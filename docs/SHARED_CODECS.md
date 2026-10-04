@@ -350,3 +350,25 @@ fixture verifies edit preservation. Both tests require no NVIDIA or FFmpeg.
 An ignored NVIDIA test connects this source to the native decoder and maps each
 decoded output; qualification now requires this test too. It has not run here.
 Production file filtering and remaining format coverage are still unfinished.
+
+
+## Native MP4 movie presentation plan
+
+The shared video timeline now exposes an export-clock edit mapper retaining
+leading and interior empty spans while reusing cumulative timescale rounding.
+The established playback mapper keeps its existing trim-leading-empty policy
+and explicit interior-empty refusal; changing export planning does not claim
+that the player renders empty spans yet.
+
+Native MP4 input builds bounded presentation occurrences from this movie map:
+B pictures are visited in PTS order, overlapping frames are clipped to media
+ranges, repeated ranges produce repeated source-frame appearances, and explicit
+empty edits become blank events. Coordinates remain in media-timescale ticks
+on the movie clock. A future rendering/export loop must realize these events.
+
+The new 18 KiB synthetic `edit-empty-spans.mov` fixture comes from the public
+control seed, with two empty spans surrounding repeated media. Native plan
+acceptance checks the two blanks, duplicated source frame, six-second endpoint
+and event-count refusal. Four shared-clock tests and three native-input tests
+pass without hardware or external tools. Hardware rendering/export remains
+unexecuted and production CUDA migration is incomplete.

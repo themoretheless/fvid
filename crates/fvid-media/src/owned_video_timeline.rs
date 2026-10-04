@@ -14,18 +14,38 @@ pub fn map_edits(
     track_scale: u32,
     movie_scale: u32,
 ) -> Result<Vec<PlaybackEdit>> {
+    map_movie_edits(
+        edits.into_iter().skip_while(|(_, start)| *start < 0),
+        track_scale,
+        movie_scale,
+    )?
+    .into_iter()
+    .map(|edit| match edit {
+        MovieEdit::Picture(picture) => Ok(picture),
+        MovieEdit::Blank { .. } => Err(unsupported(
+            "empty MP4 edit inside playback is not implemented",
+        )),
+    })
+    .collect()
+}
+/// Export clock preserves every empty edit, including the leading delay.
+#[derive(Clone, Copy, Debug)]
+pub enum MovieEdit {
+    Picture(PlaybackEdit),
+    Blank { movie_start: i64, movie_end: i64 },
+}
+pub fn map_movie_edits(
+    edits: impl IntoIterator<Item = (u64, i64)>,
+    track_scale: u32,
+    movie_scale: u32,
+) -> Result<Vec<MovieEdit>> {
+    if movie_scale == 0 || track_scale == 0 {
+        return Err(invalid("MP4 movie or track timescale is zero"));
+    }
     let mut timeline = 0u128;
     let mut movie_start = 0i64;
     let mut result = Vec::new();
-    for (duration, media_start) in edits.into_iter().skip_while(|(_, start)| *start < 0) {
-        if media_start < 0 {
-            return Err(unsupported(
-                "empty MP4 edit inside playback is not implemented",
-            ));
-        }
-        if movie_scale == 0 || track_scale == 0 {
-            return Err(invalid("MP4 movie or track timescale is zero"));
-        }
+    for (duration, media_start) in edits {
         timeline = timeline
             .checked_add(u128::from(duration))
             .ok_or_else(|| invalid("MP4 edit duration overflow"))?;
@@ -42,18 +62,26 @@ pub fn map_edits(
         if duration <= 0 {
             return Err(invalid("empty MP4 playback edit"));
         }
-        let media_end = media_start
-            .checked_add(duration)
-            .ok_or_else(|| invalid("MP4 edit endpoint overflow"))?;
+        let edit = if media_start < 0 {
+            MovieEdit::Blank {
+                movie_start,
+                movie_end,
+            }
+        } else {
+            let media_end = media_start
+                .checked_add(duration)
+                .ok_or_else(|| invalid("MP4 edit endpoint overflow"))?;
+            MovieEdit::Picture(PlaybackEdit {
+                media_start,
+                media_end,
+                movie_start,
+                movie_end,
+            })
+        };
         result
             .try_reserve(1)
             .map_err(|_| Error::Invalid("MP4 edit allocation failed".into()))?;
-        result.push(PlaybackEdit {
-            media_start,
-            media_end,
-            movie_start,
-            movie_end,
-        });
+        result.push(edit);
         movie_start = movie_end;
     }
     Ok(result)
@@ -80,6 +108,43 @@ pub fn appearances(edits: &[PlaybackEdit], start: i64, duration: i64) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn export_clock_retains_leading_and_interior_blank_spans() {
+        let edits = map_movie_edits([(1, -1), (1, 10), (1, -1), (1, 10)], 3, 2).unwrap();
+        assert!(matches!(
+            edits[0],
+            MovieEdit::Blank {
+                movie_start: 0,
+                movie_end: 2
+            }
+        ));
+        assert!(matches!(
+            edits[1],
+            MovieEdit::Picture(PlaybackEdit {
+                movie_start: 2,
+                movie_end: 3,
+                media_start: 10,
+                media_end: 11
+            })
+        ));
+        assert!(matches!(
+            edits[2],
+            MovieEdit::Blank {
+                movie_start: 3,
+                movie_end: 5
+            }
+        ));
+        assert!(matches!(
+            edits[3],
+            MovieEdit::Picture(PlaybackEdit {
+                movie_start: 5,
+                movie_end: 6,
+                media_start: 10,
+                media_end: 11
+            })
+        ));
+    }
     #[test]
     fn cumulative_fractional_rounding_does_not_drift() {
         let edits = map_edits([(1, 10), (1, 10), (1, 10)], 3, 2).unwrap();

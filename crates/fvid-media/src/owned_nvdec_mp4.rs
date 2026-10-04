@@ -7,6 +7,14 @@ use fvid_codecs::codec::{
 };
 use std::io::{Read, Seek};
 
+/// A clipped frame occurrence or explicit blank span, in media-timescale ticks
+/// on the movie clock. Repeated edits can produce multiple occurrences.
+#[derive(Clone, Copy, Debug)]
+pub struct Presentation {
+    pub sample: Option<usize>,
+    pub start: i64,
+    pub end: i64,
+}
 pub struct DecodedPacket {
     pub frame: DecodedAvc,
     /// Original decode-order index; PTS can move backwards for B pictures.
@@ -94,6 +102,88 @@ impl<R: Read + Seek> AvcMp4Input<R> {
         });
         Ok(order)
     }
+
+    pub fn movie_presentations(&self, max_entries: usize) -> Result<Vec<Presentation>, String> {
+        use crate::owned_video_timeline::{MovieEdit, map_movie_edits};
+        let order = self.media_presentation_order()?;
+        let track = self.track();
+        let edits = map_movie_edits(
+            track
+                .edits
+                .iter()
+                .map(|edit| (edit.duration, edit.media_time)),
+            track.timescale,
+            self.movie_timescale(),
+        )
+        .map_err(|e| e.to_string())?;
+        let mut result = Vec::new();
+        let mut push = |entry| -> Result<(), String> {
+            if result.len() >= max_entries {
+                return Err("NVDEC movie presentation count exceeds limit".into());
+            }
+            result.try_reserve(1).map_err(|e| e.to_string())?;
+            result.push(entry);
+            Ok(())
+        };
+        if edits.is_empty() {
+            for index in order {
+                let sample = track.samples.get(index).unwrap();
+                let end = sample
+                    .pts
+                    .checked_add(i64::from(sample.duration))
+                    .ok_or("MP4 frame endpoint overflow")?;
+                if end > sample.pts.max(0) {
+                    push(Presentation {
+                        sample: Some(index),
+                        start: sample.pts.max(0),
+                        end,
+                    })?;
+                }
+            }
+        } else {
+            for edit in edits {
+                match edit {
+                    MovieEdit::Blank {
+                        movie_start,
+                        movie_end,
+                    } => {
+                        push(Presentation {
+                            sample: None,
+                            start: movie_start,
+                            end: movie_end,
+                        })?;
+                    }
+                    MovieEdit::Picture(edit) => {
+                        for &index in &order {
+                            let sample = track.samples.get(index).unwrap();
+                            let end = sample
+                                .pts
+                                .checked_add(i64::from(sample.duration))
+                                .ok_or("MP4 frame endpoint overflow")?;
+                            let start = sample.pts.max(edit.media_start);
+                            let end = end.min(edit.media_end);
+                            if start < end {
+                                let movie_start = edit
+                                    .movie_start
+                                    .checked_add(start - edit.media_start)
+                                    .ok_or("MP4 movie timestamp overflow")?;
+                                let movie_end = edit
+                                    .movie_start
+                                    .checked_add(end - edit.media_start)
+                                    .ok_or("MP4 movie endpoint overflow")?;
+                                push(Presentation {
+                                    sample: Some(index),
+                                    start: movie_start,
+                                    end: movie_end,
+                                })?;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok(result)
+    }
     pub fn create_decoder(
         &self,
         ordinal: usize,
@@ -157,6 +247,39 @@ mod tests {
     use std::io::Cursor;
     const IPB: &[u8] =
         include_bytes!("../../../tests/fixtures/playback-errors/avc-multislice-ipb.mp4");
+
+    #[test]
+    fn synthetic_movie_timeline_preserves_blanks_repeats_and_b_order() {
+        const EMPTY: &[u8] =
+            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov");
+        let source = AvcMp4Input::open(Cursor::new(EMPTY), Limits::default()).unwrap();
+        let events = source.movie_presentations(1000).unwrap();
+        let blanks: Vec<_> = events
+            .iter()
+            .filter(|event| event.sample.is_none())
+            .collect();
+        assert_eq!(blanks.len(), 2);
+        assert_eq!(blanks[0].start, 0);
+        assert!(blanks[0].end <= blanks[1].start);
+        let first: Vec<_> = events
+            .iter()
+            .filter(|event| event.sample == Some(0))
+            .collect();
+        assert_eq!(
+            first.len(),
+            2,
+            "same source frame must occur in both ranges"
+        );
+        assert!(first[0].end <= first[1].start);
+        assert!(events.windows(2).all(|pair| pair[0].start <= pair[1].start));
+        let expected_end = ((6000_u128 * u128::from(source.track().timescale))
+            .div_ceil(u128::from(source.movie_timescale()))) as i64;
+        assert_eq!(events.last().unwrap().end, expected_end);
+        assert!(source.movie_presentations(1).is_err());
+        let b = AvcMp4Input::open(Cursor::new(IPB), Limits::default()).unwrap();
+        let events = b.movie_presentations(1000).unwrap();
+        assert!(events.windows(2).all(|pair| pair[0].start <= pair[1].start));
+    }
     #[test]
     fn native_packet_source_preserves_b_picture_clocks_and_payloads() {
         let mut original = Mp4Reader::open(Cursor::new(IPB), Limits::default()).unwrap();

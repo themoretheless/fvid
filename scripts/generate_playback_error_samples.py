@@ -111,6 +111,7 @@ def main():
     # moov changes size; mdat must precede it so chunk offsets stay valid.
     assert order.index(b"mdat") < order.index(b"moov")
     cases = {
+        "edit-empty-spans.mov": dict(edits=[(1000, -1), (2000, 0), (1000, -1), (2000, 0)]),
         "edit-gap.mov": dict(edits=[(2000, 0), (8000, 4000)]),
         "edit-three-ranges.mov": dict(edits=[(2000, 0), (2000, 4000), (4000, 8000)]),
         "edit-repeat.mov": dict(edits=[(1000, 0), (12000, 0)]),
