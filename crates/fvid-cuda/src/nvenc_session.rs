@@ -17,6 +17,14 @@ pub struct CodecGuid {
 }
 type GuidCount = unsafe extern "system" fn(*mut c_void, *mut u32) -> i32;
 type Guids = unsafe extern "system" fn(*mut c_void, *mut CodecGuid, u32, *mut u32) -> i32;
+type Preset = unsafe extern "system" fn(
+    *mut c_void,
+    crate::nvenc_sdk::GUID,
+    crate::nvenc_sdk::GUID,
+    *mut crate::nvenc_sdk::NV_ENC_PRESET_CONFIG,
+) -> u32;
+type Initialize =
+    unsafe extern "system" fn(*mut c_void, *mut crate::nvenc_sdk::NV_ENC_INITIALIZE_PARAMS) -> u32;
 type Destroy = unsafe extern "system" fn(*mut c_void) -> i32;
 type Open = unsafe extern "system" fn(*mut OpenParams, *mut *mut c_void) -> i32;
 #[repr(C)]
@@ -27,7 +35,10 @@ pub(crate) struct FunctionTable {
     guid_count: Option<GuidCount>,
     profiles: [usize; 2],
     guids: Option<Guids>,
-    before_destroy: [usize; 22],
+    before_preset: [usize; 5],
+    preset: Option<Preset>,
+    initialize: Option<Initialize>,
+    before_destroy: [usize; 15],
     destroy: Option<Destroy>,
     invalidate: usize,
     open: Option<Open>,
@@ -43,7 +54,10 @@ impl FunctionTable {
             guid_count: None,
             profiles: [0; 2],
             guids: None,
-            before_destroy: [0; 22],
+            before_preset: [0; 5],
+            preset: None,
+            initialize: None,
+            before_destroy: [0; 15],
             destroy: None,
             invalidate: 0,
             open: None,
@@ -68,6 +82,8 @@ pub struct NvencSession {
     encoder: *mut c_void,
     destroy: Destroy,
     table: FunctionTable,
+    initialized: bool,
+    failed: bool,
     device: ManuallyDrop<CodecDevice>,
     _api: ManuallyDrop<NvencApi>,
 }
@@ -106,9 +122,77 @@ impl NvencSession {
             encoder,
             destroy,
             table,
+            initialized: false,
+            failed: false,
             device: ManuallyDrop::new(device),
             _api: ManuallyDrop::new(api),
         })
+    }
+    /// Initialize synchronous H.264 encoding from the driver's default preset.
+    /// Configuration and frame submission are separate; this emits no packets.
+    pub fn initialize_h264(
+        &mut self,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+    ) -> Result<(), String> {
+        validate_geometry(width, height, fps_num, fps_den)?;
+        if self.encoder.is_null() || self.initialized || self.failed {
+            return Err("NVENC initialization requires a fresh live session".into());
+        }
+        self.device.handles()?;
+        let preset_fn = self.table.preset.ok_or("NVENC omitted preset entrypoint")?;
+        let initialize = self
+            .table
+            .initialize
+            .ok_or("NVENC omitted initialization entrypoint")?;
+        let codec = crate::nvenc_sdk::GUID {
+            Data1: 0x6bc82762,
+            Data2: 0x4e63,
+            Data3: 0x4ca4,
+            Data4: [0xaa, 0x85, 0x1e, 0x50, 0xf3, 0x21, 0xf6, 0xbf],
+        };
+        let preset_guid = crate::nvenc_sdk::GUID {
+            Data1: 0xb2dfb705,
+            Data2: 0x4ebd,
+            Data3: 0x4c49,
+            Data4: [0x9b, 0x5f, 0x24, 0xa7, 0x77, 0xd3, 0xe5, 0x87],
+        };
+        let mut preset = crate::nvenc_sdk::NV_ENC_PRESET_CONFIG::default();
+        preset.version = version(4) | (1 << 31);
+        preset.presetCfg.version = version(7) | (1 << 31);
+        // SAFETY: The SDK-generated preset storage and GUIDs have the verified
+        // ABI; the session, context and driver remain live for this call.
+        let status = unsafe { preset_fn(self.encoder, codec, preset_guid, &mut preset) };
+        if status != 0 {
+            return Err(format!("NVENC preset query failed with status {status}"));
+        }
+        let mut params = crate::nvenc_sdk::NV_ENC_INITIALIZE_PARAMS::default();
+        params.version = version(5) | (1 << 31);
+        params.encodeGUID = codec;
+        params.presetGUID = preset_guid;
+        params.encodeWidth = width;
+        params.encodeHeight = height;
+        params.darWidth = width;
+        params.darHeight = height;
+        params.frameRateNum = fps_num;
+        params.frameRateDen = fps_den;
+        params.enablePTD = 1;
+        params.encodeConfig = &mut preset.presetCfg;
+        params.maxEncodeWidth = width;
+        params.maxEncodeHeight = height;
+        // SAFETY: params and its referenced config live throughout the call;
+        // zeroed reserved fields and version constants match the pinned SDK.
+        let status = unsafe { initialize(self.encoder, &mut params) };
+        if status != 0 {
+            self.failed = true;
+            return Err(format!(
+                "NVENC encoder initialization failed with status {status}"
+            ));
+        }
+        self.initialized = true;
+        Ok(())
     }
     /// Query all codec identifiers advertised by this live encoder session.
     /// Unknown identifiers are retained rather than silently filtered.
@@ -170,6 +254,18 @@ impl Drop for NvencSession {
         // reclaims them; explicit close lets callers observe and retry errors.
     }
 }
+fn validate_geometry(width: u32, height: u32, fps_num: u32, fps_den: u32) -> Result<(), String> {
+    if width == 0
+        || height == 0
+        || width % 2 != 0
+        || height % 2 != 0
+        || fps_num == 0
+        || fps_den == 0
+    {
+        return Err("NVENC requires positive even geometry and a nonzero frame rate ratio".into());
+    }
+    Ok(())
+}
 fn read_guids(
     capacity: u32,
     query: impl FnOnce(&mut [CodecGuid], &mut u32) -> i32,
@@ -213,6 +309,38 @@ fn close_handle(
 mod tests {
     use super::*;
     #[test]
+    fn preset_init_abi_and_geometry_match_the_pinned_sdk() {
+        use crate::nvenc_sdk as sdk;
+        assert!(validate_geometry(128, 72, 60, 1).is_ok());
+        for args in [
+            (0, 72, 60, 1),
+            (127, 72, 60, 1),
+            (128, 71, 60, 1),
+            (128, 72, 0, 1),
+            (128, 72, 60, 0),
+        ] {
+            assert!(validate_geometry(args.0, args.1, args.2, args.3).is_err());
+        }
+        if std::mem::size_of::<usize>() != 8 {
+            return;
+        }
+        assert_eq!(std::mem::size_of::<sdk::NV_ENC_CONFIG>(), 3584);
+        assert_eq!(std::mem::size_of::<sdk::NV_ENC_PRESET_CONFIG>(), 5128);
+        assert_eq!(std::mem::size_of::<sdk::NV_ENC_INITIALIZE_PARAMS>(), 1808);
+        assert_eq!(
+            std::mem::offset_of!(sdk::NV_ENC_PRESET_CONFIG, presetCfg),
+            8
+        );
+        assert_eq!(
+            std::mem::offset_of!(sdk::NV_ENC_INITIALIZE_PARAMS, encodeConfig),
+            88
+        );
+        assert_eq!(std::mem::size_of::<sdk::GUID>(), 16);
+        assert_eq!(version(7) | (1 << 31), 0xf1070008);
+        assert_eq!(std::mem::offset_of!(FunctionTable, preset), 88);
+        assert_eq!(std::mem::offset_of!(FunctionTable, initialize), 96);
+    }
+    #[test]
     fn codec_query_keeps_unknown_guids_and_rejects_bad_counts() {
         let guid = CodecGuid {
             data1: 42,
@@ -248,6 +376,8 @@ mod tests {
         let device = CodecDevice::new(0).unwrap();
         let mut session = NvencSession::open(device).unwrap();
         assert!(!session.codec_guids().unwrap().is_empty());
+        session.initialize_h264(128, 72, 60, 1).unwrap();
+        assert!(session.initialize_h264(128, 72, 60, 1).is_err());
         session.close().unwrap();
         assert!(session.codec_guids().is_err());
         session.close().unwrap();
