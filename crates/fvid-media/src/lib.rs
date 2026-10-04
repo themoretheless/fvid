@@ -15,6 +15,8 @@ pub mod owned_nvdec_avc;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_hevc;
 #[cfg(feature = "native-cuda")]
+pub mod owned_nvdec_hevc_decoder;
+#[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_avc_decoder;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_mp4;

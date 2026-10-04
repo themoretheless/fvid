@@ -27,6 +27,10 @@ def qualify_native_tests(root, run):
             "synthetic_ipb_packets_decode_map_and_release_without_libav",
             "synthetic_avc_decode_filter_encode_chain_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),
+        ("fvid-media", "owned_nvdec_hevc", [
+            "synthetic_owned_hevc_idr_submits_and_maps_on_nvidia",
+            "owned_hevc_ipb_scheduler_submits_and_maps_on_nvidia",
+        ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_nvdec_mp4", [
             "own_mp4_packets_decode_on_nvidia_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),

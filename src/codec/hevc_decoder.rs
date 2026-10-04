@@ -324,32 +324,7 @@ impl HevcDecoder {
         if self.suppress_rasl && matches!(header.nal.unit_type, 8 | 9) {
             return Ok(None);
         }
-        let modulus = 1i32 << sps.poc_bits;
-        let lsb = header.poc_lsb as i32;
-        let poc = if header.nal.is_idr() {
-            0
-        } else if matches!(header.nal.unit_type, 16..=18)
-            || self.previous_poc.is_none() && header.nal.is_irap()
-        {
-            lsb
-        } else {
-            let previous = self
-                .previous_poc
-                .ok_or_else(|| invalid("HEVC stream must start at a random-access picture"))?;
-            let old = previous.rem_euclid(modulus);
-            let mut msb = previous - old;
-            if lsb < old && old - lsb >= modulus / 2 {
-                msb = msb
-                    .checked_add(modulus)
-                    .ok_or_else(|| invalid("HEVC POC overflow"))?;
-            } else if lsb > old && lsb - old > modulus / 2 {
-                msb = msb
-                    .checked_sub(modulus)
-                    .ok_or_else(|| invalid("HEVC POC overflow"))?;
-            }
-            msb.checked_add(lsb)
-                .ok_or_else(|| invalid("HEVC POC overflow"))?
-        };
+        let poc = super::hevc_poc::derive(sps, header.nal, header.poc_lsb, self.previous_poc)?;
         if header.nal.is_idr() {
             self.references.clear();
         }
@@ -384,7 +359,7 @@ impl HevcDecoder {
             &slice_lists,
             budget,
         )?);
-        if header.nal.temporal_id == 0 && !matches!(header.nal.unit_type, 0 | 2 | 4 | 6..=9) {
+        if super::hevc_poc::updates_previous(header.nal) {
             self.previous_poc = Some(poc);
         }
         if header.nal.unit_type >= 16 || header.nal.unit_type & 1 != 0 {
