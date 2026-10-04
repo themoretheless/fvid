@@ -228,3 +228,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_eq_timeline_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_hqdn3d_reference"
+harness = false

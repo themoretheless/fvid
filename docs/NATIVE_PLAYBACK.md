@@ -3842,3 +3842,26 @@ The benchmark qualifies 132 exact multi-layout 8–16-bit pixel comparisons, inc
 dimension expressions, against the
 [reference parameter evaluator](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/boxblur.c).
 Alpha/RGB stream formats and stateful expressions remain separate work.
+
+
+`hqdn3d` now uses owned causal horizontal/vertical smoothing and a persistent
+16-bit temporal sample history. Luma/chroma spatial and temporal strengths use
+the established zero/default inheritance rules, with finite constant expressions
+and named/positional options. Strength-derived tables retain fixed-point binning
+and ties-to-even rounding for 8, 9, 10, 12, 14 and 16-bit planar YUV. Root decode,
+Y4M/FFV1 export and direct-library Y4M/FFV1 streaming use the same kernel. Every
+interval-selected input updates history before framestep; clip/rewind reset it.
+Timeline-disabled inputs still run the denoiser and update history while emitting
+the original pixels. Storage/depth checks and fallible allocation precede state
+mutation; nonmonotonic clocks and mid-stream geometry changes refuse explicitly.
+Standalone frame helpers refuse fake per-call history. Synthetic acceptance checks
+stored independent pixels, packet cadence, clipping and disabled-input history.
+An explicit benchmark qualifies 202 exact pixel comparisons across moderate and
+full-range inputs, layouts, depths, strengths and timeline settings against the
+[reference denoiser](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_hqdn3d.c).
+Eight 14-bit full-range benchmark cases reproduce invalid reference samples;
+these are explicitly not counted as equivalence. Signed intermediate arithmetic,
+bounded coefficient indexes and saturated history/output keep owned samples valid,
+with separate synthetic reproduction and root/library acceptance.
+RGB/alpha formats, dynamic geometry and runtime strength commands remain separate
+work. This migration does not yet remove legacy media/CUDA production features.

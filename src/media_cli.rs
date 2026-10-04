@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--hqdn3d" {
+            let value=args.next().ok_or("missing hqdn3d options")?;
+            if filters.hqdn3d.is_some() {return Err("duplicate hqdn3d".into());}
+            if let Ok(filter)=fvid_media::owned_hqdn3d::HqDn3d::parse(value) {filters.hqdn3d=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--tmix" {
             let value=args.next().ok_or("missing tmix options")?;
             if filters.tmix.is_some() {return Err("duplicate tmix".into());}

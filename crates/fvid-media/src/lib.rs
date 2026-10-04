@@ -254,4 +254,5 @@ pub mod owned_fade;
 pub mod owned_lagfun;
 
 pub mod owned_tmix;
+pub mod owned_hqdn3d;
 mod owned_pixel_context;

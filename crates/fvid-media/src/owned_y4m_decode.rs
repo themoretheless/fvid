@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.tmix.as_deref().is_some_and(|a|crate::owned_tmix::TemporalMix::parse(a).is_err()) {return false;}
     if transform.lagfun.as_deref().is_some_and(|a|crate::owned_lagfun::LagFun::parse(a).is_err()) {return false;}
     if transform.fade.as_deref().is_some_and(|a|crate::owned_fade::Fade::parse(a).is_err()) {return false;}
@@ -127,6 +128,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 fade: transform.fade.clone(),
                 lagfun: transform.lagfun.clone(),
                 tmix: transform.tmix.clone(),
+                hqdn3d: transform.hqdn3d.clone(),
                 exposure: transform.exposure.clone(),
                 colorbalance: transform.colorbalance.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
@@ -519,6 +521,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.fade.is_some()
         || transform.lagfun.is_some()
         || transform.tmix.is_some()
+        || transform.hqdn3d.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
@@ -550,6 +553,9 @@ pub(crate) fn apply_pixel_filters_clock(
         let result: Result<()> = (|| {
             if transform.tmix.is_some() {
                 history.and_then(|h|h.tmix.as_ref()).ok_or("tmix requires persistent streaming history")?.apply(&mut frame,header.depth(),n)?;
+            }
+            if transform.hqdn3d.is_some() {
+                history.and_then(|h|h.hqdn3d.as_ref()).ok_or("hqdn3d requires persistent streaming history")?.apply(&mut frame,header.depth(),n,t)?;
             }
             if let Some(args) = transform.eq.as_deref() {
                 if let Some(eq)=history.and_then(|context|context.eq.as_ref()) {eq.apply(&mut frame,header.depth(),n,t)?;}
@@ -977,6 +983,7 @@ fn decode_reader_frames(
         || transform.fade.is_some()
         || transform.lagfun.is_some()
         || transform.tmix.is_some()
+        || transform.hqdn3d.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()

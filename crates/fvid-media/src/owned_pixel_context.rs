@@ -4,11 +4,17 @@ pub(crate) struct PixelContext {
     pub boxblur: Option<crate::owned_boxblur::BoxBlurProgram>,
     pub eq: Option<crate::owned_eq::EqualizerProgram>,
     pub lagfun: Option<crate::owned_lagfun::LagFun>,
+    pub hqdn3d: Option<crate::owned_hqdn3d::HqDn3d>,
     pub tmix: Option<crate::owned_tmix::TemporalMix>,
 }
 impl PixelContext {
     pub fn parse(transform: &fvid_media_info::DecodeTransform) -> Result<Self, String> {
         Ok(Self {
+            hqdn3d: transform
+                .hqdn3d
+                .as_deref()
+                .map(crate::owned_hqdn3d::HqDn3d::parse)
+                .transpose()?,
             boxblur: transform
                 .boxblur
                 .as_deref()

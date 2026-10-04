@@ -30,6 +30,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub hqdn3d: Option<fvid_media::owned_hqdn3d::HqDn3d>,
     pub tmix: Option<fvid_media::owned_tmix::TemporalMix>,
     pub lagfun: Option<fvid_media::owned_lagfun::LagFun>,
     pub fade: Option<fvid_media::owned_fade::Fade>,
@@ -66,6 +67,7 @@ impl PixelFilters {
         let mut result = Self {
 
             fade_state: Default::default(),
+            hqdn3d: request.hqdn3d.as_deref().map(fvid_media::owned_hqdn3d::HqDn3d::parse).transpose().map_err(|e|invalid(&e))?,
             tmix: request.tmix.as_deref().map(fvid_media::owned_tmix::TemporalMix::parse).transpose().map_err(|e|invalid(&e))?,
             lagfun: request.lagfun.as_deref().map(fvid_media::owned_lagfun::LagFun::parse).transpose().map_err(|e|invalid(&e))?,
             fade: request.fade.as_deref().map(fvid_media::owned_fade::Fade::parse).transpose().map_err(|e|invalid(&e))?,
@@ -153,7 +155,7 @@ impl PixelFilters {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.tmix.is_none() && self.lagfun.is_none() && self.unsharp.is_none()
+        self.hqdn3d.is_none() && self.tmix.is_none() && self.lagfun.is_none() && self.unsharp.is_none()
             && self.eq.is_none()
             && self.hue.is_none()
             && self.pixelize.is_none()
@@ -211,6 +213,7 @@ impl PixelFilters {
         clock: Option<fvid_media::owned_fade::FrameTime>,
     )->Result<()> {
         if let Some(filter)=&self.tmix {filter.apply(frame,depth,n).map_err(|e|invalid(&e))?;}
+        if let Some(filter)=&self.hqdn3d {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter) = &self.eq {
             filter.apply(frame, depth,n,t).map_err(|error| invalid(&error))?;
         }

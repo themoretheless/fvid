@@ -386,3 +386,46 @@ pixel; API and CLI decode must accept. Separate tests retain constant API behavi
 compare high-depth/subsampled expression kernels and require invalid radius/alpha,
 nonfinite and unknown-variable refusal before mutation. No private media, FFmpeg
 or network access is used in generation or ordinary test execution.
+
+
+### Owned spatial/temporal hqdn3d history
+
+`scripts/generate_hqdn3d_fixture.py` creates eight 4x4 YUV420 uniform-noise frames
+at 25 fps for 8/10-bit depth, plus eight odd-sized 5x3 8-bit grid frames. Only
+Python bytes are used. Uniform luma/chroma bases are 100/140/200 with offsets
+0,-4,4,-4,4,-4,4,0 (scaled by four at 10 bits). The grid sample at index i on
+frame n is 90+(7*i+3*n)%32. These reproduce the previously unsupported hqdn3d
+request. The grid also reproduces the new kernel's corrected first-column
+fixed-point rounding drift with strengths 20:15:30:25.
+
+The `.expected.raw` files are independent benchmark-oracle output from these
+synthetic sequences, not private source material. Generate sources separately,
+then run `FVID_REFERENCE_FFMPEG=/opt/homebrew/bin/ffmpeg cargo bench
+--no-default-features --bench ffmpeg_hqdn3d_reference`: the benchmark requires
+pixel equality before writing reference raw outputs under `/tmp/fvid-hqdn3d-*`.
+Uniform goldens use default parameters, and the grid uses 20:15:30:25.
+Ordinary tests only read committed inputs and goldens, require no FFmpeg/network,
+and verify root/direct-library Y4M/FFV1 lossless exports, cadence and framestep.
+Additional acceptance checks rewind, clip initialization, disabled-input history,
+scalar-history refusal, invalid storage/clock/options and native-codec/CLI routes.
+
+Recorded SHA-256 values:
+- `hqdn3d-grid-8.expected.raw`: `c24b7151f919b7e6f36ae9fa385d253bf0f56860d5ac5e3e7bbf5077a0ee84d3`
+- `hqdn3d-noise-8.expected.raw`: `b26fb641e553e5f87c32c69c3dc4c14bcdf9fb580734b0fe1efca7e2ec870418`
+- `hqdn3d-noise-10.expected.raw`: `d823144d9b3d99124652384790e6637e78c76d427f6b3278acfe8116a24ba600`
+
+
+`hqdn3d-extreme-14.y4m` adds an eight-frame 5x3 14-bit grid: on every third
+frame samples alternate zero and 16383; otherwise they follow the moderate grid
+scaled by 64. `hqdn3d-extreme-14.reference-invalid.raw` is separate benchmark
+reproduction evidence: the default reference outputs sample 65534 in the first
+row, outside the 14-bit range. Acceptance never treats that file as correct pixels.
+Own acceptance requires first-row samples 16383,2,16381,2,16381 and valid 14-bit
+samples throughout all eight frames and root/library FFV1 exports. Wide signed
+intermediates, bounded table indexes and saturated history/output remove wrapping
+and out-of-range access. The benchmark reproduces eight reference overflows and
+qualifies 202 other exact comparisons, including the two uniform-noise sequences.
+The invalid reference evidence is written to `/tmp/fvid-hqdn3d-extreme14-reference.raw`
+by the same explicit benchmark command; no external command runs in ordinary tests.
+
+SHA-256 `hqdn3d-extreme-14.reference-invalid.raw`: `3321da4419166bbd7fa1f141063eafe4baef7ef670ca16f95e47a41a22f411b8`.
