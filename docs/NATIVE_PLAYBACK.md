@@ -3547,3 +3547,14 @@ General YUV reference parity remains limited by conversion qualification.
 The explicit RGB benchmark matches 3,072 components across six option sets
 at 8 and 16 bits, including negative contrast, combined weights, preserved
 lightness and unchanged alpha. This establishes these RGB cases only.
+
+Owned `vibrance` supports scalar intensity, RGB channel balances, custom luma
+coefficients and alternate saturation mode. Packed RGB/RGBA at 8–16 bits validates
+sample precision before mutation and preserves alpha. The metadata-aware planar
+YUV path uses the owned RGB16 converter. Decode, lossless export and native CLI
+pixel processing route supported requests without the legacy backend. Synthetic
+three-frame RGBA acceptance reads committed references without FFmpeg/network;
+reference generation is isolated in `ffmpeg_vibrance_reference`. The luma
+accumulation explicitly fuses the green term into the rounded red product to
+fix the observed one-level RGB rounding discrepancy. General YUV/matrix parity
+is not implied by the RGB comparisons.

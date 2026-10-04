@@ -31,6 +31,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 pub struct PixelFilters {
     pub colorhold: Option<fvid_media::owned_colorhold::ColorHold>,
     pub colorcontrast: Option<fvid_media::owned_colorcontrast::ColorContrast>,
+    pub vibrance: Option<fvid_media::owned_vibrance::Vibrance>,
     pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
     pub eq: Option<fvid_media::owned_eq::Equalizer>,
@@ -51,6 +52,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            vibrance: request.vibrance.as_deref().map(fvid_media::owned_vibrance::Vibrance::parse).transpose().map_err(|e|invalid(&e))?,
             colorcontrast: request.colorcontrast.as_deref().map(fvid_media::owned_colorcontrast::ColorContrast::parse).transpose().map_err(|e| invalid(&e))?,
             colorhold: request.colorhold.as_deref().map(fvid_media::owned_colorhold::ColorHold::parse).transpose().map_err(|e| invalid(&e))?,
             lutyuv: request.lutyuv.as_deref().map(fvid_media::owned_lutyuv::LutYuv::parse).transpose().map_err(|e| invalid(&e))?,
@@ -136,6 +138,7 @@ impl PixelFilters {
             && self.lutyuv.is_none()
             && self.colorhold.is_none()
             && self.colorcontrast.is_none()
+            && self.vibrance.is_none()
             && self.colorize.is_none()
             && self.bilateral.is_none()
             && self.gblur.is_none()
@@ -182,6 +185,10 @@ impl PixelFilters {
         }
         if let Some(filter) = self.monochrome {filter.apply(frame,depth).map_err(|e|invalid(&e))?;}
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
+        if let Some(filter)=&self.vibrance {
+            if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
+            else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
+        }
         for filter in &self.morphology {
             filter.apply(frame, depth)?;
         }
