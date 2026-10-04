@@ -1111,7 +1111,7 @@ fn pixel_decode_args(
         if arg == "--eq" {
             let value = args.next().ok_or("missing eq args")?;
             if filters.eq.is_some() {return Err("duplicate eq".into());}
-            if let Ok(filter) = fvid_media::owned_eq::Equalizer::parse(value) {
+            if let Ok(filter) = fvid_media::owned_eq::EqualizerProgram::parse(value) {
                 filters.eq = Some(filter);
             } else {
                 result.push(arg.clone()); result.push(value.clone());

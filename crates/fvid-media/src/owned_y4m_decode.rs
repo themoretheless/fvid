@@ -56,7 +56,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
         && transform
             .eq
             .as_deref()
-            .is_none_or(|args| crate::owned_eq::Equalizer::parse(args).is_ok())
+            .is_none_or(|args| crate::owned_eq::EqualizerProgram::parse(args).is_ok())
         && transform
             .hue
             .as_deref()
@@ -376,7 +376,7 @@ pub(crate) fn transform_frame_requested_clock(
     t: Option<f64>,
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
-    history: Option<&crate::owned_pixel_history::PixelHistory>,
+    history: Option<&crate::owned_pixel_context::PixelContext>,
 ) -> Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
@@ -502,7 +502,7 @@ pub(crate) fn apply_pixel_filters_clock(
     t: Option<f64>,
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
-    history: Option<&crate::owned_pixel_history::PixelHistory>,
+    history: Option<&crate::owned_pixel_context::PixelContext>,
 ) -> Result<()> {
     if transform.unsharp.is_some()
         || transform.unsharp.is_some()
@@ -552,7 +552,8 @@ pub(crate) fn apply_pixel_filters_clock(
                 history.and_then(|h|h.tmix.as_ref()).ok_or("tmix requires persistent streaming history")?.apply(&mut frame,header.depth(),n)?;
             }
             if let Some(args) = transform.eq.as_deref() {
-                crate::owned_eq::Equalizer::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(eq)=history.and_then(|context|context.eq.as_ref()) {eq.apply(&mut frame,header.depth(),n,t)?;}
+                else {crate::owned_eq::EqualizerProgram::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.unsharp.as_deref() {
                 crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, header.depth())?;
@@ -1002,7 +1003,7 @@ fn decode_reader_frames(
     let mut selected_inputs = 0u64;
     let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse).transpose()?;
 
-    let history = crate::owned_pixel_history::PixelHistory::parse(transform)?;
+    let history = crate::owned_pixel_context::PixelContext::parse(transform)?;
     let fade = transform
         .fade
         .as_deref()

@@ -224,3 +224,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_tmix_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_eq_timeline_reference"
+harness = false

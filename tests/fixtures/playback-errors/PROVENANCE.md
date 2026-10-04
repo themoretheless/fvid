@@ -357,3 +357,17 @@ with frames=1024, reference tmix wraps the initial 16-bit sum, turning Y=64 into
 eight frames using a wide sum, through both library/root and Y4M/FFV1 sources.
 The benchmark separately reproduces this known reference defect and requires
 correct unchanged own first-frame pixels; it does not claim equivalence for it.
+
+
+### Owned frame-evaluated equalization
+
+`eq-time-25.y4m` extends `scripts/generate_eq_fixture.py` without replacing its
+original `eq-ramp.y4m` fixture. It contains nine synthetic 4x4 YUV420 frames at
+25 fps: Y=64+8*n, Cb=100, Cr=150. No external tools or private media are used.
+Acceptance requires brightness=n/10 and brightness=2.5*t to produce selected
+luma 64,130,197,255,255 with framestep=2; default init mode retains 64,80,96,112,128.
+Clips distinguish reset frame count from retained source time and assert rebased
+container clocks. Root and direct-library Y4M/FFV1, native codec sources and CLI
+routes must accept the frame program. Scalar constant API refusal remains separate;
+quoted conditionals, rewind, unknown variables and non-mutating nonfinite errors
+are also checked. Ordinary tests do not invoke FFmpeg or use network access.

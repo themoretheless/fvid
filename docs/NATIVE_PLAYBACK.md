@@ -3797,7 +3797,7 @@ the current input clock. Every interval-selected input enters the history before
 framestep, and clip/rewind reset the window. Invalid storage/depth or a changed
 stream geometry is refused before history mutation. Allocations are fallible;
 first-frame window entries share storage, and subsequent inputs evict old frames.
-Library history is owned by a per-stream `PixelHistory`, shared in responsibility
+Library history is owned by a per-stream `PixelContext`, shared in responsibility
 with lagfun; scalar frame helpers explicitly refuse fake per-call history.
 Synthetic numeric acceptance covers 8/10-bit warmup, weights, masks, intervals,
 rewind and original clocks. The explicit benchmark qualifies 58 exact YUV420/444
@@ -3809,3 +3809,20 @@ warmup window; the reference byte path wraps its 16-bit sum and darkens it.
 This known defect is deliberately fixed rather than counted as pixel equivalence. Timeline `enable` needs its own timestamp migration
 (the reference can output oldest-frame PTS), and is explicitly not admitted here;
 float/alpha stream formats and dynamic reconfiguration also remain separate work.
+
+
+`eq` now admits owned frame expressions through `EqualizerProgram`: `n` and `t`
+with `eval=init` (default, initialized at zero) or `eval=frame`. Quoted conditionals
+are accepted. Coefficients retain the constant kernel's clamping and f32 precision;
+unchanged coefficients reuse cached sample tables. A per-stream `PixelContext`
+retains the program for direct-library Y4M/FFV1 processing, while root native codec
+routes and CLI decode/Y4M/FFV1 export use the same evaluator. Every selected input
+is evaluated before framestep. Clips restart `n` while retaining source `t`; output
+container timestamps rebase to the clip origin. Synthetic acceptance covers these
+clocks, init mode, rewind, quote parsing and non-mutating nonfinite refusal.
+The explicit benchmark checks 54 exact 8-bit YUV420/422/444 pixel pairs at 25 and
+30000/1001 fps against the
+[reference equalizer](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_eq.c).
+This is not a qualification of high-depth reference equivalence or arbitrary
+positive input timestamp offsets. Variables `r`/`pos`, stateful expressions and
+nonfinite coefficients remain explicitly unsupported.

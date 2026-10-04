@@ -75,7 +75,7 @@ pub(crate) fn decode_ffv1(
     }
     let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse)
         .transpose()?;
-    let history = crate::owned_pixel_history::PixelHistory::parse(transform)?;
+    let history = crate::owned_pixel_context::PixelContext::parse(transform)?;
     let fade = transform
         .fade
         .as_deref()
@@ -384,7 +384,7 @@ fn process_frame_with_overlay(
     n:u64,
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
-    history: Option<&crate::owned_pixel_history::PixelHistory>,
+    history: Option<&crate::owned_pixel_context::PixelContext>,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {

@@ -46,7 +46,7 @@ pub struct PixelFilters {
     pub exposure: Option<fvid_media::owned_exposure::Exposure>,
     pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
-    pub eq: Option<fvid_media::owned_eq::Equalizer>,
+    pub eq: Option<fvid_media::owned_eq::EqualizerProgram>,
     pub hue: Option<fvid_media::owned_hue::HueProgram>,
     pub monochrome: Option<fvid_media::owned_monochrome::Monochrome>,
     pub colorize: Option<fvid_media::owned_colorize::Colorize>,
@@ -91,7 +91,7 @@ impl PixelFilters {
             eq: request
                 .eq
                 .as_deref()
-                .map(fvid_media::owned_eq::Equalizer::parse)
+                .map(fvid_media::owned_eq::EqualizerProgram::parse)
                 .transpose()
                 .map_err(|error| invalid(&error))?,
             hue: request
@@ -212,7 +212,7 @@ impl PixelFilters {
     )->Result<()> {
         if let Some(filter)=&self.tmix {filter.apply(frame,depth,n).map_err(|e|invalid(&e))?;}
         if let Some(filter) = &self.eq {
-            filter.apply(frame, depth).map_err(|error| invalid(&error))?;
+            filter.apply(frame, depth,n,t).map_err(|error| invalid(&error))?;
         }
         if let Some(filter) = self.unsharp {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;

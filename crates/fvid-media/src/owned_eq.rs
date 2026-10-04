@@ -1,4 +1,4 @@
-//! Constant equalization through bounded per-plane sample tables.
+//! Owned equalization with cached sample tables and frame expressions.
 use crate::owned_frame::GeometryFrame;
 type Result<T> = std::result::Result<T, String>;
 #[derive(Clone, Debug)]
@@ -53,6 +53,9 @@ impl Equalizer {
             };
             values[index] = f64::from(value.clamp(min, max) as f32);
         }
+        Self::from_values(values)
+    }
+    fn from_values(values: [f64; 8]) -> Result<Self> {
         let mut result = Self {
             tables: [[0; 256]; 3],
             values,
@@ -364,5 +367,124 @@ mod export_tests {
             }
         }
         std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+/// Per-frame expressions with reusable plane tables; the scalar Equalizer remains constant-only.
+#[derive(Debug)]
+pub struct EqualizerProgram {
+    expressions: Vec<crate::owned_expression::Expression>,
+    per_frame: bool,
+    cache: std::cell::RefCell<Option<Equalizer>>,
+}
+impl EqualizerProgram {
+    pub fn parse(args: &str) -> Result<Self> {
+        if args.len() > 4096 || args.contains('\0') {
+            return Err("invalid eq options".into());
+        }
+        let names = [
+            "contrast",
+            "brightness",
+            "saturation",
+            "gamma",
+            "gamma_r",
+            "gamma_g",
+            "gamma_b",
+            "gamma_weight",
+            "eval",
+        ];
+        let mut expressions = ["1", "0", "1", "1", "1", "1", "1", "1"]
+            .into_iter()
+            .map(crate::owned_expression::Expression::parse)
+            .collect::<Result<Vec<_>>>()?;
+        let mut per_frame = false;
+        let mut position = 0;
+        for entry in args.split(':').filter(|_| !args.is_empty()) {
+            let (name, text) = if let Some(pair) = entry.split_once('=') {
+                pair
+            } else {
+                let name = *names.get(position).ok_or("too many eq options")?;
+                position += 1;
+                (name, entry)
+            };
+            let index = names
+                .iter()
+                .position(|&name_| name_ == name.trim())
+                .ok_or("unknown eq option")?;
+            let text = text.trim();
+            if index == 8 {
+                per_frame = match text {
+                    "init" | "0" => false,
+                    "frame" | "1" => true,
+                    _ => return Err("invalid eq evaluation mode".into()),
+                };
+                continue;
+            }
+            let text = if text.starts_with('\'') || text.starts_with('"') {
+                let quote = text.chars().next().unwrap();
+                text.strip_prefix(quote)
+                    .and_then(|v| v.strip_suffix(quote))
+                    .ok_or("unclosed eq expression quote")?
+            } else {
+                text
+            };
+            let expression = crate::owned_expression::Expression::parse(text)?;
+            expression.evaluate(&[("n", 0.), ("t", 0.)])?;
+            expressions[index] = expression;
+        }
+        let result = Self {
+            expressions,
+            per_frame,
+            cache: Default::default(),
+        };
+        if !per_frame {
+            let values = result.values(0, Some(0.))?;
+            *result.cache.borrow_mut() = Some(Equalizer::from_values(values)?);
+        }
+        Ok(result)
+    }
+    fn values(&self, n: u64, t: Option<f64>) -> Result<[f64; 8]> {
+        let mut values = [0.; 8];
+        for (i, expression) in self.expressions.iter().enumerate() {
+            let value = expression.evaluate(&[("n", n as f64), ("t", t.unwrap_or(f64::NAN))])?;
+            if !value.is_finite() {
+                return Err("eq parameters must be finite".into());
+            }
+            let (min, max) = match i {
+                0 => (-1000., 1000.),
+                1 => (-1., 1.),
+                2 => (0., 3.),
+                7 => (0., 1.),
+                _ => (0.1, 10.),
+            };
+            values[i] = f64::from(value.clamp(min, max) as f32);
+        }
+        Ok(values)
+    }
+    pub fn apply(
+        &self,
+        frame: &mut GeometryFrame,
+        depth: u8,
+        n: u64,
+        t: Option<f64>,
+    ) -> Result<()> {
+        let values = if self.per_frame {
+            Some(self.values(n, t)?)
+        } else {
+            None
+        };
+        let mut cache = self
+            .cache
+            .try_borrow_mut()
+            .map_err(|_| "eq table cache is already borrowed")?;
+        if let Some(values) = values {
+            if cache.as_ref().is_none_or(|table| table.values != values) {
+                *cache = Some(Equalizer::from_values(values)?);
+            }
+        }
+        cache
+            .as_ref()
+            .ok_or("missing eq tables")?
+            .apply(frame, depth)
     }
 }
