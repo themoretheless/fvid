@@ -393,6 +393,15 @@ pub fn crop_lossless(source: &std::path::Path, destination: &std::path::Path,
 
 /// Owned spatial FFV1 export for Y4M and MP4 video, retaining all supported AAC tracks.
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
+    if crate::native_lossless::supports_framestep(&transform)
+        && validate_native_copy_options(options,false).is_ok()
+        && !crate::native_lossless_y4m::eligible(source).map_err(|e|e.to_string())?
+        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
+        let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
+        let mut spatial=transform.clone(); spatial.framestep=None;
+        let (geometry,filters)=crate::native_lossless::configuration(&spatial).map_err(|e|e.to_string())?;
+        return crate::native_export::transcode_ffv1_selected(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref(),Some(step)).map_err(|e|e.to_string());
+    }
     if crate::native_lossless::supports_overlay(&transform) {
         let spec=transform.overlay.as_ref().unwrap();
         if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
@@ -413,7 +422,7 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
     transform: LosslessTransform, options: &CopyOptions, settings: &EncoderSettings) -> Result<LosslessStats> {
     settings.validate()?;
     if fvid_media::owned_lossless::supports_encoder(settings)
-        && (crate::native_lossless::supports(&transform) || crate::native_lossless::supports_overlay(&transform))
+        && (crate::native_lossless::supports(&transform) || crate::native_lossless::supports_overlay(&transform) || crate::native_lossless::supports_framestep(&transform))
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         return transcode_lossless(source,destination,transform,options);
@@ -424,6 +433,17 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
 /// Plan eligible FFV1 exports without opening the legacy demuxer.
 pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTransform,
     options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
+    if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports_framestep(transform)
+        && validate_native_copy_options(options,false).is_ok()
+        && !crate::native_lossless_y4m::eligible(source).map_err(|e|e.to_string())?
+        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
+        let mut spatial=transform.clone(); spatial.framestep=None;
+        let mut plan=crate::native_plan::transcode_lossless(source,&spatial)?;
+        let position=plan.steps.iter().position(|s|s.action=="encode").unwrap_or(plan.steps.len());
+        plan.steps.insert(position,crate::native_plan::PlanStep { action:"filter".into(), detail:format!("owned framestep {} after spatial filters",transform.framestep.as_deref().unwrap()) });
+        plan.notes.push(format!("owned framestep {}; retain selected frame PTS/duration and every AAC packet",transform.framestep.as_deref().unwrap()));
+        return Ok(plan);
+    }
     if matches!(encoder,None|Some("ffv1")) && validate_native_copy_options(options,false).is_ok() {
         if crate::native_lossless::supports_overlay(transform) {
             if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {

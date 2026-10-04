@@ -78,7 +78,19 @@ pub fn write_mp4_processed<W: Write + Seek>(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
+    processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
+    write_mp4_selected(source, output, geometry, filters, cancel, progress, processor,
+        fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?)
+}
+
+pub fn write_mp4_selected<W: Write + Seek>(
+    source: &Path, output: &mut W,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
     mut processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+    step: fvid_media::owned_framestep::FrameStep,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
     let mut input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
@@ -276,7 +288,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         let mut samples = if let Some(samples) = prepared_first.take() {
             samples
         } else {
-            prepare(&frame, reader.dimensions(),stats.video_frames,time.map(|(pts,_)|pts as f64/1e9))?
+            prepare(&frame, reader.dimensions(),stats.decoded_frames,time.map(|(pts,_)|pts as f64/1e9))?
         };
         if let Some(process) = processor.as_deref_mut() {
             process(&mut samples,bit_depth,time.unwrap().0)?;
@@ -286,7 +298,10 @@ pub fn write_mp4_processed<W: Write + Seek>(
         {
             return Err(invalid("FFV1 transformed geometry changed"));
         }
-        if processed {filters.apply_colour_at(&mut samples,bit_depth,source_full_range,source_colour.matrix,stats.video_frames,time.map(|(pts,_)|pts as f64/1e9))?;}
+        if processed {filters.apply_colour_at(&mut samples,bit_depth,source_full_range,source_colour.matrix,stats.decoded_frames,time.map(|(pts,_)|pts as f64/1e9))?;}
+        let emit = step.emits(stats.decoded_frames);
+        stats.decoded_frames += 1;
+        if !emit { continue; }
         let packet = crate::codec::ffv1_encoder::encode(&samples, bit_depth)?;
         check(cancel)?;
         let (pts, duration) = time.unwrap();
@@ -295,7 +310,6 @@ pub fn write_mp4_processed<W: Write + Seek>(
             stats.fvid_crop_payload_copies += 1;
         }
         stats.video_frames += 1;
-        stats.decoded_frames += 1;
         stats.video_packets += 1;
         let format = match samples.subsampling {
             Some([2, 2]) => "yuv420p",
@@ -533,4 +547,13 @@ pub fn configuration(
         geometry,
         crate::native_pixels::PixelFilters::from_request(&request)?,
     ))
+}
+
+/// Temporal selection is admitted only with otherwise supported spatial operations.
+pub fn supports_framestep(transform: &crate::media_info::LosslessTransform) -> bool {
+    let Some(args) = transform.framestep.as_deref() else { return false; };
+    if fvid_media::owned_framestep::FrameStep::parse(args).is_err() { return false; }
+    let mut spatial = transform.clone();
+    spatial.framestep = None;
+    supports(&spatial)
 }

@@ -4870,6 +4870,18 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             );
         }));
     }
+    if !custom_policy && fvid::native_lossless::supports_framestep(&transform)
+        && !fvid::native_lossless_y4m::eligible(source)?
+        && fvid::native_lossless::eligible(source)? {
+        if planning {
+            let plan=fvid::media::plan_transcode_lossless(source,&transform,&options,None)?;
+            if !quiet { println!("{}",serde_json::to_string_pretty(&plan)?); }
+        } else {
+            let stats=fvid::media::transcode_lossless(source,std::path::Path::new(&args[command+2]),transform,&options)?;
+            if !quiet { println!("{}",serde_json::to_string_pretty(&stats)?); }
+        }
+        return Ok(true);
+    }
     if !fvid_media::owned_lossless::supports(source, &transform, &options) {
         return Ok(false);
     }

@@ -225,3 +225,14 @@ external generator is involved. The root decoder formerly refused framestep
 requests while only library Y4M/FFV1 routes supported them. Acceptance now checks
 one output per N selected inputs, interval-local indexing, native CLI AVC decode,
 and continued validation of a truncated frame even when that frame is discarded.
+
+### Root MP4 framestep export qualification
+
+The short synthetic `ffv1-level-one-source.mp4` also reproduces the missing
+root MP4 temporal-export route: a framestep transform formerly fell through
+to the library's Y4M/FFV1-only exporter. `mp4_framestep_exports_selected_times_and_every_audio_packet`
+is its enabled acceptance test. It covers the public explicit FFV1 level-one
+route and CLI, compares every selected FFV1 packet and its original PTS/duration
+with an unfiltered owned export, and verifies all AAC companion packets and
+timing remain identical. Existing synthetic Main10 and dual-AAC controls extend
+coverage. Ordinary tests neither invoke FFmpeg nor generate fixtures.
