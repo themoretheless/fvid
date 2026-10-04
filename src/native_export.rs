@@ -476,12 +476,13 @@ pub(crate) fn export_audio_pcm_selected_with_controls(
 }
 
 /// Owned transformed export with packet-work, encoded payload and RSS limits.
-pub(crate) fn export_audio_pcm_transformed_with_controls(
+pub fn export_audio_pcm_transformed_with_controls(
     source: &Path, destination: &Path,
     interval: Option<(std::time::Duration, std::time::Duration)>,
     volume: f64, channels: Option<u16>, sample_rate: Option<u32>,
     options: &fvid_media::CopyOptions,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    crate::media::validate_owned_audio_options(options).map_err(|error| invalid(&error))?;
     export_pcm_selected(source, destination, interval, volume, channels, sample_rate,
         options.streams.first().copied(), options.cancel.as_ref(), options.progress.as_ref(),
         true, options.max_rss_bytes, Some(options.max_packet_bytes), options.max_packets)

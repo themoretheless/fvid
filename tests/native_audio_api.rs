@@ -175,3 +175,46 @@ fn wave_packet_work_and_payload_limits_are_enforced() {
     }).is_err());
     assert!(!rejected.exists());
 }
+
+#[test]
+fn cli_audio_limits_and_plan_use_owned_export_without_media_feature() {
+    let dir = Directory::new("cli-controls");
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/audio-packet-controls.wav");
+    let output = dir.0.join("limited.f32le");
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"]).arg(&source).arg(&output)
+        .args(["--max-packet-bytes", "128", "--max-packets", "2", "--volume", "0.5", "--progress"])
+        .output().unwrap();
+    assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+    let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(stats["backend"], "fvid");
+    assert_eq!(stats["decoded_frames"], 2);
+    assert_eq!(stats["sample_frames"], 64);
+    let expected: Vec<u8> = (0..64).flat_map(|index| (index as f32 / 2000.0).to_le_bytes()).collect();
+    assert_eq!(std::fs::read(output).unwrap(), expected);
+    assert_eq!(String::from_utf8_lossy(&result.stderr).matches("\"done\":true").count(), 1);
+    let plan = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "decode-audio"]).arg(&source)
+        .args(["--max-packet-bytes", "128", "--max-packets", "2"])
+        .output().unwrap();
+    assert!(plan.status.success(), "{}", String::from_utf8_lossy(&plan.stderr));
+    assert!(String::from_utf8_lossy(&plan.stdout).contains("packet work limit: Some(2)"));
+    let precise = dir.0.join("precise.f32le");
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"]).arg(&source).arg(&precise)
+        .args(["--from", "0.000021", "--to", "0.0005", "--max-packet-bytes", "128"])
+        .output().unwrap();
+    assert!(result.status.success(), "{}", String::from_utf8_lossy(&result.stderr));
+    let expected: Vec<u8> = (2..24).flat_map(|index| (index as f32 / 1000.0).to_le_bytes()).collect();
+    assert_eq!(std::fs::read(precise).unwrap(), expected);
+    for flags in [vec!["--max-packets", "1", "--max-packets", "2"],
+        vec!["--max-rss-mib", "18446744073709551615"], vec!["--max-packet-bytes", "0"]] {
+        let rejected = dir.0.join("rejected.wav");
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode-audio"]).arg(&source).arg(&rejected).args(flags)
+            .output().unwrap();
+        assert!(!result.status.success());
+        assert!(!rejected.exists());
+    }
+}

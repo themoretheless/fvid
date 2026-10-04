@@ -378,10 +378,16 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut transform = fvid::native_plan::AudioDecodeTransform::default();
         let mut selected = None;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
         let (mut from, mut to) = (None, None);
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
             match option.as_str() {
+                "--max-packets" | "--max-packet-bytes" | "--max-rss-mib" => {
+                    if !limit_flags.insert(option.as_str()) { return Err("duplicate audio limit".into()); }
+                    parse_native_audio_limit(option, options.next().ok_or("missing audio limit")?, &mut limits)?;
+                }
                 "--streams" => {
                     if selected.is_some() {
                         return Err("duplicate streams option".into());
@@ -440,10 +446,11 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             (Some(from), Some(to)) => Some((from, to)),
             _ => return Err("plan interval requires both --from and --to".into()),
         };
-        let plan = fvid::native_plan::decode_audio_selected(
+        limits.streams = selected.into_iter().collect();
+        let plan = fvid::media::plan_decode_audio(
             std::path::Path::new(&args[2]),
             &transform,
-            selected,
+            &limits,
         )?;
         println!("{}", serde_json::to_string_pretty(&plan)?);
         return Ok(());
@@ -582,7 +589,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             !arg.starts_with('-')
                 || matches!(
                     arg.as_str(),
-                    "--from"
+                    "--max-packets" | "--max-packet-bytes" | "--max-rss-mib" | "--from"
                         | "--to"
                         | "--quiet"
                         | "--progress"
@@ -602,9 +609,14 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let mut sample_rate = None;
         let mut report_progress = false;
         let mut selected = None;
+        let mut limits = fvid::media::CopyOptions::default();
+        let mut limit_flags = std::collections::BTreeSet::new();
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
-            if option == "--streams" {
+            if matches!(option.as_str(), "--max-packets" | "--max-packet-bytes" | "--max-rss-mib") {
+                if !limit_flags.insert(option.as_str()) { return Err("duplicate audio limit".into()); }
+                parse_native_audio_limit(option, options.next().ok_or("missing audio limit")?, &mut limits)?;
+            } else if option == "--streams" {
                 if selected.is_some() {
                     return Err("duplicate streams option".into());
                 }
@@ -650,16 +662,11 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 );
             })
         });
-        let stats = fvid::native_export::export_audio_pcm_selected(
-            std::path::Path::new(&args[1]),
-            std::path::Path::new(&args[2]),
-            interval,
-            volume.unwrap_or(1.0),
-            channels,
-            sample_rate,
-            selected,
-            None,
-            progress.as_ref(),
+        limits.streams = selected.into_iter().collect();
+        limits.progress = progress;
+        let stats = fvid::native_export::export_audio_pcm_transformed_with_controls(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]),
+            interval, volume.unwrap_or(1.0), channels, sample_rate, &limits,
         )?;
         if !quiet {
             println!(
@@ -1614,7 +1621,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(feature = "media")]
 fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    let help = "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--rate N] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] (local file or http/https/rtsp/rtmp/udp URL) | probe INPUT [--input-format NAME] | capabilities | plan [remux|transcode-lossless|trim|trim-pcm|concat|overlay|xfade|burn-subtitles|loudness|loudnorm|mix-audio|merge-audio|decode-audio] INPUT... [flags] | remux INPUT OUTPUT [--streams 0,1] [--metadata KEY=VALUE] [--metadata-delete KEY] [--stream-metadata INDEX:KEY=VALUE] [--stream-metadata-delete INDEX:KEY] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | convert-subtitles INPUT OUTPUT.mkv [--codec ass] [--streams INDEX] | burn-subtitles INPUT OUTPUT.mkv --subs FILE.srt | overlay MAIN OVERLAY OUTPUT.mkv [--overlay-x N] [--overlay-y N] | xfade MAIN OTHER OUTPUT.mkv --xfade-duration SECONDS [--transition NAME] [--xfade-offset SECONDS] | decode INPUT [--input-format NAME] [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--transpose MODE] [--rotate DEGREES] [--pad WIDTH:HEIGHT:X:Y] [--scale WIDTH:HEIGHT] [--epx ARGS] [--pix-fmt NAME] [--colorspace ARGS] [--zscale ARGS] [--tonemap ARGS] [--yadif ARGS] [--bwdif ARGS] [--w3fdif ARGS] [--tblend ARGS] [--tmix ARGS] [--hqdn3d ARGS] [--gblur ARGS] [--eq ARGS] [--unsharp ARGS] [--hue ARGS] [--avgblur ARGS] [--boxblur ARGS] [--negate 0|1] [--edgedetect ARGS] [--sobel ARGS] [--prewitt ARGS] [--roberts ARGS] [--kirsch ARGS] [--scharr ARGS] [--atadenoise ARGS] [--owdenoise ARGS] [--vaguedenoiser ARGS] [--nlmeans ARGS] [--bm3d ARGS] [--dctdnoiz ARGS] [--fftdnoiz ARGS] [--smartblur ARGS] [--sab ARGS] [--bilateral ARGS] [--cas ARGS] [--vignette ARGS] [--curves ARGS] [--colorbalance ARGS] [--colorlevels ARGS] [--colorchannelmixer ARGS] [--deflicker ARGS] [--photosensitivity ARGS] [--monochrome ARGS] [--grayworld 0|ARGS] [--drawbox ARGS] [--drawgrid ARGS] [--lagfun ARGS] [--amplify ARGS] [--bitplanenoise ARGS] [--deband ARGS] [--gradfun ARGS] [--lenscorrection ARGS] [--pixelize ARGS] [--removegrain ARGS] [--yaepblur ARGS] [--vibrance ARGS] [--dilation ARGS] [--erosion ARGS] [--colorize ARGS] [--exposure ARGS] [--chromashift ARGS] [--colorcontrast ARGS] [--colorcorrect ARGS] [--histeq ARGS] [--shuffleplanes ARGS] [--lutyuv ARGS] [--colorhold ARGS] [--fade ARGS] [--perspective ARGS] [--lumakey ARGS] [--chromakey ARGS] [--colorkey ARGS] [--despill ARGS] [--selectivecolor ARGS] [--stereo3d ARGS] [--field ARGS] [--hqx ARGS] [--xbr ARGS] [--il ARGS] [--super2xsai ARGS] [--kerndeint ARGS] [--phase ARGS] [--estdif ARGS] [--tinterlace ARGS] [--separatefields ARGS] [--weave ARGS] [--doubleweave ARGS] [--framepack ARGS] [--telecine ARGS] [--pullup ARGS] [--decimate ARGS] [--mpdecimate ARGS] [--framestep ARGS] [--tile ARGS] [--untile ARGS] [--shuffleframes ARGS] [--reverse ARGS] [--loop ARGS] [--thumbnail ARGS] [--freezedetect ARGS] [--setpts ARGS] [--pseudocolor ARGS] [--minterpolate ARGS] [--fps RATE] [--subs FILE.srt] [--from SECONDS --to SECONDS] [--device N] | loudness INPUT [--streams INDEX] | loudnorm INPUT OUTPUT.wav [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] | decode-audio INPUT OUTPUT.wav [--streams INDEX] [--rate HZ] [--channels N] [--volume GAIN] [--from SECONDS --to SECONDS] | trim-pcm INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | trim INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | mix-audio OUTPUT a.m4a b.m4a [c.m4a...] [--weights W,...] [--duration shortest] [--normalize|--no-normalize] | merge-audio OUTPUT a.m4a b.m4a | concat OUTPUT INPUT INPUT... [--streams 0] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | transcode INPUT OUTPUT --encoder NAME [--encoder-option KEY=VALUE] [--from SECONDS --to SECONDS [--seek]] | transcode-lossless INPUT OUTPUT.mkv [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--transpose MODE] [--rotate DEGREES] [--pad WIDTH:HEIGHT:X:Y] [--scale WIDTH:HEIGHT] [--epx ARGS] [--pix-fmt NAME] [--colorspace ARGS] [--zscale ARGS] [--tonemap ARGS] [--yadif ARGS] [--bwdif ARGS] [--w3fdif ARGS] [--tblend ARGS] [--tmix ARGS] [--hqdn3d ARGS] [--gblur ARGS] [--eq ARGS] [--unsharp ARGS] [--hue ARGS] [--avgblur ARGS] [--boxblur ARGS] [--negate 0|1] [--edgedetect ARGS] [--sobel ARGS] [--prewitt ARGS] [--roberts ARGS] [--kirsch ARGS] [--scharr ARGS] [--atadenoise ARGS] [--owdenoise ARGS] [--vaguedenoiser ARGS] [--nlmeans ARGS] [--bm3d ARGS] [--dctdnoiz ARGS] [--fftdnoiz ARGS] [--smartblur ARGS] [--sab ARGS] [--bilateral ARGS] [--cas ARGS] [--vignette ARGS] [--curves ARGS] [--colorbalance ARGS] [--colorlevels ARGS] [--colorchannelmixer ARGS] [--deflicker ARGS] [--photosensitivity ARGS] [--monochrome ARGS] [--grayworld 0|ARGS] [--drawbox ARGS] [--drawgrid ARGS] [--lagfun ARGS] [--amplify ARGS] [--bitplanenoise ARGS] [--deband ARGS] [--gradfun ARGS] [--lenscorrection ARGS] [--pixelize ARGS] [--removegrain ARGS] [--yaepblur ARGS] [--vibrance ARGS] [--dilation ARGS] [--erosion ARGS] [--colorize ARGS] [--exposure ARGS] [--chromashift ARGS] [--colorcontrast ARGS] [--colorcorrect ARGS] [--histeq ARGS] [--shuffleplanes ARGS] [--lutyuv ARGS] [--colorhold ARGS] [--fade ARGS] [--perspective ARGS] [--lumakey ARGS] [--chromakey ARGS] [--colorkey ARGS] [--despill ARGS] [--selectivecolor ARGS] [--stereo3d ARGS] [--field ARGS] [--hqx ARGS] [--xbr ARGS] [--il ARGS] [--super2xsai ARGS] [--kerndeint ARGS] [--phase ARGS] [--estdif ARGS] [--tinterlace ARGS] [--separatefields ARGS] [--weave ARGS] [--doubleweave ARGS] [--framepack ARGS] [--telecine ARGS] [--pullup ARGS] [--decimate ARGS] [--mpdecimate ARGS] [--framestep ARGS] [--tile ARGS] [--untile ARGS] [--shuffleframes ARGS] [--reverse ARGS] [--loop ARGS] [--thumbnail ARGS] [--freezedetect ARGS] [--setpts ARGS] [--pseudocolor ARGS] [--minterpolate ARGS] [--fps RATE] [--from SECONDS --to SECONDS [--seek]] [--streams 0,1] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | crop-lossless INPUT OUTPUT.mkv --crop X:Y:WIDTH:HEIGHT [--streams 0,1] | hw-filter INPUT OUTPUT.mp4 [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--from SECONDS --to SECONDS] [--device N]";
+    let help = "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--rate N] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] (local file or http/https/rtsp/rtmp/udp URL) | probe INPUT [--input-format NAME] | capabilities | plan [remux|transcode-lossless|trim|trim-pcm|concat|overlay|xfade|burn-subtitles|loudness|loudnorm|mix-audio|merge-audio|decode-audio] INPUT... [flags] | remux INPUT OUTPUT [--streams 0,1] [--metadata KEY=VALUE] [--metadata-delete KEY] [--stream-metadata INDEX:KEY=VALUE] [--stream-metadata-delete INDEX:KEY] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | convert-subtitles INPUT OUTPUT.mkv [--codec ass] [--streams INDEX] | burn-subtitles INPUT OUTPUT.mkv --subs FILE.srt | overlay MAIN OVERLAY OUTPUT.mkv [--overlay-x N] [--overlay-y N] | xfade MAIN OTHER OUTPUT.mkv --xfade-duration SECONDS [--transition NAME] [--xfade-offset SECONDS] | decode INPUT [--input-format NAME] [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--transpose MODE] [--rotate DEGREES] [--pad WIDTH:HEIGHT:X:Y] [--scale WIDTH:HEIGHT] [--epx ARGS] [--pix-fmt NAME] [--colorspace ARGS] [--zscale ARGS] [--tonemap ARGS] [--yadif ARGS] [--bwdif ARGS] [--w3fdif ARGS] [--tblend ARGS] [--tmix ARGS] [--hqdn3d ARGS] [--gblur ARGS] [--eq ARGS] [--unsharp ARGS] [--hue ARGS] [--avgblur ARGS] [--boxblur ARGS] [--negate 0|1] [--edgedetect ARGS] [--sobel ARGS] [--prewitt ARGS] [--roberts ARGS] [--kirsch ARGS] [--scharr ARGS] [--atadenoise ARGS] [--owdenoise ARGS] [--vaguedenoiser ARGS] [--nlmeans ARGS] [--bm3d ARGS] [--dctdnoiz ARGS] [--fftdnoiz ARGS] [--smartblur ARGS] [--sab ARGS] [--bilateral ARGS] [--cas ARGS] [--vignette ARGS] [--curves ARGS] [--colorbalance ARGS] [--colorlevels ARGS] [--colorchannelmixer ARGS] [--deflicker ARGS] [--photosensitivity ARGS] [--monochrome ARGS] [--grayworld 0|ARGS] [--drawbox ARGS] [--drawgrid ARGS] [--lagfun ARGS] [--amplify ARGS] [--bitplanenoise ARGS] [--deband ARGS] [--gradfun ARGS] [--lenscorrection ARGS] [--pixelize ARGS] [--removegrain ARGS] [--yaepblur ARGS] [--vibrance ARGS] [--dilation ARGS] [--erosion ARGS] [--colorize ARGS] [--exposure ARGS] [--chromashift ARGS] [--colorcontrast ARGS] [--colorcorrect ARGS] [--histeq ARGS] [--shuffleplanes ARGS] [--lutyuv ARGS] [--colorhold ARGS] [--fade ARGS] [--perspective ARGS] [--lumakey ARGS] [--chromakey ARGS] [--colorkey ARGS] [--despill ARGS] [--selectivecolor ARGS] [--stereo3d ARGS] [--field ARGS] [--hqx ARGS] [--xbr ARGS] [--il ARGS] [--super2xsai ARGS] [--kerndeint ARGS] [--phase ARGS] [--estdif ARGS] [--tinterlace ARGS] [--separatefields ARGS] [--weave ARGS] [--doubleweave ARGS] [--framepack ARGS] [--telecine ARGS] [--pullup ARGS] [--decimate ARGS] [--mpdecimate ARGS] [--framestep ARGS] [--tile ARGS] [--untile ARGS] [--shuffleframes ARGS] [--reverse ARGS] [--loop ARGS] [--thumbnail ARGS] [--freezedetect ARGS] [--setpts ARGS] [--pseudocolor ARGS] [--minterpolate ARGS] [--fps RATE] [--subs FILE.srt] [--from SECONDS --to SECONDS] [--device N] | loudness INPUT [--streams INDEX] | loudnorm INPUT OUTPUT.wav [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] | decode-audio INPUT OUTPUT.wav [--streams INDEX] [--rate HZ] [--channels N] [--volume GAIN] [--from SECONDS --to SECONDS] [--max-packet-bytes N] [--max-packets N] [--max-rss-mib N] | trim-pcm INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | trim INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | mix-audio OUTPUT a.m4a b.m4a [c.m4a...] [--weights W,...] [--duration shortest] [--normalize|--no-normalize] | merge-audio OUTPUT a.m4a b.m4a | concat OUTPUT INPUT INPUT... [--streams 0] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | transcode INPUT OUTPUT --encoder NAME [--encoder-option KEY=VALUE] [--from SECONDS --to SECONDS [--seek]] | transcode-lossless INPUT OUTPUT.mkv [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--transpose MODE] [--rotate DEGREES] [--pad WIDTH:HEIGHT:X:Y] [--scale WIDTH:HEIGHT] [--epx ARGS] [--pix-fmt NAME] [--colorspace ARGS] [--zscale ARGS] [--tonemap ARGS] [--yadif ARGS] [--bwdif ARGS] [--w3fdif ARGS] [--tblend ARGS] [--tmix ARGS] [--hqdn3d ARGS] [--gblur ARGS] [--eq ARGS] [--unsharp ARGS] [--hue ARGS] [--avgblur ARGS] [--boxblur ARGS] [--negate 0|1] [--edgedetect ARGS] [--sobel ARGS] [--prewitt ARGS] [--roberts ARGS] [--kirsch ARGS] [--scharr ARGS] [--atadenoise ARGS] [--owdenoise ARGS] [--vaguedenoiser ARGS] [--nlmeans ARGS] [--bm3d ARGS] [--dctdnoiz ARGS] [--fftdnoiz ARGS] [--smartblur ARGS] [--sab ARGS] [--bilateral ARGS] [--cas ARGS] [--vignette ARGS] [--curves ARGS] [--colorbalance ARGS] [--colorlevels ARGS] [--colorchannelmixer ARGS] [--deflicker ARGS] [--photosensitivity ARGS] [--monochrome ARGS] [--grayworld 0|ARGS] [--drawbox ARGS] [--drawgrid ARGS] [--lagfun ARGS] [--amplify ARGS] [--bitplanenoise ARGS] [--deband ARGS] [--gradfun ARGS] [--lenscorrection ARGS] [--pixelize ARGS] [--removegrain ARGS] [--yaepblur ARGS] [--vibrance ARGS] [--dilation ARGS] [--erosion ARGS] [--colorize ARGS] [--exposure ARGS] [--chromashift ARGS] [--colorcontrast ARGS] [--colorcorrect ARGS] [--histeq ARGS] [--shuffleplanes ARGS] [--lutyuv ARGS] [--colorhold ARGS] [--fade ARGS] [--perspective ARGS] [--lumakey ARGS] [--chromakey ARGS] [--colorkey ARGS] [--despill ARGS] [--selectivecolor ARGS] [--stereo3d ARGS] [--field ARGS] [--hqx ARGS] [--xbr ARGS] [--il ARGS] [--super2xsai ARGS] [--kerndeint ARGS] [--phase ARGS] [--estdif ARGS] [--tinterlace ARGS] [--separatefields ARGS] [--weave ARGS] [--doubleweave ARGS] [--framepack ARGS] [--telecine ARGS] [--pullup ARGS] [--decimate ARGS] [--mpdecimate ARGS] [--framestep ARGS] [--tile ARGS] [--untile ARGS] [--shuffleframes ARGS] [--reverse ARGS] [--loop ARGS] [--thumbnail ARGS] [--freezedetect ARGS] [--setpts ARGS] [--pseudocolor ARGS] [--minterpolate ARGS] [--fps RATE] [--from SECONDS --to SECONDS [--seek]] [--streams 0,1] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N] | crop-lossless INPUT OUTPUT.mkv --crop X:Y:WIDTH:HEIGHT [--streams 0,1] | hw-filter INPUT OUTPUT.mp4 [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--from SECONDS --to SECONDS] [--device N]";
     let Some(command) = args.first() else {
         return Err(help.into());
     };
@@ -5564,4 +5571,16 @@ mod grayworld_cli_tests {
         }
         std::fs::remove_dir_all(directory).unwrap();
     }
+}
+
+fn parse_native_audio_limit(option: &str, value: &str, options: &mut fvid::media::CopyOptions)
+    -> Result<(), Box<dyn std::error::Error>> {
+    match option {
+        "--max-packets" => options.max_packets = Some(value.parse()?),
+        "--max-packet-bytes" => options.max_packet_bytes = value.parse()?,
+        "--max-rss-mib" => options.max_rss_bytes = Some(value.parse::<u64>()?
+            .checked_mul(1024 * 1024).ok_or("RSS limit overflows")?),
+        _ => return Err("unknown audio limit".into()),
+    }
+    Ok(())
 }

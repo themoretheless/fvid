@@ -122,7 +122,7 @@ pub fn decode_audio_transformed(
     })
 }
 
-fn validate_owned_audio_options(options: &CopyOptions) -> Result<()> {
+pub(crate) fn validate_owned_audio_options(options: &CopyOptions) -> Result<()> {
     if options.streams.len() > 1 || options.max_controlled_bytes.is_some()
         || !options.metadata_set.is_empty() || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty() || !options.stream_metadata_delete.is_empty()
