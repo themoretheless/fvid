@@ -114,6 +114,9 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         }
         Ok(this)
     }
+    pub fn device_filter_passes(&self) -> u64 {
+        self.renderer.device_filter_passes()
+    }
     pub fn media_timescale(&self) -> u32 {
         self.renderer.media_timescale()
     }
@@ -478,6 +481,15 @@ mod tests {
                 .export_avc_matroska(&output, 1 << 20, None, Some(&progress))
                 .unwrap();
             assert_eq!(stats.video_frames, expected.len() as u64);
+            let passes = if white_shader {
+                expected.len()
+            } else {
+                expected
+                    .iter()
+                    .filter(|event| event.sample.is_some())
+                    .count()
+            };
+            assert_eq!(encoder.device_filter_passes(), passes as u64);
             let events = events.lock().unwrap();
             assert!(events.last().unwrap().done);
             assert!(events[..events.len() - 1].iter().all(|event| !event.done));

@@ -1,6 +1,14 @@
 //! FVid media layer. Owned operation contracts are available without libav.
 //! The temporary legacy backend retains existing operations during migration.
 mod input_policy;
+#[cfg(feature = "native-cuda")]
+mod hw_types;
+#[cfg(feature = "native-cuda")]
+pub use hw_types::{HwFilterOptions, HwFilterStats};
+#[cfg(feature = "native-cuda")]
+pub mod owned_hw_filter;
+#[cfg(all(feature = "native-cuda", not(feature = "legacy-ffmpeg")))]
+pub use owned_hw_filter::hw_filter;
 pub mod owned_avc_annexb;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_avc;

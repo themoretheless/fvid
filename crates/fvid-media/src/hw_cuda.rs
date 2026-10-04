@@ -6,7 +6,6 @@ use fvid_cuda::{
     Nv12Processor, Nv12Transform, Nv12View, P010Processor, P010View, copy_crop_on_stream,
 };
 use lossless::{Codec, CropRect, Frame, Parameters};
-use serde::Serialize;
 use std::path::Path;
 use std::ptr;
 use std::thread;
@@ -197,45 +196,6 @@ fn gcd_i128(mut a: i128, mut b: i128) -> i128 {
         b = t;
     }
     a.abs().max(1)
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct HwFilterOptions {
-    /// Trusted CUDA C shader over native NV12/P010 Y/U/V component codes.
-    pub shader: Option<std::sync::Arc<str>>,
-    /// Supply the fifth FvidSampler argument for neighborhood reads.
-    pub shader_sampling: bool,
-    pub crop: Option<CropRect>,
-    pub horizontal_flip: bool,
-    pub vertical_flip: bool,
-    pub device: usize,
-    /// Force a host round-trip (hwdownload then hwupload) before the device
-    /// filter — same PCIe tax as FFmpeg `hwdownload,hwupload_cuda`. Counts toward
-    /// `host_frame_copies`. Default path stays device-resident (`0` copies).
-    pub host_bounce: bool,
-    /// Half-open presentation interval in microseconds from container start.
-    /// Frames outside `[from, to)` are dropped; kept frames get CFR PTS 0..N-1.
-    pub interval: Option<(i64, i64)>,
-    /// Parallel workers share the CUDA primary context so concurrent
-    /// `av_hwdevice_ctx_create` calls do not fight over incompatible flags.
-    pub share_primary_context: bool,
-}
-
-#[derive(Serialize, Debug)]
-pub struct HwFilterStats {
-    /// Selected filter implementation, independent of backend/encoder identity.
-    pub filter: &'static str,
-    pub backend: &'static str,
-    pub device: String,
-    pub video_frames: u64,
-    pub width: u32,
-    pub height: u32,
-    /// Full-frame CUDA↔host transfers via `av_hwframe_transfer_data`
-    /// (FFmpeg `hwupload_cuda` / `hwdownload` equivalents).
-    pub host_frame_copies: u64,
-    pub device_filter_passes: u64,
-    pub encoder: &'static str,
-    pub host_bounce: bool,
 }
 
 struct HwDevice(pub *mut AVBufferRef);
@@ -880,6 +840,9 @@ pub fn hw_filter(
 ) -> Result<HwFilterStats> {
     if destination.exists() {
         return Err("output already exists".into());
+    }
+    if let Some(stats) = crate::owned_hw_filter::try_filter(source, destination, options)? {
+        return Ok(stats);
     }
     // Keep fused reflections single-session until multi-session NVDEC
     // contention has been qualified for this path.

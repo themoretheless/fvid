@@ -30,6 +30,9 @@ def qualify_native_tests(root, run):
         ("fvid-media", "owned_nvdec_mp4", [
             "own_mp4_packets_decode_on_nvidia_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),
+        ("fvid-media", "owned_hw_filter", [
+            "production_hw_filter_routes_synthetic_avc_without_libav",
+        ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_nvenc_movie", [
             "synthetic_movie_encodes_and_muxes_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),

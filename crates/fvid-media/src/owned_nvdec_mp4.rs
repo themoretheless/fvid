@@ -79,6 +79,18 @@ impl<R: Read + Seek> AvcMp4Input<R> {
     pub fn track(&self) -> &Track {
         &self.reader.tracks()[self.video]
     }
+    pub fn qualify_packets(&mut self) -> Result<(), String> {
+        self.rewind_packets();
+        let result = crate::owned_nvdec_avc_decoder::qualify_packets(
+            self.sps.clone(),
+            self.pps.clone(),
+            self.length_size,
+            self.max_packet_bytes,
+            |packet| self.read_next(packet).map(|sample| sample.is_some()),
+        );
+        self.rewind_packets();
+        result
+    }
     pub fn video_metadata(&self) -> crate::owned_nvdec_movie::MovieVideoMetadata {
         use crate::owned_matroska::{ColourDescription, TrackOptions, VideoMetadata};
         let track = self.track();

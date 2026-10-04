@@ -70,7 +70,7 @@ pub use filter::{
     PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf,
 };
 #[cfg(feature = "cuda-hw")]
-pub use hw_cuda::{HwFilterOptions, HwFilterStats, hw_filter};
+pub use hw_cuda::hw_filter;
 pub use lossless::{
     CropRect, EncoderSettings, LosslessStats, LosslessTransform, OverlaySpec, ScaleSize, XfadeSpec,
     crop_lossless, transcode, transcode_lossless,

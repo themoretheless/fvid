@@ -484,3 +484,29 @@ surface and pass through the shader/transform into the reusable output; shaders
 therefore apply consistently to pictures and blanks. GPU acceptance now includes
 a uniform-white shader and checks every software-decoded output plane, including
 both originally blank spans. NVIDIA execution remains unverified.
+
+## Production CUDA routing
+
+The existing `hw-filter` entrypoint now tries the owned CUDA route first for
+AVC MP4 input and `.mkv` output. CPU qualification parses every access unit using
+the same owned POC/DPB/parameter adapter before GPU selection. Accepted files run
+through owned MP4 input, movie reader, filter/shader, retained NVENC slots and
+atomic Matroska publication. No libav retry occurs after native execution starts.
+The standalone `native-cuda` feature exports the same operation contracts and
+`hw_filter` API without enabling any legacy dependency.
+
+The native route currently excludes intervals, host bounce and nonzero SPS crop
+from automatic selection to retain existing command semantics until qualified;
+other codecs/containers remain on the legacy route. This is not yet elimination
+of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
+owned route preserves that track scope while retaining metadata and exact movie
+occurrences. Its nominal rate is reduced from source sample count/duration.
+
+Host admission tests run without a GPU/FFmpeg; Linux/Windows compile the ignored
+production-route qualification test. It asserts the owned backend, zero host
+pixel transfers, every muxed packet and FVid decoding. Hardware execution remains
+unverified. Existing CUDA option/stat types are shared between both backends.
+
+Native CUDA statistics count successful filter/copy calls directly. An unshaded
+black fill does not increment `device_filter_passes`; a blank passed through a
+shader does. This is an operation counter, not measured GPU throughput.

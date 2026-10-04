@@ -295,6 +295,22 @@ impl AvcNvdecDecoder {
     }
 }
 
+pub(crate) fn qualify_packets(
+    sps: Sps,
+    pps: Pps,
+    length_size: u8,
+    max_bytes: usize,
+    mut next: impl FnMut(&mut Vec<u8>) -> Result<bool, String>,
+) -> Result<(), String> {
+    let mut scheduler = Scheduler::new(sps, pps, length_size, 32, max_bytes)?;
+    let mut packet = Vec::new();
+    while next(&mut packet)? {
+        let pending = scheduler.prepare(&packet)?;
+        drop(scheduler.commit(pending));
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

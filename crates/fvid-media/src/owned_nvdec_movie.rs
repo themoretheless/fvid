@@ -364,6 +364,7 @@ pub struct AvcMovieRenderer<R: Read + Seek> {
     transform: fvid_cuda::Nv12Transform,
     full_range: bool,
     metadata: MovieVideoMetadata,
+    device_filter_passes: u64,
     failed: bool,
 }
 impl<R: Read + Seek> AvcMovieRenderer<R> {
@@ -409,8 +410,15 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
             transform,
             full_range,
             metadata,
+            device_filter_passes: 0,
             failed: false,
         })
+    }
+    pub fn device_filter_passes(&self) -> u64 {
+        self.device_filter_passes
+    }
+    pub fn device_name(&self) -> &str {
+        self.filter.device_name()
     }
     pub fn metadata(&self) -> &MovieVideoMetadata {
         &self.metadata
@@ -462,6 +470,10 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
             self.output.synchronize()?;
             self.reader.unmap(surface.slot)?;
             operation?;
+            self.device_filter_passes = self
+                .device_filter_passes
+                .checked_add(1)
+                .ok_or("CUDA pass count overflow")?;
         } else if let Some(blank) = self.blank.as_mut() {
             blank.fill_black(self.full_range)?;
             let operation = self
@@ -470,6 +482,10 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
             self.filter.synchronize()?;
             self.output.synchronize()?;
             operation?;
+            self.device_filter_passes = self
+                .device_filter_passes
+                .checked_add(1)
+                .ok_or("CUDA pass count overflow")?;
         } else {
             self.output.fill_black(self.full_range)?;
         }
