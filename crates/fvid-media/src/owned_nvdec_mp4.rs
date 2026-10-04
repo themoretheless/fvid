@@ -92,51 +92,13 @@ impl<R: Read + Seek> AvcMp4Input<R> {
         result
     }
     pub fn video_metadata(&self) -> crate::owned_nvdec_movie::MovieVideoMetadata {
-        use crate::owned_matroska::{ColourDescription, TrackOptions, VideoMetadata};
-        let track = self.track();
-        let signal = self.sps.vui.as_ref().and_then(|vui| vui.video_signal);
-        let mut colour = track.colour;
-        if colour.primaries == 0 && colour.transfer == 0 && colour.matrix == 0 && !colour.full_range
-        {
-            if let Some((_, full_range, codes)) = signal {
-                let [primaries, transfer, matrix] = codes.unwrap_or([2; 3]);
-                colour = ColourDescription {
-                    primaries,
-                    transfer,
-                    matrix,
-                    full_range,
-                };
-            }
-        }
-        let specified = signal.is_some()
-            || colour.primaries != 0
-            || colour.transfer != 0
-            || colour.matrix != 0
-            || colour.full_range;
-        let mut aspect = track.pixel_aspect;
-        if matches!(track.rotation, 90 | 270) {
-            aspect = (aspect.1, aspect.0);
-        }
-        if aspect == (1, 1) {
-            if let Some((x, y)) = self.sps.vui.as_ref().and_then(|vui| vui.aspect_ratio) {
-                aspect = (u32::from(x), u32::from(y));
-            }
-        }
-        crate::owned_nvdec_movie::MovieVideoMetadata {
-            file: crate::owned_matroska::FileMetadata::from_mp4(&self.reader),
-            name: track.name.clone(),
-            language: track.language.clone(),
-            options: TrackOptions {
-                rotation: track.rotation,
-                video: Some(VideoMetadata {
-                    crop: self.sps.crop,
-                    pixel_aspect: aspect,
-                    colour: specified.then_some(colour),
-                    hdr: track.hdr,
-                }),
-                ..Default::default()
-            },
-        }
+        video_metadata(
+            &self.reader,
+            self.video,
+            self.sps.crop,
+            self.sps.vui.as_ref().and_then(|vui| vui.video_signal),
+            self.sps.vui.as_ref().and_then(|vui| vui.aspect_ratio),
+        )
     }
     pub fn coded_dimensions(&self) -> (u32, u32) {
         self.sps.coded_dimensions()
@@ -152,107 +114,10 @@ impl<R: Read + Seek> AvcMp4Input<R> {
     }
     /// Stable raw-media PTS order. Movie edits must be applied separately.
     pub fn media_presentation_order(&self) -> Result<Vec<usize>, String> {
-        let mut order = Vec::new();
-        order
-            .try_reserve_exact(self.packet_count())
-            .map_err(|e| e.to_string())?;
-        order.extend(0..self.packet_count());
-        order.sort_unstable_by_key(|index| {
-            (
-                self.track()
-                    .samples
-                    .get(*index)
-                    .expect("indexed sample exists")
-                    .pts,
-                *index,
-            )
-        });
-        Ok(order)
+        media_presentation_order(self.track())
     }
-
     pub fn movie_presentations(&self, max_entries: usize) -> Result<Vec<Presentation>, String> {
-        use crate::owned_video_timeline::{MovieEdit, map_movie_edits};
-        let order = self.media_presentation_order()?;
-        let track = self.track();
-        let edits = map_movie_edits(
-            track
-                .edits
-                .iter()
-                .map(|edit| (edit.duration, edit.media_time)),
-            track.timescale,
-            self.movie_timescale(),
-        )
-        .map_err(|e| e.to_string())?;
-        let mut result = Vec::new();
-        let mut push = |entry| -> Result<(), String> {
-            if result.len() >= max_entries {
-                return Err("NVDEC movie presentation count exceeds limit".into());
-            }
-            result.try_reserve(1).map_err(|e| e.to_string())?;
-            result.push(entry);
-            Ok(())
-        };
-        if edits.is_empty() {
-            for index in order {
-                let sample = track.samples.get(index).unwrap();
-                let end = sample
-                    .pts
-                    .checked_add(i64::from(sample.duration))
-                    .ok_or("MP4 frame endpoint overflow")?;
-                if end > sample.pts.max(0) {
-                    push(Presentation {
-                        sample: Some(index),
-                        range: 0,
-                        start: sample.pts.max(0),
-                        end,
-                    })?;
-                }
-            }
-        } else {
-            for (range, edit) in edits.into_iter().enumerate() {
-                match edit {
-                    MovieEdit::Blank {
-                        movie_start,
-                        movie_end,
-                    } => {
-                        push(Presentation {
-                            sample: None,
-                            range,
-                            start: movie_start,
-                            end: movie_end,
-                        })?;
-                    }
-                    MovieEdit::Picture(edit) => {
-                        for &index in &order {
-                            let sample = track.samples.get(index).unwrap();
-                            let end = sample
-                                .pts
-                                .checked_add(i64::from(sample.duration))
-                                .ok_or("MP4 frame endpoint overflow")?;
-                            let start = sample.pts.max(edit.media_start);
-                            let end = end.min(edit.media_end);
-                            if start < end {
-                                let movie_start = edit
-                                    .movie_start
-                                    .checked_add(start - edit.media_start)
-                                    .ok_or("MP4 movie timestamp overflow")?;
-                                let movie_end = edit
-                                    .movie_start
-                                    .checked_add(end - edit.media_start)
-                                    .ok_or("MP4 movie endpoint overflow")?;
-                                push(Presentation {
-                                    sample: Some(index),
-                                    range,
-                                    start: movie_start,
-                                    end: movie_end,
-                                })?;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Ok(result)
+        movie_presentations(self.track(), self.movie_timescale(), max_entries)
     }
     pub fn create_decoder(
         &self,
@@ -316,6 +181,162 @@ impl<R: Read + Seek> AvcMp4Input<R> {
             media_timescale,
         }))
     }
+}
+pub(crate) fn video_metadata<R: Read + Seek>(
+    reader: &Mp4Reader<R>,
+    video: usize,
+    crop: [u32; 4],
+    signal: Option<(u8, bool, Option<[u8; 3]>)>,
+    fallback_aspect: Option<(u16, u16)>,
+) -> crate::owned_nvdec_movie::MovieVideoMetadata {
+    use crate::owned_matroska::{ColourDescription, TrackOptions, VideoMetadata};
+    let track = &reader.tracks()[video];
+    let mut colour = track.colour;
+    if colour.primaries == 0 && colour.transfer == 0 && colour.matrix == 0 && !colour.full_range {
+        if let Some((_, full_range, codes)) = signal {
+            let [primaries, transfer, matrix] = codes.unwrap_or([2; 3]);
+            colour = ColourDescription {
+                primaries,
+                transfer,
+                matrix,
+                full_range,
+            };
+        }
+    }
+    let specified = signal.is_some()
+        || colour.primaries != 0
+        || colour.transfer != 0
+        || colour.matrix != 0
+        || colour.full_range;
+    let mut aspect = track.pixel_aspect;
+    if matches!(track.rotation, 90 | 270) {
+        aspect = (aspect.1, aspect.0);
+    }
+    if aspect == (1, 1) {
+        if let Some((x, y)) = fallback_aspect {
+            aspect = (u32::from(x), u32::from(y));
+        }
+    }
+    crate::owned_nvdec_movie::MovieVideoMetadata {
+        file: crate::owned_matroska::FileMetadata::from_mp4(reader),
+        name: track.name.clone(),
+        language: track.language.clone(),
+        options: TrackOptions {
+            rotation: track.rotation,
+            video: Some(VideoMetadata {
+                crop: crop,
+                pixel_aspect: aspect,
+                colour: specified.then_some(colour),
+                hdr: track.hdr,
+            }),
+            ..Default::default()
+        },
+    }
+}
+pub(crate) fn media_presentation_order(track: &Track) -> Result<Vec<usize>, String> {
+    let mut order = Vec::new();
+    order
+        .try_reserve_exact(track.samples.len())
+        .map_err(|e| e.to_string())?;
+    order.extend(0..track.samples.len());
+    order.sort_unstable_by_key(|index| {
+        (
+            track
+                .samples
+                .get(*index)
+                .expect("indexed sample exists")
+                .pts,
+            *index,
+        )
+    });
+    Ok(order)
+}
+pub(crate) fn movie_presentations(
+    track: &Track,
+    movie_timescale: u32,
+    max_entries: usize,
+) -> Result<Vec<Presentation>, String> {
+    use crate::owned_video_timeline::{MovieEdit, map_movie_edits};
+    let order = media_presentation_order(track)?;
+    let edits = map_movie_edits(
+        track
+            .edits
+            .iter()
+            .map(|edit| (edit.duration, edit.media_time)),
+        track.timescale,
+        movie_timescale,
+    )
+    .map_err(|e| e.to_string())?;
+    let mut result = Vec::new();
+    let mut push = |entry| -> Result<(), String> {
+        if result.len() >= max_entries {
+            return Err("NVDEC movie presentation count exceeds limit".into());
+        }
+        result.try_reserve(1).map_err(|e| e.to_string())?;
+        result.push(entry);
+        Ok(())
+    };
+    if edits.is_empty() {
+        for index in order {
+            let sample = track.samples.get(index).unwrap();
+            let end = sample
+                .pts
+                .checked_add(i64::from(sample.duration))
+                .ok_or("MP4 frame endpoint overflow")?;
+            if end > sample.pts.max(0) {
+                push(Presentation {
+                    sample: Some(index),
+                    range: 0,
+                    start: sample.pts.max(0),
+                    end,
+                })?;
+            }
+        }
+    } else {
+        for (range, edit) in edits.into_iter().enumerate() {
+            match edit {
+                MovieEdit::Blank {
+                    movie_start,
+                    movie_end,
+                } => {
+                    push(Presentation {
+                        sample: None,
+                        range,
+                        start: movie_start,
+                        end: movie_end,
+                    })?;
+                }
+                MovieEdit::Picture(edit) => {
+                    for &index in &order {
+                        let sample = track.samples.get(index).unwrap();
+                        let end = sample
+                            .pts
+                            .checked_add(i64::from(sample.duration))
+                            .ok_or("MP4 frame endpoint overflow")?;
+                        let start = sample.pts.max(edit.media_start);
+                        let end = end.min(edit.media_end);
+                        if start < end {
+                            let movie_start = edit
+                                .movie_start
+                                .checked_add(start - edit.media_start)
+                                .ok_or("MP4 movie timestamp overflow")?;
+                            let movie_end = edit
+                                .movie_start
+                                .checked_add(end - edit.media_start)
+                                .ok_or("MP4 movie endpoint overflow")?;
+                            push(Presentation {
+                                sample: Some(index),
+                                range,
+                                start: movie_start,
+                                end: movie_end,
+                            })?;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(result)
 }
 #[cfg(test)]
 mod tests {

@@ -318,6 +318,22 @@ pub struct HevcNvdecDecoder {
     mapped: Vec<(usize, Arc<FrameSlot>)>,
     failed: bool,
 }
+pub(crate) fn qualify_packets(
+    sps: Sps,
+    pps: Pps,
+    length_size: u8,
+    max_bytes: usize,
+    mut next: impl FnMut(&mut Vec<u8>) -> Result<bool, String>,
+) -> Result<(), String> {
+    let mut scheduler = Scheduler::new(sps, pps, length_size, 32, max_bytes)?;
+    let mut packet = Vec::new();
+    while next(&mut packet)? {
+        if let Some(pending) = scheduler.prepare(&packet)? {
+            drop(scheduler.commit(pending));
+        }
+    }
+    Ok(())
+}
 impl HevcNvdecDecoder {
     pub fn new(
         sps: Sps,

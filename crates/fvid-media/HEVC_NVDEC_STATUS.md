@@ -21,7 +21,11 @@ submission leave POC/DPB unchanged. In-band parameter changes are refused until
 reconfiguration is implemented.
 
 This is not yet an operational HEVC GPU playback/export pipeline:
-production MP4 reader/render/export routing remains to be implemented.
+`HevcMp4Input` reads and qualifies the owned sample table, preserving raw
+PTS/DTS/duration/sync flags and metadata. AVC and HEVC use the same edit-timeline
+mapper and metadata builder. HEVC input tests cover Main/Main10 packet reads,
+rewind after qualification and the synthetic blank/repeated-range fixture.
+Production movie render/export routing remains to be implemented.
 Long-term references are still refused by the own slice parser. Main10 also needs
 a compatible output/render/encode path. Driver acceptance and decoded image
 correctness have not been verified on NVIDIA hardware.
@@ -34,6 +38,8 @@ The additional ignored `owned_hevc_ipb_scheduler_submits_and_maps_on_nvidia`
 test submits/maps all synthetic Main/Main10 pictures, including references and
 reordered B pictures. It also does not compare GPU pixels with a reference.
 Both hardware tests are required by the CUDA qualification runner.
+The runner also requires `own_hevc_mp4_packets_decode_on_nvidia_without_libav`,
+which connects the own MP4 input to the decoder and maps every synthetic picture.
 
 The production CUDA features still include the legacy libav backend. This
 adapter alone does not remove that dependency.

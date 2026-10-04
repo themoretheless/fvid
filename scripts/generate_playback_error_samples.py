@@ -48,7 +48,7 @@ def rewrite(data, edits=None, bad_avcc=False, duplicate_pts=False, video_metadat
         elif kind == b"stsd":
             entries = bytearray(payload[:8])
             for codec, entry in children(payload[8:]):
-                assert codec == b"avc1"
+                assert codec in {b"avc1", b"hvc1", b"hev1"}
                 extra = rewrite(entry[78:], edits, bad_avcc, duplicate_pts, video_metadata)
                 if video_metadata:
                     extra = b"".join(atom(k, p) for k, p in children(extra) if k not in {b"colr", b"pasp"})
@@ -117,6 +117,14 @@ def ffv1_level_one_source(seed):
 def main():
     seeds = load_seeds()
     OUT.mkdir(parents=True, exist_ok=True)
+    # Public synthetic HEVC seed only; never import user videos or parameters.
+    hevc = (ROOT / "tests/fixtures/hevc/main-ipb.mp4").read_bytes()
+    order = [kind for kind, _ in children(hevc)]
+    assert order.index(b"mdat") < order.index(b"moov")
+    # Movie clock 30 Hz, media clock 15360 Hz. Six-frame range is replayed,
+    # with leading/interior 0.1-second black spans.
+    (OUT / "hevc-cuda-edit-repeat.mp4").write_bytes(rewrite(hevc,
+        edits=[(3, -1), (6, 1024), (3, -1), (6, 1024)]))
     control = OUT / "control.mp4"
     control.write_bytes(seeds["control.mp4"])
     (OUT / "ffv1-level-one-source.mp4").write_bytes(ffv1_level_one_source(seeds["control.mp4"]))

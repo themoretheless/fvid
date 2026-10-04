@@ -6,6 +6,71 @@ pub struct AspectRatio {
     pub idc: u8,
     pub extended: Option<[u16; 2]>,
 }
+impl AspectRatio {
+    pub fn ratio(self) -> Option<(u16, u16)> {
+        const SAR: [(u16, u16); 16] = [
+            (1, 1),
+            (12, 11),
+            (10, 11),
+            (16, 11),
+            (40, 33),
+            (24, 11),
+            (20, 11),
+            (32, 11),
+            (80, 33),
+            (18, 11),
+            (15, 11),
+            (64, 33),
+            (160, 99),
+            (4, 3),
+            (3, 2),
+            (2, 1),
+        ];
+        let ratio = if self.idc == 255 {
+            self.extended.map(|[x, y]| (x, y))
+        } else {
+            self.idc
+                .checked_sub(1)
+                .and_then(|index| SAR.get(index as usize).copied())
+        };
+        ratio.filter(|(x, y)| *x != 0 && *y != 0)
+    }
+}
+#[cfg(test)]
+mod aspect_tests {
+    use super::AspectRatio;
+    #[test]
+    fn standard_extended_and_unspecified_sample_aspects_are_distinct() {
+        let ratio = |idc| {
+            AspectRatio {
+                idc,
+                extended: None,
+            }
+            .ratio()
+        };
+        assert_eq!(ratio(2), Some((12, 11)));
+        assert_eq!(ratio(14), Some((4, 3)));
+        assert_eq!(ratio(16), Some((2, 1)));
+        assert_eq!(ratio(0), None);
+        assert_eq!(ratio(17), None);
+        assert_eq!(
+            AspectRatio {
+                idc: 255,
+                extended: Some([7, 5])
+            }
+            .ratio(),
+            Some((7, 5))
+        );
+        assert_eq!(
+            AspectRatio {
+                idc: 255,
+                extended: Some([0, 5])
+            }
+            .ratio(),
+            None
+        );
+    }
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct VideoSignal {
     pub format: u8,
