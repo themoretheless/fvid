@@ -75,3 +75,19 @@ Ordinary acceptance processes each complete frame and reads the committed raw
 references without FFmpeg or network. No private media is used. The existing
 3×3 YUV grids also verify odd-edge frame-wide callback geometry, atomic error
 handling and native decode/export routing.
+
+### colorchannelmixer-reference-{8,16}-{0..11}.raw and float references
+
+Twelve RGBA matrix/preservation cases reuse the three-frame 8×8 arithmetic
+`vibrance-grid-{8,16}.rgba` fixtures. References cover channel permutation,
+partial gains, alpha coupling, negative/clipped gains, per-contribution ties and
+all six colour preservation modes. Integer acceptance is exact. Float input is
+derived from the 8-bit synthetic values as `value / 255 * 2 - 0.25`, retaining
+headroom. Packed float references are little-endian RGBA; float acceptance uses
+an eight-epsilon bound scaled by `max(1,abs(reference))`, with observed maximum
+absolute error 3.58e-7. They are comparison/acceptance fixtures, not refusal tests.
+References are generated only by explicitly invoking
+`FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_colorchannelmixer_reference`.
+Ordinary tests use committed bytes without FFmpeg/network. No private media or
+codec parameter sets are involved. Existing odd YUV grids exercise native
+matrix decode/export routing separately.

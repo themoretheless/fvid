@@ -22,6 +22,8 @@ pub mod owned_colorhold;
 pub mod owned_colorcontrast;
 pub mod owned_vibrance;
 pub mod owned_colorlevels;
+mod owned_color_preserve;
+pub mod owned_colorchannelmixer;
 pub mod owned_yuv_rgb;
 pub mod owned_monochrome;
 pub mod owned_lutyuv;

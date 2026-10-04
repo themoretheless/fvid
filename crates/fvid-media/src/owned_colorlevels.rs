@@ -34,16 +34,7 @@ impl ColorLevels {
                 .position(|n| *n == name.trim())
                 .ok_or("unknown colorlevels option")?;
             if index == 16 {
-                let modes = ["none", "lum", "max", "avg", "sum", "nrm", "pwr"];
-                let mode = if let Some(mode) = modes.iter().position(|n| *n == value.trim()) {
-                    mode as f64
-                } else {
-                    crate::owned_expression::constant(value.trim())?
-                };
-                if !mode.is_finite() || mode.fract() != 0.0 || !(0.0..=6.0).contains(&mode) {
-                    return Err("invalid colorlevels preserve mode".into());
-                }
-                result.preserve = mode as u8;
+                result.preserve = crate::owned_color_preserve::parse_mode(value)?;
             } else {
                 let value = crate::owned_expression::constant(value.trim())?;
                 let minimum = if index < 8 { -1.0 } else { 0.0 };
@@ -138,23 +129,8 @@ impl ColorLevels {
                 }
             });
             if self.preserve != 0 {
-                let measure = |rgb: [f32; 3]| -> f32 {
-                    let [r, g, b] = rgb;
-                    match self.preserve {
-                        1 => r.max(g).max(b) + r.min(g).min(b),
-                        2 => r.max(g).max(b),
-                        3 => (r + g + b + 1.0) / 3.0,
-                        4 => r + g + b,
-                        5 => {
-                            let [r, g, b] = rgb.map(|v| v / maximum);
-                            (r * r + g * g + b * b).sqrt()
-                        }
-                        _ => {
-                            let [r, g, b] = rgb.map(|v| v / maximum);
-                            (r * r * r + g * g * g + b * b * b).cbrt()
-                        }
-                    }
-                };
+                let measure =
+                    |rgb| crate::owned_color_preserve::measure(self.preserve, rgb, maximum);
                 let output = measure([adjusted[0], adjusted[1], adjusted[2]]);
                 if output > 0.0 {
                     let ratio = measure(original) / output;

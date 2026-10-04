@@ -3571,3 +3571,17 @@ components in 24 three-frame cases at 8/16 bits. Ordinary exact acceptance reads
 committed synthetic references, including the fixed alpha accumulation rounding
 case, without FFmpeg/network. General YUV/matrix parity and float RGB formats
 remain outside this qualification.
+
+Owned `colorchannelmixer` applies the complete RGBA gain matrix, named/numeric
+`pc` preservation modes and `pa` amount, using the owned scalar evaluator.
+Integer RGB/RGBA at 8–16 bits rounds individual matrix contributions to even
+before summation and validates all samples before mutation. Its float RGB/RGBA
+API keeps finite input headroom outside 0–1 and leaves output unclipped.
+Colour-preservation parsing and metrics are shared with owned `colorlevels`.
+Metadata-aware YUV processing, native decode and lossless export admit supported
+requests without legacy features. Synthetic references cover 18,432 integer
+components exactly, plus 9,216 float components with an eight-epsilon scaled
+precision bound; observed float maximum absolute difference is 3.58e-7 in
+norm preservation. Ordinary acceptance invokes no external codec or network.
+Float file decode/export routing and general YUV reference parity are not
+established by these API comparisons.
