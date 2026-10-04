@@ -42,6 +42,11 @@ jobs:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
           FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --no-default-features --features player --lib --bins --tests
+      - name: Test production media without external programs
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
+          FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
+        run: cargo test --locked --no-default-features --features media --lib --bins --tests
       - name: Guard native graphs and ordinary tests against FFmpeg
         run: |
           python3 scripts/test_native_dependency_policy.py

@@ -125,7 +125,7 @@ def main():
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--target", help="Cargo target triple (defaults to rustc host)")
     parser.add_argument("--production", action="store_true",
-                        help="also require production media and CUDA graphs to exclude FFmpeg")
+                        help="also require CUDA graphs to exclude FFmpeg")
     args = parser.parse_args()
     target = args.target
     if target is None:
@@ -138,10 +138,10 @@ def main():
         ("headless", ROOT / "Cargo.toml", ["--no-default-features"]),
         ("player", ROOT / "Cargo.toml", ["--no-default-features", "--features", "player"]),
         ("camera bridge", ROOT / "crates/fvid-camera-ffi/Cargo.toml", []),
+        ("production media", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media"]),
     ]
     if args.production:
         cases.extend([
-            ("production media", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media"]),
             ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
             ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
         ])

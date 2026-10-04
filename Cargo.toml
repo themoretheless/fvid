@@ -21,7 +21,7 @@ videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:naga"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
-media = ["fvid-media/legacy-ffmpeg"]
+media = ["fvid-media/http-input"]
 # Native media + CUDA NVDEC/NVENC vertical slice (pulls fvid-media/cuda-hw).
 media-cuda = ["media", "cuda", "fvid-media/cuda-hw"]
 # Local airbug toolkit from themoretheless/airbug@release (err + OTLP).

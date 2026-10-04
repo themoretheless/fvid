@@ -1,4 +1,12 @@
-# Обычные видеофайлы: native media adapter
+# Media backend FVid
+
+Обычный `--features media` использует собственный backend с HTTP-вводом без FFmpeg headers, libclang и libav. Сборка: `cargo build --release --no-default-features --features media`. Feature `mcp` включает этот backend через `media`.
+
+Поддержанные контейнеры, packet tools и операции перечислены с acceptance-проверками в [SHARED_CODECS.md](SHARED_CODECS.md). Неподдержанные операции дают явную ошибку без fallback на libav. Переход ещё не завершён: `media-cuda` и library `cuda-hw` остаются на legacy libav.
+
+## Исторический legacy/reference adapter
+
+Нижеследующие требования к FFmpeg и список возможностей относятся к прежнему адаптеру и reference-проверкам; это не подтверждение поддержки всего списка собственным backend. Для явного reference build адаптер включается через `--features media,fvid-media/legacy-ffmpeg`. Обычной сборке `media` эти установки не нужны.
 
 Добавлен необязательный `fvid-media`: Rust-адаптер к установленным libavformat/libavcodec/libavutil/libavfilter. Production-код не запускает FFmpeg CLI. Собственный Y4M CPU/GPU-движок остаётся отдельным; наличие адаптера не означает, что FFmpeg-кодеки переписаны на Rust.
 
