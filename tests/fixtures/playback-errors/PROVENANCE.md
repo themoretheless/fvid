@@ -770,3 +770,11 @@ SHA256:
 - `perspective-linear.expected.raw`: `686e122686d9520f6d58a4e67c658ff415e8f6b2e5c387fced8af0affd22325c`
 - `perspective-small.y4m`: `e32f837192b6924ee95adc93f1b2a1db5ff59a043f8f63ea6b7867862af74a13`
 - `perspective.y4m`: `1f4ed15d6d43d81eadb89cfa298e5ce0f0307f7290a31cbecb1e4edacfe4644c`
+
+### Shared compressed-video dispatch
+
+`generate-shared-codecs.py` uses Python only and the existing synthetic AV1 ramp. It creates acceptance fixtures with nonempty AV1 CodecPrivate and with the sequence OBU exclusively in CodecPrivate, plus a valid WebM envelope containing a deliberately truncated VP9 packet. No private source media or parameters are used. `native_shared_codecs` verifies actual private-header initialization, cold-decoder failure for the sequence-only configuration, matching root/library frame counts, malformed-packet errors and explicit transform refusal. Ordinary tests use committed fixtures without generators, network or FFmpeg. AV1 private configuration follows the [AOM record layout](https://aomediacodec.github.io/av1-isobmff/) and [Matroska mapping](https://www.matroska.org/technical/codec_specs.html). These tests do not establish universal codec/profile support.
+
+- `shared-av1-private.webm`: `c9f64ff547db2402829fabfb2439722d92e269567277170f6e50adfd5d29ff30`
+- `shared-av1-private-sequence.webm`: `9a373397e429500a87b031e533e14e65f9f2a8eb8fe722b40c179ebac72e5963`
+- `shared-vp9-truncated.webm`: `cf1bf012343ecbdfd6eb847597adb61384bc359ce42549ff838929091d36c942`

@@ -100,24 +100,28 @@ pub(crate) fn decode(
     distances: [i32; 8],
 ) -> Result<(Picture, Cdfs)> {
     if h.reference_mvs {
-        return Err(invalid("AV1 temporal motion field not implemented"));
+        return Err(crate::unsupported(
+            "AV1 temporal motion field not implemented",
+        ));
     }
 
     if h.quant.matrix.is_some()
         || h.filter.delta_resolution.is_some()
         || h.restoration_types != [0; 3]
     {
-        return Err(invalid(
+        return Err(crate::unsupported(
             "AV1 quantization matrices or in-loop filtering not implemented",
         ));
     }
     if h.segments.iter().flatten().any(Option::is_some) || h.intrabc || h.superres_denom != 8 {
-        return Err(invalid(
+        return Err(crate::unsupported(
             "AV1 segmentation/intrabc/superres reconstruction not implemented",
         ));
     }
     if s.color.subsampling != [true, true] {
-        return Err(invalid("AV1 native reconstruction requires 4:2:0"));
+        return Err(crate::unsupported(
+            "AV1 native reconstruction requires 4:2:0",
+        ));
     }
     let cols = 2 * (h.size[0] as usize).div_ceil(8);
     let rows = 2 * (h.size[1] as usize).div_ceil(8);
@@ -480,10 +484,12 @@ impl Decoder<'_> {
             let palette_y =
                 mode == 0 && symbol(d, c, av1_cdfs::PALETTE_Y_MODE, [size_ctx, 0])? != 0;
             if palette_y {
-                return Err(invalid("AV1 palette reconstruction not implemented"));
+                return Err(crate::unsupported(
+                    "AV1 palette reconstruction not implemented",
+                ));
             }
             if has_chroma && uv == 0 && symbol(d, c, av1_cdfs::PALETTE_UV_MODE, [0])? != 0 {
-                return Err(invalid("AV1 chroma palette not implemented"));
+                return Err(crate::unsupported("AV1 chroma palette not implemented"));
             }
         }
         let mut filter_mode = None;

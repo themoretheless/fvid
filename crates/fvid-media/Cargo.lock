@@ -1353,6 +1353,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fvid-codecs"
+version = "0.1.0"
+dependencies = [
+ "fvid-control",
+ "fvid-cpu",
+ "fvid-platform",
+]
+
+[[package]]
 name = "fvid-control"
 version = "0.1.0"
 
@@ -1376,6 +1385,7 @@ dependencies = [
  "cpal",
  "eframe",
  "epaint_default_fonts",
+ "fvid-codecs",
  "fvid-control",
  "fvid-cpu",
  "fvid-cuda",
@@ -1392,6 +1402,14 @@ name = "fvid-media-info"
 version = "0.1.0"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "fvid-platform"
+version = "0.1.0"
+dependencies = [
+ "objc2 0.6.4",
+ "objc2-foundation 0.3.2",
 ]
 
 [[package]]

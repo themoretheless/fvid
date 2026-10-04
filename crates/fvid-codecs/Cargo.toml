@@ -1,0 +1,18 @@
+[package]
+name = "fvid-codecs"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Owned AVC HEVC VP9 AV1 bitstream decoders and video signal types"
+
+[dependencies]
+fvid-cpu = { path = "../fvid-cpu" }
+fvid-platform = { path = "../fvid-platform", optional = true }
+fvid-control = { path = "../fvid-control" }
+
+[dev-dependencies]
+fvid-media = { path = "../fvid-media", default-features = false }
+
+[features]
+default = []
+player = ["dep:fvid-platform"]

@@ -1635,6 +1635,7 @@ dependencies = [
  "axum",
  "cpal",
  "eframe",
+ "fvid-codecs",
  "fvid-control",
  "fvid-cpu",
  "fvid-cuda",
@@ -1652,6 +1653,15 @@ dependencies = [
  "symphonia",
  "tokio",
  "wgpu",
+]
+
+[[package]]
+name = "fvid-codecs"
+version = "0.1.0"
+dependencies = [
+ "fvid-control",
+ "fvid-cpu",
+ "fvid-platform",
 ]
 
 [[package]]
@@ -1678,6 +1688,7 @@ dependencies = [
  "cpal",
  "eframe",
  "epaint_default_fonts",
+ "fvid-codecs",
  "fvid-control",
  "fvid-cpu",
  "fvid-cuda",

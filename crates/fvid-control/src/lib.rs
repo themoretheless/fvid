@@ -94,3 +94,5 @@ impl Default for CopyOptions {
         }
     }
 }
+
+pub mod error;

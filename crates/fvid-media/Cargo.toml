@@ -6,6 +6,7 @@ license = "MIT"
 description = "FVid media operations with an optional legacy libav backend"
 
 [dependencies]
+fvid-codecs = { path = "../fvid-codecs" }
 ab_glyph = "0.2.32"
 epaint_default_fonts = "0.36.2"
 fvid-media-info = { path = "../fvid-media-info" }
@@ -28,7 +29,7 @@ legacy-ffmpeg = ["dep:bindgen"]
 cuda-hw = ["legacy-ffmpeg", "dep:fvid-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the
 # rfd file dialogs. Off, the crate is a pure decode/edit library.
-player = [ "dep:eframe", "dep:rfd", "dep:cpal"]
+player = [ "fvid-codecs/player", "dep:eframe", "dep:rfd", "dep:cpal"]
 
 [build-dependencies]
 bindgen = { version = "0.72.1", optional = true }

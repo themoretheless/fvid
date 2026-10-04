@@ -88,6 +88,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
     if let Some(stats) = crate::owned_video_decode::try_ffv1(source, &transform)? {
         return Ok(stats);
     }
+    if let Some(stats)=crate::owned_compressed_video::try_decode(source,&transform)? {return Ok(stats);}
     let mut input = Input::open_fast_hinted(source, transform.input_format.as_deref())?;
     let video = input
         .streams()

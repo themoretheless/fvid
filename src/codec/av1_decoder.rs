@@ -77,7 +77,9 @@ impl Decoder {
                 1 => {
                     let sequence = Sequence::parse(obu.payload)?;
                     if sequence.operating_points[0].idc != 0 {
-                        return Err(invalid("AV1 layered operating points not implemented"));
+                        return Err(crate::unsupported(
+                            "AV1 layered operating points not implemented",
+                        ));
                     }
                     if self.sequence.as_ref().is_some_and(|s| s != &sequence) {
                         self.references.fill(None);
@@ -105,14 +107,14 @@ impl Decoder {
                         .as_ref()
                         .ok_or_else(|| invalid("AV1 frame precedes sequence header"))?;
                     if obu.spatial_id != 0 {
-                        return Err(invalid("AV1 spatial layering not implemented"));
+                        return Err(crate::unsupported("AV1 spatial layering not implemented"));
                     }
                     if !s.reduced_header && obu.payload.first().is_some_and(|v| v & 128 != 0) {
                         let b = &mut BitReader::new(obu.payload);
                         b.bit()?;
                         let index = b.read(3)? as usize;
                         if s.decoder_model.is_some() || s.frame_id_bits.is_some() {
-                            return Err(invalid(
+                            return Err(crate::unsupported(
                                 "AV1 show-existing timing/frame IDs not implemented",
                             ));
                         }
@@ -146,7 +148,7 @@ impl Decoder {
                         output.push(decoded);
                     } else {
                         if obu.kind != 6 {
-                            return Err(invalid(
+                            return Err(crate::unsupported(
                                 "AV1 separate frame header/tile groups not implemented",
                             ));
                         }
@@ -226,6 +228,7 @@ impl Decoder {
                         return Err(invalid("too many AV1 frames per packet"));
                     }
                 }
+                8 => return Err(crate::unsupported("AV1 tile lists not implemented")),
                 _ => return Err(invalid("unsupported AV1 OBU ordering or tile list")),
             }
         }

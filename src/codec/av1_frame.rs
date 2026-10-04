@@ -166,10 +166,12 @@ impl Header {
         let mut found_ref = None;
         if !intra {
             if s.frame_id_bits.is_some() {
-                return Err(invalid("AV1 inter frame IDs not implemented"));
+                return Err(crate::unsupported("AV1 inter frame IDs not implemented"));
             }
             if s.order_hint_bits > 0 && b.bit()? {
-                return Err(invalid("AV1 short reference signaling not implemented"));
+                return Err(crate::unsupported(
+                    "AV1 short reference signaling not implemented",
+                ));
             }
             for index in &mut references {
                 *index = b.read(3)? as usize;
@@ -261,7 +263,9 @@ impl Header {
         let mut segments = [[None; 8]; 8];
         if b.bit()? {
             if primary_reference != 7 {
-                return Err(invalid("AV1 inherited segmentation not implemented"));
+                return Err(crate::unsupported(
+                    "AV1 inherited segmentation not implemented",
+                ));
             }
             for segment in &mut segments {
                 for (j, feature) in segment.iter_mut().enumerate() {
@@ -414,12 +418,16 @@ impl Header {
         if !intra {
             for _ in 0..7 {
                 if b.bit()? {
-                    return Err(invalid("AV1 nonidentity global motion not implemented"));
+                    return Err(crate::unsupported(
+                        "AV1 nonidentity global motion not implemented",
+                    ));
                 }
             }
         }
         if s.film_grain && (show || showable) && b.bit()? {
-            return Err(invalid("AV1 film grain parameters not implemented"));
+            return Err(crate::unsupported(
+                "AV1 film grain parameters not implemented",
+            ));
         }
         align(b)?;
         Ok(Self {

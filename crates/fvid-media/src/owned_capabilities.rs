@@ -1,5 +1,5 @@
 //! Inventory of owned media components, independent of the legacy adapter.
-//! Reports components in this library, not codecs supplied only by the root crate.
+//! Reports linked owned components; container workflow admission is separate.
 //! Component presence does not imply every profile or workflow is implemented.
 use fvid_media_info::Capabilities;
 
@@ -16,6 +16,7 @@ pub fn capabilities() -> Capabilities {
         muxers: names(&["matroska", "mp4", "wav", "yuv4mpegpipe"]),
         decoders: names(&[
             "aac",
+            "h264", "hevc", "vp9", "av1",
             "alac",
             "ffv1",
             "subrip",
@@ -71,7 +72,7 @@ pub fn capabilities() -> Capabilities {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn public_inventory_is_available_without_legacy_and_does_not_claim_root_decoders() {
+    fn public_inventory_reports_shared_bitstream_components_without_legacy() {
         let inventory = crate::capabilities();
         assert_eq!(
             inventory.library_version,
@@ -88,10 +89,10 @@ mod tests {
             assert!(names.windows(2).all(|pair| pair[0] < pair[1]));
             assert!(!names.iter().any(|name| name.starts_with("lib")));
         }
-        for decoder in ["aac", "alac", "ffv1", "pcm_s16le", "subrip"] {
+        for decoder in ["aac", "alac", "ffv1", "pcm_s16le", "subrip", "h264", "hevc", "vp9", "av1"] {
             assert!(inventory.decoders.iter().any(|name| name == decoder));
         }
-        for decoder in ["h264", "hevc", "av1", "vp9", "opus"] {
+        for decoder in ["opus"] {
             assert!(!inventory.decoders.iter().any(|name| name == decoder));
         }
         for filter in ["colorize",

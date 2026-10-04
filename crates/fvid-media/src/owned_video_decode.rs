@@ -14,6 +14,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
     if crate::owned_y4m_decode::supports_transformed(source, &transform) {
         return crate::owned_y4m_decode::decode_video_transformed(source, transform);
     }
+    if let Some(stats)=crate::owned_compressed_video::try_decode(source,&transform)? {return Ok(stats);}
     try_ffv1(source, &transform)?.ok_or_else(|| {
         "owned video decode does not yet support this container, codec or transform".into()
     })

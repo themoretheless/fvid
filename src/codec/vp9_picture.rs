@@ -107,7 +107,7 @@ pub(crate) fn decode_frame_counted(
         || header.segmentation.enabled
         || ch.reference_mode != super::vp9_probs::ReferenceMode::Single
     {
-        return Err(invalid(
+        return Err(crate::unsupported(
             "VP9 picture decoder requires coded 4:2:0 frames, single-reference prediction and no segmentation",
         ));
     }

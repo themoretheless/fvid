@@ -5,12 +5,12 @@
 //! fitted, so a code value can be checked against the standard's own tables.
 
 pub mod grade;
-pub mod hdr;
-pub mod log;
+pub use fvid_codecs::color::hdr;
+pub use fvid_codecs::color::log;
 pub mod lut;
-pub mod primaries;
-pub mod tonemap;
-pub mod transfer;
+pub use fvid_codecs::color::primaries;
+pub use fvid_codecs::color::tonemap;
+pub use fvid_codecs::color::transfer;
 
 pub use grade::{Grade, Settings, ShaderLook, ShaderStages};
 pub use hdr::{

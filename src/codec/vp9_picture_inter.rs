@@ -476,8 +476,15 @@ impl Decoder<'_> {
     ) -> Result<()> {
         let reference = references[usize::from(block.reference - 1)]
             .ok_or_else(|| invalid("missing decoded VP9 reference"))?;
-        if reference.size != picture_size || reference.depth != picture_depth {
-            return Err(invalid("VP9 scaled references are not yet supported"));
+        if reference.depth != picture_depth {
+            return Err(invalid(
+                "VP9 reference depth differs from the current picture",
+            ));
+        }
+        if reference.size != picture_size {
+            return Err(crate::unsupported(
+                "VP9 scaled references are not yet supported",
+            ));
         }
         let sub = usize::from(plane > 0);
         let mut mv = block.mvs[0];

@@ -550,7 +550,9 @@ impl Decoder<'_> {
                 [(w.min(h).ilog2() as usize) - 1],
             )? != 0
         {
-            return Err(invalid("AV1 inter-intra blending not implemented"));
+            return Err(crate::unsupported(
+                "AV1 inter-intra blending not implemented",
+            ));
         }
         let mut warp = None;
         let mut local_warp = false;
@@ -582,7 +584,7 @@ impl Decoder<'_> {
                     );
                 }
                 if motion == 1 {
-                    return Err(invalid(
+                    return Err(crate::unsupported(
                         "AV1 overlapped motion compensation not implemented",
                     ));
                 }
@@ -603,7 +605,9 @@ impl Decoder<'_> {
                 .sum::<usize>()
                 .min(5);
             if self.s.masked_compound && symbol(d, c, av1_cdfs::COMP_GROUP_IDX, [ctx])? != 0 {
-                return Err(invalid("AV1 masked compound prediction not implemented"));
+                return Err(crate::unsupported(
+                    "AV1 masked compound prediction not implemented",
+                ));
             }
             if self.s.joint_compound {
                 let equal = self.distances[refs[0]].abs() == self.distances[refs[1]].abs();
@@ -707,7 +711,7 @@ impl Decoder<'_> {
                         block
                     };
                     if b.reference == 0 {
-                        return Err(invalid(
+                        return Err(crate::unsupported(
                             "AV1 sub-8x8 mixed intra/inter chroma not implemented",
                         ));
                     }
@@ -1112,7 +1116,9 @@ impl Decoder<'_> {
         let reference = references[h_references[b.reference - 1]]
             .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
         if reference.size != h_size {
-            return Err(invalid("AV1 scaled reference prediction not implemented"));
+            return Err(crate::unsupported(
+                "AV1 scaled reference prediction not implemented",
+            ));
         }
         if size[0] >= 8 && size[1] >= 8 {
             if let Some(params) = b.warp {
