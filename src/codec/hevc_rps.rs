@@ -22,6 +22,26 @@ pub fn read_short_term(
     in_slice: bool,
     max_references: u8,
 ) -> Result<Vec<ShortTermReference>> {
+    Ok(read_short_term_syntax(b, previous, in_slice, max_references)?.references)
+}
+
+/// Syntax accounting needed by hardware picture submission, before derivation
+/// removes zero POC entries or excluded references.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ShortTermSyntax {
+    pub references: Vec<ShortTermReference>,
+    pub bit_length: usize,
+    pub predictor_delta_pocs: usize,
+}
+
+pub fn read_short_term_syntax(
+    b: &mut BitReader<'_>,
+    previous: &[Vec<ShortTermReference>],
+    in_slice: bool,
+    max_references: u8,
+) -> Result<ShortTermSyntax> {
+    let start = b.position();
+    let mut predictor_delta_pocs = 0;
     if previous.len() > 64 || max_references > 15 {
         return Err(invalid("HEVC reference set configuration exceeds limits"));
     }
@@ -33,6 +53,7 @@ pub fn read_short_term(
             1
         };
         let source = &previous[previous.len() - distance];
+        predictor_delta_pocs = source.len();
         if source.len() > usize::from(max_references) {
             return Err(invalid("HEVC RPS predictor exceeds DPB"));
         }
@@ -85,7 +106,11 @@ pub fn read_short_term(
     if result.len() > usize::from(max_references) {
         return Err(invalid("derived HEVC RPS exceeds DPB"));
     }
-    Ok(result)
+    Ok(ShortTermSyntax {
+        references: result,
+        bit_length: b.position() - start,
+        predictor_delta_pocs,
+    })
 }
 #[cfg(test)]
 mod tests {
@@ -137,8 +162,13 @@ mod tests {
         // Prediction, delta=-2. Flags: used, retained-unused, used, excluded, used.
         let data = bits("110101011001");
         let mut b = BitReader::new(&data);
-        let actual = read_short_term(&mut b, &previous, false, 5).unwrap();
-        assert_eq!(actual, vec![r(-2, true), r(-3, true), r(-5, false)]);
+        let actual = read_short_term_syntax(&mut b, &previous, false, 5).unwrap();
+        assert_eq!(
+            actual.references,
+            vec![r(-2, true), r(-3, true), r(-5, false)]
+        );
+        assert_eq!(actual.bit_length, 12);
+        assert_eq!(actual.predictor_delta_pocs, 4);
         b.finish_rbsp().unwrap();
     }
     #[test]
@@ -146,14 +176,19 @@ mod tests {
         // negative=1, positive=1; delta=-1 used, delta=2 unused.
         let data = bits("010010110100");
         let mut b = BitReader::new(&data);
-        let first = read_short_term(&mut b, &[], false, 4).unwrap();
+        let syntax = read_short_term_syntax(&mut b, &[], false, 4).unwrap();
+        assert_eq!(syntax.bit_length, 12);
+        assert_eq!(syntax.predictor_delta_pocs, 0);
+        let first = syntax.references;
         assert_eq!(first, vec![r(-1, true), r(2, false)]);
         b.finish_rbsp().unwrap();
         // predicted, distance=2, delta=+1, all three entries used.
         let data = bits("101001111");
         let mut b = BitReader::new(&data);
-        let actual = read_short_term(&mut b, &[first, vec![]], true, 4).unwrap();
-        assert_eq!(actual, vec![r(1, true), r(3, true)]);
+        let actual = read_short_term_syntax(&mut b, &[first, vec![]], true, 4).unwrap();
+        assert_eq!(actual.references, vec![r(1, true), r(3, true)]);
+        assert_eq!(actual.bit_length, 9);
+        assert_eq!(actual.predictor_delta_pocs, 2);
         b.finish_rbsp().unwrap();
     }
 }

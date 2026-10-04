@@ -27,6 +27,10 @@ pub struct SliceHeader {
     pub slice_type: SliceType,
     pub poc_lsb: u32,
     pub short_term: Vec<ShortTermReference>,
+    /// Slice-local RPS syntax only; zero for IDR or an SPS-selected set.
+    pub short_term_bit_length: usize,
+    /// Predictor's delta POC count before deriving the slice-local set.
+    pub short_term_predictor_delta_pocs: usize,
     pub temporal_mvp: bool,
     pub references: [u8; 2],
     pub list_modification: [Option<Vec<u8>>; 2],
@@ -220,11 +224,16 @@ impl SliceHeader {
         }
         let mut poc_lsb = 0;
         let mut short_term = Vec::new();
+        let mut short_term_bit_length = 0;
+        let mut short_term_predictor_delta_pocs = 0;
         let mut temporal_mvp = false;
         if !payload.header.is_idr() {
             poc_lsb = b.read(sps.poc_bits)?;
             if !b.bit()? {
-                short_term = hevc_rps::read_short_term(b, &sps.short_term, true, 15)?;
+                let syntax = hevc_rps::read_short_term_syntax(b, &sps.short_term, true, 15)?;
+                short_term_bit_length = syntax.bit_length;
+                short_term_predictor_delta_pocs = syntax.predictor_delta_pocs;
+                short_term = syntax.references;
             } else {
                 let index = if sps.short_term.len() > 1 {
                     b.read((usize::BITS - (sps.short_term.len() - 1).leading_zeros()) as u8)?
@@ -346,13 +355,23 @@ impl SliceHeader {
                         };
                         if luma_flags[i] {
                             weight.values[0] += se(b, -128, 127)? as i16;
-                            let half = 1i32 << if sps.high_precision_offsets { sps.depth[0] - 1 } else { 7 };
+                            let half = 1i32
+                                << if sps.high_precision_offsets {
+                                    sps.depth[0] - 1
+                                } else {
+                                    7
+                                };
                             weight.offsets[0] = se(b, -half, half - 1)? as i16;
                         }
                         if chroma_flags[i] {
                             for c in 1..3 {
                                 weight.values[c] += se(b, -128, 127)? as i16;
-                                let half = 1i32 << if sps.high_precision_offsets { sps.depth[1] - 1 } else { 7 };
+                                let half = 1i32
+                                    << if sps.high_precision_offsets {
+                                        sps.depth[1] - 1
+                                    } else {
+                                        7
+                                    };
                                 let delta = se(b, -4 * half, 4 * half - 1)?;
                                 weight.offsets[c] = (delta + half
                                     - ((half * i32::from(weight.values[c])) >> chroma_denom))
@@ -406,6 +425,8 @@ impl SliceHeader {
             slice_type,
             poc_lsb,
             short_term,
+            short_term_bit_length,
+            short_term_predictor_delta_pocs,
             temporal_mvp,
             references,
             list_modification,

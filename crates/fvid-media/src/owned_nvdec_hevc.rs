@@ -1,6 +1,159 @@
 //! Own HEVC parameter-set translation for direct NVDEC picture submission.
+use fvid_codecs::codec::{hevc_cabac::SliceType, hevc_slice::SliceHeader};
 use fvid_codecs::codec::{hevc_pps::Pps, hevc_scaling::Matrix, hevc_sps::Sps};
 use fvid_cuda::nvdec_sdk::CUVIDHEVCPICPARAMS;
+use fvid_cuda::{NvdecSession, nvdec_sdk::CUVIDPICPARAMS};
+
+/// A live short-term reference owned by the caller's DPB scheduler.
+#[derive(Clone, Copy, Debug)]
+pub struct HevcReference {
+    pub slot: u32,
+    pub poc: i32,
+}
+
+/// Owns the Annex B slice bytes and offsets through synchronous submission.
+pub struct HevcPicture {
+    syntax: CUVIDPICPARAMS,
+    bytes: Vec<u8>,
+    offsets: Vec<u32>,
+}
+impl HevcPicture {
+    pub fn prepare(
+        sps: &Sps,
+        pps: &Pps,
+        slices: &[&[u8]],
+        slot: u32,
+        poc: i32,
+        references: &[HevcReference],
+        max_bytes: usize,
+    ) -> Result<Self, String> {
+        if slices.is_empty() || slices.len() > u32::MAX as usize || slot >= 32 {
+            return Err("invalid NVDEC HEVC slice count/current slot".into());
+        }
+        let mut h = configuration(sps, pps)?;
+        let first =
+            SliceHeader::parse(slices[0], sps, pps, max_bytes).map_err(|e| e.to_string())?;
+        if !first.first || first.dependent || references.len() > 16 {
+            return Err(
+                "NVDEC HEVC picture requires first independent slice and bounded DPB".into(),
+            );
+        }
+        if first.nal.is_idr() && (poc != 0 || !references.is_empty()) {
+            return Err("NVDEC HEVC IDR requires zero POC and empty reference state".into());
+        }
+        if !first.nal.is_idr() && poc.rem_euclid(1 << sps.poc_bits) as u32 != first.poc_lsb {
+            return Err("NVDEC HEVC POC disagrees with slice".into());
+        }
+        h.IrapPicFlag = u8::from(first.nal.is_irap());
+        h.IdrPicFlag = u8::from(first.nal.is_idr());
+        h.CurrPicOrderCntVal = poc;
+        h.NumBitsForShortTermRPSInSlice = i32::try_from(first.short_term_bit_length)
+            .map_err(|_| "HEVC RPS bit length exceeds driver field")?;
+        h.NumDeltaPocsOfRefRpsIdx = i32::try_from(first.short_term_predictor_delta_pocs)
+            .map_err(|_| "HEVC RPS predictor exceeds driver field")?;
+        for (index, reference) in references.iter().enumerate() {
+            if reference.slot >= 32
+                || reference.slot == slot
+                || reference.poc == poc
+                || references[..index]
+                    .iter()
+                    .any(|r| r.slot == reference.slot || r.poc == reference.poc)
+            {
+                return Err("NVDEC HEVC reference slots/POCs are inconsistent".into());
+            }
+            h.RefPicIdx[index] = reference.slot as i32;
+            h.PicOrderCntVal[index] = reference.poc;
+        }
+        for reference in &first.short_term {
+            let target = poc
+                .checked_add(reference.delta_poc)
+                .ok_or("HEVC reference POC overflow")?;
+            let index = references
+                .iter()
+                .position(|r| r.poc == target)
+                .ok_or("NVDEC HEVC RPS reference has no live slot")?;
+            if reference.used {
+                let (count, set) = if reference.delta_poc < 0 {
+                    (&mut h.NumPocStCurrBefore, &mut h.RefPicSetStCurrBefore)
+                } else {
+                    (&mut h.NumPocStCurrAfter, &mut h.RefPicSetStCurrAfter)
+                };
+                let output = set
+                    .get_mut(*count as usize)
+                    .ok_or("NVDEC HEVC current reference set exceeds eight entries")?;
+                *output = index as u8;
+                *count += 1;
+            }
+        }
+        h.NumPocTotalCurr = h.NumPocStCurrBefore + h.NumPocStCurrAfter;
+        let mut bytes = Vec::new();
+        let mut offsets = Vec::new();
+        offsets
+            .try_reserve(slices.len())
+            .map_err(|e| e.to_string())?;
+        let mut previous = first.clone();
+        for (index, nal) in slices.iter().enumerate() {
+            let header = if index == 0 {
+                first.clone()
+            } else {
+                SliceHeader::parse_with_previous(nal, sps, pps, max_bytes, Some(&previous))
+                    .map_err(|e| e.to_string())?
+            };
+            if index > 0 && (header.first || header.address <= previous.address)
+                || header.nal != first.nal
+                || header.poc_lsb != first.poc_lsb
+                || header.short_term != first.short_term
+                || header.picture_output != first.picture_output
+                || header.no_output_of_prior_pictures != first.no_output_of_prior_pictures
+            {
+                return Err("NVDEC HEVC slices disagree on picture identity/order".into());
+            }
+            // Mixed intra/inter slice types require separate qualification.
+            if header.slice_type != first.slice_type {
+                return Err("NVDEC HEVC mixed slice types are not qualified".into());
+            }
+            let length = bytes
+                .len()
+                .checked_add(3)
+                .and_then(|n| n.checked_add(nal.len()))
+                .filter(|n| *n <= max_bytes && *n <= u32::MAX as usize)
+                .ok_or("NVDEC HEVC picture exceeds bitstream limit")?;
+            bytes
+                .try_reserve(length - bytes.len())
+                .map_err(|e| e.to_string())?;
+            offsets.push(bytes.len() as u32);
+            bytes.extend_from_slice(&[0, 0, 1]);
+            bytes.extend_from_slice(nal);
+            previous = header;
+        }
+        let mut syntax = CUVIDPICPARAMS::default();
+        syntax.PicWidthInMbs = sps.dimensions[0].div_ceil(16) as i32;
+        syntax.FrameHeightInMbs = sps.dimensions[1].div_ceil(16) as i32;
+        syntax.CurrPicIdx = slot as i32;
+        syntax.intra_pic_flag = i32::from(first.slice_type == SliceType::I);
+        syntax.ref_pic_flag = i32::from(first.nal.is_irap() || first.nal.unit_type & 1 != 0);
+        syntax.CodecSpecific.hevc = h;
+        Ok(Self {
+            syntax,
+            bytes,
+            offsets,
+        })
+    }
+    fn parameters(&self) -> CUVIDPICPARAMS {
+        let mut params = self.syntax;
+        params.nBitstreamDataLen = self.bytes.len() as u32;
+        params.pBitstreamData = self.bytes.as_ptr();
+        params.nNumSlices = self.offsets.len() as u32;
+        params.pSliceDataOffsets = self.offsets.as_ptr();
+        params
+    }
+    /// # Safety
+    /// Session must use HEVC with matching coded geometry/depth. All referenced
+    /// slots must be live and reserved, including the output slot, until complete.
+    pub unsafe fn submit(&self, session: &mut NvdecSession) -> Result<(), String> {
+        unsafe { session.submit_picture(&mut self.parameters()) }
+    }
+}
 
 /// Populate codec configuration, not picture/RPS state. A submission adapter
 /// must additionally supply slice bytes, POC and reserved live reference slots.
@@ -203,6 +356,123 @@ fn raster<const N: usize>(matrix: &Matrix, side: usize) -> [u8; N] {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA NVDEC with HEVC Main/Main10 support"]
+    fn synthetic_owned_hevc_idr_submits_and_maps_on_nvidia() {
+        use fvid_codecs::codec::{
+            config::{HevcConfig, NalUnits},
+            hevc_nal::NalHeader,
+        };
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/hevc/main-ipb.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
+        ] {
+            let (sps, pps) = sets(bytes);
+            let mut reader =
+                crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(bytes), Default::default())
+                    .unwrap();
+            let length = HevcConfig::parse(&reader.tracks()[0].configuration)
+                .unwrap()
+                .length_size;
+            let mut packet = Vec::new();
+            reader.read_packet(0, 0, &mut packet).unwrap();
+            let slices: Vec<_> = NalUnits::new(&packet, length)
+                .unwrap()
+                .map(Result::unwrap)
+                .filter(|nal| NalHeader::parse(nal).unwrap().is_vcl())
+                .collect();
+            assert!(NalHeader::parse(slices[0]).unwrap().is_idr());
+            let picture = HevcPicture::prepare(&sps, &pps, &slices, 0, 0, &[], 1 << 20).unwrap();
+            let [width, height] = sps.dimensions;
+            let mut decoder = NvdecSession::open(
+                fvid_cuda::CodecDevice::new(0).unwrap(),
+                fvid_cuda::NvdecCodec::Hevc,
+                sps.depth[0],
+                width,
+                height,
+                20,
+                2,
+            )
+            .unwrap();
+            // SAFETY: Matching HEVC geometry/depth and an IDR without references.
+            unsafe { picture.submit(&mut decoder) }.unwrap();
+            // SAFETY: Submitted slot zero stays reserved until unmap.
+            let surface = unsafe { decoder.map_progressive(0) }.unwrap();
+            assert_eq!((surface.width, surface.height), (width, height));
+            assert_ne!(surface.pointer, 0);
+            assert!(surface.pitch >= width * if sps.depth[0] == 10 { 2 } else { 1 });
+            decoder.unmap(surface.slot).unwrap();
+            decoder.close().unwrap();
+        }
+    }
+    #[test]
+    fn synthetic_picture_submission_owns_bytes_and_resolves_live_references() {
+        use fvid_codecs::codec::{
+            config::{HevcConfig, NalUnits},
+            hevc_nal::NalHeader,
+        };
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/hevc/main-ipb.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
+        ] {
+            let (sps, pps) = sets(bytes);
+            let mut reader =
+                crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(bytes), Default::default())
+                    .unwrap();
+            let length = HevcConfig::parse(&reader.tracks()[0].configuration)
+                .unwrap()
+                .length_size;
+            let mut packet = Vec::new();
+            let mut saw_inter = false;
+            for sample in 0..reader.tracks()[0].samples.len() {
+                reader.read_packet(0, sample, &mut packet).unwrap();
+                let slices: Vec<_> = NalUnits::new(&packet, length)
+                    .unwrap()
+                    .map(Result::unwrap)
+                    .filter(|nal| NalHeader::parse(nal).unwrap().is_vcl())
+                    .collect();
+                let header = SliceHeader::parse(slices[0], &sps, &pps, 1 << 20).unwrap();
+                let poc = header.poc_lsb as i32;
+                let refs: Vec<_> = header
+                    .short_term
+                    .iter()
+                    .enumerate()
+                    .map(|(i, r)| HevcReference {
+                        slot: i as u32,
+                        poc: poc + r.delta_poc,
+                    })
+                    .collect();
+                let picture =
+                    HevcPicture::prepare(&sps, &pps, &slices, 31, poc, &refs, 1 << 20).unwrap();
+                let params = picture.parameters();
+                assert_eq!(params.nNumSlices as usize, slices.len());
+                assert_eq!(params.pBitstreamData, picture.bytes.as_ptr());
+                assert_eq!(&picture.bytes[..3], &[0, 0, 1]);
+                assert!(HevcPicture::prepare(&sps, &pps, &slices, 31, poc, &refs, 1).is_err());
+                let h = unsafe { params.CodecSpecific.hevc };
+                assert_eq!(h.CurrPicOrderCntVal, poc);
+                assert_eq!(
+                    h.NumPocTotalCurr as usize,
+                    header.short_term.iter().filter(|r| r.used).count()
+                );
+                if !refs.is_empty() {
+                    saw_inter = true;
+                    assert!(
+                        HevcPicture::prepare(&sps, &pps, &slices, 31, poc, &[], 1 << 20).is_err()
+                    );
+                    let mut aliased = refs.clone();
+                    aliased[0].slot = 31;
+                    assert!(
+                        HevcPicture::prepare(&sps, &pps, &slices, 31, poc, &aliased, 1 << 20)
+                            .is_err()
+                    );
+                    break;
+                }
+            }
+            assert!(saw_inter);
+        }
+    }
     fn sets(bytes: &[u8]) -> (Sps, Pps) {
         let reader =
             crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(bytes), Default::default())
