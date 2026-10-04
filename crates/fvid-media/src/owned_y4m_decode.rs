@@ -322,6 +322,14 @@ pub fn transform_frame_requested(
     frame: &[u8],
     transform: &DecodeTransform,
 ) -> Result<Vec<u8>> {
+    transform_frame_requested_cached(header, frame, transform, None)
+}
+pub(crate) fn transform_frame_requested_cached(
+    header: &Header,
+    frame: &[u8],
+    transform: &DecodeTransform,
+    lut: Option<&crate::owned_lutyuv::LutYuv>,
+) -> Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
     }
@@ -329,7 +337,7 @@ pub fn transform_frame_requested(
         return Err("scheduled overlay requires the streaming frame API".into());
     }
     let mut output = transform_frame_geometry_requested(header, frame, transform)?;
-    apply_pixel_filters(header, transform, &mut output)?;
+    apply_pixel_filters_cached(header, transform, &mut output, lut)?;
     Ok(output)
 }
 pub(crate) fn transform_frame_geometry_requested(
@@ -414,6 +422,14 @@ pub(crate) fn apply_pixel_filters(
     header: &Header,
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
+) -> Result<()> {
+    apply_pixel_filters_cached(header, transform, output, None)
+}
+pub(crate) fn apply_pixel_filters_cached(
+    header: &Header,
+    transform: &DecodeTransform,
+    output: &mut Vec<u8>,
+    lut: Option<&crate::owned_lutyuv::LutYuv>,
 ) -> Result<()> {
     if transform.unsharp.is_some()
         || transform.unsharp.is_some()
@@ -508,7 +524,8 @@ pub(crate) fn apply_pixel_filters(
                 );
             }
             if let Some(args) = transform.lutyuv.as_deref() {
-                crate::owned_lutyuv::LutYuv::parse(args)?.apply(&mut frame, header.depth(), header.full_range()?)?;
+                if let Some(lut) = lut {lut.apply(&mut frame, header.depth(), header.full_range()?)?;}
+                else {crate::owned_lutyuv::LutYuv::parse(args)?.apply(&mut frame, header.depth(), header.full_range()?)?;}
             }
             Ok(())
         })();
@@ -826,6 +843,7 @@ fn decode_reader_frames(
     let mut index = 0u64;
     let mut frames = 0u64;
     let mut selected_inputs = 0u64;
+    let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse).transpose()?;
     loop {
         let clock = u128::from(index) * rate_d as u128 * 1_000_000;
         if transform
@@ -882,7 +900,7 @@ fn decode_reader_frames(
                 if let Some(overlay) = overlay.as_mut() {
                     overlay.apply(&presented_header, &mut output, index)?;
                 }
-                apply_pixel_filters(&header, transform, &mut output)?;
+                apply_pixel_filters_cached(&header, transform, &mut output, lut.as_ref())?;
                 std::hint::black_box(&output);
             }
             let (pts, duration) = if visit.is_some() {

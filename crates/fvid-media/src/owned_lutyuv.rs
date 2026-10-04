@@ -4,6 +4,12 @@ type Result<T> = std::result::Result<T, String>;
 #[derive(Clone, Debug)]
 pub struct LutYuv {
     expressions: [Expression; 3],
+    cache: std::sync::Arc<std::sync::Mutex<Option<Tables>>>,
+}
+#[derive(Debug)]
+struct Tables {
+    key: (usize, usize, u8, bool),
+    planes: Vec<Vec<u16>>,
 }
 impl LutYuv {
     pub fn parse(args: &str) -> Result<Self> {
@@ -37,7 +43,10 @@ impl LutYuv {
             ])?;
             expressions[index] = expression;
         }
-        Ok(Self { expressions })
+        Ok(Self {
+            expressions,
+            cache: Default::default(),
+        })
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool) -> Result<()> {
         let [sx, sy] = frame.subsampling.ok_or("lutyuv requires planar YUV")?;
@@ -71,36 +80,47 @@ impl LutYuv {
         {
             return Err("lutyuv sample exceeds precision".into());
         }
-        // Build all tables before touching samples: invalid expressions cannot partially filter a frame.
-        let mut tables = Vec::with_capacity(3);
-        for component in 0..3 {
-            let minimum = if full_range { 0 } else { 16u32 << (depth - 8) };
-            let upper = if full_range {
-                maximum
-            } else {
-                (if component == 0 { 235u32 } else { 240u32 }) << (depth - 8)
-            };
-            let mut table = Vec::with_capacity(maximum as usize + 1);
-            for val in 0..=maximum {
-                let result = self.expressions[component].evaluate(&[
-                    ("w", frame.width as f64),
-                    ("h", frame.height as f64),
-                    ("val", val as f64),
-                    ("minval", minimum as f64),
-                    ("maxval", upper as f64),
-                    (
-                        "negval",
-                        ((minimum + upper) as f64 - val as f64).clamp(minimum as f64, upper as f64),
-                    ),
-                    ("clipval", val.clamp(minimum, upper) as f64),
-                ])?;
-                if !result.is_finite() {
-                    return Err("nonfinite lutyuv expression result".into());
+        let key = (frame.width, frame.height, depth, full_range);
+        let mut cache = self.cache.lock().map_err(|_| "LUT cache lock poisoned")?;
+        if cache.as_ref().is_none_or(|entry| entry.key != key) {
+            // Build all planes before publishing the entry or touching samples.
+
+            let mut tables = Vec::with_capacity(3);
+            for component in 0..3 {
+                let minimum = if full_range { 0 } else { 16u32 << (depth - 8) };
+                let upper = if full_range {
+                    maximum
+                } else {
+                    (if component == 0 { 235u32 } else { 240u32 }) << (depth - 8)
+                };
+                let mut table = Vec::with_capacity(maximum as usize + 1);
+                for val in 0..=maximum {
+                    let result = self.expressions[component].evaluate(&[
+                        ("w", frame.width as f64),
+                        ("h", frame.height as f64),
+                        ("val", val as f64),
+                        ("minval", minimum as f64),
+                        ("maxval", upper as f64),
+                        (
+                            "negval",
+                            ((minimum + upper) as f64 - val as f64)
+                                .clamp(minimum as f64, upper as f64),
+                        ),
+                        ("clipval", val.clamp(minimum, upper) as f64),
+                    ])?;
+                    if !result.is_finite() {
+                        return Err("nonfinite lutyuv expression result".into());
+                    }
+                    table.push(result.clamp(0.0, maximum as f64) as u16);
                 }
-                table.push(result.clamp(0.0, maximum as f64) as u16);
+                tables.push(table);
             }
-            tables.push(table);
+            *cache = Some(Tables {
+                key,
+                planes: tables,
+            });
         }
+        let tables = &cache.as_ref().unwrap().planes;
         let mut offset = 0;
         for (component, length) in [y, c, c].into_iter().enumerate() {
             for index in offset..offset + length {
@@ -259,5 +279,43 @@ mod export_tests {
             }
         }
         std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+    #[test]
+    fn reuse_and_geometry_range_precision_changes_do_not_leave_stale_tables() {
+        let filter = LutYuv::parse("y=w+h:u=maxval:v=clipval").unwrap();
+        let mut frame = GeometryFrame {
+            width: 1,
+            height: 1,
+            subsampling: Some([1, 1]),
+            data: vec![128; 3],
+        };
+        filter.apply(&mut frame, 8, false).unwrap();
+        assert_eq!(frame.data, [2, 240, 128]);
+        let allocation = filter.cache.lock().unwrap().as_ref().unwrap().planes[0].as_ptr();
+        frame.data.fill(128);
+        filter.clone().apply(&mut frame, 8, false).unwrap();
+        assert_eq!(
+            filter.cache.lock().unwrap().as_ref().unwrap().planes[0].as_ptr(),
+            allocation
+        );
+        filter.apply(&mut frame, 8, true).unwrap();
+        assert_eq!(frame.data, [2, 255, 128]);
+        frame.width = 2;
+        frame.data = vec![128; 6];
+        filter.apply(&mut frame, 8, true).unwrap();
+        assert_eq!(frame.data, [3, 3, 255, 255, 128, 128]);
+        frame.data = [128u16; 6].into_iter().flat_map(u16::to_le_bytes).collect();
+        filter.apply(&mut frame, 12, false).unwrap();
+        let samples: Vec<u16> = frame
+            .data
+            .chunks_exact(2)
+            .map(|b| u16::from_le_bytes([b[0], b[1]]))
+            .collect();
+        assert_eq!(samples, [3, 3, 3840, 3840, 256, 256]);
     }
 }

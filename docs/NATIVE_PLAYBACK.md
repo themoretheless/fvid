@@ -3447,8 +3447,7 @@ geometry, sample precision or nonfinite table results refuse before sample
 mutation. Synthetic existing colorize grids exercise both input formats and
 FFV1 export without FFmpeg or network access.
 
-This is not full LUT compatibility yet: cached table
-reuse, alpha/RGB aliases remain to implement. LUT-specific one-argument `clip`,
+This is not full LUT compatibility yet: alpha/RGB aliases remain to implement. LUT-specific one-argument `clip`,
 `gammaval` and `gammaval709` now run through the owned evaluator. Legacy production dependencies still exist.
 
 Native decode, plan, FFV1 lossless export and `export-y4m` now accept `--lutyuv`
@@ -3464,3 +3463,10 @@ its FFmpeg command substitutes `clipval` for `clip(val)` because the installed
 AVExpr parser reserves `clip` for the three-argument builtin. Ordinary acceptance
 tests compare the special functions with expanded scalar expressions using
 committed synthetic grids, including decode, planning and FFV1 export.
+
+LUT tables are retained once per filter for the current width, height, depth and
+colour range. Native filtering and streaming library Y4M/FFV1 decode reuse the
+parsed LUT across frames. Changing any key rebuilds all three tables before
+publishing them; a failed rebuild leaves the frame untouched. The cache keeps
+one entry (at most three 65,536-element u16 tables), shared by cloned filters.
+No global cache or process-wide retention is introduced.

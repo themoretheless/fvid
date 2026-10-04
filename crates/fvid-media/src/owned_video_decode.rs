@@ -73,6 +73,7 @@ pub(crate) fn decode_ffv1(
     {
         return Ok(None);
     }
+    let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse).transpose()?;
     let step = match crate::owned_framestep::FrameStep::parse(
         transform.framestep.as_deref().unwrap_or(""),
     ) {
@@ -224,6 +225,7 @@ pub(crate) fn decode_ffv1(
                 transform.overlay.as_ref(),
                 &mut overlay,
                 pts_ns,
+                lut.as_ref(),
             )?
             else {
                 return Ok(None);
@@ -347,7 +349,7 @@ fn process_frame(
     transform: &DecodeTransform,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     process_frame_with_overlay(
-        decoded, monochrome, full_range, transform, None, &mut None, 0,
+        decoded, monochrome, full_range, transform, None, &mut None, 0, None,
     )
 }
 fn process_frame_with_overlay(
@@ -358,6 +360,7 @@ fn process_frame_with_overlay(
     spec: Option<&fvid_media_info::OverlaySpec>,
     overlay: &mut Option<crate::owned_y4m_overlay::OverlayReader>,
     pts_ns: i64,
+    lut: Option<&crate::owned_lutyuv::LutYuv>,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
@@ -452,10 +455,10 @@ fn process_frame_with_overlay(
             .as_mut()
             .unwrap()
             .apply(&presented, &mut pixels, pts_ns as u64)?;
-        crate::owned_y4m_decode::apply_pixel_filters(&header, transform, &mut pixels)?;
+        crate::owned_y4m_decode::apply_pixel_filters_cached(&header, transform, &mut pixels, lut)?;
         pixels
     } else {
-        crate::owned_y4m_decode::transform_frame_requested(&header, &decoded.frame.data, transform)?
+        crate::owned_y4m_decode::transform_frame_requested_cached(&header, &decoded.frame.data, transform, lut)?
     };
     Ok(Some((
         u32::try_from(width).map_err(|_| "FFV1 output width overflow")?,
