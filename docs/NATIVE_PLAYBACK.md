@@ -3787,3 +3787,25 @@ explicit benchmark checks 42 exact YUV420/444 pixel pairs across 8, 10 and 16 bi
 including masks, decay endpoints and disabled-input updates against the
 [reference filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_lagfun.c).
 Float/alpha stream formats and dynamic reconfiguration remain separate work.
+
+`tmix` now uses an owned trailing-frame window in root decode/Y4M/FFV1 export
+and direct-library streaming Y4M/FFV1 processing. `frames`, `weights`, `scale`
+and `planes` are admitted, including repeated final weights and first-frame
+window padding. Selected planes use equal-weight integer or weighted f32 kernels;
+unselected planes retain the oldest input. Output PTS and durations remain on
+the current input clock. Every interval-selected input enters the history before
+framestep, and clip/rewind reset the window. Invalid storage/depth or a changed
+stream geometry is refused before history mutation. Allocations are fallible;
+first-frame window entries share storage, and subsequent inputs evict old frames.
+Library history is owned by a per-stream `PixelHistory`, shared in responsibility
+with lagfun; scalar frame helpers explicitly refuse fake per-call history.
+Synthetic numeric acceptance covers 8/10-bit warmup, weights, masks, intervals,
+rewind and original clocks. The explicit benchmark qualifies 58 exact YUV420/444
+pairs at 8, 10 and 16 bits and reproduces two byte-format reference overflows
+with 1024-frame windows against the
+[reference mixer](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_mix.c).
+The owned fast path uses a wide sum, preserving the first input in a large
+warmup window; the reference byte path wraps its 16-bit sum and darkens it.
+This known defect is deliberately fixed rather than counted as pixel equivalence. Timeline `enable` needs its own timestamp migration
+(the reference can output oldest-frame PTS), and is explicitly not admitted here;
+float/alpha stream formats and dynamic reconfiguration also remain separate work.

@@ -577,7 +577,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         bwdif: None,
         w3fdif: None,
         tblend: None,
-        tmix: None,
+        tmix: _,
         hqdn3d: None,
         gblur: _,
         eq: _,

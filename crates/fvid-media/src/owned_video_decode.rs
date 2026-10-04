@@ -75,7 +75,7 @@ pub(crate) fn decode_ffv1(
     }
     let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse)
         .transpose()?;
-    let lagfun = transform.lagfun.as_deref().map(crate::owned_lagfun::LagFun::parse).transpose()?;
+    let history = crate::owned_pixel_history::PixelHistory::parse(transform)?;
     let fade = transform
         .fade
         .as_deref()
@@ -243,7 +243,7 @@ pub(crate) fn decode_ffv1(
                     scale: 1_000_000_000,
                     quantum: reader.timestamp_scale_ns(),
                 }),
-                lagfun.as_ref(),
+                Some(&history),
             )?
             else {
                 return Ok(None);
@@ -384,7 +384,7 @@ fn process_frame_with_overlay(
     n:u64,
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
-    lagfun: Option<&crate::owned_lagfun::LagFun>,
+    history: Option<&crate::owned_pixel_history::PixelHistory>,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
@@ -482,14 +482,14 @@ fn process_frame_with_overlay(
         crate::owned_y4m_decode::apply_pixel_filters_clock(&header, transform, &mut pixels, lut, matrix,n,Some(pts_ns as f64/1e9),
             fade,
             clock,
-            lagfun,
+            history,
         )?;
         pixels
     } else {
         crate::owned_y4m_decode::transform_frame_requested_clock(&header, &decoded.frame.data, transform, lut, matrix,n,Some(pts_ns as f64/1e9),
             fade,
             clock,
-            lagfun,
+            history,
         )?
     };
     Ok(Some((

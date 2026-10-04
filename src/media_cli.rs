@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--tmix" {
+            let value=args.next().ok_or("missing tmix options")?;
+            if filters.tmix.is_some() {return Err("duplicate tmix".into());}
+            if let Ok(filter)=fvid_media::owned_tmix::TemporalMix::parse(value) {filters.tmix=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--lagfun" {
             let value = args.next().ok_or("missing lagfun options")?;
             if filters.lagfun.is_some() {return Err("duplicate lagfun".into());}

@@ -252,3 +252,6 @@ pub use owned_subtitle_burn::{burn_subtitles, plan_burn_subtitles};
 pub mod owned_fade;
 
 pub mod owned_lagfun;
+
+pub mod owned_tmix;
+mod owned_pixel_history;

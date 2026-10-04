@@ -220,3 +220,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_lagfun_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_tmix_reference"
+harness = false
