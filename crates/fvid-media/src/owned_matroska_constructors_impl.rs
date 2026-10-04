@@ -42,7 +42,21 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         options: &[TrackOptions],
         metadata: &FileMetadata,
     ) -> Result<Self> {
-        let file_elements = file_metadata(metadata)?;
+        Self::new_with_text_metadata(output,tracks,options,metadata,&Default::default(),&Default::default())
+    }
+    /// Preserve file-wide and per-track text tags while replacing video coding.
+    pub(crate) fn new_with_text_metadata(
+        output:&'a mut W,tracks:&[TrackSpec<'_>],options:&[TrackOptions],metadata:&FileMetadata,
+        text:&std::collections::BTreeMap<String,String>,
+        scoped:&std::collections::BTreeMap<usize,std::collections::BTreeMap<String,String>>,
+    )->Result<Self> {
+        let mut file_elements = file_metadata(metadata)?;
+        file_elements.extend(extra_text_tags(text)?);
+        for (&track,tags) in scoped {
+            if track>=tracks.len() {return Err(invalid("text metadata refers to missing track"));}
+            file_elements.extend(text_tags_element(tags,Some(track as u64+1))?);
+        }
+
         if tracks.is_empty() || tracks.len() > 126 {
             return Err(invalid("Matroska requires 1..=126 tracks"));
         }

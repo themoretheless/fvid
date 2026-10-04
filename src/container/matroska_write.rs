@@ -1,6 +1,7 @@
 //! Owned AVC/HEVC/AAC/FFV1 Matroska muxing. No external muxer is used.
 //! Mapping: https://www.matroska.org/technical/codec_specs.html#a_aac
 use crate::{Result, invalid};
+use super::FileTags;
 use crate::codec::config::{AacConfig, AvcConfig, HevcConfig};
 use super::{opus_packet, adts};
 use fvid_control::{CancelFlag, ProgressEvent, ProgressHook};

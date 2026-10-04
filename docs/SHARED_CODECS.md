@@ -46,6 +46,12 @@ All-pixel and exact timeline acceptance covers eleven committed synthetic AVC/HE
 
 ## Video-only decode selection in MP4 with audio
 
-Transformed video decode now selects the first supported video track even when an MP4 also carries audio, matching the video-only API's contract and its plain-decode path. The internal presentation bridge has a separate video-only admission mode; lossless export retains the strict single-track check until audio/other-track preservation is implemented. No multitrack export acceptance is claimed.
+Transformed video decode now selects the first supported video track even when an MP4 also carries audio, matching the video-only API's contract and its plain-decode path. The internal presentation bridge has a separate video-only admission mode. Export additionally admits one AVC/HEVC video track with AAC companion tracks as described below.
 
-A Python-only fixture combines the existing synthetic AVC baseline with the complete packet timeline of the native AAC edit fixture. Tests prove both track types and nonempty AAC samples, video pixel equivalence with the single-track control, native transformed-decode acceptance and continued explicit multitrack export refusal.
+A Python-only fixture combines the existing synthetic AVC baseline with the complete packet timeline of the native AAC edit fixture. Tests prove both track types and nonempty AAC samples, video pixel equivalence with the single-track control, native transformed-decode acceptance and audio-preserving multitrack export acceptance.
+
+## Owned MP4 filtering with AAC companions
+
+For an untrimmed MP4 containing exactly one AVC/HEVC video and one or more AAC tracks, the owned exporter filters video through FFV1 and copies every AAC packet without re-encoding. Original track order is preserved, including audio-first input. The canonical owned MP4 audio planner supplies timestamps, durations, codec delay and discard padding. Global and scoped metadata and stream metadata edits survive the final owned Matroska mux. Only final publication emits completion; packet limits and cancellation leave no partial destination.
+
+Synthetic acceptance covers negate, reverse and frame step, two AAC tracks, exact compressed audio bytes and timing, every video pixel, metadata, and identical decoded PCM after filtering. This admission requires no interval or explicit stream selection and no complex AAC edit list. Multiple video tracks, other companion codecs, multitrack WebM, and broader codec tools remain outside this scope. Production `media` and CUDA feature graphs still include `legacy-ffmpeg`; this change does not establish complete FFmpeg independence or 60 fps performance.

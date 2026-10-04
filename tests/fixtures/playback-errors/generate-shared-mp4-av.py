@@ -19,7 +19,7 @@ def track(payload,shift,identifier):
     out=b''
     for kind,body,_,_ in boxes(payload):
         if kind in [b'mdia',b'minf',b'stbl']:body=track(body,shift,identifier)
-        elif kind==b'edts' and identifier==2:
+        elif kind==b'edts' and identifier!=1:
             # This regression uses the complete AAC packet timeline, not the
             # source's unrelated edit window/movie clock.
             kind=b'free'
@@ -45,3 +45,9 @@ vtrack=next(body for kind,body,_,_ in boxes(vmoov) if kind==b'trak')
 atrack=next(body for kind,body,_,_ in boxes(amoov) if kind==b'trak')
 output=without_moov(video)+without_moov(audio)+box(b'moov',box(b'mvhd',mvhd)+box(b'trak',track(vtrack,0,1))+box(b'trak',track(atrack,len(video),2)))
 (root/'shared-mp4-av.mp4').write_bytes(output)
+
+# Audio-first, two-AAC-track order exercises original stream indices. Both
+# synthetic audio tracks reference the same public packet bytes deliberately.
+mvhd[-4:]=struct.pack('>I',4)
+multiple=without_moov(video)+without_moov(audio)+box(b'moov',box(b'mvhd',mvhd)+box(b'trak',track(atrack,len(video),2))+box(b'trak',track(vtrack,0,1))+box(b'trak',track(atrack,len(video),3)))
+(root/'shared-mp4-av-multiple.mp4').write_bytes(multiple)

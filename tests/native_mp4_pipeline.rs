@@ -240,7 +240,7 @@ fn mp4_audio_track_does_not_block_owned_video_filters_or_disappear_on_export() {
         raw_frames(&source),
         raw_frames(&fixture("playback-errors/shared-avc-baseline.mp4"))
     );
-    assert!(!fvid_media::owned_lossless::supports(
+    assert!(fvid_media::owned_lossless::supports(
         &source,
         &Default::default(),
         &Default::default()

@@ -61,7 +61,13 @@ pub(crate) fn prepare(
     prepare_selected(source, options, false)
 }
 pub(crate) fn prepare_video(source: &Path) -> Result<Option<Temporary>> {
-    prepare_selected(source, None, true)
+    prepare_video_controlled(source, None)
+}
+pub(crate) fn prepare_video_controlled(
+    source: &Path,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<Temporary>> {
+    prepare_selected(source, options, true)
 }
 fn prepare_selected(
     source: &Path,

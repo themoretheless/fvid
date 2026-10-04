@@ -830,6 +830,10 @@ The Python-only shared MP4 generator adds two derivatives of the existing synthe
 
 `generate-shared-mp4-av.py` joins committed synthetic shared AVC baseline and `audio/aac-native-edit.m4a` packet data. Original moov boxes become equal-size free boxes; the new moov contains both tracks, AAC chunk offsets shift by the video file length and its track ID becomes two. The AAC source's unrelated edit window is replaced with free, retaining its complete packet timeline without copying the source movie clock. No private media, encoders or network are used. The original fragmented audio draft reproduced an unrelated NAL error and was replaced before acceptance; the committed fixture uses indexed AAC and verifies actual nonempty samples.
 
-The regression accepts owned transformed video decode with audio present and equal video pixels/count to its single-track control. Export is still a passing refusal test, not audio-preserving export acceptance.
+The regression accepts owned transformed video decode with audio present and equal video pixels/count to its single-track control. Owned export now has acceptance coverage: negate/reverse/step preserve every AAC byte, timestamp, duration, codec delay and discard padding, plus global and scoped metadata. Decoded PCM before and after negate is identical.
 
 - `shared-mp4-av.mp4`: `aabf5a8c9a677b288b88bebc838cdc85f3b288c85e624d017013b7b63a741c83`
+
+`shared-mp4-av-multiple.mp4` uses the same public synthetic packet data, with two AAC track IDs referencing that data and an audio/video/audio moov order. The Python generator changes only container structure; it invokes no encoder, FFmpeg or network. Tests verify original track order, both complete AAC timelines, video pixels, metadata, and atomic failure for limits/cancellation. Ordinary tests do not run the generator.
+
+- `shared-mp4-av-multiple.mp4`: `35c97998994ebd2835bd2b2a980a51be62e70013de083a7f10dd11cbb16214fa`

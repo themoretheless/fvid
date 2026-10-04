@@ -1,6 +1,7 @@
 //! Owned streaming Matroska packet muxing. The shared writer is also used by
 //! the frontend; callers discard partial output on error and own publication.
 use fvid_control::{ProgressEvent, CancelFlag, ProgressHook};
+use crate::owned_file_tags::FileTags;
 use std::io::{Read, Seek, SeekFrom, Write};
 #[derive(Debug)]
 pub struct Error(pub String);
@@ -291,50 +292,6 @@ fn track_description_elements(description: Option<&VideoTrackDescription>) -> Re
         data.extend(uint(id, u64::from(description.disposition & bit != 0))?);
     }
     Ok(data)
-}
-
-fn extra_text_tags(tags: &std::collections::BTreeMap<String, String>) -> Result<Vec<u8>> {
-    text_tags_element(tags,None)
-}
-fn text_tags_element(
-    tags: &std::collections::BTreeMap<String, String>,
-    uid: Option<u64>,
-) -> Result<Vec<u8>> {
-    if tags.len() > 256 {
-        return Err(invalid("Matroska text tag count exceeds limit"));
-    }
-    let mut entries = Vec::new();
-    for (name, value) in tags {
-        if name.is_empty()
-            || name.len() > 128
-            || value.len() > 1024
-            || name.contains('\0')
-            || value.contains('\0')
-        {
-            return Err(invalid("invalid Matroska text tag"));
-        }
-        if uid.is_none() && crate::owned_file_tags::FileTags::supports_key(name) {
-            continue;
-        }
-        let simple = element(
-            0x67c8,
-            &[
-                element(0x45a3, name.as_bytes())?,
-                element(0x4487, value.as_bytes())?,
-            ]
-            .concat(),
-        )?;
-        let targets = uid
-            .map(|uid| element(0x63c0, &uint(0x63c5, uid)?))
-            .transpose()?
-            .unwrap_or_default();
-        entries.extend(element(0x7373, &[targets, simple].concat())?);
-    }
-    if entries.is_empty() {
-        Ok(Vec::new())
-    } else {
-        element(0x1254c367, &entries)
-    }
 }
 
 /// Encode and mux transformed Y4M frames into one FFV1/Matroska stream.

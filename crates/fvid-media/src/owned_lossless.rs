@@ -2,7 +2,7 @@
 use fvid_control::CopyOptions;
 use fvid_media_info::{DecodeTransform, LosslessStats, LosslessTransform};
 use std::path::Path;
-fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
+pub(crate) fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
     let accepted = LosslessTransform {
         crop: t.crop.clone(),
         vertical_flip: t.vertical_flip.clone(),
@@ -160,7 +160,7 @@ fn stream_tag_key(key: &str) -> bool {
             "rotate" | "stereo_mode" | "alpha_mode"
         )
 }
-fn policy(o: &CopyOptions, text_tags: bool) -> bool {
+pub(crate) fn policy(o: &CopyOptions, text_tags: bool) -> bool {
     (o.streams.is_empty() || o.streams == [0])
         && o.max_packet_bytes != 0
         && o.max_controlled_bytes.is_none()
@@ -195,6 +195,7 @@ fn policy(o: &CopyOptions, text_tags: bool) -> bool {
 }
 /// Whether the owned export pipeline admits this source, transform and policy.
 pub fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
+    if crate::owned_mp4_multitrack_export::supports(source,t,o) {return true;}
     if policy(o,true) && request(t).is_some() {
         match crate::owned_mp4_video_bridge::prepare(source,Some(o)) {
             Ok(Some(temporary)) => {
@@ -244,6 +245,8 @@ pub fn transcode_lossless(
     }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
+    if let Some(stats)=crate::owned_mp4_multitrack_export::try_export(source,destination,&transform,options)? {return Ok(stats);}
+
     if policy(options,true) {
         if let Some(temporary)=crate::owned_mp4_video_bridge::prepare(source,Some(options))? {
             return transcode_lossless(&temporary.path,destination,transform,options);
