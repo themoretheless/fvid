@@ -28,4 +28,10 @@ VP9 and AV1 packets now feed the existing owned filter, interval, step, reverse 
 
 AV1 configuration initialization and rewind/reset share one kernel constructor, retaining configuration-only sequence headers and static HDR metadata. Export preserves decoded range/matrix, declared primaries/transfer and merged static HDR metadata; fixed format/colour/HDR is required for the admitted streaming path. FFV1 inputs retain their existing container metadata policy. Synthetic acceptance compares every output sample with native source samples, independent negate arithmetic and expected step/reverse/shuffle frame order. HDR tests establish metadata transport, not HDR image quality.
 
-Remaining boundaries include transformed MP4 visitors, compressed multitrack exports, unknown-duration export packets, crop/rotation, RGB or studio-range monochrome streaming and unsupported codec tools. These changes do not remove the remaining production legacy feature edges.
+Remaining boundaries include transformed MP4 visitors, compressed multitrack exports, isolated untimed pictures or nonincreasing untimed display timestamps, crop/rotation, RGB or studio-range monochrome streaming and unsupported codec tools. These changes do not remove the remaining production legacy feature edges.
+
+## Missing WebM durations
+
+Owned compressed exports now infer missing durations from the next actually shown picture, not the next coded block. A separate decoder pass retains only presentation indices/PTS, including reconstruction of hidden references. Explicit positive BlockDuration/DefaultDuration wins; the terminal picture uses declared Segment end when available, otherwise repeats the preceding visible interval. An isolated picture without timing and nonpositive inferred intervals remain unadmitted. This terminal cadence policy is an estimate when the container omits its end, not recovery of unknowable original timing. Decoder cancellation and input packet limits apply during the inference pass too.
+
+Synthetic VP9 and AV1 derivatives remove DefaultDuration and BlockDuration using equal-sized Void elements. Acceptance checks source pixels, every displayed PTS and every emitted duration; the AV1 source includes hidden and show-existing pictures. Ordinary tests use no external backend.

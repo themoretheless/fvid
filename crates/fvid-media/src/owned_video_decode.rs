@@ -131,6 +131,10 @@ pub(crate) fn decode_webm(
         }
     }
     reader.scan_all().map_err(|e| e.to_string())?;
+    let inferred = if visit.is_some() && reader.tracks.iter().any(|t|t.kind==1 && matches!(t.codec.as_str(),"V_VP9"|"V_AV1")) {
+        let Some(durations)=crate::owned_webm_codec::presentation_durations(&mut reader,options)? else {return Ok(None);};
+        Some(durations)
+    } else {None};
     let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
         return Err("input has no video stream".into());
     };
@@ -192,8 +196,9 @@ pub(crate) fn decode_webm(
         let visible = !p.invisible;
         let pts_ns = p.pts_ns;
         let duration_ns = p
-            .duration_ns
-            .or((default_duration != 0).then_some(default_duration));
+            .duration_ns.filter(|&v|v!=0)
+            .or((default_duration != 0).then_some(default_duration))
+            .or_else(||inferred.as_ref().and_then(|values|values[index]));
         if options
             .and_then(|o| o.max_packets)
             .is_some_and(|limit| consumed >= limit)

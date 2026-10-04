@@ -252,3 +252,101 @@ fn pack(
         depth,
     })
 }
+
+/// Infer only missing display durations. Hidden codec pictures never delimit a
+/// visible interval. The terminal interval uses declared Segment end, otherwise
+/// the preceding visible interval; an isolated untimed picture stays unadmitted.
+pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
+    reader: &mut crate::owned_webm::WebmReader<R>,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<Vec<Option<u64>>>> {
+    let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
+        return Err("input has no video stream".into());
+    };
+    let number = track.number;
+    let default = track.default_duration_ns;
+    let mut durations = Vec::new();
+    durations
+        .try_reserve_exact(reader.packets.len())
+        .map_err(|_| "duration index allocation failed")?;
+    durations.extend(reader.packets.iter().map(|p| {
+        p.duration_ns
+            .filter(|&v| v != 0)
+            .or((default != 0).then_some(default))
+    }));
+    if reader
+        .packets
+        .iter()
+        .enumerate()
+        .all(|(i, p)| p.track != number || durations[i].is_some())
+    {
+        return Ok(Some(durations));
+    }
+    let Some(mut decoder) = Decoder::new(
+        &track.codec,
+        &track.codec_private,
+        track.width as usize,
+        track.height as usize,
+    )?
+    else {
+        return Ok(None);
+    };
+    let mut visible = Vec::new();
+    visible
+        .try_reserve_exact(reader.packets.len())
+        .map_err(|_| "presentation index allocation failed")?;
+    let mut consumed = 0u64;
+    for index in 0..reader.packets.len() {
+        let packet = &reader.packets[index];
+        if packet.track != number {
+            continue;
+        }
+        if options
+            .and_then(|o| o.cancel.as_ref())
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
+        if options
+            .and_then(|o| o.max_packets)
+            .is_some_and(|limit| consumed >= limit)
+        {
+            return Err("FFV1 input packet count exceeds limit".into());
+        }
+        consumed += 1;
+        let (shown, pts) = (!packet.invisible, packet.pts_ns);
+        let bytes = reader.read_packet(index).map_err(|e| e.to_string())?;
+        if options.is_some_and(|o| bytes.len() > o.max_packet_bytes) {
+            return Err("input packet exceeds byte limit".into());
+        }
+        match decoder.decode(&bytes) {
+            Ok(Some(_)) if shown => visible.push((index, pts)),
+            Ok(_) => {}
+            Err(error) if error.starts_with(UNSUPPORTED_PREFIX) => return Ok(None),
+            Err(error) => return Err(error),
+        }
+    }
+    for (position, &(index, pts)) in visible.iter().enumerate() {
+        if durations[index].is_some() {
+            continue;
+        }
+        let end = if let Some(&(_, next)) = visible.get(position + 1) {
+            i128::from(next)
+        } else if let Some(end) = reader
+            .duration_ns
+            .filter(|&v| i128::from(v) > i128::from(pts))
+        {
+            i128::from(end)
+        } else if let Some(&(_, previous)) = position.checked_sub(1).and_then(|p| visible.get(p)) {
+            i128::from(pts) + (i128::from(pts) - i128::from(previous))
+        } else {
+            return Ok(None);
+        };
+        let interval = end - i128::from(pts);
+        if interval <= 0 {
+            return Ok(None);
+        }
+        durations[index] = Some(u64::try_from(interval).map_err(|_| "video duration overflow")?);
+    }
+    Ok(Some(durations))
+}

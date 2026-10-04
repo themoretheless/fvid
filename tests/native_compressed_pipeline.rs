@@ -231,3 +231,88 @@ fn configuration_hdr_metadata_survives_owned_lossless_export() {
     assert_eq!(raw_frames(&output), raw_frames(&source));
     std::fs::remove_file(output).unwrap();
 }
+
+#[test]
+fn missing_default_duration_exports_visible_timeline_without_external_backend() {
+    for codec in ["vp9", "av1"] {
+        let source = fixture(&format!(
+            "playback-errors/shared-{codec}-inferred-duration.webm"
+        ));
+        let mut input = fvid_media::owned_webm::WebmReader::open(
+            Cursor::new(std::fs::read(&source).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        input.scan_all().unwrap();
+        assert_eq!(input.tracks[0].default_duration_ns, 0);
+        assert!(input.packets.iter().all(|p| p.duration_ns.is_none()));
+        let output =
+            std::env::temp_dir().join(format!("fvid-inferred-{}-{codec}.mkv", std::process::id()));
+        let stats = fvid_media::transcode_lossless(
+            &source,
+            &output,
+            Default::default(),
+            &Default::default(),
+        )
+        .unwrap_or_else(|e| panic!("{codec}: {e}"));
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(raw_frames(&output), raw_frames(&source));
+        let mut native = fvid::playback_native::NativeReader::software(
+            Cursor::new(std::fs::read(&source).unwrap()),
+            usize::MAX,
+        )
+        .unwrap();
+        let mut pts = Vec::new();
+        while native.read_frame_raw().unwrap().is_some() {
+            let (ticks, scale) = native.current_pts().unwrap();
+            pts.push((i128::from(ticks) * 1_000_000_000 / i128::from(scale)) as i64);
+        }
+        let mut exported = fvid_media::owned_webm::WebmReader::open(
+            Cursor::new(std::fs::read(&output).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        exported.scan_all().unwrap();
+        assert_eq!(
+            exported
+                .packets
+                .iter()
+                .map(|p| p.pts_ns)
+                .collect::<Vec<_>>(),
+            pts
+        );
+        for (i, p) in exported.packets.iter().enumerate() {
+            let end = pts
+                .get(i + 1)
+                .map(|&v| v as u64)
+                .or_else(|| input.duration_ns.filter(|&v| v > pts[i] as u64))
+                .unwrap_or_else(|| (pts[i] + pts[i] - pts[i - 1]) as u64);
+            assert_eq!(
+                p.duration_ns,
+                Some(end - pts[i] as u64),
+                "{codec} frame {i}"
+            );
+        }
+        std::fs::write(&output, b"previous destination").unwrap();
+        let options = fvid_control::CopyOptions {
+            max_packets: Some(1),
+            ..Default::default()
+        };
+        let existing =
+            fvid_media::transcode_lossless(&source, &output, Default::default(), &options)
+                .unwrap_err();
+        assert!(
+            existing.to_string().contains("already exists"),
+            "{existing}"
+        );
+        assert_eq!(std::fs::read(&output).unwrap(), b"previous destination");
+        std::fs::remove_file(&output).unwrap();
+        let error = fvid_media::transcode_lossless(&source, &output, Default::default(), &options)
+            .unwrap_err();
+        assert!(
+            error.to_string().contains("packet count exceeds limit"),
+            "{error}"
+        );
+        assert!(!output.exists());
+    }
+}

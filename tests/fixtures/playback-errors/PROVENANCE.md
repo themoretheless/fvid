@@ -809,3 +809,10 @@ The Python-only shared-codec generator adds three short public synthetic derivat
 - `shared-vp9-stride.webm`: `be1e74b3f75cc3274f8623a10f51de89f61c3262b5d2a07351bdad4514d03457`
 - `shared-vp9-hidden-leading.webm`: `e53cc0b1c934f0e09c9fc4e82154e70abded0b6204c4f0880a12e90482ff694d`
 - `shared-av1-hdr-carry.webm`: `da1fc747fe86552fcef64a47a14ce41921d09fd0b53b7956fd747d9f3e3401ee`
+
+### Inferred WebM durations
+
+`generate-shared-codecs.py` replaces DefaultDuration and BlockDuration with equal-sized Void elements in the existing synthetic VP9 adaptive and AV1 random-access clips. Enclosing sizes, coded bytes and declared Segment duration are retained. Before the fix the VP9 export was refused and fell through to an unrelated Y4M header error. Acceptance requires native FFV1 export, equal samples, unchanged displayed PTS and inferred positive BlockDuration for every output frame, including AV1 hidden/show-existing reconstruction. No private material, encoder or network is used.
+
+- `shared-vp9-inferred-duration.webm`: `1dd1d6e8cf324afa263ef472ed89f2913096b1b82e30238811ba77c5613fcce0`
+- `shared-av1-inferred-duration.webm`: `a1ecaaa824e4e948e223968bbbe08b53c864e2c84101b53469f189973f37caeb`

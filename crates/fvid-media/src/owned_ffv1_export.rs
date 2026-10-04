@@ -14,11 +14,18 @@ fn input(source: &Path) -> Result<crate::owned_webm::WebmReader<BufReader<File>>
     Ok(input)
 }
 pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
-    let Ok(input) = input(source) else {
+    let Ok(mut input) = input(source) else {
         return false;
     };
     if input.tracks.len() != 1 || !input.metadata_complete {
         return false;
+    }
+    if matches!(input.tracks[0].codec.as_str(),"V_VP9"|"V_AV1") {
+        match crate::owned_webm_codec::presentation_durations(&mut input,None) {
+            Ok(None) => return false,
+            // Corrupt admitted packets must fail execution atomically.
+            Ok(Some(_)) | Err(_) => {},
+        }
     }
     let track = &input.tracks[0];
     let uid = input.track_uids.get(&track.number).copied();
@@ -37,7 +44,7 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
             (p.invisible && track.codec=="V_FFV1")
                 || p.pts_ns < 0
                 || p.discard_padding_ns != 0
-                || p.duration_ns.unwrap_or(track.default_duration_ns) == 0
+                || (track.codec=="V_FFV1" && p.duration_ns.unwrap_or(track.default_duration_ns) == 0)
         })
     {
         return false;

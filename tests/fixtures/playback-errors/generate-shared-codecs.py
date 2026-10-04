@@ -119,3 +119,23 @@ hdr_track=atom('AE',uint('D7',1)+uint('73C5',1)+uint('83',1)+atom('86',b'V_AV1')
 hdr_cluster=atom('1F43B675',uint('E7',0)+atom('A3',b'\x81\0\0\0'+frame))
 hdr_segment=atom('18538067',atom('1549A966',uint('2AD7B1',1000000))+atom('1654AE6B',hdr_track)+hdr_cluster)
 (root/'shared-av1-hdr-carry.webm').write_bytes(header+hdr_segment)
+
+# Remove DefaultDuration and BlockDuration using equal-size Void, retaining coded bytes,
+# enclosing element sizes and any declared Segment duration unchanged.
+for codec, name in [('vp9', 'adaptive.webm'), ('av1', 'random-access.webm')]:
+    timed = bytearray((root.parent / codec / name).read_bytes())
+    removed = []
+    def clear_default(begin=0, end=None):
+        for kind, payload, finish in fields(timed, begin, end):
+            if kind in {0x23E383, 0x9B}:
+                id_bytes = bytes.fromhex('23E383' if kind == 0x23E383 else '9B')
+                start = payload - len(id_bytes) - 1
+                assert timed[start:start+len(id_bytes)] == id_bytes
+                total = finish - start
+                timed[start:finish] = atom('EC', bytes(total - 2))
+                removed.append(kind)
+            elif kind in containers | {0x1F43B675, 0xA0}:
+                clear_default(payload, finish)
+    clear_default()
+    assert removed
+    (root / f'shared-{codec}-inferred-duration.webm').write_bytes(timed)
