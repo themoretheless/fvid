@@ -495,7 +495,7 @@ atomic Matroska publication. No libav retry occurs after native execution starts
 The standalone `native-cuda` feature exports the same operation contracts and
 `hw_filter` API without enabling any legacy dependency.
 
-The native route currently excludes intervals, host bounce and nonzero SPS crop
+The native route currently excludes host bounce and nonzero SPS crop
 from automatic selection to retain existing command semantics until qualified;
 other codecs/containers remain on the legacy route. This is not yet elimination
 of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
@@ -510,3 +510,17 @@ unverified. Existing CUDA option/stat types are shared between both backends.
 Native CUDA statistics count successful filter/copy calls directly. An unshaded
 black fill does not increment `device_filter_passes`; a blank passed through a
 shader does. This is an operation counter, not measured GPU throughput.
+
+CLI interval routing now selects whole movie events whose starts lie in `[from,
+to)`, then rebases their timestamps. Unlike overlap clipping, a frame beginning
+before `from` is excluded and a selected frame keeps its full duration even when
+it extends past `to`. Boundaries in microseconds must map exactly to track ticks,
+as the legacy interface requires. The general native reader retains its separate
+`Clip` policy for overlap-based editing.
+
+Automatic native interval routing currently requires a single known video track,
+a zero-start movie and no empty spans; mixed-track/nonzero origins remain on legacy until equivalent
+origin handling is qualified. The duplicate-PTS synthetic fixture checks whole
+frame selection, repeated timestamps and preserved durations. GPU production
+acceptance now requests a half-second cut from the one-second control fixture
+and verifies six output packets using FVid; execution remains unverified.

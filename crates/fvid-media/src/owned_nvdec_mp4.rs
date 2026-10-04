@@ -144,6 +144,9 @@ impl<R: Read + Seek> AvcMp4Input<R> {
     pub fn movie_timescale(&self) -> u32 {
         self.reader.movie_timescale()
     }
+    pub fn track_count(&self) -> usize {
+        self.reader.tracks().len()
+    }
     pub fn packet_count(&self) -> usize {
         self.track().samples.len()
     }

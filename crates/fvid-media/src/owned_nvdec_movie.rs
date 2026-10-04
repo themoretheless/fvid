@@ -5,6 +5,14 @@ use std::{
     collections::BTreeSet,
     io::{Read, Seek},
 };
+/// Boundary semantics for interval selection on the movie clock.
+#[derive(Clone, Copy, Debug)]
+pub enum IntervalSelection {
+    /// Keep overlaps and clip their displayed duration.
+    Clip,
+    /// Keep complete events whose start lies in the half-open interval.
+    FrameStarts,
+}
 struct Epoch {
     end: usize,
     needed: BTreeSet<usize>,
@@ -154,7 +162,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
     /// Clip/rebase movie occurrences in track ticks; decoding still includes
     /// reference preroll. Variable durations and explicit blanks are retained.
     pub fn new_with_interval(
-        mut source: AvcMp4Input<R>,
+        source: AvcMp4Input<R>,
         ordinal: usize,
         decode_surfaces: u32,
         output_surfaces: u32,
@@ -162,7 +170,29 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         cache_frames: usize,
         interval: Option<(i64, i64)>,
     ) -> Result<Self, String> {
-        let events = clip_presentations(source.movie_presentations(max_events)?, interval)?;
+        Self::new_with_selection(
+            source,
+            ordinal,
+            decode_surfaces,
+            output_surfaces,
+            max_events,
+            cache_frames,
+            interval,
+            IntervalSelection::Clip,
+        )
+    }
+    pub fn new_with_selection(
+        mut source: AvcMp4Input<R>,
+        ordinal: usize,
+        decode_surfaces: u32,
+        output_surfaces: u32,
+        max_events: usize,
+        cache_frames: usize,
+        interval: Option<(i64, i64)>,
+        selection: IntervalSelection,
+    ) -> Result<Self, String> {
+        let events =
+            select_presentations(source.movie_presentations(max_events)?, interval, selection)?;
         let queue = Queue::new(events, cache_frames)?;
         source.rewind_packets();
         let decoder = source.create_decoder(ordinal, decode_surfaces, output_surfaces)?;
@@ -240,8 +270,15 @@ impl<R: Read + Seek> AvcMovieReader<R> {
     }
 }
 pub(crate) fn clip_presentations(
+    events: Vec<Presentation>,
+    interval: Option<(i64, i64)>,
+) -> Result<Vec<Presentation>, String> {
+    select_presentations(events, interval, IntervalSelection::Clip)
+}
+pub(crate) fn select_presentations(
     mut events: Vec<Presentation>,
     interval: Option<(i64, i64)>,
+    selection: IntervalSelection,
 ) -> Result<Vec<Presentation>, String> {
     let Some((from, to)) = interval else {
         return Ok(events);
@@ -250,13 +287,24 @@ pub(crate) fn clip_presentations(
         return Err("movie interval requires 0 <= from < to".into());
     }
     events.retain_mut(|event| {
-        let start = event.start.max(from);
-        let end = event.end.min(to);
-        if start >= end {
-            return false;
+        match selection {
+            IntervalSelection::Clip => {
+                let start = event.start.max(from);
+                let end = event.end.min(to);
+                if start >= end {
+                    return false;
+                }
+                event.start = start - from;
+                event.end = end - from;
+            }
+            IntervalSelection::FrameStarts => {
+                if event.start < from || event.start >= to {
+                    return false;
+                }
+                event.start -= from;
+                event.end -= from;
+            }
         }
-        event.start = start - from;
-        event.end = end - from;
         true
     });
     if events.is_empty() {
@@ -538,6 +586,32 @@ fn validate_transform(width: u32, height: u32, t: fvid_cuda::Nv12Transform) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn synthetic_frame_start_selection_keeps_whole_frames_and_duplicate_pts() {
+        let source = AvcMp4Input::open(
+            std::io::Cursor::new(
+                include_bytes!("../../../tests/fixtures/playback-errors/duplicate-pts.mp4")
+                    .as_slice(),
+            ),
+            Default::default(),
+        )
+        .unwrap();
+        let events = source.movie_presentations(1000).unwrap();
+        let selected = select_presentations(
+            events.clone(),
+            Some((1500, 5500)),
+            IntervalSelection::FrameStarts,
+        )
+        .unwrap();
+        assert_eq!(selected.len(), 5);
+        assert_eq!(selected[0].start, 500);
+        assert_eq!(selected.last().unwrap().end, 4500);
+        assert!(selected.iter().all(|event| event.end - event.start == 1000));
+        assert_eq!(selected[3].start, selected[4].start);
+        let clipped = clip_presentations(events, Some((1500, 5500))).unwrap();
+        assert_eq!(clipped[0].start, 0);
+        assert_eq!(clipped.last().unwrap().end, 4000);
+    }
     #[test]
     fn synthetic_interval_clips_blanks_repeated_frames_and_chapters() {
         let source = AvcMp4Input::open(

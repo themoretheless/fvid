@@ -14,6 +14,7 @@ struct Plan {
     transform: fvid_cuda::Nv12Transform,
     fps: (u32, u32),
     full_range: bool,
+    interval: Option<(i64, i64)>,
 }
 fn plan<R: Read + Seek>(
     source: &mut AvcMp4Input<R>,
@@ -23,8 +24,38 @@ fn plan<R: Read + Seek>(
         return Err("sampling shader mode requires shader source".into());
     }
     // Keep remaining legacy option semantics until they have owned acceptance.
-    if options.host_bounce || options.interval.is_some() {
+    if options.host_bounce {
         return Ok(None);
+    }
+    let interval = options
+        .interval
+        .map(|(from, to)| -> Result<(i64, i64), String> {
+            if from < 0 || from >= to {
+                return Err("hw-filter interval requires 0 <= from < to".into());
+            }
+            let ticks = |us: i64| -> Result<i64, String> {
+                let numerator = i128::from(us) * i128::from(source.track().timescale);
+                if numerator % 1_000_000 != 0 {
+                    return Err("interval boundary is not exact in video time base".into());
+                }
+                i64::try_from(numerator / 1_000_000)
+                    .map_err(|_| "interval timestamp overflow".into())
+            };
+            Ok((ticks(from)?, ticks(to)?))
+        })
+        .transpose()?;
+    if interval.is_some() {
+        if source.track_count() != 1 {
+            return Ok(None);
+        }
+        let events = source.movie_presentations(1_000_000)?;
+        // Legacy interval origin includes the earliest demuxed stream. Retain
+        // that route until nonzero starts and empty edits have matching proof.
+        if events.first().is_none_or(|event| event.start != 0)
+            || events.iter().any(|event| event.sample.is_none())
+        {
+            return Ok(None);
+        }
     }
     let metadata = source.video_metadata();
     if metadata.options.video.is_some_and(|v| v.crop != [0; 4]) {
@@ -87,6 +118,7 @@ fn plan<R: Read + Seek>(
         u32::try_from(duration / a).map_err(|_| "CUDA rate denominator overflow")?,
     );
     Ok(Some(Plan {
+        interval,
         transform,
         fps,
         full_range: metadata
@@ -141,7 +173,16 @@ pub fn try_filter(
             }
         })
         .transpose()?;
-    let reader = AvcMovieReader::new(source, options.device, 32, 2, 1_000_000, 16)?;
+    let reader = AvcMovieReader::new_with_selection(
+        source,
+        options.device,
+        32,
+        2,
+        1_000_000,
+        16,
+        plan.interval,
+        crate::owned_nvdec_movie::IntervalSelection::FrameStarts,
+    )?;
     let renderer = AvcMovieRenderer::new_with_shader(
         reader,
         plan.transform,
@@ -197,19 +238,24 @@ mod tests {
             &destination,
             &HwFilterOptions {
                 horizontal_flip: true,
+                interval: Some((250_000, 750_000)),
                 ..Default::default()
             },
         )
         .unwrap();
         assert_eq!(stats.backend, "owned-cuda-nvdec-nvenc");
         assert_eq!(stats.host_frame_copies, 0);
-        assert_eq!(stats.video_frames, 12);
+        assert_eq!(stats.video_frames, 6);
         let mut input = crate::owned_webm::WebmReader::open(
             BufReader::new(std::fs::File::open(&destination).unwrap()),
             Default::default(),
         )
         .unwrap();
-        assert_eq!(input.packets.len(), 12);
+        assert_eq!(input.packets.len(), 6);
+        assert_eq!(input.packets[0].pts_ns, 0);
+        assert!(input.packets.iter().all(|packet| packet.pts_ns >= 0
+            && packet.pts_ns < 500_000_000
+            && packet.duration_ns == Some(83_333_333)));
         let mut decoder = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
             &input.tracks[0].codec_private,
             16 << 20,
@@ -226,6 +272,28 @@ mod tests {
         std::fs::remove_file(destination).unwrap();
     }
     #[test]
+    fn empty_edit_interval_stays_on_legacy_until_origin_is_qualified() {
+        let mut source = AvcMp4Input::open(
+            std::io::Cursor::new(
+                include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
+                    .as_slice(),
+            ),
+            Default::default(),
+        )
+        .unwrap();
+        assert!(
+            plan(
+                &mut source,
+                &HwFilterOptions {
+                    interval: Some((250_000, 500_000)),
+                    ..Default::default()
+                }
+            )
+            .unwrap()
+            .is_none()
+        );
+    }
+    #[test]
     fn synthetic_production_route_qualifies_packets_without_driver() {
         let mut source = AvcMp4Input::open(
             std::io::Cursor::new(
@@ -238,6 +306,26 @@ mod tests {
             .unwrap()
             .unwrap();
         assert_eq!(plan.fps, (12, 1));
+        let interval_plan = super::plan(
+            &mut source,
+            &HwFilterOptions {
+                interval: Some((250_000, 750_000)),
+                ..Default::default()
+            },
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(interval_plan.interval, Some((3000, 9000)));
+        assert!(
+            super::plan(
+                &mut source,
+                &HwFilterOptions {
+                    interval: Some((1, 500_000)),
+                    ..Default::default()
+                }
+            )
+            .is_err()
+        );
         for crop in [
             fvid_media_info::CropRect {
                 x: 1,
