@@ -536,6 +536,7 @@ pub(crate) fn supports_plane_filter_source(source: &Path) -> Result<bool> {
 }
 
 pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
+    if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_grayworld::GrayWorld::parse(a).is_err()) { return false; }
     if transform.monochrome.as_deref().is_some_and(|a| fvid_media::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
     if transform.colorize.as_deref().is_some_and(|a| fvid_media::owned_colorize::Colorize::parse(a).is_err()) { return false; }
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }
@@ -588,7 +589,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         deflicker: None,
         photosensitivity: None,
         monochrome: _,
-        grayworld: None,
+        grayworld: _,
         drawbox: None,
         drawgrid: None,
         lagfun: None,

@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.grayworld.as_deref().is_some_and(|a| crate::owned_grayworld::GrayWorld::parse(a).is_err()) { return false; }
     if transform.cas.as_deref().is_some_and(|a| crate::owned_cas::Cas::parse(a).is_err()) { return false; }
     if transform.colorcorrect.as_deref().is_some_and(|a| crate::owned_colorcorrect::ColorCorrect::parse(a).is_err()) { return false; }
     if transform.colorbalance.as_deref().is_some_and(|a| crate::owned_colorbalance::ColorBalance::parse(a).is_err()) { return false; }
@@ -124,6 +125,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 colorbalance: transform.colorbalance.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
                 cas: transform.cas.clone(),
+                grayworld: transform.grayworld.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 gblur: transform.gblur.clone(),
@@ -467,6 +469,7 @@ pub(crate) fn apply_pixel_filters_cached(
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
+        || transform.grayworld.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()
         || transform.avgblur.is_some()
@@ -536,6 +539,9 @@ pub(crate) fn apply_pixel_filters_cached(
             }
             if let Some(args) = transform.monochrome.as_deref() {
                 crate::owned_monochrome::Monochrome::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.grayworld.as_deref() {
+                crate::owned_grayworld::GrayWorld::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -886,6 +892,7 @@ fn decode_reader_frames(
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
+        || transform.grayworld.is_some()
         || transform.negate.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()

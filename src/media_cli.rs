@@ -914,6 +914,15 @@ fn pixel_decode_args(
             result.extend(args.cloned());
             break;
         }
+        if arg == "--grayworld" {
+            if filters.grayworld.is_some() {return Err("duplicate grayworld".into());}
+            let value=args.next().ok_or("missing grayworld args")?;
+            match fvid_media::owned_grayworld::GrayWorld::parse(value) {
+                Ok(filter)=>filters.grayworld=Some(filter),
+                Err(_)=>{result.push(arg.clone());result.push(value.clone());}
+            }
+            continue;
+        }
         if arg == "--cas" {
             if filters.cas.is_some() {return Err("duplicate cas".into());}
             filters.cas=Some(fvid_media::owned_cas::Cas::parse(args.next().ok_or("missing cas args")?)?);
@@ -4544,7 +4553,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--exposure"|"--colorbalance"|"--colorcorrect"|"--cas"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--exposure"|"--colorbalance"|"--colorcorrect"|"--cas"|"--grayworld"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {
@@ -4804,6 +4813,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--colorbalance" => &mut transform.colorbalance,
             "--colorcorrect" => &mut transform.colorcorrect,
             "--cas" => &mut transform.cas,
+            "--grayworld" => &mut transform.grayworld,
             "--gblur" => &mut transform.gblur,
             "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
@@ -5495,6 +5505,40 @@ mod cas_cli_tests {
                 vec!["decode",source.to_str().unwrap(),"--cas",args,"--quiet"],
                 vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--cas",args,"--quiet"],
                 vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--cas",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod grayworld_cli_tests {
+    #[test]
+    fn unsupported_timeline_options_remain_available_to_existing_backend() {
+        let args=vec!["decode".into(),"synthetic.y4m".into(),"--grayworld".into(),"enable=between(n,1,2)".into()];
+        let (remaining,filters)=super::pixel_decode_args(&args).unwrap();
+        assert_eq!(remaining,args);assert!(filters.is_empty());
+        let request=fvid::media_info::DecodeTransform{grayworld:Some("enable=between(n,1,2)".into()),..Default::default()};
+        assert!(fvid::native_pixels::PixelFilters::from_request(&request).is_err());
+        let transform=fvid::media_info::LosslessTransform{grayworld:request.grayworld,..Default::default()};
+        assert!(!fvid::native_lossless::supports(&transform));
+    }
+
+    #[test]
+    fn owned_grayworld_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-grayworld-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/grayworld-gamut-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="0";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--grayworld",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--grayworld",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--grayworld",args],
             ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
             assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
             assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);

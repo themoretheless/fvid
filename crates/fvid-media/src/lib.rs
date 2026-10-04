@@ -28,6 +28,7 @@ pub mod owned_exposure;
 pub mod owned_colorbalance;
 pub mod owned_colorcorrect;
 pub mod owned_cas;
+pub mod owned_grayworld;
 pub mod owned_yuv_rgb;
 pub mod owned_monochrome;
 pub mod owned_lutyuv;

@@ -3639,3 +3639,24 @@ route through this implementation without legacy FFmpeg. Enabled offline
 acceptance matches 2,322 YUV samples and 9,216 RGBA components exactly on short
 synthetic videos. Tests also cover degenerate width/height and all integer
 depths; generic RGB/YUV conversion equivalence is outside this qualification.
+
+Owned default `grayworld` (empty or `0` arguments) balances frame-wide logarithmic
+LMS opponent means, using raster row sums and preserving alpha. The float API
+accepts linear-light RGB/RGBA and retains finite output headroom; integer RGB
+normalizes before filtering and clips only final storage. Native YUV gathers a
+complete raster float RGB frame, normalizes it to 0–1 before the logarithmic
+filter, and converts the filtered result back to YUV. This fixes nonfinite
+outputs from negative out-of-gamut intermediates on synthetic videos.
+
+Enabled float acceptance covers 768 components within an 8-epsilon scaled bound
+(observed maximum absolute error 8.34465e-7) and checks alpha exactly. Frame-wide
+conversion tests verify odd-edge raster ordering and atomic errors. Native
+decode/Y4M/FFV1 export routing is exercised at 8/12/16 bits. Whole YUV and
+integer-float RGB conversion equivalence, file-based float export and generic
+timeline `enable=` remain unqualified or incomplete. Unsupported timeline
+arguments retain the existing backend route; they are not advertised as native
+acceptance. The full FFmpeg removal goal remains open.
+
+The pending grayworld timeline acceptance uses a synthetic three-frame video
+and requires selective filtering without altering disabled frames. It remains
+ignored; the current passing refusal is not counted as native timeline support.

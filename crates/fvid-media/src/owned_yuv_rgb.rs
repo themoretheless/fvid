@@ -612,3 +612,88 @@ pub(crate) fn filter_rgb_f32_sampled(
     frame.data = output;
     Ok(())
 }
+
+/// Whole float RGB frame in raster order; publish YUV only after filtering succeeds.
+pub(crate) fn filter_rgb_f32_frame(
+    frame: &mut GeometryFrame,
+    depth: u8,
+    full: bool,
+    matrix: Matrix,
+    mut filter: impl FnMut(&mut [f32]) -> Result<()>,
+) -> Result<()> {
+    let [sx, sy] = frame
+        .subsampling
+        .ok_or("float RGB frame requires planar YUV")?;
+    if sx == 0 || sy == 0 {
+        return Err("invalid float RGB frame subsampling".into());
+    }
+    let width = frame.width;
+    let height = frame.height;
+    let cw = width.div_ceil(sx);
+    let length = width
+        .checked_mul(height)
+        .and_then(|n| n.checked_mul(3))
+        .ok_or("float RGB frame geometry overflow")?;
+    let mut rgb = Vec::new();
+    let mut cell_index = 0;
+    filter_rgb_f32_sampled(frame, depth, full, matrix, ChromaSampling::Point, |cell| {
+        if rgb.is_empty() {
+            rgb.try_reserve_exact(length)
+                .map_err(|_| "float RGB frame allocation failed")?;
+            rgb.resize(length, 0.0);
+        }
+        let x0 = (cell_index % cw) * sx;
+        let y0 = (cell_index / cw) * sy;
+        let cell_width = (width - x0).min(sx);
+        for (i, pixel) in cell.chunks_exact(3).enumerate() {
+            let at = ((y0 + i / cell_width) * width + x0 + i % cell_width) * 3;
+            rgb[at..at + 3].copy_from_slice(pixel);
+        }
+        cell_index += 1;
+        Ok(())
+    })?;
+    filter(&mut rgb)?;
+    cell_index = 0;
+    filter_rgb_f32_sampled(frame, depth, full, matrix, ChromaSampling::Point, |cell| {
+        let x0 = (cell_index % cw) * sx;
+        let y0 = (cell_index / cw) * sy;
+        let cell_width = (width - x0).min(sx);
+        for (i, pixel) in cell.chunks_exact_mut(3).enumerate() {
+            let at = ((y0 + i / cell_width) * width + x0 + i % cell_width) * 3;
+            pixel.copy_from_slice(&rgb[at..at + 3]);
+        }
+        cell_index += 1;
+        Ok(())
+    })
+}
+
+#[cfg(test)]
+mod float_frame_tests {
+    #[test]
+    fn whole_float_frame_has_raster_order_and_failure_preserves_input() {
+        let input: Vec<u8> = (0..9).map(|i| 16 + i * 23).chain([128; 8]).collect();
+        let mut frame = crate::owned_frame::GeometryFrame {
+            width: 3,
+            height: 3,
+            subsampling: Some([2, 2]),
+            data: input.clone(),
+        };
+        let mut calls = 0;
+        let result =
+            super::filter_rgb_f32_frame(&mut frame, 8, false, super::Matrix::Bt601, |rgb| {
+                calls += 1;
+                assert_eq!(rgb.len(), 27);
+                for (i, pixel) in rgb.chunks_exact(3).enumerate() {
+                    let expected = (i as f64 * 23.0 / 219.0) as f32;
+                    assert!(pixel.iter().all(|v| (*v - expected).abs() < f32::EPSILON));
+                }
+                Err("synthetic frame filter failure".into())
+            });
+        assert_eq!(calls, 1);
+        assert_eq!(result.unwrap_err(), "synthetic frame filter failure");
+        assert_eq!(frame.data, input);
+        super::filter_rgb_f32_frame(&mut frame, 8, false, super::Matrix::Bt601, |_| Ok(()))
+            .unwrap();
+        assert_eq!(frame.data, input);
+    }
+}

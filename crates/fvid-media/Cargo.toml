@@ -141,3 +141,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_cas_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_grayworld_reference"
+harness = false

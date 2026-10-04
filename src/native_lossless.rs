@@ -343,6 +343,7 @@ pub fn overlay_only(transform:&crate::media_info::LosslessTransform)->Option<&cr
 
 /// Admission for currently owned spatial transformations.
 pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
+    if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_grayworld::GrayWorld::parse(a).is_err()) { return false; }
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }
     matches!(
         transform,
@@ -396,7 +397,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             deflicker: None,
             photosensitivity: None,
             monochrome: _,
-            grayworld: None,
+            grayworld: _,
             drawbox: None,
             drawgrid: None,
             lagfun: None,
@@ -510,6 +511,7 @@ pub fn configuration(
         colorbalance: transform.colorbalance.clone(),
         colorcorrect: transform.colorcorrect.clone(),
         cas: transform.cas.clone(),
+        grayworld: transform.grayworld.clone(),
         pixelize: transform.pixelize.clone(),
         boxblur: transform.boxblur.clone(),
         gblur: transform.gblur.clone(),

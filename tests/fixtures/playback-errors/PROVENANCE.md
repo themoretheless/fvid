@@ -157,3 +157,27 @@ exactly with committed references. Boundary tests cover 1×1, 1×3, 3×1 and odd
 3×5 black frames at every integer depth 8–16, validating zero-contrast handling
 and precision checks before mutation. Fixtures contain no private media;
 generation scripts and ordinary tests need neither FFmpeg nor network.
+
+### grayworld-grid.rgba_f32, grayworld-reference.rgba_f32 and grayworld-gamut-{8,12,16}.y4m
+
+`python3 scripts/generate_grayworld_fixtures.py` creates three 8×8 packed float
+RGBA frames from arithmetic linear-light colours, including black pixels,
+unequal channel casts, headroom and varying alpha. It also writes three-frame
+5×5 YUV420 gamut-boundary videos at 8/12/16 bits. No private data is used.
+The explicit benchmark saves the direct float filter reference:
+`FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_grayworld_reference`.
+Enabled acceptance checks 768 components with an 8-epsilon scaled float bound
+and exact alpha preservation; observed maximum absolute error is 8.34465e-7.
+This is bounded rounding, not bitwise equivalence. YUV acceptance specifically
+reproduces the old unbounded conversion failure (`grayworld produced nonfinite
+RGB`) and succeeds with RGB normalization before logarithms. Explicit
+`python3 benches/grayworld_yuv_qualification.py` verifies that the reference
+adapter likewise supplies RGB in 0–1. The analytical owned YUV converter is
+not qualified for full pipeline equivalence by this probe. Ordinary tests and
+fixture generation never invoke FFmpeg or network.
+
+Grayworld timeline `enable=lt(n,1)` has a passing explicit refusal on the same
+synthetic YUV video and a separate ignored acceptance requiring frame zero to
+change and later frames to remain exact. Enable that acceptance and update the
+refusal with the generic timeline implementation; refusal is not playback
+acceptance. Existing legacy timeline routing is retained until then.
