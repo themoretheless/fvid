@@ -55,6 +55,8 @@ fn main() {
                 "coordinates=128",
                 "threshold0=3:threshold1=0:threshold2=17",
                 "170:11:5:0:0",
+                "coordinates=2^7:threshold0=PI:threshold1=5/2:threshold2=7/2",
+                "coordinates=default:threshold0=max:threshold1=min:threshold2=default",
             ] {
                 let mut f = frame(depth, sx, sy, rgb);
                 let data = f.data.clone();

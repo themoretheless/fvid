@@ -29,6 +29,12 @@ Benchmark `ffmpeg_chromashift_reference` проверяет 138 комбинац
 Regression fixture `ffv1-level-one-source.mp4` и acceptance-тест сравнивают
 результат побайтово с экспортом по умолчанию.
 
+Dilation/erosion вычисляют постоянные выражения `coordinates` и порогов,
+включая `PI`, арифметику и `min`/`max`/`default`; прежние hex-литералы сохранены.
+Три acceptance-теста работают без FFmpeg; benchmark
+`ffmpeg_morphology_reference` проверяет 260 комбинаций параметров и форматов
+побайтово.
+
 Feature `media` пока включает legacy backend для ещё не перенесённых операций;
 `mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
 из production ещё не завершено.

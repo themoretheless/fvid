@@ -167,3 +167,33 @@ fn cli_and_api_use_owned_path() {
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("duplicate erosion"));
 }
+
+#[test]
+fn constant_options_preserve_owned_pixels_and_api() {
+    for kind in KINDS {
+        for depth in [8, 10, 16] {
+            for (expression, literal) in [
+                ("coordinates=2^7:threshold0=PI:threshold1=5/2:threshold2=7/2", "128:3:2:4"),
+                ("coordinates=default:threshold0=max:threshold1=min:threshold2=default", "255:65535:0:65535"),
+                ("coordinates=0xaa:threshold0=0x10", "170:16"),
+            ] {
+                let mut actual = frame(depth, 2, 2, false);
+                let mut expected = frame(depth, 2, 2, false);
+                Morphology::parse(kind, expression).unwrap().apply(&mut actual, depth).unwrap();
+                Morphology::parse(kind, literal).unwrap().apply(&mut expected, depth).unwrap();
+                assert_eq!(actual.data, expected.data);
+            }
+        }
+        for invalid in ["coordinates=n", "coordinates=255.1", "threshold0=65535.1", "threshold0=1/0"] {
+            assert!(Morphology::parse(kind, invalid).is_err(), "{invalid}");
+        }
+    }
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let stats = fvid::media::decode_video_transformed(&path, fvid::media::DecodeTransform {
+        dilation: Some("coordinates=2^7:threshold0=PI".into()),
+        erosion: Some("coordinates=default:threshold0=5/2".into()),
+        ..Default::default()
+    }).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.video_frames, 25);
+}

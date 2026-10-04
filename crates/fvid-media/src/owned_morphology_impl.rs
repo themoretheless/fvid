@@ -22,7 +22,7 @@ impl Morphology {
     pub fn kind(self) -> MorphologyKind {
         self.kind
     }
-    /// Literal coordinates:threshold0:threshold1:threshold2:threshold3 options.
+    /// Constant expressions in coordinates:threshold0:threshold1:threshold2:threshold3.
     pub fn parse(kind: MorphologyKind, args: &str) -> Result<Self> {
         let mut result = Self {
             kind,
@@ -51,16 +51,23 @@ impl Morphology {
                 (key, entry)
             };
             let value = value.trim();
-            let number = if let Some(hex) = value.strip_prefix("0x") {
-                u16::from_str_radix(hex, 16)
-            } else {
-                value.parse()
-            }
-            .map_err(|_| invalid("morphology options require integers 0..65535"))?;
             let index = names
                 .iter()
                 .position(|name| *name == key.trim())
                 .ok_or_else(|| invalid("unknown morphology option"))?;
+            let maximum = if index == 0 { 255.0 } else { 65535.0 };
+            let number = if let Some(hex) = value.strip_prefix("0x") {
+                u16::from_str_radix(hex, 16).map(f64::from)
+                    .map_err(|_| invalid("invalid morphology hexadecimal literal"))?
+            } else {
+                morphology_expression::Expression::parse(value)
+                    .and_then(|expression| expression.evaluate(&[("default", maximum), ("min", 0.0), ("max", maximum)]))
+                    .map_err(|_| invalid("morphology requires a constant numeric expression"))?
+            };
+            if !number.is_finite() || !(0.0..=maximum).contains(&number) {
+                return Err(invalid("morphology option outside supported range"));
+            }
+            let number = number.round_ties_even() as u16;
             if index == 0 {
                 result.coordinates = u8::try_from(number)
                     .map_err(|_| invalid("morphology coordinates must be 0..255"))?;
