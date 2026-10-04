@@ -22,6 +22,7 @@ name = "fvid-cuda"
 version = "0.1.0"
 dependencies = [
  "cudarc",
+ "libloading",
 ]
 
 [[package]]

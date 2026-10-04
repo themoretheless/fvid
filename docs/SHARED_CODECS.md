@@ -97,3 +97,10 @@ Root `media` enables the owned media backend and HTTP input without enabling `le
 ## Direct CUDA codec device ownership
 
 `fvid-cuda::CodecDevice` now obtains the existing native CUDA primary-context pool and owns a separate stream for direct codec integrations. It binds the context before exposing borrowed handles and supports explicit stream synchronization. It creates no AVHWDeviceContext and requires no libav headers. Host refusal/ordinal tests pass and the Linux implementation cross-checks successfully. The NVIDIA device test is explicit and ignored without hardware; no live NVDEC/NVENC claim follows from these checks. The legacy hardware filter still needs direct codec session implementations and wiring before CUDA feature dependencies can be removed.
+
+
+## NVENC driver preflight
+
+`fvid-cuda::NvencApi` directly loads the fixed NVIDIA driver library name on Linux/Windows, retains its lifetime, and queries `NvEncodeAPIGetMaxSupportedVersion` with the SDK calling convention. Driver errors, zero versions and incompatible requested versions are explicit refusals. Tests cover those checks without requiring the driver; Linux/Windows cross-checks compile the actual loader ABI. This is not an encoder session: function-table creation, CUDA session open, registration, bitstream output and teardown still need implementation and NVIDIA hardware acceptance.
+
+ABI/reference: [NVIDIA NVENC programming guide](https://docs.nvidia.com/video-technologies/video-codec-sdk/13.1/nvenc-video-encoder-api-prog-guide/index.html), and the [official NVIDIA loader example](https://github.com/NVIDIA/video-sdk-samples/blob/master/Samples/NvCodec/NvEncoder/NvEncoder.cpp). No FFmpeg headers or library are used by this preflight.

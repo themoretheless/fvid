@@ -12,6 +12,8 @@ mod device_pool;
 mod host_pinned;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 mod native;
+mod nvenc;
+pub use nvenc::{NvencApi, NvencVersion};
 mod codec_device;
 pub use codec_device::CodecDevice;
 mod nv12;
