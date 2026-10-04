@@ -4068,3 +4068,34 @@ The explicit reference benchmark passes 1452 four-frame pixel comparisons across
 Owned `drawbox` and `drawgrid` now run through both decode/export APIs and native CLI. They support coordinates, width/height aliases, color/alpha/invert, fill/thickness, replace, positional arguments, geometry expressions (`iw`, `ih`, `sar`, `dar`, `hsub`, `vsub`, dependent x/y/w/h/t and fill) and timeline enable. The six-pass geometry evaluation preserves dependent expression semantics. Drawing runs before lagfun; box precedes grid. Source and transformed pixel aspect are supplied by the existing reader/geometry clock context.
 
 1026 explicit four-frame reference comparisons qualify 8-bit RGB/RGBA and YUV/YUVA, subsampling, negative offsets, boundaries, repeated chroma blending, aliases/defaults, opacity/replacement and tiny/odd frames. Two more comparisons qualify non-square pixel aspect; a separate synthetic combined fixture proves compositing order. The canonical standalone RGB/RGBA API also supports 9..16-bit samples, separately tested with full-precision white/alpha endpoints. Planar drawing scales CCIR colors to sample precision; the [reference filter](https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavfilter/vf_drawbox.c) accepts only 8-bit formats. This is not a high-depth legacy-equivalence claim. Detection bounding-box side data (`box_source`) remains a specifically refused unsupported option, with its refusal regression; this is not an acceptance test for detection metadata. Other unfinished production operations still retain the legacy adapter.
+
+### Owned directional debanding
+
+`deband` now uses own sample-plane code through root/library decode, FFV1 export
+and native CLI. It supports four thresholds, signed range/direction, average or
+all-neighbor decisions, equal-resolution component coupling, aliases, positional
+options and source-clock timeline enable. It runs after bitplanenoise and before
+gradfun. Spatial maps are cached by dimensions and reused on rewind; reads always
+come from the unchanged source frame. Wide coordinate arithmetic safely clamps
+full signed-range endpoints, including `i32::MIN`.
+
+The explicit `ffmpeg_deband_reference` benchmark qualified 1064 exact four-frame
+comparisons on macOS arm64, across supported 8/9/10/12/14/16-bit gray, YUV/YUVA,
+GBR/GBRA and packed RGB/RGBA layouts, tiny/odd dimensions, signed neighborhoods,
+thresholds, coupling and timeline options. Coordinate sampling uses explicit fused
+multiply-add to preserve the qualified reference rounding. Saved synthetic
+expectations exercise default, strong, all-neighbor and coupled 8/16-bit behavior.
+Ordinary tests use these files without FFmpeg or network access.
+
+Coupled subsampled input still needs format negotiation to full-resolution planes.
+The native kernel explicitly refuses it before modifying pixels; production routes
+retain the existing adapter for this combination. This refusal is not acceptance
+of coupled subsampled playback. The fixed minimum signed range is independently
+checked against clamped source endpoints, rather than claiming equivalence with
+legacy signed-overflow behavior. Remaining production workflows/features still
+include `legacy-ffmpeg`; this step does not establish full FFmpeg independence.
+
+Codec routing acceptance uses the root API for AVC/HEVC/VP9/AV1. Standalone
+`fvid-media` dispatch currently accepts Y4M/FFV1; other native codec dispatch there
+remains an explicit refusal, not a qualified acceptance. Both decode APIs accept
+coupled FFV1 sources produced by the owned export.

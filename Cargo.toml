@@ -276,3 +276,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_drawing_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_deband_reference"
+harness = false

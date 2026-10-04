@@ -567,6 +567,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
     if transform.smartblur.as_deref().is_some_and(|a| fvid_media::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
     if transform.sab.as_deref().is_some_and(|a| fvid_media::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a| fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
+    if transform.deband.as_deref().is_some_and(|a| fvid_media::owned_deband::Deband::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a| fvid_media::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a| fvid_media::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
     if transform.drawbox.as_deref().is_some_and(|a| fvid_media::owned_draw::Draw::box_filter(a).is_err()) {return false;}
@@ -615,6 +616,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         smartblur: _,
         sab: _,
         bitplanenoise: _,
+        deband: _,
         gradfun: _,
         lenscorrection: _,
         removegrain: _,
@@ -634,7 +636,6 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         drawgrid: _,
         lagfun: _,
         amplify: None,
-        deband: None,
         pixelize: _,
         vibrance: _,
         dilation: _,
@@ -848,4 +849,15 @@ pub(crate) fn matroska_audio_index<R:std::io::Read+std::io::Seek>(reader:&crate:
     let index=audio_index(reader.tracks.iter().map(|t|t.kind==2),selected)?;
     if !matches!(reader.tracks[index].codec.as_str(),"A_AAC"|"A_ALAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE") {return Err(invalid("selected Matroska audio stream is not supported by the owned export"));}
     Ok(index)
+}
+
+/// Keep legacy chroma negotiation until the owned format conversion graph is qualified.
+pub fn supports_deband_source(source:&Path,args:Option<&str>)->Result<bool>{
+ if !fvid_media::owned_deband::Deband::needs_equal_planes(args){return Ok(true);}
+ let Ok(file)=File::open(source) else{return Ok(false);};
+ let Ok(mut reader)=NativeReader::software(BufReader::new(file),usize::MAX) else{return Ok(false);};
+ let Ok(Some(raw))=reader.read_frame_raw() else{return Ok(false);};
+ let [w,h]=reader.dimensions();
+ let frame=crate::native_geometry::VideoGeometry::default().apply(&raw,w,h)?;
+ Ok(frame.subsampling.is_none()||frame.subsampling==Some([1,1]))
 }

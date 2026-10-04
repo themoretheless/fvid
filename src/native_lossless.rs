@@ -377,6 +377,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.smartblur.as_deref().is_some_and(|a| fvid_media::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
     if transform.sab.as_deref().is_some_and(|a| fvid_media::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a| fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
+    if transform.deband.as_deref().is_some_and(|a| fvid_media::owned_deband::Deband::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a| fvid_media::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a| fvid_media::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
     if transform.drawbox.as_deref().is_some_and(|a| fvid_media::owned_draw::Draw::box_filter(a).is_err()) {return false;}
@@ -428,6 +429,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             smartblur: _,
             sab: _,
             bitplanenoise: _,
+            deband: _,
             gradfun: _,
             lenscorrection: _,
             removegrain: _,
@@ -447,7 +449,6 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             drawgrid: _,
             lagfun: _,
             amplify: None,
-            deband: None,
             pixelize: _,
             vibrance: _,
             dilation: _,
@@ -555,6 +556,7 @@ pub fn configuration(
         smartblur: transform.smartblur.clone(),
         sab: transform.sab.clone(),
         bitplanenoise: transform.bitplanenoise.clone(),
+        deband: transform.deband.clone(),
         gradfun: transform.gradfun.clone(),
         lenscorrection: transform.lenscorrection.clone(),
         drawbox: transform.drawbox.clone(),

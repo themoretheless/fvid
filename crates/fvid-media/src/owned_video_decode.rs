@@ -198,6 +198,8 @@ pub(crate) fn decode_ffv1(
             }
             Err(error) => return Err(error),
         };
+        if crate::owned_deband::Deband::needs_equal_planes(transform.deband.as_deref())
+            && (decoder.monochrome()==Some(true) || decoded.frame.subsampling!=Some([1,1])) {return Ok(None);}
         let base = if decoder.monochrome() == Some(true) {
             "gray"
         } else {

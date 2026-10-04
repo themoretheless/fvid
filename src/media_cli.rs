@@ -6,6 +6,21 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("play") && fvid::player::accepts_media_play(&args[1..]) {
         return fvid::player::run_media(args[1..].to_vec());
     }
+    // Preserve the adapter's full-resolution negotiation for coupled subsampled input.
+    #[cfg(feature = "media")]
+    {
+        let command = usize::from(args.first().map(String::as_str) == Some("plan"));
+        if matches!(args.get(command).map(String::as_str), Some("decode" | "transcode" | "transcode-lossless")) {
+            if let (Some(source), Some(value)) = (
+                args.get(command + 1),
+                args.windows(2).find(|pair| pair[0] == "--deband").map(|pair| pair[1].as_str()),
+            ) {
+                if !fvid::native_media::supports_deband_source(std::path::Path::new(source), Some(value))? {
+                    return run_native(args);
+                }
+            }
+        }
+    }
     if owned_subtitle_burn_command(args)? { return Ok(()); }
     if owned_xfade_command(args)? { return Ok(()); }
     if owned_lossless_command(args)? { return Ok(()); }
@@ -1143,6 +1158,13 @@ fn pixel_decode_args(
             let value=args.next().ok_or("missing bitplanenoise options")?;
             if filters.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
             if let Ok(filter)=fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(value) {filters.bitplanenoise=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--deband" {
+            let value=args.next().ok_or("missing deband options")?;
+            if filters.deband.is_some() {return Err("duplicate deband".into());}
+            if let Ok(filter)=fvid_media::owned_deband::Deband::parse(value) {filters.deband=Some(filter);}
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
@@ -4929,6 +4951,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--bitplanenoise" => {
                 if transform.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
                 &mut transform.bitplanenoise
+            },
+            "--deband" => {
+                if transform.deband.is_some() {return Err("duplicate deband".into());}
+                &mut transform.deband
             },
             "--gradfun" => {
                 if transform.gradfun.is_some() {return Err("duplicate gradfun".into());}

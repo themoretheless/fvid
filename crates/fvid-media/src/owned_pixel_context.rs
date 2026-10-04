@@ -4,6 +4,7 @@ pub(crate) struct PixelContext {
     pub boxblur: Option<crate::owned_boxblur::BoxBlurProgram>,
     pub sab: Option<crate::owned_sab::Sab>,
     pub bitplanenoise: Option<crate::owned_bitplanenoise::BitPlaneNoise>,
+    pub deband: Option<crate::owned_deband::Deband>,
     pub gradfun: Option<crate::owned_gradfun::GradFun>,
     pub lenscorrection: Option<crate::owned_lenscorrection::LensCorrection>,
     pub drawbox: Option<crate::owned_draw::Draw>,
@@ -23,6 +24,7 @@ impl PixelContext {
         Ok(Self {
             sab: transform.sab.as_deref().map(crate::owned_sab::Sab::parse).transpose()?,
             bitplanenoise: transform.bitplanenoise.as_deref().map(crate::owned_bitplanenoise::BitPlaneNoise::parse).transpose()?,
+            deband: transform.deband.as_deref().map(crate::owned_deband::Deband::parse).transpose()?,
             gradfun: transform.gradfun.as_deref().map(crate::owned_gradfun::GradFun::parse).transpose()?,
             lenscorrection: transform.lenscorrection.as_deref().map(crate::owned_lenscorrection::LensCorrection::parse).transpose()?,
             drawbox: transform.drawbox.as_deref().map(crate::owned_draw::Draw::box_filter).transpose()?,

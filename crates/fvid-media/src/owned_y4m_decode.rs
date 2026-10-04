@@ -35,6 +35,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.smartblur.as_deref().is_some_and(|a|crate::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
     if transform.sab.as_deref().is_some_and(|a|crate::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a|crate::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
+    if transform.deband.as_deref().is_some_and(|a|crate::owned_deband::Deband::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a|crate::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a|crate::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
     if transform.drawbox.as_deref().is_some_and(|a|crate::owned_draw::Draw::box_filter(a).is_err()) {return false;}
@@ -147,6 +148,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 smartblur: transform.smartblur.clone(),
                 sab: transform.sab.clone(),
                 bitplanenoise: transform.bitplanenoise.clone(),
+                deband: transform.deband.clone(),
                 gradfun: transform.gradfun.clone(),
                 lenscorrection: transform.lenscorrection.clone(),
                 drawbox: transform.drawbox.clone(),
@@ -184,6 +186,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
     supported_request(transform)
+        && (!crate::owned_deband::Deband::needs_equal_planes(transform.deband.as_deref()) || header_format(source)==Some(PixelFormat::Yuv444))
         && overlay_supported(source, transform)
         && supports(source)
         && framestep_clock_supported(source, transform)
@@ -551,6 +554,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.smartblur.is_some()
         || transform.sab.is_some()
         || transform.bitplanenoise.is_some()
+        || transform.deband.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
         || transform.drawbox.is_some()
@@ -697,6 +701,10 @@ pub(crate) fn apply_pixel_filters_clock(
             if let Some(args) = transform.bitplanenoise.as_deref() {
                 if let Some(filter)=history.and_then(|h|h.bitplanenoise.as_ref()) {let _=filter.apply(&mut frame,header.depth(),n,t)?;}
                 else {let _=crate::owned_bitplanenoise::BitPlaneNoise::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
+            }
+            if let Some(args) = transform.deband.as_deref() {
+                if let Some(filter)=history.and_then(|h|h.deband.as_ref()){filter.apply(&mut frame,header.depth(),n,t)?;}
+                else{crate::owned_deband::Deband::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.gradfun.as_deref() {
                 if let Some(filter)=history.and_then(|h|h.gradfun.as_ref()) {filter.apply(&mut frame,header.depth(),n,t)?;}
@@ -1084,6 +1092,7 @@ fn decode_reader_frames(
         || transform.smartblur.is_some()
         || transform.sab.is_some()
         || transform.bitplanenoise.is_some()
+        || transform.deband.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
         || transform.drawbox.is_some()

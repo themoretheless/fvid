@@ -56,7 +56,8 @@ pub fn decode_video_interval(
 /// Geometry-only decoding uses owned codecs and sample planes. Remaining filter
 /// operations retain their existing adapter until their native migration.
 pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTransform) -> Result<DecodeStats> {
-    if !crate::native_media::supports_video_request(&transform)
+    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())?
+        || !crate::native_media::supports_video_request(&transform)
         || ((transform.sab.is_some() || transform.smartblur.is_some() || transform.bilateral.is_some() || transform.gblur.is_some() || transform.pixelize.is_some() || transform.chromashift.is_some() || transform.avgblur.is_some() || transform.boxblur.is_some()) && !crate::native_media::supports_plane_filter_source(source).map_err(|e|e.to_string())?) {
         return fvid_media::decode_video_transformed(source, transform);
     }
@@ -393,6 +394,7 @@ pub fn crop_lossless(source: &std::path::Path, destination: &std::path::Path,
 
 /// Owned spatial FFV1 export for Y4M and MP4 video, retaining all supported AAC tracks.
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
+    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())? {return fvid_media::transcode_lossless(source,destination,transform,options);}
     if crate::native_lossless::supports_framestep(&transform)
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
@@ -420,6 +422,7 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
 pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
     transform: LosslessTransform, options: &CopyOptions, settings: &EncoderSettings) -> Result<LosslessStats> {
     settings.validate()?;
+    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())? {return fvid_media::transcode(source,destination,transform,options,settings);}
     if fvid_media::owned_lossless::supports_encoder(settings)
         && (crate::native_lossless::supports(&transform) || crate::native_lossless::supports_overlay(&transform) || crate::native_lossless::supports_framestep(&transform))
         && validate_native_copy_options(options,false).is_ok()
@@ -432,6 +435,7 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
 /// Plan eligible FFV1 exports without opening the legacy demuxer.
 pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTransform,
     options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
+    if !crate::native_media::supports_deband_source(source,transform.deband.as_deref()).map_err(|e|e.to_string())? {return fvid_media::plan_transcode_lossless(source,transform,options,encoder);}
     if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports_framestep(transform)
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {

@@ -744,3 +744,17 @@ SHA256:
 - `drawgrid-aspect.expected.raw`: `8dcb088e77eb99226a4578e6cec09fa46cef5801f934f54e8ff537b72c475d41`
 - `drawgrid.expected.raw`: `a97bce4bcd522a6e9d184954bbb45a563c93ceadd0730ecce570ef6a137aa325`
 - `drawing-combined.expected.raw`: `b2b40d977001841e91f2aff42d6c218dc57f4353d500280b800a3dcb30b4add3`
+
+### Directional debanding
+
+`generate-deband.py` creates four 25 fps coordinate/component ramps, including odd 4:2:0, full-resolution 8/16-bit and tiny geometry, using Python only. No private media or parameter sets are used. `ffmpeg_deband_reference` separately qualified 1064 exact four-frame comparisons and saved default, strong, no-blur and coupled outputs after comparison with the owned kernel. Reference behavior: https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavfilter/vf_deband.c . Ordinary tests never run this benchmark or a fixture generator. Rewind, source clock before frame selection and owned FFV1 round trips are covered. Coupled subsampled negotiation has an explicit refusal test only; full-resolution coupling has acceptance tests. The minimum signed range uses an independent endpoint model to avoid adopting legacy overflow.
+
+- `deband-coupled.expected.raw`: `380413cd748bc192ebb16c7b07948d4744ae79fcf39343e6f5530d78df6f3231`
+- `deband-coupled.y4m`: `a3bdf71e74d9805564bbd7ca0250d85ee40d4603dcdd81cb180da336d4625e7e`
+- `deband-default.expected.raw`: `bead390f09dac441ba191f1e6a9f2bad6248b13e7781481e2c398eb7b8f1ffa9`
+- `deband-depth.expected.raw`: `d55139ac4c566db7eaab806a4cef9b4a9debe31be4bd05c97ef52fe2536f9301`
+- `deband-depth.y4m`: `306c4c19648860af2ee85d91bb773eb5b652649f6146d248bf47f07a5fefe691`
+- `deband-no-blur.expected.raw`: `9db868fda33a1a5391ff804f6df53c4cef3d91dfe3b35f99576cd5e9bb70941d`
+- `deband-small.y4m`: `e32f837192b6924ee95adc93f1b2a1db5ff59a043f8f63ea6b7867862af74a13`
+- `deband-strong.expected.raw`: `7d5ff3e413dd6676e490f9d5c4d1f3f8e59824e56233814f80db9dcb78aeace2`
+- `deband.y4m`: `1f4ed15d6d43d81eadb89cfa298e5ce0f0307f7290a31cbecb1e4edacfe4644c`
