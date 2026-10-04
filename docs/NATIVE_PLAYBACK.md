@@ -3470,3 +3470,14 @@ parsed LUT across frames. Changing any key rebuilds all three tables before
 publishing them; a failed rebuild leaves the frame untouched. The cache keeps
 one entry (at most three 65,536-element u16 tables), shared by cloned filters.
 No global cache or process-wide retention is introduced.
+
+The owned `owned_colorhold::ColorHold` sample API implements RGB/RGBA colour
+selection at 8 or 16 bits (little-endian high-depth samples), preserving alpha.
+It accepts colour/similarity/blend options, numeric scalar expressions, common
+colour names and RRGGBB hex keys. Invalid options and packed sample lengths
+refuse before mutation. The explicit `ffmpeg_colorhold_reference` benchmark
+matches all 2,048 component samples across hard and blended selections at both
+depths; ordinary tests invoke no external codec. This is the sample algorithm
+only: YUV/RGB conversion, video decode/export/CLI wiring and complete named
+colour syntax are still outstanding, so capability inventory does not yet
+advertise this filter and existing legacy workflows are retained.
