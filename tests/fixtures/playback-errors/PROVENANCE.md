@@ -7,3 +7,14 @@ export acceptance checks `y=minval:u=maxval:v=minval` produces Y=0, U=255, V=0
 and preserves full-range metadata through FFV1 and Y4M export. Treating the
 source as limited would incorrectly produce 16/240/16. No private media data,
 external codec, FFmpeg or network is involved.
+
+### colorhold-blend-reference-8.raw
+
+Synthetic reference planes generated from the committed `colorize-grid-8.y4m`
+by the explicitly invoked benchmark
+`benches/colorhold_yuv_qualification.py --save-references --fvid ...`.
+The reference graph is `format=rgba64le,colorhold=red:0.2:0.5`, returned as
+YUV420p rawvideo. It contains three 3×3 frames (51 bytes), no private media.
+Ordinary tests only read these committed bytes and invoke no external program.
+A passing reproduction records the current conversion difference; the ignored
+acceptance requires exact reference parity and must be enabled with the fix.

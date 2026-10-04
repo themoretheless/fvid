@@ -116,6 +116,25 @@ impl ColorHold {
     }
 }
 fn parse_color(value: &str) -> Result<[u8; 3]> {
+    let (value, opacity) = value
+        .split_once('@')
+        .map_or((value, None), |(rgb, a)| (rgb, Some(a)));
+    // Alpha in the key is syntactically valid but RGB distance ignores it.
+    if let Some(opacity) = opacity {
+        let number = if let Some(hex) = opacity.strip_prefix("0x") {
+            if hex.is_empty() || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
+                return Err("invalid colour opacity".into());
+            }
+            u32::from_str_radix(hex, 16).map_err(|_| "invalid colour opacity")? as f64 / 255.0
+        } else {
+            opacity
+                .parse::<f64>()
+                .map_err(|_| "invalid colour opacity")?
+        };
+        if !number.is_finite() || !(0.0..=1.0).contains(&number) {
+            return Err("invalid colour opacity".into());
+        }
+    }
     let named = match value.to_ascii_lowercase().as_str() {
         "black" => Some([0, 0, 0]),
         "white" => Some([255; 3]),
@@ -125,7 +144,16 @@ fn parse_color(value: &str) -> Result<[u8; 3]> {
         "blue" => Some([0, 0, 255]),
         "yellow" => Some([255, 255, 0]),
         "cyan" => Some([0, 255, 255]),
-        "magenta" => Some([255, 0, 255]),
+        "magenta" | "fuchsia" => Some([255, 0, 255]),
+        "aqua" => Some([0, 255, 255]),
+        "gray" => Some([128; 3]),
+        "silver" => Some([192; 3]),
+        "maroon" => Some([128, 0, 0]),
+        "navy" => Some([0, 0, 128]),
+        "olive" => Some([128, 128, 0]),
+        "purple" => Some([128, 0, 128]),
+        "teal" => Some([0, 128, 128]),
+        "orange" => Some([255, 165, 0]),
         _ => None,
     };
     if let Some(color) = named {
@@ -135,10 +163,13 @@ fn parse_color(value: &str) -> Result<[u8; 3]> {
         .strip_prefix('#')
         .or_else(|| value.strip_prefix("0x"))
         .unwrap_or(value);
-    if hex.len() != 6 || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
-        return Err("colorhold colour requires a supported name or RRGGBB hex".into());
+    if !matches!(hex.len(), 6 | 8) || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Err("colorhold colour requires a supported name or RRGGBB[AA] hex".into());
     }
-    let n = u32::from_str_radix(hex, 16).map_err(|e| e.to_string())?;
+    let mut n = u32::from_str_radix(hex, 16).map_err(|e| e.to_string())?;
+    if hex.len() == 8 {
+        n >>= 8;
+    }
     Ok([(n >> 16) as u8, (n >> 8) as u8, n as u8])
 }
 #[cfg(test)]
@@ -312,5 +343,85 @@ mod yuv_tests {
             .is_err()
         );
         assert_eq!(frame.data, original);
+    }
+}
+
+#[cfg(test)]
+mod key_syntax_tests {
+    use super::*;
+    #[test]
+    fn key_alpha_does_not_change_rgb_distance_or_source_alpha() {
+        let source = [250, 10, 10, 7, 0, 255, 0, 201];
+        let mut expected = source;
+        ColorHold::parse("red:0.2:0.5")
+            .unwrap()
+            .apply_rgb(&mut expected, 8, 4)
+            .unwrap();
+        for key in ["RED@0.5", "#ff000080", "0xff0000ff@0x80", "ff000000@1"] {
+            let mut actual = source;
+            ColorHold::parse(&format!("color={key}:similarity=0.2:blend=0.5"))
+                .unwrap()
+                .apply_rgb(&mut actual, 8, 4)
+                .unwrap();
+            assert_eq!(actual, expected);
+            assert_eq!((actual[3], actual[7]), (7, 201));
+        }
+        for key in [
+            "red@",
+            "red@NaN",
+            "red@inf",
+            "red@1.1",
+            "red@-0.1",
+            "red@0x100",
+            "red@0x",
+            "#fff",
+            "#ff0000zz",
+            "red@0.5@0.5",
+        ] {
+            assert!(ColorHold::parse(&format!("color={key}")).is_err(), "{key}");
+        }
+    }
+}
+
+#[cfg(test)]
+mod conversion_gap_tests {
+    fn samples() -> (Vec<u8>, Vec<u8>) {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        let source = std::fs::read(root.join("colorize-grid-8.y4m")).unwrap();
+        let start = source.iter().position(|v| *v == b'\n').unwrap() + 1;
+        let mut at = start;
+        let mut output = Vec::new();
+        while at < source.len() {
+            assert_eq!(&source[at..at + 6], b"FRAME\n");
+            at += 6;
+            let mut frame = crate::owned_frame::GeometryFrame {
+                width: 3,
+                height: 3,
+                subsampling: Some([2, 2]),
+                data: source[at..at + 17].to_vec(),
+            };
+            at += 17;
+            super::ColorHold::parse("red:0.2:0.5")
+                .unwrap()
+                .apply_yuv(&mut frame, 8, false, crate::owned_yuv_rgb::Matrix::Bt601)
+                .unwrap();
+            output.extend(frame.data);
+        }
+        let expected = std::fs::read(root.join("colorhold-blend-reference-8.raw")).unwrap();
+        assert_eq!(output.len(), 51);
+        assert_eq!(expected.len(), 51);
+        (output, expected)
+    }
+    #[test]
+    fn synthetic_blend_reproduces_conversion_difference() {
+        let (actual, expected) = samples();
+        assert_ne!(actual, expected);
+    }
+    #[test]
+    #[ignore = "acceptance pending RGB conversion/resampling compatibility"]
+    fn synthetic_blend_conversion_matches_reference() {
+        let (actual, expected) = samples();
+        assert_eq!(actual, expected);
     }
 }

@@ -3494,3 +3494,16 @@ a filter error leaves the source frame untouched. Tests reuse the committed
 synthetic 3×3 colorize grids for export and verify range, neutral chroma and
 presentation times. Full swscale conversion parity is not established by the
 RGB-only benchmark.
+
+Colour keys additionally accept RRGGBBAA hex and decimal/hex opacity suffixes
+(`red@0.5`, `#ff000080@0x80`). Opacity is validated but does not affect RGB
+selection or modify frame alpha. The RGB reference benchmark now matches
+3,584 components, including opacity and additional named colours.
+
+Full YUV conversion compatibility remains incomplete. The explicit
+`benches/colorhold_yuv_qualification.py` benchmark on synthetic 3×3 grids finds
+blended-selection maximum deltas of 24/393/6272 at 8/12/16 bits versus
+`format=rgba64le,colorhold` followed by FFmpeg's YUV conversion. These results
+are not equivalence passes. Committed synthetic reference planes drive a
+passing reproduction and an ignored exact-acceptance test; conversion and
+resampling must be corrected before enabling acceptance and claiming parity.

@@ -5031,6 +5031,7 @@ mod scalar_expression_tests {
                     "gamma=2:brightness=0.1",
                 ),
                 ("--hue", "h=90*2:s=1/2", "h=180:s=0.5"),
+                ("--colorhold","color=#ff000080@0.5:similarity=0.2:blend=0.5","red:0.2:0.5"),
                 ("--lutyuv", "y=gammaval(2):u=clip(val):v=gammaval709(2)", "y=pow((clipval-minval)/(maxval-minval),2)*(maxval-minval)+minval:u=clipval:v=if(lt((clipval-minval)/(maxval-minval),0.018),4.5*(clipval-minval)/(maxval-minval),1.099*pow((clipval-minval)/(maxval-minval),0.5)-0.099)*(maxval-minval)+minval"),
             ] {
                 for command in [

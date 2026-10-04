@@ -31,6 +31,9 @@ fn main() {
             "color=red:similarity=0.2",
             "color=0x234567:similarity=0.15:blend=0.5",
             "color=white:similarity=1",
+            "color=#23456780@0.25:similarity=0.15:blend=0.5",
+            "color=RED@0x80:similarity=0.2",
+            "color=orange:similarity=0.2:blend=0.25",
         ] {
             let mut actual = input.clone();
             fvid_media::owned_colorhold::ColorHold::parse(args)
