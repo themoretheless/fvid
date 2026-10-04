@@ -19,6 +19,8 @@ pub struct Decoded {
 }
 pub struct Decoder {
     sequence: Option<Sequence>,
+    initial_sequence: Option<Sequence>,
+    initial_hdr: HdrMetadata,
     references: [Option<Decoded>; 8],
     showable: [bool; 8],
     reference_types: [u8; 8],
@@ -32,6 +34,8 @@ impl Decoder {
     pub fn new(budget: usize) -> Self {
         Self {
             sequence: None,
+            initial_sequence: None,
+            initial_hdr: HdrMetadata::default(),
             references: std::array::from_fn(|_| None),
             showable: [false; 8],
             reference_types: [0; 8],
@@ -42,8 +46,35 @@ impl Decoder {
             failed: false,
         }
     }
+    /// Seed configuration OBUs before decoding access units. Reset retains the
+    /// configuration sequence and HDR metadata, but clears all frame references.
+    pub fn from_configuration(record: &[u8], budget: usize) -> Result<Self> {
+        let mut decoder = Self::new(budget);
+        if !record.is_empty() {
+            if record.len() < 4 {
+                return Err(invalid("truncated AV1 codec configuration record"));
+            }
+            if record[0] != 0x81 {
+                return Err(crate::unsupported(
+                    "unsupported AV1 codec configuration version",
+                ));
+            }
+            if !decoder.decode_packet(&record[4..])?.is_empty() {
+                return Err(invalid("AV1 codec configuration contains coded frames"));
+            }
+            decoder.initial_sequence = decoder.sequence.clone();
+            decoder.initial_hdr = decoder.hdr;
+        }
+        Ok(decoder)
+    }
     pub fn reset(&mut self) {
+        let sequence = self.initial_sequence.clone();
+        let hdr = self.initial_hdr;
         *self = Self::new(self.budget);
+        self.sequence = sequence.clone();
+        self.initial_sequence = sequence;
+        self.hdr = hdr;
+        self.initial_hdr = hdr;
     }
     /// The colour the stream's own sequence header states, once one has been
     /// read. An AV1 picture says what it is coded in where the container says

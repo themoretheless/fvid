@@ -212,9 +212,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             } else if hevc {
                 VideoDecoder::Hevc(HevcDecoder::from_configuration(&private, queue_budget)?)
             } else if av1 {
-                VideoDecoder::Av1(crate::codec::av1_decoder::Decoder::new(
-                    (budget - rgb_budget) / 12 * 10,
-                ))
+                VideoDecoder::Av1(crate::codec::av1_decoder::Decoder::from_configuration(
+                    &private, (budget - rgb_budget) / 12 * 10,
+                )?)
             } else {
                 VideoDecoder::Vp9(Decoder::new((budget - rgb_budget) / 12 * 10))
             },

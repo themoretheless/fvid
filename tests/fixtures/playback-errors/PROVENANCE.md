@@ -773,7 +773,7 @@ SHA256:
 
 ### Shared compressed-video dispatch
 
-`generate-shared-codecs.py` uses Python only and the existing synthetic AV1 ramp. It creates acceptance fixtures with nonempty AV1 CodecPrivate and with the sequence OBU exclusively in CodecPrivate, plus a valid WebM envelope containing a deliberately truncated VP9 packet. No private source media or parameters are used. `native_shared_codecs` verifies actual private-header initialization, cold-decoder failure for the sequence-only configuration, matching root/library frame counts, malformed-packet errors and explicit transform refusal. Ordinary tests use committed fixtures without generators, network or FFmpeg. AV1 private configuration follows the [AOM record layout](https://aomediacodec.github.io/av1-isobmff/) and [Matroska mapping](https://www.matroska.org/technical/codec_specs.html). These tests do not establish universal codec/profile support.
+`generate-shared-codecs.py` uses Python only and the existing synthetic AV1 ramp. It creates acceptance fixtures with nonempty AV1 CodecPrivate and with the sequence OBU exclusively in CodecPrivate, plus a valid WebM envelope containing a deliberately truncated VP9 packet. No private source media or parameters are used. `native_shared_codecs` verifies actual private-header initialization, cold-decoder failure for the sequence-only configuration, matching root/library frame counts, malformed-packet errors and owned WebM transform acceptance. Ordinary tests use committed fixtures without generators, network or FFmpeg. AV1 private configuration follows the [AOM record layout](https://aomediacodec.github.io/av1-isobmff/) and [Matroska mapping](https://www.matroska.org/technical/codec_specs.html). These tests do not establish universal codec/profile support.
 
 - `shared-av1-private.webm`: `c9f64ff547db2402829fabfb2439722d92e269567277170f6e50adfd5d29ff30`
 - `shared-av1-private-sequence.webm`: `9a373397e429500a87b031e533e14e65f9f2a8eb8fe722b40c179ebac72e5963`
@@ -799,3 +799,13 @@ SHA256:
 - `shared-edit-interior-empty.mp4`: `b3d810c657b7555d8323b2f7abe4820e7b70b09d65481ec223e523332f51da2e`
 
 The standalone duplicate-PTS regression reuses the existing synthetic `duplicate-pts.mp4`, `duplicate-pts-run.mp4` and `duplicate-pts-all.mp4` cases. Before the fix, the new test reproduced 12 displayed frames instead of 11 for the first case. Acceptance now requires 11, 8 and 1 respectively, while existing player tests verify pixel selection, EOF duration and seek/rewind. No new private media or parameters were imported.
+
+### Shared WebM streaming regressions
+
+The Python-only shared-codec generator adds three short public synthetic derivatives. `shared-vp9-stride.webm` reuses the committed odd10 clip, reproducing visible versus padded plane geometry. `shared-vp9-hidden-leading.webm` changes only the first motion clip block visibility flag: references still decode, while interval zero starts at the first visible frame. Before the fix the library selected zero frames where the root selected one. `shared-av1-hdr-carry.webm` combines the synthetic ramp/configuration-only sequence with arbitrary static CLL/MDCV metadata. No private media or parameter sets were copied. Ordinary tests consume committed files without generation or external tools.
+
+`native_compressed_pipeline` accepts all-pixel owned FFV1 export, independent negate samples and actual step/reverse/shuffle frame order for VP9 and AV1. Configuration-only AV1 initialization, rewind and seek replace the root's former frame-before-sequence error. HDR acceptance checks exact metadata transport and unchanged samples, not HDR visual quality.
+
+- `shared-vp9-stride.webm`: `be1e74b3f75cc3274f8623a10f51de89f61c3262b5d2a07351bdad4514d03457`
+- `shared-vp9-hidden-leading.webm`: `e53cc0b1c934f0e09c9fc4e82154e70abded0b6204c4f0880a12e90482ff694d`
+- `shared-av1-hdr-carry.webm`: `da1fc747fe86552fcef64a47a14ce41921d09fd0b53b7956fd747d9f3e3401ee`

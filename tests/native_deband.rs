@@ -272,8 +272,8 @@ fn cli_and_native_codec_routes() {
                 deband: Some("1thr=.5:2thr=.5:3thr=.5".into()),
                 ..Default::default()
             };
-            if library && source != "deband.y4m" {
-                // Existing standalone dispatch supports Y4M/FFV1, not these codecs yet.
+            if library && source.ends_with(".mp4") {
+                // Compressed MP4 transform visitors remain unadmitted; WebM now uses the shared pipeline.
                 let error =
                     fvid_media::decode_video_transformed(&fixture(source), transform).unwrap_err();
                 assert!(error.contains("does not yet support"), "{source}: {error}");

@@ -85,3 +85,37 @@ track = atom('AE', uint('D7', 1) + uint('73C5', 1) + uint('83', 1) + atom('86', 
 cluster = atom('1F43B675', uint('E7', 0) + atom('A3', b'\x81\0\0\0'+frame))
 segment = atom('18538067', atom('1549A966', uint('2AD7B1', 1000000)) + atom('1654AE6B', track) + cluster)
 (root / 'shared-av1-private-sequence.webm').write_bytes(header + segment)
+
+# The decoder's padded coded-plane stride differs from the odd visible size.
+(root / 'shared-vp9-stride.webm').write_bytes((root.parent / 'vp9/odd10.webm').read_bytes())
+
+# Hide the first synthetic reference picture in the container, retaining its
+# coded bytes and its reference role. The first presented picture now has a
+# later block timestamp and must still start at presentation time zero.
+hidden = bytearray((root.parent / 'vp9/motion.webm').read_bytes())
+def hide_first_block(begin=0,end=None):
+    for kind,payload,finish in fields(hidden,begin,end):
+        if kind==0xA3:
+            _,position=element_vint(hidden,payload,True)
+            flags=position+2
+            assert hidden[flags]&0x06==0
+            hidden[flags]|=0x08
+            return True
+        if kind in {0x18538067,0x1F43B675}:
+            if hide_first_block(payload,finish):return True
+    return False
+assert hide_first_block()
+(root / 'shared-vp9-hidden-leading.webm').write_bytes(hidden)
+
+# Static HDR records in the synthetic AV1 CodecPrivate. Their arbitrary public
+# numeric values exercise record transport, not HDR image-quality acceptance.
+import struct
+cll_payload=b'\x01'+struct.pack('>HH',1234,567)+b'\x80'
+mdcv_payload=b'\x02'+struct.pack('>8HII',8500,39850,6550,2300,35400,14600,15635,16450,10000000,1)+b'\x80'
+metadata_obus=bytes([0x2a,len(cll_payload)])+cll_payload+bytes([0x2a,len(mdcv_payload)])+mdcv_payload
+hdr_private=record[:4]+sequence+metadata_obus
+hdr_video=atom('E0',uint('B0',width)+uint('BA',height))
+hdr_track=atom('AE',uint('D7',1)+uint('73C5',1)+uint('83',1)+atom('86',b'V_AV1')+atom('63A2',hdr_private)+uint('23E383',40000000)+hdr_video)
+hdr_cluster=atom('1F43B675',uint('E7',0)+atom('A3',b'\x81\0\0\0'+frame))
+hdr_segment=atom('18538067',atom('1549A966',uint('2AD7B1',1000000))+atom('1654AE6B',hdr_track)+hdr_cluster)
+(root/'shared-av1-hdr-carry.webm').write_bytes(header+hdr_segment)

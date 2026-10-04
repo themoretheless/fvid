@@ -15,11 +15,13 @@ pub(crate) fn try_decode(
 ) -> Result<Option<DecodeStats>> {
     let mut request = transform.clone();
     request.input_format = None;
-    if request != DecodeTransform::default()
-        || !transform
-            .input_format
-            .as_deref()
-            .is_none_or(|v| matches!(v, "webm" | "matroska" | "mp4" | "mov"))
+    if request != DecodeTransform::default() {
+        return crate::owned_video_decode::try_webm(source, transform);
+    }
+    if !transform
+        .input_format
+        .as_deref()
+        .is_none_or(|v| matches!(v, "webm" | "matroska" | "mp4" | "mov"))
     {
         return Ok(None);
     }
@@ -69,23 +71,14 @@ pub(crate) fn try_decode(
     };
     // No arbitrary frame-memory ceiling: each decoder validates allocation sizes.
     let mut vp9 = vp9_decoder::Decoder::new(usize::MAX);
-    let mut av1 = av1_decoder::Decoder::new(usize::MAX);
-    if codec == "V_AV1" && !private.is_empty() {
-        if private.len() < 4 {
-            return Err("truncated AV1 codec configuration record".into());
-        }
-        if private[0] != 0x81 {
-            return Ok(None);
-        }
-        let primed = match av1.decode_packet(&private[4..]) {
-            Ok(value) => value,
-            Err(fvid_codecs::Error::Unsupported(_)) => return Ok(None),
-            Err(error) => return Err(error.to_string()),
-        };
-        if !primed.is_empty() {
-            return Err("AV1 codec configuration contains coded frames".into());
-        }
-    }
+    let mut av1 = match av1_decoder::Decoder::from_configuration(
+        if codec == "V_AV1" { &private } else { &[] },
+        usize::MAX,
+    ) {
+        Ok(value) => value,
+        Err(fvid_codecs::Error::Unsupported(_)) => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
 
     for index in 0..reader.packets.len() {
         let metadata = &reader.packets[index];

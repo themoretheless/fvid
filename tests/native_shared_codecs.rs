@@ -40,14 +40,15 @@ fn standalone_and_root_plain_webm_decode_use_owned_kernels() {
     }
 }
 #[test]
-fn standalone_dispatch_does_not_silently_ignore_transforms() {
+fn standalone_dispatch_applies_webm_transforms() {
     let request = fvid::media::DecodeTransform {
         deband: Some("1thr=.5".into()),
         ..Default::default()
     };
-    let error =
-        fvid_media::decode_video_transformed(&fixture("vp9/adaptive.webm"), request).unwrap_err();
-    assert!(error.contains("does not yet support"));
+    let stats =
+        fvid_media::decode_video_transformed(&fixture("vp9/adaptive.webm"), request).unwrap();
+    assert_eq!(stats.backend, "owned WebM compressed video pipeline");
+    assert!(stats.video_frames > 0);
 }
 
 #[test]

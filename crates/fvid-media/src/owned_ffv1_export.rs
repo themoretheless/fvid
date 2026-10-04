@@ -30,12 +30,11 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
         return false;
     }
     if track.kind != 1
-        || track.codec != "V_FFV1"
-        || !track.codec_private.is_empty()
+        || !matches!(track.codec.as_str(),"V_FFV1"|"V_VP9"|"V_AV1")
         || track.crop != [0; 4]
         || track.rotation != 0
         || input.packets.iter().any(|p| {
-            p.invisible
+            (p.invisible && track.codec=="V_FFV1")
                 || p.pts_ns < 0
                 || p.discard_padding_ns != 0
                 || p.duration_ns.unwrap_or(track.default_duration_ns) == 0
@@ -45,7 +44,7 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
     }
     // Qualify all keyframes before selecting this backend, preserving legacy tools.
     // Corruption remains owned and is reported by execution, without publication.
-    !matches!(decode::try_ffv1(source, transform), Ok(None))
+    !matches!(decode::try_webm(source, transform), Ok(None))
 }
 fn aspect(
     track: &crate::owned_webm::Track,
@@ -204,10 +203,9 @@ pub(crate) fn export_processed(
             track_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
     }
-    let origin = input.packets.iter().map(|p| p.pts_ns).min().unwrap_or(0);
     let mut metadata = mkv::FileMetadata {
         tags: input.tags.clone(),
-        chapters: export_chapters(&input.chapters, origin, transform.interval)?,
+        chapters: Vec::new(),
     };
     let mut text_tags = input.metadata.clone();
     for key in &options.metadata_delete {
@@ -249,7 +247,7 @@ pub(crate) fn export_processed(
                         data,
                     };
                     if let Some(callback) = process.as_deref_mut() {
-                        callback(&mut frame, view.depth, view.pts_ns, track.colour.full_range)?;
+                        callback(&mut frame, view.depth, view.pts_ns, view.full_range)?;
                     }
                     crate::owned_ffv1_encoder::encode(&frame, view.depth)?
                 };
@@ -257,10 +255,28 @@ pub(crate) fn export_processed(
                     return Err("encoded FFV1 packet exceeds byte limit".into());
                 }
                 if writer.is_none() {
+                    metadata.chapters=export_chapters(&input.chapters,view.origin_ns,transform.interval)?;
                     let video = mkv::VideoMetadata {
                         pixel_aspect: aspect(track, transform, view.width, view.height)?,
-                        colour: Some(track.colour),
-                        hdr: track.hdr,
+                        colour: Some(if track.codec == "V_FFV1" {
+                            track.colour
+                        } else {
+                            crate::owned_matroska::ColourDescription {
+                                full_range: view.full_range,
+                                matrix: view.matrix,
+                                primaries: if matches!(view.primaries, 0 | 2) {
+                                    track.colour.primaries
+                                } else {
+                                    view.primaries
+                                },
+                                transfer: if matches!(view.transfer, 0 | 2) {
+                                    track.colour.transfer
+                                } else {
+                                    view.transfer
+                                },
+                            }
+                        }),
+                        hdr: if track.codec=="V_FFV1" {track.hdr}else{view.hdr},
                         ..Default::default()
                     };
                     writer = Some(
@@ -280,7 +296,7 @@ pub(crate) fn export_processed(
                     );
                 }
                 let pts = if let Some((from, _)) = transform.interval {
-                    i128::from(view.pts_ns) - i128::from(origin) - i128::from(from) * 1000
+                    i128::from(view.pts_ns) - i128::from(view.origin_ns) - i128::from(from) * 1000
                 } else {
                     i128::from(view.pts_ns)
                 };
@@ -301,7 +317,7 @@ pub(crate) fn export_processed(
                 }
                 Ok(())
             };
-            let result = decode::decode_ffv1(source, transform, Some(&mut visitor), Some(options))
+            let result = decode::decode_webm(source, transform, Some(&mut visitor), Some(options))
                 .map_err(mkv::Error)?;
             drop(visitor);
             let (stats, consumed) = result
