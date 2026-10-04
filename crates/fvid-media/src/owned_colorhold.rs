@@ -241,7 +241,7 @@ mod yuv_tests {
     use super::*;
     use crate::{owned_frame::GeometryFrame, owned_yuv_rgb::Matrix};
     #[test]
-    fn selected_red_is_unchanged_and_odd_chroma_cells_become_neutral() {
+    fn selected_red_is_unchanged_and_odd_chroma_cells_match_reference() {
         let mut red = GeometryFrame {
             width: 1,
             height: 1,
@@ -294,6 +294,11 @@ mod yuv_tests {
                 3
             );
 
+            let reference = if depth > 8 {
+                Some(std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("../../tests/fixtures/playback-errors/colorhold-black-reference-{depth}.raw"))).unwrap().chunks_exact(2).map(|b|u16::from_le_bytes([b[0],b[1]])).collect::<Vec<_>>())
+            } else {
+                None
+            };
             let mut frames = 0;
             crate::owned_video_decode::decode_ffv1(
                 &output,
@@ -309,7 +314,12 @@ mod yuv_tests {
                             .collect()
                     };
                     let center = 1u16 << (depth - 1);
-                    assert_eq!(&values[9..], &[center; 8]);
+                    if let Some(expected) = &reference {
+                        let index = frames as usize * 17;
+                        assert_eq!(&values, &expected[index..index + 17]);
+                    } else {
+                        assert_eq!(&values[9..], &[center; 8]);
+                    }
                     assert_eq!(frame.pts_ns, frames * 500_000_000);
                     frames += 1;
                     Ok(())
@@ -436,5 +446,48 @@ mod conversion_gap_tests {
     fn synthetic_blend_conversion_matches_reference() {
         let (actual, expected) = samples();
         assert_eq!(actual, expected);
+    }
+}
+
+#[cfg(test)]
+mod high_depth_conversion_acceptance_tests {
+    #[test]
+    fn full_synthetic_filter_matches_high_depth_reference_frames() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        for depth in [12, 16] {
+            let source = std::fs::read(root.join(format!("colorize-grid-{depth}.y4m"))).unwrap();
+            let start = source.iter().position(|v| *v == b'\n').unwrap() + 1;
+            for (kind, options) in [("black", "black:0.00001"), ("blend", "red:0.2:0.5")] {
+                let mut at = start;
+                let mut output = Vec::new();
+                while at < source.len() {
+                    assert_eq!(&source[at..at + 6], b"FRAME\n");
+                    at += 6;
+                    let mut frame = crate::owned_frame::GeometryFrame {
+                        width: 3,
+                        height: 3,
+                        subsampling: Some([2, 2]),
+                        data: source[at..at + 34].to_vec(),
+                    };
+                    at += 34;
+                    super::ColorHold::parse(options)
+                        .unwrap()
+                        .apply_yuv(
+                            &mut frame,
+                            depth,
+                            false,
+                            crate::owned_yuv_rgb::Matrix::Bt601,
+                        )
+                        .unwrap();
+                    output.extend(frame.data);
+                }
+                let expected =
+                    std::fs::read(root.join(format!("colorhold-{kind}-reference-{depth}.raw")))
+                        .unwrap();
+                assert_eq!(expected.len(), 102);
+                assert_eq!(output, expected, "depth={depth} options={options}");
+            }
+        }
     }
 }

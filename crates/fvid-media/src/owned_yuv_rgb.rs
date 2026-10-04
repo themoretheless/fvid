@@ -106,6 +106,19 @@ pub fn filter_rgb16_sampled(
         quantize(2.0 * kb * (1.0 - kb) * 255.0 / (224.0 * kg)),
         quantize(2.0 * kr * (1.0 - kr) * 255.0 / (224.0 * kg)),
     ];
+    let compat =
+        !full && matches!(sampling, ChromaSampling::Point) && matches!(matrix, Matrix::Bt601);
+    let reverse_rows: [[f64; 3]; 3] = [
+        [0.299, 0.587, 0.114],
+        [-0.169, -0.331, 0.5],
+        [0.5, -0.419, -0.081],
+    ];
+    let reverse_coefficients = std::array::from_fn::<_, 3, _>(|i| {
+        reverse_rows[i].map(|coefficient| {
+            (coefficient * if i == 0 { 219.0 / 255.0 } else { 224.0 / 255.0 } * 32768.0).round()
+                as i64
+        })
+    });
     let mut output = Vec::new();
     output
         .try_reserve_exact(frame.data.len())
@@ -176,13 +189,37 @@ pub fn filter_rgb16_sampled(
                     let g = channel(1);
                     let b = channel(2);
                     let luma = kr * r + kg * g + kb * b;
+                    let (output_y, uv) = if compat {
+                        let raw = [r, g, b].map(|channel| (channel * rgb_white).round() as i64);
+                        let values = reverse_coefficients.map(|coefficients| {
+                            coefficients
+                                .into_iter()
+                                .zip(raw)
+                                .map(|(a, b)| a * b)
+                                .sum::<i64>()
+                        });
+                        let luma16 = (values[0] + (4096i64 << 15) + (1 << 14)) >> 15;
+                        let u16 = (values[1] + (32768i64 << 15) + (1 << 14)) >> 15;
+                        let v16 = (values[2] + (32768i64 << 15) + (1 << 14)) >> 15;
+                        (
+                            luma16 as f64 * scale / 256.0,
+                            (
+                                (u16 as f64 * scale / 256.0 - center) / crange,
+                                (v16 as f64 * scale / 256.0 - center) / crange,
+                            ),
+                        )
+                    } else {
+                        (
+                            black + luma * yrange,
+                            (
+                                (b - luma) / (2.0 * (1.0 - kb)),
+                                (r - luma) / (2.0 * (1.0 - kr)),
+                            ),
+                        )
+                    };
                     if rgb[at..at + 6] != before[at..at + 6] {
-                        write(&mut output, row * frame.width + col, black + luma * yrange);
+                        write(&mut output, row * frame.width + col, output_y);
                     }
-                    let uv = (
-                        (b - luma) / (2.0 * (1.0 - kb)),
-                        (r - luma) / (2.0 * (1.0 - kr)),
-                    );
                     if index == 0 {
                         point = uv;
                     }

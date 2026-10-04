@@ -5245,6 +5245,8 @@ mod colorhold_cli_tests {
                 usize::MAX,
             )
             .unwrap();
+            let reference=if depth>8 {Some(std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorhold-black-reference-{depth}.raw"))).unwrap().chunks_exact(2).map(|b|u16::from_le_bytes([b[0],b[1]])).collect::<Vec<_>>())} else {None};
+            let mut index=0;
             while let Some(frame) = reader.read_frame_raw().unwrap() {
                 let pixels = fvid::native_geometry::VideoGeometry::default()
                     .apply(&frame, 3, 3)
@@ -5259,9 +5261,11 @@ mod colorhold_cli_tests {
                         .collect()
                 };
 
-                assert_eq!(&samples[9..13], &[1u16 << (depth - 1); 4]);
-                assert_eq!(&samples[13..], &[1u16 << (depth - 1); 4]);
+                if let Some(expected)=&reference {assert_eq!(&samples,&expected[index*17..index*17+17]);}
+                else {assert_eq!(&samples[9..],&[128;8]);}
+                index+=1;
             }
+            assert_eq!(index,3);
         }
         std::fs::remove_dir_all(directory).unwrap();
     }

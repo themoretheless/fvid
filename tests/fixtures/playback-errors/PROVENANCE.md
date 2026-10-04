@@ -32,3 +32,14 @@ with alpha stripped. Generation is explicitly benchmark-only:
 No private input is used. Ordinary forward-conversion acceptance reads the
 committed files and matches all 81 component samples without FFmpeg/network.
 The full colorhold YUV acceptance remains ignored pending reverse conversion.
+
+### colorhold-{black,blend}-reference-{8,12,16}.raw
+
+All reference files come from the three-frame synthetic colorize grids via
+`benches/colorhold_yuv_qualification.py --save-references`. `black` uses
+`black:0.00001`; `blend` uses `red:0.2:0.5`. The benchmark reference graph
+first converts to RGBA64LE, applies colorhold and exports the original planar
+precision. Enabled 12/16-bit acceptance matches all 204 component samples.
+Eight-bit references retain the unresolved one-level rounding difference;
+8-bit blend exact acceptance remains ignored. Generation is benchmark-only,
+ordinary acceptance is offline and no private media is involved.

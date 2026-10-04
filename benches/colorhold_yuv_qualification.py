@@ -37,8 +37,9 @@ with tempfile.TemporaryDirectory(prefix='fvid-colorhold-yuv-') as directory:
                 print('per-pixel UV',uv)
 
             assert len(own)==len(ref), 'geometry/frame count mismatch'
-            if args.save_references and depth==8 and index==1:
-                (root/'tests/fixtures/playback-errors/colorhold-blend-reference-8.raw').write_bytes(ref)
+            if args.save_references:
+                kind='black' if index==0 else 'blend'
+                (root/f'tests/fixtures/playback-errors/colorhold-{kind}-reference-{depth}.raw').write_bytes(ref)
             size=1 if depth==8 else 2
             values=lambda data:[int.from_bytes(data[i:i+size],'little') for i in range(0,len(data),size)]
             differences=[abs(a-b) for a,b in zip(values(own),values(ref))]
