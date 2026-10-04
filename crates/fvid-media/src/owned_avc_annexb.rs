@@ -10,7 +10,7 @@ pub struct Packet {
     pub sample: Vec<u8>,
     pub sync: bool,
 }
-fn start(data: &[u8], from: usize) -> Option<(usize, usize)> {
+pub(crate) fn start(data: &[u8], from: usize) -> Option<(usize, usize)> {
     for index in from..data.len().saturating_sub(2) {
         if data[index..].starts_with(&[0, 0, 0, 1]) {
             return Some((index, 4));

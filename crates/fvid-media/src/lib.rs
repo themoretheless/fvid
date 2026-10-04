@@ -10,6 +10,7 @@ pub mod owned_hw_filter;
 #[cfg(all(feature = "native-cuda", not(feature = "legacy-ffmpeg")))]
 pub use owned_hw_filter::hw_filter;
 pub mod owned_avc_annexb;
+pub mod owned_hevc_annexb;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_avc;
 #[cfg(feature = "native-cuda")]
