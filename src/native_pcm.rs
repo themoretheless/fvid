@@ -338,6 +338,7 @@ pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
     output: &mut W,
     interval: Option<(std::time::Duration, std::time::Duration)>,
     control: &mut crate::native_media::DecodeProgress<'_>,
+    max_packet_bytes: Option<usize>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
     info.validate_decode()?;
     let range = info.decode_interval(interval)?;
@@ -346,11 +347,13 @@ pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
         info.data_offset + first * u64::from(info.block),
     ))?;
     let mut buffer = [0u8; 65536];
-    let capacity = buffer.len() / usize::from(info.block) * usize::from(info.block);
+    let capacity = buffer.len().min(max_packet_bytes.unwrap_or(usize::MAX))
+        / usize::from(info.block) * usize::from(info.block);
+    if capacity == 0 { return Err(invalid("packet byte limit is smaller than one PCM sample frame")); }
     let mut remaining = (last - first) * u64::from(info.block);
     let sample_bytes = usize::from(info.bits_per_sample / 8);
     let mut blocks = 0;
-    while remaining != 0 {
+    while remaining != 0 && !control.packet_limit_reached() {
         control.check()?;
         let n = remaining.min(capacity as u64) as usize;
         input.read_exact(&mut buffer[..n])?;
@@ -387,7 +390,7 @@ pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
         control.packet(n)?;
     }
     Ok(crate::native_media::AudioDecodeStats {
-        sample_frames: last - first,
+        sample_frames: last - first - remaining / u64::from(info.block),
         decoded_frames: blocks,
         sample_rate: info.sample_rate,
         channels: info.channels,

@@ -95,7 +95,7 @@ pub fn decode_audio_transformed(
     if !crate::native_media::is_owned_audio_trim_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::decode_audio_transformed(source, destination, transform, options);
     }
-    validate_native_copy_options(options, true)?;
+    validate_owned_audio_options(options)?;
     let interval = transform.interval.map(|(from, to)| {
         if from < 0 || to <= from {
             return Err("decode-audio interval requires 0 <= from < to".to_owned());
@@ -107,9 +107,9 @@ pub fn decode_audio_transformed(
         .map_err(|_| "invalid channel count".to_owned())).transpose()?;
     let sample_rate = transform.sample_rate.map(|n| u32::try_from(n)
         .map_err(|_| "invalid sample rate".to_owned())).transpose()?;
-    let stats = crate::native_export::export_audio_pcm_selected(
+    let stats = crate::native_export::export_audio_pcm_transformed_with_controls(
         source, destination, interval, transform.volume.unwrap_or(1.0),
-        channels, sample_rate, options.streams.first().copied(), options.cancel.as_ref(), options.progress.as_ref(),
+        channels, sample_rate, options,
     ).map_err(|e| e.to_string())?;
     Ok(AudioDecodeStats {
         sample_frames: stats.sample_frames,
@@ -120,6 +120,17 @@ pub fn decode_audio_transformed(
         planar_interleave_bytes: 0,
         decode_errors: 0,
     })
+}
+
+fn validate_owned_audio_options(options: &CopyOptions) -> Result<()> {
+    if options.streams.len() > 1 || options.max_controlled_bytes.is_some()
+        || !options.metadata_set.is_empty() || !options.metadata_delete.is_empty()
+        || !options.stream_metadata_set.is_empty() || !options.stream_metadata_delete.is_empty()
+    {
+        return Err("native audio does not yet support requested allocation budget or metadata/stream mutations".into());
+    }
+    if options.max_packet_bytes == 0 { return Err("packet byte limit must be positive".into()); }
+    fvid_media::owned_budget::check_rss_budget(options)
 }
 
 fn validate_native_copy_options(options: &CopyOptions, audio_selection: bool) -> Result<()> {
@@ -155,8 +166,15 @@ pub fn plan_decode_audio(
     if !crate::native_media::is_owned_audio_trim_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::plan_decode_audio(source, transform, options);
     }
-    validate_native_copy_options(options, true)?;
-    crate::native_plan::decode_audio_selected(source, transform, options.streams.first().copied())
+    validate_owned_audio_options(options)?;
+    let mut plan = crate::native_plan::decode_audio_selected(source, transform, options.streams.first().copied())?;
+    if options.max_packet_bytes != CopyOptions::default().max_packet_bytes
+        || options.max_packets.is_some() || options.max_rss_bytes.is_some()
+    {
+        plan.notes.push(format!("encoded packet limit: {} bytes; packet work limit: {:?}; RSS limit: {:?}",
+            options.max_packet_bytes, options.max_packets, options.max_rss_bytes));
+    }
+    Ok(plan)
 }
 
 /// Native ADTS-to-MP4/Matroska muxing and MP4 fast-start relocation. Other container

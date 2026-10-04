@@ -46,6 +46,14 @@ Acceptance-тесты используют четыре synthetic fixtures (8/10
 `scripts/benchmark_shuffleplanes_reference.py` сравнивает числовые и expression
 mapping с эталонными пикселями через FFmpeg; обычные тесты его не запускают.
 
+Публичный audio export применяет собственные `max_packet_bytes`, `max_packets`
+и `max_rss_bytes`, сохраняя интервал, gain, rematrix, resampling и атомарную
+публикацию. В WAVE размер блока ограничивается целым количеством sample frames;
+лимит работы останавливает декодирование на границе блока и возвращает фактически
+записанное число сэмплов. При заданных лимитах план показывает их значения.
+Общий controlled-allocation budget и metadata mutations этого корневого пути
+пока остаются отдельными ограничениями, а не молча игнорируются.
+
 Feature `media` пока включает legacy backend для ещё не перенесённых операций;
 `mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
 из production ещё не завершено.

@@ -475,6 +475,18 @@ pub(crate) fn export_audio_pcm_selected_with_controls(
         Some(options.max_packet_bytes), options.max_packets)
 }
 
+/// Owned transformed export with packet-work, encoded payload and RSS limits.
+pub(crate) fn export_audio_pcm_transformed_with_controls(
+    source: &Path, destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64, channels: Option<u16>, sample_rate: Option<u32>,
+    options: &fvid_media::CopyOptions,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    export_pcm_selected(source, destination, interval, volume, channels, sample_rate,
+        options.streams.first().copied(), options.cancel.as_ref(), options.progress.as_ref(),
+        true, options.max_rss_bytes, Some(options.max_packet_bytes), options.max_packets)
+}
+
 fn export_pcm_selected(
     source: &Path,
     destination: &Path,
@@ -579,7 +591,7 @@ fn export_pcm_selected(
     } else if let Some(reader) = matroska {
         crate::native_media::decode_matroska_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some((reader,info))=wave {
-        crate::native_pcm::decode_reader(reader,info,&mut pcm,interval,&mut control)?
+        crate::native_pcm::decode_reader(reader,info,&mut pcm,interval,&mut control,max_packet_bytes)?
     } else {
         crate::native_media::decode_adts_aac_reader_controlled(adts.ok_or_else(|| invalid("missing ADTS reader"))?, &mut pcm, interval, &mut control)?
     };

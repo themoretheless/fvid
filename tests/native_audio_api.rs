@@ -60,7 +60,7 @@ fn public_transforms_intervals_cancellation_and_options_are_honored() {
     assert!(media::decode_audio(&source, &cancelled, &CopyOptions { cancel: Some(cancel), ..Default::default() }).unwrap_err().contains("cancelled"));
     assert!(!cancelled.exists());
     for options in [CopyOptions { streams: vec![0, 1], ..Default::default() },
-        CopyOptions { max_packets: Some(1), ..Default::default() },
+        CopyOptions { max_controlled_bytes: Some(1), ..Default::default() },
         CopyOptions { metadata_set: vec![("title".into(), "x".into())], ..Default::default() }] {
         assert!(media::decode_audio(&source, &cancelled, &options).unwrap_err().contains("does not yet support"));
         assert!(!cancelled.exists());
@@ -91,7 +91,7 @@ fn native_plan_describes_the_actual_export_pipeline_and_rejects_unsupported_opti
             assert!(media::plan_decode_audio(&source, &bad, &CopyOptions::default()).is_err());
         }
         assert!(media::plan_decode_audio(&source, &transform,
-            &CopyOptions { max_packets: Some(1), ..Default::default() }).is_err());
+            &CopyOptions { max_packets: Some(1), ..Default::default() }).unwrap().notes.iter().any(|note| note.contains("packet work limit: Some(1)")));
     }
     let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args(["media", "plan", "decode-audio"]).arg(fixture("aac-mono-44k.aac"))
@@ -122,4 +122,56 @@ fn explicit_alac_track_selection_uses_owned_plan_and_decoder() {
         assert!(decoded.sample_frames > 0);
         assert_eq!(std::fs::read(actual).unwrap(), std::fs::read(expected).unwrap());
     }
+}
+
+#[test]
+fn public_packet_controls_limit_owned_pcm_and_fail_atomically() {
+    let dir = Directory::new("packet-controls");
+    let source = fixture("aac-mono-44k.aac");
+    let full = dir.0.join("full.f32le");
+    let limited = dir.0.join("limited.f32le");
+    let transform = AudioDecodeTransform { volume: Some(0.5), ..Default::default() };
+    let full_stats = media::decode_audio_transformed(&source, &full, transform, &Default::default()).unwrap();
+    let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let saved = events.clone();
+    let stats = media::decode_audio_transformed(&source, &limited, transform, &CopyOptions {
+        max_packets: Some(1),
+        progress: Some(ProgressHook::new(move |event| saved.lock().unwrap().push(event))),
+        ..Default::default()
+    }).unwrap();
+    assert_eq!(stats.decoded_frames, 1);
+    assert!(stats.sample_frames > 0 && stats.sample_frames < full_stats.sample_frames);
+    let bytes = std::fs::read(&limited).unwrap();
+    assert_eq!(bytes, std::fs::read(full).unwrap()[..bytes.len()]);
+    let events = events.lock().unwrap();
+    assert_eq!(events.iter().filter(|event| event.done).count(), 1);
+    assert_eq!(events.last().unwrap().packets, 1);
+    for options in [
+        CopyOptions { max_packet_bytes: 1, ..Default::default() },
+        CopyOptions { max_rss_bytes: Some(1), ..Default::default() },
+    ] {
+        let output = dir.0.join("rejected.wav");
+        assert!(media::decode_audio_transformed(&source, &output, transform, &options).is_err());
+        assert!(!output.exists());
+    }
+}
+
+#[test]
+fn wave_packet_work_and_payload_limits_are_enforced() {
+    let dir = Directory::new("wave-controls");
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/audio-packet-controls.wav");
+    let output = dir.0.join("limited.f32le");
+    let stats = media::decode_audio(&source, &output, &CopyOptions {
+        max_packet_bytes: 128, max_packets: Some(2), ..Default::default()
+    }).unwrap();
+    assert_eq!(stats.decoded_frames, 2);
+    assert_eq!(stats.sample_frames, 64);
+    let expected: Vec<u8> = (0..64).flat_map(|index| (index as f32 / 1000.0).to_le_bytes()).collect();
+    assert_eq!(std::fs::read(output).unwrap(), expected);
+    let rejected = dir.0.join("rejected.wav");
+    assert!(media::decode_audio(&source, &rejected, &CopyOptions {
+        max_packet_bytes: 1, ..Default::default()
+    }).is_err());
+    assert!(!rejected.exists());
 }

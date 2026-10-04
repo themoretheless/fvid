@@ -107,7 +107,7 @@ pub fn measure_file_controlled(
     };
     let stats = match input {
         Input::Wave(reader, info) => {
-            super::decode_reader(reader, info, &mut sink, None, &mut control)?
+            super::decode_reader(reader, info, &mut sink, None, &mut control, None)?
         }
         Input::Mp4(reader) => native_media::decode_mp4_audio_reader_controlled(
             reader,
