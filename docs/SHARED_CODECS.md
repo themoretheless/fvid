@@ -327,3 +327,26 @@ not yet establish pixel-equivalence of the filtered/reencoded result.
 Production file filtering still needs container/timestamp integration beyond
 this framing bridge; the current native implementation has not replaced every
 legacy CUDA workflow.
+
+
+## Owned MP4 input for direct AVC NVDEC
+
+`owned_nvdec_mp4::AvcMp4Input` opens the owned MP4 reader, selects its single AVC
+video track and parses its active SPS/PPS pair before creating a native decoder.
+It reuses caller packet storage, feeds packets in sample-table decode order and
+returns retained GPU tickets alongside original sample index, PTS, DTS, duration,
+sync flag and media timescale. Failed decoding makes the source terminal rather
+than skipping a packet and continuing with incomplete references.
+
+The input exposes a stable raw-media presentation-order index and preserves
+movie timescale and edit lists separately. It does not silently reinterpret raw
+media PTS as movie time or normalize variable durations to CFR. Repeated ranges,
+empty edits and timeline filtering still need the higher-level presentation loop.
+
+Ordinary tests read every packet of the existing synthetic multislice I/P/B MP4,
+compare payload and timing with the demux index, decode it with FVid software,
+check backwards decode-order PTS and ordered presentation indices. A repeated-edit
+fixture verifies edit preservation. Both tests require no NVIDIA or FFmpeg.
+An ignored NVIDIA test connects this source to the native decoder and maps each
+decoded output; qualification now requires this test too. It has not run here.
+Production file filtering and remaining format coverage are still unfinished.
