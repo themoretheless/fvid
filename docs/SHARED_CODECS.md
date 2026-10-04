@@ -101,6 +101,13 @@ Root `media` enables the owned media backend and HTTP input without enabling `le
 
 ## NVENC driver preflight
 
-`fvid-cuda::NvencApi` directly loads the fixed NVIDIA driver library name on Linux/Windows, retains its lifetime, and queries `NvEncodeAPIGetMaxSupportedVersion` with the SDK calling convention. Driver errors, zero versions and incompatible requested versions are explicit refusals. Tests cover those checks without requiring the driver; Linux/Windows cross-checks compile the actual loader ABI. This is not an encoder session: function-table creation, CUDA session open, registration, bitstream output and teardown still need implementation and NVIDIA hardware acceptance.
+`fvid-cuda::NvencApi` directly loads the fixed NVIDIA driver library name on Linux/Windows, retains its lifetime, and queries `NvEncodeAPIGetMaxSupportedVersion` with the SDK calling convention. Driver errors, zero versions and incompatible requested versions are explicit refusals. Tests cover those checks without requiring the driver; Linux/Windows cross-checks compile the actual loader ABI. This is not an encoder session: the compatibility function-table/session owner is implemented below, while encoder initialization, registration and bitstream output still need implementation and NVIDIA hardware acceptance.
 
 ABI/reference: [NVIDIA NVENC programming guide](https://docs.nvidia.com/video-technologies/video-codec-sdk/13.1/nvenc-video-encoder-api-prog-guide/index.html), and the [official NVIDIA loader example](https://github.com/NVIDIA/video-sdk-samples/blob/master/Samples/NvCodec/NvEncoder/NvEncoder.cpp). No FFmpeg headers or library are used by this preflight.
+
+
+## Direct NVENC CUDA session ownership
+
+`NvencSession` creates the NVIDIA function table, opens a CUDA session and owns encoder/device/library lifetimes. Explicit close exposes driver errors, retains a failed handle for retry and is idempotent after success. Drop attempts closure; if the driver refuses, CUDA/library resources are intentionally retained until process exit rather than unloaded under a live encoder.
+
+The implemented compatibility ABI is SDK 8.1, from NVIDIA's MIT-licensed interface header at commit `aa3544dcea2fe63122e4feb83bf805ea40e58dbe`. It predates AV1 and is not qualification of modern GPU encoding. Function-table/session sizes and offsets were matched against C compilation of that pinned header: table 2552 bytes (destroy/open offsets 224/240), open parameters 1552 bytes (API/reserved-pointer offsets 24/1040). Four host tests pass; Linux/Windows implementation and tests cross-check. The actual session test remains explicitly hardware-only/ignored. Frame encoding, modern SDK tools, NVDEC and the production CUDA pipeline remain unfinished.

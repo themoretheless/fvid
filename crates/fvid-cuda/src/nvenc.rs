@@ -66,6 +66,33 @@ impl NvencApi {
             Err("NVENC requires an NVIDIA driver on Linux or Windows".into())
         }
     }
+    pub(crate) fn session_table(&self) -> Result<crate::nvenc_session::FunctionTable, String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            // SAFETY: Fixed SDK entrypoint with the NVENCAPI ABI; its table
+            // layout and version are verified against the pinned NVIDIA header.
+            let create = unsafe {
+                self._library.get::<unsafe extern "system" fn(
+                    *mut crate::nvenc_session::FunctionTable,
+                ) -> i32>(b"NvEncodeAPICreateInstance\0")
+            }
+            .map_err(|e| format!("NVENC function-table entrypoint is unavailable: {e}"))?;
+            let mut table = crate::nvenc_session::FunctionTable::new();
+            // SAFETY: table is writable, correctly versioned SDK storage and
+            // the driver library stays loaded for the entire call.
+            let status = unsafe { create(&mut table) };
+            if status != 0 {
+                return Err(format!(
+                    "NVENC function-table creation failed with status {status}"
+                ));
+            }
+            Ok(table)
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            Err("NVENC requires an NVIDIA driver on Linux or Windows".into())
+        }
+    }
     pub fn version(&self) -> NvencVersion {
         self.version
     }
