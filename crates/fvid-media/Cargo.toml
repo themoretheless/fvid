@@ -117,3 +117,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_vibrance_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_colorlevels_reference"
+harness = false

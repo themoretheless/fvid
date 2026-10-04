@@ -61,3 +61,17 @@ or codec parameter sets are included.
 
 The existing three-frame YUV `colorize-grid-{8,12,16}.y4m` videos also exercise
 owned vibrance decode/export routing, transformed pixel data and frame geometry.
+
+### colorlevels-reference-{8,16}-{0..11}.raw
+
+These references use the existing three-frame 8×8 `vibrance-grid-{8,16}.rgba`
+synthetic videos. Twelve cases cover RGB levels, alpha levels, per-frame
+automatic extrema, reversed limits and all six preservation modes. Case 3
+specifically reproduces an alpha rounding difference at input 33 in the first
+8-bit frame; fused multiply-add fixes it and exact acceptance is enabled.
+Generation is explicitly benchmark-only:
+`FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_colorlevels_reference`.
+Ordinary acceptance processes each complete frame and reads the committed raw
+references without FFmpeg or network. No private media is used. The existing
+3×3 YUV grids also verify odd-edge frame-wide callback geometry, atomic error
+handling and native decode/export routing.

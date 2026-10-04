@@ -583,7 +583,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         vignette: None,
         curves: None,
         colorbalance: None,
-        colorlevels: None,
+        colorlevels: _,
         colorchannelmixer: None,
         deflicker: None,
         photosensitivity: None,

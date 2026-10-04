@@ -398,3 +398,71 @@ fn ordered_reduce8(sample: i64, x: usize, y: usize, phase: usize) -> i64 {
     }
     (((sample >> 1) + rank * 2) >> 7).clamp(0, 255)
 }
+
+/// Frame-wide RGB processing for filters whose limits depend on all pixels.
+/// RGB pixels follow chroma-cell traversal order, suitable for per-pixel filters
+/// and frame-wide statistics. Both passes use the same traversal.
+pub(crate) fn filter_rgb16_frame(
+    frame: &mut GeometryFrame,
+    depth: u8,
+    full: bool,
+    matrix: Matrix,
+    mut filter: impl FnMut(&mut [u8]) -> Result<()>,
+) -> Result<()> {
+    let length = frame
+        .width
+        .checked_mul(frame.height)
+        .and_then(|v| v.checked_mul(6))
+        .ok_or("RGB frame geometry overflow")?;
+    let mut rgb = Vec::new();
+    filter_rgb16_sampled(frame, depth, full, matrix, ChromaSampling::Point, |cell| {
+        if rgb.capacity() == 0 {
+            rgb.try_reserve_exact(length)
+                .map_err(|_| "RGB frame allocation failed")?;
+        }
+        rgb.extend_from_slice(cell);
+        Ok(())
+    })?;
+    if rgb.len() != length {
+        return Err("RGB frame traversal length mismatch".into());
+    }
+    filter(&mut rgb)?;
+    let mut at = 0;
+    filter_rgb16_sampled(frame, depth, full, matrix, ChromaSampling::Point, |cell| {
+        let end = at + cell.len();
+        cell.copy_from_slice(&rgb[at..end]);
+        at = end;
+        Ok(())
+    })
+}
+
+#[cfg(test)]
+mod whole_frame_tests {
+    #[test]
+    fn whole_frame_callback_sees_all_odd_edge_pixels_once_and_failure_is_atomic() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        let source = std::fs::read(root.join("colorize-grid-8.y4m")).unwrap();
+        let start = source.iter().position(|v| *v == b'\n').unwrap() + 7;
+        let mut frame = crate::owned_frame::GeometryFrame {
+            width: 3,
+            height: 3,
+            subsampling: Some([2, 2]),
+            data: source[start..start + 17].to_vec(),
+        };
+        let before = frame.data.clone();
+        let mut calls = 0;
+        let error = super::filter_rgb16_frame(&mut frame, 8, false, super::Matrix::Bt601, |rgb| {
+            calls += 1;
+            assert_eq!(rgb.len(), 3 * 3 * 6);
+            rgb.fill(0);
+            Err("synthetic filter error".into())
+        })
+        .unwrap_err();
+        assert_eq!(calls, 1);
+        assert_eq!(error, "synthetic filter error");
+        assert_eq!(frame.data, before);
+        super::filter_rgb16_frame(&mut frame, 8, false, super::Matrix::Bt601, |_| Ok(())).unwrap();
+        assert_eq!(frame.data, before);
+    }
+}

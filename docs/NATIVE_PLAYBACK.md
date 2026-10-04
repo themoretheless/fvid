@@ -3558,3 +3558,16 @@ reference generation is isolated in `ffmpeg_vibrance_reference`. The luma
 accumulation explicitly fuses the green term into the rounded red product to
 fix the observed one-level RGB rounding discrepancy. General YUV/matrix parity
 is not implied by the RGB comparisons.
+
+Owned `colorlevels` supports per-channel RGB/alpha input/output black and white
+points, automatic per-frame extrema and all six colour preservation modes.
+Numeric parameters use the owned expression evaluator. Packed RGB/RGBA accepts
+8–16-bit precision and validates the entire buffer before mutation. The automatic
+YUV path collects one complete RGB16 frame so extrema span all chroma cells;
+allocation is fallible and filter errors preserve the input frame. Explicit
+limits keep the cell-wise converter path. Native decode and lossless export
+admit these requests without legacy features. The benchmark matches 18,432 RGBA
+components in 24 three-frame cases at 8/16 bits. Ordinary exact acceptance reads
+committed synthetic references, including the fixed alpha accumulation rounding
+case, without FFmpeg/network. General YUV/matrix parity and float RGB formats
+remain outside this qualification.
