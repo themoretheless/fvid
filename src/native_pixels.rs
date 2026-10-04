@@ -261,7 +261,7 @@ impl PixelFilters {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
-        if let Some(filter)=self.fade { filter.apply(frame,depth,full_range,n).map_err(|e|invalid(&e))?; }
+        if let Some(filter)=self.fade { filter.apply_colour(frame,depth,full_range,matrix_code,n).map_err(|e|invalid(&e))?; }
         Ok(())
     }
 }

@@ -120,7 +120,7 @@ impl ColorHold {
         Ok(())
     }
 }
-fn parse_color(value: &str) -> Result<[u8; 3]> {
+pub(crate) fn parse_color(value: &str) -> Result<[u8; 3]> {
     let (value, opacity) = value
         .split_once('@')
         .map_or((value, None), |(rgb, a)| (rgb, Some(a)));

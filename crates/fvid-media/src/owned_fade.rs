@@ -1,4 +1,4 @@
-//! Frame-count fade to black, implemented over owned packed sample planes.
+//! Frame-count fade over owned packed RGB and planar YUV samples.
 use crate::owned_frame::GeometryFrame;
 type Result<T> = std::result::Result<T, String>;
 #[derive(Clone, Copy, Debug)]
@@ -6,6 +6,7 @@ pub struct Fade {
     out: bool,
     start: u32,
     frames: u32,
+    color: [u8; 3],
 }
 impl Fade {
     pub fn parse(args: &str) -> Result<Self> {
@@ -16,6 +17,7 @@ impl Fade {
             out: false,
             start: 0,
             frames: 25,
+            color: [0; 3],
         };
         let mut position = 0;
         for option in args.split(':').filter(|_| !args.is_empty()) {
@@ -75,12 +77,32 @@ impl Fade {
                     }
                 }
                 "color" | "c" => {
-                    if !matches!(
-                        value,
-                        "black" | "0x000000" | "0x000000ff" | "#000000" | "#000000ff"
-                    ) {
-                        return Err("owned fade currently requires opaque black".into());
+                    // Alpha fades remain separately unsupported; do not silently
+                    // reinterpret a translucent fade color as opaque.
+                    let (rgb, opacity) = value
+                        .split_once('@')
+                        .map_or((value, None), |(c, a)| (c, Some(a)));
+                    if let Some(opacity) = opacity {
+                        let opaque = if let Some(hex) = opacity.strip_prefix("0x") {
+                            u32::from_str_radix(hex, 16).ok() == Some(255)
+                        } else {
+                            opacity.parse::<f64>().ok() == Some(1.0)
+                        };
+                        if !opaque {
+                            return Err("owned fade translucent colors are not implemented".into());
+                        }
                     }
+                    let hex = rgb
+                        .strip_prefix('#')
+                        .or_else(|| rgb.strip_prefix("0x"))
+                        .unwrap_or(rgb);
+                    if hex.len() == 8
+                        && hex.bytes().all(|b| b.is_ascii_hexdigit())
+                        && !hex[6..].eq_ignore_ascii_case("ff")
+                    {
+                        return Err("owned fade translucent colors are not implemented".into());
+                    }
+                    result.color = crate::owned_colorhold::parse_color(value)?;
                 }
                 _ => return Err("unknown fade option".into()),
             }
@@ -97,6 +119,78 @@ impl Fade {
             (elapsed * (65536 / u64::from(self.frames))).min(65535) as i64
         };
         if self.out { 65535 - amount } else { amount }
+    }
+    /// Packed RGB/RGBA, at 8 or 16 bits. Alpha is retained unchanged.
+    pub fn apply_rgb(self, data: &mut [u8], depth: u8, channels: usize, n: u64) -> Result<()> {
+        if !matches!(depth, 8 | 16) {
+            return Err("colored fade RGB requires 8 or 16 bits".into());
+        }
+        self.apply_rgb_scaled(data, depth, channels, n, (1u32 << depth) - 1)
+    }
+    fn apply_rgb_scaled(
+        self,
+        data: &mut [u8],
+        depth: u8,
+        channels: usize,
+        n: u64,
+        white: u32,
+    ) -> Result<()> {
+        if !matches!(channels, 3 | 4) {
+            return Err("fade requires RGB or RGBA".into());
+        }
+        let bytes = if depth == 8 { 1 } else { 2 };
+        if data.len() % (bytes * channels) != 0 {
+            return Err("fade RGB length mismatch".into());
+        }
+        let factor = self.factor(n);
+        if factor == 65535 {
+            return Ok(());
+        }
+        for pixel in data.chunks_exact_mut(bytes * channels) {
+            for channel in 0..3 {
+                let sample = &mut pixel[channel * bytes..(channel + 1) * bytes];
+                let value = if bytes == 1 {
+                    i64::from(sample[0])
+                } else {
+                    i64::from(u16::from_le_bytes([sample[0], sample[1]]))
+                };
+                let target = i64::from(u32::from(self.color[channel]) * white / 255);
+                let output = (target + (((value - target) * factor + 32768) >> 16)) as u16;
+                if bytes == 1 {
+                    sample[0] = output as u8;
+                } else {
+                    sample.copy_from_slice(&output.to_le_bytes());
+                }
+            }
+        }
+        Ok(())
+    }
+    /// Colored YUV fades use the same owned RGB16 working domain as other RGB filters.
+    pub fn apply_colour(
+        self,
+        frame: &mut GeometryFrame,
+        depth: u8,
+        full: bool,
+        matrix_code: u8,
+        n: u64,
+    ) -> Result<()> {
+        if self.color == [0; 3] || frame.subsampling.is_none() {
+            return self.apply(frame, depth, full, n);
+        }
+        let matrix = crate::owned_yuv_rgb::Matrix::from_code(if matrix_code == 0 {
+            6
+        } else {
+            matrix_code
+        })?;
+        let white = if full { 65535 } else { 65280 };
+        crate::owned_yuv_rgb::filter_rgb16_sampled(
+            frame,
+            depth,
+            full,
+            matrix,
+            crate::owned_yuv_rgb::ChromaSampling::Point,
+            |data| self.apply_rgb_scaled(data, 16, 3, n, white),
+        )
     }
     /// Frame index counts inputs before temporal selection. RGB is packed RGB24.
     /// Validate the entire geometry/precision before any mutation.
@@ -143,6 +237,12 @@ impl Fade {
                 .any(|s| u32::from(u16::from_le_bytes([s[0], s[1]])) > maximum)
         {
             return Err("fade sample exceeds precision".into());
+        }
+        if self.color != [0; 3] {
+            if frame.subsampling.is_none() {
+                return self.apply_rgb(&mut frame.data, depth, 3, n);
+            }
+            return self.apply_colour(frame, depth, full_range, 6, n);
         }
         let factor = self.factor(n);
         if factor == 65535 {

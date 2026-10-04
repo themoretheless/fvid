@@ -97,5 +97,74 @@ fn main() {
             cases += 1;
         }
     }
+
+    for (format, channels) in [("rgb24", 3usize), ("rgba", 4usize)] {
+        for color in [
+            "red",
+            "blue",
+            "green",
+            "lime",
+            "white",
+            "orange",
+            "0x123456",
+            "0x123456ff",
+            "red@1",
+        ] {
+            for direction in ["in", "out"] {
+                let args = format!("{direction}:1:3:color={color}");
+                let filter = Fade::parse(&args).unwrap();
+                let mut input = Vec::new();
+                let mut expected = Vec::new();
+                for n in 0..7 {
+                    let mut bytes = (0..15 * channels)
+                        .map(|i| ((i * 173 + n * 31) % 256) as u8)
+                        .collect::<Vec<_>>();
+                    input.extend(&bytes);
+                    filter.apply_rgb(&mut bytes, 8, channels, n as u64).unwrap();
+                    expected.extend(bytes);
+                }
+                let mut child = Command::new(&executable)
+                    .args([
+                        "-v",
+                        "error",
+                        "-f",
+                        "rawvideo",
+                        "-pixel_format",
+                        format,
+                        "-video_size",
+                        "5x3",
+                        "-framerate",
+                        "25",
+                        "-i",
+                        "pipe:0",
+                        "-vf",
+                        &format!("fade={args}"),
+                        "-frames:v",
+                        "7",
+                        "-threads",
+                        "1",
+                        "-f",
+                        "rawvideo",
+                        "-pix_fmt",
+                        format,
+                        "pipe:1",
+                    ])
+                    .stdin(Stdio::piped())
+                    .stdout(Stdio::piped())
+                    .stderr(Stdio::piped())
+                    .spawn()
+                    .unwrap();
+                child.stdin.take().unwrap().write_all(&input).unwrap();
+                let output = child.wait_with_output().unwrap();
+                assert!(
+                    output.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+                assert_eq!(output.stdout, expected, "{format} {args}");
+                cases += 1;
+            }
+        }
+    }
     println!("fade: {cases} exact pixel comparisons passed");
 }

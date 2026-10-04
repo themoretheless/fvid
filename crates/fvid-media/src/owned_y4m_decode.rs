@@ -606,7 +606,7 @@ pub(crate) fn apply_pixel_filters_cached_at(
             if let Some(args) = transform.colorhold.as_deref() {
                 crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
             }
-            if let Some(args)=transform.fade.as_deref() {crate::owned_fade::Fade::parse(args)?.apply(&mut frame,header.depth(),header.full_range()?,n)?;}
+            if let Some(args)=transform.fade.as_deref() {crate::owned_fade::Fade::parse(args)?.apply_colour(&mut frame,header.depth(),header.full_range()?,matrix,n)?;}
             Ok(())
         })();
         *output = frame.data;

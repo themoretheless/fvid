@@ -58,7 +58,7 @@ fn frame_fade_numeric_endpoints_and_precision_validation() {
         "type=other",
         "n=2.5",
         "alpha=1",
-        "color=red",
+        "color=not-a-color",
         "d=1",
     ] {
         assert!(Fade::parse(args).is_err(), "{args}");
@@ -266,5 +266,139 @@ fn chroma_halfway_rounding_has_a_synthetic_video_regression() {
     assert_eq!(
         samples.data,
         [vec![40; 16], vec![128; 4], vec![129; 4]].concat()
+    );
+}
+
+#[test]
+fn colored_rgb_fade_has_exact_endpoints_and_retains_alpha() {
+    use fvid_media::owned_fade::Fade;
+    let filter = Fade::parse("out:0:2:color=blue").unwrap();
+    for (n, expected) in [
+        (0, [255, 0, 0, 17]),
+        (1, [127, 0, 128, 17]),
+        (2, [0, 0, 255, 17]),
+    ] {
+        let mut pixel = [255, 0, 0, 17];
+        filter.apply_rgb(&mut pixel, 8, 4, n).unwrap();
+        assert_eq!(pixel, expected);
+    }
+    let mut pixel = [65535u16, 0, 0, 1234]
+        .into_iter()
+        .flat_map(u16::to_le_bytes)
+        .collect::<Vec<_>>();
+    filter.apply_rgb(&mut pixel, 16, 4, 1).unwrap();
+    let values = pixel
+        .chunks_exact(2)
+        .map(|p| u16::from_le_bytes([p[0], p[1]]))
+        .collect::<Vec<_>>();
+    assert_eq!(values, [32767, 0, 32768, 1234]);
+    for args in [
+        "color=blue@0.5",
+        "color=0x0000ff80",
+        "color=not-a-color",
+        "alpha=1",
+    ] {
+        assert!(Fade::parse(args).is_err());
+    }
+    assert!(Fade::parse("color=Blue@1").is_ok());
+}
+
+#[test]
+fn colored_yuv_fade_exports_known_ten_bit_endpoints() {
+    let source = fixture("playback-errors/fade-colour-10.y4m");
+    let transform = LosslessTransform {
+        fade: Some("out:0:2:color=blue".into()),
+        ..Default::default()
+    };
+    for library in [false, true] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-color-fade-{}-{library}.mkv",
+            std::process::id()
+        ));
+        let stats = if library {
+            fvid_media::transcode_lossless(
+                &source,
+                &output,
+                transform.clone(),
+                &CopyOptions::default(),
+            )
+        } else {
+            fvid::media::transcode_lossless(
+                &source,
+                &output,
+                transform.clone(),
+                &CopyOptions::default(),
+            )
+        }
+        .unwrap();
+        assert_eq!(stats.video_frames, 3);
+        assert_eq!(stats.pixel_format, "yuv444p10le");
+        let mut reader =
+            NativeReader::software(Cursor::new(std::fs::read(&output).unwrap()), usize::MAX)
+                .unwrap();
+        for n in 0..3 {
+            let frame = reader.read_frame_raw().unwrap().unwrap();
+            let data = VideoGeometry::default().apply(&frame, 4, 4).unwrap().data;
+            let values = data
+                .chunks_exact(2)
+                .map(|p| u16::from_le_bytes([p[0], p[1]]))
+                .collect::<Vec<_>>();
+            if n == 0 {
+                assert_eq!(values, [vec![256; 16], vec![512; 32]].concat());
+            }
+            if n == 2 {
+                assert_eq!(
+                    values,
+                    [vec![164; 16], vec![960; 16], vec![439; 16]].concat()
+                );
+            }
+        }
+        assert!(reader.read_frame_raw().unwrap().is_none());
+        std::fs::remove_file(output).unwrap();
+    }
+    for (index, name) in [
+        "playback-errors/ffv1-level-one-source.mp4",
+        "hevc/main10-ipb.mp4",
+        "vp9/adaptive.webm",
+        "av1/ramp.webm",
+        "playback-errors/framestep-opus.mkv",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let source = fixture(name);
+        let output = std::env::temp_dir().join(format!(
+            "fvid-color-fade-codecs-{}-{index}.mkv",
+            std::process::id()
+        ));
+        let stats = fvid::media::transcode_lossless(
+            &source,
+            &output,
+            transform.clone(),
+            &CopyOptions::default(),
+        )
+        .unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert!(stats.video_frames > 0);
+        let mut reader =
+            NativeReader::software(Cursor::new(std::fs::read(&output).unwrap()), usize::MAX)
+                .unwrap();
+        let mut count = 0;
+        while reader.read_frame_raw().unwrap().is_some() {
+            count += 1;
+        }
+        assert_eq!(count, stats.video_frames);
+        std::fs::remove_file(output).unwrap();
+    }
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode"])
+        .arg(&source)
+        .args(["--fade", "out:0:2:color=blue"])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
     );
 }

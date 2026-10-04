@@ -3728,8 +3728,16 @@ functions and enabling other filter types still require further migration.
 Frame-count `fade` теперь выполняется собственным кодом при decode и FFV1-экспорте:
 `in/out`, `start_frame/s`, `nb_frames/n`, RGB24 и YUV 8–16 бит. Счётчик входных
 кадров сохраняется перед framestep. Benchmark `ffmpeg_fade_reference` проверяет
-42 комбинации побайтово; обычные тесты используют синтетические числовые fixtures.
-Режимы по времени, цветной fade и alpha пока не перенесены.
+42 комбинации чёрного fade побайтово; обычные тесты используют синтетические числовые fixtures.
+Режимы по времени и alpha fade пока не перенесены.
 Совместимость округления fade проверена по
 [исходному reference-фильтру](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_fade.c)
 и отдельному benchmark; этот код не подключается к production-сборке.
+
+Цветной frame-count fade теперь использует собственное RGB-ядро и общий
+RGB16-конвертер для YUV, сохраняя исходную битность. Поддерживаются имена цветов
+из общего парсера FVid и RRGGBB[FF] hex; alpha сохраняется. Непрозрачные цвета
+проверены 36 RGB24/RGBA benchmark-парами (всего 78 вместе с чёрным fade).
+10-битный синтетический fixture проверяет известный цвет конечного кадра
+в обоих API. Это не доказательство побайтовой эквивалентности всего legacy
+YUV↔RGB8 графа. Time-based fade, alpha fade и полупрозрачные цвета ещё не перенесены.
