@@ -43,12 +43,17 @@ fn as_time(n: i128) -> Result<u64> {
         .ok_or_else(|| invalid("Matroska timestamp overflow"))
 }
 pub(crate) fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>) -> Result<TrackPlan> {
+    plan_window(track, movie_scale, None, cancel)
+}
+pub(crate) fn plan_window(
+    track: &Track, movie_scale: u32, interval: Option<(i64, i64)>, cancel: Option<&CancelFlag>,
+) -> Result<TrackPlan> {
     let mut packets = Vec::new();
     packets
         .try_reserve_exact(track.samples.len())
         .map_err(|_| invalid("cannot allocate Matroska packet timing"))?;
     if track.codec == *b"mp4a" {
-        let audio = matroska_write::aac_packet_plan(track, movie_scale, cancel)?;
+        let audio = matroska_write::aac_packet_plan_window(track, movie_scale, interval, cancel)?;
         for i in 0..audio.count {
             check(cancel)?;
             let (pts, duration, padding) = audio.packet(i)?;
@@ -70,6 +75,7 @@ pub(crate) fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>)
             packets,
         });
     }
+    if interval.is_some() { return Err(invalid("video interval belongs to the presentation bridge")); }
     let (begin, end) = match track.edits.as_slice() {
         [] => (0i128, None),
         [edit] if edit.media_time >= 0 && movie_scale != 0 => {

@@ -51,3 +51,21 @@ output=without_moov(video)+without_moov(audio)+box(b'moov',box(b'mvhd',mvhd)+box
 mvhd[-4:]=struct.pack('>I',4)
 multiple=without_moov(video)+without_moov(audio)+box(b'moov',box(b'mvhd',mvhd)+box(b'trak',track(atrack,len(video),2))+box(b'trak',track(vtrack,0,1))+box(b'trak',track(atrack,len(video),3)))
 (root/'shared-mp4-av-multiple.mp4').write_bytes(multiple)
+
+# Sample-aligned AAC priming plus a movie-clock endpoint, using only the same
+# public coded packets. Keep the packet prefix required by the overlap decoder.
+mdia=next(body for kind,body,_,_ in boxes(atrack) if kind==b'mdia')
+mdhd=next(body for kind,body,_,_ in boxes(mdia) if kind==b'mdhd')
+at=20 if mdhd[0]==1 else 12
+scale=int.from_bytes(mdhd[at:at+4],'big')
+duration=int.from_bytes(mdhd[at+4:at+4+(8 if mdhd[0]==1 else 4)],'big')
+movie_at=20 if mvhd[0]==1 else 12
+movie_scale=int.from_bytes(mvhd[movie_at:movie_at+4],'big')
+priming=1024
+length=(duration-priming)*movie_scale//scale
+assert length>0
+edit=box(b'edts',box(b'elst',bytes(4)+struct.pack('>IIiHH',1,length,priming,1,0)))
+primed_track=track(atrack,len(video),2)+edit
+mvhd[-4:]=struct.pack('>I',3)
+primed=without_moov(video)+without_moov(audio)+box(b'moov',box(b'mvhd',mvhd)+box(b'trak',track(vtrack,0,1))+box(b'trak',primed_track))
+(root/'shared-mp4-av-priming.mp4').write_bytes(primed)

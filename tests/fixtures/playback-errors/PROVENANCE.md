@@ -837,3 +837,9 @@ The regression accepts owned transformed video decode with audio present and equ
 `shared-mp4-av-multiple.mp4` uses the same public synthetic packet data, with two AAC track IDs referencing that data and an audio/video/audio moov order. The Python generator changes only container structure; it invokes no encoder, FFmpeg or network. Tests verify original track order, both complete AAC timelines, video pixels, metadata, and atomic failure for limits/cancellation. Ordinary tests do not run the generator.
 
 - `shared-mp4-av-multiple.mp4`: `35c97998994ebd2835bd2b2a980a51be62e70013de083a7f10dd11cbb16214fa`
+
+### MP4 interval export with AAC priming
+
+`shared-mp4-av-priming.mp4` derives from the same Python-only public AVC/AAC join. Its AAC track retains a 1024-sample media origin and a contiguous movie-clock edit ending within the public AAC timeline. No coded packets or codec configuration are changed. This distinguishes interval-relative trimming from accidentally treating the requested range as an absolute media origin. The previous exporter explicitly refused any interval for MP4 with companions; the acceptance test now verifies non-sample-aligned intervals, exact decoded PCM versus direct source interval decode, independent ceil-rounded sample counts, and video frame-start selection/rebased PTS. Both unedited fixtures and the priming derivative run without generator execution, FFmpeg or network.
+
+- `shared-mp4-av-priming.mp4`: `62ec58f67f938cff7a542b303b696bbffde54994faa7eb25f80aca9b96366d0e`

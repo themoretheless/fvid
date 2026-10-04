@@ -36,6 +36,14 @@ pub(crate) fn aac_packet_plan(
     movie_scale: u32,
     cancel: Option<&CancelFlag>,
 ) -> Result<AacPacketPlan> {
+    aac_packet_plan_window(track, movie_scale, None, cancel)
+}
+pub(crate) fn aac_packet_plan_window(
+    track: &Mp4AacTrack,
+    movie_scale: u32,
+    interval: Option<(i64, i64)>,
+    cancel: Option<&CancelFlag>,
+) -> Result<AacPacketPlan> {
     if track.handler != *b"soun" || track.codec != *b"mp4a" {
         return Err(invalid("MP4 track is not AAC"));
     }
@@ -57,7 +65,7 @@ pub(crate) fn aac_packet_plan(
         u64::try_from(n / d).map_err(|_| invalid("AAC sample position overflow"))
     };
     let media_end = position(track.duration)?;
-    let (start, end) = match track.edits.as_slice() {
+    let (mut start, mut end) = match track.edits.as_slice() {
         [] => (0, media_end),
         [edit] if edit.media_time >= 0 && movie_scale != 0 => {
             let start = position(edit.media_time as u64)?;
@@ -79,6 +87,23 @@ pub(crate) fn aac_packet_plan(
     };
     if start >= end || end > media_end {
         return Err(invalid("AAC edit exceeds media samples"));
+    }
+    if let Some((from, to)) = interval {
+        if from < 0 || from >= to {
+            return Err(invalid("audio interval requires 0 <= from < to"));
+        }
+        let samples = |us: i64| -> Result<u64> {
+            u64::try_from((us as u128 * rate).div_ceil(1_000_000))
+                .map_err(|_| invalid("AAC interval sample overflow"))
+        };
+        let origin = start;
+        start = origin.checked_add(samples(from)?)
+            .ok_or_else(|| invalid("AAC interval endpoint overflow"))?;
+        end = end.min(origin.checked_add(samples(to)?)
+            .ok_or_else(|| invalid("AAC interval endpoint overflow"))?);
+        if start >= end {
+            return Err(invalid("audio interval contains no samples"));
+        }
     }
     let frame = u64::from(config.frame_samples);
     let count =

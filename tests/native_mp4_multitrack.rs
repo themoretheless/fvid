@@ -282,3 +282,121 @@ fn copied_aac_has_identical_decoded_samples_after_video_filtering() {
         std::fs::remove_file(file).unwrap();
     }
 }
+
+#[test]
+fn interval_filter_export_preserves_sample_exact_aac_preroll_and_padding() {
+    for name in [
+        "shared-mp4-av.mp4",
+        "shared-mp4-av-multiple.mp4",
+        "shared-mp4-av-priming.mp4",
+    ] {
+        let source = fixture(&format!("playback-errors/{name}"));
+        for (case, interval) in [(30_001, 100_003), (0, 50_001)].into_iter().enumerate() {
+            let base = std::env::temp_dir().join(format!(
+                "fvid-mp4-interval-{}-{name}-{case}",
+                std::process::id()
+            ));
+            let output = base.with_extension("mkv");
+            let transform = fvid_media::LosslessTransform {
+                interval: Some(interval),
+                negate: Some("".into()),
+                ..Default::default()
+            };
+            assert!(fvid_media::owned_lossless::supports(
+                &source,
+                &transform,
+                &Default::default()
+            ));
+            let stats =
+                fvid_media::transcode_lossless(&source, &output, transform, &Default::default())
+                    .unwrap();
+            assert_eq!(stats.backend, "fvid");
+            let input = fvid_media::owned_mp4::Mp4Reader::open(
+                Cursor::new(std::fs::read(&source).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            for (index, track) in input
+                .tracks()
+                .iter()
+                .enumerate()
+                .filter(|(_, t)| t.handler == *b"soun")
+            {
+                let before = base.with_extension(format!("{index}.before.wav"));
+                let after = base.with_extension(format!("{index}.after.wav"));
+                let options = fvid_control::CopyOptions {
+                    streams: vec![index],
+                    ..Default::default()
+                };
+                let a =
+                    fvid_media::decode_audio_interval(&source, &before, Some(interval), &options)
+                        .unwrap();
+                let b = fvid_media::decode_audio(&output, &after, &options).unwrap();
+                let available = match track.edits.as_slice() {
+                    [] => {
+                        u128::from(track.duration) * u128::from(track.sample_rate)
+                            / u128::from(track.timescale)
+                    }
+                    [edit] => (u128::from(edit.duration) * u128::from(track.sample_rate))
+                        .div_ceil(u128::from(input.movie_timescale())),
+                    _ => panic!("synthetic input must have at most one audio edit"),
+                };
+                let expected = ((interval.1 as u128 * u128::from(track.sample_rate))
+                    .div_ceil(1_000_000)
+                    .min(available)
+                    - (interval.0 as u128 * u128::from(track.sample_rate)).div_ceil(1_000_000))
+                    as u64;
+                assert_eq!(a.sample_frames, expected);
+                assert_eq!(b.sample_frames, expected);
+                assert_eq!(
+                    wave_payload(&before),
+                    wave_payload(&after),
+                    "{name}/{case}/{index}"
+                );
+                std::fs::remove_file(before).unwrap();
+                std::fs::remove_file(after).unwrap();
+            }
+            let mut native = fvid::playback_native::NativeReader::software(
+                Cursor::new(std::fs::read(&source).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            let raw = raw_frames(&source);
+            let mut selected = Vec::new();
+            let mut timeline = Vec::new();
+            let mut i = 0;
+            while native.read_frame_raw().unwrap().is_some() {
+                let (from, to, scale) = native.frame_interval().unwrap();
+                let from = (from * 1_000_000_000 / u128::from(scale)) as i64;
+                let to = (to * 1_000_000_000 / u128::from(scale)) as i64;
+                let start = from;
+                let end = to;
+                if from >= interval.0 * 1000 && from < interval.1 * 1000 {
+                    selected.push(raw[i].iter().map(|p| 255 - p).collect::<Vec<_>>());
+                    timeline.push((start - interval.0 * 1000, Some((end - start) as u64)));
+                }
+                i += 1;
+            }
+            assert!(
+                raw_frames(&output) == selected,
+                "video pixels differ: {name}/{case}"
+            );
+            let mut mux = fvid_media::owned_webm::WebmReader::open(
+                Cursor::new(std::fs::read(&output).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            mux.scan_all().unwrap();
+            let video = mux.tracks.iter().find(|t| t.kind == 1).unwrap().number;
+            assert_eq!(
+                mux.packets
+                    .iter()
+                    .filter(|p| p.track == video)
+                    .map(|p| (p.pts_ns, p.duration_ns))
+                    .collect::<Vec<_>>(),
+                timeline
+            );
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+}

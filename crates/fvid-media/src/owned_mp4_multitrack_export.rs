@@ -24,10 +24,7 @@ fn qualify(
     if !crate::owned_mp4_video_bridge::recognizes(source) {
         return Ok(None);
     }
-    if transform.interval.is_some()
-        || !options.streams.is_empty()
-        || crate::owned_lossless::request(transform).is_none()
-    {
+    if !options.streams.is_empty() || crate::owned_lossless::request(transform).is_none() {
         return Ok(None);
     }
     let mut normalized = options.clone();
@@ -292,9 +289,10 @@ pub(crate) fn try_export(
             });
             plans.push(None);
         } else {
-            let plan = crate::owned_mp4_matroska::plan(
+            let plan = crate::owned_mp4_matroska::plan_window(
                 track,
                 input.reader.movie_timescale(),
+                transform.interval,
                 options.cancel.as_ref(),
             )
             .map_err(|e| e.to_string())?;
