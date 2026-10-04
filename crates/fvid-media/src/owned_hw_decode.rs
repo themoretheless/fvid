@@ -34,24 +34,8 @@ pub fn decode_video_cuda(
     source: &Path,
     ordinal: usize,
 ) -> Result<fvid_media_info::DecodeStats, String> {
-    try_decode(source, ordinal)?
-        .ok_or_else(|| "native CUDA decode does not yet cover this input".into())
-}
-
-/// None is returned only before opening the device. After native admission,
-/// driver/decode errors are final and never retried through libav.
-pub fn try_decode(
-    source: &Path,
-    ordinal: usize,
-) -> Result<Option<fvid_media_info::DecodeStats>, String> {
     let input = BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-    let mut source = match MovieSource::open(input, Default::default()) {
-        Ok(source) => source,
-        Err(_) => return Ok(None),
-    };
-    if qualify(&mut source).is_err() {
-        return Ok(None);
-    }
+    let mut source = open_qualified(input)?;
     let (width, height) = visible_dimensions(&source)?;
     let pixel_format = if source.bit_depth() == 10 {
         "cuda/p010"
@@ -72,14 +56,20 @@ pub fn try_decode(
         }
     }
     decoder.close()?;
-    Ok(Some(fvid_media_info::DecodeStats {
+    Ok(fvid_media_info::DecodeStats {
         backend: "owned-cuda-nvdec",
         video_frames: count,
         width,
         height,
         pixel_format: pixel_format.into(),
         decode_errors: 0,
-    }))
+    })
+}
+
+fn open_qualified<R: Read + Seek>(input: R) -> Result<MovieSource<R>, String> {
+    let mut source = MovieSource::open(input, Default::default())?;
+    qualify(&mut source)?;
+    Ok(source)
 }
 
 #[cfg(test)]
@@ -97,6 +87,17 @@ mod tests {
             qualify(&mut source).unwrap();
             assert!(source.read_next(&mut Vec::new()).unwrap().unwrap().sync);
         }
+    }
+    #[test]
+    fn corrupt_synthetic_nal_keeps_precise_admission_error_without_driver() {
+        let bytes =
+            include_bytes!("../../../tests/fixtures/playback-errors/shared-mp4-corrupt-nal.mp4");
+        let error = match open_qualified(std::io::Cursor::new(bytes.as_slice())) {
+            Ok(_) => panic!("corrupt NAL must not reach device creation"),
+            Err(error) => error,
+        };
+        assert!(error.contains("invalid NAL payload length"), "{error}");
+        assert!(!error.contains("does not yet cover"), "{error}");
     }
     #[test]
     fn decode_statistics_use_visible_sps_crop_dimensions() {

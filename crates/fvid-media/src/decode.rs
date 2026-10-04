@@ -6135,17 +6135,5 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
 
 #[cfg(feature = "cuda-hw")]
 pub fn decode_video_cuda(source: &Path, device: usize) -> Result<DecodeStats> {
-    if let Some(stats) = crate::owned_hw_decode::try_decode(source, device)? {
-        return Ok(stats);
-    }
-    let (video_frames, width, height) = crate::hw_cuda::hw_decode_only(source, device)?;
-    Ok(DecodeStats {
-        backend: "cuda-nvdec",
-        video_frames,
-        width,
-        height,
-        pixel_format: "cuda/nv12".into(),
-        // The device path reads its packets strictly, so nothing was ever skipped here.
-        decode_errors: 0,
-    })
+    crate::owned_hw_decode::decode_video_cuda(source, device)
 }

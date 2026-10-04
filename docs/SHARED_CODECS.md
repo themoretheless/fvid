@@ -581,3 +581,11 @@ An ignored NVIDIA acceptance test covers AVC crop, HEVC Main and Main10 output
 counts/dimensions/formats. It has not run here. Other codecs/containers still
 need owned device adapters for full functional coverage. The feature edge is
 removed; this is not yet universal CUDA codec/container support.
+
+Native CUDA decode now propagates container and codec qualification errors
+verbatim before device creation. The old `try_decode` legacy fallback adapter
+and libav decode-only implementation have been removed; even an explicit
+legacy reference build uses the owned CUDA decode entrypoint. The existing
+synthetic corrupt-NAL fixture verifies the specific `invalid NAL payload length`
+error instead of a generic unsupported-input message. NVIDIA execution remains
+unverified and unsupported codec tools are still incomplete native work.
