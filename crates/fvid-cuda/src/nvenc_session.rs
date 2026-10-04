@@ -113,6 +113,30 @@ pub struct NvencPacket {
     pub duration: u64,
     pub picture_type: u32,
 }
+/// Codec selected for direct eight-bit NV12 encoding.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NvencCodec {
+    H264,
+    Hevc,
+}
+impl NvencCodec {
+    fn guid(self) -> crate::nvenc_sdk::GUID {
+        match self {
+            Self::H264 => crate::nvenc_sdk::GUID {
+                Data1: 0x6bc82762,
+                Data2: 0x4e63,
+                Data3: 0x4ca4,
+                Data4: [0xaa, 0x85, 0x1e, 0x50, 0xf3, 0x21, 0xf6, 0xbf],
+            },
+            Self::Hevc => crate::nvenc_sdk::GUID {
+                Data1: 0x790cdc88,
+                Data2: 0x4522,
+                Data3: 0x4d7b,
+                Data4: [0x94, 0x25, 0xbd, 0xa9, 0x97, 0x5f, 0x76, 0x03],
+            },
+        }
+    }
+}
 struct LockedOutput {
     hw_status: u32,
     pointer: *mut u8,
@@ -200,6 +224,28 @@ impl NvencSession {
         fps_num: u32,
         fps_den: u32,
     ) -> Result<(), String> {
+        self.initialize_nv12(NvencCodec::H264, width, height, fps_num, fps_den)
+    }
+    /// Initialize eight-bit HEVC encoding using the driver's default preset.
+    pub fn initialize_hevc(
+        &mut self,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+    ) -> Result<(), String> {
+        self.initialize_nv12(NvencCodec::Hevc, width, height, fps_num, fps_den)
+    }
+    /// Initialize the selected codec. Unsupported driver capabilities return
+    /// the SDK error; no software or libav fallback is opened.
+    pub fn initialize_nv12(
+        &mut self,
+        codec: NvencCodec,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+    ) -> Result<(), String> {
         validate_geometry(width, height, fps_num, fps_den)?;
         if self.encoder.is_null() || self.initialized || self.failed {
             return Err("NVENC initialization requires a fresh live session".into());
@@ -210,12 +256,7 @@ impl NvencSession {
             .table
             .initialize
             .ok_or("NVENC omitted initialization entrypoint")?;
-        let codec = crate::nvenc_sdk::GUID {
-            Data1: 0x6bc82762,
-            Data2: 0x4e63,
-            Data3: 0x4ca4,
-            Data4: [0xaa, 0x85, 0x1e, 0x50, 0xf3, 0x21, 0xf6, 0xbf],
-        };
+        let codec = codec.guid();
         let preset_guid = crate::nvenc_sdk::GUID {
             Data1: 0xb2dfb705,
             Data2: 0x4ebd,
@@ -551,7 +592,7 @@ impl NvencSession {
             params.outputBitstream = self.outputs[index].handle;
             params.set_doNotWait(u32::from(nonblocking));
             // SAFETY: The oldest ready output belongs to this live encoder;
-            // SDK storage is writable and nonblocking mode avoids deadlock.
+            // SDK storage is writable; cleanup may block to await completion.
             let status = unsafe { lock(self.encoder, &mut params) };
             if status == crate::nvenc_sdk::_NVENCSTATUS_NV_ENC_ERR_LOCK_BUSY {
                 return Ok(false);
@@ -949,6 +990,16 @@ mod tests {
     #[test]
     #[ignore = "requires an NVIDIA CUDA device with NVENC"]
     fn direct_cuda_session_opens_and_closes_without_libav() {
+        direct_codec_round_trip(super::NvencCodec::H264);
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires an NVIDIA CUDA device with HEVC NVENC"]
+    fn direct_hevc_submission_without_libav() {
+        direct_codec_round_trip(super::NvencCodec::Hevc);
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    fn direct_codec_round_trip(codec: super::NvencCodec) {
         use cudarc::driver::DevicePtr;
         let owner = crate::device_pool::shared(0).unwrap();
         let stream = owner.new_stream().unwrap();
@@ -959,8 +1010,8 @@ mod tests {
         let device = CodecDevice::new(0).unwrap();
         let mut session = NvencSession::open(device).unwrap();
         assert!(!session.codec_guids().unwrap().is_empty());
-        session.initialize_h264(128, 72, 60, 1).unwrap();
-        assert!(session.initialize_h264(128, 72, 60, 1).is_err());
+        session.initialize_nv12(codec, 128, 72, 60, 1).unwrap();
+        assert!(session.initialize_nv12(codec, 128, 72, 60, 1).is_err());
         for (index, buffer) in buffers.iter().enumerate() {
             let (pointer, _guard) = buffer.device_ptr(&stream);
             // SAFETY: All allocations use the same pooled primary context,

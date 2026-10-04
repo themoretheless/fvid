@@ -144,3 +144,10 @@ checks packet timestamps and nonempty payloads. It does not yet prove decoder
 acceptance or production filter integration. Hardware execution remains deferred
 to the user's NVIDIA machine. Host tests and Linux/Windows compilation do not
 establish GPU performance or SDK compatibility on a particular driver.
+
+
+Direct eight-bit NV12 initialization now selects H.264 or HEVC with the
+respective SDK codec GUID and the driver's default preset. HEVC has its own
+ignored NVIDIA submission/drain test using the same synthetic surfaces and
+resource lifecycle. No HEVC hardware execution is claimed; P010/Main10 and
+native NVDEC remain separate unfinished work.
