@@ -7,6 +7,17 @@ pub struct ColorHold {
     blend: f32,
 }
 impl ColorHold {
+    pub fn apply_yuv(
+        &self,
+        frame: &mut crate::owned_frame::GeometryFrame,
+        depth: u8,
+        full: bool,
+        matrix: crate::owned_yuv_rgb::Matrix,
+    ) -> Result<()> {
+        crate::owned_yuv_rgb::filter_rgb16(frame, depth, full, matrix, |rgb| {
+            self.apply_rgb(rgb, 16, 3)
+        })
+    }
     pub fn parse(args: &str) -> Result<Self> {
         let mut filter = Self {
             color: [0; 3],
@@ -186,5 +197,120 @@ mod tests {
                 .is_err()
         );
         assert_eq!(invalid, [1, 2]);
+    }
+}
+
+#[cfg(test)]
+mod yuv_tests {
+    use super::*;
+    use crate::{owned_frame::GeometryFrame, owned_yuv_rgb::Matrix};
+    #[test]
+    fn selected_red_is_unchanged_and_odd_chroma_cells_become_neutral() {
+        let mut red = GeometryFrame {
+            width: 1,
+            height: 1,
+            subsampling: Some([1, 1]),
+            data: vec![81, 90, 240],
+        };
+        ColorHold::parse("red:0.05")
+            .unwrap()
+            .apply_yuv(&mut red, 8, false, Matrix::Bt601)
+            .unwrap();
+        assert_eq!(red.data, [81, 90, 240]);
+        red.data = vec![76, 85, 255];
+        ColorHold::parse("red:0.05")
+            .unwrap()
+            .apply_yuv(&mut red, 8, true, Matrix::Bt601)
+            .unwrap();
+        assert_eq!(red.data, [76, 85, 255]);
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "../../tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let dir =
+                std::env::temp_dir().join(format!("fvid-colorhold-yuv-{}", std::process::id()));
+            std::fs::create_dir_all(&dir).unwrap();
+            let output = dir.join(format!("filtered-{depth}.mkv"));
+            let stats = crate::owned_lossless::transcode_lossless(
+                &source,
+                &output,
+                fvid_media_info::LosslessTransform {
+                    colorhold: Some("black:0.00001".into()),
+                    ..Default::default()
+                },
+                &Default::default(),
+            )
+            .unwrap();
+            assert_eq!(stats.video_frames, 3);
+            let repeated = dir.join(format!("ffv1-filtered-{depth}.mkv"));
+            assert_eq!(
+                crate::owned_lossless::transcode_lossless(
+                    &output,
+                    &repeated,
+                    fvid_media_info::LosslessTransform {
+                        colorhold: Some("black:0.00001".into()),
+                        ..Default::default()
+                    },
+                    &Default::default()
+                )
+                .unwrap()
+                .video_frames,
+                3
+            );
+
+            let mut frames = 0;
+            crate::owned_video_decode::decode_ffv1(
+                &output,
+                &Default::default(),
+                Some(&mut |frame| {
+                    let values: Vec<u16> = if depth == 8 {
+                        frame.pixels.iter().map(|v| *v as u16).collect()
+                    } else {
+                        frame
+                            .pixels
+                            .chunks_exact(2)
+                            .map(|b| u16::from_le_bytes([b[0], b[1]]))
+                            .collect()
+                    };
+                    let center = 1u16 << (depth - 1);
+                    assert_eq!(&values[9..], &[center; 8]);
+                    assert_eq!(frame.pts_ns, frames * 500_000_000);
+                    frames += 1;
+                    Ok(())
+                }),
+                None,
+            )
+            .unwrap()
+            .unwrap();
+            assert_eq!(frames, 3);
+            std::fs::remove_dir_all(dir).unwrap();
+        }
+    }
+    #[test]
+    fn failed_rgb_filter_is_atomic_and_noop_keeps_out_of_range_samples() {
+        let mut frame = GeometryFrame {
+            width: 3,
+            height: 3,
+            subsampling: Some([2, 2]),
+            data: vec![255; 17],
+        };
+        let original = frame.data.clone();
+        crate::owned_yuv_rgb::filter_rgb16(&mut frame, 8, false, Matrix::Bt709, |_| Ok(()))
+            .unwrap();
+        assert_eq!(frame.data, original);
+        let mut calls = 0;
+        assert!(
+            crate::owned_yuv_rgb::filter_rgb16(&mut frame, 8, false, Matrix::Bt2020, |rgb| {
+                calls += 1;
+                rgb.fill(0);
+                if calls == 2 {
+                    Err("deliberate error".into())
+                } else {
+                    Ok(())
+                }
+            })
+            .is_err()
+        );
+        assert_eq!(frame.data, original);
     }
 }

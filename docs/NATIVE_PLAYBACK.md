@@ -3477,7 +3477,19 @@ It accepts colour/similarity/blend options, numeric scalar expressions, common
 colour names and RRGGBB hex keys. Invalid options and packed sample lengths
 refuse before mutation. The explicit `ffmpeg_colorhold_reference` benchmark
 matches all 2,048 component samples across hard and blended selections at both
-depths; ordinary tests invoke no external codec. This is the sample algorithm
-only: YUV/RGB conversion, video decode/export/CLI wiring and complete named
-colour syntax are still outstanding, so capability inventory does not yet
-advertise this filter and existing legacy workflows are retained.
+depths; ordinary tests invoke no external codec. Owned planar YUV conversion and library Y4M/FFV1 decode/lossless export now
+accept `colorhold`, using BT.601 by default. Native CLI wiring, metadata-driven
+matrix selection and complete named colour syntax remain outstanding, so
+capability inventory does not yet advertise this filter and other legacy
+workflows are retained.
+
+The reusable `owned_yuv_rgb::filter_rgb16` converter accepts BT.601/709/2020,
+limited/full range, 8–16-bit planar samples and arbitrary valid subsampling.
+RGB processing uses 16-bit channels and chroma is averaged over each actual
+cell, including partial cells at odd frame edges. Cells unchanged by the RGB
+filter preserve source samples exactly, including out-of-range excursions.
+Sample validation and processing finish before the output frame is published;
+a filter error leaves the source frame untouched. Tests reuse the committed
+synthetic 3×3 colorize grids for export and verify range, neutral chroma and
+presentation times. Full swscale conversion parity is not established by the
+RGB-only benchmark.
