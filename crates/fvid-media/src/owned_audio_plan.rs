@@ -73,16 +73,19 @@ pub(crate) fn supports(
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
-pub fn plan_decode_audio(
-    source: &Path,
-    transform: &AudioDecodeTransform,
-    options: &CopyOptions,
-) -> Result<MediaPlan> {
-    crate::owned_audio_export::validate_request(*transform, options)?;
-    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-        return Err("media operation cancelled".into());
-    }
-    crate::owned_budget::check_rss_budget(options)?;
+pub(crate) struct AudioDescriptor {
+    pub(crate) rate: u32,
+    pub(crate) channels: u16,
+    mask: u32,
+    codec: String,
+    precision: String,
+    stream_index: usize,
+    adts: bool,
+    mp4: bool,
+    is_matroska: bool,
+}
+
+pub(crate) fn source_descriptor(source: &Path, options: &CopyOptions) -> Result<AudioDescriptor> {
     let adts = crate::owned_adts_export::recognizes(source)?;
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
     let matroska = matroska_descriptor(source, options)?;
@@ -147,6 +150,26 @@ pub fn plan_decode_audio(
             },
         )
     };
+    Ok(AudioDescriptor {
+        rate, channels, mask, codec, precision, stream_index,
+        adts, mp4, is_matroska,
+    })
+}
+
+pub fn plan_decode_audio(
+    source: &Path,
+    transform: &AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<MediaPlan> {
+    crate::owned_audio_export::validate_request(*transform, options)?;
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
+    let AudioDescriptor {
+        rate, channels, mask, codec, precision, stream_index,
+        adts, mp4, is_matroska,
+    } = source_descriptor(source, options)?;
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
     if output_channels != i32::from(channels) {
         if !((channels <= 8 && matches!(output_channels, 1 | 2))

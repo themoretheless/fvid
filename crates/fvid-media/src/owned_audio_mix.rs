@@ -18,7 +18,7 @@ pub fn merge_audio(sources: &[PathBuf], destination: &Path) -> Result<MergeAudio
     merge_with_decoder(sources, destination, decode_owned_audio)
 }
 
-/// Build a source-read-only plan, validating decoding in private temporary storage.
+/// Build a read-only plan from the same owned decoder configuration as execution.
 pub fn plan_mix_audio(
     sources: &[PathBuf],
     options: &MixAudioOptions,
@@ -59,17 +59,23 @@ fn audio_plan(
     use fvid_media_info::{MediaPlan, PlanStep};
     let mut geometry = None;
     for source in sources {
-        // Validate the exact owned presentation decoder used during execution.
-        let (info, _) = decode_owned_audio(source)?;
-        if info.sample_frames == 0 || !(1..=64).contains(&info.channels) {
+        let info = crate::owned_audio_plan::source_descriptor(source, &Default::default())?;
+        if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
+            let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+            if crate::owned_wave_inspect::inspect(&mut file, None)
+                .map_err(|e| e.to_string())?.sample_frames == 0 {
+                return Err("audio mix/merge requires nonempty owned audio inputs".into());
+            }
+        }
+        if !(1..=64).contains(&info.channels) {
             return Err("audio mix/merge requires nonempty owned audio inputs".into());
         }
         if let Some((rate, channels)) = geometry {
-            if rate != info.sample_rate || (!merge && channels != info.channels) {
+            if rate != info.rate || (!merge && channels != info.channels) {
                 return Err("audio inputs must share sample rate and mixing channel count".into());
             }
         } else {
-            geometry = Some((info.sample_rate, info.channels));
+            geometry = Some((info.rate, info.channels));
         }
     }
     Ok(MediaPlan {
@@ -80,7 +86,7 @@ fn audio_plan(
         steps: vec![
             PlanStep {
                 action: "decode".into(),
-                detail: "owned audio decoder to float32 PCM (planning validates decoding)".into(),
+                detail: "owned audio decoder to float32 PCM".into(),
             },
             PlanStep {
                 action: if merge { "merge" } else { "mix" }.into(),
