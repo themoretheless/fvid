@@ -437,7 +437,7 @@ registered buffers; failed cleanup retains GPU owners.
 `write_avc_matroska` uses the own Annex B converter and packet writer. It carries
 track-clock timestamps/durations into nanoseconds, checks stable AVC setup and
 writes explicit black-span events as video pictures. It currently exports video
-only; audio, file tags/chapters, atomic file publication and production
+only; audio and production
 CLI wiring still need integration. HEVC packets can be pulled through the encoder
 but this Matroska helper currently requires AVC.
 
@@ -459,5 +459,15 @@ HEVC configuration. HDR tags are preserved; no tone mapping is implied.
 
 The synthetic `avc-cuda-video-metadata.mp4` regression proves metadata reading
 and owned-container preservation. GPU acceptance now includes this fixture,
-but only host tests and cross compilation have run here. File tags/chapters,
-audio handling and production CLI integration remain unfinished.
+but only host tests and cross compilation have run here. Audio handling and production CLI integration remain unfinished.
+
+`export_avc_matroska` now reuses the owned atomic publisher: it refuses existing
+output, syncs a temporary file, closes NVENC before publication, and emits `done`
+only after the final path is created. Packet progress is emitted while writing;
+cancellation is checked between render/encode iterations and inside driver waits.
+File tags and chapters are copied from the own MP4 reader to the Matroska writer.
+The metadata fixture now carries an explicit synthetic title and chapter, whose
+round trip is verified without CUDA. NVIDIA acceptance exercises actual file
+publication, completed progress, and existing-output preservation, but has not
+run here. This API remains video-only; production `hw-filter` still uses legacy
+libav while its remaining codec/audio/options are being ported.

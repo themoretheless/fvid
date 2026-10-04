@@ -111,6 +111,7 @@ impl<R: Read + Seek> AvcMp4Input<R> {
             }
         }
         crate::owned_nvdec_movie::MovieVideoMetadata {
+            file: crate::owned_matroska::FileMetadata::from_mp4(&self.reader),
             name: track.name.clone(),
             language: track.language.clone(),
             options: TrackOptions {
@@ -317,6 +318,8 @@ mod tests {
         )
         .unwrap();
         let metadata = source.video_metadata();
+        assert_eq!(metadata.file.tags.title, "FVid synthetic CUDA metadata");
+        assert_eq!(metadata.file.chapters[0].title, "Start");
         let video = metadata.options.video.unwrap();
         assert_eq!(metadata.options.rotation, 90);
         assert_eq!(video.pixel_aspect, (3, 2));
@@ -345,8 +348,13 @@ mod tests {
             language: "und",
         }];
         let mut output = std::io::Cursor::new(Vec::new());
-        let mut writer =
-            PacketWriter::new_with_options(&mut output, &tracks, &[metadata.options]).unwrap();
+        let mut writer = PacketWriter::new_with_metadata(
+            &mut output,
+            &tracks,
+            &[metadata.options],
+            &metadata.file,
+        )
+        .unwrap();
         writer
             .write_packet(0, 0, duration, sample.sync, &packet)
             .unwrap();
@@ -356,6 +364,8 @@ mod tests {
             Default::default(),
         )
         .unwrap();
+        assert_eq!(read.tags, metadata.file.tags);
+        assert_eq!(read.chapters[0].title, "Start");
         assert_eq!(read.tracks[0].rotation, 90);
         assert_eq!(read.tracks[0].colour, colour);
     }

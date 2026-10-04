@@ -2,7 +2,7 @@
 
 `avc-cuda-video-metadata.mp4` is generated from the immutable public synthetic
 `control.mp4` seed. It replaces container colour with BT.709 limited-range,
-adds 3:2 pixel aspect and a 90-degree track matrix. Codec packets and parameter
+adds 3:2 pixel aspect, a 90-degree track matrix, a synthetic title and a chapter. Codec packets and parameter
 sets remain synthetic; no private media is used. `mdat` precedes changed `moov`,
 so packet offsets remain valid.
 

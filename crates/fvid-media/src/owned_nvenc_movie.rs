@@ -121,17 +121,30 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         if self.failed {
             return Err("native movie encoder failed; reopen it".into());
         }
-        let result = self.next_inner();
+        self.next_packet_controlled(None)
+    }
+    fn next_packet_controlled(
+        &mut self,
+        cancel: Option<&fvid_control::CancelFlag>,
+    ) -> Result<Option<NvencPacket>, String> {
+        if self.failed {
+            return Err("native movie encoder failed; reopen it".into());
+        }
+        let result = self.next_inner(cancel);
         if result.is_err() {
             self.failed = true;
         }
         result
     }
-    fn next_inner(&mut self) -> Result<Option<NvencPacket>, String> {
+    fn next_inner(
+        &mut self,
+        cancel: Option<&fvid_control::CancelFlag>,
+    ) -> Result<Option<NvencPacket>, String> {
         let deadline = Instant::now()
             .checked_add(self.wait)
             .ok_or("movie encoder wait overflow")?;
         loop {
+            check_cancel(cancel)?;
             if let Some(packet) = self.encoder.receive()? {
                 self.pool.received()?;
                 return Ok(Some(packet));
@@ -173,7 +186,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                             .encoder
                             .submit_nv12(input, output, timestamp, duration)?
                         {
-                            NvencSubmit::Busy => wait_until(deadline)?,
+                            NvencSubmit::Busy => wait_until(deadline, cancel)?,
                             NvencSubmit::Ready | NvencSubmit::Queued => {
                                 self.pool.accepted(slot)?;
                                 break;
@@ -186,7 +199,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                 self.eos = true;
                 continue;
             }
-            wait_until(deadline)?;
+            wait_until(deadline, cancel)?;
         }
     }
     /// Write AVC output with the owned Matroska writer. This is video-only;
@@ -199,7 +212,9 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         if self.codec != NvencCodec::H264 {
             return Err("AVC Matroska export requires H.264 encoding".into());
         }
-        let result = self.write_avc_inner(output, max_packet_bytes);
+        let result = self
+            .write_avc_inner(output, max_packet_bytes, None, None)
+            .map(|event| event.packets);
         if result.is_err() {
             self.failed = true;
         }
@@ -209,9 +224,12 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         &mut self,
         output: &mut W,
         max_packet_bytes: usize,
-    ) -> Result<u64, String> {
+        cancel: Option<&fvid_control::CancelFlag>,
+        progress: Option<&fvid_control::ProgressHook>,
+    ) -> Result<fvid_control::ProgressEvent, String> {
+        check_cancel(cancel)?;
         let first = self
-            .next_packet()?
+            .next_packet_controlled(cancel)?
             .ok_or("movie encoder returned no video")?;
         let first_sample = crate::owned_avc_annexb::convert(&first.bytes, max_packet_bytes)?;
         let configuration = first_sample
@@ -232,10 +250,11 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                 &self.renderer.metadata().language
             },
         }];
-        let mut writer = crate::owned_matroska::PacketWriter::new_with_options(
+        let mut writer = crate::owned_matroska::PacketWriter::new_with_metadata(
             output,
             &tracks,
             &[self.renderer.metadata().options],
+            &self.renderer.metadata().file,
         )
         .map_err(|e| e.to_string())?;
         let scale = self.media_timescale();
@@ -248,8 +267,10 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                 &first_sample.sample,
             )
             .map_err(|e| e.to_string())?;
-        let mut count = 1u64;
-        while let Some(packet) = self.next_packet()? {
+        if let Some(hook) = progress {
+            hook.emit(writer.event());
+        }
+        while let Some(packet) = self.next_packet_controlled(cancel)? {
             let sample = crate::owned_avc_annexb::convert(&packet.bytes, max_packet_bytes)?;
             if sample
                 .configuration
@@ -267,10 +288,49 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                     &sample.sample,
                 )
                 .map_err(|e| e.to_string())?;
-            count = count.checked_add(1).ok_or("movie packet count overflow")?;
+            if let Some(hook) = progress {
+                hook.emit(writer.event());
+            }
         }
-        writer.finish().map_err(|e| e.to_string())?;
-        Ok(count)
+        check_cancel(cancel)?;
+        writer.finish().map_err(|e| e.to_string())
+    }
+    /// Finalize and close the encoder before atomically publishing a new .mkv.
+    /// Existing output is preserved. Progress is done only after publication.
+    pub fn export_avc_matroska(
+        &mut self,
+        destination: &std::path::Path,
+        max_packet_bytes: usize,
+        cancel: Option<&fvid_control::CancelFlag>,
+        progress: Option<&fvid_control::ProgressHook>,
+    ) -> Result<fvid_media_info::DecodeStats, String> {
+        if self.codec != NvencCodec::H264 {
+            return Err("AVC Matroska export requires H.264 encoding".into());
+        }
+        let (width, height) = self.renderer.buffer().dimensions();
+        let result = crate::owned_matroska::export_atomic(destination, cancel, progress, |file| {
+            let event = self
+                .write_avc_inner(file, max_packet_bytes, cancel, progress)
+                .map_err(crate::owned_matroska::Error)?;
+            self.close().map_err(crate::owned_matroska::Error)?;
+            Ok((
+                fvid_media_info::DecodeStats {
+                    backend: "owned-cuda-nvdec-nvenc",
+                    video_frames: event.packets,
+                    width,
+                    height,
+                    pixel_format: "nv12".into(),
+                    decode_errors: 0,
+                },
+                event,
+                0,
+            ))
+        })
+        .map_err(|e| e.to_string());
+        if result.is_err() {
+            self.failed = true;
+        }
+        result.map(|(stats, _, _)| stats)
     }
     pub fn close(&mut self) -> Result<(), String> {
         self.failed = true;
@@ -301,7 +361,14 @@ fn ticks_ns(ticks: u64, timescale: u32) -> Result<u64, String> {
         .map_err(|_| "movie nanosecond timestamp overflow".into())
 }
 
-fn wait_until(deadline: Instant) -> Result<(), String> {
+fn check_cancel(cancel: Option<&fvid_control::CancelFlag>) -> Result<(), String> {
+    if cancel.is_some_and(|flag| flag.is_cancelled()) {
+        return Err("cancelled".into());
+    }
+    Ok(())
+}
+fn wait_until(deadline: Instant, cancel: Option<&fvid_control::CancelFlag>) -> Result<(), String> {
+    check_cancel(cancel)?;
     if Instant::now() >= deadline {
         return Err("native movie encoder timed out; pool may be smaller than driver delay".into());
     }
@@ -311,6 +378,16 @@ fn wait_until(deadline: Instant) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn cancellation_interrupts_waits_before_timeout() {
+        let flag = fvid_control::CancelFlag::new();
+        flag.cancel();
+        assert_eq!(
+            wait_until(Instant::now() + Duration::from_secs(10), Some(&flag)).unwrap_err(),
+            "cancelled"
+        );
+        assert!(check_cancel(None).is_ok());
+    }
     #[test]
     fn movie_clock_conversion_is_checked() {
         assert_eq!(ticks_ns(1, 3).unwrap(), 333_333_333);
@@ -357,17 +434,51 @@ mod tests {
                 Duration::from_secs(10),
             )
             .unwrap();
-            let mut output = Cursor::new(Vec::new());
-            assert_eq!(
-                encoder.write_avc_matroska(&mut output, 1 << 20).unwrap(),
-                expected.len() as u64
+            struct Directory(std::path::PathBuf);
+            impl Drop for Directory {
+                fn drop(&mut self) {
+                    let _ = std::fs::remove_dir_all(&self.0);
+                }
+            }
+            let directory = Directory(std::env::temp_dir().join(format!(
+                    "fvid-native-export-{}-{}",
+                    std::process::id(),
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_nanos()
+                )));
+            std::fs::create_dir(&directory.0).unwrap();
+            let output = directory.0.join("output.mkv");
+            let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+            let observed = events.clone();
+            let published = output.clone();
+            let progress = fvid_control::ProgressHook::new(move |event| {
+                if event.done {
+                    assert!(published.exists());
+                }
+                observed.lock().unwrap().push(event);
+            });
+            let stats = encoder
+                .export_avc_matroska(&output, 1 << 20, None, Some(&progress))
+                .unwrap();
+            assert_eq!(stats.video_frames, expected.len() as u64);
+            let events = events.lock().unwrap();
+            assert!(events.last().unwrap().done);
+            assert!(events[..events.len() - 1].iter().all(|event| !event.done));
+            let before = std::fs::read(&output).unwrap();
+            assert!(
+                encoder
+                    .export_avc_matroska(&output, 1 << 20, None, None)
+                    .is_err()
             );
-            encoder.close().unwrap();
-            let mut saved = crate::owned_webm::WebmReader::open(
-                Cursor::new(output.into_inner()),
-                Default::default(),
-            )
-            .unwrap();
+            assert_eq!(std::fs::read(&output).unwrap(), before);
+            assert_eq!(std::fs::read_dir(&directory.0).unwrap().count(), 1);
+            let mut saved =
+                crate::owned_webm::WebmReader::open(Cursor::new(before), Default::default())
+                    .unwrap();
+            assert_eq!(saved.tags, metadata.file.tags);
+            assert_eq!(saved.chapters.len(), metadata.file.chapters.len());
             assert_eq!(saved.tracks[0].rotation, metadata.options.rotation);
             assert_eq!(
                 Some(saved.tracks[0].colour),

@@ -210,6 +210,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
 #[derive(Clone, Debug)]
 pub struct MovieVideoMetadata {
     pub options: crate::owned_matroska::TrackOptions,
+    pub file: crate::owned_matroska::FileMetadata,
     pub name: String,
     pub language: String,
 }
@@ -409,6 +410,7 @@ mod tests {
             ColourDescription, ContentLight, HdrMetadata, TrackOptions, VideoMetadata,
         };
         let metadata = MovieVideoMetadata {
+            file: Default::default(),
             name: "synthetic".into(),
             language: "eng".into(),
             options: TrackOptions {

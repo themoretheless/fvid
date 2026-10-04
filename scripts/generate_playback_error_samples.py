@@ -78,6 +78,11 @@ def rewrite(data, edits=None, bad_avcc=False, duplicate_pts=False, video_metadat
                 at += 2 + size
             # Reproduce the malformed *metadata*, not any private SPS/PPS/media.
             payload = payload[:at] + bytes.fromhex("7bf7f700")
+        if kind == b"moov" and video_metadata:
+            payload = b"".join(atom(k, p) for k, p in children(payload) if k != b"udta")
+            title = atom(b"\xa9nam", b"FVid synthetic CUDA metadata")
+            chapter = bytes(8) + bytes([1]) + struct.pack(">Q", 0) + bytes([5]) + b"Start"
+            payload += atom(b"udta", title + atom(b"chpl", chapter))
         if kind == b"tkhd" and video_metadata:
             assert payload[0] == 0
             matrix = struct.pack(">9i", 0, 65536, 0, -65536, 0, 0, 0, 0, 1 << 30)
