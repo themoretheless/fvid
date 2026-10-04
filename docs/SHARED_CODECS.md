@@ -216,3 +216,25 @@ The pinned-header C probes verify 264-byte x64 processing storage and stream/
 reserved-pointer offsets 56/248 on both Linux and Windows. Host regression tests
 cover output extent refusal, unmap retry and ABI. No GPU mapping execution or
 production CUDA/libav replacement is claimed by these tests.
+
+
+## Direct NVDEC picture submission
+
+The session now resolves `cuvidDecodePicture` and submits typed picture
+parameters without libav. A checked-in generated SDK data module includes
+H.264/HEVC/VP8/VP9 codec-specific layouts; the developer generator is separate
+from ordinary builds and emits no linked functions.
+
+The unsafe boundary requires readable bitstream/slice-offset arrays and correct
+codec/reference parameters from a parser. Admission checks progressive coded
+geometry, picture-slot bounds, nonempty byte/offset storage and increasing slice
+offsets. A mapped picture cannot be overwritten. Only successfully submitted
+indices may be mapped; failed submissions invalidate their previous mapping
+eligibility. These checks do not validate the codec-specific union or references.
+
+Pinned-header C probes verify 4280-byte x64 picture storage and byte-pointer/
+slice-pointer/codec-union offsets 32/48/184 on Linux and Windows. Regeneration is
+byte-identical. Host tests cover malformed submission admission and slice ordering;
+Linux/Windows test compilation passes. No compressed-stream hardware acceptance
+has been executed: parser callbacks, reference-slot scheduling and end-to-end
+production CUDA integration remain necessary before removing the legacy backend.

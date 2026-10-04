@@ -16,6 +16,8 @@ mod nvenc_sdk;
 mod nvenc_session;
 pub use nvenc_session::{CodecGuid, NvencCodec, NvencPacket, NvencSession, NvencSubmit};
 mod nvdec;
+/// Pinned NVIDIA picture-parameter data ABI; no linked SDK symbols.
+pub mod nvdec_sdk;
 pub use nvdec::{NvdecApi, NvdecCaps, NvdecChroma, NvdecCodec, NvdecSession, NvdecSurface};
 mod nvenc;
 pub use nvenc::{NvencApi, NvencVersion};

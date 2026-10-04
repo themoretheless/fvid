@@ -270,6 +270,8 @@ impl Default for ProcParams {
         }
     }
 }
+type DecodePicture =
+    unsafe extern "system" fn(DecoderHandle, *mut crate::nvdec_sdk::CUVIDPICPARAMS) -> i32;
 type MapFrame =
     unsafe extern "system" fn(DecoderHandle, i32, *mut u64, *mut u32, *mut ProcParams) -> i32;
 type UnmapFrame = unsafe extern "system" fn(DecoderHandle, u64) -> i32;
@@ -290,8 +292,9 @@ pub struct NvdecSession {
     destroy: DestroyDecoder,
     map: MapFrame,
     unmap: UnmapFrame,
-    mapped: Vec<(usize, u64)>,
+    mapped: Vec<(usize, u64, u32)>,
     next_slot: usize,
+    submitted: Vec<bool>,
     width: u32,
     height: u32,
     depth: u8,
@@ -335,6 +338,7 @@ impl NvdecSession {
             unmap,
             mapped: Vec::new(),
             next_slot: 0,
+            submitted: vec![false; decode_surfaces as usize],
             width,
             height,
             depth,
@@ -356,6 +360,43 @@ impl NvdecSession {
         Ok(session)
     }
 
+    /// Submit the SDK picture description supplied by the bitstream parser.
+    ///
+    /// # Safety
+    /// Both raw byte/offset arrays must remain valid and readable until this
+    /// call returns. CodecSpecific must describe this session's codec and all
+    /// reference indices must refer to reserved decoded pictures in this session.
+    /// A parser must not recycle reference pictures while the driver uses them.
+    pub unsafe fn submit_picture(
+        &mut self,
+        params: &mut crate::nvdec_sdk::CUVIDPICPARAMS,
+    ) -> Result<(), String> {
+        if self.decoder.is_null() {
+            return Err("NVDEC decoder is closed".into());
+        }
+        let picture = validate_picture(params, self.width, self.height, self.decode_surfaces)?;
+        if self.mapped.iter().any(|entry| entry.2 == picture) {
+            return Err("NVDEC picture is still mapped and cannot be overwritten".into());
+        }
+        // SAFETY: Caller provides readable offset array extent.
+        let offsets = unsafe {
+            std::slice::from_raw_parts(params.pSliceDataOffsets, params.nNumSlices as usize)
+        };
+        validate_slice_offsets(offsets, params.nBitstreamDataLen)?;
+        self.device.handles()?;
+        let decode = self.api.picture_entrypoint()?;
+        self.submitted[picture as usize] = false;
+        // SAFETY: Caller guarantees codec/reference parameters and byte arrays;
+        // context is bound and driver library remains loaded.
+        let status = unsafe { decode(self.decoder, params) };
+        if status != 0 {
+            return Err(format!(
+                "NVDEC picture submission failed with CUDA status {status}"
+            ));
+        }
+        self.submitted[picture as usize] = true;
+        Ok(())
+    }
     /// Map a decoded progressive picture into a driver-owned CUDA surface.
     ///
     /// # Safety
@@ -363,7 +404,14 @@ impl NvdecSession {
     /// index still reserved by the parser. Do not reuse it while mapped.
     /// Synchronize all consumers before unmap or closing the session.
     pub unsafe fn map_progressive(&mut self, picture: u32) -> Result<NvdecSurface, String> {
-        if self.decoder.is_null() || picture >= self.decode_surfaces {
+        if self.decoder.is_null()
+            || picture >= self.decode_surfaces
+            || !self
+                .submitted
+                .get(picture as usize)
+                .copied()
+                .unwrap_or(false)
+        {
             return Err("NVDEC mapping requires a live decoder and valid picture index".into());
         }
         if self.mapped.len() >= self.output_surfaces as usize {
@@ -394,7 +442,7 @@ impl NvdecSession {
         };
         // Preserve a returned mapping even on refusal so cleanup can retry.
         if pointer != 0 {
-            self.mapped.push((slot, pointer));
+            self.mapped.push((slot, pointer, picture));
             self.next_slot = next_slot;
         }
         if status != 0 {
@@ -433,7 +481,7 @@ impl NvdecSession {
         }
         self.device.handles()?;
         self.device.synchronize()?;
-        for (_, pointer) in &mut self.mapped {
+        for (_, pointer, _) in &mut self.mapped {
             release_mapping(pointer, |pointer| {
                 // SAFETY: Tracked live mapping; unmap precedes decoder destruction.
                 unsafe { (self.unmap)(self.decoder, pointer) }
@@ -458,6 +506,20 @@ impl Drop for NvdecSession {
     }
 }
 impl NvdecApi {
+    fn picture_entrypoint(&self) -> Result<DecodePicture, String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            let name = [b"cuvidDecodePicture".as_slice(), &[0]].concat();
+            // SAFETY: Fixed CUDAAPI signature and SDK-generated picture ABI.
+            let decode = unsafe { self.library.get::<DecodePicture>(name.as_slice()) }
+                .map_err(|e| format!("NVDEC decode entrypoint unavailable: {e}"))?;
+            Ok(*decode)
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            Err("NVDEC requires an NVIDIA driver on Linux or Windows".into())
+        }
+    }
     fn mapping_entrypoints(&self) -> Result<(MapFrame, UnmapFrame), String> {
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         {
@@ -556,6 +618,42 @@ fn release_decoder(
     Ok(())
 }
 
+fn validate_picture(
+    p: &crate::nvdec_sdk::CUVIDPICPARAMS,
+    width: u32,
+    height: u32,
+    surfaces: u32,
+) -> Result<u32, String> {
+    let index = u32::try_from(p.CurrPicIdx).map_err(|_| "NVDEC negative picture index")?;
+    if index >= surfaces
+        || p.PicWidthInMbs != width.div_ceil(16) as i32
+        || p.FrameHeightInMbs != height.div_ceil(16) as i32
+        || p.field_pic_flag != 0
+    {
+        return Err("NVDEC picture geometry/index does not match progressive decoder".into());
+    }
+    if p.nBitstreamDataLen == 0
+        || p.pBitstreamData.is_null()
+        || p.nNumSlices == 0
+        || p.pSliceDataOffsets.is_null()
+        || (p.nNumSlices as u64) * 4 > isize::MAX as u64
+        || p.nBitstreamDataLen as u64 > isize::MAX as u64
+    {
+        return Err("NVDEC picture has invalid byte/slice-array extent".into());
+    }
+    Ok(index)
+}
+fn validate_slice_offsets(offsets: &[u32], bytes: u32) -> Result<(), String> {
+    if offsets.first() != Some(&0)
+        || offsets.last().is_none_or(|last| *last >= bytes)
+        || offsets.windows(2).any(|pair| pair[0] >= pair[1])
+    {
+        return Err(
+            "NVDEC slice offsets must start at zero and increase within the bitstream".into(),
+        );
+    }
+    Ok(())
+}
 fn validate_surface(
     pointer: u64,
     pitch: u32,
@@ -589,6 +687,41 @@ fn release_mapping(pointer: &mut u64, unmap: impl FnOnce(u64) -> i32) -> Result<
 mod tests {
     use super::*;
 
+    #[test]
+    fn picture_storage_and_slice_admission_match_sdk_contract() {
+        use crate::nvdec_sdk::CUVIDPICPARAMS;
+        if std::mem::size_of::<usize>() == 8 {
+            assert_eq!(std::mem::size_of::<CUVIDPICPARAMS>(), 4280);
+            assert_eq!(std::mem::offset_of!(CUVIDPICPARAMS, pBitstreamData), 32);
+            assert_eq!(std::mem::offset_of!(CUVIDPICPARAMS, pSliceDataOffsets), 48);
+            assert_eq!(std::mem::offset_of!(CUVIDPICPARAMS, CodecSpecific), 184);
+        }
+        let bytes = [0_u8; 10];
+        let offsets = [0, 5];
+        let mut p = CUVIDPICPARAMS::default();
+        p.PicWidthInMbs = 8;
+        p.FrameHeightInMbs = 5;
+        p.CurrPicIdx = 1;
+        p.nBitstreamDataLen = bytes.len() as u32;
+        p.pBitstreamData = bytes.as_ptr();
+        p.nNumSlices = 2;
+        p.pSliceDataOffsets = offsets.as_ptr();
+        assert_eq!(validate_picture(&p, 128, 72, 4).unwrap(), 1);
+        assert!(validate_slice_offsets(&offsets, 10).is_ok());
+        for invalid in [&[][..], &[1, 5], &[0, 0], &[0, 10], &[0, 8, 5]] {
+            assert!(validate_slice_offsets(invalid, 10).is_err());
+        }
+        p.CurrPicIdx = -1;
+        assert!(validate_picture(&p, 128, 72, 4).is_err());
+        p.CurrPicIdx = 4;
+        assert!(validate_picture(&p, 128, 72, 4).is_err());
+        p.CurrPicIdx = 0;
+        p.field_pic_flag = 1;
+        assert!(validate_picture(&p, 128, 72, 4).is_err());
+        p.field_pic_flag = 0;
+        p.pBitstreamData = std::ptr::null();
+        assert!(validate_picture(&p, 128, 72, 4).is_err());
+    }
     #[test]
     fn mapped_surface_extent_and_release_failures_are_checked() {
         assert!(validate_surface(4096, 1920, 1920, 1080, 8).is_ok());
