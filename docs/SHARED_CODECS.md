@@ -497,11 +497,20 @@ The standalone `native-cuda` feature exports the same operation contracts and
 
 The native route currently excludes host bounce
 from automatic selection to retain existing command semantics until qualified;
-Main10 needs the P010 render/encode path, and other codecs/containers remain on
+Main10 now has owned P010 buffers/rendering but still needs NVENC Main10 and
+HEVC bitstream/container export; other codecs/containers remain on
 the legacy route. This is not yet elimination
 of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
 owned route preserves that track scope while retaining metadata and exact movie
 occurrences. Its nominal rate is reduced from source sample count/duration.
+
+The shared movie renderer selects a typed `Yuv420Buffer`/`Yuv420Processor` pair:
+NV12 for eight-bit and P010 for ten-bit, retaining byte pitches and code depth.
+Owned P010 black fill includes padding, with limited Y=64 and neutral UV=512
+stored MSB-aligned in 16-bit words. P010 processors now expose the same explicit
+launch synchronization boundary as NV12 before NVDEC unmap or cleanup. The
+Main10 repeated-edit fixture is accepted by own software/clock tests; physical
+CUDA black fill and movie/shader rendering remain ignored hardware tests.
 
 `MovieSource` dispatches owned AVC/HEVC inputs into a shared `MovieReader` and
 NV12 `MovieRenderer`; the original AVC names remain aliases. HEVC movie

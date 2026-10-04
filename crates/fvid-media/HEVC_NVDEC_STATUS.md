@@ -32,8 +32,11 @@ qualification; they do not prove hardware image correctness or performance.
 Hidden output/RASL pictures are removed from presentation events and remain
 decoder preroll. Mid-stream prior-output suppression, in-band parameter changes
 and field sequences remain explicitly unqualified.
-Long-term references are still refused by the own slice parser. Main10 also needs
-a compatible output/render/encode path. Driver acceptance and decoded image
+Long-term references are still refused by the own slice parser. Main10 can now
+render through owned P010 buffers/processors, including blank/repeated edits and
+trusted shaders. NVENC Main10 initialization/registration and owned HEVC
+bitstream/container export remain pending, so production export still refuses
+Main10 before opening GPU resources. Driver acceptance and decoded image
 correctness have not been verified on NVIDIA hardware.
 
 The ignored Linux/Windows test

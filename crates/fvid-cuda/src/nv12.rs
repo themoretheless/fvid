@@ -34,6 +34,17 @@ pub struct P010Processor {
 }
 
 impl P010Processor {
+    /// Wait even after a partially queued launch failed, before unmap/cleanup.
+    pub fn synchronize(&self) -> Result<(), String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.inner.synchronize_launch()
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            Err(crate::unsupported())
+        }
+    }
     pub fn device_name(&self) -> &str {
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         {

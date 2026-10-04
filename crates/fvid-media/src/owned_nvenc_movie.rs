@@ -65,6 +65,12 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         slots: usize,
         wait: Duration,
     ) -> Result<Self, String> {
+        if renderer.buffer().bit_depth() != 8 {
+            return Err(
+                "native movie encoder still requires NV12; P010 NVENC/HEVC export is pending"
+                    .into(),
+            );
+        }
         let pool = Pool::new(slots)?;
         if wait.is_zero() {
             return Err("movie encoder wait must be positive".into());
@@ -172,7 +178,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                     let (width, height) = buffer.dimensions();
                     self.copy.follow_stream(buffer.stream_handle()?);
                     let copied = self.copy.apply(
-                        self.renderer.buffer().view()?,
+                        self.renderer.buffer().nv12_view()?,
                         buffer.view()?,
                         Nv12Transform {
                             out_width: width,

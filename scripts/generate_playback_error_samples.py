@@ -118,13 +118,15 @@ def main():
     seeds = load_seeds()
     OUT.mkdir(parents=True, exist_ok=True)
     # Public synthetic HEVC seed only; never import user videos or parameters.
-    hevc = (ROOT / "tests/fixtures/hevc/main-ipb.mp4").read_bytes()
-    order = [kind for kind, _ in children(hevc)]
-    assert order.index(b"mdat") < order.index(b"moov")
     # Movie clock 30 Hz, media clock 15360 Hz. Six-frame range is replayed,
     # with leading/interior 0.1-second black spans.
-    (OUT / "hevc-cuda-edit-repeat.mp4").write_bytes(rewrite(hevc,
-        edits=[(3, -1), (6, 1024), (3, -1), (6, 1024)]))
+    for seed, name in [("main-ipb.mp4", "hevc-cuda-edit-repeat.mp4"),
+                       ("main10-ipb.mp4", "hevc-main10-cuda-edit-repeat.mp4")]:
+        hevc = (ROOT / "tests/fixtures/hevc" / seed).read_bytes()
+        order = [kind for kind, _ in children(hevc)]
+        assert order.index(b"mdat") < order.index(b"moov")
+        (OUT / name).write_bytes(rewrite(hevc,
+            edits=[(3, -1), (6, 1024), (3, -1), (6, 1024)]))
     control = OUT / "control.mp4"
     control.write_bytes(seeds["control.mp4"])
     (OUT / "ffv1-level-one-source.mp4").write_bytes(ffv1_level_one_source(seeds["control.mp4"]))

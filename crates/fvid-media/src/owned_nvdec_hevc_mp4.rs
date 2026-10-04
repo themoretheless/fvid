@@ -22,38 +22,53 @@ mod tests {
     const MAIN10: &[u8] = include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4");
     #[test]
     fn synthetic_hevc_edits_keep_blanks_and_repeated_b_picture_occurrences() {
-        let mut input = HevcMp4Input::open(
-            Cursor::new(
+        for (bytes, depth) in [
+            (
                 include_bytes!("../../../tests/fixtures/playback-errors/hevc-cuda-edit-repeat.mp4")
                     .as_slice(),
+                8,
             ),
-            Limits::default(),
-        )
-        .unwrap();
-        input.qualify_packets().unwrap();
-        assert_eq!(
-            (input.movie_timescale(), input.track().timescale),
-            (30, 15360)
-        );
-        let events = input.movie_presentations(100).unwrap();
-        assert_eq!(events.len(), 14);
-        let blanks: Vec<_> = events
-            .iter()
-            .filter(|event| event.sample.is_none())
-            .collect();
-        assert_eq!(blanks.len(), 2);
-        assert!(blanks.iter().all(|event| event.end - event.start == 1536));
-        let first: Vec<_> = events.iter().filter(|event| event.range == 1).collect();
-        let repeated: Vec<_> = events.iter().filter(|event| event.range == 3).collect();
-        assert_eq!(first.len(), 6);
-        assert_eq!(repeated.len(), 6);
-        for (a, b) in first.iter().zip(&repeated) {
-            assert_eq!(a.sample, b.sample);
-            assert_eq!(b.start - a.start, 4608);
-            assert_eq!(a.end - a.start, 512);
+            (
+                include_bytes!(
+                    "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
+                )
+                .as_slice(),
+                10,
+            ),
+        ] {
+            let mut input = HevcMp4Input::open(Cursor::new(bytes), Limits::default()).unwrap();
+            assert_eq!(input.bit_depth(), depth);
+            let mut decoder =
+                HevcDecoder::from_configuration(&input.track().configuration, 64 << 20).unwrap();
+            let mut packet = Vec::new();
+            while input.read_next(&mut packet).unwrap().is_some() {
+                assert!(decoder.decode_packet(&packet).unwrap().is_some());
+            }
+            input.qualify_packets().unwrap();
+            assert_eq!(
+                (input.movie_timescale(), input.track().timescale),
+                (30, 15360)
+            );
+            let events = input.movie_presentations(100).unwrap();
+            assert_eq!(events.len(), 14);
+            let blanks: Vec<_> = events
+                .iter()
+                .filter(|event| event.sample.is_none())
+                .collect();
+            assert_eq!(blanks.len(), 2);
+            assert!(blanks.iter().all(|event| event.end - event.start == 1536));
+            let first: Vec<_> = events.iter().filter(|event| event.range == 1).collect();
+            let repeated: Vec<_> = events.iter().filter(|event| event.range == 3).collect();
+            assert_eq!(first.len(), 6);
+            assert_eq!(repeated.len(), 6);
+            for (a, b) in first.iter().zip(&repeated) {
+                assert_eq!(a.sample, b.sample);
+                assert_eq!(b.start - a.start, 4608);
+                assert_eq!(a.end - a.start, 512);
+            }
+            assert!(events.windows(2).all(|pair| pair[0].end <= pair[1].start));
+            assert_eq!(events.last().unwrap().end, 9216);
         }
-        assert!(events.windows(2).all(|pair| pair[0].end <= pair[1].start));
-        assert_eq!(events.last().unwrap().end, 9216);
     }
     #[test]
     fn own_hevc_input_qualifies_rewinds_and_preserves_all_sample_clocks() {

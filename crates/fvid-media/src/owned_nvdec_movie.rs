@@ -419,9 +419,9 @@ fn transformed_metadata(
 /// Complete external uses of `buffer()` before advancing or closing this renderer.
 pub struct MovieRenderer<R: Read + Seek> {
     reader: std::mem::ManuallyDrop<MovieReader<R>>,
-    output: std::mem::ManuallyDrop<fvid_cuda::Nv12Buffer>,
-    blank: std::mem::ManuallyDrop<Option<fvid_cuda::Nv12Buffer>>,
-    filter: std::mem::ManuallyDrop<fvid_cuda::Nv12Processor>,
+    output: std::mem::ManuallyDrop<fvid_cuda::Yuv420Buffer>,
+    blank: std::mem::ManuallyDrop<Option<fvid_cuda::Yuv420Buffer>>,
+    filter: std::mem::ManuallyDrop<fvid_cuda::Yuv420Processor>,
     transform: fvid_cuda::Nv12Transform,
     full_range: bool,
     metadata: MovieVideoMetadata,
@@ -443,11 +443,7 @@ impl<R: Read + Seek> MovieRenderer<R> {
         full_range: bool,
         shader: Option<&fvid_cuda::ByteShader>,
     ) -> Result<Self, String> {
-        if reader.source.bit_depth() != 8 {
-            return Err(
-                "native NV12 movie renderer requires eight-bit input; Main10 needs P010".into(),
-            );
-        }
+        let depth = reader.source.bit_depth();
         let (width, height) = reader.source.coded_dimensions();
         let metadata = transformed_metadata(
             reader.video_metadata()?,
@@ -456,17 +452,23 @@ impl<R: Read + Seek> MovieRenderer<R> {
             transform,
             full_range,
         )?;
-        let output =
-            fvid_cuda::Nv12Buffer::new(reader.ordinal, transform.out_width, transform.out_height)?;
+        let output = fvid_cuda::Yuv420Buffer::new(
+            reader.ordinal,
+            transform.out_width,
+            transform.out_height,
+            depth,
+        )?;
         let blank = if shader.is_some() {
-            Some(fvid_cuda::Nv12Buffer::new(reader.ordinal, width, height)?)
+            Some(fvid_cuda::Yuv420Buffer::new(
+                reader.ordinal,
+                width,
+                height,
+                depth,
+            )?)
         } else {
             None
         };
-        let mut filter = match shader {
-            Some(shader) => fvid_cuda::Nv12Processor::with_shader(reader.ordinal, shader)?,
-            None => fvid_cuda::Nv12Processor::new(reader.ordinal)?,
-        };
+        let mut filter = fvid_cuda::Yuv420Processor::new(reader.ordinal, depth, shader)?;
         filter.follow_stream(output.stream_handle()?);
         Ok(Self {
             reader: std::mem::ManuallyDrop::new(reader),
@@ -492,7 +494,7 @@ impl<R: Read + Seek> MovieRenderer<R> {
     pub(crate) fn ordinal(&self) -> usize {
         self.reader.ordinal
     }
-    pub fn buffer(&self) -> &fvid_cuda::Nv12Buffer {
+    pub fn buffer(&self) -> &fvid_cuda::Yuv420Buffer {
         &self.output
     }
     pub fn media_timescale(&self) -> u32 {
@@ -515,18 +517,13 @@ impl<R: Read + Seek> MovieRenderer<R> {
         if let Some(frame) = presented.frame {
             let surface = self.reader.map(&frame)?;
             let (width, height) = self.reader.source.coded_dimensions();
-            let uv = surface
-                .pointer
-                .checked_add(u64::from(surface.pitch) * u64::from(height))
-                .ok_or("NVDEC UV pointer overflow")?;
-            let source = fvid_cuda::Nv12View {
-                y: surface.pointer,
-                uv,
-                pitch_y: surface.pitch,
-                pitch_uv: surface.pitch,
+            let source = fvid_cuda::Yuv420View::from_contiguous(
+                surface.pointer,
+                surface.pitch,
                 width,
                 height,
-            };
+                surface.bit_depth,
+            )?;
             let operation = self
                 .filter
                 .apply(source, self.output.view()?, self.transform);
@@ -603,6 +600,67 @@ fn validate_transform(width: u32, height: u32, t: fvid_cuda::Nv12Transform) -> R
 
 #[cfg(test)]
 mod tests {
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA HEVC Main10 NVDEC and CUDA"]
+    fn synthetic_main10_movie_renders_p010_blanks_repeats_and_shader_on_nvidia() {
+        use crate::owned_nvdec_hevc_mp4::HevcMp4Input;
+        for white_shader in [false, true] {
+            let mut source = HevcMp4Input::open(
+                std::io::Cursor::new(
+                    include_bytes!(
+                        "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
+                    )
+                    .as_slice(),
+                ),
+                Default::default(),
+            )
+            .unwrap();
+            let expected = source.visible_movie_presentations(1000).unwrap();
+            assert_eq!(source.bit_depth(), 10);
+            let (width, height) = source.coded_dimensions();
+            let reader = MovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
+            let shader=white_shader.then(||fvid_cuda::ByteShader::new("__device__ unsigned int process_byte(unsigned int v, unsigned int p, unsigned int x, unsigned int y) { return p == 0u ? 940u : 512u; }").unwrap());
+            let mut renderer = MovieRenderer::new_with_shader(
+                reader,
+                fvid_cuda::Nv12Transform {
+                    out_width: width,
+                    out_height: height,
+                    hflip: true,
+                    vflip: true,
+                    ..Default::default()
+                },
+                false,
+                shader.as_ref(),
+            )
+            .unwrap();
+            let mut count = 0;
+            while let Some(event) = renderer.render_next().unwrap() {
+                assert_eq!(
+                    (event.sample, event.start, event.end),
+                    (
+                        expected[count].sample,
+                        expected[count].start,
+                        expected[count].end
+                    )
+                );
+                assert_eq!(renderer.buffer().bit_depth(), 10);
+                assert!(renderer.buffer().nv12_view().is_err());
+                let fvid_cuda::Yuv420View::P010(view) = renderer.buffer().view().unwrap() else {
+                    panic!("Main10 must remain P010")
+                };
+                assert_ne!(view.y, 0);
+                assert!(view.pitch_y >= width * 2);
+                count += 1;
+            }
+            assert_eq!(count, 14);
+            assert_eq!(
+                renderer.device_filter_passes(),
+                if white_shader { 14 } else { 12 }
+            );
+            renderer.close().unwrap();
+        }
+    }
     #[test]
     fn suppressed_preroll_advances_decode_without_creating_black_events() {
         let mut queue = Queue::<usize>::new(
@@ -840,7 +898,7 @@ mod tests {
                 (event.sample, event.start, event.end),
                 (expected.sample, expected.start, expected.end)
             );
-            assert_ne!(renderer.buffer().view().unwrap().y, 0);
+            assert_ne!(renderer.buffer().nv12_view().unwrap().y, 0);
             if event.sample.is_none() {
                 blanks += 1;
             }

@@ -20,6 +20,7 @@ def qualify_native_tests(root, run):
         ("fvid-cuda", "pipeline::tests", ["resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip", "sampling_shader_matches_independent_crop_and_reflection_reference"], []),
         ("fvid-cuda", "nv12_buffer::tests", [
             "device_black_fill_has_correct_luma_chroma_and_padding",
+            "device_p010_black_fill_has_exact_codes_and_word_padding",
         ], []),
         ("fvid-cuda", "nv12::native_nv12::shader_tests", ["native_nv12_sampling_shader_preserves_pitches_and_matches_cpu", "native_p010_sampling_shader_preserves_pitches_and_matches_cpu", "followed_stream_survives_parameter_changes_and_processor_drop"], []),
         ("fvid-media", "owned_nvdec_avc", [
@@ -45,6 +46,7 @@ def qualify_native_tests(root, run):
         ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_nvdec_movie", [
             "synthetic_movie_blanks_and_repeated_ranges_present_on_nvidia",
+            "synthetic_main10_movie_renders_p010_blanks_repeats_and_shader_on_nvidia",
         ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "hw_cuda::layout_tests", ["main10_filter_encodes_hevc_without_host_frame_copies", "vertical_reflection_copies_host_frames_only_when_explicitly_requested"], ["--features", "cuda-hw"]),
     ]
