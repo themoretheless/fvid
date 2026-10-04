@@ -44,6 +44,8 @@ fn main() {
                 "1:-2:-3:2:smear",
                 "-255:255:255:-255:wrap",
                 "cbh=3:crv=-2:edge=1",
+                "cbh=PI:cbv=-3/2:crh=5/2:crv=-5/2:edge=1/2",
+                "cbh=max:cbv=min:crh=default:crv=2^3:edge=wrap",
             ] {
                 let mut f = frame(depth, sub);
                 let input = f.data.clone();

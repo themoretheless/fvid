@@ -102,3 +102,32 @@ fn decode_cli_and_api_preserve_native_backend_and_intervals() {
         }
     }
 }
+
+#[test]
+fn constant_expressions_keep_native_pixels_and_public_route() {
+    for depth in [8, 10, 16] {
+        for sub in [[2, 2], [2, 1], [1, 1]] {
+            for (expression, literal) in [
+                ("cbh=PI:cbv=-3/2:crh=5/2:crv=-5/2:edge=1/2", "3:-2:2:-2:smear"),
+                ("cbh=max:cbv=min:crh=default:crv=2^3:edge=wrap", "255:-255:0:8:wrap"),
+            ] {
+                let mut actual = frame(depth, sub);
+                let mut expected = frame(depth, sub);
+                ChromaShift::parse(expression).unwrap().apply(&mut actual, depth).unwrap();
+                ChromaShift::parse(literal).unwrap().apply(&mut expected, depth).unwrap();
+                assert_eq!(actual.data, expected.data);
+            }
+        }
+    }
+    for invalid in ["cbh=n", "cbh=1/0", "cbh=255.1", "edge=1.1"] {
+        assert!(ChromaShift::parse(invalid).is_err(), "{invalid}");
+    }
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let request = fvid::media::DecodeTransform {
+        chromashift: Some("cbh=1+2:edge=wrap".into()),
+        ..Default::default()
+    };
+    let stats = fvid::media::decode_video_transformed(&path, request).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.video_frames, 25);
+}

@@ -26,21 +26,24 @@ impl ChromaShift {
                 .iter()
                 .position(|name| *name == key.trim())
                 .ok_or_else(|| invalid("unknown chromashift option"))?;
-            if index == 4 {
-                result.wrap = match value.trim() {
-                    "smear" | "0" => false,
-                    "wrap" | "1" => true,
-                    _ => return Err(invalid("chromashift edge must be smear, wrap, 0 or 1")),
-                };
+            let (minimum, maximum, constants): (f64, f64, &[(&str, f64)]) = if index == 4 {
+                (0.0, 1.0, &[("smear", 0.0), ("wrap", 1.0)])
             } else {
-                let shift = value
-                    .trim()
-                    .parse::<i16>()
-                    .map_err(|_| invalid("chromashift requires integer shifts"))?;
-                if !(-255..=255).contains(&shift) {
-                    return Err(invalid("chromashift shift must be -255..255"));
-                }
-                result.shifts[index / 2][index % 2] = shift;
+                (-255.0, 255.0, &[])
+            };
+            let mut variables = vec![("min", minimum), ("max", maximum), ("default", 0.0)];
+            variables.extend_from_slice(constants);
+            let number = chromashift_expression::Expression::parse(value.trim())
+                .and_then(|expression| expression.evaluate(&variables))
+                .map_err(|_| invalid("chromashift requires a constant numeric expression"))?;
+            if !number.is_finite() || !(minimum..=maximum).contains(&number) {
+                return Err(invalid("chromashift option outside supported range"));
+            }
+            let number = number.round_ties_even() as i16;
+            if index == 4 {
+                result.wrap = number != 0;
+            } else {
+                result.shifts[index / 2][index % 2] = number;
             }
         }
         Ok(result)

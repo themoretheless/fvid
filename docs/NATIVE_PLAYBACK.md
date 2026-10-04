@@ -15,6 +15,10 @@ cargo run --release --no-default-features --features player -- play --start-time
 Их acceptance-тесты запускаются с `--no-default-features` без libav.
 Sobel, Prewitt, Roberts, Kirsch и Scharr вычисляют постоянные выражения
 для `scale` и `delta` собственным parser/evaluator, включая `PI` и арифметику.
+`chromashift` также вычисляет постоянные выражения, `min`/`max`/`default`
+и `smear`/`wrap`, проверяя диапазон до округления целых параметров.
+Benchmark `ffmpeg_chromashift_reference` проверяет 138 комбинаций параметров,
+форматов и глубин побайтовым сравнением; обычные acceptance-тесты не запускают FFmpeg.
 Feature `media` пока включает legacy backend для ещё не перенесённых операций;
 `mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
 из production ещё не завершено.
