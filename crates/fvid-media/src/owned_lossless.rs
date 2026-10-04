@@ -195,6 +195,15 @@ fn policy(o: &CopyOptions, text_tags: bool) -> bool {
 }
 /// Whether the owned export pipeline admits this source, transform and policy.
 pub fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
+    if policy(o,true) && request(t).is_some() {
+        match crate::owned_mp4_video_bridge::prepare(source,Some(o)) {
+            Ok(Some(temporary)) => {
+                if request(t).is_some_and(|r|crate::owned_ffv1_export::supports(&temporary.path,&r)){return true;}
+            }
+            Err(_) if crate::owned_mp4_video_bridge::recognizes(source) => return true,
+            _=>{},
+        }
+    }
     if policy(o, true) && request(t).is_some_and(|r| crate::owned_ffv1_export::supports(source, &r)) {
         return true;
     }
@@ -235,6 +244,11 @@ pub fn transcode_lossless(
     }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
+    if policy(options,true) {
+        if let Some(temporary)=crate::owned_mp4_video_bridge::prepare(source,Some(options))? {
+            return transcode_lossless(&temporary.path,destination,transform,options);
+        }
+    }
     if policy(options, true) && crate::owned_ffv1_export::supports(source, &request) {
         let (stats, event, consumed) =
             crate::owned_ffv1_export::export(source, destination, &request, options)?;

@@ -10,6 +10,16 @@ pub(crate) fn try_decode(
     source: &Path,
     transform: &DecodeTransform,
 ) -> Result<Option<DecodeStats>> {
+    decode_presented(source, transform, None, None)
+}
+
+pub(crate) type Visitor<'a> = dyn FnMut(&FrameMetadata, &[u8], u64, u64) -> Result<()> + 'a;
+pub(crate) fn decode_presented(
+    source: &Path,
+    transform: &DecodeTransform,
+    mut visit: Option<&mut Visitor<'_>>,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<DecodeStats>> {
     if transform
         .input_format
         .as_deref()
@@ -19,7 +29,10 @@ pub(crate) fn try_decode(
     }
     let mut reader = match crate::owned_mp4::Mp4Reader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        crate::owned_mp4::Limits {
+            packet_bytes: options.map_or(32 << 20, |o| o.max_packet_bytes),
+            ..Default::default()
+        },
     ) {
         Ok(value) => value,
         Err(error) if error.is_unsupported() => return Ok(None),
@@ -48,6 +61,17 @@ pub(crate) fn try_decode(
         Err(Error::Unsupported(_)) => return Ok(None),
         Err(error) => return Err(error.to_string()),
     };
+    let scale = track.timescale;
+    let container_colour = track.colour;
+    let container_hdr = track.hdr;
+    let mut spool = if visit.is_some() {
+        Some(crate::owned_reverse::Reverse::new()?)
+    } else {
+        None
+    };
+    let mut spool_count = 0;
+    let mut storage_format = None;
+    let mut pixels = Vec::new();
     let configuration = track.configuration.clone();
     let samples = track.samples.len();
     let avc = matches!(&track.codec, b"avc1" | b"avc3");
@@ -71,6 +95,7 @@ pub(crate) fn try_decode(
             Err(error) => return Err(error.to_string()),
         };
         for sample in 0..samples {
+            check_options(options, sample)?;
             let timing = reader.tracks()[index]
                 .samples
                 .get(sample)
@@ -85,7 +110,33 @@ pub(crate) fn try_decode(
             };
             if let Some(picture) = decoded {
                 let (width, height) = picture.dimensions();
+                if let Some(spool) = spool.as_mut() {
+                    let current = (
+                        [width as u32, height as u32],
+                        picture.bit_depth,
+                        [true, true],
+                        false,
+                    );
+                    if storage_format.is_some_and(|previous| previous != current) {
+                        return Ok(None);
+                    }
+                    storage_format = Some(current);
+                    pixels = pack_avc(&picture)?;
+                    spool.push(&pixels, 0, 0)?;
+                }
+                let mut colour = container_colour;
+                if let Some((_, full, codes)) = decoder.active_vui().and_then(|v| v.video_signal) {
+                    colour.full_range = full;
+                    if let Some([primaries, transfer, matrix]) = codes {
+                        colour.primaries = primaries;
+                        colour.transfer = transfer;
+                        colour.matrix = matrix;
+                    }
+                }
                 frames.push(FrameMetadata {
+                    colour,
+                    hdr: container_hdr,
+                    slot: spool_count,
                     pts: timing.pts,
                     duration: i64::from(timing.duration),
                     sample,
@@ -97,6 +148,7 @@ pub(crate) fn try_decode(
                     sub: [true, true],
                     mono: false,
                 });
+                spool_count += 1;
             }
         }
     } else {
@@ -106,6 +158,7 @@ pub(crate) fn try_decode(
             Err(error) => return Err(error.to_string()),
         };
         for sample in 0..samples {
+            check_options(options, sample)?;
             let timing = reader.tracks()[index]
                 .samples
                 .get(sample)
@@ -137,7 +190,39 @@ pub(crate) fn try_decode(
                     2 => [true, false],
                     _ => return Err("invalid HEVC chroma format".into()),
                 };
+                if let Some(spool) = spool.as_mut() {
+                    let current = (size, picture.depth[0], sub, chroma == 0);
+                    if storage_format.is_some_and(|previous| previous != current) {
+                        return Ok(None);
+                    }
+                    storage_format = Some(current);
+                    if chroma != 0 && picture.depth[0] != picture.depth[1] {
+                        return Ok(None);
+                    }
+                    pixels = pack_hevc(picture, sub, chroma == 0)?;
+                    spool.push(&pixels, 0, 0)?;
+                }
+                let mut colour = container_colour;
+                if let Some(signal) = decoder.parameters().0.vui.as_ref().and_then(|v| v.signal) {
+                    colour.full_range = signal.full_range;
+                    if let Some([primaries, transfer, matrix]) = signal.colour {
+                        colour.primaries = primaries;
+                        colour.transfer = transfer;
+                        colour.matrix = matrix;
+                    }
+                }
+                let mut hdr = crate::owned_webm_codec::hdr_metadata(decoder.hdr());
+                hdr.mastering = hdr.mastering.or(container_hdr.mastering);
+                if hdr.light.max_cll == 0.0 {
+                    hdr.light.max_cll = container_hdr.light.max_cll;
+                }
+                if hdr.light.max_fall == 0.0 {
+                    hdr.light.max_fall = container_hdr.light.max_fall;
+                }
                 frames.push(FrameMetadata {
+                    colour,
+                    hdr,
+                    slot: spool_count,
                     pts: timing.pts,
                     duration: i64::from(timing.duration),
                     sample,
@@ -146,6 +231,7 @@ pub(crate) fn try_decode(
                     sub,
                     mono: chroma == 0,
                 });
+                spool_count += 1;
             }
         }
     }
@@ -158,7 +244,19 @@ pub(crate) fn try_decode(
                 .ok_or("video timestamp overflow")?
                 > 0
             {
-                frame.account(&mut stats)?;
+                emit(
+                    frame,
+                    frame.pts.max(0),
+                    frame
+                        .pts
+                        .checked_add(frame.duration)
+                        .ok_or("video timestamp overflow")?,
+                    scale,
+                    &mut spool,
+                    &mut pixels,
+                    &mut visit,
+                    &mut stats,
+                )?;
             }
         }
     } else {
@@ -178,7 +276,24 @@ pub(crate) fn try_decode(
                 .map_err(|e| e.to_string())?
                     != 0
                 {
-                    frame.account(&mut stats)?;
+                    let start = frame.pts.max(edit.media_start);
+                    let end = (frame.pts + frame.duration).min(edit.media_end);
+                    let mapped = edit
+                        .movie_start
+                        .checked_add(start - edit.media_start)
+                        .ok_or("movie timestamp overflow")?;
+                    emit(
+                        frame,
+                        mapped,
+                        mapped
+                            .checked_add(end - start)
+                            .ok_or("movie timestamp overflow")?,
+                        scale,
+                        &mut spool,
+                        &mut pixels,
+                        &mut visit,
+                        &mut stats,
+                    )?;
                 }
             }
         }
@@ -190,14 +305,17 @@ pub(crate) fn try_decode(
 }
 
 #[derive(Clone, Copy)]
-struct FrameMetadata {
+pub(crate) struct FrameMetadata {
+    pub colour: crate::owned_matroska::ColourDescription,
+    pub hdr: crate::owned_matroska::HdrMetadata,
+    slot: u64,
     pts: i64,
     duration: i64,
     sample: usize,
-    size: [u32; 2],
-    depth: u8,
-    sub: [bool; 2],
-    mono: bool,
+    pub size: [u32; 2],
+    pub depth: u8,
+    pub sub: [bool; 2],
+    pub mono: bool,
 }
 impl FrameMetadata {
     fn account(&self, stats: &mut DecodeStats) -> Result<()> {
@@ -248,6 +366,9 @@ mod tests {
     use super::*;
     fn frame(pts: i64, duration: i64, sample: usize) -> FrameMetadata {
         FrameMetadata {
+            colour: Default::default(),
+            hdr: Default::default(),
+            slot: sample as u64,
             pts,
             duration,
             sample,
@@ -270,4 +391,136 @@ mod tests {
         assert!(normalize_presentations(&mut vec![frame(0, 0, 0)]).is_err());
         assert!(normalize_presentations(&mut vec![frame(i64::MAX, 1, 0)]).is_err());
     }
+}
+
+fn check_options(options: Option<&fvid_control::CopyOptions>, sample: usize) -> Result<()> {
+    if options
+        .and_then(|o| o.cancel.as_ref())
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
+        return Err("media operation cancelled".into());
+    }
+    if options
+        .and_then(|o| o.max_packets)
+        .is_some_and(|n| sample as u64 >= n)
+    {
+        return Err("MP4 input packet count exceeds limit".into());
+    }
+    Ok(())
+}
+fn emit(
+    frame: &FrameMetadata,
+    start: i64,
+    end: i64,
+    scale: u32,
+    spool: &mut Option<crate::owned_reverse::Reverse>,
+    pixels: &mut Vec<u8>,
+    visit: &mut Option<&mut Visitor<'_>>,
+    stats: &mut DecodeStats,
+) -> Result<()> {
+    frame.account(stats)?;
+    if let (Some(spool), Some(callback)) = (spool.as_mut(), visit.as_deref_mut()) {
+        if scale == 0 || start < 0 || end <= start {
+            return Err("invalid MP4 presentation interval".into());
+        }
+        let ns = |ticks: i64| {
+            u64::try_from(i128::from(ticks) * 1_000_000_000 / i128::from(scale))
+                .map_err(|_| "MP4 timestamp exceeds nanosecond range".to_string())
+        };
+        let start = ns(start)?;
+        let end = ns(end)?;
+        if end <= start {
+            return Err("MP4 interval is below nanosecond precision".into());
+        }
+        spool.read_at(frame.slot, pixels)?;
+        callback(frame, pixels, start, end - start)?;
+    }
+    Ok(())
+}
+fn pack_avc(p: &fvid_codecs::codec::avc_picture::IntraPicture) -> Result<Vec<u8>> {
+    pack_cropped(
+        [p.coded_width, p.coded_height],
+        p.crop,
+        p.bit_depth,
+        [true, true],
+        false,
+        [&p.y, &p.cb, &p.cr],
+    )
+}
+fn pack_hevc(
+    p: &fvid_codecs::codec::hevc_picture::Picture,
+    sub: [bool; 2],
+    mono: bool,
+) -> Result<Vec<u8>> {
+    pack_cropped(
+        p.dimensions.map(|v| v as usize),
+        p.crop.map(|v| v as usize),
+        p.depth[0],
+        sub,
+        mono,
+        p.planes.each_ref().map(|plane| plane.samples()),
+    )
+}
+fn pack_cropped(
+    coded: [usize; 2],
+    crop: [usize; 4],
+    depth: u8,
+    sub: [bool; 2],
+    mono: bool,
+    planes: [&[u16]; 3],
+) -> Result<Vec<u8>> {
+    let width = coded[0]
+        .checked_sub(crop[0])
+        .and_then(|n| n.checked_sub(crop[1]))
+        .ok_or("video crop exceeds width")?;
+    let height = coded[1]
+        .checked_sub(crop[2])
+        .and_then(|n| n.checked_sub(crop[3]))
+        .ok_or("video crop exceeds height")?;
+    let sub = if mono {
+        [1, 1]
+    } else {
+        sub.map(|v| if v { 2 } else { 1 })
+    };
+    let chroma = width
+        .div_ceil(sub[0])
+        .checked_mul(height.div_ceil(sub[1]))
+        .ok_or("chroma size overflow")?;
+    let count = width
+        .checked_mul(height)
+        .and_then(|n| chroma.checked_mul(2).and_then(|c| n.checked_add(c)))
+        .ok_or("video size overflow")?;
+    let bytes = if depth == 8 { 1 } else { 2 };
+    let mut output =
+        crate::owned_frame::buffer(count.checked_mul(bytes).ok_or("video size overflow")?)?;
+    let mut cursor = 0;
+    for (component, plane) in planes.iter().enumerate() {
+        let (sx, sy) = if component == 0 {
+            (1, 1)
+        } else {
+            (sub[0], sub[1])
+        };
+        let stride = coded[0].div_ceil(sx);
+        for row in 0..height.div_ceil(sy) {
+            for column in 0..width.div_ceil(sx) {
+                let sample = if mono && component > 0 {
+                    1u16 << (depth - 1)
+                } else {
+                    let index = (crop[2] / sy + row)
+                        .checked_mul(stride)
+                        .and_then(|v| v.checked_add(crop[0] / sx + column))
+                        .ok_or("video sample offset overflow")?;
+                    *plane.get(index).ok_or("decoded crop exceeds plane")?
+                };
+                if depth == 8 {
+                    output[cursor] = u8::try_from(sample).map_err(|_| "8-bit sample overflow")?;
+                    cursor += 1;
+                } else {
+                    output[cursor..cursor + 2].copy_from_slice(&sample.to_le_bytes());
+                    cursor += 2;
+                }
+            }
+        }
+    }
+    Ok(output)
 }

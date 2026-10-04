@@ -781,7 +781,7 @@ SHA256:
 
 ### Shared MP4 decoder dispatch
 
-`generate-shared-mp4.py` derives four cases from the existing short synthetic AVC and HEVC fixtures, replacing complete `edts` boxes with equally sized `free` boxes. Packet bytes and sample offsets remain unchanged. No private source media or codec parameters are used, and no encoder, FFmpeg or network is invoked. `native_shared_codecs` accepts baseline/B-picture AVC and Main/Main10 HEVC through standalone own kernels, comparing counts, visible geometry and source pixel formats with root native playback. Edit lists and transformed requests have separate refusal tests, not acceptance claims.
+`generate-shared-mp4.py` derives four cases from the existing short synthetic AVC and HEVC fixtures, replacing complete `edts` boxes with equally sized `free` boxes. Packet bytes and sample offsets remain unchanged. No private source media or codec parameters are used, and no encoder, FFmpeg or network is invoked. `native_shared_codecs` accepts baseline/B-picture AVC and Main/Main10 HEVC through standalone own kernels, comparing counts, visible geometry and source pixel formats with root native playback. Shared edit lists and single-video-track transforms now have acceptance coverage; interior empty edits retain separate refusal coverage.
 
 - `shared-avc-baseline.mp4`: `a61bb2d3c42029fafbf7bde4f0ac52464d1333c763dae192bb5710ff23a68122`
 - `shared-avc-bframes.mp4`: `dc2592399a106e13e769c4d727fa33b94e00bec2407b57093e7c17bae577b70d`
@@ -816,3 +816,12 @@ The Python-only shared-codec generator adds three short public synthetic derivat
 
 - `shared-vp9-inferred-duration.webm`: `1dd1d6e8cf324afa263ef472ed89f2913096b1b82e30238811ba77c5613fcce0`
 - `shared-av1-inferred-duration.webm`: `a1ecaaa824e4e948e223968bbbe08b53c864e2c84101b53469f189973f37caeb`
+
+### MP4 presentation bridge regressions
+
+The Python-only shared MP4 generator adds two derivatives of the existing synthetic AVC baseline. `shared-mp4-undefined-language.mp4` names the original undefined-language case that initially failed with `unsupported Matroska track description`. Acceptance verifies `und` transport and unchanged pixels. `shared-mp4-corrupt-nal.mp4` replaces only the first media NAL length prefix with 0xffffffff, retaining the complete container and configuration. Tests verify that exact packet prefix, the specific `invalid NAL payload length` error, owned dispatch admission and no output publication. No private frames, audio or codec parameters were used.
+
+`native_mp4_pipeline` reuses the four shared codec fixtures, four supported shared edit fixtures and three duplicate-PTS fixtures. Acceptance compares every plain/negated pixel, step/reverse frame order and every plain output PTS/duration with native presentation. Leading edits use their documented 10-bit source when computing independent negate expectations. Ordinary tests run neither generators nor external encoders. These tests qualify the admitted single-video workflow, not multitrack preservation or universal profiles.
+
+- `shared-mp4-undefined-language.mp4`: `a61bb2d3c42029fafbf7bde4f0ac52464d1333c763dae192bb5710ff23a68122`
+- `shared-mp4-corrupt-nal.mp4`: `2d4e1f865f5a6dbb5cec42933a55c88c514ed22f0b0c9fe26363cf8229ba46a5`

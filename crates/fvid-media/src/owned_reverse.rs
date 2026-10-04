@@ -46,6 +46,26 @@ impl Reverse {
             }
         }
     }
+    /// Replay one fixed-size decoded record in presentation order.
+    pub(crate) fn read_at(&mut self, index: u64, data: &mut Vec<u8>) -> Result<()> {
+        if index >= self.count || self.failed {
+            return Err("invalid presentation spool index".into());
+        }
+        let length = self.length.unwrap_or(0);
+        if data.len() < length {
+            data.try_reserve_exact(length - data.len())
+                .map_err(|e| e.to_string())?;
+        }
+        data.resize(length, 0);
+        let offset = index
+            .checked_mul(self.stride()?)
+            .and_then(|v| v.checked_add(16))
+            .ok_or("presentation spool offset overflow")?;
+        let file = self.file.as_mut().unwrap();
+        file.seek(SeekFrom::Start(offset))
+            .and_then(|_| file.read_exact(data))
+            .map_err(|e| e.to_string())
+    }
     fn stride(&self) -> Result<u64> {
         u64::try_from(self.length.unwrap_or(0))
             .ok()

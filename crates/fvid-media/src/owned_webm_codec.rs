@@ -61,29 +61,7 @@ impl Decoder {
         let Kind::Av1(decoder) = &self.kind else {
             return None;
         };
-        let hdr = decoder.hdr();
-        let corner = |value: fvid_codecs::color::primaries::Chromaticity| {
-            crate::owned_matroska::Chromaticity {
-                x: value.x,
-                y: value.y,
-            }
-        };
-        Some(crate::owned_matroska::HdrMetadata {
-            mastering: hdr
-                .mastering
-                .map(|m| crate::owned_matroska::MasteringDisplay {
-                    red: corner(m.red),
-                    green: corner(m.green),
-                    blue: corner(m.blue),
-                    white: corner(m.white),
-                    max_luminance: m.max_luminance,
-                    min_luminance: m.min_luminance,
-                }),
-            light: crate::owned_matroska::ContentLight {
-                max_cll: hdr.light.max_cll,
-                max_fall: hdr.light.max_fall,
-            },
-        })
+        Some(hdr_metadata(decoder.hdr()))
     }
     pub fn decode(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
         let mut shown = None;
@@ -349,4 +327,30 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
         durations[index] = Some(u64::try_from(interval).map_err(|_| "video duration overflow")?);
     }
     Ok(Some(durations))
+}
+
+pub(crate) fn hdr_metadata(
+    hdr: fvid_codecs::color::hdr::HdrMetadata,
+) -> crate::owned_matroska::HdrMetadata {
+    let corner =
+        |value: fvid_codecs::color::primaries::Chromaticity| crate::owned_matroska::Chromaticity {
+            x: value.x,
+            y: value.y,
+        };
+    crate::owned_matroska::HdrMetadata {
+        mastering: hdr
+            .mastering
+            .map(|m| crate::owned_matroska::MasteringDisplay {
+                red: corner(m.red),
+                green: corner(m.green),
+                blue: corner(m.blue),
+                white: corner(m.white),
+                max_luminance: m.max_luminance,
+                min_luminance: m.min_luminance,
+            }),
+        light: crate::owned_matroska::ContentLight {
+            max_cll: hdr.light.max_cll,
+            max_fall: hdr.light.max_fall,
+        },
+    }
 }

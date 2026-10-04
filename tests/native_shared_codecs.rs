@@ -138,7 +138,7 @@ fn standalone_mp4_decodes_owned_avc_and_hevc_access_units() {
 }
 
 #[test]
-fn mp4_edits_are_accepted_and_transforms_remain_unadmitted() {
+fn mp4_edits_and_transforms_use_owned_pipeline() {
     let source = fixture("hevc/main-ipb.mp4");
     let reader = fvid_media::owned_mp4::Mp4Reader::open(
         std::io::Cursor::new(std::fs::read(&source).unwrap()),
@@ -162,12 +162,13 @@ fn mp4_edits_are_accepted_and_transforms_remain_unadmitted() {
         deband: Some("1thr=.5".into()),
         ..Default::default()
     };
-    let error = fvid_media::decode_video_transformed(
+    let stats = fvid_media::decode_video_transformed(
         &fixture("playback-errors/shared-avc-baseline.mp4"),
         request,
     )
-    .unwrap_err();
-    assert!(error.contains("does not yet support"), "{error}");
+    .unwrap();
+    assert_eq!(stats.backend, "owned MP4 compressed video pipeline");
+    assert!(stats.video_frames > 0);
 }
 
 #[test]

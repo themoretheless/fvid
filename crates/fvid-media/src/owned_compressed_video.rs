@@ -15,9 +15,6 @@ pub(crate) fn try_decode(
 ) -> Result<Option<DecodeStats>> {
     let mut request = transform.clone();
     request.input_format = None;
-    if request != DecodeTransform::default() {
-        return crate::owned_video_decode::try_webm(source, transform);
-    }
     if !transform
         .input_format
         .as_deref()
@@ -29,7 +26,29 @@ pub(crate) fn try_decode(
     let mut magic = [0; 8];
     let count = file.read(&mut magic).map_err(|e| e.to_string())?;
     if count == 8 && crate::owned_mp4::recognizes_prefix(&magic) {
-        return crate::owned_mp4_video_decode::try_decode(source, transform);
+        if request == DecodeTransform::default() {
+            return crate::owned_mp4_video_decode::try_decode(source, transform);
+        }
+        if transform
+            .input_format
+            .as_deref()
+            .is_some_and(|v| !matches!(v, "mp4" | "mov"))
+        {
+            return Ok(None);
+        }
+        let Some(temporary) = crate::owned_mp4_video_bridge::prepare(source, None)? else {
+            return Ok(None);
+        };
+        let mut request = transform.clone();
+        request.input_format = Some("matroska".into());
+        let mut result = crate::owned_video_decode::try_webm(&temporary.path, &request)?;
+        if let Some(stats) = result.as_mut() {
+            stats.backend = "owned MP4 compressed video pipeline";
+        }
+        return Ok(result);
+    }
+    if request != DecodeTransform::default() {
+        return crate::owned_video_decode::try_webm(source, transform);
     }
     if count < 4 || magic[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
         return Ok(None);

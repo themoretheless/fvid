@@ -35,3 +35,28 @@ for name, source in [('shared-avc-baseline', 'short/avc-baseline.mp4'),
                      ('shared-hevc-main', 'hevc/main-ipb.mp4'),
                      ('shared-hevc-main10', 'hevc/main10-ipb.mp4')]:
     (root / (name+'.mp4')).write_bytes(remove_edits((root.parent/source).read_bytes()))
+
+# Explicit metadata regression: the public synthetic AVC track declares und.
+(root / "shared-mp4-undefined-language.mp4").write_bytes((root / "shared-avc-baseline.mp4").read_bytes())
+
+# Keep the complete container/configuration, corrupt only the first public
+# synthetic access unit's length prefix so admitted corruption cannot fallback.
+corrupt = bytearray((root / 'shared-avc-baseline.mp4').read_bytes())
+at = 0
+while at < len(corrupt):
+    size = int.from_bytes(corrupt[at:at+4], 'big')
+    header = 8
+    if size == 1:
+        size = int.from_bytes(corrupt[at+8:at+16], 'big')
+        header = 16
+    elif size == 0:
+        size = len(corrupt)-at
+    assert size >= header and at+size <= len(corrupt)
+    if corrupt[at+4:at+8] == b'mdat':
+        assert size >= header+4
+        corrupt[at+header:at+header+4] = b'\xff'*4
+        break
+    at += size
+else:
+    raise AssertionError('no synthetic media data')
+(root / 'shared-mp4-corrupt-nal.mp4').write_bytes(corrupt)
