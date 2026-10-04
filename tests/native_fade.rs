@@ -59,7 +59,7 @@ fn frame_fade_numeric_endpoints_and_precision_validation() {
         "n=2.5",
         "alpha=1",
         "color=not-a-color",
-        "d=1",
+        "d=-1",
     ] {
         assert!(Fade::parse(args).is_err(), "{args}");
     }
@@ -401,4 +401,124 @@ fn colored_yuv_fade_exports_known_ten_bit_endpoints() {
         "{}",
         String::from_utf8_lossy(&out.stderr)
     );
+}
+
+
+#[test]
+fn time_fade_preserves_gates_and_fractional_clock_before_framestep() {
+    for (case, args, expected) in [
+        (
+            0,
+            "out:s=1:d=0.1",
+            [
+                (64, 100, 150),
+                (59, 109, 143),
+                (16, 128, 128),
+                (16, 128, 128),
+                (16, 128, 128),
+            ],
+        ),
+        (
+            1,
+            "out:st=0.1:d=0.1",
+            [
+                (64, 100, 150),
+                (80, 100, 150),
+                (69, 109, 143),
+                (16, 128, 128),
+                (16, 128, 128),
+            ],
+        ),
+        (
+            2,
+            "out:st=0.1:n=2",
+            [
+                (64, 100, 150),
+                (80, 100, 150),
+                (56, 114, 139),
+                (16, 128, 128),
+                (16, 128, 128),
+            ],
+        ),
+    ] {
+        for (rate_name, rate_num, rate_den) in [("25", 25u128, 1u128), ("ntsc", 30000, 1001)] {
+            let source = fixture(&format!("playback-errors/fade-time-{rate_name}.y4m"));
+            for library in [false, true] {
+                let output = std::env::temp_dir().join(format!(
+                    "fvid-time-fade-{}-{case}-{library}-{rate_name}.mkv",
+                    std::process::id()
+                ));
+                let transform = LosslessTransform {
+                    fade: Some(args.into()),
+                    framestep: Some("2".into()),
+                    ..Default::default()
+                };
+                let stats = if library {
+                    fvid_media::transcode_lossless(
+                        &source,
+                        &output,
+                        transform,
+                        &CopyOptions::default(),
+                    )
+                } else {
+                    fvid::media::transcode_lossless(
+                        &source,
+                        &output,
+                        transform,
+                        &CopyOptions::default(),
+                    )
+                }
+                .unwrap();
+                assert_eq!(stats.video_frames, 5);
+                assert_eq!(stats.decoded_frames, 9);
+                let mut reader = NativeReader::software(
+                    Cursor::new(std::fs::read(&output).unwrap()),
+                    usize::MAX,
+                )
+                .unwrap();
+                for (n, (y, u, v)) in expected.into_iter().enumerate() {
+                    let frame = reader.read_frame_raw().unwrap().unwrap();
+                    assert_eq!(
+                        VideoGeometry::default().apply(&frame, 4, 4).unwrap().data,
+                        [vec![y; 16], vec![u; 4], vec![v; 4]].concat(),
+                        "{args} n={n} library={library}"
+                    );
+                    let (start, end, scale) = reader.frame_interval().unwrap();
+                    let actual_start = start * 1_000_000_000 / u128::from(scale);
+                    let expected_start = n as u128 * 2 * rate_den * 1_000_000_000 / rate_num;
+                    assert!(actual_start.abs_diff(expected_start) <= 1_000_000);
+                    let actual_duration = (end - start) * 1_000_000_000 / u128::from(scale);
+                    assert!(
+                        actual_duration.abs_diff(rate_den * 1_000_000_000 / rate_num) <= 1_000_000
+                    );
+                }
+                std::fs::remove_file(output).unwrap();
+            }
+        }
+    }
+}
+#[test]
+fn time_fade_stream_state_errors_and_rewind_are_explicit() {
+    use fvid_media::owned_fade::{Fade, FadeClock, FrameTime};
+    let fade = FadeClock::parse("out:s=1:d=0.1").unwrap();
+    for pass in 0..2 {
+        for (n, expected) in [(0, 255), (1, 255), (2, 170), (3, 85), (4, 0)] {
+            let value = fade
+                .at(n, Some(FrameTime::new(n as u128, 25).unwrap()))
+                .unwrap();
+            let mut rgb = [255; 3];
+            value.apply_rgb(&mut rgb, 8, 3, n).unwrap();
+            assert_eq!(rgb, [expected; 3], "pass {pass} n={n}");
+        }
+    }
+    assert!(fade.at(5, None).is_err());
+    assert!(fade.at(5, Some(FrameTime::new(5, 30).unwrap())).is_err());
+    let mut rgb = [255; 3];
+    assert!(
+        Fade::parse("d=1")
+            .unwrap()
+            .apply_rgb(&mut rgb, 8, 3, 0)
+            .is_err()
+    );
+    assert_eq!(rgb, [255; 3]);
 }

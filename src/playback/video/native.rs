@@ -359,6 +359,15 @@ impl<R: BufRead + Seek> NativeReader<R> {
     }
     /// Exact half-open interval of the current frame, in source clock ticks.
     /// No accumulated floating-point or nanosecond rounding is involved.
+
+    /// Smallest source timestamp step, expressed in frame_interval units.
+    pub fn frame_clock_quantum(&self) -> u64 {
+        match self {
+            Self::Y4m(reader) => u64::from(reader.frame_rate().1),
+            Self::Webm(reader) => reader.clock_quantum(),
+            _ => 1,
+        }
+    }
     pub fn frame_interval(&self) -> Option<(u128, u128, u32)> {
         match self {
             Self::Webm(r) => r.frame_interval(),

@@ -73,7 +73,12 @@ pub(crate) fn decode_ffv1(
     {
         return Ok(None);
     }
-    let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse).transpose()?;
+    let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse)
+        .transpose()?;
+    let fade = transform
+        .fade
+        .as_deref()
+        .map(crate::owned_fade::FadeClock::parse).transpose()?;
     let step = match crate::owned_framestep::FrameStep::parse(
         transform.framestep.as_deref().unwrap_or(""),
     ) {
@@ -230,6 +235,13 @@ pub(crate) fn decode_ffv1(
                 lut.as_ref(),
                 matrix,
                 timeline_index,
+
+                fade.as_ref(),
+                Some(crate::owned_fade::FrameTime {
+                    ticks: i128::from(pts_ns) - i128::from(origin),
+                    scale: 1_000_000_000,
+                    quantum: reader.timestamp_scale_ns(),
+                }),
             )?
             else {
                 return Ok(None);
@@ -354,6 +366,7 @@ fn process_frame(
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     process_frame_with_overlay(
         decoded, monochrome, full_range, transform, None, &mut None, 0, None, 6, 0,
+     None, None,
     )
 }
 fn process_frame_with_overlay(
@@ -367,6 +380,8 @@ fn process_frame_with_overlay(
     lut: Option<&crate::owned_lutyuv::LutYuv>,
     matrix: u8,
     n:u64,
+    fade: Option<&crate::owned_fade::FadeClock>,
+    clock: Option<crate::owned_fade::FrameTime>,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
@@ -461,10 +476,16 @@ fn process_frame_with_overlay(
             .as_mut()
             .unwrap()
             .apply(&presented, &mut pixels, pts_ns as u64)?;
-        crate::owned_y4m_decode::apply_pixel_filters_cached_at(&header, transform, &mut pixels, lut, matrix,n,Some(pts_ns as f64/1e9))?;
+        crate::owned_y4m_decode::apply_pixel_filters_clock(&header, transform, &mut pixels, lut, matrix,n,Some(pts_ns as f64/1e9),
+            fade,
+            clock,
+        )?;
         pixels
     } else {
-        crate::owned_y4m_decode::transform_frame_requested_cached_at(&header, &decoded.frame.data, transform, lut, matrix,n,Some(pts_ns as f64/1e9))?
+        crate::owned_y4m_decode::transform_frame_requested_clock(&header, &decoded.frame.data, transform, lut, matrix,n,Some(pts_ns as f64/1e9),
+            fade,
+            clock,
+        )?
     };
     Ok(Some((
         u32::try_from(width).map_err(|_| "FFV1 output width overflow")?,

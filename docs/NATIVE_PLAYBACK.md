@@ -3729,7 +3729,7 @@ Frame-count `fade` теперь выполняется собственным к
 `in/out`, `start_frame/s`, `nb_frames/n`, RGB24 и YUV 8–16 бит. Счётчик входных
 кадров сохраняется перед framestep. Benchmark `ffmpeg_fade_reference` проверяет
 42 комбинации чёрного fade побайтово; обычные тесты используют синтетические числовые fixtures.
-Режимы по времени и alpha fade пока не перенесены.
+Alpha fade пока не перенесён.
 Совместимость округления fade проверена по
 [исходному reference-фильтру](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_fade.c)
 и отдельному benchmark; этот код не подключается к production-сборке.
@@ -3740,4 +3740,14 @@ RGB16-конвертер для YUV, сохраняя исходную битн�
 проверены 36 RGB24/RGBA benchmark-парами (всего 78 вместе с чёрным fade).
 10-битный синтетический fixture проверяет известный цвет конечного кадра
 в обоих API. Это не доказательство побайтовой эквивалентности всего legacy
-YUV↔RGB8 графа. Time-based fade, alpha fade и полупрозрачные цвета ещё не перенесены.
+YUV↔RGB8 графа. Alpha fade и полупрозрачные цвета ещё не перенесены.
+
+Time-based `fade` uses persistent owned stream state and integer presentation clocks.
+Decimal `start_time/st` and `duration/d` are rounded to the input time-base quantum
+(including 30000/1001 Y4M), with both frame and time gates respected before framestep.
+Rewind resets the state; missing clocks and mid-stream clock changes are refused.
+Root and direct-library streaming decode/export pass exact reader clocks; scalar
+frame APIs require explicit clock evaluation for temporal configurations. WebM
+uses the reader timeline relative to its first displayed frame. The benchmark
+now checks 120 exact pixel pairs, including 42 time-based RGB/YUV cases at 25 and
+30000/1001 fps. Ordinary regression tests use generated Y4M inputs and no FFmpeg.

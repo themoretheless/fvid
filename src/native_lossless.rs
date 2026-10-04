@@ -78,10 +78,12 @@ pub fn write_mp4_processed<W: Write + Seek>(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
-    processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+    processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>,
+    >,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     write_mp4_selected(source, output, geometry, filters, cancel, progress, processor,
-        fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?)
+        fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?,
+    )
 }
 
 pub fn write_mp4_selected<W: Write + Seek>(
@@ -89,7 +91,8 @@ pub fn write_mp4_selected<W: Write + Seek>(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
-    mut processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+    mut processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>,
+    >,
     step: fvid_media::owned_framestep::FrameStep,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
@@ -121,7 +124,8 @@ pub fn write_mp4_selected<W: Write + Seek>(
     let source_full_range = source_colour.full_range;
     let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
-    let prepare = |frame: &RawFrame, display: [usize; 2], n:u64, t:Option<f64>| -> Result<_> {
+    let prepare = |frame: &RawFrame, display: [usize; 2], n:u64, t:Option<f64>,
+                   clock: Option<fvid_media::owned_fade::FrameTime>| -> Result<_> {
         let (w, h, depth) = match frame {
             RawFrame::Avc { picture, .. } => {
                 let (w, h) = picture.dimensions();
@@ -135,10 +139,14 @@ pub fn write_mp4_selected<W: Write + Seek>(
         } else {
             geometry.apply(frame, w, h)?
         };
-        if !processed {filters.apply_colour_at(&mut samples, depth, source_full_range, source_colour.matrix,n,t)?;}
+        if !processed {filters.apply_colour_clock(&mut samples, depth, source_full_range, source_colour.matrix,n,t,
+                clock,
+            )?;}
         Ok(samples)
     };
-    let first_samples = prepare(&first, reader.dimensions(),0,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
+    let first_samples = prepare(&first, reader.dimensions(),0,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64),
+        crate::native_pixels::frame_clock(&reader)?,
+    )?;
     let output_dimensions = (first_samples.width, first_samples.height);
     let output_layout = first_samples.subsampling;
     let mut prepared_first = Some(first_samples);
@@ -288,7 +296,9 @@ pub fn write_mp4_selected<W: Write + Seek>(
         let mut samples = if let Some(samples) = prepared_first.take() {
             samples
         } else {
-            prepare(&frame, reader.dimensions(),stats.decoded_frames,time.map(|(pts,_)|pts as f64/1e9))?
+            prepare(&frame, reader.dimensions(),stats.decoded_frames,time.map(|(pts,_)|pts as f64/1e9),
+                crate::native_pixels::frame_clock(&reader)?,
+            )?
         };
         if let Some(process) = processor.as_deref_mut() {
             process(&mut samples,bit_depth,time.unwrap().0)?;
@@ -298,7 +308,9 @@ pub fn write_mp4_selected<W: Write + Seek>(
         {
             return Err(invalid("FFV1 transformed geometry changed"));
         }
-        if processed {filters.apply_colour_at(&mut samples,bit_depth,source_full_range,source_colour.matrix,stats.decoded_frames,time.map(|(pts,_)|pts as f64/1e9))?;}
+        if processed {filters.apply_colour_clock(&mut samples,bit_depth,source_full_range,source_colour.matrix,stats.decoded_frames,time.map(|(pts,_)|pts as f64/1e9),
+                crate::native_pixels::frame_clock(&reader)?,
+            )?;}
         let emit = step.emits(stats.decoded_frames);
         stats.decoded_frames += 1;
         if !emit { continue; }
@@ -349,7 +361,8 @@ pub fn supports_overlay(transform:&crate::media_info::LosslessTransform)->bool {
 }
 
 /// A plain overlay request can share the dedicated owned compositor.
-pub fn overlay_only(transform:&crate::media_info::LosslessTransform)->Option<&crate::media_info::OverlaySpec> {
+pub fn overlay_only(transform:&crate::media_info::LosslessTransform,
+)->Option<&crate::media_info::OverlaySpec> {
     let spec=transform.overlay.as_ref()?;
     let mut remaining=transform.clone();remaining.overlay=None;
     identity(&remaining).then_some(spec)

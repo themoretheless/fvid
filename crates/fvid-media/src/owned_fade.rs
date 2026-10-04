@@ -1,12 +1,80 @@
-//! Frame-count fade over owned packed RGB and planar YUV samples.
+//! Frame-count and time-based fade over owned packed RGB and planar YUV samples.
 use crate::owned_frame::GeometryFrame;
 type Result<T> = std::result::Result<T, String>;
+
+/// Exact frame presentation clock; scale is ticks per second.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FrameTime {
+    pub ticks: i128,
+    pub scale: u64,
+    pub quantum: u64,
+}
+impl FrameTime {
+    pub fn new(ticks: u128, scale: u64) -> Result<Self> {
+        if scale == 0 {
+            return Err("zero fade clock".into());
+        }
+        Ok(Self {
+            ticks: i128::try_from(ticks).map_err(|_| "fade timestamp overflow")?,
+            scale,
+            quantum: 1,
+        })
+    }
+    pub fn from_seconds(seconds: f64) -> Result<Self> {
+        let ticks = seconds * 1e9;
+        if !ticks.is_finite() || ticks.abs() >= i128::MAX as f64 {
+            return Err("invalid fade timestamp".into());
+        }
+        Ok(Self {
+            ticks: ticks.round() as i128,
+            scale: 1_000_000_000,
+            quantum: 1,
+        })
+    }
+    pub fn with_quantum(mut self, quantum: u64) -> Result<Self> {
+        if quantum == 0 {
+            return Err("zero fade clock quantum".into());
+        }
+        self.quantum = quantum;
+        Ok(self)
+    }
+    pub fn seconds(self) -> f64 {
+        self.ticks as f64 / self.scale as f64
+    }
+}
+#[derive(Clone, Copy, Debug, Default)]
+pub struct FadeState {
+    phase: Option<(u64, i128, u64, u64)>,
+    done: bool,
+}
+/// A per-stream clock context; do not parse/reinitialize it for every frame.
+pub struct FadeClock {
+    filter: Fade,
+    state: std::cell::Cell<FadeState>,
+}
+impl FadeClock {
+    pub fn parse(args: &str) -> Result<Self> {
+        Ok(Self {
+            filter: Fade::parse(args)?,
+            state: Default::default(),
+        })
+    }
+    pub fn at(&self, n: u64, time: Option<FrameTime>) -> Result<Fade> {
+        let mut state = self.state.get();
+        let filter = self.filter.at(n, time, &mut state)?;
+        self.state.set(state);
+        Ok(filter)
+    }
+}
 #[derive(Clone, Copy, Debug)]
 pub struct Fade {
     out: bool,
     start: u32,
     frames: u32,
     color: [u8; 3],
+    start_us: u64,
+    duration_us: u64,
+    evaluated: Option<i64>,
 }
 impl Fade {
     pub fn parse(args: &str) -> Result<Self> {
@@ -18,6 +86,9 @@ impl Fade {
             start: 0,
             frames: 25,
             color: [0; 3],
+            start_us: 0,
+            duration_us: 0,
+            evaluated: None,
         };
         let mut position = 0;
         for option in args.split(':').filter(|_| !args.is_empty()) {
@@ -72,8 +143,17 @@ impl Fade {
                     }
                 }
                 "start_time" | "st" | "duration" | "d" => {
-                    if crate::owned_expression::constant(value)? != 0.0 {
-                        return Err("owned fade time-based mode is not implemented".into());
+
+                    let text = if value.starts_with('.') {
+                        format!("0{value}")
+                    } else {
+                        value.to_owned()
+                    };
+                    let number = fvid_media_info::parse_time(&text)? as u64;
+                    if matches!(name.trim(), "start_time" | "st") {
+                        result.start_us = number;
+                    } else {
+                        result.duration_us = number;
                     }
                 }
                 "color" | "c" => {
@@ -109,7 +189,113 @@ impl Fade {
         }
         Ok(result)
     }
+
+    pub fn has_time(self) -> bool {
+        self.start_us != 0 || self.duration_us != 0
+    }
+    /// Rescale decimal microsecond options into the supplied source time base,
+    /// rounding half ticks upward. Keep the start gates and irreversible end state.
+    pub fn at(self, n: u64, time: Option<FrameTime>, state: &mut FadeState) -> Result<Self> {
+        let mut candidate = *state;
+        let evaluated = self.at_inner(n, time, &mut candidate)?;
+        *state = candidate;
+        Ok(evaluated)
+    }
+    fn at_inner(mut self, n: u64, time: Option<FrameTime>, state: &mut FadeState) -> Result<Self> {
+        if !self.has_time() {
+            return Ok(self);
+        }
+        let clock = time.ok_or("time-based fade requires a presentation clock")?;
+        if clock.scale == 0 {
+            return Err("zero fade clock".into());
+        }
+        if n == 0 {
+            *state = Default::default();
+        }
+        let ticks = |us: u64| -> Result<i128> {
+            if clock.quantum == 0 {
+                return Err("zero fade clock quantum".into());
+            }
+            let denominator = 1_000_000u128 * u128::from(clock.quantum);
+            let value = u128::from(us)
+                .checked_mul(u128::from(clock.scale))
+                .and_then(|v| v.checked_add(denominator / 2))
+                .ok_or("fade option clock overflow")?
+                / denominator;
+            let value = value
+                .checked_mul(u128::from(clock.quantum))
+                .ok_or("fade option clock overflow")?;
+            i128::try_from(value).map_err(|_| "fade option clock overflow".into())
+        };
+        let start = ticks(self.start_us)?;
+        let duration = ticks(self.duration_us)?;
+        if let Some((_, _, scale, quantum)) = state.phase {
+            if scale != clock.scale || quantum != clock.quantum {
+                return Err("fade time base changed within a stream".into());
+            }
+        }
+        if state.phase.is_none() && clock.ticks >= start && n >= u64::from(self.start) {
+            let time_start = if start == 0 && self.start != 0 {
+                clock.ticks
+            } else {
+                start
+            };
+            let frame_start = if start != 0 && self.start == 0 {
+                n
+            } else {
+                u64::from(self.start)
+            };
+            state.phase = Some((frame_start, time_start, clock.scale, clock.quantum));
+        }
+        let amount = if state.done {
+            65535
+        } else if let Some((frame_start, time_start, _, _)) = state.phase {
+            if duration == 0 {
+                let length = if self.duration_us != 0 {
+                    0
+                } else {
+                    u64::from(self.frames)
+                };
+                let elapsed = n.saturating_sub(frame_start);
+                if elapsed > length {
+                    state.done = true;
+                    65535
+                } else {
+                    (elapsed * (65536 / u64::from(self.frames))).min(65535) as i64
+                }
+            } else {
+                let elapsed = clock
+                    .ticks
+                    .checked_sub(time_start)
+                    .ok_or("fade clock subtraction overflow")?;
+                if elapsed > duration {
+                    state.done = true;
+                    65535
+                } else {
+                    let value = elapsed
+                        .checked_mul(65535)
+                        .ok_or("fade clock multiplication overflow")?
+                        / duration;
+                    value.clamp(0, 65535) as i64
+                }
+            }
+        } else {
+            0
+        };
+        self.evaluated = Some(if self.out { 65535 - amount } else { amount });
+        Ok(self)
+    }
+    fn require_clock(self) -> Result<()> {
+        if self.has_time() && self.evaluated.is_none() {
+            return Err("time-based fade requires a stream clock context".into());
+        }
+        Ok(())
+    }
     fn factor(self, n: u64) -> i64 {
+
+        if let Some(factor) = self.evaluated {
+            return factor;
+        }
         let elapsed = n.saturating_sub(u64::from(self.start));
         let amount = if n < u64::from(self.start) {
             0
@@ -122,6 +308,8 @@ impl Fade {
     }
     /// Packed RGB/RGBA, at 8 or 16 bits. Alpha is retained unchanged.
     pub fn apply_rgb(self, data: &mut [u8], depth: u8, channels: usize, n: u64) -> Result<()> {
+
+        self.require_clock()?;
         if !matches!(depth, 8 | 16) {
             return Err("colored fade RGB requires 8 or 16 bits".into());
         }
@@ -174,6 +362,8 @@ impl Fade {
         matrix_code: u8,
         n: u64,
     ) -> Result<()> {
+
+        self.require_clock()?;
         if self.color == [0; 3] || frame.subsampling.is_none() {
             return self.apply(frame, depth, full, n);
         }
@@ -201,6 +391,8 @@ impl Fade {
         full_range: bool,
         n: u64,
     ) -> Result<()> {
+
+        self.require_clock()?;
         if !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
             return Err("invalid fade frame".into());
         }

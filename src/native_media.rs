@@ -156,7 +156,7 @@ pub fn decode_video_pipeline_overlay_step(
                 _ => 8,
             };
             if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
-            filters.apply_colour_at(&mut output, depth, reader.colour().full_range, reader.colour().matrix, input_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
+            filters.apply_colour_clock(&mut output, depth, reader.colour().full_range, reader.colour().matrix, input_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64), crate::native_pixels::frame_clock(&reader)?)?;
             std::hint::black_box(output);
         }
         let emit = step.emits(input_frames);

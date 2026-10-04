@@ -359,6 +359,20 @@ pub(crate) fn transform_frame_requested_cached_at(
     header:&Header, frame:&[u8], transform:&DecodeTransform,
     lut:Option<&crate::owned_lutyuv::LutYuv>, matrix:u8, n:u64,t:Option<f64>,
 )->Result<Vec<u8>> {
+
+    transform_frame_requested_clock(header, frame, transform, lut, matrix, n, t, None, None)
+}
+pub(crate) fn transform_frame_requested_clock(
+    header: &Header,
+    frame: &[u8],
+    transform: &DecodeTransform,
+    lut: Option<&crate::owned_lutyuv::LutYuv>,
+    matrix: u8,
+    n: u64,
+    t: Option<f64>,
+    fade: Option<&crate::owned_fade::FadeClock>,
+    clock: Option<crate::owned_fade::FrameTime>,
+) -> Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
     }
@@ -366,7 +380,10 @@ pub(crate) fn transform_frame_requested_cached_at(
         return Err("scheduled overlay requires the streaming frame API".into());
     }
     let mut output = transform_frame_geometry_requested(header, frame, transform)?;
-    apply_pixel_filters_cached_at(header, transform, &mut output, lut, matrix,n,t)?;
+    apply_pixel_filters_clock(header, transform, &mut output, lut, matrix,n,t,
+        fade,
+        clock,
+    )?;
     Ok(output)
 }
 pub(crate) fn transform_frame_geometry_requested(
@@ -467,6 +484,19 @@ pub(crate) fn apply_pixel_filters_cached_at(
     header: &Header, transform: &DecodeTransform, output: &mut Vec<u8>,
     lut: Option<&crate::owned_lutyuv::LutYuv>, matrix: u8, n:u64, t:Option<f64>,
 ) -> Result<()> {
+    apply_pixel_filters_clock(header, transform, output, lut, matrix, n, t, None, None)
+}
+pub(crate) fn apply_pixel_filters_clock(
+    header: &Header,
+    transform: &DecodeTransform,
+    output: &mut Vec<u8>,
+    lut: Option<&crate::owned_lutyuv::LutYuv>,
+    matrix: u8,
+    n: u64,
+    t: Option<f64>,
+    fade: Option<&crate::owned_fade::FadeClock>,
+    clock: Option<crate::owned_fade::FrameTime>,
+) -> Result<()> {
     if transform.unsharp.is_some()
         || transform.unsharp.is_some()
         || transform.eq.is_some()
@@ -544,27 +574,33 @@ pub(crate) fn apply_pixel_filters_cached_at(
                 crate::owned_cas::Cas::parse(args)?.apply(&mut frame,header.depth())?;
             }
             if let Some(args) = transform.colorbalance.as_deref() {
-                crate::owned_colorbalance::ColorBalance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_colorbalance::ColorBalance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
             if let Some(args) = transform.colorlevels.as_deref() {
-                crate::owned_colorlevels::ColorLevels::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_colorlevels::ColorLevels::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
             if let Some(args) = transform.colorchannelmixer.as_deref() {
-                crate::owned_colorchannelmixer::ColorChannelMixer::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_colorchannelmixer::ColorChannelMixer::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
             if let Some(args) = transform.monochrome.as_deref() {
                 crate::owned_monochrome::Monochrome::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.grayworld.as_deref() {
-                if crate::owned_timeline::Timeline::grayworld(args)?.enabled(n,t,frame.width,frame.height)? {
-                    crate::owned_grayworld::GrayWorld::default().apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                if crate::owned_timeline::Timeline::grayworld(args)?.enabled(n,t,frame.width,frame.height,
+                )? {
+                    crate::owned_grayworld::GrayWorld::default().apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                    )?;
                 }
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.vibrance.as_deref() {
-                crate::owned_vibrance::Vibrance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_vibrance::Vibrance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
             for (kind, args) in morphology(transform) {
                 if let Some(args) = args.as_deref() {
@@ -576,14 +612,16 @@ pub(crate) fn apply_pixel_filters_cached_at(
                 crate::owned_colorize::Colorize::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.exposure.as_deref() {
-                crate::owned_exposure::Exposure::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_exposure::Exposure::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
             if let Some(args) = transform.chromashift.as_deref() {
                 crate::owned_chromashift::ChromaShift::parse(args)?
                     .apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.colorcontrast.as_deref() {
-                crate::owned_colorcontrast::ColorContrast::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_colorcontrast::ColorContrast::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
             if let Some(args) = transform.colorcorrect.as_deref() {
                 crate::owned_colorcorrect::ColorCorrect::parse(args)?.apply(&mut frame,header.depth())?;
@@ -601,12 +639,20 @@ pub(crate) fn apply_pixel_filters_cached_at(
             }
             if let Some(args) = transform.lutyuv.as_deref() {
                 if let Some(lut) = lut {lut.apply(&mut frame, header.depth(), header.full_range()?)?;}
-                else {crate::owned_lutyuv::LutYuv::parse(args)?.apply(&mut frame, header.depth(), header.full_range()?)?;}
+                else {crate::owned_lutyuv::LutYuv::parse(args)?.apply(&mut frame, header.depth(), header.full_range()?,
+                    )?;}
             }
             if let Some(args) = transform.colorhold.as_deref() {
-                crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
+                )?;
             }
-            if let Some(args)=transform.fade.as_deref() {crate::owned_fade::Fade::parse(args)?.apply_colour(&mut frame,header.depth(),header.full_range()?,matrix,n)?;}
+            if let Some(args)=transform.fade.as_deref() {
+                let filter = if let Some(fade) = fade {
+                    fade.at(n, clock)?
+                } else {
+                    crate::owned_fade::Fade::parse(args)?
+                };
+                filter.apply_colour(&mut frame,header.depth(),header.full_range()?,matrix,n)?;}
             Ok(())
         })();
         *output = frame.data;
@@ -670,7 +716,8 @@ fn transform_frame_into(
             } else {
                 (dx, dy)
             };
-            let (iw, ih, dw, dh) = (crop.width.div_ceil(dx), crop.height.div_ceil(dy), ow.div_ceil(odx), oh.div_ceil(ody));
+            let (iw, ih, dw, dh) = (crop.width.div_ceil(dx), crop.height.div_ceil(dy), ow.div_ceil(odx), oh.div_ceil(ody),
+            );
             let (tw, th) = if transpose.is_some() {
                 (ih, iw)
             } else {
@@ -831,7 +878,8 @@ fn decode_reader_frames(
         std::mem::swap(&mut w, &mut h);
     }
     if let Some(angle) = transform.rotate {
-        let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?);
+        let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?,
+        );
         (w, h) = (u128::from(rw), u128::from(rh));
     }
     if let Some(pad) = transform.pad {
@@ -936,6 +984,12 @@ fn decode_reader_frames(
     let mut frames = 0u64;
     let mut selected_inputs = 0u64;
     let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse).transpose()?;
+
+    let fade = transform
+        .fade
+        .as_deref()
+        .map(crate::owned_fade::FadeClock::parse)
+        .transpose()?;
     loop {
         let clock = u128::from(index) * rate_d as u128 * 1_000_000;
         if transform
@@ -987,12 +1041,22 @@ fn decode_reader_frames(
                 } else {
                     transform_frame_into(&header, &input, transform.crop,
                         transform.horizontal_flip, transform.vertical_flip, transform.scale,
-                        transform.transpose, transform.pad, &mut output)?;
+                        transform.transpose, transform.pad, &mut output,
+                    )?;
                 }
                 if let Some(overlay) = overlay.as_mut() {
                     overlay.apply(&presented_header, &mut output, index)?;
                 }
-                apply_pixel_filters_cached_at(&header, transform, &mut output, lut.as_ref(), 6, filtered_frames, Some(index as f64 * rate_d as f64 / rate_n as f64))?;
+                apply_pixel_filters_clock(&header, transform, &mut output, lut.as_ref(), 6, filtered_frames, Some(index as f64 * rate_d as f64 / rate_n as f64),
+                    fade.as_ref(),
+                    Some(
+                        crate::owned_fade::FrameTime::new(
+                            u128::from(index) * rate_d as u128,
+                            rate_n as u64,
+                        )?
+                        .with_quantum(rate_d as u64)?,
+                    ),
+                )?;
                 filtered_frames=filtered_frames.checked_add(1).ok_or("timeline frame count overflow")?;
                 std::hint::black_box(&output);
             }

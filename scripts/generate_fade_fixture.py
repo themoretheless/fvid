@@ -18,3 +18,10 @@ colored = bytearray(b"YUV4MPEG2 W4 H4 F25:1 Ip A1:1 C444p10 XCOLORRANGE=LIMITED\
 for frame in range(3):
     colored += b"FRAME\n" + struct.pack("<48H", *([256] * 16 + [512] * 32))
 (ROOT / "tests/fixtures/playback-errors/fade-colour-10.y4m").write_bytes(colored)
+
+# Nine frames make mixed frame/time gates and temporal selection observable.
+for suffix, rate in [("25", "25:1"), ("ntsc", "30000:1001")]:
+    timed = bytearray(f"YUV4MPEG2 W4 H4 F{rate} Ip A1:1 C420 XCOLORRANGE=LIMITED\n".encode())
+    for frame in range(9):
+        timed += b"FRAME\n" + bytes([64 + frame * 8]) * 16 + bytes([100]) * 4 + bytes([150]) * 4
+    (ROOT / f"tests/fixtures/playback-errors/fade-time-{suffix}.y4m").write_bytes(timed)

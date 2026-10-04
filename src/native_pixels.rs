@@ -31,6 +31,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 #[derive(Default)]
 pub struct PixelFilters {
     pub fade: Option<fvid_media::owned_fade::Fade>,
+    pub fade_state: std::cell::Cell<fvid_media::owned_fade::FadeState>,
     pub colorhold: Option<fvid_media::owned_colorhold::ColorHold>,
     pub colorcontrast: Option<fvid_media::owned_colorcontrast::ColorContrast>,
     pub vibrance: Option<fvid_media::owned_vibrance::Vibrance>,
@@ -61,6 +62,8 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+
+            fade_state: Default::default(),
             fade: request.fade.as_deref().map(fvid_media::owned_fade::Fade::parse).transpose().map_err(|e|invalid(&e))?,
             grayworld: request.grayworld.as_deref().map(fvid_media::owned_timeline::Timeline::grayworld).transpose().map_err(|e|invalid(&e))?,
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
@@ -177,13 +180,32 @@ impl PixelFilters {
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
         self.apply_range(frame, depth, false)
     }
-    pub fn apply_range(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool) -> Result<()> {
+    pub fn apply_range(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool,
+    ) -> Result<()> {
         self.apply_colour(frame, depth, full_range, 6)
     }
-    pub fn apply_colour(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool, matrix_code:u8) -> Result<()> {
+    pub fn apply_colour(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool, matrix_code:u8,
+    ) -> Result<()> {
         self.apply_colour_at(frame,depth,full_range,matrix_code,0,None)
     }
-    pub fn apply_colour_at(&self, frame: &mut GeometryFrame, depth:u8, full_range:bool, matrix_code:u8, n:u64, t:Option<f64>)->Result<()> {
+    pub fn apply_colour_at(&self, frame: &mut GeometryFrame, depth:u8, full_range:bool, matrix_code:u8, n:u64, t:Option<f64>,
+    ) -> Result<()> {
+        let clock = t
+            .map(fvid_media::owned_fade::FrameTime::from_seconds)
+            .transpose()
+            .map_err(|e| invalid(&e))?;
+        self.apply_colour_clock(frame, depth, full_range, matrix_code, n, t, clock)
+    }
+    pub fn apply_colour_clock(
+        &self,
+        frame: &mut GeometryFrame,
+        depth: u8,
+        full_range: bool,
+        matrix_code: u8,
+        n: u64,
+        t: Option<f64>,
+        clock: Option<fvid_media::owned_fade::FrameTime>,
+    )->Result<()> {
         if let Some(filter) = &self.eq {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
@@ -261,7 +283,12 @@ impl PixelFilters {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
-        if let Some(filter)=self.fade { filter.apply_colour(frame,depth,full_range,matrix_code,n).map_err(|e|invalid(&e))?; }
+        if let Some(filter)=self.fade {
+            let mut state = self.fade_state.get();
+            let evaluated = filter.at(n, clock, &mut state).map_err(|e| invalid(&e))?;
+            evaluated
+                .apply_colour(frame,depth,full_range,matrix_code,n).map_err(|e|invalid(&e))?;
+            self.fade_state.set(state); }
         Ok(())
     }
 }
@@ -417,9 +444,25 @@ mod colorhold_tests {
         let request=crate::media_info::DecodeTransform{colorhold:Some("red:0.02".into()),..Default::default()};
         assert!(crate::native_media::supports_video_request(&request));
         let filters=PixelFilters::from_request(&request).unwrap();
-        let mut frame=GeometryFrame{width:1,height:1,subsampling:Some([1,1]),data:vec![63,102,240]};
+        let mut frame=GeometryFrame{width:1,height:1,subsampling:Some([1,1]),data:vec![63,102,240],
+        };
         filters.apply_colour(&mut frame,8,false,1).unwrap();assert_eq!(frame.data,[63,102,240]);
         filters.apply_colour(&mut frame,8,false,6).unwrap();assert_eq!(&frame.data[1..],&[128,128]);
         let before=frame.data.clone();assert!(filters.apply_colour(&mut frame,8,false,10).is_err());assert_eq!(frame.data,before);
     }
+}
+
+
+/// Convert the reader's exact presentation clock without floating-point loss.
+pub fn frame_clock<R: std::io::BufRead + std::io::Seek>(
+    reader: &crate::playback_native::NativeReader<R>,
+) -> Result<Option<fvid_media::owned_fade::FrameTime>> {
+    reader
+        .frame_interval()
+        .map(|(start, _, scale)| {
+            fvid_media::owned_fade::FrameTime::new(start, u64::from(scale))?
+                .with_quantum(reader.frame_clock_quantum())
+        })
+        .transpose()
+        .map_err(|e| invalid(&e))
 }

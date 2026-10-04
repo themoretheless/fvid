@@ -368,6 +368,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn frame_period(&self) -> Duration {
         Duration::from_nanos((self.end - self.start) as u64)
     }
+    pub fn clock_quantum(&self) -> u64 {
+        self.demux.timestamp_scale_ns()
+    }
     pub fn frame_interval(&self) -> Option<(u128, u128, u32)> {
         if self.frames == 0 {
             None
