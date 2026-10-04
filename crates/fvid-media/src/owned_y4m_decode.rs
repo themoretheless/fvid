@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.lutyuv.as_deref().is_some_and(|a| crate::owned_lutyuv::LutYuv::parse(a).is_err()) { return false; }
     if transform.monochrome.as_deref().is_some_and(|a| crate::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
     if transform.colorize.as_deref().is_some_and(|a| crate::owned_colorize::Colorize::parse(a).is_err()) { return false; }
     if transform.bilateral.as_deref().is_some_and(|a| crate::owned_bilateral::Bilateral::parse(a).is_err()) { return false; }
@@ -104,6 +105,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 hue: transform.hue.clone(),
                 colorize: transform.colorize.clone(),
                 monochrome: transform.monochrome.clone(),
+                lutyuv: transform.lutyuv.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 gblur: transform.gblur.clone(),
@@ -419,6 +421,7 @@ pub(crate) fn apply_pixel_filters(
         || transform.hue.is_some()
         || transform.colorize.is_some()
         || transform.monochrome.is_some()
+        || transform.lutyuv.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()
         || transform.avgblur.is_some()
@@ -503,6 +506,9 @@ pub(crate) fn apply_pixel_filters(
                         header.depth(),
                     )?,
                 );
+            }
+            if let Some(args) = transform.lutyuv.as_deref() {
+                crate::owned_lutyuv::LutYuv::parse(args)?.apply(&mut frame, header.depth(), header.full_range()?)?;
             }
             Ok(())
         })();
@@ -797,6 +803,7 @@ fn decode_reader_frames(
         || transform.hue.is_some()
         || transform.colorize.is_some()
         || transform.monochrome.is_some()
+        || transform.lutyuv.is_some()
         || transform.negate.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()

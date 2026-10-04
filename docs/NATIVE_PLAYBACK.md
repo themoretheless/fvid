@@ -3437,3 +3437,16 @@ that reference output is quantized by the inserted conversion and that FVid
 retains low-order sample bits, rather than asserting equality between different
 format pipelines. High-depth expression/numeric equivalence remains covered by
 the ordinary CLI regression for all four filters.
+
+Owned library LUT processing now accepts `DecodeTransform::lutyuv` and
+`LosslessTransform::lutyuv` for planar Y4M and FFV1 input at 8–16 bits. Component
+options `y/u/v` and `c0/c1/c2` use the scalar expression evaluator and variables
+`w`, `h`, `val`, `minval`, `maxval`, `negval`, `clipval`. Range comes from the
+source metadata; default component expressions clamp to that range. Invalid
+geometry, sample precision or nonfinite table results refuse before sample
+mutation. Synthetic existing colorize grids exercise both input formats and
+FFV1 export without FFmpeg or network access.
+
+This is not full LUT compatibility yet: native CLI/player wiring, cached table
+reuse, alpha/RGB aliases, and LUT-specific one-argument `clip`, `gammaval` and
+`gammaval709` remain to implement. Legacy production dependencies still exist.

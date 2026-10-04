@@ -19,6 +19,7 @@ pub mod owned_y4m;
 pub mod owned_hls;
 pub mod owned_colorize;
 pub mod owned_monochrome;
+pub mod owned_lutyuv;
 pub mod owned_y4m_probe;
 pub mod owned_y4m_decode;
 #[cfg(not(feature = "legacy-ffmpeg"))]
