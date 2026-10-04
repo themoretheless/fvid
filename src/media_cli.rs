@@ -917,7 +917,7 @@ fn pixel_decode_args(
         if arg == "--grayworld" {
             if filters.grayworld.is_some() {return Err("duplicate grayworld".into());}
             let value=args.next().ok_or("missing grayworld args")?;
-            match fvid_media::owned_grayworld::GrayWorld::parse(value) {
+            match fvid_media::owned_timeline::Timeline::grayworld(value) {
                 Ok(filter)=>filters.grayworld=Some(filter),
                 Err(_)=>{result.push(arg.clone());result.push(value.clone());}
             }
@@ -5516,14 +5516,33 @@ mod cas_cli_tests {
 #[cfg(test)]
 mod grayworld_cli_tests {
     #[test]
-    fn unsupported_timeline_options_remain_available_to_existing_backend() {
+    fn timeline_controls_decode_y4m_and_ffv1_export_without_legacy() {
+        let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/grayworld-gamut-8.y4m");
+        let read=|path:&std::path::Path| {
+            let input=std::fs::read(path).unwrap();let mut frames=Vec::new();
+            fvid_media::owned_y4m_decode::visit_reader_transformed(std::io::Cursor::new(input),&Default::default(),|_,frame,_,_|{frames.push(frame.to_vec());Ok(())}).unwrap();frames
+        };
+        let original=read(&source);
+        let directory=std::env::temp_dir().join(format!("fvid-grayworld-timeline-{}",std::process::id()));std::fs::create_dir_all(&directory).unwrap();
+        for (case,args,selected) in [(0,"enable=lt(n,1)",0),(1,"enable='gte(t,1)*eq(w,5)*eq(h,5)'",2)] {
+            let y4m=directory.join(format!("selected-{case}.y4m"));let mkv=directory.join(format!("selected-{case}.mkv"));let decoded=directory.join(format!("decoded-{case}.y4m"));
+            for command in [vec!["decode",source.to_str().unwrap(),"--grayworld",args,"--quiet"],vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--grayworld",args],vec!["transcode-lossless",source.to_str().unwrap(),mkv.to_str().unwrap(),"--grayworld",args,"--quiet"],vec!["export-y4m",mkv.to_str().unwrap(),decoded.to_str().unwrap()]] {
+                super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            for output in [&y4m,&decoded] {let actual=read(output);assert_eq!(actual.len(),3);for i in 0..3 {if i==selected{assert_ne!(actual[i],original[i]);}else{assert_eq!(actual[i],original[i]);}}}
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn native_timeline_options_are_admitted() {
         let args=vec!["decode".into(),"synthetic.y4m".into(),"--grayworld".into(),"enable=between(n,1,2)".into()];
         let (remaining,filters)=super::pixel_decode_args(&args).unwrap();
-        assert_eq!(remaining,args);assert!(filters.is_empty());
+        assert_eq!(remaining,vec!["decode".to_owned(),"synthetic.y4m".to_owned()]);assert!(!filters.is_empty());
         let request=fvid::media_info::DecodeTransform{grayworld:Some("enable=between(n,1,2)".into()),..Default::default()};
-        assert!(fvid::native_pixels::PixelFilters::from_request(&request).is_err());
+        assert!(fvid::native_pixels::PixelFilters::from_request(&request).is_ok());
         let transform=fvid::media_info::LosslessTransform{grayworld:request.grayworld,..Default::default()};
-        assert!(!fvid::native_lossless::supports(&transform));
+        assert!(fvid::native_lossless::supports(&transform));
     }
 
     #[test]

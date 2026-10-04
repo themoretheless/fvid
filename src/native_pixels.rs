@@ -34,7 +34,7 @@ pub struct PixelFilters {
     pub vibrance: Option<fvid_media::owned_vibrance::Vibrance>,
     pub colorlevels: Option<fvid_media::owned_colorlevels::ColorLevels>,
     pub colorchannelmixer: Option<fvid_media::owned_colorchannelmixer::ColorChannelMixer>,
-    pub grayworld: Option<fvid_media::owned_grayworld::GrayWorld>,
+    pub grayworld: Option<fvid_media::owned_timeline::Timeline>,
     pub cas: Option<fvid_media::owned_cas::Cas>,
     pub colorcorrect: Option<fvid_media::owned_colorcorrect::ColorCorrect>,
     pub colorbalance: Option<fvid_media::owned_colorbalance::ColorBalance>,
@@ -59,7 +59,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
-            grayworld: request.grayworld.as_deref().map(fvid_media::owned_grayworld::GrayWorld::parse).transpose().map_err(|e|invalid(&e))?,
+            grayworld: request.grayworld.as_deref().map(fvid_media::owned_timeline::Timeline::grayworld).transpose().map_err(|e|invalid(&e))?,
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
             colorcorrect: request.colorcorrect.as_deref().map(fvid_media::owned_colorcorrect::ColorCorrect::parse).transpose().map_err(|e|invalid(&e))?,
             colorbalance: request.colorbalance.as_deref().map(fvid_media::owned_colorbalance::ColorBalance::parse).transpose().map_err(|e|invalid(&e))?,
@@ -177,6 +177,9 @@ impl PixelFilters {
         self.apply_colour(frame, depth, full_range, 6)
     }
     pub fn apply_colour(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool, matrix_code:u8) -> Result<()> {
+        self.apply_colour_at(frame,depth,full_range,matrix_code,0,None)
+    }
+    pub fn apply_colour_at(&self, frame: &mut GeometryFrame, depth:u8, full_range:bool, matrix_code:u8, n:u64, t:Option<f64>)->Result<()> {
         if let Some(filter) = &self.eq {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
@@ -218,9 +221,12 @@ impl PixelFilters {
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
         if let Some(filter) = self.monochrome {filter.apply(frame,depth).map_err(|e|invalid(&e))?;}
-        if let Some(filter)=self.grayworld {
+        if let Some(timeline)=&self.grayworld {
+            if timeline.enabled(n,t,frame.width,frame.height).map_err(|e|invalid(&e))? {
+            let filter=fvid_media::owned_grayworld::GrayWorld::default();
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,frame.width,frame.height,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
+        }
         }
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
         if let Some(filter)=&self.vibrance {

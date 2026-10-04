@@ -142,7 +142,7 @@ pub fn decode_video_pipeline_overlay(
                 _ => 8,
             };
             if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
-            filters.apply_colour(&mut output, depth, reader.colour().full_range, reader.colour().matrix)?;
+            filters.apply_colour_at(&mut output, depth, reader.colour().full_range, reader.colour().matrix, stats.video_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
             std::hint::black_box(output);
         }
         stats.video_frames = stats
@@ -536,7 +536,7 @@ pub(crate) fn supports_plane_filter_source(source: &Path) -> Result<bool> {
 }
 
 pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
-    if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_grayworld::GrayWorld::parse(a).is_err()) { return false; }
+    if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.monochrome.as_deref().is_some_and(|a| fvid_media::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
     if transform.colorize.as_deref().is_some_and(|a| fvid_media::owned_colorize::Colorize::parse(a).is_err()) { return false; }
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }

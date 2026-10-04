@@ -95,5 +95,105 @@ fn main() {
         )
         .unwrap();
     }
+    timeline_reference(&fixtures, &source, &input);
     std::fs::remove_file(source).unwrap();
+}
+
+fn timeline_reference(fixtures: &Path, source: &Path, input: &[u8]) {
+    for (case, args) in [
+        "enable=lt(n,1)",
+        "enable=gte(t,1)",
+        "enable=eq(w,8)*eq(h,8)*between(n,1,2)",
+        "enable=0.49",
+        "enable=NAN",
+        "enable=-0.5",
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let timeline = fvid_media::owned_timeline::Timeline::grayworld(args).unwrap();
+        let mut actual = Vec::new();
+        for (n, frame) in input.chunks_exact(8 * 8 * 4 * 4).enumerate() {
+            let mut rgb: Vec<f32> = frame
+                .chunks_exact(4)
+                .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
+                .collect();
+            if timeline
+                .enabled(n as u64, Some(n as f64 / 2.0), 8, 8)
+                .unwrap()
+            {
+                fvid_media::owned_grayworld::GrayWorld
+                    .apply_rgb_f32(&mut rgb, 8, 8, 4)
+                    .unwrap();
+            }
+            actual.extend(rgb);
+        }
+        let reference =
+            Command::new(std::env::var("FVID_FFMPEG").unwrap_or_else(|_| "ffmpeg".into()))
+                .args([
+                    "-nostdin",
+                    "-v",
+                    "error",
+                    "-filter_threads",
+                    "1",
+                    "-f",
+                    "rawvideo",
+                    "-pixel_format",
+                    "gbrapf32le",
+                    "-video_size",
+                    "8x8",
+                    "-framerate",
+                    "2",
+                    "-i",
+                ])
+                .arg(source)
+                .args([
+                    "-vf",
+                    &format!(
+                        "grayworld=enable='{}'",
+                        args.strip_prefix("enable=").unwrap()
+                    ),
+                    "-frames:v",
+                    "3",
+                    "-pix_fmt",
+                    "gbrapf32le",
+                    "-f",
+                    "rawvideo",
+                    "pipe:1",
+                ])
+                .output()
+                .unwrap();
+        assert!(
+            reference.status.success(),
+            "{}",
+            String::from_utf8_lossy(&reference.stderr)
+        );
+        let mut expected = Vec::new();
+        for frame in reference.stdout.chunks_exact(8 * 8 * 4 * 4) {
+            for i in 0..64 {
+                for plane in [2, 0, 1, 3] {
+                    let at = (plane * 64 + i) * 4;
+                    expected.push(f32::from_le_bytes(frame[at..at + 4].try_into().unwrap()));
+                }
+            }
+        }
+        assert_eq!(actual.len(), expected.len());
+        for (a, b) in actual.iter().zip(&expected) {
+            assert!(
+                (a - b).abs() <= 8.0 * f32::EPSILON * b.abs().max(1.0),
+                "case={case} actual={a} expected={b}"
+            );
+        }
+        if std::env::var_os("FVID_WRITE_SYNTHETIC_REFERENCES").is_some() {
+            std::fs::write(
+                fixtures.join(format!("grayworld-timeline-reference-{case}.rgba_f32")),
+                expected
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect::<Vec<_>>(),
+            )
+            .unwrap();
+        }
+        println!("timeline={args} components={} bounded match", actual.len());
+    }
 }

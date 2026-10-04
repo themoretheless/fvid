@@ -3652,11 +3652,14 @@ Enabled float acceptance covers 768 components within an 8-epsilon scaled bound
 (observed maximum absolute error 8.34465e-7) and checks alpha exactly. Frame-wide
 conversion tests verify odd-edge raster ordering and atomic errors. Native
 decode/Y4M/FFV1 export routing is exercised at 8/12/16 bits. Whole YUV and
-integer-float RGB conversion equivalence, file-based float export and generic
-timeline `enable=` remain unqualified or incomplete. Unsupported timeline
-arguments retain the existing backend route; they are not advertised as native
-acceptance. The full FFmpeg removal goal remains open.
+integer-float RGB conversion equivalence and file-based float export remain
+unqualified or incomplete. The full FFmpeg removal goal remains open.
 
-The pending grayworld timeline acceptance uses a synthetic three-frame video
-and requires selective filtering without altering disabled frames. It remains
-ignored; the current passing refusal is not counted as native timeline support.
+Grayworld now accepts native stateless `enable=` expressions, including optional
+quotes. The owned timeline context supplies n, presentation time t in seconds,
+w and h, and unavailable pos as NaN. Absolute expression magnitude at least 0.5
+enables filtering; NaN disables it. Disabled frames bypass RGB conversion and
+retain exact source bytes. The previous timeline acceptance is enabled, and
+invalid-variable refusal remains separate. CLI acceptance covers n/time/dimension
+selection through decode, Y4M export and FFV1 export. Stateful/random AVExpr
+functions and enabling other filter types still require further migration.

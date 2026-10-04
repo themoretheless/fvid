@@ -174,7 +174,7 @@ pub fn write_processed<W: Write + Seek>(
         }
     };
     let depth = depth_of(&first)?;
-    let prepare = |frame: &RawFrame| -> Result<_> {
+    let prepare = |frame: &RawFrame,n:u64,t:Option<f64>| -> Result<_> {
         if depth_of(frame)? != depth {
             return Err(invalid("frame sample depth changed"));
         }
@@ -199,14 +199,14 @@ pub fn write_processed<W: Write + Seek>(
         } else {
             geometry.apply(frame, coded_w, coded_h)?
         };
-        if !processed {filters.apply_colour(&mut samples, depth, source_full_range, source_colour.matrix)?;}
+        if !processed {filters.apply_colour_at(&mut samples, depth, source_full_range, source_colour.matrix,n,t)?;}
         Ok(samples)
     };
     let mut colour = reader.colour();
     if let RawFrame::Planar8(ref p) = first {
         colour.full_range = p.colour.full;
     }
-    let first = prepare(&first)?;
+    let first = prepare(&first,0,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
     let shape = (first.width, first.height, first.subsampling);
     let encoding = Encoding::Ffv1V1 {
         width: u32::try_from(first.width).map_err(|_| invalid("FFV1 width overflow"))?,
@@ -463,7 +463,7 @@ pub fn write_processed<W: Write + Seek>(
             process(&mut samples,depth,start)?;
             if (samples.width,samples.height,samples.subsampling)!=shape {return Err(invalid("processed frame geometry changed"));}
         }
-        if processed {filters.apply_colour(&mut samples,depth,source_full_range,source_colour.matrix)?;}
+        if processed {filters.apply_colour_at(&mut samples,depth,source_full_range,source_colour.matrix,stats.video_frames,Some(start as f64/1e9))?;}
         let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
         check(cancel)?;
         copy_audio(start, &mut writer, &mut stats)?;
@@ -476,7 +476,7 @@ pub fn write_processed<W: Write + Seek>(
             hook.emit(writer.event());
         }
         check(cancel)?;
-        next = reader.read_frame_raw()?.as_ref().map(prepare).transpose()?;
+        next = reader.read_frame_raw()?.as_ref().map(|frame|prepare(frame,stats.video_frames,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))).transpose()?;
     }
     check(cancel)?;
     copy_audio(u64::MAX, &mut writer, &mut stats)?;

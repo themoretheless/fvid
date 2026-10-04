@@ -176,8 +176,19 @@ adapter likewise supplies RGB in 0–1. The analytical owned YUV converter is
 not qualified for full pipeline equivalence by this probe. Ordinary tests and
 fixture generation never invoke FFmpeg or network.
 
-Grayworld timeline `enable=lt(n,1)` has a passing explicit refusal on the same
-synthetic YUV video and a separate ignored acceptance requiring frame zero to
-change and later frames to remain exact. Enable that acceptance and update the
-refusal with the generic timeline implementation; refusal is not playback
-acceptance. Existing legacy timeline routing is retained until then.
+Grayworld timeline `enable=lt(n,1)` now has enabled acceptance requiring frame
+zero to change and later frames to remain exact. The old refusal is updated to
+an invalid-variable case. CLI tests additionally select by presentation time
+and dimensions through Y4M and FFV1 export. Invalid expressions are refused
+before processing, separately from these positive playback acceptances.
+
+### grayworld-timeline-reference-{0..5}.rgba_f32
+
+The explicit `ffmpeg_grayworld_reference` benchmark evaluates six stateless
+enable expressions at two frames per second on the existing three-frame float
+video: frame number, time, dimensions, below-threshold 0.49, NaN and negative
+threshold -0.5. Enabled ordinary acceptance checks all 4,608 components against
+committed references with the same 8-epsilon scaled float bound; disabled
+frames bypass the correction exactly. Core FFV1 scheduling and CLI Y4M/FFV1
+export also verify that only the intended first or last frame changes. All
+ordinary tests are offline and invoke no external reference tool.

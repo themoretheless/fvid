@@ -30,7 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
-    if transform.grayworld.as_deref().is_some_and(|a| crate::owned_grayworld::GrayWorld::parse(a).is_err()) { return false; }
+    if transform.grayworld.as_deref().is_some_and(|a| crate::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.cas.as_deref().is_some_and(|a| crate::owned_cas::Cas::parse(a).is_err()) { return false; }
     if transform.colorcorrect.as_deref().is_some_and(|a| crate::owned_colorcorrect::ColorCorrect::parse(a).is_err()) { return false; }
     if transform.colorbalance.as_deref().is_some_and(|a| crate::owned_colorbalance::ColorBalance::parse(a).is_err()) { return false; }
@@ -351,6 +351,12 @@ pub(crate) fn transform_frame_requested_cached(
     lut: Option<&crate::owned_lutyuv::LutYuv>,
     matrix: u8,
 ) -> Result<Vec<u8>> {
+    transform_frame_requested_cached_at(header,frame,transform,lut,matrix,0,None)
+}
+pub(crate) fn transform_frame_requested_cached_at(
+    header:&Header, frame:&[u8], transform:&DecodeTransform,
+    lut:Option<&crate::owned_lutyuv::LutYuv>, matrix:u8, n:u64,t:Option<f64>,
+)->Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
     }
@@ -358,7 +364,7 @@ pub(crate) fn transform_frame_requested_cached(
         return Err("scheduled overlay requires the streaming frame API".into());
     }
     let mut output = transform_frame_geometry_requested(header, frame, transform)?;
-    apply_pixel_filters_cached(header, transform, &mut output, lut, matrix)?;
+    apply_pixel_filters_cached_at(header, transform, &mut output, lut, matrix,n,t)?;
     Ok(output)
 }
 pub(crate) fn transform_frame_geometry_requested(
@@ -453,6 +459,12 @@ pub(crate) fn apply_pixel_filters_cached(
     lut: Option<&crate::owned_lutyuv::LutYuv>,
     matrix: u8,
 ) -> Result<()> {
+    apply_pixel_filters_cached_at(header, transform, output, lut, matrix, 0, None)
+}
+pub(crate) fn apply_pixel_filters_cached_at(
+    header: &Header, transform: &DecodeTransform, output: &mut Vec<u8>,
+    lut: Option<&crate::owned_lutyuv::LutYuv>, matrix: u8, n:u64, t:Option<f64>,
+) -> Result<()> {
     if transform.unsharp.is_some()
         || transform.unsharp.is_some()
         || transform.eq.is_some()
@@ -541,7 +553,9 @@ pub(crate) fn apply_pixel_filters_cached(
                 crate::owned_monochrome::Monochrome::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.grayworld.as_deref() {
-                crate::owned_grayworld::GrayWorld::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                if crate::owned_timeline::Timeline::grayworld(args)?.enabled(n,t,frame.width,frame.height)? {
+                    crate::owned_grayworld::GrayWorld::default().apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
+                }
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -912,6 +926,7 @@ fn decode_reader_frames(
     }
     let mut output = Vec::new();
     let mut scratch = [0u8; 8192];
+    let mut filtered_frames=0u64;
     let mut index = 0u64;
     let mut frames = 0u64;
     let mut selected_inputs = 0u64;
@@ -972,7 +987,8 @@ fn decode_reader_frames(
                 if let Some(overlay) = overlay.as_mut() {
                     overlay.apply(&presented_header, &mut output, index)?;
                 }
-                apply_pixel_filters_cached(&header, transform, &mut output, lut.as_ref(), 6)?;
+                apply_pixel_filters_cached_at(&header, transform, &mut output, lut.as_ref(), 6, filtered_frames, Some(index as f64 * rate_d as f64 / rate_n as f64))?;
+                filtered_frames=filtered_frames.checked_add(1).ok_or("timeline frame count overflow")?;
                 std::hint::black_box(&output);
             }
             let (pts, duration) = if visit.is_some() {

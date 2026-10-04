@@ -262,9 +262,9 @@ mod timeline_qualification {
         .unwrap()
     }
     #[test]
-    fn timeline_is_refused_without_claiming_native_acceptance() {
+    fn invalid_timeline_is_refused_without_claiming_acceptance() {
         let request = fvid_media_info::DecodeTransform {
-            grayworld: Some("enable=lt(n,1)".into()),
+            grayworld: Some("enable=unknown".into()),
             ..Default::default()
         };
         assert!(!crate::owned_y4m_decode::supported_request(&request));
@@ -280,7 +280,6 @@ mod timeline_qualification {
         );
     }
     #[test]
-    #[ignore = "acceptance pending owned generic filter timeline evaluation"]
     fn timeline_enable_changes_only_selected_frames() {
         let source = fixture();
         let collect = |request: &fvid_media_info::DecodeTransform| {

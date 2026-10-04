@@ -109,7 +109,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
     let source_full_range = source_colour.full_range;
     let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
-    let prepare = |frame: &RawFrame, display: [usize; 2]| -> Result<_> {
+    let prepare = |frame: &RawFrame, display: [usize; 2], n:u64, t:Option<f64>| -> Result<_> {
         let (w, h, depth) = match frame {
             RawFrame::Avc { picture, .. } => {
                 let (w, h) = picture.dimensions();
@@ -123,10 +123,10 @@ pub fn write_mp4_processed<W: Write + Seek>(
         } else {
             geometry.apply(frame, w, h)?
         };
-        if !processed {filters.apply_colour(&mut samples, depth, source_full_range, source_colour.matrix)?;}
+        if !processed {filters.apply_colour_at(&mut samples, depth, source_full_range, source_colour.matrix,n,t)?;}
         Ok(samples)
     };
-    let first_samples = prepare(&first, reader.dimensions())?;
+    let first_samples = prepare(&first, reader.dimensions(),0,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
     let output_dimensions = (first_samples.width, first_samples.height);
     let output_layout = first_samples.subsampling;
     let mut prepared_first = Some(first_samples);
@@ -276,7 +276,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         let mut samples = if let Some(samples) = prepared_first.take() {
             samples
         } else {
-            prepare(&frame, reader.dimensions())?
+            prepare(&frame, reader.dimensions(),stats.video_frames,time.map(|(pts,_)|pts as f64/1e9))?
         };
         if let Some(process) = processor.as_deref_mut() {
             process(&mut samples,bit_depth,time.unwrap().0)?;
@@ -286,7 +286,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         {
             return Err(invalid("FFV1 transformed geometry changed"));
         }
-        if processed {filters.apply_colour(&mut samples,bit_depth,source_full_range,source_colour.matrix)?;}
+        if processed {filters.apply_colour_at(&mut samples,bit_depth,source_full_range,source_colour.matrix,stats.video_frames,time.map(|(pts,_)|pts as f64/1e9))?;}
         let packet = crate::codec::ffv1_encoder::encode(&samples, bit_depth)?;
         check(cancel)?;
         let (pts, duration) = time.unwrap();
@@ -343,7 +343,7 @@ pub fn overlay_only(transform:&crate::media_info::LosslessTransform)->Option<&cr
 
 /// Admission for currently owned spatial transformations.
 pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
-    if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_grayworld::GrayWorld::parse(a).is_err()) { return false; }
+    if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }
     matches!(
         transform,

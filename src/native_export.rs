@@ -220,7 +220,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             Some(geometry.apply_display(&frame, width, height, rotation)?)
         };
         if let Some(picture) = &mut transformed {
-            filters.apply_colour(picture, depth, full, reader.colour().matrix)?;
+            filters.apply_colour_at(picture, depth, full, reader.colour().matrix, count-segment_start, Some(start as f64/scale as f64))?;
         }
         let (width, height) = if let Some(picture) = &transformed {
             chroma = match picture.subsampling {

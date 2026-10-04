@@ -144,6 +144,7 @@ pub(crate) fn decode_ffv1(
         None
     };
     let mut overlay = None;
+    let mut timeline_frames=0u64;
     let mut frame_metadata = None;
     let mut temporal_format = None;
     let mut consumed = 0u64;
@@ -228,10 +229,12 @@ pub(crate) fn decode_ffv1(
                 pts_ns,
                 lut.as_ref(),
                 matrix,
+                timeline_frames,
             )?
             else {
                 return Ok(None);
             };
+            if emit {timeline_frames=timeline_frames.checked_add(1).ok_or("timeline frame count overflow")?;}
             stats.width = width;
             stats.height = height;
             stats.pixel_format = format;
@@ -351,7 +354,7 @@ fn process_frame(
     transform: &DecodeTransform,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     process_frame_with_overlay(
-        decoded, monochrome, full_range, transform, None, &mut None, 0, None, 6,
+        decoded, monochrome, full_range, transform, None, &mut None, 0, None, 6, 0,
     )
 }
 fn process_frame_with_overlay(
@@ -364,6 +367,7 @@ fn process_frame_with_overlay(
     pts_ns: i64,
     lut: Option<&crate::owned_lutyuv::LutYuv>,
     matrix: u8,
+    n:u64,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
@@ -458,10 +462,10 @@ fn process_frame_with_overlay(
             .as_mut()
             .unwrap()
             .apply(&presented, &mut pixels, pts_ns as u64)?;
-        crate::owned_y4m_decode::apply_pixel_filters_cached(&header, transform, &mut pixels, lut, matrix)?;
+        crate::owned_y4m_decode::apply_pixel_filters_cached_at(&header, transform, &mut pixels, lut, matrix,n,Some(pts_ns as f64/1e9))?;
         pixels
     } else {
-        crate::owned_y4m_decode::transform_frame_requested_cached(&header, &decoded.frame.data, transform, lut, matrix)?
+        crate::owned_y4m_decode::transform_frame_requested_cached_at(&header, &decoded.frame.data, transform, lut, matrix,n,Some(pts_ns as f64/1e9))?
     };
     Ok(Some((
         u32::try_from(width).map_err(|_| "FFV1 output width overflow")?,
