@@ -67,7 +67,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
     ) -> Result<Self, String> {
         if renderer.buffer().bit_depth() != 8 {
             return Err(
-                "native movie encoder still requires NV12; P010 NVENC/HEVC export is pending"
+                "native movie encoder still requires NV12; P010 pools/HEVC export are pending"
                     .into(),
             );
         }

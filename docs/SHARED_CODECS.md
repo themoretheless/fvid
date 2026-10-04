@@ -497,8 +497,9 @@ The standalone `native-cuda` feature exports the same operation contracts and
 
 The native route currently excludes host bounce
 from automatic selection to retain existing command semantics until qualified;
-Main10 now has owned P010 buffers/rendering but still needs NVENC Main10 and
-HEVC bitstream/container export; other codecs/containers remain on
+Main10 now has owned P010 buffers/rendering and direct NVENC Main10 API support,
+but still needs retained P010 movie-encoder pools and HEVC bitstream/container
+export; other codecs/containers remain on
 the legacy route. This is not yet elimination
 of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
 owned route preserves that track scope while retaining metadata and exact movie

@@ -17,6 +17,11 @@ def require_executed_tests(stdout, minimum, required=()):
 
 def qualify_native_tests(root, run):
     suites = [
+        ("fvid-cuda", "nvenc_session::tests", [
+            "direct_cuda_session_opens_and_closes_without_libav",
+            "direct_hevc_submission_without_libav",
+            "direct_hevc_main10_p010_submission_without_libav",
+        ], []),
         ("fvid-cuda", "pipeline::tests", ["resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip", "sampling_shader_matches_independent_crop_and_reflection_reference"], []),
         ("fvid-cuda", "nv12_buffer::tests", [
             "device_black_fill_has_correct_luma_chroma_and_padding",

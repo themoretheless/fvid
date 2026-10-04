@@ -1,4 +1,4 @@
-//! Direct NVENC 8.1 CUDA session ABI. No frame encoding is implemented here.
+//! Direct NVENC 8.1 CUDA sessions, owned resource registration and submission.
 //! SDK layout: NVIDIA/video-sdk-samples@aa3544dcea2fe63122e4feb83bf805ea40e58dbe,
 //! Samples/NvCodec/NvEncoder/nvEncodeAPI.h. This compatibility ABI predates AV1.
 use crate::{CodecDevice, NvencApi, NvencVersion};
@@ -121,11 +121,31 @@ pub struct NvencColour {
     pub matrix: u8,
     pub full_range: bool,
 }
-/// Codec selected for direct eight-bit NV12 encoding.
+/// Codec selected for direct CUDA encoding.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NvencCodec {
     H264,
     Hevc,
+}
+/// CUDA resource format, preserved through initialization, mapping and submit.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NvencInputFormat {
+    Nv12,
+    P010,
+}
+impl NvencInputFormat {
+    fn raw(self) -> u32 {
+        match self {
+            Self::Nv12 => 1,
+            Self::P010 => 65536,
+        }
+    }
+    fn sample_bytes(self) -> u32 {
+        match self {
+            Self::Nv12 => 1,
+            Self::P010 => 2,
+        }
+    }
 }
 impl NvencCodec {
     fn guid(self) -> crate::nvenc_sdk::GUID {
@@ -171,6 +191,7 @@ pub struct NvencSession {
     eos: bool,
     inputs: Vec<InputResource>,
     geometry: Option<(u32, u32)>,
+    input_format: Option<NvencInputFormat>,
     initialized: bool,
     failed: bool,
     device: ManuallyDrop<CodecDevice>,
@@ -217,6 +238,7 @@ impl NvencSession {
             eos: false,
             inputs: Vec::new(),
             geometry: None,
+            input_format: None,
             initialized: false,
             failed: false,
             device: ManuallyDrop::new(device),
@@ -266,6 +288,53 @@ impl NvencSession {
         fps_den: u32,
         colour: Option<NvencColour>,
     ) -> Result<(), String> {
+        self.initialize_format(
+            codec,
+            NvencInputFormat::Nv12,
+            width,
+            height,
+            fps_num,
+            fps_den,
+            colour,
+        )
+    }
+    pub fn initialize_p010(
+        &mut self,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+    ) -> Result<(), String> {
+        self.initialize_p010_with_colour(width, height, fps_num, fps_den, None)
+    }
+    pub fn initialize_p010_with_colour(
+        &mut self,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+        colour: Option<NvencColour>,
+    ) -> Result<(), String> {
+        self.initialize_format(
+            NvencCodec::Hevc,
+            NvencInputFormat::P010,
+            width,
+            height,
+            fps_num,
+            fps_den,
+            colour,
+        )
+    }
+    fn initialize_format(
+        &mut self,
+        codec: NvencCodec,
+        format: NvencInputFormat,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+        colour: Option<NvencColour>,
+    ) -> Result<(), String> {
         validate_geometry(width, height, fps_num, fps_den)?;
         if self.encoder.is_null() || self.initialized || self.failed {
             return Err("NVENC initialization requires a fresh live session".into());
@@ -296,6 +365,7 @@ impl NvencSession {
         if let Some(colour) = colour {
             set_colour(&mut preset.presetCfg, selected_codec, colour);
         }
+        set_input_format(&mut preset.presetCfg, selected_codec, format)?;
         let mut params = crate::nvenc_sdk::NV_ENC_INITIALIZE_PARAMS::default();
         params.version = version(5) | (1 << 31);
         params.encodeGUID = codec;
@@ -320,6 +390,7 @@ impl NvencSession {
             ));
         }
         self.geometry = Some((width, height));
+        self.input_format = Some(format);
         self.initialized = true;
         Ok(())
     }
@@ -377,11 +448,35 @@ impl NvencSession {
         pitch: u32,
         allocation_bytes: u64,
     ) -> Result<usize, String> {
+        unsafe { self.register_format(pointer, pitch, allocation_bytes, NvencInputFormat::Nv12) }
+    }
+    /// Register/map caller-owned P010, with ten-bit codes MSB-aligned in words.
+    /// # Safety
+    /// Same context/lifetime/synchronization requirements as `register_nv12`;
+    /// pitch/allocation length are bytes, and both planes contain 16-bit words.
+    pub unsafe fn register_p010(
+        &mut self,
+        pointer: u64,
+        pitch: u32,
+        allocation_bytes: u64,
+    ) -> Result<usize, String> {
+        unsafe { self.register_format(pointer, pitch, allocation_bytes, NvencInputFormat::P010) }
+    }
+    unsafe fn register_format(
+        &mut self,
+        pointer: u64,
+        pitch: u32,
+        allocation_bytes: u64,
+        format: NvencInputFormat,
+    ) -> Result<usize, String> {
         if self.encoder.is_null() || !self.initialized || self.failed {
             return Err("NVENC registration requires a healthy initialized session".into());
         }
         let (width, height) = self.geometry.ok_or("NVENC geometry is unavailable")?;
-        validate_surface(pointer, width, height, pitch, allocation_bytes)?;
+        if self.input_format != Some(format) {
+            return Err("NVENC registration format differs from initialized encoder".into());
+        }
+        validate_surface_format(pointer, width, height, pitch, allocation_bytes, format)?;
         self.device.handles()?;
         let register = self
             .table
@@ -404,8 +499,8 @@ impl NvencSession {
         params.height = height;
         params.pitch = pitch;
         params.resourceToRegister = pointer as *mut c_void;
-        params.bufferFormat = 1;
-        // SAFETY: Caller guarantees the context, lifetime and NV12 allocation;
+        params.bufferFormat = format.raw();
+        // SAFETY: Caller guarantees context, lifetime and matching CUDA format;
         // generated SDK storage and all reserved fields are correctly initialized.
         let status = unsafe { register(self.encoder, &mut params) };
         if status != 0 {
@@ -433,9 +528,9 @@ impl NvencSession {
             return Err(format!("NVENC input mapping failed with status {status}"));
         }
         self.inputs[index].mapped = mapping.mappedResource;
-        if mapping.mappedResource.is_null() || mapping.mappedBufferFmt != 1 {
+        if mapping.mappedResource.is_null() || mapping.mappedBufferFmt != format.raw() {
             self.failed = true;
-            return Err("NVENC returned invalid NV12 mapping geometry".into());
+            return Err("NVENC returned invalid CUDA mapping format/geometry".into());
         }
         Ok(index)
     }
@@ -448,6 +543,28 @@ impl NvencSession {
         timestamp: u64,
         duration: u64,
     ) -> Result<NvencSubmit, String> {
+        self.submit_format(input, output, timestamp, duration, NvencInputFormat::Nv12)
+    }
+    pub fn submit_p010(
+        &mut self,
+        input: usize,
+        output: usize,
+        timestamp: u64,
+        duration: u64,
+    ) -> Result<NvencSubmit, String> {
+        self.submit_format(input, output, timestamp, duration, NvencInputFormat::P010)
+    }
+    fn submit_format(
+        &mut self,
+        input: usize,
+        output: usize,
+        timestamp: u64,
+        duration: u64,
+        format: NvencInputFormat,
+    ) -> Result<NvencSubmit, String> {
+        if self.input_format != Some(format) {
+            return Err("NVENC submit format differs from initialized encoder".into());
+        }
         if self.encoder.is_null() || !self.initialized || self.failed || self.eos {
             return Err(
                 "NVENC submission requires a healthy initialized session before EOS".into(),
@@ -491,7 +608,7 @@ impl NvencSession {
         params.inputDuration = duration;
         params.inputBuffer = source.mapped;
         params.outputBitstream = target.handle;
-        params.bufferFmt = 1;
+        params.bufferFmt = format.raw();
         params.pictureStruct = 1;
         // SAFETY: Session-owned mapped input/output handles are live, reserved
         // fields are zero, and caller retains the registered CUDA allocation.
@@ -778,18 +895,62 @@ fn validate_surface(
     pitch: u32,
     bytes: u64,
 ) -> Result<(), String> {
+    validate_surface_format(pointer, width, height, pitch, bytes, NvencInputFormat::Nv12)
+}
+fn validate_surface_format(
+    pointer: u64,
+    width: u32,
+    height: u32,
+    pitch: u32,
+    bytes: u64,
+    format: NvencInputFormat,
+) -> Result<(), String> {
     validate_geometry(width, height, 1, 1)?;
+    let row = width
+        .checked_mul(format.sample_bytes())
+        .ok_or("NVENC CUDA row overflow")?;
     let minimum = u64::from(pitch)
         .checked_mul(u64::from(height) + u64::from(height) / 2)
         .ok_or("NVENC NV12 allocation size overflow")?;
     if pointer.checked_add(bytes).is_none()
         || pointer == 0
         || usize::try_from(pointer).is_err()
-        || pitch < width
+        || pitch < row
+        || pointer % u64::from(format.sample_bytes()) != 0
         || pitch % 2 != 0
         || bytes < minimum
     {
         return Err("NVENC NV12 pointer, pitch or allocation extent is invalid".into());
+    }
+    Ok(())
+}
+fn set_input_format(
+    config: &mut crate::nvenc_sdk::NV_ENC_CONFIG,
+    codec: NvencCodec,
+    format: NvencInputFormat,
+) -> Result<(), String> {
+    if format == NvencInputFormat::P010 && codec != NvencCodec::Hevc {
+        return Err("pinned NVENC ABI supports P010 only with HEVC Main10".into());
+    }
+    if codec == NvencCodec::Hevc {
+        // SAFETY: HEVC initialization selects the matching union member.
+        unsafe {
+            config.encodeCodecConfig.hevcConfig.set_pixelBitDepthMinus8(
+                if format == NvencInputFormat::P010 {
+                    2
+                } else {
+                    0
+                },
+            );
+        }
+        if format == NvencInputFormat::P010 {
+            config.profileGUID = crate::nvenc_sdk::GUID {
+                Data1: 0xfa4d2b6c,
+                Data2: 0x3a5b,
+                Data3: 0x411a,
+                Data4: [0x80, 0x18, 0x0a, 0x3f, 0x5e, 0x3c, 0x9b, 0xe5],
+            };
+        }
     }
     Ok(())
 }
@@ -868,6 +1029,44 @@ fn set_colour(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn main10_config_selects_p010_profile_depth_and_preserves_colour() {
+        let mut config = crate::nvenc_sdk::NV_ENC_CONFIG::default();
+        set_colour(
+            &mut config,
+            NvencCodec::Hevc,
+            NvencColour {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            },
+        );
+        set_input_format(&mut config, NvencCodec::Hevc, NvencInputFormat::P010).unwrap();
+        assert_eq!(config.profileGUID.Data1, 0xfa4d2b6c);
+        assert_eq!(config.profileGUID.Data2, 0x3a5b);
+        assert_eq!(config.profileGUID.Data3, 0x411a);
+        let hevc = unsafe { config.encodeCodecConfig.hevcConfig };
+        assert_eq!(hevc.pixelBitDepthMinus8(), 2);
+        assert_eq!(hevc.hevcVUIParameters.colourPrimaries, 9);
+        assert_eq!(hevc.hevcVUIParameters.transferCharacteristics, 16);
+        assert_eq!(
+            NvencInputFormat::P010.raw(),
+            crate::nvenc_sdk::_NV_ENC_BUFFER_FORMAT_NV_ENC_BUFFER_FORMAT_YUV420_10BIT
+        );
+        assert!(set_input_format(&mut config, NvencCodec::H264, NvencInputFormat::P010).is_err());
+    }
+    #[test]
+    fn p010_registration_validates_word_rows_and_full_pitched_allocation() {
+        let format = NvencInputFormat::P010;
+        assert!(validate_surface_format(256, 130, 72, 512, 55296, format).is_ok());
+        assert!(validate_surface_format(257, 130, 72, 512, 55296, format).is_err());
+        assert!(validate_surface_format(256, 130, 72, 256, 55296, format).is_err());
+        assert!(validate_surface_format(256, 130, 72, 512, 55295, format).is_err());
+        assert!(
+            validate_surface_format(256, u32::MAX - 1, 72, u32::MAX - 1, u64::MAX, format).is_err()
+        );
+    }
     #[test]
     fn own_colour_is_written_to_both_codec_vui_members() {
         for codec in [super::NvencCodec::H264, super::NvencCodec::Hevc] {
@@ -1080,33 +1279,79 @@ mod tests {
         direct_codec_round_trip(super::NvencCodec::Hevc);
     }
     #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA HEVC Main10 NVENC"]
+    fn direct_hevc_main10_p010_submission_without_libav() {
+        direct_format_round_trip(NvencCodec::Hevc, NvencInputFormat::P010);
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
     fn direct_codec_round_trip(codec: super::NvencCodec) {
+        direct_format_round_trip(codec, NvencInputFormat::Nv12);
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    fn direct_format_round_trip(codec: NvencCodec, format: NvencInputFormat) {
         use cudarc::driver::DevicePtr;
         let owner = crate::device_pool::shared(0).unwrap();
         let stream = owner.new_stream().unwrap();
         let buffers: Vec<_> = (0..4)
-            .map(|_| stream.alloc_zeros::<u8>(128 * 72 * 3 / 2).unwrap())
+            .map(|_| {
+                stream
+                    .alloc_zeros::<u8>(128 * 72 * 3 / 2 * format.sample_bytes() as usize)
+                    .unwrap()
+            })
             .collect();
         stream.synchronize().unwrap();
         let device = CodecDevice::new(0).unwrap();
         let mut session = NvencSession::open(device).unwrap();
         assert!(!session.codec_guids().unwrap().is_empty());
-        session.initialize_nv12(codec, 128, 72, 60, 1).unwrap();
+        if format == NvencInputFormat::P010 {
+            session.initialize_p010(128, 72, 60, 1).unwrap();
+        } else {
+            session.initialize_nv12(codec, 128, 72, 60, 1).unwrap();
+        }
         assert!(session.initialize_nv12(codec, 128, 72, 60, 1).is_err());
         for (index, buffer) in buffers.iter().enumerate() {
             let (pointer, _guard) = buffer.device_ptr(&stream);
             // SAFETY: All allocations use the same pooled primary context,
             // are synchronized and remain live until successful close.
+            let register = if format == NvencInputFormat::P010 {
+                NvencSession::register_p010
+            } else {
+                NvencSession::register_nv12
+            };
             assert_eq!(
-                unsafe { session.register_nv12(pointer, 128, 128 * 72 * 3 / 2) }.unwrap(),
+                unsafe {
+                    register(
+                        &mut session,
+                        pointer,
+                        128 * format.sample_bytes(),
+                        128 * 72 * 3 / 2 * u64::from(format.sample_bytes()),
+                    )
+                }
+                .unwrap(),
                 index
             );
+            // Wrong-format registration is rejected without invalidating the
+            // session or accepting another driver resource.
+            if format == NvencInputFormat::P010 {
+                assert!(unsafe { session.register_nv12(pointer, 256, 128 * 72 * 3) }.is_err());
+            }
             assert_eq!(session.create_output().unwrap(), index);
         }
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        if format == NvencInputFormat::P010 {
+            assert!(session.submit_nv12(0, 0, 0, 1).is_err());
+        } else {
+            assert!(session.submit_p010(0, 0, 0, 1).is_err());
+        }
+        let submit = if format == NvencInputFormat::P010 {
+            NvencSession::submit_p010
+        } else {
+            NvencSession::submit_nv12
+        };
         for index in 0..buffers.len() {
             loop {
-                let result = session.submit_nv12(index, index, index as u64, 1).unwrap();
+                let result = submit(&mut session, index, index, index as u64, 1).unwrap();
                 if result != super::NvencSubmit::Busy {
                     break;
                 }

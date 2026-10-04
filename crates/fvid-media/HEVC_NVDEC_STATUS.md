@@ -34,8 +34,10 @@ decoder preroll. Mid-stream prior-output suppression, in-band parameter changes
 and field sequences remain explicitly unqualified.
 Long-term references are still refused by the own slice parser. Main10 can now
 render through owned P010 buffers/processors, including blank/repeated edits and
-trusted shaders. NVENC Main10 initialization/registration and owned HEVC
-bitstream/container export remain pending, so production export still refuses
+trusted shaders. The direct NVENC session now initializes HEVC Main10 and
+registers/maps/submits P010 resources with a persistent format check. Connecting
+that API to the retained movie-encoder pools and owned HEVC bitstream/container
+export remains pending, so production export still refuses
 Main10 before opening GPU resources. Driver acceptance and decoded image
 correctness have not been verified on NVIDIA hardware.
 
