@@ -37,6 +37,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.bitplanenoise.as_deref().is_some_and(|a|crate::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a|crate::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a|crate::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
+    if transform.removegrain.as_deref().is_some_and(|a|crate::owned_removegrain::RemoveGrain::parse(a).is_err()) {return false;}
     if transform.yaepblur.as_deref().is_some_and(|a|crate::owned_yaepblur::YaepBlur::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.tmix.as_deref().is_some_and(|a|crate::owned_tmix::TemporalMix::parse(a).is_err()) {return false;}
@@ -146,6 +147,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 bitplanenoise: transform.bitplanenoise.clone(),
                 gradfun: transform.gradfun.clone(),
                 lenscorrection: transform.lenscorrection.clone(),
+                removegrain: transform.removegrain.clone(),
                 yaepblur: transform.yaepblur.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
                 cas: transform.cas.clone(),
@@ -547,6 +549,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.bitplanenoise.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
+        || transform.removegrain.is_some()
         || transform.yaepblur.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
@@ -689,6 +692,10 @@ pub(crate) fn apply_pixel_filters_clock(
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.removegrain.as_deref() {
+                if let Some(filter)=history.and_then(|h|h.removegrain.as_ref()) {filter.apply(&mut frame,header.depth(),n,t)?;}
+                else {crate::owned_removegrain::RemoveGrain::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.yaepblur.as_deref() {
                 if let Some(filter)=history.and_then(|h|h.yaepblur.as_ref()) {filter.apply(&mut frame,header.depth(),n,t)?;}
@@ -1063,6 +1070,7 @@ fn decode_reader_frames(
         || transform.bitplanenoise.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
+        || transform.removegrain.is_some()
         || transform.yaepblur.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()

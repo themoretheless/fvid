@@ -268,3 +268,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_yaepblur_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_removegrain_reference"
+harness = false

@@ -1160,6 +1160,13 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--removegrain" {
+            let value=args.next().ok_or("missing removegrain options")?;
+            if filters.removegrain.is_some() {return Err("duplicate removegrain".into());}
+            if let Ok(filter)=fvid_media::owned_removegrain::RemoveGrain::parse(value) {filters.removegrain=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--yaepblur" {
             let value=args.next().ok_or("missing yaepblur options")?;
             if filters.yaepblur.is_some() {return Err("duplicate yaepblur".into());}
@@ -4916,6 +4923,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--lenscorrection" => {
                 if transform.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
                 &mut transform.lenscorrection
+            },
+            "--removegrain" => {
+                if transform.removegrain.is_some() {return Err("duplicate removegrain".into());}
+                &mut transform.removegrain
             },
             "--yaepblur" => {
                 if transform.yaepblur.is_some() {return Err("duplicate yaepblur".into());}
