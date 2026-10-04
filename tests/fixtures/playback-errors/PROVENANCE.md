@@ -230,9 +230,25 @@ and continued validation of a truncated frame even when that frame is discarded.
 
 The short synthetic `ffv1-level-one-source.mp4` also reproduces the missing
 root MP4 temporal-export route: a framestep transform formerly fell through
-to the library's Y4M/FFV1-only exporter. `mp4_framestep_exports_selected_times_and_every_audio_packet`
+to the library's Y4M/FFV1-only exporter. `framestep_exports_selected_times_and_every_audio_packet`
 is its enabled acceptance test. It covers the public explicit FFV1 level-one
 route and CLI, compares every selected FFV1 packet and its original PTS/duration
 with an unfiltered owned export, and verifies all AAC companion packets and
 timing remain identical. Existing synthetic Main10 and dual-AAC controls extend
 coverage. Ordinary tests neither invoke FFmpeg nor generate fixtures.
+
+
+### WebM/Matroska/Y4M framestep export and Opus retention
+
+`framestep-opus.mkv` is generated separately by
+`scripts/generate_framestep_opus_fixture.py` without FFmpeg or network. It reuses
+one hash-verified own-encoded synthetic FFV1 keyframe from
+`shuffleplanes-444-8.mkv` six times at 40 ms intervals, adds twelve canonical
+20 ms Opus silence packets, a 312-sample pre-skip and 2 ms final discard padding.
+No private media or parameters are included. Before the fix, this FFV1+Opus
+source with framestep fell through to the library's video-only export and
+refused the companion track. Enabled acceptance compares selected video packets,
+every audio packet, original timestamps/durations and discard padding with
+an unfiltered own export. The same regression qualifies VP9 8/10/12-bit, AV1,
+FFV1 and Y4M routes, API explicit FFV1 level=1 and CLI. A deliberately truncated
+discarded Y4M frame must still fail without publishing an output.

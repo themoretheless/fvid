@@ -902,9 +902,6 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
     cancel:Option<&crate::media_control::CancelFlag>,progress:Option<&crate::media_control::ProgressHook>,
     step:Option<fvid_media::owned_framestep::FrameStep>,
 )->Result<crate::media_info::LosslessStats> {
-    if step.is_some() && crate::native_lossless_y4m::eligible(source)? {
-        return Err(invalid("MP4 frame selection requires an AVC/HEVC source"));
-    }
     if destination.extension().and_then(|s|s.to_str())!=Some("mkv"){return Err(invalid("lossless export requires FFV1 in .mkv"));}
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
@@ -914,7 +911,9 @@ pub fn transcode_ffv1_selected(source:&Path,destination:&Path,
     }).ok_or_else(||invalid("cannot reserve FFV1 output"))??;
     let mut output=BufWriter::new(file);
     let (stats,event)=if crate::native_lossless_y4m::eligible(source)? {
-        crate::native_lossless_y4m::write(source,&mut output,geometry,filters,cancel,progress)?
+        if let Some(step)=step {
+            crate::native_lossless_y4m::write_selected(source,&mut output,geometry,filters,cancel,progress,None,step)?
+        } else { crate::native_lossless_y4m::write(source,&mut output,geometry,filters,cancel,progress)? }
     } else if let Some(step)=step {
         crate::native_lossless::write_mp4_selected(source,&mut output,geometry,filters,cancel,progress,None,step)?
     } else { crate::native_lossless::write_mp4_transformed(source,&mut output,geometry,filters,cancel,progress)? };

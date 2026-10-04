@@ -93,7 +93,18 @@ pub fn write<W: Write + Seek>(
 pub fn write_processed<W: Write + Seek>(
     source:&Path,output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
     cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
+    processor:Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+)->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
+    write_selected(source,output,geometry,filters,cancel,progress,processor,
+        fvid_media::owned_framestep::FrameStep::parse("").map_err(|e|invalid(&e))?)
+}
+
+/// Decode every source frame, then encode selected frames with original clocks.
+pub fn write_selected<W: Write + Seek>(
+    source:&Path,output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
+    cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
     mut processor:Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+    step:fvid_media::owned_framestep::FrameStep,
 )->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     check(cancel)?;
     if !eligible(source)? {
@@ -463,20 +474,23 @@ pub fn write_processed<W: Write + Seek>(
             process(&mut samples,depth,start)?;
             if (samples.width,samples.height,samples.subsampling)!=shape {return Err(invalid("processed frame geometry changed"));}
         }
-        if processed {filters.apply_colour_at(&mut samples,depth,source_full_range,source_colour.matrix,stats.video_frames,Some(start as f64/1e9))?;}
-        let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
-        check(cancel)?;
+        if processed {filters.apply_colour_at(&mut samples,depth,source_full_range,source_colour.matrix,stats.decoded_frames,Some(start as f64/1e9))?;}
         copy_audio(start, &mut writer, &mut stats)?;
-        writer.write_packet(video_index, start, end - start, true, &packet)?;
-        stats.video_frames += 1;
+        let emit=step.emits(stats.decoded_frames);
         stats.decoded_frames += 1;
-        stats.video_packets += 1;
-        stats.fvid_crop_payload_copies += u64::from(geometry.crop.is_some());
+        if emit {
+            let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
+            check(cancel)?;
+            writer.write_packet(video_index, start, end - start, true, &packet)?;
+            stats.video_frames += 1;
+            stats.video_packets += 1;
+            stats.fvid_crop_payload_copies += u64::from(geometry.crop.is_some());
+        }
         if let Some(hook) = progress {
             hook.emit(writer.event());
         }
         check(cancel)?;
-        next = reader.read_frame_raw()?.as_ref().map(|frame|prepare(frame,stats.video_frames,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))).transpose()?;
+        next = reader.read_frame_raw()?.as_ref().map(|frame|prepare(frame,stats.decoded_frames,reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))).transpose()?;
     }
     check(cancel)?;
     copy_audio(u64::MAX, &mut writer, &mut stats)?;

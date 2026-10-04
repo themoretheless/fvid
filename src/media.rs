@@ -395,7 +395,6 @@ pub fn crop_lossless(source: &std::path::Path, destination: &std::path::Path,
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
     if crate::native_lossless::supports_framestep(&transform)
         && validate_native_copy_options(options,false).is_ok()
-        && !crate::native_lossless_y4m::eligible(source).map_err(|e|e.to_string())?
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let step=fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap())?;
         let mut spatial=transform.clone(); spatial.framestep=None;
@@ -435,7 +434,6 @@ pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTra
     options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
     if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports_framestep(transform)
         && validate_native_copy_options(options,false).is_ok()
-        && !crate::native_lossless_y4m::eligible(source).map_err(|e|e.to_string())?
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let mut spatial=transform.clone(); spatial.framestep=None;
         let mut plan=crate::native_plan::transcode_lossless(source,&spatial)?;

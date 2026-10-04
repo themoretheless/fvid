@@ -116,7 +116,7 @@ fn framestep_cli_decodes_avc_without_legacy_feature() {
 }
 
 #[test]
-fn mp4_framestep_exports_selected_times_and_every_audio_packet() {
+fn framestep_exports_selected_times_and_every_audio_packet() {
     use fvid::{
         container::webm::WebmReader,
         media::{CopyOptions, LosslessTransform},
@@ -128,6 +128,13 @@ fn mp4_framestep_exports_selected_times_and_every_audio_packet() {
         "playback-errors/ffv1-level-one-source.mp4",
         "hevc/main10-ipb.mp4",
         "audio/two-audio.mp4",
+        "playback-errors/framestep-opus.mkv",
+        "vp9/adaptive.webm",
+        "vp9/odd10.webm",
+        "vp9/lossless12.webm",
+        "av1/ramp.webm",
+        "playback-errors/shuffleplanes-444-8.mkv",
+        "playback-errors/framestep-six-frames.y4m",
     ]
     .iter()
     .enumerate()
@@ -192,6 +199,11 @@ fn mp4_framestep_exports_selected_times_and_every_audio_packet() {
             for (a, b) in actual.into_iter().zip(expected) {
                 assert_eq!(step.packets[a].pts_ns, base.packets[b].pts_ns);
                 assert_eq!(step.packets[a].duration_ns, base.packets[b].duration_ns);
+                assert_eq!(
+                    step.packets[a].discard_padding_ns,
+                    base.packets[b].discard_padding_ns
+                );
+                assert_eq!(step.packets[a].invisible, base.packets[b].invisible);
                 assert_eq!(step.read_packet(a).unwrap(), base.read_packet(b).unwrap());
             }
         }
@@ -213,5 +225,45 @@ fn mp4_framestep_exports_selected_times_and_every_audio_packet() {
         serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()["video_frames"],
         4
     );
+    for (index, name) in [
+        "vp9/adaptive.webm",
+        "av1/ramp.webm",
+        "playback-errors/framestep-six-frames.y4m",
+        "playback-errors/framestep-opus.mkv",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "transcode-lossless"])
+            .arg(fixture(name))
+            .arg(dir.join(format!("cli-extra-{index}.mkv")))
+            .args(["--framestep", "2"])
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{name}: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()["backend"],
+            "fvid"
+        );
+    }
+    let failed = dir.join("truncated.mkv");
+    assert!(
+        fvid::media::transcode_lossless(
+            &fixture("playback-errors/framestep-discarded-truncated.y4m"),
+            &failed,
+            LosslessTransform {
+                framestep: Some("2".into()),
+                ..Default::default()
+            },
+            &CopyOptions::default()
+        )
+        .is_err()
+    );
+    assert!(!failed.exists());
     std::fs::remove_dir_all(dir).unwrap();
 }

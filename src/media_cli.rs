@@ -4871,7 +4871,6 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
         }));
     }
     if !custom_policy && fvid::native_lossless::supports_framestep(&transform)
-        && !fvid::native_lossless_y4m::eligible(source)?
         && fvid::native_lossless::eligible(source)? {
         if planning {
             let plan=fvid::media::plan_transcode_lossless(source,&transform,&options,None)?;
