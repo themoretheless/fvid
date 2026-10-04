@@ -103,3 +103,31 @@ fn truncated_source_does_not_publish_pixelized_output() {
     assert!(!output.exists());
     assert_eq!(std::fs::read_dir(directory).unwrap().count(), 1);
 }
+
+#[test]
+fn expression_parameters_use_owned_pixels_and_public_api() {
+    for (expression, literal) in [
+        ("w=PI:h=5/2:m=1/2:p=1+1", "3:2:avg:1"),
+        ("w=default/4:h=min:m=max-1:p=7", "4:1:min:7"),
+    ] {
+        let make = || GeometryFrame {
+            width: 3, height: 1, subsampling: Some([1, 1]),
+            data: vec![0, 10, 20, 30, 60, 90, 20, 40, 80],
+        };
+        let mut actual = make();
+        let mut expected = make();
+        Pixelize::parse(expression).unwrap().apply(&mut actual, 8).unwrap();
+        Pixelize::parse(literal).unwrap().apply(&mut expected, 8).unwrap();
+        assert_eq!(actual.data, expected.data);
+    }
+    for invalid in ["w=n", "w=1/0", "w=1024.1", "m=2.1", "p=-0.1", "p=7/2"] {
+        assert!(Pixelize::parse(invalid).is_err(), "{invalid}");
+    }
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let stats = fvid::media::decode_video_transformed(&path, fvid::media::DecodeTransform {
+        pixelize: Some("w=1+2:h=5/2:m=max-1:p=7".into()),
+        ..Default::default()
+    }).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.video_frames, 25);
+}

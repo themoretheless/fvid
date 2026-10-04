@@ -4,4 +4,5 @@ type Result<T> = std::result::Result<T, String>;
 fn invalid(message: &str) -> String {
     message.into()
 }
+use crate::owned_expression as pixelize_expression;
 include!("owned_pixelize_impl.rs");

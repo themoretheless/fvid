@@ -40,6 +40,8 @@ fn main() {
                 "w=5:h=3:m=min:p=5",
                 "1:1:max:1",
                 "1024:1024:2:7",
+                "w=PI:h=5/2:m=1/2:p=1+1",
+                "w=default/4:h=min:m=max-1:p=7",
             ] {
                 let mut frame = GeometryFrame {
                     width: 17,

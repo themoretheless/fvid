@@ -27,20 +27,48 @@ impl Pixelize {
                     "planes" | "p" => 3,
                     _ => return Err(invalid("unknown pixelize option")),
                 };
-                values[index] = if index == 2 {
-                    match value {
-                        "avg" => 0,
-                        "min" => 1,
-                        "max" => 2,
-                        _ => value
-                            .parse()
-                            .map_err(|_| invalid("invalid pixelize mode"))?,
+                if index == 3 {
+                    let mut flags = 0usize;
+                    let mut remaining = value.trim();
+                    while !remaining.is_empty() {
+                        let operation = remaining.as_bytes()[0];
+                        if operation == b'+' || operation == b'-' {
+                            remaining = &remaining[1..];
+                        }
+                        let end = remaining.find(['+', '-']).unwrap_or(remaining.len());
+                        let number = pixelize_expression::Expression::parse(&remaining[..end])
+                            .and_then(|expression| expression.evaluate(&[("default", 15.0), ("min", 0.0), ("max", 15.0), ("none", 0.0)]))
+                            .map_err(|_| invalid("invalid pixelize plane flags"))?;
+                        if !number.is_finite() || number.fract() != 0.0 || !(0.0..=15.0).contains(&number) {
+                            return Err(invalid("invalid pixelize plane flags"));
+                        }
+                        flags = match operation {
+                            b'+' => flags | number as usize,
+                            b'-' => flags & !(number as usize),
+                            _ => number as usize,
+                        };
+                        remaining = &remaining[end..];
                     }
+                    if value.trim().is_empty() { return Err(invalid("empty pixelize plane flags")); }
+                    values[index] = flags;
+                    continue;
+                }
+                let minimum = if index < 2 { 1.0 } else { 0.0 };
+                let maximum = [1024.0, 1024.0, 2.0, 15.0][index];
+                let default = [16.0, 16.0, 0.0, 15.0][index];
+                let mut variables = vec![("default", default)];
+                if index == 2 {
+                    variables.extend_from_slice(&[("avg", 0.0), ("min", 1.0), ("max", 2.0)]);
                 } else {
-                    value
-                        .parse()
-                        .map_err(|_| invalid("invalid pixelize integer"))?
-                };
+                    variables.extend_from_slice(&[("min", minimum), ("max", maximum)]);
+                }
+                let number = pixelize_expression::Expression::parse(value.trim())
+                    .and_then(|expression| expression.evaluate(&variables))
+                    .map_err(|_| invalid("pixelize requires a constant numeric expression"))?;
+                if !number.is_finite() || !(minimum..=maximum).contains(&number) {
+                    return Err(invalid("pixelize option outside supported range"));
+                }
+                values[index] = number.round_ties_even() as usize;
             }
         }
         if !(1..=1024).contains(&values[0])
