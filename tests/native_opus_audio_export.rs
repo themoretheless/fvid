@@ -233,3 +233,43 @@ fn opus_packet_limit_cancel_and_completion_keep_atomic_publication() {
     assert!(error.contains("cancelled"), "{error}");
     assert!(!output.exists());
 }
+
+#[test]
+fn opus_file_export_accepts_speech_hybrid_and_surround_profiles() {
+    for (name, channels) in [
+        ("opus-mono", 1),
+        ("opus-stereo", 2),
+        ("opus-silk", 1),
+        ("opus-hybrid", 1),
+        ("opus-surround", 6),
+        ("opus-positive-first", 1),
+    ] {
+        let source = fixture(&format!("playback-errors/{name}.webm"));
+        let expected = std::fs::read(fixture(&format!("playback-errors/{name}.f32"))).unwrap();
+        let output = std::env::temp_dir().join(format!(
+            "fvid-opus-profiles-{}-{name}.wav",
+            std::process::id()
+        ));
+        let stats =
+            fvid_media::decode_audio_interval(&source, &output, None, &Default::default()).unwrap();
+        assert_eq!(
+            (stats.sample_rate, stats.channels),
+            (48000, channels),
+            "{name}"
+        );
+        assert_eq!(stats.sample_frames, 48000, "{name}");
+        let actual = wave_payload(&output);
+        assert_eq!(actual.len(), expected.len(), "{name}");
+        let error = actual
+            .chunks_exact(4)
+            .zip(expected.chunks_exact(4))
+            .map(|(a, b)| {
+                (f32::from_le_bytes(a.try_into().unwrap())
+                    - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+            })
+            .fold(0.0f32, f32::max);
+        assert!(error < 0.00002, "{name}: PCM max error {error}");
+        std::fs::remove_file(output).unwrap();
+    }
+}
