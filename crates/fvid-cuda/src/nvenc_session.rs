@@ -38,7 +38,10 @@ pub(crate) struct FunctionTable {
     before_preset: [usize; 5],
     preset: Option<Preset>,
     initialize: Option<Initialize>,
-    before_destroy: [usize; 15],
+    input_buffers: [usize; 2],
+    create_output: crate::nvenc_sdk::PNVENCCREATEBITSTREAMBUFFER,
+    destroy_output: crate::nvenc_sdk::PNVENCDESTROYBITSTREAMBUFFER,
+    before_destroy: [usize; 11],
     destroy: Option<Destroy>,
     invalidate: usize,
     open: Option<Open>,
@@ -57,7 +60,10 @@ impl FunctionTable {
             before_preset: [0; 5],
             preset: None,
             initialize: None,
-            before_destroy: [0; 15],
+            input_buffers: [0; 2],
+            create_output: None,
+            destroy_output: None,
+            before_destroy: [0; 11],
             destroy: None,
             invalidate: 0,
             open: None,
@@ -82,6 +88,7 @@ pub struct NvencSession {
     encoder: *mut c_void,
     destroy: Destroy,
     table: FunctionTable,
+    outputs: Vec<*mut c_void>,
     initialized: bool,
     failed: bool,
     device: ManuallyDrop<CodecDevice>,
@@ -122,6 +129,7 @@ impl NvencSession {
             encoder,
             destroy,
             table,
+            outputs: Vec::new(),
             initialized: false,
             failed: false,
             device: ManuallyDrop::new(device),
@@ -194,6 +202,41 @@ impl NvencSession {
         self.initialized = true;
         Ok(())
     }
+    /// Allocate a driver output slot after initialization. Slots remain owned
+    /// by this session and are released before the encoder is destroyed.
+    pub fn create_output(&mut self) -> Result<usize, String> {
+        if self.encoder.is_null() || !self.initialized || self.failed {
+            return Err("NVENC output allocation requires a healthy initialized session".into());
+        }
+        self.device.handles()?;
+        let create = self
+            .table
+            .create_output
+            .ok_or("NVENC omitted output-create entrypoint")?;
+        self.table
+            .destroy_output
+            .ok_or("NVENC omitted output-destroy entrypoint")?;
+        self.outputs
+            .try_reserve(1)
+            .map_err(|e| format!("NVENC output ownership allocation failed: {e}"))?;
+        let mut params = crate::nvenc_sdk::NV_ENC_CREATE_BITSTREAM_BUFFER::default();
+        params.version = version(1);
+        // SAFETY: Initialized session and generated SDK storage are live; size,
+        // deprecated heap and reserved fields remain zero as required by SDK.
+        let status = unsafe { create(self.encoder, &mut params) };
+        if status != 0 {
+            return Err(format!(
+                "NVENC output allocation failed with status {status}"
+            ));
+        }
+        if params.bitstreamBuffer.is_null() {
+            self.failed = true;
+            return Err("NVENC allocated a null output handle".into());
+        }
+        let index = self.outputs.len();
+        self.outputs.push(params.bitstreamBuffer);
+        Ok(index)
+    }
     /// Query all codec identifiers advertised by this live encoder session.
     /// Unknown identifiers are retained rather than silently filtered.
     pub fn codec_guids(&self) -> Result<Vec<CodecGuid>, String> {
@@ -232,6 +275,19 @@ impl NvencSession {
         }
         self.device.handles()?;
         self.device.synchronize()?;
+        if !self.outputs.is_empty() {
+            let destroy = self
+                .table
+                .destroy_output
+                .ok_or("NVENC omitted output-destroy entrypoint")?;
+            for output in &mut self.outputs {
+                // SAFETY: Each nonnull output belongs to this live encoder;
+                // successful destruction clears it, preventing a repeated free.
+                close_handle(output, |handle| unsafe {
+                    destroy(self.encoder, handle) as i32
+                })?;
+            }
+        }
         // SAFETY: The live encoder belongs to this session; the driver library
         // remains loaded and the owning CUDA context is bound above.
         close_handle(&mut self.encoder, |encoder| unsafe {
@@ -309,6 +365,32 @@ fn close_handle(
 mod tests {
     use super::*;
     #[test]
+    fn output_creation_abi_matches_sdk_and_partial_cleanup_is_retryable() {
+        if std::mem::size_of::<usize>() == 8 {
+            assert_eq!(
+                std::mem::size_of::<crate::nvenc_sdk::NV_ENC_CREATE_BITSTREAM_BUFFER>(),
+                776
+            );
+            assert_eq!(
+                std::mem::offset_of!(
+                    crate::nvenc_sdk::NV_ENC_CREATE_BITSTREAM_BUFFER,
+                    bitstreamBuffer
+                ),
+                16
+            );
+            assert_eq!(std::mem::offset_of!(FunctionTable, create_output), 120);
+            assert_eq!(std::mem::offset_of!(FunctionTable, destroy_output), 128);
+        }
+        let handle = std::ptr::dangling_mut::<c_void>();
+        let mut outputs = [handle, handle];
+        close_handle(&mut outputs[0], |_| 0).unwrap();
+        assert!(close_handle(&mut outputs[1], |_| 20).is_err());
+        assert!(outputs[0].is_null());
+        assert_eq!(outputs[1], handle);
+        close_handle(&mut outputs[0], |_| panic!("freed output retried")).unwrap();
+        close_handle(&mut outputs[1], |_| 0).unwrap();
+    }
+    #[test]
     fn preset_init_abi_and_geometry_match_the_pinned_sdk() {
         use crate::nvenc_sdk as sdk;
         assert!(validate_geometry(128, 72, 60, 1).is_ok());
@@ -378,7 +460,10 @@ mod tests {
         assert!(!session.codec_guids().unwrap().is_empty());
         session.initialize_h264(128, 72, 60, 1).unwrap();
         assert!(session.initialize_h264(128, 72, 60, 1).is_err());
+        assert_eq!(session.create_output().unwrap(), 0);
+        assert_eq!(session.create_output().unwrap(), 1);
         session.close().unwrap();
+        assert!(session.create_output().is_err());
         assert!(session.codec_guids().is_err());
         session.close().unwrap();
     }
