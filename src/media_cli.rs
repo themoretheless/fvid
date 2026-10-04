@@ -968,6 +968,15 @@ fn pixel_decode_args(
             filters.colorcontrast=Some(fvid_media::owned_colorcontrast::ColorContrast::parse(args.next().ok_or("missing colorcontrast args")?)?);
             continue;
         }
+        if arg == "--fade" {
+            if filters.fade.is_some() {return Err("duplicate fade".into());}
+            let value=args.next().ok_or("missing fade args")?;
+            match fvid_media::owned_fade::Fade::parse(value) {
+                Ok(filter)=>filters.fade=Some(filter),
+                Err(_)=>{result.push(arg.clone());result.push(value.clone());}
+            }
+            continue;
+        }
         if arg == "--colorhold" {
             if filters.colorhold.is_some() {return Err("duplicate colorhold".into());}
             filters.colorhold=Some(fvid_media::owned_colorhold::ColorHold::parse(args.next().ok_or("missing colorhold args")?)?);
@@ -4558,7 +4567,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--exposure"|"--colorbalance"|"--colorcorrect"|"--cas"|"--grayworld"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--fade"|"--exposure"|"--colorbalance"|"--colorcorrect"|"--cas"|"--grayworld"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {

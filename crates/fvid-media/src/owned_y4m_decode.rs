@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.fade.as_deref().is_some_and(|a|crate::owned_fade::Fade::parse(a).is_err()) {return false;}
     if transform.grayworld.as_deref().is_some_and(|a| crate::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.cas.as_deref().is_some_and(|a| crate::owned_cas::Cas::parse(a).is_err()) { return false; }
     if transform.colorcorrect.as_deref().is_some_and(|a| crate::owned_colorcorrect::ColorCorrect::parse(a).is_err()) { return false; }
@@ -121,6 +122,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 vibrance: transform.vibrance.clone(),
                 colorlevels: transform.colorlevels.clone(),
                 colorchannelmixer: transform.colorchannelmixer.clone(),
+                fade: transform.fade.clone(),
                 exposure: transform.exposure.clone(),
                 colorbalance: transform.colorbalance.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
@@ -477,6 +479,7 @@ pub(crate) fn apply_pixel_filters_cached_at(
         || transform.vibrance.is_some()
         || transform.colorlevels.is_some()
         || transform.colorchannelmixer.is_some()
+        || transform.fade.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
@@ -603,6 +606,7 @@ pub(crate) fn apply_pixel_filters_cached_at(
             if let Some(args) = transform.colorhold.as_deref() {
                 crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
             }
+            if let Some(args)=transform.fade.as_deref() {crate::owned_fade::Fade::parse(args)?.apply(&mut frame,header.depth(),header.full_range()?,n)?;}
             Ok(())
         })();
         *output = frame.data;
@@ -902,6 +906,7 @@ fn decode_reader_frames(
         || transform.vibrance.is_some()
         || transform.colorlevels.is_some()
         || transform.colorchannelmixer.is_some()
+        || transform.fade.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
@@ -960,7 +965,7 @@ fn decode_reader_frames(
         let mut remaining = frame_bytes;
         while remaining != 0 {
             let count = remaining.min(scratch.len());
-            let buffer = if (geometry || visit.is_some()) && selected {
+            let buffer = if (geometry || visit.is_some()) && in_interval {
                 let at = frame_bytes - remaining;
                 &mut input[at..at + count]
             } else {
@@ -975,7 +980,7 @@ fn decode_reader_frames(
             })?;
             remaining -= count;
         }
-        if selected {
+        if in_interval {
             if geometry {
                 if transform.rotate.is_some() {
                     output = transform_frame_geometry_requested(&header, &input, transform)?;
@@ -991,6 +996,7 @@ fn decode_reader_frames(
                 filtered_frames=filtered_frames.checked_add(1).ok_or("timeline frame count overflow")?;
                 std::hint::black_box(&output);
             }
+            if selected {
             let (pts, duration) = if visit.is_some() {
                 let start = u128::from(index) * rate_d as u128 * 1_000_000_000 / rate_n as u128;
                 let end = (u128::from(index) + 1) * rate_d as u128 * 1_000_000_000 / rate_n as u128;
@@ -1025,6 +1031,7 @@ fn decode_reader_frames(
             frames = frames
                 .checked_add(emitted)
                 .ok_or("Y4M frame count overflow")?;
+            }
         }
         index = index.checked_add(1).ok_or("Y4M frame count overflow")?;
     }

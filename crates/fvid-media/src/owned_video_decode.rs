@@ -144,7 +144,6 @@ pub(crate) fn decode_ffv1(
         None
     };
     let mut overlay = None;
-    let mut timeline_frames=0u64;
     let mut frame_metadata = None;
     let mut temporal_format = None;
     let mut consumed = 0u64;
@@ -205,6 +204,7 @@ pub(crate) fn decode_ffv1(
                 _ => return Ok(None),
             }
         };
+        let timeline_index=selected_inputs;
         let emit = visible && selected && !past_end && step.emits(selected_inputs);
         if visible && selected && !past_end {
             selected_inputs = selected_inputs
@@ -218,7 +218,7 @@ pub(crate) fn decode_ffv1(
             } else {
                 format!("{base}{}le", decoded.depth)
             };
-        } else if emit || stats.pixel_format.is_empty() {
+        } else if (visible && selected && !past_end) || stats.pixel_format.is_empty() {
             let Some((width, height, format, pixels)) = process_frame_with_overlay(
                 &decoded,
                 decoder.monochrome() == Some(true),
@@ -229,12 +229,11 @@ pub(crate) fn decode_ffv1(
                 pts_ns,
                 lut.as_ref(),
                 matrix,
-                timeline_frames,
+                timeline_index,
             )?
             else {
                 return Ok(None);
             };
-            if emit {timeline_frames=timeline_frames.checked_add(1).ok_or("timeline frame count overflow")?;}
             stats.width = width;
             stats.height = height;
             stats.pixel_format = format;

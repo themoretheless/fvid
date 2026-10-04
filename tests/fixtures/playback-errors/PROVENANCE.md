@@ -252,3 +252,24 @@ every audio packet, original timestamps/durations and discard padding with
 an unfiltered own export. The same regression qualifies VP9 8/10/12-bit, AV1,
 FFV1 and Y4M routes, API explicit FFV1 level=1 and CLI. A deliberately truncated
 discarded Y4M frame must still fail without publishing an output.
+
+### Owned frame-count fade
+
+`scripts/generate_fade_fixture.py` writes six 4x4 YUV420 frames with known luma
+64+16*n, Cb=100 and Cr=150, plus a three-frame chroma rounding control (Cb=129,
+Cr=131). Only Python bytes are used, with no private samples, FFmpeg or network.
+The root API formerly lacked an owned fade implementation. `tests/native_fade.rs`
+enables acceptance for decode, FFV1 export, frame-index continuity before
+framestep, CLI decode/transcode/export-y4m, numeric endpoints and original clocks.
+The half-way chroma control reproduces the one-level rounding discrepancy found
+by the explicit benchmark: at fade-in frame 1 of 2, Cb=129 and Cr=131 become 128
+and 129. Ordinary tests assert these stored mathematical expectations and do not
+run a reference codec. Time-based, colored and alpha modes remain unsupported
+by this own implementation, with explicit admission/refusal.
+
+Direct library Y4M and single-track FFV1 export are checked against the same
+six-frame numeric expectations. This also reproduces the previously compressed
+filter clock when framestep ran before spatial filters: inputs 0/2/4 were
+incorrectly evaluated as filter indices 0/1/2. The fix evaluates filters on all
+interval-selected inputs before temporal output selection, retaining indices
+0/2/4 and validating discarded filtered frames.

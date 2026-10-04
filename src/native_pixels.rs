@@ -30,6 +30,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub fade: Option<fvid_media::owned_fade::Fade>,
     pub colorhold: Option<fvid_media::owned_colorhold::ColorHold>,
     pub colorcontrast: Option<fvid_media::owned_colorcontrast::ColorContrast>,
     pub vibrance: Option<fvid_media::owned_vibrance::Vibrance>,
@@ -60,6 +61,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            fade: request.fade.as_deref().map(fvid_media::owned_fade::Fade::parse).transpose().map_err(|e|invalid(&e))?,
             grayworld: request.grayworld.as_deref().map(fvid_media::owned_timeline::Timeline::grayworld).transpose().map_err(|e|invalid(&e))?,
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
             colorcorrect: request.colorcorrect.as_deref().map(fvid_media::owned_colorcorrect::ColorCorrect::parse).transpose().map_err(|e|invalid(&e))?,
@@ -156,6 +158,7 @@ impl PixelFilters {
             && self.vibrance.is_none()
             && self.colorlevels.is_none()
             && self.colorchannelmixer.is_none()
+            && self.fade.is_none()
             && self.exposure.is_none()
             && self.colorbalance.is_none()
             && self.colorcorrect.is_none()
@@ -258,6 +261,7 @@ impl PixelFilters {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
+        if let Some(filter)=self.fade { filter.apply(frame,depth,full_range,n).map_err(|e|invalid(&e))?; }
         Ok(())
     }
 }

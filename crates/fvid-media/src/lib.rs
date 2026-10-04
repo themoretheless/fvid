@@ -248,3 +248,5 @@ pub mod owned_text_raster;
 pub mod owned_subtitle_burn;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_subtitle_burn::{burn_subtitles, plan_burn_subtitles};
+
+pub mod owned_fade;

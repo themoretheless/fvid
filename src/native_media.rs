@@ -556,6 +556,7 @@ pub(crate) fn supports_plane_filter_source(source: &Path) -> Result<bool> {
 }
 
 pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
+    if transform.fade.as_deref().is_some_and(|a|fvid_media::owned_fade::Fade::parse(a).is_err()) {return false;}
     if transform.framestep.as_deref().is_some_and(|args| fvid_media::owned_framestep::FrameStep::parse(args).is_err()) { return false; }
     if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.monochrome.as_deref().is_some_and(|a| fvid_media::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
@@ -634,7 +635,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         shuffleplanes: _,
         lutyuv: _,
         colorhold: _,
-        fade: None,
+        fade: _,
         perspective: None,
         lumakey: None,
         chromakey: None,
