@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Source policy controls; no Cargo, FFmpeg or network required."""
 import unittest
+from unittest import mock
+import check_native_dependencies as guard
 import pathlib
 import tempfile
 from check_native_dependencies import external_test_calls, external_python_calls, audit_native_validators, audit_fixture_generators, NATIVE_VALIDATORS
@@ -115,6 +117,22 @@ class FixtureDirectoryPolicy(unittest.TestCase):
             (fixtures/"generate.py").write_text('Path("ffmpeg-reference.raw").read_bytes()')
             _,failures=audit_fixture_generators(root)
             self.assertEqual(failures,[])
+
+
+class ProductionMediaPolicy(unittest.TestCase):
+    def test_normal_audit_rejects_legacy_in_production_media(self):
+        def graph(manifest, features, target, offline):
+            return [], features == ["--no-default-features", "--features", "media"]
+
+        with mock.patch("sys.argv", ["guard", "--offline", "--target", "test-target"]), \
+             mock.patch.object(guard, "dependencies", side_effect=graph) as dependencies, \
+             mock.patch.object(guard, "audit_ordinary_tests", return_value=([], [])), \
+             mock.patch.object(guard, "audit_fixture_generators", return_value=([], [])), \
+             mock.patch.object(guard, "audit_native_validators", return_value=([], [])), \
+             mock.patch("builtins.print"):
+            with self.assertRaisesRegex(SystemExit, "production media: FFmpeg dependency reached graph"):
+                guard.main()
+            self.assertEqual(dependencies.call_count, 6)
 
 
 if __name__ == "__main__":
