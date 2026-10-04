@@ -389,3 +389,26 @@ Windows test compilation pass; the physical fill test remains unexecuted here.
 This supplies the black-frame primitive needed by the existing synthetic
 empty-edit timeline fixture. The movie event rendering/export loop still needs
 to connect it, and production CUDA still has the legacy backend.
+
+
+## Native AVC movie reader
+
+`AvcMovieReader` now drives own MP4 packet input, timeline occurrences and direct
+NVDEC. Its bounded queue accepts decode-order samples while delivering movie
+events in presentation order. It caches only pictures needed before the next
+replay, discards unnecessary preroll display tickets, and restarts both packet
+iteration and decoder at source edit boundaries and repeated occurrences rather than retaining an entire
+movie on GPU. Returned picture tickets remain owned while callers filter them.
+All mapped/raw pointer consumers must finish before advancing across a replay.
+
+The staged queue refuses unexpected decode indices and insufficient B-picture
+cache before requesting another decode. Decoder/input errors make the reader
+terminal. Blank events return no decoded ticket and can be rendered using the
+owned GPU black-fill primitive.
+
+Host tests cover reordered B output, repeated-range restart, long preroll without
+retaining future-repeat frames, blanks and cache admission. An ignored NVIDIA
+test runs the existing empty-edit synthetic MOV through the reader, maps/unmaps
+pictures and fills both blank events on GPU; qualification requires it. This
+hardware test has not run here. Production encode/mux publication and remaining
+codec profiles/formats still require integration.

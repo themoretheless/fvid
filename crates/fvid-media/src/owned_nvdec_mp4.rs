@@ -11,6 +11,8 @@ use std::io::{Read, Seek};
 /// on the movie clock. Repeated edits can produce multiple occurrences.
 #[derive(Clone, Copy, Debug)]
 pub struct Presentation {
+    /// Source edit range; decoder state is reset between ranges.
+    pub range: usize,
     pub sample: Option<usize>,
     pub start: i64,
     pub end: i64,
@@ -77,6 +79,9 @@ impl<R: Read + Seek> AvcMp4Input<R> {
     pub fn track(&self) -> &Track {
         &self.reader.tracks()[self.video]
     }
+    pub fn coded_dimensions(&self) -> (u32, u32) {
+        self.sps.coded_dimensions()
+    }
     pub fn movie_timescale(&self) -> u32 {
         self.reader.movie_timescale()
     }
@@ -135,13 +140,14 @@ impl<R: Read + Seek> AvcMp4Input<R> {
                 if end > sample.pts.max(0) {
                     push(Presentation {
                         sample: Some(index),
+                        range: 0,
                         start: sample.pts.max(0),
                         end,
                     })?;
                 }
             }
         } else {
-            for edit in edits {
+            for (range, edit) in edits.into_iter().enumerate() {
                 match edit {
                     MovieEdit::Blank {
                         movie_start,
@@ -149,6 +155,7 @@ impl<R: Read + Seek> AvcMp4Input<R> {
                     } => {
                         push(Presentation {
                             sample: None,
+                            range,
                             start: movie_start,
                             end: movie_end,
                         })?;
@@ -173,6 +180,7 @@ impl<R: Read + Seek> AvcMp4Input<R> {
                                     .ok_or("MP4 movie endpoint overflow")?;
                                 push(Presentation {
                                     sample: Some(index),
+                                    range,
                                     start: movie_start,
                                     end: movie_end,
                                 })?;
@@ -199,6 +207,12 @@ impl<R: Read + Seek> AvcMp4Input<R> {
             output_surfaces,
             self.max_packet_bytes,
         )
+    }
+    /// Restart packet iteration. Any decoder must also be reopened before
+    /// decoding after rewind; resetting the container cursor alone is insufficient.
+    pub fn rewind_packets(&mut self) {
+        self.next = 0;
+        self.failed = false;
     }
     /// Reuses caller storage and advances only after a successful bounded read.
     pub fn read_next(&mut self, bytes: &mut Vec<u8>) -> Result<Option<Sample>, String> {
