@@ -207,6 +207,62 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         Ok(())
     }
 }
+#[derive(Clone, Debug)]
+pub struct MovieVideoMetadata {
+    pub options: crate::owned_matroska::TrackOptions,
+    pub name: String,
+    pub language: String,
+}
+fn transformed_metadata(
+    mut metadata: MovieVideoMetadata,
+    width: u32,
+    height: u32,
+    t: fvid_cuda::Nv12Transform,
+    full_range: bool,
+) -> Result<MovieVideoMetadata, String> {
+    validate_transform(width, height, t)?;
+    if let Some(video) = metadata.options.video.as_mut() {
+        if video
+            .colour
+            .is_some_and(|colour| colour.full_range != full_range)
+        {
+            return Err(
+                "movie black range differs from source pixels; range conversion is required".into(),
+            );
+        }
+        if video.colour.is_none() {
+            video.colour = Some(crate::owned_matroska::ColourDescription {
+                primaries: 2,
+                transfer: 2,
+                matrix: 2,
+                full_range,
+            });
+        }
+        let [left, right, top, bottom] = video.crop;
+        let visible_right = width.checked_sub(right).ok_or("invalid source crop")?;
+        let visible_bottom = height.checked_sub(bottom).ok_or("invalid source crop")?;
+        let out_right = t.crop_x + t.out_width;
+        let out_bottom = t.crop_y + t.out_height;
+        if left.max(t.crop_x) >= visible_right.min(out_right)
+            || top.max(t.crop_y) >= visible_bottom.min(out_bottom)
+        {
+            return Err("movie transform removes the visible image".into());
+        }
+        video.crop = [
+            left.saturating_sub(t.crop_x),
+            out_right.saturating_sub(visible_right),
+            top.saturating_sub(t.crop_y),
+            out_bottom.saturating_sub(visible_bottom),
+        ];
+        if t.hflip {
+            video.crop.swap(0, 1);
+        }
+        if t.vflip {
+            video.crop.swap(2, 3);
+        }
+    }
+    Ok(metadata)
+}
 /// Owns a reusable GPU output surface and renders each movie event without libav.
 /// Complete external uses of `buffer()` before advancing or closing this renderer.
 pub struct AvcMovieRenderer<R: Read + Seek> {
@@ -215,6 +271,7 @@ pub struct AvcMovieRenderer<R: Read + Seek> {
     filter: std::mem::ManuallyDrop<fvid_cuda::Nv12Processor>,
     transform: fvid_cuda::Nv12Transform,
     full_range: bool,
+    metadata: MovieVideoMetadata,
     failed: bool,
 }
 impl<R: Read + Seek> AvcMovieRenderer<R> {
@@ -224,7 +281,13 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
         full_range: bool,
     ) -> Result<Self, String> {
         let (width, height) = reader.source.coded_dimensions();
-        validate_transform(width, height, transform)?;
+        let metadata = transformed_metadata(
+            reader.source.video_metadata(),
+            width,
+            height,
+            transform,
+            full_range,
+        )?;
         let output =
             fvid_cuda::Nv12Buffer::new(reader.ordinal, transform.out_width, transform.out_height)?;
         let mut filter = fvid_cuda::Nv12Processor::new(reader.ordinal)?;
@@ -235,8 +298,12 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
             filter: std::mem::ManuallyDrop::new(filter),
             transform,
             full_range,
+            metadata,
             failed: false,
         })
+    }
+    pub fn metadata(&self) -> &MovieVideoMetadata {
+        &self.metadata
     }
     pub(crate) fn ordinal(&self) -> usize {
         self.reader.ordinal
@@ -336,6 +403,74 @@ fn validate_transform(width: u32, height: u32, t: fvid_cuda::Nv12Transform) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn render_metadata_preserves_display_and_maps_crop_through_flips() {
+        use crate::owned_matroska::{
+            ColourDescription, ContentLight, HdrMetadata, TrackOptions, VideoMetadata,
+        };
+        let metadata = MovieVideoMetadata {
+            name: "synthetic".into(),
+            language: "eng".into(),
+            options: TrackOptions {
+                rotation: 90,
+                video: Some(VideoMetadata {
+                    crop: [2, 4, 6, 8],
+                    pixel_aspect: (2, 1),
+                    colour: Some(ColourDescription {
+                        primaries: 9,
+                        transfer: 16,
+                        matrix: 9,
+                        full_range: false,
+                    }),
+                    hdr: HdrMetadata {
+                        light: ContentLight {
+                            max_cll: 1000.0,
+                            max_fall: 400.0,
+                        },
+                        ..Default::default()
+                    },
+                }),
+                ..Default::default()
+            },
+        };
+        let t = fvid_cuda::Nv12Transform {
+            crop_x: 2,
+            crop_y: 6,
+            out_width: 60,
+            out_height: 40,
+            hflip: true,
+            vflip: true,
+        };
+        let transformed = transformed_metadata(metadata.clone(), 64, 48, t, false).unwrap();
+        let video = transformed.options.video.unwrap();
+        assert_eq!(video.crop, [2, 0, 6, 0]);
+        assert_eq!(video.pixel_aspect, (2, 1));
+        assert_eq!(video.colour, metadata.options.video.unwrap().colour);
+        assert_eq!(video.hdr, metadata.options.video.unwrap().hdr);
+        assert_eq!(
+            (
+                transformed.options.rotation,
+                transformed.name.as_str(),
+                transformed.language.as_str()
+            ),
+            (90, "synthetic", "eng")
+        );
+        assert!(transformed_metadata(metadata.clone(), 64, 48, t, true).is_err());
+        assert!(
+            transformed_metadata(
+                metadata,
+                64,
+                48,
+                fvid_cuda::Nv12Transform {
+                    out_width: 2,
+                    out_height: 2,
+                    ..Default::default()
+                },
+                false
+            )
+            .is_err()
+        );
+    }
     #[test]
     fn render_geometry_is_checked_before_device_allocation() {
         use fvid_cuda::Nv12Transform;

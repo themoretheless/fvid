@@ -85,8 +85,20 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
             codec,
         };
         let (width, height) = this.renderer.buffer().dimensions();
+        let colour = this
+            .renderer
+            .metadata()
+            .options
+            .video
+            .and_then(|video| video.colour)
+            .map(|c| fvid_cuda::NvencColour {
+                primaries: if c.primaries == 0 { 2 } else { c.primaries },
+                transfer: if c.transfer == 0 { 2 } else { c.transfer },
+                matrix: if c.matrix == 0 { 2 } else { c.matrix },
+                full_range: c.full_range,
+            });
         this.encoder
-            .initialize_nv12(codec, width, height, fps_num, fps_den)?;
+            .initialize_nv12_with_colour(codec, width, height, fps_num, fps_den, colour)?;
         for _ in 0..slots {
             this.buffers.push(Nv12Buffer::new(ordinal, width, height)?);
             let buffer = this.buffers.last().unwrap();
@@ -213,11 +225,19 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                 width,
                 height,
             },
-            name: "",
-            language: "und",
+            name: &self.renderer.metadata().name,
+            language: if self.renderer.metadata().language.is_empty() {
+                "und"
+            } else {
+                &self.renderer.metadata().language
+            },
         }];
-        let mut writer =
-            crate::owned_matroska::PacketWriter::new(output, &tracks).map_err(|e| e.to_string())?;
+        let mut writer = crate::owned_matroska::PacketWriter::new_with_options(
+            output,
+            &tracks,
+            &[self.renderer.metadata().options],
+        )
+        .map_err(|e| e.to_string())?;
         let scale = self.media_timescale();
         writer
             .write_packet(
@@ -305,82 +325,89 @@ mod tests {
         use crate::owned_nvdec_movie::AvcMovieReader;
         use crate::owned_nvdec_mp4::AvcMp4Input;
         use std::io::Cursor;
-        let source = AvcMp4Input::open(
-            Cursor::new(
-                include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
-                    .as_slice(),
-            ),
-            Default::default(),
-        )
-        .unwrap();
-        let expected = source.movie_presentations(1000).unwrap();
-        let scale = source.track().timescale;
-        let (width, height) = source.coded_dimensions();
-        let reader = AvcMovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
-        let renderer = AvcMovieRenderer::new(
-            reader,
-            Nv12Transform {
-                out_width: width,
-                out_height: height,
-                hflip: true,
-                ..Default::default()
-            },
-            false,
-        )
-        .unwrap();
-        let mut encoder = AvcMovieEncoder::new(
-            renderer,
-            NvencCodec::H264,
-            60,
-            1,
-            32,
-            Duration::from_secs(10),
-        )
-        .unwrap();
-        let mut output = Cursor::new(Vec::new());
-        assert_eq!(
-            encoder.write_avc_matroska(&mut output, 1 << 20).unwrap(),
-            expected.len() as u64
-        );
-        encoder.close().unwrap();
-        let mut saved = crate::owned_webm::WebmReader::open(
-            Cursor::new(output.into_inner()),
-            Default::default(),
-        )
-        .unwrap();
-        let mut expected: Vec<_> = expected
-            .iter()
-            .map(|event| {
-                (
-                    ticks_ns(event.start as u64, scale).unwrap(),
-                    ticks_ns((event.end - event.start) as u64, scale).unwrap(),
-                )
-            })
-            .collect();
-        expected.sort_unstable();
-        let mut actual: Vec<_> = saved
-            .packets
-            .iter()
-            .map(|packet| {
-                (
-                    u64::try_from(packet.pts_ns).unwrap(),
-                    packet.duration_ns.unwrap(),
-                )
-            })
-            .collect();
-        actual.sort_unstable();
-        assert_eq!(actual, expected);
-        let mut software = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
-            &saved.tracks[0].codec_private,
-            16 << 20,
-        )
-        .unwrap();
-        for index in 0..saved.packets.len() {
-            let packet = saved.read_packet(index).unwrap();
-            let picture = software.decode_order(&packet).unwrap().unwrap();
-            assert_eq!(picture.dimensions(), (width as usize, height as usize));
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
+                .as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/avc-cuda-video-metadata.mp4")
+                .as_slice(),
+        ] {
+            let source = AvcMp4Input::open(Cursor::new(bytes), Default::default()).unwrap();
+            let expected = source.movie_presentations(1000).unwrap();
+            let scale = source.track().timescale;
+            let (width, height) = source.coded_dimensions();
+            let reader = AvcMovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
+            let renderer = AvcMovieRenderer::new(
+                reader,
+                Nv12Transform {
+                    out_width: width,
+                    out_height: height,
+                    hflip: true,
+                    ..Default::default()
+                },
+                false,
+            )
+            .unwrap();
+            let metadata = renderer.metadata().clone();
+            let mut encoder = AvcMovieEncoder::new(
+                renderer,
+                NvencCodec::H264,
+                60,
+                1,
+                32,
+                Duration::from_secs(10),
+            )
+            .unwrap();
+            let mut output = Cursor::new(Vec::new());
+            assert_eq!(
+                encoder.write_avc_matroska(&mut output, 1 << 20).unwrap(),
+                expected.len() as u64
+            );
+            encoder.close().unwrap();
+            let mut saved = crate::owned_webm::WebmReader::open(
+                Cursor::new(output.into_inner()),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(saved.tracks[0].rotation, metadata.options.rotation);
+            assert_eq!(
+                Some(saved.tracks[0].colour),
+                metadata.options.video.unwrap().colour
+            );
+            let mut expected: Vec<_> = expected
+                .iter()
+                .map(|event| {
+                    (
+                        ticks_ns(event.start as u64, scale).unwrap(),
+                        ticks_ns((event.end - event.start) as u64, scale).unwrap(),
+                    )
+                })
+                .collect();
+            expected.sort_unstable();
+            let mut actual: Vec<_> = saved
+                .packets
+                .iter()
+                .map(|packet| {
+                    (
+                        u64::try_from(packet.pts_ns).unwrap(),
+                        packet.duration_ns.unwrap(),
+                    )
+                })
+                .collect();
+            actual.sort_unstable();
+            assert_eq!(actual, expected);
+            let mut software = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
+                &saved.tracks[0].codec_private,
+                16 << 20,
+            )
+            .unwrap();
+            for index in 0..saved.packets.len() {
+                let packet = saved.read_packet(index).unwrap();
+                let picture = software.decode_order(&packet).unwrap().unwrap();
+                assert_eq!(picture.dimensions(), (width as usize, height as usize));
+            }
         }
     }
+
     #[test]
     fn queued_inputs_are_never_reused_before_output() {
         let mut pool = Pool::new(2).unwrap();

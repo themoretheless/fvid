@@ -113,6 +113,14 @@ pub struct NvencPacket {
     pub duration: u64,
     pub picture_type: u32,
 }
+/// H.273 colour codes carried into the encoder's VUI.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct NvencColour {
+    pub primaries: u8,
+    pub transfer: u8,
+    pub matrix: u8,
+    pub full_range: bool,
+}
 /// Codec selected for direct eight-bit NV12 encoding.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NvencCodec {
@@ -246,6 +254,18 @@ impl NvencSession {
         fps_num: u32,
         fps_den: u32,
     ) -> Result<(), String> {
+        self.initialize_nv12_with_colour(codec, width, height, fps_num, fps_den, None)
+    }
+    /// Set VUI alongside the preset; no pixel conversion is performed.
+    pub fn initialize_nv12_with_colour(
+        &mut self,
+        codec: NvencCodec,
+        width: u32,
+        height: u32,
+        fps_num: u32,
+        fps_den: u32,
+        colour: Option<NvencColour>,
+    ) -> Result<(), String> {
         validate_geometry(width, height, fps_num, fps_den)?;
         if self.encoder.is_null() || self.initialized || self.failed {
             return Err("NVENC initialization requires a fresh live session".into());
@@ -256,6 +276,7 @@ impl NvencSession {
             .table
             .initialize
             .ok_or("NVENC omitted initialization entrypoint")?;
+        let selected_codec = codec;
         let codec = codec.guid();
         let preset_guid = crate::nvenc_sdk::GUID {
             Data1: 0xb2dfb705,
@@ -271,6 +292,9 @@ impl NvencSession {
         let status = unsafe { preset_fn(self.encoder, codec, preset_guid, &mut preset) };
         if status != 0 {
             return Err(format!("NVENC preset query failed with status {status}"));
+        }
+        if let Some(colour) = colour {
+            set_colour(&mut preset.presetCfg, selected_codec, colour);
         }
         let mut params = crate::nvenc_sdk::NV_ENC_INITIALIZE_PARAMS::default();
         params.version = version(5) | (1 << 31);
@@ -820,8 +844,65 @@ fn close_handle(
     *encoder = std::ptr::null_mut();
     Ok(())
 }
+fn set_colour(
+    config: &mut crate::nvenc_sdk::NV_ENC_CONFIG,
+    codec: NvencCodec,
+    colour: NvencColour,
+) {
+    // SAFETY: The preset was requested for this same codec, so its matching
+    // codec-config union member is active. Both VUI structures share the SDK ABI.
+    let vui = unsafe {
+        match codec {
+            NvencCodec::H264 => &mut config.encodeCodecConfig.h264Config.h264VUIParameters,
+            NvencCodec::Hevc => &mut config.encodeCodecConfig.hevcConfig.hevcVUIParameters,
+        }
+    };
+    vui.videoSignalTypePresentFlag = 1;
+    vui.videoFormat = 5;
+    vui.videoFullRangeFlag = u32::from(colour.full_range);
+    vui.colourDescriptionPresentFlag = 1;
+    vui.colourPrimaries = u32::from(colour.primaries);
+    vui.transferCharacteristics = u32::from(colour.transfer);
+    vui.colourMatrix = u32::from(colour.matrix);
+}
+
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn own_colour_is_written_to_both_codec_vui_members() {
+        for codec in [super::NvencCodec::H264, super::NvencCodec::Hevc] {
+            let mut config = crate::nvenc_sdk::NV_ENC_CONFIG::default();
+            let colour = super::NvencColour {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: true,
+            };
+            super::set_colour(&mut config, codec, colour);
+            let vui = unsafe {
+                match codec {
+                    super::NvencCodec::H264 => {
+                        config.encodeCodecConfig.h264Config.h264VUIParameters
+                    }
+                    super::NvencCodec::Hevc => {
+                        config.encodeCodecConfig.hevcConfig.hevcVUIParameters
+                    }
+                }
+            };
+            assert_eq!(
+                (
+                    vui.videoSignalTypePresentFlag,
+                    vui.videoFullRangeFlag,
+                    vui.colourDescriptionPresentFlag,
+                    vui.colourPrimaries,
+                    vui.transferCharacteristics,
+                    vui.colourMatrix
+                ),
+                (1, 1, 1, 9, 16, 9)
+            );
+        }
+    }
+
     #[test]
     fn submission_distinguishes_buffered_frames_from_unaccepted_busy_frames() {
         assert_eq!(

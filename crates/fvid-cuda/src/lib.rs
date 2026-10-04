@@ -14,7 +14,9 @@ mod host_pinned;
 mod native;
 mod nvenc_sdk;
 mod nvenc_session;
-pub use nvenc_session::{CodecGuid, NvencCodec, NvencPacket, NvencSession, NvencSubmit};
+pub use nvenc_session::{
+    CodecGuid, NvencCodec, NvencColour, NvencPacket, NvencSession, NvencSubmit,
+};
 mod nvdec;
 /// Pinned NVIDIA picture-parameter data ABI; no linked SDK symbols.
 pub mod nvdec_sdk;

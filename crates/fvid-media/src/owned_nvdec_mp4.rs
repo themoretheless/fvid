@@ -79,6 +79,52 @@ impl<R: Read + Seek> AvcMp4Input<R> {
     pub fn track(&self) -> &Track {
         &self.reader.tracks()[self.video]
     }
+    pub fn video_metadata(&self) -> crate::owned_nvdec_movie::MovieVideoMetadata {
+        use crate::owned_matroska::{ColourDescription, TrackOptions, VideoMetadata};
+        let track = self.track();
+        let signal = self.sps.vui.as_ref().and_then(|vui| vui.video_signal);
+        let mut colour = track.colour;
+        if colour.primaries == 0 && colour.transfer == 0 && colour.matrix == 0 && !colour.full_range
+        {
+            if let Some((_, full_range, codes)) = signal {
+                let [primaries, transfer, matrix] = codes.unwrap_or([2; 3]);
+                colour = ColourDescription {
+                    primaries,
+                    transfer,
+                    matrix,
+                    full_range,
+                };
+            }
+        }
+        let specified = signal.is_some()
+            || colour.primaries != 0
+            || colour.transfer != 0
+            || colour.matrix != 0
+            || colour.full_range;
+        let mut aspect = track.pixel_aspect;
+        if matches!(track.rotation, 90 | 270) {
+            aspect = (aspect.1, aspect.0);
+        }
+        if aspect == (1, 1) {
+            if let Some((x, y)) = self.sps.vui.as_ref().and_then(|vui| vui.aspect_ratio) {
+                aspect = (u32::from(x), u32::from(y));
+            }
+        }
+        crate::owned_nvdec_movie::MovieVideoMetadata {
+            name: track.name.clone(),
+            language: track.language.clone(),
+            options: TrackOptions {
+                rotation: track.rotation,
+                video: Some(VideoMetadata {
+                    crop: self.sps.crop,
+                    pixel_aspect: aspect,
+                    colour: specified.then_some(colour),
+                    hdr: track.hdr,
+                }),
+                ..Default::default()
+            },
+        }
+    }
     pub fn coded_dimensions(&self) -> (u32, u32) {
         self.sps.coded_dimensions()
     }
@@ -257,6 +303,63 @@ impl<R: Read + Seek> AvcMp4Input<R> {
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn synthetic_source_metadata_survives_owned_container_export() {
+        use crate::owned_matroska::{Encoding, PacketWriter, TrackSpec};
+        let mut source = AvcMp4Input::open(
+            std::io::Cursor::new(
+                include_bytes!(
+                    "../../../tests/fixtures/playback-errors/avc-cuda-video-metadata.mp4"
+                )
+                .as_slice(),
+            ),
+            Limits::default(),
+        )
+        .unwrap();
+        let metadata = source.video_metadata();
+        let video = metadata.options.video.unwrap();
+        assert_eq!(metadata.options.rotation, 90);
+        assert_eq!(video.pixel_aspect, (3, 2));
+        let colour = video.colour.unwrap();
+        assert_eq!(
+            (
+                colour.primaries,
+                colour.transfer,
+                colour.matrix,
+                colour.full_range
+            ),
+            (1, 1, 1, false)
+        );
+        let (width, height) = source.coded_dimensions();
+        let mut packet = Vec::new();
+        let sample = source.read_next(&mut packet).unwrap().unwrap();
+        let duration =
+            u64::from(sample.duration) * 1_000_000_000 / u64::from(source.track().timescale);
+        let tracks = [TrackSpec {
+            encoding: Encoding::Avc {
+                configuration: &source.track().configuration,
+                width,
+                height,
+            },
+            name: &metadata.name,
+            language: "und",
+        }];
+        let mut output = std::io::Cursor::new(Vec::new());
+        let mut writer =
+            PacketWriter::new_with_options(&mut output, &tracks, &[metadata.options]).unwrap();
+        writer
+            .write_packet(0, 0, duration, sample.sync, &packet)
+            .unwrap();
+        writer.finish().unwrap();
+        let read = crate::owned_webm::WebmReader::open(
+            std::io::Cursor::new(output.into_inner()),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(read.tracks[0].rotation, 90);
+        assert_eq!(read.tracks[0].colour, colour);
+    }
+
     use super::*;
     use std::io::Cursor;
     const IPB: &[u8] =

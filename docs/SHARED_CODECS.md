@@ -437,7 +437,7 @@ registered buffers; failed cleanup retains GPU owners.
 `write_avc_matroska` uses the own Annex B converter and packet writer. It carries
 track-clock timestamps/durations into nanoseconds, checks stable AVC setup and
 writes explicit black-span events as video pictures. It currently exports video
-only; audio, colour/rotation metadata, atomic file publication and production
+only; audio, file tags/chapters, atomic file publication and production
 CLI wiring still need integration. HEVC packets can be pulled through the encoder
 but this Matroska helper currently requires AVC.
 
@@ -446,3 +446,18 @@ ignored `synthetic_movie_encodes_and_muxes_without_libav` qualification test use
 the public empty-edit MOV, verifies every output timestamp/duration, and decodes
 all muxed AVC pictures using FVid. It has only been cross-compiled here; NVIDIA
 execution remains unverified. `cuda-hw` still enables the legacy production path.
+
+Native CUDA movie export now carries source track name/language, rotation,
+coded pixel aspect, SPS display crop and colour/HDR tags into the owned Matroska
+writer. Container colour takes precedence over AVC VUI; VUI supplies otherwise
+unstated colour/aspect. Crop is intersected with the filter window and its edges
+are swapped by flips. A window with no visible image is refused before CUDA
+allocation. The black-fill range must agree with stated source pixels; this
+path does not silently convert range. Unknown colour uses unspecified H.273
+codes with the selected range. NVENC receives matching colour VUI in H.264 and
+HEVC configuration. HDR tags are preserved; no tone mapping is implied.
+
+The synthetic `avc-cuda-video-metadata.mp4` regression proves metadata reading
+and owned-container preservation. GPU acceptance now includes this fixture,
+but only host tests and cross compilation have run here. File tags/chapters,
+audio handling and production CLI integration remain unfinished.

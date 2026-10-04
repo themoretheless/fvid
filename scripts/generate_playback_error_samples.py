@@ -24,11 +24,11 @@ def children(data):
         at += size
 
 
-def rewrite(data, edits=None, bad_avcc=False, duplicate_pts=False):
+def rewrite(data, edits=None, bad_avcc=False, duplicate_pts=False, video_metadata=False):
     result = bytearray()
     for kind, payload in children(data):
         if kind in {b"moov", b"trak", b"mdia", b"minf", b"stbl", b"edts"}:
-            payload = rewrite(payload, edits, bad_avcc, duplicate_pts)
+            payload = rewrite(payload, edits, bad_avcc, duplicate_pts, video_metadata)
             if kind == b"stbl" and duplicate_pts:
                 assert all(k != b"ctts" for k, _ in children(payload))
                 # Decode time stays strictly increasing; frame 6 repeats PTS 5.
@@ -49,7 +49,12 @@ def rewrite(data, edits=None, bad_avcc=False, duplicate_pts=False):
             entries = bytearray(payload[:8])
             for codec, entry in children(payload[8:]):
                 assert codec == b"avc1"
-                entries += atom(codec, entry[:78] + rewrite(entry[78:], edits, bad_avcc, duplicate_pts))
+                extra = rewrite(entry[78:], edits, bad_avcc, duplicate_pts, video_metadata)
+                if video_metadata:
+                    extra = b"".join(atom(k, p) for k, p in children(extra) if k not in {b"colr", b"pasp"})
+                    extra += atom(b"colr", b"nclx" + struct.pack(">HHHB", 1, 1, 1, 0))
+                    extra += atom(b"pasp", struct.pack(">II", 3, 2))
+                entries += atom(codec, entry[:78] + extra)
             payload = bytes(entries)
         elif kind == b"elst" and edits is not None:
             payload = bytes(4) + struct.pack(">I", len(edits))
@@ -73,6 +78,10 @@ def rewrite(data, edits=None, bad_avcc=False, duplicate_pts=False):
                 at += 2 + size
             # Reproduce the malformed *metadata*, not any private SPS/PPS/media.
             payload = payload[:at] + bytes.fromhex("7bf7f700")
+        if kind == b"tkhd" and video_metadata:
+            assert payload[0] == 0
+            matrix = struct.pack(">9i", 0, 65536, 0, -65536, 0, 0, 0, 0, 1 << 30)
+            payload = payload[:40] + matrix + payload[76:]
         result += atom(kind, payload)
     return bytes(result)
 
@@ -111,6 +120,7 @@ def main():
     # moov changes size; mdat must precede it so chunk offsets stay valid.
     assert order.index(b"mdat") < order.index(b"moov")
     cases = {
+        "avc-cuda-video-metadata.mp4": dict(video_metadata=True),
         "edit-empty-spans.mov": dict(edits=[(1000, -1), (2000, 0), (1000, -1), (2000, 0)]),
         "edit-gap.mov": dict(edits=[(2000, 0), (8000, 4000)]),
         "edit-three-ranges.mov": dict(edits=[(2000, 0), (2000, 4000), (4000, 8000)]),
