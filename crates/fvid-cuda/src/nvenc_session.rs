@@ -41,11 +41,15 @@ pub(crate) struct FunctionTable {
     input_buffers: [usize; 2],
     create_output: crate::nvenc_sdk::PNVENCCREATEBITSTREAMBUFFER,
     destroy_output: crate::nvenc_sdk::PNVENCDESTROYBITSTREAMBUFFER,
-    before_destroy: [usize; 11],
+    before_map: [usize; 9],
+    map_input: crate::nvenc_sdk::PNVENCMAPINPUTRESOURCE,
+    unmap_input: crate::nvenc_sdk::PNVENCUNMAPINPUTRESOURCE,
     destroy: Option<Destroy>,
     invalidate: usize,
     open: Option<Open>,
-    tail: [usize; 7],
+    register_input: crate::nvenc_sdk::PNVENCREGISTERRESOURCE,
+    unregister_input: crate::nvenc_sdk::PNVENCUNREGISTERRESOURCE,
+    tail: [usize; 5],
     reserved2: [usize; 281],
 }
 impl FunctionTable {
@@ -63,11 +67,15 @@ impl FunctionTable {
             input_buffers: [0; 2],
             create_output: None,
             destroy_output: None,
-            before_destroy: [0; 11],
+            before_map: [0; 9],
+            map_input: None,
+            unmap_input: None,
             destroy: None,
             invalidate: 0,
             open: None,
-            tail: [0; 7],
+            register_input: None,
+            unregister_input: None,
+            tail: [0; 5],
             reserved2: [0; 281],
         }
     }
@@ -82,6 +90,10 @@ struct OpenParams {
     reserved1: [u32; 253],
     reserved2: [usize; 64],
 }
+struct InputResource {
+    registered: *mut c_void,
+    mapped: *mut c_void,
+}
 /// Owns the encoder, its CUDA resources and the loaded driver library.
 /// An open session is not an initialized encoder or a verified hardware path.
 pub struct NvencSession {
@@ -89,6 +101,8 @@ pub struct NvencSession {
     destroy: Destroy,
     table: FunctionTable,
     outputs: Vec<*mut c_void>,
+    inputs: Vec<InputResource>,
+    geometry: Option<(u32, u32)>,
     initialized: bool,
     failed: bool,
     device: ManuallyDrop<CodecDevice>,
@@ -130,6 +144,8 @@ impl NvencSession {
             destroy,
             table,
             outputs: Vec::new(),
+            inputs: Vec::new(),
+            geometry: None,
             initialized: false,
             failed: false,
             device: ManuallyDrop::new(device),
@@ -199,6 +215,7 @@ impl NvencSession {
                 "NVENC encoder initialization failed with status {status}"
             ));
         }
+        self.geometry = Some((width, height));
         self.initialized = true;
         Ok(())
     }
@@ -235,6 +252,81 @@ impl NvencSession {
         }
         let index = self.outputs.len();
         self.outputs.push(params.bitstreamBuffer);
+        Ok(index)
+    }
+    /// Register and map a caller-owned pitched CUDA NV12 allocation.
+    ///
+    /// # Safety
+    /// The pointer must belong to this session's CUDA context and remain live
+    /// until successful session close (including retries). Its actual readable
+    /// extent must be at least allocation_bytes; Y followed by interleaved UV
+    /// must use the declared pitch and initialized encoder geometry. The caller
+    /// must synchronize writes before submitting and not reuse pending inputs.
+    pub unsafe fn register_nv12(
+        &mut self,
+        pointer: u64,
+        pitch: u32,
+        allocation_bytes: u64,
+    ) -> Result<usize, String> {
+        if self.encoder.is_null() || !self.initialized || self.failed {
+            return Err("NVENC registration requires a healthy initialized session".into());
+        }
+        let (width, height) = self.geometry.ok_or("NVENC geometry is unavailable")?;
+        validate_surface(pointer, width, height, pitch, allocation_bytes)?;
+        self.device.handles()?;
+        let register = self
+            .table
+            .register_input
+            .ok_or("NVENC omitted register entrypoint")?;
+        let map = self.table.map_input.ok_or("NVENC omitted map entrypoint")?;
+        self.table
+            .unmap_input
+            .ok_or("NVENC omitted unmap entrypoint")?;
+        self.table
+            .unregister_input
+            .ok_or("NVENC omitted unregister entrypoint")?;
+        self.inputs
+            .try_reserve(1)
+            .map_err(|e| format!("NVENC input ownership allocation failed: {e}"))?;
+        let mut params = crate::nvenc_sdk::NV_ENC_REGISTER_RESOURCE::default();
+        params.version = version(3);
+        params.resourceType = 1;
+        params.width = width;
+        params.height = height;
+        params.pitch = pitch;
+        params.resourceToRegister = pointer as *mut c_void;
+        params.bufferFormat = 1;
+        // SAFETY: Caller guarantees the context, lifetime and NV12 allocation;
+        // generated SDK storage and all reserved fields are correctly initialized.
+        let status = unsafe { register(self.encoder, &mut params) };
+        if status != 0 {
+            return Err(format!(
+                "NVENC input registration failed with status {status}"
+            ));
+        }
+        if params.registeredResource.is_null() {
+            self.failed = true;
+            return Err("NVENC returned a null registered input".into());
+        }
+        let index = self.inputs.len();
+        self.inputs.push(InputResource {
+            registered: params.registeredResource,
+            mapped: std::ptr::null_mut(),
+        });
+        let mut mapping = crate::nvenc_sdk::NV_ENC_MAP_INPUT_RESOURCE::default();
+        mapping.version = version(4);
+        mapping.registeredResource = params.registeredResource;
+        // SAFETY: Registration is live and already tracked for cleanup; the
+        // mapping output is SDK-typed writable storage on the bound context.
+        let status = unsafe { map(self.encoder, &mut mapping) };
+        if status != 0 {
+            return Err(format!("NVENC input mapping failed with status {status}"));
+        }
+        self.inputs[index].mapped = mapping.mappedResource;
+        if mapping.mappedResource.is_null() || mapping.mappedBufferFmt != 1 {
+            self.failed = true;
+            return Err("NVENC returned invalid NV12 mapping geometry".into());
+        }
         Ok(index)
     }
     /// Query all codec identifiers advertised by this live encoder session.
@@ -275,6 +367,27 @@ impl NvencSession {
         }
         self.device.handles()?;
         self.device.synchronize()?;
+        if !self.inputs.is_empty() {
+            let unmap = self
+                .table
+                .unmap_input
+                .ok_or("NVENC omitted unmap entrypoint")?;
+            let unregister = self
+                .table
+                .unregister_input
+                .ok_or("NVENC omitted unregister entrypoint")?;
+            for input in &mut self.inputs {
+                release_input(
+                    input,
+                    // SAFETY: Each mapped handle belongs to this live encoder;
+                    // helper ordering prevents unregister while mapping is live.
+                    |handle| unsafe { unmap(self.encoder, handle) as i32 },
+                    // SAFETY: Each registered handle belongs to this encoder;
+                    // successful releases are cleared before a retry.
+                    |handle| unsafe { unregister(self.encoder, handle) as i32 },
+                )?;
+            }
+        }
         if !self.outputs.is_empty() {
             let destroy = self
                 .table
@@ -309,6 +422,37 @@ impl Drop for NvencSession {
         // context while the driver still owns the live encoder. Process exit
         // reclaims them; explicit close lets callers observe and retry errors.
     }
+}
+fn release_input(
+    input: &mut InputResource,
+    unmap: impl FnOnce(*mut c_void) -> i32,
+    unregister: impl FnOnce(*mut c_void) -> i32,
+) -> Result<(), String> {
+    close_handle(&mut input.mapped, unmap).map_err(|e| format!("NVENC input unmap: {e}"))?;
+    close_handle(&mut input.registered, unregister)
+        .map_err(|e| format!("NVENC input unregister: {e}"))
+}
+fn validate_surface(
+    pointer: u64,
+    width: u32,
+    height: u32,
+    pitch: u32,
+    bytes: u64,
+) -> Result<(), String> {
+    validate_geometry(width, height, 1, 1)?;
+    let minimum = u64::from(pitch)
+        .checked_mul(u64::from(height) + u64::from(height) / 2)
+        .ok_or("NVENC NV12 allocation size overflow")?;
+    if pointer.checked_add(bytes).is_none()
+        || pointer == 0
+        || usize::try_from(pointer).is_err()
+        || pitch < width
+        || pitch % 2 != 0
+        || bytes < minimum
+    {
+        return Err("NVENC NV12 pointer, pitch or allocation extent is invalid".into());
+    }
+    Ok(())
 }
 fn validate_geometry(width: u32, height: u32, fps_num: u32, fps_den: u32) -> Result<(), String> {
     if width == 0
@@ -364,6 +508,54 @@ fn close_handle(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn input_cleanup_does_not_unregister_a_failed_mapping_release() {
+        let pointer = std::ptr::dangling_mut::<c_void>();
+        let mut input = InputResource {
+            registered: pointer,
+            mapped: pointer,
+        };
+        assert!(
+            release_input(
+                &mut input,
+                |_| 20,
+                |_| panic!("unregistered a live mapping")
+            )
+            .is_err()
+        );
+        assert_eq!(input.mapped, pointer);
+        assert_eq!(input.registered, pointer);
+        assert!(release_input(&mut input, |_| 0, |_| 20).is_err());
+        assert!(input.mapped.is_null());
+        assert_eq!(input.registered, pointer);
+        release_input(
+            &mut input,
+            |_| panic!("mapped handle released twice"),
+            |_| 0,
+        )
+        .unwrap();
+        assert!(input.registered.is_null());
+    }
+    #[test]
+    fn nv12_surface_extent_includes_both_planes() {
+        assert!(validate_surface(256, 128, 72, 256, 27648).is_ok());
+        assert!(validate_surface(0, 128, 72, 256, 27648).is_err());
+        assert!(validate_surface(256, 128, 72, 126, 27648).is_err());
+        assert!(validate_surface(256, 128, 72, 257, 30000).is_err());
+        assert!(validate_surface(256, 128, 72, 256, 18432).is_err());
+        if std::mem::size_of::<usize>() == 8 {
+            assert_eq!(
+                std::mem::size_of::<crate::nvenc_sdk::NV_ENC_REGISTER_RESOURCE>(),
+                1536
+            );
+            assert_eq!(
+                std::mem::size_of::<crate::nvenc_sdk::NV_ENC_MAP_INPUT_RESOURCE>(),
+                1544
+            );
+            assert_eq!(std::mem::offset_of!(FunctionTable, map_input), 208);
+            assert_eq!(std::mem::offset_of!(FunctionTable, register_input), 248);
+        }
+    }
     #[test]
     fn output_creation_abi_matches_sdk_and_partial_cleanup_is_retryable() {
         if std::mem::size_of::<usize>() == 8 {
@@ -455,11 +647,23 @@ mod tests {
     #[test]
     #[ignore = "requires an NVIDIA CUDA device with NVENC"]
     fn direct_cuda_session_opens_and_closes_without_libav() {
+        use cudarc::driver::DevicePtr;
+        let owner = crate::device_pool::shared(0).unwrap();
+        let stream = owner.new_stream().unwrap();
+        let buffer = stream.alloc_zeros::<u8>(128 * 72 * 3 / 2).unwrap();
+        stream.synchronize().unwrap();
+        let (pointer, _guard) = buffer.device_ptr(&stream);
         let device = CodecDevice::new(0).unwrap();
         let mut session = NvencSession::open(device).unwrap();
         assert!(!session.codec_guids().unwrap().is_empty());
         session.initialize_h264(128, 72, 60, 1).unwrap();
         assert!(session.initialize_h264(128, 72, 60, 1).is_err());
+        // SAFETY: The same ordinal uses the same primary-context pool; buffer
+        // and stream remain live and synchronized until successful close below.
+        assert_eq!(
+            unsafe { session.register_nv12(pointer, 128, 128 * 72 * 3 / 2) }.unwrap(),
+            0
+        );
         assert_eq!(session.create_output().unwrap(), 0);
         assert_eq!(session.create_output().unwrap(), 1);
         session.close().unwrap();
