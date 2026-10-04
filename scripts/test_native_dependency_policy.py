@@ -132,7 +132,11 @@ class ProductionMediaPolicy(unittest.TestCase):
              mock.patch("builtins.print"):
             with self.assertRaisesRegex(SystemExit, "production media: FFmpeg dependency reached graph"):
                 guard.main()
-            self.assertEqual(dependencies.call_count, 6)
+            self.assertEqual(dependencies.call_count, 7)
+            self.assertTrue(any(
+                call.args[1] == ["--no-default-features", "--features", "native-cuda"]
+                for call in dependencies.call_args_list
+            ))
 
 
 if __name__ == "__main__":

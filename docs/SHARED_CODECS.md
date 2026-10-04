@@ -238,3 +238,24 @@ byte-identical. Host tests cover malformed submission admission and slice orderi
 Linux/Windows test compilation passes. No compressed-stream hardware acceptance
 has been executed: parser callbacks, reference-slot scheduling and end-to-end
 production CUDA integration remain necessary before removing the legacy backend.
+
+
+## FVid AVC syntax to NVDEC
+
+The FFmpeg-free `fvid-media/native-cuda` feature now exposes
+`owned_nvdec_avc::AvcPicture`. It converts FVid-parsed SPS/PPS/access-unit slices
+and scaling matrices into the SDK picture description, owns Annex-B slice bytes
+and offsets, and initializes unused DPB entries to invalid slots. Caller-supplied
+reference descriptors carry decode slots, frame/long-term indices and field POC.
+Submission still requires correct live reference ownership in the matching session.
+
+This first adapter admits progressive eight-bit 4:2:0 with one slice group;
+interlaced, FMO and higher-depth AVC require further translation. The existing
+synthetic control MP4 exercises the owned MP4/config/slice parsers and parameter
+assembly in an ordinary host test without NVIDIA or external tools. A separate
+ignored NVIDIA test submits its first IDR, maps output and releases it; it is not
+pixel-equivalence proof and has not executed here.
+
+The ordinary dependency guard includes the new native CUDA adapter graph.
+Legacy `cuda-hw` still activates libav while production filter integration,
+reference scheduling and remaining codec adapters are unfinished.
