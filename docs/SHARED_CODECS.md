@@ -92,3 +92,8 @@ Planning shares the audio exporter's decoder configuration descriptor and reads 
 ## Production media feature
 
 Root `media` enables the owned media backend and HTTP input without enabling `legacy-ffmpeg`. The dependency guard now checks this production graph on every normal run. Root `mcp` inherits that backend through `media`. Unsupported owned codecs, packet tools or workflows return their explicit errors instead of invoking libav in this graph; completing those gaps remains migration work, not proof of universal compatibility. `media-cuda` and library `cuda-hw` still enable the legacy adapter and remain outside the completed removal.
+
+
+## Direct CUDA codec device ownership
+
+`fvid-cuda::CodecDevice` now obtains the existing native CUDA primary-context pool and owns a separate stream for direct codec integrations. It binds the context before exposing borrowed handles and supports explicit stream synchronization. It creates no AVHWDeviceContext and requires no libav headers. Host refusal/ordinal tests pass and the Linux implementation cross-checks successfully. The NVIDIA device test is explicit and ignored without hardware; no live NVDEC/NVENC claim follows from these checks. The legacy hardware filter still needs direct codec session implementations and wiring before CUDA feature dependencies can be removed.

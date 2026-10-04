@@ -12,6 +12,8 @@ mod device_pool;
 mod host_pinned;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 mod native;
+mod codec_device;
+pub use codec_device::CodecDevice;
 mod nv12;
 mod pipeline;
 mod shader;
