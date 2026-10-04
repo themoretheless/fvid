@@ -33,4 +33,9 @@ for name,format,mapping,promote in [
     shuffled=subprocess.run([args.ffmpeg,'-nostdin','-v','error','-i',str(root/(name+'.y4m')),
         '-vf',filters,'-pix_fmt',format,'-f','rawvideo','pipe:1'],check=True,stdout=subprocess.PIPE).stdout
     assert shuffled==(root/(name+'.yuv')).read_bytes(), name+': analytical shuffle differs'
-    print(f'{name}: exact FFV1 decode and shuffle, {(time.perf_counter()-start)*1000:.3f} ms including two process startups')
+    expression_mapping=':'.join(f'map{i}={value}*2/2' for i,value in enumerate(mapping.split(':')))
+    expression_filters=('scale=flags=neighbor,format='+format+',' if promote else '')+'shuffleplanes='+expression_mapping
+    expression_result=subprocess.run([args.ffmpeg,'-nostdin','-v','error','-i',str(root/(name+'.y4m')),
+        '-vf',expression_filters,'-pix_fmt',format,'-f','rawvideo','pipe:1'],check=True,stdout=subprocess.PIPE).stdout
+    assert expression_result==(root/(name+'.yuv')).read_bytes(), name+': expression shuffle differs'
+    print(f'{name}: exact FFV1 decode and shuffle, {(time.perf_counter()-start)*1000:.3f} ms including three process startups')

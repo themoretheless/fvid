@@ -205,3 +205,33 @@ fn declared_y4m_depths_and_layouts_keep_full_width_samples() {
         }
     }
 }
+
+#[test]
+fn expression_indices_preserve_owned_fixture_pixels() {
+    for (_, source, expected, depth, literal) in CASES {
+        let expression = literal.split(':').enumerate()
+            .map(|(index, value)| format!("map{index}={value}*2/2"))
+            .collect::<Vec<_>>().join(":");
+        let mut reader = NativeReader::software(Cursor::new(source), usize::MAX).unwrap();
+        let mut actual = Vec::new();
+        while let Some(raw) = reader.read_frame_raw().unwrap() {
+            let [width, height] = reader.dimensions();
+            let mut frame = VideoGeometry::default().apply(&raw, width, height).unwrap();
+            apply(ShufflePlanes::parse(&expression).unwrap(), &mut frame, depth).unwrap();
+            actual.extend_from_slice(&frame.data);
+        }
+        assert_eq!(actual, expected);
+    }
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/shuffleplanes-444-8.mkv");
+    let stats = fvid::media::decode_video_transformed(&path, fvid::media::DecodeTransform {
+        shuffleplanes: Some("map0=3/2:map1=default:map2=min".into()),
+        ..Default::default()
+    }).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.video_frames, 2);
+    assert_eq!(ShufflePlanes::parse("map0=3/2:map1=default:map2=min").unwrap().mapping, [2, 1, 0]);
+    for invalid in ["map0=n", "map0=1/0", "map0=3.1", "map0=3"] {
+        assert!(ShufflePlanes::parse(invalid).is_err(), "{invalid}");
+    }
+}

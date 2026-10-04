@@ -23,12 +23,12 @@ impl ShufflePlanes {
                 if index >= 4 {
                     return Err("too many shuffleplanes options".into());
                 }
-                let value = value
-                    .parse::<usize>()
-                    .map_err(|_| "invalid shuffleplanes index")?;
-                if value > 3 {
+                let number = crate::owned_expression::Expression::parse(value.trim())?
+                    .evaluate(&[("default", index as f64), ("min", 0.0), ("max", 3.0)])?;
+                if !number.is_finite() || !(0.0..=3.0).contains(&number) {
                     return Err("shuffleplanes index must be 0..=3".into());
                 }
+                let value = number.round_ties_even() as usize;
                 maps[index] = value;
             }
         }

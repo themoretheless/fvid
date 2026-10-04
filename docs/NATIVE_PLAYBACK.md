@@ -39,6 +39,13 @@ Dilation/erosion вычисляют постоянные выражения `coo
 `ffmpeg_morphology_reference` проверяет 260 комбинаций параметров и форматов
 побайтово.
 
+`shuffleplanes` вычисляет постоянные выражения индексов, с проверкой диапазона
+до округления и прежним отказом при обращении к отсутствующей alpha-плоскости.
+Acceptance-тесты используют четыре synthetic fixtures (8/10/16 бит,
+перестановка/дублирование, повышение chroma). Benchmark
+`scripts/benchmark_shuffleplanes_reference.py` сравнивает числовые и expression
+mapping с эталонными пикселями через FFmpeg; обычные тесты его не запускают.
+
 Feature `media` пока включает legacy backend для ещё не перенесённых операций;
 `mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
 из production ещё не завершено.
