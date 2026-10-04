@@ -297,6 +297,14 @@ fn interval_filter_export_preserves_sample_exact_aac_preroll_and_padding() {
                 std::process::id()
             ));
             let output = base.with_extension("mkv");
+            let export_options = fvid_control::CopyOptions {
+                streams: if name == "shared-mp4-av-priming.mp4" {
+                    vec![1, 0]
+                } else {
+                    Vec::new()
+                },
+                ..Default::default()
+            };
             let transform = fvid_media::LosslessTransform {
                 interval: Some(interval),
                 negate: Some("".into()),
@@ -305,10 +313,10 @@ fn interval_filter_export_preserves_sample_exact_aac_preroll_and_padding() {
             assert!(fvid_media::owned_lossless::supports(
                 &source,
                 &transform,
-                &Default::default()
+                &export_options
             ));
             let stats =
-                fvid_media::transcode_lossless(&source, &output, transform, &Default::default())
+                fvid_media::transcode_lossless(&source, &output, transform, &export_options)
                     .unwrap();
             assert_eq!(stats.backend, "fvid");
             let input = fvid_media::owned_mp4::Mp4Reader::open(
@@ -331,7 +339,20 @@ fn interval_filter_export_preserves_sample_exact_aac_preroll_and_padding() {
                 let a =
                     fvid_media::decode_audio_interval(&source, &before, Some(interval), &options)
                         .unwrap();
-                let b = fvid_media::decode_audio(&output, &after, &options).unwrap();
+                let mapped = export_options
+                    .streams
+                    .iter()
+                    .position(|&i| i == index)
+                    .unwrap_or(index);
+                let b = fvid_media::decode_audio(
+                    &output,
+                    &after,
+                    &fvid_control::CopyOptions {
+                        streams: vec![mapped],
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
                 let available = match track.edits.as_slice() {
                     [] => {
                         u128::from(track.duration) * u128::from(track.sample_rate)
@@ -398,5 +419,147 @@ fn interval_filter_export_preserves_sample_exact_aac_preroll_and_padding() {
             );
             std::fs::remove_file(output).unwrap();
         }
+    }
+}
+
+#[test]
+fn selected_mp4_tracks_keep_requested_order_audio_bytes_and_scoped_metadata() {
+    let source = fixture("playback-errors/shared-mp4-av-multiple.mp4");
+    let mut input = fvid_media::owned_mp4::Mp4Reader::open(
+        Cursor::new(std::fs::read(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    let original = raw_frames(&source);
+    let expected: Vec<Vec<u8>> = original
+        .iter()
+        .map(|f| f.iter().map(|p| 255 - p).collect())
+        .collect();
+    for (case, selected) in [vec![2, 1, 0], vec![1], vec![2, 1], vec![1, 0]]
+        .into_iter()
+        .enumerate()
+    {
+        let base =
+            std::env::temp_dir().join(format!("fvid-mp4-selection-{}-{case}", std::process::id()));
+        let output = base.with_extension("mkv");
+        let mut options = fvid_control::CopyOptions {
+            streams: selected.clone(),
+            ..Default::default()
+        };
+        options.max_packets = Some(
+            selected
+                .iter()
+                .map(|&i| input.tracks()[i].samples.len() as u64)
+                .sum(),
+        );
+        for index in 0..3 {
+            options
+                .stream_metadata_set
+                .push((index, "title".into(), format!("original-{index}")));
+            options
+                .stream_metadata_set
+                .push((index, "role".into(), format!("role-{index}")));
+        }
+        let transform = fvid_media::LosslessTransform {
+            negate: Some("".into()),
+            ..Default::default()
+        };
+        assert!(fvid_media::owned_lossless::supports(
+            &source, &transform, &options
+        ));
+        let stats = fvid_media::transcode_lossless(&source, &output, transform, &options).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert!(raw_frames(&output) == expected);
+        let mut reader = fvid_media::owned_webm::WebmReader::open(
+            Cursor::new(std::fs::read(&output).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.tracks.len(), selected.len());
+        let mut copied = 0;
+        for (mapped, &source_index) in selected.iter().enumerate() {
+            let track = &reader.tracks[mapped];
+            assert_eq!(track.name, format!("original-{source_index}"));
+            let uid = reader.track_uids[&track.number];
+            assert_eq!(
+                reader.track_metadata[&uid]["ROLE"],
+                format!("role-{source_index}")
+            );
+            if source_index == 1 {
+                assert_eq!(track.codec, "V_FFV1");
+                continue;
+            }
+            assert_eq!(track.codec, "A_AAC");
+            let mut payload = Vec::new();
+            let mut original = Vec::new();
+            for i in 0..input.tracks()[source_index].samples.len() {
+                input.read_packet(source_index, i, &mut payload).unwrap();
+                original.push(payload.clone());
+            }
+            let number = track.number;
+            let actual = packets(&mut reader, number);
+            assert_eq!(
+                actual.iter().map(|p| p.3.clone()).collect::<Vec<_>>(),
+                original
+            );
+            copied += actual.len() as u64;
+            let before = base.with_extension(format!("{source_index}.before.wav"));
+            let after = base.with_extension(format!("{source_index}.after.wav"));
+            fvid_media::decode_audio(
+                &source,
+                &before,
+                &fvid_control::CopyOptions {
+                    streams: vec![source_index],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            fvid_media::decode_audio(
+                &output,
+                &after,
+                &fvid_control::CopyOptions {
+                    streams: vec![mapped],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(wave_payload(&before), wave_payload(&after));
+            std::fs::remove_file(before).unwrap();
+            std::fs::remove_file(after).unwrap();
+        }
+        assert_eq!(stats.copied_packets, copied);
+        std::fs::remove_file(output).unwrap();
+    }
+}
+
+#[test]
+fn invalid_mp4_track_selection_is_owned_and_never_publishes() {
+    let source = fixture("playback-errors/shared-mp4-av-multiple.mp4");
+    for (case, selection) in [vec![1, 1], vec![3, 1], vec![0, 2]].into_iter().enumerate() {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-mp4-selection-invalid-{}-{case}.mkv",
+            std::process::id()
+        ));
+        let options = fvid_control::CopyOptions {
+            streams: selection,
+            ..Default::default()
+        };
+        assert!(fvid_media::owned_lossless::supports(
+            &source,
+            &Default::default(),
+            &options
+        ));
+        let error = fvid_media::transcode_lossless(&source, &output, Default::default(), &options)
+            .unwrap_err();
+        assert!(
+            error.to_string().contains(if case < 2 {
+                "invalid or duplicate MP4 stream index"
+            } else {
+                "selected video stream"
+            }),
+            "{error}"
+        );
+        assert!(!output.exists());
     }
 }

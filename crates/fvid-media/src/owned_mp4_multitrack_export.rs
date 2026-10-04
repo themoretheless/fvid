@@ -15,6 +15,7 @@ struct Input {
     reader: Reader,
     video: usize,
     count: u64,
+    selected: Vec<usize>,
 }
 fn qualify(
     source: &Path,
@@ -24,10 +25,11 @@ fn qualify(
     if !crate::owned_mp4_video_bridge::recognizes(source) {
         return Ok(None);
     }
-    if !options.streams.is_empty() || crate::owned_lossless::request(transform).is_none() {
+    if crate::owned_lossless::request(transform).is_none() {
         return Ok(None);
     }
     let mut normalized = options.clone();
+    normalized.streams.clear();
     for (i, _, _) in &mut normalized.stream_metadata_set {
         *i = 0;
     }
@@ -62,6 +64,12 @@ fn qualify(
         return Ok(None);
     }
     let video = videos[0];
+    let selected = crate::owned_mp4_matroska::selection(tracks.len(), &options.streams)
+        .map_err(|e| e.to_string())?;
+    if !selected.contains(&video) {
+        return Err("lossless export requires at least one selected video stream".into());
+    }
+
     if tracks[video].rotation != 0
         || !matches!(&tracks[video].codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1")
     {
@@ -88,7 +96,8 @@ fn qualify(
     {
         return Ok(None);
     }
-    let count = tracks.iter().try_fold(0u64, |n, t| {
+    let count = selected.iter().try_fold(0u64, |n, &i| {
+        let t = &tracks[i];
         n.checked_add(t.samples.len() as u64)
             .ok_or("MP4 input packet count overflow")
     })?;
@@ -99,6 +108,7 @@ fn qualify(
         reader,
         video,
         count,
+        selected,
     }))
 }
 pub(crate) fn supports(
@@ -192,6 +202,7 @@ pub(crate) fn try_export(
     let video_path = private.0.join("video.mkv");
     let mut stage = options.clone();
     stage.progress = None;
+    stage.streams.clear();
     stage.max_packets = None;
     stage.stream_metadata_set = options
         .stream_metadata_set
@@ -264,10 +275,11 @@ pub(crate) fn try_export(
                 .insert(key.to_ascii_uppercase(), value.clone());
         }
     }
-    let mut plans = Vec::new();
+    let mut plans = (0..tracks.len()).map(|_| None).collect::<Vec<_>>();
     let mut specs = Vec::new();
     let mut track_options = Vec::new();
-    for (i, track) in tracks.iter().enumerate() {
+    for &i in &input.selected {
+        let track = &tracks[i];
         if i == input.video {
             specs.push(mkv::TrackSpec {
                 encoding: mkv::Encoding::Ffv1V1 {
@@ -287,7 +299,6 @@ pub(crate) fn try_export(
                 default_duration_ns: vt.default_duration_ns,
                 ..Default::default()
             });
-            plans.push(None);
         } else {
             let plan = crate::owned_mp4_matroska::plan_window(
                 track,
@@ -298,8 +309,22 @@ pub(crate) fn try_export(
             .map_err(|e| e.to_string())?;
             track_options.push(plan.options);
             specs.push(crate::owned_mp4_matroska::spec(track).map_err(|e| e.to_string())?);
-            plans.push(Some(plan));
+            plans[i] = Some(plan);
         }
+    }
+    let scoped = scoped
+        .into_iter()
+        .filter_map(|(source, tags)| {
+            input
+                .selected
+                .iter()
+                .position(|&i| i == source)
+                .map(|output| (output, tags))
+        })
+        .collect();
+    let mut output_indices = vec![None; tracks.len()];
+    for (output, &source) in input.selected.iter().enumerate() {
+        output_indices[source] = Some(output);
     }
     let mut packets = Vec::new();
     packets
@@ -339,12 +364,13 @@ pub(crate) fn try_export(
         let mut payload = Vec::new();
         for &(_, track, index) in &packets {
             check(options)?;
+            let mapped = output_indices[track].ok_or("missing selected output track")?;
             if track == input.video {
                 let packet = video.packets[index].clone();
                 let data = video.read_packet(index).map_err(|e| e.to_string())?;
                 writer
                     .write_packet(
-                        track,
+                        mapped,
                         packet.pts_ns as u64,
                         packet.duration_ns.unwrap_or(vt.default_duration_ns),
                         true,
@@ -364,7 +390,7 @@ pub(crate) fn try_export(
                     .sync;
                 writer
                     .write_packet_with_options(
-                        track,
+                        mapped,
                         packet.pts,
                         packet.duration,
                         sync,
