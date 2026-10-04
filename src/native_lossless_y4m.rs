@@ -145,6 +145,7 @@ pub fn write_selected<W: Write + Seek>(
     let [w, h] = reader.dimensions();
     let rotation = reader.rotation();
     let source_colour = reader.colour();
+    filters.configure_vignette_source(&reader,geometry)?;
     let source_full_range = source_colour.full_range;
     let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();

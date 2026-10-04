@@ -2,6 +2,7 @@
 #[derive(Debug)]
 pub(crate) struct PixelContext {
     pub boxblur: Option<crate::owned_boxblur::BoxBlurProgram>,
+    pub vignette: Option<crate::owned_vignette::Vignette>,
     pub curves: Option<crate::owned_curves::Curves>,
     pub eq: Option<crate::owned_eq::EqualizerProgram>,
     pub lagfun: Option<crate::owned_lagfun::LagFun>,
@@ -11,6 +12,7 @@ pub(crate) struct PixelContext {
 impl PixelContext {
     pub fn parse(transform: &fvid_media_info::DecodeTransform) -> Result<Self, String> {
         Ok(Self {
+            vignette: transform.vignette.as_deref().map(crate::owned_vignette::Vignette::parse).transpose()?,
             curves: transform
                 .curves
                 .as_deref()

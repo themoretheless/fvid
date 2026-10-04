@@ -121,6 +121,7 @@ pub fn write_mp4_selected<W: Write + Seek>(
         .ok_or_else(|| invalid("input has no decoded video frames"))?;
     check(cancel)?;
     let source_colour = reader.colour();
+    filters.configure_vignette_source(&reader,geometry)?;
     let source_full_range = source_colour.full_range;
     let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
@@ -372,6 +373,7 @@ pub fn overlay_only(transform:&crate::media_info::LosslessTransform,
 pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.curves.as_deref().is_some_and(|a| fvid_media::owned_curves::Curves::parse(a).is_err()) {return false;}
+    if transform.vignette.as_deref().is_some_and(|a| fvid_media::owned_vignette::Vignette::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlurProgram::parse(args).is_err()) { return false; }
     matches!(
@@ -418,7 +420,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             sab: None,
             bilateral: _,
             cas: _,
-            vignette: None,
+            vignette: _,
             curves: _,
             colorbalance: _,
             colorlevels: _,
@@ -540,6 +542,7 @@ pub fn configuration(
         exposure: transform.exposure.clone(),
         colorbalance: transform.colorbalance.clone(),
         curves: transform.curves.clone(),
+        vignette: transform.vignette.clone(),
         colorcorrect: transform.colorcorrect.clone(),
         cas: transform.cas.clone(),
         grayworld: transform.grayworld.clone(),

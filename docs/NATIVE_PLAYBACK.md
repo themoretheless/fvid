@@ -3891,3 +3891,27 @@ matrix-zero default for absent metadata as BT.601, matching native playback;
 a short synthetic AVC fragment verifies the previous refusal is fixed.
 Runtime curve commands and complete legacy format-negotiation parity remain work;
 legacy media/CUDA production dependencies are not yet removed.
+
+`vignette` now has an owned radial mask, forward/backward shading, configurable
+centre, angle, aspect and deterministic per-stream dithering. Cached masks retain
+RNG state across input frames, including frames dropped by framestep; rewind
+resets the stream. Expressions support w/h/n/t and explicit r/pts/tb metadata,
+init/frame evaluation and generic timeline enable. An undefined init result
+promotes an n/t expression to frame evaluation. Missing required source metadata
+is refused before sample mutation. Native routes transport pixel aspect and
+presentation clocks; the root nominal rate follows its reader, while the
+library Matroska rate comes from DefaultDuration, without substituting 25 fps
+when it is absent. Geometry updates the aspect used by the filter.
+
+The explicit benchmark matches 210 four-frame outputs for RGB24 and planar
+8-bit YUV 444/422/420/411/410/440, forward/backward modes, animated expressions,
+three sample aspects, dithering and disabled frames against the
+[reference vignette filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_vignette.c).
+Synthetic golden tests cover persistent RNG and the single-precision angle
+rounding failure (RGB byte 322 must be 72, rather than 73), both lossless APIs,
+CLI decode/export and framestep. The owned YUV implementation additionally accepts
+9–16-bit samples; these are FVid extensions, not legacy high-depth parity claims.
+Packed RGB is RGB24 without alpha. Zero/nonfinite aspect and unavailable clock
+variables have explicit refusals. Runtime option commands, alpha and arbitrary
+legacy format negotiation remain outside this qualification. Legacy production
+media/CUDA dependencies still require migration before FFmpeg independence is true.

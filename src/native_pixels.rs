@@ -30,6 +30,8 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    /// Optional (pixel aspect, nominal frame rate) for owned shading expressions.
+    pub vignette_source: std::cell::Cell<Option<(f64, f64)>>,
     pub hqdn3d: Option<fvid_media::owned_hqdn3d::HqDn3d>,
     pub tmix: Option<fvid_media::owned_tmix::TemporalMix>,
     pub lagfun: Option<fvid_media::owned_lagfun::LagFun>,
@@ -43,6 +45,7 @@ pub struct PixelFilters {
     pub grayworld: Option<fvid_media::owned_timeline::Timeline>,
     pub cas: Option<fvid_media::owned_cas::Cas>,
     pub colorcorrect: Option<fvid_media::owned_colorcorrect::ColorCorrect>,
+    pub vignette: Option<fvid_media::owned_vignette::Vignette>,
     pub curves: Option<fvid_media::owned_curves::Curves>,
     pub colorbalance: Option<fvid_media::owned_colorbalance::ColorBalance>,
     pub exposure: Option<fvid_media::owned_exposure::Exposure>,
@@ -64,9 +67,17 @@ pub struct PixelFilters {
     pub shuffleplanes: Option<crate::native_shuffleplanes::ShufflePlanes>,
 }
 impl PixelFilters {
+    pub(crate) fn configure_vignette_source<R: std::io::BufRead + std::io::Seek>(&self, reader: &crate::playback_native::NativeReader<R>, geometry: &crate::native_geometry::VideoGeometry) -> Result<()> {
+        if self.vignette.is_none() {return Ok(());}
+        let [w,h]=reader.dimensions();
+        let aspect=crate::native_export::transformed_aspect(reader.pixel_aspect(),w,h,geometry)?;
+        self.vignette_source.set(Some((aspect.0 as f64/aspect.1 as f64,reader.frame_period().as_secs_f64().recip())));
+        Ok(())
+    }
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
 
+            vignette_source: Default::default(),
             fade_state: Default::default(),
             hqdn3d: request.hqdn3d.as_deref().map(fvid_media::owned_hqdn3d::HqDn3d::parse).transpose().map_err(|e|invalid(&e))?,
             tmix: request.tmix.as_deref().map(fvid_media::owned_tmix::TemporalMix::parse).transpose().map_err(|e|invalid(&e))?,
@@ -75,6 +86,7 @@ impl PixelFilters {
             grayworld: request.grayworld.as_deref().map(fvid_media::owned_timeline::Timeline::grayworld).transpose().map_err(|e|invalid(&e))?,
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
             colorcorrect: request.colorcorrect.as_deref().map(fvid_media::owned_colorcorrect::ColorCorrect::parse).transpose().map_err(|e|invalid(&e))?,
+            vignette: request.vignette.as_deref().map(fvid_media::owned_vignette::Vignette::parse).transpose().map_err(|e|invalid(&e))?,
             curves: request.curves.as_deref().map(fvid_media::owned_curves::Curves::parse).transpose().map_err(|e|invalid(&e))?,
             colorbalance: request.colorbalance.as_deref().map(fvid_media::owned_colorbalance::ColorBalance::parse).transpose().map_err(|e|invalid(&e))?,
             exposure: request.exposure.as_deref().map(fvid_media::owned_exposure::Exposure::parse).transpose().map_err(|e|invalid(&e))?,
@@ -172,6 +184,7 @@ impl PixelFilters {
             && self.fade.is_none()
             && self.exposure.is_none()
             && self.colorbalance.is_none()
+            && self.vignette.is_none()
             && self.curves.is_none()
             && self.colorcorrect.is_none()
             && self.cas.is_none()
@@ -245,6 +258,12 @@ impl PixelFilters {
             filter.apply(frame, depth).map_err(|e| invalid(&e))?;
         }
         if let Some(filter)=self.cas {filter.apply(frame,depth).map_err(|e|invalid(&e))?;}
+        if let Some(filter)=&self.vignette {filter.apply_clock(frame,depth,fvid_media::owned_vignette::Clock {
+                n,t,pts:clock.map(|c|c.ticks as f64/c.quantum as f64),
+                time_base:clock.map(|c|c.quantum as f64/c.scale as f64),
+                rate:self.vignette_source.get().map(|(_,r)|r),
+                sample_aspect:self.vignette_source.get().map_or(1.,|(sar,_)|sar),
+            }).map_err(|e|invalid(&e))?;}
         if let Some(filter)=&self.curves {
             if frame.subsampling.is_none() {filter.apply_rgb_clock(&mut frame.data,depth,3,frame.width,frame.height,n,t).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix,n,t).map_err(|e|invalid(&e))?;}

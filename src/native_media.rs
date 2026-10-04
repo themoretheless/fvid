@@ -156,6 +156,7 @@ pub fn decode_video_pipeline_overlay_step(
                 _ => 8,
             };
             if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
+            filters.configure_vignette_source(&reader,geometry)?;
             filters.apply_colour_clock(&mut output, depth, reader.colour().full_range, reader.colour().matrix, input_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64), crate::native_pixels::frame_clock(&reader)?)?;
             std::hint::black_box(output);
         }
@@ -562,6 +563,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
     if transform.monochrome.as_deref().is_some_and(|a| fvid_media::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
     if transform.colorize.as_deref().is_some_and(|a| fvid_media::owned_colorize::Colorize::parse(a).is_err()) { return false; }
     if transform.curves.as_deref().is_some_and(|a| fvid_media::owned_curves::Curves::parse(a).is_err()) {return false;}
+    if transform.vignette.as_deref().is_some_and(|a| fvid_media::owned_vignette::Vignette::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlurProgram::parse(args).is_err()) { return false; }
     matches!(transform, DecodeTransform {
@@ -605,7 +607,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         sab: None,
         bilateral: _,
         cas: _,
-        vignette: None,
+        vignette: _,
         curves: _,
         colorbalance: _,
         colorlevels: _,

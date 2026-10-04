@@ -220,6 +220,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             Some(geometry.apply_display(&frame, width, height, rotation)?)
         };
         if let Some(picture) = &mut transformed {
+            filters.configure_vignette_source(&reader,geometry)?;
             filters.apply_colour_clock(picture, depth, full, reader.colour().matrix, count-segment_start, Some(start as f64/scale as f64), crate::native_pixels::frame_clock(&reader)?)?;
         }
         let (width, height) = if let Some(picture) = &transformed {

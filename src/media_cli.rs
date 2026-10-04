@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--vignette" {
+            let value=args.next().ok_or("missing vignette options")?;
+            if filters.vignette.is_some() {return Err("duplicate vignette".into());}
+            if let Ok(filter)=fvid_media::owned_vignette::Vignette::parse(value) {filters.vignette=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--curves" {
             let value=args.next().ok_or("missing curves options")?;
             if filters.curves.is_some() {return Err("duplicate curves".into());}
@@ -4852,6 +4859,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--colorlevels" => &mut transform.colorlevels,
             "--colorchannelmixer" => &mut transform.colorchannelmixer,
             "--exposure" => &mut transform.exposure,
+            "--vignette" => {
+                if transform.vignette.is_some() {return Err("duplicate vignette".into());}
+                &mut transform.vignette
+            },
             "--colorbalance" => &mut transform.colorbalance,
             "--colorcorrect" => &mut transform.colorcorrect,
             "--cas" => &mut transform.cas,

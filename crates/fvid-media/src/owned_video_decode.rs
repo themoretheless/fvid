@@ -129,6 +129,7 @@ pub(crate) fn decode_ffv1(
     let full_range = track.colour.full_range;
     let matrix = if track.colour.matrix == 0 {6} else {track.colour.matrix};
     let default_duration = track.default_duration_ns;
+    let source_info = (track.pixel_aspect(), default_duration);
     let width = u32::try_from(track.width).map_err(|_| "FFV1 width exceeds API range")?;
     let height = u32::try_from(track.height).map_err(|_| "FFV1 height exceeds API range")?;
     // No implicit policy ceiling: allocation sizes are checked by the decoder.
@@ -244,6 +245,7 @@ pub(crate) fn decode_ffv1(
                     quantum: reader.timestamp_scale_ns(),
                 }),
                 Some(&history),
+                source_info,
             )?
             else {
                 return Ok(None);
@@ -368,7 +370,7 @@ fn process_frame(
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     process_frame_with_overlay(
         decoded, monochrome, full_range, transform, None, &mut None, 0, None, 6, 0,
-     None, None, None,
+     None, None, None, ((1, 1), 0),
     )
 }
 fn process_frame_with_overlay(
@@ -385,6 +387,7 @@ fn process_frame_with_overlay(
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
     history: Option<&crate::owned_pixel_context::PixelContext>,
+    source_info: ((u32, u32), u64),
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
@@ -411,7 +414,7 @@ fn process_frame_with_overlay(
     } else {
         format!("{layout}p{}", decoded.depth)
     };
-    let header = Header {
+    let mut header = Header {
         width: decoded.frame.width,
         height: decoded.frame.height,
         format,
@@ -427,6 +430,20 @@ fn process_frame_with_overlay(
             ),
         ],
     };
+    let ((aspect_n, aspect_d), duration_ns) = source_info;
+    header.tokens.push(format!("A{aspect_n}:{aspect_d}"));
+    if duration_ns != 0 {
+        let (mut a, mut b) = (1_000_000_000u64, duration_ns);
+        while b != 0 {
+            let remainder = a % b;
+            a = b;
+            b = remainder;
+        }
+        let (n, d) = (1_000_000_000 / a, duration_ns / a);
+        if n <= i32::MAX as u64 && d <= i32::MAX as u64 {
+            header.tokens.push(format!("F{n}:{d}"));
+        }
+    }
     let (width, height, _) = crate::owned_y4m_decode::requested_geometry(&header, transform)?;
     let promote = transform
         .shuffleplanes

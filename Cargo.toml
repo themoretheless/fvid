@@ -236,3 +236,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_curves_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_vignette_reference"
+harness = false

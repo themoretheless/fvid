@@ -31,6 +31,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.curves.as_deref().is_some_and(|a|crate::owned_curves::Curves::parse(a).is_err()) {return false;}
+    if transform.vignette.as_deref().is_some_and(|a|crate::owned_vignette::Vignette::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.tmix.as_deref().is_some_and(|a|crate::owned_tmix::TemporalMix::parse(a).is_err()) {return false;}
     if transform.lagfun.as_deref().is_some_and(|a|crate::owned_lagfun::LagFun::parse(a).is_err()) {return false;}
@@ -133,6 +134,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 exposure: transform.exposure.clone(),
                 colorbalance: transform.colorbalance.clone(),
                 curves: transform.curves.clone(),
+                vignette: transform.vignette.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
                 cas: transform.cas.clone(),
                 grayworld: transform.grayworld.clone(),
@@ -527,6 +529,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.curves.is_some()
+        || transform.vignette.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()
@@ -598,6 +601,24 @@ pub(crate) fn apply_pixel_filters_clock(
             }
             if let Some(args) = transform.cas.as_deref() {
                 crate::owned_cas::Cas::parse(args)?.apply(&mut frame,header.depth())?;
+            }
+            if transform.vignette.is_some() {
+                if let Some(filter)=history.and_then(|h|h.vignette.as_ref()) {let rate=if header.tokens.iter().any(|t|t.starts_with('F')) {Some(header.frame_rate()?)} else {None};
+                    let aspect=header.pixel_aspect()?;
+                    let mut sar=aspect.0 as f64/aspect.1 as f64;
+                    let crop=transform.crop.unwrap_or(fvid_media_info::CropRect{x:0,y:0,width:header.width,height:header.height});
+                    let (mut cw,mut ch)=(u32::try_from(crop.width).map_err(|_|"vignette crop width overflow")?,u32::try_from(crop.height).map_err(|_|"vignette crop height overflow")?);
+                    if transform.transpose.is_some() {sar=sar.recip();std::mem::swap(&mut cw,&mut ch);}
+                    if let Some(angle)=transform.rotate {(cw,ch)=angle.size(cw,ch);}
+                    if let Some(pad)=transform.pad {(cw,ch)=(pad.width,pad.height);}
+                    if transform.scale.is_some() {sar*=cw as f64*frame.height as f64/(ch as f64*frame.width as f64);}
+                    filter.apply_clock(&mut frame,header.depth(),crate::owned_vignette::Clock {
+                        n,t,pts: clock.map(|c|c.ticks as f64/c.quantum as f64),
+                        rate:rate.map(|r|r[0] as f64/r[1] as f64),
+                        time_base: clock.map(|c|c.quantum as f64/c.scale as f64),
+                        sample_aspect:sar,
+                    })?;}
+                else {return Err("vignette requires persistent streaming context".into());}
             }
             if let Some(args) = transform.curves.as_deref() {
                 let apply = |filter:&crate::owned_curves::Curves,frame:&mut crate::owned_frame::GeometryFrame| filter.apply_yuv(frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,n,t);
@@ -994,6 +1015,7 @@ fn decode_reader_frames(
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.curves.is_some()
+        || transform.vignette.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()

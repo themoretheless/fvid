@@ -472,3 +472,32 @@ Recorded SHA-256 values:
 - `curves-gray-8.expected.raw`: `5b8890a286def16560207958f8bda3839ba77225c224b4bdef82077c1ffd4a3a`
 - `curves-gray-10.expected.raw`: `ae3cd4d263c0c32779c00d32cc9a0ec42bcad779840e24ea2af23d765d8885ca`
 - `curves-matrix-unspecified.mp4`: `fa68c4fdc56220d16413e5bdebb7eaa017119f89e989a1d40d58a525a0bf1cbe`
+
+### Owned vignette masks, RNG persistence and fractional-centre rounding
+
+`scripts/generate_vignette_fixture.py` uses Python byte arithmetic only. The
+four 16x12 frames at 25 fps contain `(sample_index * 37 + frame_index * 23 + 101)
+mod 256`. `vignette-dither.y4m` is planar YUV420 with square pixels;
+`vignette-fractional.rgb24` is a four-frame RGB24 rawvideo sequence at the same
+size/rate. Neither input contains private video, audio or codec parameters.
+
+The explicit `ffmpeg_vignette_reference` benchmark produced the saved raw
+expected bytes, after matching every owned sample. Its executable must be supplied
+through `FVID_REFERENCE_FFMPEG`. Ordinary tests and fixture generation do not
+invoke it or require network access. The YUV golden uses default shading; the
+RGB golden uses `angle=PI/3:x0=3.7:y0=5.2`. The latter specifically reproduces
+angle precision: byte 322 was 73 when the angle incorrectly retained double
+precision, and is 72 with the corrected mask. The former differs from parsing
+an independent filter on each frame, so it exercises RNG persistence rather
+than merely checking a still mask. Tests verify complete sequences and rewind,
+exports from both APIs, CLI framestep before output selection, explicit source
+clocks, enable, malformed storage, refusal before mutation and high-depth YUV
+identity/saturation. These are playback/export acceptance tests, not passing
+unsupported-behaviour refusals presented as acceptance.
+
+SHA-256:
+
+- `vignette-dither.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
+- `vignette-dither.expected.raw`: `e79b233fde98f15a2e15a939c97c7840419db88cc30bc949a2e67f7971c259d9`
+- `vignette-fractional.rgb24`: `089e7d1c300308700478f57e71c6898e8b8168f6913d024720a062364186e20a`
+- `vignette-fractional.expected.raw`: `14b7d196823b05133f8dc09e83514390d1ff1bde32a22c5342b3171941fc0401`
