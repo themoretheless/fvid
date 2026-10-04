@@ -127,4 +127,20 @@ Initialized direct sessions now allocate driver bitstream slots and track them b
 
 ## Direct CUDA NV12 registration
 
-Initialized NVENC sessions now register and map caller-owned CUDA NV12 allocations, checking pitch, pointer range and the full Y+UV extent. The raw pointer API is explicitly unsafe: the caller must retain and synchronize the allocation until successful session closure, including cleanup retries. Session records retain registrations even if mapping fails. Cleanup unmaps before unregistering, then releases output buffers and encoder; failures retain handles for retry. SDK register/map sizes and function-table offsets were C-verified as 1536/1544 and 248/256/208/216. Nine host tests and Linux/Windows test cross-checks pass. The explicit NVIDIA test now allocates a synthetic CUDA surface from the same primary-context pool, registers/maps it and closes the session before freeing the allocation. It has not been executed on hardware here. Picture submission, output locking, NVDEC and production CUDA wiring remain unfinished.
+Initialized NVENC sessions now register and map caller-owned CUDA NV12 allocations, checking pitch, pointer range and the full Y+UV extent. The raw pointer API is explicitly unsafe: the caller must retain and synchronize the allocation until successful session closure, including cleanup retries. Session records retain registrations even if mapping fails. Cleanup unmaps before unregistering, then releases output buffers and encoder; failures retain handles for retry. SDK register/map sizes and function-table offsets were C-verified as 1536/1544 and 248/256/208/216. Nine host tests and Linux/Windows test cross-checks pass. The explicit NVIDIA test now allocates a synthetic CUDA surface from the same primary-context pool, registers/maps it and closes the session before freeing the allocation. It has not been executed on hardware here. NVDEC and production CUDA wiring remain unfinished.
+
+
+## Direct NVENC frame submission
+
+The direct session accepts mapped NV12 inputs and output slots, distinguishes
+buffered frames from unaccepted busy submissions, and drains packets in submission
+order. EOS makes pending outputs eligible; close waits through blocking output
+locks before releasing CUDA inputs. Failed unlocks retain their handles for retry.
+Packets copy driver bytes into owned Rust storage before unlocking and reject
+hardware errors or empty output.
+
+The ignored NVIDIA test now submits four synthetic CUDA frames, drains EOS and
+checks packet timestamps and nonempty payloads. It does not yet prove decoder
+acceptance or production filter integration. Hardware execution remains deferred
+to the user's NVIDIA machine. Host tests and Linux/Windows compilation do not
+establish GPU performance or SDK compatibility on a particular driver.

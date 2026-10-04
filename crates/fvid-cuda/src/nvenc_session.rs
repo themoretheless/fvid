@@ -2,7 +2,7 @@
 //! SDK layout: NVIDIA/video-sdk-samples@aa3544dcea2fe63122e4feb83bf805ea40e58dbe,
 //! Samples/NvCodec/NvEncoder/nvEncodeAPI.h. This compatibility ABI predates AV1.
 use crate::{CodecDevice, NvencApi, NvencVersion};
-use std::{ffi::c_void, mem::ManuallyDrop};
+use std::{collections::VecDeque, ffi::c_void, mem::ManuallyDrop};
 const API: u32 = 8 | (1 << 24);
 const fn version(revision: u32) -> u32 {
     API | (revision << 16) | (7 << 28)
@@ -41,7 +41,10 @@ pub(crate) struct FunctionTable {
     input_buffers: [usize; 2],
     create_output: crate::nvenc_sdk::PNVENCCREATEBITSTREAMBUFFER,
     destroy_output: crate::nvenc_sdk::PNVENCDESTROYBITSTREAMBUFFER,
-    before_map: [usize; 9],
+    encode: crate::nvenc_sdk::PNVENCENCODEPICTURE,
+    lock_output: crate::nvenc_sdk::PNVENCLOCKBITSTREAM,
+    unlock_output: crate::nvenc_sdk::PNVENCUNLOCKBITSTREAM,
+    before_map: [usize; 6],
     map_input: crate::nvenc_sdk::PNVENCMAPINPUTRESOURCE,
     unmap_input: crate::nvenc_sdk::PNVENCUNMAPINPUTRESOURCE,
     destroy: Option<Destroy>,
@@ -67,7 +70,10 @@ impl FunctionTable {
             input_buffers: [0; 2],
             create_output: None,
             destroy_output: None,
-            before_map: [0; 9],
+            encode: None,
+            lock_output: None,
+            unlock_output: None,
+            before_map: [0; 6],
             map_input: None,
             unmap_input: None,
             destroy: None,
@@ -91,8 +97,35 @@ struct OpenParams {
     reserved2: [usize; 64],
 }
 struct InputResource {
+    pitch: u32,
     registered: *mut c_void,
     mapped: *mut c_void,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NvencSubmit {
+    Ready,
+    Queued,
+    Busy,
+}
+pub struct NvencPacket {
+    pub bytes: Vec<u8>,
+    pub timestamp: u64,
+    pub duration: u64,
+    pub picture_type: u32,
+}
+struct LockedOutput {
+    hw_status: u32,
+    pointer: *mut u8,
+    count: u32,
+    timestamp: u64,
+    duration: u64,
+    picture_type: u32,
+}
+struct OutputResource {
+    handle: *mut c_void,
+    input: Option<usize>,
+    ready: bool,
+    locked: Option<LockedOutput>,
 }
 /// Owns the encoder, its CUDA resources and the loaded driver library.
 /// An open session is not an initialized encoder or a verified hardware path.
@@ -100,7 +133,10 @@ pub struct NvencSession {
     encoder: *mut c_void,
     destroy: Destroy,
     table: FunctionTable,
-    outputs: Vec<*mut c_void>,
+    outputs: Vec<OutputResource>,
+    pending: VecDeque<usize>,
+    next_frame: u32,
+    eos: bool,
     inputs: Vec<InputResource>,
     geometry: Option<(u32, u32)>,
     initialized: bool,
@@ -144,6 +180,9 @@ impl NvencSession {
             destroy,
             table,
             outputs: Vec::new(),
+            pending: VecDeque::new(),
+            next_frame: 0,
+            eos: false,
             inputs: Vec::new(),
             geometry: None,
             initialized: false,
@@ -251,7 +290,12 @@ impl NvencSession {
             return Err("NVENC allocated a null output handle".into());
         }
         let index = self.outputs.len();
-        self.outputs.push(params.bitstreamBuffer);
+        self.outputs.push(OutputResource {
+            handle: params.bitstreamBuffer,
+            input: None,
+            ready: false,
+            locked: None,
+        });
         Ok(index)
     }
     /// Register and map a caller-owned pitched CUDA NV12 allocation.
@@ -310,6 +354,7 @@ impl NvencSession {
         }
         let index = self.inputs.len();
         self.inputs.push(InputResource {
+            pitch,
             registered: params.registeredResource,
             mapped: std::ptr::null_mut(),
         });
@@ -328,6 +373,202 @@ impl NvencSession {
             return Err("NVENC returned invalid NV12 mapping geometry".into());
         }
         Ok(index)
+    }
+    /// Submit a mapped NV12 input and an unused output slot. NEED_MORE_INPUT
+    /// still accepts the frame. Busy accepts nothing and may be retried.
+    pub fn submit_nv12(
+        &mut self,
+        input: usize,
+        output: usize,
+        timestamp: u64,
+        duration: u64,
+    ) -> Result<NvencSubmit, String> {
+        if self.encoder.is_null() || !self.initialized || self.failed || self.eos {
+            return Err(
+                "NVENC submission requires a healthy initialized session before EOS".into(),
+            );
+        }
+        let source = self
+            .inputs
+            .get(input)
+            .ok_or("NVENC input index is invalid")?;
+        let target = self
+            .outputs
+            .get(output)
+            .ok_or("NVENC output index is invalid")?;
+        if source.mapped.is_null()
+            || target.handle.is_null()
+            || target.input.is_some()
+            || self.outputs.iter().any(|slot| slot.input == Some(input))
+        {
+            return Err("NVENC input/output is unavailable or pending".into());
+        }
+        let next_frame = self
+            .next_frame
+            .checked_add(1)
+            .ok_or("NVENC frame index overflow")?;
+        self.pending
+            .try_reserve(1)
+            .map_err(|e| format!("NVENC submission queue allocation failed: {e}"))?;
+        self.device.handles()?;
+        let encode = self
+            .table
+            .encode
+            .ok_or("NVENC omitted picture entrypoint")?;
+        let (width, height) = self.geometry.ok_or("NVENC geometry is unavailable")?;
+        let mut params = crate::nvenc_sdk::NV_ENC_PIC_PARAMS::default();
+        params.version = version(4) | (1 << 31);
+        params.inputWidth = width;
+        params.inputHeight = height;
+        params.inputPitch = source.pitch;
+        params.frameIdx = self.next_frame;
+        params.inputTimeStamp = timestamp;
+        params.inputDuration = duration;
+        params.inputBuffer = source.mapped;
+        params.outputBitstream = target.handle;
+        params.bufferFmt = 1;
+        params.pictureStruct = 1;
+        // SAFETY: Session-owned mapped input/output handles are live, reserved
+        // fields are zero, and caller retains the registered CUDA allocation.
+        let status = unsafe { encode(self.encoder, &mut params) };
+        let accepted = match submission_status(status) {
+            Ok(value) => value,
+            Err(error) => {
+                self.failed = true;
+                return Err(error);
+            }
+        };
+        if accepted == NvencSubmit::Busy {
+            return Ok(accepted);
+        }
+        self.outputs[output].input = Some(input);
+        self.outputs[output].ready = accepted == NvencSubmit::Ready;
+        self.pending.push_back(output);
+        self.next_frame = next_frame;
+        if accepted == NvencSubmit::Ready {
+            for &index in &self.pending {
+                self.outputs[index].ready = true;
+            }
+        }
+        Ok(accepted)
+    }
+    /// Submit EOS once. Success makes all accepted outputs eligible to read.
+    pub fn finish(&mut self) -> Result<(), String> {
+        if self.encoder.is_null() || !self.initialized || self.failed {
+            return Err("NVENC finish requires a healthy initialized session".into());
+        }
+        self.flush_encoder()
+    }
+    fn flush_encoder(&mut self) -> Result<(), String> {
+        if self.eos {
+            return Ok(());
+        }
+        self.device.handles()?;
+        let encode = self
+            .table
+            .encode
+            .ok_or("NVENC omitted picture entrypoint")?;
+        let mut params = crate::nvenc_sdk::NV_ENC_PIC_PARAMS::default();
+        params.version = version(4) | (1 << 31);
+        params.encodePicFlags = 8;
+        // SAFETY: SDK EOS parameters carry no input/output pointer; the encoder
+        // and owning device remain live until accepted work is drained.
+        let status = unsafe { encode(self.encoder, &mut params) };
+        if status != 0 {
+            return Err(format!("NVENC EOS failed with status {status}"));
+        }
+        self.eos = true;
+        for &index in &self.pending {
+            self.outputs[index].ready = true;
+        }
+        Ok(())
+    }
+    /// Poll the oldest accepted output; returns None while the driver is busy
+    /// or needs further input. Successful unlock precedes slot/input reuse.
+    pub fn receive(&mut self) -> Result<Option<NvencPacket>, String> {
+        if self.encoder.is_null() || self.failed {
+            return Err("NVENC output requires a healthy live session".into());
+        }
+        let Some(&index) = self.pending.front() else {
+            return Ok(None);
+        };
+        if !self.outputs[index].ready {
+            return Ok(None);
+        }
+        self.device.handles()?;
+        if !self.lock_slot(index, true)? {
+            return Ok(None);
+        }
+        let unlock = self
+            .table
+            .unlock_output
+            .ok_or("NVENC omitted output-unlock entrypoint")?;
+        let locked = self.outputs[index].locked.as_ref().unwrap();
+        if locked.hw_status != 0 || locked.count == 0 {
+            return Err(format!(
+                "NVENC returned invalid encoded output: hardware status {}, bytes {}",
+                locked.hw_status, locked.count
+            ));
+        }
+        let count = usize::try_from(locked.count).map_err(|_| "NVENC output size overflow")?;
+        if (count != 0 && locked.pointer.is_null()) || count > isize::MAX as usize {
+            return Err("NVENC locked output has invalid pointer/length".into());
+        }
+        let mut bytes = Vec::new();
+        bytes
+            .try_reserve_exact(count)
+            .map_err(|e| format!("NVENC packet allocation failed: {e}"))?;
+        if count != 0 {
+            // SAFETY: Successful SDK lock guarantees this readable extent until
+            // unlock; zero length avoids creating a slice from a null pointer.
+            bytes.extend_from_slice(unsafe { std::slice::from_raw_parts(locked.pointer, count) });
+        }
+        let packet = NvencPacket {
+            bytes,
+            timestamp: locked.timestamp,
+            duration: locked.duration,
+            picture_type: locked.picture_type,
+        };
+        // SAFETY: The output remains locked and the driver library is live.
+        let status = unsafe { unlock(self.encoder, self.outputs[index].handle) };
+        if status != 0 {
+            return Err(format!("NVENC output unlock failed with status {status}"));
+        }
+        self.outputs[index].locked = None;
+        self.outputs[index].input = None;
+        self.outputs[index].ready = false;
+        self.pending.pop_front();
+        Ok(Some(packet))
+    }
+    fn lock_slot(&mut self, index: usize, nonblocking: bool) -> Result<bool, String> {
+        let lock = self
+            .table
+            .lock_output
+            .ok_or("NVENC omitted output-lock entrypoint")?;
+        if self.outputs[index].locked.is_none() {
+            let mut params = crate::nvenc_sdk::NV_ENC_LOCK_BITSTREAM::default();
+            params.version = version(1);
+            params.outputBitstream = self.outputs[index].handle;
+            params.set_doNotWait(u32::from(nonblocking));
+            // SAFETY: The oldest ready output belongs to this live encoder;
+            // SDK storage is writable and nonblocking mode avoids deadlock.
+            let status = unsafe { lock(self.encoder, &mut params) };
+            if status == crate::nvenc_sdk::_NVENCSTATUS_NV_ENC_ERR_LOCK_BUSY {
+                return Ok(false);
+            }
+            if status != 0 {
+                return Err(format!("NVENC output lock failed with status {status}"));
+            }
+            self.outputs[index].locked = Some(LockedOutput {
+                hw_status: params.hwEncodeStatus,
+                pointer: params.bitstreamBufferPtr.cast(),
+                count: params.bitstreamSizeInBytes,
+                timestamp: params.outputTimeStamp,
+                duration: params.outputDuration,
+                picture_type: params.pictureType,
+            });
+        }
+        Ok(true)
     }
     /// Query all codec identifiers advertised by this live encoder session.
     /// Unknown identifiers are retained rather than silently filtered.
@@ -367,6 +608,29 @@ impl NvencSession {
         }
         self.device.handles()?;
         self.device.synchronize()?;
+        if self.initialized && (!self.pending.is_empty() || self.failed) {
+            self.flush_encoder()?;
+        }
+        while let Some(&index) = self.pending.front() {
+            // A successful EOS makes outputs eligible; blocking lock waits for
+            // completion before the associated CUDA input can be released.
+            if !self.lock_slot(index, false)? {
+                return Err("NVENC cleanup output is still busy".into());
+            }
+            let unlock = self
+                .table
+                .unlock_output
+                .ok_or("NVENC omitted output-unlock entrypoint")?;
+            // SAFETY: This pending slot has a successful outstanding lock.
+            let status = unsafe { unlock(self.encoder, self.outputs[index].handle) };
+            if status != 0 {
+                return Err(format!("NVENC cleanup unlock failed with status {status}"));
+            }
+            self.outputs[index].locked = None;
+            self.outputs[index].input = None;
+            self.outputs[index].ready = false;
+            self.pending.pop_front();
+        }
         if !self.inputs.is_empty() {
             let unmap = self
                 .table
@@ -396,7 +660,7 @@ impl NvencSession {
             for output in &mut self.outputs {
                 // SAFETY: Each nonnull output belongs to this live encoder;
                 // successful destruction clears it, preventing a repeated free.
-                close_handle(output, |handle| unsafe {
+                close_handle(&mut output.handle, |handle| unsafe {
                     destroy(self.encoder, handle) as i32
                 })?;
             }
@@ -421,6 +685,16 @@ impl Drop for NvencSession {
         // On driver failure, retain resources rather than unload a library or
         // context while the driver still owns the live encoder. Process exit
         // reclaims them; explicit close lets callers observe and retry errors.
+    }
+}
+fn submission_status(status: u32) -> Result<NvencSubmit, String> {
+    match status {
+        0 => Ok(NvencSubmit::Ready),
+        crate::nvenc_sdk::_NVENCSTATUS_NV_ENC_ERR_NEED_MORE_INPUT => Ok(NvencSubmit::Queued),
+        crate::nvenc_sdk::_NVENCSTATUS_NV_ENC_ERR_ENCODER_BUSY => Ok(NvencSubmit::Busy),
+        _ => Err(format!(
+            "NVENC picture submission failed with status {status}"
+        )),
     }
 }
 fn release_input(
@@ -507,11 +781,39 @@ fn close_handle(
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn submission_distinguishes_buffered_frames_from_unaccepted_busy_frames() {
+        assert_eq!(
+            super::submission_status(0).unwrap(),
+            super::NvencSubmit::Ready
+        );
+        assert_eq!(
+            super::submission_status(17).unwrap(),
+            super::NvencSubmit::Queued
+        );
+        assert_eq!(
+            super::submission_status(18).unwrap(),
+            super::NvencSubmit::Busy
+        );
+        assert!(super::submission_status(20).is_err());
+    }
+    #[test]
+    fn submission_entrypoints_preserve_sdk_function_table_offsets() {
+        if std::mem::size_of::<usize>() == 8 {
+            assert_eq!(std::mem::offset_of!(super::FunctionTable, encode), 136);
+            assert_eq!(std::mem::offset_of!(super::FunctionTable, lock_output), 144);
+            assert_eq!(
+                std::mem::offset_of!(super::FunctionTable, unlock_output),
+                152
+            );
+        }
+    }
     use super::*;
     #[test]
     fn input_cleanup_does_not_unregister_a_failed_mapping_release() {
         let pointer = std::ptr::dangling_mut::<c_void>();
         let mut input = InputResource {
+            pitch: 128,
             registered: pointer,
             mapped: pointer,
         };
@@ -650,22 +952,59 @@ mod tests {
         use cudarc::driver::DevicePtr;
         let owner = crate::device_pool::shared(0).unwrap();
         let stream = owner.new_stream().unwrap();
-        let buffer = stream.alloc_zeros::<u8>(128 * 72 * 3 / 2).unwrap();
+        let buffers: Vec<_> = (0..4)
+            .map(|_| stream.alloc_zeros::<u8>(128 * 72 * 3 / 2).unwrap())
+            .collect();
         stream.synchronize().unwrap();
-        let (pointer, _guard) = buffer.device_ptr(&stream);
         let device = CodecDevice::new(0).unwrap();
         let mut session = NvencSession::open(device).unwrap();
         assert!(!session.codec_guids().unwrap().is_empty());
         session.initialize_h264(128, 72, 60, 1).unwrap();
         assert!(session.initialize_h264(128, 72, 60, 1).is_err());
-        // SAFETY: The same ordinal uses the same primary-context pool; buffer
-        // and stream remain live and synchronized until successful close below.
-        assert_eq!(
-            unsafe { session.register_nv12(pointer, 128, 128 * 72 * 3 / 2) }.unwrap(),
-            0
-        );
-        assert_eq!(session.create_output().unwrap(), 0);
-        assert_eq!(session.create_output().unwrap(), 1);
+        for (index, buffer) in buffers.iter().enumerate() {
+            let (pointer, _guard) = buffer.device_ptr(&stream);
+            // SAFETY: All allocations use the same pooled primary context,
+            // are synchronized and remain live until successful close.
+            assert_eq!(
+                unsafe { session.register_nv12(pointer, 128, 128 * 72 * 3 / 2) }.unwrap(),
+                index
+            );
+            assert_eq!(session.create_output().unwrap(), index);
+        }
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        for index in 0..buffers.len() {
+            loop {
+                let result = session.submit_nv12(index, index, index as u64, 1).unwrap();
+                if result != super::NvencSubmit::Busy {
+                    break;
+                }
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "NVENC submission remained busy"
+                );
+                std::thread::sleep(std::time::Duration::from_millis(1));
+            }
+        }
+        session.finish().unwrap();
+        session.finish().unwrap();
+        assert!(session.submit_nv12(0, 0, 99, 1).is_err());
+        let mut timestamps = Vec::new();
+        while timestamps.len() < buffers.len() {
+            if let Some(packet) = session.receive().unwrap() {
+                assert!(!packet.bytes.is_empty());
+                assert_eq!(packet.duration, 1);
+                timestamps.push(packet.timestamp);
+            } else {
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "NVENC output remained busy"
+                );
+                std::thread::sleep(std::time::Duration::from_millis(1));
+            }
+        }
+        timestamps.sort_unstable();
+        assert_eq!(timestamps, vec![0, 1, 2, 3]);
+        assert!(session.receive().unwrap().is_none());
         session.close().unwrap();
         assert!(session.create_output().is_err());
         assert!(session.codec_guids().is_err());
