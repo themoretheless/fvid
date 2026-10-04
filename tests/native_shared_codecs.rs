@@ -137,7 +137,7 @@ fn standalone_mp4_decodes_owned_avc_and_hevc_access_units() {
 }
 
 #[test]
-fn mp4_edits_and_transforms_remain_explicitly_unadmitted() {
+fn mp4_edits_are_accepted_and_transforms_remain_unadmitted() {
     let source = fixture("hevc/main-ipb.mp4");
     let reader = fvid_media::owned_mp4::Mp4Reader::open(
         std::io::Cursor::new(std::fs::read(&source).unwrap()),
@@ -153,8 +153,10 @@ fn mp4_edits_and_transforms_remain_explicitly_unadmitted() {
             .edits
             .is_empty()
     );
-    let error = fvid_media::decode_video(&source).unwrap_err();
-    assert!(error.contains("does not yet support"), "{error}");
+    let library = fvid_media::decode_video(&source).unwrap();
+    let root = fvid::media::decode_video(&source).unwrap();
+    assert_eq!(library.video_frames, root.video_frames);
+    assert_eq!(library.backend, "owned MP4 compressed video decode");
     let request = fvid::media::DecodeTransform {
         deband: Some("1thr=.5".into()),
         ..Default::default()
@@ -165,4 +167,48 @@ fn mp4_edits_and_transforms_remain_explicitly_unadmitted() {
     )
     .unwrap_err();
     assert!(error.contains("does not yet support"), "{error}");
+}
+
+#[test]
+fn mp4_repeated_disjoint_fractional_and_leading_edits_use_owned_decode() {
+    for (name, expected) in [
+        ("repeat", Some(6)),
+        ("disjoint", Some(6)),
+        ("fractional", Some(3)),
+        ("leading", Some(3)),
+    ] {
+        let source = fixture(&format!("playback-errors/shared-edit-{name}.mp4"));
+        let root = fvid::media::decode_video(&source).unwrap_or_else(|e| panic!("{name}: {e}"));
+        let library = fvid_media::decode_video(&source).unwrap_or_else(|e| panic!("{name}: {e}"));
+        assert_eq!(library.backend, "owned MP4 compressed video decode");
+        assert_eq!(library.video_frames, root.video_frames, "{name}");
+        if let Some(expected) = expected {
+            assert_eq!(library.video_frames, expected, "{name}");
+        }
+        assert_eq!(
+            (library.width, library.height),
+            (root.width, root.height),
+            "{name}"
+        );
+    }
+}
+#[test]
+fn interior_empty_edit_is_an_explicit_capability_refusal() {
+    let source = fixture("playback-errors/shared-edit-interior-empty.mp4");
+    let error = fvid_media::decode_video(&source).unwrap_err();
+    assert!(error.contains("does not yet support"), "{error}");
+    let error = fvid::media::decode_video(&source).unwrap_err();
+    assert!(error.contains("empty MP4 edit inside playback"), "{error}");
+}
+
+#[test]
+fn mp4_duplicate_pts_keep_one_displayed_picture_per_time() {
+    for (name, expected) in [("duplicate-pts.mp4", 11), ("duplicate-pts-run.mp4", 8)] {
+        let source = fixture(&format!("playback-errors/{name}"));
+        let root = fvid::media::decode_video(&source).unwrap();
+        let library = fvid_media::decode_video(&source).unwrap();
+        assert_eq!(library.video_frames, expected, "{name}");
+        assert_eq!(library.video_frames, root.video_frames, "{name}");
+        assert_eq!(library.backend, "owned MP4 compressed video decode");
+    }
 }

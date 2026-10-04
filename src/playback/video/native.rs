@@ -17,14 +17,7 @@ use std::{
 mod packed;
 pub use packed::PackedPlanar;
 
-/// A rate-one media range placed on the playable movie timeline.
-#[derive(Clone, Copy, Debug)]
-pub struct PlaybackEdit {
-    media_start: i64,
-    media_end: i64,
-    movie_start: i64,
-    movie_end: i64,
-}
+pub use fvid_media::owned_video_timeline::PlaybackEdit;
 
 pub enum NativeReader<R> {
     Webm(crate::playback_webm::WebmVideoReader<R>),
@@ -1308,48 +1301,11 @@ fn playback_edits(
     track: &crate::container::mp4::Track,
     movie_scale: u32,
 ) -> Result<Vec<PlaybackEdit>> {
-    let edits: Vec<_> = track
-        .edits
-        .iter()
-        .skip_while(|edit| edit.media_time < 0)
-        .collect();
-    if edits.is_empty() {
-        return Ok(Vec::new());
-    }
-    if movie_scale == 0 {
-        return Err(invalid("MP4 movie timescale is zero"));
-    }
-    let mut timeline = 0u128;
-    let mut movie_start = 0i64;
-    let mut result = Vec::new();
-    for edit in edits {
-        if edit.media_time < 0 {
-            return Err(invalid("empty MP4 edit inside playback is not implemented"));
-        }
-        timeline = timeline
-            .checked_add(u128::from(edit.duration))
-            .ok_or_else(|| invalid("MP4 edit duration overflow"))?;
-        let movie_end = i64::try_from(
-            (timeline * u128::from(track.timescale)).div_ceil(u128::from(movie_scale)),
-        )
-        .map_err(|_| invalid("MP4 edit duration overflow"))?;
-        let duration = movie_end - movie_start;
-        if duration <= 0 {
-            return Err(invalid("empty MP4 playback edit"));
-        }
-        let media_end = edit
-            .media_time
-            .checked_add(duration)
-            .ok_or_else(|| invalid("MP4 edit endpoint overflow"))?;
-        result.push(PlaybackEdit {
-            media_start: edit.media_time,
-            media_end,
-            movie_start,
-            movie_end,
-        });
-        movie_start = movie_end;
-    }
-    Ok(result)
+    fvid_media::owned_video_timeline::map_edits(
+        track.edits.iter().map(|edit| (edit.duration, edit.media_time)),
+        track.timescale,
+        movie_scale,
+    )
 }
 
 #[cfg(test)]

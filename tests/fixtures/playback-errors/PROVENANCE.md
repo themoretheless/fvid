@@ -787,3 +787,15 @@ SHA256:
 - `shared-avc-bframes.mp4`: `dc2592399a106e13e769c4d727fa33b94e00bec2407b57093e7c17bae577b70d`
 - `shared-hevc-main.mp4`: `39bbb904f0f9e2184f3c504532e93e067b9e3255d218a1464459e10affab84ec`
 - `shared-hevc-main10.mp4`: `a0eacfe438a9cc80614f5375f4bfc4a30437a677743f422c9859ce8f134e6893`
+
+### Shared MP4 presentation edits
+
+`generate-shared-mp4-edits.py` derives five cases from the committed synthetic shared AVC/HEVC clips. The original moov becomes an equally sized free box; a rebuilt moov is appended, preserving all original sample offsets and coded packets. Media origins come from the synthetic stts/ctts tables. Movie and track-header durations are rescaled to a 1000 Hz movie clock so the 1 ms edit remains nonzero. No private source media, frames, audio or parameter sets are used, and no generator or encoder runs in ordinary tests. Repeated, disjoint, fractional and leading-empty edits have native root/standalone acceptance tests, including independent expected displayed counts (6, 6, 3 and 3). Interior-empty edits retain explicit refusal coverage until blank-frame behavior is implemented. Shared timeline unit tests separately verify cumulative rational rounding, half-open overlap, repeated appearances, invalid clocks and arithmetic overflow. Existing player seek/rewind regressions verify integration.
+
+- `shared-edit-repeat.mp4`: `5a0a09fde331126a6ca4155075e51f86cc6926577facdac646f5c7adb55ba98d`
+- `shared-edit-disjoint.mp4`: `4496b574de6b73608e7f925fc95a430b2438dbce431a04823de084ca59ccd5b6`
+- `shared-edit-fractional.mp4`: `fac233b3ad2890ec0227284e8ddb888144f32ebdc377cd89b075e0dcb2b9285f`
+- `shared-edit-leading.mp4`: `9db227e155ec22e7d2168424ea2a20b3a4cc434141e0128cbbcb05b7cb5d6ec6`
+- `shared-edit-interior-empty.mp4`: `b3d810c657b7555d8323b2f7abe4820e7b70b09d65481ec223e523332f51da2e`
+
+The standalone duplicate-PTS regression reuses the existing synthetic `duplicate-pts.mp4`, `duplicate-pts-run.mp4` and `duplicate-pts-all.mp4` cases. Before the fix, the new test reproduced 12 displayed frames instead of 11 for the first case. Acceptance now requires 11, 8 and 1 respectively, while existing player tests verify pixel selection, EOF duration and seek/rewind. No new private media or parameters were imported.
