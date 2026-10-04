@@ -3502,8 +3502,13 @@ selection or modify frame alpha. The RGB reference benchmark now matches
 
 Full YUV conversion compatibility remains incomplete. The explicit
 `benches/colorhold_yuv_qualification.py` benchmark on synthetic 3×3 grids finds
-blended-selection maximum deltas of 24/393/6272 at 8/12/16 bits versus
+blended-selection maximum deltas of 1/6/98 at 8/12/16 bits versus
 `format=rgba64le,colorhold` followed by FFmpeg's YUV conversion. These results
-are not equivalence passes. Committed synthetic reference planes drive a
-passing reproduction and an ignored exact-acceptance test; conversion and
-resampling must be corrected before enabling acceptance and claiming parity.
+are not equivalence passes. Point sampling corrected the previous
+24/393/6272 deltas; coefficients and rounding remain to qualify.
+Committed synthetic reference planes drive a
+passing reproduction and an ignored exact-acceptance test; remaining conversion
+coefficients and rounding must be corrected before enabling acceptance and
+claiming parity. `colorhold` now selects the upper-left pixel of each chroma
+cell, matching the reference sampling behaviour. Generic conversion retains
+cell averaging by default and exposes both modes explicitly.

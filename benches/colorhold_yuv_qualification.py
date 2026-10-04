@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 parser=argparse.ArgumentParser()
 parser.add_argument('--fvid',type=Path,required=True)
+parser.add_argument('--diagnostic',action='store_true',help='print intermediate synthetic RGB/UV samples')
 parser.add_argument('--save-references',action='store_true',help='write synthetic reference sample planes')
 args=parser.parse_args()
 root=Path(__file__).resolve().parents[1]
@@ -23,6 +24,18 @@ with tempfile.TemporaryDirectory(prefix='fvid-colorhold-yuv-') as directory:
             run([str(args.fvid.resolve()),'media','transcode-lossless',str(source),str(output),'--colorhold',options])
             own=run(['ffmpeg','-nostdin','-v','error','-i',str(output),'-an','-pix_fmt',pix,'-f','rawvideo','-'])
             ref=run(['ffmpeg','-nostdin','-v','error','-i',str(source),'-vf',f'format=rgba64le,colorhold={options}', '-an','-pix_fmt',pix,'-f','rawvideo','-'])
+            if args.diagnostic and depth==8 and index==1:
+                print('own first frame',list(own[:17]),'reference',list(ref[:17]))
+                rgba=run(['ffmpeg','-nostdin','-v','error','-i',str(source),'-vf','format=rgba64le','-frames:v','1','-f','rawvideo','-'])
+                print('reference RGB16',[int.from_bytes(rgba[i:i+2],'little') for i in range(0,len(rgba),2)])
+                filtered=run(['ffmpeg','-nostdin','-v','error','-i',str(source),'-vf','format=rgba64le,colorhold=red:0.2:0.5','-frames:v','1','-f','rawvideo','-'])
+                uv=[]
+                for at in range(0,len(filtered),8):
+                    r,g,b=[int.from_bytes(filtered[at+i:at+i+2],'little')/65535 for i in (0,2,4)]
+                    l=.299*r+.587*g+.114*b
+                    uv.append((round(128+224*(b-l)/(2*(1-.114))),round(128+224*(r-l)/(2*(1-.299)))))
+                print('per-pixel UV',uv)
+
             assert len(own)==len(ref), 'geometry/frame count mismatch'
             if args.save_references and depth==8 and index==1:
                 (root/'tests/fixtures/playback-errors/colorhold-blend-reference-8.raw').write_bytes(ref)

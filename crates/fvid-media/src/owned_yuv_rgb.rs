@@ -25,6 +25,21 @@ pub fn filter_rgb16(
     depth: u8,
     full: bool,
     matrix: Matrix,
+    filter: impl FnMut(&mut [u8]) -> Result<()>,
+) -> Result<()> {
+    filter_rgb16_sampled(frame, depth, full, matrix, ChromaSampling::Average, filter)
+}
+#[derive(Clone, Copy, Debug)]
+pub enum ChromaSampling {
+    Average,
+    Point,
+}
+pub fn filter_rgb16_sampled(
+    frame: &mut GeometryFrame,
+    depth: u8,
+    full: bool,
+    matrix: Matrix,
+    sampling: ChromaSampling,
     mut filter: impl FnMut(&mut [u8]) -> Result<()>,
 ) -> Result<()> {
     let [sx, sy] = frame
@@ -120,6 +135,7 @@ pub fn filter_rgb16(
             let mut usum = 0.0;
             let mut vsum = 0.0;
             let mut index = 0;
+            let mut point = (0.0, 0.0);
             for row in y0..y1 {
                 for col in x0..x1 {
                     let at = index * 6;
@@ -133,19 +149,73 @@ pub fn filter_rgb16(
                     if rgb[at..at + 6] != before[at..at + 6] {
                         write(&mut output, row * frame.width + col, black + luma * yrange);
                     }
-                    usum += (b - luma) / (2.0 * (1.0 - kb));
-                    vsum += (r - luma) / (2.0 * (1.0 - kr));
+                    let uv = (
+                        (b - luma) / (2.0 * (1.0 - kb)),
+                        (r - luma) / (2.0 * (1.0 - kr)),
+                    );
+                    if index == 0 {
+                        point = uv;
+                    }
+                    usum += uv.0;
+                    vsum += uv.1;
                     index += 1;
                 }
             }
-            write(&mut output, y + cell, center + crange * usum / count as f64);
-            write(
-                &mut output,
-                y + c + cell,
-                center + crange * vsum / count as f64,
-            );
+            let (u, v) = match sampling {
+                ChromaSampling::Average => (usum / count as f64, vsum / count as f64),
+                ChromaSampling::Point => point,
+            };
+            write(&mut output, y + cell, center + crange * u);
+            write(&mut output, y + c + cell, center + crange * v);
         }
     }
     frame.data = output;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn point_sampling_and_cell_average_remain_distinct_at_subsampled_edges() {
+        let source = vec![128; 6];
+        let mut point = GeometryFrame {
+            width: 2,
+            height: 2,
+            subsampling: Some([2, 2]),
+            data: source.clone(),
+        };
+        let mut average = GeometryFrame {
+            width: 2,
+            height: 2,
+            subsampling: Some([2, 2]),
+            data: source,
+        };
+        let paint = |rgb: &mut [u8]| {
+            for (i, pixel) in rgb.chunks_exact_mut(6).enumerate() {
+                let color = if i == 0 {
+                    [65535u16, 0, 0]
+                } else {
+                    [0u16, 0, 65535]
+                };
+                for (sample, bytes) in color.into_iter().zip(pixel.chunks_exact_mut(2)) {
+                    bytes.copy_from_slice(&sample.to_le_bytes());
+                }
+            }
+            Ok(())
+        };
+        filter_rgb16_sampled(
+            &mut point,
+            8,
+            true,
+            Matrix::Bt601,
+            ChromaSampling::Point,
+            paint,
+        )
+        .unwrap();
+        filter_rgb16(&mut average, 8, true, Matrix::Bt601, paint).unwrap();
+        assert_eq!(&point.data[4..], &[85, 255]);
+        assert!(average.data[4] > 128 && average.data[5] < 200);
+        assert_eq!(&point.data[..4], &average.data[..4]);
+    }
 }

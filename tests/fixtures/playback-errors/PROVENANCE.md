@@ -18,3 +18,7 @@ YUV420p rawvideo. It contains three 3×3 frames (51 bytes), no private media.
 Ordinary tests only read these committed bytes and invoke no external program.
 A passing reproduction records the current conversion difference; the ignored
 acceptance requires exact reference parity and must be enabled with the fix.
+
+The colorhold reproduction additionally requires differences no greater than
+one 8-bit level after point-sampling correction. Exact acceptance remains
+ignored pending coefficient and rounding compatibility.

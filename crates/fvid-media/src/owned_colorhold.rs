@@ -14,9 +14,14 @@ impl ColorHold {
         full: bool,
         matrix: crate::owned_yuv_rgb::Matrix,
     ) -> Result<()> {
-        crate::owned_yuv_rgb::filter_rgb16(frame, depth, full, matrix, |rgb| {
-            self.apply_rgb(rgb, 16, 3)
-        })
+        crate::owned_yuv_rgb::filter_rgb16_sampled(
+            frame,
+            depth,
+            full,
+            matrix,
+            crate::owned_yuv_rgb::ChromaSampling::Point,
+            |rgb| self.apply_rgb(rgb, 16, 3),
+        )
     }
     pub fn parse(args: &str) -> Result<Self> {
         let mut filter = Self {
@@ -417,6 +422,14 @@ mod conversion_gap_tests {
     fn synthetic_blend_reproduces_conversion_difference() {
         let (actual, expected) = samples();
         assert_ne!(actual, expected);
+        // Point sampling removed the former 24-level chroma mismatch; remaining
+        // differences on this fixture are conversion coefficient/rounding error.
+        assert!(
+            actual
+                .iter()
+                .zip(&expected)
+                .all(|(a, b)| a.abs_diff(*b) <= 1)
+        );
     }
     #[test]
     #[ignore = "acceptance pending RGB conversion/resampling compatibility"]
