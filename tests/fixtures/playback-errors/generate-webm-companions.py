@@ -125,3 +125,23 @@ for kind,body in fields(segment):
         body=b''.join(rewritten)
     parts.append(atom(kind,body))
 (root/'shared-vp9-untimed-companions.mkv').write_bytes(atom(0x1a45dfa3,contents(data,0x1a45dfa3))+atom(0x18538067,b''.join(parts)))
+
+# OpusHead's input rate describes recording history; rendering is always 48 kHz.
+for label,rate in [('input-rate',44100),('unknown-rate',0)]:
+    data=(root/'shared-vp9-companions.mkv').read_bytes()
+    parts=[]
+    for kind,body in fields(contents(data,0x18538067)):
+        if kind==0x1654ae6b:
+            tracks=[]
+            for child,payload in fields(body):
+                if child==0xae and contents(payload,0x86)==b'A_OPUS':
+                    entries=[]
+                    for tag,value in fields(payload):
+                        if tag==0x63a2:
+                            value=bytearray(value);value[12:16]=rate.to_bytes(4,'little');value=bytes(value)
+                        entries.append(atom(tag,value))
+                    payload=b''.join(entries)
+                tracks.append(atom(child,payload))
+            body=b''.join(tracks)
+        parts.append(atom(kind,body))
+    (root/f'shared-vp9-opus-{label}.mkv').write_bytes(atom(0x1a45dfa3,contents(data,0x1a45dfa3))+atom(0x18538067,b''.join(parts)))

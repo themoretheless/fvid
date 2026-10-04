@@ -26,6 +26,9 @@ pub(crate) fn supports(
     if crate::owned_matroska_aac_export::recognizes(source, options).unwrap_or(false) {
         return crate::owned_matroska_aac_export::supports(source, transform, options);
     }
+    if crate::owned_matroska_opus_export::recognizes(source, options).unwrap_or(false) {
+        return crate::owned_matroska_opus_export::supports(source, transform, options);
+    }
     if crate::owned_matroska_alac_export::recognizes(source, options).unwrap_or(false) {
         return crate::owned_matroska_alac_export::supports(source, transform, options);
     }
@@ -140,6 +143,9 @@ pub fn decode_audio_transformed(
     }
     if crate::owned_matroska_aac_export::recognizes(source, options)? {
         return crate::owned_matroska_aac_export::apply(source, destination, transform, options);
+    }
+    if crate::owned_matroska_opus_export::recognizes(source, options)? {
+        return crate::owned_matroska_opus_export::apply(source, destination, transform, options);
     }
     if crate::owned_matroska_alac_export::recognizes(source, options)? {
         return crate::owned_matroska_alac_export::apply(source, destination, transform, options);

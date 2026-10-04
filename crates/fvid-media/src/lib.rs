@@ -184,6 +184,9 @@ pub mod owned_codec_metadata;
 pub mod owned_hevc_nal;
 
 pub mod owned_opus_packet;
+pub mod owned_opus;
+pub mod owned_matroska_opus;
+mod owned_matroska_opus_export;
 
 pub mod owned_matroska_copy;
 

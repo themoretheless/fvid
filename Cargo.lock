@@ -1693,6 +1693,7 @@ dependencies = [
  "fvid-cpu",
  "fvid-cuda",
  "fvid-media-info",
+ "fvid-opus",
  "libc",
  "reqwest",
  "rfd",

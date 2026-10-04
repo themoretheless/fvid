@@ -64,8 +64,17 @@ MP4 companion export also supports explicit original stream indices in the reque
 
 One FFV1/VP9/AV1 video plus selected AAC/Opus companions now uses the existing owned frame pipeline and a final owned Matroska packet mux. Video-only selection, audio-first track order and reordered stream indices are supported. Companion codec setup, packet bytes, PTS, explicit durations, CodecDelay and signed DiscardPadding survive unchanged. Scoped tags follow original source indices to new output UIDs; global metadata edits use the existing video exporter. Private staging is shared with MP4 and emits no public completion. Cancellation and packet caps preserve atomic publication.
 
-Three Python-only fixtures join committed synthetic VP9/AV1 with AAC and Opus packets. Acceptance checks negate/reverse/step pixels, all/reordered/video-only tracks, metadata, exact companion packet tuples, AAC presentation PCM and raw Opus PCM decoded by `fvid-opus`. Opus transport presentation is checked separately through identical clocks, delay and padding. The standalone `decode_audio` file-export API still lacks its Opus adapter; tests use the own Opus packet decoder directly rather than a legacy audio fallback.
+Three Python-only fixtures join committed synthetic VP9/AV1 with AAC and Opus packets. Acceptance checks negate/reverse/step pixels, all/reordered/video-only tracks, metadata, exact companion packet tuples, AAC presentation PCM and raw Opus PCM decoded by `fvid-opus`. Opus transport presentation is checked separately through identical clocks, delay and padding. These companion-copy tests use the own Opus packet decoder directly. The standalone file-export adapter is described below.
 
 This admission currently excludes intervals, multiple video tracks, unrepresented metadata, nondefault dispositions, conflicting legacy/IETF languages, negative block PTS and backwards audio packet clocks, other audio codecs, video crop/rotation and unsupported pixel/codec tools. Remaining workflows and production legacy feature edges still require removal. The private filtered-video stage incurs disk I/O; no 60 fps claim is made.
 
 Missing companion durations no longer force fallback: AAC uses the declared frame-sample count/rate, and Opus validates transport framing and infers its duration from TOC. An additional synthetic file omits both audio BlockDuration and DefaultDuration while preserving delay/padding. Acceptance compares decoded PCM with the source and verifies that only the missing duration metadata is reconstructed.
+
+
+## Owned Matroska Opus audio export
+
+`decode_audio` now routes selected Matroska/WebM Opus through `fvid-opus`, the existing presentation timeline and WAVE DSP/export pipeline. CodecDelay, signed DiscardPadding, intervals, gain, channel conversion and resampling are covered by native acceptance tests. Planning and container loudness use the same adapter. The player shares its PCM decoding, output gain, channel permutation and reset implementation; its SILK, hybrid, stereo and surround regressions pass.
+
+Opus Matroska output always declares the 48 kHz codec clock. OpusHead's informational input rate may be 44.1 kHz or zero and is preserved without changing playback timing. Two synthetic video derivatives cover both values and compare round-trip presentation PCM. Cancellation, packet caps and completion preserve atomic file publication.
+
+Aggregate controlled-allocation admission for Opus audio remains unsupported. Noncanonical mappings, Ogg file export and broader legacy production workflows are not covered by this adapter; production features still have legacy FFmpeg edges.

@@ -79,8 +79,8 @@ fn track_entry(
             if metadata.is_some() || rotation!=0 {return Err(invalid("video metadata supplied for Opus track"));}
             let channels=opus_packet::header_channels(configuration)?;
             if delay!=opus_packet::pre_skip_ns(configuration)? {return Err(invalid("Opus codec delay differs from pre-skip"));}
-            let sample_rate=u32::from_le_bytes(configuration[12..16].try_into().unwrap());
-            if sample_rate==0 {return Err(invalid("owned Matroska Opus output requires a nonzero input sample rate"));}
+            // OpusHead input_sample_rate is informational; Matroska uses the 48 kHz codec clock.
+            let sample_rate=48000u32;
             ("A_OPUS",configuration,2,element(0xe1,&[
                 element(0xb5,&f64::from(sample_rate).to_be_bytes())?,uint(0x9f,u64::from(channels))?
             ].concat())?)

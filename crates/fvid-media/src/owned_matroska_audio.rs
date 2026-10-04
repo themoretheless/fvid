@@ -47,6 +47,7 @@ enum MatroskaTimelineDecoder {
     Pcm(crate::owned_pcm_decoder::PcmDecoder),
     Alac(crate::owned_alac::AlacDecoder),
     Aac(crate::owned_aac::NativeAacDecoder),
+    Opus(crate::owned_opus::OpusDecoder),
 }
 impl MatroskaTimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
@@ -55,6 +56,17 @@ impl MatroskaTimelineDecoder {
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => Ok(Self::Pcm(
                 crate::owned_pcm_decoder::PcmDecoder::from_matroska(track)?,
             )),
+            "A_OPUS" => {
+                let decoder = crate::owned_opus::OpusDecoder::new(
+                    &track.codec_private,
+                    u32::try_from(track.sample_rate)
+                        .map_err(|_| invalid("Opus sample rate overflow"))?,
+                    u16::try_from(track.channels)
+                        .map_err(|_| invalid("Opus channel count overflow"))?,
+                )
+                .map_err(|e| invalid(&e))?;
+                Ok(Self::Opus(decoder))
+            }
             "A_ALAC" => Ok(Self::Alac(crate::owned_alac::AlacDecoder::from_matroska(
                 track,
             )?)),
@@ -71,6 +83,7 @@ impl MatroskaTimelineDecoder {
             Self::Pcm(d) => d.sample_rate(),
             Self::Alac(d) => d.sample_rate(),
             Self::Aac(d) => d.sample_rate(),
+            Self::Opus(d) => d.sample_rate(),
         }
     }
     fn channels(&self) -> u16 {
@@ -78,6 +91,7 @@ impl MatroskaTimelineDecoder {
             Self::Pcm(d) => d.channels(),
             Self::Alac(d) => d.channels(),
             Self::Aac(d) => u16::from(d.channels()),
+            Self::Opus(d) => d.channels(),
         }
     }
     fn decode(&mut self, data: &[u8]) -> Result<Vec<f32>> {
@@ -85,6 +99,7 @@ impl MatroskaTimelineDecoder {
             Self::Pcm(d) => Ok(d.decode_pcm(data)?),
             Self::Alac(d) => Ok(d.decode_pcm(data)?),
             Self::Aac(d) => Ok(d.decode(data)?),
+            Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e)),
         }
     }
 }
@@ -328,7 +343,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     control.check()?;
     let mut reader = if codec == "A_AAC" {
         open_aac_reader(source, options, options.max_packet_bytes)?
-    } else if matches!(codec, "A_ALAC" | "PCM") {
+    } else if matches!(codec, "A_ALAC" | "A_OPUS" | "PCM") {
         open_audio_reader(source, options, options.max_packet_bytes)?
     } else {
         MatroskaTimelineReader::open(
@@ -352,7 +367,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
             "selected Matroska audio stream has a different codec",
         ));
     }
-    if matches!(codec, "A_AAC" | "A_ALAC" | "PCM") {
+    if matches!(codec, "A_AAC" | "A_ALAC" | "A_OPUS" | "PCM") {
         admit_audio_reader(&mut reader, index, options)?;
     }
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)

@@ -88,6 +88,8 @@ pub(crate) fn decode_to_wave(
                 crate::owned_mp4_audio::decode_mp4_audio_pcm(file, writer, None, options)
             } else if codec == "aac" {
                 crate::owned_matroska_aac::decode_matroska_aac_pcm(file, writer, None, options)
+            } else if codec == "opus" {
+                crate::owned_matroska_opus::decode_matroska_opus_pcm(file, writer, None, options)
             } else if codec == "alac" {
                 crate::owned_matroska_alac::decode_matroska_alac_pcm(file, writer, None, options)
             } else {

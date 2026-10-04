@@ -1390,6 +1390,7 @@ dependencies = [
  "fvid-cpu",
  "fvid-cuda",
  "fvid-media-info",
+ "fvid-opus",
  "libc",
  "reqwest",
  "rfd",
@@ -1403,6 +1404,10 @@ version = "0.1.0"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "fvid-opus"
+version = "0.1.0"
 
 [[package]]
 name = "fvid-platform"

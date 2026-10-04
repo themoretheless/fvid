@@ -852,7 +852,7 @@ Explicit MP4 stream-selection regression reuses `shared-mp4-av-multiple.mp4`: or
 
 VP9 originally has neither DefaultDuration nor explicit block durations; the generator infers spans from adjacent packet PTS and uses the previous interval when the declared Segment end equals the last packet start, matching the own presentation policy. An initial zero-duration derivative failed during native input reading and was corrected before export acceptance, so that unrelated invalid-container error is not the regression under test. The final fixtures reproduce the former single-track export gate; acceptance verifies actual multitrack filtering/copy rather than passing refusal.
 
-`native_webm_multitrack` covers negate/reverse/step, requested track order/subsets, every video pixel, global/scoped metadata, exact compressed audio packet/timing/padding tuples and AAC presentation PCM. Opus PCM is compared with the own `fvid-opus` packet decoder; the standalone audio file-export API has no Opus adapter yet. Error tests cover packet limits, duplicate indices, no selected video, pre-cancellation and cancellation during final mux, with no destination publication.
+`native_webm_multitrack` covers negate/reverse/step, requested track order/subsets, every video pixel, global/scoped metadata, exact compressed audio packet/timing/padding tuples and AAC presentation PCM. Opus PCM is compared with the own `fvid-opus` packet decoder; these companion-copy tests do not depend on the standalone audio file-export adapter. Error tests cover packet limits, duplicate indices, no selected video, pre-cancellation and cancellation during final mux, with no destination publication.
 
 - `shared-vp9-companions.mkv`: `ab518f16ce1be189ed149c365d493f4dfa034fccda4ae8544749670d91a6074b`
 - `shared-av1-companions.mkv`: `24cd7e67b6380ff121a829f5f40747c945e660e324e841b7bad1fe85f7513adb`
@@ -860,3 +860,13 @@ VP9 originally has neither DefaultDuration nor explicit block durations; the gen
 `shared-vp9-untimed-companions.mkv` omits both AAC/Opus block durations and their default-duration hint, retaining signed padding in BlockGroup. The owned export infers AAC duration from frame samples/rate and Opus duration from validated TOC/framing. The same full pixel/metadata/packet/PCM acceptance runs on this derivative; existing packet bytes/PTS/delay/padding remain identical, while absent durations acquire explicit inferred values. All three files carry original global and UID-scoped synthetic text tags whose preservation is checked independently of metadata assignments.
 
 - `shared-vp9-untimed-companions.mkv`: `ec4280732b823818bfbbc00ff0b3b1fe403c6fe5af0b0f0ab3f76abd44b73777`
+
+
+### Opus informational input rate and owned audio export
+
+`generate-webm-companions.py` also derives two short video fixtures from the public synthetic companion file, changing only OpusHead's informational input-rate field. Coded packets, container clock, delay and padding remain unchanged; no private media or encoder is used.
+
+- `shared-vp9-opus-input-rate.mkv`: input rate 44100; SHA-256 `718f45b5ff63503a6204dd6bf41a4f8ebbd0681197eed8a540fbe4bb3698bfd2`.
+- `shared-vp9-opus-unknown-rate.mkv`: input rate zero; SHA-256 `1e822150836f56e44c112c1b464761ab1e1e41f1eb1534f5ca26e88afd26d525`.
+
+Previously the owned Matroska writer declared the informational rate as its codec clock, producing 44100 Hz or refusing zero. Acceptance now requires 48000 Hz output and exact native presentation PCM after video filtering and companion remux. `native_opus_audio_export` additionally covers full/interval WAVE export, delay/padding, missing packet durations, existing WAVE DSP parity, loudness parity, packet limits, cancellation and atomic completion. Ordinary tests read committed fixtures and require neither FFmpeg nor network.

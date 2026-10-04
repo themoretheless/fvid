@@ -33,6 +33,10 @@ pub(crate) fn matroska_descriptor(
                 crate::owned_matroska_aac_export::geometry(source, options)?;
             (rate, channels, mask, "aac".into(), "float32".into())
         }
+        "A_OPUS" => {
+            let (rate, channels)=crate::owned_matroska_opus_export::geometry(source,options)?;
+            (rate,channels,crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,"opus".into(),"float32".into())
+        }
         "A_ALAC" => {
             let (rate, channels) = crate::owned_matroska_alac_export::geometry(source, options)?;
             (
