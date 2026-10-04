@@ -378,6 +378,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.sab.as_deref().is_some_and(|a| fvid_media::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a| fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a| fvid_media::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
+    if transform.lenscorrection.as_deref().is_some_and(|a| fvid_media::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlurProgram::parse(args).is_err()) { return false; }
     matches!(
@@ -424,6 +425,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             sab: _,
             bitplanenoise: _,
             gradfun: _,
+            lenscorrection: _,
             bilateral: _,
             cas: _,
             vignette: _,
@@ -440,7 +442,6 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             lagfun: _,
             amplify: None,
             deband: None,
-            lenscorrection: None,
             pixelize: _,
             removegrain: None,
             yaepblur: None,
@@ -551,6 +552,7 @@ pub fn configuration(
         sab: transform.sab.clone(),
         bitplanenoise: transform.bitplanenoise.clone(),
         gradfun: transform.gradfun.clone(),
+        lenscorrection: transform.lenscorrection.clone(),
         colorcorrect: transform.colorcorrect.clone(),
         cas: transform.cas.clone(),
         grayworld: transform.grayworld.clone(),

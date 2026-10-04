@@ -120,63 +120,11 @@ impl ColorHold {
         Ok(())
     }
 }
-pub(crate) fn parse_color(value: &str) -> Result<[u8; 3]> {
-    let (value, opacity) = value
-        .split_once('@')
-        .map_or((value, None), |(rgb, a)| (rgb, Some(a)));
-    // Alpha in the key is syntactically valid but RGB distance ignores it.
-    if let Some(opacity) = opacity {
-        let number = if let Some(hex) = opacity.strip_prefix("0x") {
-            if hex.is_empty() || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
-                return Err("invalid colour opacity".into());
-            }
-            u32::from_str_radix(hex, 16).map_err(|_| "invalid colour opacity")? as f64 / 255.0
-        } else {
-            opacity
-                .parse::<f64>()
-                .map_err(|_| "invalid colour opacity")?
-        };
-        if !number.is_finite() || !(0.0..=1.0).contains(&number) {
-            return Err("invalid colour opacity".into());
-        }
-    }
-    let named = match value.to_ascii_lowercase().as_str() {
-        "black" => Some([0, 0, 0]),
-        "white" => Some([255; 3]),
-        "red" => Some([255, 0, 0]),
-        "green" => Some([0, 128, 0]),
-        "lime" => Some([0, 255, 0]),
-        "blue" => Some([0, 0, 255]),
-        "yellow" => Some([255, 255, 0]),
-        "cyan" => Some([0, 255, 255]),
-        "magenta" | "fuchsia" => Some([255, 0, 255]),
-        "aqua" => Some([0, 255, 255]),
-        "gray" => Some([128; 3]),
-        "silver" => Some([192; 3]),
-        "maroon" => Some([128, 0, 0]),
-        "navy" => Some([0, 0, 128]),
-        "olive" => Some([128, 128, 0]),
-        "purple" => Some([128, 0, 128]),
-        "teal" => Some([0, 128, 128]),
-        "orange" => Some([255, 165, 0]),
-        _ => None,
-    };
-    if let Some(color) = named {
-        return Ok(color);
-    }
-    let hex = value
-        .strip_prefix('#')
-        .or_else(|| value.strip_prefix("0x"))
-        .unwrap_or(value);
-    if !matches!(hex.len(), 6 | 8) || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
-        return Err("colorhold colour requires a supported name or RRGGBB[AA] hex".into());
-    }
-    let mut n = u32::from_str_radix(hex, 16).map_err(|e| e.to_string())?;
-    if hex.len() == 8 {
-        n >>= 8;
-    }
-    Ok([(n >> 16) as u8, (n >> 8) as u8, n as u8])
+pub(crate) fn parse_color(value: &str) -> Result<[u8;3]> {
+    let rgba=crate::owned_rgba::parse(value)?;
+    Ok([rgba[0],rgba[1],rgba[2]])
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

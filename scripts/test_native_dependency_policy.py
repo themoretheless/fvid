@@ -3,7 +3,7 @@
 import unittest
 import pathlib
 import tempfile
-from check_native_dependencies import external_test_calls, external_python_calls, audit_native_validators, NATIVE_VALIDATORS
+from check_native_dependencies import external_test_calls, external_python_calls, audit_native_validators, audit_fixture_generators, NATIVE_VALIDATORS
 
 
 class OrdinaryTestPolicy(unittest.TestCase):
@@ -91,6 +91,30 @@ class NativeValidatorPolicy(unittest.TestCase):
                 _, failures = audit_native_validators(root)
                 self.assertEqual(len(failures), 1)
                 self.assertIn("could not be audited", failures[0])
+
+
+class FixtureDirectoryPolicy(unittest.TestCase):
+    def test_nested_fixture_generator_cannot_launch_reference_tools(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=pathlib.Path(folder)
+            (root/"scripts").mkdir()
+            (root/"scripts/generate_safe.py").write_text('data = bytes([1, 2, 3])')
+            fixtures=root/"tests/fixtures/playback-errors"
+            fixtures.mkdir(parents=True)
+            (fixtures/"generate_bad.py").write_text('\nsubprocess.run(["ffmpeg", "-i", "test.y4m"])')
+            paths,failures=audit_fixture_generators(root)
+            self.assertEqual(len(paths),2)
+            self.assertEqual(len(failures),1)
+            self.assertIn("tests/fixtures/playback-errors/generate_bad.py:2:",failures[0])
+
+    def test_fixture_input_generation_and_saved_references_remain_allowed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=pathlib.Path(folder)
+            fixtures=root/"tests/fixtures/nested"
+            fixtures.mkdir(parents=True)
+            (fixtures/"generate.py").write_text('Path("ffmpeg-reference.raw").read_bytes()')
+            _,failures=audit_fixture_generators(root)
+            self.assertEqual(failures,[])
 
 
 if __name__ == "__main__":

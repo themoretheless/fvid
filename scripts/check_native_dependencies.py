@@ -91,7 +91,8 @@ def external_python_calls(source):
 
 
 def audit_fixture_generators(root):
-    paths = sorted((root / "scripts").glob("generate*.py"))
+    paths = sorted(set((root / "scripts").glob("generate*.py"))
+                   | set((root / "tests" / "fixtures").rglob("*.py")))
     failures = []
     for path in paths:
         try:

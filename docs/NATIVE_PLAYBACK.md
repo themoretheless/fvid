@@ -4005,3 +4005,31 @@ identified from exact legacy matches. Stored 65x65/radius32 and 9x9 fixtures
 prevent a fresh-scratch approximation or a no-op from passing unnoticed. General
 library/filter/CLI tests and player/dependency checks remain FFmpeg-free; the
 optional production media/CUDA adapter still needs further migration.
+
+`lenscorrection` now has an owned radial inverse map and quantized nearest or
+bilinear sampling in native decode, Y4M export and FFV1 lossless export. Maps are
+cached per plane geometry and bounded to four entries. Center/coefficient
+options, positional arguments, interpolation values 0–64, fill colors and input
+n/t enable are supported; the operator follows gradfun and precedes pixelize.
+Nearest/default identity and the legacy bilinear rounding convention are distinct
+behaviors. Wide intermediates protect radius calculations and interpolation.
+Fill uses the compatible fixed BT.709 limited-range conversion and bit-depth
+shift, independently of source full-range metadata; metadata is preserved.
+
+The explicit `ffmpeg_lenscorrection_reference` benchmark passed 1452 exact
+four-frame comparisons over even/odd/1x1 dimensions, supported 8/9/10/12/14/16-bit
+planar YUV/GBR/gray/alpha formats, positive/negative distortion, displaced centers,
+nearest/bilinear, interpolation aliases, colored/transparent fill and enable.
+Formats unsupported by libavfilter are excluded rather than comparing a hidden
+format conversion (notably GBRAP9/14 and YUVA44414). Standalone component APIs
+cover grayscale, RGB and alpha; whole native frames cover planar YUV or packed
+RGB8. This is not proof of all container/alpha-format decoding.
+
+The reusable `owned_rgba` parser provides all 140 named RGB values, RGB/RGBA hex,
+decimal/hex opacity and the random/bikeshed color forms. Fade and colorhold share
+this parser. A separate explicit reference benchmark passed 145 deterministic
+named/hex/opacity comparisons; uppercase 0X prefixes are a native extension,
+while nondeterministic random colors are validated by contract rather than byte
+comparison. Ordinary tests require no FFmpeg or network. The dependency policy
+now scans Python fixture generators under tests/fixtures as well as scripts.
+Production media/CUDA still retain other legacy libav workflows.

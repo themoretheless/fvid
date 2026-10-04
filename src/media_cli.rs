@@ -1153,6 +1153,13 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--lenscorrection" {
+            let value=args.next().ok_or("missing lenscorrection options")?;
+            if filters.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
+            if let Ok(filter)=fvid_media::owned_lenscorrection::LensCorrection::parse(value) {filters.lenscorrection=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--smartblur" {
             let value=args.next().ok_or("missing smartblur options")?;
             if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
@@ -4898,6 +4905,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--gradfun" => {
                 if transform.gradfun.is_some() {return Err("duplicate gradfun".into());}
                 &mut transform.gradfun
+            },
+            "--lenscorrection" => {
+                if transform.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
+                &mut transform.lenscorrection
             },
             "--smartblur" => {
                 if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}

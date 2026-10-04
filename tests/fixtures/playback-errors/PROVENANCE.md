@@ -618,3 +618,36 @@ SHA-256:
 - `gradfun-edge.expected.raw`: `f16d59b00fd32872b244c40e9ead88386a2258c323bb525d6aa1443cc61fcb63`
 - `gradfun-overflow-safe.expected.raw`: `6a5b5652a183636852dc1b5805dd7d20778929598fdfaa406e18e334ec959447`
 - `gradfun-overflow-legacy.expected.raw`: `28aa7be7a5426a0618701c84fc16f7338e457a6194e4b78dec595bc84e903aea`
+
+## Owned lenscorrection
+
+`generate-lenscorrection.py` generates four 16x12 YUV420 frames from
+`(37*i + 23*n + 101) % 256`. `lenscorrection-full.y4m` changes only the
+full-range declaration; `lenscorrection-small.y4m` has four 1x1 YUV420 frames.
+No private video, audio or codec parameters are used. Generation is separate
+from ordinary test execution.
+
+The explicit `ffmpeg_lenscorrection_reference` benchmark saved expected bytes
+only after exact equality: default nearest identity, `k1=.3:k2=.1` radial warp,
+and `k1=-.3:k2=.1:i=bilinear:fc=0xff0050@.4` bilinear mapping. Tests compare
+these independent bytes through rewind, both lossless APIs, full/limited-range
+Y4M and FFV1 inputs, input clocks before framestep, clipping, CLI outputs and
+existing synthetic AVC/HEVC/VP9/AV1 routes. Standalone high-depth alpha and
+packed RGB acceptance, bilinear identity rounding, malformed-storage refusals
+and disabled frames have separate checks. Alpha component acceptance does not
+claim full alpha-container decoding.
+
+The named RGB table is factual color data from FFmpeg libavutil/parseutils.c;
+no external parsing implementation was imported. Explicit benchmarks verify
+all 140 named colors and five deterministic hex/opacity combinations. Random
+color contracts and uppercase 0X are native acceptance tests, not oracle byte
+comparisons. Ordinary regressions use only saved bytes and owned code.
+
+SHA-256:
+
+- `lenscorrection.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
+- `lenscorrection-full.y4m`: `078dc614dcbc4a4cec1b7fe8726109046abcc9ae197d86a6b5c4af57bba8066b`
+- `lenscorrection-small.y4m`: `589c21477e12ea09c0025900d303ed4b3dfe2b339f28b316d9738a55d19bddde`
+- `lenscorrection-identity.expected.raw`: `32c6fdc2596e8480c9c56f23c3a18b2c79cec06d240bc83476850661c7da9d02`
+- `lenscorrection-warp.expected.raw`: `ae788446c3717117ac6be7f521b95044fee81b2df1f97eca0574992bb61f2eb6`
+- `lenscorrection-bilinear.expected.raw`: `e98efc8b7c6ddc04effd157c1803074aa531291fddadb389d04033af0a4f893a`

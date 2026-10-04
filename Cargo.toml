@@ -256,3 +256,11 @@ harness = false
 [[bench]]
 name = "ffmpeg_gradfun_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_lenscorrection_reference"
+harness = false
+
+[[bench]]
+name = "ffmpeg_rgba_reference"
+harness = false
