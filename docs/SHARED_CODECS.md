@@ -420,3 +420,29 @@ Callers must finish using its borrowed output before advancing. Any render error
 makes it terminal; cleanup retains owners if GPU completion cannot be established.
 This adds the reusable render stage; production encoding/export integration is
 still incomplete and `cuda-hw` still enables the legacy backend.
+
+## Native movie encode and Matroska stage
+
+`AvcMovieEncoder` connects the owned AVC movie renderer to direct NVENC using a
+bounded pool of 1..64 registered GPU input/output slots. A slot stays reserved
+until its accepted output drains, including delayed encoder submissions. An
+extra device-to-device copy separates the renderer's reusable output from
+in-flight encoder inputs. This does not upload/download decoded pixel planes.
+The default driver preset remains active; the caller supplies its nominal rate,
+pool capacity and positive wait timeout. A pool smaller than driver delay can
+time out and makes the encoder terminal, without reusing pending allocations.
+EOS drains accepted output and cleanup closes the encoder before releasing its
+registered buffers; failed cleanup retains GPU owners.
+
+`write_avc_matroska` uses the own Annex B converter and packet writer. It carries
+track-clock timestamps/durations into nanoseconds, checks stable AVC setup and
+writes explicit black-span events as video pictures. It currently exports video
+only; audio, colour/rotation metadata, atomic file publication and production
+CLI wiring still need integration. HEVC packets can be pulled through the encoder
+but this Matroska helper currently requires AVC.
+
+Host tests check bounded FIFO input ownership and timestamp arithmetic. The
+ignored `synthetic_movie_encodes_and_muxes_without_libav` qualification test uses
+the public empty-edit MOV, verifies every output timestamp/duration, and decodes
+all muxed AVC pictures using FVid. It has only been cross-compiled here; NVIDIA
+execution remains unverified. `cuda-hw` still enables the legacy production path.

@@ -10,6 +10,8 @@ pub mod owned_nvdec_avc_decoder;
 pub mod owned_nvdec_mp4;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_movie;
+#[cfg(feature = "native-cuda")]
+pub mod owned_nvenc_movie;
 pub mod owned_capabilities;
 pub mod owned_expression;
 pub use owned_capabilities::capabilities;

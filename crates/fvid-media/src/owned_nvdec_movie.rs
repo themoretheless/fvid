@@ -238,6 +238,9 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
             failed: false,
         })
     }
+    pub(crate) fn ordinal(&self) -> usize {
+        self.reader.ordinal
+    }
     pub fn buffer(&self) -> &fvid_cuda::Nv12Buffer {
         &self.output
     }
