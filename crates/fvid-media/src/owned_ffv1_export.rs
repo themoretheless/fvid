@@ -175,7 +175,7 @@ pub(crate) fn export_processed(
     mut process: Option<&mut dyn FnMut(&mut crate::owned_frame::GeometryFrame, u8, i64, bool) -> Result<()>>,
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
     let input = input(source)?;
-    let track = input.tracks.first().ok_or("input has no video stream")?;
+    let track = input.tracks.iter().find(|t|t.kind==1).ok_or("input has no video stream")?;
     let mut description = mkv::VideoTrackDescription {
         name: track.name.clone(),
         language: input

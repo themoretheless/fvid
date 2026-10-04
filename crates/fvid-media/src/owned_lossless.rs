@@ -196,6 +196,7 @@ pub(crate) fn policy(o: &CopyOptions, text_tags: bool) -> bool {
 /// Whether the owned export pipeline admits this source, transform and policy.
 pub fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
     if crate::owned_mp4_multitrack_export::supports(source,t,o) {return true;}
+    if crate::owned_webm_multitrack_export::supports(source,t,o) {return true;}
     if policy(o,true) && request(t).is_some() {
         match crate::owned_mp4_video_bridge::prepare(source,Some(o)) {
             Ok(Some(temporary)) => {
@@ -246,6 +247,7 @@ pub fn transcode_lossless(
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
     if let Some(stats)=crate::owned_mp4_multitrack_export::try_export(source,destination,&transform,options)? {return Ok(stats);}
+    if let Some(stats)=crate::owned_webm_multitrack_export::try_export(source,destination,&transform,options)? {return Ok(stats);}
 
     if policy(options,true) {
         if let Some(temporary)=crate::owned_mp4_video_bridge::prepare(source,Some(options))? {

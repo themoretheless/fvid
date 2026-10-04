@@ -275,6 +275,8 @@ mod owned_compressed_video;
 mod owned_mp4_video_decode;
 mod owned_mp4_video_bridge;
 mod owned_mp4_multitrack_export;
+mod owned_webm_multitrack_export;
+mod owned_video_temporary;
 pub mod owned_video_timeline;
 mod owned_webm_codec;
 

@@ -62,6 +62,7 @@ airbug-otel = { git = "https://github.com/themoretheless/airbug", branch = "rele
 fvid-vt = { path = "crates/fvid-vt", optional = true }
 
 [dev-dependencies]
+fvid-opus = { path = "crates/fvid-opus" }
 pollster = "0.4"
 naga = { version = "=30.0.1", features = ["wgsl-in", "glsl-out", "hlsl-out", "spv-out", "msl-out"] }
 airbug = { git = "https://github.com/themoretheless/airbug", branch = "release" }
