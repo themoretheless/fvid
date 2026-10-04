@@ -455,6 +455,38 @@ mod tests {
         };
         assert!(!packet.bytes.is_empty());
         assert_eq!((packet.timestamp, packet.duration), (0, 1));
+        let converted = crate::owned_avc_annexb::convert(&packet.bytes, 1 << 20).unwrap();
+        let configuration = converted
+            .configuration
+            .as_ref()
+            .expect("NVENC first IDR must carry SPS/PPS");
+        let mut container = std::io::Cursor::new(Vec::new());
+        let tracks = [crate::owned_matroska::TrackSpec {
+            encoding: crate::owned_matroska::Encoding::Avc {
+                configuration,
+                width,
+                height,
+            },
+            name: "",
+            language: "und",
+        }];
+        let mut writer = crate::owned_matroska::PacketWriter::new(&mut container, &tracks).unwrap();
+        writer
+            .write_packet(0, 0, 16_666_667, converted.sync, &converted.sample)
+            .unwrap();
+        writer.finish().unwrap();
+        let mut saved = crate::owned_webm::WebmReader::open(
+            std::io::Cursor::new(container.into_inner()),
+            Default::default(),
+        )
+        .unwrap();
+        let payload = saved.read_packet(0).unwrap();
+        assert_eq!(payload, converted.sample);
+        let mut software =
+            fvid_codecs::codec::avc_decoder::AvcDecoder::new(configuration, 16 << 20).unwrap();
+        let picture = software.decode_order(&payload).unwrap().unwrap();
+        assert_eq!(picture.dimensions(), (width as usize, height as usize));
+
         encoder.close().unwrap();
         decoder.close().unwrap();
     }

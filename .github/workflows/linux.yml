@@ -51,7 +51,9 @@ jobs:
         env:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
           FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
-        run: cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features --features native-cuda --lib owned_nvdec_avc
+        run: |
+          cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features --features native-cuda --lib owned_nvdec_avc
+          cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features --features native-cuda --lib owned_avc_annexb
       - name: Guard native graphs and ordinary tests against FFmpeg
         run: |
           python3 scripts/test_native_dependency_policy.py

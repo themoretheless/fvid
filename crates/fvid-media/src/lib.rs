@@ -1,6 +1,7 @@
 //! FVid media layer. Owned operation contracts are available without libav.
 //! The temporary legacy backend retains existing operations during migration.
 mod input_policy;
+pub mod owned_avc_annexb;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_avc;
 #[cfg(feature = "native-cuda")]

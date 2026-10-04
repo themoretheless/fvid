@@ -306,3 +306,24 @@ Linux/Windows but has not run on a physical NVIDIA device here.
 The chain remains an explicit ignored hardware qualification test; production
 `cuda-hw` still uses the legacy backend pending actual filter/container wiring
 and complete format coverage.
+
+
+## Owned AVC encoder-to-container framing
+
+`owned_avc_annexb::convert` converts three/four-byte Annex B start codes to
+four-byte NAL lengths, derives validated `avcC` from bounded SPS/PPS sets,
+preserves in-band parameter NALs and identifies IDR packets. Missing/invalid NAL
+framing, incomplete parameter sets, conflicting parameter IDs and byte-limit
+overflow refuse explicitly. SPS/PPS validation uses FVid's owned syntax parsers.
+
+An ordinary synthetic control-MP4 test repackages its first access unit as
+encoder-style Annex B, converts it, writes/reads the own Matroska container and
+compares decoded pixels with the original access unit through FVid's AVC decoder.
+No FFmpeg, network or GPU is required. The ignored direct codec/filter-chain test
+now also muxes actual NVENC output, reopens it and decodes it with FVid, checking
+the output dimensions. The latter remains unexecuted on NVIDIA here and does
+not yet establish pixel-equivalence of the filtered/reencoded result.
+
+Production file filtering still needs container/timestamp integration beyond
+this framing bridge; the current native implementation has not replaced every
+legacy CUDA workflow.
