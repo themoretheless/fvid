@@ -7,7 +7,7 @@ pub struct LutYuv {
 }
 impl LutYuv {
     pub fn parse(args: &str) -> Result<Self> {
-        let mut expressions = std::array::from_fn(|_| Expression::parse("clipval").unwrap());
+        let mut expressions = std::array::from_fn(|_| Expression::parse_lut("clipval").unwrap());
         let mut positional = 0;
         for option in args.split(':').filter(|_| !args.is_empty()) {
             let (key, value) = match option.split_once('=') {
@@ -25,7 +25,7 @@ impl LutYuv {
                 "v" | "c2" => 2,
                 _ => return Err("unsupported lutyuv component".into()),
             };
-            let expression = Expression::parse(value.trim())?;
+            let expression = Expression::parse_lut(value.trim())?;
             expression.evaluate(&[
                 ("w", 1.0),
                 ("h", 1.0),
@@ -184,7 +184,7 @@ mod tests {
         let filter = LutYuv::parse("y=1/(val-1)").unwrap();
         assert!(filter.apply(&mut frame, 8, false).is_err());
         assert_eq!(frame.data, original);
-        for args in ["y=unknown", "a=val", "y=clip(val)", "y=random(0)"] {
+        for args in ["y=unknown", "a=val", "y=clip(val,0)", "y=random(0)"] {
             assert!(LutYuv::parse(args).is_err());
         }
     }

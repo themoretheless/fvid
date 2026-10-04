@@ -3448,9 +3448,19 @@ mutation. Synthetic existing colorize grids exercise both input formats and
 FFV1 export without FFmpeg or network access.
 
 This is not full LUT compatibility yet: cached table
-reuse, alpha/RGB aliases, and LUT-specific one-argument `clip`, `gammaval` and
-`gammaval709` remain to implement. Legacy production dependencies still exist.
+reuse, alpha/RGB aliases remain to implement. LUT-specific one-argument `clip`,
+`gammaval` and `gammaval709` now run through the owned evaluator. Legacy production dependencies still exist.
 
 Native decode, plan, FFV1 lossless export and `export-y4m` now accept `--lutyuv`
 through the owned sample pipeline. Native readers pass source colour range to
 the LUT; the synthetic full-range fixture verifies 0/255 endpoints and metadata.
+
+LUT-context functions support `clip(value)` with the component range,
+`gammaval(gamma)` and the piecewise `gammaval709(gamma)`. Three-argument scalar
+`clip(value, minimum, maximum)` remains accepted too. Ordinary parameter
+expressions do not acquire these context-dependent functions. The explicit
+scalar-expression reference benchmark compares LUT output at 8/12/16 bits;
+its FFmpeg command substitutes `clipval` for `clip(val)` because the installed
+AVExpr parser reserves `clip` for the three-argument builtin. Ordinary acceptance
+tests compare the special functions with expanded scalar expressions using
+committed synthetic grids, including decode, planning and FFV1 export.

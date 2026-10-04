@@ -23,7 +23,7 @@ impl Node {
     fn validate_variables(&self, variables: &[(&str, f64)]) -> Result<()> {
         match self {
             Self::Variable(name) if !variables.iter().any(|(key, _)| *key == name) => {
-                return Err(format!("unknown expression variable {name}"))
+                return Err(format!("unknown expression variable {name}"));
             }
             Self::Unary(_, a) => a.validate_variables(variables)?,
             Self::Binary(_, a, b) => {
@@ -41,6 +41,7 @@ impl Node {
     }
 }
 struct Parser<'a> {
+    lut: bool,
     text: &'a [u8],
     at: usize,
 }
@@ -153,6 +154,8 @@ impl Parser<'_> {
         if self.take(b'(') {
             let arities = match name {
                 "if" | "ifnot" => (2, 3),
+                "clip" if self.lut => (1, 3),
+                "gammaval" | "gammaval709" if self.lut => (1, 1),
                 "clip" | "between" | "lerp" => (3, 3),
                 "atan2" | "hypot" | "pow" | "min" | "max" | "mod" | "eq" | "gt" | "gte" | "lt"
                 | "lte" | "bitand" | "bitor" => (2, 2),
@@ -174,7 +177,10 @@ impl Parser<'_> {
                     }
                 }
             }
-            if args.len() < arities.0 || args.len() > arities.1 {
+            if args.len() < arities.0
+                || args.len() > arities.1
+                || (name == "clip" && args.len() == 2)
+            {
                 return Err("invalid expression function arity".into());
             }
             Ok(Node::Call(name.to_owned(), args))
@@ -192,7 +198,14 @@ impl Parser<'_> {
 }
 impl Expression {
     pub fn parse(text: &str) -> Result<Self> {
+        Self::parse_mode(text, false)
+    }
+    pub(crate) fn parse_lut(text: &str) -> Result<Self> {
+        Self::parse_mode(text, true)
+    }
+    fn parse_mode(text: &str, lut: bool) -> Result<Self> {
         let mut parser = Parser {
+            lut,
             text: text.as_bytes(),
             at: 0,
         };
@@ -223,11 +236,7 @@ fn evaluate(node: &Node, vars: &[(&str, f64)]) -> Result<f64> {
             .ok_or_else(|| format!("unknown expression variable {name}"))?,
         Node::Unary(negative, node) => {
             let value = evaluate(node, vars)?;
-            if *negative {
-                -value
-            } else {
-                value
-            }
+            if *negative { -value } else { value }
         }
         Node::Binary(operator, a, b) => {
             let a = evaluate(a, vars)?;
@@ -318,6 +327,37 @@ fn evaluate(node: &Node, vars: &[(&str, f64)]) -> Result<f64> {
                 "isinf" => boolean(a.is_infinite()),
                 "between" => boolean(a >= b && a <= c),
                 "lerp" => a + (b - a) * c,
+                "gammaval" | "gammaval709" => {
+                    let context = |name| {
+                        vars.iter()
+                            .find_map(|(key, value)| (*key == name).then_some(*value))
+                            .ok_or_else(|| format!("missing LUT context {name}"))
+                    };
+                    let minimum = context("minval")?;
+                    let maximum = context("maxval")?;
+                    let level = (context("clipval")? - minimum) / (maximum - minimum);
+                    let adjusted = if name == "gammaval" {
+                        level.powf(a)
+                    } else if level < 0.018 {
+                        4.5 * level
+                    } else {
+                        1.099 * level.powf(1.0 / a) - 0.099
+                    };
+                    adjusted * (maximum - minimum) + minimum
+                }
+                "clip" if args.len() == 1 => {
+                    let context = |name| {
+                        vars.iter()
+                            .find_map(|(key, value)| (*key == name).then_some(*value))
+                            .ok_or_else(|| format!("missing LUT context {name}"))
+                    };
+                    let minimum = context("minval")?;
+                    let maximum = context("maxval")?;
+                    if minimum > maximum || minimum.is_nan() || maximum.is_nan() {
+                        return Err("invalid LUT range".into());
+                    }
+                    a.clamp(minimum, maximum)
+                }
                 "clip" => {
                     if b > c || b.is_nan() || c.is_nan() {
                         return Err("invalid expression clip interval".into());
@@ -418,5 +458,54 @@ mod tests {
                 .contains("call-stack")
         );
         assert!(constant("if(1,2,unknown)").is_err());
+    }
+}
+
+#[cfg(test)]
+mod lut_context_tests {
+    use super::*;
+    #[test]
+    fn lut_functions_use_their_component_range() {
+        let vars = |value| {
+            [
+                ("minval", 16.0),
+                ("maxval", 235.0),
+                ("clipval", value),
+                ("val", value),
+            ]
+        };
+        assert_eq!(
+            Expression::parse_lut("clip(-100)")
+                .unwrap()
+                .evaluate(&vars(16.0))
+                .unwrap(),
+            16.0
+        );
+        assert_eq!(
+            Expression::parse_lut("clip(1000)")
+                .unwrap()
+                .evaluate(&vars(235.0))
+                .unwrap(),
+            235.0
+        );
+        let square = Expression::parse_lut("gammaval(2)").unwrap();
+        assert_eq!(square.evaluate(&vars(16.0)).unwrap(), 16.0);
+        assert_eq!(square.evaluate(&vars(235.0)).unwrap(), 235.0);
+        assert_eq!(square.evaluate(&vars(125.5)).unwrap(), 70.75);
+        let rec709 = Expression::parse_lut("gammaval709(2)").unwrap();
+        assert!((rec709.evaluate(&vars(18.19)).unwrap() - 25.855).abs() < 1e-10);
+        assert!((rec709.evaluate(&vars(70.75)).unwrap() - 114.6595).abs() < 1e-10);
+        for text in ["clip(val)", "gammaval(2)", "gammaval709(2)"] {
+            assert!(Expression::parse(text).is_err());
+        }
+        assert_eq!(
+            Expression::parse_lut("clip(3,0,2)")
+                .unwrap()
+                .evaluate(&[])
+                .unwrap(),
+            2.0
+        );
+        assert!(Expression::parse_lut("clip(1,2)").is_err());
+        assert!(rec709.evaluate(&[]).is_err());
     }
 }
