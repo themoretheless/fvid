@@ -73,7 +73,6 @@ fn quicktime_without_file_type_atom_uses_owned_probe_and_audio_export() {
             .unwrap();
             assert_eq!(std::fs::read(decoded).unwrap(), expected);
         }
-        #[cfg(feature = "media")]
         {
             let info = fvid::media::probe(&input).unwrap();
             assert_eq!(info.streams, baseline.streams);

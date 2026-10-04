@@ -1,4 +1,3 @@
-#[cfg(feature = "media")]
 #[test]
 fn matroska_vp9_av1_plane_filters_use_owned_decode() {
     use fvid::media::{DecodeTransform, decode_video_transformed};

@@ -108,7 +108,6 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
             std::process::id(),
             name.replace('/', "-")
         ));
-        #[cfg(feature = "media")]
         {
             let plan = fvid::media::plan_transcode_lossless(
                 &source,
@@ -238,7 +237,6 @@ fn rotated_source_geometry_and_filter_bake_orientation_once() {
             }
         }
         let _cleanup = Cleanup(output.clone());
-        #[cfg(feature = "media")]
         let stats = {
             let transform = if filtered {
                 fvid::media::LosslessTransform {
@@ -260,11 +258,6 @@ fn rotated_source_geometry_and_filter_bake_orientation_once() {
             fvid::media::transcode_lossless(&source, &output, transform, &Default::default())
                 .unwrap()
         };
-        #[cfg(not(feature = "media"))]
-        let stats = fvid::native_export::transcode_ffv1_transformed(
-            &source, &output, &geometry, &filters, None, None,
-        )
-        .unwrap();
         assert_eq!(stats.backend, "fvid");
         let mut expected = geometry.apply_display_media(&raw, w, h, rotation).unwrap();
         filters.apply(&mut expected, 8).unwrap();

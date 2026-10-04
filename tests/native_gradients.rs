@@ -126,7 +126,6 @@ fn request_and_cli_use_owned_gradient_pipeline() {
         let stats: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
         assert_eq!(stats["backend"], "fvid");
         assert_eq!(stats["video_frames"], 1);
-        #[cfg(feature = "media")]
         assert_eq!(
             fvid::media::decode_video_transformed(&path, request)
                 .unwrap()

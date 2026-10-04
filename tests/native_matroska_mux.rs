@@ -83,7 +83,6 @@ fn packets_configuration_nanosecond_clock_and_pcm_survive_matroska() {
             String::from_utf8_lossy(&run.stderr)
         );
         assert_eq!(std::fs::read(&dest).unwrap(), *output.get_ref());
-        #[cfg(feature = "media")]
         {
             let api = d.0.join(format!("api-{name}.mkv"));
             let stats = fvid::media::remux(&path, &api, &Default::default()).unwrap();
@@ -198,7 +197,6 @@ fn matroska_concat_joins_independent_segments_with_contiguous_clock() {
             String::from_utf8_lossy(&run.stderr)
         );
         assert_eq!(std::fs::read(cli).unwrap(), bytes);
-        #[cfg(feature = "media")]
         {
             let api = d.0.join(format!("api-{name}.mka"));
             let stats = fvid::media::concat(&sources, &api, &Default::default()).unwrap();
@@ -580,7 +578,6 @@ fn mp4_aac_cli_and_api_publish_metadata_and_preserve_existing_output() {
             .to_string_lossy()
             .ends_with(".tmp"))
     );
-    #[cfg(feature = "media")]
     {
         let api = d.0.join("api.mkv");
         let stats = fvid::media::remux(&source, &api, &Default::default()).unwrap();

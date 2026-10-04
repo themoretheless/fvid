@@ -74,7 +74,6 @@ fn independent_aac_edits_and_mixed_containers_concatenate_exact_samples() {
         stats.sample_frames * u64::from(stats.channels) * 4,
         (original.len() * 3) as u64
     );
-    #[cfg(feature = "media")]
     {
         let public = d.0.join("public.mkv");
         let result = fvid::media::concat(&sources, &public, &Default::default()).unwrap();

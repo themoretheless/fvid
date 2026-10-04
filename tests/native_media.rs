@@ -33,7 +33,6 @@ fn invalid_input_is_not_silently_retried() {
     assert!(fvid::native_media::decode_video(&path).is_err());
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn public_media_api_uses_native_decode() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");

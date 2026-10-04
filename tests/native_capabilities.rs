@@ -35,7 +35,6 @@ fn cli_and_public_api_report_owned_components() {
         serde_json::from_slice::<serde_json::Value>(&result.stdout).unwrap(),
         expected
     );
-    #[cfg(feature = "media")]
     assert_eq!(
         serde_json::to_value(fvid::media::capabilities()).unwrap(),
         expected

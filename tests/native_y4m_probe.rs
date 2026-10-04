@@ -38,7 +38,6 @@ fn y4m_probe_counts_tagged_frames_and_rejects_truncation() {
                 .streams,
             info.streams
         );
-        #[cfg(feature = "media")]
         assert_eq!(fvid::media::probe(&file).unwrap().streams, info.streams);
         bytes.pop();
         std::fs::write(&file, &bytes).unwrap();
@@ -47,7 +46,6 @@ fn y4m_probe_counts_tagged_frames_and_rejects_truncation() {
                 .unwrap_err()
                 .contains("truncated")
         );
-        #[cfg(feature = "media")]
         assert!(fvid::media::probe(&file).is_err());
     }
     let file = directory.join("unsupported");

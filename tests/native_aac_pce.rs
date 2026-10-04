@@ -156,7 +156,6 @@ fn owned_cli_exports_pce_with_priming_and_explicit_wav_speakers() {
         .abs();
         assert!(delta < 1e-6, "PCM error {delta}");
     }
-    #[cfg(feature = "media")]
     {
         let api = directory.join("api.wav");
         let stats = fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();
@@ -217,7 +216,6 @@ fn adts_pce_stream_and_indexed_decode_preserve_all_samples_and_wav_layout() {
     );
     let wave = fvid::native_pcm::inspect(&mut std::fs::File::open(&output).unwrap(), None).unwrap();
     assert_eq!((wave.channels, wave.channel_mask), (8, 0xff));
-    #[cfg(feature = "media")]
     {
         let api = directory.join("api.wav");
         fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();

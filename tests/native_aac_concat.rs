@@ -75,7 +75,6 @@ fn packets_timestamps_cli_and_api_match_owned_concat() {
             serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(),
             serde_json::to_value(&plan).unwrap()
         );
-        #[cfg(feature = "media")]
         {
             let dest = d.0.join(format!("api-{name}.m4a"));
             let stats = fvid::media::concat(&sources, &dest, &Default::default()).unwrap();

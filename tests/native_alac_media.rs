@@ -101,7 +101,6 @@ fn cli_plan_intervals_gain_selection_and_api_use_owned_alac() {
     let plan: serde_json::Value = serde_json::from_slice(&plan.stdout).unwrap();
     assert_eq!(plan["streams"][0]["codec"], "alac");
     assert!(plan["graph"].is_null());
-    #[cfg(feature = "media")]
     {
         let output = d.0.join("api.f32le");
         let transform = fvid::media::AudioDecodeTransform {
@@ -192,7 +191,6 @@ fn damaged_packet_and_cookie_fail_without_publishing() {
     let input = d.0.join("bad.m4a");
     std::fs::write(&input, corrupt).unwrap();
     assert!(fvid::native_media::is_owned_audio_source(&input).unwrap());
-    #[cfg(feature = "media")]
     {
         let output = d.0.join("api-bad.f32le");
         assert!(fvid::media::decode_audio(&input, &output, &Default::default()).is_err());
@@ -253,7 +251,6 @@ fn matroska_alac_uses_owned_timeline() {
         std::fs::read(window).unwrap(),
         bytes[start * stride..end * stride]
     );
-    #[cfg(feature = "media")]
     {
         let output = d.0.join("api.f32le");
         fvid::media::decode_audio(&source, &output, &Default::default()).unwrap();

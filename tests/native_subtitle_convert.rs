@@ -68,7 +68,6 @@ fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
         String::from_utf8_lossy(&result.stderr)
     );
     assert_eq!(std::fs::read(cli).unwrap(), expected);
-    #[cfg(feature = "media")]
     {
         let api = directory.join("api.mkv");
         assert_eq!(
@@ -189,7 +188,6 @@ fn matroska_ass_conversion_preserves_header_styling_packets_and_timing() {
             String::from_utf8_lossy(&result.stderr)
         );
         assert_eq!(std::fs::read(cli).unwrap(), original);
-        #[cfg(feature = "media")]
         {
             let api = directory.join(format!("api-{label}.mkv"));
             assert_eq!(

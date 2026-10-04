@@ -63,7 +63,6 @@ fn assert_audio_copy_plan(name: &str) {
         serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
         serde_json::to_value(&expected).unwrap()
     );
-    #[cfg(feature = "media")]
     assert_eq!(
         fvid::media::plan_concat(&paths, &Default::default()).unwrap(),
         expected

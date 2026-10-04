@@ -8,6 +8,15 @@ cargo run --release --no-default-features --features player -- play video.webm
 cargo run --release --no-default-features --features player -- play --start-time 1:30 --rate 2 clip.mp4
 ```
 
+## Публичный API без FFmpeg
+
+`fvid::media` доступен без feature `media`; собственные маршруты чтения,
+декодирования, преобразования, экспорта и remux доступны через общий API.
+Их acceptance-тесты запускаются с `--no-default-features` без libav.
+Feature `media` пока включает legacy backend для ещё не перенесённых операций;
+`mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
+из production ещё не завершено.
+
 ## Реализовано
 
 - Y4M: 8-bit planar YUV420/422/444, проверка заголовков и буферов.

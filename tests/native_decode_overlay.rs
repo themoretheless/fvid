@@ -21,7 +21,6 @@ fn owned_decode_composites_with_geometry_filters_and_intervals() {
         assert_eq!(stats.backend, "fvid");
         assert_eq!(stats.video_frames, plain.video_frames);
         assert_eq!((stats.width, stats.height), (plain.width, plain.height));
-        #[cfg(feature = "media")]
         {
             let api = fvid::media::decode_video_transformed(&source, request.clone()).unwrap();
             assert_eq!(api.backend, "fvid");

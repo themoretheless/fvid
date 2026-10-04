@@ -73,7 +73,6 @@ pub mod playback_xm;
 pub mod player;
 #[cfg(feature = "player")]
 pub mod player_gpu;
-#[cfg(feature = "media")]
 pub mod media;
 pub mod native_media;
 pub mod native_capabilities;

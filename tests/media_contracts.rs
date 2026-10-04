@@ -39,7 +39,6 @@ fn native_results_have_the_shared_public_schema_without_media_feature() {
         serde_json::to_value(pcm).unwrap(),
         serde_json::json!({"packets":2,"sample_frames":4,"payload_bytes":16,"fvid_payload_copies":0})
     );
-    #[cfg(feature = "media")]
     {
         let legacy_alias: fvid::media::DecodeStats = stats;
         let actual = fvid::media::decode_video(&path).unwrap();
@@ -98,7 +97,6 @@ fn independent_options_preserve_shared_cancellation_and_progress() {
     assert_eq!(events.load(Ordering::Relaxed), 1);
     assert!(options.cancel.as_ref().unwrap().is_cancelled());
     assert!(!path.exists());
-    #[cfg(feature = "media")]
     {
         let alias: fvid::media::CopyOptions = options;
         assert!(alias.cancel.unwrap().is_cancelled());
@@ -129,22 +127,18 @@ fn shared_video_requests_execute_headlessly_and_keep_legacy_type_compatibility()
     assert_eq!((stats.width, stats.height), (4, 4));
     assert_eq!(stats.backend, "fvid");
     assert!(stats.video_frames > 0);
-    let unsupported = DecodeTransform {
+    let blurred = DecodeTransform {
         gblur: Some("sigma=1".into()),
         ..Default::default()
     };
-    assert!(
-        fvid::native_media::decode_video_request(&path, &unsupported)
-            .unwrap_err()
-            .to_string()
-            .contains("not yet supported")
-    );
+    let blurred_stats = fvid::native_media::decode_video_request(&path, &blurred).unwrap();
+    assert_eq!(blurred_stats.backend, "fvid");
+    assert_eq!(blurred_stats.video_frames, 25);
     let invalid = DecodeTransform {
         interval: Some((-1, 0)),
         ..Default::default()
     };
     assert!(fvid::native_media::decode_video_request(&path, &invalid).is_err());
-    #[cfg(feature = "media")]
     {
         let legacy: fvid::media::DecodeTransform = transform;
         assert_eq!(

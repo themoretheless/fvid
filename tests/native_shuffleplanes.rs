@@ -91,7 +91,6 @@ fn shared_decode_and_cli_execute_shuffle_without_legacy_backend() {
             serde_json::from_slice::<serde_json::Value>(&command.stdout).unwrap()["backend"],
             "fvid"
         );
-        #[cfg(feature = "media")]
         assert_eq!(
             fvid::media::decode_video_transformed(&path, request)
                 .unwrap()

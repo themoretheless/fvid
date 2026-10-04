@@ -80,7 +80,6 @@ fn shared_request_and_cli_use_owned_negate() {
             serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap()["backend"],
             "fvid"
         );
-        #[cfg(feature = "media")]
         assert_eq!(
             fvid::media::decode_video_transformed(&path, request)
                 .unwrap()

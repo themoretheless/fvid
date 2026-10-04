@@ -145,7 +145,6 @@ fn cli_and_api_use_owned_path() {
         let value: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
         assert_eq!(value["backend"], "fvid");
         assert_eq!(value["video_frames"], base.video_frames);
-        #[cfg(feature = "media")]
         assert_eq!(
             fvid::media::decode_video_transformed(&path, request)
                 .unwrap()

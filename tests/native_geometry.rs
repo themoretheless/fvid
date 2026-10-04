@@ -153,7 +153,6 @@ fn native_geometry_api_and_cli_use_owned_decoder() {
     assert_eq!(json["width"], 16);
     assert_eq!(json["height"], 8);
     assert_eq!(json["video_frames"], 2);
-    #[cfg(feature = "media")]
     {
         let stats = fvid::media::decode_video_transformed(
             &path,
@@ -317,7 +316,6 @@ fn transpose_padding_cli_runs_without_media_feature() {
     assert_eq!(json["height"], 20);
     assert_eq!(json["pixel_format"], "yuv420p10le");
     assert_eq!(json["video_frames"], 17);
-    #[cfg(feature = "media")]
     {
         let stats = fvid::media::decode_video_transformed(
             &path,

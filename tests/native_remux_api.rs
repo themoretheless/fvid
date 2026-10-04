@@ -1,4 +1,3 @@
-#![cfg(feature = "media")]
 use fvid::{
     media::{self, CopyOptions},
     media_control::{CancelFlag, ProgressHook},

@@ -1,4 +1,3 @@
-#![cfg(feature = "media")]
 use fvid::media::{self, AudioDecodeTransform, CopyOptions, CancelFlag, ProgressHook};
 use std::{path::PathBuf, sync::{Arc, Mutex}};
 struct Directory(PathBuf);

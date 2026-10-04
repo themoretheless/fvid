@@ -65,7 +65,6 @@ fn decode_cli_and_api_preserve_native_backend_and_intervals() {
         let value: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
         assert_eq!(value["backend"], "fvid");
         assert_eq!(value["video_frames"], direct.video_frames);
-        #[cfg(feature = "media")]
         {
             let actual = fvid::media::decode_video_transformed(&path, request).unwrap();
             assert_eq!(actual.backend, "fvid");

@@ -75,7 +75,6 @@ fn trim_keeps_decoder_preroll_and_matches_full_decode_sample_slice() {
                     .detail
                     .contains(&format!("{} float32", last - first))
             );
-            #[cfg(feature = "media")]
             {
                 let out = d.0.join(format!("api-{name}-{from}.wav"));
                 let stats =
@@ -208,7 +207,6 @@ fn selected_container_audio_keeps_timing_and_rejects_implicit_track_loss() {
         assert_eq!(std::fs::read(cli).unwrap(), bytes);
         let plan = fvid::native_plan::trim_aac(&source, 0, 40000, Some(stream)).unwrap();
         assert_eq!(plan.streams[0].index, stream);
-        #[cfg(feature = "media")]
         {
             let options = fvid::media::CopyOptions {
                 streams: vec![stream],

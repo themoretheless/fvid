@@ -1,5 +1,6 @@
-//! Media API migration: plain video decode and AAC PCM export use FVid's native pipeline.
-//! Remaining exports still use the legacy adapter and retain its dependencies.
+//! Public media API, available in builds without FFmpeg.
+//! Owned codecs and containers handle native routes. The optional `media` feature
+//! retains the legacy adapter for operations whose migration is still incomplete.
 pub use fvid_media::*;
 // Public operation contracts belong to FVid, independently of legacy execution.
 pub use crate::media_info::{

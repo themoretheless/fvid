@@ -58,7 +58,6 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     assert_eq!(json["sample_frames"], 96000);
     let api = fvid::native_pcm::measure_loudness_file(&source, None, &[1.0], None).unwrap();
     assert_eq!(json["integrated_lufs"].as_f64(), api.integrated_lufs);
-    #[cfg(feature = "media")]
     {
         let result = fvid::media::measure_loudness(&source, &Default::default()).unwrap();
         assert_eq!(result.integrated_lufs, api.integrated_lufs);
@@ -101,7 +100,6 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
         .iter()
         .any(|step| step["action"] == "write"));
     assert_eq!(plan["streams"][0]["index"], 0);
-    #[cfg(feature = "media")]
     assert_eq!(
         serde_json::to_value(fvid::media::plan_loudness(&source, &Default::default()).unwrap())
             .unwrap(),
@@ -163,7 +161,6 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
         Some(&hook)
     )
     .is_err());
-    #[cfg(feature = "media")]
     {
         let options = fvid::media::CopyOptions {
             progress: Some(fvid::media_control::ProgressHook::new(|_| {})),
@@ -276,7 +273,6 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     .is_err());
     assert!(!output.exists());
 
-    #[cfg(feature = "media")]
     {
         let output = source.with_extension("media.wav");
         let published = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
@@ -348,7 +344,6 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
         }
     )
     .is_err());
-    #[cfg(feature = "media")]
     assert_eq!(
         plan,
         serde_json::to_value(

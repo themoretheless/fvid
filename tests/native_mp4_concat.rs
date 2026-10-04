@@ -180,7 +180,6 @@ fn cancellation_no_overwrite_and_incompatible_inputs_preserve_publication() {
     assert_eq!(std::fs::read(&output).unwrap(), b"existing");
     assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 1);
 }
-#[cfg(feature = "media")]
 #[test]
 fn public_concat_and_plan_select_owned_matroska_workflow() {
     let d = dir("api");

@@ -24,7 +24,6 @@ fn reductions_edges_and_validation() {
     }
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn decoder_api_and_cli_use_owned_pixelize() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
@@ -75,7 +74,6 @@ fn malformed_planes_fail_before_mutation() {
     }
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn truncated_source_does_not_publish_pixelized_output() {
     let directory =

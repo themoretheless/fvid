@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 fn fixture(name: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name)
 }
-#[cfg(feature = "media")]
 #[test]
 fn legacy_api_reexports_native_description_types_and_preserves_results() {
     for name in ["video.mp4", "audio/aac-mono-44k.aac", "vp9/adaptive.webm"] {

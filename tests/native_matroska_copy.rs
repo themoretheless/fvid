@@ -135,7 +135,6 @@ fn cli_and_plan_use_owned_path() {
     );
     assert!(fvid::native_plan::remux(&source).unwrap().is_some());
 }
-#[cfg(feature = "media")]
 #[test]
 fn media_api_uses_owned_path() {
     let d = dir("api");
@@ -166,7 +165,6 @@ fn custom_packet_limit_is_checked_before_any_container_bytes_are_written() {
     }
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn public_remux_and_plan_own_custom_packet_budget_and_failure_publication() {
     let d = dir("packet-limit");

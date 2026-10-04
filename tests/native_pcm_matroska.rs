@@ -260,7 +260,6 @@ fn trim_pcm_matroska_matches_selected_source_samples() {
     assert_eq!(a.sample_frames, b.sample_frames);
     assert_eq!(b.sample_frames, c.sample_frames);
     assert_eq!(std::fs::read(raw).unwrap(), std::fs::read(decoded).unwrap());
-    #[cfg(feature = "media")]
     {
         let public = d.0.join("public.mkv");
         let options = fvid::media::CopyOptions::default();

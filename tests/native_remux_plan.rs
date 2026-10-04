@@ -34,7 +34,6 @@ fn owned_plans_match_cli_and_public_api_without_changing_inputs() {
             serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
             expected
         );
-        #[cfg(feature = "media")]
         {
             assert_eq!(
                 serde_json::to_value(fvid::media::plan_remux(&path, &Default::default()).unwrap())

@@ -137,7 +137,6 @@ fn cli_api_cancel_and_atomic_publication() {
             .to_string_lossy()
             .ends_with(".tmp"))
     );
-    #[cfg(feature = "media")]
     {
         let path = dir.0.join("api.mkv");
         let stats = fvid::media::transcode_lossless(
@@ -346,7 +345,6 @@ fn spatial_export_cli_api_metadata_and_failures() {
         String::from_utf8_lossy(&out.stderr)
     );
     assert_eq!(std::fs::read(cli).unwrap(), bytes);
-    #[cfg(feature = "media")]
     {
         let api = dir.0.join("api.mkv");
         let stats =
@@ -367,11 +365,17 @@ fn spatial_export_cli_api_metadata_and_failures() {
         .is_err()
     );
     assert!(!invalid.exists());
-    let unsupported = fvid::media_info::LosslessTransform {
+    let blurred = fvid::media_info::LosslessTransform {
         gblur: Some("1".into()),
         ..Default::default()
     };
-    assert!(!fvid::native_lossless::supports(&unsupported));
+    assert!(fvid::native_lossless::supports(&blurred));
+    let blurred_output = dir.0.join("blurred.mkv");
+    let blurred_stats = fvid::media::transcode_lossless(
+        &source, &blurred_output, blurred, &Default::default(),
+    ).unwrap();
+    assert_eq!(blurred_stats.backend, "fvid");
+    assert!(blurred_output.exists());
     let original = dir.0.join("original.mkv");
     fvid::native_export::transcode_mp4_ffv1(&source, &original, None, None).unwrap();
     let mut unchanged = webm::WebmReader::open(
@@ -406,7 +410,6 @@ fn spatial_export_cli_api_metadata_and_failures() {
     }
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
     use fvid::native_geometry::VideoGeometry;
@@ -541,7 +544,6 @@ fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
     }
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn owned_lossless_plans_show_filter_order_and_y4m_without_audio() {
     use fvid::media::{LosslessTransform, plan_transcode_lossless};

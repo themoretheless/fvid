@@ -219,7 +219,6 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
                 .collect::<Vec<_>>()
         );
         std::fs::remove_file(&window).unwrap();
-        #[cfg(feature = "media")]
         {
             let api = d.0.join("api.f32le");
             fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();

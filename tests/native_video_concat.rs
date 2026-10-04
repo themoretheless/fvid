@@ -66,7 +66,6 @@ fn avc_hevc_concat_preserves_exported_samples_and_cli_api_agree() {
             serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(),
             serde_json::to_value(&plan).unwrap()
         );
-        #[cfg(feature = "media")]
         {
             let api = d.0.join(format!("{i}-api.y4m"));
             let stats = fvid::media::concat(&sources, &api, &Default::default()).unwrap();
@@ -194,7 +193,6 @@ fn interval_trim_matches_full_decode_presentation_frames() {
             serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(),
             serde_json::to_value(&plan).unwrap()
         );
-        #[cfg(feature = "media")]
         {
             let api = d.0.join(format!("{i}-api.y4m"));
             let stats = fvid::media::trim(&source, &api, from, to, &Default::default()).unwrap();

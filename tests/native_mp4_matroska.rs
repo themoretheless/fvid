@@ -290,7 +290,6 @@ fn cli_and_api_remux_all_tracks_with_atomic_publication() {
             .to_string_lossy()
             .ends_with(".tmp"))
     );
-    #[cfg(feature = "media")]
     {
         let api = dir.0.join("api.mkv");
         assert_eq!(

@@ -93,7 +93,6 @@ fn cancellation_before_during_and_after_muxing_never_publishes_output() {
     }
 }
 
-#[cfg(feature = "media")]
 #[test]
 fn legacy_media_reexports_the_same_control_types() {
     let flag: fvid::media::CancelFlag = CancelFlag::new();

@@ -204,7 +204,6 @@ fn media_api_and_y4m_export_keep_ffv1_samples() {
                 format!("yuv{name}p{depth}le")
             }
         );
-        #[cfg(feature = "media")]
         assert_eq!(fvid::media::decode_video(&source).unwrap().video_frames, 3);
         assert_eq!(
             fvid::native_export::export_y4m(&source, &destination).unwrap(),

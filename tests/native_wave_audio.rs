@@ -264,7 +264,6 @@ fn cli_plan_and_media_api_use_owned_pcm_conversion() {
     );
     let plan: serde_json::Value = serde_json::from_slice(&run.stdout).unwrap();
     assert_eq!(plan["streams"][0]["codec"], "pcm_u8");
-    #[cfg(feature = "media")]
     {
         let api = dir.0.join("api.f32le");
         let transform = fvid::media::AudioDecodeTransform {
@@ -396,7 +395,6 @@ fn wave_probe_uses_sample_clock_and_owned_dispatch() {
                 .unwrap(),
             expected
         );
-        #[cfg(feature = "media")]
         assert_eq!(
             serde_json::to_value(fvid::media::probe(&path).unwrap()).unwrap(),
             expected
@@ -413,7 +411,6 @@ fn wave_probe_uses_sample_clock_and_owned_dispatch() {
     bytes.pop();
     std::fs::write(&path, bytes).unwrap();
     assert!(fvid::native_probe::try_probe_as(&path, None).is_err());
-    #[cfg(feature = "media")]
     assert!(fvid::media::probe(&path).is_err());
     std::fs::write(&path, b"RIFF\0\0\0\0AVI ").unwrap();
     assert!(
@@ -481,7 +478,6 @@ fn wave_concat_preserves_samples_and_matches_cli_plan_and_api() {
             serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(),
             serde_json::to_value(&plan).unwrap()
         );
-        #[cfg(feature = "media")]
         {
             let api_dest = d.0.join(format!("{bits}-{float}-api.wav"));
             let stats = fvid::media::concat(&sources, &api_dest, &Default::default()).unwrap();
@@ -629,7 +625,6 @@ fn multichannel_identity_preserves_mask_and_rematrix_needs_known_layout() {
             ..Default::default()
         };
         assert!(fvid::native_plan::decode_audio(&source, &request).is_err());
-        #[cfg(feature = "media")]
         {
             let api = d.0.join(format!("{channels}-{mask}-api.f32le"));
             fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();

@@ -203,7 +203,6 @@ fn aac_wave_cli_plan_and_api_use_owned_pipeline() {
     let plan: serde_json::Value = serde_json::from_slice(&plan.stdout).unwrap();
     assert_eq!(plan["command"], "mix-audio");
     assert!(plan["graph"].is_null());
-    #[cfg(feature = "media")]
     {
         let api = d.0.join("api.wav");
         let stats = fvid::media::mix_audio(&sources, &api, &Default::default()).unwrap();
@@ -260,7 +259,6 @@ fn merge_channel_order_shortest_and_legacy_wav_contract() {
         assert_eq!(before.len(), 44 + expected.len());
         assert!(native_audio_mix::merge_audio(&sources, &destination).is_err());
         assert_eq!(std::fs::read(&destination).unwrap(), before);
-        #[cfg(feature = "media")]
         {
             let legacy = d.0.join(format!("legacy-{left}-{right}.wav"));
             fvid_media::merge_audio(&sources, &legacy).unwrap();
@@ -472,7 +470,6 @@ fn mix_and_merge_matroska_match_wave_samples_and_channel_order() {
             );
         }
         assert_eq!(std::fs::read(&mka).unwrap(), bytes);
-        #[cfg(feature = "media")]
         {
             let public = d.0.join(format!("public-{name}.mkv"));
             if merge {

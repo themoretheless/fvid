@@ -161,7 +161,6 @@ fn overlay_exports_avc_hevc_main10_exact_samples_with_atomic_publication() {
         assert!(native_export::overlay_video(&source, &source, &output, 0, 0, None, None).is_err());
         assert_eq!(std::fs::read(&output).unwrap(), bytes);
 
-        #[cfg(feature = "media")]
         {
             let public = d.0.join(format!("public-{i}.mkv"));
             fvid::media::overlay_video(&source, &source, &public, 0, 0, &Default::default())
@@ -283,7 +282,6 @@ fn overlay_transform_uses_owned_lossless_export_plan_and_headless_commands() {
     assert!(result.status.success());
     let plan: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(plan["command"], "transcode-lossless");
-    #[cfg(feature = "media")]
     {
         let options = Default::default();
         let a = d.0.join("api.mkv");
@@ -399,7 +397,6 @@ fn combined_geometry_overlay_and_negate_apply_in_the_documented_order() {
             actions,
             ["decode", "geometry", "overlay", "filter", "encode", "write"]
         );
-        #[cfg(feature = "media")]
         {
             let public = d.0.join(format!("public-{i}.mkv"));
             fvid::media::transcode_lossless(&source, &public, transform, &Default::default())
@@ -471,7 +468,6 @@ fn filter_flag_permutations_match_media_transform_order() {
                 "filter order {i}, reversed={reversed}"
             );
         }
-        #[cfg(feature = "media")]
         {
             let mut transform = spatial;
             transform.overlay = Some(fvid::media_info::OverlaySpec {

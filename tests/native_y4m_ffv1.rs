@@ -113,7 +113,6 @@ fn cli_api_filters_and_failure_publication() {
     let mut expected = Cursor::new(Vec::new());
     fvid::native_lossless_y4m::write(&src, &mut expected, &geometry, &filters, None, None).unwrap();
     assert_eq!(bytes, expected.into_inner());
-    #[cfg(feature = "media")]
     {
         let dest = d.0.join("api.mkv");
         let stats =

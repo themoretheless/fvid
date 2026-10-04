@@ -98,7 +98,6 @@ fn alac_and_matroska_pcm_trim_use_owned_sample_exact_wave_export() {
             .is_err()
         );
         assert!(!bad.exists());
-        #[cfg(feature = "media")]
         {
             let api = dir.join(format!("{n}-api.wav"));
             let stats = fvid::media::trim(&input, &api, from, to, &Default::default()).unwrap();

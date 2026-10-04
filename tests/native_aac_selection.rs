@@ -126,7 +126,6 @@ fn chosen_mp4_and_matroska_tracks_match_independent_pcm_references() {
             String::from_utf8_lossy(&run.stderr)
         );
         assert_eq!(std::fs::read(cli).unwrap(), actual);
-        #[cfg(feature = "media")]
         {
             let public = dir.0.join(format!("public-{name}-{stream}.f32le"));
             let options = fvid::media::CopyOptions {

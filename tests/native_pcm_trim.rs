@@ -242,7 +242,6 @@ fn headless_cli_and_media_api_select_native_wave_path() {
     let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(json["sample_frames"], 9);
     assert!(String::from_utf8_lossy(&result.stderr).contains("\"done\":true"));
-    #[cfg(feature = "media")]
     {
         let api = dir.0.join("api.wav");
         let stats = fvid::media::trim_pcm(&source, &api, 125, 1250, &Default::default()).unwrap();
@@ -297,7 +296,6 @@ fn plans_and_both_trim_commands_share_exact_sample_ranges() {
         let mut native = fvid::native_plan::trim_pcm(&source, 125, 10000, Some(0)).unwrap();
         native.command = command.to_owned();
         assert_eq!(json, serde_json::to_value(native).unwrap());
-        #[cfg(feature = "media")]
         {
             let plan = if command == "trim" {
                 fvid::media::plan_trim(&source, 125, 10000, &Default::default())
@@ -338,7 +336,6 @@ fn plans_and_both_trim_commands_share_exact_sample_ranges() {
     }
     assert_eq!(outputs[0], outputs[1]);
     assert_eq!(std::fs::read(&source).unwrap(), original);
-    #[cfg(feature = "media")]
     {
         let dest = dir.0.join("api-trim.wav");
         let stats = fvid::media::trim(&source, &dest, 125, 10000, &Default::default()).unwrap();
