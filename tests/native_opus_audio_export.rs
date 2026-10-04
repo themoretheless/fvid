@@ -273,3 +273,37 @@ fn opus_file_export_accepts_speech_hybrid_and_surround_profiles() {
         std::fs::remove_file(output).unwrap();
     }
 }
+
+#[test]
+fn compressed_opus_mix_and_merge_match_decoded_wave_inputs() {
+    let source = fixture("playback-errors/opus-stereo.webm");
+    let storage = std::env::temp_dir().join(format!("fvid-opus-mix-{}", std::process::id()));
+    std::fs::create_dir(&storage).unwrap();
+    let wave = storage.join("input.wav");
+    fvid_media::decode_audio(&source, &wave, &Default::default()).unwrap();
+    let compressed = vec![source.clone(), source];
+    let decoded = vec![wave.clone(), wave];
+    assert_eq!(
+        fvid_media::plan_mix_audio(&compressed, &Default::default())
+            .unwrap()
+            .command,
+        "mix-audio"
+    );
+    assert_eq!(
+        fvid_media::plan_merge_audio(&compressed).unwrap().command,
+        "merge-audio"
+    );
+    for merge in [false, true] {
+        let actual = storage.join(format!("actual-{merge}.wav"));
+        let expected = storage.join(format!("expected-{merge}.wav"));
+        if merge {
+            fvid_media::merge_audio(&compressed, &actual).unwrap();
+            fvid_media::merge_audio(&decoded, &expected).unwrap();
+        } else {
+            fvid_media::mix_audio(&compressed, &actual, &Default::default()).unwrap();
+            fvid_media::mix_audio(&decoded, &expected, &Default::default()).unwrap();
+        }
+        assert_eq!(wave_payload(&actual), wave_payload(&expected));
+    }
+    std::fs::remove_dir_all(storage).unwrap();
+}

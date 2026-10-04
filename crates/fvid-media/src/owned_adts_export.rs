@@ -121,9 +121,9 @@ pub(crate) fn decoded_prefix(
     })
 }
 
-struct Spool(PathBuf);
+pub(crate) struct Spool(pub(crate) PathBuf);
 impl Spool {
-    fn create() -> Result<Self> {
+    pub(crate) fn create() -> Result<Self> {
         static NEXT: AtomicU64 = AtomicU64::new(0);
         loop {
             let path = std::env::temp_dir().join(format!(

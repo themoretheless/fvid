@@ -1,4 +1,4 @@
-//! Owned float WAV mix and channel merge, available without FFmpeg.
+//! Owned audio decoding, float PCM mix and channel merge without FFmpeg.
 #![forbid(unsafe_code)]
 use crate::owned_wav_file::write_wav_f32le;
 use fvid_media_info::AudioDecodeStats;
@@ -12,13 +12,13 @@ pub fn mix_audio(
     destination: &Path,
     options: &MixAudioOptions,
 ) -> Result<MixAudioStats> {
-    mix_with_decoder(sources, destination, options, decode_float_wave)
+    mix_with_decoder(sources, destination, options, decode_owned_audio)
 }
 pub fn merge_audio(sources: &[PathBuf], destination: &Path) -> Result<MergeAudioStats> {
-    merge_with_decoder(sources, destination, decode_float_wave)
+    merge_with_decoder(sources, destination, decode_owned_audio)
 }
 
-/// Build a read-only plan using the same PCM geometry required by execution.
+/// Build a source-read-only plan, validating decoding in private temporary storage.
 pub fn plan_mix_audio(
     sources: &[PathBuf],
     options: &MixAudioOptions,
@@ -59,15 +59,10 @@ fn audio_plan(
     use fvid_media_info::{MediaPlan, PlanStep};
     let mut geometry = None;
     for source in sources {
-        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        let info =
-            crate::owned_wave_inspect::inspect(&mut file, None).map_err(|e| e.to_string())?;
-        if !info.float
-            || info.bits_per_sample != 32
-            || info.sample_frames == 0
-            || !(1..=64).contains(&info.channels)
-        {
-            return Err("audio mix/merge requires nonempty float32 WAVE inputs".into());
+        // Validate the exact owned presentation decoder used during execution.
+        let (info, _) = decode_owned_audio(source)?;
+        if info.sample_frames == 0 || !(1..=64).contains(&info.channels) {
+            return Err("audio mix/merge requires nonempty owned audio inputs".into());
         }
         if let Some((rate, channels)) = geometry {
             if rate != info.sample_rate || (!merge && channels != info.channels) {
@@ -85,7 +80,7 @@ fn audio_plan(
         steps: vec![
             PlanStep {
                 action: "decode".into(),
-                detail: "owned float32 WAVE reader".into(),
+                detail: "owned audio decoder to float32 PCM (planning validates decoding)".into(),
             },
             PlanStep {
                 action: if merge { "merge" } else { "mix" }.into(),
@@ -99,6 +94,20 @@ fn audio_plan(
         graph: None,
         notes: vec!["no FFmpeg or libav execution".into()],
     })
+}
+
+/// Decode through the same owned file-export pipeline used by decode_audio.
+/// The private spool is removed on success and error; it is never published.
+pub(crate) fn decode_owned_audio(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
+        if let Ok(decoded) = decode_float_wave(source) {
+            return Ok(decoded);
+        }
+    }
+    let spool = crate::owned_adts_export::Spool::create()?;
+    let wave = spool.0.join("decoded.wav");
+    crate::owned_audio_export::decode_audio(source, &wave, &Default::default())?;
+    decode_float_wave(&wave)
 }
 
 pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {

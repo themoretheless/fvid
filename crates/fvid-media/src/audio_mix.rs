@@ -13,8 +13,9 @@ pub fn merge_audio(sources: &[PathBuf], destination: &Path) -> Result<MergeAudio
 }
 
 fn decode_to_packed_f32(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
-    if crate::owned_wave_inspect::is_wave(source).map_err(|e| e.to_string())? {
-        if let Ok(decoded) = crate::owned_audio_mix::decode_float_wave(source) { return Ok(decoded); }
+    let options = CopyOptions::default();
+    if crate::owned_audio_export::supports(source, Path::new("owned-mix.wav"), Default::default(), &options) {
+        return crate::owned_audio_mix::decode_owned_audio(source);
     }
     let mut input = Input::open_fast(source)?;
     if unsafe { (*input.0).nb_chapters } != 0 {

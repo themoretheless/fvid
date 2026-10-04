@@ -80,3 +80,10 @@ Opus Matroska output always declares the 48 kHz codec clock. OpusHead's informat
 Aggregate controlled-allocation admission for Opus audio remains unsupported. Noncanonical mappings, Ogg file export and broader legacy production workflows are not covered by this adapter; production features still have legacy FFmpeg edges.
 
 Standalone Opus WAVE export is also accepted against committed PCM references for SILK, hybrid, mono/stereo CELT, 5.1 family-1 and a positive first timestamp. Each fixture produces exactly 48000 presentation frames with maximum absolute sample error below 0.00002; tests execute no reference encoder or decoder process.
+
+
+## Owned compressed audio mix and merge
+
+The standalone mix/merge entrypoints now decode inputs through the owned audio file-export pipeline, retaining the direct float32 WAVE fast path. Other admitted formats are decoded into a private RAII-cleaned WAVE spool before the existing PCM mix/channel merge. Legacy dispatch adopts this path for inputs admitted by the owned exporter; unsupported inputs still retain the legacy fallback.
+
+Planning validates the same decoder and presentation geometry, including decoding compressed inputs; it may therefore cost a full decode and use temporary disk/PCM storage. Output publication and geometry checks remain those of the existing mix/merge implementation. Native Opus acceptance compares both mixed and channel-merged PCM exactly against predecoded WAVE inputs. Existing weighted/shortest WAVE regression also passes. This closes the prior float32-WAVE-only input restriction for admitted audio, but does not remove all legacy production features.
