@@ -1,5 +1,5 @@
 //! Explicit independent filter reference benchmark.
-use fvid::{native_boxblur::BoxBlur, native_geometry::GeometryFrame};
+use fvid::{native_boxblur::BoxBlurProgram, native_geometry::GeometryFrame};
 fn frame(depth: u8, subsampling: [usize; 2]) -> GeometryFrame {
     let (w, h) = (33usize, 25usize);
     let n = w * h + 2 * w.div_ceil(subsampling[0]) * h.div_ceil(subsampling[1]);
@@ -24,6 +24,7 @@ fn main() {
         io::Write,
         process::{Command, Stdio},
     };
+    let mut comparisons = 0;
     let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
     for (layout, sub, depths) in [
         ("420", [2, 2], vec![8, 9, 10, 12, 14, 16]),
@@ -41,13 +42,18 @@ fn main() {
             };
             for args in [
                 "",
+                "lr='min(w,h)/8':lp=2:cr='floor(min(cw,ch)/8)'",
+                "lr=hsub/2:cr=vsub/2:ar=0",
                 "3:1:1:2",
                 "lr=3:lp=3:cr=0:cp=-1",
                 "luma_radius=1:luma_power=0:chroma_radius=1:chroma_power=3",
             ] {
                 let mut f = frame(depth, sub);
                 let input = f.data.clone();
-                BoxBlur::parse(args).unwrap().apply(&mut f, depth).unwrap();
+                BoxBlurProgram::parse(args)
+                    .unwrap()
+                    .apply(&mut f, depth)
+                    .unwrap();
                 let mut child = Command::new(&ffmpeg)
                     .args([
                         "-v",
@@ -83,7 +89,9 @@ fn main() {
                     String::from_utf8_lossy(&out.stderr)
                 );
                 assert_eq!(out.stdout, f.data, "{format} {args}");
+                comparisons += 1;
             }
         }
     }
+    println!("{comparisons} exact boxblur pixel comparisons passed");
 }

@@ -97,7 +97,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
         && transform
             .boxblur
             .as_deref()
-            .is_none_or(|args| crate::owned_boxblur::BoxBlur::parse(args).is_ok())
+            .is_none_or(|args| crate::owned_boxblur::BoxBlurProgram::parse(args).is_ok())
         && transform
             .negate
             .as_deref()
@@ -569,7 +569,11 @@ pub(crate) fn apply_pixel_filters_clock(
                     .apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.boxblur.as_deref() {
-                crate::owned_boxblur::BoxBlur::parse(args)?.apply(&mut frame, header.depth())?;
+                if let Some(filter) = history.and_then(|context| context.boxblur.as_ref()) {
+                    filter.apply(&mut frame, header.depth())?;
+                } else {
+                    crate::owned_boxblur::BoxBlurProgram::parse(args)?.apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.negate.as_deref() {
                 crate::owned_negate::Negate::parse(args)?.apply(&mut frame.data, header.depth())?;

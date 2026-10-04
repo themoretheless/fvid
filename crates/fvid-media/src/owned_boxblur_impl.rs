@@ -1,4 +1,3 @@
-
 #[derive(Clone, Copy, Debug)]
 pub struct BoxBlur {
     radius: [usize; 3],
@@ -6,7 +5,7 @@ pub struct BoxBlur {
 }
 impl BoxBlur {
     /// Integer radii and pass counts, in luma/chroma/alpha option order.
-    /// Expressions remain the responsibility of the legacy request adapter.
+    /// Use BoxBlurProgram for geometry-dependent radius expressions.
     pub fn parse(args: &str) -> Result<Self> {
         let names = [
             "luma_radius",
@@ -196,5 +195,120 @@ fn blur_line(input: &[u16], output: &mut [u16], radius: usize, bytes: usize) {
         } else {
             rounded as u16
         };
+    }
+}
+
+/// Radius expressions evaluated against source plane dimensions.
+#[derive(Debug)]
+pub struct BoxBlurProgram {
+    radius: [BoxBlurExpression; 3],
+    power: [u32; 3],
+}
+impl BoxBlurProgram {
+    pub fn parse(args: &str) -> Result<Self> {
+        if args.len() > 4096 || args.contains('\0') {
+            return Err(invalid("invalid boxblur options"));
+        }
+        let names = [
+            "luma_radius",
+            "luma_power",
+            "chroma_radius",
+            "chroma_power",
+            "alpha_radius",
+            "alpha_power",
+        ];
+        let aliases = ["lr", "lp", "cr", "cp", "ar", "ap"];
+        let mut radii: [Option<BoxBlurExpression>; 3] = [None, None, None];
+        let mut powers = [Some(2u32), None, None];
+        let mut positional = 0;
+        for entry in args.split(':').filter(|_| !args.is_empty()) {
+            let (key, text) = if let Some(pair) = entry.split_once('=') {
+                pair
+            } else {
+                let key = *names
+                    .get(positional)
+                    .ok_or_else(|| invalid("too many boxblur options"))?;
+                positional += 1;
+                (key, entry)
+            };
+            let index = names
+                .iter()
+                .zip(aliases)
+                .position(|(name, alias)| *name == key.trim() || alias == key.trim())
+                .ok_or_else(|| invalid("unknown boxblur option"))?;
+            let text = text.trim();
+            if index % 2 == 1 {
+                let n = text
+                    .parse::<i32>()
+                    .map_err(|_| invalid("boxblur powers must be integers"))?;
+                if n < 0 && !(n == -1 && index != 1) {
+                    return Err(invalid("boxblur power out of range"));
+                }
+                powers[index / 2] = if n == -1 { None } else { Some(n as u32) };
+            } else {
+                let text = if text.starts_with('\'') || text.starts_with('"') {
+                    let quote = text.chars().next().unwrap();
+                    text.strip_prefix(quote)
+                        .and_then(|v| v.strip_suffix(quote))
+                        .ok_or_else(|| invalid("unclosed boxblur expression quote"))?
+                } else {
+                    text
+                };
+                let expr = BoxBlurExpression::parse(text).map_err(|e| invalid(&e))?;
+                expr.evaluate(&[
+                    ("w", 32.),
+                    ("h", 32.),
+                    ("cw", 16.),
+                    ("ch", 16.),
+                    ("hsub", 2.),
+                    ("vsub", 2.),
+                ])
+                .map_err(|e| invalid(&e))?;
+                radii[index / 2] = Some(expr);
+            }
+        }
+        let luma = radii[0]
+            .take()
+            .unwrap_or(BoxBlurExpression::parse("2").map_err(|e| invalid(&e))?);
+        let chroma = radii[1].take().unwrap_or(luma.clone());
+        let alpha = radii[2].take().unwrap_or(luma.clone());
+        let power = powers[0].unwrap();
+        Ok(Self {
+            radius: [luma, chroma, alpha],
+            power: [
+                power,
+                powers[1].unwrap_or(power),
+                powers[2].unwrap_or(power),
+            ],
+        })
+    }
+    pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
+        let [sx, sy] = frame
+            .subsampling
+            .ok_or_else(|| invalid("boxblur requires planar YUV"))?;
+        if sx == 0 || sy == 0 {
+            return Err(invalid("invalid boxblur subsampling"));
+        }
+        let vars = [
+            ("w", frame.width as f64),
+            ("h", frame.height as f64),
+            ("cw", (frame.width / sx) as f64),
+            ("ch", (frame.height / sy) as f64),
+            ("hsub", sx as f64),
+            ("vsub", sy as f64),
+        ];
+        let mut radius = [0; 3];
+        for (i, expr) in self.radius.iter().enumerate() {
+            let value = expr.evaluate(&vars).map_err(|e| invalid(&e))?;
+            if !value.is_finite() || value.trunc() < 0. || value.trunc() > i32::MAX as f64 {
+                return Err(invalid("boxblur radius expression out of range"));
+            }
+            radius[i] = value.trunc() as usize;
+        }
+        BoxBlur {
+            radius,
+            power: self.power,
+        }
+        .apply(frame, depth)
     }
 }

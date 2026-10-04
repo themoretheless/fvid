@@ -99,10 +99,129 @@ fn reflection_and_pass_quantization_have_known_pixels() {
 }
 
 #[test]
-fn expressions_are_not_claimed_by_native_admission() {
+fn dimension_expressions_are_admitted_but_invalid_radius_refuses() {
     let transform = fvid::media_info::LosslessTransform {
         boxblur: Some("lr=w".into()),
         ..Default::default()
     };
-    assert!(!fvid::native_lossless::supports(&transform));
+    assert!(fvid::native_lossless::supports(&transform));
+    let mut f = frame(8, [2, 2]);
+    let before = f.data.clone();
+    assert!(
+        fvid::native_boxblur::BoxBlurProgram::parse("lr=w")
+            .unwrap()
+            .apply(&mut f, 8)
+            .is_err()
+    );
+    assert_eq!(f.data, before);
+}
+
+#[test]
+fn expressions_match_integer_kernels_and_validate_all_planes() {
+    use fvid::native_boxblur::BoxBlurProgram;
+    for depth in [8, 10, 16] {
+        for sub in [[2, 2], [2, 1], [1, 1], [4, 4]] {
+            let radius = (25 / sub[1]).min(33 / sub[0]) / 8;
+            let constant = format!("3:2:{radius}");
+            let mut actual = frame(depth, sub);
+            let mut expected = frame(depth, sub);
+            BoxBlurProgram::parse("lr='min(w,h)/8':lp=2:cr=floor(min(cw,ch)/8)")
+                .unwrap()
+                .apply(&mut actual, depth)
+                .unwrap();
+            BoxBlur::parse(&constant)
+                .unwrap()
+                .apply(&mut expected, depth)
+                .unwrap();
+            assert_eq!(actual.data, expected.data);
+        }
+    }
+    for args in ["lr=n", "lr=if(1,1,unknown)", "lr='w", "lp=w"] {
+        assert!(BoxBlurProgram::parse(args).is_err());
+    }
+    for args in ["lr=0/0", "lr=w", "lr=1:ar=w", "lr=1:cr=-2"] {
+        let mut actual = frame(8, [2, 2]);
+        let before = actual.data.clone();
+        assert!(
+            BoxBlurProgram::parse(args)
+                .unwrap()
+                .apply(&mut actual, 8)
+                .is_err()
+        );
+        assert_eq!(actual.data, before);
+    }
+}
+#[test]
+fn synthetic_expression_source_accepts_owned_api_and_cli() {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/boxblur-expression-9.y4m");
+    let args = "lr='min(w,h)/8':lp=1:cr=0:ar=0";
+    let transform = fvid::media_info::DecodeTransform {
+        boxblur: Some(args.into()),
+        ..Default::default()
+    };
+    let root = fvid::native_media::decode_video_request(&path, &transform).unwrap();
+    let library = fvid::media::decode_video_transformed(&path, transform).unwrap();
+    assert_eq!(root.video_frames, 3);
+    assert_eq!(library.video_frames, 3);
+    assert_eq!(root.backend, "fvid");
+    assert_eq!(library.backend, "fvid");
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode"])
+        .arg(&path)
+        .args(["--boxblur", args])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let mut f = GeometryFrame {
+        width: 9,
+        height: 9,
+        subsampling: Some([1, 1]),
+        data: [vec![90], vec![0; 80], vec![40; 162]].concat(),
+    };
+    fvid::native_boxblur::BoxBlurProgram::parse(args)
+        .unwrap()
+        .apply(&mut f, 8)
+        .unwrap();
+    assert_eq!(&f.data[..3], &[40, 20, 0]);
+    assert_eq!(&f.data[9..12], &[20, 10, 0]);
+    assert!(f.data[18..81].iter().all(|&v| v == 0));
+    assert_eq!(&f.data[81..], &[40; 162]);
+    for library in [false, true] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-boxblur-expression-{}-{library}.mkv",
+            std::process::id()
+        ));
+        let transform = fvid::media_info::LosslessTransform {
+            boxblur: Some(args.into()),
+            ..Default::default()
+        };
+        if library {
+            fvid_media::transcode_lossless(&path, &output, transform, &Default::default()).unwrap();
+        } else {
+            fvid::media::transcode_lossless(&path, &output, transform, &Default::default())
+                .unwrap();
+        }
+        let mut reader = fvid::playback_native::NativeReader::software(
+            std::io::Cursor::new(std::fs::read(&output).unwrap()),
+            usize::MAX,
+        )
+        .unwrap();
+        for _ in 0..3 {
+            let raw = reader.read_frame_raw().unwrap().unwrap();
+            assert_eq!(
+                fvid::native_geometry::VideoGeometry::default()
+                    .apply(&raw, 9, 9)
+                    .unwrap()
+                    .data,
+                f.data
+            );
+        }
+        assert!(reader.read_frame_raw().unwrap().is_none());
+        std::fs::remove_file(output).unwrap();
+    }
 }

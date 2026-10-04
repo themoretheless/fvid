@@ -51,7 +51,7 @@ pub struct PixelFilters {
     pub monochrome: Option<fvid_media::owned_monochrome::Monochrome>,
     pub colorize: Option<fvid_media::owned_colorize::Colorize>,
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
-    pub boxblur: Option<crate::native_boxblur::BoxBlur>,
+    pub boxblur: Option<crate::native_boxblur::BoxBlurProgram>,
     pub bilateral: Option<fvid_media::owned_bilateral::Bilateral>,
     pub gblur: Option<fvid_media::owned_gblur::GaussianBlur>,
     pub avgblur: Option<crate::native_avgblur::AverageBlur>,
@@ -104,7 +104,7 @@ impl PixelFilters {
             boxblur: request
                 .boxblur
                 .as_deref()
-                .map(crate::native_boxblur::BoxBlur::parse)
+                .map(crate::native_boxblur::BoxBlurProgram::parse)
                 .transpose()?,
             bilateral: request.bilateral.as_deref().map(fvid_media::owned_bilateral::Bilateral::parse).transpose().map_err(|e| invalid(&e))?,
             gblur: request.gblur.as_deref().map(fvid_media::owned_gblur::GaussianBlur::parse).transpose().map_err(|e| invalid(&e))?,
@@ -226,7 +226,7 @@ impl PixelFilters {
         if let Some(filter) = self.avgblur {
             filter.apply(frame, depth)?;
         }
-        if let Some(filter) = self.boxblur {
+        if let Some(filter) = &self.boxblur {
             filter.apply(frame, depth)?;
         }
         if let Some(negate) = self.negate {

@@ -1,4 +1,5 @@
 //! Owned separable repeated box blur on planar YUV samples.
+use crate::owned_expression::Expression as BoxBlurExpression;
 use crate::owned_frame::{GeometryFrame, buffer};
 type Result<T> = std::result::Result<T, String>;
 fn invalid(message: &str) -> String {

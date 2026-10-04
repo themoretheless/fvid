@@ -1002,7 +1002,7 @@ fn pixel_decode_args(
                 if filters.boxblur.is_some() {
                     return Err("duplicate boxblur".into());
                 }
-                if let Ok(filter) = fvid::native_boxblur::BoxBlur::parse(value) {
+                if let Ok(filter) = fvid::native_boxblur::BoxBlurProgram::parse(value) {
                     filters.boxblur = Some(filter);
                     continue;
                 }

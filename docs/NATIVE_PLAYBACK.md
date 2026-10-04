@@ -3826,3 +3826,19 @@ The explicit benchmark checks 54 exact 8-bit YUV420/422/444 pixel pairs at 25 an
 This is not a qualification of high-depth reference equivalence or arbitrary
 positive input timestamp offsets. Variables `r`/`pos`, stateful expressions and
 nonfinite coefficients remain explicitly unsupported.
+
+
+Owned `boxblur` radius expressions now accept `w`, `h`, `cw`, `ch`, `hsub` and
+`vsub`, quoted expressions and the existing aliases/positional options. Chroma
+variables use floor dimensions, while stored odd-sized planes retain rounded-up
+samples. Fractional radii truncate toward zero; chroma/alpha radii inherit the
+luma expression and powers inherit the luma power. Powers remain integer-only.
+Each radius is checked, including the absent alpha plane's configuration, before
+any pixel mutation. Nonfinite/out-of-range radii and unknown variables explicitly
+refuse. The constant `BoxBlur` API remains available; production entrypoints use
+`BoxBlurProgram`, parsed once in the library streaming context. Synthetic impulse
+acceptance checks exact pixels through root/library FFV1 exports and CLI decode.
+The benchmark qualifies 132 exact multi-layout 8–16-bit pixel comparisons, including
+dimension expressions, against the
+[reference parameter evaluator](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/boxblur.c).
+Alpha/RGB stream formats and stateful expressions remain separate work.
