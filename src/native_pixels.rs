@@ -30,7 +30,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
-    /// Optional (pixel aspect, nominal frame rate) for owned shading expressions.
+    /// Optional (pixel aspect, nominal frame rate) for owned shading and drawing expressions.
     pub vignette_source: std::cell::Cell<Option<(f64, f64)>>,
     pub hqdn3d: Option<fvid_media::owned_hqdn3d::HqDn3d>,
     pub tmix: Option<fvid_media::owned_tmix::TemporalMix>,
@@ -49,6 +49,8 @@ pub struct PixelFilters {
     pub bitplanenoise: Option<fvid_media::owned_bitplanenoise::BitPlaneNoise>,
     pub gradfun: Option<fvid_media::owned_gradfun::GradFun>,
     pub lenscorrection: Option<fvid_media::owned_lenscorrection::LensCorrection>,
+    pub drawbox: Option<fvid_media::owned_draw::Draw>,
+    pub drawgrid: Option<fvid_media::owned_draw::Draw>,
     pub removegrain: Option<fvid_media::owned_removegrain::RemoveGrain>,
     pub yaepblur: Option<fvid_media::owned_yaepblur::YaepBlur>,
     pub smartblur: Option<fvid_media::owned_smartblur::SmartBlur>,
@@ -75,7 +77,7 @@ pub struct PixelFilters {
 }
 impl PixelFilters {
     pub(crate) fn configure_vignette_source<R: std::io::BufRead + std::io::Seek>(&self, reader: &crate::playback_native::NativeReader<R>, geometry: &crate::native_geometry::VideoGeometry) -> Result<()> {
-        if self.vignette.is_none() {return Ok(());}
+        if self.vignette.is_none() && self.drawbox.is_none() && self.drawgrid.is_none() {return Ok(());}
         let [w,h]=reader.dimensions();
         let aspect=crate::native_export::transformed_aspect(reader.pixel_aspect(),w,h,geometry)?;
         self.vignette_source.set(Some((aspect.0 as f64/aspect.1 as f64,reader.frame_period().as_secs_f64().recip())));
@@ -97,6 +99,8 @@ impl PixelFilters {
             bitplanenoise: request.bitplanenoise.as_deref().map(fvid_media::owned_bitplanenoise::BitPlaneNoise::parse).transpose().map_err(|e|invalid(&e))?,
             gradfun: request.gradfun.as_deref().map(fvid_media::owned_gradfun::GradFun::parse).transpose().map_err(|e|invalid(&e))?,
             lenscorrection: request.lenscorrection.as_deref().map(fvid_media::owned_lenscorrection::LensCorrection::parse).transpose().map_err(|e|invalid(&e))?,
+            drawbox: request.drawbox.as_deref().map(fvid_media::owned_draw::Draw::box_filter).transpose().map_err(|e|invalid(&e))?,
+            drawgrid: request.drawgrid.as_deref().map(fvid_media::owned_draw::Draw::grid_filter).transpose().map_err(|e|invalid(&e))?,
             removegrain: request.removegrain.as_deref().map(fvid_media::owned_removegrain::RemoveGrain::parse).transpose().map_err(|e|invalid(&e))?,
             yaepblur: request.yaepblur.as_deref().map(fvid_media::owned_yaepblur::YaepBlur::parse).transpose().map_err(|e|invalid(&e))?,
             smartblur: request.smartblur.as_deref().map(fvid_media::owned_smartblur::SmartBlur::parse).transpose().map_err(|e|invalid(&e))?,
@@ -202,6 +206,8 @@ impl PixelFilters {
             && self.bitplanenoise.is_none()
             && self.gradfun.is_none()
             && self.lenscorrection.is_none()
+            && self.drawbox.is_none()
+            && self.drawgrid.is_none()
             && self.removegrain.is_none()
             && self.yaepblur.is_none()
             && self.smartblur.is_none()
@@ -311,6 +317,9 @@ impl PixelFilters {
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
         }
+        let drawing_sar=self.vignette_source.get().map_or(1.,|(sar,_)|sar);
+        if let Some(filter)=&self.drawbox {filter.apply_with_aspect(frame,depth,drawing_sar,n,t).map_err(|e|invalid(&e))?;}
+        if let Some(filter)=&self.drawgrid {filter.apply_with_aspect(frame,depth,drawing_sar,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=&self.lagfun {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=&self.bitplanenoise {let _=filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=&self.gradfun {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}

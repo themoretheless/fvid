@@ -727,3 +727,20 @@ SHA256:
 - `removegrain-chain.expected.raw`: `fcff76c3e720e0531b5ddb5d3e55b95d96d9830a77f5f79790048b3e37340a16`
 - `removegrain-small.y4m`: `07670e2bb2b609ef62ff4ed96320d9f0ca3f7cf399173e16e1e4e6e5836f7b21`
 - `removegrain.y4m`: `1d3f91cce0fd958988015ea9e7dd1e57055d2da5075e90d5427ee1d08f91bc95`
+
+### Drawing regions, blend order and non-square aspect
+
+`generate-drawing.py` creates four 17x13 YUV420 frames (347 samples each) at 25 fps, sample `(37*i+23*n+101)%256`. `drawing-aspect.y4m` has A4:3; normal input A1:1. `drawing-small.y4m` is a four-frame 1x1 companion. No private data or external tools are involved. Expected bytes are generated only by the explicit `ffmpeg_drawing_reference` benchmark after each full output matches the own renderer. Ordinary tests do not launch an external executable.
+
+`drawbox.expected.raw` and `drawgrid.expected.raw` use `x=1:y=2:w=9:h=7:c=red@.4:t=2`. Aspect expectations use `x=sar*3:y=dar:w=iw/2:h=ih/2:c=red@.4:t=2` at SAR4/3, and therefore exercise actual shape placement, not just a metadata round trip. `drawing-combined.expected.raw` renders the normal box followed by grid `w=5:h=4:c=blue@.3:t=1`; reversed order must differ. Both root/library FFV1 exports reproduce the qualified bytes. Tests separately cover precision endpoints, RGBA/YUVA replacement/inversion, invalid/nonfinite geometry before mutation, source-clock enable before frame selection, rewind and native codec routing. The detection-box metadata option has an explicit refusal test only; its intended support is not qualified. The reference neighborhood/render behavior is inspected from FFmpeg vf_drawbox.c and colorspace.h; the implementation uses own scalar expressions/colors and no libav calls.
+
+SHA256:
+
+- `drawing-aspect.y4m`: `6da93ac66549f9c3c727b16da320ef4ad64e180f5e2caf4fab6f9115c1b9ac67`
+- `drawing-small.y4m`: `589c21477e12ea09c0025900d303ed4b3dfe2b339f28b316d9738a55d19bddde`
+- `drawing.y4m`: `817e9f609ccd6ff869b790ca7300b8fd8da1dcd601b9386a6df6ff5d880ea353`
+- `drawbox-aspect.expected.raw`: `264f34b49d5092ed2de3d9b458d1567c7f6de07b816cc4cf181c1da42aa51e8b`
+- `drawbox.expected.raw`: `438f88fbb375c15191188c00ef85eb57e944ebadda4325c0c38ad43cc4003012`
+- `drawgrid-aspect.expected.raw`: `8dcb088e77eb99226a4578e6cec09fa46cef5801f934f54e8ff537b72c475d41`
+- `drawgrid.expected.raw`: `a97bce4bcd522a6e9d184954bbb45a563c93ceadd0730ecce570ef6a137aa325`
+- `drawing-combined.expected.raw`: `b2b40d977001841e91f2aff42d6c218dc57f4353d500280b800a3dcb30b4add3`

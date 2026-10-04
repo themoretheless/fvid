@@ -37,6 +37,8 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.bitplanenoise.as_deref().is_some_and(|a|crate::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a|crate::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a|crate::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
+    if transform.drawbox.as_deref().is_some_and(|a|crate::owned_draw::Draw::box_filter(a).is_err()) {return false;}
+    if transform.drawgrid.as_deref().is_some_and(|a|crate::owned_draw::Draw::grid_filter(a).is_err()) {return false;}
     if transform.removegrain.as_deref().is_some_and(|a|crate::owned_removegrain::RemoveGrain::parse(a).is_err()) {return false;}
     if transform.yaepblur.as_deref().is_some_and(|a|crate::owned_yaepblur::YaepBlur::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
@@ -147,6 +149,8 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 bitplanenoise: transform.bitplanenoise.clone(),
                 gradfun: transform.gradfun.clone(),
                 lenscorrection: transform.lenscorrection.clone(),
+                drawbox: transform.drawbox.clone(),
+                drawgrid: transform.drawgrid.clone(),
                 removegrain: transform.removegrain.clone(),
                 yaepblur: transform.yaepblur.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
@@ -549,6 +553,8 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.bitplanenoise.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
+        || transform.drawbox.is_some()
+        || transform.drawgrid.is_some()
         || transform.removegrain.is_some()
         || transform.yaepblur.is_some()
         || transform.colorcorrect.is_some()
@@ -674,6 +680,16 @@ pub(crate) fn apply_pixel_filters_clock(
                     crate::owned_grayworld::GrayWorld::default().apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
                     )?;
                 }
+            }
+            if transform.drawbox.is_some() || transform.drawgrid.is_some() {
+                let sar=transformed_pixel_aspect(header,transform,frame.width,frame.height)?;
+                for (args,cached,grid) in [
+                    (transform.drawbox.as_deref(),history.and_then(|h|h.drawbox.as_ref()),false),
+                    (transform.drawgrid.as_deref(),history.and_then(|h|h.drawgrid.as_ref()),true),
+                ] {if let Some(args)=args {
+                    if let Some(filter)=cached {filter.apply_with_aspect(&mut frame,header.depth(),sar,n,t)?;}
+                    else {crate::owned_draw::Draw::parse(if grid{crate::owned_draw::Kind::Grid}else{crate::owned_draw::Kind::Box},args)?.apply_with_aspect(&mut frame,header.depth(),sar,n,t)?;}
+                }}
             }
             if transform.lagfun.is_some() {
                 history.and_then(|h|h.lagfun.as_ref()).ok_or("lagfun requires persistent streaming history")?.apply(&mut frame,header.depth(),n,t)?;
@@ -1070,6 +1086,8 @@ fn decode_reader_frames(
         || transform.bitplanenoise.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
+        || transform.drawbox.is_some()
+        || transform.drawgrid.is_some()
         || transform.removegrain.is_some()
         || transform.yaepblur.is_some()
         || transform.colorcorrect.is_some()
@@ -1435,4 +1453,13 @@ mod reverse_tests {
             assert_eq!(stats.video_frames, seen.len() as u64);
         }
     }
+}
+
+fn transformed_pixel_aspect(header:&Header,transform:&DecodeTransform,w:usize,h:usize)->Result<f64> {
+ let aspect=header.pixel_aspect()?;let mut sar=aspect.0 as f64/aspect.1 as f64;
+ let crop=transform.crop.unwrap_or(fvid_media_info::CropRect{x:0,y:0,width:header.width,height:header.height});
+ let (mut cw,mut ch)=(u32::try_from(crop.width).map_err(|_|"drawing crop width overflow")?,u32::try_from(crop.height).map_err(|_|"drawing crop height overflow")?);
+ if transform.transpose.is_some(){sar=sar.recip();std::mem::swap(&mut cw,&mut ch);}
+ if let Some(angle)=transform.rotate{(cw,ch)=angle.size(cw,ch);}if let Some(pad)=transform.pad{(cw,ch)=(pad.width,pad.height);}
+ if transform.scale.is_some(){sar*=cw as f64*h as f64/(ch as f64*w as f64);}Ok(sar)
 }

@@ -272,3 +272,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_removegrain_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_drawing_reference"
+harness = false

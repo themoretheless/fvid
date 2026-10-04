@@ -1160,6 +1160,20 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--drawbox" {
+            let value=args.next().ok_or("missing drawbox options")?;
+            if filters.drawbox.is_some() {return Err("duplicate drawbox".into());}
+            if let Ok(filter)=fvid_media::owned_draw::Draw::box_filter(value) {filters.drawbox=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
+        if arg == "--drawgrid" {
+            let value=args.next().ok_or("missing drawgrid options")?;
+            if filters.drawgrid.is_some() {return Err("duplicate drawgrid".into());}
+            if let Ok(filter)=fvid_media::owned_draw::Draw::grid_filter(value) {filters.drawgrid=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--removegrain" {
             let value=args.next().ok_or("missing removegrain options")?;
             if filters.removegrain.is_some() {return Err("duplicate removegrain".into());}
@@ -4923,6 +4937,14 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--lenscorrection" => {
                 if transform.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
                 &mut transform.lenscorrection
+            },
+            "--drawbox" => {
+                if transform.drawbox.is_some() {return Err("duplicate drawbox".into());}
+                &mut transform.drawbox
+            },
+            "--drawgrid" => {
+                if transform.drawgrid.is_some() {return Err("duplicate drawgrid".into());}
+                &mut transform.drawgrid
             },
             "--removegrain" => {
                 if transform.removegrain.is_some() {return Err("duplicate removegrain".into());}

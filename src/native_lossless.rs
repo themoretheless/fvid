@@ -379,6 +379,8 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.bitplanenoise.as_deref().is_some_and(|a| fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a| fvid_media::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a| fvid_media::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
+    if transform.drawbox.as_deref().is_some_and(|a| fvid_media::owned_draw::Draw::box_filter(a).is_err()) {return false;}
+    if transform.drawgrid.as_deref().is_some_and(|a| fvid_media::owned_draw::Draw::grid_filter(a).is_err()) {return false;}
     if transform.removegrain.as_deref().is_some_and(|a| fvid_media::owned_removegrain::RemoveGrain::parse(a).is_err()) {return false;}
     if transform.yaepblur.as_deref().is_some_and(|a| fvid_media::owned_yaepblur::YaepBlur::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
@@ -441,8 +443,8 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             photosensitivity: None,
             monochrome: _,
             grayworld: _,
-            drawbox: None,
-            drawgrid: None,
+            drawbox: _,
+            drawgrid: _,
             lagfun: _,
             amplify: None,
             deband: None,
@@ -555,6 +557,8 @@ pub fn configuration(
         bitplanenoise: transform.bitplanenoise.clone(),
         gradfun: transform.gradfun.clone(),
         lenscorrection: transform.lenscorrection.clone(),
+        drawbox: transform.drawbox.clone(),
+        drawgrid: transform.drawgrid.clone(),
         removegrain: transform.removegrain.clone(),
         yaepblur: transform.yaepblur.clone(),
         colorcorrect: transform.colorcorrect.clone(),
