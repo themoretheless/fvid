@@ -43,3 +43,9 @@ AVC/HEVC MP4 with a single video track now feeds the established owned FFV1 filt
 The bridge is transitional: it incurs temporary disk storage and an extra own FFV1 encode/decode pass, rather than retaining all decoded frames in RAM. It is not a 60 fps performance qualification. RAII removes both temporary stores; only the established final exporter publishes user output atomically. Codec/presentation corruption remains an owned error even in legacy-enabled dispatch. Explicit codec or changing-format capability refusals remain distinguishable.
 
 All-pixel and exact timeline acceptance covers eleven committed synthetic AVC/HEVC clips, including Main10, B pictures, duplicate PTS, repeated/disjoint/fractional/leading edits. Independent negate arithmetic and step/reverse order verify actual transformation. A corrupt-NAL derivative verifies the specific invalid length error and absence of output in native-only and `media` builds. Audio/other tracks, refused tracks, rotation, interior empty edits and unsupported codec tools remain unadmitted by this bridge; no tracks are silently dropped. The production legacy feature edges are still present.
+
+## Video-only decode selection in MP4 with audio
+
+Transformed video decode now selects the first supported video track even when an MP4 also carries audio, matching the video-only API's contract and its plain-decode path. The internal presentation bridge has a separate video-only admission mode; lossless export retains the strict single-track check until audio/other-track preservation is implemented. No multitrack export acceptance is claimed.
+
+A Python-only fixture combines the existing synthetic AVC baseline with the complete packet timeline of the native AAC edit fixture. Tests prove both track types and nonempty AAC samples, video pixel equivalence with the single-track control, native transformed-decode acceptance and continued explicit multitrack export refusal.

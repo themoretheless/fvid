@@ -36,7 +36,7 @@ pub(crate) fn try_decode(
         {
             return Ok(None);
         }
-        let Some(temporary) = crate::owned_mp4_video_bridge::prepare(source, None)? else {
+        let Some(temporary) = crate::owned_mp4_video_bridge::prepare_video(source)? else {
             return Ok(None);
         };
         let mut request = transform.clone();

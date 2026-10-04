@@ -204,6 +204,45 @@ fn admitted_mp4_packet_corruption_stays_owned_and_atomic() {
     let error =
         fvid_media::transcode_lossless(&source, &output, Default::default(), &Default::default())
             .unwrap_err();
-    assert!(error.to_string().contains("invalid NAL payload length"), "{error}");
+    assert!(
+        error.to_string().contains("invalid NAL payload length"),
+        "{error}"
+    );
     assert!(!output.exists());
+}
+
+#[test]
+fn mp4_audio_track_does_not_block_owned_video_filters_or_disappear_on_export() {
+    let source = fixture("playback-errors/shared-mp4-av.mp4");
+    let reader = fvid_media::owned_mp4::Mp4Reader::open(
+        Cursor::new(std::fs::read(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    assert_eq!(reader.tracks().len(), 2);
+    assert_eq!(reader.tracks()[0].handler, *b"vide");
+    assert_eq!(reader.tracks()[1].handler, *b"soun");
+    assert_eq!(reader.tracks()[1].codec, *b"mp4a");
+    assert!(!reader.tracks()[1].samples.is_empty());
+    let request = fvid_media::DecodeTransform {
+        negate: Some("".into()),
+        ..Default::default()
+    };
+    let stats = fvid_media::decode_video_transformed(&source, request.clone()).unwrap();
+    assert_eq!(stats.backend, "owned MP4 compressed video pipeline");
+    let control = fvid_media::decode_video_transformed(
+        &fixture("playback-errors/shared-avc-baseline.mp4"),
+        request,
+    )
+    .unwrap();
+    assert_eq!(stats.video_frames, control.video_frames);
+    assert_eq!(
+        raw_frames(&source),
+        raw_frames(&fixture("playback-errors/shared-avc-baseline.mp4"))
+    );
+    assert!(!fvid_media::owned_lossless::supports(
+        &source,
+        &Default::default(),
+        &Default::default()
+    ));
 }

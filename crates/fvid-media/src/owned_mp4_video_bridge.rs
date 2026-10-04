@@ -58,6 +58,16 @@ pub(crate) fn prepare(
     source: &Path,
     options: Option<&fvid_control::CopyOptions>,
 ) -> Result<Option<Temporary>> {
+    prepare_selected(source, options, false)
+}
+pub(crate) fn prepare_video(source: &Path) -> Result<Option<Temporary>> {
+    prepare_selected(source, None, true)
+}
+fn prepare_selected(
+    source: &Path,
+    options: Option<&fvid_control::CopyOptions>,
+    video_only: bool,
+) -> Result<Option<Temporary>> {
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let mut prefix = [0; 8];
     if file.read(&mut prefix).map_err(|e| e.to_string())? != 8
@@ -76,15 +86,17 @@ pub(crate) fn prepare(
         Err(e) if e.is_unsupported() => return Ok(None),
         Err(e) => return Err(e.to_string()),
     };
-    // Never silently drop audio, refused tracks or other video tracks.
-    if reader.tracks().len() != 1
-        || !reader.refused().is_empty()
-        || reader.tracks()[0].handler != *b"vide"
-        || reader.tracks()[0].rotation != 0
-    {
+    // Decode statistics intentionally selects video; exported files must retain
+    // every source track until a multitrack bridge is implemented.
+    if !video_only && (reader.tracks().len() != 1 || !reader.refused().is_empty()) {
         return Ok(None);
     }
-    let track = &reader.tracks()[0];
+    let Some(track) = reader.tracks().iter().find(|t| t.handler == *b"vide") else {
+        return Ok(None);
+    };
+    if track.rotation != 0 {
+        return Ok(None);
+    }
     let aspect = track.pixel_aspect;
     let file_metadata = mkv::FileMetadata::from_mp4(&reader);
     let description = mkv::VideoTrackDescription {

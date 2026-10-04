@@ -825,3 +825,11 @@ The Python-only shared MP4 generator adds two derivatives of the existing synthe
 
 - `shared-mp4-undefined-language.mp4`: `a61bb2d3c42029fafbf7bde4f0ac52464d1333c763dae192bb5710ff23a68122`
 - `shared-mp4-corrupt-nal.mp4`: `2d4e1f865f5a6dbb5cec42933a55c88c514ed22f0b0c9fe26363cf8229ba46a5`
+
+### MP4 video-only filtering with an AAC track
+
+`generate-shared-mp4-av.py` joins committed synthetic shared AVC baseline and `audio/aac-native-edit.m4a` packet data. Original moov boxes become equal-size free boxes; the new moov contains both tracks, AAC chunk offsets shift by the video file length and its track ID becomes two. The AAC source's unrelated edit window is replaced with free, retaining its complete packet timeline without copying the source movie clock. No private media, encoders or network are used. The original fragmented audio draft reproduced an unrelated NAL error and was replaced before acceptance; the committed fixture uses indexed AAC and verifies actual nonempty samples.
+
+The regression accepts owned transformed video decode with audio present and equal video pixels/count to its single-track control. Export is still a passing refusal test, not audio-preserving export acceptance.
+
+- `shared-mp4-av.mp4`: `aabf5a8c9a677b288b88bebc838cdc85f3b288c85e624d017013b7b63a741c83`
