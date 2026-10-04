@@ -914,6 +914,11 @@ fn pixel_decode_args(
             result.extend(args.cloned());
             break;
         }
+        if arg == "--cas" {
+            if filters.cas.is_some() {return Err("duplicate cas".into());}
+            filters.cas=Some(fvid_media::owned_cas::Cas::parse(args.next().ok_or("missing cas args")?)?);
+            continue;
+        }
         if arg == "--colorcorrect" {
             if filters.colorcorrect.is_some() {return Err("duplicate colorcorrect".into());}
             filters.colorcorrect=Some(fvid_media::owned_colorcorrect::ColorCorrect::parse(args.next().ok_or("missing colorcorrect args")?)?);
@@ -4539,7 +4544,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--exposure"|"--colorbalance"|"--colorcorrect"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--exposure"|"--colorbalance"|"--colorcorrect"|"--cas"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {
@@ -4798,6 +4803,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--exposure" => &mut transform.exposure,
             "--colorbalance" => &mut transform.colorbalance,
             "--colorcorrect" => &mut transform.colorcorrect,
+            "--cas" => &mut transform.cas,
             "--gblur" => &mut transform.gblur,
             "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
@@ -5466,6 +5472,29 @@ mod colorcorrect_cli_tests {
                 vec!["decode",source.to_str().unwrap(),"--colorcorrect",args,"--quiet"],
                 vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorcorrect",args,"--quiet"],
                 vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorcorrect",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod cas_cli_tests {
+    #[test]
+    fn owned_cas_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-cas-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/cas-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="strength=0.8:planes=5";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--cas",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--cas",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--cas",args],
             ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
             assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
             assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);

@@ -3628,3 +3628,14 @@ cases. Fused centering and correction preserve the reference rounding; an
 enabled regression checks the specific zero-adjustment one-level failure.
 RGB conversion and arbitrary multi-thread reference analysis parity are not
 qualified by these tests.
+
+Owned `cas` implements contrast-adaptive sharpening of planar YUV and packed
+RGB/RGBA at 8–16 bits, with replicated boundaries, strength 0–1 and plane masks
+0–15. RGB masks follow G/B/R/A plane order, so default 7 preserves alpha and
+bit 8 explicitly sharpens it. All geometry and precision checks precede output
+allocation and mutation; errors preserve input. Black neighbourhoods use zero
+weight, avoiding undefined division by zero. Decode, Y4M export and FFV1 export
+route through this implementation without legacy FFmpeg. Enabled offline
+acceptance matches 2,322 YUV samples and 9,216 RGBA components exactly on short
+synthetic videos. Tests also cover degenerate width/height and all integer
+depths; generic RGB/YUV conversion equivalence is outside this qualification.

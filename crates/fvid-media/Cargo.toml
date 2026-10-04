@@ -137,3 +137,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_colorcorrect_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_cas_reference"
+harness = false

@@ -143,3 +143,17 @@ adjustment regression specifically checks first-frame chroma 46 and 47:
 separate multiply/subtract loses one level, whereas fused centering preserves
 the reference results. All reference generation is benchmark-only. Fixtures
 contain no private media and ordinary tests require neither FFmpeg nor network.
+
+### cas-grid-{8,12,16}.y4m, cas-reference-{8,12,16}-{0..5}.raw, cas-rgb-reference-{8,16}-{0..5}.raw
+
+`python3 scripts/generate_cas_fixtures.py` generates three-frame 5×5 planar
+YUV420 videos: flat black, flat white and an arithmetic edge/chroma pattern.
+RGBA qualification reuses the three-frame arithmetic `vibrance-grid` videos.
+Six cases cover default/full strength, bypass and G/Y, B/R/chroma and all-plane
+masks, including alpha. Explicit benchmark generation:
+`FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_cas_reference`.
+Enabled ordinary tests compare 2,322 YUV samples and 9,216 RGBA components
+exactly with committed references. Boundary tests cover 1×1, 1×3, 3×1 and odd
+3×5 black frames at every integer depth 8–16, validating zero-contrast handling
+and precision checks before mutation. Fixtures contain no private media;
+generation scripts and ordinary tests need neither FFmpeg nor network.
