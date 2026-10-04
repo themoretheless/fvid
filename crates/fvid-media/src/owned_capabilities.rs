@@ -39,7 +39,7 @@ pub fn capabilities() -> Capabilities {
             "boxblur",
             "chromashift",
             "colorize",
-            "colorhold", "colorcontrast", "vibrance", "colorlevels", "colorchannelmixer", "exposure",
+            "colorhold", "colorcontrast", "vibrance", "colorlevels", "colorchannelmixer", "exposure", "colorbalance",
             "monochrome",
             "lutyuv",
             "crop",
@@ -94,7 +94,7 @@ mod tests {
             assert!(!inventory.decoders.iter().any(|name| name == decoder));
         }
         for filter in ["colorize",
-            "colorhold", "colorcontrast", "vibrance", "colorlevels", "colorchannelmixer", "exposure", "monochrome",
+            "colorhold", "colorcontrast", "vibrance", "colorlevels", "colorchannelmixer", "exposure", "colorbalance", "monochrome",
             "lutyuv", "eq", "hue", "bilateral"] {
             assert!(inventory.filters.iter().any(|name| name == filter));
         }

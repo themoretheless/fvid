@@ -3605,3 +3605,12 @@ and an ignored exact pipeline acceptance. These are not equivalence passes.
 The external round-trip also changes some alpha values at zero exposure; owned
 alpha preservation is checked against the original input independently. Float
 file decode/export and general YUV conversion parity remain unqualified.
+
+Owned `colorbalance` supports all nine RGB shadow/midtone/highlight adjustments,
+positional/keyed scalar expressions and the preserve-lightness boolean. It
+preserves alpha, validates all input samples before mutation and supports
+RGB/RGBA precision from 8 to 16 bits. YUV uses the owned metadata-aware point
+chroma RGB16 converter. Native decode, Y4M export and FFV1 lossless export
+accept the filter without the legacy backend. Six three-frame reference cases
+at 8/16 bits match all 9,216 RGBA components exactly in enabled offline tests;
+general YUV conversion equivalence remains unqualified.

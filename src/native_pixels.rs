@@ -34,6 +34,7 @@ pub struct PixelFilters {
     pub vibrance: Option<fvid_media::owned_vibrance::Vibrance>,
     pub colorlevels: Option<fvid_media::owned_colorlevels::ColorLevels>,
     pub colorchannelmixer: Option<fvid_media::owned_colorchannelmixer::ColorChannelMixer>,
+    pub colorbalance: Option<fvid_media::owned_colorbalance::ColorBalance>,
     pub exposure: Option<fvid_media::owned_exposure::Exposure>,
     pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
@@ -55,6 +56,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            colorbalance: request.colorbalance.as_deref().map(fvid_media::owned_colorbalance::ColorBalance::parse).transpose().map_err(|e|invalid(&e))?,
             exposure: request.exposure.as_deref().map(fvid_media::owned_exposure::Exposure::parse).transpose().map_err(|e|invalid(&e))?,
             colorchannelmixer: request.colorchannelmixer.as_deref().map(fvid_media::owned_colorchannelmixer::ColorChannelMixer::parse).transpose().map_err(|e|invalid(&e))?,
             colorlevels: request.colorlevels.as_deref().map(fvid_media::owned_colorlevels::ColorLevels::parse).transpose().map_err(|e|invalid(&e))?,
@@ -148,6 +150,7 @@ impl PixelFilters {
             && self.colorlevels.is_none()
             && self.colorchannelmixer.is_none()
             && self.exposure.is_none()
+            && self.colorbalance.is_none()
             && self.colorize.is_none()
             && self.bilateral.is_none()
             && self.gblur.is_none()
@@ -191,6 +194,10 @@ impl PixelFilters {
         }
         if let Some(filter) = self.bilateral {
             filter.apply(frame, depth).map_err(|e| invalid(&e))?;
+        }
+        if let Some(filter)=&self.colorbalance {
+            if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
+            else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
         if let Some(filter)=&self.colorlevels {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}

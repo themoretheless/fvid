@@ -118,3 +118,14 @@ maximum, scaled 240 and scaled 16. The old RGB16 workspace specifically fails
 the first frame (235–236 instead of 255 at eight bits), proving premature
 highlight clipping. Enabled acceptance checks all frames at all three depths
 through the owned Y4M pipeline. No private media is used.
+
+### colorbalance-reference-{8,16}-{0..5}.raw
+
+Six shadow/midtone/highlight parameter sets, including both preserve-lightness
+cases and extreme adjustments, use the three-frame arithmetic RGBA videos
+`vibrance-grid-{8,16}.rgba` from the pure-Python generator. Explicit benchmark
+generation: `FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_colorbalance_reference`.
+Enabled ordinary acceptance compares all 9,216 RGBA components exactly against
+committed references; alpha remains the original input. Native routing uses
+three-frame odd-size Y4M fixtures at 8/12/16 bits. Ordinary tests never invoke
+FFmpeg or network; no private media is included.
