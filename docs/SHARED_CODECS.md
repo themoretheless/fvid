@@ -285,3 +285,24 @@ not executed here and checks mapping metadata rather than pixel equivalence.
 The first scheduler keeps the adapter's progressive eight-bit 4:2:0/single-group
 scope and explicitly refuses frame-number gaps requiring inferred references.
 Production CUDA filter wiring and other codec adapters remain unfinished.
+
+
+## Owned NV12 allocation and direct codec/filter chain
+
+`Nv12Buffer` allocates pitched CUDA Y/UV storage through FVid's shared primary
+context, with checked dimensions, plane extents and device addresses. It exposes
+a borrowed raw view and an output stream for ordering filter work. The allocation
+must remain live until external codec registrations and unsafe pointer users
+are finished; borrowing its view does not transfer allocation ownership.
+
+The existing CUDA qualification runner now additionally requires three native
+AVC tests, including a synthetic first-IDR NVDEC -> GPU reflection -> NVENC chain.
+The test orders filter completion through the owned output stream, unmaps the
+decoder surface, registers the retained filtered allocation, drains encoder EOS
+and closes the encoder before freeing its input. It checks packet existence and
+timestamp/duration, not pixel-equivalence or 60 fps. This test is compiled on
+Linux/Windows but has not run on a physical NVIDIA device here.
+
+The chain remains an explicit ignored hardware qualification test; production
+`cuda-hw` still uses the legacy backend pending actual filter/container wiring
+and complete format coverage.

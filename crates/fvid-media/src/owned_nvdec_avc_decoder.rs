@@ -386,6 +386,78 @@ mod tests {
         drop(frame);
         assert_eq!(state.slots[index as usize].strong_count(), 0);
     }
+
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires an NVIDIA CUDA device with NVDEC and NVENC"]
+    fn synthetic_avc_decode_filter_encode_chain_without_libav() {
+        use fvid_cuda::{Nv12Buffer, Nv12Processor, Nv12Transform, Nv12View, NvencSession};
+        let (mut reader, state) = input(CONTROL);
+        let (width, height) = state.sps.coded_dimensions();
+        let mut decoder =
+            AvcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20)
+                .unwrap();
+        let mut packet = Vec::new();
+        reader.read_packet(0, 0, &mut packet).unwrap();
+        let frame = decoder.decode(&packet).unwrap();
+        let source = decoder.map(&frame).unwrap();
+        let src = Nv12View {
+            y: source.pointer,
+            uv: source
+                .pointer
+                .checked_add(u64::from(source.pitch) * u64::from(height))
+                .unwrap(),
+            pitch_y: source.pitch,
+            pitch_uv: source.pitch,
+            width,
+            height,
+        };
+        let output = Nv12Buffer::new(0, width, height).unwrap();
+        let mut filter = Nv12Processor::new(0).unwrap();
+        filter.follow_stream(output.stream_handle().unwrap());
+        filter
+            .apply(
+                src,
+                output.view().unwrap(),
+                Nv12Transform {
+                    crop_x: 0,
+                    crop_y: 0,
+                    out_width: width,
+                    out_height: height,
+                    hflip: true,
+                    vflip: true,
+                },
+            )
+            .unwrap();
+        output.synchronize().unwrap();
+        decoder.unmap(source.slot).unwrap();
+        let view = output.view().unwrap();
+        let mut encoder = NvencSession::open(CodecDevice::new(0).unwrap()).unwrap();
+        encoder.initialize_h264(width, height, 60, 1).unwrap();
+        // SAFETY: Allocation shares primary context, filtering is complete,
+        // and output remains live until successful encoder close.
+        let input =
+            unsafe { encoder.register_nv12(view.y, view.pitch_y, output.byte_len() as u64) }
+                .unwrap();
+        let slot = encoder.create_output().unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        while encoder.submit_nv12(input, slot, 0, 1).unwrap() == fvid_cuda::NvencSubmit::Busy {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+        encoder.finish().unwrap();
+        let packet = loop {
+            if let Some(packet) = encoder.receive().unwrap() {
+                break packet;
+            }
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        };
+        assert!(!packet.bytes.is_empty());
+        assert_eq!((packet.timestamp, packet.duration), (0, 1));
+        encoder.close().unwrap();
+        decoder.close().unwrap();
+    }
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     #[test]
     #[ignore = "requires an NVIDIA CUDA device with NVDEC"]

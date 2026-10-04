@@ -24,6 +24,8 @@ pub use nvenc::{NvencApi, NvencVersion};
 mod codec_device;
 pub use codec_device::CodecDevice;
 mod nv12;
+mod nv12_buffer;
+pub use nv12_buffer::Nv12Buffer;
 mod pipeline;
 mod shader;
 pub use shader::ByteShader;

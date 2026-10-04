@@ -19,6 +19,11 @@ def qualify_native_tests(root, run):
     suites = [
         ("fvid-cuda", "pipeline::tests", ["resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip", "sampling_shader_matches_independent_crop_and_reflection_reference"], []),
         ("fvid-cuda", "nv12::native_nv12::shader_tests", ["native_nv12_sampling_shader_preserves_pitches_and_matches_cpu", "native_p010_sampling_shader_preserves_pitches_and_matches_cpu", "followed_stream_survives_parameter_changes_and_processor_drop"], []),
+        ("fvid-media", "owned_nvdec_avc", [
+            "synthetic_owned_avc_picture_decodes_and_maps_on_nvidia",
+            "synthetic_ipb_packets_decode_map_and_release_without_libav",
+            "synthetic_avc_decode_filter_encode_chain_without_libav",
+        ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "hw_cuda::layout_tests", ["main10_filter_encodes_hevc_without_host_frame_copies", "vertical_reflection_copies_host_frames_only_when_explicitly_requested"], ["--features", "cuda-hw"]),
     ]
     results = []
