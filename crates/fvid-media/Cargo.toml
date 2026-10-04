@@ -28,7 +28,8 @@ default = []
 http-input = ["dep:reqwest"]
 legacy-ffmpeg = ["dep:bindgen"]
 native-cuda = ["dep:fvid-cuda"]
-cuda-hw = ["legacy-ffmpeg", "native-cuda"]
+# Production CUDA is owned; legacy libav is opt-in for comparison benchmarks.
+cuda-hw = ["native-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the
 # rfd file dialogs. Off, the crate is a pure decode/edit library.
 player = [ "fvid-codecs/player", "dep:eframe", "dep:rfd", "dep:cpal"]

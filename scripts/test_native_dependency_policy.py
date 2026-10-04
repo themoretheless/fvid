@@ -132,11 +132,25 @@ class ProductionMediaPolicy(unittest.TestCase):
              mock.patch("builtins.print"):
             with self.assertRaisesRegex(SystemExit, "production media: FFmpeg dependency reached graph"):
                 guard.main()
-            self.assertEqual(dependencies.call_count, 7)
+            self.assertEqual(dependencies.call_count, 9)
             self.assertTrue(any(
                 call.args[1] == ["--no-default-features", "--features", "native-cuda"]
                 for call in dependencies.call_args_list
             ))
+
+    def test_normal_audit_rejects_each_production_cuda_feature_without_opt_in(self):
+        for feature, name in [("media-cuda", "production CUDA"), ("cuda-hw", "media library CUDA")]:
+            with self.subTest(feature=feature):
+                def graph(manifest, features, target, offline):
+                    return [], features == ["--no-default-features", "--features", feature]
+                with mock.patch("sys.argv", ["guard", "--offline", "--target", "test-target"]), \
+                     mock.patch.object(guard, "dependencies", side_effect=graph), \
+                     mock.patch.object(guard, "audit_ordinary_tests", return_value=([], [])), \
+                     mock.patch.object(guard, "audit_fixture_generators", return_value=([], [])), \
+                     mock.patch.object(guard, "audit_native_validators", return_value=([], [])), \
+                     mock.patch("builtins.print"):
+                    with self.assertRaisesRegex(SystemExit, name + ": FFmpeg dependency reached graph"):
+                        guard.main()
 
 
 if __name__ == "__main__":

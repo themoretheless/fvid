@@ -11,13 +11,17 @@ from unittest.mock import patch
 import validate_hw_cuda
 
 REQUIRED = {
-    "pipeline::tests": ["resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip",
-                        "sampling_shader_matches_independent_crop_and_reflection_reference"],
-    "nv12::native_nv12::shader_tests": ["native_nv12_sampling_shader_preserves_pitches_and_matches_cpu",
-                                      "native_p010_sampling_shader_preserves_pitches_and_matches_cpu",
-                                      "followed_stream_survives_parameter_changes_and_processor_drop"],
-    "hw_cuda::layout_tests": ["main10_filter_encodes_hevc_without_host_frame_copies",
-                             "vertical_reflection_copies_host_frames_only_when_explicitly_requested"],
+    "nvenc_session::tests": ["direct_cuda_session_opens_and_closes_without_libav", "direct_hevc_submission_without_libav", "direct_hevc_main10_p010_submission_without_libav"],
+    "pipeline::tests": ["resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip", "sampling_shader_matches_independent_crop_and_reflection_reference"],
+    "nv12_buffer::tests": ["device_black_fill_has_correct_luma_chroma_and_padding", "device_p010_black_fill_has_exact_codes_and_word_padding"],
+    "nv12::native_nv12::shader_tests": ["native_nv12_sampling_shader_preserves_pitches_and_matches_cpu", "native_p010_sampling_shader_preserves_pitches_and_matches_cpu", "followed_stream_survives_parameter_changes_and_processor_drop"],
+    "owned_nvdec_avc": ["synthetic_owned_avc_picture_decodes_and_maps_on_nvidia", "synthetic_ipb_packets_decode_map_and_release_without_libav", "synthetic_avc_decode_filter_encode_chain_without_libav"],
+    "owned_nvdec_hevc": ["synthetic_owned_hevc_idr_submits_and_maps_on_nvidia", "owned_hevc_ipb_scheduler_submits_and_maps_on_nvidia", "own_hevc_mp4_packets_decode_on_nvidia_without_libav"],
+    "owned_nvdec_mp4": ["own_mp4_packets_decode_on_nvidia_without_libav"],
+    "owned_hw_filter": ["production_hw_filter_routes_synthetic_avc_without_libav", "production_hw_filter_routes_sps_crop_without_libav", "production_hw_filter_routes_hevc_movie_without_libav", "production_hw_filter_routes_main10_movie_without_libav"],
+    "owned_hw_decode": ["production_decode_device_uses_owned_code_without_libav"],
+    "owned_nvenc_movie": ["synthetic_movie_encodes_and_muxes_without_libav", "synthetic_main10_movie_encodes_and_muxes_without_libav"],
+    "owned_nvdec_movie": ["synthetic_movie_blanks_and_repeated_ranges_present_on_nvidia", "synthetic_main10_movie_renders_p010_blanks_repeats_and_shader_on_nvidia"],
 }
 
 
@@ -56,8 +60,8 @@ class ReferencePolicy(unittest.TestCase):
             self.assertFalse(report["reference_requested"])
             self.assertFalse(report["reference_completed"])
             self.assertFalse(report["provided_cli_checks_completed"])
-            self.assertEqual([r["passed"] for r in report["native_tests"]], [2, 3, 2])
-            self.assertEqual(len(self.calls), 4)
+            self.assertEqual([r["passed"] for r in report["native_tests"]], [3, 2, 2, 3, 3, 3, 1, 4, 1, 2, 2])
+            self.assertEqual(len(self.calls), 12)
             self.assertTrue(all("--ignored" in c for c in self.calls[1:]))
             self.assertIn("cuda-hw", self.calls[-1])
 
@@ -65,7 +69,7 @@ class ReferencePolicy(unittest.TestCase):
         reference_calls = []
 
         def reference(run, binary, report, checks):
-            self.assertEqual(len(self.calls), 4)
+            self.assertEqual(len(self.calls), 12)
             reference_calls.append(binary)
             checks.append("simulated reference checks")
 
@@ -88,7 +92,7 @@ class ReferencePolicy(unittest.TestCase):
             destination = pathlib.Path(folder) / "report.json"
             with patch.object(validate_hw_cuda.subprocess, "run", side_effect=empty), \
                  patch.dict(sys.modules, {"benchmark_hw_cuda_reference": None}):
-                with self.assertRaisesRegex(RuntimeError, "requires at least 2"):
+                with self.assertRaisesRegex(RuntimeError, "requires at least 3"):
                     validate_hw_cuda.main(["--benchmark-reference", "--report", str(destination)])
             report = json.loads(destination.read_text())
             self.assertEqual(report["status"], "failed")

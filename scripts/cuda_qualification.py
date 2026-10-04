@@ -32,33 +32,32 @@ def qualify_native_tests(root, run):
             "synthetic_owned_avc_picture_decodes_and_maps_on_nvidia",
             "synthetic_ipb_packets_decode_map_and_release_without_libav",
             "synthetic_avc_decode_filter_encode_chain_without_libav",
-        ], ["--no-default-features", "--features", "native-cuda"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_nvdec_hevc", [
             "synthetic_owned_hevc_idr_submits_and_maps_on_nvidia",
             "owned_hevc_ipb_scheduler_submits_and_maps_on_nvidia",
             "own_hevc_mp4_packets_decode_on_nvidia_without_libav",
-        ], ["--no-default-features", "--features", "native-cuda"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_nvdec_mp4", [
             "own_mp4_packets_decode_on_nvidia_without_libav",
-        ], ["--no-default-features", "--features", "native-cuda"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_hw_filter", [
             "production_hw_filter_routes_synthetic_avc_without_libav",
             "production_hw_filter_routes_sps_crop_without_libav",
             "production_hw_filter_routes_hevc_movie_without_libav",
             "production_hw_filter_routes_main10_movie_without_libav",
-        ], ["--no-default-features", "--features", "native-cuda"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_hw_decode", [
             "production_decode_device_uses_owned_code_without_libav",
-        ], ["--no-default-features", "--features", "native-cuda"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_nvenc_movie", [
             "synthetic_movie_encodes_and_muxes_without_libav",
             "synthetic_main10_movie_encodes_and_muxes_without_libav",
-        ], ["--no-default-features", "--features", "native-cuda"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_nvdec_movie", [
             "synthetic_movie_blanks_and_repeated_ranges_present_on_nvidia",
             "synthetic_main10_movie_renders_p010_blanks_repeats_and_shader_on_nvidia",
-        ], ["--no-default-features", "--features", "native-cuda"]),
-        ("fvid-media", "hw_cuda::layout_tests", ["main10_filter_encodes_hevc_without_host_frame_copies", "vertical_reflection_copies_host_frames_only_when_explicitly_requested"], ["--features", "cuda-hw"]),
+        ], ["--no-default-features", "--features", "cuda-hw"]),
     ]
     results = []
     for package, selector, required, features in suites:

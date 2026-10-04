@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject FFmpeg adapters in supported native build graphs (not legacy media)."""
+"""Reject FFmpeg adapters in production and native build graphs."""
 import argparse
 import ast
 from pathlib import Path
@@ -125,7 +125,7 @@ def main():
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--target", help="Cargo target triple (defaults to rustc host)")
     parser.add_argument("--production", action="store_true",
-                        help="also require CUDA graphs to exclude FFmpeg")
+                        help="compatibility flag; production CUDA graphs are always audited")
     args = parser.parse_args()
     target = args.target
     if target is None:
@@ -140,12 +140,9 @@ def main():
         ("player", ROOT / "Cargo.toml", ["--no-default-features", "--features", "player"]),
         ("camera bridge", ROOT / "crates/fvid-camera-ffi/Cargo.toml", []),
         ("production media", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media"]),
+        ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
+        ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
     ]
-    if args.production:
-        cases.extend([
-            ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
-            ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
-        ])
     test_paths, failures = audit_ordinary_tests(ROOT)
     if not failures:
         print(f"ordinary tests: {len(test_paths)} Rust files; no known external FFmpeg test calls", flush=True)

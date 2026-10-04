@@ -487,7 +487,14 @@ both originally blank spans. NVIDIA execution remains unverified.
 
 ## Production CUDA routing
 
-The existing `hw-filter` entrypoint now tries the owned CUDA route first for
+`media-cuda` and `cuda-hw` now enable owned CUDA code without `legacy-ffmpeg`.
+The default dependency guard audits both graphs, including in CI. Earlier
+migration notes in this document describe the legacy dependency before this
+feature change; they are not the current production graph. An explicit
+`legacy-ffmpeg` opt-in remains for reference benchmarks while native coverage
+is extended. No unsupported production input is automatically retried with libav.
+
+The existing `hw-filter` entrypoint uses the owned CUDA route for
 AVC or qualified Main/Main10 HEVC MP4 input and `.mkv` output. CPU qualification parses every access unit using
 the same owned POC/DPB/parameter adapter before GPU selection. Accepted files run
 through owned MP4 input, movie reader, filter/shader, retained NVENC slots and
@@ -500,10 +507,11 @@ from automatic selection to retain existing command semantics until qualified;
 Main10 uses retained P010 encoder pools/copies, Main10 NVENC registration and
 submission, and owned HEVC Annex B/hvcC/Matroska export. Its hardware acceptance
 test remains ignored until run on NVIDIA; host tests qualify source syntax,
-clock and bit-exact Annex B conversion. Other codecs/containers remain on
-the legacy route. This is not yet elimination
-of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
-owned route preserves that track scope while retaining metadata and exact movie
+clock and bit-exact Annex B conversion. Other codecs/containers return an
+explicit unsupported-route error until owned support is implemented. This
+feature change removes the build dependency; it does not establish complete
+native codec/container/option equivalence. The owned operation exports video
+only while retaining metadata and exact movie
 occurrences. Its nominal rate is reduced from source sample count/duration.
 
 The shared movie renderer selects a typed `Yuv420Buffer`/`Yuv420Processor` pair:
@@ -539,8 +547,8 @@ as the legacy interface requires. The general native reader retains its separate
 `Clip` policy for overlap-based editing.
 
 Automatic native interval routing currently requires a single known video track,
-a zero-start movie and no empty spans; mixed-track/nonzero origins remain on legacy until equivalent
-origin handling is qualified. The duplicate-PTS synthetic fixture checks whole
+a zero-start movie and no empty spans; mixed-track/nonzero origins return an
+unsupported-route error until equivalent origin handling is qualified. The duplicate-PTS synthetic fixture checks whole
 frame selection, repeated timestamps and preserved durations. GPU production
 acceptance now requests a half-second cut from the one-second control fixture
 and verifies six output packets using FVid; execution remains unverified.
@@ -566,9 +574,10 @@ owned MP4 demux, POC/DPB scheduling and direct NVDEC submission. Each visible
 picture is mapped/unmapped to wait for device reconstruction without copying
 pixels to CPU. Statistics report visible dimensions after SPS cropping and `cuda/nv12` or `cuda/p010`.
 The standalone `native-cuda` feature exports `decode_video_cuda` without libav.
-The temporary `cuda-hw` entrypoint calls this route before its legacy fallback;
+The production `cuda-hw` entrypoint uses this route without a legacy fallback;
 unsupported admission happens before device creation, and execution errors never
 retry through libav. CPU tests prove synthetic source admission and rewind.
 An ignored NVIDIA acceptance test covers AVC crop, HEVC Main and Main10 output
 counts/dimensions/formats. It has not run here. Other codecs/containers still
-need owned device adapters before the `cuda-hw` legacy feature edge is removed.
+need owned device adapters for full functional coverage. The feature edge is
+removed; this is not yet universal CUDA codec/container support.
