@@ -16,12 +16,8 @@ by the explicitly invoked benchmark
 The reference graph is `format=rgba64le,colorhold=red:0.2:0.5`, returned as
 YUV420p rawvideo. It contains three 3×3 frames (51 bytes), no private media.
 Ordinary tests only read these committed bytes and invoke no external program.
-A passing reproduction records the current conversion difference; the ignored
-acceptance requires exact reference parity and must be enabled with the fix.
-
-The colorhold reproduction additionally requires differences no greater than
-one 8-bit level after point-sampling correction. Exact acceptance remains
-ignored pending coefficient and rounding compatibility.
+Exact acceptance is enabled after correcting conversion and ordered rounding;
+the former passing difference reproduction has been removed.
 
 ### colorhold-rgb-stage-{8,12,16}.raw
 
@@ -31,7 +27,7 @@ with alpha stripped. Generation is explicitly benchmark-only:
 `FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_colorhold_reference`.
 No private input is used. Ordinary forward-conversion acceptance reads the
 committed files and matches all 81 component samples without FFmpeg/network.
-The full colorhold YUV acceptance remains ignored pending reverse conversion.
+Full colorhold YUV acceptance is also enabled for the synthetic limited BT.601 cases.
 
 ### colorhold-{black,blend}-reference-{8,12,16}.raw
 
@@ -39,7 +35,6 @@ All reference files come from the three-frame synthetic colorize grids via
 `benches/colorhold_yuv_qualification.py --save-references`. `black` uses
 `black:0.00001`; `blend` uses `red:0.2:0.5`. The benchmark reference graph
 first converts to RGBA64LE, applies colorhold and exports the original planar
-precision. Enabled 12/16-bit acceptance matches all 204 component samples.
-Eight-bit references retain the unresolved one-level rounding difference;
-8-bit blend exact acceptance remains ignored. Generation is benchmark-only,
+precision. Enabled 8/12/16-bit acceptance matches all 306 component samples.
+Ordered rounding fixes the former eight-bit difference. Generation is benchmark-only,
 ordinary acceptance is offline and no private media is involved.

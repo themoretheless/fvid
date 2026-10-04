@@ -226,12 +226,10 @@ mod tests {
             assert!(ColorHold::parse(args).is_err());
         }
         let mut invalid = vec![1, 2];
-        assert!(
-            ColorHold::parse("")
-                .unwrap()
-                .apply_rgb(&mut invalid, 8, 3)
-                .is_err()
-        );
+        assert!(ColorHold::parse("")
+            .unwrap()
+            .apply_rgb(&mut invalid, 8, 3)
+            .is_err());
         assert_eq!(invalid, [1, 2]);
     }
 }
@@ -429,20 +427,6 @@ mod conversion_gap_tests {
         (output, expected)
     }
     #[test]
-    fn synthetic_blend_reproduces_conversion_difference() {
-        let (actual, expected) = samples();
-        assert_ne!(actual, expected);
-        // Point sampling removed the former 24-level chroma mismatch; remaining
-        // differences on this fixture are conversion coefficient/rounding error.
-        assert!(
-            actual
-                .iter()
-                .zip(&expected)
-                .all(|(a, b)| a.abs_diff(*b) <= 1)
-        );
-    }
-    #[test]
-    #[ignore = "acceptance pending RGB conversion/resampling compatibility"]
     fn synthetic_blend_conversion_matches_reference() {
         let (actual, expected) = samples();
         assert_eq!(actual, expected);
@@ -450,12 +434,13 @@ mod conversion_gap_tests {
 }
 
 #[cfg(test)]
-mod high_depth_conversion_acceptance_tests {
+mod conversion_acceptance_tests {
     #[test]
-    fn full_synthetic_filter_matches_high_depth_reference_frames() {
+    fn full_synthetic_filter_matches_reference_frames() {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/fixtures/playback-errors");
-        for depth in [12, 16] {
+        for depth in [8, 12, 16] {
+            let frame_bytes = if depth == 8 { 17 } else { 34 };
             let source = std::fs::read(root.join(format!("colorize-grid-{depth}.y4m"))).unwrap();
             let start = source.iter().position(|v| *v == b'\n').unwrap() + 1;
             for (kind, options) in [("black", "black:0.00001"), ("blend", "red:0.2:0.5")] {
@@ -468,9 +453,9 @@ mod high_depth_conversion_acceptance_tests {
                         width: 3,
                         height: 3,
                         subsampling: Some([2, 2]),
-                        data: source[at..at + 34].to_vec(),
+                        data: source[at..at + frame_bytes].to_vec(),
                     };
-                    at += 34;
+                    at += frame_bytes;
                     super::ColorHold::parse(options)
                         .unwrap()
                         .apply_yuv(
@@ -485,7 +470,7 @@ mod high_depth_conversion_acceptance_tests {
                 let expected =
                     std::fs::read(root.join(format!("colorhold-{kind}-reference-{depth}.raw")))
                         .unwrap();
-                assert_eq!(expected.len(), 102);
+                assert_eq!(expected.len(), 3 * frame_bytes);
                 assert_eq!(output, expected, "depth={depth} options={options}");
             }
         }

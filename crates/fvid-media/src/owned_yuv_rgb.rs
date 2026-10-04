@@ -201,11 +201,24 @@ pub fn filter_rgb16_sampled(
                         let luma16 = (values[0] + (4096i64 << 15) + (1 << 14)) >> 15;
                         let u16 = (values[1] + (32768i64 << 15) + (1 << 14)) >> 15;
                         let v16 = (values[2] + (32768i64 << 15) + (1 << 14)) >> 15;
+                        let reduced = if depth == 8 {
+                            [
+                                ordered_reduce8(luma16, col, row, 0) as f64,
+                                ordered_reduce8(u16, cx, cy, 0) as f64,
+                                ordered_reduce8(v16, cx, cy, 3) as f64,
+                            ]
+                        } else {
+                            [
+                                luma16 as f64 * scale / 256.0,
+                                u16 as f64 * scale / 256.0,
+                                v16 as f64 * scale / 256.0,
+                            ]
+                        };
                         (
-                            luma16 as f64 * scale / 256.0,
+                            reduced[0],
                             (
-                                (u16 as f64 * scale / 256.0 - center) / crange,
-                                (v16 as f64 * scale / 256.0 - center) / crange,
+                                (reduced[1] - center) / crange,
+                                (reduced[2] - center) / crange,
                             ),
                         )
                     } else {
@@ -371,4 +384,17 @@ mod forward_acceptance_tests {
             assert_eq!(cell, 4);
         }
     }
+}
+
+// A three-level ordered threshold matrix, generated from two-bit ranks.
+// Each 8x8 tile visits all 64 thresholds; V uses a shifted horizontal phase.
+fn ordered_reduce8(sample: i64, x: usize, y: usize, phase: usize) -> i64 {
+    let x = x.wrapping_add(phase);
+    let ranks = [[1i64, 2, 3, 0], [0, 3, 2, 1], [2, 1, 0, 3]];
+    let mut rank = 0;
+    for (bit, weight) in [(0, 16), (1, 4), (2, 1)] {
+        let index = (((y >> bit) & 1) << 1) | ((x >> bit) & 1);
+        rank += ranks[bit][index] * weight;
+    }
+    (((sample >> 1) + rank * 2) >> 7).clamp(0, 255)
 }

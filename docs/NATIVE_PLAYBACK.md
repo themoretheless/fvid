@@ -3500,20 +3500,13 @@ Colour keys additionally accept RRGGBBAA hex and decimal/hex opacity suffixes
 selection or modify frame alpha. The RGB reference benchmark now matches
 3,584 components, including opacity and additional named colours.
 
-Full YUV conversion compatibility remains incomplete. The explicit
-`benches/colorhold_yuv_qualification.py` benchmark on synthetic 3×3 grids finds
-blended-selection maximum deltas of 1/0/0 at 8/12/16 bits versus
-`format=rgba64le,colorhold` followed by FFmpeg's YUV conversion. These results
-are not equivalence passes. Point sampling corrected the previous
-24/393/6272 deltas; nominal RGB16 white correction further reduced
-1/6/98 to 1/1/8, and Q15 reverse conversion reduced them to 1/0/0.
-Eight-bit rounding remains to qualify.
-Committed synthetic reference planes drive a
-passing reproduction and an ignored exact-acceptance test; remaining conversion
-coefficients and rounding must be corrected before enabling acceptance and
-claiming parity. `colorhold` now selects the upper-left pixel of each chroma
-cell, matching the reference sampling behaviour. Generic conversion retains
-cell averaging by default and exposes both modes explicitly.
+The explicit `benches/colorhold_yuv_qualification.py` benchmark on synthetic
+3×3 grids now matches all 306 hard/blended-selection component samples at
+8/12/16 bits. Ordinary acceptance reads committed synthetic reference planes
+without FFmpeg or network. The former difference reproduction is removed and
+eight-bit exact acceptance is enabled. `colorhold` selects the upper-left pixel
+of each chroma cell; generic conversion retains cell averaging by default.
+This qualifies these limited BT.601 cases only, not general YUV compatibility.
 
 Limited-range conversion represents nominal RGB white as 65280 (`255 << 8`)
 with saturation headroom through 65535. Full-range conversion retains 65535
@@ -3523,18 +3516,16 @@ coefficients to Q13 before applying source samples. All 81 RGB16 components
 of the first synthetic frames at 8/12/16 bits match the reference exactly;
 committed raw reference planes drive an ordinary acceptance test. This does
 not establish whole-pipeline or general swscale parity. The latest YUV
-qualification reports maximum deltas 1/0/0 for both blended selection and
-hard grayscale. The prior 12-bit grayscale exact match depended on
-compensating errors between analytical forward and reverse stages; it is no
-longer a current parity claim.
+qualification reports zero differences for both blended selection and hard
+grayscale at all three depths.
 
 The limited BT.601 point-sampling path now quantizes reverse matrix coefficients
 to Q15 and rounds into the 16-bit YUV domain before reducing sample precision.
-The synthetic hard/blended selections at 12 and 16 bits match all 204 reference
+Eight-bit output uses a tiled ordered threshold matrix with a shifted V phase.
+The synthetic hard/blended selections at 8, 12 and 16 bits match all 306 reference
 samples exactly; enabled ordinary acceptance reads committed reference planes
-for all three frames. This proves only these cases. The 8-bit exact acceptance
-remains ignored because output rounding still differs by one sample level;
-other matrices, full range and general resampling parity are not established.
+for all three frames. This proves only these cases; other matrices, full range
+and general resampling parity are not established.
 
 Compatibility Q15 coefficients can leave hard grayscale chroma up to two
 16-bit levels below the neutral centre, as does the explicit reference.
