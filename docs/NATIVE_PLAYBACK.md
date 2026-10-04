@@ -24,6 +24,11 @@ Benchmark `ffmpeg_chromashift_reference` проверяет 138 комбинац
 отклоняются. Benchmark `ffmpeg_pixelize_reference` сравнивает 91 комбинацию
 параметров, форматов и глубин побайтово; пять acceptance-тестов работают без FFmpeg.
 
+Явный экспорт `ffv1` с `level=1` использует тот же собственный маршрут, что и
+настройки по умолчанию, включая собственные decoder H.264, HEVC, VP9 и AV1.
+Regression fixture `ffv1-level-one-source.mp4` и acceptance-тест сравнивают
+результат побайтово с экспортом по умолчанию.
+
 Feature `media` пока включает legacy backend для ещё не перенесённых операций;
 `mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
 из production ещё не завершено.

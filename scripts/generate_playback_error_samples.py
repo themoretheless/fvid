@@ -91,11 +91,21 @@ def load_seeds():
     return seeds
 
 
+def ffv1_level_one_source(seed):
+    # Keep offsets and all synthetic packets intact; distinguish this fixture
+    # by the harmless ftyp minor version. The trigger is the encoder request.
+    data = bytearray(seed)
+    assert data[4:8] == b"ftyp"
+    data[12:16] = struct.pack(">I", 1)
+    return bytes(data)
+
+
 def main():
     seeds = load_seeds()
     OUT.mkdir(parents=True, exist_ok=True)
     control = OUT / "control.mp4"
     control.write_bytes(seeds["control.mp4"])
+    (OUT / "ffv1-level-one-source.mp4").write_bytes(ffv1_level_one_source(seeds["control.mp4"]))
     source = control.read_bytes()
     order = [kind for kind, _ in children(source)]
     # moov changes size; mdat must precede it so chunk offsets stay valid.

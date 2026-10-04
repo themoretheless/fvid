@@ -928,3 +928,24 @@ fn owned_cli_export_writes_multiple_container_tags() {
     assert_eq!(reader.tracks[0].name, "Synthetic video");
     assert_eq!(reader.tracks[0].language, "rus");
 }
+
+#[test]
+fn explicit_ffv1_level_one_uses_owned_source_decoders() {
+    let dir = directory("explicit-level-one");
+    for (index, name) in ["playback-errors/ffv1-level-one-source.mp4", "hevc/main10-ipb.mp4", "vp9/adaptive.webm", "av1/ramp.webm"].iter().enumerate() {
+        let source = fixture(name);
+        let reference = dir.0.join(format!("default-{index}.mkv"));
+        let explicit = dir.0.join(format!("level-one-{index}.mkv"));
+        let transform = || fvid::media::LosslessTransform {
+            crop: Some(fvid::media::CropRect { x: 0, y: 0, width: 8, height: 8 }),
+            ..Default::default()
+        };
+        fvid::media::transcode_lossless(&source, &reference, transform(), &Default::default()).unwrap();
+        let settings = fvid::media::EncoderSettings {
+            name: "ffv1".into(), options: vec![("level".into(), "1".into())],
+        };
+        let stats = fvid::media::transcode(&source, &explicit, transform(), &Default::default(), &settings).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(std::fs::read(&explicit).unwrap(), std::fs::read(reference).unwrap());
+    }
+}

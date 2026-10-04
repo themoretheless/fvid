@@ -390,11 +390,11 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
     fvid_media::transcode_lossless(source,destination,transform,options)
 }
 
-/// Explicit FFV1 requests without codec overrides share the owned exporter.
+/// Explicit settings supported by the owned FFV1 encoder share its exporter.
 pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
     transform: LosslessTransform, options: &CopyOptions, settings: &EncoderSettings) -> Result<LosslessStats> {
     settings.validate()?;
-    if settings.name=="ffv1" && settings.options.is_empty()
+    if fvid_media::owned_lossless::supports_encoder(settings)
         && (crate::native_lossless::supports(&transform) || crate::native_lossless::supports_overlay(&transform))
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
