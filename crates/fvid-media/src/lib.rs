@@ -26,6 +26,7 @@ mod owned_color_preserve;
 pub mod owned_colorchannelmixer;
 pub mod owned_exposure;
 pub mod owned_colorbalance;
+pub mod owned_curves;
 pub mod owned_colorcorrect;
 pub mod owned_cas;
 pub mod owned_grayworld;

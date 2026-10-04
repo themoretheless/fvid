@@ -43,6 +43,7 @@ pub struct PixelFilters {
     pub grayworld: Option<fvid_media::owned_timeline::Timeline>,
     pub cas: Option<fvid_media::owned_cas::Cas>,
     pub colorcorrect: Option<fvid_media::owned_colorcorrect::ColorCorrect>,
+    pub curves: Option<fvid_media::owned_curves::Curves>,
     pub colorbalance: Option<fvid_media::owned_colorbalance::ColorBalance>,
     pub exposure: Option<fvid_media::owned_exposure::Exposure>,
     pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
@@ -74,6 +75,7 @@ impl PixelFilters {
             grayworld: request.grayworld.as_deref().map(fvid_media::owned_timeline::Timeline::grayworld).transpose().map_err(|e|invalid(&e))?,
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
             colorcorrect: request.colorcorrect.as_deref().map(fvid_media::owned_colorcorrect::ColorCorrect::parse).transpose().map_err(|e|invalid(&e))?,
+            curves: request.curves.as_deref().map(fvid_media::owned_curves::Curves::parse).transpose().map_err(|e|invalid(&e))?,
             colorbalance: request.colorbalance.as_deref().map(fvid_media::owned_colorbalance::ColorBalance::parse).transpose().map_err(|e|invalid(&e))?,
             exposure: request.exposure.as_deref().map(fvid_media::owned_exposure::Exposure::parse).transpose().map_err(|e|invalid(&e))?,
             colorchannelmixer: request.colorchannelmixer.as_deref().map(fvid_media::owned_colorchannelmixer::ColorChannelMixer::parse).transpose().map_err(|e|invalid(&e))?,
@@ -170,6 +172,7 @@ impl PixelFilters {
             && self.fade.is_none()
             && self.exposure.is_none()
             && self.colorbalance.is_none()
+            && self.curves.is_none()
             && self.colorcorrect.is_none()
             && self.cas.is_none()
             && self.grayworld.is_none()
@@ -242,6 +245,10 @@ impl PixelFilters {
             filter.apply(frame, depth).map_err(|e| invalid(&e))?;
         }
         if let Some(filter)=self.cas {filter.apply(frame,depth).map_err(|e|invalid(&e))?;}
+        if let Some(filter)=&self.curves {
+            if frame.subsampling.is_none() {filter.apply_rgb_clock(&mut frame.data,depth,3,frame.width,frame.height,n,t).map_err(|e|invalid(&e))?;}
+            else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix,n,t).map_err(|e|invalid(&e))?;}
+        }
         if let Some(filter)=&self.colorbalance {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}

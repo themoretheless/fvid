@@ -11,7 +11,7 @@ impl Matrix {
     pub fn from_code(code: u8) -> Result<Self> {
         match code {
             1 => Ok(Self::Bt709),
-            2 | 5 | 6 => Ok(Self::Bt601),
+            0 | 2 | 5 | 6 => Ok(Self::Bt601),
             9 => Ok(Self::Bt2020),
             _ => Err("RGB filter colour matrix is not implemented".into()),
         }

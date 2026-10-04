@@ -371,6 +371,7 @@ pub fn overlay_only(transform:&crate::media_info::LosslessTransform,
 /// Admission for currently owned spatial transformations.
 pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
+    if transform.curves.as_deref().is_some_and(|a| fvid_media::owned_curves::Curves::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlurProgram::parse(args).is_err()) { return false; }
     matches!(
@@ -418,7 +419,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             bilateral: _,
             cas: _,
             vignette: None,
-            curves: None,
+            curves: _,
             colorbalance: _,
             colorlevels: _,
             colorchannelmixer: _,
@@ -538,6 +539,7 @@ pub fn configuration(
         fade: transform.fade.clone(),
         exposure: transform.exposure.clone(),
         colorbalance: transform.colorbalance.clone(),
+        curves: transform.curves.clone(),
         colorcorrect: transform.colorcorrect.clone(),
         cas: transform.cas.clone(),
         grayworld: transform.grayworld.clone(),

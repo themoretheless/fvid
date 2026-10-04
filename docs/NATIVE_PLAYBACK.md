@@ -3865,3 +3865,29 @@ bounded coefficient indexes and saturated history/output keep owned samples vali
 with separate synthetic reproduction and root/library acceptance.
 RGB/alpha formats, dynamic geometry and runtime strength commands remain separate
 work. This migration does not yet remove legacy media/CUDA production features.
+
+
+`curves` now owns RGB/RGBA lookup tables for 8–16-bit samples, natural cubic and
+PCHIP interpolation, all ten named/numeric presets, per-channel/master/all points,
+ACV version 1/4 reading and Gnuplot script export. Explicit channel points take
+priority over `all`, then ACV, then presets; master lookup follows channel lookup.
+Inputs are bounded and finite, x coordinates must increase and remain distinct
+at the selected LUT precision. Tables are cached per precision; the library
+streaming context retains the program. Plot generation happens on application,
+not read-only admission; errors occur before pixel mutation. Alpha is preserved.
+Clocked APIs implement timeline enable; scalar RGB calls explicitly refuse a
+configured timeline rather than invent frame time or dimensions. Root native
+codec decode/Y4M/FFV1 export and direct-library Y4M/FFV1 processing admit curves.
+Clips reset the filter frame count and retain source time before framestep.
+The YUV path uses the established owned RGB16 point conversion, retaining source
+precision. It is not a qualification of every default legacy format negotiation.
+The explicit benchmark qualifies 288 RGB/RGBA/planar-GBR pixel comparisons across
+8, 9, 10, 12, 14 and 16 bits, plus two forced RGB48-to-YUV sequences against the
+[reference curves filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_curves.c).
+PCHIP plateau arithmetic uses explicit fused operations to retain exact rounding.
+Synthetic acceptance covers the plateau, ACV/plot, disabled frames, clip clocks,
+packet cadence and complete exports. RGB filters now accept FVid's existing
+matrix-zero default for absent metadata as BT.601, matching native playback;
+a short synthetic AVC fragment verifies the previous refusal is fixed.
+Runtime curve commands and complete legacy format-negotiation parity remain work;
+legacy media/CUDA production dependencies are not yet removed.

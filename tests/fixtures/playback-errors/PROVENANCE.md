@@ -429,3 +429,46 @@ The invalid reference evidence is written to `/tmp/fvid-hqdn3d-extreme14-referen
 by the same explicit benchmark command; no external command runs in ordinary tests.
 
 SHA-256 `hqdn3d-extreme-14.reference-invalid.raw`: `3321da4419166bbd7fa1f141063eafe4baef7ef670ca16f95e47a41a22f411b8`.
+
+
+### Owned curves and absent-matrix RGB admission
+
+`scripts/generate_curves_fixture.py` uses only Python bytes and a hash-pinned
+public synthetic seed. It generates four 4x4 YUV444 grayscale frames at 25 fps
+for 8/10-bit sources (alternating limited-range 16/235, neutral chroma 128,
+scaled by four at 10 bits). The 16x16 RGB24/RGB48 ramps use samples
+(i,255-i,37*i modulo 256), scaled by 257 at 16 bits. ACV version 4 contains
+master inversion and identity R/G/B control points, in big-endian y/x order.
+No private video, frames, audio or codec parameter sets are used.
+
+The RGB ramps reproduce the corrected PCHIP plateau rounding failure for
+`all='0/0 0.25/0 0.5/0.5 0.75/1 1/1':interp=pchip`: RGB24 byte 7 must be 255,
+where the initial separate-operation kernel returned 254. Full `.expected.raw`
+RGB outputs are independent explicit benchmark oracle data. Grayscale goldens
+are the forced `format=rgb48le,curves=negative,format=yuv444p[10le]` chain,
+including limited-range RGB16 headroom and ordered 8-bit reduction. Acceptance
+checks complete decoded root/library Y4M/FFV1 export pixels and original cadence,
+not a guessed nominal-white conversion. Clip tests distinguish reset n from
+retained source t. ACV precedence, alpha, LUT precision changes, plotting and
+non-mutating malformed/depth/timeline refusal are checked separately.
+
+`curves-matrix-unspecified.mp4` is only the first five-sample fragment (0.2 s)
+of repository `tests/fixtures/video.mp4`, the documented synthetic testsrc AVC
+seed with SHA-256 6f9246a6066acabbe71be5419ee390b1767b978c2de80e4434b6f4afbbbf0a05.
+The byte prefix preserves original fragment-relative offsets and absent colour
+matrix metadata. This reproduces the prior RGB-filter admission refusal for
+FVid's matrix-zero default. Acceptance asserts that matrix value and five native
+decoded frames with curves, using BT.601 consistently with native playback.
+
+Regenerate input files separately with the Python generator. Regenerate oracle
+outputs explicitly with `FVID_REFERENCE_FFMPEG=/opt/homebrew/bin/ffmpeg cargo
+bench --no-default-features --bench ffmpeg_curves_reference`; only the benchmark
+executes FFmpeg and writes verified goldens under `/tmp/fvid-curves-*`.
+Ordinary tests use committed files and require neither FFmpeg nor network.
+
+Recorded SHA-256 values:
+- `curves-plateau-8.expected.raw`: `58d2e9dc4195cdc0297b2d50a125ba0c75bb53c8b2dfa12ffda2a37a6a886f47`
+- `curves-plateau-16.expected.raw`: `2f5bb622de32981593bb2a0149f03116015e9ac20ddce85fb69937543f205c28`
+- `curves-gray-8.expected.raw`: `5b8890a286def16560207958f8bda3839ba77225c224b4bdef82077c1ffd4a3a`
+- `curves-gray-10.expected.raw`: `ae3cd4d263c0c32779c00d32cc9a0ec42bcad779840e24ea2af23d765d8885ca`
+- `curves-matrix-unspecified.mp4`: `fa68c4fdc56220d16413e5bdebb7eaa017119f89e989a1d40d58a525a0bf1cbe`

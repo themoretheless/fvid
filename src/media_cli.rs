@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--curves" {
+            let value=args.next().ok_or("missing curves options")?;
+            if filters.curves.is_some() {return Err("duplicate curves".into());}
+            if let Ok(filter)=fvid_media::owned_curves::Curves::parse(value) {filters.curves=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--hqdn3d" {
             let value=args.next().ok_or("missing hqdn3d options")?;
             if filters.hqdn3d.is_some() {return Err("duplicate hqdn3d".into());}

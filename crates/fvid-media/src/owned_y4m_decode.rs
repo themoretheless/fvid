@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.curves.as_deref().is_some_and(|a|crate::owned_curves::Curves::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.tmix.as_deref().is_some_and(|a|crate::owned_tmix::TemporalMix::parse(a).is_err()) {return false;}
     if transform.lagfun.as_deref().is_some_and(|a|crate::owned_lagfun::LagFun::parse(a).is_err()) {return false;}
@@ -131,6 +132,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 hqdn3d: transform.hqdn3d.clone(),
                 exposure: transform.exposure.clone(),
                 colorbalance: transform.colorbalance.clone(),
+                curves: transform.curves.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
                 cas: transform.cas.clone(),
                 grayworld: transform.grayworld.clone(),
@@ -524,6 +526,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.hqdn3d.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
+        || transform.curves.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()
@@ -595,6 +598,10 @@ pub(crate) fn apply_pixel_filters_clock(
             }
             if let Some(args) = transform.cas.as_deref() {
                 crate::owned_cas::Cas::parse(args)?.apply(&mut frame,header.depth())?;
+            }
+            if let Some(args) = transform.curves.as_deref() {
+                let apply = |filter:&crate::owned_curves::Curves,frame:&mut crate::owned_frame::GeometryFrame| filter.apply_yuv(frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,n,t);
+                if let Some(filter)=history.and_then(|h|h.curves.as_ref()) {apply(filter,&mut frame)?;} else {apply(&crate::owned_curves::Curves::parse(args)?,&mut frame)?;}
             }
             if let Some(args) = transform.colorbalance.as_deref() {
                 crate::owned_colorbalance::ColorBalance::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
@@ -986,6 +993,7 @@ fn decode_reader_frames(
         || transform.hqdn3d.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
+        || transform.curves.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()
