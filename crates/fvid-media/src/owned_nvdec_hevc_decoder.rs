@@ -334,6 +334,39 @@ pub(crate) fn qualify_packets(
     }
     Ok(())
 }
+pub(crate) fn movie_visibility(
+    sps: Sps,
+    pps: Pps,
+    length_size: u8,
+    max_bytes: usize,
+    max_packets: usize,
+    mut next: impl FnMut(&mut Vec<u8>) -> Result<bool, String>,
+) -> Result<Vec<bool>, String> {
+    let mut scheduler = Scheduler::new(sps, pps, length_size, 32, max_bytes)?;
+    let mut packet = Vec::new();
+    let mut visibility = Vec::new();
+    while next(&mut packet)? {
+        if visibility.len() >= max_packets {
+            return Err("HEVC visibility exceeds sample count".into());
+        }
+        let frame = if let Some(pending) = scheduler.prepare(&packet)? {
+            if !visibility.is_empty() && pending.frame.no_output_of_prior_pictures {
+                return Err(
+                    "HEVC mid-stream prior-output suppression needs movie qualification".into(),
+                );
+            }
+            Some(scheduler.commit(pending))
+        } else {
+            None
+        };
+        visibility.try_reserve(1).map_err(|e| e.to_string())?;
+        visibility.push(frame.is_some_and(|f| f.output));
+    }
+    if visibility.len() != max_packets {
+        return Err("HEVC visibility is missing source samples".into());
+    }
+    Ok(visibility)
+}
 impl HevcNvdecDecoder {
     pub fn new(
         sps: Sps,

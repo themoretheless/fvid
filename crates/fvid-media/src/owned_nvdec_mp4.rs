@@ -38,6 +38,12 @@ impl<R: Read + Seek> AvcMp4Input<R> {
     pub fn open(input: R, limits: Limits) -> Result<Self, String> {
         let max_packet_bytes = limits.packet_bytes;
         let reader = Mp4Reader::open(input, limits).map_err(|e| e.to_string())?;
+        Self::from_reader(reader, max_packet_bytes)
+    }
+    pub(crate) fn from_reader(
+        reader: Mp4Reader<R>,
+        max_packet_bytes: usize,
+    ) -> Result<Self, String> {
         let videos: Vec<_> = reader
             .tracks()
             .iter()

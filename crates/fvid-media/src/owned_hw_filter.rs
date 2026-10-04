@@ -1,8 +1,8 @@
 //! Production CUDA route using owned demux/scheduling/filter/encode/container code.
 use crate::{
     HwFilterOptions, HwFilterStats,
-    owned_nvdec_movie::{AvcMovieReader, AvcMovieRenderer},
-    owned_nvdec_mp4::AvcMp4Input,
+    owned_nvdec_movie::{MovieReader, MovieRenderer},
+    owned_nvdec_source::MovieSource,
     owned_nvenc_movie::AvcMovieEncoder,
 };
 use std::{
@@ -17,14 +17,14 @@ struct Plan {
     interval: Option<(i64, i64)>,
 }
 fn plan<R: Read + Seek>(
-    source: &mut AvcMp4Input<R>,
+    source: &mut MovieSource<R>,
     options: &HwFilterOptions,
 ) -> Result<Option<Plan>, String> {
     if options.shader_sampling && options.shader.is_none() {
         return Err("sampling shader mode requires shader source".into());
     }
     // Keep remaining legacy option semantics until they have owned acceptance.
-    if options.host_bounce {
+    if options.host_bounce || source.bit_depth() != 8 {
         return Ok(None);
     }
     let interval = options
@@ -66,11 +66,11 @@ fn plan<R: Read + Seek>(
     let visible_width = width
         .checked_sub(left)
         .and_then(|width| width.checked_sub(right))
-        .ok_or("invalid AVC horizontal display crop")?;
+        .ok_or("invalid video horizontal display crop")?;
     let visible_height = height
         .checked_sub(top)
         .and_then(|height| height.checked_sub(bottom))
-        .ok_or("invalid AVC vertical display crop")?;
+        .ok_or("invalid video vertical display crop")?;
     let crop = options.crop.unwrap_or(fvid_media_info::CropRect {
         x: 0,
         y: 0,
@@ -176,7 +176,7 @@ pub fn try_filter(
         return Ok(None);
     }
     let input = BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-    let mut source = match AvcMp4Input::open(input, Default::default()) {
+    let mut source = match MovieSource::open(input, Default::default()) {
         Ok(source) => source,
         Err(_) => return Ok(None),
     };
@@ -194,7 +194,7 @@ pub fn try_filter(
             }
         })
         .transpose()?;
-    let reader = AvcMovieReader::new_with_selection(
+    let reader = MovieReader::new_with_selection(
         source,
         options.device,
         32,
@@ -204,12 +204,8 @@ pub fn try_filter(
         plan.interval,
         crate::owned_nvdec_movie::IntervalSelection::FrameStarts,
     )?;
-    let renderer = AvcMovieRenderer::new_with_shader(
-        reader,
-        plan.transform,
-        plan.full_range,
-        shader.as_ref(),
-    )?;
+    let renderer =
+        MovieRenderer::new_with_shader(reader, plan.transform, plan.full_range, shader.as_ref())?;
     let device = renderer.device_name().to_owned();
     let mut encoder = AvcMovieEncoder::new(
         renderer,
@@ -239,6 +235,98 @@ pub fn try_filter(
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn synthetic_hevc_main_and_repeated_edits_enter_native_production_route() {
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/hevc/main-ipb.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/hevc-cuda-edit-repeat.mp4")
+                .as_slice(),
+        ] {
+            let mut source =
+                MovieSource::open(std::io::Cursor::new(bytes), Default::default()).unwrap();
+            assert!(matches!(source, MovieSource::Hevc(_)));
+            let plan = plan(&mut source, &HwFilterOptions::default())
+                .unwrap()
+                .expect("HEVC Main must enter owned route");
+            assert_eq!(plan.fps, (30, 1));
+            assert_eq!(
+                (plan.transform.out_width, plan.transform.out_height),
+                source.coded_dimensions()
+            );
+            assert!(source.read_next(&mut Vec::new()).unwrap().unwrap().sync);
+        }
+        let mut source = MovieSource::open(
+            std::io::Cursor::new(
+                include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
+            ),
+            Default::default(),
+        )
+        .unwrap();
+        assert!(
+            plan(&mut source, &HwFilterOptions::default())
+                .unwrap()
+                .is_none(),
+            "Main10 requires P010 renderer qualification"
+        );
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA HEVC NVDEC and H264 NVENC"]
+    fn production_hw_filter_routes_hevc_movie_without_libav() {
+        for relative in [
+            "../../tests/fixtures/hevc/main-ipb.mp4",
+            "../../tests/fixtures/playback-errors/hevc-cuda-edit-repeat.mp4",
+        ] {
+            let source = Path::new(env!("CARGO_MANIFEST_DIR")).join(relative);
+            let mut own = MovieSource::open(
+                BufReader::new(std::fs::File::open(&source).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            let events = own.movie_presentations(1000).unwrap();
+            let timescale = own.track().timescale;
+            let destination = std::env::temp_dir().join(format!(
+                "fvid-owned-hevc-{}-{}.mkv",
+                std::process::id(),
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ));
+            let stats = hw_filter(&source, &destination, &HwFilterOptions::default()).unwrap();
+            assert_eq!(stats.backend, "owned-cuda-nvdec-nvenc");
+            assert_eq!(stats.host_frame_copies, 0);
+            assert_eq!(stats.video_frames as usize, events.len());
+            let mut input = crate::owned_webm::WebmReader::open(
+                BufReader::new(std::fs::File::open(&destination).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(input.packets.len(), events.len());
+            let mut decoder = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
+                &input.tracks[0].codec_private,
+                16 << 20,
+            )
+            .unwrap();
+            for (index, event) in events.iter().enumerate() {
+                let packet = &input.packets[index];
+                let expected =
+                    i64::try_from(i128::from(event.start) * 1_000_000_000 / i128::from(timescale))
+                        .unwrap();
+                assert!(
+                    (packet.pts_ns - expected).abs() <= 1_000_000,
+                    "Matroska clock quantization must not change movie occurrence"
+                );
+                assert!(
+                    decoder
+                        .decode_order(&input.read_packet(index).unwrap())
+                        .unwrap()
+                        .is_some()
+                );
+            }
+            std::fs::remove_file(destination).unwrap();
+        }
+    }
     use super::*;
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     #[test]
@@ -362,7 +450,7 @@ mod tests {
     }
     #[test]
     fn synthetic_sps_crop_is_removed_before_native_encoding() {
-        let mut source = AvcMp4Input::open(
+        let mut source = MovieSource::open(
             std::io::Cursor::new(
                 include_bytes!("../../../tests/fixtures/playback-errors/avc-display-crop.mp4")
                     .as_slice(),
@@ -442,7 +530,7 @@ mod tests {
     }
     #[test]
     fn empty_edit_interval_stays_on_legacy_until_origin_is_qualified() {
-        let mut source = AvcMp4Input::open(
+        let mut source = MovieSource::open(
             std::io::Cursor::new(
                 include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
                     .as_slice(),
@@ -464,7 +552,7 @@ mod tests {
     }
     #[test]
     fn synthetic_production_route_qualifies_packets_without_driver() {
-        let mut source = AvcMp4Input::open(
+        let mut source = MovieSource::open(
             std::io::Cursor::new(
                 include_bytes!("../../../tests/fixtures/playback-errors/control.mp4").as_slice(),
             ),

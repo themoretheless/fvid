@@ -166,6 +166,12 @@ impl<R: Read + Seek> HevcMp4Input<R> {
     pub fn open(input: R, limits: Limits) -> Result<Self, String> {
         let max_packet_bytes = limits.packet_bytes;
         let reader = Mp4Reader::open(input, limits).map_err(|e| e.to_string())?;
+        Self::from_reader(reader, max_packet_bytes)
+    }
+    pub(crate) fn from_reader(
+        reader: Mp4Reader<R>,
+        max_packet_bytes: usize,
+    ) -> Result<Self, String> {
         let videos: Vec<_> = reader
             .tracks()
             .iter()
@@ -265,6 +271,25 @@ impl<R: Read + Seek> HevcMp4Input<R> {
         );
         self.rewind_packets();
         result
+    }
+    pub fn visible_movie_presentations(
+        &mut self,
+        max_entries: usize,
+    ) -> Result<Vec<Presentation>, String> {
+        let mut events = self.movie_presentations(max_entries)?;
+        self.rewind_packets();
+        let result = crate::owned_nvdec_hevc_decoder::movie_visibility(
+            self.sps.clone(),
+            self.pps.clone(),
+            self.length_size,
+            self.max_packet_bytes,
+            self.packet_count(),
+            |packet| self.read_next(packet).map(|s| s.is_some()),
+        );
+        self.rewind_packets();
+        let visible = result?;
+        events.retain(|event| event.sample.is_none_or(|index| visible[index]));
+        Ok(events)
     }
     pub fn create_decoder(
         &self,

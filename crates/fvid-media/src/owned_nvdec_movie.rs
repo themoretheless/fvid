@@ -1,6 +1,8 @@
 //! Bound decode-order caching and replay for the owned MP4 movie clock.
-use crate::owned_nvdec_avc_decoder::{AvcNvdecDecoder, DecodedAvc};
-use crate::owned_nvdec_mp4::{AvcMp4Input, Presentation};
+#[cfg(test)]
+use crate::owned_nvdec_mp4::AvcMp4Input;
+use crate::owned_nvdec_mp4::Presentation;
+use crate::owned_nvdec_source::{DecodedVideo, MovieDecoder, MovieSource};
 use std::{
     collections::BTreeSet,
     io::{Read, Seek},
@@ -120,19 +122,29 @@ impl<T> Queue<T> {
         self.next_decode = 0;
         Ok(())
     }
+    fn supply_optional(&mut self, index: usize, frame: Option<T>) -> Result<(), String> {
+        if let Some(frame) = frame {
+            return self.supply(index, frame);
+        }
+        if index != self.next_decode || self.epochs[self.epoch].needed.contains(&index) {
+            return Err("movie timeline requires a suppressed source picture".into());
+        }
+        self.next_decode = index.checked_add(1).ok_or("movie decode index overflow")?;
+        Ok(())
+    }
 }
-pub struct PresentedAvc {
+pub struct PresentedVideo {
     pub event: Presentation,
     /// None denotes an explicit blank span; rendering supplies a black frame.
-    pub frame: Option<DecodedAvc>,
+    pub frame: Option<DecodedVideo>,
 }
 /// Pulls frames on the movie clock through own demux, POC/DPB and direct NVDEC.
 /// Finish all mapped/raw-pointer use before asking for the next presentation:
 /// replay may close the previous decoder and invalidate its surfaces/tickets.
-pub struct AvcMovieReader<R> {
-    source: AvcMp4Input<R>,
-    decoder: AvcNvdecDecoder,
-    queue: Queue<DecodedAvc>,
+pub struct MovieReader<R> {
+    source: MovieSource<R>,
+    decoder: MovieDecoder,
+    queue: Queue<DecodedVideo>,
     scratch: Vec<u8>,
     interval: Option<(i64, i64)>,
     ordinal: usize,
@@ -140,9 +152,9 @@ pub struct AvcMovieReader<R> {
     output_surfaces: u32,
     failed: bool,
 }
-impl<R: Read + Seek> AvcMovieReader<R> {
+impl<R: Read + Seek> MovieReader<R> {
     pub fn new(
-        source: AvcMp4Input<R>,
+        source: impl Into<MovieSource<R>>,
         ordinal: usize,
         decode_surfaces: u32,
         output_surfaces: u32,
@@ -162,7 +174,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
     /// Clip/rebase movie occurrences in track ticks; decoding still includes
     /// reference preroll. Variable durations and explicit blanks are retained.
     pub fn new_with_interval(
-        source: AvcMp4Input<R>,
+        source: impl Into<MovieSource<R>>,
         ordinal: usize,
         decode_surfaces: u32,
         output_surfaces: u32,
@@ -182,7 +194,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         )
     }
     pub fn new_with_selection(
-        mut source: AvcMp4Input<R>,
+        source: impl Into<MovieSource<R>>,
         ordinal: usize,
         decode_surfaces: u32,
         output_surfaces: u32,
@@ -191,6 +203,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         interval: Option<(i64, i64)>,
         selection: IntervalSelection,
     ) -> Result<Self, String> {
+        let mut source = source.into();
         let events =
             select_presentations(source.movie_presentations(max_events)?, interval, selection)?;
         let queue = Queue::new(events, cache_frames)?;
@@ -219,7 +232,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
     pub fn media_timescale(&self) -> u32 {
         self.source.track().timescale
     }
-    pub fn next_presentation(&mut self) -> Result<Option<PresentedAvc>, String> {
+    pub fn next_presentation(&mut self) -> Result<Option<PresentedVideo>, String> {
         if self.failed {
             return Err("native movie reader failed; reopen it".into());
         }
@@ -229,11 +242,11 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         }
         result
     }
-    fn next_inner(&mut self) -> Result<Option<PresentedAvc>, String> {
+    fn next_inner(&mut self) -> Result<Option<PresentedVideo>, String> {
         loop {
             match self.queue.next()? {
                 Action::End => return Ok(None),
-                Action::Ready(event, frame) => return Ok(Some(PresentedAvc { event, frame })),
+                Action::Ready(event, frame) => return Ok(Some(PresentedVideo { event, frame })),
                 Action::Decode(index) => {
                     let packet = self
                         .source
@@ -242,7 +255,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
                     if packet.index != index {
                         return Err("movie source cursor does not match decode queue".into());
                     }
-                    self.queue.supply(index, packet.frame)?;
+                    self.queue.supply_optional(index, packet.frame)?;
                 }
                 Action::Rewind => {
                     self.decoder.close()?;
@@ -257,7 +270,7 @@ impl<R: Read + Seek> AvcMovieReader<R> {
             }
         }
     }
-    pub fn map(&mut self, frame: &DecodedAvc) -> Result<fvid_cuda::NvdecSurface, String> {
+    pub fn map(&mut self, frame: &DecodedVideo) -> Result<fvid_cuda::NvdecSurface, String> {
         self.decoder.map(frame)
     }
     pub fn unmap(&mut self, slot: usize) -> Result<(), String> {
@@ -404,8 +417,8 @@ fn transformed_metadata(
 }
 /// Owns a reusable GPU output surface and renders each movie event without libav.
 /// Complete external uses of `buffer()` before advancing or closing this renderer.
-pub struct AvcMovieRenderer<R: Read + Seek> {
-    reader: std::mem::ManuallyDrop<AvcMovieReader<R>>,
+pub struct MovieRenderer<R: Read + Seek> {
+    reader: std::mem::ManuallyDrop<MovieReader<R>>,
     output: std::mem::ManuallyDrop<fvid_cuda::Nv12Buffer>,
     blank: std::mem::ManuallyDrop<Option<fvid_cuda::Nv12Buffer>>,
     filter: std::mem::ManuallyDrop<fvid_cuda::Nv12Processor>,
@@ -415,9 +428,9 @@ pub struct AvcMovieRenderer<R: Read + Seek> {
     device_filter_passes: u64,
     failed: bool,
 }
-impl<R: Read + Seek> AvcMovieRenderer<R> {
+impl<R: Read + Seek> MovieRenderer<R> {
     pub fn new(
-        reader: AvcMovieReader<R>,
+        reader: MovieReader<R>,
         transform: fvid_cuda::Nv12Transform,
         full_range: bool,
     ) -> Result<Self, String> {
@@ -425,11 +438,16 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
     }
     /// Trusted CUDA point/sampling shader, fused into the owned transform.
     pub fn new_with_shader(
-        reader: AvcMovieReader<R>,
+        reader: MovieReader<R>,
         transform: fvid_cuda::Nv12Transform,
         full_range: bool,
         shader: Option<&fvid_cuda::ByteShader>,
     ) -> Result<Self, String> {
+        if reader.source.bit_depth() != 8 {
+            return Err(
+                "native NV12 movie renderer requires eight-bit input; Main10 needs P010".into(),
+            );
+        }
         let (width, height) = reader.source.coded_dimensions();
         let metadata = transformed_metadata(
             reader.video_metadata()?,
@@ -546,7 +564,7 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
         self.reader.close()
     }
 }
-impl<R: Read + Seek> Drop for AvcMovieRenderer<R> {
+impl<R: Read + Seek> Drop for MovieRenderer<R> {
     fn drop(&mut self) {
         // A failed wait must not release allocations still used by the filter.
         // Retain all owners rather than risking device use-after-free.
@@ -585,6 +603,26 @@ fn validate_transform(width: u32, height: u32, t: fvid_cuda::Nv12Transform) -> R
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn suppressed_preroll_advances_decode_without_creating_black_events() {
+        let mut queue = Queue::<usize>::new(
+            vec![Presentation {
+                range: 0,
+                sample: Some(1),
+                start: 10,
+                end: 20,
+            }],
+            2,
+        )
+        .unwrap();
+        assert!(matches!(queue.next().unwrap(), Action::Decode(0)));
+        queue.supply_optional(0, None).unwrap();
+        assert!(matches!(queue.next().unwrap(), Action::Decode(1)));
+        assert!(queue.supply_optional(1, None).is_err());
+        queue.supply_optional(1, Some(17)).unwrap();
+        assert!(matches!(queue.next().unwrap(), Action::Ready(_, Some(17))));
+        assert!(matches!(queue.next().unwrap(), Action::End));
+    }
     use super::*;
     #[test]
     fn synthetic_frame_start_selection_keeps_whole_frames_and_duplicate_pts() {
@@ -782,8 +820,8 @@ mod tests {
         .unwrap();
         let expected = source.movie_presentations(1000).unwrap();
         let (width, height) = source.coded_dimensions();
-        let reader = AvcMovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
-        let mut renderer = AvcMovieRenderer::new(
+        let reader = MovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
+        let mut renderer = MovieRenderer::new(
             reader,
             fvid_cuda::Nv12Transform {
                 out_width: width,
@@ -877,3 +915,8 @@ mod tests {
         assert!(queue.next().is_err());
     }
 }
+
+/// Compatibility names for callers of the original AVC-only movie API.
+pub type AvcMovieReader<R> = MovieReader<R>;
+pub type AvcMovieRenderer<R> = MovieRenderer<R>;
+pub type PresentedAvc = PresentedVideo;

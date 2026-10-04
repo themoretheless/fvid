@@ -1,5 +1,5 @@
 //! Bounded GPU input ownership for native movie encoding, without libav.
-use crate::owned_nvdec_movie::AvcMovieRenderer;
+use crate::owned_nvdec_movie::MovieRenderer;
 use fvid_cuda::{
     CodecDevice, Nv12Buffer, Nv12Processor, Nv12Transform, NvencCodec, NvencPacket, NvencSession,
     NvencSubmit,
@@ -45,7 +45,7 @@ impl Pool {
 /// Each accepted input retains its own GPU allocation until output is drained;
 /// rendering the next event never overwrites an in-flight NVENC input.
 pub struct AvcMovieEncoder<R: Read + Seek> {
-    renderer: ManuallyDrop<AvcMovieRenderer<R>>,
+    renderer: ManuallyDrop<MovieRenderer<R>>,
     encoder: ManuallyDrop<NvencSession>,
     copy: ManuallyDrop<Nv12Processor>,
     buffers: ManuallyDrop<Vec<Nv12Buffer>>,
@@ -58,7 +58,7 @@ pub struct AvcMovieEncoder<R: Read + Seek> {
 }
 impl<R: Read + Seek> AvcMovieEncoder<R> {
     pub fn new(
-        renderer: AvcMovieRenderer<R>,
+        renderer: MovieRenderer<R>,
         codec: NvencCodec,
         fps_num: u32,
         fps_den: u32,
@@ -430,7 +430,7 @@ mod tests {
                 AvcMovieReader::new_with_interval(source, 0, 32, 2, 1000, 8, interval).unwrap();
             let shader = white_shader.then(|| fvid_cuda::ByteShader::new(
                 "__device__ unsigned int process_byte(unsigned int value, unsigned int plane, unsigned int x, unsigned int y) { return plane == 0u ? 235u : 128u; }").unwrap());
-            let renderer = AvcMovieRenderer::new_with_shader(
+            let renderer = MovieRenderer::new_with_shader(
                 reader,
                 Nv12Transform {
                     out_width: width,
