@@ -614,7 +614,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         grayworld: _,
         drawbox: None,
         drawgrid: None,
-        lagfun: None,
+        lagfun: _,
         amplify: None,
         bitplanenoise: None,
         deband: None,

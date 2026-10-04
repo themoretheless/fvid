@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--lagfun" {
+            let value = args.next().ok_or("missing lagfun options")?;
+            if filters.lagfun.is_some() {return Err("duplicate lagfun".into());}
+            if let Ok(filter)=fvid_media::owned_lagfun::LagFun::parse(value) {filters.lagfun=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--hue" {
             let value = args.next().ok_or("missing hue args")?;
             if filters.hue.is_some() {

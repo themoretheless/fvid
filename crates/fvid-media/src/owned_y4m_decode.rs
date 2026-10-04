@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.lagfun.as_deref().is_some_and(|a|crate::owned_lagfun::LagFun::parse(a).is_err()) {return false;}
     if transform.fade.as_deref().is_some_and(|a|crate::owned_fade::Fade::parse(a).is_err()) {return false;}
     if transform.grayworld.as_deref().is_some_and(|a| crate::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.cas.as_deref().is_some_and(|a| crate::owned_cas::Cas::parse(a).is_err()) { return false; }
@@ -123,6 +124,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 colorlevels: transform.colorlevels.clone(),
                 colorchannelmixer: transform.colorchannelmixer.clone(),
                 fade: transform.fade.clone(),
+                lagfun: transform.lagfun.clone(),
                 exposure: transform.exposure.clone(),
                 colorbalance: transform.colorbalance.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
@@ -360,7 +362,7 @@ pub(crate) fn transform_frame_requested_cached_at(
     lut:Option<&crate::owned_lutyuv::LutYuv>, matrix:u8, n:u64,t:Option<f64>,
 )->Result<Vec<u8>> {
 
-    transform_frame_requested_clock(header, frame, transform, lut, matrix, n, t, None, None)
+    transform_frame_requested_clock(header, frame, transform, lut, matrix, n, t, None, None, None)
 }
 pub(crate) fn transform_frame_requested_clock(
     header: &Header,
@@ -372,6 +374,7 @@ pub(crate) fn transform_frame_requested_clock(
     t: Option<f64>,
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
+    lagfun: Option<&crate::owned_lagfun::LagFun>,
 ) -> Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
@@ -383,6 +386,7 @@ pub(crate) fn transform_frame_requested_clock(
     apply_pixel_filters_clock(header, transform, &mut output, lut, matrix,n,t,
         fade,
         clock,
+        lagfun,
     )?;
     Ok(output)
 }
@@ -484,7 +488,7 @@ pub(crate) fn apply_pixel_filters_cached_at(
     header: &Header, transform: &DecodeTransform, output: &mut Vec<u8>,
     lut: Option<&crate::owned_lutyuv::LutYuv>, matrix: u8, n:u64, t:Option<f64>,
 ) -> Result<()> {
-    apply_pixel_filters_clock(header, transform, output, lut, matrix, n, t, None, None)
+    apply_pixel_filters_clock(header, transform, output, lut, matrix, n, t, None, None, None)
 }
 pub(crate) fn apply_pixel_filters_clock(
     header: &Header,
@@ -496,6 +500,7 @@ pub(crate) fn apply_pixel_filters_clock(
     t: Option<f64>,
     fade: Option<&crate::owned_fade::FadeClock>,
     clock: Option<crate::owned_fade::FrameTime>,
+    lagfun: Option<&crate::owned_lagfun::LagFun>,
 ) -> Result<()> {
     if transform.unsharp.is_some()
         || transform.unsharp.is_some()
@@ -510,6 +515,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.colorlevels.is_some()
         || transform.colorchannelmixer.is_some()
         || transform.fade.is_some()
+        || transform.lagfun.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
@@ -594,6 +600,9 @@ pub(crate) fn apply_pixel_filters_clock(
                     crate::owned_grayworld::GrayWorld::default().apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?,
                     )?;
                 }
+            }
+            if transform.lagfun.is_some() {
+                lagfun.ok_or("lagfun requires persistent streaming history")?.apply(&mut frame,header.depth(),n,t)?;
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -955,6 +964,7 @@ fn decode_reader_frames(
         || transform.colorlevels.is_some()
         || transform.colorchannelmixer.is_some()
         || transform.fade.is_some()
+        || transform.lagfun.is_some()
         || transform.exposure.is_some()
         || transform.colorbalance.is_some()
         || transform.colorcorrect.is_some()
@@ -985,6 +995,7 @@ fn decode_reader_frames(
     let mut selected_inputs = 0u64;
     let lut = transform.lutyuv.as_deref().map(crate::owned_lutyuv::LutYuv::parse).transpose()?;
 
+    let lagfun = transform.lagfun.as_deref().map(crate::owned_lagfun::LagFun::parse).transpose()?;
     let fade = transform
         .fade
         .as_deref()
@@ -1056,6 +1067,7 @@ fn decode_reader_frames(
                         )?
                         .with_quantum(rate_d as u64)?,
                     ),
+                    lagfun.as_ref(),
                 )?;
                 filtered_frames=filtered_frames.checked_add(1).ok_or("timeline frame count overflow")?;
                 std::hint::black_box(&output);

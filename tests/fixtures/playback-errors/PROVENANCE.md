@@ -322,3 +322,18 @@ rotation outputs are Cb/Cr=100/150 and 156/106. CLI decode/Y4M/FFV1 and native
 AVC/HEVC/VP9/AV1 decode routing also require acceptance. Scalar API refusal stays
 separate from streaming acceptance; missing timestamps, malformed quotes and
 unknown/stateful variables are tested explicitly.
+
+### Owned lagfun history
+
+`lagfun-dark-8.y4m` and `lagfun-dark-10.y4m` are generated without codec tools by
+`scripts/generate_lagfun_fixture.py`: eight 4x4 frames at 25 fps, first Y/Cb/Cr =
+100/140/200 and subsequent 16/64/64, multiplied by four for 10-bit samples.
+This short synthetic sequence reproduces the previous unsupported lagfun request
+and distinguishes unrounded history from rounded frame feedback: at 8 bits,
+Y=100,95,90,86,81,... whereas rounded feedback incorrectly yields 82 at frame 4.
+Acceptance asserts complete independent numeric tables at both depths through
+root and direct-library Y4M and owned FFV1 sources, before framestep selection.
+Separate tests require clip state reset, rewind, plane masks, disabled-input
+history updates, non-mutating malformed-frame refusal and scalar-history refusal.
+Native codec source decode and CLI decode/Y4M/FFV1 routes require acceptance.
+No private media or FFmpeg is used by fixture generation or ordinary tests.

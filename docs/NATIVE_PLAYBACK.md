@@ -3771,3 +3771,19 @@ keeps its explicit refusal of dynamic parameters. No FFmpeg execution is needed
 by production or ordinary tests. The reference benchmark separately qualifies 72 exact pixel comparisons for
 8/10-bit YUV420/422/444 at 25 and 30000/1001 fps against the
 [reference hue filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_hue.c).
+
+`lagfun` now runs with owned persistent f32 history in native decode, Y4M export,
+FFV1 export and direct-library streaming Y4M/FFV1 processing. Decay is applied to
+unrounded history and integer output uses ties-to-even rounding. Plane masks,
+`enable` expressions, disabled-input history updates and rewind are supported;
+framestep runs after every selected input updates history. A new clip starts new
+history. Invalid frames are validated before changing history, and a mid-stream
+geometry/depth change is refused explicitly. The standalone scalar frame helper
+refuses requests requiring history instead of silently resetting on each call.
+The filter retains one f32 sample per input component with checked, fallible
+allocation; no external decoder/filter or arbitrary memory budget is introduced.
+Synthetic 8/10-bit tests assert known numeric outputs and API/CLI routing. The
+explicit benchmark checks 42 exact YUV420/444 pixel pairs across 8, 10 and 16 bits,
+including masks, decay endpoints and disabled-input updates against the
+[reference filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_lagfun.c).
+Float/alpha stream formats and dynamic reconfiguration remain separate work.

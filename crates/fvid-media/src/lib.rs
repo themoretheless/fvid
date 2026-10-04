@@ -250,3 +250,5 @@ pub mod owned_subtitle_burn;
 pub use owned_subtitle_burn::{burn_subtitles, plan_burn_subtitles};
 
 pub mod owned_fade;
+
+pub mod owned_lagfun;

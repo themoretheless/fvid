@@ -30,6 +30,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub lagfun: Option<fvid_media::owned_lagfun::LagFun>,
     pub fade: Option<fvid_media::owned_fade::Fade>,
     pub fade_state: std::cell::Cell<fvid_media::owned_fade::FadeState>,
     pub colorhold: Option<fvid_media::owned_colorhold::ColorHold>,
@@ -64,6 +65,7 @@ impl PixelFilters {
         let mut result = Self {
 
             fade_state: Default::default(),
+            lagfun: request.lagfun.as_deref().map(fvid_media::owned_lagfun::LagFun::parse).transpose().map_err(|e|invalid(&e))?,
             fade: request.fade.as_deref().map(fvid_media::owned_fade::Fade::parse).transpose().map_err(|e|invalid(&e))?,
             grayworld: request.grayworld.as_deref().map(fvid_media::owned_timeline::Timeline::grayworld).transpose().map_err(|e|invalid(&e))?,
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
@@ -149,7 +151,7 @@ impl PixelFilters {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.unsharp.is_none()
+        self.lagfun.is_none() && self.unsharp.is_none()
             && self.eq.is_none()
             && self.hue.is_none()
             && self.pixelize.is_none()
@@ -254,6 +256,7 @@ impl PixelFilters {
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
         }
+        if let Some(filter)=&self.lagfun {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
         if let Some(filter)=&self.vibrance {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
