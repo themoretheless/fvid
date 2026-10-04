@@ -402,18 +402,32 @@ mod tests {
         use crate::owned_nvdec_movie::AvcMovieReader;
         use crate::owned_nvdec_mp4::AvcMp4Input;
         use std::io::Cursor;
-        for bytes in [
-            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
-                .as_slice(),
-            include_bytes!("../../../tests/fixtures/playback-errors/avc-cuda-video-metadata.mp4")
-                .as_slice(),
+        const EMPTY: &[u8] =
+            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov");
+        const METADATA: &[u8] =
+            include_bytes!("../../../tests/fixtures/playback-errors/avc-cuda-video-metadata.mp4");
+        for (bytes, white_shader, clipped) in [
+            (EMPTY, false, false),
+            (METADATA, false, false),
+            (EMPTY, true, false),
+            (EMPTY, false, true),
         ] {
             let source = AvcMp4Input::open(Cursor::new(bytes), Default::default()).unwrap();
-            let expected = source.movie_presentations(1000).unwrap();
+            let unit = (1000 * u64::from(source.track().timescale))
+                .div_ceil(u64::from(source.movie_timescale())) as i64;
+            let interval = clipped.then_some((unit / 2, unit * 9 / 2));
+            let expected = crate::owned_nvdec_movie::clip_presentations(
+                source.movie_presentations(1000).unwrap(),
+                interval,
+            )
+            .unwrap();
             let scale = source.track().timescale;
             let (width, height) = source.coded_dimensions();
-            let reader = AvcMovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
-            let renderer = AvcMovieRenderer::new(
+            let reader =
+                AvcMovieReader::new_with_interval(source, 0, 32, 2, 1000, 8, interval).unwrap();
+            let shader = white_shader.then(|| fvid_cuda::ByteShader::new(
+                "__device__ unsigned int process_byte(unsigned int value, unsigned int plane, unsigned int x, unsigned int y) { return plane == 0u ? 235u : 128u; }").unwrap());
+            let renderer = AvcMovieRenderer::new_with_shader(
                 reader,
                 Nv12Transform {
                     out_width: width,
@@ -422,6 +436,7 @@ mod tests {
                     ..Default::default()
                 },
                 false,
+                shader.as_ref(),
             )
             .unwrap();
             let metadata = renderer.metadata().clone();
@@ -515,6 +530,18 @@ mod tests {
                 let packet = saved.read_packet(index).unwrap();
                 let picture = software.decode_order(&packet).unwrap().unwrap();
                 assert_eq!(picture.dimensions(), (width as usize, height as usize));
+                if white_shader {
+                    // Includes the two empty spans: ignoring their shader would
+                    // produce limited black Y=16 instead of this uniform white.
+                    assert!(picture.y.iter().all(|sample| sample.abs_diff(235) <= 2));
+                    assert!(
+                        picture
+                            .cb
+                            .iter()
+                            .chain(&picture.cr)
+                            .all(|sample| sample.abs_diff(128) <= 2)
+                    );
+                }
             }
         }
     }

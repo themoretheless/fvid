@@ -126,6 +126,7 @@ pub struct AvcMovieReader<R> {
     decoder: AvcNvdecDecoder,
     queue: Queue<DecodedAvc>,
     scratch: Vec<u8>,
+    interval: Option<(i64, i64)>,
     ordinal: usize,
     decode_surfaces: u32,
     output_surfaces: u32,
@@ -133,14 +134,36 @@ pub struct AvcMovieReader<R> {
 }
 impl<R: Read + Seek> AvcMovieReader<R> {
     pub fn new(
-        mut source: AvcMp4Input<R>,
+        source: AvcMp4Input<R>,
         ordinal: usize,
         decode_surfaces: u32,
         output_surfaces: u32,
         max_events: usize,
         cache_frames: usize,
     ) -> Result<Self, String> {
-        let queue = Queue::new(source.movie_presentations(max_events)?, cache_frames)?;
+        Self::new_with_interval(
+            source,
+            ordinal,
+            decode_surfaces,
+            output_surfaces,
+            max_events,
+            cache_frames,
+            None,
+        )
+    }
+    /// Clip/rebase movie occurrences in track ticks; decoding still includes
+    /// reference preroll. Variable durations and explicit blanks are retained.
+    pub fn new_with_interval(
+        mut source: AvcMp4Input<R>,
+        ordinal: usize,
+        decode_surfaces: u32,
+        output_surfaces: u32,
+        max_events: usize,
+        cache_frames: usize,
+        interval: Option<(i64, i64)>,
+    ) -> Result<Self, String> {
+        let events = clip_presentations(source.movie_presentations(max_events)?, interval)?;
+        let queue = Queue::new(events, cache_frames)?;
         source.rewind_packets();
         let decoder = source.create_decoder(ordinal, decode_surfaces, output_surfaces)?;
         Ok(Self {
@@ -148,11 +171,20 @@ impl<R: Read + Seek> AvcMovieReader<R> {
             decoder,
             queue,
             scratch: Vec::new(),
+            interval,
             ordinal,
             decode_surfaces,
             output_surfaces,
             failed: false,
         })
+    }
+    fn video_metadata(&self) -> Result<MovieVideoMetadata, String> {
+        let mut metadata = self.source.video_metadata();
+        if let Some(interval) = self.interval {
+            metadata.file.chapters =
+                clip_chapters(&metadata.file.chapters, interval, self.media_timescale())?;
+        }
+        Ok(metadata)
     }
     pub fn media_timescale(&self) -> u32 {
         self.source.track().timescale
@@ -207,6 +239,64 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         Ok(())
     }
 }
+pub(crate) fn clip_presentations(
+    mut events: Vec<Presentation>,
+    interval: Option<(i64, i64)>,
+) -> Result<Vec<Presentation>, String> {
+    let Some((from, to)) = interval else {
+        return Ok(events);
+    };
+    if from < 0 || from >= to {
+        return Err("movie interval requires 0 <= from < to".into());
+    }
+    events.retain_mut(|event| {
+        let start = event.start.max(from);
+        let end = event.end.min(to);
+        if start >= end {
+            return false;
+        }
+        event.start = start - from;
+        event.end = end - from;
+        true
+    });
+    if events.is_empty() {
+        return Err("movie interval has no presentations".into());
+    }
+    Ok(events)
+}
+fn clip_chapters(
+    chapters: &[crate::owned_matroska::Chapter],
+    interval: (i64, i64),
+    scale: u32,
+) -> Result<Vec<crate::owned_matroska::Chapter>, String> {
+    let nanos = |ticks: i64| -> Result<u64, String> {
+        if scale == 0 {
+            return Err("movie timescale is zero".into());
+        }
+        let ticks = u64::try_from(ticks).map_err(|_| "negative chapter interval")?;
+        u64::try_from(u128::from(ticks) * 1_000_000_000 / u128::from(scale))
+            .map_err(|_| "chapter interval overflow".into())
+    };
+    let (from, to) = (nanos(interval.0)?, nanos(interval.1)?);
+    let mut result = Vec::new();
+    for (index, chapter) in chapters.iter().enumerate() {
+        let start = chapter.start_ns.max(from);
+        let end = chapter
+            .end_ns
+            .or_else(|| chapters.get(index + 1).map(|next| next.start_ns))
+            .unwrap_or(to)
+            .min(to);
+        if start < end {
+            result.push(crate::owned_matroska::Chapter {
+                start_ns: start - from,
+                end_ns: Some(end - from),
+                title: chapter.title.clone(),
+            });
+        }
+    }
+    Ok(result)
+}
+
 #[derive(Clone, Debug)]
 pub struct MovieVideoMetadata {
     pub options: crate::owned_matroska::TrackOptions,
@@ -269,6 +359,7 @@ fn transformed_metadata(
 pub struct AvcMovieRenderer<R: Read + Seek> {
     reader: std::mem::ManuallyDrop<AvcMovieReader<R>>,
     output: std::mem::ManuallyDrop<fvid_cuda::Nv12Buffer>,
+    blank: std::mem::ManuallyDrop<Option<fvid_cuda::Nv12Buffer>>,
     filter: std::mem::ManuallyDrop<fvid_cuda::Nv12Processor>,
     transform: fvid_cuda::Nv12Transform,
     full_range: bool,
@@ -281,9 +372,18 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
         transform: fvid_cuda::Nv12Transform,
         full_range: bool,
     ) -> Result<Self, String> {
+        Self::new_with_shader(reader, transform, full_range, None)
+    }
+    /// Trusted CUDA point/sampling shader, fused into the owned transform.
+    pub fn new_with_shader(
+        reader: AvcMovieReader<R>,
+        transform: fvid_cuda::Nv12Transform,
+        full_range: bool,
+        shader: Option<&fvid_cuda::ByteShader>,
+    ) -> Result<Self, String> {
         let (width, height) = reader.source.coded_dimensions();
         let metadata = transformed_metadata(
-            reader.source.video_metadata(),
+            reader.video_metadata()?,
             width,
             height,
             transform,
@@ -291,11 +391,20 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
         )?;
         let output =
             fvid_cuda::Nv12Buffer::new(reader.ordinal, transform.out_width, transform.out_height)?;
-        let mut filter = fvid_cuda::Nv12Processor::new(reader.ordinal)?;
+        let blank = if shader.is_some() {
+            Some(fvid_cuda::Nv12Buffer::new(reader.ordinal, width, height)?)
+        } else {
+            None
+        };
+        let mut filter = match shader {
+            Some(shader) => fvid_cuda::Nv12Processor::with_shader(reader.ordinal, shader)?,
+            None => fvid_cuda::Nv12Processor::new(reader.ordinal)?,
+        };
         filter.follow_stream(output.stream_handle()?);
         Ok(Self {
             reader: std::mem::ManuallyDrop::new(reader),
             output: std::mem::ManuallyDrop::new(output),
+            blank: std::mem::ManuallyDrop::new(blank),
             filter: std::mem::ManuallyDrop::new(filter),
             transform,
             full_range,
@@ -353,6 +462,14 @@ impl<R: Read + Seek> AvcMovieRenderer<R> {
             self.output.synchronize()?;
             self.reader.unmap(surface.slot)?;
             operation?;
+        } else if let Some(blank) = self.blank.as_mut() {
+            blank.fill_black(self.full_range)?;
+            let operation = self
+                .filter
+                .apply(blank.view()?, self.output.view()?, self.transform);
+            self.filter.synchronize()?;
+            self.output.synchronize()?;
+            operation?;
         } else {
             self.output.fill_black(self.full_range)?;
         }
@@ -380,6 +497,7 @@ impl<R: Read + Seek> Drop for AvcMovieRenderer<R> {
         unsafe {
             std::mem::ManuallyDrop::drop(&mut self.filter);
             std::mem::ManuallyDrop::drop(&mut self.reader);
+            std::mem::ManuallyDrop::drop(&mut self.blank);
             std::mem::ManuallyDrop::drop(&mut self.output);
         }
     }
@@ -404,6 +522,61 @@ fn validate_transform(width: u32, height: u32, t: fvid_cuda::Nv12Transform) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn synthetic_interval_clips_blanks_repeated_frames_and_chapters() {
+        let source = AvcMp4Input::open(
+            std::io::Cursor::new(
+                include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
+                    .as_slice(),
+            ),
+            Default::default(),
+        )
+        .unwrap();
+        let scale = (1000 * u64::from(source.track().timescale))
+            .div_ceil(u64::from(source.movie_timescale())) as i64;
+        let original = source.movie_presentations(1000).unwrap();
+        let clipped =
+            clip_presentations(original.clone(), Some((scale / 2, scale * 9 / 2))).unwrap();
+        assert_eq!(clipped.first().unwrap().start, 0);
+        assert_eq!(clipped.last().unwrap().end, scale * 4);
+        assert_eq!(
+            clipped
+                .iter()
+                .filter(|event| event.sample.is_none())
+                .count(),
+            2
+        );
+        assert!(
+            clipped
+                .iter()
+                .all(|event| event.start >= 0 && event.end > event.start)
+        );
+        assert!(clip_presentations(original.clone(), Some((-1, scale))).is_err());
+        assert!(clip_presentations(original.clone(), Some((scale, scale))).is_err());
+        assert!(clip_presentations(original, Some((scale * 6, scale * 7))).is_err());
+        use crate::owned_matroska::Chapter;
+        let chapters = [
+            Chapter {
+                start_ns: 0,
+                end_ns: None,
+                title: "first".into(),
+            },
+            Chapter {
+                start_ns: 2_000_000_000,
+                end_ns: None,
+                title: "second".into(),
+            },
+        ];
+        let chapters = clip_chapters(&chapters, (500, 4500), 1000).unwrap();
+        assert_eq!(
+            (chapters[0].start_ns, chapters[0].end_ns),
+            (0, Some(1_500_000_000))
+        );
+        assert_eq!(
+            (chapters[1].start_ns, chapters[1].end_ns),
+            (1_500_000_000, Some(4_000_000_000))
+        );
+    }
     #[test]
     fn render_metadata_preserves_display_and_maps_crop_through_flips() {
         use crate::owned_matroska::{

@@ -368,7 +368,7 @@ on the movie clock. A future rendering/export loop must realize these events.
 
 The new 18 KiB synthetic `edit-empty-spans.mov` fixture comes from the public
 control seed, with two empty spans surrounding repeated media. Native plan
-acceptance checks the two blanks, duplicated source frame, six-second endpoint
+acceptance checks the two blanks, duplicated source frame, half-second endpoint
 and event-count refusal. Four shared-clock tests and three native-input tests
 pass without hardware or external tools. Hardware rendering/export remains
 unexecuted and production CUDA migration is incomplete.
@@ -471,3 +471,16 @@ round trip is verified without CUDA. NVIDIA acceptance exercises actual file
 publication, completed progress, and existing-output preservation, but has not
 run here. This API remains video-only; production `hw-filter` still uses legacy
 libav while its remaining codec/audio/options are being ported.
+
+The native reader now accepts a half-open track-tick movie interval, clips each
+frame/blank occurrence, rebases timestamps and trims/rebases chapters. Reference
+preroll still decodes through the original packet stream. Empty or invalid
+intervals are refused; variable durations remain intact. Legacy `hw-filter`
+currently rebases selected frames to CFR, so CLI behavior is not yet switched.
+
+`AvcMovieRenderer::new_with_shader` supports trusted point and sampling shaders
+through the same CUDA processor. Empty spans get an owned source-sized black
+surface and pass through the shader/transform into the reusable output; shaders
+therefore apply consistently to pictures and blanks. GPU acceptance now includes
+a uniform-white shader and checks every software-decoded output plane, including
+both originally blank spans. NVIDIA execution remains unverified.
