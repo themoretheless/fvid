@@ -194,3 +194,25 @@ Host tests exercise request admission and destruction retries. An ignored NVIDIA
 test creates and closes an actual H.264 decoder without libav; it has not run here.
 Compressed-packet parsing, picture submission, surface mapping and production
 CUDA integration remain unfinished.
+
+
+## Direct NVDEC mapped outputs
+
+Sessions now resolve the 64-bit CUDA-pointer map/unmap entrypoints directly.
+The unsafe progressive-picture mapping API requires an already submitted picture
+whose decode slot remains reserved. It returns a borrowed device-pointer/pitch
+description, not a retained allocation. All consumers must finish before unmap
+or session closure. Native packet parsing and picture submission are still pending,
+so real mapped-frame acceptance has not been exercised yet.
+
+Mapping bookkeeping is bounded by simultaneous output capacity; released entries
+are removed and monotonically increasing slot identifiers prevent a stale release
+from freeing a later mapping. Invalid pointers, pitches, high-bit-depth alignment
+and overflowing extents refuse. Returned mappings remain owned even when mapping
+reports an error. Cleanup retains failed unmaps for retry and unmaps all tracked
+surfaces before destroying the decoder.
+
+The pinned-header C probes verify 264-byte x64 processing storage and stream/
+reserved-pointer offsets 56/248 on both Linux and Windows. Host regression tests
+cover output extent refusal, unmap retry and ABI. No GPU mapping execution or
+production CUDA/libav replacement is claimed by these tests.

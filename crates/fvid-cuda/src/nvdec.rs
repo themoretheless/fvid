@@ -230,10 +230,73 @@ struct CreateInfo {
     target: Rect,
     reserved2: [std::ffi::c_ulong; 5],
 }
+
+#[repr(C)]
+struct ProcParams {
+    progressive: i32,
+    second_field: i32,
+    top_field_first: i32,
+    unpaired_field: i32,
+    reserved_flags: u32,
+    reserved_zero: u32,
+    raw_input: u64,
+    raw_input_pitch: u32,
+    raw_input_format: u32,
+    raw_output: u64,
+    raw_output_pitch: u32,
+    reserved1: u32,
+    output_stream: *mut std::ffi::c_void,
+    reserved: [u32; 46],
+    reserved2: [*mut std::ffi::c_void; 2],
+}
+impl Default for ProcParams {
+    fn default() -> Self {
+        Self {
+            progressive: 1,
+            second_field: 0,
+            top_field_first: 0,
+            unpaired_field: 0,
+            reserved_flags: 0,
+            reserved_zero: 0,
+            raw_input: 0,
+            raw_input_pitch: 0,
+            raw_input_format: 0,
+            raw_output: 0,
+            raw_output_pitch: 0,
+            reserved1: 0,
+            output_stream: std::ptr::null_mut(),
+            reserved: [0; 46],
+            reserved2: [std::ptr::null_mut(); 2],
+        }
+    }
+}
+type MapFrame =
+    unsafe extern "system" fn(DecoderHandle, i32, *mut u64, *mut u32, *mut ProcParams) -> i32;
+type UnmapFrame = unsafe extern "system" fn(DecoderHandle, u64) -> i32;
+/// Borrowed CUDA output description. Pointer use is unsafe and must finish
+/// before unmap/close; copying this descriptor does not retain the allocation.
+#[derive(Clone, Copy, Debug)]
+pub struct NvdecSurface {
+    pub slot: usize,
+    pub pointer: u64,
+    pub pitch: u32,
+    pub width: u32,
+    pub height: u32,
+    pub bit_depth: u8,
+}
 /// Owns a decoder allocation. Packet parsing and picture submission are pending.
 pub struct NvdecSession {
     decoder: DecoderHandle,
     destroy: DestroyDecoder,
+    map: MapFrame,
+    unmap: UnmapFrame,
+    mapped: Vec<(usize, u64)>,
+    next_slot: usize,
+    width: u32,
+    height: u32,
+    depth: u8,
+    decode_surfaces: u32,
+    output_surfaces: u32,
     device: std::mem::ManuallyDrop<CodecDevice>,
     api: std::mem::ManuallyDrop<NvdecApi>,
 }
@@ -264,9 +327,19 @@ impl NvdecSession {
             return Err("NVDEC device does not support requested coded geometry/format".into());
         }
         let (create, destroy) = api.decoder_entrypoints()?;
+        let (map, unmap) = api.mapping_entrypoints()?;
         let mut session = Self {
             decoder: std::ptr::null_mut(),
             destroy,
+            map,
+            unmap,
+            mapped: Vec::new(),
+            next_slot: 0,
+            width,
+            height,
+            depth,
+            decode_surfaces,
+            output_surfaces,
             device: std::mem::ManuallyDrop::new(device),
             api: std::mem::ManuallyDrop::new(api),
         };
@@ -282,6 +355,77 @@ impl NvdecSession {
         }
         Ok(session)
     }
+
+    /// Map a decoded progressive picture into a driver-owned CUDA surface.
+    ///
+    /// # Safety
+    /// The picture must have completed submission in this decoder, with its
+    /// index still reserved by the parser. Do not reuse it while mapped.
+    /// Synchronize all consumers before unmap or closing the session.
+    pub unsafe fn map_progressive(&mut self, picture: u32) -> Result<NvdecSurface, String> {
+        if self.decoder.is_null() || picture >= self.decode_surfaces {
+            return Err("NVDEC mapping requires a live decoder and valid picture index".into());
+        }
+        if self.mapped.len() >= self.output_surfaces as usize {
+            return Err("NVDEC mapped output capacity is exhausted".into());
+        }
+        let slot = self.next_slot;
+        let next_slot = slot.checked_add(1).ok_or("NVDEC mapping slot overflow")?;
+        self.mapped
+            .try_reserve(1)
+            .map_err(|e| format!("NVDEC mapping bookkeeping allocation failed: {e}"))?;
+        let (_, stream) = self.device.handles()?;
+        let mut params = ProcParams {
+            output_stream: stream as *mut std::ffi::c_void,
+            ..ProcParams::default()
+        };
+        let mut pointer = 0;
+        let mut pitch = 0;
+        // SAFETY: Caller guarantees a decoded reserved picture. Typed output
+        // storage and zeroed SDK parameters stay live throughout the call.
+        let status = unsafe {
+            (self.map)(
+                self.decoder,
+                picture as i32,
+                &mut pointer,
+                &mut pitch,
+                &mut params,
+            )
+        };
+        // Preserve a returned mapping even on refusal so cleanup can retry.
+        if pointer != 0 {
+            self.mapped.push((slot, pointer));
+            self.next_slot = next_slot;
+        }
+        if status != 0 {
+            return Err(format!("NVDEC mapping failed with CUDA status {status}"));
+        }
+        validate_surface(pointer, pitch, self.width, self.height, self.depth)?;
+        Ok(NvdecSurface {
+            slot,
+            pointer,
+            pitch,
+            width: self.width,
+            height: self.height,
+            bit_depth: self.depth,
+        })
+    }
+    /// Release a slot after synchronizing every CUDA consumer of its pointer.
+    pub fn unmap(&mut self, slot: usize) -> Result<(), String> {
+        let index = self
+            .mapped
+            .iter()
+            .position(|entry| entry.0 == slot)
+            .ok_or("NVDEC mapped slot is absent or already released")?;
+        self.device.handles()?;
+        self.device.synchronize()?;
+        release_mapping(&mut self.mapped[index].1, |pointer| {
+            // SAFETY: Tracked live mapping; consumer work must be completed.
+            unsafe { (self.unmap)(self.decoder, pointer) }
+        })?;
+        self.mapped.swap_remove(index);
+        Ok(())
+    }
     /// Failed destruction preserves the handle for retry.
     pub fn close(&mut self) -> Result<(), String> {
         if self.decoder.is_null() {
@@ -289,6 +433,12 @@ impl NvdecSession {
         }
         self.device.handles()?;
         self.device.synchronize()?;
+        for (_, pointer) in &mut self.mapped {
+            release_mapping(pointer, |pointer| {
+                // SAFETY: Tracked live mapping; unmap precedes decoder destruction.
+                unsafe { (self.unmap)(self.decoder, pointer) }
+            })?;
+        }
         release_decoder(&mut self.decoder, |handle| {
             // SAFETY: Live decoder, bound context and retained driver library.
             unsafe { (self.destroy)(handle) }
@@ -308,6 +458,24 @@ impl Drop for NvdecSession {
     }
 }
 impl NvdecApi {
+    fn mapping_entrypoints(&self) -> Result<(MapFrame, UnmapFrame), String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            let map_name = [b"cuvidMapVideoFrame64".as_slice(), &[0]].concat();
+            let unmap_name = [b"cuvidUnmapVideoFrame64".as_slice(), &[0]].concat();
+            // SAFETY: SDK CUDAAPI 64-bit device-pointer signature.
+            let map = unsafe { self.library.get::<MapFrame>(map_name.as_slice()) }
+                .map_err(|e| format!("NVDEC map entrypoint unavailable: {e}"))?;
+            // SAFETY: SDK CUDAAPI destructor for a mapped 64-bit device pointer.
+            let unmap = unsafe { self.library.get::<UnmapFrame>(unmap_name.as_slice()) }
+                .map_err(|e| format!("NVDEC unmap entrypoint unavailable: {e}"))?;
+            Ok((*map, *unmap))
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            Err("NVDEC requires an NVIDIA driver on Linux or Windows".into())
+        }
+    }
     fn decoder_entrypoints(&self) -> Result<(CreateDecoder, DestroyDecoder), String> {
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         {
@@ -387,10 +555,66 @@ fn release_decoder(
     *handle = std::ptr::null_mut();
     Ok(())
 }
+
+fn validate_surface(
+    pointer: u64,
+    pitch: u32,
+    width: u32,
+    height: u32,
+    depth: u8,
+) -> Result<(), String> {
+    let row = u64::from(width) * if depth > 8 { 2 } else { 1 };
+    let bytes = u64::from(pitch) * (u64::from(height) + u64::from(height) / 2);
+    if pointer == 0
+        || u64::from(pitch) < row
+        || (depth > 8 && (pointer % 2 != 0 || pitch % 2 != 0))
+        || pointer.checked_add(bytes).is_none()
+    {
+        return Err("NVDEC returned an invalid mapped surface extent".into());
+    }
+    Ok(())
+}
+fn release_mapping(pointer: &mut u64, unmap: impl FnOnce(u64) -> i32) -> Result<(), String> {
+    if *pointer == 0 {
+        return Ok(());
+    }
+    let status = unmap(*pointer);
+    if status != 0 {
+        return Err(format!("NVDEC unmap failed with CUDA status {status}"));
+    }
+    *pointer = 0;
+    Ok(())
+}
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    #[test]
+    fn mapped_surface_extent_and_release_failures_are_checked() {
+        assert!(validate_surface(4096, 1920, 1920, 1080, 8).is_ok());
+        assert!(validate_surface(4096, 3840, 1920, 1080, 10).is_ok());
+        assert!(validate_surface(4097, 3840, 1920, 1080, 10).is_err());
+        assert!(validate_surface(4096, 1919, 1920, 1080, 8).is_err());
+        assert!(validate_surface(u64::MAX - 10, 1920, 1920, 1080, 8).is_err());
+        assert!(validate_surface(0, 1920, 1920, 1080, 8).is_err());
+        let mut pointer = 4096;
+        assert!(release_mapping(&mut pointer, |_| 999).is_err());
+        assert_eq!(pointer, 4096);
+        release_mapping(&mut pointer, |p| {
+            assert_eq!(p, 4096);
+            0
+        })
+        .unwrap();
+        release_mapping(&mut pointer, |_| panic!("duplicate unmap")).unwrap();
+    }
+    #[test]
+    fn processing_storage_matches_pinned_header() {
+        if std::mem::size_of::<usize>() == 8 {
+            assert_eq!(std::mem::size_of::<ProcParams>(), 264);
+            assert_eq!(std::mem::offset_of!(ProcParams, output_stream), 56);
+            assert_eq!(std::mem::offset_of!(ProcParams, reserved2), 248);
+        }
+    }
     #[test]
     fn creation_storage_matches_linux_and_windows_c_layouts() {
         if std::mem::size_of::<usize>() != 8 {
