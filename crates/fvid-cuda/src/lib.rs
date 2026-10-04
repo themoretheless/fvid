@@ -13,7 +13,7 @@ mod host_pinned;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 mod native;
 mod nvenc_session;
-pub use nvenc_session::NvencSession;
+pub use nvenc_session::{CodecGuid, NvencSession};
 mod nvenc;
 pub use nvenc::{NvencApi, NvencVersion};
 mod codec_device;

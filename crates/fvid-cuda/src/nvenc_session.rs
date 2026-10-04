@@ -7,13 +7,27 @@ const API: u32 = 8 | (1 << 24);
 const fn version(revision: u32) -> u32 {
     API | (revision << 16) | (7 << 28)
 }
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct CodecGuid {
+    pub data1: u32,
+    pub data2: u16,
+    pub data3: u16,
+    pub data4: [u8; 8],
+}
+type GuidCount = unsafe extern "system" fn(*mut c_void, *mut u32) -> i32;
+type Guids = unsafe extern "system" fn(*mut c_void, *mut CodecGuid, u32, *mut u32) -> i32;
 type Destroy = unsafe extern "system" fn(*mut c_void) -> i32;
 type Open = unsafe extern "system" fn(*mut OpenParams, *mut *mut c_void) -> i32;
 #[repr(C)]
 pub(crate) struct FunctionTable {
     version: u32,
     reserved: u32,
-    before_destroy: [usize; 27],
+    legacy_open: usize,
+    guid_count: Option<GuidCount>,
+    profiles: [usize; 2],
+    guids: Option<Guids>,
+    before_destroy: [usize; 22],
     destroy: Option<Destroy>,
     invalidate: usize,
     open: Option<Open>,
@@ -25,7 +39,11 @@ impl FunctionTable {
         Self {
             version: version(2),
             reserved: 0,
-            before_destroy: [0; 27],
+            legacy_open: 0,
+            guid_count: None,
+            profiles: [0; 2],
+            guids: None,
+            before_destroy: [0; 22],
             destroy: None,
             invalidate: 0,
             open: None,
@@ -49,6 +67,7 @@ struct OpenParams {
 pub struct NvencSession {
     encoder: *mut c_void,
     destroy: Destroy,
+    table: FunctionTable,
     device: ManuallyDrop<CodecDevice>,
     _api: ManuallyDrop<NvencApi>,
 }
@@ -86,8 +105,39 @@ impl NvencSession {
         Ok(Self {
             encoder,
             destroy,
+            table,
             device: ManuallyDrop::new(device),
             _api: ManuallyDrop::new(api),
+        })
+    }
+    /// Query all codec identifiers advertised by this live encoder session.
+    /// Unknown identifiers are retained rather than silently filtered.
+    pub fn codec_guids(&self) -> Result<Vec<CodecGuid>, String> {
+        if self.encoder.is_null() {
+            return Err("NVENC session is closed".into());
+        }
+        self.device.handles()?;
+        let count = self
+            .table
+            .guid_count
+            .ok_or("NVENC omitted codec-count entrypoint")?;
+        let guids = self
+            .table
+            .guids
+            .ok_or("NVENC omitted codec-list entrypoint")?;
+        let mut capacity = 0;
+        // SAFETY: The session and library are live; capacity is writable SDK
+        // uint32_t storage, and this entrypoint uses the verified NVENCAPI ABI.
+        let status = unsafe { count(self.encoder, &mut capacity) };
+        if status != 0 {
+            return Err(format!(
+                "NVENC codec-count query failed with status {status}"
+            ));
+        }
+        read_guids(capacity, |output, written| {
+            // SAFETY: output has the exact advertised capacity of initialized
+            // GUID storage; the SDK requires writes to stay within that count.
+            unsafe { guids(self.encoder, output.as_mut_ptr(), capacity, written) }
         })
     }
     /// Close explicitly to observe driver errors; on failure the handle remains
@@ -120,6 +170,31 @@ impl Drop for NvencSession {
         // reclaims them; explicit close lets callers observe and retry errors.
     }
 }
+fn read_guids(
+    capacity: u32,
+    query: impl FnOnce(&mut [CodecGuid], &mut u32) -> i32,
+) -> Result<Vec<CodecGuid>, String> {
+    if capacity == 0 {
+        return Ok(Vec::new());
+    }
+    let mut values = Vec::new();
+    values
+        .try_reserve_exact(capacity as usize)
+        .map_err(|e| format!("NVENC codec-list allocation failed: {e}"))?;
+    values.resize(capacity as usize, CodecGuid::default());
+    let mut written = 0;
+    let status = query(&mut values, &mut written);
+    if status != 0 {
+        return Err(format!(
+            "NVENC codec-list query failed with status {status}"
+        ));
+    }
+    if written > capacity {
+        return Err("NVENC codec-list count exceeds supplied capacity".into());
+    }
+    values.truncate(written as usize);
+    Ok(values)
+}
 fn close_handle(
     encoder: &mut *mut c_void,
     destroy: impl FnOnce(*mut c_void) -> i32,
@@ -137,13 +212,44 @@ fn close_handle(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn codec_query_keeps_unknown_guids_and_rejects_bad_counts() {
+        let guid = CodecGuid {
+            data1: 42,
+            ..Default::default()
+        };
+        assert_eq!(
+            read_guids(2, |out, count| {
+                out[0] = guid;
+                *count = 1;
+                0
+            })
+            .unwrap(),
+            vec![guid]
+        );
+        assert!(
+            read_guids(1, |_, count| {
+                *count = 2;
+                0
+            })
+            .is_err()
+        );
+        assert!(read_guids(1, |_, _| 15).is_err());
+        assert!(
+            read_guids(0, |_, _| panic!("empty query invoked"))
+                .unwrap()
+                .is_empty()
+        );
+    }
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     #[test]
     #[ignore = "requires an NVIDIA CUDA device with NVENC"]
     fn direct_cuda_session_opens_and_closes_without_libav() {
         let device = CodecDevice::new(0).unwrap();
         let mut session = NvencSession::open(device).unwrap();
+        assert!(!session.codec_guids().unwrap().is_empty());
         session.close().unwrap();
+        assert!(session.codec_guids().is_err());
         session.close().unwrap();
     }
     #[test]
