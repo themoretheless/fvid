@@ -45,7 +45,7 @@ pub struct PixelFilters {
     pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
     pub eq: Option<fvid_media::owned_eq::Equalizer>,
-    pub hue: Option<fvid_media::owned_hue::Hue>,
+    pub hue: Option<fvid_media::owned_hue::HueProgram>,
     pub monochrome: Option<fvid_media::owned_monochrome::Monochrome>,
     pub colorize: Option<fvid_media::owned_colorize::Colorize>,
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
@@ -93,7 +93,7 @@ impl PixelFilters {
             hue: request
                 .hue
                 .as_deref()
-                .map(fvid_media::owned_hue::Hue::parse)
+                .map(fvid_media::owned_hue::HueProgram::parse)
                 .transpose()
                 .map_err(|error| invalid(&error))?,
             pixelize: request.pixelize.as_deref().map(crate::native_pixelize::Pixelize::parse).transpose()?,
@@ -212,8 +212,8 @@ impl PixelFilters {
         if let Some(filter) = self.unsharp {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
-        if let Some(filter) = self.hue {
-            filter.apply(frame, depth).map_err(|error| invalid(&error))?;
+        if let Some(filter) = &self.hue {
+            filter.at(n,t).map_err(|error| invalid(&error))?.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
         if let Some(filter) = self.gblur {
             filter.apply(frame, depth).map_err(|e| invalid(&e))?;

@@ -58,7 +58,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
         && transform
             .hue
             .as_deref()
-            .is_none_or(|args| crate::owned_hue::Hue::parse(args).is_ok())
+            .is_none_or(|args| crate::owned_hue::HueProgram::parse(args).is_ok())
         && transform.reverse.as_deref().is_none_or(str::is_empty)
         && transform
             .shuffleframes
@@ -546,7 +546,7 @@ pub(crate) fn apply_pixel_filters_clock(
                 crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.hue.as_deref() {
-                crate::owned_hue::Hue::parse(args)?.apply(&mut frame, header.depth())?;
+                crate::owned_hue::HueProgram::parse(args)?.at(n,t)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.gblur.as_deref() {
                 crate::owned_gblur::GaussianBlur::parse(args)?.apply(&mut frame, header.depth())?;

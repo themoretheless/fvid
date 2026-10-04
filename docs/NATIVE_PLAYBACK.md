@@ -3759,3 +3759,15 @@ Public root/direct-library exports and CLI decode are qualified by synthetic
 numeric acceptance. HH:MM:SS option syntax still requires separate migration.
 The explicit fade benchmark includes these forms at both qualified frame rates;
 its time parsing oracle is [av_parse_time](https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/parseutils.c).
+
+Animated `hue` expressions now use `HueProgram` and the owned expression evaluator
+in root decode/Y4M/FFV1 export and library streaming paths. The `h`, `H`, `s` and
+`b` options accept `n` and presentation time `t`, including quoted conditionals.
+Inputs discarded by framestep still advance the filter index; interval selection
+restarts `n` at zero and retains source presentation time. Missing/nonfinite time
+results are explicit runtime errors; `pts`, `r`, `tb` and stateful expression
+functions remain outside this migration. The scalar constant `Hue::parse` API
+keeps its explicit refusal of dynamic parameters. No FFmpeg execution is needed
+by production or ordinary tests. The reference benchmark separately qualifies 72 exact pixel comparisons for
+8/10-bit YUV420/422/444 at 25 and 30000/1001 fps against the
+[reference hue filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_hue.c).

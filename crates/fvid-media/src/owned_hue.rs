@@ -34,6 +34,24 @@ impl Hue {
                 _ => return Err("unknown hue option".into()),
             }
         }
+        Self::from_values(degrees, radians, saturation, brightness)
+    }
+    fn from_values(
+        degrees: Option<f32>,
+        radians: Option<f32>,
+        saturation: f32,
+        brightness: f32,
+    ) -> Result<Self> {
+        if degrees
+            .into_iter()
+            .chain(radians)
+            .chain([saturation, brightness])
+            .any(|v| !v.is_finite())
+        {
+            return Err("hue parameters must be finite".into());
+        }
+        let saturation = saturation.clamp(-10., 10.);
+        let brightness = brightness.clamp(-10., 10.);
         if degrees.is_some() && radians.is_some() {
             return Err("h and H cannot both be specified".into());
         }
@@ -259,5 +277,74 @@ mod export_tests {
             }
         }
         std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+/// Parsed expressions evaluated once for every filter input, before output selection.
+#[derive(Clone, Debug)]
+pub struct HueProgram {
+    degrees: Option<crate::owned_expression::Expression>,
+    radians: Option<crate::owned_expression::Expression>,
+    saturation: crate::owned_expression::Expression,
+    brightness: crate::owned_expression::Expression,
+}
+impl HueProgram {
+    pub fn parse(args: &str) -> Result<Self> {
+        if args.len() > 4096 || args.contains('\0') {
+            return Err("invalid hue options".into());
+        }
+        let mut result = Self {
+            degrees: None,
+            radians: None,
+            saturation: crate::owned_expression::Expression::parse("1")?,
+            brightness: crate::owned_expression::Expression::parse("0")?,
+        };
+        let mut position = 0;
+        for entry in args.split(':').filter(|_| !args.is_empty()) {
+            let (key, value) = if let Some(pair) = entry.split_once('=') {
+                pair
+            } else {
+                let key = *["h", "s", "H", "b"]
+                    .get(position)
+                    .ok_or("too many hue options")?;
+                position += 1;
+                (key, entry)
+            };
+            let value = value.trim();
+            let value = if value.starts_with('\'') || value.starts_with('"') {
+                let quote = value.chars().next().unwrap();
+                value
+                    .strip_prefix(quote)
+                    .and_then(|v| v.strip_suffix(quote))
+                    .ok_or("unclosed hue expression quote")?
+            } else {
+                value
+            };
+            let expression = crate::owned_expression::Expression::parse(value)?;
+            // Evaluation validates every variable, even in an inactive if branch.
+            expression.evaluate(&[("n", 0.), ("t", f64::NAN)])?;
+            match key.trim() {
+                "h" => result.degrees = Some(expression),
+                "H" => result.radians = Some(expression),
+                "s" => result.saturation = expression,
+                "b" => result.brightness = expression,
+                _ => return Err("unknown hue option".into()),
+            }
+        }
+        if result.degrees.is_some() && result.radians.is_some() {
+            return Err("h and H cannot both be specified".into());
+        }
+        Ok(result)
+    }
+    pub fn at(&self, n: u64, t: Option<f64>) -> Result<Hue> {
+        let variables = [("n", n as f64), ("t", t.unwrap_or(f64::NAN))];
+        let evaluate =
+            |e: &crate::owned_expression::Expression| e.evaluate(&variables).map(|v| v as f32);
+        Hue::from_values(
+            self.degrees.as_ref().map(evaluate).transpose()?,
+            self.radians.as_ref().map(evaluate).transpose()?,
+            evaluate(&self.saturation)?,
+            evaluate(&self.brightness)?,
+        )
     }
 }

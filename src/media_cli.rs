@@ -1137,7 +1137,7 @@ fn pixel_decode_args(
             if filters.hue.is_some() {
                 return Err("duplicate hue".into());
             }
-            if let Ok(filter) = fvid_media::owned_hue::Hue::parse(value) {
+            if let Ok(filter) = fvid_media::owned_hue::HueProgram::parse(value) {
                 filters.hue = Some(filter);
             } else {
                 result.push(arg.clone());
