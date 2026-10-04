@@ -89,6 +89,9 @@ pub fn filter_rgb16_sampled(
         (16.0 * scale, 219.0 * scale, 224.0 * scale)
     };
     let center = (1u32 << (depth - 1)) as f64;
+    // Limited YUV uses nominal 8-bit code excursions scaled to RGB16;
+    // 255 << 8 is the nominal RGB white, with headroom up to 65535.
+    let rgb_white = if full { 65535.0 } else { 65280.0 };
     let (kr, kb) = match matrix {
         Matrix::Bt601 => (0.299, 0.114),
         Matrix::Bt709 => (0.2126, 0.0722),
@@ -122,7 +125,8 @@ pub fn filter_rgb16_sampled(
                     let g = (luma - kr * r - kb * b) / kg;
                     for sample in [r, g, b] {
                         rgb.extend_from_slice(
-                            &((sample.clamp(0.0, 1.0) * 65535.0).round() as u16).to_le_bytes(),
+                            &((sample * rgb_white).round().clamp(0.0, 65535.0) as u16)
+                                .to_le_bytes(),
                         );
                     }
                 }
@@ -140,7 +144,8 @@ pub fn filter_rgb16_sampled(
                 for col in x0..x1 {
                     let at = index * 6;
                     let channel = |i: usize| {
-                        u16::from_le_bytes([rgb[at + i * 2], rgb[at + i * 2 + 1]]) as f64 / 65535.0
+                        u16::from_le_bytes([rgb[at + i * 2], rgb[at + i * 2 + 1]]) as f64
+                            / rgb_white
                     };
                     let r = channel(0);
                     let g = channel(1);
@@ -217,5 +222,48 @@ mod tests {
         assert_eq!(&point.data[4..], &[85, 255]);
         assert!(average.data[4] > 128 && average.data[5] < 200);
         assert_eq!(&point.data[..4], &average.data[..4]);
+    }
+}
+
+#[cfg(test)]
+mod nominal_range_tests {
+    use super::*;
+    #[test]
+    fn limited_nominal_white_retains_rgb_headroom_at_all_yuv_precisions() {
+        for depth in [8, 12, 16] {
+            for full in [false, true] {
+                let center = 1u16 << (depth - 1);
+                let white = if full {
+                    ((1u32 << depth) - 1) as u16
+                } else {
+                    235u16 << (depth - 8)
+                };
+                let samples = [white, center, center];
+                let mut frame = GeometryFrame {
+                    width: 1,
+                    height: 1,
+                    subsampling: Some([1, 1]),
+                    data: if depth == 8 {
+                        samples.map(|v| v as u8).to_vec()
+                    } else {
+                        samples.into_iter().flat_map(u16::to_le_bytes).collect()
+                    },
+                };
+                let original = frame.data.clone();
+                let mut calls = 0;
+                filter_rgb16(&mut frame, depth, full, Matrix::Bt601, |rgb| {
+                    let decoded: Vec<u16> = rgb
+                        .chunks_exact(2)
+                        .map(|p| u16::from_le_bytes([p[0], p[1]]))
+                        .collect();
+                    assert_eq!(decoded, vec![if full { 65535 } else { 65280 }; 3]);
+                    calls += 1;
+                    Ok(())
+                })
+                .unwrap();
+                assert_eq!(calls, 1);
+                assert_eq!(frame.data, original);
+            }
+        }
     }
 }
