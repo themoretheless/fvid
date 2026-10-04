@@ -532,3 +532,36 @@ SHA-256:
 - `smartblur-edges.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
 - `smartblur-blur.expected.raw`: `ce811803cedfe10ee0501e88e9de6d9382dfbb607a4f83160ef1eac78989d332`
 - `smartblur-sharpen.expected.raw`: `0deda7f8c8f211a6dc6cf8b6f7d1f62d9be930c07c6ca3ff6796f3681e678a2d`
+
+### Owned SAB guidance, reflection maps and similarity support
+
+`scripts/generate_sab_fixture.py` uses Python byte arithmetic only, never an
+external reference executable. `sab-guidance-edges.y4m` has four 16x12 YUV420
+frames at 25 fps, square pixels and `(sample_index * 37 + frame_index * 23 + 101)
+mod 256` samples. It intentionally reuses the same compact pattern as other
+owned filter fixtures, with independent SAB expected results. The default output
+changes 169 samples; strong smoothing changes 1147, so a no-op cannot satisfy the
+regression. No private video, audio or codec parameters are present.
+
+The explicit `ffmpeg_sab_reference` benchmark saved `sab-blur.expected.raw` for
+defaults and `sab-smooth.expected.raw` for `lr=4:lpfr=2:ls=100`, only after every
+owned sample matched the external oracle. `FVID_REFERENCE_FFMPEG` is required by
+the benchmark. Ordinary tests use saved bytes, require neither FFmpeg nor network
+access, and never invoke fixture generation.
+
+`sab-single-pixel.y4m` has four 1x1 YUV420 frames with samples `[64 + n * 10, 128,
+128]`. It verifies owned decoding with a zero-period reflection axis. It is an
+acceptance test for FVid's degenerate-axis extension, not an external reference
+comparison. Additional tests cover both lossless APIs, Y4M/FFV1 sources, clipping,
+input n/t before framestep, CLI decode/Y4M/lossless exports, odd/high-depth flat
+fields and standalone grayscale/chroma settings. Invalid parameters or malformed
+storage have distinct refusals without pixel mutation; packed-RGB refusal is
+not counted as intended playback acceptance. Existing documented synthetic
+codec sources verify native AVC/HEVC/VP9/AV1 filter routing.
+
+SHA-256:
+
+- `sab-guidance-edges.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
+- `sab-blur.expected.raw`: `49b5fd2afa2fc2d8625578b06fee7cd806951348c22da34fea02500d22dad74b`
+- `sab-smooth.expected.raw`: `4a2fd4def4a1f691faa70589a4eb768e55279a6a8391955909e4f4eb4d75d412`
+- `sab-single-pixel.y4m`: `b9eb60e6eb097a47d87a9c13c0e9d38bf3025a8bd72265a7cb9a9d433f6c013f`

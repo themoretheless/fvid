@@ -244,3 +244,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_smartblur_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_sab_reference"
+harness = false

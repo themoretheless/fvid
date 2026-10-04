@@ -29,6 +29,7 @@ pub mod owned_colorbalance;
 pub mod owned_curves;
 pub mod owned_vignette;
 pub mod owned_smartblur;
+pub mod owned_sab;
 pub mod owned_colorcorrect;
 pub mod owned_cas;
 pub mod owned_grayworld;

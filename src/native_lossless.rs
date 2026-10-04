@@ -375,6 +375,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.curves.as_deref().is_some_and(|a| fvid_media::owned_curves::Curves::parse(a).is_err()) {return false;}
     if transform.vignette.as_deref().is_some_and(|a| fvid_media::owned_vignette::Vignette::parse(a).is_err()) {return false;}
     if transform.smartblur.as_deref().is_some_and(|a| fvid_media::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
+    if transform.sab.as_deref().is_some_and(|a| fvid_media::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlurProgram::parse(args).is_err()) { return false; }
     matches!(
@@ -418,7 +419,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             dctdnoiz: None,
             fftdnoiz: None,
             smartblur: _,
-            sab: None,
+            sab: _,
             bilateral: _,
             cas: _,
             vignette: _,
@@ -545,6 +546,7 @@ pub fn configuration(
         curves: transform.curves.clone(),
         vignette: transform.vignette.clone(),
         smartblur: transform.smartblur.clone(),
+        sab: transform.sab.clone(),
         colorcorrect: transform.colorcorrect.clone(),
         cas: transform.cas.clone(),
         grayworld: transform.grayworld.clone(),

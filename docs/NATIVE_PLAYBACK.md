@@ -3939,3 +3939,26 @@ high-depth format negotiation. Packed RGB conversion and full alpha transport
 through the existing three-plane native frame API remain separate work.
 Legacy media/CUDA features still retain FFmpeg and must be migrated before the
 whole production dependency goal can be marked complete.
+
+`sab` now has an owned shape-adaptive planar filter: Gaussian guidance is supplied
+by the existing owned smartblur FIR stage, then mirrored neighbours are weighted
+by cached spatial and guidance-similarity tables. Luma/chroma radius, guidance
+radius and strength support positional/named aliases and independent chroma
+inheritance. Timeline enable uses the input n/t clock. Checked scratch buffers
+hold guidance and the complete result before publishing pixels; integer means
+use wide accumulators. A one-pixel axis has a constant reflection map, avoiding
+an undefined reflection period. No production libavfilter/libswscale call is
+needed for these supported operations.
+
+The explicit benchmark matches 380 complete four-frame outputs across four
+sizes and all five planar 8-bit layouts accepted by the
+[reference SAB filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_sab.c).
+It includes minimal/maximal parameters, independent chroma guidance, similarity
+support boundaries, sentinels, aliases and disabled frames. Saved synthetic
+acceptance compares both APIs, Y4M/FFV1 export, clipped clocks and framestep;
+root decode also accepts the filter on synthetic AVC, HEVC Main10, VP9 and AV1.
+Native source admission keeps unsupported formats on their existing adapter
+instead of assuming every source can supply planar frames. Own 9–16-bit YUV,
+YUV440, standalone grayscale and single-pixel-axis handling are extensions;
+this is not qualification of legacy high-depth/RGB/alpha format negotiation.
+Legacy production media/CUDA dependencies remain unfinished.

@@ -17,6 +17,7 @@ fn cli_and_public_api_report_owned_components() {
         assert!(names.windows(2).all(|p| p[0] < p[1]));
     }
     for filter in [
+        "sab",
         "smartblur",
         "vignette",
         "curves",

@@ -13,6 +13,14 @@ fn matroska_vp9_av1_plane_filters_use_owned_decode() {
         let source = root.join(name);
         for request in [
             DecodeTransform {
+                sab: Some("ls=10".into()),
+                ..Default::default()
+            },
+            DecodeTransform {
+                smartblur: Some("lt=8".into()),
+                ..Default::default()
+            },
+            DecodeTransform {
                 avgblur: Some("1:7:1".into()),
                 ..Default::default()
             },

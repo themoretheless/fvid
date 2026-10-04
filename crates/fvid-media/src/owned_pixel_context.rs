@@ -2,6 +2,7 @@
 #[derive(Debug)]
 pub(crate) struct PixelContext {
     pub boxblur: Option<crate::owned_boxblur::BoxBlurProgram>,
+    pub sab: Option<crate::owned_sab::Sab>,
     pub smartblur: Option<crate::owned_smartblur::SmartBlur>,
     pub vignette: Option<crate::owned_vignette::Vignette>,
     pub curves: Option<crate::owned_curves::Curves>,
@@ -13,6 +14,7 @@ pub(crate) struct PixelContext {
 impl PixelContext {
     pub fn parse(transform: &fvid_media_info::DecodeTransform) -> Result<Self, String> {
         Ok(Self {
+            sab: transform.sab.as_deref().map(crate::owned_sab::Sab::parse).transpose()?,
             smartblur: transform.smartblur.as_deref().map(crate::owned_smartblur::SmartBlur::parse).transpose()?,
             vignette: transform.vignette.as_deref().map(crate::owned_vignette::Vignette::parse).transpose()?,
             curves: transform

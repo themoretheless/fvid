@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--sab" {
+            let value=args.next().ok_or("missing sab options")?;
+            if filters.sab.is_some() {return Err("duplicate sab".into());}
+            if let Ok(filter)=fvid_media::owned_sab::Sab::parse(value) {filters.sab=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--smartblur" {
             let value=args.next().ok_or("missing smartblur options")?;
             if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
@@ -2115,6 +2122,10 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 i += 1;
                 fftdnoiz = Some(args.get(i).ok_or("missing fftdnoiz args")?.clone());
             }
+            "--sab" => {
+                if transform.sab.is_some() {return Err("duplicate sab".into());}
+                &mut transform.sab
+            },
             "--smartblur" => {
                 i += 1;
                 smartblur = Some(args.get(i).ok_or("missing smartblur args")?.clone());
@@ -2135,6 +2146,10 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 i += 1;
                 epx = Some(args.get(i).ok_or("missing epx args")?.clone());
             }
+            "--sab" => {
+                if transform.sab.is_some() {return Err("duplicate sab".into());}
+                &mut transform.sab
+            },
             "--smartblur" => {
                 if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}
                 &mut transform.smartblur
@@ -4870,6 +4885,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--colorlevels" => &mut transform.colorlevels,
             "--colorchannelmixer" => &mut transform.colorchannelmixer,
             "--exposure" => &mut transform.exposure,
+            "--sab" => {
+                if transform.sab.is_some() {return Err("duplicate sab".into());}
+                &mut transform.sab
+            },
             "--smartblur" => {
                 if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}
                 &mut transform.smartblur
