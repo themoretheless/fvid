@@ -1,9 +1,9 @@
 //! Constant-memory selection of one frame per N input frames.
 type Result<T> = std::result::Result<T, String>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct FrameStep(u32);
+pub struct FrameStep(u32);
 impl FrameStep {
-    pub(crate) fn parse(args: &str) -> Result<Self> {
+    pub fn parse(args: &str) -> Result<Self> {
         if args.len() > 128 || args.contains('\0') {
             return Err("invalid framestep options".into());
         }
@@ -34,7 +34,7 @@ impl FrameStep {
         }
         Ok(Self(step))
     }
-    pub(crate) fn emits(self, input_index: u64) -> bool {
+    pub fn emits(self, input_index: u64) -> bool {
         input_index % u64::from(self.0) == 0
     }
     pub(crate) fn frame_rate(self, [n, d]: [i32; 2]) -> Result<[i32; 2]> {

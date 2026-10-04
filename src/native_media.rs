@@ -61,6 +61,19 @@ pub fn decode_video_pipeline_overlay(
     filters: &crate::native_pixels::PixelFilters,
     overlay: Option<&crate::media_info::OverlaySpec>,
 ) -> Result<DecodeStats> {
+    decode_video_pipeline_overlay_step(source, interval, geometry, filters, overlay,
+        fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?)
+}
+
+/// Decode every reference and filter input, then select one output per step.
+/// The step counter begins after presentation interval selection.
+pub fn decode_video_pipeline_overlay_step(
+    source: &Path, interval: Option<(Duration, Duration)>,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    overlay: Option<&crate::media_info::OverlaySpec>,
+    step: fvid_media::owned_framestep::FrameStep,
+) -> Result<DecodeStats> {
     let mut compositor = overlay.map(|spec| crate::native_export::TimedOverlay::new(&spec.path, i64::from(spec.x), i64::from(spec.y))).transpose()?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("decode interval requires from < to"));
@@ -78,6 +91,7 @@ pub fn decode_video_pipeline_overlay(
         pixel_format: String::new(),
         decode_errors: 0,
     };
+    let mut input_frames = 0u64;
     while let Some(frame) = reader.read_frame_raw()? {
         let overlay_pts = if let Some(compositor) = compositor.as_mut() {
             let (start, _, scale) = reader.frame_interval().ok_or_else(|| invalid("overlay frame has no timing"))?;
@@ -109,9 +123,9 @@ pub fn decode_video_pipeline_overlay(
             }
         }
         let [width, height] = reader.dimensions();
-        stats.width = u32::try_from(width).map_err(|_| invalid("video width overflow"))?;
-        stats.height = u32::try_from(height).map_err(|_| invalid("video height overflow"))?;
-        stats.pixel_format = match &frame {
+        let mut output_width = u32::try_from(width).map_err(|_| invalid("video width overflow"))?;
+        let mut output_height = u32::try_from(height).map_err(|_| invalid("video height overflow"))?;
+        let mut pixel_format = match &frame {
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             RawFrame::Surface { surface, .. } => match surface.depth() {
                 8 => "nv12".into(), _ => "p010le".into(),
@@ -127,13 +141,13 @@ pub fn decode_video_pipeline_overlay(
         };
         if !geometry.is_identity() || !filters.is_empty() || compositor.is_some() {
             let mut output = geometry.apply_cropped_display(&frame, width, height, reader.rotation(), reader.insets())?;
-            stats.width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
-            stats.height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
+            output_width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
+            output_height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
             if geometry.transpose.is_some() {
-                stats.pixel_format = match stats.pixel_format.as_str() {
+                pixel_format = match pixel_format.as_str() {
                     "yuv422p" => "yuv440p".into(),
                     "yuv440p" => "yuv422p".into(),
-                    _ => stats.pixel_format,
+                    _ => pixel_format,
                 };
             }
             let depth = match &frame {
@@ -142,9 +156,15 @@ pub fn decode_video_pipeline_overlay(
                 _ => 8,
             };
             if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
-            filters.apply_colour_at(&mut output, depth, reader.colour().full_range, reader.colour().matrix, stats.video_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
+            filters.apply_colour_at(&mut output, depth, reader.colour().full_range, reader.colour().matrix, input_frames, reader.frame_interval().map(|(start,_,scale)|start as f64/scale as f64))?;
             std::hint::black_box(output);
         }
+        let emit = step.emits(input_frames);
+        input_frames = input_frames.checked_add(1).ok_or_else(|| invalid("input frame count overflow"))?;
+        if !emit { continue; }
+        stats.width = output_width;
+        stats.height = output_height;
+        stats.pixel_format = pixel_format;
         stats.video_frames = stats
             .video_frames
             .checked_add(1)
@@ -536,6 +556,7 @@ pub(crate) fn supports_plane_filter_source(source: &Path) -> Result<bool> {
 }
 
 pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
+    if transform.framestep.as_deref().is_some_and(|args| fvid_media::owned_framestep::FrameStep::parse(args).is_err()) { return false; }
     if transform.grayworld.as_deref().is_some_and(|a| fvid_media::owned_timeline::Timeline::grayworld(a).is_err()) { return false; }
     if transform.monochrome.as_deref().is_some_and(|a| fvid_media::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
     if transform.colorize.as_deref().is_some_and(|a| fvid_media::owned_colorize::Colorize::parse(a).is_err()) { return false; }
@@ -638,7 +659,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         pullup: None,
         decimate: None,
         mpdecimate: None,
-        framestep: None,
+        framestep: _,
         tile: None,
         untile: None,
         shuffleframes: None,
@@ -676,7 +697,9 @@ pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Resul
         pad: transform.pad.map(|r| [r.width as usize, r.height as usize, r.x as usize, r.y as usize]),
     };
     let filters = crate::native_pixels::PixelFilters::from_request(transform)?;
-    decode_video_pipeline_overlay(source, interval, &geometry, &filters, transform.overlay.as_ref())
+    let step = fvid_media::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap_or(""))
+        .map_err(|e| invalid(&e))?;
+    decode_video_pipeline_overlay_step(source, interval, &geometry, &filters, transform.overlay.as_ref(), step)
 }
 
 /// Detect ALAC in MP4 or Matroska by container contents, independent of filename suffix.

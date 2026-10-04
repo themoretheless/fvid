@@ -215,3 +215,13 @@ read its fixed 64 KiB blocks regardless of packet-work and payload controls.
 `wave_packet_work_and_payload_limits_are_enforced` requires max_packet_bytes=128
 and max_packets=2 to publish exactly 64 original samples in two decode blocks.
 A limit below one stored sample frame must fail without output publication.
+
+### Root framestep decode qualification
+
+`tests/native_framestep.rs` reuses the synthetic control
+`ffv1-level-one-source.mp4`, the six-frame and deliberately truncated framestep
+Y4M fixtures, and committed HEVC/VP9/AV1/FFV1 controls. No private data or new
+external generator is involved. The root decoder formerly refused framestep
+requests while only library Y4M/FFV1 routes supported them. Acceptance now checks
+one output per N selected inputs, interval-local indexing, native CLI AVC decode,
+and continued validation of a truncated frame even when that frame is discarded.

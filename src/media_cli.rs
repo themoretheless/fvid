@@ -731,14 +731,12 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }
-    let (pixel_args, filters) = pixel_decode_args(args)?;
+    let (step_args, step) = framestep_decode_args(args)?;
+    let (pixel_args, filters) = pixel_decode_args(&step_args)?;
     let (decode_args, geometry) = geometry_decode_args(&pixel_args)?;
     if let Some((path, quiet, interval)) = plain_decode(&decode_args)? {
-        let stats = fvid::native_media::decode_video_pipeline(
-            std::path::Path::new(path),
-            interval,
-            &geometry,
-            &filters,
+        let stats = fvid::native_media::decode_video_pipeline_overlay_step(
+            std::path::Path::new(path), interval, &geometry, &filters, None, step,
         )?;
         if !quiet {
             // These strings are internal backend/pixel-format names; paths and
@@ -5583,4 +5581,20 @@ fn parse_native_audio_limit(option: &str, value: &str, options: &mut fvid::media
         _ => return Err("unknown audio limit".into()),
     }
     Ok(())
+}
+
+fn framestep_decode_args(args: &[String]) -> Result<(Vec<String>, fvid_media::owned_framestep::FrameStep), Box<dyn std::error::Error>> {
+    use fvid_media::owned_framestep::FrameStep;
+    let mut step = None;
+    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), FrameStep::parse("")?)); }
+    let mut output = vec![args[0].clone()];
+    let mut items = args[1..].iter();
+    while let Some(option) = items.next() {
+        if option == "--" { output.push(option.clone()); output.extend(items.cloned()); break; }
+        if option == "--framestep" {
+            if step.is_some() { return Err("duplicate framestep option".into()); }
+            step = Some(FrameStep::parse(items.next().ok_or("missing framestep options")?)?);
+        } else { output.push(option.clone()); }
+    }
+    Ok((output, step.unwrap_or(FrameStep::parse("")?)))
 }
