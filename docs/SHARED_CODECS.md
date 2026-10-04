@@ -171,3 +171,26 @@ requests, error handling and geometry admission. Linux/Windows test compilation
 passes. An ignored NVIDIA test queries actual H.264 device capabilities without
 libav. It has not been executed here. This creates no decoder, processes no
 compressed packets and does not yet replace production NVDEC.
+
+
+## Direct NVDEC decoder ownership
+
+`NvdecSession` creates a driver decoder after querying the selected device's
+4:2:0 codec/depth/geometry limits. Its request explicitly carries coded size,
+parser-provided reference-surface count and mapped-output capacity. NV12 is
+selected for eight-bit input and P016 for higher bit depth. Reference count must
+come from the sequence parser; this allocation API does not infer it from a file.
+
+The hand-written SDK layout uses platform C `unsigned long`, not a fixed Rust
+integer: pinned-header C probes give 176-byte Linux and 112-byte Windows x64
+creation storage, with display/output-format/context-lock/reserved-tail offsets
+80/88/120/136 and 44/52/72/88 respectively. Rust regression checks cover both
+layouts. Driver function pointers use CUDAAPI's system calling convention.
+
+Closure binds the owning context, synchronizes its stream and destroys the
+decoder. Failure retains the handle for retry; a failed final Drop intentionally
+retains its context and driver library rather than unloading live resources.
+Host tests exercise request admission and destruction retries. An ignored NVIDIA
+test creates and closes an actual H.264 decoder without libav; it has not run here.
+Compressed-packet parsing, picture submission, surface mapping and production
+CUDA integration remain unfinished.

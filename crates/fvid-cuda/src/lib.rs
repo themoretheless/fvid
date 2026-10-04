@@ -16,7 +16,7 @@ mod nvenc_sdk;
 mod nvenc_session;
 pub use nvenc_session::{CodecGuid, NvencCodec, NvencPacket, NvencSession, NvencSubmit};
 mod nvdec;
-pub use nvdec::{NvdecApi, NvdecCaps, NvdecChroma, NvdecCodec};
+pub use nvdec::{NvdecApi, NvdecCaps, NvdecChroma, NvdecCodec, NvdecSession};
 mod nvenc;
 pub use nvenc::{NvencApi, NvencVersion};
 mod codec_device;
