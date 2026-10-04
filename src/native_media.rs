@@ -606,7 +606,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         colorize: _,
         exposure: None,
         chromashift: _,
-        colorcontrast: None,
+        colorcontrast: _,
         colorcorrect: None,
         histeq: None,
         shuffleplanes: _,

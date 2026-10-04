@@ -3533,3 +3533,17 @@ Export acceptance now compares complete committed reference frames instead
 of assuming exact neutral chroma. The generic analytical converter still
 uses its mathematical matrix; compatibility quantization is confined to
 limited BT.601 point sampling.
+
+Owned `colorcontrast` processes RGB opponent channels with `rc/gm/by`, their
+weights `rcw/gmw/byw`, and lightness preservation `pl`. Numeric parameters use
+the owned scalar expression evaluator. Packed RGB/RGBA at 8–16 bits preserves
+alpha and validates all sample precision before mutation; zero weights leave
+pixels untouched. Planar YUV uses the owned metadata-aware RGB16 converter.
+Y4M/FFV1 decode and lossless export, plus native CLI pixel processing, admit
+this filter without enabling the legacy backend. Synthetic acceptance reuses
+three-frame `colorize-grid-{8,12,16}.y4m` videos; external reference comparison
+is isolated in the explicitly invoked `ffmpeg_colorcontrast_reference` benchmark.
+General YUV reference parity remains limited by conversion qualification.
+The explicit RGB benchmark matches 3,072 components across six option sets
+at 8 and 16 bits, including negative contrast, combined weights, preserved
+lightness and unchanged alpha. This establishes these RGB cases only.

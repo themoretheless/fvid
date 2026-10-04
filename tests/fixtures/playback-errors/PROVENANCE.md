@@ -38,3 +38,10 @@ first converts to RGBA64LE, applies colorhold and exports the original planar
 precision. Enabled 8/12/16-bit acceptance matches all 306 component samples.
 Ordered rounding fixes the former eight-bit difference. Generation is benchmark-only,
 ordinary acceptance is offline and no private media is involved.
+
+### colorcontrast acceptance using colorize grids
+
+The existing pure-Python three-frame 3×3 `colorize-grid-{8,12,16}.y4m` fixtures
+also exercise owned `colorcontrast` decode/export acceptance. Tests verify
+three transformed frames with preserved byte geometry and changed pixels.
+No new private input, codec parameters, external executable or network is used.

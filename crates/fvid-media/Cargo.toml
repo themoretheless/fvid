@@ -109,3 +109,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_colorhold_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_colorcontrast_reference"
+harness = false

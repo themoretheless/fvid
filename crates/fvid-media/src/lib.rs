@@ -19,6 +19,7 @@ pub mod owned_y4m;
 pub mod owned_hls;
 pub mod owned_colorize;
 pub mod owned_colorhold;
+pub mod owned_colorcontrast;
 pub mod owned_yuv_rgb;
 pub mod owned_monochrome;
 pub mod owned_lutyuv;
