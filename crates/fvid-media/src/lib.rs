@@ -33,6 +33,7 @@ pub mod owned_sab;
 pub mod owned_bitplanenoise;
 pub mod owned_gradfun;
 pub mod owned_lenscorrection;
+pub mod owned_yaepblur;
 pub mod owned_rgba;
 mod owned_color_names;
 pub mod owned_colorcorrect;

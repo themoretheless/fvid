@@ -1160,6 +1160,13 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--yaepblur" {
+            let value=args.next().ok_or("missing yaepblur options")?;
+            if filters.yaepblur.is_some() {return Err("duplicate yaepblur".into());}
+            if let Ok(filter)=fvid_media::owned_yaepblur::YaepBlur::parse(value) {filters.yaepblur=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--smartblur" {
             let value=args.next().ok_or("missing smartblur options")?;
             if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
@@ -4909,6 +4916,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--lenscorrection" => {
                 if transform.lenscorrection.is_some() {return Err("duplicate lenscorrection".into());}
                 &mut transform.lenscorrection
+            },
+            "--yaepblur" => {
+                if transform.yaepblur.is_some() {return Err("duplicate yaepblur".into());}
+                &mut transform.yaepblur
             },
             "--smartblur" => {
                 if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}

@@ -651,3 +651,38 @@ SHA-256:
 - `lenscorrection-identity.expected.raw`: `32c6fdc2596e8480c9c56f23c3a18b2c79cec06d240bc83476850661c7da9d02`
 - `lenscorrection-warp.expected.raw`: `ae788446c3717117ac6be7f521b95044fee81b2df1f97eca0574992bb61f2eb6`
 - `lenscorrection-bilinear.expected.raw`: `e98efc8b7c6ddc04effd157c1803074aa531291fddadb389d04033af0a4f893a`
+
+## Owned yaepblur
+
+`generate-yaepblur.py` generates four 16x12 YUV420 frames from the sample
+formula `(37*i + 23*n + 101) % 256`, plus full-range and 1x1 variants.
+`yaepblur-wide.y4m` is one 257x257 YUV444p16 frame: luma is 65535 except the
+central sample 0, both chroma planes are 32768. No private media or codec
+parameters are used; generation remains separate from ordinary tests.
+
+The explicit `ffmpeg_yaepblur_reference` benchmark saved default and strong
+(`r=4:p=7:s=1024`) bytes only after exact reference equality. The independently
+qualified chain fixture uses `pixelize=4:3:avg:7` before this strong filter;
+the reverse order differs, so the fixture detects a pipeline-order regression.
+The wide safe/legacy outputs have independent closed-form window models: the
+legacy uint64 overflow is reproduced at 21 windows, while wide native arithmetic
+produces centre 65532 rather than 22072. Safe acceptance is not mislabelled as
+reference equivalence. Both models verify every output sample.
+
+Acceptance covers both lossless APIs, Y4M/FFV1 sources, full-range metadata,
+clipping and framestep clocks, CLI decode/Y4M/FFV1 exports and existing synthetic
+AVC/HEVC/VP9/AV1 routes. Separate tests check grayscale/alpha depth, GBR-order
+packed-RGB masks, parameter aliases/bypass and refusals without pixel mutation.
+Ordinary tests neither invoke FFmpeg nor require network access.
+
+SHA-256:
+
+- `yaepblur.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
+- `yaepblur-full.y4m`: `078dc614dcbc4a4cec1b7fe8726109046abcc9ae197d86a6b5c4af57bba8066b`
+- `yaepblur-small.y4m`: `589c21477e12ea09c0025900d303ed4b3dfe2b339f28b316d9738a55d19bddde`
+- `yaepblur-wide.y4m`: `d25148d23d247f44f57312cae945b7d5d6fe7ba76a5b3956363d5734b377798e`
+- `yaepblur-default.expected.raw`: `6afc784a46a091c61f0c3db5a218f8a049a4849edb3306bb52982c4cf2f6609d`
+- `yaepblur-strong.expected.raw`: `aa609ef2c3f3b2f3d40b39ebaa0b01020154010aedb919686c7ee4a9726ece5f`
+- `yaepblur-chain.expected.raw`: `e86e02c74b65d1dcaf085fe0ceb6450a6ab0504c0c0d9ac6cde40e407a832744`
+- `yaepblur-wide.safe.raw`: `a9541b57f81c4148c9addd36c58905f2607b725deb0f1b9b5dd9007c98e7766b`
+- `yaepblur-wide.legacy.raw`: `d782c9aeef4a46717690bfb677ad833586c4efe75a6639dbd4e47445dc357366`

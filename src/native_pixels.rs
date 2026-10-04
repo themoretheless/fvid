@@ -49,6 +49,7 @@ pub struct PixelFilters {
     pub bitplanenoise: Option<fvid_media::owned_bitplanenoise::BitPlaneNoise>,
     pub gradfun: Option<fvid_media::owned_gradfun::GradFun>,
     pub lenscorrection: Option<fvid_media::owned_lenscorrection::LensCorrection>,
+    pub yaepblur: Option<fvid_media::owned_yaepblur::YaepBlur>,
     pub smartblur: Option<fvid_media::owned_smartblur::SmartBlur>,
     pub vignette: Option<fvid_media::owned_vignette::Vignette>,
     pub curves: Option<fvid_media::owned_curves::Curves>,
@@ -95,6 +96,7 @@ impl PixelFilters {
             bitplanenoise: request.bitplanenoise.as_deref().map(fvid_media::owned_bitplanenoise::BitPlaneNoise::parse).transpose().map_err(|e|invalid(&e))?,
             gradfun: request.gradfun.as_deref().map(fvid_media::owned_gradfun::GradFun::parse).transpose().map_err(|e|invalid(&e))?,
             lenscorrection: request.lenscorrection.as_deref().map(fvid_media::owned_lenscorrection::LensCorrection::parse).transpose().map_err(|e|invalid(&e))?,
+            yaepblur: request.yaepblur.as_deref().map(fvid_media::owned_yaepblur::YaepBlur::parse).transpose().map_err(|e|invalid(&e))?,
             smartblur: request.smartblur.as_deref().map(fvid_media::owned_smartblur::SmartBlur::parse).transpose().map_err(|e|invalid(&e))?,
             vignette: request.vignette.as_deref().map(fvid_media::owned_vignette::Vignette::parse).transpose().map_err(|e|invalid(&e))?,
             curves: request.curves.as_deref().map(fvid_media::owned_curves::Curves::parse).transpose().map_err(|e|invalid(&e))?,
@@ -198,6 +200,7 @@ impl PixelFilters {
             && self.bitplanenoise.is_none()
             && self.gradfun.is_none()
             && self.lenscorrection.is_none()
+            && self.yaepblur.is_none()
             && self.smartblur.is_none()
             && self.vignette.is_none()
             && self.curves.is_none()
@@ -310,6 +313,7 @@ impl PixelFilters {
         if let Some(filter)=&self.gradfun {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=&self.lenscorrection {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
+        if let Some(filter)=&self.yaepblur {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=&self.vibrance {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}

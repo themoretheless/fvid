@@ -4033,3 +4033,28 @@ while nondeterministic random colors are validated by contract rather than byte
 comparison. Ordinary tests require no FFmpeg or network. The dependency policy
 now scans Python fixture generators under tests/fixtures as well as scripts.
 Production media/CUDA still retain other legacy libav workflows.
+
+`yaepblur` now uses owned local-statistics edge-preserving blur in native decode,
+Y4M export and FFV1 lossless export. Radius/plane-mask/sigma, positional options,
+aliases and n/t/w/h enable use the native pipeline; the filter runs after
+pixelize and before vibrance. One full-frame radius cap is shared by subsampled
+components. Native packed RGB8 uses the compatible GBR plane-mask order; the
+standalone component API also covers grayscale and alpha, with explicit source
+dimensions for subsampled radius/timeline context.
+
+Rolling vertical/horizontal sums require scratch proportional to plane width,
+not two full-image integral tables. Local statistics use wide integer
+intermediates. The explicit `ffmpeg_yaepblur_reference` benchmark passed 1584
+complete four-frame comparisons over supported 8/9/10/12/14/16-bit YUV/GBR/gray/
+alpha, packed RGB8, even/odd/1x1 dimensions, masks, radius and sigma boundaries,
+zero-radius/mask bypass and enable. A separately qualified pixelize→yaepblur
+chain distinguishes the prescribed order from the reversed order.
+
+A one-frame synthetic 257x257 YUV444p16 fixture proves the legacy uint64
+sum-square overflow in 21 windows. Independent closed-form models verify both
+the legacy wrapping result and the owned wide-arithmetic correction over every
+sample. The centre is 65532 with correct statistics versus 22072 after legacy
+overflow. Safe native acceptance is explicitly separate from overflow
+reproduction and exact non-overflow comparisons. Both APIs preserve these bytes
+through FFV1 export. Ordinary tests do not run FFmpeg or access the network.
+The production media/CUDA dependency graph still needs further legacy migration.

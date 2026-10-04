@@ -264,3 +264,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_rgba_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_yaepblur_reference"
+harness = false
