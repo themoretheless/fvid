@@ -1,0 +1,12 @@
+lavfi.bitplanenoise.0.1=0.000000
+lavfi.bitplanenoise.1.1=0.000000
+lavfi.bitplanenoise.2.1=0.000000
+lavfi.bitplanenoise.0.1=0.000000
+lavfi.bitplanenoise.1.1=0.000000
+lavfi.bitplanenoise.2.1=0.000000
+lavfi.bitplanenoise.0.1=0.000000
+lavfi.bitplanenoise.1.1=0.000000
+lavfi.bitplanenoise.2.1=0.000000
+lavfi.bitplanenoise.0.1=0.000000
+lavfi.bitplanenoise.1.1=0.000000
+lavfi.bitplanenoise.2.1=0.000000

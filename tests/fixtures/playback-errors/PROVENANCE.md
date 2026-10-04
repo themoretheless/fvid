@@ -565,3 +565,23 @@ SHA-256:
 - `sab-blur.expected.raw`: `49b5fd2afa2fc2d8625578b06fee7cd806951348c22da34fea02500d22dad74b`
 - `sab-smooth.expected.raw`: `4a2fd4def4a1f691faa70589a4eb768e55279a6a8391955909e4f4eb4d75d412`
 - `sab-single-pixel.y4m`: `b9eb60e6eb097a47d87a9c13c0e9d38bf3025a8bd72265a7cb9a9d433f6c013f`
+
+## Owned bitplanenoise
+
+`generate-bitplanenoise.py` builds four 16x12 YUV420 frames from the sample
+formula `(37*i + 23*n + 101) % 256`; no private media or codec parameters
+are used. Generation is separate from ordinary tests.
+
+`bitplanenoise.expected.raw` and `bitplanenoise.expected.txt` were saved by
+the explicit `ffmpeg_bitplanenoise_reference` benchmark only after pixel and
+metadata equality with the own implementation. They cover `bitplane=1:filter=1`.
+The ordinary acceptance tests check pixels, reports, analysis-only preservation,
+rewind, input timeline before framestep, both lossless APIs and CLI outputs.
+Single-column/high-depth and packed RGB acceptance are native extensions;
+malformed storage and invalid arguments have transactional refusal tests.
+
+SHA-256:
+
+- `bitplanenoise.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
+- `bitplanenoise.expected.raw`: `4cf9816ed1062189ff0c8d427fba5e912cc68fc9af76cf7f08fd255977de3b33`
+- `bitplanenoise.expected.txt`: `dd98b27da3f7208d300802586d0e2eefb6f344a5a03756613d911fa9ae9cc39f`

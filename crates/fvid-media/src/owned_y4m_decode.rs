@@ -34,6 +34,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.vignette.as_deref().is_some_and(|a|crate::owned_vignette::Vignette::parse(a).is_err()) {return false;}
     if transform.smartblur.as_deref().is_some_and(|a|crate::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
     if transform.sab.as_deref().is_some_and(|a|crate::owned_sab::Sab::parse(a).is_err()) {return false;}
+    if transform.bitplanenoise.as_deref().is_some_and(|a|crate::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.tmix.as_deref().is_some_and(|a|crate::owned_tmix::TemporalMix::parse(a).is_err()) {return false;}
     if transform.lagfun.as_deref().is_some_and(|a|crate::owned_lagfun::LagFun::parse(a).is_err()) {return false;}
@@ -139,6 +140,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 vignette: transform.vignette.clone(),
                 smartblur: transform.smartblur.clone(),
                 sab: transform.sab.clone(),
+                bitplanenoise: transform.bitplanenoise.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
                 cas: transform.cas.clone(),
                 grayworld: transform.grayworld.clone(),
@@ -536,6 +538,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.vignette.is_some()
         || transform.smartblur.is_some()
         || transform.sab.is_some()
+        || transform.bitplanenoise.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()
@@ -662,6 +665,10 @@ pub(crate) fn apply_pixel_filters_clock(
             }
             if transform.lagfun.is_some() {
                 history.and_then(|h|h.lagfun.as_ref()).ok_or("lagfun requires persistent streaming history")?.apply(&mut frame,header.depth(),n,t)?;
+            }
+            if let Some(args) = transform.bitplanenoise.as_deref() {
+                if let Some(filter)=history.and_then(|h|h.bitplanenoise.as_ref()) {let _=filter.apply(&mut frame,header.depth(),n,t)?;}
+                else {let _=crate::owned_bitplanenoise::BitPlaneNoise::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -1032,6 +1039,7 @@ fn decode_reader_frames(
         || transform.vignette.is_some()
         || transform.smartblur.is_some()
         || transform.sab.is_some()
+        || transform.bitplanenoise.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()

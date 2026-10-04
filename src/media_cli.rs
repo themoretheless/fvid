@@ -1139,6 +1139,13 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--bitplanenoise" {
+            let value=args.next().ok_or("missing bitplanenoise options")?;
+            if filters.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
+            if let Ok(filter)=fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(value) {filters.bitplanenoise=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--smartblur" {
             let value=args.next().ok_or("missing smartblur options")?;
             if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
@@ -2122,10 +2129,6 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 i += 1;
                 fftdnoiz = Some(args.get(i).ok_or("missing fftdnoiz args")?.clone());
             }
-            "--sab" => {
-                if transform.sab.is_some() {return Err("duplicate sab".into());}
-                &mut transform.sab
-            },
             "--smartblur" => {
                 i += 1;
                 smartblur = Some(args.get(i).ok_or("missing smartblur args")?.clone());
@@ -2146,14 +2149,6 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 i += 1;
                 epx = Some(args.get(i).ok_or("missing epx args")?.clone());
             }
-            "--sab" => {
-                if transform.sab.is_some() {return Err("duplicate sab".into());}
-                &mut transform.sab
-            },
-            "--smartblur" => {
-                if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}
-                &mut transform.smartblur
-            },
             "--vignette" => {
                 i += 1;
                 vignette = Some(args.get(i).ok_or("missing vignette args")?.clone());
@@ -4888,6 +4883,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--sab" => {
                 if transform.sab.is_some() {return Err("duplicate sab".into());}
                 &mut transform.sab
+            },
+            "--bitplanenoise" => {
+                if transform.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
+                &mut transform.bitplanenoise
             },
             "--smartblur" => {
                 if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}

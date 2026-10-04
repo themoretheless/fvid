@@ -46,6 +46,7 @@ pub struct PixelFilters {
     pub cas: Option<fvid_media::owned_cas::Cas>,
     pub colorcorrect: Option<fvid_media::owned_colorcorrect::ColorCorrect>,
     pub sab: Option<fvid_media::owned_sab::Sab>,
+    pub bitplanenoise: Option<fvid_media::owned_bitplanenoise::BitPlaneNoise>,
     pub smartblur: Option<fvid_media::owned_smartblur::SmartBlur>,
     pub vignette: Option<fvid_media::owned_vignette::Vignette>,
     pub curves: Option<fvid_media::owned_curves::Curves>,
@@ -89,6 +90,7 @@ impl PixelFilters {
             cas: request.cas.as_deref().map(fvid_media::owned_cas::Cas::parse).transpose().map_err(|e|invalid(&e))?,
             colorcorrect: request.colorcorrect.as_deref().map(fvid_media::owned_colorcorrect::ColorCorrect::parse).transpose().map_err(|e|invalid(&e))?,
             sab: request.sab.as_deref().map(fvid_media::owned_sab::Sab::parse).transpose().map_err(|e|invalid(&e))?,
+            bitplanenoise: request.bitplanenoise.as_deref().map(fvid_media::owned_bitplanenoise::BitPlaneNoise::parse).transpose().map_err(|e|invalid(&e))?,
             smartblur: request.smartblur.as_deref().map(fvid_media::owned_smartblur::SmartBlur::parse).transpose().map_err(|e|invalid(&e))?,
             vignette: request.vignette.as_deref().map(fvid_media::owned_vignette::Vignette::parse).transpose().map_err(|e|invalid(&e))?,
             curves: request.curves.as_deref().map(fvid_media::owned_curves::Curves::parse).transpose().map_err(|e|invalid(&e))?,
@@ -189,6 +191,7 @@ impl PixelFilters {
             && self.exposure.is_none()
             && self.colorbalance.is_none()
             && self.sab.is_none()
+            && self.bitplanenoise.is_none()
             && self.smartblur.is_none()
             && self.vignette.is_none()
             && self.curves.is_none()
@@ -297,6 +300,7 @@ impl PixelFilters {
         }
         }
         if let Some(filter)=&self.lagfun {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
+        if let Some(filter)=&self.bitplanenoise {let _=filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
         if let Some(filter)=&self.vibrance {
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}

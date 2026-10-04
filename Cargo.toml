@@ -248,3 +248,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_sab_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_bitplanenoise_reference"
+harness = false

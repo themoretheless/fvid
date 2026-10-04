@@ -3962,3 +3962,24 @@ instead of assuming every source can supply planar frames. Own 9–16-bit YUV,
 YUV440, standalone grayscale and single-pixel-axis handling are extensions;
 this is not qualification of legacy high-depth/RGB/alpha format negotiation.
 Legacy production media/CUDA dependencies remain unfinished.
+
+`bitplanenoise` now uses FVid's own bit-plane majority analysis and optional
+black/white visualization in native decode, Y4M export and FFV1 lossless export.
+The reusable `owned_bitplanenoise::BitPlaneNoise` API exposes per-plane integer
+counts, the compatible float score, metadata keys and six-decimal values through
+`Report::metadata`, plus a precise score computed from integer counts. This does
+not add per-frame metadata transport to output containers. `enable` uses the
+existing native input clock; filtering follows lagfun and precedes pixelize.
+Planar 8–16-bit samples and a safe single-column extension are supported; packed
+8-bit RGB is an owned extension, with reports indexed in packed channel order.
+
+The explicit `ffmpeg_bitplanenoise_reference` benchmark passed 270 exact
+four-frame pixel and metadata comparisons over YUV444/422/420, 8/9/10/12/14/16
+bits, odd dimensions, single rows, analysis-only, visualization, above-depth bit
+selection and timeline enable. Single-column and packed-RGB extensions have
+separate native acceptance tests, not external equivalence claims. Ordinary
+regressions use saved synthetic fixtures without FFmpeg or network access.
+The legacy CLI's duplicate SAB/SmartBlur match arms referencing an unavailable
+transform were removed; both native and legacy feature configurations compile.
+The production `media` and `media-cuda` features still contain legacy libav
+workflows. This migration does not establish whole-project independence.
