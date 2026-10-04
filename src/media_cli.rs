@@ -914,6 +914,11 @@ fn pixel_decode_args(
             result.extend(args.cloned());
             break;
         }
+        if arg == "--exposure" {
+            if filters.exposure.is_some() {return Err("duplicate exposure".into());}
+            filters.exposure=Some(fvid_media::owned_exposure::Exposure::parse(args.next().ok_or("missing exposure args")?)?);
+            continue;
+        }
         if arg == "--colorchannelmixer" {
             if filters.colorchannelmixer.is_some() {return Err("duplicate colorchannelmixer".into());}
             filters.colorchannelmixer=Some(fvid_media::owned_colorchannelmixer::ColorChannelMixer::parse(args.next().ok_or("missing colorchannelmixer args")?)?);
@@ -4524,7 +4529,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"|"--colorhold"|"--colorcontrast"|"--vibrance"|"--colorlevels"|"--colorchannelmixer"|"--exposure"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {
@@ -4780,6 +4785,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--vibrance" => &mut transform.vibrance,
             "--colorlevels" => &mut transform.colorlevels,
             "--colorchannelmixer" => &mut transform.colorchannelmixer,
+            "--exposure" => &mut transform.exposure,
             "--gblur" => &mut transform.gblur,
             "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
@@ -5379,6 +5385,29 @@ mod colorchannelmixer_cli_tests {
                 vec!["decode",source.to_str().unwrap(),"--colorchannelmixer",args,"--quiet"],
                 vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--colorchannelmixer",args,"--quiet"],
                 vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--colorchannelmixer",args],
+            ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
+            assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod exposure_cli_tests {
+    #[test]
+    fn owned_exposure_decode_and_export_without_legacy() {
+        let directory=std::env::temp_dir().join(format!("fvid-exposure-cli-{}",std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8,12,16] {
+            let source=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"));
+            let output=directory.join(format!("contrast-{depth}.mkv"));
+            let y4m=directory.join(format!("contrast-{depth}.y4m"));
+            let args="exposure=1";
+            for command in [
+                vec!["decode",source.to_str().unwrap(),"--exposure",args,"--quiet"],
+                vec!["transcode-lossless",source.to_str().unwrap(),output.to_str().unwrap(),"--exposure",args,"--quiet"],
+                vec!["export-y4m",source.to_str().unwrap(),y4m.to_str().unwrap(),"--exposure",args],
             ] {super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();}
             assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames,3);
             assert_eq!(fvid_media::decode_video(&y4m).unwrap().video_frames,3);

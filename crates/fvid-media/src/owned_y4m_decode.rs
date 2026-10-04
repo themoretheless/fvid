@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.exposure.as_deref().is_some_and(|a| crate::owned_exposure::Exposure::parse(a).is_err()) { return false; }
     if transform.colorchannelmixer.as_deref().is_some_and(|a| crate::owned_colorchannelmixer::ColorChannelMixer::parse(a).is_err()) { return false; }
     if transform.colorlevels.as_deref().is_some_and(|a| crate::owned_colorlevels::ColorLevels::parse(a).is_err()) { return false; }
     if transform.vibrance.as_deref().is_some_and(|a| crate::owned_vibrance::Vibrance::parse(a).is_err()) { return false; }
@@ -116,6 +117,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 vibrance: transform.vibrance.clone(),
                 colorlevels: transform.colorlevels.clone(),
                 colorchannelmixer: transform.colorchannelmixer.clone(),
+                exposure: transform.exposure.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 gblur: transform.gblur.clone(),
@@ -455,6 +457,7 @@ pub(crate) fn apply_pixel_filters_cached(
         || transform.vibrance.is_some()
         || transform.colorlevels.is_some()
         || transform.colorchannelmixer.is_some()
+        || transform.exposure.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()
         || transform.avgblur.is_some()
@@ -533,6 +536,9 @@ pub(crate) fn apply_pixel_filters_cached(
             }
             if let Some(args) = transform.colorize.as_deref() {
                 crate::owned_colorize::Colorize::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.exposure.as_deref() {
+                crate::owned_exposure::Exposure::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
             }
             if let Some(args) = transform.chromashift.as_deref() {
                 crate::owned_chromashift::ChromaShift::parse(args)?
@@ -858,6 +864,7 @@ fn decode_reader_frames(
         || transform.vibrance.is_some()
         || transform.colorlevels.is_some()
         || transform.colorchannelmixer.is_some()
+        || transform.exposure.is_some()
         || transform.negate.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()

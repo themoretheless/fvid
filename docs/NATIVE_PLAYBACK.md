@@ -3585,3 +3585,23 @@ precision bound; observed float maximum absolute difference is 3.58e-7 in
 norm preservation. Ordinary acceptance invokes no external codec or network.
 Float file decode/export routing and general YUV reference parity are not
 established by these API comparisons.
+
+Owned `exposure` parses exposure/black-point expressions, computes the float
+working-domain correction and preserves alpha, with the specified finite fallback
+for a zero denominator. Its float RGB/RGBA API retains output headroom; integer
+RGB/RGBA uses normalized float math followed by clipping and ties-to-even output.
+Native decode/export uses a metadata-aware float RGB workspace, preserving
+highlights until final YUV quantization. Three-frame synthetic Y4M fixtures at
+8/12/16 bits verify this headroom; the previous RGB16 path fails specifically
+with white luma 235–236 instead of 255 at eight bits.
+Ordinary float acceptance matches all 6,144 synthetic components
+exactly without FFmpeg/network.
+
+Complete integer-float RGB conversion parity remains unresolved. The explicit
+benchmark records eight-bit half-exposure maximum delta 1 and sixteen-bit zero
+exposure maximum delta 65; the near-zero-denominator case amplifies conversion
+differences further. Committed RGB reference files drive passing reproductions
+and an ignored exact pipeline acceptance. These are not equivalence passes.
+The external round-trip also changes some alpha values at zero exposure; owned
+alpha preservation is checked against the original input independently. Float
+file decode/export and general YUV conversion parity remain unqualified.

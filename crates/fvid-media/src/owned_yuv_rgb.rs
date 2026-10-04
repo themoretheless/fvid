@@ -466,3 +466,149 @@ mod whole_frame_tests {
         assert_eq!(frame.data, before);
     }
 }
+
+/// Float RGB cells retain negative values and highlight headroom until final YUV quantization.
+pub(crate) fn filter_rgb_f32_sampled(
+    frame: &mut GeometryFrame,
+    depth: u8,
+    full: bool,
+    matrix: Matrix,
+    sampling: ChromaSampling,
+    mut filter: impl FnMut(&mut [f32]) -> Result<()>,
+) -> Result<()> {
+    let [sx, sy] = frame
+        .subsampling
+        .ok_or("float YUV conversion requires planar samples")?;
+    if !(8..=16).contains(&depth) || sx == 0 || sy == 0 || frame.width == 0 || frame.height == 0 {
+        return Err("invalid float YUV geometry or precision".into());
+    }
+    let y = frame
+        .width
+        .checked_mul(frame.height)
+        .ok_or("float YUV geometry overflow")?;
+    let cw = frame.width.div_ceil(sx);
+    let ch = frame.height.div_ceil(sy);
+    let c = cw.checked_mul(ch).ok_or("float YUV geometry overflow")?;
+    let bytes = if depth == 8 { 1 } else { 2 };
+    let maximum = (1u32 << depth) - 1;
+    if c.checked_mul(2)
+        .and_then(|v| v.checked_add(y))
+        .and_then(|v| v.checked_mul(bytes))
+        != Some(frame.data.len())
+    {
+        return Err("float YUV sample length mismatch".into());
+    }
+    let read = |i: usize| -> f64 {
+        if bytes == 1 {
+            frame.data[i] as f64
+        } else {
+            u16::from_le_bytes([frame.data[i * 2], frame.data[i * 2 + 1]]) as f64
+        }
+    };
+    if (0..y + 2 * c).any(|i| read(i) > maximum as f64) {
+        return Err("float YUV sample exceeds precision".into());
+    }
+    let scale = (1u32 << (depth - 8)) as f64;
+    let (black, yrange, crange) = if full {
+        (0.0, maximum as f64, maximum as f64)
+    } else {
+        (16.0 * scale, 219.0 * scale, 224.0 * scale)
+    };
+    let center = (1u32 << (depth - 1)) as f64;
+    let (kr, kb) = match matrix {
+        Matrix::Bt601 => (0.299, 0.114),
+        Matrix::Bt709 => (0.2126, 0.0722),
+        Matrix::Bt2020 => (0.2627, 0.0593),
+    };
+    let kg = 1.0 - kr - kb;
+    let size = frame
+        .width
+        .min(sx)
+        .checked_mul(frame.height.min(sy))
+        .and_then(|v| v.checked_mul(3))
+        .ok_or("float RGB cell overflow")?;
+    let mut output = Vec::new();
+    output
+        .try_reserve_exact(frame.data.len())
+        .map_err(|_| "float YUV output allocation failed")?;
+    output.extend_from_slice(&frame.data);
+    let mut rgb = Vec::new();
+    rgb.try_reserve_exact(size)
+        .map_err(|_| "float RGB cell allocation failed")?;
+    let mut before = Vec::new();
+    before
+        .try_reserve_exact(size)
+        .map_err(|_| "float RGB copy allocation failed")?;
+    let write = |data: &mut [u8], i: usize, value: f64| {
+        let value = value.round_ties_even().clamp(0.0, maximum as f64) as u16;
+        if bytes == 1 {
+            data[i] = value as u8;
+        } else {
+            data[i * 2..i * 2 + 2].copy_from_slice(&value.to_le_bytes());
+        }
+    };
+    for cy in 0..ch {
+        for cx in 0..cw {
+            let cell = cy * cw + cx;
+            let x0 = cx * sx;
+            let y0 = cy * sy;
+            let x1 = x0.saturating_add(sx).min(frame.width);
+            let y1 = y0.saturating_add(sy).min(frame.height);
+            let u = (read(y + cell) - center) / crange;
+            let v = (read(y + c + cell) - center) / crange;
+            rgb.clear();
+            for row in y0..y1 {
+                for col in x0..x1 {
+                    let luma = (read(row * frame.width + col) - black) / yrange;
+                    let r = luma + 2.0 * (1.0 - kr) * v;
+                    let b = luma + 2.0 * (1.0 - kb) * u;
+                    let g = (luma - kr * r - kb * b) / kg;
+                    rgb.extend([r as f32, g as f32, b as f32]);
+                }
+            }
+            before.clear();
+            before.extend_from_slice(&rgb);
+            filter(&mut rgb)?;
+            if rgb.iter().any(|v| !v.is_finite()) {
+                return Err("float RGB filter returned nonfinite sample".into());
+            }
+            if rgb == before {
+                continue;
+            }
+            let mut sums = [0.0f64; 2];
+            let mut point = [0.0f64; 2];
+            let mut at = 0;
+            for row in y0..y1 {
+                for col in x0..x1 {
+                    let [r, g, b] = [
+                        rgb[at * 3] as f64,
+                        rgb[at * 3 + 1] as f64,
+                        rgb[at * 3 + 2] as f64,
+                    ];
+                    let luma = kr * r + kg * g + kb * b;
+                    write(&mut output, row * frame.width + col, black + yrange * luma);
+                    let uv = [
+                        (b - luma) / (2.0 * (1.0 - kb)),
+                        (r - luma) / (2.0 * (1.0 - kr)),
+                    ];
+                    if at == 0 {
+                        point = uv;
+                    }
+                    for i in 0..2 {
+                        sums[i] += uv[i];
+                    }
+                    at += 1;
+                }
+            }
+            let uv = if matches!(sampling, ChromaSampling::Point) {
+                point
+            } else {
+                sums.map(|v| v / at as f64)
+            };
+            write(&mut output, y + cell, center + crange * uv[0]);
+            write(&mut output, y + c + cell, center + crange * uv[1]);
+        }
+    }
+    frame.data = output;
+    Ok(())
+}

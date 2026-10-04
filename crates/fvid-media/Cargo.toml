@@ -125,3 +125,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_colorchannelmixer_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_exposure_reference"
+harness = false
