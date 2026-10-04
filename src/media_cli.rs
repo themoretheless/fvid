@@ -1132,6 +1132,13 @@ fn pixel_decode_args(
             else { result.push(arg.clone()); result.push(value.clone()); }
             continue;
         }
+        if arg == "--smartblur" {
+            let value=args.next().ok_or("missing smartblur options")?;
+            if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
+            if let Ok(filter)=fvid_media::owned_smartblur::SmartBlur::parse(value) {filters.smartblur=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--vignette" {
             let value=args.next().ok_or("missing vignette options")?;
             if filters.vignette.is_some() {return Err("duplicate vignette".into());}
@@ -2128,6 +2135,10 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 i += 1;
                 epx = Some(args.get(i).ok_or("missing epx args")?.clone());
             }
+            "--smartblur" => {
+                if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}
+                &mut transform.smartblur
+            },
             "--vignette" => {
                 i += 1;
                 vignette = Some(args.get(i).ok_or("missing vignette args")?.clone());
@@ -4859,6 +4870,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--colorlevels" => &mut transform.colorlevels,
             "--colorchannelmixer" => &mut transform.colorchannelmixer,
             "--exposure" => &mut transform.exposure,
+            "--smartblur" => {
+                if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}
+                &mut transform.smartblur
+            },
             "--vignette" => {
                 if transform.vignette.is_some() {return Err("duplicate vignette".into());}
                 &mut transform.vignette

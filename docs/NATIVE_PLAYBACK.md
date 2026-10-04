@@ -3915,3 +3915,27 @@ Packed RGB is RGB24 without alpha. Zero/nonfinite aspect and unavailable clock
 variables have explicit refusals. Runtime option commands, alpha and arbitrary
 legacy format negotiation remain outside this qualification. Legacy production
 media/CUDA dependencies still require migration before FFmpeg independence is true.
+
+`smartblur` now uses owned separable Gaussian/unsharp kernels, cached integer
+coefficient rows and contour thresholds, with luma/chroma/alpha parameters,
+positional or named aliases and generic timeline enable. Chroma/alpha sentinel
+values inherit luma independently. Plane borders replicate source edge samples;
+coefficient quantization retains its remainder, and horizontal intermediate
+precision and final clipping are explicit. All output planes are prepared before
+committing a frame. Production processing needs neither libavfilter nor libswscale.
+The native decode, Y4M export and both lossless APIs admit planar smartblur; clip
+n/t and framestep selection retain their input-frame semantics. Capabilities now
+list smartblur and the previously qualified fade/lagfun/tmix/hqdn3d/curves/vignette.
+
+The explicit benchmark matches 640 four-frame outputs over 16x12, 17x13, 32x24
+and 5x3 pictures, six 8-bit planar YUV layouts, grayscale and three alpha layouts,
+including negative strength, both threshold signs, inheritance and enable. It
+uses the [reference smartblur filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_smartblur.c)
+only inside the benchmark. Full YUV routes and standalone grayscale/alpha plane
+APIs share the same owned kernel. Synthetic saved outputs verify ordinary tests
+without an external oracle. Planar 9–16-bit filtering scales the threshold and
+retains source precision as an FVid extension; this is not a claim about legacy
+high-depth format negotiation. Packed RGB conversion and full alpha transport
+through the existing three-plane native frame API remain separate work.
+Legacy media/CUDA features still retain FFmpeg and must be migrated before the
+whole production dependency goal can be marked complete.

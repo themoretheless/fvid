@@ -16,6 +16,20 @@ fn cli_and_public_api_report_owned_components() {
     ] {
         assert!(names.windows(2).all(|p| p[0] < p[1]));
     }
+    for filter in [
+        "smartblur",
+        "vignette",
+        "curves",
+        "hqdn3d",
+        "tmix",
+        "lagfun",
+        "fade",
+    ] {
+        assert!(
+            inventory.filters.iter().any(|name| name == filter),
+            "{filter}"
+        );
+    }
     assert!(inventory.decoders.contains(&"h264".into()));
     assert!(inventory.decoders.contains(&"hevc".into()));
     assert!(inventory.decoders.contains(&"aac".into()));

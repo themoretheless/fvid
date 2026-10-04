@@ -501,3 +501,34 @@ SHA-256:
 - `vignette-dither.expected.raw`: `e79b233fde98f15a2e15a939c97c7840419db88cc30bc949a2e67f7971c259d9`
 - `vignette-fractional.rgb24`: `089e7d1c300308700478f57e71c6898e8b8168f6913d024720a062364186e20a`
 - `vignette-fractional.expected.raw`: `14b7d196823b05133f8dc09e83514390d1ff1bde32a22c5342b3171941fc0401`
+
+### Owned smartblur Gaussian/unsharp kernels and contour thresholds
+
+`scripts/generate_smartblur_fixture.py` generates `smartblur-edges.y4m` with
+Python byte arithmetic only: four 16x12 YUV420 frames at 25 fps, square pixels,
+and `(sample_index * 37 + frame_index * 23 + 101) mod 256` samples. The input
+contains no private frames, audio or codec parameters. Its bytes intentionally
+match the compact vignette source because both tests need repeatable spatial
+edges and saturation inputs, while their independently stored outputs differ.
+
+`smartblur-blur.expected.raw` uses defaults. `smartblur-sharpen.expected.raw`
+uses `lr=5:ls=-1:lt=-30`, covering strong sharpening, clipping and negative
+contour thresholds. The explicit `ffmpeg_smartblur_reference` benchmark saved
+these independent complete four-frame outputs only after every sample matched
+FVid. It requires `FVID_REFERENCE_FFMPEG`; ordinary tests and fixture generation
+never invoke the reference executable and do not require network access.
+
+Acceptance tests compare saved pixels, both export APIs, Y4M and FFV1 inputs,
+input n/t after clipping, enable before framestep, and CLI decode/Y4M/lossless
+export. Separate tests exercise odd chroma dimensions, high-depth flat fields,
+standalone alpha/grayscale settings, sentinels and named aliases. Invalid options
+or malformed/out-of-range storage have explicit refusal tests with unchanged
+pixels; these refusals are not reported as playback acceptance. Root decode
+also applies the filter to documented synthetic AVC, HEVC Main10, VP9 and AV1
+sources. No universal codec-profile or packed-RGB acceptance is implied.
+
+SHA-256:
+
+- `smartblur-edges.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
+- `smartblur-blur.expected.raw`: `ce811803cedfe10ee0501e88e9de6d9382dfbb607a4f83160ef1eac78989d332`
+- `smartblur-sharpen.expected.raw`: `0deda7f8c8f211a6dc6cf8b6f7d1f62d9be930c07c6ca3ff6796f3681e678a2d`

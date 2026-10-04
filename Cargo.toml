@@ -240,3 +240,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_vignette_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_smartblur_reference"
+harness = false

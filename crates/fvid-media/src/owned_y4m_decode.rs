@@ -32,6 +32,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.curves.as_deref().is_some_and(|a|crate::owned_curves::Curves::parse(a).is_err()) {return false;}
     if transform.vignette.as_deref().is_some_and(|a|crate::owned_vignette::Vignette::parse(a).is_err()) {return false;}
+    if transform.smartblur.as_deref().is_some_and(|a|crate::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a|crate::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.tmix.as_deref().is_some_and(|a|crate::owned_tmix::TemporalMix::parse(a).is_err()) {return false;}
     if transform.lagfun.as_deref().is_some_and(|a|crate::owned_lagfun::LagFun::parse(a).is_err()) {return false;}
@@ -135,6 +136,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 colorbalance: transform.colorbalance.clone(),
                 curves: transform.curves.clone(),
                 vignette: transform.vignette.clone(),
+                smartblur: transform.smartblur.clone(),
                 colorcorrect: transform.colorcorrect.clone(),
                 cas: transform.cas.clone(),
                 grayworld: transform.grayworld.clone(),
@@ -530,6 +532,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.colorbalance.is_some()
         || transform.curves.is_some()
         || transform.vignette.is_some()
+        || transform.smartblur.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()
@@ -595,6 +598,10 @@ pub(crate) fn apply_pixel_filters_clock(
                     crate::owned_gradient::Gradient::parse(kind, args)?
                         .apply(&mut frame, header.depth())?;
                 }
+            }
+            if let Some(args) = transform.smartblur.as_deref() {
+                if let Some(filter)=history.and_then(|h|h.smartblur.as_ref()) {filter.apply(&mut frame,header.depth(),n,t)?;}
+                else {crate::owned_smartblur::SmartBlur::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
             }
             if let Some(args) = transform.bilateral.as_deref() {
                 crate::owned_bilateral::Bilateral::parse(args)?.apply(&mut frame, header.depth())?;
@@ -1016,6 +1023,7 @@ fn decode_reader_frames(
         || transform.colorbalance.is_some()
         || transform.curves.is_some()
         || transform.vignette.is_some()
+        || transform.smartblur.is_some()
         || transform.colorcorrect.is_some()
         || transform.cas.is_some()
         || transform.grayworld.is_some()
