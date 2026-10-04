@@ -3,6 +3,8 @@
 mod input_policy;
 #[cfg(feature = "native-cuda")]
 pub mod owned_nvdec_avc;
+#[cfg(feature = "native-cuda")]
+pub mod owned_nvdec_avc_decoder;
 pub mod owned_capabilities;
 pub mod owned_expression;
 pub use owned_capabilities::capabilities;

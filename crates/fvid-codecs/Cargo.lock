@@ -58,6 +58,7 @@ dependencies = [
  "fvid-control",
  "fvid-cpu",
  "fvid-media-info",
+ "fvid-opus",
  "libc",
  "serde",
  "serde_json",
@@ -69,6 +70,10 @@ version = "0.1.0"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "fvid-opus"
+version = "0.1.0"
 
 [[package]]
 name = "fvid-platform"

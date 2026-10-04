@@ -7,6 +7,7 @@ use super::{
 use crate::{Result, invalid};
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct ReferenceBuffer<T> {
     frame_num_bits: u8,
     capacity: usize,

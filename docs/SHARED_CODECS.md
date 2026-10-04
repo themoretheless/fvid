@@ -259,3 +259,29 @@ pixel-equivalence proof and has not executed here.
 The ordinary dependency guard includes the new native CUDA adapter graph.
 Legacy `cuda-hw` still activates libav while production filter integration,
 reference scheduling and remaining codec adapters are unfinished.
+
+
+## Owned AVC NVDEC reference scheduling
+
+`AvcNvdecDecoder` combines the owned slice adapter with FVid's existing POC and
+DPB marking logic. It computes staged state before submission and commits only
+after the driver accepts the picture. Malformed input leaves the previous POC/
+DPB unchanged. A driver error requires reopening because its internal state is
+no longer assumed recoverable.
+
+Reference entries and retained decoded-picture tickets hold decode slots.
+Mappings additionally pin their picture until successful unmap. Slots become
+reusable only after all owners release them; exhaustion applies backpressure.
+Foreign tickets refuse and duplicate mappings refuse before calling the driver.
+Caller code remains responsible for display order, packet timestamps and
+synchronizing unsafe CUDA-pointer consumers before release.
+
+Ordinary tests parse every packet of existing synthetic control and multislice
+I/P/B MP4 fixtures, validate reference scheduling and ensure retained display
+tickets prevent slot reuse even after DPB eviction. Another test drops staged
+work and checks that malformed input does not advance committed state. An ignored
+NVIDIA test decodes/maps/releases the complete I/P/B fixture without libav; it has
+not executed here and checks mapping metadata rather than pixel equivalence.
+The first scheduler keeps the adapter's progressive eight-bit 4:2:0/single-group
+scope and explicitly refuses frame-number gaps requiring inferred references.
+Production CUDA filter wiring and other codec adapters remain unfinished.

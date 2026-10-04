@@ -42,7 +42,7 @@ pub struct DecodedPoc {
     pub after_marking: FieldOrder,
     pub frame_num_offset: i32,
 }
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct PocDecoder {
     config: Option<(u8, PictureOrder)>,
     previous_frame_num: u32,
