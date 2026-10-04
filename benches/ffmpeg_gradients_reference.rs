@@ -47,7 +47,9 @@ fn main() {
         (16, "yuv420p16le", 2, 2),
     ] {
         for kind in KINDS {
-            for args in ["", "planes=1:scale=0.125:delta=3"] {
+            for args in ["", "planes=1:scale=0.125:delta=3",
+                "planes=7/2:scale=default/8:delta=PI",
+                "planes=max-8:scale=1/8:delta=default"] {
                 let mut f = frame(depth);
                 f.subsampling = Some([sx, sy]);
                 f.data

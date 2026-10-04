@@ -14,7 +14,11 @@ cargo run --release --no-default-features --features player -- play --start-time
 декодирования, преобразования, экспорта и remux доступны через общий API.
 Их acceptance-тесты запускаются с `--no-default-features` без libav.
 Sobel, Prewitt, Roberts, Kirsch и Scharr вычисляют постоянные выражения
-для `scale` и `delta` собственным parser/evaluator, включая `PI` и арифметику.
+для `planes`, `scale` и `delta` собственным parser/evaluator, включая `PI`,
+арифметику и `min`/`max`/`default`. Маска округляется к целому; диапазоны
+числовых параметров проверяются до преобразования в `f32`.
+Benchmark `ffmpeg_gradients_reference` сравнивает 180 комбинаций побайтово;
+шесть acceptance-тестов работают без FFmpeg.
 `chromashift` также вычисляет постоянные выражения, `min`/`max`/`default`
 и `smear`/`wrap`, проверяя диапазон до округления целых параметров.
 Benchmark `ffmpeg_chromashift_reference` проверяет 138 комбинаций параметров,

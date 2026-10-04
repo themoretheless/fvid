@@ -23,7 +23,7 @@ impl Negate {
     }
 }
 
-use fvid_media::owned_expression::constant as gradient_constant;
+use fvid_media::owned_expression as gradient_expression;
 include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 
 /// Native filter order matches the public media request, independent of CLI

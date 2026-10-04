@@ -52,28 +52,33 @@ impl Gradient {
             let value = value.trim();
             match key.trim() {
                 "planes" => {
-                    let parsed = if let Some(hex) = value.strip_prefix("0x") {
-                        u8::from_str_radix(hex, 16)
+                    let number = if let Some(hex) = value.strip_prefix("0x") {
+                        u8::from_str_radix(hex, 16).map(f64::from)
+                            .map_err(|_| invalid("invalid gradient plane hexadecimal literal"))?
                     } else {
-                        value.parse()
-                    }
-                    .map_err(|_| invalid("gradient planes requires an integer 0..15"))?;
-                    if parsed > 15 {
+                        gradient_expression::Expression::parse(value)
+                            .and_then(|expression| expression.evaluate(&[("min", 0.0), ("max", 15.0), ("default", 15.0)]))
+                            .map_err(|_| invalid("gradient planes requires a constant expression"))?
+                    };
+                    if !number.is_finite() || !(0.0..=15.0).contains(&number) {
                         return Err(invalid("gradient planes must be 0..15"));
                     }
+                    let parsed = number.round_ties_even() as u8;
                     result.planes = parsed;
                 }
                 "scale" | "delta" => {
-                    let number = gradient_constant(value)
-                        .map_err(|_| invalid("gradient options require constant numeric expressions"))? as f32;
                     let lower = if key.trim() == "scale" { 0.0 } else { -65535.0 };
+                    let default = if key.trim() == "scale" { 1.0 } else { 0.0 };
+                    let number = gradient_expression::Expression::parse(value)
+                        .and_then(|expression| expression.evaluate(&[("min", lower), ("max", 65535.0), ("default", default)]))
+                        .map_err(|_| invalid("gradient options require constant numeric expressions"))?;
                     if !number.is_finite() || !(lower..=65535.0).contains(&number) {
                         return Err(invalid("gradient option outside supported range"));
                     }
                     if key.trim() == "scale" {
-                        result.scale = number;
+                        result.scale = number as f32;
                     } else {
-                        result.delta = number;
+                        result.delta = number as f32;
                     }
                 }
                 _ => return Err(invalid("unknown gradient option")),

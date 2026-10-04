@@ -237,13 +237,13 @@ fn owned_constant_gradient_expressions_preserve_pixels_and_validation() {
         for depth in [8, 10, 16] {
             let mut expression = frame(depth);
             let mut literal = frame(depth);
-            Gradient::parse(kind, "planes=7:scale=1/8:delta=2^3")
+            Gradient::parse(kind, "planes=max-8:scale=default/8:delta=2^3")
                 .unwrap().apply(&mut expression, depth).unwrap();
             Gradient::parse(kind, "7:0.125:8")
                 .unwrap().apply(&mut literal, depth).unwrap();
             assert_eq!(expression.data, literal.data);
         }
-        for invalid in ["scale=n", "scale=1/0", "scale=-1", "delta=65536"] {
+        for invalid in ["planes=n", "planes=15.1", "scale=65535.0001", "delta=65535.0001", "scale=n", "scale=1/0", "scale=-1", "delta=65536"] {
             assert!(Gradient::parse(kind, invalid).is_err(), "{invalid}");
         }
     }
