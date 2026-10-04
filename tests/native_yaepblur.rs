@@ -421,3 +421,66 @@ fn pixelize_then_yaepblur_matches_saved_independent_chain_pixels() {
         std::fs::remove_file(path).unwrap();
     }
 }
+
+#[test]
+fn numeric_syntax_does_not_require_legacy_filter_fallback() {
+    let expected = std::fs::read(fixture("yaepblur-strong.expected.raw")).unwrap();
+    for args in [
+        "r=0x4:p=0X7:s=1Ki",
+        "r=4:p=7:s=128B",
+        "r=4:p=7:s=1.024k",
+        "r=4:p=7:s=1.024E3",
+    ] {
+        let filter = YaepBlur::parse(args).unwrap();
+        let mut pixels = Vec::new();
+        for n in 0..4 {
+            let mut f = frame(n);
+            filter
+                .apply(&mut f, 8, n as u64, Some(n as f64 / 25.))
+                .unwrap();
+            pixels.extend(f.data);
+        }
+        assert_eq!(pixels, expected, "{args}");
+        for library in [false, true] {
+            let output = std::env::temp_dir()
+                .join(format!("fvid-number-{}-{library}.mkv", std::process::id()));
+            let transform = fvid::media::LosslessTransform {
+                yaepblur: Some(args.into()),
+                ..Default::default()
+            };
+            let stats = if library {
+                fvid_media::transcode_lossless(
+                    &fixture("numeric-parameters.y4m"),
+                    &output,
+                    transform,
+                    &Default::default(),
+                )
+            } else {
+                fvid::media::transcode_lossless(
+                    &fixture("numeric-parameters.y4m"),
+                    &output,
+                    transform,
+                    &Default::default(),
+                )
+            }
+            .unwrap();
+            assert_eq!(stats.backend, "fvid");
+            let mut reader = fvid::playback_native::NativeReader::software(
+                Cursor::new(std::fs::read(&output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            let mut actual = Vec::new();
+            while let Some(raw) = reader.read_frame_raw().unwrap() {
+                actual.extend(
+                    fvid::native_geometry::VideoGeometry::default()
+                        .apply(&raw, 16, 12)
+                        .unwrap()
+                        .data,
+                );
+            }
+            assert_eq!(actual, expected, "{args} library={library}");
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+}

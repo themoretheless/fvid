@@ -7,6 +7,7 @@ use std::{
 fn main() {
     let oracle =
         std::env::var_os("FVID_REFERENCE_FFMPEG").expect("explicit reference executable required");
+    qualify_numeric_literals(&oracle);
     let mut count = 0;
     for (w, h) in [(16usize, 12usize), (17, 13), (1, 1)] {
         for depth in [8u8, 9, 10, 12, 14, 16] {
@@ -50,6 +51,10 @@ fn main() {
                     "radius=0",
                     "r=1:p=15:s=1",
                     "r=4:p=7:s=1024",
+                    "r=0x4:p=0X7:s=1Ki",
+                    "r=4:p=7:s=128B",
+                    "r=4:p=7:s=60dB",
+                    "r=4:p=7:s=1k",
                     "radius=2147483647:planes=15:sigma=2147483647",
                     "r=7:p=0",
                     "r=4:p=2:s=4096",
@@ -394,4 +399,69 @@ fn chain(oracle: &std::ffi::OsStr) {
     );
     std::fs::write("/tmp/fvid-yaepblur-chain.reference.raw", &out.stdout).unwrap();
     println!("yaepblur: pixelize chain order qualified against the reference");
+}
+
+fn qualify_numeric_literals(oracle: &std::ffi::OsStr) {
+    let cases = [
+        "0x80",
+        "0X80",
+        "1Ki/8",
+        "16B",
+        "1k/8",
+        "20dB*10",
+        "-20dB*1000",
+        "-(20dB)+138",
+        "(-20dB)^2*10000",
+        "1E/1e16",
+        "1E-2*10000",
+        "1m*100000",
+        "1e2",
+        "0x10Ki/128",
+        "1.5k/10",
+        "1e2k/1000",
+        "1KiB/64",
+        "1ci*10000",
+        "1di*1000",
+        "1ui*100000000",
+        "1Mi/8192",
+        "0xffffffffffffffff/1e17",
+    ];
+    for text in cases {
+        let expected = fvid_media::owned_expression::constant(text).unwrap();
+        let expression = format!("round({text})");
+        let result = Command::new(oracle)
+            .args([
+                "-v",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                &format!("nullsrc=s=2x2,format=gray,lut=c0='{expression}'"),
+                "-threads",
+                "1",
+                "-frames:v",
+                "1",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "gray",
+                "pipe:1",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{text}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(
+            result.stdout,
+            vec![expected.round().clamp(0., 255.) as u8; 4],
+            "{text}"
+        );
+    }
+    println!(
+        "numeric literals: {} exact quantized scalar comparisons passed",
+        cases.len()
+    );
 }

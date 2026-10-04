@@ -66,7 +66,36 @@ impl Parser<'_> {
             return Err("expression nesting exceeds call-stack bound".into());
         }
         self.space();
-        let mut left = if self.take(b'+') {
+        // A signed dB literal converts the signed exponent before unary arithmetic.
+        let negative_db = if self.text.get(self.at) == Some(&b'-') {
+            let start = self.at;
+            let mut end = start + 1;
+            while self.text.get(end).is_some_and(|b| {
+                b.is_ascii_digit() || matches!(b, b'.' | b'e' | b'E' | b'+' | b'-')
+            }) {
+                end += 1;
+            }
+            if self.text.get(end..end + 2) == Some(b"dB") {
+                std::str::from_utf8(&self.text[start..end])
+                    .unwrap()
+                    .parse::<f64>()
+                    .ok()
+                    .map(|value| (value, end + 2))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        let mut left = if let Some((value, end)) = negative_db {
+            self.at = end;
+            let mut value = 10f64.powf(value / 20.0);
+            if self.text.get(self.at) == Some(&b'B') {
+                value *= 8.0;
+                self.at += 1;
+            }
+            Node::Number(value)
+        } else if self.take(b'+') {
             Node::Unary(false, Box::new(self.expression(minimum.max(3), depth + 1)?))
         } else if self.take(b'-') {
             Node::Unary(true, Box::new(self.expression(minimum.max(3), depth + 1)?))
@@ -110,34 +139,106 @@ impl Parser<'_> {
             .get(self.at)
             .is_some_and(|b| b.is_ascii_digit() || *b == b'.')
         {
-            while self
-                .text
-                .get(self.at)
-                .is_some_and(|b| b.is_ascii_digit() || *b == b'.')
-            {
-                self.at += 1;
-            }
+            let mut number: f64;
             if self
                 .text
-                .get(self.at)
-                .is_some_and(|b| matches!(*b, b'e' | b'E'))
+                .get(start..start + 2)
+                .is_some_and(|s| s == b"0x" || s == b"0X")
             {
-                self.at += 1;
-                if self
+                self.at += 2;
+                let digits = self.at;
+                let mut value = 0u64;
+                while let Some(byte) = self
                     .text
                     .get(self.at)
-                    .is_some_and(|b| matches!(*b, b'+' | b'-'))
+                    .copied()
+                    .filter(u8::is_ascii_hexdigit)
                 {
+                    let digit = (byte as char).to_digit(16).unwrap() as u64;
+                    value = value.saturating_mul(16).saturating_add(digit);
                     self.at += 1;
                 }
+                if self.at == digits {
+                    return Err("invalid hexadecimal expression number".into());
+                }
+                number = value as f64;
+            } else {
                 while self.text.get(self.at).is_some_and(u8::is_ascii_digit) {
                     self.at += 1;
                 }
+                if self.text.get(self.at) == Some(&b'.') {
+                    self.at += 1;
+                    while self.text.get(self.at).is_some_and(u8::is_ascii_digit) {
+                        self.at += 1;
+                    }
+                }
+                if self
+                    .text
+                    .get(self.at)
+                    .is_some_and(|b| matches!(b, b'e' | b'E'))
+                {
+                    let exponent = self.at;
+                    self.at += 1;
+                    if self
+                        .text
+                        .get(self.at)
+                        .is_some_and(|b| matches!(b, b'+' | b'-'))
+                    {
+                        self.at += 1;
+                    }
+                    let digits = self.at;
+                    while self.text.get(self.at).is_some_and(u8::is_ascii_digit) {
+                        self.at += 1;
+                    }
+                    if self.at == digits {
+                        self.at = exponent;
+                    }
+                }
+                number = std::str::from_utf8(&self.text[start..self.at])
+                    .unwrap()
+                    .parse()
+                    .map_err(|_| "invalid expression number")?;
             }
-            let number = std::str::from_utf8(&self.text[start..self.at])
-                .unwrap()
-                .parse()
-                .map_err(|_| "invalid expression number")?;
+            if self.text.get(self.at..self.at + 2) == Some(b"dB") {
+                number = 10f64.powf(number / 20.0);
+                self.at += 2;
+            } else {
+                let exponent = match self.text.get(self.at) {
+                    Some(b'y') => -24,
+                    Some(b'z') => -21,
+                    Some(b'a') => -18,
+                    Some(b'f') => -15,
+                    Some(b'p') => -12,
+                    Some(b'n') => -9,
+                    Some(b'u') => -6,
+                    Some(b'm') => -3,
+                    Some(b'c') => -2,
+                    Some(b'd') => -1,
+                    Some(b'h') => 2,
+                    Some(b'k' | b'K') => 3,
+                    Some(b'M') => 6,
+                    Some(b'G') => 9,
+                    Some(b'T') => 12,
+                    Some(b'P') => 15,
+                    Some(b'E') => 18,
+                    Some(b'Z') => 21,
+                    Some(b'Y') => 24,
+                    _ => 0,
+                };
+                if exponent != 0 {
+                    self.at += 1;
+                    if self.text.get(self.at) == Some(&b'i') {
+                        number *= 2f64.powf(exponent as f64 / 0.3);
+                        self.at += 1;
+                    } else {
+                        number *= 10f64.powi(exponent);
+                    }
+                }
+            }
+            if self.text.get(self.at) == Some(&b'B') {
+                number *= 8.0;
+                self.at += 1;
+            }
             return Ok(Node::Number(number));
         }
         while self
@@ -418,6 +519,35 @@ mod tests {
                 .unwrap(),
             82.0
         );
+    }
+    #[test]
+    fn numeric_hex_suffixes_and_exponent_ambiguity() {
+        for (text, expected) in [
+            ("0xFF", 255.),
+            ("0X10", 16.),
+            ("0xffffffffffffffffffff", u64::MAX as f64),
+            ("1k", 1000.),
+            ("1Ki", 1024.),
+            ("1KiB", 8192.),
+            ("1B", 8.),
+            ("20dB", 10.),
+            ("-20dB", 0.1),
+            ("1E", 1e18),
+            ("1E-2", 0.01),
+            ("1m", 0.001),
+            ("0x10Ki", 16384.),
+            ("1.5k", 1500.),
+            ("1e2k", 100000.),
+        ] {
+            let actual = constant(text).unwrap();
+            assert!(
+                (actual - expected).abs() <= expected.abs() * 1e-14,
+                "{text}: {actual}"
+            );
+        }
+        for text in ["0x", "0Xz", "1e", "1e+", "1..2", "1Kii", "1BB", "1dBBx"] {
+            assert!(constant(text).is_err(), "{text}");
+        }
     }
     #[test]
     fn nonfinite_values_propagate_instead_of_becoming_valid_filter_parameters() {

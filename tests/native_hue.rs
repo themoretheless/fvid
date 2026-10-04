@@ -19,7 +19,7 @@ fn native_filter_pipeline_uses_owned_hue_before_other_pixel_filters() {
     filters.apply(&mut frame, 8).unwrap();
     assert_eq!(frame.data, [239, 191, 127, 20, 95, 95]);
     let invalid = DecodeTransform {
-        hue: Some("h=t".into()),
+        hue: Some("h=unknown".into()),
         ..Default::default()
     };
     assert!(PixelFilters::from_request(&invalid).is_err());
@@ -108,7 +108,8 @@ fn mp4_lossless_export_applies_hue_and_preserves_every_frame() {
     assert!(exported.read_frame_raw().unwrap().is_none());
     drop(exported);
     std::fs::remove_file(output).unwrap();
-    assert!(!fvid::native_lossless::supports(
+    // Timeline support is qualified by native_hue_timeline; retain admission here.
+    assert!(fvid::native_lossless::supports(
         &fvid::media_info::LosslessTransform {
             hue: Some("h=t".into()),
             ..Default::default()

@@ -4058,3 +4058,5 @@ overflow. Safe native acceptance is explicitly separate from overflow
 reproduction and exact non-overflow comparisons. Both APIs preserve these bytes
 through FFV1 export. Ordinary tests do not run FFmpeg or access the network.
 The production media/CUDA dependency graph still needs further legacy migration.
+
+Owned scalar filter expressions now accept hexadecimal integers, decimal/SI and binary prefixes, byte multipliers and signed dB literals. Scientific exponents remain distinct from the exa suffix (`1E` versus `1E3`). Negative dB converts the signed exponent before unary arithmetic, so `-20dB` is 0.1 while `-(20dB)` is -10. The explicit yaepblur reference benchmark now covers 2112 four-frame comparisons, including hex, Ki, B, dB and decimal kilo parameters. A further 22 quantized scalar reference comparisons cover signed dB, exponent ambiguity, fractional binary prefixes and hex limits. This broadens owned filter admission; production media/CUDA legacy dependencies remain unfinished.
