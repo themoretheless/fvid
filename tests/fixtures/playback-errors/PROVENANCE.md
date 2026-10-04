@@ -129,3 +129,17 @@ Enabled ordinary acceptance compares all 9,216 RGBA components exactly against
 committed references; alpha remains the original input. Native routing uses
 three-frame odd-size Y4M fixtures at 8/12/16 bits. Ordinary tests never invoke
 FFmpeg or network; no private media is included.
+
+### colorcorrect-grid-{8,12,16}.y4m and colorcorrect-reference-{8,12,16}-{0..7}.raw
+
+`python3 scripts/generate_colorcorrect_fixtures.py` writes three 5×5 YUV420
+frames with arithmetic luma and independently varying chroma, without FFmpeg
+or network. Eight parameter cases cover manual offsets, negative/zero
+saturation, clipping, average/minmax/median analysis, and zero adjustments.
+The explicit reference benchmark uses `-filter_threads 1` so analysis spans
+the entire frame: `FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --offline --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_colorcorrect_reference`.
+Enabled ordinary acceptance checks all 3,096 YUV samples exactly. The zero
+adjustment regression specifically checks first-frame chroma 46 and 47:
+separate multiply/subtract loses one level, whereas fused centering preserves
+the reference results. All reference generation is benchmark-only. Fixtures
+contain no private media and ordinary tests require neither FFmpeg nor network.

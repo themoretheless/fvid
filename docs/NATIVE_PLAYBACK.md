@@ -3614,3 +3614,17 @@ chroma RGB16 converter. Native decode, Y4M export and FFV1 lossless export
 accept the filter without the legacy backend. Six three-frame reference cases
 at 8/16 bits match all 9,216 RGBA components exactly in enabled offline tests;
 general YUV conversion equivalence remains unqualified.
+
+Owned `colorcorrect` implements manual luma-dependent red/blue shadow/highlight
+correction and all three automatic analysis modes (average, minmax, median),
+with saturation from -3 to 3. Analysis is deterministic over the entire frame,
+independent of worker partitioning; the external qualification therefore uses
+one filter thread. Native planar YUV decode, Y4M export and FFV1 export need no
+legacy backend for this filter. Geometry, sample precision and histogram
+allocation are checked before mutation; luma is preserved and the top-left
+luma of each actual chroma cell supplies its correction. Synthetic 5×5
+three-frame videos at 8/12/16 bits match 3,096 samples exactly across eight
+cases. Fused centering and correction preserve the reference rounding; an
+enabled regression checks the specific zero-adjustment one-level failure.
+RGB conversion and arbitrary multi-thread reference analysis parity are not
+qualified by these tests.
