@@ -51,13 +51,13 @@ pub fn decode(
         || slice.address != 0
         || slice.nal.layer_id != 0
     {
-        return Err(invalid("unsupported HEVC picture tools"));
+        return Err(crate::unsupported("unsupported HEVC picture tools"));
     }
     if slice.slice_type != SliceType::I && !(1..=5).contains(&slice.max_merge_candidates) {
         return Err(invalid("invalid HEVC merge candidate count"));
     }
     if sps.depth[0] != sps.depth[1] {
-        return Err(invalid("HEVC mixed component bit depths are not supported"));
+        return Err(crate::unsupported("HEVC mixed component bit depths are not supported"));
     }
     for list in 0..2 {
         if lists[list].len() != slice.references[list] as usize {
@@ -385,7 +385,7 @@ pub fn decode_slices(
         || pps.tiles.is_some()
         || sps.depth[0] != sps.depth[1]
     {
-        return Err(invalid("unsupported HEVC multi-slice picture tools"));
+        return Err(crate::unsupported("unsupported HEVC multi-slice picture tools"));
     }
     for (index, slice) in slices.iter().enumerate() {
         if slice.first != (index == 0)
@@ -406,7 +406,7 @@ pub fn decode_slices(
             return Err(invalid("invalid HEVC merge candidate count"));
         }
         if sps.depth[0] != sps.depth[1] {
-            return Err(invalid("HEVC mixed component bit depths are not supported"));
+            return Err(crate::unsupported("HEVC mixed component bit depths are not supported"));
         }
         for list in 0..2 {
             if reference_lists[list].len() != slice.references[list] as usize {

@@ -112,3 +112,57 @@ fn sequence_header_in_configuration_primes_the_actual_decoder() {
         (frames[0].picture.size[0], frames[0].picture.size[1])
     );
 }
+
+#[test]
+fn standalone_mp4_decodes_owned_avc_and_hevc_access_units() {
+    for name in [
+        "shared-avc-baseline",
+        "shared-avc-bframes",
+        "shared-hevc-main",
+        "shared-hevc-main10",
+    ] {
+        let source = fixture(&format!("playback-errors/{name}.mp4"));
+        let root = fvid::media::decode_video(&source).unwrap();
+        let library = fvid_media::decode_video(&source).unwrap_or_else(|e| panic!("{name}: {e}"));
+        assert_eq!(library.backend, "owned MP4 compressed video decode");
+        assert_eq!(library.video_frames, root.video_frames, "{name}");
+        assert_eq!(
+            (library.width, library.height),
+            (root.width, root.height),
+            "{name}"
+        );
+        assert_eq!(library.pixel_format, root.pixel_format, "{name}");
+        assert_eq!(library.decode_errors, 0);
+    }
+}
+
+#[test]
+fn mp4_edits_and_transforms_remain_explicitly_unadmitted() {
+    let source = fixture("hevc/main-ipb.mp4");
+    let reader = fvid_media::owned_mp4::Mp4Reader::open(
+        std::io::Cursor::new(std::fs::read(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    assert!(
+        !reader
+            .tracks()
+            .iter()
+            .find(|t| t.handler == *b"vide")
+            .unwrap()
+            .edits
+            .is_empty()
+    );
+    let error = fvid_media::decode_video(&source).unwrap_err();
+    assert!(error.contains("does not yet support"), "{error}");
+    let request = fvid::media::DecodeTransform {
+        deband: Some("1thr=.5".into()),
+        ..Default::default()
+    };
+    let error = fvid_media::decode_video_transformed(
+        &fixture("playback-errors/shared-avc-baseline.mp4"),
+        request,
+    )
+    .unwrap_err();
+    assert!(error.contains("does not yet support"), "{error}");
+}

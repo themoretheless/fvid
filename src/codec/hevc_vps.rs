@@ -73,7 +73,7 @@ impl Vps {
         let max_sub_layers_minus1 = bits.read(3)? as u8;
         let temporal_id_nesting = bits.bit()?;
         if !internal || !available || max_layers_minus1 != 0 {
-            return Err(invalid(
+            return Err(crate::unsupported(
                 "multilayer or external-base HEVC VPS is not implemented",
             ));
         }
@@ -85,7 +85,7 @@ impl Vps {
         let profile = ProfileTierLevel::read(&mut bits, true, max_sub_layers_minus1)?;
         let ordering = read_ordering(&mut bits, max_sub_layers_minus1)?;
         if bits.read(6)? != 0 || bits.unsigned_golomb()? != 0 {
-            return Err(invalid("multiple HEVC layer sets are not implemented"));
+            return Err(crate::unsupported("multiple HEVC layer sets are not implemented"));
         }
         let mut hrd = None;
         let timing = if bits.bit()? {
@@ -126,7 +126,7 @@ impl Vps {
             None
         };
         if bits.bit()? {
-            return Err(invalid("HEVC VPS extension is not implemented"));
+            return Err(crate::unsupported("HEVC VPS extension is not implemented"));
         }
         bits.finish_rbsp()?;
         Ok(Self {

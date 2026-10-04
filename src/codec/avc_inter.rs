@@ -52,7 +52,7 @@ pub fn macroblock_type(slice: SliceType, code: u32) -> Result<MacroblockType> {
         SliceType::P | SliceType::Sp => 5,
         SliceType::B => 23,
         SliceType::I => 0,
-        SliceType::Si => return Err(invalid("SI macroblock syntax is not implemented")),
+        SliceType::Si => return Err(crate::unsupported("SI macroblock syntax is not implemented")),
     };
     if code >= offset {
         let intra = code - offset;

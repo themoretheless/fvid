@@ -272,6 +272,7 @@ pub mod owned_hqdn3d;
 mod owned_pixel_context;
 
 mod owned_compressed_video;
+mod owned_mp4_video_decode;
 
 /// Shared owned AVC/HEVC/VP9/AV1 packet decoders; container workflow admission is separate.
 pub use fvid_codecs::codec as owned_codecs;

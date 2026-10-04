@@ -778,3 +778,12 @@ SHA256:
 - `shared-av1-private.webm`: `c9f64ff547db2402829fabfb2439722d92e269567277170f6e50adfd5d29ff30`
 - `shared-av1-private-sequence.webm`: `9a373397e429500a87b031e533e14e65f9f2a8eb8fe722b40c179ebac72e5963`
 - `shared-vp9-truncated.webm`: `cf1bf012343ecbdfd6eb847597adb61384bc359ce42549ff838929091d36c942`
+
+### Shared MP4 decoder dispatch
+
+`generate-shared-mp4.py` derives four cases from the existing short synthetic AVC and HEVC fixtures, replacing complete `edts` boxes with equally sized `free` boxes. Packet bytes and sample offsets remain unchanged. No private source media or codec parameters are used, and no encoder, FFmpeg or network is invoked. `native_shared_codecs` accepts baseline/B-picture AVC and Main/Main10 HEVC through standalone own kernels, comparing counts, visible geometry and source pixel formats with root native playback. Edit lists and transformed requests have separate refusal tests, not acceptance claims.
+
+- `shared-avc-baseline.mp4`: `a61bb2d3c42029fafbf7bde4f0ac52464d1333c763dae192bb5710ff23a68122`
+- `shared-avc-bframes.mp4`: `dc2592399a106e13e769c4d727fa33b94e00bec2407b57093e7c17bae577b70d`
+- `shared-hevc-main.mp4`: `39bbb904f0f9e2184f3c504532e93e067b9e3255d218a1464459e10affab84ec`
+- `shared-hevc-main10.mp4`: `a0eacfe438a9cc80614f5375f4bfc4a30437a677743f422c9859ce8f134e6893`

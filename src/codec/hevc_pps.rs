@@ -166,14 +166,14 @@ impl Pps {
         if b.bit()? {
             let range = b.bit()?;
             if b.read(7)? != 0 {
-                return Err(invalid("HEVC multilayer/3D/SCC/unknown PPS extensions are not implemented"));
+                return Err(crate::unsupported("HEVC multilayer/3D/SCC/unknown PPS extensions are not implemented"));
             }
             if range {
                 if transform_skip {
                     transform_skip_max_log2 = ue(b, u32::from(sps.transform_block_log2[1] - 2))? as u8 + 2;
                 }
                 if b.bit()? || b.bit()? {
-                    return Err(invalid("HEVC cross-component prediction/chroma QP lists are not implemented"));
+                    return Err(crate::unsupported("HEVC cross-component prediction/chroma QP lists are not implemented"));
                 }
                 for component in 0..2 {
                     sao_offset_scale[component] = ue(b, u32::from(sps.depth[component].saturating_sub(10)))? as u8;

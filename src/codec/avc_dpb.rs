@@ -35,7 +35,7 @@ impl<T> ReferenceBuffer<T> {
     }
     pub fn lists(&self, header: &SliceHeader, poc: i32) -> Result<ReferenceLists> {
         if header.field_pic {
-            return Err(invalid("AVC field reference lists are not implemented"));
+            return Err(crate::unsupported("AVC field reference lists are not implemented"));
         }
         frame_lists(
             &self.references(),
@@ -59,7 +59,7 @@ impl<T> ReferenceBuffer<T> {
         picture: Arc<T>,
     ) -> Result<()> {
         if header.field_pic {
-            return Err(invalid("AVC field reference marking is not implemented"));
+            return Err(crate::unsupported("AVC field reference marking is not implemented"));
         }
         let max = 1u32 << self.frame_num_bits;
         if header.frame_num >= max

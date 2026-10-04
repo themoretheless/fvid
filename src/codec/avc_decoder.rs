@@ -243,7 +243,7 @@ impl AvcDecoder {
             header.slice_type,
             SliceType::I | SliceType::P | SliceType::B
         ) {
-            return Err(invalid("AVC picture type is not implemented"));
+            return Err(crate::unsupported("AVC picture type is not implemented"));
         }
         if !header.idr
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))
@@ -256,7 +256,7 @@ impl AvcDecoder {
                     && header.frame_num != (previous + 1) % (1 << sps.frame_num_bits)
             })
         {
-            return Err(invalid("AVC frame-number gaps are not implemented"));
+            return Err(crate::unsupported("AVC frame-number gaps are not implemented"));
         }
         let (w, h) = sps.coded_dimensions();
         let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize)?;
@@ -286,7 +286,7 @@ impl AvcDecoder {
                 .last_poc
                 .is_some_and(|p| order.before_marking.picture() <= p)
         {
-            return Err(invalid("AVC display reordering is not implemented"));
+            return Err(crate::unsupported("AVC display reordering is not implemented"));
         }
         let buffer = self
             .dpb

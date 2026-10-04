@@ -189,7 +189,7 @@ impl Sps {
         if b.bit()? {
             let range = b.bit()?;
             if b.read(7)? != 0 {
-                return Err(invalid(
+                return Err(crate::unsupported(
                     "HEVC multilayer/3D/SCC/unknown SPS extensions are not implemented",
                 ));
             }
@@ -197,7 +197,7 @@ impl Sps {
                 let flags = b.read(9)?;
                 // 7.3.2.2.2: the sixth of nine flags disables reference filtering.
                 if flags & !((1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 3) | (1 << 2) | (1 << 1)) != 0 {
-                    return Err(invalid(
+                    return Err(crate::unsupported(
                         "remaining HEVC SPS range-extension tools are not implemented",
                     ));
                 }

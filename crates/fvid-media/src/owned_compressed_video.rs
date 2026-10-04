@@ -19,13 +19,24 @@ pub(crate) fn try_decode(
         || !transform
             .input_format
             .as_deref()
-            .is_none_or(|v| matches!(v, "webm" | "matroska"))
+            .is_none_or(|v| matches!(v, "webm" | "matroska" | "mp4" | "mov"))
     {
         return Ok(None);
     }
     let mut file = File::open(source).map_err(|e| e.to_string())?;
-    let mut magic = [0; 4];
-    if file.read(&mut magic).map_err(|e| e.to_string())? != 4 || magic != [0x1a, 0x45, 0xdf, 0xa3] {
+    let mut magic = [0; 8];
+    let count = file.read(&mut magic).map_err(|e| e.to_string())?;
+    if count == 8 && crate::owned_mp4::recognizes_prefix(&magic) {
+        return crate::owned_mp4_video_decode::try_decode(source, transform);
+    }
+    if count < 4 || magic[..4] != [0x1a, 0x45, 0xdf, 0xa3] {
+        return Ok(None);
+    }
+    if transform
+        .input_format
+        .as_deref()
+        .is_some_and(|v| !matches!(v, "webm" | "matroska"))
+    {
         return Ok(None);
     }
     let mut reader = crate::owned_webm::WebmReader::open(
@@ -127,7 +138,7 @@ pub(crate) fn try_decode(
     }
     Ok(Some(stats))
 }
-fn account(
+pub(crate) fn account(
     stats: &mut DecodeStats,
     size: [u32; 2],
     depth: u8,

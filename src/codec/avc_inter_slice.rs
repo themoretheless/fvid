@@ -79,7 +79,7 @@ impl<'a> InterCavlcSlice<'a> {
         memory_limit: usize,
     ) -> Result<Self> {
         if header.field_pic {
-            return Err(invalid("field slices are not supported"));
+            return Err(crate::unsupported("field slices are not supported"));
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)

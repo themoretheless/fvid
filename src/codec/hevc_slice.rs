@@ -239,7 +239,7 @@ impl SliceHeader {
                     .clone();
             }
             if sps.long_term_present {
-                return Err(invalid(
+                return Err(crate::unsupported(
                     "HEVC long-term slice references are not implemented",
                 ));
             }
