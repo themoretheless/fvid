@@ -207,9 +207,156 @@ impl<R: Read + Seek> AvcMovieReader<R> {
         Ok(())
     }
 }
+/// Owns a reusable GPU output surface and renders each movie event without libav.
+/// Complete external uses of `buffer()` before advancing or closing this renderer.
+pub struct AvcMovieRenderer<R: Read + Seek> {
+    reader: std::mem::ManuallyDrop<AvcMovieReader<R>>,
+    output: std::mem::ManuallyDrop<fvid_cuda::Nv12Buffer>,
+    filter: std::mem::ManuallyDrop<fvid_cuda::Nv12Processor>,
+    transform: fvid_cuda::Nv12Transform,
+    full_range: bool,
+    failed: bool,
+}
+impl<R: Read + Seek> AvcMovieRenderer<R> {
+    pub fn new(
+        reader: AvcMovieReader<R>,
+        transform: fvid_cuda::Nv12Transform,
+        full_range: bool,
+    ) -> Result<Self, String> {
+        let (width, height) = reader.source.coded_dimensions();
+        validate_transform(width, height, transform)?;
+        let output =
+            fvid_cuda::Nv12Buffer::new(reader.ordinal, transform.out_width, transform.out_height)?;
+        let mut filter = fvid_cuda::Nv12Processor::new(reader.ordinal)?;
+        filter.follow_stream(output.stream_handle()?);
+        Ok(Self {
+            reader: std::mem::ManuallyDrop::new(reader),
+            output: std::mem::ManuallyDrop::new(output),
+            filter: std::mem::ManuallyDrop::new(filter),
+            transform,
+            full_range,
+            failed: false,
+        })
+    }
+    pub fn buffer(&self) -> &fvid_cuda::Nv12Buffer {
+        &self.output
+    }
+    pub fn media_timescale(&self) -> u32 {
+        self.reader.media_timescale()
+    }
+    pub fn render_next(&mut self) -> Result<Option<Presentation>, String> {
+        if self.failed {
+            return Err("native movie renderer failed; reopen it".into());
+        }
+        let result = self.render_inner();
+        if result.is_err() {
+            self.failed = true;
+        }
+        result
+    }
+    fn render_inner(&mut self) -> Result<Option<Presentation>, String> {
+        let Some(presented) = self.reader.next_presentation()? else {
+            return Ok(None);
+        };
+        if let Some(frame) = presented.frame {
+            let surface = self.reader.map(&frame)?;
+            let (width, height) = self.reader.source.coded_dimensions();
+            let uv = surface
+                .pointer
+                .checked_add(u64::from(surface.pitch) * u64::from(height))
+                .ok_or("NVDEC UV pointer overflow")?;
+            let source = fvid_cuda::Nv12View {
+                y: surface.pointer,
+                uv,
+                pitch_y: surface.pitch,
+                pitch_uv: surface.pitch,
+                width,
+                height,
+            };
+            let operation = self
+                .filter
+                .apply(source, self.output.view()?, self.transform);
+            // Wait even when launch fails: an earlier copy may already be queued.
+            // Keep the decoder mapping alive if completion cannot be established.
+            self.filter.synchronize()?;
+            self.output.synchronize()?;
+            self.reader.unmap(surface.slot)?;
+            operation?;
+        } else {
+            self.output.fill_black(self.full_range)?;
+        }
+        Ok(Some(presented.event))
+    }
+    pub fn close(&mut self) -> Result<(), String> {
+        self.failed = true;
+        self.filter.synchronize()?;
+        self.output.synchronize()?;
+        self.reader.close()
+    }
+}
+impl<R: Read + Seek> Drop for AvcMovieRenderer<R> {
+    fn drop(&mut self) {
+        // A failed wait must not release allocations still used by the filter.
+        // Retain all owners rather than risking device use-after-free.
+        if self.filter.synchronize().is_err()
+            || self.output.synchronize().is_err()
+            || self.reader.close().is_err()
+        {
+            return;
+        }
+        // SAFETY: All GPU work completed and the decoder closed. Each field is
+        // manually dropped exactly once, and no external use is permitted here.
+        unsafe {
+            std::mem::ManuallyDrop::drop(&mut self.filter);
+            std::mem::ManuallyDrop::drop(&mut self.reader);
+            std::mem::ManuallyDrop::drop(&mut self.output);
+        }
+    }
+}
+
+fn validate_transform(width: u32, height: u32, t: fvid_cuda::Nv12Transform) -> Result<(), String> {
+    if t.out_width == 0
+        || t.out_height == 0
+        || (t.crop_x | t.crop_y | t.out_width | t.out_height) & 1 != 0
+        || t.crop_x
+            .checked_add(t.out_width)
+            .is_none_or(|end| end > width)
+        || t.crop_y
+            .checked_add(t.out_height)
+            .is_none_or(|end| end > height)
+    {
+        return Err("native movie crop must be even and inside the coded image".into());
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn render_geometry_is_checked_before_device_allocation() {
+        use fvid_cuda::Nv12Transform;
+        let valid = Nv12Transform {
+            out_width: 32,
+            out_height: 24,
+            ..Default::default()
+        };
+        assert!(validate_transform(64, 48, valid).is_ok());
+        for invalid in [
+            Nv12Transform::default(),
+            Nv12Transform { crop_x: 1, ..valid },
+            Nv12Transform {
+                crop_x: u32::MAX - 1,
+                ..valid
+            },
+            Nv12Transform {
+                out_height: 50,
+                ..valid
+            },
+        ] {
+            assert!(validate_transform(64, 48, invalid).is_err());
+        }
+    }
     fn frame(index: usize) -> Presentation {
         Presentation {
             sample: Some(index),
@@ -232,34 +379,36 @@ mod tests {
         .unwrap();
         let expected = source.movie_presentations(1000).unwrap();
         let (width, height) = source.coded_dimensions();
-        let mut blank = fvid_cuda::Nv12Buffer::new(0, width, height).unwrap();
-        let mut reader = AvcMovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
+        let reader = AvcMovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
+        let mut renderer = AvcMovieRenderer::new(
+            reader,
+            fvid_cuda::Nv12Transform {
+                out_width: width,
+                out_height: height,
+                hflip: true,
+                ..Default::default()
+            },
+            false,
+        )
+        .unwrap();
         let mut count = 0;
         let mut blanks = 0;
-        while let Some(presented) = reader.next_presentation().unwrap() {
+        while let Some(event) = renderer.render_next().unwrap() {
             let expected = expected[count];
             assert_eq!(
-                (
-                    presented.event.sample,
-                    presented.event.start,
-                    presented.event.end
-                ),
+                (event.sample, event.start, event.end),
                 (expected.sample, expected.start, expected.end)
             );
-            if let Some(frame) = presented.frame {
-                let surface = reader.map(&frame).unwrap();
-                assert_ne!(surface.pointer, 0);
-                reader.unmap(surface.slot).unwrap();
-            } else {
-                blank.fill_black(false).unwrap();
+            assert_ne!(renderer.buffer().view().unwrap().y, 0);
+            if event.sample.is_none() {
                 blanks += 1;
             }
             count += 1;
         }
         assert_eq!(count, expected.len());
         assert_eq!(blanks, 2);
-        reader.close().unwrap();
-        assert!(reader.next_presentation().is_err());
+        renderer.close().unwrap();
+        assert!(renderer.render_next().is_err());
     }
     #[test]
     fn b_order_and_repeats_rewind_without_retaining_the_previous_range() {

@@ -408,7 +408,15 @@ owned GPU black-fill primitive.
 
 Host tests cover reordered B output, repeated-range restart, long preroll without
 retaining future-repeat frames, blanks and cache admission. An ignored NVIDIA
-test runs the existing empty-edit synthetic MOV through the reader, maps/unmaps
-pictures and fills both blank events on GPU; qualification requires it. This
+test runs the existing empty-edit synthetic MOV through the renderer, flips
+pictures into its owned output and fills both blank events on GPU; qualification requires it. This
 hardware test has not run here. Production encode/mux publication and remaining
 codec profiles/formats still require integration.
+
+`AvcMovieRenderer` owns the reader, output allocation and filter stream. It validates
+an even crop before allocation, renders each picture to NV12, waits before
+unmapping decoder input, and fills empty spans using the selected black range.
+Callers must finish using its borrowed output before advancing. Any render error
+makes it terminal; cleanup retains owners if GPU completion cannot be established.
+This adds the reusable render stage; production encoding/export integration is
+still incomplete and `cuda-hw` still enables the legacy backend.

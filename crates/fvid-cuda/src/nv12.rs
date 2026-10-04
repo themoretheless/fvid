@@ -184,7 +184,7 @@ impl Nv12Processor {
         }
     }
 
-    /// Bind filter work to FFmpeg's CUDA stream so NVENC sees ordered dependencies
+    /// Order filter work before consumers on a borrowed CUDA stream
     /// without a full device sync (same primary context).
     /// The borrowed stream must remain alive until this processor is dropped.
     /// Switching streams drains the previous stream before subsequent work.
@@ -199,8 +199,20 @@ impl Nv12Processor {
         }
     }
 
-    /// `src`/`dst` must be valid, nonoverlapping CUDA device surfaces on this device. Crop and size
-    /// must be even. Host full-frame copies are not performed.
+    /// Wait for filter work, including a launch whose later ordering step failed.
+    pub fn synchronize(&self) -> Result<(), String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.inner.synchronize_launch()
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            Err(crate::unsupported())
+        }
+    }
+
+    /// `src`/`dst` must be valid, nonoverlapping CUDA surfaces on this device.
+    /// Crop and size must be even. No host full-frame copies are performed.
     pub fn apply(
         &mut self,
         src: Nv12View,
@@ -461,11 +473,11 @@ mod native_nv12 {
                 self.poisoned = true;
                 return;
             }
-            // NVENC submits on FFmpeg's stream; we record an event so it waits for our work.
+            // Record an event so the consumer stream waits for our work.
             self.follow = Some(stream as cuda::CUstream);
         }
 
-        fn synchronize_launch(&self) -> Result<(), String> {
+        pub(super) fn synchronize_launch(&self) -> Result<(), String> {
             self.device
                 .context
                 .bind_to_thread()
