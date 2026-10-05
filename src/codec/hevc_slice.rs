@@ -27,6 +27,7 @@ pub struct SliceHeader {
     pub slice_type: SliceType,
     pub poc_lsb: u32,
     pub short_term: Vec<ShortTermReference>,
+    pub long_term: Vec<super::hevc_long_term::LongTermReference>,
     /// Slice-local RPS syntax only; zero for IDR or an SPS-selected set.
     pub short_term_bit_length: usize,
     /// Predictor's delta POC count before deriving the slice-local set.
@@ -224,6 +225,7 @@ impl SliceHeader {
         }
         let mut poc_lsb = 0;
         let mut short_term = Vec::new();
+        let mut long_term = Vec::new();
         let mut short_term_bit_length = 0;
         let mut short_term_predictor_delta_pocs = 0;
         let mut temporal_mvp = false;
@@ -248,9 +250,15 @@ impl SliceHeader {
                     .clone();
             }
             if sps.long_term_present {
-                return Err(crate::unsupported(
-                    "HEVC long-term slice references are not implemented",
-                ));
+                let capacity = sps.ordering.last()
+                    .ok_or_else(|| invalid("HEVC SPS has no DPB ordering"))?
+                    .max_decoded_pictures.saturating_sub(1);
+                let remaining = usize::from(capacity).checked_sub(short_term.len())
+                    .ok_or_else(|| invalid("HEVC short-term reference count exceeds DPB"))?;
+                long_term = super::hevc_long_term::read_long_term(
+                    b, &sps.long_term, sps.poc_bits,
+                    u8::try_from(remaining).map_err(|_| invalid("HEVC DPB capacity overflow"))?,
+                )?;
             }
             temporal_mvp = sps.temporal_mvp && b.bit()?;
         }
@@ -283,7 +291,8 @@ impl SliceHeader {
                     references[1] = ue(b, 14)? as u8 + 1;
                 }
             }
-            let total = short_term.iter().filter(|r| r.used).count();
+            let total = short_term.iter().filter(|r| r.used).count()
+                + long_term.iter().filter(|r| r.used).count();
             if total == 0 {
                 return Err(invalid("HEVC inter slice has no current references"));
             }
@@ -425,6 +434,7 @@ impl SliceHeader {
             slice_type,
             poc_lsb,
             short_term,
+            long_term,
             short_term_bit_length,
             short_term_predictor_delta_pocs,
             temporal_mvp,

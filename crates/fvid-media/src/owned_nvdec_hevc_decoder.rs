@@ -221,6 +221,9 @@ impl Scheduler {
         let first = *slices.first().ok_or("HEVC packet has no picture")?;
         let header = SliceHeader::parse(first, &self.sps, &self.pps, self.max_bytes)
             .map_err(|e| e.to_string())?;
+        if !header.long_term.is_empty() {
+            return Err("HEVC NVDEC long-term reference submission is not implemented".into());
+        }
         if header.nal.temporal_id as usize >= self.sps.ordering.len() {
             return Err("HEVC picture exceeds SPS temporal layers".into());
         }
