@@ -151,6 +151,8 @@ pub mod hevc_qp;
 pub mod hevc_residual;
 #[path = "../../../src/codec/hevc_rps.rs"]
 pub mod hevc_rps;
+#[path = "../../../src/codec/hevc_long_term.rs"]
+pub mod hevc_long_term;
 #[path = "../../../src/codec/hevc_sao.rs"]
 pub mod hevc_sao;
 #[path = "../../../src/codec/hevc_scaling.rs"]
