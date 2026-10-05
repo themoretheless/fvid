@@ -44,6 +44,8 @@ pub struct Sps {
     pub sao: bool,
     pub pcm: Option<Pcm>,
     pub short_term: Vec<Vec<ShortTermReference>>,
+    #[cfg(test)]
+    pub(crate) long_term_flag_bit: usize,
     pub long_term_present: bool,
     pub long_term: Vec<(u16, bool)>,
     pub temporal_mvp: bool,
@@ -165,6 +167,8 @@ impl Sps {
                 ordering.last().unwrap().max_decoded_pictures - 1,
             )?);
         }
+        #[cfg(test)]
+        let long_term_flag_bit = b.position();
         let long_term_present = b.bit()?;
         let mut long_term = Vec::new();
         if long_term_present {
@@ -232,6 +236,8 @@ impl Sps {
             sao,
             pcm,
             short_term,
+            #[cfg(test)]
+            long_term_flag_bit,
             long_term_present,
             long_term,
             temporal_mvp,

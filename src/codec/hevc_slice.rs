@@ -30,6 +30,8 @@ pub struct SliceHeader {
     pub long_term: Vec<super::hevc_long_term::LongTermReference>,
     /// Slice-local RPS syntax only; zero for IDR or an SPS-selected set.
     pub short_term_bit_length: usize,
+    #[cfg(test)]
+    pub(crate) short_term_bit_range: std::ops::Range<usize>,
     /// Predictor's delta POC count before deriving the slice-local set.
     pub short_term_predictor_delta_pocs: usize,
     pub temporal_mvp: bool,
@@ -228,9 +230,13 @@ impl SliceHeader {
         let mut long_term = Vec::new();
         let mut short_term_bit_length = 0;
         let mut short_term_predictor_delta_pocs = 0;
+        #[cfg(test)]
+        let mut short_term_bit_range = 0..0;
         let mut temporal_mvp = false;
         if !payload.header.is_idr() {
             poc_lsb = b.read(sps.poc_bits)?;
+            #[cfg(test)]
+            let short_term_start = b.position();
             if !b.bit()? {
                 let syntax = hevc_rps::read_short_term_syntax(b, &sps.short_term, true, 15)?;
                 short_term_bit_length = syntax.bit_length;
@@ -248,6 +254,10 @@ impl SliceHeader {
                     .get(index)
                     .ok_or_else(|| invalid("HEVC slice RPS index out of range"))?
                     .clone();
+            }
+            #[cfg(test)]
+            {
+                short_term_bit_range = short_term_start..b.position();
             }
             if sps.long_term_present {
                 let capacity = sps.ordering.last()
@@ -436,6 +446,8 @@ impl SliceHeader {
             short_term,
             long_term,
             short_term_bit_length,
+            #[cfg(test)]
+            short_term_bit_range,
             short_term_predictor_delta_pocs,
             temporal_mvp,
             references,

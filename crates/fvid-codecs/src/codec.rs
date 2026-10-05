@@ -197,3 +197,7 @@ pub mod vp9_residual;
 mod vp9_tables;
 #[path = "../../../src/codec/vp9_transform.rs"]
 pub mod vp9_transform;
+
+#[cfg(test)]
+#[path = "../../../src/codec/hevc_long_term_fixture.rs"]
+mod hevc_long_term_fixture;

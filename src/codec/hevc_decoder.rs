@@ -1,4 +1,4 @@
-//! Stateful native HEVC access-unit decoding and short-term reference storage.
+//! Stateful native HEVC access-unit decoding and reference picture storage.
 use super::{
     config::{HevcConfig, NalUnits},
     hevc_motion::Reference,
@@ -337,10 +337,7 @@ impl HevcDecoder {
             }
             slice_lists.push(other_lists);
         }
-        if headers.iter().any(|h| !h.long_term.is_empty()) {
-            return Err(crate::unsupported("HEVC long-term motion prediction is not implemented"));
-        }
-        self.references.retain(|r| retained.contains(&r.poc));
+        self.references.retain(|r| retained.iter().any(|&(poc, _)| poc == r.poc));
         let retained_bytes = self
             .references
             .iter()
@@ -394,7 +391,7 @@ fn reference_lists(
     poc: i32,
     references: &[Reference],
     poc_bits: u8,
-) -> Result<(Vec<i32>, [Vec<Reference>; 2])> {
+) -> Result<(Vec<(i32, bool)>, [Vec<Reference>; 2])> {
     let mut retained = Vec::new();
     let mut before = Vec::new();
     let mut after = Vec::new();
@@ -402,7 +399,7 @@ fn reference_lists(
         let target = poc
             .checked_add(r.delta_poc)
             .ok_or_else(|| invalid("HEVC reference POC overflow"))?;
-        retained.push(target);
+        retained.push((target, false));
         if r.used {
             let mut reference = references
                 .iter()
@@ -426,10 +423,10 @@ fn reference_lists(
     let mut long = Vec::new();
     for entry in &header.long_term {
         if let Some(target) = entry.resolve(poc, poc_bits, &dpb_pocs)? {
-            if target == poc || retained.contains(&target) {
+            if target == poc || retained.iter().any(|&(poc, _)| poc == target) {
                 return Err(invalid("HEVC long-term RPS repeats a reference POC"));
             }
-            retained.push(target);
+            retained.push((target, true));
             if entry.used {
                 let mut reference = references.iter().find(|r| r.poc == target)
                     .ok_or_else(|| invalid("HEVC long-term current reference is missing"))?.clone();
@@ -493,7 +490,7 @@ mod long_term_list_tests {
             poc, long_term: false, picture: Arc::clone(&picture),
         }).collect();
         let (retained, lists) = reference_lists(&header, 35, &references, 4).unwrap();
-        assert_eq!(retained, [34, 36, 19]);
+        assert_eq!(retained, [(34, false), (36, false), (19, true)]);
         assert_eq!(lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(), [34, 36, 19]);
         assert_eq!(lists[1].iter().map(|r| r.poc).collect::<Vec<_>>(), [36, 34, 19]);
         assert_eq!(lists[0].iter().map(|r| r.long_term).collect::<Vec<_>>(), [false, false, true]);
@@ -503,5 +500,16 @@ mod long_term_list_tests {
         assert!(reference_lists(&header, 35, &references[..2], 4).is_err());
         header.long_term[0] = LongTermReference { poc_lsb: 2, used: true, msb_cycles: Some(0) };
         assert!(reference_lists(&header, 35, &references, 4).err().unwrap().to_string().contains("repeats"));
+        // The same retained POC with a different classification is a different RPS.
+        header.short_term = vec![ShortTermReference { delta_poc: -1, used: true }];
+        header.long_term.clear();
+        header.references = [1, 1];
+        header.list_modification = [None, None];
+        let (short_set, _) = reference_lists(&header, 35, &references, 4).unwrap();
+        header.short_term.clear();
+        header.long_term = vec![LongTermReference { poc_lsb: 2, used: true, msb_cycles: Some(0) }];
+        let (long_set, _) = reference_lists(&header, 35, &references, 4).unwrap();
+        assert_ne!(short_set, long_set, "slices cannot change a retained picture's classification");
+
     }
 }

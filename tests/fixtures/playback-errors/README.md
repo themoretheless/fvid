@@ -177,3 +177,29 @@ remain intact, export all four frames with exact expected pixels, and write the
 plot file. The old delimiter split fails specifically with `unclosed curves
 quote`; malformed incomplete quotes remain rejected. No private media or
 parameter sets are used and no external programs generate/run this regression.
+
+## HEVC long-term references
+
+`hevc-long-term-rext8.mp4` contains three 64×64 8-bit I/P/P pictures. It is
+derived exclusively from the owned synthetic explicit-RDPCM fixture
+`hevc-rext-explicit-rdpcm-8-skip-disabled.mp4`: the SPS enables long-term
+references with zero SPS entries; each P slice replaces its short-term set
+with explicit used long-term entries and MSB cycles. CABAC data is retained.
+No private content or codec parameter sets are used.
+
+Before the fix, the second picture fails specifically with
+`HEVC long-term motion prediction is not implemented`. The active acceptance
+test requires used long-term entries, empty short-term sets, all three decoded
+pictures, exact bytes from the independent HM 18.0 reconstruction in
+`hevc-long-term-rext8.yuv`, and identical results after decoder reset.
+This qualifies the contained low-delay RExt case, not every HEVC profile or
+hardware submission.
+
+Regeneration is separate from ordinary tests:
+
+```sh
+python3 scripts/generate_hevc_long_term_sample.py --hm-decoder /path/to/TAppDecoder
+```
+
+The script explicitly runs the ignored native syntax rewriter, the owned MP4
+muxer, and HM for the pixel oracle. Ordinary tests use committed bytes only.
