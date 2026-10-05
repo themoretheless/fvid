@@ -1,8 +1,8 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Download a pinned Windows shared FFmpeg 9.0 build (headers + import libs + DLLs)
-  and optionally locate LLVM for bindgen/libclang.
+  Optional external FFmpeg setup for explicit reference benchmarks.
+  Production FVid media/player/CUDA builds do not require this script.
 #>
 param(
     [string]$Prefix = "C:\ffmpeg-shared",
@@ -25,7 +25,7 @@ if (Test-Path $Prefix) { Remove-Item -Recurse -Force $Prefix }
 New-Item -ItemType Directory -Path $Prefix | Out-Null
 Copy-Item -Recurse -Force (Join-Path $root.FullName "*") $Prefix
 
-foreach ($need in @("include\libavformat\avformat.h", "lib\avformat.lib", "bin")) {
+foreach ($need in @("lib\avutil.lib", "bin\ffmpeg.exe", "bin\ffprobe.exe")) {
     $path = Join-Path $Prefix $need
     if (-not (Test-Path $path)) { throw "Missing expected path after extract: $path" }
 }
@@ -33,19 +33,8 @@ foreach ($need in @("include\libavformat\avformat.h", "lib\avformat.lib", "bin")
 $env:FVID_FFMPEG_PREFIX = $Prefix
 $env:PATH = "$(Join-Path $Prefix 'bin');$env:PATH"
 
-$llvmCandidates = @(
-    "${env:ProgramFiles}\LLVM\bin",
-    "${env:ProgramFiles(x86)}\LLVM\bin"
-) + @(Get-ChildItem "${env:ProgramFiles}\LLVM*" -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "bin" })
-$libclang = $llvmCandidates | Where-Object { Test-Path (Join-Path $_ "libclang.dll") } | Select-Object -First 1
-if ($libclang) {
-    $env:LIBCLANG_PATH = $libclang
-    Write-Host "LIBCLANG_PATH=$libclang"
-} else {
-    Write-Warning "libclang.dll not found. Install LLVM (winget install LLVM.LLVM) and set LIBCLANG_PATH to its bin directory."
-}
-
 Write-Host "FVID_FFMPEG_PREFIX=$Prefix"
-Write-Host "Session PATH includes FFmpeg bin. Persist with:"
+Write-Host "Reference benchmark PATH includes FFmpeg bin. Production FVid does not need these settings."
+Write-Host "Optional benchmark settings:"
 Write-Host "  [Environment]::SetEnvironmentVariable('FVID_FFMPEG_PREFIX','$Prefix','User')"
 Write-Host "  # and append $Prefix\bin to User PATH"

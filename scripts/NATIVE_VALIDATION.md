@@ -1,3 +1,9 @@
+> Current dependency status: production `media`, `media-cuda`, `cuda-hw`, and
+> the historical `legacy-ffmpeg` marker all use owned library APIs without libav.
+> The default dependency guard covers all these graphs. Older dated audit notes
+> below describe migration history. FFmpeg is optional for explicit reference
+> benchmarks; native codec/tool coverage and physical NVIDIA proof remain pending.
+
 # Validation without FFmpeg
 
 `validate_gpu.py` now compares CPU/GPU planar crop and reflection results with

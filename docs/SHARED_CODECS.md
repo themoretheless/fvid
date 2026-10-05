@@ -4,7 +4,7 @@
 
 Plain WebM VP9/AV1 requests now dispatch through these kernels in both native-only and legacy-enabled fvid-media builds. AV1 configuration OBUs initialize the decoder before packets, including files whose first packet has no sequence header. Malformed packets propagate errors; explicitly unsupported tools remain capability refusals. WebM transforms now use the shared owned streaming pipeline; unsupported container workflows remain explicit capability refusals.
 
-This is a migration step, not complete FFmpeg independence. MP4 interior-empty-edit, rotation and multitrack workflows, remaining exports and codec/profile gaps still require migration. Root CUDA features still enable legacy-ffmpeg; ordinary media now uses the owned backend. Presence in the capability inventory denotes linked packet-decoder components, not acceptance of every container workflow or profile.
+The library and production feature graphs no longer depend on FFmpeg/libav, including CUDA and the historical reference marker. Native functional coverage is still incomplete: remaining exports and codec/profile/tool gaps require implementation and acceptance. Presence in the capability inventory denotes linked packet-decoder components, not acceptance of every container workflow or profile. Earlier migration sections below record historical state; the current production and retired-backend sections describe the active API.
 
 Verification: shared-kernel unit tests, root and standalone media unit tests, native deband/perspective regressions, eleven shared-codec integration tests and the offline native dependency guard. Ordinary tests require neither FFmpeg nor network access.
 

@@ -2,31 +2,30 @@
 
 Обычный `--features media` использует собственный backend с HTTP-вводом без FFmpeg headers, libclang и libav. Сборка: `cargo build --release --no-default-features --features media`. Feature `mcp` включает этот backend через `media`.
 
-Поддержанные контейнеры, packet tools и операции перечислены с acceptance-проверками в [SHARED_CODECS.md](SHARED_CODECS.md). Неподдержанные операции дают явную ошибку без fallback на libav. Переход ещё не завершён: `media-cuda` и library `cuda-hw` остаются на legacy libav.
+Поддержанные контейнеры, codec tools и операции перечислены с acceptance-проверками в [SHARED_CODECS.md](SHARED_CODECS.md). Неподдержанные операции дают явную ошибку без fallback на libav. `media-cuda` и library `cuda-hw` также используют собственный backend. Покрытие всех профилей/tools и аппаратная квалификация NVIDIA ещё не завершены.
 
-## Исторический legacy/reference adapter
-
-Нижеследующие требования к FFmpeg и список возможностей относятся к прежнему адаптеру и reference-проверкам; это не подтверждение поддержки всего списка собственным backend. Для явного reference build адаптер включается через `--features media,fvid-media/legacy-ffmpeg`. Обычной сборке `media` эти установки не нужны.
-
-Добавлен необязательный `fvid-media`: Rust-адаптер к установленным libavformat/libavcodec/libavutil/libavfilter. Production-код не запускает FFmpeg CLI. Собственный Y4M CPU/GPU-движок остаётся отдельным; наличие адаптера не означает, что FFmpeg-кодеки переписаны на Rust.
-
-## Сборка
+## Сборка без FFmpeg
 
 ```sh
 cargo build --release --features media
 ./target/release/fvid media --help
 ```
 
-Нужны FFmpeg development headers/libraries и libclang для генерации bindings. На проверенном Apple Silicon хосте используются `/opt/homebrew/include`, `/opt/homebrew/lib`, FFmpeg 9.0.1 и Command Line Tools libclang. Другой prefix задаётся `FVID_FFMPEG_PREFIX`. `cargo build --release --no-default-features --features media` отключает wgpu/CUDA, сохраняя native media.
+Для CPU media не нужны FFmpeg headers/libraries, libclang или генерация libav bindings. `--no-default-features --features media` отключает wgpu/CUDA, сохраняя native media. Feature `mcp` использует тот же backend через `media`.
 
 ### Windows
 
-1. Установите LLVM (`winget install LLVM.LLVM`) и задайте `LIBCLANG_PATH` на каталог `bin` с `libclang.dll`.
-2. Скачайте shared+dev FFmpeg 9.0: `powershell -File scripts/setup_ffmpeg_windows.ps1` (по умолчанию `C:\ffmpeg-shared` с `include/`, `lib/*.lib`, `bin/*.dll` из BtbN `win64-gpl-shared-9.0`).
-3. В сессии: `$env:FVID_FFMPEG_PREFIX='C:\ffmpeg-shared'`; добавьте `C:\ffmpeg-shared\bin` в `PATH`.
-4. `cargo build --release --features media` (или `--features mcp`). Для NVDEC/NVENC: `--features media-cuda` и `fvid media hw-filter …`.
+1. Установите Rust и обычные MSVC build tools.
+2. `cargo build --release --features media` (или `--features mcp`).
+3. Для NVDEC/NVENC: NVIDIA driver, CUDA Toolkit 13.x для NVRTC, `scripts/use_cuda_windows.ps1`, затем `cargo build --release --features media-cuda`. FFmpeg SDK и LLVM/libclang для libav не нужны.
 
-Qualified: macOS/FFmpeg 9.0.1; Windows/FFmpeg 9.0.1 shared (BtbN n9.0.1-29). `validate_media.py --benchmark-reference` retains the full external comparison corpus (the CPU gate requires ≥524 passing checks). Feature `media` не входит в стандартную сборку, чтобы GPU/CPU-ядро не требовало FFmpeg.
+## Явные reference benchmarks
+
+FFmpeg используется только эталонными benchmarks. Флаг `fvid-media/legacy-ffmpeg` не возвращает прежний adapter и не меняет публичный API FVid. Он сохранён для совместимости с timestamp benchmark, который сам линкуется с `libavutil`.
+
+На Windows optional `powershell -File scripts/setup_ffmpeg_windows.ps1` подготавливает внешние `ffmpeg.exe`/`ffprobe.exe` и import library/DLL для `ffmpeg_time_reference`. Скрипт не нужен для production-сборки; FFmpeg headers и поиск libclang из него удалены. `FVID_FFMPEG_PREFIX` задаёт каталог библиотек только для явного benchmark, а не backend.
+
+Внешний corpus запускается отдельно: `validate_media.py --benchmark-reference`. Обычные validators и tests не требуют FFmpeg или network. Список команд ниже описывает операции и исторические примеры; поддержку конкретного формата/profile/tools следует проверять по актуальным acceptance-тестам, а не по наличию имени команды.
 
 ## Работающие команды
 
