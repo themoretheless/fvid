@@ -132,6 +132,9 @@ impl<R: Read + Seek> MovieEncoder<R> {
         }
         Ok(this)
     }
+    pub fn host_frame_copies(&self) -> u64 {
+        self.renderer.host_frame_copies()
+    }
     pub fn device_filter_passes(&self) -> u64 {
         self.renderer.device_filter_passes()
     }

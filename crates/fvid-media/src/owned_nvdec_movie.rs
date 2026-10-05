@@ -422,6 +422,8 @@ pub struct MovieRenderer<R: Read + Seek> {
     output: std::mem::ManuallyDrop<fvid_cuda::Yuv420Buffer>,
     blank: std::mem::ManuallyDrop<Option<fvid_cuda::Yuv420Buffer>>,
     filter: std::mem::ManuallyDrop<fvid_cuda::Yuv420Processor>,
+    bounce_copy: std::mem::ManuallyDrop<Option<fvid_cuda::Yuv420Processor>>,
+    host_frame_copies: u64,
     transform: fvid_cuda::Nv12Transform,
     full_range: bool,
     metadata: MovieVideoMetadata,
@@ -443,6 +445,16 @@ impl<R: Read + Seek> MovieRenderer<R> {
         full_range: bool,
         shader: Option<&fvid_cuda::ByteShader>,
     ) -> Result<Self, String> {
+        Self::new_with_shader_and_host_bounce(reader, transform, full_range, shader, false)
+    }
+    /// Optional host transfer occurs on the coded source surface before filters.
+    pub fn new_with_shader_and_host_bounce(
+        reader: MovieReader<R>,
+        transform: fvid_cuda::Nv12Transform,
+        full_range: bool,
+        shader: Option<&fvid_cuda::ByteShader>,
+        host_bounce: bool,
+    ) -> Result<Self, String> {
         let depth = reader.source.bit_depth();
         let (width, height) = reader.source.coded_dimensions();
         let metadata = transformed_metadata(
@@ -458,7 +470,7 @@ impl<R: Read + Seek> MovieRenderer<R> {
             transform.out_height,
             depth,
         )?;
-        let blank = if shader.is_some() {
+        let blank = if shader.is_some() || host_bounce {
             Some(fvid_cuda::Yuv420Buffer::new(
                 reader.ordinal,
                 width,
@@ -468,6 +480,9 @@ impl<R: Read + Seek> MovieRenderer<R> {
         } else {
             None
         };
+        let bounce_copy = host_bounce
+            .then(|| fvid_cuda::Yuv420Processor::new(reader.ordinal, depth, None))
+            .transpose()?;
         let mut filter = fvid_cuda::Yuv420Processor::new(reader.ordinal, depth, shader)?;
         filter.follow_stream(output.stream_handle()?);
         Ok(Self {
@@ -475,12 +490,17 @@ impl<R: Read + Seek> MovieRenderer<R> {
             output: std::mem::ManuallyDrop::new(output),
             blank: std::mem::ManuallyDrop::new(blank),
             filter: std::mem::ManuallyDrop::new(filter),
+            bounce_copy: std::mem::ManuallyDrop::new(bounce_copy),
+            host_frame_copies: 0,
             transform,
             full_range,
             metadata,
             device_filter_passes: 0,
             failed: false,
         })
+    }
+    pub fn host_frame_copies(&self) -> u64 {
+        self.host_frame_copies
     }
     pub fn device_filter_passes(&self) -> u64 {
         self.device_filter_passes
@@ -524,6 +544,37 @@ impl<R: Read + Seek> MovieRenderer<R> {
                 height,
                 surface.bit_depth,
             )?;
+            let source = if let Some(copy) = self.bounce_copy.as_mut() {
+                let scratch = self
+                    .blank
+                    .as_mut()
+                    .ok_or("missing CUDA host bounce buffer")?;
+                copy.follow_stream(scratch.stream_handle()?);
+                let copied = copy.apply(
+                    source,
+                    scratch.view()?,
+                    fvid_cuda::Nv12Transform {
+                        out_width: width,
+                        out_height: height,
+                        ..Default::default()
+                    },
+                );
+                copy.synchronize()?;
+                scratch.synchronize()?;
+                copied?;
+                scratch.host_roundtrip()?;
+                self.host_frame_copies = self
+                    .host_frame_copies
+                    .checked_add(2)
+                    .ok_or("host copy count overflow")?;
+                self.device_filter_passes = self
+                    .device_filter_passes
+                    .checked_add(1)
+                    .ok_or("CUDA pass count overflow")?;
+                scratch.view()?
+            } else {
+                source
+            };
             let operation = self
                 .filter
                 .apply(source, self.output.view()?, self.transform);
@@ -539,6 +590,13 @@ impl<R: Read + Seek> MovieRenderer<R> {
                 .ok_or("CUDA pass count overflow")?;
         } else if let Some(blank) = self.blank.as_mut() {
             blank.fill_black(self.full_range)?;
+            if self.bounce_copy.is_some() {
+                blank.host_roundtrip()?;
+                self.host_frame_copies = self
+                    .host_frame_copies
+                    .checked_add(2)
+                    .ok_or("host copy count overflow")?;
+            }
             let operation = self
                 .filter
                 .apply(blank.view()?, self.output.view()?, self.transform);
@@ -556,6 +614,9 @@ impl<R: Read + Seek> MovieRenderer<R> {
     }
     pub fn close(&mut self) -> Result<(), String> {
         self.failed = true;
+        if let Some(copy) = self.bounce_copy.as_ref() {
+            copy.synchronize()?;
+        }
         self.filter.synchronize()?;
         self.output.synchronize()?;
         self.reader.close()
@@ -565,7 +626,11 @@ impl<R: Read + Seek> Drop for MovieRenderer<R> {
     fn drop(&mut self) {
         // A failed wait must not release allocations still used by the filter.
         // Retain all owners rather than risking device use-after-free.
-        if self.filter.synchronize().is_err()
+        if self
+            .bounce_copy
+            .as_ref()
+            .is_some_and(|copy| copy.synchronize().is_err())
+            || self.filter.synchronize().is_err()
             || self.output.synchronize().is_err()
             || self.reader.close().is_err()
         {
@@ -574,6 +639,7 @@ impl<R: Read + Seek> Drop for MovieRenderer<R> {
         // SAFETY: All GPU work completed and the decoder closed. Each field is
         // manually dropped exactly once, and no external use is permitted here.
         unsafe {
+            std::mem::ManuallyDrop::drop(&mut self.bounce_copy);
             std::mem::ManuallyDrop::drop(&mut self.filter);
             std::mem::ManuallyDrop::drop(&mut self.reader);
             std::mem::ManuallyDrop::drop(&mut self.blank);

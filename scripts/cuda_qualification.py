@@ -26,6 +26,7 @@ def qualify_native_tests(root, run):
         ("fvid-cuda", "nv12_buffer::tests", [
             "device_black_fill_has_correct_luma_chroma_and_padding",
             "device_p010_black_fill_has_exact_codes_and_word_padding",
+            "native_host_roundtrip_preserves_nv12_and_p010_bytes",
         ], []),
         ("fvid-cuda", "nv12::native_nv12::shader_tests", ["native_nv12_sampling_shader_preserves_pitches_and_matches_cpu", "native_p010_sampling_shader_preserves_pitches_and_matches_cpu", "followed_stream_survives_parameter_changes_and_processor_drop"], []),
         ("fvid-media", "owned_nvdec_avc", [
@@ -46,6 +47,7 @@ def qualify_native_tests(root, run):
             "production_hw_filter_routes_sps_crop_without_libav",
             "production_hw_filter_routes_hevc_movie_without_libav",
             "production_hw_filter_routes_main10_movie_without_libav",
+            "production_host_bounce_preserves_main10_shader_and_movie_clock",
         ], ["--no-default-features", "--features", "cuda-hw"]),
         ("fvid-media", "owned_hw_decode", [
             "production_decode_device_uses_owned_code_without_libav",

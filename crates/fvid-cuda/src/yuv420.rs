@@ -61,6 +61,9 @@ impl Yuv420Buffer {
     pub fn synchronize(&self) -> Result<(), String> {
         buffer_dispatch!(self, b, b.synchronize())
     }
+    pub fn host_roundtrip(&mut self) -> Result<(), String> {
+        buffer_dispatch!(self, b, b.host_roundtrip())
+    }
     pub fn fill_black(&mut self, full_range: bool) -> Result<(), String> {
         buffer_dispatch!(self, b, b.fill_black(full_range))
     }

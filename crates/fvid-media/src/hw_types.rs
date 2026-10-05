@@ -13,13 +13,14 @@ pub struct HwFilterOptions {
     pub device: usize,
     /// Force a host round-trip (hwdownload then hwupload) before the device
     /// filter — same PCIe tax as FFmpeg `hwdownload,hwupload_cuda`. Counts toward
-    /// `host_frame_copies`. Default path stays device-resident (`0` copies).
+    /// `host_frame_copies`. Includes blank movie occurrences. Default path
+    /// stays device-resident (`0` copies).
     pub host_bounce: bool,
     /// Half-open presentation interval in microseconds from container start.
     /// Frames outside `[from, to)` are dropped; kept frames get CFR PTS 0..N-1.
     pub interval: Option<(i64, i64)>,
-    /// Parallel workers share the CUDA primary context so concurrent
-    /// `av_hwdevice_ctx_create` calls do not fight over incompatible flags.
+    /// Compatibility option for callers requesting a shared primary context.
+    /// The owned CUDA path always shares its device's primary context.
     pub share_primary_context: bool,
 }
 
@@ -32,8 +33,7 @@ pub struct HwFilterStats {
     pub video_frames: u64,
     pub width: u32,
     pub height: u32,
-    /// Full-frame CUDA↔host transfers via `av_hwframe_transfer_data`
-    /// (FFmpeg `hwupload_cuda` / `hwdownload` equivalents).
+    /// Full-frame CUDA↔host transfers (two per explicit host-bounced event).
     pub host_frame_copies: u64,
     pub device_filter_passes: u64,
     pub encoder: &'static str,

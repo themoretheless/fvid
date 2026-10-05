@@ -502,9 +502,8 @@ atomic Matroska publication. No libav retry occurs after native execution starts
 The standalone `native-cuda` feature exports the same operation contracts and
 `hw_filter` API without enabling any legacy dependency.
 
-The native route currently excludes host bounce
-from automatic selection to retain existing command semantics until qualified;
-Main10 uses retained P010 encoder pools/copies, Main10 NVENC registration and
+The native route supports explicit host bounce through owned source-sized
+NV12/P010 staging before filtering, without libav. Main10 uses retained P010 encoder pools/copies, Main10 NVENC registration and
 submission, and owned HEVC Annex B/hvcC/Matroska export. Its hardware acceptance
 test remains ignored until run on NVIDIA; host tests qualify source syntax,
 clock and bit-exact Annex B conversion. Other codecs/containers return an
@@ -589,3 +588,19 @@ legacy reference build uses the owned CUDA decode entrypoint. The existing
 synthetic corrupt-NAL fixture verifies the specific `invalid NAL payload length`
 error instead of a generic unsupported-input message. NVIDIA execution remains
 unverified and unsupported codec tools are still incomplete native work.
+
+## Owned CUDA host bounce
+
+Explicit `host_bounce` copies the entire coded source into a retained typed
+staging surface, then performs GPU-to-host and host-to-GPU transfers before
+crop/shader processing. NV12/P010 pitches, padding and code depth are preserved
+by the transfer. The staging host allocation is fallible and reused across
+frames; synchronization precedes host
+release, and a failed completion wait retains host storage. Defaults allocate
+no host pixel buffer. Blank spans also receive the requested roundtrip, and
+statistics count two full-frame host transfers per movie occurrence. The extra
+identity staging kernel counts as a device pass for nonblank occurrences.
+The old host-bounce refusal expectation is now an admission test. Ignored
+NVIDIA tests check byte-exact NV12/P010 transfers and Main10 shader/crop export
+including blanks, repeated ranges, original movie timestamps and all decoded
+pixel planes. These tests are cross-compiled here but have not run on NVIDIA.

@@ -12,6 +12,8 @@ pub struct Nv12Buffer {
     bytes: usize,
     sample_bytes: u32,
     #[cfg(any(target_os = "linux", target_os = "windows"))]
+    host_staging: Option<Vec<u8>>,
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
     buffer: cudarc::driver::CudaSlice<u8>,
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     stream: Arc<cudarc::driver::CudaStream>,
@@ -44,6 +46,7 @@ impl Nv12Buffer {
                 pitch,
                 bytes,
                 sample_bytes,
+                host_staging: None,
                 buffer,
                 stream,
                 device,
@@ -117,6 +120,45 @@ impl Nv12Buffer {
         #[cfg(not(any(target_os = "linux", target_os = "windows")))]
         {
             let _ = full_range;
+            Err(crate::unsupported())
+        }
+    }
+    /// Explicit full-allocation GPU -> host -> GPU transfer, preserving pitches,
+    /// padding and component codes. Complete external writes before calling.
+    pub fn host_roundtrip(&mut self) -> Result<(), String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.device
+                .context
+                .bind_to_thread()
+                .map_err(|e| e.to_string())?;
+            self.stream.synchronize().map_err(|e| e.to_string())?;
+            let mut host = self.host_staging.take().unwrap_or_default();
+            host.try_reserve_exact(self.bytes.saturating_sub(host.len()))
+                .map_err(|e| e.to_string())?;
+            host.resize(self.bytes, 0u8);
+            let copied = self
+                .stream
+                .memcpy_dtoh(&self.buffer, &mut host)
+                .map_err(|e| e.to_string());
+            if let Err(error) = self.stream.synchronize() {
+                std::mem::forget(host);
+                return Err(error.to_string());
+            }
+            copied?;
+            let copied = self
+                .stream
+                .memcpy_htod(&host, &mut self.buffer)
+                .map_err(|e| e.to_string());
+            if let Err(error) = self.stream.synchronize() {
+                std::mem::forget(host);
+                return Err(error.to_string());
+            }
+            self.host_staging = Some(host);
+            copied
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
             Err(crate::unsupported())
         }
     }
@@ -194,6 +236,9 @@ impl P010Buffer {
     }
     pub fn fill_black(&mut self, full_range: bool) -> Result<(), String> {
         self.inner.fill_black(full_range)
+    }
+    pub fn host_roundtrip(&mut self) -> Result<(), String> {
+        self.inner.host_roundtrip()
     }
     pub fn stream_handle(&self) -> Result<u64, String> {
         self.inner.stream_handle()
@@ -291,6 +336,25 @@ fn make_view_format(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA CUDA"]
+    fn native_host_roundtrip_preserves_nv12_and_p010_bytes() {
+        for depth in [8, 10] {
+            let mut buffer =
+                Nv12Buffer::new_format(0, 130, 72, if depth == 10 { 2 } else { 1 }).unwrap();
+            let expected: Vec<u8> = (0..buffer.bytes)
+                .map(|index| (index.wrapping_mul(37) ^ (index >> 4)) as u8)
+                .collect();
+            buffer
+                .stream
+                .memcpy_htod(&expected, &mut buffer.buffer)
+                .unwrap();
+            buffer.stream.synchronize().unwrap();
+            buffer.host_roundtrip().unwrap();
+            assert_eq!(buffer.stream.clone_dtoh(&buffer.buffer).unwrap(), expected);
+        }
+    }
     #[test]
     fn p010_layout_uses_word_rows_and_checks_actual_pitched_extent() {
         assert_eq!(layout_format(130, 72, 2).unwrap(), (512, 55296));
