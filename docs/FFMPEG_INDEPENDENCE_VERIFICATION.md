@@ -11,11 +11,13 @@ aarch64 Linux builds and tests completed without an FFmpeg SDK; runtime checks
 also used a PATH with no external programs. FFmpeg remains a benchmark/reference
 dependency, not a production backend.
 
-On 2026-10-06 the user reported completing all requested Windows checks. Windows
-verification is therefore recorded as user-confirmed, rather than outstanding.
-No Windows command logs, tested commit identifier or individual hardware results
-were supplied with that confirmation; this is not an independently observed CI
-result or a separate assertion of NVIDIA performance or codec coverage.
+Windows and NVIDIA verification was supplied in commit `670dc44d` and confirmed
+by the user on 2026-10-06. `benchmarks/windows-cuda-validation.json` records
+28 passing physical CUDA tests on an RTX 5090 with driver 617.14, including
+NVDEC/NVENC, NV12/P010, shader sampling and production decode/filter/export.
+`benchmarks/windows-cuda-cli.json` records a passing Main10 CLI export: 14 frames,
+zero decode errors and zero host frame copies. These are supplied hardware
+results, not locally rerun macOS checks or universal GPU qualification.
 
 GitHub-hosted Windows CI was separately blocked by an account billing issue.
 That infrastructure failure does not invalidate the user's local verification.
