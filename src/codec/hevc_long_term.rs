@@ -11,6 +11,26 @@ pub struct LongTermReference {
     pub msb_cycles: Option<u64>,
 }
 impl LongTermReference {
+    /// Resolve the current RPS entry against retained DPB picture POCs.
+    /// LSB-only syntax cannot choose arbitrarily between multiple POC cycles.
+    /// An absent unused entry is legal; an absent current reference is not.
+    pub fn resolve(&self, current: i32, poc_bits: u8, dpb: &[i32]) -> Result<Option<i32>> {
+        let full = self.full_poc(current, poc_bits)?;
+        let mask = (1u32 << poc_bits) - 1;
+        let mut matches = dpb.iter().copied().filter(|&poc| {
+            full.map_or((poc as u32 & mask) == self.poc_lsb, |target| poc == target)
+        });
+        let found = matches.next();
+        if matches.next().is_some() {
+            return Err(invalid("ambiguous HEVC long-term reference POC"));
+        }
+        if self.used && found.is_none() {
+            return Err(invalid("missing HEVC long-term current reference"));
+        }
+        // Explicit unused POCs still belong to the retained set even when no
+        // decoded picture is currently present. LSB-only missing entries do not.
+        Ok(found.or(full))
+    }
     pub fn full_poc(&self, current: i32, poc_bits: u8) -> Result<Option<i32>> {
         if !(4..=16).contains(&poc_bits) || self.poc_lsb >= 1u32 << poc_bits {
             return Err(invalid("invalid HEVC long-term POC geometry"));
@@ -168,5 +188,37 @@ mod tests {
             msb_cycles: Some(i64::MAX as u64 / 16),
         };
         assert!(reference.full_poc(i32::MIN, 4).is_err());
+    }
+
+    #[test]
+    fn dpb_resolution_distinguishes_cycles_and_missing_unused_entries() {
+        let mut reference = LongTermReference {
+            poc_lsb: 3,
+            used: true,
+            msb_cycles: None,
+        };
+        assert_eq!(reference.resolve(35, 4, &[19, 32]).unwrap(), Some(19));
+        assert!(
+            reference
+                .resolve(35, 4, &[3, 19])
+                .unwrap_err()
+                .to_string()
+                .contains("ambiguous")
+        );
+        assert!(
+            reference
+                .resolve(35, 4, &[32])
+                .unwrap_err()
+                .to_string()
+                .contains("missing")
+        );
+        reference.msb_cycles = Some(1);
+        assert_eq!(reference.resolve(35, 4, &[3, 19]).unwrap(), Some(19));
+        assert!(reference.resolve(35, 4, &[3]).is_err());
+        reference.used = false;
+        assert_eq!(reference.resolve(35, 4, &[3]).unwrap(), Some(19));
+        reference.msb_cycles = None;
+        assert_eq!(reference.resolve(35, 4, &[32]).unwrap(), None);
+        assert_eq!(reference.resolve(-1, 4, &[-13]).unwrap(), Some(-13));
     }
 }
