@@ -1,4 +1,4 @@
-//! Own HEVC POC/short-term DPB scheduling for direct NVDEC submission.
+//! Own HEVC POC and reference DPB scheduling for direct NVDEC submission.
 use super::owned_nvdec_hevc::{HevcPicture, HevcReference};
 use fvid_codecs::codec::{
     config::NalUnits, hevc_nal::NalHeader, hevc_poc, hevc_pps::Pps, hevc_slice::SliceHeader,
@@ -50,6 +50,26 @@ mod tests {
             decoder.close().unwrap();
         }
     }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires physical NVIDIA HEVC NVDEC long-term qualification"]
+    fn owned_hevc_long_term_submits_and_maps_on_nvidia() {
+        let bytes = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
+        let (mut reader, state, mut software) = input(bytes);
+        let mut decoder = HevcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20).unwrap();
+        let mut packet = Vec::new();
+        for sample in 0..3 {
+            reader.read_packet(0, sample, &mut packet).unwrap();
+            let expected = software.decode_packet(&packet).unwrap().unwrap();
+            let frame = decoder.decode(&packet).unwrap().unwrap();
+            assert_eq!(frame.picture_order, expected.poc);
+            assert_eq!(frame.output, expected.output);
+            let surface = decoder.map(&frame).unwrap();
+            assert_ne!(surface.pointer, 0);
+            decoder.unmap(surface.slot).unwrap();
+        }
+        decoder.close().unwrap();
+    }
     fn input(bytes: &[u8]) -> (Mp4Reader<Cursor<&[u8]>>, Scheduler, HevcDecoder) {
         let reader = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
         let config = HevcConfig::parse(&reader.tracks()[0].configuration).unwrap();
@@ -59,6 +79,29 @@ mod tests {
         let state =
             Scheduler::new(sps.clone(), pps.clone(), config.length_size, 32, 1 << 20).unwrap();
         (reader, state, software)
+    }
+    #[test]
+    fn long_term_fixture_retains_slots_and_aborted_submission_preserves_state() {
+        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
+        let (mut reader, mut state, mut software) = input(data);
+        let mut packet = Vec::new();
+        for sample in 0..3 {
+            reader.read_packet(0, sample, &mut packet).unwrap();
+            let expected = software.decode_packet(&packet).unwrap().unwrap();
+            let previous = state.previous_poc;
+            let retained: Vec<_> = state.references.iter().map(|r| (r.index, r.poc)).collect();
+            let pending = state.prepare(&packet).unwrap().unwrap();
+            assert_eq!(pending.frame.picture_order, expected.poc);
+            drop(pending);
+            assert_eq!(state.previous_poc, previous);
+            assert_eq!(state.references.iter().map(|r| (r.index, r.poc)).collect::<Vec<_>>(), retained);
+            let pending = state.prepare(&packet).unwrap().unwrap();
+            assert_eq!(pending.references.len(), if sample == 0 { 1 } else { 2 });
+            if sample != 0 { assert_eq!(pending.references[0].poc, sample as i32 - 1); }
+            let frame = state.commit(pending);
+            assert!(state.owns(&frame));
+            assert_eq!(state.previous_poc, Some(sample as i32));
+        }
     }
     #[test]
     fn main_and_main10_all_ipb_pictures_follow_owned_software_poc_and_dpb() {
@@ -221,9 +264,6 @@ impl Scheduler {
         let first = *slices.first().ok_or("HEVC packet has no picture")?;
         let header = SliceHeader::parse(first, &self.sps, &self.pps, self.max_bytes)
             .map_err(|e| e.to_string())?;
-        if !header.long_term.is_empty() {
-            return Err("HEVC NVDEC long-term reference submission is not implemented".into());
-        }
         if header.nal.temporal_id as usize >= self.sps.ordering.len() {
             return Err("HEVC picture exceeds SPS temporal layers".into());
         }
@@ -251,6 +291,27 @@ impl Scheduler {
                 .ok_or("HEVC RPS reference has not been decoded")?;
             references.push(reference.clone());
         }
+        let dpb_pocs: Vec<_> = self.references.iter().map(|r| r.poc).collect();
+        let mut long_pocs = Vec::new();
+        for entry in &header.long_term {
+            let Some(target) = entry.resolve(poc, self.sps.poc_bits, &dpb_pocs)
+                .map_err(|e| e.to_string())?
+            else {
+                continue;
+            };
+            if target == poc
+                || long_pocs.contains(&target)
+                || references.iter().any(|r| r.poc == target)
+            {
+                return Err("HEVC NVDEC long-term RPS repeats a reference POC".into());
+            }
+            long_pocs.push(target);
+            if let Some(reference) = self.references.iter().find(|r| r.poc == target) {
+                references.push(reference.clone());
+            } else if entry.used {
+                return Err("HEVC NVDEC long-term reference has not been decoded".into());
+            }
+        }
         // Weak slots include references from the old DPB until submission commits,
         // plus display tickets and mappings. No live driver source is overwritten.
         let index = self
@@ -264,6 +325,7 @@ impl Scheduler {
             .map(|r| HevcReference {
                 slot: r.index,
                 poc: r.poc,
+                long_term: long_pocs.contains(&r.poc),
             })
             .collect();
         let picture = HevcPicture::prepare(

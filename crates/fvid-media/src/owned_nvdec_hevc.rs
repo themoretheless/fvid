@@ -4,11 +4,12 @@ use fvid_codecs::codec::{hevc_pps::Pps, hevc_scaling::Matrix, hevc_sps::Sps};
 use fvid_cuda::nvdec_sdk::CUVIDHEVCPICPARAMS;
 use fvid_cuda::{NvdecSession, nvdec_sdk::CUVIDPICPARAMS};
 
-/// A live short-term reference owned by the caller's DPB scheduler.
+/// A live reference owned by the caller's DPB scheduler.
 #[derive(Clone, Copy, Debug)]
 pub struct HevcReference {
     pub slot: u32,
     pub poc: i32,
+    pub long_term: bool,
 }
 
 /// Owns the Annex B slice bytes and offsets through synchronous submission.
@@ -63,6 +64,7 @@ impl HevcPicture {
             }
             h.RefPicIdx[index] = reference.slot as i32;
             h.PicOrderCntVal[index] = reference.poc;
+            h.IsLongTerm[index] = u8::from(reference.long_term);
         }
         for reference in &first.short_term {
             let target = poc
@@ -72,6 +74,9 @@ impl HevcPicture {
                 .iter()
                 .position(|r| r.poc == target)
                 .ok_or("NVDEC HEVC RPS reference has no live slot")?;
+            if references[index].long_term {
+                return Err("NVDEC HEVC short-term RPS has a long-term slot".into());
+            }
             if reference.used {
                 let (count, set) = if reference.delta_poc < 0 {
                     (&mut h.NumPocStCurrBefore, &mut h.RefPicSetStCurrBefore)
@@ -85,7 +90,37 @@ impl HevcPicture {
                 *count += 1;
             }
         }
-        h.NumPocTotalCurr = h.NumPocStCurrBefore + h.NumPocStCurrAfter;
+        let dpb_pocs: Vec<_> = references.iter().map(|r| r.poc).collect();
+        let mut long_pocs = Vec::new();
+        for entry in &first.long_term {
+            let Some(target) = entry.resolve(poc, sps.poc_bits, &dpb_pocs)
+                .map_err(|e| e.to_string())?
+            else {
+                continue;
+            };
+            if long_pocs.contains(&target)
+                || first.short_term.iter().any(|r| poc.checked_add(r.delta_poc) == Some(target))
+            {
+                return Err("NVDEC HEVC long-term RPS repeats a reference POC".into());
+            }
+            long_pocs.push(target);
+            let Some(index) = references.iter().position(|r| r.poc == target) else {
+                if entry.used {
+                    return Err("NVDEC HEVC long-term RPS has no live slot".into());
+                }
+                continue;
+            };
+            if !references[index].long_term {
+                return Err("NVDEC HEVC long-term RPS has a short-term slot".into());
+            }
+            if entry.used {
+                let output = h.RefPicSetLtCurr.get_mut(h.NumPocLtCurr as usize)
+                    .ok_or("NVDEC HEVC long-term current set exceeds eight entries")?;
+                *output = index as u8;
+                h.NumPocLtCurr += 1;
+            }
+        }
+        h.NumPocTotalCurr = h.NumPocStCurrBefore + h.NumPocStCurrAfter + h.NumPocLtCurr;
         let mut bytes = Vec::new();
         let mut offsets = Vec::new();
         offsets
@@ -103,6 +138,7 @@ impl HevcPicture {
                 || header.nal != first.nal
                 || header.poc_lsb != first.poc_lsb
                 || header.short_term != first.short_term
+                || header.long_term != first.long_term
                 || header.picture_output != first.picture_output
                 || header.no_output_of_prior_pictures != first.no_output_of_prior_pictures
             {
@@ -408,6 +444,39 @@ mod tests {
         }
     }
     #[test]
+    fn synthetic_long_term_submission_sets_driver_classification_and_current_set() {
+        use fvid_codecs::codec::{config::NalUnits, hevc_decoder::HevcDecoder, hevc_nal::NalHeader};
+        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
+        let mut reader = crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
+        let software = HevcDecoder::from_configuration(&reader.tracks()[0].configuration, 16 << 20).unwrap();
+        let (sps, pps) = software.parameters();
+        let mut packet = Vec::new();
+        for sample in 0..3 {
+            reader.read_packet(0, sample, &mut packet).unwrap();
+            let slices: Vec<_> = NalUnits::new(&packet, 4).unwrap().map(Result::unwrap)
+                .filter(|nal| NalHeader::parse(nal).unwrap().is_vcl()).collect();
+            let refs = if sample == 0 { Vec::new() } else {
+                vec![HevcReference { slot: (sample - 1) as u32, poc: sample as i32 - 1, long_term: true }]
+            };
+            let picture = HevcPicture::prepare(sps, pps, &slices, 31, sample as i32, &refs, 1 << 20).unwrap();
+            let h = unsafe { picture.parameters().CodecSpecific.hevc };
+            assert_eq!(h.NumPocStCurrBefore, 0);
+            assert_eq!(h.NumPocStCurrAfter, 0);
+            assert_eq!(h.NumPocLtCurr, i32::from(sample != 0));
+            assert_eq!(h.NumPocTotalCurr, h.NumPocLtCurr);
+            if sample != 0 {
+                assert_eq!(h.RefPicSetLtCurr[0], 0);
+                assert_eq!(h.RefPicIdx[0], (sample - 1) as i32);
+                assert_eq!(h.PicOrderCntVal[0], sample as i32 - 1);
+                assert_eq!(h.IsLongTerm[0], 1);
+                let mut invalid = refs.clone(); invalid[0].long_term = false;
+                assert!(HevcPicture::prepare(sps, pps, &slices, 31, sample as i32, &invalid, 1 << 20)
+                    .err().unwrap().contains("short-term slot"));
+                assert!(HevcPicture::prepare(sps, pps, &slices, 31, sample as i32, &[], 1 << 20).is_err());
+            }
+        }
+    }
+    #[test]
     fn synthetic_picture_submission_owns_bytes_and_resolves_live_references() {
         use fvid_codecs::codec::{
             config::{HevcConfig, NalUnits},
@@ -442,6 +511,7 @@ mod tests {
                     .map(|(i, r)| HevcReference {
                         slot: i as u32,
                         poc: poc + r.delta_poc,
+                        long_term: false,
                     })
                     .collect();
                 let picture =

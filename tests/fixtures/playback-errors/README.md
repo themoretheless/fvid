@@ -203,3 +203,13 @@ python3 scripts/generate_hevc_long_term_sample.py --hm-decoder /path/to/TAppDeco
 
 The script explicitly runs the ignored native syntax rewriter, the owned MP4
 muxer, and HM for the pixel oracle. Ordinary tests use committed bytes only.
+
+The same HEVC long-term fixture exercises the owned NVDEC scheduling/submission
+adapter without a driver: `synthetic_long_term_submission_sets_driver_classification_and_current_set`
+checks `IsLongTerm`, `RefPicSetLtCurr`, all current-set counts and bad/missing
+slot classification; `long_term_fixture_retains_slots_and_aborted_submission_preserves_state`
+checks DPB retention and aborted submission. Before support, the scheduler
+refused the second picture with `HEVC NVDEC long-term reference submission is not implemented`.
+These passing parameter/scheduler tests are not physical GPU playback acceptance.
+`owned_hevc_long_term_submits_and_maps_on_nvidia` is separately ignored on
+Linux/Windows until explicitly run on an NVIDIA device.

@@ -2007,8 +2007,15 @@ long-term motion refusal at the second picture. Acceptance checks every YUV
 byte against independent HM 18.0 output for all three pictures and after reset.
 Ordinary tests use committed bytes and require neither HM nor FFmpeg.
 
-This evidence covers the contained low-delay 8-bit RExt stream. NVDEC
-long-term submission still explicitly refuses the feature; physical NVIDIA
-qualification and broader mixed/B-picture compressed long-term fixtures remain
-necessary. Codec coverage is therefore not declared complete, and the requested
-FVid versus FFmpeg performance comparison remains after acceptance tests.
+This evidence covers the contained low-delay 8-bit RExt stream. The NVDEC
+adapter now fills IsLongTerm, RefPicSetLtCurr, NumPocLtCurr and NumPocTotalCurr;
+its owned scheduler retains the resolved long-term slots. Synthetic tests
+verify driver fields, classification/missing-slot errors, retained POCs and
+abort-without-commit behavior. These tests do not call an NVIDIA driver.
+
+`owned_hevc_long_term_submits_and_maps_on_nvidia` is an explicitly ignored
+physical-device test on Linux/Windows. It submits all three pictures and checks
+map/unmap and POC/output against software. Physical execution remains unproven;
+it is separate from the software's exact HM pixel comparison. Broader mixed/B
+compressed long-term fixtures also remain necessary. Codec coverage is not
+declared complete, and FVid versus FFmpeg benchmarks remain after acceptance.
