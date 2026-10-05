@@ -663,3 +663,29 @@ stage successfully. Their broader root test stages were still running at this
 observation. The current local media/player CLI binary's Mach-O dependency list
 contains system frameworks and no libav libraries; this is local linkage evidence,
 not an executed Windows/Linux or NVIDIA hardware result.
+
+### Full feature compilation and checkout regressions (2026-10-05)
+
+`FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg cargo check --locked --offline --all-features
+--lib --bins --tests` completed successfully on macOS. This checks every root
+production feature plus library, binary and integration-test targets; it is a
+compilation check, not a linked all-feature executable or GPU execution result.
+
+On `f57334de`, Linux's default test stage accepted owned `gblur` decoding but
+failed an obsolete refusal assertion in `native_y4m_library_transform`. That
+assertion now requires successful three-frame owned Y4M decode. Windows's default
+stage exposed checkout-only CRLF conversion in `bitplanenoise.expected.txt`;
+metadata values and pixel bytes already matched. `.gitattributes` now fixes LF
+for expected text sidecars and binary handling for raw pixel/PCM fixtures.
+With `core.autocrlf=true`, Git's checkout filters were checked against committed
+blob bytes for the metadata sidecar, raw bitplane pixels and 16-bit RGBA fixture:
+all three remain byte-identical. No reference bytes were edited or regenerated.
+
+The focused `native_bitplanenoise`, `native_gblur_cli` and
+`native_y4m_library_transform` integration targets then passed all 23 tests with
+`CARGO_TARGET_AARCH64_APPLE_DARWIN_RUNNER='/usr/bin/env PATH=/fvid/no-external-programs'`
+and `FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg`, using locked offline dependencies.
+This includes exact bitplane pixels/metadata, Gaussian CLI decode/plan/export,
+the formerly stale refusal, frame-clock selection and rejection of requested
+malformed Y4M tails. Windows checkout was simulated above; new Windows/Linux CI
+execution is still required to confirm the complete changed checkout.

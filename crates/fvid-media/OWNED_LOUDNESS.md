@@ -26,10 +26,11 @@ Build and test independently:
 cargo test --manifest-path crates/fvid-media/Cargo.toml --no-default-features
 ```
 
-Normal tests require neither FFmpeg nor network access. The two ignored
-reference tests may be run explicitly with `FVID_REFERENCE_FFMPEG` pointing
-to an external executable. Legacy libav loudness APIs still exist behind the
-optional legacy feature; this migration does not claim their replacement.
+Normal tests require neither FFmpeg nor network access. External comparisons
+are separate explicit benchmarks, including `ffmpeg_wave_loudness_reference`
+and `ffmpeg_true_peak_reference`. The public file loudness APIs use owned
+decoders and meters; the `legacy-ffmpeg` compatibility marker does not select
+a libav backend. Unsupported source formats/tools remain explicit errors.
 
 ## Constant gain normalization
 

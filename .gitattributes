@@ -1,2 +1,7 @@
 *.yuv binary
 *.y4m binary
+*.raw binary
+*.rgb binary
+*.rgba binary
+*.pcm binary
+tests/fixtures/playback-errors/*.expected.txt text eol=lf

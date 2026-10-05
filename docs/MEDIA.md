@@ -296,11 +296,13 @@ RGB conversion, reports the actual backend and decoded pixel format, and
 propagates errors without falling back to FFmpeg. This API explicitly selects the owned software decoders even when
 VideoToolbox is enabled for other playback paths. Native Main10 frames retain their 10-bit planes.
 
-This is one migrated operation, not removal of the full FFmpeg dependency:
-`decode_video_transformed`, the CLI transform route, export and the remaining
-legacy `fvid-media` APIs still depend on the adapter. The `media` feature still
-links it. The native operation is tested separately with no default features;
-its public compatibility wrapper is also tested with `media` enabled.
+`decode_video_transformed`, the CLI transform route and admitted exports now
+use owned `fvid-media` APIs as well. Production `media` and CUDA features do not
+link the retired libav adapter, and the `legacy-ffmpeg` marker does not select it.
+Unsupported formats, codec tools and requested workflows return explicit errors;
+FFmpeg independence does not imply universal codec or workflow compatibility.
+The native operation is tested with no default features and its public
+compatibility wrapper is tested with `media` enabled.
 
 Plain CLI decode is migrated as well:
 

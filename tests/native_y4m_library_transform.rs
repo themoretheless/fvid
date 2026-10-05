@@ -163,15 +163,14 @@ fn interval_uses_exact_frame_clock_and_stops_before_unrequested_tail() {
     let stats = fvid_media::owned_y4m_decode::decode_reader_transformed(Cursor::new(&data), &unsharp).unwrap();
     assert_eq!((stats.video_frames, stats.width, stats.height), (3, 16, 16));
     assert_eq!(stats.backend, "owned Y4M planar decode");
-    let unsupported = DecodeTransform {
+    let gblur = DecodeTransform {
         gblur: Some(String::new()),
         ..Default::default()
     };
-    assert!(
-        fvid_media::owned_y4m_decode::decode_reader_transformed(Cursor::new(&data), &unsupported)
-            .unwrap_err()
-            .contains("transform options")
-    );
+    let stats = fvid_media::owned_y4m_decode::decode_reader_transformed(Cursor::new(&data), &gblur)
+        .unwrap();
+    assert_eq!((stats.video_frames, stats.width, stats.height), (3, 16, 16));
+    assert_eq!(stats.backend, "owned Y4M planar decode");
 }
 
 #[test]

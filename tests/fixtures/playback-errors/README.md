@@ -162,3 +162,9 @@ The existing `vibrance-grid-16.rgba` also reproduces Windows colorchannelmixer
 power-preservation rounding at pixels 121 and 168. Dedicated acceptance checks
 require the unchanged independent `colorchannelmixer-reference-16-11.raw` bytes;
 the metric uses a binary64 cube root before binary32 quantization.
+
+Fixture checkout preserves exact bytes on Windows as well: `.raw`, `.rgb`,
+`.rgba` and `.pcm` are binary in `.gitattributes`, alongside Y4M/YUV. Text
+`*.expected.txt` sidecars use LF even with `core.autocrlf=true`. This keeps the
+bitplanenoise metadata oracle's exact newline bytes independent of checkout
+settings, without changing its values or the synthetic video/pixel references.

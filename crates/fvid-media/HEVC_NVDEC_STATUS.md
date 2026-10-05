@@ -34,12 +34,13 @@ decoder preroll. Mid-stream prior-output suppression, in-band parameter changes
 and field sequences remain explicitly unqualified.
 Long-term references are still refused by the own slice parser. Main10 can now
 render through owned P010 buffers/processors, including blank/repeated edits and
-trusted shaders. The direct NVENC session now initializes HEVC Main10 and
-registers/maps/submits P010 resources with a persistent format check. Connecting
-that API to the retained movie-encoder pools and owned HEVC bitstream/container
-export remains pending, so production export still refuses
-Main10 before opening GPU resources. Driver acceptance and decoded image
-correctness have not been verified on NVIDIA hardware.
+trusted shaders. The direct NVENC session initializes HEVC Main10 and
+registers/maps/submits P010 resources with a persistent format check.
+`owned_nvenc_movie` connects this session to retained movie-encoder pools and
+owned HEVC Annex B conversion and Matroska export. The production Main10 route
+is admitted before GPU startup, and host tests verify precision and configuration
+admission. Driver acceptance and decoded image correctness have not been
+verified on NVIDIA hardware.
 
 The ignored Linux/Windows test
 `synthetic_owned_hevc_idr_submits_and_maps_on_nvidia` submits and maps the first
@@ -56,5 +57,14 @@ movie timestamps and decoding of all exported H.264 packets by FVid, using both
 the Main I/P/B seed and the blank/repeated-range fixture. It is required by the
 qualification runner but has not been executed here.
 
-The production CUDA features still include the legacy libav backend. This
-adapter alone does not remove that dependency.
+The runner additionally requires `synthetic_main10_movie_encodes_and_muxes_without_libav`,
+`production_hw_filter_routes_main10_movie_without_libav` and
+`production_host_bounce_preserves_main10_shader_and_movie_clock`. These exercise
+Main10 export, shader processing, host staging and the blank/repeated edit clock
+on real NVIDIA devices; they remain unexecuted here.
+
+Production `media-cuda`, library `cuda-hw` and `native-cuda` use the owned
+backend without libav. The `legacy-ffmpeg` marker does not restore a library
+adapter; FFmpeg is reserved for explicit reference benchmarks. Dependency and
+host preparation checks establish this build boundary, not hardware playback
+correctness or 60 fps. Real NVIDIA qualification is deferred to the user.
