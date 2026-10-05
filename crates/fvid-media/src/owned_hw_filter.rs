@@ -44,22 +44,16 @@ fn plan<R: Read + Seek>(
             Ok((ticks(from)?, ticks(to)?))
         })
         .transpose()?;
-    if interval.is_some() {
-        if source.track_count() != 1 {
-            return Ok(None);
-        }
-        let events = source.movie_presentations(1_000_000)?;
-        // Legacy interval origin includes the earliest demuxed stream. Retain
-        // that route until nonzero starts and empty edits have matching proof.
-        if events.first().is_none_or(|event| event.start != 0)
-            || events.iter().any(|event| event.sample.is_none())
-        {
-            return Ok(None);
-        }
-    }
     let metadata = source.video_metadata();
     if source.qualify_packets().is_err() {
         return Ok(None);
+    }
+    if interval.is_some() {
+        crate::owned_nvdec_movie::select_presentations(
+            source.movie_presentations(1_000_000)?,
+            interval,
+            crate::owned_nvdec_movie::IntervalSelection::FrameStarts,
+        )?;
     }
     let (width, height) = source.coded_dimensions();
     let [left, right, top, bottom] = metadata.options.video.map_or([0; 4], |video| video.crop);
@@ -279,99 +273,111 @@ mod tests {
     #[test]
     #[ignore = "requires NVIDIA HEVC Main10 NVDEC/NVENC and CUDA"]
     fn production_host_bounce_preserves_main10_shader_and_movie_clock() {
-        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4");
-        struct Output(std::path::PathBuf);
-        impl Drop for Output {
-            fn drop(&mut self) {
-                let _ = std::fs::remove_file(&self.0);
+        for interval in [None, Some((200_000, 500_000))] {
+            let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4");
+            struct Output(std::path::PathBuf);
+            impl Drop for Output {
+                fn drop(&mut self) {
+                    let _ = std::fs::remove_file(&self.0);
+                }
             }
-        }
-        let output = Output(
-            std::env::temp_dir().join(format!(
+            let output = Output(std::env::temp_dir().join(format!(
                 "fvid-main10-bounce-{}-{}.mkv",
                 std::process::id(),
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .unwrap()
                     .as_nanos()
-            )),
-        );
-        let mut input = MovieSource::open(
-            BufReader::new(std::fs::File::open(&source).unwrap()),
-            Default::default(),
-        )
-        .unwrap();
-        let events = input.movie_presentations(1000).unwrap();
-        let scale = input.track().timescale;
-        let options = HwFilterOptions {
-            host_bounce: true,
-            crop: Some(fvid_media_info::CropRect {
-                x: 2,
-                y: 2,
-                width: 32,
-                height: 32,
-            }),
-            shader: Some(std::sync::Arc::from(
-                "__device__ unsigned int process_byte(unsigned int value, unsigned int plane, unsigned int x, unsigned int y) { return plane == 0u ? 940u : 512u; }",
-            )),
-            ..Default::default()
-        };
-        let stats = hw_filter(&source, &output.0, &options).unwrap();
-        assert_eq!(stats.backend, "owned-cuda-nvdec-nvenc");
-        assert!(stats.host_bounce);
-        assert_eq!(stats.host_frame_copies, events.len() as u64 * 2);
-        assert_eq!(
-            stats.device_filter_passes,
-            (events.len() + events.iter().filter(|e| e.sample.is_some()).count()) as u64
-        );
-        assert_eq!((stats.width, stats.height), (32, 32));
-        let mut saved = crate::owned_webm::WebmReader::open(
-            BufReader::new(std::fs::File::open(&output.0).unwrap()),
-            Default::default(),
-        )
-        .unwrap();
-        saved.scan_all().unwrap();
-        let mut times: Vec<_> = saved
-            .packets
-            .iter()
-            .map(|p| (p.pts_ns as u64, p.duration_ns.unwrap()))
-            .collect();
-        let mut expected: Vec<_> = events
-            .iter()
-            .map(|e| {
+            )));
+            let mut input = MovieSource::open(
+                BufReader::new(std::fs::File::open(&source).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            let scale = input.track().timescale;
+            let ticks = interval.map(|(from, to)| {
                 (
-                    (e.start as u64 * 1_000_000_000) / u64::from(scale),
-                    ((e.end - e.start) as u64 * 1_000_000_000) / u64::from(scale),
+                    from * i64::from(scale) / 1_000_000,
+                    to * i64::from(scale) / 1_000_000,
                 )
-            })
-            .collect();
-        times.sort_unstable();
-        expected.sort_unstable();
-        assert_eq!(times, expected);
-        let mut decoder = fvid_codecs::codec::hevc_decoder::HevcDecoder::from_configuration(
-            &saved.tracks[0].codec_private,
-            64 << 20,
-        )
-        .unwrap();
-        for index in 0..saved.packets.len() {
-            let frame = decoder
-                .decode_packet(&saved.read_packet(index).unwrap())
-                .unwrap()
-                .unwrap();
-            assert_eq!(frame.picture.depth, [10, 10]);
-            assert!(
-                frame.picture.planes[0]
-                    .samples()
-                    .iter()
-                    .all(|v| v.abs_diff(940) <= 2)
+            });
+            let events = crate::owned_nvdec_movie::select_presentations(
+                input.movie_presentations(1000).unwrap(),
+                ticks,
+                crate::owned_nvdec_movie::IntervalSelection::FrameStarts,
+            )
+            .unwrap();
+            let options = HwFilterOptions {
+                host_bounce: true,
+                interval,
+                crop: Some(fvid_media_info::CropRect {
+                    x: 2,
+                    y: 2,
+                    width: 32,
+                    height: 32,
+                }),
+                shader: Some(std::sync::Arc::from(
+                    "__device__ unsigned int process_byte(unsigned int value, unsigned int plane, unsigned int x, unsigned int y) { return plane == 0u ? 940u : 512u; }",
+                )),
+                ..Default::default()
+            };
+            let stats = hw_filter(&source, &output.0, &options).unwrap();
+            assert_eq!(stats.backend, "owned-cuda-nvdec-nvenc");
+            assert!(stats.host_bounce);
+            assert_eq!(stats.host_frame_copies, events.len() as u64 * 2);
+            assert_eq!(
+                stats.device_filter_passes,
+                (events.len() + events.iter().filter(|e| e.sample.is_some()).count()) as u64
             );
-            assert!(
-                frame.picture.planes[1..]
-                    .iter()
-                    .flat_map(|p| p.samples())
-                    .all(|v| v.abs_diff(512) <= 2)
-            );
+            assert_eq!((stats.width, stats.height), (32, 32));
+            let mut saved = crate::owned_webm::WebmReader::open(
+                BufReader::new(std::fs::File::open(&output.0).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            saved.scan_all().unwrap();
+            let mut times: Vec<_> = saved
+                .packets
+                .iter()
+                .map(|p| (p.pts_ns as u64, p.duration_ns.unwrap()))
+                .collect();
+            let mut expected: Vec<_> = events
+                .iter()
+                .map(|e| {
+                    (
+                        (e.start as u64 * 1_000_000_000) / u64::from(scale),
+                        ((e.end - e.start) as u64 * 1_000_000_000) / u64::from(scale),
+                    )
+                })
+                .collect();
+            times.sort_unstable();
+            expected.sort_unstable();
+            assert_eq!(times, expected);
+            let mut decoder = fvid_codecs::codec::hevc_decoder::HevcDecoder::from_configuration(
+                &saved.tracks[0].codec_private,
+                64 << 20,
+            )
+            .unwrap();
+            for index in 0..saved.packets.len() {
+                let frame = decoder
+                    .decode_packet(&saved.read_packet(index).unwrap())
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(frame.picture.depth, [10, 10]);
+                assert!(
+                    frame.picture.planes[0]
+                        .samples()
+                        .iter()
+                        .all(|v| v.abs_diff(940) <= 2)
+                );
+                assert!(
+                    frame.picture.planes[1..]
+                        .iter()
+                        .flat_map(|p| p.samples())
+                        .all(|v| v.abs_diff(512) <= 2)
+                );
+            }
         }
     }
     #[cfg(any(target_os = "linux", target_os = "windows"))]
@@ -682,26 +688,40 @@ mod tests {
         assert_eq!(count, 8);
     }
     #[test]
-    fn empty_edit_interval_stays_on_legacy_until_origin_is_qualified() {
-        let mut source = MovieSource::open(
-            std::io::Cursor::new(
-                include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
-                    .as_slice(),
-            ),
-            Default::default(),
-        )
-        .unwrap();
-        assert!(
-            plan(
-                &mut source,
-                &HwFilterOptions {
-                    interval: Some((250_000, 500_000)),
-                    ..Default::default()
-                }
+    fn empty_edits_and_repeated_ranges_use_container_clock_in_production_intervals() {
+        for bytes in [
+            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov")
+                .as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/hevc-cuda-edit-repeat.mp4")
+                .as_slice(),
+            include_bytes!(
+                "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
             )
-            .unwrap()
-            .is_none()
-        );
+            .as_slice(),
+        ] {
+            let mut source =
+                MovieSource::open(std::io::Cursor::new(bytes), Default::default()).unwrap();
+            let options = HwFilterOptions {
+                interval: Some((0, 500_000)),
+                ..Default::default()
+            };
+            let plan = plan(&mut source, &options)
+                .unwrap()
+                .expect("blank and repeated movie events must be admitted");
+            let scale = source.track().timescale;
+            assert_eq!(plan.interval, Some((0, i64::from(scale) / 2)));
+            let events = crate::owned_nvdec_movie::select_presentations(
+                source.movie_presentations(1000).unwrap(),
+                plan.interval,
+                crate::owned_nvdec_movie::IntervalSelection::FrameStarts,
+            )
+            .unwrap();
+            assert_eq!(events[0].start, 0);
+            assert!(events[0].sample.is_none());
+            assert!(events.iter().any(|e| e.sample.is_some()));
+            assert!(events.iter().all(|e| e.start < i64::from(scale) / 2));
+            assert!(source.read_next(&mut Vec::new()).unwrap().unwrap().sync);
+        }
     }
     #[test]
     fn synthetic_production_route_qualifies_packets_without_driver() {

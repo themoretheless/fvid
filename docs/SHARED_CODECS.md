@@ -545,9 +545,10 @@ it extends past `to`. Boundaries in microseconds must map exactly to track ticks
 as the legacy interface requires. The general native reader retains its separate
 `Clip` policy for overlap-based editing.
 
-Automatic native interval routing currently requires a single known video track,
-a zero-start movie and no empty spans; mixed-track/nonzero origins return an
-unsupported-route error until equivalent origin handling is qualified. The duplicate-PTS synthetic fixture checks whole
+Native intervals now use the container movie clock directly, preserving edit
+blanks and repeated ranges. They no longer normalize against the earliest
+demuxed stream or reject the movie simply because it has blank spans or other
+tracks. Video-only export keeps its existing track scope; audio is not remuxed. The duplicate-PTS synthetic fixture checks whole
 frame selection, repeated timestamps and preserved durations. GPU production
 acceptance now requests a half-second cut from the one-second control fixture
 and verifies six output packets using FVid; execution remains unverified.
@@ -604,3 +605,11 @@ The old host-bounce refusal expectation is now an admission test. Ignored
 NVIDIA tests check byte-exact NV12/P010 transfers and Main10 shader/crop export
 including blanks, repeated ranges, original movie timestamps and all decoded
 pixel planes. These tests are cross-compiled here but have not run on NVIDIA.
+
+The production empty-edit interval refusal has been replaced by host admission
+and movie-clock selection acceptance for AVC, HEVC Main and Main10 synthetic
+fixtures. Interval preflight selects actual events before opening GPU resources;
+an empty selection returns its specific error. The Main10 NVIDIA host-bounce
+acceptance now runs both full-movie and 0.2–0.5 second selections, comparing all
+packet timestamps/durations and software-decoded shader output, including a
+blank span and both repeated ranges. Physical execution remains unverified.
