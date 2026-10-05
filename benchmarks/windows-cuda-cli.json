@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "device": "NVIDIA GeForce RTX 5090",
+  "driver": "617.14",
+  "features": "media-cuda",
+  "binary_sha256": "7dce6d1109a3193fe7415444bc661eb4b3c1e277db777aea116e7542ae0ae16b",
+  "source": "tests/fixtures/playback-errors/cuda-hevc-main10-edit-repeat.mp4",
+  "output": "benchmarks/cuda-main10-verified.mkv",
+  "video_frames": 14,
+  "width": 256,
+  "height": 192,
+  "host_frame_copies": 0,
+  "device_filter_passes": 12,
+  "pixel_format": "yuv420p10le",
+  "decode_errors": 0
+}

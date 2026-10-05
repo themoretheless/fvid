@@ -1822,6 +1822,41 @@ fn external_subtitles_and_device_name() {
         fvid_media::parse_cube_lut_1d_size("LUT_1D_SIZE 256"),
         Some(256)
     );
+    assert_eq!(
+        fvid_media::parse_spherical_projection("mollweide").unwrap(),
+        fvid_media::SphericalProjection::Mollweide
+    );
+    assert_eq!(
+        fvid_media::parse_spherical_projection("hammer").unwrap(),
+        fvid_media::SphericalProjection::Hammer
+    );
+    let src: Vec<u32> = (0..16).map(|n| n * 0x00_0f_0f_0f).collect();
+    assert_eq!(
+        fvid_media::project_mollweide_view(4, 4, &src, 4, 4, 0, 0, 90_000).len(),
+        16
+    );
+    assert_eq!(
+        fvid_media::project_hammer_view(4, 4, &src, 4, 4, 0, 0, 90_000).len(),
+        16
+    );
+    assert_eq!(
+        fvid_media::project_stereographic_fisheye_view(4, 4, &src, 4, 4, 0, 0, 0, 120_000).len(),
+        16
+    );
+    assert_eq!(fvid_media::content_light_scale_milli(1_000, 400), 400);
+    assert!(fvid_media::ambient_compensation_gain_milli(400, 100) > 1_000);
+    assert!(fvid_media::apply_ambient_gain_channel(100, 1_500) > 100);
+    assert!(fvid_media::hdr_tonemap_modes_differ(
+        fvid_media::HdrTonemap::Hable,
+        fvid_media::HdrTonemap::Reinhard
+    ));
+    assert!(fvid_media::spherical_projections_differ(
+        fvid_media::SphericalProjection::Equirect,
+        fvid_media::SphericalProjection::Mollweide,
+        &src,
+        4,
+        4
+    ));
     assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
     let hdr_opts = fvid_media::PlayRenderOptions {
         hdr_tonemap: fvid_media::HdrTonemap::Hable,

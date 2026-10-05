@@ -366,8 +366,8 @@ mod tests {
             hevc_nal::NalHeader,
         };
         for bytes in [
-            include_bytes!("../../../tests/fixtures/hevc/main-ipb.mp4").as_slice(),
-            include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/cuda-hevc.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/cuda-hevc-main10.mp4").as_slice(),
         ] {
             let (sps, pps) = sets(bytes);
             let mut reader =

@@ -60,7 +60,7 @@ def audit_ordinary_tests(root):
                    | set((root / "crates").glob("*/tests/**/*.rs")))
     for path in paths:
         for line in external_test_calls(path.read_text()):
-            failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg test hook; move reference execution to an explicit benchmark")
+            failures.append(f"{path.relative_to(root).as_posix()}:{line}: external FFmpeg test hook; move reference execution to an explicit benchmark")
     return paths, failures
 
 
@@ -103,9 +103,9 @@ def audit_fixture_generators(root):
     for path in paths:
         try:
             for line in external_python_calls(path.read_text()):
-                failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg fixture hook; use owned generation or an explicit reference benchmark")
+                failures.append(f"{path.relative_to(root).as_posix()}:{line}: external FFmpeg fixture hook; use owned generation or an explicit reference benchmark")
         except SyntaxError as error:
-            failures.append(f"{path.relative_to(root)}:{error.lineno}: generator source could not be audited: {error.msg}")
+            failures.append(f"{path.relative_to(root).as_posix()}:{error.lineno}: generator source could not be audited: {error.msg}")
     return paths, failures
 
 
@@ -127,9 +127,9 @@ def audit_ordinary_python(root):
     for path in paths:
         try:
             for line in external_python_calls(path.read_text()):
-                failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg workflow hook; move it to an explicit reference benchmark")
+                failures.append(f"{path.relative_to(root).as_posix()}:{line}: external FFmpeg workflow hook; move it to an explicit reference benchmark")
         except (SyntaxError, OSError) as error:
-            failures.append(f"{path.relative_to(root)}: ordinary Python source could not be audited: {error}")
+            failures.append(f"{path.relative_to(root).as_posix()}: ordinary Python source could not be audited: {error}")
     return paths, failures
 
 
@@ -139,11 +139,11 @@ def audit_native_validators(root):
     for path in paths:
         try:
             for line in external_python_calls(path.read_text()):
-                failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg validation hook; move it to an explicit reference benchmark")
+                failures.append(f"{path.relative_to(root).as_posix()}:{line}: external FFmpeg validation hook; move it to an explicit reference benchmark")
         except SyntaxError as error:
-            failures.append(f"{path.relative_to(root)}:{error.lineno}: validator source could not be audited: {error.msg}")
+            failures.append(f"{path.relative_to(root).as_posix()}:{error.lineno}: validator source could not be audited: {error.msg}")
         except OSError as error:
-            failures.append(f"{path.relative_to(root)}: validator source could not be audited: {error}")
+            failures.append(f"{path.relative_to(root).as_posix()}: validator source could not be audited: {error}")
     return paths, failures
 
 

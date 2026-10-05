@@ -1,9 +1,9 @@
-//! Direct NVENC 8.1 CUDA sessions, owned resource registration and submission.
-//! SDK layout: NVIDIA/video-sdk-samples@aa3544dcea2fe63122e4feb83bf805ea40e58dbe,
-//! Samples/NvCodec/NvEncoder/nvEncodeAPI.h. This compatibility ABI predates AV1.
+//! Direct NVENC 12.0 CUDA sessions, owned resource registration and submission.
+//! SDK layout: NVIDIA/VideoProcessingFramework@529fb192f22ec305b8b237ed9e6014e171339c81,
+//! src/TC/third_party/nvEncodeAPI.h.
 use crate::{CodecDevice, NvencApi, NvencVersion};
 use std::{collections::VecDeque, ffi::c_void, mem::ManuallyDrop};
-const API: u32 = 8 | (1 << 24);
+const API: u32 = 12;
 const fn version(revision: u32) -> u32 {
     API | (revision << 16) | (7 << 28)
 }
@@ -53,7 +53,11 @@ pub(crate) struct FunctionTable {
     register_input: crate::nvenc_sdk::PNVENCREGISTERRESOURCE,
     unregister_input: crate::nvenc_sdk::PNVENCUNREGISTERRESOURCE,
     tail: [usize; 5],
-    reserved2: [usize; 281],
+    last_error: crate::nvenc_sdk::PNVENCGETLASTERROR,
+    io_streams: crate::nvenc_sdk::PNVENCSETIOCUDASTREAMS,
+    preset_ex: crate::nvenc_sdk::PNVENCGETENCODEPRESETCONFIGEX,
+    sequence_ex: usize,
+    reserved2: [usize; 277],
 }
 impl FunctionTable {
     pub(crate) fn new() -> Self {
@@ -82,7 +86,11 @@ impl FunctionTable {
             register_input: None,
             unregister_input: None,
             tail: [0; 5],
-            reserved2: [0; 281],
+            last_error: None,
+            io_streams: None,
+            preset_ex: None,
+            sequence_ex: 0,
+            reserved2: [0; 277],
         }
     }
 }
@@ -134,7 +142,7 @@ pub enum NvencInputFormat {
     P010,
 }
 impl NvencInputFormat {
-    fn raw(self) -> u32 {
+    fn raw(self) -> crate::nvenc_sdk::NV_ENC_BUFFER_FORMAT {
         match self {
             Self::Nv12 => 1,
             Self::P010 => 65536,
@@ -200,7 +208,10 @@ pub struct NvencSession {
 impl NvencSession {
     pub fn open(device: CodecDevice) -> Result<Self, String> {
         let api = NvencApi::load()?;
-        api.require(NvencVersion { major: 8, minor: 1 })?;
+        api.require(NvencVersion {
+            major: 12,
+            minor: 0,
+        })?;
         let table = api.session_table()?;
         let open = table
             .open
@@ -245,7 +256,7 @@ impl NvencSession {
             _api: ManuallyDrop::new(api),
         })
     }
-    /// Initialize synchronous H.264 encoding from the driver's default preset.
+    /// Initialize synchronous H.264 encoding from the driver's P1 preset.
     /// Configuration and frame submission are separate; this emits no packets.
     pub fn initialize_h264(
         &mut self,
@@ -256,7 +267,7 @@ impl NvencSession {
     ) -> Result<(), String> {
         self.initialize_nv12(NvencCodec::H264, width, height, fps_num, fps_den)
     }
-    /// Initialize eight-bit HEVC encoding using the driver's default preset.
+    /// Initialize eight-bit HEVC encoding using the driver's P1 preset.
     pub fn initialize_hevc(
         &mut self,
         width: u32,
@@ -340,7 +351,10 @@ impl NvencSession {
             return Err("NVENC initialization requires a fresh live session".into());
         }
         self.device.handles()?;
-        let preset_fn = self.table.preset.ok_or("NVENC omitted preset entrypoint")?;
+        let preset_fn = self
+            .table
+            .preset_ex
+            .ok_or("NVENC omitted extended preset entrypoint")?;
         let initialize = self
             .table
             .initialize
@@ -348,23 +362,31 @@ impl NvencSession {
         let selected_codec = codec;
         let codec = codec.guid();
         let preset_guid = crate::nvenc_sdk::GUID {
-            Data1: 0xb2dfb705,
-            Data2: 0x4ebd,
-            Data3: 0x4c49,
-            Data4: [0x9b, 0x5f, 0x24, 0xa7, 0x77, 0xd3, 0xe5, 0x87],
+            Data1: 0xfc0a8d3e,
+            Data2: 0x45f8,
+            Data3: 0x4cf8,
+            Data4: [0x80, 0xc7, 0x29, 0x88, 0x71, 0x59, 0x0e, 0xbf],
         };
         let mut preset = crate::nvenc_sdk::NV_ENC_PRESET_CONFIG::default();
         preset.version = version(4) | (1 << 31);
-        preset.presetCfg.version = version(7) | (1 << 31);
+        preset.presetCfg.version = version(8) | (1 << 31);
         // SAFETY: The SDK-generated preset storage and GUIDs have the verified
         // ABI; the session, context and driver remain live for this call.
-        let status = unsafe { preset_fn(self.encoder, codec, preset_guid, &mut preset) };
+        let tuning = crate::nvenc_sdk::NV_ENC_TUNING_INFO_NV_ENC_TUNING_INFO_HIGH_QUALITY;
+        let status = unsafe { preset_fn(self.encoder, codec, preset_guid, tuning, &mut preset) };
         if status != 0 {
             return Err(format!("NVENC preset query failed with status {status}"));
         }
         if let Some(colour) = colour {
             set_colour(&mut preset.presetCfg, selected_codec, colour);
         }
+        // Presets leave bitrate selection to the application. An unspecified
+        // VBR bitrate is not a usable export policy; use bounded constant QP.
+        preset.presetCfg.rcParams.rateControlMode =
+            crate::nvenc_sdk::_NV_ENC_PARAMS_RC_MODE_NV_ENC_PARAMS_RC_CONSTQP;
+        preset.presetCfg.rcParams.constQP.qpInterP = 23;
+        preset.presetCfg.rcParams.constQP.qpInterB = 25;
+        preset.presetCfg.rcParams.constQP.qpIntra = 20;
         set_input_format(&mut preset.presetCfg, selected_codec, format)?;
         let mut params = crate::nvenc_sdk::NV_ENC_INITIALIZE_PARAMS::default();
         params.version = version(5) | (1 << 31);
@@ -377,6 +399,7 @@ impl NvencSession {
         params.frameRateNum = fps_num;
         params.frameRateDen = fps_den;
         params.enablePTD = 1;
+        params.tuningInfo = tuning;
         params.encodeConfig = &mut preset.presetCfg;
         params.maxEncodeWidth = width;
         params.maxEncodeHeight = height;
@@ -385,8 +408,24 @@ impl NvencSession {
         let status = unsafe { initialize(self.encoder, &mut params) };
         if status != 0 {
             self.failed = true;
+            let detail = self
+                .table
+                .last_error
+                .map(|get| {
+                    // SAFETY: The encoder and driver remain live; the SDK owns the
+                    // returned null-terminated diagnostic string.
+                    let pointer = unsafe { get(self.encoder) };
+                    if pointer.is_null() {
+                        String::new()
+                    } else {
+                        unsafe { std::ffi::CStr::from_ptr(pointer) }
+                            .to_string_lossy()
+                            .into_owned()
+                    }
+                })
+                .unwrap_or_default();
             return Err(format!(
-                "NVENC encoder initialization failed with status {status}"
+                "NVENC encoder initialization failed with status {status}: {detail}"
             ));
         }
         self.geometry = Some((width, height));
@@ -493,7 +532,7 @@ impl NvencSession {
             .try_reserve(1)
             .map_err(|e| format!("NVENC input ownership allocation failed: {e}"))?;
         let mut params = crate::nvenc_sdk::NV_ENC_REGISTER_RESOURCE::default();
-        params.version = version(3);
+        params.version = version(4);
         params.resourceType = 1;
         params.width = width;
         params.height = height;
@@ -504,8 +543,23 @@ impl NvencSession {
         // generated SDK storage and all reserved fields are correctly initialized.
         let status = unsafe { register(self.encoder, &mut params) };
         if status != 0 {
+            let detail = self
+                .table
+                .last_error
+                .map(|get| {
+                    // SAFETY: The live session and driver own the returned string.
+                    let pointer = unsafe { get(self.encoder) };
+                    if pointer.is_null() {
+                        String::new()
+                    } else {
+                        unsafe { std::ffi::CStr::from_ptr(pointer) }
+                            .to_string_lossy()
+                            .into_owned()
+                    }
+                })
+                .unwrap_or_default();
             return Err(format!(
-                "NVENC input registration failed with status {status}"
+                "NVENC input registration failed with status {status}: {detail}"
             ));
         }
         if params.registeredResource.is_null() {
@@ -599,7 +653,7 @@ impl NvencSession {
             .ok_or("NVENC omitted picture entrypoint")?;
         let (width, height) = self.geometry.ok_or("NVENC geometry is unavailable")?;
         let mut params = crate::nvenc_sdk::NV_ENC_PIC_PARAMS::default();
-        params.version = version(4) | (1 << 31);
+        params.version = version(6) | (1 << 31);
         params.inputWidth = width;
         params.inputHeight = height;
         params.inputPitch = source.pitch;
@@ -651,7 +705,7 @@ impl NvencSession {
             .encode
             .ok_or("NVENC omitted picture entrypoint")?;
         let mut params = crate::nvenc_sdk::NV_ENC_PIC_PARAMS::default();
-        params.version = version(4) | (1 << 31);
+        params.version = version(6) | (1 << 31);
         params.encodePicFlags = 8;
         // SAFETY: SDK EOS parameters carry no input/output pointer; the encoder
         // and owning device remain live until accepted work is drained.
@@ -686,7 +740,10 @@ impl NvencSession {
             .unlock_output
             .ok_or("NVENC omitted output-unlock entrypoint")?;
         let locked = self.outputs[index].locked.as_ref().unwrap();
-        if locked.hw_status != 0 || locked.count == 0 {
+        // hwEncodeStatus is driver metadata, not an NVENCSTATUS return code.
+        // Current Windows drivers report 2 for successfully encoded pictures.
+        // The successful lock call and readable nonempty packet qualify output.
+        if locked.count == 0 {
             return Err(format!(
                 "NVENC returned invalid encoded output: hardware status {}, bytes {}",
                 locked.hw_status, locked.count
@@ -729,9 +786,11 @@ impl NvencSession {
             .ok_or("NVENC omitted output-lock entrypoint")?;
         if self.outputs[index].locked.is_none() {
             let mut params = crate::nvenc_sdk::NV_ENC_LOCK_BITSTREAM::default();
-            params.version = version(1);
+            params.version = version(2);
             params.outputBitstream = self.outputs[index].handle;
-            params.set_doNotWait(u32::from(nonblocking));
+            // Windows synchronous encoding requires a blocking bitstream lock
+            // so the driver completes its host copy before exposing the bytes.
+            params.set_doNotWait(u32::from(nonblocking && !cfg!(target_os = "windows")));
             // SAFETY: The oldest ready output belongs to this live encoder;
             // SDK storage is writable; cleanup may block to await completion.
             let status = unsafe { lock(self.encoder, &mut params) };
@@ -747,7 +806,7 @@ impl NvencSession {
                 count: params.bitstreamSizeInBytes,
                 timestamp: params.outputTimeStamp,
                 duration: params.outputDuration,
-                picture_type: params.pictureType,
+                picture_type: params.pictureType as u32,
             });
         }
         Ok(true)
@@ -869,7 +928,7 @@ impl Drop for NvencSession {
         // reclaims them; explicit close lets callers observe and retry errors.
     }
 }
-fn submission_status(status: u32) -> Result<NvencSubmit, String> {
+fn submission_status(status: crate::nvenc_sdk::NVENCSTATUS) -> Result<NvencSubmit, String> {
     match status {
         0 => Ok(NvencSubmit::Ready),
         crate::nvenc_sdk::_NVENCSTATUS_NV_ENC_ERR_NEED_MORE_INPUT => Ok(NvencSubmit::Queued),
@@ -1022,9 +1081,9 @@ fn set_colour(
     vui.videoFormat = 5;
     vui.videoFullRangeFlag = u32::from(colour.full_range);
     vui.colourDescriptionPresentFlag = 1;
-    vui.colourPrimaries = u32::from(colour.primaries);
-    vui.transferCharacteristics = u32::from(colour.transfer);
-    vui.colourMatrix = u32::from(colour.matrix);
+    vui.colourPrimaries = i32::from(colour.primaries);
+    vui.transferCharacteristics = i32::from(colour.transfer);
+    vui.colourMatrix = i32::from(colour.matrix);
 }
 
 #[cfg(test)]
@@ -1138,14 +1197,12 @@ mod tests {
             registered: pointer,
             mapped: pointer,
         };
-        assert!(
-            release_input(
-                &mut input,
-                |_| 20,
-                |_| panic!("unregistered a live mapping")
-            )
-            .is_err()
-        );
+        assert!(release_input(
+            &mut input,
+            |_| 20,
+            |_| panic!("unregistered a live mapping")
+        )
+        .is_err());
         assert_eq!(input.mapped, pointer);
         assert_eq!(input.registered, pointer);
         assert!(release_input(&mut input, |_| 0, |_| 20).is_err());
@@ -1233,9 +1290,20 @@ mod tests {
             88
         );
         assert_eq!(std::mem::size_of::<sdk::GUID>(), 16);
-        assert_eq!(version(7) | (1 << 31), 0xf1070008);
+        assert_eq!(version(8) | (1 << 31), 0xf008000c);
         assert_eq!(std::mem::offset_of!(FunctionTable, preset), 88);
         assert_eq!(std::mem::offset_of!(FunctionTable, initialize), 96);
+        assert_eq!(
+            std::mem::size_of::<FunctionTable>(),
+            std::mem::size_of::<sdk::NV_ENCODE_API_FUNCTION_LIST>()
+        );
+        assert_eq!(
+            std::mem::offset_of!(FunctionTable, preset_ex),
+            std::mem::offset_of!(
+                sdk::NV_ENCODE_API_FUNCTION_LIST,
+                nvEncGetEncodePresetConfigEx
+            )
+        );
     }
     #[test]
     fn codec_query_keeps_unknown_guids_and_rejects_bad_counts() {
@@ -1252,19 +1320,15 @@ mod tests {
             .unwrap(),
             vec![guid]
         );
-        assert!(
-            read_guids(1, |_, count| {
-                *count = 2;
-                0
-            })
-            .is_err()
-        );
+        assert!(read_guids(1, |_, count| {
+            *count = 2;
+            0
+        })
+        .is_err());
         assert!(read_guids(1, |_, _| 15).is_err());
-        assert!(
-            read_guids(0, |_, _| panic!("empty query invoked"))
-                .unwrap()
-                .is_empty()
-        );
+        assert!(read_guids(0, |_, _| panic!("empty query invoked"))
+            .unwrap()
+            .is_empty());
     }
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     #[test]
@@ -1295,9 +1359,11 @@ mod tests {
         let stream = owner.new_stream().unwrap();
         let buffers: Vec<_> = (0..4)
             .map(|_| {
-                stream
-                    .alloc_zeros::<u8>(128 * 72 * 3 / 2 * format.sample_bytes() as usize)
-                    .unwrap()
+                crate::nv12_buffer::codec_allocation(
+                    &stream,
+                    256 * 128 * 3 / 2 * format.sample_bytes() as usize,
+                )
+                .unwrap()
             })
             .collect();
         stream.synchronize().unwrap();
@@ -1305,11 +1371,11 @@ mod tests {
         let mut session = NvencSession::open(device).unwrap();
         assert!(!session.codec_guids().unwrap().is_empty());
         if format == NvencInputFormat::P010 {
-            session.initialize_p010(128, 72, 60, 1).unwrap();
+            session.initialize_p010(256, 128, 60, 1).unwrap();
         } else {
-            session.initialize_nv12(codec, 128, 72, 60, 1).unwrap();
+            session.initialize_nv12(codec, 256, 128, 60, 1).unwrap();
         }
-        assert!(session.initialize_nv12(codec, 128, 72, 60, 1).is_err());
+        assert!(session.initialize_nv12(codec, 256, 128, 60, 1).is_err());
         for (index, buffer) in buffers.iter().enumerate() {
             let (pointer, _guard) = buffer.device_ptr(&stream);
             // SAFETY: All allocations use the same pooled primary context,
@@ -1324,8 +1390,8 @@ mod tests {
                     register(
                         &mut session,
                         pointer,
-                        128 * format.sample_bytes(),
-                        128 * 72 * 3 / 2 * u64::from(format.sample_bytes()),
+                        256 * format.sample_bytes(),
+                        256 * 128 * 3 / 2 * u64::from(format.sample_bytes()),
                     )
                 }
                 .unwrap(),
@@ -1334,7 +1400,7 @@ mod tests {
             // Wrong-format registration is rejected without invalidating the
             // session or accepting another driver resource.
             if format == NvencInputFormat::P010 {
-                assert!(unsafe { session.register_nv12(pointer, 256, 128 * 72 * 3) }.is_err());
+                assert!(unsafe { session.register_nv12(pointer, 256, 256 * 128 * 3) }.is_err());
             }
             assert_eq!(session.create_output().unwrap(), index);
         }
@@ -1412,6 +1478,6 @@ mod tests {
         assert_eq!(std::mem::size_of::<OpenParams>(), 1552);
         assert_eq!(std::mem::offset_of!(OpenParams, api), 24);
         assert_eq!(std::mem::offset_of!(OpenParams, reserved2), 1040);
-        assert_eq!(version(2), 0x71020008);
+        assert_eq!(version(2), 0x7002000c);
     }
 }

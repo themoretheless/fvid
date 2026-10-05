@@ -323,11 +323,10 @@ impl NvdecSession {
             output_surfaces,
         )?;
         let api = NvdecApi::load()?;
-        if !api
-            .capabilities(&device, codec, NvdecChroma::Yuv420, depth)?
-            .accepts_geometry(width, height)
-        {
-            return Err("NVDEC device does not support requested coded geometry/format".into());
+        let caps = api.capabilities(&device, codec, NvdecChroma::Yuv420, depth)?;
+        if !caps.accepts_geometry(width, height) {
+            return Err(format!("NVDEC device does not support requested coded geometry/format: {codec:?} {depth}-bit {width}x{height}, supported={}, dimensions {}x{}..{}x{}",
+                caps.supported, caps.min_width, caps.min_height, caps.max_width, caps.max_height));
         }
         let (create, destroy) = api.decoder_entrypoints()?;
         let (map, unmap) = api.mapping_entrypoints()?;
@@ -847,20 +846,16 @@ mod tests {
         assert!(!caps.accepts_geometry(u32::MAX, u32::MAX));
         assert!(query_caps(NvdecCodec::H264, NvdecChroma::Yuv420, 7, |_| panic!()).is_err());
         assert!(query_caps(NvdecCodec::H264, NvdecChroma::Yuv420, 8, |_| 999).is_err());
-        assert!(
-            query_caps(NvdecCodec::H264, NvdecChroma::Yuv420, 8, |r| {
-                r.supported = 1;
-                0
-            })
-            .is_err()
-        );
-        assert!(
-            query_caps(NvdecCodec::H264, NvdecChroma::Yuv420, 8, |r| {
-                r.supported = 2;
-                0
-            })
-            .is_err()
-        );
+        assert!(query_caps(NvdecCodec::H264, NvdecChroma::Yuv420, 8, |r| {
+            r.supported = 1;
+            0
+        })
+        .is_err());
+        assert!(query_caps(NvdecCodec::H264, NvdecChroma::Yuv420, 8, |r| {
+            r.supported = 2;
+            0
+        })
+        .is_err());
     }
     #[test]
     fn unsupported_capability_is_a_result_not_a_fake_decoder() {

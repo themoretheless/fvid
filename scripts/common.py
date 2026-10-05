@@ -27,6 +27,8 @@ def prepend_cuda_bin():
     toolkit = pathlib.Path(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA")
     if toolkit.is_dir():
         candidates.extend(sorted(toolkit.glob("v13.*/bin"), reverse=True))
+    candidates = [directory for candidate in candidates
+                  for directory in (candidate / "x64", candidate)]
     for candidate in candidates:
         if candidate.is_dir() and (candidate / "nvrtc64_130_0.dll").is_file():
             path = str(candidate)

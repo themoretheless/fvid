@@ -493,9 +493,9 @@ mod tests {
         use crate::owned_nvdec_mp4::AvcMp4Input;
         use std::io::Cursor;
         const EMPTY: &[u8] =
-            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov");
+            include_bytes!("../../../tests/fixtures/playback-errors/cuda-h264-edit-empty-spans.mov");
         const METADATA: &[u8] =
-            include_bytes!("../../../tests/fixtures/playback-errors/avc-cuda-video-metadata.mp4");
+            include_bytes!("../../../tests/fixtures/playback-errors/cuda-h264-video-metadata.mp4");
         for (bytes, white_shader, clipped) in [
             (EMPTY, false, false),
             (METADATA, false, false),
@@ -653,7 +653,7 @@ mod tests {
         use crate::owned_nvdec_hevc_mp4::HevcMp4Input;
         use std::io::Cursor;
         let bytes = include_bytes!(
-            "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
+            "../../../tests/fixtures/playback-errors/cuda-hevc-main10-edit-repeat.mp4"
         );
         let source = HevcMp4Input::open(Cursor::new(bytes.as_slice()), Default::default()).unwrap();
         let scale = source.track().timescale;
@@ -662,8 +662,8 @@ mod tests {
         let renderer = MovieRenderer::new(
             reader,
             Nv12Transform {
-                out_width: 64,
-                out_height: 64,
+                out_width: 256,
+                out_height: 192,
                 ..Default::default()
             },
             false,
@@ -689,6 +689,7 @@ mod tests {
             Default::default(),
         )
         .unwrap();
+        saved.scan_all().unwrap();
         let config =
             fvid_codecs::codec::config::HevcConfig::parse(&saved.tracks[0].codec_private).unwrap();
         assert_eq!(config.bit_depth_luma, 10);
@@ -721,7 +722,7 @@ mod tests {
                 .unwrap()
                 .unwrap();
             assert_eq!(frame.picture.depth, [10, 10]);
-            assert_eq!(frame.picture.dimensions, [64, 64]);
+            assert_eq!(frame.picture.dimensions, [256, 192]);
         }
     }
 

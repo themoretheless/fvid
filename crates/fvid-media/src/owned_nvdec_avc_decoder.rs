@@ -408,7 +408,7 @@ mod tests {
     #[ignore = "requires an NVIDIA CUDA device with NVDEC and NVENC"]
     fn synthetic_avc_decode_filter_encode_chain_without_libav() {
         use fvid_cuda::{Nv12Buffer, Nv12Processor, Nv12Transform, Nv12View, NvencSession};
-        let (mut reader, state) = input(CONTROL);
+        let (mut reader, state) = input(include_bytes!("../../../tests/fixtures/playback-errors/cuda-h264.mp4"));
         let (width, height) = state.sps.coded_dimensions();
         let mut decoder =
             AvcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20)

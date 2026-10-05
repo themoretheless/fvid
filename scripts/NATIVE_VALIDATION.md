@@ -2,7 +2,8 @@
 > the historical `legacy-ffmpeg` marker all use owned library APIs without libav.
 > The default dependency guard covers all these graphs. Older dated audit notes
 > below describe migration history. FFmpeg is optional for explicit reference
-> benchmarks; native codec/tool coverage and physical NVIDIA proof remain pending.
+> benchmarks; complete native codec/tool coverage remains pending. Physical CUDA
+> acceptance on Windows / RTX 5090 passed on 2026-10-05 (see below).
 
 # Validation without FFmpeg
 
@@ -724,3 +725,37 @@ build --locked --offline --all-features --bin fvid`. `otool -L
 target/debug/fvid` lists Apple frameworks and system libraries, with no libav,
 libswscale or libswresample dependency. This proves the all-feature macOS CLI
 links without a FFmpeg SDK; it does not establish physical NVIDIA execution.
+
+
+## Windows CUDA acceptance — 2026-10-05
+
+Windows / GeForce RTX 5090, driver 617.14, CUDA toolkit 13.4: all 28 required
+physical tests across 11 suites passed via alidate_hw_cuda.py. The local
+report is enchmarks/windows-cuda-validation.json; this is Cargo acceptance,
+not a performance or external-reference qualification. Production builds use
+owned codec APIs without libav.
+
+NVENC bindings now target SDK 12.0 and select the extended P1 preset. Windows
+codec buffers use conventional device allocations, and synchronous bitstream
+locks wait for complete output. Hardware fixtures are saved synthetic AVC/HEVC
+Main/Main10 videos large enough for device capability limits, generated only
+by the explicit enchmark_cuda_fixture_reference.py --write-fixtures command.
+Ordinary tests consume those files without FFmpeg or network access.
+
+The debug CLI built with --no-default-features --features media-cuda exported
+cuda-hevc-main10-edit-repeat.mp4 through NVDEC → GPU filter → NVENC: 14 frames,
+256×192, zero host frame copies. The owned software decoder read all 14 output
+frames as yuv420p10le with zero decode errors. Windows CLI stack reservation is
+8 MiB to support owned codec parsing on the main thread.
+
+Ordinary CUDA library tests: 40 passed (17 physical cases ignored here).
+Ordinary owned media tests: 369 passed (18 physical cases ignored here).
+A concurrent WAV temporary-file reuse race found by the Windows run was fixed
+by retaining the originally reserved handle and using a monotonic identifier;
+a synthetic concurrent PCM regression test passed. Native dependency audits
+passed for all production feature graphs on x86_64-pc-windows-msvc.
+
+The separate physical root CLI regression `native_cuda_cli` also passed. It
+launches the Windows binary, exports the saved synthetic Main10 fixture, and
+checks owned software decoding of every output frame with no host copies.
+The six playback-control integration tests passed after conflict migration.
