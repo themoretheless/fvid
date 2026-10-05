@@ -168,3 +168,12 @@ Fixture checkout preserves exact bytes on Windows as well: `.raw`, `.rgb`,
 `*.expected.txt` sidecars use LF even with `core.autocrlf=true`. This keeps the
 bitplanenoise metadata oracle's exact newline bytes independent of checkout
 settings, without changing its values or the synthetic video/pixel references.
+
+Quoted curves path regression reuses `curves-gray-8.y4m`, its exact saved
+negative pixels, and the synthetic `curves-negative.acv` parameters. The test
+copies only that synthetic ACV into a temporary filename containing a colon on
+POSIX; Windows supplies the drive colon. Quoted `psfile` and `plot` paths must
+remain intact, export all four frames with exact expected pixels, and write the
+plot file. The old delimiter split fails specifically with `unclosed curves
+quote`; malformed incomplete quotes remain rejected. No private media or
+parameter sets are used and no external programs generate/run this regression.

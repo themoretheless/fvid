@@ -67,6 +67,61 @@ fn plateau_and_cache_precision_match_saved_independent_pixels() {
     assert_eq!(invalid, before);
 }
 #[test]
+fn quoted_curve_and_plot_paths_preserve_option_separators_in_video_export() {
+    let directory = std::env::temp_dir().join(format!("fvid-curves-quoted-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    // Windows supplies a drive colon; POSIX uses a colon in the filename.
+    let curve = directory.join(if cfg!(windows) {
+        "source-negative.acv"
+    } else {
+        "source:negative.acv"
+    });
+    let plot = directory.join(if cfg!(windows) {
+        "output-plot.gnuplot"
+    } else {
+        "output:plot.gnuplot"
+    });
+    std::fs::copy(fixture("playback-errors/curves-negative.acv"), &curve).unwrap();
+    let args = format!("psfile=\"{}\":plot=\"{}\"", curve.display(), plot.display());
+    // The old colon splitter handed this exact incomplete token to unquote.
+    assert_eq!(
+        Curves::parse(args.split(':').next().unwrap())
+            .err()
+            .as_deref(),
+        Some("unclosed curves quote")
+    );
+    Curves::parse(&args).unwrap();
+    let output = directory.join("negative.mkv");
+    let stats = fvid_media::transcode_lossless(
+        &fixture("playback-errors/curves-gray-8.y4m"),
+        &output,
+        LosslessTransform {
+            curves: Some(args),
+            ..Default::default()
+        },
+        &CopyOptions::default(),
+    )
+    .unwrap();
+    assert_eq!(stats.video_frames, 4);
+    let mut reader =
+        NativeReader::software(Cursor::new(std::fs::read(&output).unwrap()), usize::MAX).unwrap();
+    let mut pixels = Vec::new();
+    while let Some(raw) = reader.read_frame_raw().unwrap() {
+        pixels.extend(VideoGeometry::default().apply(&raw, 4, 4).unwrap().data);
+    }
+    assert_eq!(
+        pixels,
+        std::fs::read(fixture("playback-errors/curves-gray-8.expected.raw")).unwrap()
+    );
+    assert!(
+        std::fs::read_to_string(&plot)
+            .unwrap()
+            .contains("plot '-' using 1:2")
+    );
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
 fn acv_priority_plot_and_explicit_timeline_use_owned_contracts() {
     let file = fixture("playback-errors/curves-negative.acv");
     let bytes = std::fs::read(&file).unwrap();

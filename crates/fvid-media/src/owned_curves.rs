@@ -34,7 +34,7 @@ impl Curves {
         let mut position = 0;
         let mut clocked = false;
         let mut enable = crate::owned_timeline::Timeline::default();
-        for option in args.split(':').filter(|_| !args.is_empty()) {
+        for option in split_options(args)? {
             let (key, value) = if let Some(pair) = option.split_once('=') {
                 pair
             } else {
@@ -231,6 +231,30 @@ impl Curves {
         Ok(())
     }
 }
+fn split_options(args: &str) -> Result<Vec<&str>> {
+    let mut result = Vec::new();
+    let mut start = 0;
+    let mut quote = None;
+    for (offset, character) in args.char_indices() {
+        match (quote, character) {
+            (Some(open), close) if open == close => quote = None,
+            (None, '\'' | '"') => quote = Some(character),
+            (None, ':') => {
+                result.push(&args[start..offset]);
+                start = offset + 1;
+            }
+            _ => {}
+        }
+    }
+    if quote.is_some() {
+        return Err("unclosed curves quote".into());
+    }
+    if !args.is_empty() {
+        result.push(&args[start..]);
+    }
+    Ok(result)
+}
+
 fn unquote(value: &str) -> Result<&str> {
     if value.starts_with('\'') || value.starts_with('"') {
         let quote = value.chars().next().unwrap();

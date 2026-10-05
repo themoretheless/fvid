@@ -266,13 +266,20 @@ fn temporal_lossless_cli_plans_use_owned_export_backend() {
             "--reverse" => request.reverse = Some(value.into()),
             _ => request.shuffleframes = Some(value.into()),
         }
-        let expected = fvid_media::owned_lossless::plan_transcode_lossless(
+        // CLI dispatch uses the public facade, including its owned framestep
+        // exporter. The internal generic library exporter has a different plan.
+        let expected = fvid::media::plan_transcode_lossless(
             &source,
             &request,
             &Default::default(),
             None,
         )
         .unwrap();
+        assert!(expected.graph.is_none());
+        assert!(expected.notes.iter().any(|note| note.contains("no external")));
+        assert!(expected.steps.iter().any(|step| {
+            step.action == "encode" && step.detail.to_ascii_lowercase().contains("ffv1")
+        }));
         let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
             .args(["media", "plan", "transcode-lossless"])
             .arg(&source)

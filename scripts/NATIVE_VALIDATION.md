@@ -689,3 +689,31 @@ This includes exact bitplane pixels/metadata, Gaussian CLI decode/plan/export,
 the formerly stale refusal, frame-clock selection and rejection of requested
 malformed Y4M tails. Windows checkout was simulated above; new Windows/Linux CI
 execution is still required to confirm the complete changed checkout.
+
+### Quoted curves paths and public temporal plan contract (2026-10-05)
+
+On `78315f45`, Windows default tests exposed a real curves option-parser bug:
+colon splitting ignored quotes and truncated Windows drive paths. The parser
+now splits only outside matching single/double quotes and preserves literal
+backslashes. The portable regression reuses the synthetic four-frame grayscale
+video and negative ACV/expected pixels; it uses a POSIX filename colon or Windows
+drive colon, verifies the exact former quote error, requires exact exported
+pixels and checks plot-file creation. Original reference bytes remain unchanged.
+
+Linux exposed a separate test-contract mismatch: CLI temporal plans use the
+public `fvid::media` facade and its own optimized framestep exporter, while the
+test expected the internal generic exporter's different descriptor. The test
+now compares the complete CLI JSON to the same public API, additionally requiring
+no external graph, the no-external-backend note and an FFV1 encoding stage.
+Execution routing was not changed. `native_curves`, `native_framestep` and
+`owned_filter_inventory` passed all 19 tests with a deliberately empty test PATH,
+invalid FFmpeg prefix and locked offline dependencies. Framestep checks include
+actual packet timestamps, selected frames and retained AAC packets.
+
+Before the quoted-path parser change, the production library also completed
+`FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg cargo build --locked --offline --all-features
+--lib`. Its archive's undefined-symbol list had no known FFmpeg C API names
+(`av_*`, `avcodec_*`, `avformat_*`, `avfilter_*`, `avio_*`, `sws_*`, `swr_*`). This
+is library compilation/code-generation and symbol evidence, not a linked
+all-feature CLI or physical NVIDIA result. A fresh all-feature library build
+for the quoted-path change is running separately; its outcome remains pending.
