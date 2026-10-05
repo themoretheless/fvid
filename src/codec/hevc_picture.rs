@@ -25,6 +25,7 @@ pub struct Picture {
     /// Collocated motion at the normative 16x16 temporal-prediction grid.
     pub(crate) motion: Vec<Motion>,
     pub(crate) reference_pocs: [Vec<i32>; 2],
+    pub(crate) reference_long_term: [Vec<bool>; 2],
 }
 /// Decode a complete Main/Main10 IDR slice, including WPP, QP deltas and filters.
 /// Output planes have coded dimensions; crop is metadata. The supplied budget
@@ -336,6 +337,7 @@ pub fn decode(
     Ok(Picture {
         motion,
         reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
+        reference_long_term: std::array::from_fn(|l| lists[l].iter().map(|r| r.long_term).collect()),
         dimensions: [w, h],
         crop: sps.crop,
         depth: sps.depth,
@@ -647,6 +649,7 @@ pub fn decode_slices(
     Ok(Picture {
         motion,
         reference_pocs: canonical_pocs,
+        reference_long_term: std::array::from_fn(|l| canonical[l].iter().map(|r| r.long_term).collect()),
         dimensions: [w, h],
         crop: sps.crop,
         depth: sps.depth,

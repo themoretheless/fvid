@@ -367,6 +367,7 @@ impl HevcDecoder {
         }
         if header.nal.unit_type >= 16 || header.nal.unit_type & 1 != 0 {
             self.references.push(Reference {
+                long_term: false,
                 poc,
                 picture: Arc::clone(&picture),
             });
@@ -403,7 +404,7 @@ fn reference_lists(
             .ok_or_else(|| invalid("HEVC reference POC overflow"))?;
         retained.push(target);
         if r.used {
-            let reference = references
+            let mut reference = references
                 .iter()
                 .find(|r| r.poc == target)
                 .ok_or_else(|| {
@@ -413,6 +414,7 @@ fn reference_lists(
                     ))
                 })?
                 .clone();
+            reference.long_term = false;
             if r.delta_poc < 0 {
                 before.push(reference);
             } else {
@@ -429,8 +431,10 @@ fn reference_lists(
             }
             retained.push(target);
             if entry.used {
-                long.push(references.iter().find(|r| r.poc == target)
-                    .ok_or_else(|| invalid("HEVC long-term current reference is missing"))?.clone());
+                let mut reference = references.iter().find(|r| r.poc == target)
+                    .ok_or_else(|| invalid("HEVC long-term current reference is missing"))?.clone();
+                reference.long_term = true;
+                long.push(reference);
             }
         }
     }
@@ -486,12 +490,13 @@ mod long_term_list_tests {
         header.long_term = vec![LongTermReference { poc_lsb: 3, used: true, msb_cycles: Some(1) }];
         header.references = [3, 3];
         let references: Vec<_> = [34, 36, 19].into_iter().map(|poc| Reference {
-            poc, picture: Arc::clone(&picture),
+            poc, long_term: false, picture: Arc::clone(&picture),
         }).collect();
         let (retained, lists) = reference_lists(&header, 35, &references, 4).unwrap();
         assert_eq!(retained, [34, 36, 19]);
         assert_eq!(lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(), [34, 36, 19]);
         assert_eq!(lists[1].iter().map(|r| r.poc).collect::<Vec<_>>(), [36, 34, 19]);
+        assert_eq!(lists[0].iter().map(|r| r.long_term).collect::<Vec<_>>(), [false, false, true]);
         header.list_modification[0] = Some(vec![2, 0, 1]);
         let (_, lists) = reference_lists(&header, 35, &references, 4).unwrap();
         assert_eq!(lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(), [19, 34, 36]);

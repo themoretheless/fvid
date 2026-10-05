@@ -8,6 +8,7 @@ use crate::{Result, invalid};
 use std::sync::Arc;
 #[derive(Clone)]
 pub struct Reference {
+    pub long_term: bool,
     pub poc: i32,
     pub picture: Arc<Picture>,
 }
@@ -96,13 +97,15 @@ impl Spatial<'_> {
                 .ok_or_else(|| invalid("HEVC collocated motion has invalid reference"))?;
             let target = self.lists[list]
                 .get(reference as usize)
-                .ok_or_else(|| invalid("HEVC temporal target reference is missing"))?
-                .poc;
-            return Ok(Some(scale(
-                vector.mv,
-                collocated.poc - source_poc,
-                self.poc - target,
-            )?));
+                .ok_or_else(|| invalid("HEVC temporal target reference is missing"))?;
+            let source_long = *p.reference_long_term[source_list]
+                .get(vector.reference as usize)
+                .ok_or_else(|| invalid("HEVC collocated reference classification is missing"))?;
+            if let Some(mv) = reference_predictor(vector.mv,
+                collocated.poc.saturating_sub(source_poc),
+                self.poc.saturating_sub(target.poc), source_long, target.long_term)? {
+                return Ok(Some(mv));
+            }
         }
         Ok(None)
     }
@@ -275,22 +278,22 @@ impl Spatial<'_> {
                     let Some(reference) = references[list] else {
                         continue;
                     };
-                    let target = self.lists[list][reference as usize].poc;
+                    let target = &self.lists[list][reference as usize];
                     let find =
                         |neighbours: &[Option<Motion>], scaled: bool| -> Result<Option<[i16; 2]>> {
                             for motion in neighbours.iter().flatten() {
                                 for l in [list, 1 - list] {
                                     if let Some(v) = motion[l] {
-                                        let source = self.lists[l][v.reference as usize].poc;
-                                        if source == target {
+                                        let source = &self.lists[l][v.reference as usize];
+                                        if source.long_term != target.long_term { continue; }
+                                        if source.poc == target.poc {
                                             return Ok(Some(v.mv));
                                         }
                                         if scaled {
-                                            return Ok(Some(scale(
-                                                v.mv,
-                                                self.poc - source,
-                                                self.poc - target,
-                                            )?));
+                                            return reference_predictor(v.mv,
+                                                self.poc.saturating_sub(source.poc),
+                                                self.poc.saturating_sub(target.poc),
+                                                source.long_term, target.long_term);
                                         }
                                     }
                                 }
@@ -336,6 +339,12 @@ impl Spatial<'_> {
             }
         }
     }
+}
+fn reference_predictor(mv: [i16; 2], source: i32, target: i32,
+    source_long: bool, target_long: bool) -> Result<Option<[i16; 2]>> {
+    if source_long != target_long { return Ok(None); }
+    if target_long { return Ok(Some(mv)); }
+    Ok(Some(scale(mv, source, target)?))
 }
 pub fn scale(mv: [i16; 2], source: i32, target: i32) -> Result<[i16; 2]> {
     if source == target {
@@ -601,6 +610,52 @@ mod tests {
     use crate::codec::hevc_plane::Plane;
 
     #[test]
+    fn reference_classification_controls_temporal_scaling_and_availability() {
+        let mv = [64, -32];
+        assert_eq!(reference_predictor(mv, 4, 2, false, false).unwrap(), Some([32, -16]));
+        assert_eq!(reference_predictor(mv, 4, 2, true, true).unwrap(), Some(mv));
+        assert_eq!(reference_predictor(mv, 0, 100, true, true).unwrap(), Some(mv));
+        assert_eq!(reference_predictor(mv, 4, 2, true, false).unwrap(), None);
+        assert_eq!(reference_predictor(mv, 4, 2, false, true).unwrap(), None);
+        assert!(reference_predictor(mv, 0, 2, false, false).is_err());
+    }
+
+    #[test]
+    fn temporal_prediction_tries_center_after_a_reference_class_mismatch() {
+        use crate::codec::{config::{HevcConfig, NalUnits}, hevc_decoder::HevcDecoder, hevc_nal::NalHeader};
+        let data = include_bytes!("../../tests/fixtures/playback-errors/shared-hevc-main.mp4");
+        let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
+        let configuration = &input.tracks()[0].configuration;
+        let length = HevcConfig::parse(configuration).unwrap().length_size;
+        let decoder = HevcDecoder::from_configuration(configuration, 16 << 20).unwrap();
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let nal = NalUnits::new(&packet, length).unwrap().map(|n| n.unwrap())
+            .find(|n| NalHeader::parse(n).unwrap().is_vcl()).unwrap();
+        let (sps, pps) = decoder.parameters();
+        let header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
+        let mut motion = vec![[None, None]; 8];
+        motion[5][0] = Some(Vector { reference: 0, mv: [12, 8] });
+        motion[0][0] = Some(Vector { reference: 1, mv: [64, -32] });
+        let picture = Arc::new(Picture {
+            dimensions: [64, 32], crop: [0; 4], depth: [8; 2],
+            planes: [Plane::new(64, 32, 8, 8192).unwrap(),
+                Plane::new(32, 16, 8, 2048).unwrap(), Plane::new(32, 16, 8, 2048).unwrap()],
+            sao: Vec::new(), motion,
+            reference_pocs: [vec![0, 1], Vec::new()],
+            reference_long_term: [vec![false, true], Vec::new()],
+        });
+        let lists = [vec![
+            Reference { poc: 8, long_term: false, picture: Arc::clone(&picture) },
+            Reference { poc: 1, long_term: true, picture },
+        ], Vec::new()];
+        let spatial = Spatial { rect: [0, 0, 16, 16], cu: [0, 0, 4],
+            partition: Partition::Full, part_index: 0, merge_log2: 2, ctu_log2: 6,
+            poc: 12, lists: &lists };
+        assert_eq!(spatial.temporal(&header, 0, 1).unwrap(), Some([64, -32]));
+    }
+
+    #[test]
     fn separable_prediction_matches_scalar_at_all_phases_and_borders() {
         for depth in [8, 10, 12] {
             let mut picture = Picture {
@@ -615,6 +670,7 @@ mod tests {
                 sao: Vec::new(),
                 motion: Vec::new(),
                 reference_pocs: [Vec::new(), Vec::new()],
+                reference_long_term: [Vec::new(), Vec::new()],
             };
             let mut state = 97u32;
             for plane in &mut picture.planes {
