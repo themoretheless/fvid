@@ -572,3 +572,22 @@ system libraries/frameworks and no libav library. The offline flag prevents
 Cargo network access; the invalid FFmpeg prefix checks SDK independence. This
 local command retains the normal executable PATH, so runtime absence of external
 tool calls is supported separately by source audits and CI's empty test PATH.
+
+### Combined media/player CLI regression checks
+
+Running the built core/player library tests directly with
+`PATH=/fvid/no-external-programs` also passed: 893 passed, 23 ignored.
+Combined `media,player` CLI compilation exposed a stale `play_paths` call to the
+retired library player. The CLI now routes `media play` through the existing
+native player parser, including invalid requests. With an empty executable PATH,
+18 CLI unit tests and two native media-play CLI integration tests passed.
+
+The AVC lossless acceptance suite explicitly selects `open_software`, so its
+six passing sample/rewind/camera checks do not depend on automatic VideoToolbox
+selection. Native export passed all 18 tests after updating the HueProgram API
+and replacing an obsolete 10-bit EQ refusal with acceptance: 17 frames at 30 Hz,
+10-bit luma saturated to 1023, original chroma preserved byte-for-byte, and only
+the final Y4M published. Both use existing committed synthetic fixtures and run
+without a reference process. Linux and Windows CI now cover combined media/player
+CLI and export. The complete 163-target integration audit remains separate from
+these passing targeted checks and must not be inferred from them.

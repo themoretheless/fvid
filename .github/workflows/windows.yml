@@ -26,6 +26,10 @@ jobs:
         run: cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features
       - name: Test default features
         run: cargo test --lib --bins --tests
+      - name: Test combined native media and player CLI without a FFmpeg SDK
+        env:
+          FVID_FFMPEG_PREFIX: C:\fvid\no-ffmpeg
+        run: cargo test --locked --no-default-features --features media,player --bin fvid --test native_media_play_cli --test native_export
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
       - name: CPU-only

@@ -47,6 +47,11 @@ jobs:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
           FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --locked --no-default-features --features media --lib --bins --tests
+      - name: Test combined native media and player CLI without external programs
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
+          FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
+        run: cargo test --locked --no-default-features --features media,player --bin fvid --test native_media_play_cli --test native_export
       - name: Test production CUDA preparation without external programs
         env:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs

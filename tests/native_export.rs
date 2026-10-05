@@ -504,7 +504,7 @@ fn owned_pixel_filters_export_y4m_through_cli() {
             ..Default::default()
         };
         let mut filters = fvid::native_pixels::PixelFilters::default();
-        filters.hue = Some(fvid_media::owned_hue::Hue::parse("h=90").unwrap());
+        filters.hue = Some(fvid_media::owned_hue::HueProgram::parse("h=90").unwrap());
         filters.negate = Some(fvid::native_pixels::Negate::parse("").unwrap());
         let mut original = fvid::playback_native::NativeReader::software(
             std::io::Cursor::new(std::fs::read(&source).unwrap()),
@@ -543,23 +543,36 @@ fn owned_pixel_filters_export_y4m_through_cli() {
 }
 
 #[test]
-fn unsupported_filter_depth_does_not_publish_y4m_or_leave_temporary_files() {
+fn main10_equalizer_exports_saturated_luma_and_preserves_chroma() {
     let dir = directory();
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
-    let output = dir.0.join("rejected.y4m");
+    let output = dir.0.join("equalized.y4m");
     let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args(["media", "export-y4m"])
         .arg(&source)
         .arg(&output)
-        .args(["--eq", "brightness=0.06"])
+        .args(["--eq", "brightness=1"])
+        .env("PATH", "/nonexistent")
         .output()
         .unwrap();
-    assert!(!run.status.success());
-    assert!(
-        String::from_utf8_lossy(&run.stderr).contains("8-bit"),
-        "{}",
-        String::from_utf8_lossy(&run.stderr)
-    );
-    assert!(!output.exists());
-    assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 0);
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    let bytes = std::fs::read(&output).unwrap();
+    let end = bytes.iter().position(|&b| b == b'\n').unwrap() + 1;
+    let header = std::str::from_utf8(&bytes[..end]).unwrap();
+    assert!(header.contains("W128 H128 F30:1"), "{header}");
+    assert!(header.contains("C420p10"), "{header}");
+    let oracle = include_bytes!("fixtures/hevc/main10-ipb.yuv");
+    let frame_size = oracle.len() / 17;
+    let luma_bytes = 128 * 128 * 2;
+    let mut payload = &bytes[end..];
+    for original in oracle.chunks_exact(frame_size) {
+        assert!(payload.starts_with(b"FRAME\n"));
+        payload = &payload[6..];
+        assert!(payload[..luma_bytes].chunks_exact(2)
+            .all(|sample| u16::from_le_bytes([sample[0], sample[1]]) == 1023));
+        assert_eq!(&payload[luma_bytes..frame_size], &original[luma_bytes..]);
+        payload = &payload[frame_size..];
+    }
+    assert!(payload.is_empty());
+    assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
 }
