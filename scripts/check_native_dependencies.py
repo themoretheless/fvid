@@ -54,7 +54,10 @@ def external_test_calls(source):
 
 def audit_ordinary_tests(root):
     failures = []
-    paths = sorted((root / "tests").rglob("*.rs"))
+    paths = sorted(set((root / "tests").rglob("*.rs"))
+                   | set((root / "src").rglob("*.rs"))
+                   | set((root / "crates").glob("*/src/**/*.rs"))
+                   | set((root / "crates").glob("*/tests/**/*.rs")))
     for path in paths:
         for line in external_test_calls(path.read_text()):
             failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg test hook; move reference execution to an explicit benchmark")

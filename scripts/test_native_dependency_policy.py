@@ -21,6 +21,20 @@ class OrdinaryTestPolicy(unittest.TestCase):
             with self.subTest(source=source):
                 self.assertEqual(external_test_calls("\n" + source), [2])
 
+    def test_inline_crate_and_root_sources_are_audited_but_benchmarks_are_separate(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            for name in ["src/main.rs", "crates/sample/src/lib.rs", "crates/sample/tests/acceptance.rs"]:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('Command::new("ffmpeg");')
+            bench = root / "crates/sample/benches/reference.rs"
+            bench.parent.mkdir(parents=True)
+            bench.write_text('Command::new("ffmpeg");')
+            paths, failures = guard.audit_ordinary_tests(root)
+            self.assertEqual(len(paths), 3)
+            self.assertEqual(len(failures), 3)
+
     def test_saved_oracles_and_own_cli_are_allowed(self):
         source = '''// Reference bytes were generated using ffmpeg.
 include_bytes!("fixtures/ffmpeg-nearest.rgb");
