@@ -54,7 +54,10 @@ mod tests {
     #[test]
     #[ignore = "requires physical NVIDIA HEVC NVDEC long-term qualification"]
     fn owned_hevc_long_term_submits_and_maps_on_nvidia() {
-        let bytes = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
+        for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice()] {
         let (mut reader, state, mut software) = input(bytes);
         let mut decoder = HevcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20).unwrap();
         let mut packet = Vec::new();
@@ -69,6 +72,7 @@ mod tests {
             decoder.unmap(surface.slot).unwrap();
         }
         decoder.close().unwrap();
+        }
     }
     fn input(bytes: &[u8]) -> (Mp4Reader<Cursor<&[u8]>>, Scheduler, HevcDecoder) {
         let reader = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
@@ -102,7 +106,8 @@ mod tests {
     #[test]
     fn mixed_and_lsb_only_fixtures_follow_software_and_keep_live_reference_slots() {
         for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
-                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice()] {
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice()] {
             let (mut reader, mut state, mut software) = input(bytes);
             let mut packet = Vec::new();
             for sample in 0..3 {

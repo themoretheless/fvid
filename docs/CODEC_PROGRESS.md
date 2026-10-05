@@ -2050,3 +2050,14 @@ before the fix because decoding succeeded. It now verifies the exact error,
 reset recovery and NVDEC scheduler rollback. This refusal is not new valid
 codec-profile support. Existing valid explicit, LSB-only and mixed long-term
 fixtures continue to require exact independent HM pixels and reset replay.
+
+### SPS-selected HEVC long-term acceptance (2026-10-06)
+
+An owned 64×64 I/P/P fixture now selects two different long-term entries from
+SPS rather than encoding their POC explicitly in slices. Software acceptance
+checks table contents, selected LSBs and exact independent HM 18.0 pixels
+before/after reset. NVDEC tests include its table count, current-set translation
+and scheduler retention. The ignored Linux/Windows physical-device test covers
+all four valid long-term variants; execution still requires an NVIDIA device.
+This closes a verification gap for SPS selection, not all HEVC profiles or
+all-active mixed/B-picture motion.

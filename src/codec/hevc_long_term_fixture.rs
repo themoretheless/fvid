@@ -45,7 +45,7 @@ fn generate_long_term_stream() {
     let mode = std::env::var("FVID_HEVC_LONG_TERM_MODE").unwrap_or_else(|_| "explicit".into());
     assert!(matches!(
         mode.as_str(),
-        "explicit" | "lsb" | "mixed" | "invalid-short"
+        "explicit" | "lsb" | "mixed" | "invalid-short" | "sps"
     ));
     let source = include_bytes!(
         "../../tests/fixtures/playback-errors/hevc-rext-explicit-rdpcm-8-skip-disabled.mp4"
@@ -77,9 +77,17 @@ fn generate_long_term_stream() {
                 let mut payload = bits(&rbsp.bytes);
                 // Strip trailing padding, preserve rbsp_stop_one_bit, insert zero SPS entries.
                 payload.truncate(payload.iter().rposition(|&b| b).unwrap() + 1);
+                let mut long_syntax = vec![true];
+                ue(if mode == "sps" { 2 } else { 0 }, &mut long_syntax);
+                if mode == "sps" {
+                    for poc in [0u32, 1] {
+                        long_syntax.extend((0..sps.poc_bits).rev().map(|i| poc & (1 << i) != 0));
+                        long_syntax.push(true);
+                    }
+                }
                 payload.splice(
                     sps.long_term_flag_bit..sps.long_term_flag_bit + 1,
-                    [true, true],
+                    long_syntax,
                 );
                 if matches!(mode.as_str(), "mixed" | "invalid-short") {
                     let mut ordering = vec![false];
@@ -139,7 +147,12 @@ fn generate_long_term_stream() {
                     ue(1, &mut syntax); // delta_poc_s0_minus1: retained POC zero.
                     syntax.push(true);
                 }
-                ue(slice.short_term.len(), &mut syntax);
+                if mode == "sps" {
+                    ue(slice.short_term.len(), &mut syntax);
+                    ue(0, &mut syntax);
+                } else {
+                    ue(slice.short_term.len(), &mut syntax);
+                }
                 let modulus = 1i32 << sps.poc_bits;
                 let mut previous_cycle = 0;
                 for reference in &slice.short_term {
@@ -147,8 +160,15 @@ fn generate_long_term_stream() {
                     let lsb = target.rem_euclid(modulus);
                     let cycle = (poc - poc.rem_euclid(modulus) - target + lsb) / modulus;
                     assert!(cycle >= previous_cycle);
-                    syntax.extend((0..sps.poc_bits).rev().map(|i| lsb & (1 << i) != 0));
-                    syntax.push(reference.used);
+                    if mode == "sps" {
+                        assert_eq!(slice.short_term.len(), 1);
+                        assert_eq!(target, index as i32 - 1);
+                        assert!(reference.used);
+                        syntax.push(target != 0); // lt_idx_sps selects one of two entries.
+                    } else {
+                        syntax.extend((0..sps.poc_bits).rev().map(|i| lsb & (1 << i) != 0));
+                        syntax.push(reference.used);
+                    }
                     syntax.push(mode != "lsb");
                     if mode != "lsb" {
                         ue((cycle - previous_cycle) as usize, &mut syntax);
@@ -199,10 +219,17 @@ fn check_video(data: &[u8], expected: &[u8], mode: &str) {
             input.read_packet(0, index, &mut packet).unwrap();
             let (sps, pps) = decoder.parameters();
             assert!(sps.long_term_present);
+            if mode == "sps" {
+                assert_eq!(sps.long_term, [(0, true), (1, true)]);
+            }
             for nal in NalUnits::new(&packet, 4).unwrap() {
                 let nal = nal.unwrap();
                 if NalHeader::parse(nal).unwrap().is_vcl() {
                     let header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
+                    if mode == "sps" && index != 0 {
+                        assert_eq!(header.long_term.len(), 1);
+                        assert_eq!(header.long_term[0].poc_lsb, index as u32 - 1);
+                    }
                     if index != 0 {
                         if mode == "mixed" && index == 1 {
                             assert!(header.long_term.is_empty());
@@ -316,4 +343,13 @@ fn long_term_picture_cannot_be_reused_as_short_term_without_reset() {
     decoder.reset();
     input.read_packet(0, 0, &mut packet).unwrap();
     assert_eq!(decoder.decode_packet(&packet).unwrap().unwrap().poc, 0);
+}
+
+#[test]
+fn sps_selected_long_term_video_matches_independent_hm_pixels_and_rewind() {
+    check_video(
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4"),
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.yuv"),
+        "sps",
+    );
 }

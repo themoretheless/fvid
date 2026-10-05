@@ -18,6 +18,7 @@ root = Path(__file__).resolve().parents[1]
 fixtures = root / 'tests/fixtures/playback-errors'
 for mode, name in [('explicit', 'hevc-long-term-rext8'),
                    ('lsb', 'hevc-long-term-lsb-rext8'),
+                   ('sps', 'hevc-long-term-sps-rext8'),
                    ('mixed', 'hevc-long-term-mixed-rext8'),
                    ('invalid-short', 'hevc-long-term-invalid-short-rext8')]:
     with tempfile.TemporaryDirectory(prefix='fvid-hevc-long-term-') as directory:

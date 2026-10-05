@@ -469,7 +469,8 @@ mod tests {
     #[test]
     fn synthetic_long_term_submission_sets_driver_classification_and_current_set() {
         use fvid_codecs::codec::{config::NalUnits, hevc_decoder::HevcDecoder, hevc_nal::NalHeader};
-        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
+        for data in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4").as_slice(),
+                     include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice()] {
         let mut reader = crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
         let software = HevcDecoder::from_configuration(&reader.tracks()[0].configuration, 16 << 20).unwrap();
         let (sps, pps) = software.parameters();
@@ -483,6 +484,7 @@ mod tests {
             };
             let picture = HevcPicture::prepare(sps, pps, &slices, 31, sample as i32, &refs, 1 << 20).unwrap();
             let h = unsafe { picture.parameters().CodecSpecific.hevc };
+            assert_eq!(h.num_long_term_ref_pics_sps as usize, sps.long_term.len());
             assert_eq!(h.NumPocStCurrBefore, 0);
             assert_eq!(h.NumPocStCurrAfter, 0);
             assert_eq!(h.NumPocLtCurr, i32::from(sample != 0));
@@ -497,6 +499,7 @@ mod tests {
                     .err().unwrap().contains("short-term slot"));
                 assert!(HevcPicture::prepare(sps, pps, &slices, 31, sample as i32, &[], 1 << 20).is_err());
             }
+        }
         }
     }
     #[test]

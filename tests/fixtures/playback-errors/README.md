@@ -248,3 +248,20 @@ The long-term generator also produces this MP4, with no pixel oracle: HM
 conceals its missing short-term reference, so its recovered frames cannot
 serve as acceptance evidence. Valid long-term fixture oracles still must
 decode without HM reference-loss concealment.
+
+### SPS-selected HEVC long-term references
+
+`hevc-long-term-sps-rext8.mp4` uses two long-term SPS entries, POC LSB zero
+and one, both used. Its two P slices select entry zero and then entry one with
+`lt_idx_sps`, one SPS-selected entry, zero explicit slice entries and explicit
+MSB cycle zero. This is distinct from fixtures declaring no long-term SPS
+entries and spelling out each slice's POC.
+
+The active native acceptance test verifies both SPS entries, the selected POC
+LSB per picture, empty short-term sets, exact HM 18.0 pixels and reset replay.
+NVDEC parameter tests check `num_long_term_ref_pics_sps`, the resolved live slot
+and long-term current set; scheduler tests include the same stream. The
+ignored physical NVIDIA long-term test now includes all four valid variants.
+No physical GPU result or B-picture/multiple-active-list qualification is
+implied by these tests. The existing explicit generator produces this fourth
+valid fixture and separate YUV oracle without FFmpeg.
