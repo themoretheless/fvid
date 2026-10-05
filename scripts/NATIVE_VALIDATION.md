@@ -557,3 +557,18 @@ modes, legacy/player compilation, native dependency/source guards and diff
 checks passed. Existing generated temporal artifacts remain byte-identical.
 This migrates Y4M reverse; other source codecs and unimplemented production
 filters still require their existing adapter and the overall migration is open.
+
+## Core/player verification on macOS, 2026-10-05
+
+`FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg cargo test --locked --offline --features media,player --lib`
+completed successfully: 893 passed, 0 failed, 23 ignored. The command was started
+at `0cb90384`; the subsequent Opus capability inventory change has its own
+passing targeted library test. This run includes native player, seek, codec and
+GPU-render unit tests selected by these features. It does not execute the
+ignored cases or establish NVIDIA performance or complete codec coverage.
+
+`otool -L` on the resulting `fvid-c8ad722cfb4fc6a9` test executable listed macOS
+system libraries/frameworks and no libav library. The offline flag prevents
+Cargo network access; the invalid FFmpeg prefix checks SDK independence. This
+local command retains the normal executable PATH, so runtime absence of external
+tool calls is supported separately by source audits and CI's empty test PATH.
