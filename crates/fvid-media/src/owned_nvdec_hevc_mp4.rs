@@ -143,7 +143,7 @@ mod tests {
     #[test]
     #[ignore = "requires NVIDIA HEVC Main/Main10 NVDEC"]
     fn own_hevc_mp4_packets_decode_on_nvidia_without_libav() {
-        for bytes in [MAIN, MAIN10] {
+        for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/cuda-hevc.mp4").as_slice(), include_bytes!("../../../tests/fixtures/playback-errors/cuda-hevc-main10.mp4").as_slice()] {
             let mut source = HevcMp4Input::open(Cursor::new(bytes), Limits::default()).unwrap();
             source.qualify_packets().unwrap();
             let count = source.packet_count();

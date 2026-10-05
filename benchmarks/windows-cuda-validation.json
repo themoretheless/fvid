@@ -1,0 +1,109 @@
+{
+  "created_utc": "2026-10-05T18:11:03.322207+00:00",
+  "binary_sha256": "5cbcb3ec3ff96ec6c2029ef8a4a8e39c7920a41f73b8af12316731ca6e6a3689",
+  "checks": [
+    "physical CUDA point/sampling, NV12/P010, stream lifetime and NVENC tests"
+  ],
+  "status": "passed",
+  "scope": "physical CUDA Cargo tests",
+  "reference_requested": false,
+  "reference_completed": false,
+  "provided_cli_checks_completed": false,
+  "nvidia": "NVIDIA GeForce RTX 5090, 617.14",
+  "native_tests": [
+    {
+      "suite": "nvenc_session::tests",
+      "passed": 3,
+      "required_tests": [
+        "direct_cuda_session_opens_and_closes_without_libav",
+        "direct_hevc_submission_without_libav",
+        "direct_hevc_main10_p010_submission_without_libav"
+      ]
+    },
+    {
+      "suite": "pipeline::tests",
+      "passed": 2,
+      "required_tests": [
+        "resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip",
+        "sampling_shader_matches_independent_crop_and_reflection_reference"
+      ]
+    },
+    {
+      "suite": "nv12_buffer::tests",
+      "passed": 3,
+      "required_tests": [
+        "device_black_fill_has_correct_luma_chroma_and_padding",
+        "device_p010_black_fill_has_exact_codes_and_word_padding",
+        "native_host_roundtrip_preserves_nv12_and_p010_bytes"
+      ]
+    },
+    {
+      "suite": "nv12::native_nv12::shader_tests",
+      "passed": 3,
+      "required_tests": [
+        "native_nv12_sampling_shader_preserves_pitches_and_matches_cpu",
+        "native_p010_sampling_shader_preserves_pitches_and_matches_cpu",
+        "followed_stream_survives_parameter_changes_and_processor_drop"
+      ]
+    },
+    {
+      "suite": "owned_nvdec_avc",
+      "passed": 3,
+      "required_tests": [
+        "synthetic_owned_avc_picture_decodes_and_maps_on_nvidia",
+        "synthetic_ipb_packets_decode_map_and_release_without_libav",
+        "synthetic_avc_decode_filter_encode_chain_without_libav"
+      ]
+    },
+    {
+      "suite": "owned_nvdec_hevc",
+      "passed": 3,
+      "required_tests": [
+        "synthetic_owned_hevc_idr_submits_and_maps_on_nvidia",
+        "owned_hevc_ipb_scheduler_submits_and_maps_on_nvidia",
+        "own_hevc_mp4_packets_decode_on_nvidia_without_libav"
+      ]
+    },
+    {
+      "suite": "owned_nvdec_mp4",
+      "passed": 1,
+      "required_tests": [
+        "own_mp4_packets_decode_on_nvidia_without_libav"
+      ]
+    },
+    {
+      "suite": "owned_hw_filter",
+      "passed": 5,
+      "required_tests": [
+        "production_hw_filter_routes_synthetic_avc_without_libav",
+        "production_hw_filter_routes_sps_crop_without_libav",
+        "production_hw_filter_routes_hevc_movie_without_libav",
+        "production_hw_filter_routes_main10_movie_without_libav",
+        "production_host_bounce_preserves_main10_shader_and_movie_clock"
+      ]
+    },
+    {
+      "suite": "owned_hw_decode",
+      "passed": 1,
+      "required_tests": [
+        "production_decode_device_uses_owned_code_without_libav"
+      ]
+    },
+    {
+      "suite": "owned_nvenc_movie",
+      "passed": 2,
+      "required_tests": [
+        "synthetic_movie_encodes_and_muxes_without_libav",
+        "synthetic_main10_movie_encodes_and_muxes_without_libav"
+      ]
+    },
+    {
+      "suite": "owned_nvdec_movie",
+      "passed": 2,
+      "required_tests": [
+        "synthetic_movie_blanks_and_repeated_ranges_present_on_nvidia",
+        "synthetic_main10_movie_renders_p010_blanks_repeats_and_shader_on_nvidia"
+      ]
+    }
+  ]
+}

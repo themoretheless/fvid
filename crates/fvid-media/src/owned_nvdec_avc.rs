@@ -205,7 +205,7 @@ mod tests {
         use fvid_codecs::codec::{avc_access_unit, avc_poc::PocDecoder, config::AvcConfig};
         let mut reader = crate::owned_mp4::Mp4Reader::open(
             std::io::Cursor::new(include_bytes!(
-                "../../../tests/fixtures/playback-errors/control.mp4"
+                "../../../tests/fixtures/playback-errors/cuda-h264.mp4"
             )),
             crate::owned_mp4::Limits::default(),
         )

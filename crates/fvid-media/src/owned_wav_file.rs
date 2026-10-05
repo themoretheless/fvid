@@ -203,28 +203,25 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
     let mut temporary = None;
-    for attempt in 0..100 {
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    for _ in 0..100 {
+        let attempt = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let path = directory.join(format!(".fvid-wav-{}-{attempt}.tmp", std::process::id()));
         match std::fs::OpenOptions::new()
             .write(true)
             .create_new(true)
             .open(&path)
         {
-            Ok(_) => {
-                temporary = Some(path);
+            Ok(file) => {
+                temporary = Some((path, file));
                 break;
             }
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
             Err(e) => return Err(e.to_string()),
         }
     }
-    let temporary = temporary.ok_or("cannot reserve temporary output")?;
+    let (temporary, mut file) = temporary.ok_or("cannot reserve temporary output")?;
     let write = (|| -> Result<()> {
-        let mut file = std::fs::OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .open(&temporary)
-            .map_err(|e| e.to_string())?;
         let block_align = (channels as u16)
             .checked_mul(WIDTH as u16)
             .ok_or("wav block align overflow")?;
@@ -292,6 +289,28 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn concurrent_synthetic_pcm_exports_keep_independent_payloads() {
+        std::thread::scope(|scope| {
+            for worker in 0..8 {
+                scope.spawn(move || {
+                    let path = std::env::temp_dir().join(format!(
+                        "fvid-concurrent-pcm-{}-{worker}.wav",
+                        std::process::id()
+                    ));
+                    for iteration in 0..20 {
+                        let samples = [f64::from(worker), f64::from(iteration)];
+                        write_wav_f64le(&path, 48000, 1, &samples).unwrap();
+                        let bytes = std::fs::read(&path).unwrap();
+                        let expected: Vec<u8> =
+                            samples.iter().flat_map(|s| s.to_le_bytes()).collect();
+                        assert_eq!(&bytes[bytes.len() - expected.len()..], expected);
+                        std::fs::remove_file(&path).unwrap();
+                    }
+                });
+            }
+        });
+    }
     use super::*;
     #[test]
     fn synthetic_float_wav_preserves_bits_and_refuses_overwrite() {

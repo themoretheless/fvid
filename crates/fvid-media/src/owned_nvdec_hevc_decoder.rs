@@ -32,7 +32,7 @@ mod tests {
     #[test]
     #[ignore = "requires NVIDIA HEVC Main/Main10 NVDEC"]
     fn owned_hevc_ipb_scheduler_submits_and_maps_on_nvidia() {
-        for bytes in [MAIN, MAIN10] {
+        for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/cuda-hevc.mp4").as_slice(), include_bytes!("../../../tests/fixtures/playback-errors/cuda-hevc-main10.mp4").as_slice()] {
             let (mut reader, state, mut software) = input(bytes);
             let mut decoder =
                 HevcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20)

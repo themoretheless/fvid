@@ -1,0 +1,10 @@
+{
+  "cuda-h264-crop.mp4": "e4d25d6ca3e5825b001c55bc9e70646fffecadf5d6dbd7ff0c4cd6a6930a6e42",
+  "cuda-h264-video-metadata.mp4": "ae147463952469e43ca1acff6c6e11e7b7980e1cb476de767c48ed74748c1733",
+  "cuda-h264.mp4": "70966cbc99d6612db8fe510803beadba3b5990155b1eb894713620f59cbb50ad",
+  "cuda-hevc-edit-repeat.mp4": "efe5ed54216139b565f739a520bb7995341fdffb467fe743b91e47ff19db777b",
+  "cuda-hevc-main10-edit-repeat.mp4": "01d6e7a333311cba69489eeb2165627e45464cdf107c9064bfedafb6c94cc212",
+  "cuda-hevc-main10.mp4": "6e3c5ac42e895af7f2446c13c48c2fa77accbac3a1921f43f423d60dcba51752",
+  "cuda-hevc.mp4": "f64f1866fb5957c02a4f2b04391abe1a7997b59f553b525998dd19dc69e6a822",
+  "cuda-h264-edit-empty-spans.mov": "9dabd82af697e7da04f84ecdbcdcf2494b17f235b0d39b5bc03d926e89c93452"
+}

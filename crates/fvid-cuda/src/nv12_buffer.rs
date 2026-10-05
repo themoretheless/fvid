@@ -5,6 +5,29 @@ use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use std::sync::Arc;
 
+/// NVENC registration on Windows requires a conventional CUDA allocation,
+/// rather than an allocation from cuMemAllocAsync's virtual memory pool.
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+pub(crate) fn codec_allocation(
+    stream: &Arc<cudarc::driver::CudaStream>,
+    bytes: usize,
+) -> Result<cudarc::driver::CudaSlice<u8>, String> {
+    stream
+        .context()
+        .bind_to_thread()
+        .map_err(|e| e.to_string())?;
+    // SAFETY: Allocate the checked byte extent in this stream's live context.
+    let pointer =
+        unsafe { cudarc::driver::result::malloc_sync(bytes) }.map_err(|e| e.to_string())?;
+    // SAFETY: Transfer the unique allocation into a byte slice of its exact
+    // extent; the owning stream frees it after its recorded operations finish.
+    let mut buffer = unsafe { stream.upgrade_device_ptr::<u8>(pointer, bytes) };
+    stream
+        .memset_zeros(&mut buffer)
+        .map_err(|e| e.to_string())?;
+    Ok(buffer)
+}
+
 pub struct Nv12Buffer {
     width: u32,
     height: u32,
@@ -38,7 +61,7 @@ impl Nv12Buffer {
         {
             let device = crate::device_pool::shared(ordinal)?;
             let stream = device.new_stream()?;
-            let buffer = stream.alloc_zeros::<u8>(bytes).map_err(|e| e.to_string())?;
+            let buffer = codec_allocation(&stream, bytes)?;
             stream.synchronize().map_err(|e| e.to_string())?;
             Ok(Self {
                 width,
@@ -383,16 +406,12 @@ mod tests {
             let (y, uv) = plane_bytes(output.pitch(), 72).unwrap();
             assert_eq!(bytes.len(), y + uv);
             let code = |word: &[u8]| u16::from_le_bytes([word[0], word[1]]);
-            assert!(
-                bytes[..y]
-                    .chunks_exact(2)
-                    .all(|word| code(word) == if full_range { 0 } else { 64 << 6 })
-            );
-            assert!(
-                bytes[y..]
-                    .chunks_exact(2)
-                    .all(|word| code(word) == 512 << 6)
-            );
+            assert!(bytes[..y]
+                .chunks_exact(2)
+                .all(|word| code(word) == if full_range { 0 } else { 64 << 6 }));
+            assert!(bytes[y..]
+                .chunks_exact(2)
+                .all(|word| code(word) == 512 << 6));
             let view = output.view().unwrap();
             assert_eq!(view.pitch_y, 512);
             assert_eq!(view.uv - view.y, y as u64);
@@ -416,11 +435,9 @@ mod tests {
             let bytes = output.stream.clone_dtoh(&output.buffer).unwrap();
             let (y, uv) = plane_bytes(output.pitch, output.height).unwrap();
             assert_eq!(bytes.len(), y + uv);
-            assert!(
-                bytes[..y]
-                    .iter()
-                    .all(|value| *value == if full_range { 0 } else { 16 })
-            );
+            assert!(bytes[..y]
+                .iter()
+                .all(|value| *value == if full_range { 0 } else { 16 }));
             assert!(bytes[y..].iter().all(|value| *value == 128));
         }
     }

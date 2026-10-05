@@ -2367,6 +2367,12 @@ pub enum SphericalProjection {
     Miller,
     /// Azimuthal equidistant projection.
     AzimuthalEquidistant,
+    /// Mollweide equal-area projection.
+    Mollweide,
+    /// Hammer azimuthal equal-area projection.
+    Hammer,
+    /// Stereographic fisheye, distinct from the little-planet remap.
+    StereographicFisheye,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2386,7 +2392,10 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::Gnomonic => SphericalProjection::Sinusoidal,
         SphericalProjection::Sinusoidal => SphericalProjection::Miller,
         SphericalProjection::Miller => SphericalProjection::AzimuthalEquidistant,
-        SphericalProjection::AzimuthalEquidistant => SphericalProjection::Equirect,
+        SphericalProjection::AzimuthalEquidistant => SphericalProjection::Mollweide,
+        SphericalProjection::Mollweide => SphericalProjection::Hammer,
+        SphericalProjection::Hammer => SphericalProjection::StereographicFisheye,
+        SphericalProjection::StereographicFisheye => SphericalProjection::Equirect,
     }
 }
 
@@ -2408,6 +2417,9 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::Sinusoidal => "Sinusoidal",
         SphericalProjection::Miller => "Miller",
         SphericalProjection::AzimuthalEquidistant => "Azimuthal EQ",
+        SphericalProjection::Mollweide => "Mollweide",
+        SphericalProjection::Hammer => "Hammer",
+        SphericalProjection::StereographicFisheye => "Stereo fisheye",
     }
 }
 
@@ -2762,6 +2774,37 @@ pub fn project_spherical_view(
             yaw_deg_milli,
             pitch_deg_milli,
             roll_deg_milli,
+        ),
+        SphericalProjection::Mollweide => project_mollweide_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::Hammer => project_hammer_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::StereographicFisheye => project_stereographic_fisheye_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
         ),
     }
 }
@@ -6271,6 +6314,197 @@ pub fn format_cube_lut_osd(size: Option<usize>) -> String {
     }
 }
 
+/// Mollweide equal-area projection (approximate inverse).
+pub fn project_mollweide_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let half = fov * 0.5;
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        let y = (pitch + ny * half).clamp(-1.0, 1.0);
+        let mut theta = y;
+        for _ in 0..4 {
+            let f = 2.0 * theta + theta.sin() - std::f32::consts::PI * y;
+            let df = 2.0 + theta.cos();
+            theta -= f / df.max(1e-3);
+        }
+        let lat = theta.asin().clamp(
+            -std::f32::consts::FRAC_PI_2 + 0.01,
+            std::f32::consts::FRAC_PI_2 - 0.01,
+        );
+        let cos_t = theta.cos().max(1e-3);
+        for ox in 0..out_w {
+            let nx = 2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0;
+            let lon = yaw + (nx * half * aspect * std::f32::consts::SQRT_2) / cos_t;
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Hammer equal-area azimuthal projection.
+pub fn project_hammer_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let half = fov * 0.5;
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        for ox in 0..out_w {
+            let nx = 2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0;
+            let x = nx * half * aspect;
+            let y = pitch + ny * half;
+            let z2 = 1.0 - (x * x) / 8.0 - (y * y) / 2.0;
+            if z2 <= 0.0 {
+                out[(oy * out_w + ox) as usize] = 0;
+                continue;
+            }
+            let z = z2.sqrt();
+            let lon = yaw + 2.0 * (z * x / (2.0 * (2.0 * z2 - 1.0).max(1e-3))).atan();
+            let lat = (y * z).asin().clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Stereographic fisheye: r = 2*tan(theta/2).
+pub fn project_stereographic_fisheye_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let r_max = 2.0 * (fov * 0.5).tan().max(1e-6);
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let r = (nx * nx + ny * ny).sqrt();
+            if r > 1.0 {
+                out[(oy * out_w + ox) as usize] = 0;
+                continue;
+            }
+            let theta = 2.0 * (r * r_max * 0.5).atan();
+            let phi = ny.atan2(nx);
+            let x_cam = theta.sin() * phi.cos();
+            let y_cam = theta.sin() * phi.sin();
+            let z_cam = theta.cos();
+            let (sin_p, cos_p) = pitch.sin_cos();
+            let (sin_y, cos_y) = yaw.sin_cos();
+            let y1 = y_cam * cos_p - z_cam * sin_p;
+            let z1 = y_cam * sin_p + z_cam * cos_p;
+            let x2 = x_cam * cos_y + z1 * sin_y;
+            let z2 = -x_cam * sin_y + z1 * cos_y;
+            let len = (x2 * x2 + y1 * y1 + z2 * z2).sqrt().max(1e-6);
+            let lon = (z2 / len).atan2(x2 / len);
+            let lat = (y1 / len).asin().clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Scale content by MaxCLL versus display peak (HDR content-light mapping).
+pub fn content_light_scale_milli(maxcll: u32, display_peak_nits: u32) -> u32 {
+    let content = clamp_hdr_maxcll(maxcll).max(1);
+    let display = clamp_hdr_nits(display_peak_nits).max(1);
+    ((display as u64 * 1_000) / content as u64).min(4_000) as u32
+}
+
+pub fn format_content_light_scale_osd(scale_milli: u32) -> String {
+    format!("CLL scale ×{:.2}", scale_milli as f32 / 1_000.0)
+}
+
+/// Estimate an ambient light compensation gain.
+pub fn ambient_compensation_gain_milli(ambient_nits: u32, reference_nits: u32) -> u32 {
+    let amb = ambient_nits.clamp(1, 10_000);
+    let refer = reference_nits.clamp(1, 1_000);
+    let ratio = (amb as f32 / refer as f32).sqrt().clamp(0.5, 2.0);
+    (ratio * 1_000.0).round() as u32
+}
+
+pub fn format_ambient_compensation_osd(gain_milli: u32) -> String {
+    format!("Ambient ×{:.2}", gain_milli as f32 / 1_000.0)
+}
+
+pub fn apply_ambient_gain_channel(value: u8, gain_milli: u32) -> u8 {
+    let gain = gain_milli.clamp(250, 2_000);
+    ((u32::from(value) * gain) / 1_000).min(255) as u8
+}
+
+pub fn hdr_tonemap_modes_differ(a: HdrTonemap, b: HdrTonemap) -> bool {
+    if a == b {
+        return false;
+    }
+    apply_hdr_tonemap_pixel(180, 180, 180, a, COLOR_TRC_SMPTE2084)
+        != apply_hdr_tonemap_pixel(180, 180, 180, b, COLOR_TRC_SMPTE2084)
+}
+
+pub fn spherical_projections_differ(
+    a: SphericalProjection,
+    b: SphericalProjection,
+    src: &[u32],
+    src_w: u32,
+    src_h: u32,
+) -> bool {
+    if a == b || src.is_empty() || src_w == 0 || src_h == 0 {
+        return false;
+    }
+    let va = project_spherical_view(src_w, src_h, src, 8, 8, a, 30_000, 10_000, 0, 90_000);
+    let vb = project_spherical_view(src_w, src_h, src, 8, 8, b, 30_000, 10_000, 0, 90_000);
+    va != vb
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title
@@ -7186,8 +7420,13 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "azimuthal" | "azimuthal-equidistant" | "aeqd" => {
             Ok(SphericalProjection::AzimuthalEquidistant)
         }
+        "mollweide" => Ok(SphericalProjection::Mollweide),
+        "hammer" | "hammer-aitoff" => Ok(SphericalProjection::Hammer),
+        "stereographic-fisheye" | "stereo-fisheye" | "sg-fisheye" => {
+            Ok(SphericalProjection::StereographicFisheye)
+        }
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal|miller|azimuthal)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal|miller|azimuthal|mollweide|hammer|stereographic-fisheye)"
         )
         .into()),
     }

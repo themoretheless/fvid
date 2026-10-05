@@ -113,21 +113,21 @@ mod tests {
     fn production_decode_device_uses_owned_code_without_libav() {
         for (relative, count, dimensions, format) in [
             (
-                "../../tests/fixtures/playback-errors/avc-display-crop.mp4",
+                "../../tests/fixtures/playback-errors/cuda-h264-crop.mp4",
                 8,
-                (62, 46),
+                (318, 238),
                 "cuda/nv12",
             ),
             (
-                "../../tests/fixtures/hevc/main-ipb.mp4",
+                "../../tests/fixtures/playback-errors/cuda-hevc.mp4",
                 17,
-                (64, 64),
+                (256, 192),
                 "cuda/nv12",
             ),
             (
-                "../../tests/fixtures/hevc/main10-ipb.mp4",
+                "../../tests/fixtures/playback-errors/cuda-hevc-main10.mp4",
                 17,
-                (64, 64),
+                (256, 192),
                 "cuda/p010",
             ),
         ] {

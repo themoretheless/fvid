@@ -675,7 +675,7 @@ mod tests {
             let mut source = HevcMp4Input::open(
                 std::io::Cursor::new(
                     include_bytes!(
-                        "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
+                        "../../../tests/fixtures/playback-errors/cuda-hevc-main10-edit-repeat.mp4"
                     )
                     .as_slice(),
                 ),
@@ -936,7 +936,7 @@ mod tests {
     #[ignore = "requires an NVIDIA CUDA device with NVDEC"]
     fn synthetic_movie_blanks_and_repeated_ranges_present_on_nvidia() {
         const EMPTY: &[u8] =
-            include_bytes!("../../../tests/fixtures/playback-errors/edit-empty-spans.mov");
+            include_bytes!("../../../tests/fixtures/playback-errors/cuda-h264-edit-empty-spans.mov");
         let source = AvcMp4Input::open(
             std::io::Cursor::new(EMPTY),
             crate::owned_mp4::Limits::default(),

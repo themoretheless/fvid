@@ -275,7 +275,7 @@ mod tests {
     fn production_host_bounce_preserves_main10_shader_and_movie_clock() {
         for interval in [None, Some((200_000, 500_000))] {
             let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4");
+                .join("../../tests/fixtures/playback-errors/cuda-hevc-main10-edit-repeat.mp4");
             struct Output(std::path::PathBuf);
             impl Drop for Output {
                 fn drop(&mut self) {
@@ -314,8 +314,8 @@ mod tests {
                 crop: Some(fvid_media_info::CropRect {
                     x: 2,
                     y: 2,
-                    width: 32,
-                    height: 32,
+                    width: 252,
+                    height: 188,
                 }),
                 shader: Some(std::sync::Arc::from(
                     "__device__ unsigned int process_byte(unsigned int value, unsigned int plane, unsigned int x, unsigned int y) { return plane == 0u ? 940u : 512u; }",
@@ -330,7 +330,7 @@ mod tests {
                 stats.device_filter_passes,
                 (events.len() + events.iter().filter(|e| e.sample.is_some()).count()) as u64
             );
-            assert_eq!((stats.width, stats.height), (32, 32));
+            assert_eq!((stats.width, stats.height), (252, 188));
             let mut saved = crate::owned_webm::WebmReader::open(
                 BufReader::new(std::fs::File::open(&output.0).unwrap()),
                 Default::default(),
@@ -385,7 +385,7 @@ mod tests {
     #[ignore = "requires NVIDIA HEVC Main10 NVDEC and NVENC"]
     fn production_hw_filter_routes_main10_movie_without_libav() {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4");
+            .join("../../tests/fixtures/playback-errors/cuda-hevc-main10-edit-repeat.mp4");
         struct Output(std::path::PathBuf);
         impl Drop for Output {
             fn drop(&mut self) {
@@ -410,6 +410,7 @@ mod tests {
             Default::default(),
         )
         .unwrap();
+        saved.scan_all().unwrap();
         let config =
             fvid_codecs::codec::config::HevcConfig::parse(&saved.tracks[0].codec_private).unwrap();
         assert_eq!((config.bit_depth_luma, config.bit_depth_chroma), (10, 10));
@@ -432,8 +433,8 @@ mod tests {
     #[ignore = "requires NVIDIA HEVC NVDEC and H264 NVENC"]
     fn production_hw_filter_routes_hevc_movie_without_libav() {
         for relative in [
-            "../../tests/fixtures/hevc/main-ipb.mp4",
-            "../../tests/fixtures/playback-errors/hevc-cuda-edit-repeat.mp4",
+            "../../tests/fixtures/playback-errors/cuda-hevc.mp4",
+            "../../tests/fixtures/playback-errors/cuda-hevc-edit-repeat.mp4",
         ] {
             let source = Path::new(env!("CARGO_MANIFEST_DIR")).join(relative);
             let mut own = MovieSource::open(
@@ -492,7 +493,7 @@ mod tests {
     #[ignore = "requires NVIDIA NVDEC and NVENC"]
     fn production_hw_filter_routes_synthetic_avc_without_libav() {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/fixtures/playback-errors/control.mp4");
+            .join("../../tests/fixtures/playback-errors/cuda-h264.mp4");
         let destination = std::env::temp_dir().join(format!(
             "fvid-owned-hw-filter-{}-{}.mkv",
             std::process::id(),
@@ -519,6 +520,7 @@ mod tests {
             Default::default(),
         )
         .unwrap();
+        input.scan_all().unwrap();
         assert_eq!(input.packets.len(), 6);
         assert_eq!(input.packets[0].pts_ns, 0);
         assert!(input.packets.iter().all(|packet| packet.pts_ns >= 0
@@ -544,14 +546,14 @@ mod tests {
     #[ignore = "requires NVIDIA NVDEC and NVENC"]
     fn production_hw_filter_routes_sps_crop_without_libav() {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/fixtures/playback-errors/avc-display-crop.mp4");
+            .join("../../tests/fixtures/playback-errors/cuda-h264-crop.mp4");
         for crop in [
             None,
             Some(fvid_media_info::CropRect {
                 x: 2,
                 y: 4,
-                width: 58,
-                height: 40,
+                width: 314,
+                height: 230,
             }),
         ] {
             let destination = std::env::temp_dir().join(format!(
@@ -562,7 +564,7 @@ mod tests {
                     .unwrap()
                     .as_nanos()
             ));
-            let dimensions = crop.map_or((62, 46), |crop| (crop.width as u32, crop.height as u32));
+            let dimensions = crop.map_or((318, 238), |crop| (crop.width as u32, crop.height as u32));
             let stats = hw_filter(
                 &source,
                 &destination,
@@ -583,6 +585,7 @@ mod tests {
                 Default::default(),
             )
             .unwrap();
+            input.scan_all().unwrap();
             assert_eq!(
                 (input.tracks[0].width, input.tracks[0].height),
                 (u64::from(dimensions.0), u64::from(dimensions.1))
