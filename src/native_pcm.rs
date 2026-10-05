@@ -148,8 +148,7 @@ pub fn trim_wave(
         input.try_clone()?,
         info,
         destination,
-        new_end,
-        last - first,
+        WaveExtent { end: new_end, frames: last - first },
         &mut [(
             input,
             info.data_offset + first * u64::from(info.block),
@@ -160,16 +159,21 @@ pub fn trim_wave(
     )
 }
 
+struct WaveExtent {
+    end: u64,
+    frames: u64,
+}
+
 fn write_wave(
     mut input: File,
     info: WaveInfo,
     destination: &Path,
-    new_end: u64,
-    frames: u64,
+    extent: WaveExtent,
     segments: &mut [(File, u64, u64)],
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<PcmTrimStats> {
+    let WaveExtent { end: new_end, frames } = extent;
     let bytes = frames * u64::from(info.block);
     if bytes > u64::from(u32::MAX)
         || new_end - 8 > u64::from(u32::MAX)
@@ -397,10 +401,12 @@ pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
     })
 }
 
+type ConcatInputs = (WaveInfo, u64, Vec<(File, u64, u64)>);
+
 fn concat_inputs(
     sources: &[PathBuf],
     cancel: Option<&CancelFlag>,
-) -> Result<(WaveInfo, u64, Vec<(File, u64, u64)>)> {
+) -> Result<ConcatInputs> {
     if !(2..=256).contains(&sources.len()) {
         return Err(invalid("concat requires 2..=256 inputs"));
     }
@@ -481,8 +487,7 @@ pub fn concat_wave(
         segments[0].0.try_clone()?,
         info,
         destination,
-        end,
-        frames,
+        WaveExtent { end, frames },
         &mut segments,
         cancel,
         progress,

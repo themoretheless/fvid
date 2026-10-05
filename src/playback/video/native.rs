@@ -19,6 +19,10 @@ pub use packed::PackedPlanar;
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
 
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Keep the public reader variant constructors compatible; private codec state is boxed"
+)]
 pub enum NativeReader<R> {
     Webm(crate::playback_webm::WebmVideoReader<R>),
     Y4m(Y4mReader<R>),
@@ -350,9 +354,6 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Self::Avc { period, .. } => *period,
         }
     }
-    /// Exact half-open interval of the current frame, in source clock ticks.
-    /// No accumulated floating-point or nanosecond rounding is involved.
-
     /// Smallest source timestamp step, expressed in frame_interval units.
     pub fn frame_clock_quantum(&self) -> u64 {
         match self {
@@ -509,7 +510,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 if track.timescale == 0 {
                     return None;
                 }
-                let end = media_end.map_or(i128::from(track.duration), |end| i128::from(end));
+                let end = media_end.map_or(i128::from(track.duration), i128::from);
                 let ticks = edits.last().map_or(end - i128::from(*media_start), |edit| {
                     i128::from(edit.movie_end)
                 });
@@ -582,8 +583,8 @@ impl<R: BufRead + Seek> NativeReader<R> {
             return target;
         }
         let result = (|| {
-            if let Some(raw) = self.seek_raw(target)? {
-                if let Self::Avc {
+            if let Some(raw) = self.seek_raw(target)?
+                && let Self::Avc {
                     rgb,
                     rgb_budget,
                     rotation,
@@ -593,7 +594,6 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 {
                     fill_rgb(raw, rgb, *rgb_budget, *rotation, *dimensions)?;
                 }
-            }
             Ok(())
         })();
         if result.is_err() {
@@ -1003,7 +1003,7 @@ pub(crate) fn yuv_to_rgb_range(
     }
     for (py, line) in out.chunks_exact_mut(width * 3).enumerate() {
         let uv_row = (py / sy) * width.div_ceil(sx);
-        for (px, pixel) in line.chunks_exact_mut(3).enumerate() {
+        for (px, pixel) in line.as_chunks_mut::<3>().0.iter_mut().enumerate() {
             let uv = uv_row + px / sx;
             let y = i32::from(data[py * width + px]) - 16;
             let u = i32::from(data[luma_len + uv]) - 128;
@@ -1406,7 +1406,7 @@ mod tests {
             (b"vp09", "VP9"),
             (b"av01", "AV1"),
         ] {
-            assert_eq!(mp4_codec(&fourcc), name, "{fourcc:?}");
+            assert_eq!(mp4_codec(fourcc), name, "{fourcc:?}");
         }
     }
     #[test]

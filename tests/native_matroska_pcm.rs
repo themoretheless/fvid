@@ -187,7 +187,7 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
         )
         .unwrap();
         let joined: Vec<u8> = baseline
-            .chunks_exact(8)
+            .as_chunks::<8>().0.iter()
             .flat_map(|f| f.iter().chain(f).copied())
             .collect();
         assert_eq!(std::fs::read(&merged_pcm).unwrap(), joined);
@@ -395,8 +395,8 @@ fn synthetic_pcm32_and_float64_export_retains_precision_through_shared_timeline(
         )
         .unwrap();
         let widened: Vec<u8> = old
-            .chunks_exact(4)
-            .flat_map(|b| f64::from(f32::from_le_bytes(b.try_into().unwrap())).to_le_bytes())
+            .as_chunks::<4>().0.iter()
+            .flat_map(|b| f64::from(f32::from_le_bytes(*b)).to_le_bytes())
             .collect();
         assert_ne!(widened, baseline, "fixture must detect an f32 intermediate");
         let destination = dir.0.join(format!("{name}.wav"));

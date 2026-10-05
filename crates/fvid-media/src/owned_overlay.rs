@@ -5,3 +5,7 @@ fn invalid(message: &str) -> String {
     message.into()
 }
 include!("owned_overlay_impl.rs");
+
+pub(crate) fn validate_frame(frame: &GeometryFrame, depth: u8) -> Result<()> {
+    planes(frame, depth).map(|_| ())
+}

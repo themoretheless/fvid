@@ -60,12 +60,12 @@ mod tests {
             for i in 0..codes.len() {
                 let mut fields = vec![(codes[i], lens[i])];
                 let mut expected = [0i16; 4];
-                for k in 0..width {
+                for (k, value) in expected[..width].iter_mut().enumerate() {
                     let digit = (i / radix.pow((width - 1 - k) as u32)) % radix;
-                    expected[k] = digit as i16 - bias;
+                    *value = digit as i16 - bias;
                     if bias == 0 && digit != 0 {
                         fields.push((1, 1));
-                        expected[k] = -expected[k];
+                        *value = -*value;
                     }
                 }
                 if book == 11 {

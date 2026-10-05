@@ -154,7 +154,7 @@ fn compressed_filter_export_changes_pixels_and_reorders_actual_frames() {
                             bytes.iter().map(|v| 255 - v).collect()
                         } else {
                             bytes
-                                .chunks_exact(2)
+                                .as_chunks::<2>().0.iter()
                                 .flat_map(|v| {
                                     (((1u16 << depth) - 1) - u16::from_le_bytes([v[0], v[1]]))
                                         .to_le_bytes()
@@ -187,7 +187,7 @@ fn compressed_filter_export_changes_pixels_and_reorders_actual_frames() {
                     ..Default::default()
                 },
                 originals
-                    .chunks_exact(2)
+                    .as_chunks::<2>().0.iter()
                     .flat_map(|frames| frames.iter().rev().cloned())
                     .collect(),
             ),

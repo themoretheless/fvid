@@ -5,7 +5,7 @@
 //! what rate they advance the timeline, `strf` repeats the geometry the Wave registry
 //! spells as a `WAVEFORMATEX`, the interleaved records carry the bytes, and `idx1`
 //! states the whole record list once more. No single one of those statements is needed
-//! - the records alone are enough to play a file - and that is the point: a reader that
+//! (the records alone are enough to play a file), and that is the point: a reader that
 //! believes one field cannot tell a header from a mistake, while a reader that checks
 //! them against each other refuses the file that only looks like one. So this module
 //! indexes the records and then holds the file's own restatement of that list against
@@ -127,7 +127,7 @@ fn u16_at(bytes: &[u8], at: usize) -> Option<u16> {
 }
 
 fn id_at(bytes: &[u8], at: usize) -> Option<[u8; 4]> {
-    Some(bytes.get(at..at + 4)?.try_into().ok()?)
+    bytes.get(at..at + 4)?.try_into().ok()
 }
 
 /// One chunk of a RIFF run: its id and where its bytes sit in the file. `end` is the
@@ -676,7 +676,7 @@ mod tests {
             // wrapper's twelve bytes - its header and its own type word - stand in front
             // of the record, which the entry still points at.
             let (written, offset) = if nested && index % 2 == 1 {
-                (list(b"rec ", &[record.clone()]), at + 12)
+                (list(b"rec ", std::slice::from_ref(&record)), at + 12)
             } else {
                 (record, at)
             };
@@ -727,8 +727,7 @@ mod tests {
 
     fn said(bytes: &[u8], limits: Limits) -> String {
         Avi::parse(bytes, &limits)
-            .err()
-            .expect("refused")
+            .expect_err("refused")
             .to_string()
     }
 

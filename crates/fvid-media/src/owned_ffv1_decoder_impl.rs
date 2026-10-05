@@ -181,7 +181,7 @@ impl Decoder {
                 .filter(|v| *v <= 32768)
                 .ok_or_else(|| invalid("FFV1 context count overflow"))?;
         }
-        let count = (scale as usize + 1) / 2;
+        let count = (scale as usize).div_ceil(2);
         let bytes = count * 64 + std::mem::size_of::<State>();
         if bytes > self.budget {
             return Err(invalid("FFV1 contexts exceed memory budget"));

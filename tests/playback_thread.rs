@@ -834,16 +834,9 @@ fn a_camera_log_unfolds_in_the_picture_the_thread_shows() {
                     bytes.push(60 + (((x * 10 + y * 3) as u32 + u32::from(frame) * 5) % 161) as u8);
                 }
             }
-            for _ in 0..height / 2 {
-                for _ in 0..width / 2 {
-                    bytes.push(128);
-                }
-            }
-            for _ in 0..height / 2 {
-                for _ in 0..width / 2 {
-                    bytes.push(128);
-                }
-            }
+            let chroma_samples = (height / 2) * (width / 2);
+            bytes.extend(std::iter::repeat_n(128, chroma_samples));
+            bytes.extend(std::iter::repeat_n(128, chroma_samples));
         }
         bytes
     }

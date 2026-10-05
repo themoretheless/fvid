@@ -110,8 +110,8 @@ mod tests {
         assert_eq!(decoded.len() * 4, reference.len());
         let mut squared_error = 0.0;
         let mut peak_error = 0.0f64;
-        for (&actual, bytes) in decoded.iter().zip(reference.chunks_exact(4)) {
-            let expected = f32::from_le_bytes(bytes.try_into().unwrap());
+        for (&actual, bytes) in decoded.iter().zip(reference.as_chunks::<4>().0.iter()) {
+            let expected = f32::from_le_bytes(*bytes);
             let error = f64::from(actual) - f64::from(expected);
             squared_error += error * error;
             peak_error = peak_error.max(error.abs());

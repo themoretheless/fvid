@@ -37,7 +37,7 @@ fn main() {
             assert!(source.publish(tick, &destination).unwrap());
             destination.copy_latest(None, &mut actual).unwrap();
             let rgb = &reference.stdout[index as usize * 192..(index as usize + 1) * 192];
-            for (bgra, rgb) in actual.chunks_exact(4).zip(rgb.chunks_exact(3)) {
+            for (bgra, rgb) in actual.as_chunks::<4>().0.iter().zip(rgb.as_chunks::<3>().0.iter()) {
                 assert_eq!(bgra[3], 255);
                 for channel in 0..3 {
                     peak = peak.max(bgra[2 - channel].abs_diff(rgb[channel]));

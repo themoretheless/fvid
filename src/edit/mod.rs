@@ -4,7 +4,6 @@
 //! frames, or mux output; those responsibilities belong to `container`,
 //! `codec`, `y4m`, and the execution backends.
 
-mod concat;
 mod plan;
 mod planner;
 mod project;

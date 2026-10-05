@@ -602,6 +602,18 @@ fn publish_events(
     }))
 }
 
+/// Convert supported subtitle sources with backend-independent operation options.
+/// Unsupported profiles return `None` before creating the destination.
+pub fn try_convert_with_options(
+    source: &Path,
+    destination: &Path,
+    options: &media_info::SubtitleConvertOptions,
+) -> Result<Option<SubtitleStats>> {
+    match options.codec {
+        media_info::SubtitleCodec::Ass => try_convert(source, destination, &options.streams),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::ass_text;
@@ -615,17 +627,5 @@ mod tests {
         for text in ["&#123;", "&#92;", "&#0;", "&#xD800;", "&unknown;"] {
             assert!(ass_text(text).is_none(), "{text}");
         }
-    }
-}
-
-/// Convert supported subtitle sources with backend-independent operation options.
-/// Unsupported profiles return `None` before creating the destination.
-pub fn try_convert_with_options(
-    source: &Path,
-    destination: &Path,
-    options: &media_info::SubtitleConvertOptions,
-) -> Result<Option<SubtitleStats>> {
-    match options.codec {
-        media_info::SubtitleCodec::Ass => try_convert(source, destination, &options.streams),
     }
 }

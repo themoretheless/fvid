@@ -244,7 +244,7 @@ fn synthetic_leading_aac_padding_does_not_return_as_silence() {
             encoding: Encoding::Aac {
                 configuration: &asc,
                 sample_rate: config.sample_rate,
-                channels: config.channels.into(),
+                channels: config.channels,
             },
             name: "",
             language: "",

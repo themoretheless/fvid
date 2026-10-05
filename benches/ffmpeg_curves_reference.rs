@@ -122,7 +122,7 @@ fn main() {
                 }
                 if !planar
                     && channels == 3
-                    && args == format!("all='0/0 0.25/0 0.5/0.5 0.75/1 1/1':interp=pchip")
+                    && args == "all='0/0 0.25/0 0.5/0.5 0.75/1 1/1':interp=pchip"
                 {
                     std::fs::write(
                         format!("/tmp/fvid-curves-plateau-{depth}.reference.raw"),
@@ -142,7 +142,7 @@ fn main() {
 fn planarize(data: &[u8]) -> Vec<u8> {
     let mut output = Vec::new();
     for channel in [1, 2, 0] {
-        for pixel in data.chunks_exact(6) {
+        for pixel in data.as_chunks::<6>().0 {
             output.extend_from_slice(&pixel[channel * 2..channel * 2 + 2]);
         }
     }

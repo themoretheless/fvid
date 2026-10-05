@@ -135,16 +135,13 @@ fn main() {
                     && h == 13
                     && format == "yuv420p"
                     && std::env::var_os("FVID_WRITE_REFERENCE_FIXTURES").is_some()
-                {
-                    if let Some(mode) = args
+                    && let Some(mode) = args
                         .strip_prefix("m0=")
                         .and_then(|v| v.split(':').next())
                         .and_then(|v| v.parse::<u8>().ok())
-                    {
-                        if args == format!("m0={mode}:m1={mode}:m2={mode}:m3={mode}") {
-                            std::fs::write(format!("tests/fixtures/playback-errors/removegrain-{mode:02}.expected.raw"),result.stdout).unwrap();
-                        }
-                    }
+                    && args == format!("m0={mode}:m1={mode}:m2={mode}:m3={mode}")
+                {
+                    std::fs::write(format!("tests/fixtures/playback-errors/removegrain-{mode:02}.expected.raw"),result.stdout).unwrap();
                 }
             }
         }

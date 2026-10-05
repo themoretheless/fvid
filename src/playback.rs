@@ -214,7 +214,7 @@ mod tests {
             data.extend(std::iter::repeat_n(240, chroma_len));
             let mut reader = Y4mReader::new(Cursor::new(data), 100).unwrap();
             assert!(reader.read_frame().unwrap());
-            for pixel in reader.rgb().chunks_exact(3) {
+            for pixel in reader.rgb().as_chunks::<3>().0.iter() {
                 assert!(pixel[0] >= 254 && pixel[1] <= 1 && pixel[2] <= 1);
             }
             assert!(!reader.read_frame().unwrap());

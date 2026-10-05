@@ -73,7 +73,7 @@ impl AverageBlur {
             || (bytes == 2
                 && frame
                     .data
-                    .chunks_exact(2)
+                    .as_chunks::<2>().0.iter()
                     .any(|p| u32::from(u16::from_le_bytes([p[0], p[1]])) >= 1u32 << depth))
         {
             return Err(invalid("invalid avgblur sample storage"));
@@ -105,16 +105,16 @@ impl AverageBlur {
                         u64::from(u16::from_le_bytes([frame.data[at], frame.data[at + 1]]))
                     }
                 };
-                for x in 0..w {
-                    columns[x] = sample(x, 0) * ry as u64;
+                for (x, column) in columns[..w].iter_mut().enumerate() {
+                    *column = sample(x, 0) * ry as u64;
                     for y in 0..=ry {
-                        columns[x] += sample(x, y);
+                        *column += sample(x, y);
                     }
                 }
                 for y in 0..h {
                     if y > 0 {
-                        for x in 0..w {
-                            columns[x] = columns[x] - sample(x, y.saturating_sub(ry + 1))
+                        for (x, column) in columns[..w].iter_mut().enumerate() {
+                            *column = *column - sample(x, y.saturating_sub(ry + 1))
                                 + sample(x, (y + ry).min(h - 1));
                         }
                     }

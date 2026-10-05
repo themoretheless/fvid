@@ -18,7 +18,7 @@ fn hevc_resolution_change_keeps_camera_format_pixels_and_timeline() {
         assert_eq!(position, (expected.len() as u64 * 1_000_000_000).div_ceil(30));
         let bgra: Vec<u8> = reference
             .rgb()
-            .chunks_exact(3)
+            .as_chunks::<3>().0.iter()
             .flat_map(|p| [p[2], p[1], p[0], 255])
             .collect();
         let mut fitted = vec![0; 128 * 128 * 4];

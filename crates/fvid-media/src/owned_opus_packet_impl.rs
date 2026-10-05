@@ -88,7 +88,7 @@ pub fn duration_ns(packet: &[u8]) -> Result<u64> {
         if sizes > end.saturating_sub(offset) || end - offset - sizes > 1275 {
             return Err(invalid("invalid Opus frame lengths"));
         }
-    } else if (end - offset) % count != 0 || (end - offset) / count > 1275 {
+    } else if !(end - offset).is_multiple_of(count) || (end - offset) / count > 1275 {
         return Err(invalid("invalid Opus CBR frame lengths"));
     }
     Ok((frame_us * count) as u64 * 1000)

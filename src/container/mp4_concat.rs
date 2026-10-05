@@ -66,17 +66,16 @@ pub fn open(
         if !mp4_matroska::eligible(&reader) {
             return Ok(None);
         }
-        if let Some(first) = segments.first() {
-            if reader.tracks().len() != first.reader.tracks().len()
+        if let Some(first) = segments.first()
+            && (reader.tracks().len() != first.reader.tracks().len()
                 || !reader
                     .tracks()
                     .iter()
                     .zip(first.reader.tracks())
-                    .all(|(a, b)| compatible(a, b))
+                    .all(|(a, b)| compatible(a, b)))
             {
                 return Ok(None);
             }
-        }
         if reader
             .tracks()
             .iter()

@@ -375,7 +375,7 @@ fn monochrome_fixture_playback_preserves_luma_depth_timing_and_seek() {
         assert!(reader.read_frame().unwrap());
         let first = reader.rgb().to_vec();
         assert_eq!(first.len(), 4 * 3 * 3);
-        for pixel in first.chunks_exact(3) {
+        for pixel in first.as_chunks::<3>().0 {
             assert_eq!(pixel[0], pixel[1]);
             assert_eq!(pixel[1], pixel[2]);
         }

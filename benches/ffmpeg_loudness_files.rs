@@ -90,10 +90,10 @@ mod file_tests {
                 assert_eq!(owned.len(), foreign.len());
                 let mut maximum = 0f64;
                 let mut squared = 0f64;
-                for (a, b) in owned.chunks_exact(4).zip(foreign.chunks_exact(4)) {
+                for (a, b) in owned.as_chunks::<4>().0.iter().zip(foreign.as_chunks::<4>().0.iter()) {
                     let difference = f64::from(
-                        f32::from_le_bytes(a.try_into().unwrap())
-                            - f32::from_le_bytes(b.try_into().unwrap()),
+                        f32::from_le_bytes(*a)
+                            - f32::from_le_bytes(*b),
                     );
                     maximum = maximum.max(difference.abs());
                     squared += difference * difference;
@@ -105,12 +105,12 @@ mod file_tests {
             }
             assert_eq!(output.len(), reference.len(), "{codec}/{ext} sample count");
             for (i, (actual, expected)) in output
-                .chunks_exact(4)
-                .zip(reference.chunks_exact(4))
+                .as_chunks::<4>().0.iter()
+                .zip(reference.as_chunks::<4>().0.iter())
                 .enumerate()
             {
-                let actual = f32::from_le_bytes(actual.try_into().unwrap());
-                let expected = f32::from_le_bytes(expected.try_into().unwrap());
+                let actual = f32::from_le_bytes(*actual);
+                let expected = f32::from_le_bytes(*expected);
                 assert!(
                     (actual - expected).abs() < 1e-7,
                     "{codec}/{ext} sample {i}: {actual} != {expected}"

@@ -251,6 +251,7 @@ impl PixelFilters {
             .map_err(|e| invalid(&e))?;
         self.apply_colour_clock(frame, depth, full_range, matrix_code, n, t, clock)
     }
+    #[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
     pub fn apply_colour_clock(
         &self,
         frame: &mut GeometryFrame,
@@ -316,12 +317,11 @@ impl PixelFilters {
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
         }
         if let Some(filter) = self.monochrome {filter.apply(frame,depth).map_err(|e|invalid(&e))?;}
-        if let Some(timeline)=&self.grayworld {
-            if timeline.enabled(n,t,frame.width,frame.height).map_err(|e|invalid(&e))? {
-            let filter=fvid_media::owned_grayworld::GrayWorld::default();
+        if let Some(timeline)=&self.grayworld
+            && timeline.enabled(n,t,frame.width,frame.height).map_err(|e|invalid(&e))? {
+            let filter=fvid_media::owned_grayworld::GrayWorld;
             if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,frame.width,frame.height,depth,3).map_err(|e|invalid(&e))?;}
             else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
-        }
         }
         let drawing_sar=self.vignette_source.get().map_or(1.,|(sar,_)|sar);
         if let Some(filter)=&self.drawbox {filter.apply_with_aspect(frame,depth,drawing_sar,n,t).map_err(|e|invalid(&e))?;}
@@ -375,7 +375,6 @@ impl PixelFilters {
 
 #[cfg(test)]
 mod colorize_tests {
-    use super::*;
     #[test]
     fn colorize_native_decode_and_lossless_export_accept_high_depth_odd_frames() {
         use crate::playback_native::NativeReader;
@@ -424,7 +423,7 @@ mod colorize_tests {
                 } else {
                     frame
                         .data
-                        .chunks_exact(2)
+                        .as_chunks::<2>().0.iter()
                         .map(|s| u16::from_le_bytes([s[0], s[1]]))
                         .collect()
                 };
@@ -446,7 +445,6 @@ mod colorize_tests {
 
 #[cfg(test)]
 mod monochrome_tests {
-    use super::*;
     #[test]
     fn monochrome_native_decode_and_lossless_export_accept_high_depth_odd_frames() {
         use crate::playback_native::NativeReader;
@@ -496,7 +494,7 @@ mod monochrome_tests {
                 } else {
                     frame
                         .data
-                        .chunks_exact(2)
+                        .as_chunks::<2>().0.iter()
                         .map(|s| u16::from_le_bytes([s[0], s[1]]))
                         .collect()
                 };

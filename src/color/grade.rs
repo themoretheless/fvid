@@ -920,9 +920,9 @@ mod tests {
         for node in 0..=32 {
             let code = node as f64 / 32.0;
             let shown = grade.rgb([code as f32; 3]);
-            for channel in 0..3 {
+            for (channel, &value) in shown.iter().enumerate() {
                 let want = forward(code, channel);
-                let got = f64::from(shown[channel]);
+                let got = f64::from(value);
                 apart = apart.max((want - reversed(code, channel)).abs());
                 worst = worst.max((want - got).abs());
                 assert!(

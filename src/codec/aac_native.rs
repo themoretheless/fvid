@@ -51,9 +51,9 @@ mod tests {
         assert_eq!(samples.len() * 4, reference.len());
         let mut squared = 0.0;
         let mut peak = 0.0f64;
-        for (&sample, bytes) in samples.iter().zip(reference.chunks_exact(4)) {
+        for (&sample, bytes) in samples.iter().zip(reference.as_chunks::<4>().0.iter()) {
             let error =
-                f64::from(sample) - f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+                f64::from(sample) - f64::from(f32::from_le_bytes(*bytes));
             squared += error * error;
             peak = peak.max(error.abs());
         }
@@ -84,9 +84,9 @@ mod tests {
         assert_eq!(samples.len() * 4, reference.len());
         let mut squared = 0.0;
         let mut peak = 0.0f64;
-        for (&sample, bytes) in samples.iter().zip(reference.chunks_exact(4)) {
+        for (&sample, bytes) in samples.iter().zip(reference.as_chunks::<4>().0.iter()) {
             let error =
-                f64::from(sample) - f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+                f64::from(sample) - f64::from(f32::from_le_bytes(*bytes));
             squared += error * error;
             peak = peak.max(error.abs());
         }
@@ -203,9 +203,9 @@ mod tests {
         assert_eq!(samples.len() * 4, reference.len());
         let mut squared = 0.0;
         let mut peak = 0.0f64;
-        for (&sample, bytes) in samples.iter().zip(reference.chunks_exact(4)) {
+        for (&sample, bytes) in samples.iter().zip(reference.as_chunks::<4>().0.iter()) {
             let error =
-                f64::from(sample) - f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+                f64::from(sample) - f64::from(f32::from_le_bytes(*bytes));
             squared += error * error;
             peak = peak.max(error.abs());
         }
@@ -234,9 +234,9 @@ mod tests {
         assert_eq!(samples.len() * 4, reference.len());
         let mut squared = [0.0; 6];
         let mut peak = [0.0f64; 6];
-        for (i, (&sample, bytes)) in samples.iter().zip(reference.chunks_exact(4)).enumerate() {
+        for (i, (&sample, bytes)) in samples.iter().zip(reference.as_chunks::<4>().0.iter()).enumerate() {
             let error =
-                f64::from(sample) - f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+                f64::from(sample) - f64::from(f32::from_le_bytes(*bytes));
             squared[i % 6] += error * error;
             peak[i % 6] = peak[i % 6].max(error.abs());
         }

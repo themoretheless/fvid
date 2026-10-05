@@ -50,7 +50,7 @@ fn camera_high_depth_bgra_matches_rgb_reference_and_holds_or_rewinds_exactly() {
                 Some(tick)
             );
             let reference = &analytic[index * 192..(index + 1) * 192];
-            for (bgra, rgb) in actual.chunks_exact(4).zip(reference.chunks_exact(3)) {
+            for (bgra, rgb) in actual.as_chunks::<4>().0.iter().zip(reference.as_chunks::<3>().0.iter()) {
                 assert_eq!(bgra[3], 255);
                 assert_eq!(
                     &[bgra[2], bgra[1], bgra[0]],

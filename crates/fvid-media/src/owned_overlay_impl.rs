@@ -55,7 +55,7 @@ fn planes(frame: &GeometryFrame, depth: u8) -> Result<Vec<Plane>> {
         let max = ((1u32 << depth) - 1) as u16;
         if frame
             .data
-            .chunks_exact(2)
+            .as_chunks::<2>().0.iter()
             .any(|p| u16::from_le_bytes([p[0], p[1]]) > max)
         {
             return Err(invalid("overlay sample exceeds declared depth"));
@@ -63,10 +63,6 @@ fn planes(frame: &GeometryFrame, depth: u8) -> Result<Vec<Plane>> {
     }
     Ok(result)
 }
-pub(crate) fn validate_frame(frame: &GeometryFrame, depth: u8) -> Result<()> {
-    planes(frame, depth).map(|_| ())
-}
-
 /// Replace the covered destination samples with an opaque foreground.
 /// Inputs must already share colour encoding, range, depth and chroma sampling.
 /// Offscreen pixels are clipped. Chroma-subsampled placement must be aligned;
@@ -100,11 +96,10 @@ pub fn overlay_opaque_depth(
     }
     let target = planes(destination, destination_depth)?;
     let source = planes(foreground, foreground_depth)?;
-    if let Some([sx, sy]) = destination.subsampling {
-        if x % i64::try_from(sx).unwrap() != 0 || y % i64::try_from(sy).unwrap() != 0 {
+    if let Some([sx, sy]) = destination.subsampling
+        && (x % i64::try_from(sx).unwrap() != 0 || y % i64::try_from(sy).unwrap() != 0) {
             return Err(invalid("overlay placement must align with chroma samples"));
         }
-    }
     for (plane, (dst, src)) in target.iter().zip(source).enumerate() {
         let px = i128::from(x) / dst.sx as i128;
         let py = i128::from(y) / dst.sy as i128;

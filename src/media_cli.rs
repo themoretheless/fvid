@@ -40,9 +40,8 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             } else {
                 owned.push(option.clone());
                 // Keep parameter values together, including strings resembling flags.
-                if !matches!(option.as_str(), "--hflip" | "--vflip" | "--quiet" | "--progress" | "--seek") {
-                    if let Some(value) = options.next() { owned.push(value.clone()); }
-                }
+                if !matches!(option.as_str(), "--hflip" | "--vflip" | "--quiet" | "--progress" | "--seek")
+                    && let Some(value) = options.next() { owned.push(value.clone()); }
             }
         }
         if let Some(name) = encoder {
@@ -308,8 +307,8 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 _ => supported = false,
             }
         }
-        if supported {
-            if let Some(stats) = fvid::native_subtitle::try_convert(
+        if supported
+            && let Some(stats) = fvid::native_subtitle::try_convert(
                 std::path::Path::new(&args[1]),
                 std::path::Path::new(&args[2]),
                 &streams,
@@ -319,7 +318,6 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 }
                 return Ok(());
             }
-        }
     }
     if native_mix(args)? || native_merge(args)? {
         return Ok(());
@@ -375,15 +373,13 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("remux")
         && args.len() >= 3
-    {
-        if let Some(plan) = fvid::native_plan::remux(std::path::Path::new(&args[2]))? {
+        && let Some(plan) = fvid::native_plan::remux(std::path::Path::new(&args[2]))? {
             if args[3..].iter().any(|s| s != "--quiet") {
                 return Err("native remux plan supports all streams without metadata mutations or custom budgets".into());
             }
             println!("{}", serde_json::to_string_pretty(&plan)?);
             return Ok(());
         }
-    }
 
     if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("decode-audio")
@@ -1458,9 +1454,7 @@ fn plain_decode(args: &[String]) -> Result<Option<DecodeRequest<'_>>, Box<dyn st
             } else {
                 to = Some(time);
             }
-        } else if !positional && arg.starts_with('-') {
-            return Ok(None);
-        } else if path.replace(arg.as_str()).is_some() {
+        } else if (!positional && arg.starts_with('-')) || path.replace(arg.as_str()).is_some() {
             return Ok(None);
         }
     }
@@ -1663,6 +1657,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut subtitle_codec = fvid_media::SubtitleCodec::Ass;
     let mut device = 0usize;
     let mut cuda_shader = None;
+    #[cfg(feature = "media-cuda")]
     let mut cuda_shader_sampling = false;
     let mut device_set = false;
     let mut quiet = false;
@@ -1702,7 +1697,10 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--seek" => seek = true,
             "--cuda-shader" | "--cuda-sampling-shader" => {
-                cuda_shader_sampling = args[i] == "--cuda-sampling-shader";
+                #[cfg(feature = "media-cuda")]
+                {
+                    cuda_shader_sampling = args[i] == "--cuda-sampling-shader";
+                }
                 if command != "hw-filter" {
                     return Err("--cuda-shader requires hw-filter".into());
                 }
@@ -4229,7 +4227,7 @@ fn native_mix(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
                 options.weights = iter
                     .next()
                     .ok_or("missing mix weights")?
-                    .split(|c| c == ',' || c == ' ')
+                    .split([',', ' '])
                     .filter(|s| !s.is_empty())
                     .map(str::parse::<f32>)
                     .collect::<Result<Vec<_>, _>>()?;
@@ -5133,7 +5131,7 @@ mod lutyuv_cli_tests {
                 } else {
                     pixels
                         .data
-                        .chunks_exact(2)
+                        .as_chunks::<2>().0.iter()
                         .map(|s| u16::from_le_bytes([s[0], s[1]]))
                         .collect()
                 };
@@ -5238,7 +5236,7 @@ mod colorhold_cli_tests {
                 usize::MAX,
             )
             .unwrap();
-            let reference=if depth>8 {Some(std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorhold-black-reference-{depth}.raw"))).unwrap().chunks_exact(2).map(|b|u16::from_le_bytes([b[0],b[1]])).collect::<Vec<_>>())} else {None};
+            let reference=if depth>8 {Some(std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/colorhold-black-reference-{depth}.raw"))).unwrap().as_chunks::<2>().0.iter().map(|b|u16::from_le_bytes([b[0],b[1]])).collect::<Vec<_>>())} else {None};
             let mut index=0;
             while let Some(frame) = reader.read_frame_raw().unwrap() {
                 let pixels = fvid::native_geometry::VideoGeometry::default()
@@ -5249,7 +5247,7 @@ mod colorhold_cli_tests {
                 } else {
                     pixels
                         .data
-                        .chunks_exact(2)
+                        .as_chunks::<2>().0.iter()
                         .map(|s| u16::from_le_bytes([s[0], s[1]]))
                         .collect()
                 };

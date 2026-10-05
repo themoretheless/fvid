@@ -511,11 +511,10 @@ impl Spool {
             .unwrap_or(0)
             .saturating_sub(reserved_memory());
         let lead = (remaining / 2).min(2 << 30) / CHUNK * CHUNK;
-        if lead >= 8 << 20 {
-            if let Ok(spool) = Self::with_storage(path, lead, true) {
+        if lead >= 8 << 20
+            && let Ok(spool) = Self::with_storage(path, lead, true) {
                 return Ok(spool);
             }
-        }
         Self::open(path, SPOOL_LEAD)
     }
 
@@ -906,7 +905,7 @@ pub fn available_memory() -> Option<u64> {
                 )?;
             }
         }
-        return pages.checked_mul(page);
+        pages.checked_mul(page)
     }
     #[cfg(not(any(target_os = "linux", target_os = "macos")))]
     None

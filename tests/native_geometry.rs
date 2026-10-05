@@ -418,13 +418,13 @@ fn media_sampling_preserves_the_native_contract_separately() {
     let media = geometry.apply_media(&input, 16, 1).unwrap();
     let native = geometry.apply(&input, 16, 1).unwrap();
     assert_eq!(
-        media.data.chunks_exact(3).map(|p| p[0]).collect::<Vec<_>>(),
+        media.data.as_chunks::<3>().0.iter().map(|p| p[0]).collect::<Vec<_>>(),
         [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15]
     );
     assert_eq!(
         native
             .data
-            .chunks_exact(3)
+            .as_chunks::<3>().0.iter()
             .map(|p| p[0])
             .collect::<Vec<_>>(),
         [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15]

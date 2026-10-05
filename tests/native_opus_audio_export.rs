@@ -261,11 +261,11 @@ fn opus_file_export_accepts_speech_hybrid_and_surround_profiles() {
         let actual = wave_payload(&output);
         assert_eq!(actual.len(), expected.len(), "{name}");
         let error = actual
-            .chunks_exact(4)
-            .zip(expected.chunks_exact(4))
+            .as_chunks::<4>().0.iter()
+            .zip(expected.as_chunks::<4>().0.iter())
             .map(|(a, b)| {
-                (f32::from_le_bytes(a.try_into().unwrap())
-                    - f32::from_le_bytes(b.try_into().unwrap()))
+                (f32::from_le_bytes(*a)
+                    - f32::from_le_bytes(*b))
                 .abs()
             })
             .fold(0.0f32, f32::max);

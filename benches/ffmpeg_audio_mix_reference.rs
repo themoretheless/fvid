@@ -40,33 +40,7 @@ fn wave(path: &Path, samples: &[f32], rate: u32, channels: u16) {
     }
     std::fs::write(path, out).unwrap();
 }
-fn labelled_wave(path: &Path, samples: &[f32], rate: u32, channels: u16) {
-    wave(path, samples, rate, channels);
-    if channels <= 2 {
-        return;
-    }
-    let mut bytes = std::fs::read(path).unwrap();
-    let mask: u32 = match channels {
-        3 => 7,
-        4 => 0x107,
-        5 => 0x37,
-        6 => 0x3f,
-        _ => 0,
-    };
-    bytes[16..20].copy_from_slice(&40u32.to_le_bytes());
-    bytes[20..22].copy_from_slice(&0xfffeu16.to_le_bytes());
-    let mut extra = Vec::new();
-    extra.extend_from_slice(&22u16.to_le_bytes());
-    extra.extend_from_slice(&32u16.to_le_bytes());
-    extra.extend_from_slice(&mask.to_le_bytes());
-    extra.extend_from_slice(&[
-        3, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71,
-    ]);
-    bytes.splice(36..36, extra);
-    let len = (bytes.len() - 8) as u32;
-    bytes[4..8].copy_from_slice(&len.to_le_bytes());
-    std::fs::write(path, bytes).unwrap();
-}
+
 fn pcm(path: &Path) -> Vec<u8> {
     let bytes = std::fs::read(path).unwrap();
     let mut at = 12;

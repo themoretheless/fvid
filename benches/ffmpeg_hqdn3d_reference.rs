@@ -117,12 +117,12 @@ fn main() {
                 let invalid = depth > 8
                     && out
                         .stdout
-                        .chunks_exact(2)
+                        .as_chunks::<2>().0.iter()
                         .any(|v| u32::from(u16::from_le_bytes([v[0], v[1]])) > maximum);
                 assert!(
                     depth == 8
                         || expected
-                            .chunks_exact(2)
+                            .as_chunks::<2>().0.iter()
                             .all(|v| u32::from(u16::from_le_bytes([v[0], v[1]])) <= maximum)
                 );
                 if invalid {

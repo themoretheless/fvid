@@ -235,7 +235,7 @@ impl<'a> DecodeProgress<'a> {
     pub(crate) fn packet(&mut self, bytes: usize) -> Result<()> {
         self.event.packets = self.event.packets.checked_add(1).ok_or_else(|| invalid("audio packet count overflow"))?;
         self.event.payload_bytes = self.event.payload_bytes.checked_add(bytes as u64).ok_or_else(|| invalid("audio byte count overflow"))?;
-        if self.event.packets % 256 == 0 { self.emit(false); }
+        if self.event.packets.is_multiple_of(256) { self.emit(false); }
         self.check()
     }
 }

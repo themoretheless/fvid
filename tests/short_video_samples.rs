@@ -25,7 +25,7 @@ fn check(video: &[u8], oracle: &[u8]) {
     assert!(!reader.hardware_accelerated());
     for pass in 0..2 {
         let mut previous = None;
-        for (index, expected) in oracle.chunks_exact(FRAME_BYTES).enumerate() {
+        for (index, expected) in oracle.as_chunks::<FRAME_BYTES>().0.iter().enumerate() {
             let frame = reader.read_frame_raw().unwrap().expect("missing frame");
             assert_eq!(planar(frame), expected, "pass {pass}, frame {index}");
             let interval = reader.frame_interval().unwrap();

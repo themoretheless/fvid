@@ -71,9 +71,9 @@ fn chosen_mp4_and_matroska_tracks_match_independent_pcm_references() {
         }
         let mut peak = 0.0f64;
         let mut squared = 0.0;
-        for (a, b) in actual.chunks_exact(4).zip(reference.chunks_exact(4)) {
-            let delta = f64::from(f32::from_le_bytes(a.try_into().unwrap()))
-                - f64::from(f32::from_le_bytes(b.try_into().unwrap()));
+        for (a, b) in actual.as_chunks::<4>().0.iter().zip(reference.as_chunks::<4>().0.iter()) {
+            let delta = f64::from(f32::from_le_bytes(*a))
+                - f64::from(f32::from_le_bytes(*b));
             peak = peak.max(delta.abs());
             squared += delta * delta;
         }

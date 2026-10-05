@@ -97,7 +97,7 @@ impl IcsInfo {
         let size = output.len() / windows;
         if self.group_lengths.is_empty()
             || self.group_lengths.len() > windows
-            || self.group_lengths.iter().any(|&n| n == 0)
+            || self.group_lengths.contains(&0)
             || self
                 .group_lengths
                 .iter()

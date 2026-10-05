@@ -34,9 +34,9 @@ fn short_frame_aac_matches_independent_pcm_across_window_transitions() {
         assert_eq!(actual.len(), reference.len());
         let mut peak = 0.0f64;
         let mut energy = 0.0f64;
-        for (a, b) in actual.chunks_exact(4).zip(reference.chunks_exact(4)) {
-            let a = f32::from_le_bytes(a.try_into().unwrap());
-            let b = f32::from_le_bytes(b.try_into().unwrap());
+        for (a, b) in actual.as_chunks::<4>().0.iter().zip(reference.as_chunks::<4>().0.iter()) {
+            let a = f32::from_le_bytes(*a);
+            let b = f32::from_le_bytes(*b);
             assert!(a.is_finite());
             peak = peak.max(f64::from((a - b).abs()));
             energy += f64::from(b) * f64::from(b);

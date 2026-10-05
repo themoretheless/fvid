@@ -93,12 +93,11 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         decoder.reset();
         let mut first_sample=0;
         let mut expected=None;
-        if let Some((index,start,previous,state)) = &checkpoint {
-            if *start <= from && decoder.restore_checkpoint(state)? {
+        if let Some((index,start,previous,state)) = &checkpoint
+            && *start <= from && decoder.restore_checkpoint(state)? {
                 first_sample = *index;
                 expected = *previous;
             }
-        }
         let mut captured=false;
         let mut written = 0u64;
         for sample_index in first_sample..track.samples.len() {

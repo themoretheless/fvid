@@ -4,7 +4,8 @@ use fvid::{
     playback_native::NativeReader,
 };
 use std::{io::Cursor, path::Path};
-const CASES: [(&str, &[u8], &[u8], u8, &str); 4] = [
+type PlaneCase = (&'static str, &'static [u8], &'static [u8], u8, &'static str);
+const CASES: [PlaneCase; 4] = [
     (
         "shuffleplanes-444-8",
         include_bytes!("fixtures/playback-errors/shuffleplanes-444-8.mkv"),

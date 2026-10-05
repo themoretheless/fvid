@@ -34,8 +34,8 @@ fn implicit_stereo_layout_rematrixes_without_legacy() {
     assert_eq!(bytes.len(), 4800 * 4);
     assert!(
         bytes
-            .chunks_exact(4)
-            .all(|sample| f32::from_le_bytes(sample.try_into().unwrap()) == 0.25)
+            .as_chunks::<4>().0.iter()
+            .all(|sample| f32::from_le_bytes(*sample) == 0.25)
     );
     std::fs::remove_file(destination).unwrap();
 }

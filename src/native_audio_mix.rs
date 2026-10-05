@@ -166,15 +166,15 @@ pub fn mix_audio(
             input.read_exact(&mut encoded[..count * 4])?;
             for (dst, src) in mixed[..count]
                 .iter_mut()
-                .zip(encoded[..count * 4].chunks_exact(4))
+                .zip(encoded[..count * 4].as_chunks::<4>().0.iter())
             {
-                let sample = f32::from_le_bytes(src.try_into().unwrap());
+                let sample = f32::from_le_bytes(*src);
                 *dst = (f64::from(*dst) + f64::from(sample) * f64::from(*scale)) as f32;
             }
         }
         for (sample, bytes) in mixed[..count]
             .iter()
-            .zip(encoded[..count * 4].chunks_exact_mut(4))
+            .zip(encoded[..count * 4].as_chunks_mut::<4>().0.iter_mut())
         {
             bytes.copy_from_slice(&sample.to_le_bytes());
         }

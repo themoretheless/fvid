@@ -56,10 +56,10 @@ struct Hardware {
 }
 
 enum Decoder {
-    Avc(AvcDecoder),
-    Hevc(HevcDecoder),
-    Vp9(vp9::Decoder),
-    Av1(av1::Decoder),
+    Avc(Box<AvcDecoder>),
+    Hevc(Box<HevcDecoder>),
+    Vp9(Box<vp9::Decoder>),
+    Av1(Box<av1::Decoder>),
 }
 impl Decoder {
     fn reset(&mut self) {
@@ -184,13 +184,13 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         future_pts.reverse();
         let work_budget = decoder_budget - decoder_budget / 2;
         let decoder = match &track.codec {
-            b"hvc1" | b"hev1" => Decoder::Hevc(HevcDecoder::from_configuration(
+            b"hvc1" | b"hev1" => Decoder::Hevc(Box::new(HevcDecoder::from_configuration(
                 &track.configuration,
                 work_budget,
-            )?),
-            b"avc1" | b"avc3" => Decoder::Avc(AvcDecoder::new(&track.configuration, work_budget)?),
-            b"vp09" => Decoder::Vp9(vp9::Decoder::new(work_budget)),
-            b"av01" => Decoder::Av1(av1::Decoder::new(work_budget)),
+            )?)),
+            b"avc1" | b"avc3" => Decoder::Avc(Box::new(AvcDecoder::new(&track.configuration, work_budget)?)),
+            b"vp09" => Decoder::Vp9(Box::new(vp9::Decoder::new(work_budget))),
+            b"av01" => Decoder::Av1(Box::new(av1::Decoder::new(work_budget))),
             _ => unreachable!(),
         };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]

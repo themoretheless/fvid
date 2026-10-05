@@ -288,7 +288,7 @@ fn colored_rgb_fade_has_exact_endpoints_and_retains_alpha() {
         .collect::<Vec<_>>();
     filter.apply_rgb(&mut pixel, 16, 4, 1).unwrap();
     let values = pixel
-        .chunks_exact(2)
+        .as_chunks::<2>().0.iter()
         .map(|p| u16::from_le_bytes([p[0], p[1]]))
         .collect::<Vec<_>>();
     assert_eq!(values, [32767, 0, 32768, 1234]);
@@ -340,7 +340,7 @@ fn colored_yuv_fade_exports_known_ten_bit_endpoints() {
             let frame = reader.read_frame_raw().unwrap().unwrap();
             let data = VideoGeometry::default().apply(&frame, 4, 4).unwrap().data;
             let values = data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .map(|p| u16::from_le_bytes([p[0], p[1]]))
                 .collect::<Vec<_>>();
             if n == 0 {

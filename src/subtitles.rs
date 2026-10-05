@@ -529,7 +529,7 @@ fn windows_1251(byte: u8) -> char {
 /// byte is a half-unit and goes unheard, which `chunks_exact` already means.
 fn decode_utf16(bytes: &[u8], little_endian: bool) -> String {
     let units: Vec<u16> = bytes
-        .chunks_exact(2)
+        .as_chunks::<2>().0.iter()
         .map(|pair| {
             if little_endian {
                 u16::from_le_bytes([pair[0], pair[1]])

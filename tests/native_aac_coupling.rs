@@ -118,8 +118,8 @@ fn coupling_matches_saved_pcm_reset_and_checkpoint() {
             "silent target must receive nonzero coupling PCM"
         );
         let mut peak = 0f32;
-        for (sample, bytes) in actual.iter().zip(expected.chunks_exact(4)) {
-            peak = peak.max((sample - f32::from_le_bytes(bytes.try_into().unwrap())).abs());
+        for (sample, bytes) in actual.iter().zip(expected.as_chunks::<4>().0.iter()) {
+            peak = peak.max((sample - f32::from_le_bytes(*bytes)).abs());
         }
         assert!(
             peak < 0.0000001,
@@ -205,7 +205,7 @@ fn independent_cpe_selection_routes_only_to_selected_channels() {
         let mut peak = [0f32; 2];
         while let Some(packet) = reader.next_packet().unwrap() {
             let pcm = decoder.decode(&packet).unwrap();
-            for pair in pcm.chunks_exact(2) {
+            for pair in pcm.as_chunks::<2>().0.iter() {
                 for channel in 0..2 {
                     peak[channel] = peak[channel].max(pair[channel].abs());
                 }
@@ -255,11 +255,11 @@ fn dependent_tns_fixtures_distinguish_coupling_stages() {
     ] {
         assert_eq!(before.len(), after.len());
         let difference = before
-            .chunks_exact(4)
-            .zip(after.chunks_exact(4))
+            .as_chunks::<4>().0.iter()
+            .zip(after.as_chunks::<4>().0.iter())
             .map(|(a, b)| {
-                (f32::from_le_bytes(a.try_into().unwrap())
-                    - f32::from_le_bytes(b.try_into().unwrap()))
+                (f32::from_le_bytes(*a)
+                    - f32::from_le_bytes(*b))
                 .abs()
             })
             .fold(0f32, f32::max);

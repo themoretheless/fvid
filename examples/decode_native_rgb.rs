@@ -43,15 +43,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         frames += 1;
     }
     reader.rewind()?;
-    if let Some((rgb, dimensions, period)) = first {
-        if !reader.read_frame()?
+    if let Some((rgb, dimensions, period)) = first
+        && (!reader.read_frame()?
             || reader.rgb() != rgb
             || reader.dimensions() != dimensions
-            || reader.frame_period() != period
+            || reader.frame_period() != period)
         {
             return Err("native RGB rewind mismatch".into());
         }
-    }
     output.flush()?;
     if args.len() == 3 {
         let file = OpenOptions::new()

@@ -160,7 +160,7 @@ fn multislice_camera_frames_loop_and_seek_back_without_ffmpeg() {
             (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64,
             reader
                 .rgb()
-                .chunks_exact(3)
+                .as_chunks::<3>().0.iter()
                 .flat_map(|p| [p[2], p[1], p[0], 255])
                 .collect::<Vec<_>>(),
         ));
@@ -275,7 +275,7 @@ fn encoded_slice_list_modification_selects_different_reference_pictures() {
     const VIDEO: &[u8] = include_bytes!("fixtures/playback-errors/avc-slice-lists.mp4");
     const ORACLE: &[u8] = include_bytes!("fixtures/playback-errors/avc-slice-lists.yuv");
     assert_eq!(ORACLE.len(), 3 * 32 * 16 * 3 / 2);
-    for row in ORACLE[2 * 32 * 16 * 3 / 2..][..32 * 16].chunks_exact(32) {
+    for row in ORACLE[2 * 32 * 16 * 3 / 2..][..32 * 16].as_chunks::<32>().0 {
         assert_eq!(&row[..16], &[180; 16]);
         assert_eq!(&row[16..], &[80; 16]);
     }
@@ -351,11 +351,11 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
             actual == ORACLE,
             "temporal direct mismatch: actual {:?}, oracle {:?}",
             actual
-                .chunks_exact(768)
+                .as_chunks::<768>().0.iter()
                 .map(|f| (f[0], f[16]))
                 .collect::<Vec<_>>(),
             ORACLE
-                .chunks_exact(768)
+                .as_chunks::<768>().0.iter()
                 .map(|f| (f[0], f[16]))
                 .collect::<Vec<_>>()
         );

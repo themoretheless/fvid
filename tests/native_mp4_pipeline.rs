@@ -71,7 +71,7 @@ fn mp4_presentation_pixels_survive_owned_filters_and_export() {
                             bytes.iter().map(|v| 255 - v).collect()
                         } else {
                             bytes
-                                .chunks_exact(2)
+                                .as_chunks::<2>().0.iter()
                                 .flat_map(|v| {
                                     (((1u16 << depth) - 1) - u16::from_le_bytes([v[0], v[1]]))
                                         .to_le_bytes()

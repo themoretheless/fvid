@@ -219,6 +219,7 @@ pub fn overlay_video(
 }
 
 /// Geometry precedes compositing; supported pixel filters follow compositing.
+#[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn overlay_video_transformed(
     main: &Path,
     foreground: &Path,

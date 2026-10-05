@@ -169,7 +169,8 @@ fn cli_api_filters_and_failure_publication() {
 fn unsupported_y4m_profiles_do_not_take_over_the_legacy_route() {
     let d = dir("admission");
     let p = d.0.join("in.y4m");
-    for header in ["C420p10 Ip F25:1"] {
+    {
+        let header = "C420p10 Ip F25:1";
         std::fs::write(&p, format!("YUV4MPEG2 W8 H6 {header}\n")).unwrap();
         assert!(fvid::native_lossless::eligible(&p).unwrap(), "{header}");
     }

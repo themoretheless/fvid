@@ -352,7 +352,7 @@ fn transformed_main10_export_keeps_reference_pixels_and_black_padding() {
     assert!(header.contains("W20 H36 F30:1 Ip A1:1 C420p10"), "{header}");
     let reference = include_bytes!("fixtures/hevc/main10-ipb.yuv");
     let mut expected = Vec::new();
-    for frame in reference.chunks_exact(128 * 128 * 3).skip(3).take(3) {
+    for frame in reference.as_chunks::<{ 128 * 128 * 3 }>().0.iter().skip(3).take(3) {
         expected.extend_from_slice(b"FRAME\n");
         let mut source_offset = 0;
         for (sw, sh, cx, cy, cw, ch, ow, oh, pad, black) in [
@@ -503,9 +503,11 @@ fn owned_pixel_filters_export_y4m_through_cli() {
             crop: Some([0, 0, 16, 16]),
             ..Default::default()
         };
-        let mut filters = fvid::native_pixels::PixelFilters::default();
-        filters.hue = Some(fvid_media::owned_hue::HueProgram::parse("h=90").unwrap());
-        filters.negate = Some(fvid::native_pixels::Negate::parse("").unwrap());
+        let filters = fvid::native_pixels::PixelFilters {
+            hue: Some(fvid_media::owned_hue::HueProgram::parse("h=90").unwrap()),
+            negate: Some(fvid::native_pixels::Negate::parse("").unwrap()),
+            ..Default::default()
+        };
         let mut original = fvid::playback_native::NativeReader::software(
             std::io::Cursor::new(std::fs::read(&source).unwrap()),
             usize::MAX,
@@ -568,7 +570,7 @@ fn main10_equalizer_exports_saturated_luma_and_preserves_chroma() {
     for original in oracle.chunks_exact(frame_size) {
         assert!(payload.starts_with(b"FRAME\n"));
         payload = &payload[6..];
-        assert!(payload[..luma_bytes].chunks_exact(2)
+        assert!(payload[..luma_bytes].as_chunks::<2>().0.iter()
             .all(|sample| u16::from_le_bytes([sample[0], sample[1]]) == 1023));
         assert_eq!(&payload[luma_bytes..frame_size], &original[luma_bytes..]);
         payload = &payload[frame_size..];

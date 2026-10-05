@@ -173,9 +173,9 @@ fn selected_container_audio_keeps_timing_and_rejects_implicit_track_loss() {
         assert_eq!(pcm.len(), reference.len());
         let mut square = 0.0f64;
         let mut peak = 0.0f64;
-        for (actual, expected) in pcm.chunks_exact(4).zip(reference.chunks_exact(4)) {
-            let delta = f64::from(f32::from_le_bytes(actual.try_into().unwrap()))
-                - f64::from(f32::from_le_bytes(expected.try_into().unwrap()));
+        for (actual, expected) in pcm.as_chunks::<4>().0.iter().zip(reference.as_chunks::<4>().0.iter()) {
+            let delta = f64::from(f32::from_le_bytes(*actual))
+                - f64::from(f32::from_le_bytes(*expected));
             square += delta * delta;
             peak = peak.max(delta.abs());
         }

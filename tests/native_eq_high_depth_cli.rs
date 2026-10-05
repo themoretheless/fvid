@@ -62,7 +62,7 @@ fn high_depth_eq_decode_plan_and_lossless_export() {
             let samples: Vec<u16> = frame
                 .frame
                 .data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .map(|b| u16::from_le_bytes([b[0], b[1]]))
                 .collect();
             let count = 1u32 << depth;

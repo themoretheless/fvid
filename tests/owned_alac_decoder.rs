@@ -12,7 +12,7 @@ fn library_alac_reconstruction_matches_frontend_for_every_fixture_packet() {
         let mut frontend = fvid::codec::alac_decoder::AlacDecoder::new(
             &track.configuration, track.sample_rate, track.channels).unwrap();
         let mut data = Vec::new();
-        assert!(track.samples.len() > 0);
+        assert!(!track.samples.is_empty());
         for index in 0..track.samples.len() {
             reader.read_packet(0, index, &mut data).unwrap();
             let expected = frontend.decode_pcm(&data).unwrap();

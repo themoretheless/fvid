@@ -58,7 +58,8 @@ fn y4m_probe_counts_tagged_frames_and_rejects_truncation() {
         (4, 2)
     );
     assert_eq!(supported.duration_us, Some(0));
-    for header in ["YUV4MPEG2 W4 H2 F25:1 It C420jpeg\n"] {
+    {
+        let header = "YUV4MPEG2 W4 H2 F25:1 It C420jpeg\n";
         std::fs::write(&file, header).unwrap();
         assert!(
             fvid::native_probe::try_probe_as(&file, None)

@@ -4,9 +4,7 @@ use fvid::{
 };
 use std::io::Cursor;
 
-fn compare(
-    source: &[u8],
-    oracle: &[u8],
+struct ToolExpectations {
     depth: u8,
     disabled: bool,
     rotation: bool,
@@ -14,7 +12,10 @@ fn compare(
     context: bool,
     rdpcm: bool,
     explicit: bool,
-) {
+}
+
+fn compare(source: &[u8], oracle: &[u8], tools: ToolExpectations) {
+    let ToolExpectations { depth, disabled, rotation, bypass, context, rdpcm, explicit } = tools;
     let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
     let configuration = input.tracks()[0].configuration.clone();
     let parsed = HevcConfig::parse(&configuration).unwrap();
@@ -115,9 +116,7 @@ fn rext_intra_reference_filtering_matches_oracles_and_reset() {
             true,
         ),
     ] {
-        compare(
-            source, oracle, depth, disabled, false, None, false, false, false,
-        );
+        compare(source, oracle, ToolExpectations { depth, disabled, rotation: false, bypass: None, context: false, rdpcm: false, explicit: false });
     }
     assert_ne!(
         include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-enabled.yuv"),
@@ -174,17 +173,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
 fn rext_transform_skip_rotation_matches_oracle() {
     macro_rules! check {
         ($stem:literal, $depth:literal, $rotation:literal, $bypass:literal) => {
-            compare(
-                include_bytes!(concat!("fixtures/playback-errors/", $stem, ".mp4")),
-                include_bytes!(concat!("fixtures/playback-errors/", $stem, ".yuv")),
-                $depth,
-                false,
-                $rotation,
-                Some($bypass),
-                false,
-                false,
-                false,
-            );
+            compare(include_bytes!(concat!("fixtures/playback-errors/", $stem, ".mp4")), include_bytes!(concat!("fixtures/playback-errors/", $stem, ".yuv")), ToolExpectations { depth: $depth, disabled: false, rotation: $rotation, bypass: Some($bypass), context: false, rdpcm: false, explicit: false });
         };
     }
     check!("hevc-rext-rotation-8-skip-disabled", 8, false, false);
@@ -238,7 +227,7 @@ fn rext_significance_contexts_match_oracle() {
                 (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))[..],
                  &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
             ] {
-                compare(source, oracle, $depth, false, false, Some($bypass), enabled, false, false);
+                compare(source, oracle, ToolExpectations { depth: $depth, disabled: false, rotation: false, bypass: Some($bypass), context: enabled, rdpcm: false, explicit: false });
             }
             // Context selection changes actual VCL coding, not merely SPS bytes.
             assert_ne!(
@@ -263,7 +252,7 @@ fn implicit_rdpcm_matches_oracles() {
                 (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))[..],
                  &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
             ] {
-                compare(source, oracle, $depth, false, false, Some($bypass), false, enabled, false);
+                compare(source, oracle, ToolExpectations { depth: $depth, disabled: false, rotation: false, bypass: Some($bypass), context: false, rdpcm: enabled, explicit: false });
             }
             assert_ne!(
                 coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))),
@@ -307,7 +296,7 @@ fn explicit_rdpcm_matches_inter_oracles() {
                  &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
             ] {
                 assert_lowdelay_inter(source);
-                compare(source, oracle, $depth, false, false, Some($bypass), false, false, enabled);
+                compare(source, oracle, ToolExpectations { depth: $depth, disabled: false, rotation: false, bypass: Some($bypass), context: false, rdpcm: false, explicit: enabled });
             }
             assert_ne!(
                 coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))),
@@ -323,66 +312,18 @@ fn explicit_rdpcm_matches_inter_oracles() {
 
 #[test]
 fn large_transform_skip_matches_oracle() {
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-enabled.yuv"),
-        8, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-disabled.yuv"),
-        8, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-enabled.yuv"),
-        10, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-disabled.yuv"),
-        10, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-enabled.yuv"),
-        8, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-disabled.yuv"),
-        8, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-enabled.yuv"),
-        10, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-disabled.yuv"),
-        10, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-enabled.yuv"),
-        8, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-disabled.yuv"),
-        8, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-enabled.yuv"),
-        10, false, false, Some(false), false, false, false,
-    );
-    compare(
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.yuv"),
-        10, false, false, Some(false), false, false, false,
-    );
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-enabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-disabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-enabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-disabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-enabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-disabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-enabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-disabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-enabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-disabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-enabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
 }
 
 fn assert_high_precision_weights(source: &[u8], enabled: bool) {
@@ -410,91 +351,47 @@ fn assert_high_precision_weights(source: &[u8], enabled: bool) {
 #[test]
 fn high_precision_weighted_prediction_matches_oracle() {
     assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.mp4"), true);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.yuv"),
-        8, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.mp4"), false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.yuv"),
-        8, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.mp4"), true);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.yuv"),
-        10, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.mp4"), false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.yuv"),
-        10, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
 }
 
 #[test]
 fn twelve_bit_420_matches_oracle() {
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled.yuv"),
-        12, false, false, Some(false), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled.yuv"),
-        12, false, false, Some(false), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled.yuv"),
-        12, false, false, Some(true), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled.yuv"),
-        12, false, false, Some(true), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters.yuv"),
-        12, false, false, Some(false), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters.yuv"),
-        12, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.yuv"),
-        12, false, false, Some(false), false, false, true);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: true });
     assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.yuv"),
-        12, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.yuv"),
-        12, false, false, Some(true), false, false, true);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: true });
     assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.yuv"),
-        12, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
 }
 
 #[test]
 fn lossless_bypass_with_filters_matches_oracle() {
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.yuv"),
-        12, false, false, Some(true), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.yuv"),
-        12, false, false, Some(true), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-enabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-enabled-filters.yuv"),
-        8, false, false, Some(true), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-disabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-disabled-filters.yuv"),
-        8, false, false, Some(true), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-enabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-enabled-filters.yuv"),
-        10, false, false, Some(true), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-disabled-filters.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-disabled-filters.yuv"),
-        10, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-enabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-enabled-filters.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-disabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-disabled-filters.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-enabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-enabled-filters.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-disabled-filters.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-disabled-filters.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
 }
 
 #[test]
 fn twelve_bit_high_qp_filters_match_oracle() {
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-qp51.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-qp51.yuv"),
-        12, false, false, Some(false), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.yuv"),
-        12, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-qp51.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-qp51.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
 }
 
 fn assert_scaled_sao(source: &[u8]) {
@@ -520,23 +417,15 @@ fn assert_scaled_sao(source: &[u8]) {
 #[test]
 fn twelve_bit_scaled_sao_matches_oracle() {
     assert_scaled_sao(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.yuv"),
-        12, false, false, Some(false), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: true, rdpcm: false, explicit: false });
     assert_scaled_sao(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.yuv"),
-        12, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
 }
 
 #[test]
 fn mixed_bypass_with_filters_matches_oracle() {
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24.yuv"),
-        12, false, false, Some(true), true, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.yuv"),
-        12, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
 }
 
 fn assert_two_filtered_slices(source: &[u8]) {
@@ -556,59 +445,35 @@ fn assert_two_filtered_slices(source: &[u8]) {
 #[test]
 fn multislice_bypass_with_filters_matches_oracle() {
     assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.yuv"),
-        12, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
     assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.yuv"),
-        12, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
     assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.yuv"),
-        12, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: true, rdpcm: false, explicit: false });
     assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.mp4"));
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.yuv"),
-        12, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.yuv"), ToolExpectations { depth: 12, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
 }
 
 #[test]
 fn persistent_rice_disabled_controls_match_oracle() {
     {
-        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-disabled.mp4"),
-            include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-disabled.yuv"),
-            8, false, false, Some(false), false, false, false);
+        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-disabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     }
     {
-        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-disabled.mp4"),
-            include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-disabled.yuv"),
-            8, false, false, Some(true), false, false, false);
+        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-disabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
     }
     {
-        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-disabled.mp4"),
-            include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-disabled.yuv"),
-            10, false, false, Some(false), false, false, false);
+        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-disabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
     }
     {
-        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-disabled.mp4"),
-            include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-disabled.yuv"),
-            10, false, false, Some(true), false, false, false);
+        compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-disabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-disabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
     }
 }
 
 #[test]
 fn persistent_rice_acceptance_matches_oracle() {
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.yuv"),
-        8, false, false, Some(false), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-enabled.yuv"),
-        8, false, false, Some(true), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-enabled.yuv"),
-        10, false, false, Some(false), false, false, false);
-    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-enabled.mp4"),
-        include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-enabled.yuv"),
-        10, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-enabled.yuv"), ToolExpectations { depth: 8, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-enabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(false), context: false, rdpcm: false, explicit: false });
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-enabled.mp4"), include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-enabled.yuv"), ToolExpectations { depth: 10, disabled: false, rotation: false, bypass: Some(true), context: false, rdpcm: false, explicit: false });
 }

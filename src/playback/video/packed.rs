@@ -96,7 +96,7 @@ impl PackedPlanar {
         budget: usize,
     ) -> Result<Self> {
         let [left, right, top, bottom] = p.crop;
-        if left % 2 != 0 || top % 2 != 0 || p.coded_width % 2 != 0 || p.coded_height % 2 != 0 {
+        if left % 2 != 0 || top % 2 != 0 || !p.coded_width.is_multiple_of(2) || !p.coded_height.is_multiple_of(2) {
             return Err(invalid("unaligned coded planar crop"));
         }
         let width = p
@@ -235,7 +235,7 @@ impl PackedPlanar {
             (16.0 * scale, 219.0 * scale, 224.0 * scale)
         };
         let cw = self.frame.width.div_ceil(sx);
-        for (i, out) in rgb.chunks_exact_mut(3).enumerate() {
+        for (i, out) in rgb.as_chunks_mut::<3>().0.iter_mut().enumerate() {
             let x = i % self.frame.width;
             let y = i / self.frame.width;
             let c = (y / sy) * cw + x / sx;

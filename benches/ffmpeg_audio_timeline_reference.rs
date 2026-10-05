@@ -96,12 +96,13 @@ fn render(
     }
     let size = u32::from_le_bytes(bytes[at + 4..at + 8].try_into().unwrap()) as usize;
     let samples = bytes[at + 8..at + 8 + size]
-        .chunks_exact(4)
-        .map(|p| f32::from_le_bytes(p.try_into().unwrap()))
+        .as_chunks::<4>().0.iter()
+        .map(|p| f32::from_le_bytes(*p))
         .collect::<Vec<_>>();
     assert_eq!(stats.sample_frames, samples.len() as u64);
-    if interval.is_none() {
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+    if interval.is_none()
+        && let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG")
+    {
             let result = std::process::Command::new(ffmpeg)
                 .args(["-v", "error", "-i"])
                 .arg(&input)
@@ -121,11 +122,10 @@ fn render(
             );
             let reference = result
                 .stdout
-                .chunks_exact(4)
-                .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
+                .as_chunks::<4>().0.iter()
+                .map(|v| f32::from_le_bytes(*v))
                 .collect::<Vec<_>>();
             assert_eq!(reference, samples, "independent presentation-clock PCM");
-        }
     }
     samples
 }

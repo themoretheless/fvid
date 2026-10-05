@@ -548,7 +548,7 @@ impl<R: Read + Seek> WebmReader<R> {
                         // A track whose only statement is the `und` writers use
                         // for "nothing was said" leaves the player knowing no
                         // more than one that states nothing at all.
-                        let stated = ietf.unwrap_or_else(|| if current.is_empty() {older} else {current});
+                        let stated = ietf.unwrap_or(if current.is_empty() {older} else {current});
                         track_languages.insert(track.number,if language_present {stated.clone()} else {"eng".into()});
                         track_dispositions.insert(track.number,disposition);
                         track_legacy_languages.insert(track.number,legacy_language.unwrap_or_else(||"eng".into()));
@@ -619,8 +619,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                 &mut *reader,
                                 child,
                                 timestamp,
-                                true,
-                                true,
+                                BlockKind::Simple,
                                 &mut *packets,
                                 *limits,
                                 &mut lace_groups,
@@ -647,8 +646,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                             &mut *reader,
                                             block,
                                             timestamp,
-                                            false,
-                                            key,
+                                            BlockKind::Group { keyframe: key },
                                             &mut *packets,
                                             *limits,
                                             &mut lace_groups,
@@ -974,12 +972,16 @@ fn lace_vint<R: Read + Seek>(r: &mut R, limit: u64) -> Result<(u64, u32)> {
     }
     Ok((value, width))
 }
+enum BlockKind {
+    Simple,
+    Group { keyframe: bool },
+}
+
 fn read_block<R: Read + Seek>(
     r: &mut R,
     e: Element,
     timestamp: Option<u64>,
-    simple: bool,
-    key: bool,
+    kind: BlockKind,
     out: &mut Vec<Packet>,
     limits: Limits,
     groups: &mut Vec<std::ops::Range<usize>>,
@@ -1087,7 +1089,10 @@ fn read_block<R: Read + Seek>(
         out.push(Packet {
             track,
             pts_ns,
-            keyframe: if simple { h[2] & 0x80 != 0 } else { key },
+            keyframe: match kind {
+                BlockKind::Simple => h[2] & 0x80 != 0,
+                BlockKind::Group { keyframe } => keyframe,
+            },
             invisible: h[2] & 8 != 0,
             offset,
             size: usize::try_from(size).map_err(|_| invalid("WebM packet size overflow"))?,

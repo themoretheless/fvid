@@ -96,13 +96,13 @@ fn rounded_interior_aac_duration_exports_exact_presentation_windows() {
     assert_eq!(stats.sample_frames,48008);
     let actual = std::fs::read(&output).unwrap();
     assert_eq!(actual.len(),expected.len());
-    let maximum = actual.chunks_exact(4).zip(expected.chunks_exact(4)).map(|(a,b)| (f32::from_le_bytes(a.try_into().unwrap())-f32::from_le_bytes(b.try_into().unwrap())).abs()).fold(0.0f32,f32::max);
+    let maximum = actual.as_chunks::<4>().0.iter().zip(expected.as_chunks::<4>().0.iter()).map(|(a,b)| (f32::from_le_bytes(*a)-f32::from_le_bytes(*b)).abs()).fold(0.0f32,f32::max);
     assert!(maximum < 1e-6,"PCM difference {maximum}");
     std::fs::remove_file(&output).unwrap();
     fvid::native_export::export_audio_pcm_selected(&source,&output,Some((std::time::Duration::from_millis(10),std::time::Duration::from_millis(30))),1.0,None,None,Some(1),None,None).unwrap();
     let actual = std::fs::read(&output).unwrap();
     assert_eq!(actual.len(),960*8);
-    let maximum = actual.chunks_exact(4).zip(expected[480*8..1440*8].chunks_exact(4)).map(|(a,b)| (f32::from_le_bytes(a.try_into().unwrap())-f32::from_le_bytes(b.try_into().unwrap())).abs()).fold(0.0f32,f32::max);
+    let maximum = actual.as_chunks::<4>().0.iter().zip(expected[480*8..1440*8].as_chunks::<4>().0.iter()).map(|(a,b)| (f32::from_le_bytes(*a)-f32::from_le_bytes(*b)).abs()).fold(0.0f32,f32::max);
     assert!(maximum < 1e-6,"interval PCM difference {maximum}");
     std::fs::remove_file(output).unwrap();
 }

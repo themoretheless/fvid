@@ -22,7 +22,7 @@ pub fn write_adts_limited<R: Read, W: Write + Seek>(
     write_aac_packets(
         input.configuration(),
         &asc,
-        || input.next_packet().map_err(Into::into),
+        || convert_adts_packet(input.next_packet()),
         output,
         cancel,
         progress,
@@ -53,7 +53,7 @@ pub fn concat_adts_limited<R: Read, W: Write + Seek>(
     write_aac_packets(
         sequence.configuration(),
         &asc,
-        || sequence.next_packet().map_err(Into::into),
+        || convert_adts_packet(sequence.next_packet()),
         output,
         cancel,
         progress,
@@ -75,7 +75,7 @@ fn write_aac_packets<W: Write + Seek>(
         encoding: Encoding::Aac {
             configuration: asc,
             sample_rate: config.sample_rate,
-            channels: config.channels.into(),
+            channels: config.channels,
         },
         name: "",
         language: "",
@@ -121,4 +121,14 @@ fn write_aac_packets<W: Write + Seek>(
     let event = writer.finish()?;
     check()?;
     Ok(event)
+}
+
+// The shared muxer has different error types in the core and media crate.
+fn convert_adts_packet<E, F>(
+    packet: std::result::Result<Option<Vec<u8>>, E>,
+) -> std::result::Result<Option<Vec<u8>>, F>
+where
+    F: From<E>,
+{
+    packet.map_err(F::from)
 }

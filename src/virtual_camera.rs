@@ -226,7 +226,7 @@ impl LatestFrame {
             let offset = ((y + top) * source[0] + left) * 3;
             let row = &rgb[offset..offset + self.width * 3];
             let out = &mut state.bgra[y * self.width * 4..(y + 1) * self.width * 4];
-            for (pixel, bgra) in row.chunks_exact(3).zip(out.chunks_exact_mut(4)) {
+            for (pixel, bgra) in row.as_chunks::<3>().0.iter().zip(out.as_chunks_mut::<4>().0.iter_mut()) {
                 bgra.copy_from_slice(&[pixel[2], pixel[1], pixel[0], 255]);
             }
         }
@@ -260,7 +260,7 @@ impl LatestFrame {
         if state.tick.is_some_and(|last| tick.sequence <= last.sequence || tick.host_time_ns <= last.host_time_ns) {
             return Err(invalid("virtual-camera frame timestamp is not increasing"));
         }
-        for pixel in state.bgra.chunks_exact_mut(4) { pixel.copy_from_slice(&[0,0,0,255]); }
+        for pixel in state.bgra.as_chunks_mut::<4>().0.iter_mut() { pixel.copy_from_slice(&[0,0,0,255]); }
         let (left, top) = ((self.width - w) / 2, (self.height - h) / 2);
         for y in 0..h {
             for x in 0..w {
@@ -409,18 +409,16 @@ impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
         self.end_behavior = behavior;
     }
     fn select(&mut self, media_time_ns: u64) -> Result<()> {
-        if let Some((start, _, scale)) = self.reader.frame_interval() {
-            if u128::from(media_time_ns) * u128::from(scale) < start * 1_000_000_000 {
+        if let Some((start, _, scale)) = self.reader.frame_interval()
+            && u128::from(media_time_ns) * u128::from(scale) < start * 1_000_000_000 {
                 self.reader.rewind()?;
                 self.eof = false;
             }
-        }
         while !self.eof {
-            if let Some((_, end, scale)) = self.reader.frame_interval() {
-                if u128::from(media_time_ns) * u128::from(scale) < end * 1_000_000_000 {
+            if let Some((_, end, scale)) = self.reader.frame_interval()
+                && u128::from(media_time_ns) * u128::from(scale) < end * 1_000_000_000 {
                     break;
                 }
-            }
             if !self.reader.read_frame()? {
                 self.eof = true;
             }
@@ -433,8 +431,8 @@ impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
             self.duration_ns.map_or(tick.media_time_ns, |duration| tick.media_time_ns % duration)
         } else { tick.media_time_ns };
         self.select(time)?;
-        if self.eof && looping && self.duration_ns.is_none() {
-            if let Some((_, end, scale)) = self.reader.frame_interval() {
+        if self.eof && looping && self.duration_ns.is_none()
+            && let Some((_, end, scale)) = self.reader.frame_interval() {
                 let duration = (end * 1_000_000_000).div_ceil(u128::from(scale));
                 let duration = u64::try_from(duration).map_err(|_| invalid("camera source duration exceeds nanosecond clock"))?;
                 if duration == 0 { return Err(invalid("camera loop requires a positive duration")); }
@@ -443,7 +441,6 @@ impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
                 self.eof = false;
                 self.select(tick.media_time_ns % duration)?;
             }
-        }
         if self.reader.frame_interval().is_none() {
             return Ok(false);
         }
@@ -524,7 +521,7 @@ mod native_source_tests {
             };
             assert!(source.publish(tick, &output).unwrap());
             assert_eq!(output.copy_latest(None, &mut pixels).unwrap(), Some(tick));
-            for pixel in pixels.chunks_exact(4) {
+            for pixel in pixels.as_chunks::<4>().0.iter() {
                 assert_eq!(pixel, &[expected, expected, expected, 255]);
             }
         }
@@ -562,7 +559,7 @@ pub fn fit_bgra_aspect(
     } else {
         ((display_w * th as u128 / display_h).max(1) as usize, th)
     };
-    for pixel in output.chunks_exact_mut(4) {
+    for pixel in output.as_chunks_mut::<4>().0.iter_mut() {
         pixel.copy_from_slice(&[0, 0, 0, 255]);
     }
     let (left, top) = ((tw - w) / 2, (th - h) / 2);
@@ -587,8 +584,8 @@ mod fit_tests {
         assert_eq!(&output[16..32], &row);
         assert_eq!(&output[32..48], &row);
         for pixel in output[..16]
-            .chunks_exact(4)
-            .chain(output[48..].chunks_exact(4))
+            .as_chunks::<4>().0.iter()
+            .chain(output[48..].as_chunks::<4>().0.iter())
         {
             assert_eq!(pixel, &[0, 0, 0, 255]);
         }

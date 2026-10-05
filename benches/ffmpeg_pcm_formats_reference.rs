@@ -101,8 +101,8 @@ fn mp4_pcm_tracks_export_intervals_and_match_reference() {
                 (to.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
             let stride = usize::from(stats.channels) * 4;
             let expected: Vec<u8> = bytes[start * stride..end * stride]
-                .chunks_exact(4)
-                .flat_map(|b| (f32::from_le_bytes(b.try_into().unwrap()) * 0.5).to_le_bytes())
+                .as_chunks::<4>().0.iter()
+                .flat_map(|b| (f32::from_le_bytes(*b) * 0.5).to_le_bytes())
                 .collect();
             assert_eq!(std::fs::read(window).unwrap(), expected);
             if let Some(binary) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
@@ -339,7 +339,7 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
         )
         .unwrap();
         let joined: Vec<u8> = baseline
-            .chunks_exact(8)
+            .as_chunks::<8>().0.iter()
             .flat_map(|f| f.iter().chain(f).copied())
             .collect();
         assert_eq!(std::fs::read(&merged_pcm).unwrap(), joined);

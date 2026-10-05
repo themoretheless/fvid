@@ -79,7 +79,7 @@ fn lagfun_preserves_fractional_history_before_framestep_and_rewind() {
                         (279, 391, 559),
                     ];
                     for (n, &(y, u, v)) in values.iter().enumerate() {
-                        if n as u64 % step != 0 {
+                        if !(n as u64).is_multiple_of(step) {
                             continue;
                         }
                         let expected = if depth == 8 {

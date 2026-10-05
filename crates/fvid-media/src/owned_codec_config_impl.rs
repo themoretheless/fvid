@@ -291,11 +291,10 @@ pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
         }
         while dc.at < dc.data.len() {
             let (tag, data) = descriptor(&mut dc)?;
-            if tag == 5 {
-                if asc.replace(data).is_some() {
+            if tag == 5
+                && asc.replace(data).is_some() {
                     return Err(invalid("duplicate AudioSpecificConfig"));
                 }
-            }
         }
     }
     asc.ok_or_else(|| invalid("missing AudioSpecificConfig"))

@@ -831,7 +831,8 @@ fn external_subtitles_and_device_name() {
         fvid_media::HdrTonemap::Hable,
         fvid_media::COLOR_TRC_SMPTE2084,
     );
-    assert!(mapped.0 <= 255);
+    assert_eq!(mapped.0, mapped.1);
+    assert_eq!(mapped.1, mapped.2);
     assert!(fvid_media::pq_eotf(0.5) > 0.0);
     assert!(fvid_media::hlg_eotf(0.5) > 0.0);
     assert!(fvid_media::pq_eotf(0.8) > fvid_media::pq_eotf(0.2));
@@ -876,9 +877,11 @@ fn external_subtitles_and_device_name() {
     let back = fvid_media::project_equirect_view(64, 32, &dual, 8, 8, 180_000, 0, 60_000);
     assert_ne!(front[0], back[0]);
     let gray = vec![0x00_80_80_80u32; 4];
-    let mut hdr_opts = fvid_media::PlayRenderOptions::default();
-    hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
-    hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
+    let hdr_opts = fvid_media::PlayRenderOptions {
+        hdr_tonemap: fvid_media::HdrTonemap::Hable,
+        color_trc: fvid_media::COLOR_TRC_SMPTE2084,
+        ..Default::default()
+    };
     let flat = fvid_media::render_play_pixels(
         2,
         2,
@@ -901,7 +904,7 @@ fn external_subtitles_and_device_name() {
     );
     assert!(fvid_media::format_media_info_osd("demo", 640, 360, -1, 0, true).contains("360°"));
     let jump = fvid_media::random_seek_us(100_000_000, 42).unwrap();
-    assert!(jump >= 0 && jump < 100_000_000);
+    assert!((0..100_000_000).contains(&jump));
     assert_eq!(fvid_media::random_seek_us(100_000_000, 42), Some(jump));
     assert_eq!(fvid_media::random_seek_us(0, 1), None);
     assert!(fvid_media::detect_equirect_aspect(3840, 1920));
@@ -1287,7 +1290,7 @@ fn external_subtitles_and_device_name() {
         fvid_media::cycle_spherical_projection(fvid_media::SphericalProjection::Equirect),
         fvid_media::SphericalProjection::DualFisheye
     );
-    let planet = fvid_media::project_little_planet(8, 4, &vec![0x00_80_80_80u32; 32], 4, 4, 0);
+    let planet = fvid_media::project_little_planet(8, 4, &[0x00_80_80_80u32; 32], 4, 4, 0);
     assert_eq!(planet.len(), 16);
     let cube = fvid_media::sample_cubemap_pixel(&[0x00_ff_00_00u32; 96], 24, 4, 1.0, 0.0, 0.0);
     assert_eq!(cube, 0x00_ff_00_00);
@@ -1317,11 +1320,13 @@ fn external_subtitles_and_device_name() {
         fvid_media::skip_marker_target_us(10, Some(90), Some(1_000)),
         Some(90)
     );
-    let mut hdr_opts = fvid_media::PlayRenderOptions::default();
-    hdr_opts.spherical = true;
-    hdr_opts.spherical_projection = fvid_media::SphericalProjection::LittlePlanet;
+    let hdr_opts = fvid_media::PlayRenderOptions {
+        spherical: true,
+        spherical_projection: fvid_media::SphericalProjection::LittlePlanet,
+        ..Default::default()
+    };
     let projected =
-        fvid_media::render_play_pixels(8, 4, &vec![0x00_40_40_40u32; 32], &hdr_opts, None);
+        fvid_media::render_play_pixels(8, 4, &[0x00_40_40_40u32; 32], &hdr_opts, None);
     assert_eq!(projected.0, 8);
     let filtered = fvid_media::filter_playlist_paths(
         &[PathBuf::from("a/foo.mp4"), PathBuf::from("b/bar.mkv")],
@@ -1468,7 +1473,7 @@ fn external_subtitles_and_device_name() {
     assert_eq!((bu, bv), (500, 500));
     assert_eq!(fvid_media::blend_tonemap_channel(200, 100, 500), 150);
     let desat = fvid_media::apply_hdr_highlight_desat_pixel(255, 200, 180, 500);
-    assert!(desat.0 <= 255);
+    assert!(desat.0 < 255 && desat.1 > 200 && desat.2 > 180);
     let mastering = fvid_media::parse_hdr_mastering_nits("0.005,1000").unwrap();
     assert_eq!(mastering.0, 5);
     assert_eq!(mastering.1, 1_000);
@@ -1548,13 +1553,15 @@ fn external_subtitles_and_device_name() {
     assert_eq!(fvid_media::multi_room_sync_target_us(100, 200, 0), 150);
     assert_eq!(fvid_media::hdr_sdr_ratio_milli(1_000, 100), 10_000);
     assert_eq!(fvid_media::accelerometer_horizon_pitch_milli(0), 0);
-    let mut soft = fvid_media::PlayRenderOptions::default();
-    soft.hdr_tonemap = fvid_media::HdrTonemap::Hable;
-    soft.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
-    soft.tonemap_strength_milli = 500;
-    soft.hdr_highlight_desat_milli = 400;
-    soft.hdr_black_lift_milli = 50;
-    soft.color_temp_kelvin = 4_000;
+    let soft = fvid_media::PlayRenderOptions {
+        hdr_tonemap: fvid_media::HdrTonemap::Hable,
+        color_trc: fvid_media::COLOR_TRC_SMPTE2084,
+        tonemap_strength_milli: 500,
+        hdr_highlight_desat_milli: 400,
+        hdr_black_lift_milli: 50,
+        color_temp_kelvin: 4_000,
+        ..Default::default()
+    };
     let gray = vec![0x00_c0_c0_c0u32; 4];
     let full = fvid_media::render_play_pixels(
         2,
@@ -1781,9 +1788,11 @@ fn external_subtitles_and_device_name() {
         Some(600)
     );
     assert_eq!(fvid_media::sample_1d_lut_u8(&[0, 128, 255], 128), 128);
-    let mut gamut_opts = fvid_media::PlayRenderOptions::default();
-    gamut_opts.gamut_map_bt709 = true;
-    gamut_opts.color_primaries = fvid_media::COLOR_PRIMARIES_BT2020;
+    let gamut_opts = fvid_media::PlayRenderOptions {
+        gamut_map_bt709: true,
+        color_primaries: fvid_media::COLOR_PRIMARIES_BT2020,
+        ..Default::default()
+    };
     let gpix = fvid_media::render_play_pixels(1, 1, &[0x00_c8_28_28u32], &gamut_opts, None);
     assert_ne!(gpix.2[0], 0x00_c8_28_28);
     assert_eq!(
@@ -1814,10 +1823,12 @@ fn external_subtitles_and_device_name() {
         Some(256)
     );
     assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
-    let mut hdr_opts = fvid_media::PlayRenderOptions::default();
-    hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
-    hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
-    hdr_opts.hdr_nits = 400;
+    let hdr_opts = fvid_media::PlayRenderOptions {
+        hdr_tonemap: fvid_media::HdrTonemap::Hable,
+        color_trc: fvid_media::COLOR_TRC_SMPTE2084,
+        hdr_nits: 400,
+        ..Default::default()
+    };
     let gray = vec![0x00_80_80_80u32; 4];
     let base = fvid_media::render_play_pixels(
         2,

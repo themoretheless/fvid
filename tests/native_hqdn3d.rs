@@ -278,7 +278,7 @@ fn extreme_reference_overflow_is_reproduced_and_owned_pixels_remain_valid() {
     let data = std::fs::read(&source).unwrap();
     let start = data.iter().position(|&b| b == b'\n').unwrap() + 1;
     let filter = HqDn3d::parse("").unwrap();
-    for (n, chunk) in data[start..].chunks_exact(60).enumerate() {
+    for (n, chunk) in data[start..].as_chunks::<60>().0.iter().enumerate() {
         assert_eq!(&chunk[..6], b"FRAME\n");
         let mut frame = GeometryFrame {
             width: 5,
@@ -292,13 +292,13 @@ fn extreme_reference_overflow_is_reproduced_and_owned_pixels_remain_valid() {
         assert!(
             frame
                 .data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .all(|v| u16::from_le_bytes([v[0], v[1]]) <= 16383)
         );
         if n == 0 {
             assert_eq!(
                 frame.data[..10]
-                    .chunks_exact(2)
+                    .as_chunks::<2>().0.iter()
                     .map(|v| u16::from_le_bytes([v[0], v[1]]))
                     .collect::<Vec<_>>(),
                 [16383, 2, 16381, 2, 16381]
@@ -330,7 +330,7 @@ fn extreme_reference_overflow_is_reproduced_and_owned_pixels_remain_valid() {
             assert!(
                 frame
                     .data
-                    .chunks_exact(2)
+                    .as_chunks::<2>().0.iter()
                     .all(|v| u16::from_le_bytes([v[0], v[1]]) <= 16383)
             );
             if n == 0 {

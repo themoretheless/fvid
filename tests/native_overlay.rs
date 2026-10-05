@@ -321,7 +321,7 @@ fn combined_geometry_overlay_and_negate_apply_in_the_documented_order() {
             .into_iter()
             .map(|data| {
                 if name.contains("odd10") {
-                    data.chunks_exact(2)
+                    data.as_chunks::<2>().0.iter()
                         .flat_map(|p| (1023 - u16::from_le_bytes([p[0], p[1]])).to_le_bytes())
                         .collect::<Vec<_>>()
                 } else {
@@ -333,8 +333,10 @@ fn combined_geometry_overlay_and_negate_apply_in_the_documented_order() {
             horizontal_flip: true,
             ..Default::default()
         };
-        let mut filters = fvid::native_pixels::PixelFilters::default();
-        filters.negate = Some(fvid::native_pixels::Negate);
+        let filters = fvid::native_pixels::PixelFilters {
+            negate: Some(fvid::native_pixels::Negate),
+            ..Default::default()
+        };
         let output = d.0.join(format!("{i}.mkv"));
         native_export::overlay_video_transformed(
             &source, &source, &output, 0, 0, None, None, &geometry, &filters,

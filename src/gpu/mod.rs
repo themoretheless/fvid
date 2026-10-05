@@ -348,7 +348,8 @@ impl GpuProcessor {
                         label: Some("fvid byte shader"),
                         source: wgpu::ShaderSource::Wgsl(source.into()),
                     });
-                    let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+
+                    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                         label: Some("fvid crop/reflect"),
                         layout: Some(&pipeline_layout),
                         vertex: wgpu::VertexState {
@@ -372,8 +373,7 @@ impl GpuProcessor {
                         }),
                         multiview_mask: None,
                         cache: None,
-                    });
-                    pipeline
+                    })
                 })
                 .clone();
             stages.push(Stage {

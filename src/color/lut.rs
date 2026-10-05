@@ -399,7 +399,7 @@ impl Lut {
             // at mid-grey, half of 1.5, where clipping the node on the way in
             // could only ever return 128.
             let data = three_values
-                .chunks_exact(3)
+                .as_chunks::<3>().0.iter()
                 .map(|c| [c[0], c[1], c[2]])
                 .collect();
             return Ok(Self::Three(Lut3d {
@@ -473,13 +473,11 @@ impl Lut {
                 // the mesh means, so it is read and dropped — except for `Mesh`,
                 // whose second number is the one thing here a reader needs and
                 // the rows cannot tell it: the depth the codes are written at.
-                if fields.len() == 3 && fields[0].eq_ignore_ascii_case("Mesh") {
-                    if let Ok(bits) = fields[2].parse::<u32>() {
-                        if (4..=24).contains(&bits) {
+                if fields.len() == 3 && fields[0].eq_ignore_ascii_case("Mesh")
+                    && let Ok(bits) = fields[2].parse::<u32>()
+                        && (4..=24).contains(&bits) {
                             scale = (2.0f32).powi(bits as i32) - 1.0;
                         }
-                    }
-                }
                 continue;
             }
             if fields.len() == 1 {
@@ -1113,7 +1111,6 @@ const MAX_1D_ENTRIES: usize = 300_000;
 
 fn parse_size(rest: &str, line_no: usize, limit: usize) -> Result<usize> {
     let n: usize = rest
-        .trim()
         .split_whitespace()
         .next()
         .unwrap_or("")

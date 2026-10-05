@@ -70,6 +70,10 @@ pub fn write_mp4_transformed<W: Write + Seek>(
     write_mp4_processed(source,output,geometry,filters,cancel,progress,None)
 }
 
+/// Frame callback used by owned lossless exporters, with the caller's lifetime.
+pub type FrameProcessor<'a> =
+    dyn FnMut(&mut crate::native_geometry::GeometryFrame, u8, u64) -> Result<()> + 'a;
+
 /// Run an owned frame processor before FFV1 encoding, retaining timing and AAC.
 /// Processor input has stored rotation materialized; dimensions/sampling must
 /// remain unchanged. Publication remains the caller's responsibility.
@@ -78,21 +82,20 @@ pub fn write_mp4_processed<W: Write + Seek>(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
-    processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>,
-    >,
+    processor: Option<&mut FrameProcessor<'_>>,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     write_mp4_selected(source, output, geometry, filters, cancel, progress, processor,
         fvid_media::owned_framestep::FrameStep::parse("").map_err(|e| invalid(&e))?,
     )
 }
 
+#[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn write_mp4_selected<W: Write + Seek>(
     source: &Path, output: &mut W,
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
-    mut processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>,
-    >,
+    mut processor: Option<&mut FrameProcessor<'_>>,
     step: fvid_media::owned_framestep::FrameStep,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
@@ -176,7 +179,7 @@ pub fn write_mp4_selected<W: Write + Seek>(
             })
         })
         .collect::<Result<Vec<_>>>()?;
-    let mut options = plans.iter().map(|p| p.options.clone()).collect::<Vec<_>>();
+    let mut options = plans.iter().map(|p| p.options).collect::<Vec<_>>();
     if bake_rotation {
         options[video].rotation = 0;
         let [width, height] = reader.dimensions();
@@ -199,11 +202,10 @@ pub fn write_mp4_selected<W: Write + Seek>(
     check(cancel)?;
     let mut audio = BinaryHeap::new();
     for (i, plan) in plans.iter().enumerate() {
-        if i != video {
-            if let Some(first) = plan.packets.first() {
+        if i != video
+            && let Some(first) = plan.packets.first() {
                 audio.push(Reverse((first.dts, i, 0usize)));
             }
-        }
     }
     let mut payload = Vec::new();
     let mut stats = crate::media_info::LosslessStats {

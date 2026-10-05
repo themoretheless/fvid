@@ -244,11 +244,10 @@ fn write_aac_packets<W: Write + std::io::Seek>(
             .payload_bytes
             .checked_add(packet.len() as u64)
             .ok_or_else(|| invalid("AAC payload size overflow"))?;
-        if event.packets % 256 == 0 {
-            if let Some(hook) = progress {
+        if event.packets.is_multiple_of(256)
+            && let Some(hook) = progress {
                 hook.emit(event);
             }
-        }
     }
     check()?;
     let end = output.stream_position()?;

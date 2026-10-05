@@ -47,7 +47,7 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
 fn write_pcm_samples(output: &mut impl std::io::Write, samples: &[f32]) -> Result<()> {
     let mut bytes = [0u8; 4096];
     for chunk in samples.chunks(bytes.len() / 4) {
-        for (sample, target) in chunk.iter().zip(bytes.chunks_exact_mut(4)) {
+        for (sample, target) in chunk.iter().zip(bytes.as_chunks_mut::<4>().0.iter_mut()) {
             target.copy_from_slice(&sample.to_le_bytes());
         }
         output.write_all(&bytes[..chunk.len() * 4])?;

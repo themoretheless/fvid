@@ -1,7 +1,6 @@
 //! Explicit MP4 concat video and AAC reference comparisons.
 use fvid::{
     container::{mp4, webm},
-    media_control::{CancelFlag, ProgressHook},
     native_export,
     native_geometry::VideoGeometry,
     playback_native::NativeReader,
@@ -10,7 +9,6 @@ use std::{
     fs::File,
     io::BufReader,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
 };
 struct Dir(PathBuf);
 impl Drop for Dir {
@@ -392,10 +390,10 @@ fn primed_aac_without_pns_preserves_independently_decoded_pcm_at_the_join() {
     assert_eq!(actual.len(), original.len() * 2);
     let reference = [original.as_slice(), original.as_slice()].concat();
     let difference = actual
-        .chunks_exact(4)
-        .zip(reference.chunks_exact(4))
+        .as_chunks::<4>().0.iter()
+        .zip(reference.as_chunks::<4>().0.iter())
         .map(|(a, b)| {
-            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
+            (f32::from_le_bytes(*a) - f32::from_le_bytes(*b))
                 .abs()
         })
         .fold(0f32, f32::max);
@@ -416,10 +414,10 @@ fn primed_aac_without_pns_preserves_independently_decoded_pcm_at_the_join() {
     assert_eq!(samples.len(), reference.len());
     assert_eq!(stats.sample_frames as usize * 4, samples.len());
     let difference = samples
-        .chunks_exact(4)
-        .zip(reference.chunks_exact(4))
+        .as_chunks::<4>().0.iter()
+        .zip(reference.as_chunks::<4>().0.iter())
         .map(|(a, b)| {
-            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
+            (f32::from_le_bytes(*a) - f32::from_le_bytes(*b))
                 .abs()
         })
         .fold(0f32, f32::max);

@@ -148,7 +148,7 @@ fn encode_planes(
     if data.len() != expected
         || (bytes == 2
             && data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .any(|b| u32::from(u16::from_le_bytes([b[0], b[1]])) > maximum))
     {
         return Err(invalid("invalid FFV1 sample storage"));

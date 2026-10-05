@@ -294,7 +294,7 @@ fn high_depth_export_uses_full_precision_half_sample_model() {
                         let at = 2 * (p * 221 + y * 17 + x);
                         u16::from_le_bytes([source[at], source[at + 1]]) as u32
                     };
-                    let average = (read(x) + read((x + 1).min(16)) + 1) / 2;
+                    let average = (read(x) + read((x + 1).min(16))).div_ceil(2);
                     expected.extend((average as u16).to_le_bytes());
                 }
             }

@@ -77,7 +77,7 @@ impl<'a, W: Write + Seek> Sink<'a, W> {
         if self.bytes.is_empty() {
             return Ok(());
         }
-        if self.bytes.len() % self.frame_bytes != 0 {
+        if !self.bytes.len().is_multiple_of(self.frame_bytes) {
             return Err(invalid("incomplete Matroska PCM sample frame"));
         }
         let next = self

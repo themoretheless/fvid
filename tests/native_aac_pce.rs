@@ -89,8 +89,8 @@ fn tagged_eight_channel_decode_matches_independent_pcm_per_speaker() {
     let reference = include_bytes!("fixtures/audio/aac-pce-wide8-mp4-reference.f32le");
     // The reference ignores container edits, matching raw packet synthesis.
     let reference: Vec<f32> = reference
-        .chunks_exact(4)
-        .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+        .as_chunks::<4>().0.iter()
+        .map(|b| f32::from_le_bytes(*b))
         .collect();
 
     let last = track.samples.get(track.samples.len() - 1).unwrap();
@@ -150,9 +150,9 @@ fn owned_cli_exports_pce_with_priming_and_explicit_wav_speakers() {
     let pcm = std::fs::read(raw).unwrap();
     let reference = include_bytes!("fixtures/audio/aac-pce-wide8-export-reference.f32le");
     assert_eq!(pcm.len(), reference.len());
-    for (a, b) in pcm.chunks_exact(4).zip(reference.chunks_exact(4)) {
-        let delta = (f32::from_le_bytes(a.try_into().unwrap())
-            - f32::from_le_bytes(b.try_into().unwrap()))
+    for (a, b) in pcm.as_chunks::<4>().0.iter().zip(reference.as_chunks::<4>().0.iter()) {
+        let delta = (f32::from_le_bytes(*a)
+            - f32::from_le_bytes(*b))
         .abs();
         assert!(delta < 1e-6, "PCM error {delta}");
     }
@@ -179,9 +179,9 @@ fn adts_pce_stream_and_indexed_decode_preserve_all_samples_and_wav_layout() {
     fvid::native_media::decode_aac_pcm(input, &mut buffered, &Limits::default()).unwrap();
     assert_eq!(buffered, sequential);
     assert_eq!(sequential.len(), reference.len());
-    for (a, b) in sequential.chunks_exact(4).zip(reference.chunks_exact(4)) {
-        let delta = (f32::from_le_bytes(a.try_into().unwrap())
-            - f32::from_le_bytes(b.try_into().unwrap()))
+    for (a, b) in sequential.as_chunks::<4>().0.iter().zip(reference.as_chunks::<4>().0.iter()) {
+        let delta = (f32::from_le_bytes(*a)
+            - f32::from_le_bytes(*b))
         .abs();
         assert!(delta < 1e-6);
     }
@@ -386,9 +386,9 @@ fn standard_configuration_seven_matches_strict_independent_wide_pcm() {
     let mut actual = Vec::new();
     fvid::native_media::decode_aac_pcm(source, &mut actual, &Default::default()).unwrap();
     assert_eq!(actual.len(), reference.len());
-    for (a, b) in actual.chunks_exact(4).zip(reference.chunks_exact(4)) {
+    for (a, b) in actual.as_chunks::<4>().0.iter().zip(reference.as_chunks::<4>().0.iter()) {
         assert!(
-            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
+            (f32::from_le_bytes(*a) - f32::from_le_bytes(*b))
                 .abs()
                 < 1e-6
         );
@@ -492,7 +492,7 @@ fn adts_program_after_fill_elements_retains_audio_and_rejects_tools() {
             }
         }
         let prefix: Vec<u8> = bits
-            .chunks_exact(8)
+            .as_chunks::<8>().0.iter()
             .map(|byte| byte.iter().fold(0, |value, bit| value * 2 + u8::from(*bit)))
             .collect();
         assert_eq!(bits.len() % 8, 0);
@@ -594,8 +594,8 @@ fn indexed_61_and_71_layouts_match_independent_pcm_per_speaker() {
             actual.len() * 4 - reference.len(),
             (1024 - last.duration as usize) * usize::from(channels) * 4
         );
-        for (a, b) in actual.iter().zip(reference.chunks_exact(4)) {
-            assert!((*a - f32::from_le_bytes(b.try_into().unwrap())).abs() < 1e-6);
+        for (a, b) in actual.iter().zip(reference.as_chunks::<4>().0.iter()) {
+            assert!((*a - f32::from_le_bytes(*b)).abs() < 1e-6);
         }
     }
 }

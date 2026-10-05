@@ -154,7 +154,8 @@ mod tests {
     #[test]
     fn unsupported_tools_do_not_consume_channel_header() {
         let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
-        for (tns, gain) in [(0, 1)] {
+        {
+            let (tns, gain) = (0, 1);
             let (data, _) = pack(&[
                 (100, 8),
                 (0, 1),

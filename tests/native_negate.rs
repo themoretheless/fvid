@@ -39,7 +39,7 @@ fn high_depth_samples_use_their_own_maximum_and_fail_atomically() {
         Negate.apply(&mut image, depth).unwrap();
         let actual: Vec<_> = image
             .data
-            .chunks_exact(2)
+            .as_chunks::<2>().0.iter()
             .map(|b| u16::from_le_bytes([b[0], b[1]]))
             .collect();
         assert_eq!(actual, samples.map(|v| max - v));

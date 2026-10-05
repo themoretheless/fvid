@@ -55,7 +55,7 @@ fn mux(name: &str) -> Vec<u8> {
             encoding: Encoding::Aac {
                 configuration: &config.asc,
                 sample_rate: config.sample_rate,
-                channels: config.channels.into(),
+                channels: config.channels,
             },
             name: "sound",
             language: "rus",

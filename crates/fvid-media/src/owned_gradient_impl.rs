@@ -125,7 +125,7 @@ impl Gradient {
             || (bytes == 2
                 && frame
                     .data
-                    .chunks_exact(2)
+                    .as_chunks::<2>().0.iter()
                     .any(|v| u32::from(u16::from_le_bytes([v[0], v[1]])) > max))
         {
             return Err(invalid("invalid gradient sample storage"));

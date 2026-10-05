@@ -84,7 +84,7 @@ impl BoxBlur {
             || (bytes == 2
                 && frame
                     .data
-                    .chunks_exact(2)
+                    .as_chunks::<2>().0.iter()
                     .any(|p| u32::from(u16::from_le_bytes([p[0], p[1]])) >= 1u32 << depth))
         {
             return Err(invalid("invalid boxblur sample storage"));
@@ -136,9 +136,9 @@ impl BoxBlur {
                     let (lines, length, step) = if vertical { (w, h, w) } else { (h, w, 1) };
                     for line in 0..lines {
                         let start = if vertical { line } else { line * w };
-                        for i in 0..length {
+                        for (i, value) in a[..length].iter_mut().enumerate() {
                             let at = base + (start + i * step) * bytes;
-                            a[i] = if bytes == 1 {
+                            *value = if bytes == 1 {
                                 u16::from(output[at])
                             } else {
                                 u16::from_le_bytes([output[at], output[at + 1]])
@@ -148,12 +148,12 @@ impl BoxBlur {
                             blur_line(&a[..length], &mut b[..length], radius, bytes);
                             std::mem::swap(&mut a, &mut b);
                         }
-                        for i in 0..length {
+                        for (i, value) in a[..length].iter().enumerate() {
                             let at = base + (start + i * step) * bytes;
                             if bytes == 1 {
-                                output[at] = a[i] as u8;
+                                output[at] = *value as u8;
                             } else {
-                                output[at..at + 2].copy_from_slice(&a[i].to_le_bytes());
+                                output[at..at + 2].copy_from_slice(&value.to_le_bytes());
                             }
                         }
                     }

@@ -489,7 +489,7 @@ fn tempo_segments(tempos: &[(u64, u32)], ppq: u64) -> Vec<(u64, u64, u32)> {
         tempo = next;
         segments.push((at, microsecond, next));
     }
-    if segments.first().map_or(true, |segment| segment.0 != 0) {
+    if segments.first().is_none_or(|segment| segment.0 != 0) {
         segments.insert(0, (0, 0, DEFAULT_TEMPO_MICROSECONDS));
     }
     segments
@@ -580,7 +580,7 @@ pub fn read_window(data: &[u8]) -> Result<Vec<WindowEvent>> {
         )));
     }
     let mut events = Vec::with_capacity(data.len() / RECORD_BYTES);
-    for record in data.chunks_exact(RECORD_BYTES) {
+    for record in data.as_chunks::<RECORD_BYTES>().0 {
         let offset = u32::from_le_bytes(record[1..5].try_into().unwrap());
         let channel = record[5];
         if channel > 15 {
@@ -976,7 +976,7 @@ mod tests {
         // A header that promises more than the file holds.
         assert!(
             SmfFile::parse(
-                &b"MThd\x00\x00\x00\x40\x00\x00\x00\x01\x01\xe0".to_vec(),
+                b"MThd\x00\x00\x00\x40\x00\x00\x00\x01\x01\xe0".as_ref(),
                 &Limits::default()
             )
             .is_err()

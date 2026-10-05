@@ -44,15 +44,6 @@ fn fields_to_first_gap<R: Read + Seek>(
 /// attachment. A list this reader cannot walk, or one that names nothing of the
 /// kind, leaves the file stating nothing instead of failing it — as does a tag
 /// of a name this player has no line for.
-fn read_tags<R: Read + Seek>(
-    r: &mut R,
-    e: Element,
-    count: &mut usize,
-    max: usize,
-    out: &mut FileTags,
-) {
-    read_tags_collect(r, e, count, max, out, &mut |_, _, _| {});
-}
 fn read_tags_collect<R: Read + Seek>(
     r: &mut R,
     e: Element,

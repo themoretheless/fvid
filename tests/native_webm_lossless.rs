@@ -192,7 +192,8 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
 
 #[test]
 fn admission_keeps_unsupported_audio_on_existing_path() {
-    for name in ["audio/vorbis-stereo.webm"] {
+    {
+        let name = "audio/vorbis-stereo.webm";
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures")
             .join(name);
@@ -336,7 +337,7 @@ fn stored_crop_then_rotation_then_filter_preserves_ten_bit_samples() {
             negate: filtered.then_some(fvid::native_pixels::Negate),
             ..Default::default()
         };
-        let stats = fvid::native_export::transcode_ffv1_transformed(
+        let _stats = fvid::native_export::transcode_ffv1_transformed(
             &source,
             &output,
             &VideoGeometry::default(),

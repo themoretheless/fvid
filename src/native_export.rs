@@ -51,7 +51,7 @@ pub fn export_y4m_transformed(
     interval: Option<(std::time::Duration, std::time::Duration)>,
     geometry: &crate::native_geometry::VideoGeometry,
 ) -> Result<u64> {
-    Ok(export_y4m_sources(&[source.to_owned()],destination,interval,geometry,&Default::default(),false,None,None)?.packets)
+    Ok(export_y4m_sources(&[source.to_owned()], destination, Y4mInterval { range: interval, relative: false }, geometry, &Default::default(), None, None)?.packets)
 }
 
 /// Export owned spatial and pixel processing while retaining frame timing and depth.
@@ -62,8 +62,7 @@ pub fn export_y4m_pipeline(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
 ) -> Result<u64> {
-    Ok(export_y4m_sources(&[source.to_owned()], destination, interval, geometry,
-        filters, false, None, None)?.packets)
+    Ok(export_y4m_sources(&[source.to_owned()], destination, Y4mInterval { range: interval, relative: false }, geometry, filters, None, None)?.packets)
 }
 
 /// Decode compatible video segments in order into one constant-rate Y4M stream.
@@ -77,7 +76,7 @@ pub fn concat_y4m(sources: &[PathBuf], destination: &Path, selected: Option<usiz
         if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
         validate_video_selection(source,selected)?;
     }
-    export_y4m_sources(sources,destination,None,&Default::default(),&Default::default(),false,cancel,progress)
+    export_y4m_sources(sources, destination, Y4mInterval { range: None, relative: false }, &Default::default(), &Default::default(), cancel, progress)
 }
 
 pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
@@ -97,11 +96,17 @@ pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -
     Ok(())
 }
 
+struct Y4mInterval {
+    range: Option<(std::time::Duration, std::time::Duration)>,
+    relative: bool,
+}
+
 fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
-    interval: Option<(std::time::Duration,std::time::Duration)>, geometry: &crate::native_geometry::VideoGeometry,
+    selection: Y4mInterval, geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
-    relative_interval: bool, cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
+    let Y4mInterval { range: interval, relative: relative_interval } = selection;
     let mut control=crate::native_media::DecodeProgress::new(cancel,progress)?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("export interval requires from < to"));
@@ -155,15 +160,14 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             .checked_sub(start)
             .filter(|n| *n > 0)
             .ok_or_else(|| invalid("invalid frame duration"))?;
-        if let Some((old_end, old_duration, old_scale)) = previous {
-            if product(start, old_scale)? != product(old_end, u128::from(scale))?
-                || product(duration, old_scale)? != product(old_duration, u128::from(scale))?
+        if let Some((old_end, old_duration, old_scale)) = previous
+            && (product(start, old_scale)? != product(old_end, u128::from(scale))?
+                || product(duration, old_scale)? != product(old_duration, u128::from(scale))?)
             {
                 return Err(invalid(
                     "Y4M export requires constant contiguous frame timing",
                 ));
             }
-        }
         control.check()?;
         if let Some((first_duration,first_scale))=output_rate {
             if product(duration,first_scale)?!=product(first_duration,u128::from(scale))? {
@@ -393,6 +397,7 @@ pub fn export_aac_pcm_resampled(
 
 /// AAC PCM export with encoded-packet progress and cancellation. Counts include
 /// reference pre-roll/replayed edits; done is emitted only after publication.
+#[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn export_aac_pcm_controlled(
     source: &Path,
     destination: &Path,
@@ -407,6 +412,7 @@ pub fn export_aac_pcm_controlled(
 }
 
 /// Export one explicitly selected container audio stream (zero-based index).
+#[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn export_aac_pcm_selected(
     source: &Path,
     destination: &Path,
@@ -418,10 +424,17 @@ pub fn export_aac_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false,None,None,None)
+    export_pcm_selected(
+        source, destination, interval,
+        PcmTransform { volume, channels, sample_rate },
+        selected,
+        PcmExportLimits { cancel, progress, max_rss_bytes: None, max_packet_bytes: None, max_packets: None },
+        false,
+    )
 }
 
 /// Export owned AAC, MP4 ALAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
+#[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn export_audio_pcm_selected(
     source: &Path,
     destination: &Path,
@@ -433,7 +446,13 @@ pub fn export_audio_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true,None,None,None)
+    export_pcm_selected(
+        source, destination, interval,
+        PcmTransform { volume, channels, sample_rate },
+        selected,
+        PcmExportLimits { cancel, progress, max_rss_bytes: None, max_packet_bytes: None, max_packets: None },
+        true,
+    )
 }
 
 /// Export selected owned audio while checking process RSS before decoding and
@@ -446,7 +465,13 @@ pub fn export_audio_pcm_selected_with_rss_limit(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, None, None)
+    export_pcm_selected(
+        source, destination, None,
+        PcmTransform { volume: 1., channels: None, sample_rate: None },
+        selected,
+        PcmExportLimits { cancel, progress, max_rss_bytes, max_packet_bytes: None, max_packets: None },
+        true,
+    )
 }
 
 /// Export selected owned audio with encoded-payload and process RSS limits.
@@ -460,7 +485,13 @@ pub fn export_audio_pcm_selected_with_limits(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, Some(max_packet_bytes), None)
+    export_pcm_selected(
+        source, destination, None,
+        PcmTransform { volume: 1., channels: None, sample_rate: None },
+        selected,
+        PcmExportLimits { cancel, progress, max_rss_bytes, max_packet_bytes: Some(max_packet_bytes), max_packets: None },
+        true,
+    )
 }
 
 /// Internal compressed-audio spooling controls. Unmigrated admission/metadata
@@ -471,9 +502,13 @@ pub(crate) fn export_audio_pcm_selected_with_controls(
     selected: Option<usize>,
     options: &fvid_media::CopyOptions,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source, destination, None, 1., None, None, selected,
-        options.cancel.as_ref(), options.progress.as_ref(), true, options.max_rss_bytes,
-        Some(options.max_packet_bytes), options.max_packets)
+    export_pcm_selected(
+        source, destination, None,
+        PcmTransform { volume: 1., channels: None, sample_rate: None },
+        selected,
+        PcmExportLimits { cancel: options.cancel.as_ref(), progress: options.progress.as_ref(), max_rss_bytes: options.max_rss_bytes, max_packet_bytes: Some(options.max_packet_bytes), max_packets: options.max_packets },
+        true,
+    )
 }
 
 /// Owned transformed export with packet-work, encoded payload and RSS limits.
@@ -484,26 +519,39 @@ pub fn export_audio_pcm_transformed_with_controls(
     options: &fvid_media::CopyOptions,
 ) -> Result<crate::native_media::AudioDecodeStats> {
     crate::media::validate_owned_audio_options(options).map_err(|error| invalid(&error))?;
-    export_pcm_selected(source, destination, interval, volume, channels, sample_rate,
-        options.streams.first().copied(), options.cancel.as_ref(), options.progress.as_ref(),
-        true, options.max_rss_bytes, Some(options.max_packet_bytes), options.max_packets)
+    export_pcm_selected(
+        source, destination, interval,
+        PcmTransform { volume, channels, sample_rate },
+        options.streams.first().copied(),
+        PcmExportLimits { cancel: options.cancel.as_ref(), progress: options.progress.as_ref(), max_rss_bytes: options.max_rss_bytes, max_packet_bytes: Some(options.max_packet_bytes), max_packets: options.max_packets },
+        true,
+    )
 }
 
-fn export_pcm_selected(
-    source: &Path,
-    destination: &Path,
-    interval: Option<(std::time::Duration, std::time::Duration)>,
+struct PcmTransform {
     volume: f64,
     channels: Option<u16>,
     sample_rate: Option<u32>,
-    selected: Option<usize>,
-    cancel: Option<&crate::media_control::CancelFlag>,
-    progress: Option<&crate::media_control::ProgressHook>,
-    allow_wave:bool,
+}
+
+struct PcmExportLimits<'a> {
+    cancel: Option<&'a crate::media_control::CancelFlag>,
+    progress: Option<&'a crate::media_control::ProgressHook>,
     max_rss_bytes: Option<u64>,
     max_packet_bytes: Option<usize>,
     max_packets: Option<u64>,
+}
+
+fn export_pcm_selected(    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    transform: PcmTransform,
+    selected: Option<usize>,
+    limits: PcmExportLimits<'_>,
+    allow_wave: bool,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    let PcmTransform { volume, channels, sample_rate } = transform;
+    let PcmExportLimits { cancel, progress, max_rss_bytes, max_packet_bytes, max_packets } = limits;
     let mut control = crate::native_media::DecodeProgress::new_with_limits(cancel, progress, max_rss_bytes, max_packets)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
         return Err(invalid("sample rate must be within 8000..=384000"));
@@ -603,9 +651,8 @@ fn export_pcm_selected(
     stats.channels = output_channels;
     stats.sample_frames = resampler.finish()?;
     stats.sample_rate = output_rate;
-    if let Some(frames) = sink.finish()? {
-        if frames != stats.sample_frames {return Err(invalid("PCM muxed sample count mismatch"));}
-    }
+    if let Some(frames) = sink.finish()?
+        && frames != stats.sample_frames {return Err(invalid("PCM muxed sample count mismatch"));}
     if wav {
         let header = float_wav_header_with_mask(&stats, output_mask)?;
         output.seek(SeekFrom::Start(0))?;
@@ -816,7 +863,7 @@ pub fn trim_y4m(source: &Path, destination: &Path, from: i64, to: i64, selected:
     if destination.extension().and_then(|s|s.to_str())!=Some("y4m") {return Err(invalid("native video trim output requires .y4m"));}
     if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
     validate_video_selection(source,selected)?;
-    export_y4m_sources(&[source.to_owned()],destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),&Default::default(),&Default::default(),true,cancel,progress)
+    export_y4m_sources(&[source.to_owned()], destination, Y4mInterval { range: Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))), relative: true }, &Default::default(), &Default::default(), cancel, progress)
 }
 
 /// Whether the MP4 contains exactly one AAC track and no omitted tracks.

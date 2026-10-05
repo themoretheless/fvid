@@ -75,7 +75,8 @@ fn invalid_offsets_fail_before_output() {
     let mut corrupted = include_bytes!("fixtures/audio/aac-native-edit.m4a").to_vec();
     let table = corrupted.windows(4).position(|v| v == b"stco").unwrap();
     corrupted[table + 12..table + 16].copy_from_slice(&1u32.to_be_bytes());
-    for source in [corrupted.as_slice()] {
+    {
+        let source = corrupted.as_slice();
         let mut output = Vec::new();
         assert!(fast_start(&mut Cursor::new(source), &mut output).is_err());
         assert!(output.is_empty());

@@ -102,7 +102,7 @@ fn decode_plan_and_export_bilateral_without_ffmpeg() {
         .decode(&reader.read_packet(0).unwrap())
         .unwrap()
         .frame;
-    for row in frame.data[..32].chunks_exact(8) {
+    for row in frame.data[..32].as_chunks::<8>().0 {
         assert!(row[..4].iter().all(|&v| (61..=63).contains(&v)));
         assert!(row[4..].iter().all(|&v| (201..=203).contains(&v)));
     }

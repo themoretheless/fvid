@@ -70,10 +70,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             .ok_or("no AV1 video track")?
             .number;
         for i in 0..reader.packets.len() {
-            if reader.packets[i].track == track {
-                if emit(&reader.read_packet(i)?)? {
-                    break;
-                }
+            if reader.packets[i].track == track && emit(&reader.read_packet(i)?)? {
+                break;
             }
         }
     } else {

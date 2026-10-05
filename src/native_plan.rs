@@ -88,7 +88,7 @@ pub fn decode_audio_selected(
     });
     Ok(MediaPlan {
         command: "decode-audio".into(), input: source.to_path_buf(), inputs: vec![source.to_path_buf()],
-        streams: vec![PlanStream { index: index, media_type: "audio".into(),
+        streams: vec![PlanStream { index, media_type: "audio".into(),
             codec, disposition: "decode".into() }],
         steps, graph: None,
         notes: vec![

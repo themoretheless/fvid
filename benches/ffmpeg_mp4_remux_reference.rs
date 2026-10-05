@@ -92,10 +92,8 @@ fn independent_decoder_preserves_video_and_audio_for_combined_files() {
             "{name}: video"
         );
         let input = mp4::Mp4Reader::open(Cursor::new(&bytes), Default::default()).unwrap();
-        let mut audio_index = 0;
-        for track in input.tracks().iter().filter(|t| t.handler == *b"soun") {
+        for (audio_index, track) in input.tracks().iter().filter(|t| t.handler == *b"soun").enumerate() {
             let map = format!("0:a:{audio_index}");
-            audio_index += 1;
             let before = decode(&source, &map, true);
             let after = decode(&dest, &map, true);
             let samples = if track.edits.is_empty() {

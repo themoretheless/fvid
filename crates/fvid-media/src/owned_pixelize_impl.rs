@@ -118,7 +118,7 @@ impl Pixelize {
         if bytes == 2
             && frame
                 .data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .any(|s| u32::from(u16::from_le_bytes([s[0], s[1]])) >= 1u32 << depth)
         {
             return Err(invalid("pixelize sample exceeds depth"));

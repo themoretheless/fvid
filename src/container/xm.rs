@@ -570,7 +570,7 @@ pub struct Row {
 
 /// The row a packet holds.
 pub fn read_row(bytes: &[u8]) -> Result<Row> {
-    if bytes.len() < ROW_HEADER_BYTES || (bytes.len() - ROW_HEADER_BYTES) % CELL_BYTES != 0 {
+    if bytes.len() < ROW_HEADER_BYTES || !(bytes.len() - ROW_HEADER_BYTES).is_multiple_of(CELL_BYTES) {
         return Err(invalid(
             "module row packet holds neither a whole row nor a whole number of cells",
         ));
@@ -580,7 +580,7 @@ pub fn read_row(bytes: &[u8]) -> Result<Row> {
         bpm: u16::from_le_bytes([bytes[4], bytes[5]]),
         speed: bytes[6],
         cells: bytes[ROW_HEADER_BYTES..]
-            .chunks_exact(CELL_BYTES)
+            .as_chunks::<CELL_BYTES>().0.iter()
             .map(|cell| Cell {
                 note: cell[0],
                 instrument: cell[1],
@@ -1009,7 +1009,7 @@ fn read_envelope(bytes: &[u8], at: usize) -> Result<Vec<(u16, u16)>> {
         .get(at..at + ENVELOPE_BYTES)
         .ok_or_else(|| invalid("module's envelopes run past its end"))?;
     Ok(slice
-        .chunks_exact(4)
+        .as_chunks::<4>().0.iter()
         .map(|pair| {
             (
                 u16::from_le_bytes([pair[0], pair[1]]),
@@ -1043,7 +1043,7 @@ fn widen_8(value: i8) -> i16 {
 /// Undo the same thing over little-endian words, which is the 16-bit form.
 pub fn decode_delta_16(data: &[u8]) -> Vec<i16> {
     let mut value: i16 = 0;
-    data.chunks_exact(2)
+    data.as_chunks::<2>().0.iter()
         .map(|pair| {
             value = value.wrapping_add(i16::from_le_bytes([pair[0], pair[1]]));
             value
@@ -1265,8 +1265,8 @@ mod tests {
         out.extend_from_slice(&instrument.keymap);
         // Both envelopes twelve points of nothing, which is the shape a module
         // holds when its author never drew one.
-        out.extend_from_slice(&vec![0u8; 2 * ENVELOPE_BYTES]);
-        out.extend_from_slice(&vec![0u8; INSTRUMENT_FLAGS - 225]);
+        out.extend_from_slice(&[0u8; 2 * ENVELOPE_BYTES]);
+        out.extend_from_slice(&[0u8; INSTRUMENT_FLAGS - 225]);
         out.extend_from_slice(&instrument.envelope_flags.to_le_bytes());
         out.extend_from_slice(&[0, 0, 0, 0]);
         out.extend_from_slice(&instrument.fadeout.to_le_bytes());
@@ -1821,7 +1821,7 @@ mod tests {
         let module = parse(&bytes).expect("the module opens");
         assert_eq!(
             (module.speed, module.bpm),
-            (u8::from(DEFAULT_SPEED), DEFAULT_BPM)
+            (DEFAULT_SPEED, DEFAULT_BPM)
         );
         // Every row is measured by them, so the module is its three rows at 120
         // ms each.
@@ -1840,8 +1840,7 @@ mod tests {
         let mut bytes = two_notes();
         bytes[OFFSET_VERSION..OFFSET_VERSION + 2].copy_from_slice(&0x0105u16.to_le_bytes());
         let error = parse(&bytes)
-            .err()
-            .expect("a version after the last the format states");
+            .expect_err("a version after the last the format states");
         assert!(
             error.to_string().contains("not one of the three"),
             "{error}"
@@ -1863,8 +1862,7 @@ mod tests {
             bytes[record + SAMPLE_TYPE] = kind;
             bytes[record + SAMPLE_RESERVED] = reserved;
             let error = parse(&bytes)
-                .err()
-                .expect("a sample the reader cannot take")
+                .expect_err("a sample the reader cannot take")
                 .to_string();
             assert!(error.contains(message), "{error} states no {message}");
         }
@@ -1893,7 +1891,7 @@ mod tests {
         // A channel count above the most the format states.
         let mut bytes = two_notes();
         bytes[OFFSET_CHANNELS..OFFSET_CHANNELS + 2].copy_from_slice(&40u16.to_le_bytes());
-        let error = parse(&bytes).err().expect("no 40 channels");
+        let error = parse(&bytes).expect_err("no 40 channels");
         assert!(error.to_string().contains("outside the 1..=32"), "{error}");
         // A sample count the instrument's own records cannot fill.
         let mut bytes = two_notes();

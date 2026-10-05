@@ -81,7 +81,7 @@ pub fn concat_audio(
         sample_frames: 0,
         decoded_frames: 0,
         sample_rate: rate,
-        channels: channels,
+        channels,
     };
     let mut event = ProgressEvent {
         packets: 0,

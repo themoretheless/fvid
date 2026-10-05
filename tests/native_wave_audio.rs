@@ -48,7 +48,7 @@ fn wave(bits: u16, channels: u16, float: bool, ext: Option<(u16, u32)>, data: &[
     out.extend(b"data");
     out.extend((data.len() as u32).to_le_bytes());
     out.extend(data);
-    if data.len() % 2 != 0 {
+    if !data.len().is_multiple_of(2) {
         out.push(0);
     }
     let n = (out.len() - 8) as u32;
@@ -58,8 +58,8 @@ fn wave(bits: u16, channels: u16, float: bool, ext: Option<(u16, u32)>, data: &[
 fn values(path: &std::path::Path) -> Vec<f32> {
     std::fs::read(path)
         .unwrap()
-        .chunks_exact(4)
-        .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+        .as_chunks::<4>().0.iter()
+        .map(|b| f32::from_le_bytes(*b))
         .collect()
 }
 #[test]
@@ -543,7 +543,7 @@ fn wave_concat_rewrites_fact_and_keeps_first_metadata_after_data() {
         bytes.extend((4 + tag.len() as u32).to_le_bytes());
         bytes.extend(b"INFO");
         bytes.extend(tag);
-        if tag.len() % 2 != 0 {
+        if !tag.len().is_multiple_of(2) {
             bytes.push(0);
         }
         let size = (bytes.len() - 8) as u32;

@@ -530,8 +530,7 @@ mod tests {
         let last = bytes.len() - 1;
         bytes[last] ^= 0xff;
         let error = Ogg::parse(&bytes, &Limits::default())
-            .err()
-            .expect("a corrupted page is not a page")
+            .expect_err("a corrupted page is not a page")
             .to_string();
         assert!(error.contains("checksum"), "{error}");
     }
@@ -543,8 +542,7 @@ mod tests {
         cut.truncate(cut.len() - 3);
         assert!(
             Ogg::parse(&cut, &Limits::default())
-                .err()
-                .expect("a truncated page")
+                .expect_err("a truncated page")
                 .to_string()
                 .contains("states")
         );
@@ -553,8 +551,7 @@ mod tests {
         let lone = page(1, 0, 0, 2 | 1, &[vec![3u8; 8]]);
         assert!(
             Ogg::parse(&[lone.clone(), lone].concat(), &Limits::default())
-                .err()
-                .expect("a packet that never began")
+                .expect_err("a packet that never began")
                 .to_string()
                 .contains("never began")
         );
@@ -567,8 +564,7 @@ mod tests {
         .concat();
         assert!(
             Ogg::parse(&open, &Limits::default())
-                .err()
-                .expect("a stream that ends unfinished")
+                .expect_err("a stream that ends unfinished")
                 .to_string()
                 .contains("still open")
         );
@@ -577,8 +573,7 @@ mod tests {
         version[4] = 1;
         assert!(
             Ogg::parse(&version, &Limits::default())
-                .err()
-                .expect("a version this reader does not walk")
+                .expect_err("a version this reader does not walk")
                 .to_string()
                 .contains("version")
         );

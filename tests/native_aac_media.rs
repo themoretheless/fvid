@@ -11,9 +11,9 @@ fn headless_aac_export_matches_saved_pcm_reference() {
     assert_eq!(pcm.len(), oracle.len());
     let mut squared = 0.0f64;
     let mut peak = 0.0f64;
-    for (a, b) in pcm.chunks_exact(4).zip(oracle.chunks_exact(4)) {
-        let delta = f64::from(f32::from_le_bytes(a.try_into().unwrap()))
-            - f64::from(f32::from_le_bytes(b.try_into().unwrap()));
+    for (a, b) in pcm.as_chunks::<4>().0.iter().zip(oracle.as_chunks::<4>().0.iter()) {
+        let delta = f64::from(f32::from_le_bytes(*a))
+            - f64::from(f32::from_le_bytes(*b));
         squared += delta * delta;
         peak = peak.max(delta.abs());
     }
@@ -140,9 +140,9 @@ fn mp4_aac_edit_removes_priming_and_encoder_tail() {
     let oracle = include_bytes!("fixtures/audio/aac-native-edit-reference.f32le");
     assert!(oracle.len() >= pcm.len());
     let mut peak = 0.0f32;
-    for (a, b) in pcm.chunks_exact(4).zip(oracle.chunks_exact(4)) {
-        peak = peak.max((f32::from_le_bytes(a.try_into().unwrap())
-            - f32::from_le_bytes(b.try_into().unwrap())).abs());
+    for (a, b) in pcm.as_chunks::<4>().0.iter().zip(oracle.as_chunks::<4>().0.iter()) {
+        peak = peak.max((f32::from_le_bytes(*a)
+            - f32::from_le_bytes(*b)).abs());
     }
     assert!(peak < 1e-6, "peak error {peak}");
 }
@@ -258,9 +258,9 @@ fn matroska_aac_matches_saved_reference_and_interval() {
     assert_eq!(pcm.len(), oracle.len());
     let mut squared = 0.0f64;
     let mut peak = 0.0f64;
-    for (a, b) in pcm.chunks_exact(4).zip(oracle.chunks_exact(4)) {
-        let delta = f64::from(f32::from_le_bytes(a.try_into().unwrap()))
-            - f64::from(f32::from_le_bytes(b.try_into().unwrap()));
+    for (a, b) in pcm.as_chunks::<4>().0.iter().zip(oracle.as_chunks::<4>().0.iter()) {
+        let delta = f64::from(f32::from_le_bytes(*a))
+            - f64::from(f32::from_le_bytes(*b));
         squared += delta*delta; peak = peak.max(delta.abs());
     }
     assert!((squared/(pcm.len()/4) as f64).sqrt() < 0.00015);
@@ -329,8 +329,8 @@ fn native_volume_scales_all_aac_containers_without_clipping() {
             assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
             let wave = std::fs::read(&output).unwrap();
             assert_eq!(u32::from_le_bytes(wave[68..72].try_into().unwrap()) as u64, baseline.sample_frames);
-            let expected: Vec<_> = pcm.chunks_exact(4).flat_map(|bytes|
-                (f32::from_le_bytes(bytes.try_into().unwrap()) * gain).to_le_bytes()).collect();
+            let expected: Vec<_> = pcm.as_chunks::<4>().0.iter().flat_map(|bytes|
+                (f32::from_le_bytes(*bytes) * gain).to_le_bytes()).collect();
             assert_eq!(&wave[80..], expected);
         }
         for gain in [-1.0, 65.0, f64::NAN, f64::INFINITY] {
@@ -360,13 +360,13 @@ fn surround_to_stereo_and_mono_preserves_timing_and_wav_layout() {
         assert_eq!(u16::from_le_bytes(data[22..24].try_into().unwrap()), channels);
         assert_eq!(u32::from_le_bytes(data[40..44].try_into().unwrap()), if channels == 1 {4} else {3});
         assert_eq!(data.len()-80, stats.sample_frames as usize * channels as usize * 4);
-        for (input, actual) in original.chunks_exact(24).zip(data[80..].chunks_exact(channels as usize*4)) {
-            let samples: Vec<_> = input.chunks_exact(4).map(|v| f32::from_le_bytes(v.try_into().unwrap()) as f64).collect();
+        for (input, actual) in original.as_chunks::<24>().0.iter().zip(data[80..].chunks_exact(channels as usize*4)) {
+            let samples: Vec<_> = input.as_chunks::<4>().0.iter().map(|v| f32::from_le_bytes(*v) as f64).collect();
             let left = samples[0] + (samples[2]+samples[4])/2f64.sqrt();
             let right = samples[1] + (samples[2]+samples[5])/2f64.sqrt();
             let expected = if channels == 1 {vec![(left+right)*0.25]} else {vec![left*0.5,right*0.5]};
-            for (bytes, reference) in actual.chunks_exact(4).zip(expected) {
-                let value = f32::from_le_bytes(bytes.try_into().unwrap()) as f64;
+            for (bytes, reference) in actual.as_chunks::<4>().0.iter().zip(expected) {
+                let value = f32::from_le_bytes(*bytes) as f64;
                 assert!((value-reference).abs() < 5e-8);
             }
         }
@@ -392,9 +392,9 @@ fn native_resample_cli_keeps_duration_and_sets_output_geometry() {
         assert_eq!(u32::from_le_bytes(bytes[28..32].try_into().unwrap()), rate*8);
         assert_eq!(u32::from_le_bytes(bytes[68..72].try_into().unwrap()), frames);
         assert_eq!(bytes.len(), 80+frames as usize*8);
-        for pair in bytes[80..].chunks_exact(8) { assert_eq!(&pair[..4], &pair[4..]); }
+        for pair in bytes[80..].as_chunks::<8>().0.iter() { assert_eq!(&pair[..4], &pair[4..]); }
         // Mono source remains audible in both output channels.
-        assert!(bytes[80..].chunks_exact(4).any(|v| f32::from_le_bytes(v.try_into().unwrap()).abs()>0.01));
+        assert!(bytes[80..].as_chunks::<4>().0.iter().any(|v| f32::from_le_bytes(*v).abs()>0.01));
     }
     std::fs::remove_dir_all(dir).unwrap();
 }

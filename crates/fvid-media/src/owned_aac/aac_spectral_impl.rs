@@ -17,7 +17,7 @@ pub fn read(
     if !matches!(frame_samples, 960 | 1024)
         || info.group_lengths.is_empty()
         || info.group_lengths.len() > windows
-        || info.group_lengths.iter().any(|&n| n == 0)
+        || info.group_lengths.contains(&0)
         || info
             .group_lengths
             .iter()
@@ -46,7 +46,7 @@ pub fn read(
                 0 | 13..=15 => result.resize(result.len() + count, 0),
                 1..=11 => {
                     let tuple = if book <= 4 { 4 } else { 2 };
-                    if width % tuple != 0 {
+                    if !width.is_multiple_of(tuple) {
                         return Err(invalid("AAC band splits spectral tuple"));
                     }
                     for _ in 0..count / tuple {

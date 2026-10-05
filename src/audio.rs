@@ -954,6 +954,7 @@ mod tests {
     }
 
 
+    #[test]
     fn default_rate_consumes_one_frame_per_frame() {
         for _ in 0..8 {
             let (frames, carry) = scaled_frames(128, 1_000, 0);

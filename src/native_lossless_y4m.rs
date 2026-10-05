@@ -93,8 +93,7 @@ pub fn write<W: Write + Seek>(
 pub fn write_processed<W: Write + Seek>(
     source:&Path,output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
     cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
-    processor:Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>,
-    >,
+    processor:Option<&mut crate::native_lossless::FrameProcessor<'_>>,
 )->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     write_selected(source,output,geometry,filters,cancel,progress,processor,
         fvid_media::owned_framestep::FrameStep::parse("").map_err(|e|invalid(&e))?,
@@ -102,11 +101,11 @@ pub fn write_processed<W: Write + Seek>(
 }
 
 /// Decode every source frame, then encode selected frames with original clocks.
+#[expect(clippy::too_many_arguments, reason = "Preserve the public export/filter entrypoint signature for existing callers")]
 pub fn write_selected<W: Write + Seek>(
     source:&Path,output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
     cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
-    mut processor:Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>,
-    >,
+    mut processor:Option<&mut crate::native_lossless::FrameProcessor<'_>>,
     step:fvid_media::owned_framestep::FrameStep,
 )->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     check(cancel)?;
@@ -318,7 +317,6 @@ pub fn write_selected<W: Write + Seek>(
             },
             colour: Some(colour),
             hdr: reader.hdr(),
-            ..Default::default()
         }),
         ..Default::default()
     };

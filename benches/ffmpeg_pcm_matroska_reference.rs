@@ -1,15 +1,12 @@
 use fvid::{
     container::{
-        matroska_write::{Encoding, PacketWriter, TrackSpec},
         webm,
     },
-    media_control::{CancelFlag, ProgressHook},
     native_export,
 };
 use std::{
     io::Cursor,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
 };
 struct Dir(PathBuf);
 impl Drop for Dir {

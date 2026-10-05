@@ -20,6 +20,16 @@ fn invalid(message: &str) -> Error {
 }
 include!("owned_ebml_impl.rs");
 include!("owned_matroska_metadata_read_impl.rs");
+
+fn read_tags<R: Read + Seek>(
+    r: &mut R,
+    e: Element,
+    count: &mut usize,
+    max: usize,
+    out: &mut FileTags,
+) {
+    read_tags_collect(r, e, count, max, out, &mut |_, _, _| {});
+}
 impl Element {
     pub fn id(&self) -> u32 {
         self.id

@@ -15,7 +15,7 @@ use fvid::{
 };
 fn hex(s: &str) -> Vec<u8> {
     s.as_bytes()
-        .chunks_exact(2)
+        .as_chunks::<2>().0.iter()
         .map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap())
         .collect()
 }
@@ -73,7 +73,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     .map(|(_, m)| *m)
             };
             let left = p.x.checked_sub(1).and_then(|x| neighbour(x, p.y));
-            let top = if p.y % (1 << self.sps.coding_block_log2[1]) == 0 {
+            let top = if p.y.is_multiple_of(1 << self.sps.coding_block_log2[1]) {
                 None
             } else {
                 p.y.checked_sub(1).and_then(|y| neighbour(p.x, y))
@@ -111,7 +111,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 delta_read = true;
             }
             let qps = hevc_qp::components(self.qp, self.sps.depth, [0, 0])?;
-            for component in 0..3 {
+            for (component, &qp) in qps.iter().enumerate() {
                 if component != 0 && !u.owns_chroma {
                     continue;
                 }
@@ -123,7 +123,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     },
                     component: component as u8,
                     bit_depth: self.sps.depth[usize::from(component != 0)],
-                    qp: qps[component],
+                    qp,
                     intra_mode: Some(if component == 0 { mode } else { chroma }),
                     transform_skip_enabled: self.pps.transform_skip,
                     transquant_bypass: bypass,

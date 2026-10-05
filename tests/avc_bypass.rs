@@ -30,7 +30,7 @@ fn compare(file: &[u8], oracle: &[u8], cabac: bool, depth: u8) {
             .find(|n| matches!(n[0] & 31, 1 | 5))
             .unwrap();
         let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
-        assert_eq!(i32::from(header.slice_qp) + 6 * i32::from(depth - 8), 0);
+        assert_eq!(header.slice_qp + 6 * i32::from(depth - 8), 0);
         if header.slice_type == SliceType::I {
             let mut cavlc = if pps.cabac {
                 None
@@ -183,7 +183,7 @@ fn ten_bit_lossless_camera_bridge_preserves_native_pixels_and_backward_seek() {
             let position = (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64;
             let pixels: Vec<u8> = reader
                 .rgb()
-                .chunks_exact(3)
+                .as_chunks::<3>().0.iter()
                 .flat_map(|p| [p[2], p[1], p[0], 255])
                 .collect();
             expected.push((position, pixels));
@@ -225,7 +225,7 @@ fn compressed_lossless_camera_loops_all_frames() {
             (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64,
             reader
                 .rgb()
-                .chunks_exact(3)
+                .as_chunks::<3>().0.iter()
                 .flat_map(|p| [p[2], p[1], p[0], 255])
                 .collect::<Vec<_>>(),
         ));

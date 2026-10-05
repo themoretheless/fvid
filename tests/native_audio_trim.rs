@@ -30,7 +30,7 @@ fn alac_and_matroska_pcm_trim_use_owned_sample_exact_wave_export() {
         let full = std::fs::read(full).unwrap();
         let (from, to) = (1000i64, 5000i64);
         let boundary = |us: i64| {
-            ((us as u64 * u64::from(info.sample_rate) + 999999) / 1000000) as usize
+            (us as u64 * u64::from(info.sample_rate)).div_ceil(1000000) as usize
                 * usize::from(info.channels)
                 * 4
         };

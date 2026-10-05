@@ -125,7 +125,7 @@ pub(crate) fn plan_window(
         durations[pair[0].1] = span;
     }
     let mut last_visible = None;
-    for i in 0..track.samples.len() {
+    for (i, &sample_duration) in durations.iter().enumerate() {
         check(cancel)?;
         let sample = track
             .samples
@@ -135,7 +135,7 @@ pub(crate) fn plan_window(
             return Err(invalid("zero MP4 video sample duration"));
         }
         let start = i128::from(sample.pts);
-        let finish = start + durations[i];
+        let finish = start + sample_duration;
         let clipped_start = start.max(begin);
         let clipped_end = end.map_or(finish, |end| finish.min(end));
         let invisible = clipped_start >= clipped_end;
@@ -336,7 +336,7 @@ pub fn write_selected_with_metadata_overrides<R: Read + Seek, W: Write + Seek>(
         .map(|t| plan(t, input.movie_timescale(), cancel))
         .collect::<Result<_>>()?;
     let specs: Vec<_> = tracks.iter().map(spec).collect::<Result<_>>()?;
-    let options: Vec<_> = plans.iter().map(|p| p.options.clone()).collect();
+    let options: Vec<_> = plans.iter().map(|p| p.options).collect();
     let mut writer =
         PacketWriter::new_with_metadata(output, &specs, &options, metadata.file)?;
     if let Some(hook) = progress {

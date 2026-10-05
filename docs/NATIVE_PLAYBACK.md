@@ -3,6 +3,15 @@
 Приложение → библиотека FVid → собственные контейнеры, декодеры и обработка
 кадров. Оконная библиотека и графический API не декодируют медиа.
 
+Текущие production features `media`, `media-cuda` и `cuda-hw` используют
+собственный backend без FFmpeg/libav. `legacy-ffmpeg` сохранён только как
+маркер для явного reference benchmark и не переключает библиотеку на libav.
+Ниже сохранены записи отдельных этапов миграции: их оговорки об оставшихся
+legacy-зависимостях описывают состояние на момент того этапа. Актуальные
+маршруты и ограничения перечислены в [SHARED_CODECS.md](SHARED_CODECS.md).
+Отсутствие зависимости не означает поддержку всех codec profiles/tools;
+аппаратная проверка NVDEC/NVENC на NVIDIA ещё предстоит.
+
 ```sh
 cargo run --release --no-default-features --features player -- play video.webm
 cargo run --release --no-default-features --features player -- play --start-time 1:30 --rate 2 clip.mp4

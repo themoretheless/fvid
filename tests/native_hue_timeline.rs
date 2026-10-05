@@ -42,14 +42,14 @@ fn animated_hue_keeps_every_filter_input_before_selection_and_clip_time() {
                 };
                 let stats = if library {
                     fvid_media::transcode_lossless(
-                        &source,
+                        source,
                         &output,
                         transform,
                         &CopyOptions::default(),
                     )
                 } else {
                     fvid::media::transcode_lossless(
-                        &source,
+                        source,
                         &output,
                         transform,
                         &CopyOptions::default(),

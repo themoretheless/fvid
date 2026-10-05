@@ -156,7 +156,7 @@ impl AlacDecoder {
     /// Conservative retained decoder and interleaved PCM payload estimate.
     /// Includes three i32/u32 scratch planes and up to twice the output length
     /// for Vec growth. Excludes caller packet/I/O buffers and allocator headers.
-    pub(crate) fn decode_admission_bytes(
+    pub fn decode_admission_bytes(
         configuration: &[u8],
         sample_rate: u32,
         channels: u16,
@@ -170,9 +170,6 @@ impl AlacDecoder {
             .and_then(|bytes| bytes.checked_add(16 * 1024))
             .ok_or_else(|| invalid("ALAC memory estimate overflow"))
     }
-
-    /// Current audio specification (sample rate, channels).
-
 
     /// The frame's elements, read in the order the packet holds them and written
     /// into `out` at their track's channel positions.
@@ -235,7 +232,7 @@ impl AlacDecoder {
         bits.skip(4);
         bits.skip(12);
         let declared = bits.bit();
-        let mut extra_bits = u32::from(bits.take(2)) * 8;
+        let mut extra_bits = bits.take(2) * 8;
         // A pair codes the mid channel, which can be a bit wider than either of the
         // two samples it stands for.
         let bps = params.sample_size as i32 - extra_bits as i32 + width as i32 - 1;

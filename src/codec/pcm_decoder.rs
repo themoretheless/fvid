@@ -56,8 +56,8 @@ mod tests {
         assert_eq!((packet.timebase_num, packet.timebase_den), (1, 48_000));
         packet
             .data
-            .chunks_exact(4)
-            .map(|chunk| f32::from_le_bytes(chunk.try_into().unwrap()))
+            .as_chunks::<4>().0.iter()
+            .map(|chunk| f32::from_le_bytes(*chunk))
             .collect()
     }
 
@@ -274,8 +274,8 @@ mod tests {
                 .expect("PCM always yields a packet");
             let samples: Vec<f32> = packet
                 .data
-                .chunks_exact(4)
-                .map(|chunk| f32::from_le_bytes(chunk.try_into().unwrap()))
+                .as_chunks::<4>().0.iter()
+                .map(|chunk| f32::from_le_bytes(*chunk))
                 .collect();
             assert_eq!(samples, vec![expected], "{codec} at {bits} bits");
         }

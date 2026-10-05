@@ -55,8 +55,8 @@ fn cli_plan_intervals_gain_selection_and_api_use_owned_alac() {
     let start = (from.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
     let end = (to.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
     let samples: Vec<f32> = bytes
-        .chunks_exact(4)
-        .map(|p| f32::from_le_bytes(p.try_into().unwrap()))
+        .as_chunks::<4>().0.iter()
+        .map(|p| f32::from_le_bytes(*p))
         .collect();
     let expected: Vec<u8> = (start..end)
         .flat_map(|i| ((samples[2 * i] + samples[2 * i + 1]) * 0.5 * 0.5).to_le_bytes())
@@ -172,7 +172,7 @@ fn owned_mix_and_merge_accept_alac_inputs() {
     let decoded = d.0.join("merge.f32le");
     export(&merged, &decoded, None, 1.0, None, None, None, None, None).unwrap();
     let expected: Vec<u8> = bytes
-        .chunks_exact(4)
+        .as_chunks::<4>().0.iter()
         .flat_map(|sample| sample.iter().chain(sample).copied())
         .collect();
     assert_eq!(std::fs::read(decoded).unwrap(), expected);

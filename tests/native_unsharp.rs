@@ -39,7 +39,7 @@ fn owned_unsharp_export_retains_precision_and_known_impulse_response() {
             frame
                 .frame
                 .data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .map(|b| u16::from_le_bytes([b[0], b[1]]))
                 .collect()
         };

@@ -29,8 +29,8 @@ pub fn measure_file_controlled(
     input.seek(SeekFrom::Start(0))?;
     enum Input {
         Wave(BufReader<std::fs::File>, super::WaveInfo),
-        Mp4(crate::container::mp4::Mp4Reader<BufReader<std::fs::File>>),
-        Mka(crate::container::webm::WebmReader<BufReader<std::fs::File>>),
+        Mp4(Box<crate::container::mp4::Mp4Reader<BufReader<std::fs::File>>>),
+        Mka(Box<crate::container::webm::WebmReader<BufReader<std::fs::File>>>),
         Adts(crate::container::adts::StreamReader<BufReader<std::fs::File>>),
     }
     let (input, rate, channels) = if &prefix[..4] == b"RIFF" {
@@ -46,14 +46,14 @@ pub fn measure_file_controlled(
         let index = native_media::mp4_audio_index(&reader, selected)?;
         let decoder = crate::native_audio_decoder::PacketPcmDecoder::new(&reader.tracks()[index])?;
         let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-        (Input::Mp4(reader), rate, channels)
+        (Input::Mp4(Box::new(reader)), rate, channels)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         let reader = crate::container::webm::WebmReader::open(input, Default::default())?;
         let index = native_media::matroska_audio_index(&reader, selected)?;
         let decoder =
             crate::native_audio_decoder::PacketPcmDecoder::from_matroska(&reader.tracks[index])?;
         let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-        (Input::Mka(reader), rate, channels)
+        (Input::Mka(Box::new(reader)), rate, channels)
     } else {
         if selected.is_some_and(|s| s != 0) {
             return Err(invalid("ADTS has only stream 0"));
@@ -110,14 +110,14 @@ pub fn measure_file_controlled(
             super::decode_reader(reader, info, &mut sink, None, &mut control, None)?
         }
         Input::Mp4(reader) => native_media::decode_mp4_audio_reader_controlled(
-            reader,
+            *reader,
             &mut sink,
             None,
             selected,
             &mut control,
         )?,
         Input::Mka(reader) => native_media::decode_matroska_audio_reader_controlled(
-            reader,
+            *reader,
             &mut sink,
             None,
             selected,

@@ -62,7 +62,7 @@ fn high_depth_hue_decode_plan_and_lossless_export() {
             let samples: Vec<u16> = frame
                 .frame
                 .data
-                .chunks_exact(2)
+                .as_chunks::<2>().0.iter()
                 .map(|b| u16::from_le_bytes([b[0], b[1]]))
                 .collect();
             assert_eq!(&samples[..9], &[16, 100, 200, 300, 400, 500, 600, 700, 800]);

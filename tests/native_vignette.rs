@@ -23,7 +23,7 @@ fn saved_pixels_persistent_dither_and_rewind() {
     let golden = std::fs::read(fixture("vignette-fractional.expected.raw")).unwrap();
     let shading = Vignette::parse("angle=PI/3:x0=3.7:y0=5.2").unwrap();
     let mut result = Vec::new();
-    for (n, data) in rgb.chunks_exact(576).enumerate() {
+    for (n, data) in rgb.as_chunks::<576>().0.iter().enumerate() {
         let mut frame = GeometryFrame {
             width: 16,
             height: 12,

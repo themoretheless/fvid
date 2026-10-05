@@ -165,7 +165,7 @@ fn synthetic_resample_window(extension: &str) {
     )
     .unwrap();
     let expected = std::fs::read(&reference).unwrap();
-    for extension in [extension] {
+    {
         let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/playback-errors")
             .join(if precise {
@@ -585,9 +585,9 @@ fn mp4_pcm_raw_api_matches_frontend_with_retained_budget() {
                         || reader.tracks()[index].codec == *b"fl32"
                 );
                 let expected_f64: Vec<u8> = actual
-                    .chunks_exact(4)
+                    .as_chunks::<4>().0.iter()
                     .flat_map(|bytes| {
-                        f64::from(f32::from_le_bytes(bytes.try_into().unwrap())).to_le_bytes()
+                        f64::from(f32::from_le_bytes(*bytes)).to_le_bytes()
                     })
                     .collect();
                 let mut precise = Vec::new();

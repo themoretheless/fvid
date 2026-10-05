@@ -20,15 +20,15 @@ use std::{
 enum Picture {
     Coded(Arc<IntraPicture>, AvcColour),
     Ffv1(Arc<PackedPlanar>),
-    Vp9(Decoded),
+    Vp9(Box<Decoded>),
     Av1(crate::codec::av1_decoder::Decoded),
 }
 enum VideoDecoder {
-    Avc(AvcDecoder),
-    Hevc(HevcDecoder),
-    Ffv1(crate::codec::ffv1_decoder::Decoder),
-    Vp9(Decoder),
-    Av1(crate::codec::av1_decoder::Decoder),
+    Avc(Box<AvcDecoder>),
+    Hevc(Box<HevcDecoder>),
+    Ffv1(Box<crate::codec::ffv1_decoder::Decoder>),
+    Vp9(Box<Decoder>),
+    Av1(Box<crate::codec::av1_decoder::Decoder>),
 }
 struct Frame {
     decoded: Picture,
@@ -149,14 +149,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // what it makes of them when it meets them again.
         let open_signal = av1.then(|| {
             let mut seed = crate::codec::av1_metadata::signal_from_bytes(&private);
-            if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
-                if let Ok(packet) = demux.read_packet(index) {
+            if let Some(index) = demux.packets.iter().position(|p| p.track == track)
+                && let Ok(packet) = demux.read_packet(index) {
                     // The packet is the later of the two statements, so it wins
                     // and the CodecPrivate fills whatever it left out.
                     let (stated, light) = crate::codec::av1_metadata::signal_from_bytes(&packet);
                     seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
                 }
-            }
             seed
         });
         let queue_budget = (budget - rgb_budget) / 2;
@@ -202,21 +201,21 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         Ok(Self {
             demux,
             decoder: if let Some((w, h)) = ffv1_size {
-                VideoDecoder::Ffv1(crate::codec::ffv1_decoder::Decoder::new(
+                VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::new(
                     w,
                     h,
                     queue_budget,
-                )?)
+                )?))
             } else if avc {
-                VideoDecoder::Avc(AvcDecoder::new(&private, queue_budget)?)
+                VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
             } else if hevc {
-                VideoDecoder::Hevc(HevcDecoder::from_configuration(&private, queue_budget)?)
+                VideoDecoder::Hevc(Box::new(HevcDecoder::from_configuration(&private, queue_budget)?))
             } else if av1 {
-                VideoDecoder::Av1(crate::codec::av1_decoder::Decoder::from_configuration(
+                VideoDecoder::Av1(Box::new(crate::codec::av1_decoder::Decoder::from_configuration(
                     &private, (budget - rgb_budget) / 12 * 10,
-                )?)
+                )?))
             } else {
-                VideoDecoder::Vp9(Decoder::new((budget - rgb_budget) / 12 * 10))
+                VideoDecoder::Vp9(Box::new(Decoder::new((budget - rgb_budget) / 12 * 10)))
             },
             track,
             index: 0,
@@ -671,7 +670,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                 ));
                             }
                             visible = Some(Frame {
-                                decoded: Picture::Vp9(decoded),
+                                decoded: Picture::Vp9(Box::new(decoded)),
                                 pts,
                                 duration,
                             });
@@ -878,7 +877,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             let cb_row = (py / 2) * u_stride;
             let cr_row = (py / 2) * v_stride;
             let line = &mut self.rgb[py * w * 3..][..w * 3];
-            for (px, pixel) in line.chunks_exact_mut(3).enumerate() {
+            for (px, pixel) in line.as_chunks_mut::<3>().0.iter_mut().enumerate() {
                 let luma = (f64::from(y.0[luma_row + px]) - offset) / yr;
                 let cb = (f64::from(u.0[cb_row + px / 2]) - 128.0 * scale) / cr;
                 let cv = (f64::from(v.0[cr_row + px / 2]) - 128.0 * scale) / cr;
@@ -1060,6 +1059,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         })
     }
 }
+
+/// Compatibility name retained for callers of the original VP9-only adapter.
+pub type WebmVp9Reader<R> = WebmVideoReader<R>;
 
 #[cfg(test)]
 mod tests {
@@ -1359,6 +1361,3 @@ mod tests {
         assert_eq!(reader.bitstream_hdr(), light);
     }
 }
-
-/// Compatibility name retained for callers of the original VP9-only adapter.
-pub type WebmVp9Reader<R> = WebmVideoReader<R>;

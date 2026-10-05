@@ -53,10 +53,10 @@ mod tests {
                 for (group, &length) in info.group_lengths.iter().enumerate() {
                     window_groups.extend(std::iter::repeat_n(group, length as usize));
                 }
-                for window in 0..8 {
+                for (window, &group) in window_groups.iter().enumerate() {
                     for bin in 0..28 {
                         let band = offsets.iter().position(|&end| end > bin).unwrap() - 1;
-                        coordinates.push((window_groups[window], band, window, bin));
+                        coordinates.push((group, band, window, bin));
                     }
                 }
                 coordinates.sort();

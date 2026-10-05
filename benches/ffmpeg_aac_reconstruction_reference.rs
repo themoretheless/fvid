@@ -61,10 +61,10 @@ fn non_noise_aac_reconstruction_matches_independent_decoder() {
         );
         let mut maximum = 0f64;
         let mut squared = 0f64;
-        for (actual, reference) in actual.chunks_exact(4).zip(reference.stdout.chunks_exact(4)) {
+        for (actual, reference) in actual.as_chunks::<4>().0.iter().zip(reference.stdout.as_chunks::<4>().0.iter()) {
             let difference = f64::from(
-                f32::from_le_bytes(actual.try_into().unwrap())
-                    - f32::from_le_bytes(reference.try_into().unwrap()),
+                f32::from_le_bytes(*actual)
+                    - f32::from_le_bytes(*reference),
             );
             maximum = maximum.max(difference.abs());
             squared += difference * difference;

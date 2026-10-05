@@ -175,7 +175,7 @@ fn main() {
 // Independent reproduction of the 9x9/radius=4 no-window-update corner.
 // All source data is synthetic. This is diagnostic, never a production path.
 fn legacy_overflow_model(format: &str, sampling: [usize; 2]) -> (Vec<u8>, usize) {
-    let mut memory = vec![0u16; 72];
+    let mut memory = [0u16; 72];
     let mut out = Vec::new();
     let mut failures = 0;
     let dimensions = if format == "gray" {
@@ -199,7 +199,7 @@ fn legacy_overflow_model(format: &str, sampling: [usize; 2]) -> (Vec<u8>, usize)
                 memory[16..40].fill(0);
                 let mut dc = [0u16; 4];
                 for pair in 0..4 {
-                    for x in 0..4 {
+                    for (x, dc_value) in dc.iter_mut().enumerate() {
                         let at = 40 + pair * 8 + x;
                         let mut value = memory[at - 8];
                         for row in [2 * pair, 2 * pair + 1] {
@@ -207,7 +207,7 @@ fn legacy_overflow_model(format: &str, sampling: [usize; 2]) -> (Vec<u8>, usize)
                                 value = value.wrapping_add(frame[offset + row * w + col] as u16);
                             }
                         }
-                        dc[x] = value.wrapping_sub(memory[at]);
+                        *dc_value = value.wrapping_sub(memory[at]);
                         memory[at] = value;
                     }
                 }

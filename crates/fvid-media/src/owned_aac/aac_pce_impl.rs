@@ -167,7 +167,7 @@ impl ProgramConfig {
             put(&mut fields, u32::from(*independent), 1);
             put(&mut fields, u32::from(*tag), 4);
         }
-        while fields.len() % 8 != 0 {
+        while !fields.len().is_multiple_of(8) {
             fields.push(false);
         }
         put(&mut fields, self.comment.len() as u32, 8);

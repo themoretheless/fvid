@@ -1203,14 +1203,12 @@ fn parse_track(
         result.configuration = atom.get(at..).unwrap_or_default().to_vec();
         // The AAC bitstream config defines decoded geometry. QuickTime/ISO
         // sample entries may retain a generic stereo declaration for mono AAC.
-        if result.codec == *b"mp4a" {
-            if let Ok(asc) = crate::codec::config::aac_specific_config(&result.configuration) {
-                if let Ok(config) = crate::codec::config::AacConfig::parse(asc) {
+        if result.codec == *b"mp4a"
+            && let Ok(asc) = crate::codec::config::aac_specific_config(&result.configuration)
+                && let Ok(config) = crate::codec::config::AacConfig::parse(asc) {
                     result.sample_rate = config.sample_rate;
                     result.channels = u16::from(config.channels);
                 }
-            }
-        }
     }
     // A fragmented track describes its coding here and its samples nowhere: the
     // tables beside this entry either are absent or hold one entry each at zero,
@@ -1367,7 +1365,7 @@ fn sample_index(
     if timing.len() == 1 && optional(stbl, b"ctts")?.is_none() && optional(stbl, b"stss")?.is_none()
     {
         let units = match count.checked_div(samples_per_unit) {
-            Some(units) if count % samples_per_unit == 0 => units,
+            Some(units) if count.is_multiple_of(samples_per_unit) => units,
             _ => return Err(invalid("sample count is not a whole number of blocks")),
         };
         let ticks = u64::from(timing[0].1)
@@ -1835,7 +1833,7 @@ fn chunk_runs(
             || first > chunks
             || per_chunk == 0
             || u32be(stsc, 16 + i * 12)? != 1
-            || per_chunk % samples_per_unit != 0
+            || !per_chunk.is_multiple_of(samples_per_unit)
             || mapping.last().is_some_and(|&(prev, _)| first <= prev)
         {
             return Err(invalid("invalid sample-to-chunk mapping"));
@@ -2218,7 +2216,7 @@ mod tests {
         // Every other coding's `stsz` entry is the frame it names, blocks included: a track of
         // any of them goes on being indexed per sample as it was before this arm existed.
         for codec in [*b"twos", *b"MAC0", *b"lpcm", *b"sowt", *b"mp4a"] {
-            assert_eq!(mace_block(&codec, 2), None, "{:?} is not MACE", &codec);
+            assert_eq!(mace_block(&codec, 2), None, "{:?} is not MACE", codec);
         }
         assert!(is_mace(b"MAC3") && is_mace(b"MAC6") && !is_mace(b"MAC0"));
     }

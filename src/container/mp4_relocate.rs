@@ -218,8 +218,8 @@ pub fn fast_start_controlled<R: Read + Seek>(
     let mut reported = 0u64;
     for index in order {
         check()?;
-        if index == movie && moov.is_some() {
-            output.write_all(moov.as_ref().unwrap())?;
+        if let Some(moov) = moov.as_ref().filter(|_| index == movie) {
+            output.write_all(moov)?;
         } else {
             let span = &spans[index];
             reader.seek(SeekFrom::Start(span.start))?;

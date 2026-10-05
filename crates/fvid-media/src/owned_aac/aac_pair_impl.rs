@@ -79,8 +79,8 @@ impl ChannelPair {
                             let left_noise = self.left.codebooks[group][band] == 13;
                             let right_noise = self.right.codebooks[group][band] == 13;
                             if left_noise || right_noise {
-                                if left_noise && right_noise && enabled {
-                                    if let (
+                                if left_noise && right_noise && enabled
+                                    && let (
                                         super::aac_scalefactors::BandScale::Noise(le),
                                         super::aac_scalefactors::BandScale::Noise(re),
                                     ) = (
@@ -91,7 +91,6 @@ impl ChannelPair {
                                             * 2.0f64.powf(f64::from(re - le) / 4.0))
                                             as f32;
                                     }
-                                }
                                 continue;
                             }
                             let (mid, side) = (left[i], right[i]);

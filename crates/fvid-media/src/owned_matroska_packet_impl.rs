@@ -61,8 +61,8 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         )?;
         let duration_offset = output.stream_position()? + info.len() as u64 - 8;
         output.write_all(&info)?;
-        output.write_all(&element(0x1654ae6b, &entries)?)?;
-        output.write_all(&file_elements)?;
+        output.write_all(&element(0x1654ae6b, entries)?)?;
+        output.write_all(file_elements)?;
         Ok(Self {
             output,
             segment_size,
@@ -156,8 +156,8 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         }
         if let Some((rate, channels)) = self.pcm[track] {
             let frame_bytes = usize::from(channels) * 4;
-            if payload.len() % frame_bytes != 0 || options.invisible || !sync
-                || payload.chunks_exact(4).any(|p|!f32::from_le_bytes(p.try_into().unwrap()).is_finite()) {
+            if !payload.len().is_multiple_of(frame_bytes) || options.invisible || !sync
+                || payload.as_chunks::<4>().0.iter().any(|p|!f32::from_le_bytes(*p).is_finite()) {
                 return Err(invalid("invalid Matroska float PCM packet"));
             }
             let frames = (payload.len() / frame_bytes) as u128;

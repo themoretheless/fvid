@@ -109,8 +109,8 @@ impl VideoGeometry {
                         != Some(height)
                     || picture.coded_width % 2 != 0
                     || picture.coded_height % 2 != 0
-                    || width % 2 != 0
-                    || height % 2 != 0
+                    || !width.is_multiple_of(2)
+                    || !height.is_multiple_of(2)
                     || left % 2 != 0
                     || top % 2 != 0
                     || !(8..=16).contains(&picture.bit_depth)
