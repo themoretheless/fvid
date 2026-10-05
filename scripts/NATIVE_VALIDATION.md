@@ -591,3 +591,20 @@ the final Y4M published. Both use existing committed synthetic fixtures and run
 without a reference process. Linux and Windows CI now cover combined media/player
 CLI and export. The complete 163-target integration audit remains separate from
 these passing targeted checks and must not be inferred from them.
+
+### Explicit software selection for saved codec samples
+
+Saved pixel/seek/rewind oracles now explicitly use `Mp4VideoReader::open_software`
+or `NativeReader::software`. Automatic platform decoding is a separate contract:
+these tests must exercise FVid's kernels even when VideoToolbox is compiled.
+The selected combined `media,player` run, with an empty executable PATH and
+invalid FFmpeg prefix, passed all 48 tests: AVC multislice 11, AVC scaling 3,
+HEVC multislice 9, HEVC playback 9 and HEVC RExt smoothing 16. Existing synthetic
+fixtures and independent stored samples remain unchanged; no oracle was weakened.
+
+The dependency guard's eleven required graphs also passed offline for
+`x86_64-unknown-linux-gnu` and `x86_64-pc-windows-gnu`, including root
+`--all-features` (396 and 323 normal/build packages respectively). Missing Cargo
+cache packages were fetched separately with the locked manifests before the
+successful offline audits. These are dependency checks, not cross-platform
+execution or hardware qualification.

@@ -1,7 +1,7 @@
 use fvid::{container::mp4::Limits, playback_mp4::Mp4VideoReader, playback_native::NativeReader};
 use std::{io::Cursor, time::Duration};
 fn compare(mp4: &[u8], yuv: &[u8], depth: u8) {
-    let mut source = Mp4VideoReader::open(Cursor::new(mp4), Limits::default(), 16 << 20).unwrap();
+    let mut source = Mp4VideoReader::open_software(Cursor::new(mp4), Limits::default(), 16 << 20).unwrap();
     assert!(!source.hardware_accelerated());
     for pass in 0..2 {
         let mut bytes = Vec::new();
@@ -63,9 +63,9 @@ fn weighted_temporal_prediction_matches_oracle() {
 }
 #[test]
 fn native_dispatch_rewind_and_seek() {
-    let mut reader = NativeReader::without_memory_limit(Cursor::new(include_bytes!(
+    let mut reader = NativeReader::software(Cursor::new(include_bytes!(
         "fixtures/hevc/main-ipb.mp4"
-    )))
+    )), usize::MAX)
     .unwrap();
     assert!(!reader.hardware_accelerated());
     assert!(reader.seekable());

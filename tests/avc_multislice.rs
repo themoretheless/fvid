@@ -44,7 +44,7 @@ fn actual_two_slice_ipb_stream_decodes_all_picture_types() {
 #[test]
 fn two_slice_ipb_matches_saved_yuv_and_rewind() {
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(VIDEO), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(VIDEO), Default::default(), 16 << 20)
             .unwrap();
     for _ in 0..2 {
         let mut actual = Vec::new();
@@ -246,7 +246,7 @@ fn cavlc_and_ten_bit_multislice_ipb_match_independent_yuv() {
             }] = true;
         }
         assert_eq!(kinds, [true; 3]);
-        let mut reader = fvid::playback_mp4::Mp4VideoReader::open(
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
             Cursor::new(video),
             Default::default(),
             16 << 20,
@@ -296,7 +296,7 @@ fn encoded_slice_list_modification_selects_different_reference_pictures() {
         vec![fvid::codec::avc_slice::RefModification::Subtract(1)]
     );
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(VIDEO), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(VIDEO), Default::default(), 16 << 20)
             .unwrap();
     for _ in 0..2 {
         let mut actual = Vec::new();
@@ -337,7 +337,7 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
         assert_eq!(slice.header.refs_l0, 2);
     }
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(VIDEO), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(VIDEO), Default::default(), 16 << 20)
             .unwrap();
     for _ in 0..2 {
         let mut actual = Vec::new();
@@ -367,7 +367,7 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
 fn temporal_direct_matches_analytic_picture_identity() {
     let video = include_bytes!("fixtures/playback-errors/avc-slice-lists-temporal.mp4");
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(video), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(video), Default::default(), 16 << 20)
             .unwrap();
     let mut actual = Vec::new();
     while let Some(frame) = reader.read_frame().unwrap() {
@@ -461,7 +461,7 @@ fn mixed_slice_types_match_jm_and_rewind() {
     assert_eq!(slices.len(),2);
     assert_ne!(slices[0].header.slice_type,slices[1].header.slice_type);
     assert!(slices.iter().all(|s|matches!(s.header.slice_type,SliceType::I|SliceType::P|SliceType::B)));
-    let mut reader=fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(data),Default::default(),16<<20).unwrap();
+    let mut reader=fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(data),Default::default(),16<<20).unwrap();
     for _ in 0..2 {
         let mut actual=Vec::new();let mut frames=0;
         while let Some(frame)=reader.read_frame().unwrap() {

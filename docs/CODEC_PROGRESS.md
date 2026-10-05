@@ -1,7 +1,27 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
 Цель: собственные H.264, H.265 и AAC в FVid; production-модуль `media`
-не зависит от FFmpeg. Цель пока **не достигнута**.
+не зависит от FFmpeg.
+
+## Актуальный статус зависимости 2026-10-05
+
+Production API библиотеки, `media`, `media-cuda` и `cuda-hw` используют собственный
+backend. `legacy-ffmpeg` стал пустым compatibility marker для отдельного
+reference benchmark; он не включает libav в библиотеку. Обязательный offline
+аудит всех 11 normal/build графов, включая `--all-features`, прошёл для macOS,
+Linux и Windows. В графах нет FFmpeg/libav adapter packages.
+
+Core/player library tests прошли с пустым executable PATH: 893 passed,
+23 ignored. Для текущих CLI/export исправлений отдельно прошли 18 CLI unit,
+2 media-play CLI, 6 AVC lossless и 18 native export tests. Также прошли 48 тестов AVC multislice/scaling и HEVC multislice/playback/RExt
+с явным software-входом, независимо от наличия VideoToolbox. Полный integration
+аудит остаётся отдельной проверкой. Native `media play` больше не обращается
+к удалённому legacy player API. SDK FFmpeg для production не нужен.
+
+Это проверка независимости, а не доказательство полного покрытия profiles/tools,
+кодекового паритета или 60 fps. Аппаратная NVIDIA-проверка отложена пользователем;
+оставшиеся codec ограничения требуют собственных acceptance-тестов. Датированные
+секции ниже сохраняют историю миграции и могут описывать уже удалённые legacy edges.
 
 ## Актуальная проверка 2026-10-01
 

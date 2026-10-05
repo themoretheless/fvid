@@ -61,7 +61,7 @@ fn compare(
         decoder.reset();
     }
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(source), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(source), Default::default(), 16 << 20)
             .unwrap();
     assert!(!reader.hardware_accelerated());
     for _ in 0..2 {

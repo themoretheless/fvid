@@ -43,7 +43,7 @@ fn independent_multislice_picture_headers_have_ordered_shared_identity() {
 
 fn compare_multislice(source: &[u8], reference: &[u8], depth: u8) {
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(source), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(source), Default::default(), 16 << 20)
             .unwrap();
     assert!(!reader.hardware_accelerated());
     for _ in 0..2 {
@@ -150,7 +150,7 @@ fn multislice_temporal_stream_matches_reference_across_reference_storage() {
 fn temporal_multislice_seek_rebuilds_reference_storage_after_eof() {
     let source = include_bytes!("fixtures/playback-errors/hevc-multislice-temporal.mp4");
     let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(source), Default::default(), 16 << 20)
+        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(source), Default::default(), 16 << 20)
             .unwrap();
     let pixels = |frame: &fvid::playback_mp4::VideoFrame| {
         [
