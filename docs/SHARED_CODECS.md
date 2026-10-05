@@ -632,3 +632,9 @@ refuses resurrection of legacy source inclusion or libav header/link directives.
 Tests use an invalid FFmpeg prefix to verify the marker does not need headers
 or native FFmpeg libraries. Native codec/profile/tool coverage and actual NVIDIA
 qualification remain incomplete; retirement does not imply universal parity.
+
+The dependency audit also requires the root `--all-features` normal/build graph,
+so optional production integrations cannot escape the per-feature FFmpeg gate.
+A policy regression injects `ffmpeg-sys-next` into that graph and requires the
+default audit to fail. This source/dependency proof remains distinct from full
+native codec equivalence and physical NVIDIA/performance acceptance.

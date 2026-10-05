@@ -152,11 +152,23 @@ class ProductionMediaPolicy(unittest.TestCase):
              mock.patch("builtins.print"):
             with self.assertRaisesRegex(SystemExit, "production media: FFmpeg dependency reached graph"):
                 guard.main()
-            self.assertEqual(dependencies.call_count, 10)
+            self.assertEqual(dependencies.call_count, 11)
             self.assertTrue(any(
                 call.args[1] == ["--no-default-features", "--features", "native-cuda"]
                 for call in dependencies.call_args_list
             ))
+
+    def test_all_features_graph_is_mandatory_and_rejects_ffmpeg_adapter(self):
+        def graph(manifest, features, target, offline):
+            return ({"ffmpeg-sys-next"}, False) if features == ["--all-features"] else ([], False)
+        with mock.patch("sys.argv", ["guard", "--offline", "--target", "test-target"]), \
+             mock.patch.object(guard, "dependencies", side_effect=graph), \
+             mock.patch.object(guard, "audit_ordinary_tests", return_value=([], [])), \
+             mock.patch.object(guard, "audit_fixture_generators", return_value=([], [])), \
+             mock.patch.object(guard, "audit_native_validators", return_value=([], [])), \
+             mock.patch("builtins.print"):
+            with self.assertRaisesRegex(SystemExit, "all production features: FFmpeg dependency reached graph"):
+                guard.main()
 
     def test_normal_audit_rejects_each_production_cuda_feature_without_opt_in(self):
         for feature, name in [("media-cuda", "production CUDA"), ("cuda-hw", "media library CUDA")]:

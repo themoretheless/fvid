@@ -146,6 +146,7 @@ def main():
         ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
         ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
         ("reference-marker library", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "legacy-ffmpeg"]),
+        ("all production features", ROOT / "Cargo.toml", ["--all-features"]),
     ]
     test_paths, failures = audit_ordinary_tests(ROOT)
     if not failures:
