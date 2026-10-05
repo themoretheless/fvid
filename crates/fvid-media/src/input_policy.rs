@@ -14,7 +14,7 @@ pub fn with_standalone_inputs<T>(operation: impl FnOnce() -> T) -> T {
     let _restore = Restore(STANDALONE.replace(true));
     operation()
 }
-#[cfg_attr(not(feature = "legacy-ffmpeg"), allow(dead_code))]
+#[allow(dead_code)]
 pub(super) fn active() -> bool {
     STANDALONE.get()
 }

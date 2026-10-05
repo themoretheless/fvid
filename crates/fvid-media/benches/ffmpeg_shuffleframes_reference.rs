@@ -150,25 +150,41 @@ fn main() {
         assert_eq!(pixels, reference.stdout, "reference filter: {case}");
         #[cfg(feature = "legacy-ffmpeg")]
         if interval.is_none() {
-            // A nonempty encoder option forces the preexisting adapter rather
-            // than selecting the new own operation; level 1 is lossless too.
-            let legacy = directory.join(format!("legacy-{case}.mkv"));
-            let old = fvid_media::transcode(
-                &source,
-                &legacy,
-                transform,
-                &options,
-                &fvid_media_info::EncoderSettings {
-                    name: "ffv1".into(),
-                    options: vec![("level".into(), "1".into())],
-                },
-            )
-            .unwrap();
-            assert_eq!(old.decoded_frames, consumed);
+            // Additional external level-1 oracle. FVid still encodes its owned
+            // format; this comparison makes no native level-1 support claim.
+            let encoded = directory.join(format!("reference-level1-{case}.mkv"));
+            let reference = Command::new(&ffmpeg)
+                .args(["-v", "error", "-threads", "1", "-i"])
+                .arg(&source)
+                .args([
+                    "-vf",
+                    filter,
+                    "-fps_mode",
+                    "passthrough",
+                    "-c:v",
+                    "ffv1",
+                    "-level",
+                    "1",
+                ])
+                .arg(&encoded)
+                .output()
+                .unwrap();
+            assert!(
+                reference.status.success(),
+                "{}",
+                String::from_utf8_lossy(&reference.stderr)
+            );
+            let (reference_pixels, reference_timing) = decode(&ffmpeg, &encoded);
+            assert_eq!(reference_pixels, pixels);
+            // FFmpeg derives Matroska DefaultDuration from the filtered nominal
+            // rate (framestep can change it). Owned durations remain checked
+            // against the independent original-clock expectations above.
             assert_eq!(
-                decode(&ffmpeg, &legacy),
-                (pixels.clone(), timing.clone()),
-                "previous adapter: {case}"
+                reference_timing
+                    .iter()
+                    .map(|event| event.0)
+                    .collect::<Vec<_>>(),
+                timing.iter().map(|event| event.0).collect::<Vec<_>>()
             );
         }
         println!(
@@ -176,9 +192,8 @@ fn main() {
             expected.len()
         );
     }
-    #[cfg(feature = "legacy-ffmpeg")]
     for (case, mapping) in [("all-drop", "-1"), ("partial", "0 1 2 3 4 5 6 7")] {
-        let output = directory.join(format!("legacy-empty-{case}.mkv"));
+        let output = directory.join(format!("owned-empty-{case}.mkv"));
         let result = fvid_media::transcode(
             &source,
             &output,
@@ -189,9 +204,14 @@ fn main() {
             &fvid_media::CopyOptions::default(),
             &fvid_media_info::EncoderSettings {
                 name: "ffv1".into(),
-                options: vec![("level".into(), "1".into())],
+                options: Vec::new(),
             },
         );
-        assert!(result.unwrap_err().contains("no video frames decoded"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Matroska has no selected frames")
+        );
+        assert!(!output.exists());
     }
 }

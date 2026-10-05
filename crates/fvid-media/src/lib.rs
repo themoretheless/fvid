@@ -1,5 +1,5 @@
 //! FVid media layer. Owned operation contracts are available without libav.
-//! The temporary legacy backend retains existing operations during migration.
+//! Public operations always use owned implementations; FFmpeg is benchmark-only.
 mod input_policy;
 #[cfg(feature = "native-cuda")]
 mod hw_types;
@@ -7,11 +7,11 @@ mod hw_types;
 pub use hw_types::{HwFilterOptions, HwFilterStats};
 #[cfg(feature = "native-cuda")]
 pub mod owned_hw_filter;
-#[cfg(all(feature = "native-cuda", not(feature = "legacy-ffmpeg")))]
+#[cfg(feature = "native-cuda")]
 pub use owned_hw_filter::hw_filter;
 #[cfg(feature = "native-cuda")]
 pub mod owned_hw_decode;
-#[cfg(all(feature = "native-cuda", not(feature = "legacy-ffmpeg")))]
+#[cfg(feature = "native-cuda")]
 pub use owned_hw_decode::decode_video_cuda;
 pub mod owned_avc_annexb;
 pub mod owned_hevc_annexb;
@@ -39,11 +39,7 @@ pub use owned_capabilities::capabilities;
 #[cfg(feature = "http-input")]
 pub mod owned_http;
 pub use input_policy::with_standalone_inputs;
-#[cfg(feature = "legacy-ffmpeg")]
-include!("legacy.rs");
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use fvid_media_info::*;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use fvid_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressHook};
 
 pub mod owned_wav;
@@ -81,7 +77,6 @@ pub mod owned_monochrome;
 pub mod owned_lutyuv;
 pub mod owned_y4m_probe;
 pub mod owned_y4m_decode;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_video_decode::{decode_video, decode_video_transformed};
 pub mod owned_aac;
 pub mod owned_avc;
@@ -93,7 +88,6 @@ pub mod owned_loudness;
 pub mod owned_normalize;
 pub mod owned_loudnorm;
 mod owned_dynamic_loudnorm;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_loudnorm::{apply_loudnorm, apply_loudnorm_dual, plan_loudnorm};
 
 pub mod owned_pcm_gain;
@@ -116,43 +110,32 @@ pub mod owned_time;
 
 pub mod owned_wave_inspect;
 pub mod owned_probe;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_probe::{probe, probe_as};
 
 pub mod owned_pcm_channels;
 
 pub mod owned_audio_mix;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_audio_mix::{mix_audio, merge_audio, plan_mix_audio, plan_merge_audio};
 
 pub mod owned_audio_export;
 pub mod owned_audio_plan;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_audio_plan::plan_decode_audio;
 mod owned_adts_export;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_audio_export::{decode_audio, decode_audio_interval, decode_audio_transformed};
 
 pub mod owned_wave_metadata;
 
 pub mod owned_budget;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_budget::{parse_max_memory_mib, parse_max_rss_mib};
 
 pub mod owned_wave_remux;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_wave_remux::{trim, trim_pcm};
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_concat::concat;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_remux::remux;
 
 pub mod owned_wave_plan;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_wave_plan::{plan_trim, plan_trim_pcm};
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_concat::plan_concat;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_remux_plan::plan_remux;
 
 pub mod owned_true_peak;
@@ -160,7 +143,6 @@ pub mod owned_true_peak;
 pub mod owned_wave_loudness;
 pub mod owned_adts_loudness;
 pub mod owned_adts_loudnorm;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_wave_loudness::{measure_loudness, plan_loudness};
 
 pub mod owned_negate;
@@ -186,7 +168,6 @@ pub mod owned_morphology;
 
 pub mod owned_overlay;
 pub mod owned_xfade;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_xfade::{plan_xfade, xfade_video};
 mod owned_y4m_overlay;
 
@@ -195,7 +176,6 @@ pub mod owned_ffv1_encoder;
 pub mod owned_matroska;
 
 pub mod owned_lossless;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_lossless::{
     crop_lossless, overlay_video, plan_overlay, plan_transcode_lossless, transcode, transcode_lossless,
 };
@@ -232,7 +212,6 @@ pub mod owned_adts_remux;
 pub mod owned_concat;
 
 pub mod owned_subtitle;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path,
     options: &fvid_media_info::SubtitleConvertOptions) -> std::result::Result<fvid_media_info::NativeSubtitleStats, String> {
     owned_subtitle::try_convert_with_options(source, destination, options)
@@ -289,13 +268,11 @@ pub mod owned_ima_wav;
 pub mod owned_ms_adpcm;
 
 pub mod owned_play_controls;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_play_controls::*;
 
 pub mod owned_text_raster;
 
 pub mod owned_subtitle_burn;
-#[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_subtitle_burn::{burn_subtitles, plan_burn_subtitles};
 
 pub mod owned_fade;

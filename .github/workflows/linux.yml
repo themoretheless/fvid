@@ -60,6 +60,7 @@ jobs:
           cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features --features cuda-hw --lib owned_hevc_annexb
           cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features --features cuda-hw --lib owned_hw_decode
           cargo check --locked --no-default-features --features media-cuda --bin fvid
+          cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features --features cuda-hw,legacy-ffmpeg --lib
       - name: Guard native graphs and ordinary tests against FFmpeg
         run: |
           python3 scripts/test_native_dependency_policy.py

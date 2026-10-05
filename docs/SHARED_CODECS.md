@@ -490,9 +490,8 @@ both originally blank spans. NVIDIA execution remains unverified.
 `media-cuda` and `cuda-hw` now enable owned CUDA code without `legacy-ffmpeg`.
 The default dependency guard audits both graphs, including in CI. Earlier
 migration notes in this document describe the legacy dependency before this
-feature change; they are not the current production graph. An explicit
-`legacy-ffmpeg` opt-in remains for reference benchmarks while native coverage
-is extended. No unsupported production input is automatically retried with libav.
+feature change; they are not the current production graph. The historical `legacy-ffmpeg` flag is now an empty compatibility marker for
+reference benchmarks; it cannot switch the public API or library linkage. No unsupported production input is automatically retried with libav.
 
 The existing `hw-filter` entrypoint uses the owned CUDA route for
 AVC or qualified Main/Main10 HEVC MP4 input and `.mkv` output. CPU qualification parses every access unit using
@@ -613,3 +612,23 @@ an empty selection returns its specific error. The Main10 NVIDIA host-bounce
 acceptance now runs both full-movie and 0.2–0.5 second selections, comparing all
 packet timestamps/durations and software-decoded shader output, including a
 blank span and both repeated ranges. Physical execution remains unverified.
+
+## Legacy library backend retired
+
+The media library no longer includes `legacy.rs`, gates native public exports
+on `legacy-ffmpeg`, generates libav bindings, or links any FFmpeg library. Even
+an explicit reference-marker build uses the same owned public API. Its build
+script may add a reference library search directory; only the explicit
+`ffmpeg_time_reference` benchmark declares a direct `avutil` link. Other
+reference benchmarks invoke external FFmpeg, outside ordinary library/test runs.
+The reverse/shuffle reference cases now compare owned results with external
+level-1 FFV1 oracle files, rather than invoking a retired library adapter. This
+comparison checks pixels and PTS and does not claim native FFV1 level-1
+encoding support. Owned durations remain independently checked against the
+synthetic source clock; FFmpeg derives its Matroska DefaultDuration from the
+filtered nominal rate, so that additional oracle does not compare durations.
+The default dependency guard checks the reference-marker library as well and
+refuses resurrection of legacy source inclusion or libav header/link directives.
+Tests use an invalid FFmpeg prefix to verify the marker does not need headers
+or native FFmpeg libraries. Native codec/profile/tool coverage and actual NVIDIA
+qualification remain incomplete; retirement does not imply universal parity.

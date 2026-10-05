@@ -28,4 +28,5 @@ fixtures; they do not prove NVENC output or NVIDIA performance.
 Production `media-cuda`/`cuda-hw` features now enable owned adapters without
 libav. Remaining unsupported routes are reported explicitly; native functional
 coverage and physical NVIDIA execution remain incomplete. Explicit
-`legacy-ffmpeg` is reserved for reference benchmarks.
+`legacy-ffmpeg` is now an empty reference-benchmark marker and cannot select
+libav library APIs.

@@ -119,6 +119,26 @@ class FixtureDirectoryPolicy(unittest.TestCase):
             self.assertEqual(failures,[])
 
 
+class ReferenceMarkerIsolation(unittest.TestCase):
+    def test_reference_link_search_is_allowed_but_library_backend_and_linkage_are_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            source = root / "crates/fvid-media/src"
+            source.mkdir(parents=True)
+            lib = source / "lib.rs"
+            build = source.parent / "build.rs"
+            lib.write_text('pub use owned_video_decode::decode_video;')
+            build.write_text('println!("cargo:rustc-link-search=native=/reference/lib");')
+            self.assertFalse(guard.library_uses_ffmpeg(root))
+            for bad in ['include!("legacy.rs");', 'include!("av.rs");']:
+                lib.write_text(bad)
+                self.assertTrue(guard.library_uses_ffmpeg(root))
+            lib.write_text('pub use owned_video_decode::decode_video;')
+            for bad in ['println!("cargo:rustc-link-lib=dylib=avutil");', 'bindgen.header("libavcodec/avcodec.h")']:
+                build.write_text(bad)
+                self.assertTrue(guard.library_uses_ffmpeg(root))
+
+
 class ProductionMediaPolicy(unittest.TestCase):
     def test_normal_audit_rejects_legacy_in_production_media(self):
         def graph(manifest, features, target, offline):
@@ -132,7 +152,7 @@ class ProductionMediaPolicy(unittest.TestCase):
              mock.patch("builtins.print"):
             with self.assertRaisesRegex(SystemExit, "production media: FFmpeg dependency reached graph"):
                 guard.main()
-            self.assertEqual(dependencies.call_count, 9)
+            self.assertEqual(dependencies.call_count, 10)
             self.assertTrue(any(
                 call.args[1] == ["--no-default-features", "--features", "native-cuda"]
                 for call in dependencies.call_args_list

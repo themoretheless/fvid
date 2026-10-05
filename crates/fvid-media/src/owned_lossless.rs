@@ -467,7 +467,6 @@ mod plan_tests {
         assert!(stats.video_frames > 0);
         let info = crate::owned_webm_probe::probe_webm(&output).unwrap();
         assert_eq!(info.streams[0].codec, "ffv1");
-        #[cfg(feature = "legacy-ffmpeg")]
         {
             let public =
                 crate::plan_transcode_lossless(&source, &transform, &options, Some("ffv1"))

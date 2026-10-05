@@ -9,6 +9,15 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def library_uses_ffmpeg(root):
+    """The reference marker must never resurrect library backend/linkage."""
+    source = (root / "crates/fvid-media/src/lib.rs").read_text()
+    build = (root / "crates/fvid-media/build.rs").read_text()
+    return bool(re.search(r'include!\s*\(\s*"(?:legacy|av)\.rs"', source)
+                or re.search(r'libav(?:codec|format|filter|util|device|resample)/', build)
+                or re.search(r'cargo:rustc-link-lib[^\n]*(?:avcodec|avformat|avfilter|avutil|avdevice|swresample|swscale)', build))
+
+
 def dependencies(manifest, features, target, offline):
     # cargo metadata includes inactive optional edges activated only through a
     # weak dependency feature. cargo tree filters these for the selected build.
@@ -18,13 +27,7 @@ def dependencies(manifest, features, target, offline):
         command.append("--offline")
     output = subprocess.check_output(command, cwd=ROOT, text=True)
     packages = {line.split()[0] for line in output.splitlines() if line.strip()}
-    legacy = False
-    if "fvid-media" in packages:
-        feature_command = command.copy()
-        feature_command[feature_command.index("--edges") + 1] = "features"
-        feature_command.extend(["--invert", "fvid-media"])
-        activated = subprocess.check_output(feature_command, cwd=ROOT, text=True)
-        legacy = 'fvid-media feature "legacy-ffmpeg"' in activated
+    legacy = "fvid-media" in packages and library_uses_ffmpeg(ROOT)
     return packages, legacy
 
 
@@ -142,6 +145,7 @@ def main():
         ("production media", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media"]),
         ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
         ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
+        ("reference-marker library", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "legacy-ffmpeg"]),
     ]
     test_paths, failures = audit_ordinary_tests(ROOT)
     if not failures:

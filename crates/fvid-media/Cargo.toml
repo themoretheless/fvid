@@ -3,7 +3,7 @@ name = "fvid-media"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-description = "FVid media operations with an optional legacy libav backend"
+description = "Owned FVid media operations without FFmpeg"
 
 [dependencies]
 fvid-opus = { path = "../fvid-opus" }
@@ -26,16 +26,15 @@ reqwest = { version = "=0.12.28", optional = true, default-features = false, fea
 [features]
 default = []
 http-input = ["dep:reqwest"]
-legacy-ffmpeg = ["dep:bindgen"]
+# Compatibility flag for the explicit libavutil timestamp benchmark only.
+# It never selects another implementation of the library API.
+legacy-ffmpeg = []
 native-cuda = ["dep:fvid-cuda"]
 # Production CUDA is owned; legacy libav is opt-in for comparison benchmarks.
 cuda-hw = ["native-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the
 # rfd file dialogs. Off, the crate is a pure decode/edit library.
 player = [ "fvid-codecs/player", "dep:eframe", "dep:rfd", "dep:cpal"]
-
-[build-dependencies]
-bindgen = { version = "0.72.1", optional = true }
 
 [[bench]]
 name = "ffmpeg_audio_reference"
