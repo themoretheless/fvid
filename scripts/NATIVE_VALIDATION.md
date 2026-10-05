@@ -715,5 +715,12 @@ Before the quoted-path parser change, the production library also completed
 --lib`. Its archive's undefined-symbol list had no known FFmpeg C API names
 (`av_*`, `avcodec_*`, `avformat_*`, `avfilter_*`, `avio_*`, `sws_*`, `swr_*`). This
 is library compilation/code-generation and symbol evidence, not a linked
-all-feature CLI or physical NVIDIA result. A fresh all-feature library build
-for the quoted-path change is running separately; its outcome remains pending.
+all-feature CLI or physical NVIDIA result. The fresh all-feature library build
+including the quoted-path change also completed successfully; its archive's
+undefined-symbol list again contained none of those FFmpeg C API names.
+
+The production CLI also completed `FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg cargo
+build --locked --offline --all-features --bin fvid`. `otool -L
+target/debug/fvid` lists Apple frameworks and system libraries, with no libav,
+libswscale or libswresample dependency. This proves the all-feature macOS CLI
+links without a FFmpeg SDK; it does not establish physical NVIDIA execution.
