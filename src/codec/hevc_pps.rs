@@ -48,6 +48,21 @@ pub struct Deblocking {
     pub disabled: bool,
     pub offsets_div2: [i8; 2],
 }
+/// H.265 7.3.2.3.2 bounded syntax; index zero's inferred [0,0] is not stored.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ChromaQpOffsetList {
+    pub depth: u8,
+    pub entries: Vec<[i8; 2]>,
+}
+fn read_chroma_qp_list(b: &mut BitReader<'_>, max_depth: u8) -> Result<ChromaQpOffsetList> {
+    let depth = ue(b, u32::from(max_depth))? as u8;
+    let count = ue(b, 5)? as usize + 1;
+    let mut entries = Vec::with_capacity(count);
+    for _ in 0..count {
+        entries.push([se(b, -12, 12)? as i8, se(b, -12, 12)? as i8]);
+    }
+    Ok(ChromaQpOffsetList { depth, entries })
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Pps {
     pub id: u8,
@@ -63,6 +78,7 @@ pub struct Pps {
     pub transform_skip: bool,
     pub transform_skip_max_log2: u8,
     pub sao_offset_scale: [u8; 2],
+    pub chroma_qp_offset_list: Option<ChromaQpOffsetList>,
     pub cu_qp_delta_depth: Option<u8>,
     pub chroma_qp_offsets: [i8; 2],
     pub slice_chroma_qp_offsets: bool,
@@ -167,6 +183,7 @@ impl Pps {
         let slice_header_extension = b.bit()?;
         let mut transform_skip_max_log2 = 2;
         let mut sao_offset_scale = [0; 2];
+        let mut chroma_qp_offset_list = None;
         if b.bit()? {
             let range = b.bit()?;
             if b.read(7)? != 0 {
@@ -176,8 +193,15 @@ impl Pps {
                 if transform_skip {
                     transform_skip_max_log2 = ue(b, u32::from(sps.transform_block_log2[1] - 2))? as u8 + 2;
                 }
-                if b.bit()? || b.bit()? {
-                    return Err(crate::unsupported("HEVC cross-component prediction/chroma QP lists are not implemented"));
+                if b.bit()? {
+                    return Err(crate::unsupported("HEVC cross-component prediction is not implemented"));
+                }
+                if b.bit()? {
+                    if sps.chroma_format == 0 || sps.separate_colour_plane {
+                        return Err(invalid("HEVC chroma QP list requires chroma components"));
+                    }
+                    chroma_qp_offset_list = Some(read_chroma_qp_list(b,
+                        sps.coding_block_log2[1] - sps.coding_block_log2[0])?);
                 }
                 for component in 0..2 {
                     sao_offset_scale[component] = ue(b, u32::from(sps.depth[component].saturating_sub(10)))? as u8;
@@ -199,6 +223,7 @@ impl Pps {
             transform_skip,
             transform_skip_max_log2,
             sao_offset_scale,
+            chroma_qp_offset_list,
             cu_qp_delta_depth,
             chroma_qp_offsets,
             slice_chroma_qp_offsets,
@@ -254,5 +279,161 @@ mod tests {
             vec![1, 3, 3]
         );
         assert!(tile_axis(&mut BitReader::new(&[0x38]), 7, 2, false).is_err());
+    }
+}
+
+#[cfg(test)]
+mod chroma_qp_fixture_tests {
+    use super::*;
+    fn syntax(depth: u32, count_minus1: u32, entries: &[[i32; 2]]) -> Vec<u8> {
+        fn ue(v: u32, bits: &mut Vec<bool>) {
+            let v = v + 1;
+            let width = 32 - v.leading_zeros();
+            bits.extend(std::iter::repeat_n(false, (width - 1) as usize));
+            bits.extend((0..width).rev().map(|i| v & (1 << i) != 0));
+        }
+        let mut bits = Vec::new();
+        ue(depth, &mut bits);
+        ue(count_minus1, &mut bits);
+        for pair in entries {
+            for &v in pair {
+                ue(
+                    if v > 0 {
+                        (2 * v - 1) as u32
+                    } else {
+                        (-2 * v) as u32
+                    },
+                    &mut bits,
+                );
+            }
+        }
+        while bits.len() % 8 != 0 {
+            bits.push(false);
+        }
+        bits.chunks_exact(8)
+            .map(|c| c.iter().fold(0u8, |a, &b| (a << 1) | u8::from(b)))
+            .collect()
+    }
+    #[test]
+    fn chroma_qp_list_depth_count_offsets_and_truncation_are_bounded() {
+        let entries = [[-12, 12], [-2, 3], [0, 0], [12, -12], [6, 6], [-1, -1]];
+        let data = syntax(2, 5, &entries);
+        let table = read_chroma_qp_list(&mut BitReader::new(&data), 2).unwrap();
+        assert_eq!(table.depth, 2);
+        assert_eq!(table.entries.len(), 6);
+        assert_eq!(
+            table
+                .entries
+                .iter()
+                .map(|p| p.map(i32::from))
+                .collect::<Vec<_>>(),
+            entries
+        );
+        for data in [
+            syntax(3, 0, &[[0, 0]]),
+            syntax(0, 6, &[]),
+            syntax(0, 0, &[[13, 0]]),
+            syntax(0, 0, &[[0, -13]]),
+        ] {
+            assert!(read_chroma_qp_list(&mut BitReader::new(&data), 2).is_err());
+        }
+        for end in 0..data.len() {
+            assert!(read_chroma_qp_list(&mut BitReader::new(&data[..end]), 2).is_err());
+        }
+    }
+    #[test]
+    fn active_chroma_qp_fixture_parses_table_and_refuses_unimplemented_selection() {
+        let data = include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4"
+        );
+        let mut input =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = super::super::config::HevcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(
+            config
+                .arrays
+                .iter()
+                .find(|a| a.nal_type == 33)
+                .unwrap()
+                .units[0],
+            16 << 20,
+        )
+        .unwrap();
+        let pps = Pps::parse(
+            config
+                .arrays
+                .iter()
+                .find(|a| a.nal_type == 34)
+                .unwrap()
+                .units[0],
+            &sps,
+            16 << 20,
+        )
+        .unwrap();
+        let table = pps.chroma_qp_offset_list.as_ref().unwrap();
+        assert_eq!(table.depth, 0);
+        assert_eq!(table.entries, [[6, 6]]);
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let nal = super::super::config::NalUnits::new(&packet, config.length_size)
+            .unwrap()
+            .map(Result::unwrap)
+            .find(|n| {
+                super::super::hevc_nal::NalHeader::parse(n)
+                    .unwrap()
+                    .is_vcl()
+            })
+            .unwrap();
+        let header =
+            super::super::hevc_slice::SliceHeader::parse(nal, &sps, &pps, 16 << 20).unwrap();
+        assert!(header.cu_chroma_qp_offset_enabled);
+        let mut decoder =
+            super::super::hevc_decoder::HevcDecoder::from_configuration(&configuration, 16 << 20)
+                .unwrap();
+        let error = decoder
+            .decode_packet(&packet)
+            .err()
+            .expect("selection remains unsupported");
+        assert!(
+            error
+                .to_string()
+                .contains("HEVC CU chroma QP selection is not implemented"),
+            "{error}"
+        );
+    }
+    #[test]
+    #[ignore = "acceptance awaits CABAC chroma QP selection and CU-group offset application"]
+    fn active_chroma_qp_fixture_matches_hm_pixels_after_selection_is_implemented() {
+        let data = include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4"
+        );
+        let expected = include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.yuv"
+        );
+        let mut input =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
+        let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+            &input.tracks()[0].configuration,
+            16 << 20,
+        )
+        .unwrap();
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        for pass in 0..2 {
+            if pass != 0 {
+                decoder.reset();
+            }
+            let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+            let pixels: Vec<_> = decoded
+                .picture
+                .planes
+                .iter()
+                .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap()))
+                .collect();
+            assert_eq!(pixels, expected);
+        }
     }
 }

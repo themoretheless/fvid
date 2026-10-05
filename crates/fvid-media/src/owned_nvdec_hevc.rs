@@ -194,6 +194,9 @@ impl HevcPicture {
 /// Populate codec configuration, not picture/RPS state. A submission adapter
 /// must additionally supply slice bytes, POC and reserved live reference slots.
 pub fn configuration(sps: &Sps, pps: &Pps) -> Result<CUVIDHEVCPICPARAMS, String> {
+    if pps.chroma_qp_offset_list.is_some() {
+        return Err("NVDEC HEVC chroma QP lists are not qualified".into());
+    }
     if sps.chroma_format != 1
         || sps.separate_colour_plane
         || !matches!(sps.depth, [8, 8] | [10, 10])
@@ -442,6 +445,14 @@ mod tests {
             decoder.unmap(surface.slot).unwrap();
             decoder.close().unwrap();
         }
+    }
+    #[test]
+    fn active_chroma_qp_list_refuses_unqualified_nvdec_configuration() {
+        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4");
+        let (sps, pps) = sets(data);
+        assert_eq!(pps.chroma_qp_offset_list.as_ref().unwrap().entries, [[6, 6]]);
+        let error = configuration(&sps, &pps).err().expect("CU chroma QP lists need GPU qualification");
+        assert!(error.contains("NVDEC HEVC chroma QP lists are not qualified"), "{error}");
     }
     #[test]
     fn mixed_reference_fixture_translates_both_driver_current_sets() {

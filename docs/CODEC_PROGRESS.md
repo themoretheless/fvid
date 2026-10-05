@@ -2089,3 +2089,19 @@ presentation-order permutation; omitted order preserves existing fixtures.
 NVDEC scheduling and the ignored physical-device test include both variants.
 This qualifies the contained Main8 reordered cases, not all profiles/tools,
 all player seeks or physical GPU decoding.
+
+### HEVC chroma-QP list syntax foundation (2026-10-06)
+
+PPS range-extension parsing now separates cross-component prediction refusal
+from chroma-QP lists and reads their bounded group depth and up to six signed
+Cb/Cr pairs. Chroma-less/separate-plane lists refuse. Slice headers expose the
+CU-adjustment enable flag and maintain correct entropy alignment. The owned
+one-picture RExt fixture reproduces the former PPS refusal and now checks
+exact depth zero, entry [6,6] and active slice enablement.
+
+Active picture reconstruction still refuses with the precise CU-selection
+error; NVDEC configuration explicitly refuses unqualified lists. Bounds and
+refusal tests pass, but they are not acceptance evidence. The independent HM
+pixel/reset acceptance remains ignored pending CABAC flag/index decoding,
+CU-group state/reset and chroma-QP application. This stage does not close the
+chroma-QP tool gap or the overall codec objective.

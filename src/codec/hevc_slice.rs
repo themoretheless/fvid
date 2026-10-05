@@ -55,6 +55,7 @@ pub struct SliceHeader {
     pub qp: i32,
     /// Effective PPS + slice offsets.
     pub chroma_qp_offsets: [i8; 2],
+    pub cu_chroma_qp_offset_enabled: bool,
     pub deblocking: Deblocking,
     pub loop_filter_across_slices: bool,
     /// Byte lengths in escaped NAL data, including any emulation-prevention bytes.
@@ -429,6 +430,7 @@ impl SliceHeader {
                 *value = sum as i8;
             }
         }
+        let cu_chroma_qp_offset_enabled = pps.chroma_qp_offset_list.is_some() && b.bit()?;
         let mut deblocking = pps.deblocking;
         if deblocking.override_enabled && b.bit()? {
             deblocking.disabled = b.bit()?;
@@ -477,6 +479,7 @@ impl SliceHeader {
             sao,
             qp,
             chroma_qp_offsets,
+            cu_chroma_qp_offset_enabled,
             deblocking,
             loop_filter_across_slices,
             entry_point_offsets,

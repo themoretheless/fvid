@@ -44,6 +44,9 @@ pub fn decode(
     lists: &[Vec<Reference>; 2],
     budget: usize,
 ) -> Result<Picture> {
+    if slice.cu_chroma_qp_offset_enabled {
+        return Err(crate::unsupported("HEVC CU chroma QP selection is not implemented"));
+    }
     if sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.pcm.is_some()
@@ -355,6 +358,9 @@ pub fn decode_slices(
     slice_lists: &[[Vec<Reference>; 2]],
     budget: usize,
 ) -> Result<Picture> {
+    if slices.iter().any(|s| s.cu_chroma_qp_offset_enabled) {
+        return Err(crate::unsupported("HEVC CU chroma QP selection is not implemented"));
+    }
     if slices.len() != slice_lists.len() {
         return Err(invalid("HEVC slice reference count mismatch"));
     }
