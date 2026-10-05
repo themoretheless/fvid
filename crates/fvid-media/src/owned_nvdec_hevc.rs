@@ -444,6 +444,29 @@ mod tests {
         }
     }
     #[test]
+    fn mixed_reference_fixture_translates_both_driver_current_sets() {
+        use fvid_codecs::codec::{config::NalUnits, hevc_decoder::HevcDecoder, hevc_nal::NalHeader};
+        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4");
+        let mut reader = crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
+        let decoder = HevcDecoder::from_configuration(&reader.tracks()[0].configuration, 16 << 20).unwrap();
+        let (sps, pps) = decoder.parameters();
+        let mut packet = Vec::new(); reader.read_packet(0, 2, &mut packet).unwrap();
+        let slices: Vec<_> = NalUnits::new(&packet, 4).unwrap().map(Result::unwrap)
+            .filter(|n| NalHeader::parse(n).unwrap().is_vcl()).collect();
+        let refs = [HevcReference { slot: 4, poc: 0, long_term: false },
+                    HevcReference { slot: 7, poc: 1, long_term: true }];
+        let picture = HevcPicture::prepare(sps, pps, &slices, 31, 2, &refs, 1 << 20).unwrap();
+        let h = unsafe { picture.parameters().CodecSpecific.hevc };
+        assert_eq!(h.NumPocStCurrBefore, 1);
+        assert_eq!(h.NumPocStCurrAfter, 0);
+        assert_eq!(h.NumPocLtCurr, 1);
+        assert_eq!(h.NumPocTotalCurr, 2);
+        assert_eq!(h.RefPicSetStCurrBefore[0], 0);
+        assert_eq!(h.RefPicSetLtCurr[0], 1);
+        assert_eq!(&h.IsLongTerm[..2], &[0, 1]);
+        assert_eq!(&h.RefPicIdx[..2], &[4, 7]);
+    }
+    #[test]
     fn synthetic_long_term_submission_sets_driver_classification_and_current_set() {
         use fvid_codecs::codec::{config::NalUnits, hevc_decoder::HevcDecoder, hevc_nal::NalHeader};
         let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");

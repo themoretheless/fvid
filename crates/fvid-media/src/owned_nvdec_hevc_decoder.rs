@@ -81,6 +81,25 @@ mod tests {
         (reader, state, software)
     }
     #[test]
+    fn mixed_and_lsb_only_fixtures_follow_software_and_keep_live_reference_slots() {
+        for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice()] {
+            let (mut reader, mut state, mut software) = input(bytes);
+            let mut packet = Vec::new();
+            for sample in 0..3 {
+                reader.read_packet(0, sample, &mut packet).unwrap();
+                let expected = software.decode_packet(&packet).unwrap().unwrap();
+                let pending = state.prepare(&packet).unwrap().unwrap();
+                assert_eq!(pending.frame.picture_order, expected.poc);
+                assert_eq!(pending.frame.output, expected.output);
+                for reference in &pending.references {
+                    assert!(state.slots[reference.index as usize].upgrade().is_some());
+                }
+                drop(state.commit(pending));
+            }
+        }
+    }
+    #[test]
     fn long_term_fixture_retains_slots_and_aborted_submission_preserves_state() {
         let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
         let (mut reader, mut state, mut software) = input(data);

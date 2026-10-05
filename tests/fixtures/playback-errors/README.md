@@ -213,3 +213,21 @@ refused the second picture with `HEVC NVDEC long-term reference submission is no
 These passing parameter/scheduler tests are not physical GPU playback acceptance.
 `owned_hevc_long_term_submits_and_maps_on_nvidia` is separately ignored on
 Linux/Windows until explicitly run on an NVIDIA device.
+
+### Mixed and LSB-only HEVC long-term fixtures
+
+`hevc-long-term-lsb-rext8.mp4` replaces explicit MSB cycles with LSB-only
+long-term entries. `hevc-long-term-mixed-rext8.mp4` keeps POC zero short-term
+through POC one; POC two uses a short-term POC zero and a long-term POC one.
+Both entries have `used_by_curr_pic` set. Its active L0 list has one entry,
+selecting the short-term picture; separate all-long-term fixtures select the
+long-term picture. VPS/SPS DPB limits are raised to three for the mixed stream.
+This avoids an invalid conversion of an already long-term picture into a
+short-term reference, which HM would conceal by inserting a lost picture.
+
+Both three-frame 64×64 variants have separate HM 18.0 YUV oracles. Active
+acceptance tests assert their exact RPS structure, POCs, output flags and every
+pixel before/after decoder reset. NVDEC tests check both driver current sets
+and the mixed/LSB scheduler's live slots; no NVIDIA playback is claimed here.
+The existing generator produces all three variants and rejects any HM log
+reporting insertion of a lost POC before saving the reference output.

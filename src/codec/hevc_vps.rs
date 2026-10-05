@@ -55,6 +55,8 @@ pub struct Vps {
     pub temporal_id_nesting: bool,
     pub profile: ProfileTierLevel,
     pub ordering: Vec<Ordering>,
+    #[cfg(test)]
+    pub(crate) ordering_bit_range: std::ops::Range<usize>,
     pub timing: Option<Timing>,
     pub hrd: Option<super::hevc_hrd::Hrd>,
 }
@@ -83,7 +85,11 @@ impl Vps {
         // H.265 7.4.3.1 explicitly requires decoders to ignore this reserved value.
         bits.skip(16)?;
         let profile = ProfileTierLevel::read(&mut bits, true, max_sub_layers_minus1)?;
+        #[cfg(test)]
+        let ordering_start = bits.position();
         let ordering = read_ordering(&mut bits, max_sub_layers_minus1)?;
+        #[cfg(test)]
+        let ordering_bit_range = ordering_start..bits.position();
         if bits.read(6)? != 0 || bits.unsigned_golomb()? != 0 {
             return Err(crate::unsupported("multiple HEVC layer sets are not implemented"));
         }
@@ -134,6 +140,8 @@ impl Vps {
             temporal_id_nesting,
             profile,
             ordering,
+            #[cfg(test)]
+            ordering_bit_range,
             timing,
             hrd,
         })

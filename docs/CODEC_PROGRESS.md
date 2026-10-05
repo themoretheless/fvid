@@ -2019,3 +2019,18 @@ map/unmap and POC/output against software. Physical execution remains unproven;
 it is separate from the software's exact HM pixel comparison. Broader mixed/B
 compressed long-term fixtures also remain necessary. Codec coverage is not
 declared complete, and FVid versus FFmpeg benchmarks remain after acceptance.
+
+### Mixed and LSB-only HEVC long-term acceptance (2026-10-06)
+
+Owned three-picture variants now qualify LSB-only resolution without MSB
+cycles and a mixed short-term/long-term current set against independent HM
+18.0 pixels, including reset. The mixed picture carries two used entries but
+one active L0 entry; it exercises current-set construction and short-term
+motion alongside the separate all-long-term motion fixture. VPS/SPS explicitly
+admit its three-picture DPB. This does not qualify all-active mixed L0/L1
+B-picture motion, ambiguous LSB cycles, or every profile.
+
+NVDEC synthetic tests cover both current-set arrays/counts, classification
+flags and live slot retention for these variants. Physical GPU behavior still
+requires device qualification. Fixture generation remains explicit and
+separate from tests, uses no FFmpeg, and refuses concealed HM reference losses.

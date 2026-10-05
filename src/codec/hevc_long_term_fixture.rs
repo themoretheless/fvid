@@ -42,6 +42,8 @@ fn escaped_nal(header: &[u8], mut payload: Vec<bool>) -> Vec<u8> {
 #[ignore = "explicit synthetic fixture regeneration; requires FVID_HEVC_LONG_TERM_STREAM"]
 fn generate_long_term_stream() {
     let destination = std::env::var_os("FVID_HEVC_LONG_TERM_STREAM").expect("explicit output path");
+    let mode = std::env::var("FVID_HEVC_LONG_TERM_MODE").unwrap_or_else(|_| "explicit".into());
+    assert!(matches!(mode.as_str(), "explicit" | "lsb" | "mixed"));
     let source = include_bytes!(
         "../../tests/fixtures/playback-errors/hevc-rext-explicit-rdpcm-8-skip-disabled.mp4"
     );
@@ -55,6 +57,8 @@ fn generate_long_term_stream() {
     let (sps, pps) = decoder.parameters();
     let (sps, pps) = (sps.clone(), pps.clone());
     assert!(!sps.long_term_present);
+    assert_eq!(sps.ordering.len(), 1);
+    assert!(!pps.lists_modification);
     assert!(!pps.entropy_sync && pps.tiles.is_none());
     assert_eq!(sps.dimensions, [64, 64]);
     assert_eq!(sps.depth, [8, 8]);
@@ -74,6 +78,25 @@ fn generate_long_term_stream() {
                     sps.long_term_flag_bit..sps.long_term_flag_bit + 1,
                     [true, true],
                 );
+                if mode == "mixed" {
+                    let mut ordering = vec![false];
+                    ue(2, &mut ordering);
+                    ue(0, &mut ordering);
+                    ue(0, &mut ordering);
+                    payload.splice(sps.ordering_bit_range.clone(), ordering);
+                }
+                emit(&escaped_nal(&nal[..2], payload));
+            } else if array.nal_type == 32 && mode == "mixed" {
+                let vps = super::hevc_vps::Vps::parse(nal, 16 << 20).unwrap();
+                assert_eq!(vps.ordering.len(), 1);
+                let rbsp = NalRbsp::parse(nal, 16 << 20).unwrap();
+                let mut payload = bits(&rbsp.bytes);
+                payload.truncate(payload.iter().rposition(|&b| b).unwrap() + 1);
+                let mut ordering = vec![false];
+                ue(2, &mut ordering);
+                ue(0, &mut ordering);
+                ue(0, &mut ordering);
+                payload.splice(vps.ordering_bit_range, ordering);
                 emit(&escaped_nal(&nal[..2], payload));
             } else {
                 emit(nal);
@@ -100,22 +123,33 @@ fn generate_long_term_stream() {
             if !sps.short_term.is_empty() {
                 syntax.push(false);
             }
-            ue(0, &mut syntax);
-            ue(0, &mut syntax); // Empty short-term RPS.
-            ue(slice.short_term.len(), &mut syntax);
-            let modulus = 1i32 << sps.poc_bits;
-            let mut previous_cycle = 0;
-            for reference in &slice.short_term {
-                let target = poc + reference.delta_poc;
-                let lsb = target.rem_euclid(modulus);
-                let cycle = (poc - poc.rem_euclid(modulus) - target + lsb) / modulus;
-                assert!(cycle >= previous_cycle);
-                syntax.extend((0..sps.poc_bits).rev().map(|i| lsb & (1 << i) != 0));
-                syntax.push(reference.used);
-                syntax.push(true); // Explicit MSB cycle.
-                ue((cycle - previous_cycle) as usize, &mut syntax);
-                previous_cycle = cycle;
-                used += usize::from(reference.used);
+            if mode == "mixed" && index == 1 {
+                syntax = bits(&slice.rbsp)[slice.short_term_bit_range.clone()].to_vec();
+                ue(0, &mut syntax); // Keep POC zero short-term for the next picture.
+            } else {
+                ue(usize::from(mode == "mixed" && index == 2), &mut syntax);
+                ue(0, &mut syntax);
+                if mode == "mixed" && index == 2 {
+                    ue(1, &mut syntax); // delta_poc_s0_minus1: retained POC zero.
+                    syntax.push(true);
+                }
+                ue(slice.short_term.len(), &mut syntax);
+                let modulus = 1i32 << sps.poc_bits;
+                let mut previous_cycle = 0;
+                for reference in &slice.short_term {
+                    let target = poc + reference.delta_poc;
+                    let lsb = target.rem_euclid(modulus);
+                    let cycle = (poc - poc.rem_euclid(modulus) - target + lsb) / modulus;
+                    assert!(cycle >= previous_cycle);
+                    syntax.extend((0..sps.poc_bits).rev().map(|i| lsb & (1 << i) != 0));
+                    syntax.push(reference.used);
+                    syntax.push(mode != "lsb");
+                    if mode != "lsb" {
+                        ue((cycle - previous_cycle) as usize, &mut syntax);
+                    }
+                    previous_cycle = cycle;
+                    used += usize::from(reference.used);
+                }
             }
             let mut payload = bits(&slice.rbsp);
             let end = slice.entropy_byte_offset * 8;
@@ -131,14 +165,14 @@ fn generate_long_term_stream() {
             emit(&escaped_nal(&nal[..2], payload));
         }
     }
-    assert!(used >= 2, "fixture must actually use long-term pictures");
+    assert!(
+        used >= if mode == "mixed" { 1 } else { 2 },
+        "fixture must actually use long-term pictures"
+    );
     std::fs::write(destination, stream).unwrap();
 }
 
-#[test]
-fn long_term_reference_video_matches_independent_hm_pixels_and_rewind() {
-    let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4");
-    let expected = include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-rext8.yuv");
+fn check_video(data: &[u8], expected: &[u8], mode: &str) {
     let mut input =
         crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
             .unwrap();
@@ -160,9 +194,26 @@ fn long_term_reference_video_matches_independent_hm_pixels_and_rewind() {
                 if NalHeader::parse(nal).unwrap().is_vcl() {
                     let header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
                     if index != 0 {
-                        assert!(header.short_term.is_empty());
-                        assert!(header.long_term.iter().any(|r| r.used));
-                        used += 1;
+                        if mode == "mixed" && index == 1 {
+                            assert!(header.long_term.is_empty());
+                            assert_eq!(header.short_term.len(), 1);
+                        } else {
+                            assert!(header.long_term.iter().any(|r| r.used));
+                            assert!(
+                                header
+                                    .long_term
+                                    .iter()
+                                    .all(|r| r.msb_cycles.is_none() == (mode == "lsb"))
+                            );
+                            if mode == "mixed" {
+                                assert_eq!(header.short_term.len(), 1);
+                                assert!(header.short_term[0].used);
+                                assert_eq!(header.short_term[0].delta_poc, -2);
+                            } else {
+                                assert!(header.short_term.is_empty());
+                            }
+                            used += 1;
+                        }
                     }
                 }
             }
@@ -181,10 +232,35 @@ fn long_term_reference_video_matches_independent_hm_pixels_and_rewind() {
                 );
             }
         }
-        assert_eq!(used, 2);
+        assert_eq!(used, if mode == "mixed" { 1 } else { 2 });
         assert_eq!(
             pixels, expected,
             "independent HM reconstruction, pass {pass}"
         );
     }
+}
+
+#[test]
+fn long_term_reference_video_matches_independent_hm_pixels_and_rewind() {
+    check_video(
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4"),
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-rext8.yuv"),
+        "explicit",
+    );
+}
+#[test]
+fn lsb_only_long_term_video_matches_independent_hm_pixels_and_rewind() {
+    check_video(
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4"),
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.yuv"),
+        "lsb",
+    );
+}
+#[test]
+fn mixed_short_and_long_term_video_matches_independent_hm_pixels_and_rewind() {
+    check_video(
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4"),
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.yuv"),
+        "mixed",
+    );
 }

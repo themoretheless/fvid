@@ -35,6 +35,8 @@ pub struct Sps {
     pub depth: [u8; 2],
     pub poc_bits: u8,
     pub ordering: Vec<Ordering>,
+    #[cfg(test)]
+    pub(crate) ordering_bit_range: std::ops::Range<usize>,
     pub coding_block_log2: [u8; 2],
     pub transform_block_log2: [u8; 2],
     pub transform_hierarchy_depth: [u8; 2],
@@ -115,7 +117,11 @@ impl Sps {
         }
         let depth = [ue(b, 8)? as u8 + 8, ue(b, 8)? as u8 + 8];
         let poc_bits = ue(b, 12)? as u8 + 4;
+        #[cfg(test)]
+        let ordering_start = b.position();
         let ordering = read_ordering(b, max_sub)?;
+        #[cfg(test)]
+        let ordering_bit_range = ordering_start..b.position();
         let min_cb = ue(b, 3)? as u8 + 3;
         let max_cb = min_cb + ue(b, 3)? as u8;
         let min_tb = ue(b, 3)? as u8 + 2;
@@ -227,6 +233,8 @@ impl Sps {
             depth,
             poc_bits,
             ordering,
+            #[cfg(test)]
+            ordering_bit_range,
             coding_block_log2: [min_cb, max_cb],
             transform_block_log2: [min_tb, max_tb],
             transform_hierarchy_depth,
