@@ -665,3 +665,11 @@ mutations per source stream remain refusals of this route. Direct override
 validation rejects duplicate/unselected/absent indexes and NUL text before any
 header bytes. Existing publication/cancellation tests remain enabled. This
 extends container metadata operations, not codec profile/tool decoding support.
+
+### Matroska Opus controlled-memory acceptance
+
+`generate_opus_lacing_fixtures.py` writes `opus-controlled-memory.mka`, a 90 ms synthetic mono Opus DTX stream with four individually timestamped variable-duration packets. No codec executable or private media is used. `native_opus_audio_export` verifies identical PCM with a sufficient aggregate admission budget for mono, stereo and surround sources, insufficient-budget refusal before PCM output, and atomic WAVE export. Admission covers a conservative SILK/CELT decoder/synthesis reserve, interleaved scratch, encoded/rebuilt packets, index payload and cloned track strings; it is not a process RSS or allocator-overhead measurement. Metadata options are not cloned into the PCM phase.
+
+### Variable Opus laces with BlockDuration
+
+`opus-lace-variable-duration-block.mka` is the generator-owned 90 ms EBML-laced BlockGroup regression: the four packet durations are 20/40/10/20 ms. The former equal division of BlockDuration produced timestamps 0/22.5/45/67.5 ms and failed PCM playback with overlapping intervals. The parser acceptance test now requires 0/20/60/70 ms; the PCM/export acceptance test decodes the complete stream. BlockDuration describes the whole block, not four equal codec packet durations (https://www.matroska.org/technical/elements.html).

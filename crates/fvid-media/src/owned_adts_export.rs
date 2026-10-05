@@ -14,7 +14,7 @@ type Result<T> = std::result::Result<T, String>;
 
 // The PCM phase cannot apply container tags. Build its policy directly rather
 // than cloning potentially unbounded tag strings and discarding them afterward.
-fn pcm_decode_options(options: &CopyOptions) -> CopyOptions {
+pub(crate) fn pcm_decode_options(options: &CopyOptions) -> CopyOptions {
     CopyOptions {
         streams: options.streams.clone(),
         max_packet_bytes: options.max_packet_bytes,

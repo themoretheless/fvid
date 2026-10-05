@@ -7,7 +7,8 @@ use std::{
 };
 /// Decode delay, signed padding, gaps and ceil-rounded interval boundaries.
 /// Errors may leave partial caller-owned PCM; progress never reports publication.
-/// Aggregate allocation admission and metadata mutations remain unsupported.
+/// Controlled allocation admission covers decoder scratch, packet/index payload
+/// and cloned track metadata. Metadata mutations remain unsupported.
 pub fn decode_matroska_opus_pcm<R: Read + Seek>(
     source: R,
     output: &mut impl Write,

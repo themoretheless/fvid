@@ -25,6 +25,16 @@ def main():
             info=element(0x1549a966,uint(0x2ad7b1,1000000)+element(0x4489,struct.pack('>d',90)))
             data=header+element(0x18538067,info+element(0x1654ae6b,element(0xae,track))+element(0x1f43b675,uint(0xe7,0)+block))
             (OUT/f'opus-lace-{mode}{"-group" if group else ""}.mka').write_bytes(data)
+            if mode=='ebml' and group:
+                (OUT/'opus-lace-variable-duration-block.mka').write_bytes(data)
+                # Named regression for aggregate decoder/index/packet admission.
+                clock=0
+                blocks=b''
+                for packet,duration in zip(packets,[20,40,10,20]):
+                    blocks+=element(0xa3,b'\x81'+struct.pack('>h',clock)+b'\x80'+packet)
+                    clock+=duration
+                memory=header+element(0x18538067,info+element(0x1654ae6b,element(0xae,track))+element(0x1f43b675,uint(0xe7,0)+blocks))
+                (OUT/'opus-controlled-memory.mka').write_bytes(memory)
             if mode=='xiph' and not group:
                 (OUT/'opus-lace-invalid-packet.mka').write_bytes(data.replace(bytes.fromhex('f8fffe'),bytes.fromhex('fb00fe'),1))
 if __name__=='__main__':main()

@@ -12,6 +12,34 @@ pub struct OpusDecoder {
     failed: bool,
 }
 impl OpusDecoder {
+    /// Conservative payload admission for the adapter's supported 48 kHz
+    /// layouts. One MiB per elementary stream covers SILK/CELT state and
+    /// synthesis scratch at the maximum 5760 samples, including Vec growth.
+    /// Another 32 bytes per interleaved sample covers adapter/output and
+    /// multistream scratch; 512 KiB covers construction and fixed storage.
+    /// Encoded/rebuilt packets and container indexes are charged by the caller.
+    /// This is an admission estimate, not an allocator or process RSS limit.
+    pub(crate) fn decode_admission_bytes(configuration: &[u8], rate: u32, channels: u16) -> Result<usize> {
+        let head = fvid_opus::OpusHead::parse(configuration).map_err(|e| e.to_string())?;
+        if rate != 48000 || channels != u16::from(head.channel_count) {
+            return Err("Opus requires its declared channel layout at 48000 Hz".into());
+        }
+        if channels > 8 || !matches!(head.mapping_family, 0 | 1) {
+            return Err("owned Opus supports mapping families 0/1 up to eight channels".into());
+        }
+        let streams = if head.mapping_family == 0 { 1 } else {
+            let layout = fvid_opus::ChannelLayout::surround(usize::from(channels), 1)
+                .map_err(|e| e.to_string())?;
+            if usize::from(head.stream_count) != layout.nb_streams
+                || usize::from(head.coupled_count) != layout.nb_coupled_streams
+                || head.channel_mapping != layout.mapping
+            {
+                return Err("owned Opus requires the standard family-1 channel mapping".into());
+            }
+            layout.nb_streams
+        };
+        Ok(streams * 1024 * 1024 + usize::from(channels) * 5760 * 32 + 512 * 1024)
+    }
     pub fn new(configuration: &[u8], rate: u32, channels: u16) -> Result<Self> {
         let head = fvid_opus::OpusHead::parse(configuration).map_err(|e| e.to_string())?;
         if rate != 48000 || channels != u16::from(head.channel_count) {

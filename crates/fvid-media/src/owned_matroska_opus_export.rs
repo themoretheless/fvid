@@ -25,12 +25,7 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
     }))
 }
 fn decode_options(options: &CopyOptions) -> CopyOptions {
-    let mut options = options.clone();
-    options.metadata_set.clear();
-    options.metadata_delete.clear();
-    options.stream_metadata_set.clear();
-    options.stream_metadata_delete.clear();
-    options
+    crate::owned_adts_export::pcm_decode_options(options)
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(

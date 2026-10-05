@@ -703,7 +703,9 @@ impl<R: Read + Seek> WebmReader<R> {
             let count = (group.end-group.start) as u128;
             let track = tracks.iter().find(|t| t.number == first.track).unwrap();
             let default = track.default_duration_ns;
-            if default == 0 && first.duration_ns.is_none() && track.codec == "A_OPUS" {
+            // BlockDuration describes the whole block, not an equal duration
+            // for every lace. Opus TOCs provide individual packet durations.
+            if default == 0 && track.codec == "A_OPUS" {
                 opus_lace_channels(&track.codec_private).map_err(|_| unsupported(
                     "Opus lace timing requires mono/stereo mapping family 0"))?;
                 let mut elapsed = 0i128;

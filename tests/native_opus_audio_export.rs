@@ -7,6 +7,58 @@ fn fixture(name: &str) -> PathBuf {
         .join("tests/fixtures")
         .join(name)
 }
+#[test]
+fn synthetic_opus_laces_accept_controlled_memory_and_refuse_before_pcm() {
+    // The owned generator emits four DTX packets with different durations.
+    // Reuse that short synthetic regression fixture, never private media.
+    for name in [
+        "opus-controlled-memory.mka",
+        "opus-lace-variable-duration-block.mka",
+        "opus-lace-xiph-group.mka",
+        "opus-lace-ebml-group.mka",
+        "opus-stereo.webm",
+        "opus-surround.webm",
+        "opus-silk.webm",
+        "opus-hybrid.webm",
+    ] {
+        let source = fixture(&format!("playback-errors/{name}"));
+        let bytes = std::fs::read(&source).unwrap();
+        let mut expected = Vec::new();
+        let reference = fvid_media::owned_matroska_opus::decode_matroska_opus_pcm(
+            Cursor::new(&bytes), &mut expected, None, &Default::default(),
+        ).unwrap();
+        assert!(!expected.is_empty());
+        let options = fvid_control::CopyOptions {
+            max_controlled_bytes: Some(64 * 1024 * 1024),
+            ..Default::default()
+        };
+        let mut actual = Vec::new();
+        let accepted = fvid_media::owned_matroska_opus::decode_matroska_opus_pcm(
+            Cursor::new(&bytes), &mut actual, None, &options,
+        ).unwrap();
+        assert_eq!(actual, expected);
+        assert_eq!(accepted.sample_frames, reference.sample_frames);
+        let low = fvid_control::CopyOptions {
+            max_controlled_bytes: Some(1024 * 1024),
+            ..Default::default()
+        };
+        let mut refused = Vec::new();
+        let error = fvid_media::owned_matroska_opus::decode_matroska_opus_pcm(
+            Cursor::new(&bytes), &mut refused, None, &low,
+        ).unwrap_err();
+        assert!(error.to_string().contains("controlled memory budget exceeded"), "{error}");
+        assert!(refused.is_empty());
+        let output = std::env::temp_dir().join(format!("fvid-opus-budget-{}-{name}.wav", std::process::id()));
+        let _ = std::fs::remove_file(&output);
+        let error = fvid_media::decode_audio(&source, &output, &low).unwrap_err();
+        assert!(error.to_string().contains("controlled memory budget exceeded"), "{error}");
+        assert!(!output.exists());
+        let stats = fvid_media::decode_audio(&source, &output, &options).unwrap();
+        assert_eq!(stats.sample_frames, reference.sample_frames);
+        assert_eq!(wave_payload(&output), expected);
+        std::fs::remove_file(output).unwrap();
+    }
+}
 fn wave_payload(path: &Path) -> Vec<u8> {
     let bytes = std::fs::read(path).unwrap();
     assert_eq!(&bytes[..4], b"RIFF");

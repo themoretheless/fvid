@@ -149,6 +149,7 @@ fn matroska_probe_subtracts_codec_delay_without_changing_packet_clock() {
 #[test]
 fn opus_laces_without_default_duration_use_each_packet_clock() {
     for name in [
+        "opus-lace-variable-duration-block.mka",
         "opus-lace-xiph.mka",
         "opus-lace-ebml.mka",
         "opus-lace-xiph-group.mka",
@@ -162,21 +163,12 @@ fn opus_laces_without_default_duration_use_each_packet_clock() {
         reader.scan_all().unwrap();
         assert_eq!(reader.packets.len(), 4);
         assert_eq!(reader.tracks[0].default_duration_ns, 0);
-        let clocks = if name.contains("group") {
-            [
-                (0, 22500000),
-                (22500000, 22500000),
-                (45000000, 22500000),
-                (67500000, 22500000),
-            ]
-        } else {
-            [
+        let clocks = [
                 (0, 20000000),
                 (20000000, 40000000),
                 (60000000, 10000000),
                 (70000000, 20000000),
-            ]
-        };
+            ];
         for (i, (pts, duration)) in clocks.into_iter().enumerate() {
             assert_eq!(
                 (reader.packets[i].pts_ns, reader.packets[i].duration_ns),

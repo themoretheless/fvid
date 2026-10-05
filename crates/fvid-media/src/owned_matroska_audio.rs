@@ -223,6 +223,11 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
                 .map_err(|_| invalid("ALAC channel count exceeds decoder geometry"))?,
         )
         .map_err(|e| invalid(&e.to_string()))?,
+        "A_OPUS" => crate::owned_opus::OpusDecoder::decode_admission_bytes(
+            &track.codec_private,
+            u32::try_from(track.sample_rate).map_err(|_| invalid("Opus sample rate overflow"))?,
+            u16::try_from(track.channels).map_err(|_| invalid("Opus channel count overflow"))?,
+        ).map_err(|e| invalid(&e))?,
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
             // Geometry validation allocates no heap. Widened samples are charged
             // against each packet below, using f64 even for the f32 API.
@@ -239,6 +244,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         track.codec.as_str(),
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
     );
+    let opus = track.codec == "A_OPUS";
     let mut visited_packets = 0;
     let mut largest_packet = 0;
     reader
@@ -258,8 +264,10 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             visited_packets = reader.packets.len();
             // One encoded packet plus at most eight bytes per input byte for
             // f64 conversion of unsigned 8-bit PCM; wider formats cost less.
+            // Opus multistream also retains a rebuilt elementary packet, with
+            // up to twice its length reserved by Vec growth.
             let packet = largest_packet
-                .checked_mul(if pcm { 9 } else { 1 })
+                .checked_mul(if pcm { 9 } else if opus { 3 } else { 1 })
                 .ok_or_else(|| {
                     crate::owned_ebml::Error("Matroska memory estimate overflow".into())
                 })?;
