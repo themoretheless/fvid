@@ -46,7 +46,7 @@ def external_test_calls(source):
     """
     patterns = [
         r'\b(?:var_os|var|option_env!|env!)\s*\(\s*"[^"]*(?:FFMPEG|FFPROBE)[^"]*"',
-        r'\bCommand\s*::\s*new\s*\(\s*"(?:[^"\n]*/)?(?:ffmpeg|ffprobe)(?:\.exe)?"',
+        r'\bCommand\s*::\s*new\s*\(\s*"(?:[^"\n]*[/\\])?(?:ffmpeg|ffprobe)(?:\.exe)?"',
     ]
     return sorted({source.count("\n", 0, match.start()) + 1
                    for pattern in patterns for match in re.finditer(pattern, source)})
@@ -75,7 +75,7 @@ def external_python_calls(source):
     def literal(node):
         return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
     def tool(value):
-        return value is not None and re.fullmatch(r"(?:[^\n]*/)?(?:ffmpeg|ffprobe)(?:\.exe)?", value, re.I)
+        return value is not None and re.fullmatch(r"(?:[^\n]*[/\\])?(?:ffmpeg|ffprobe)(?:\.exe)?", value, re.I)
     def environment(value):
         return value is not None and any(name in value.upper() for name in ("FFMPEG", "FFPROBE"))
     for node in ast.walk(tree):

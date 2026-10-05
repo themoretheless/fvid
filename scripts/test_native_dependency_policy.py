@@ -17,6 +17,7 @@ class OrdinaryTestPolicy(unittest.TestCase):
             'Command::new("ffmpeg")',
             'Command :: new ( "/opt/homebrew/bin/ffprobe" )',
             'std::process::Command::new("ffmpeg.exe")',
+            r'Command::new("C:\\tools\\ffmpeg.exe")',
         ]:
             with self.subTest(source=source):
                 self.assertEqual(external_test_calls("\n" + source), [2])
@@ -49,6 +50,7 @@ class FixtureGeneratorPolicy(unittest.TestCase):
             'subprocess.run(["ffmpeg", "-version"])',
             'execute(("/usr/bin/ffprobe", "input"))',
             'subprocess.Popen("ffmpeg.exe")',
+            r'subprocess.run([r"C:\tools\ffprobe.exe"])',
             'os.getenv("FVID_REFERENCE_FFMPEG")',
             'os.environ.get("FFPROBE_PATH")',
             'os.environ["FFMPEG_BINARY"]',
