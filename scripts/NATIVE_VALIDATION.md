@@ -608,3 +608,31 @@ The dependency guard's eleven required graphs also passed offline for
 cache packages were fetched separately with the locked manifests before the
 successful offline audits. These are dependency checks, not cross-platform
 execution or hardware qualification.
+
+### Portable filter math acceptance (2026-10-05)
+
+Linux CI exposed deband sampling-coordinate differences from platform binary32
+`sinf`; the saved macOS reference selected different radii after random-value
+amplification. Owned deband now evaluates sine/cosine at binary64 precision,
+then explicitly quantizes to binary32. The independent Python fixture generator
+creates separate `deband-portable-*.expected.raw` acceptance pixels. Historical
+reference bytes remain unchanged. A dedicated synthetic boundary case requires
+luma 89 at (5, 1), and the full ramp acceptance covers four frames, rewind,
+threshold/blur/coupling, 8/16-bit layouts, source clocks and owned CLI export.
+
+Windows CI exposed two 16-bit colorchannelmixer power-preservation rounding
+errors. The shared metric now evaluates its cube root at binary64 precision
+before binary32 quantization. The two synthetic pixels and the complete saved
+RGB/float reference suites retain their original independent expected bytes.
+All 31 `owned_color` library tests passed with `PATH=/fvid/no-external-programs`
+and `FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg` on macOS. All 15 dependency policy tests
+passed, and the locked offline production graph audit passed all 11 cases for
+macOS, Linux and Windows, including all production features. These graph audits
+are not execution proof for Linux/Windows or physical NVIDIA devices.
+
+The changed root `native_deband` target passed all eight tests locally, then
+passed all eight again by directly executing its compiled test binary with
+`PATH=/fvid/no-external-programs` and `FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg`.
+The empty-PATH run includes real child CLI decode, Y4M export and FFV1 transcode,
+followed by owned decode and exact independent pixel comparisons. Local results
+do not yet prove the new Linux/Windows CI runs; those must execute the fix.

@@ -279,8 +279,11 @@ impl Deband {
         for y in 0..h {
             for x in 0..w {
                 // Preserve the fused coordinate arithmetic qualified against the reference.
-                let random =
-                    (((x as f32).mul_add(12.9898, y as f32 * 78.233)).sin() * 43758.545).fract();
+                // Binary32 libm sine varies across macOS/Linux and changes the
+                // sampling map after amplification. Evaluate at binary64
+                // precision, then explicitly quantize to the map's binary32.
+                let angle = (x as f32).mul_add(12.9898, y as f32 * 78.233);
+                let random = (((angle as f64).sin() as f32) * 43758.545).fract();
                 let random = if random < 0. { random + 1. } else { random };
                 let direction = if self.direction < 0. {
                     -self.direction
@@ -293,8 +296,8 @@ impl Deband {
                     (random * self.range as f32) as i64
                 };
                 points.push([
-                    (direction.cos() * distance as f32) as i64,
-                    (direction.sin() * distance as f32) as i64,
+                    ((direction as f64).cos() as f32 * distance as f32) as i64,
+                    ((direction as f64).sin() as f32 * distance as f32) as i64,
                 ]);
             }
         }

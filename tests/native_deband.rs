@@ -35,6 +35,19 @@ fn frame(n: usize, sub: [usize; 2], depth: u8) -> GeometryFrame {
     }
 }
 #[test]
+fn synthetic_sampling_boundary_uses_portable_sine_precision() {
+    // At (5, 1), a one-ULP difference in sinf changes the random radius.
+    // Independent binary64 math in generate-deband.py selects luma 89;
+    // the historical macOS binary32-libm reference selected 86.
+    let mut f = frame(0, [2, 2], 8);
+    Deband::parse("1thr=.5:2thr=.5:3thr=.5:4thr=.5")
+        .unwrap()
+        .apply(&mut f, 8, 0, Some(0.))
+        .unwrap();
+    assert_eq!(f.data[22], 89);
+}
+
+#[test]
 fn qualified_pixels_and_rewind() {
     for (name, args, sub, depth) in [
         ("default", "", [2, 2], 8),
@@ -43,7 +56,8 @@ fn qualified_pixels_and_rewind() {
         ("coupled", "1thr=.5:2thr=.5:3thr=.5:4thr=.5:c=1", [1, 1], 8),
         ("depth", "1thr=.5:2thr=.5:3thr=.5:4thr=.5:c=1", [1, 1], 16),
     ] {
-        let expected = std::fs::read(fixture(&format!("deband-{name}.expected.raw"))).unwrap();
+        let expected =
+            std::fs::read(fixture(&format!("deband-portable-{name}.expected.raw"))).unwrap();
         let program = Deband::parse(args).unwrap();
         for _ in 0..2 {
             let mut output = Vec::new();
@@ -139,7 +153,7 @@ fn timeline_noop_validation_and_coupled_subsampling_refusal() {
 #[test]
 fn root_and_library_exports_keep_source_clock_before_framestep() {
     use fvid::media::{CopyOptions, LosslessTransform};
-    let expected = std::fs::read(fixture("deband-strong.expected.raw")).unwrap();
+    let expected = std::fs::read(fixture("deband-portable-strong.expected.raw")).unwrap();
     for library in [false, true] {
         for step in [1usize, 2] {
             let output = std::env::temp_dir().join(format!(
@@ -198,8 +212,8 @@ fn root_and_library_exports_keep_source_clock_before_framestep() {
 #[test]
 fn coupled_full_resolution_and_high_depth_export_are_owned() {
     for (source, golden) in [
-        ("deband-coupled.y4m", "deband-coupled.expected.raw"),
-        ("deband-depth.y4m", "deband-depth.expected.raw"),
+        ("deband-coupled.y4m", "deband-portable-coupled.expected.raw"),
+        ("deband-depth.y4m", "deband-portable-depth.expected.raw"),
     ] {
         for library in [false, true] {
             let output = std::env::temp_dir().join(format!(
@@ -281,7 +295,7 @@ fn cli_and_native_codec_routes() {
             assert!(stats.video_frames > 0, "{source}");
         }
     }
-    let expected = std::fs::read(fixture("deband-strong.expected.raw")).unwrap();
+    let expected = std::fs::read(fixture("deband-portable-strong.expected.raw")).unwrap();
     for command in ["decode", "export-y4m", "transcode-lossless"] {
         let output = std::env::temp_dir().join(format!(
             "fvid-deband-cli-{}-{command}.mkv",

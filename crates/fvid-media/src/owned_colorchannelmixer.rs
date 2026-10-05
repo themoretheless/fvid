@@ -267,6 +267,23 @@ mod synthetic_acceptance {
 #[cfg(test)]
 mod rgb_reference_acceptance {
     #[test]
+    fn power_preservation_keeps_synthetic_halfway_pixels_platform_independent() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        let input = std::fs::read(root.join("vibrance-grid-16.rgba")).unwrap();
+        let expected = std::fs::read(root.join("colorchannelmixer-reference-16-11.raw")).unwrap();
+        let mixer = super::ColorChannelMixer::parse("rr=0.5:rg=0.2:bb=0.7:pc=pwr:pa=1").unwrap();
+        // These two synthetic blue samples rounded down on Windows cbrtf,
+        // although the committed independent reference rounds them up.
+        for pixel in [121, 168] {
+            let offset = pixel * 8;
+            let mut actual = input[offset..offset + 8].to_vec();
+            mixer.apply_rgb(&mut actual, 16, 4).unwrap();
+            assert_eq!(actual, expected[offset..offset + 8], "pixel={pixel}");
+        }
+    }
+
+    #[test]
     fn three_frame_synthetic_rgba_matches_committed_references() {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../tests/fixtures/playback-errors");

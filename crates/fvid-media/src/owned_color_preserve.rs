@@ -24,7 +24,10 @@ pub(crate) fn measure(mode: u8, rgb: [f32; 3], maximum: f32) -> f32 {
         }
         6 => {
             let [r, g, b] = rgb.map(|v| v / maximum);
-            (r * r * r + g * g * g + b * b * b).cbrt()
+            // Some platform cbrtf implementations differ by one binary32 ULP.
+            // That error can cross an integer pixel's rounding boundary. Compute
+            // the root at binary64 precision before quantizing the metric.
+            ((r * r * r + g * g * g + b * b * b) as f64).cbrt() as f32
         }
         _ => 0.0,
     }

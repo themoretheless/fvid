@@ -148,3 +148,17 @@ ramps and four different chroma cells, generated without FFmpeg by
 `scripts/generate_monochrome_fixtures.py`. Acceptance tests check chroma-driven
 luma changes, neutral output chroma, precision, all timestamps and Y4M/FFV1
 export and decode through the owned library and CLI.
+
+`deband-portable-{default,strong,no-blur,coupled,depth}.expected.raw`:
+independent expected pixels for the four-frame synthetic `deband*.y4m` ramps.
+`generate-deband.py` computes binary64 sine/cosine and explicitly rounds the
+sampling-map arithmetic to binary32, without external programs. These reproduce
+the Linux/macOS sampling-coordinate divergence at luma position (5, 1), where
+platform `sinf` changed a random radius. Owned deband now uses the wider math on
+all platforms. The older `deband-*.expected.raw` bytes are retained as historical
+macOS-libm references, not used as portable acceptance oracles.
+
+The existing `vibrance-grid-16.rgba` also reproduces Windows colorchannelmixer
+power-preservation rounding at pixels 121 and 168. Dedicated acceptance checks
+require the unchanged independent `colorchannelmixer-reference-16-11.raw` bytes;
+the metric uses a binary64 cube root before binary32 quantization.
