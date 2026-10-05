@@ -16,7 +16,11 @@ pub fn capabilities() -> Capabilities {
         muxers: names(&["matroska", "mp4", "wav", "yuv4mpegpipe"]),
         decoders: names(&[
             "aac",
-            "h264", "hevc", "vp9", "av1",
+            "opus",
+            "h264",
+            "hevc",
+            "vp9",
+            "av1",
             "alac",
             "ffv1",
             "subrip",
@@ -34,14 +38,39 @@ pub fn capabilities() -> Capabilities {
         ]),
         encoders: names(&["ass", "ffv1", "pcm_f32le", "rawvideo"]),
         filters: names(&[
-            "drawbox", "drawgrid", "removegrain", "yaepblur", "lenscorrection", "perspective", "deband", "gradfun", "bitplanenoise", "sab", "smartblur", "vignette", "curves", "hqdn3d", "tmix", "lagfun", "fade",
+            "drawbox",
+            "drawgrid",
+            "removegrain",
+            "yaepblur",
+            "lenscorrection",
+            "perspective",
+            "deband",
+            "gradfun",
+            "bitplanenoise",
+            "sab",
+            "smartblur",
+            "vignette",
+            "curves",
+            "hqdn3d",
+            "tmix",
+            "lagfun",
+            "fade",
             "gblur",
             "bilateral",
             "avgblur",
             "boxblur",
             "chromashift",
             "colorize",
-            "colorhold", "colorcontrast", "vibrance", "colorlevels", "colorchannelmixer", "exposure", "colorbalance", "colorcorrect", "cas", "grayworld",
+            "colorhold",
+            "colorcontrast",
+            "vibrance",
+            "colorlevels",
+            "colorchannelmixer",
+            "exposure",
+            "colorbalance",
+            "colorcorrect",
+            "cas",
+            "grayworld",
             "monochrome",
             "lutyuv",
             "crop",
@@ -89,15 +118,38 @@ mod tests {
             assert!(names.windows(2).all(|pair| pair[0] < pair[1]));
             assert!(!names.iter().any(|name| name.starts_with("lib")));
         }
-        for decoder in ["aac", "alac", "ffv1", "pcm_s16le", "subrip", "h264", "hevc", "vp9", "av1"] {
+        for decoder in [
+            "opus",
+            "aac",
+            "alac",
+            "ffv1",
+            "pcm_s16le",
+            "subrip",
+            "h264",
+            "hevc",
+            "vp9",
+            "av1",
+        ] {
             assert!(inventory.decoders.iter().any(|name| name == decoder));
         }
-        for decoder in ["opus"] {
-            assert!(!inventory.decoders.iter().any(|name| name == decoder));
-        }
-        for filter in ["colorize",
-            "colorhold", "colorcontrast", "vibrance", "colorlevels", "colorchannelmixer", "exposure", "colorbalance", "colorcorrect", "cas", "grayworld", "monochrome",
-            "lutyuv", "eq", "hue", "bilateral"] {
+        for filter in [
+            "colorize",
+            "colorhold",
+            "colorcontrast",
+            "vibrance",
+            "colorlevels",
+            "colorchannelmixer",
+            "exposure",
+            "colorbalance",
+            "colorcorrect",
+            "cas",
+            "grayworld",
+            "monochrome",
+            "lutyuv",
+            "eq",
+            "hue",
+            "bilateral",
+        ] {
             assert!(inventory.filters.iter().any(|name| name == filter));
         }
     }

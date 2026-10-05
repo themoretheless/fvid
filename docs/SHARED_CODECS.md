@@ -77,7 +77,7 @@ Missing companion durations no longer force fallback: AAC uses the declared fram
 
 Opus Matroska output always declares the 48 kHz codec clock. OpusHead's informational input rate may be 44.1 kHz or zero and is preserved without changing playback timing. Two synthetic video derivatives cover both values and compare round-trip presentation PCM. Cancellation, packet caps and completion preserve atomic file publication.
 
-Aggregate controlled-allocation admission for Opus audio remains unsupported. Noncanonical mappings, Ogg file export and broader legacy production workflows are not covered by this adapter; production features still have legacy FFmpeg edges.
+Aggregate controlled-allocation admission for Opus audio remains unsupported. Noncanonical mappings and Ogg file export are not covered by this adapter. The public decoder inventory now reports the linked owned Opus component; this does not imply support for every mapping or container. Production features no longer select the retired FFmpeg backend.
 
 Standalone Opus WAVE export is also accepted against committed PCM references for SILK, hybrid, mono/stereo CELT, 5.1 family-1 and a positive first timestamp. Each fixture produces exactly 48000 presentation frames with maximum absolute sample error below 0.00002; tests execute no reference encoder or decoder process.
 
