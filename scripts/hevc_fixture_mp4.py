@@ -1,4 +1,4 @@
-"""Owned muxer for single-layer, no-reordering HM fixture streams (not general muxing)."""
+"""Owned muxer for single-layer HM fixture streams with explicit optional presentation order (not general muxing)."""
 import re
 import struct
 
@@ -25,7 +25,7 @@ def header(size, values, matrix_offset=None):
     return bytes(data)
 
 
-def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False):
+def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None):
     units = [n for n in re.split(b'\x00\x00\x00?\x01', stream) if n]
     parameters = {kind: [] for kind in (32, 33, 34)}
     samples, current, sync, pending = [], [], [], []
@@ -86,6 +86,13 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False)
     count = len(samples)
     stbl = table(b'stsd', 1, box(codec, bytes(entry) + box(b'hvcC', hvcc)))
     stbl += table(b'stts', 1, ints(count, 1))
+    if presentation_order is not None:
+        if sorted(presentation_order) != list(range(count)):
+            raise ValueError('fixture presentation order must be a dense POC permutation')
+        entries = b''.join(struct.pack('>Ii', 1, poc - index)
+                           for index, poc in enumerate(presentation_order))
+        stbl += box(b'ctts', ints(0x01000000, count) + entries)
+
     stbl += table(b'stsc', 1, ints(1, count, 1))
     stbl += box(b'stsz', ints(0, 0, count) + ints(*(len(s) for s in samples)))
     stbl += table(b'stco', 1, ints(len(ftyp) + 8))

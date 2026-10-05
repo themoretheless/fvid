@@ -295,3 +295,31 @@ committed bytes without HM, FFmpeg or network access. These B pictures are
 low-delay with ascending POCs, not reordered future-reference B pictures.
 The owned NVDEC scheduler and ignored physical-device test include both mixed
 variants; actual GPU execution remains unproven.
+
+### Reordered HEVC B pictures with future and long-term past references
+
+`hevc-long-term-reordered-base-main8.mp4` and
+`hevc-long-term-reordered-mixed-main8.mp4` are owned three-picture 64×64
+Main8 streams. HM decodes I/P/B in POC order 0,2,1; presentation remains 0,1,2.
+The mixed B picture keeps future POC two short-term and converts past POC zero
+to long-term, with two active references in each list. The fixture muxer takes
+an explicit dense presentation-order permutation and writes signed version-1
+`ctts`: offsets 0,+1,-1, giving DTS 0,1,2 and PTS 0,2,1.
+
+Acceptance checks those container clocks, the used positive short-term delta,
+long-term POC zero, actual B-motion use of future POC two, every HM pixel
+sorted into presentation order, and complete reset/replay. The independently
+saved YUV oracle is in presentation order, not decoder packet order. The own
+NVDEC scheduler and ignored physical-device test include both streams. These
+tests do not claim actual player seek/UI or physical GPU execution.
+
+Regenerate separately from tests:
+
+```sh
+python3 scripts/generate_hevc_long_term_reordered_sample.py --hm-encoder /path/to/TAppEncoder --hm-decoder /path/to/TAppDecoder
+```
+
+The owned GOP config and deterministic pixels are generated without private
+media. HM reconstruction must match decoder output; decoder logs must show
+exactly POCs 0,2,1 and no concealed reference loss before saving oracles.
+Ordinary tests read committed bytes without FFmpeg, HM or network access.

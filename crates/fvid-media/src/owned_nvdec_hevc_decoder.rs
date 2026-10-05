@@ -59,7 +59,9 @@ mod tests {
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-main8.mp4").as_slice(),
-                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4").as_slice()] {
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-reordered-base-main8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-reordered-mixed-main8.mp4").as_slice()] {
         let (mut reader, state, mut software) = input(bytes);
         let mut decoder = HevcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20).unwrap();
         let mut packet = Vec::new();
@@ -111,7 +113,9 @@ mod tests {
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-main8.mp4").as_slice(),
-                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4").as_slice()] {
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-reordered-base-main8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-reordered-mixed-main8.mp4").as_slice()] {
             let (mut reader, mut state, mut software) = input(bytes);
             let mut packet = Vec::new();
             for sample in 0..reader.tracks()[0].samples.len() {

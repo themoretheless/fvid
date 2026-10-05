@@ -2077,3 +2077,15 @@ active list entries.
 This proves the contained low-delay Main8 B cases. Reordered B pictures with
 future references, additional profiles/tools and physical NVDEC execution
 remain separate requirements; overall codec coverage is not complete.
+
+### Reordered mixed HEVC B-picture acceptance (2026-10-06)
+
+Owned I/P/B fixtures now decode in order 0,2,1. The mixed B uses short-term
+future POC two and long-term past POC zero, with two active L0/L1 entries.
+Acceptance verifies actual future-reference motion, exact independent HM
+pixels in presentation order, decoder reset, and signed composition clocks
+DTS 0,1,2 / PTS 0,2,1. Fixture-only MP4 muxing accepts an explicit dense
+presentation-order permutation; omitted order preserves existing fixtures.
+NVDEC scheduling and the ignored physical-device test include both variants.
+This qualifies the contained Main8 reordered cases, not all profiles/tools,
+all player seeks or physical GPU decoding.

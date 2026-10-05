@@ -45,9 +45,21 @@ fn generate_long_term_stream() {
     let mode = std::env::var("FVID_HEVC_LONG_TERM_MODE").unwrap_or_else(|_| "explicit".into());
     assert!(matches!(
         mode.as_str(),
-        "explicit" | "lsb" | "mixed" | "invalid-short" | "sps" | "b-mixed" | "b-mixed-l1"
+        "explicit"
+            | "lsb"
+            | "mixed"
+            | "invalid-short"
+            | "sps"
+            | "b-mixed"
+            | "b-mixed-l1"
+            | "reordered-mixed"
     ));
-    let source = if mode.starts_with("b-mixed") {
+    let source = if mode == "reordered-mixed" {
+        include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-long-term-reordered-base-main8.mp4"
+        )
+        .as_slice()
+    } else if mode.starts_with("b-mixed") {
         include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-b-base-main8.mp4")
             .as_slice()
     } else {
@@ -134,7 +146,15 @@ fn generate_long_term_stream() {
     for index in 0..input.tracks()[0].samples.len() {
         input.read_packet(0, index, &mut packet).unwrap();
         let poc = decoder.decode_packet(&packet).unwrap().unwrap().poc;
-        assert_eq!(poc, index as i32, "fixture must be low delay");
+        assert_eq!(
+            poc,
+            if mode == "reordered-mixed" {
+                [0, 2, 1][index]
+            } else {
+                index as i32
+            },
+            "explicit decode POC order"
+        );
         for nal in NalUnits::new(&packet, config.length_size).unwrap() {
             let nal = nal.unwrap();
             let header = NalHeader::parse(nal).unwrap();
@@ -148,9 +168,28 @@ fn generate_long_term_stream() {
             if !sps.short_term.is_empty() {
                 syntax.push(false);
             }
-            if mode == "mixed" && index == 1 {
+            if matches!(mode.as_str(), "mixed" | "reordered-mixed") && index == 1 {
                 syntax = bits(&slice.rbsp)[slice.short_term_bit_range.clone()].to_vec();
                 ue(0, &mut syntax); // Keep POC zero short-term for the next picture.
+            } else if mode == "reordered-mixed" {
+                assert_eq!(poc, 1);
+                assert_eq!(
+                    slice
+                        .short_term
+                        .iter()
+                        .map(|r| r.delta_poc)
+                        .collect::<Vec<_>>(),
+                    [-1, 1]
+                );
+                ue(0, &mut syntax);
+                ue(1, &mut syntax); // Only future POC two stays short-term.
+                ue(0, &mut syntax);
+                syntax.push(true);
+                ue(1, &mut syntax); // One explicit long-term past POC zero.
+                syntax.extend(std::iter::repeat_n(false, sps.poc_bits as usize));
+                syntax.extend([true, true]);
+                ue(0, &mut syntax);
+                used += 1;
             } else {
                 ue(
                     usize::from(
@@ -224,7 +263,7 @@ fn generate_long_term_stream() {
         }
     }
     assert!(
-        used >= if matches!(mode.as_str(), "mixed" | "invalid-short") {
+        used >= if matches!(mode.as_str(), "mixed" | "invalid-short" | "reordered-mixed") {
             1
         } else {
             2
@@ -474,11 +513,7 @@ fn b_frames_with_active_mixed_l0_l1_match_hm_pixels_and_rewind() {
                 let swapped = decoder.parameters().1.lists_modification;
                 assert_eq!(
                     observed[1],
-                    if swapped {
-                        [false, true]
-                    } else {
-                        [true, true]
-                    }
+                    if swapped { [false, true] } else { [true, true] }
                 );
                 for list in 0..2 {
                     for kind in 0..2 {
@@ -493,4 +528,106 @@ fn b_frames_with_active_mixed_l0_l1_match_hm_pixels_and_rewind() {
         [[true, true], [true, true]],
         "both reference types must be used by mixed B-picture motion in both lists"
     );
+}
+
+#[test]
+fn reordered_b_future_short_and_past_long_references_match_hm_pixels_and_timestamps() {
+    use super::hevc_cabac::SliceType;
+    for (data, expected, mixed) in [
+        (
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-long-term-reordered-base-main8.mp4"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-long-term-reordered-base-main8.yuv"
+            )
+            .as_slice(),
+            false,
+        ),
+        (
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-long-term-reordered-mixed-main8.mp4"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-long-term-reordered-mixed-main8.yuv"
+            )
+            .as_slice(),
+            true,
+        ),
+    ] {
+        let mut input =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
+        assert_eq!(
+            (0..3)
+                .map(|i| input.tracks()[0].samples.get(i).unwrap().dts)
+                .collect::<Vec<_>>(),
+            [0, 1, 2]
+        );
+        assert_eq!(
+            (0..3)
+                .map(|i| input.tracks()[0].samples.get(i).unwrap().pts)
+                .collect::<Vec<_>>(),
+            [0, 2, 1]
+        );
+        let mut decoder =
+            HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+        let mut packet = Vec::new();
+        for pass in 0..2 {
+            if pass != 0 {
+                decoder.reset();
+            }
+            let mut pixels = vec![Vec::new(); 3];
+            let mut saw_future_motion = false;
+            for (index, poc) in [0, 2, 1].into_iter().enumerate() {
+                input.read_packet(0, index, &mut packet).unwrap();
+                if index == 2 {
+                    let (sps, pps) = decoder.parameters();
+                    let nal = NalUnits::new(&packet, 4)
+                        .unwrap()
+                        .map(Result::unwrap)
+                        .find(|n| NalHeader::parse(n).unwrap().is_vcl())
+                        .unwrap();
+                    let header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
+                    assert_eq!(header.slice_type, SliceType::B);
+                    assert_eq!(header.references, [2, 2]);
+                    assert!(header.short_term.iter().any(|r| r.delta_poc == 1 && r.used));
+                    if mixed {
+                        assert_eq!(header.short_term.len(), 1);
+                        assert_eq!(header.long_term.len(), 1);
+                        assert_eq!(header.long_term[0].poc_lsb, 0);
+                        assert!(header.long_term[0].used);
+                    }
+                }
+                let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                assert_eq!(decoded.poc, poc);
+                assert!(decoded.output);
+                if index == 2 {
+                    for motion in &decoded.picture.motion {
+                        for (list, vector) in motion.iter().enumerate() {
+                            if let Some(v) = vector {
+                                saw_future_motion |=
+                                    decoded.picture.reference_pocs[list][v.reference as usize] == 2;
+                            }
+                        }
+                    }
+                }
+                for plane in &decoded.picture.planes {
+                    pixels[poc as usize]
+                        .extend(plane.samples().iter().map(|&v| u8::try_from(v).unwrap()));
+                }
+            }
+            assert!(
+                saw_future_motion,
+                "future picture must actually be used by B motion"
+            );
+            assert_eq!(
+                pixels.concat(),
+                expected,
+                "presentation-ordered HM pixels, mixed {mixed}, pass {pass}"
+            );
+        }
+    }
 }
