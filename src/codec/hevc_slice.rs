@@ -37,6 +37,8 @@ pub struct SliceHeader {
     pub temporal_mvp: bool,
     pub references: [u8; 2],
     pub list_modification: [Option<Vec<u8>>; 2],
+    #[cfg(test)]
+    pub(crate) list_modification_bit_range: std::ops::Range<usize>,
     pub mvd_l1_zero: bool,
     pub cabac_init: bool,
     pub collocated_list: usize,
@@ -280,6 +282,8 @@ impl SliceHeader {
         };
         let mut references = [0; 2];
         let mut list_modification = [None, None];
+        #[cfg(test)]
+        let mut list_modification_bit_range = 0..0;
         let mut mvd_l1_zero = false;
         let mut cabac_init = false;
         let mut collocated_list = 0;
@@ -306,6 +310,8 @@ impl SliceHeader {
             if total == 0 {
                 return Err(invalid("HEVC inter slice has no current references"));
             }
+            #[cfg(test)]
+            let list_modification_start = b.position();
             if pps.lists_modification && total > 1 {
                 let width = (usize::BITS - (total - 1).leading_zeros()) as u8;
                 for list in 0..if slice_type == SliceType::B { 2 } else { 1 } {
@@ -322,6 +328,8 @@ impl SliceHeader {
                     }
                 }
             }
+            #[cfg(test)]
+            { list_modification_bit_range = list_modification_start..b.position(); }
             mvd_l1_zero = slice_type == SliceType::B && b.bit()?;
             cabac_init = pps.cabac_init_present && b.bit()?;
             if temporal_mvp {
@@ -452,6 +460,8 @@ impl SliceHeader {
             temporal_mvp,
             references,
             list_modification,
+            #[cfg(test)]
+            list_modification_bit_range,
             mvd_l1_zero,
             cabac_init,
             collocated_list,

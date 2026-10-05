@@ -265,3 +265,33 @@ ignored physical NVIDIA long-term test now includes all four valid variants.
 No physical GPU result or B-picture/multiple-active-list qualification is
 implied by these tests. The existing explicit generator produces this fourth
 valid fixture and separate YUV oracle without FFmpeg.
+
+### HEVC B pictures with active mixed L0/L1
+
+`hevc-long-term-b-base-main8.mp4` is an owned four-picture 64×64 Main8 I/B/B/B
+control. `hevc-long-term-b-mixed-main8.mp4` converts the older reference to
+long-term and retains the nearest as short-term. POCs two and three each have
+two active entries in both L0 and L1. The final owned source picture blends
+the preceding two pictures to exercise bi-prediction.
+
+`hevc-long-term-b-mixed-l1-main8.mp4` additionally enables PPS list
+modification and reverses L1 for POC two, so L0 is [short, long] and L1 is
+[long, short]. All three have independent HM 18.0 YUV oracles. Acceptance
+requires exact pixels for every picture and reset replay. It also inspects
+actual collocated motion: the unmodified-list mixed stream must use both
+reference types in both lists; the L1-permuted stream must use a long-term L1
+reference. Merely having an unused list entry cannot satisfy the test.
+
+Regenerate explicitly with owned deterministic pixels/configuration:
+
+```sh
+python3 scripts/generate_hevc_long_term_b_sample.py --hm-encoder /path/to/TAppEncoder --hm-decoder /path/to/TAppDecoder
+```
+
+The generator first verifies encoder reconstruction against the independent
+HM decoder, then rewrites only parameter/RPS/list syntax through the ignored
+native generator and rejects concealed reference losses. Ordinary tests read
+committed bytes without HM, FFmpeg or network access. These B pictures are
+low-delay with ascending POCs, not reordered future-reference B pictures.
+The owned NVDEC scheduler and ignored physical-device test include both mixed
+variants; actual GPU execution remains unproven.

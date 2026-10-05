@@ -57,11 +57,13 @@ mod tests {
         for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
-                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice()] {
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-main8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4").as_slice()] {
         let (mut reader, state, mut software) = input(bytes);
         let mut decoder = HevcNvdecDecoder::new(state.sps, state.pps, state.length_size, 0, 32, 2, 1 << 20).unwrap();
         let mut packet = Vec::new();
-        for sample in 0..3 {
+        for sample in 0..reader.tracks()[0].samples.len() {
             reader.read_packet(0, sample, &mut packet).unwrap();
             let expected = software.decode_packet(&packet).unwrap().unwrap();
             let frame = decoder.decode(&packet).unwrap().unwrap();
@@ -107,10 +109,12 @@ mod tests {
     fn mixed_and_lsb_only_fixtures_follow_software_and_keep_live_reference_slots() {
         for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice(),
-                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice()] {
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-main8.mp4").as_slice(),
+                      include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4").as_slice()] {
             let (mut reader, mut state, mut software) = input(bytes);
             let mut packet = Vec::new();
-            for sample in 0..3 {
+            for sample in 0..reader.tracks()[0].samples.len() {
                 reader.read_packet(0, sample, &mut packet).unwrap();
                 let expected = software.decode_packet(&packet).unwrap().unwrap();
                 let pending = state.prepare(&packet).unwrap().unwrap();

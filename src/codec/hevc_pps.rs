@@ -75,6 +75,8 @@ pub struct Pps {
     pub deblocking: Deblocking,
     pub scaling_lists: Option<ScalingLists>,
     pub lists_modification: bool,
+    #[cfg(test)]
+    pub(crate) lists_modification_bit: usize,
     pub parallel_merge_log2: u8,
     pub slice_header_extension: bool,
 }
@@ -158,6 +160,8 @@ impl Pps {
         } else {
             None
         };
+        #[cfg(test)]
+        let lists_modification_bit = b.position();
         let lists_modification = b.bit()?;
         let parallel_merge_log2 = ue(b, u32::from(sps.coding_block_log2[1] - 2))? as u8 + 2;
         let slice_header_extension = b.bit()?;
@@ -207,6 +211,8 @@ impl Pps {
             deblocking,
             scaling_lists,
             lists_modification,
+            #[cfg(test)]
+            lists_modification_bit,
             parallel_merge_log2,
             slice_header_extension,
         })

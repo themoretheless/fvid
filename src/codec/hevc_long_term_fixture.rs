@@ -45,11 +45,17 @@ fn generate_long_term_stream() {
     let mode = std::env::var("FVID_HEVC_LONG_TERM_MODE").unwrap_or_else(|_| "explicit".into());
     assert!(matches!(
         mode.as_str(),
-        "explicit" | "lsb" | "mixed" | "invalid-short" | "sps"
+        "explicit" | "lsb" | "mixed" | "invalid-short" | "sps" | "b-mixed" | "b-mixed-l1"
     ));
-    let source = include_bytes!(
-        "../../tests/fixtures/playback-errors/hevc-rext-explicit-rdpcm-8-skip-disabled.mp4"
-    );
+    let source = if mode.starts_with("b-mixed") {
+        include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-b-base-main8.mp4")
+            .as_slice()
+    } else {
+        include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-rext-explicit-rdpcm-8-skip-disabled.mp4"
+        )
+        .as_slice()
+    };
     let mut input =
         crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(source), Default::default())
             .unwrap();
@@ -97,6 +103,11 @@ fn generate_long_term_stream() {
                     payload.splice(sps.ordering_bit_range.clone(), ordering);
                 }
                 emit(&escaped_nal(&nal[..2], payload));
+            } else if array.nal_type == 34 && mode == "b-mixed-l1" {
+                let rbsp = NalRbsp::parse(nal, 16 << 20).unwrap();
+                let mut payload = bits(&rbsp.bytes);
+                payload[pps.lists_modification_bit] = true;
+                emit(&escaped_nal(&nal[..2], payload));
             } else if array.nal_type == 32 && matches!(mode.as_str(), "mixed" | "invalid-short") {
                 let vps = super::hevc_vps::Vps::parse(nal, 16 << 20).unwrap();
                 assert_eq!(vps.ordering.len(), 1);
@@ -116,7 +127,10 @@ fn generate_long_term_stream() {
     }
     let mut packet = Vec::new();
     let mut used = 0;
-    assert_eq!(input.tracks()[0].samples.len(), 3);
+    assert_eq!(
+        input.tracks()[0].samples.len(),
+        if mode.starts_with("b-mixed") { 4 } else { 3 }
+    );
     for index in 0..input.tracks()[0].samples.len() {
         input.read_packet(0, index, &mut packet).unwrap();
         let poc = decoder.decode_packet(&packet).unwrap().unwrap().poc;
@@ -139,7 +153,10 @@ fn generate_long_term_stream() {
                 ue(0, &mut syntax); // Keep POC zero short-term for the next picture.
             } else {
                 ue(
-                    usize::from(matches!(mode.as_str(), "mixed" | "invalid-short") && index == 2),
+                    usize::from(
+                        matches!(mode.as_str(), "mixed" | "invalid-short") && index == 2
+                            || mode.starts_with("b-mixed") && index >= 2,
+                    ),
                     &mut syntax,
                 );
                 ue(0, &mut syntax);
@@ -147,15 +164,22 @@ fn generate_long_term_stream() {
                     ue(1, &mut syntax); // delta_poc_s0_minus1: retained POC zero.
                     syntax.push(true);
                 }
+                if mode.starts_with("b-mixed") && index >= 2 {
+                    assert_eq!(slice.short_term[0].delta_poc, -1);
+                    ue(0, &mut syntax);
+                    syntax.push(slice.short_term[0].used);
+                }
+                let long_references =
+                    &slice.short_term[usize::from(mode.starts_with("b-mixed") && index >= 2)..];
                 if mode == "sps" {
-                    ue(slice.short_term.len(), &mut syntax);
+                    ue(long_references.len(), &mut syntax);
                     ue(0, &mut syntax);
                 } else {
-                    ue(slice.short_term.len(), &mut syntax);
+                    ue(long_references.len(), &mut syntax);
                 }
                 let modulus = 1i32 << sps.poc_bits;
                 let mut previous_cycle = 0;
-                for reference in &slice.short_term {
+                for reference in long_references {
                     let target = poc + reference.delta_poc;
                     let lsb = target.rem_euclid(modulus);
                     let cycle = (poc - poc.rem_euclid(modulus) - target + lsb) / modulus;
@@ -182,6 +206,14 @@ fn generate_long_term_stream() {
             let alignment = payload[..end].iter().rposition(|&b| b).unwrap();
             let entropy = payload[end..].to_vec();
             payload.truncate(alignment);
+            if mode == "b-mixed-l1" && index >= 2 {
+                let modification = if index == 2 {
+                    vec![false, true, true, false]
+                } else {
+                    vec![false, false]
+                };
+                payload.splice(slice.list_modification_bit_range.clone(), modification);
+            }
             payload.splice(slice.short_term_bit_range.clone(), syntax);
             payload.push(true);
             while payload.len() % 8 != 0 {
@@ -351,5 +383,114 @@ fn sps_selected_long_term_video_matches_independent_hm_pixels_and_rewind() {
         include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.mp4"),
         include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-sps-rext8.yuv"),
         "sps",
+    );
+}
+
+#[test]
+fn b_frames_with_active_mixed_l0_l1_match_hm_pixels_and_rewind() {
+    use super::hevc_cabac::SliceType;
+    let mut mixed_motion_coverage = [[false; 2]; 2];
+    for (data, expected, mixed) in [
+        (
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-b-base-main8.mp4")
+                .as_slice(),
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-b-base-main8.yuv")
+                .as_slice(),
+            false,
+        ),
+        (
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-main8.mp4")
+                .as_slice(),
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-main8.yuv")
+                .as_slice(),
+            true,
+        ),
+        (
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.mp4"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-long-term-b-mixed-l1-main8.yuv"
+            )
+            .as_slice(),
+            true,
+        ),
+    ] {
+        let mut input =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
+        let mut decoder =
+            HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+        let mut packet = Vec::new();
+        for pass in 0..2 {
+            if pass != 0 {
+                decoder.reset();
+            }
+            let mut pixels = Vec::new();
+            let mut observed = [[false; 2]; 2];
+            for index in 0..4 {
+                input.read_packet(0, index, &mut packet).unwrap();
+                let (sps, pps) = decoder.parameters();
+                let nal = NalUnits::new(&packet, 4)
+                    .unwrap()
+                    .map(Result::unwrap)
+                    .find(|n| NalHeader::parse(n).unwrap().is_vcl())
+                    .unwrap();
+                let header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
+                if index > 0 {
+                    assert_eq!(header.slice_type, SliceType::B);
+                }
+                if index >= 2 {
+                    assert_eq!(header.references, [2, 2]);
+                    if mixed {
+                        assert_eq!(header.short_term.len(), 1);
+                        assert_eq!(header.short_term[0].delta_poc, -1);
+                        assert!(header.short_term[0].used);
+                        assert_eq!(header.long_term.len(), 1);
+                        assert_eq!(header.long_term[0].poc_lsb, index as u32 - 2);
+                        assert!(header.long_term[0].used);
+                    }
+                }
+                let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                assert_eq!(decoded.poc, index as i32);
+                for motion in &decoded.picture.motion {
+                    for (list, vector) in motion.iter().enumerate() {
+                        if let Some(vector) = vector {
+                            observed[list][usize::from(
+                                decoded.picture.reference_long_term[list]
+                                    [vector.reference as usize],
+                            )] = true;
+                        }
+                    }
+                }
+                for plane in &decoded.picture.planes {
+                    pixels.extend(plane.samples().iter().map(|&v| u8::try_from(v).unwrap()));
+                }
+            }
+            assert_eq!(pixels, expected, "HM oracle, mixed {mixed}, pass {pass}");
+            if mixed {
+                assert_eq!(observed[0], [true, true]);
+                let swapped = decoder.parameters().1.lists_modification;
+                assert_eq!(
+                    observed[1],
+                    if swapped {
+                        [false, true]
+                    } else {
+                        [true, true]
+                    }
+                );
+                for list in 0..2 {
+                    for kind in 0..2 {
+                        mixed_motion_coverage[list][kind] |= observed[list][kind];
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(
+        mixed_motion_coverage,
+        [[true, true], [true, true]],
+        "both reference types must be used by mixed B-picture motion in both lists"
     );
 }

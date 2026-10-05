@@ -2061,3 +2061,19 @@ and scheduler retention. The ignored Linux/Windows physical-device test covers
 all four valid long-term variants; execution still requires an NVIDIA device.
 This closes a verification gap for SPS selection, not all HEVC profiles or
 all-active mixed/B-picture motion.
+
+### Active mixed L0/L1 HEVC B-picture acceptance (2026-10-06)
+
+An owned HM-encoded Main8 I/B/B/B control and two long-term variants now
+exercise two active references in both lists. The nearest picture remains
+short-term and the older picture becomes long-term; one variant reverses L1
+via PPS/slice list modification. Independent HM pixels and decoder-reset
+replay qualify the complete compressed-picture path. Actual motion-map
+inspection requires both reference types in L0/L1 for the normal mixed stream
+and long-term L1 motion for the permuted stream. The deterministic final
+source frame is a blend to elicit bi-prediction rather than merely advertise
+active list entries.
+
+This proves the contained low-delay Main8 B cases. Reordered B pictures with
+future references, additional profiles/tools and physical NVDEC execution
+remain separate requirements; overall codec coverage is not complete.
