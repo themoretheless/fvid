@@ -231,3 +231,20 @@ pixel before/after decoder reset. NVDEC tests check both driver current sets
 and the mixed/LSB scheduler's live slots; no NVIDIA playback is claimed here.
 The existing generator produces all three variants and rejects any HM log
 reporting insertion of a lost POC before saving the reference output.
+
+### HEVC persistent reference classification
+
+`hevc-long-term-invalid-short-rext8.mp4` is an owned invalid three-picture
+64×64 stream: POC one marks POC zero long-term, then POC two requests it as a
+used short-term reference. The previous software decoder silently accepted
+this because stored DPB references lost their classification between pictures.
+The regression first verifies the exact short-term delta -2, successful first
+two pictures, and then the specific classification refusal. Reset must allow
+normal IDR decoding again. This is a passing refusal test for an invalid
+stream, not playback acceptance. The NVDEC scheduler checks the same refusal
+and unchanged POC, retained slots and long-term status after failure.
+
+The long-term generator also produces this MP4, with no pixel oracle: HM
+conceals its missing short-term reference, so its recovered frames cannot
+serve as acceptance evidence. Valid long-term fixture oracles still must
+decode without HM reference-loss concealment.

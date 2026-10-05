@@ -81,6 +81,25 @@ mod tests {
         (reader, state, software)
     }
     #[test]
+    fn long_term_to_short_term_refusal_preserves_scheduler_state() {
+        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-invalid-short-rext8.mp4");
+        let (mut reader, mut state, _) = input(data);
+        let mut packet = Vec::new();
+        for sample in 0..2 {
+            reader.read_packet(0, sample, &mut packet).unwrap();
+            let pending = state.prepare(&packet).unwrap().unwrap();
+            drop(state.commit(pending));
+        }
+        assert_eq!(state.reference_long_term, [0]);
+        let retained: Vec<_> = state.references.iter().map(|r| (r.index, r.poc)).collect();
+        reader.read_packet(0, 2, &mut packet).unwrap();
+        let error = state.prepare(&packet).err().expect("must refuse invalid reference classification");
+        assert!(error.contains("long-term picture as short-term"), "{error}");
+        assert_eq!(state.previous_poc, Some(1));
+        assert_eq!(state.reference_long_term, [0]);
+        assert_eq!(state.references.iter().map(|r| (r.index, r.poc)).collect::<Vec<_>>(), retained);
+    }
+    #[test]
     fn mixed_and_lsb_only_fixtures_follow_software_and_keep_live_reference_slots() {
         for bytes in [include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.mp4").as_slice(),
                       include_bytes!("../../../tests/fixtures/playback-errors/hevc-long-term-lsb-rext8.mp4").as_slice()] {
@@ -108,11 +127,13 @@ mod tests {
             reader.read_packet(0, sample, &mut packet).unwrap();
             let expected = software.decode_packet(&packet).unwrap().unwrap();
             let previous = state.previous_poc;
+            let previous_classification = state.reference_long_term.clone();
             let retained: Vec<_> = state.references.iter().map(|r| (r.index, r.poc)).collect();
             let pending = state.prepare(&packet).unwrap().unwrap();
             assert_eq!(pending.frame.picture_order, expected.poc);
             drop(pending);
             assert_eq!(state.previous_poc, previous);
+            assert_eq!(state.reference_long_term, previous_classification);
             assert_eq!(state.references.iter().map(|r| (r.index, r.poc)).collect::<Vec<_>>(), retained);
             let pending = state.prepare(&packet).unwrap().unwrap();
             assert_eq!(pending.references.len(), if sample == 0 { 1 } else { 2 });
@@ -221,6 +242,7 @@ struct Scheduler {
     previous_poc: Option<i32>,
     suppress_rasl: bool,
     references: Vec<Arc<FrameSlot>>,
+    reference_long_term: Vec<i32>,
     slots: Vec<Weak<FrameSlot>>,
 }
 struct Pending {
@@ -229,6 +251,7 @@ struct Pending {
     previous_poc: Option<i32>,
     suppress_rasl: bool,
     references: Vec<Arc<FrameSlot>>,
+    reference_long_term: Vec<i32>,
 }
 impl Scheduler {
     fn new(
@@ -261,6 +284,7 @@ impl Scheduler {
             previous_poc: None,
             suppress_rasl: false,
             references: Vec::new(),
+            reference_long_term: Vec::new(),
             slots: (0..capacity).map(|_| Weak::new()).collect(),
         })
     }
@@ -303,6 +327,9 @@ impl Scheduler {
             let target = poc
                 .checked_add(r.delta_poc)
                 .ok_or("HEVC reference POC overflow")?;
+            if self.reference_long_term.contains(&target) {
+                return Err("HEVC NVDEC RPS uses a long-term picture as short-term".into());
+            }
             let reference = self
                 .references
                 .iter()
@@ -368,6 +395,9 @@ impl Scheduler {
         } else {
             self.previous_poc
         };
+        let reference_long_term = long_pocs.into_iter()
+            .filter(|poc| references.iter().any(|reference| reference.poc == *poc))
+            .collect();
         self.slots[index as usize] = Arc::downgrade(&slot);
         Ok(Some(Pending {
             picture,
@@ -380,12 +410,14 @@ impl Scheduler {
             previous_poc,
             suppress_rasl,
             references,
+            reference_long_term,
         }))
     }
     fn commit(&mut self, pending: Pending) -> DecodedHevc {
         self.previous_poc = pending.previous_poc;
         self.suppress_rasl = pending.suppress_rasl;
         self.references = pending.references;
+        self.reference_long_term = pending.reference_long_term;
         pending.frame
     }
     fn owns(&self, frame: &DecodedHevc) -> bool {

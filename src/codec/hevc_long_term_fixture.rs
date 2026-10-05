@@ -43,7 +43,10 @@ fn escaped_nal(header: &[u8], mut payload: Vec<bool>) -> Vec<u8> {
 fn generate_long_term_stream() {
     let destination = std::env::var_os("FVID_HEVC_LONG_TERM_STREAM").expect("explicit output path");
     let mode = std::env::var("FVID_HEVC_LONG_TERM_MODE").unwrap_or_else(|_| "explicit".into());
-    assert!(matches!(mode.as_str(), "explicit" | "lsb" | "mixed"));
+    assert!(matches!(
+        mode.as_str(),
+        "explicit" | "lsb" | "mixed" | "invalid-short"
+    ));
     let source = include_bytes!(
         "../../tests/fixtures/playback-errors/hevc-rext-explicit-rdpcm-8-skip-disabled.mp4"
     );
@@ -78,7 +81,7 @@ fn generate_long_term_stream() {
                     sps.long_term_flag_bit..sps.long_term_flag_bit + 1,
                     [true, true],
                 );
-                if mode == "mixed" {
+                if matches!(mode.as_str(), "mixed" | "invalid-short") {
                     let mut ordering = vec![false];
                     ue(2, &mut ordering);
                     ue(0, &mut ordering);
@@ -86,7 +89,7 @@ fn generate_long_term_stream() {
                     payload.splice(sps.ordering_bit_range.clone(), ordering);
                 }
                 emit(&escaped_nal(&nal[..2], payload));
-            } else if array.nal_type == 32 && mode == "mixed" {
+            } else if array.nal_type == 32 && matches!(mode.as_str(), "mixed" | "invalid-short") {
                 let vps = super::hevc_vps::Vps::parse(nal, 16 << 20).unwrap();
                 assert_eq!(vps.ordering.len(), 1);
                 let rbsp = NalRbsp::parse(nal, 16 << 20).unwrap();
@@ -127,9 +130,12 @@ fn generate_long_term_stream() {
                 syntax = bits(&slice.rbsp)[slice.short_term_bit_range.clone()].to_vec();
                 ue(0, &mut syntax); // Keep POC zero short-term for the next picture.
             } else {
-                ue(usize::from(mode == "mixed" && index == 2), &mut syntax);
+                ue(
+                    usize::from(matches!(mode.as_str(), "mixed" | "invalid-short") && index == 2),
+                    &mut syntax,
+                );
                 ue(0, &mut syntax);
-                if mode == "mixed" && index == 2 {
+                if matches!(mode.as_str(), "mixed" | "invalid-short") && index == 2 {
                     ue(1, &mut syntax); // delta_poc_s0_minus1: retained POC zero.
                     syntax.push(true);
                 }
@@ -166,7 +172,11 @@ fn generate_long_term_stream() {
         }
     }
     assert!(
-        used >= if mode == "mixed" { 1 } else { 2 },
+        used >= if matches!(mode.as_str(), "mixed" | "invalid-short") {
+            1
+        } else {
+            2
+        },
         "fixture must actually use long-term pictures"
     );
     std::fs::write(destination, stream).unwrap();
@@ -263,4 +273,47 @@ fn mixed_short_and_long_term_video_matches_independent_hm_pixels_and_rewind() {
         include_bytes!("../../tests/fixtures/playback-errors/hevc-long-term-mixed-rext8.yuv"),
         "mixed",
     );
+}
+
+#[test]
+fn long_term_picture_cannot_be_reused_as_short_term_without_reset() {
+    let data = include_bytes!(
+        "../../tests/fixtures/playback-errors/hevc-long-term-invalid-short-rext8.mp4"
+    );
+    let mut input =
+        crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+            .unwrap();
+    let mut decoder =
+        HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+    let mut packet = Vec::new();
+    for index in 0..2 {
+        input.read_packet(0, index, &mut packet).unwrap();
+        assert_eq!(
+            decoder.decode_packet(&packet).unwrap().unwrap().poc,
+            index as i32
+        );
+    }
+    input.read_packet(0, 2, &mut packet).unwrap();
+    let (sps, pps) = decoder.parameters();
+    let nal = NalUnits::new(&packet, 4)
+        .unwrap()
+        .map(Result::unwrap)
+        .find(|n| NalHeader::parse(n).unwrap().is_vcl())
+        .unwrap();
+    let header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
+    assert_eq!(header.short_term[0].delta_poc, -2);
+    assert!(header.short_term[0].used);
+    let error = decoder
+        .decode_packet(&packet)
+        .err()
+        .expect("must refuse invalid reference classification");
+    assert!(
+        error
+            .to_string()
+            .contains("long-term picture as short-term"),
+        "{error}"
+    );
+    decoder.reset();
+    input.read_packet(0, 0, &mut packet).unwrap();
+    assert_eq!(decoder.decode_packet(&packet).unwrap().unwrap().poc, 0);
 }

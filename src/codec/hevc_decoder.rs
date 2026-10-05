@@ -338,6 +338,9 @@ impl HevcDecoder {
             slice_lists.push(other_lists);
         }
         self.references.retain(|r| retained.iter().any(|&(poc, _)| poc == r.poc));
+        for reference in &mut self.references {
+            reference.long_term = retained.iter().find(|&&(poc, _)| poc == reference.poc).unwrap().1;
+        }
         let retained_bytes = self
             .references
             .iter()
@@ -399,6 +402,9 @@ fn reference_lists(
         let target = poc
             .checked_add(r.delta_poc)
             .ok_or_else(|| invalid("HEVC reference POC overflow"))?;
+        if references.iter().any(|r| r.poc == target && r.long_term) {
+            return Err(invalid("HEVC RPS uses a long-term picture as short-term"));
+        }
         retained.push((target, false));
         if r.used {
             let mut reference = references

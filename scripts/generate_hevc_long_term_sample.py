@@ -18,7 +18,8 @@ root = Path(__file__).resolve().parents[1]
 fixtures = root / 'tests/fixtures/playback-errors'
 for mode, name in [('explicit', 'hevc-long-term-rext8'),
                    ('lsb', 'hevc-long-term-lsb-rext8'),
-                   ('mixed', 'hevc-long-term-mixed-rext8')]:
+                   ('mixed', 'hevc-long-term-mixed-rext8'),
+                   ('invalid-short', 'hevc-long-term-invalid-short-rext8')]:
     with tempfile.TemporaryDirectory(prefix='fvid-hevc-long-term-') as directory:
         stream = Path(directory) / 'long-term.hevc'
         pixels = Path(directory) / 'long-term.yuv'
@@ -26,6 +27,10 @@ for mode, name in [('explicit', 'hevc-long-term-rext8'),
         subprocess.run(['cargo', 'test', '--locked', '--offline', '--manifest-path',
                         'crates/fvid-codecs/Cargo.toml', '--lib', 'generate_long_term_stream',
                         '--', '--ignored'], cwd=root, env=environment, check=True)
+        if mode == 'invalid-short':
+            (fixtures / f'{name}.mp4').write_bytes(mux(stream.read_bytes(), 8))
+            print(f'Generated {name}: invalid classification refusal fixture, no pixel oracle')
+            continue
         reference = subprocess.run([str(args.hm_decoder.resolve()), '-b', str(stream), '-o', str(pixels),
                         '--OutputBitDepth=8', '--OutputBitDepthC=8',
                         '--SEIDecodedPictureHash=0'], check=True, capture_output=True, text=True)

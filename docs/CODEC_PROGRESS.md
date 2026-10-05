@@ -2034,3 +2034,19 @@ NVDEC synthetic tests cover both current-set arrays/counts, classification
 flags and live slot retention for these variants. Physical GPU behavior still
 requires device qualification. Fixture generation remains explicit and
 separate from tests, uses no FFmpeg, and refuses concealed HM reference losses.
+
+### Persistent HEVC DPB classification (2026-10-06)
+
+Fixed a real state bug: after a picture marked a retained reference long-term,
+the software DPB previously kept its original short-term flag. A subsequent
+short-term RPS lookup could therefore reuse a long-term picture, contrary to
+H.265 8.3.2's short-term-only lookup. The stored DPB now preserves the resolved
+classification; such invalid requests refuse instead of publishing a picture.
+The owned NVDEC scheduler separately commits long-term POCs with its reference
+slots and retains the old classification when a pending submission is dropped.
+
+The new owned invalid-long-to-short fixture failed the refusal expectation
+before the fix because decoding succeeded. It now verifies the exact error,
+reset recovery and NVDEC scheduler rollback. This refusal is not new valid
+codec-profile support. Existing valid explicit, LSB-only and mixed long-term
+fixtures continue to require exact independent HM pixels and reset replay.
