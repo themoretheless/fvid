@@ -61,7 +61,7 @@ pub(crate) fn matroska_descriptor(
     };
     Ok(Some((index, rate, channels, mask, codec, precision)))
 }
-/// Legacy dispatch only adopts plans accepted by the owned metadata preflight.
+/// Admit only plans accepted by the owned metadata preflight.
 /// This does not decode packets, create a destination, or emit progress.
 pub(crate) fn supports(
     source: &Path,

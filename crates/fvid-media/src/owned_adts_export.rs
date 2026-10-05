@@ -39,9 +39,9 @@ pub(crate) fn recognizes(source: &Path) -> Result<bool> {
         Err(e) => Err(e.to_string()),
     }
 }
-// Legacy dispatch needs to distinguish owned packet tools from profiles/tools
-// still supported by its old backend. Qualification is read-only and emits no
-// progress; execution still revalidates the source and never retries failures.
+// Read-only admission checks the owned packet tools and requested policies.
+// Qualification emits no progress; execution revalidates the source and never
+// retries failures through another decoder.
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,

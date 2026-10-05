@@ -112,6 +112,27 @@ def audit_fixture_generators(root):
 NATIVE_VALIDATORS = ("validate_gpu.py", "validate_resident.py", "validate_hw_cuda.py", "validate_media.py", "validate_klite_coverage.py", "fetch_klite_samples.py")
 
 
+def audit_ordinary_python(root):
+    """Audit new workflows too, rather than only the validator registry.
+
+    Explicit top-level benchmark entrypoints/modules are the only exemptions.
+    Python tests and nested workflow helpers remain ordinary code.
+    """
+    scripts = root / "scripts"
+    paths = [path for path in sorted(scripts.rglob("*.py"))
+             if not (path.parent == scripts and
+                     (path.name.startswith("benchmark_") or
+                      path.name in {"benchmark.py", "show_bench.py"}))]
+    failures = []
+    for path in paths:
+        try:
+            for line in external_python_calls(path.read_text()):
+                failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg workflow hook; move it to an explicit reference benchmark")
+        except (SyntaxError, OSError) as error:
+            failures.append(f"{path.relative_to(root)}: ordinary Python source could not be audited: {error}")
+    return paths, failures
+
+
 def audit_native_validators(root):
     paths = [root / "scripts" / name for name in NATIVE_VALIDATORS]
     failures = []
@@ -162,6 +183,10 @@ def main():
     failures.extend(validator_failures)
     if not validator_failures:
         print(f"native validators: {len(validator_paths)} Python files; no known external FFmpeg calls", flush=True)
+    python_paths, python_failures = audit_ordinary_python(ROOT)
+    failures.extend(python_failures)
+    if not python_failures:
+        print(f"ordinary Python workflows/tests: {len(python_paths)} files; no known external FFmpeg calls", flush=True)
     for name, manifest, features in cases:
         try:
             packages, legacy = dependencies(manifest, features, target, args.offline)

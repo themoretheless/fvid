@@ -135,6 +135,42 @@ class FixtureDirectoryPolicy(unittest.TestCase):
             self.assertEqual(failures,[])
 
 
+class OrdinaryPythonWorkflowPolicy(unittest.TestCase):
+    def test_new_and_nested_workflows_and_python_tests_are_audited(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            for name in ["export_preview.py", "nested/worker.py", "test_decode.py"]:
+                path = root / "scripts" / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('\nsubprocess.run(["ffmpeg"])')
+            paths, failures = guard.audit_ordinary_python(root)
+            self.assertEqual(len(paths), 3)
+            self.assertEqual(len(failures), 3)
+            self.assertTrue(all(":2:" in failure for failure in failures))
+
+    def test_explicit_reference_benchmarks_are_separate(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            for name in ["benchmark.py", "show_bench.py", "benchmark_media_reference.py"]:
+                (scripts / name).write_text('subprocess.run(["ffmpeg"])')
+            (scripts / "ordinary.py").write_text('subprocess.run(["fvid"])')
+            paths, failures = guard.audit_ordinary_python(root)
+            self.assertEqual([path.name for path in paths], ["ordinary.py"])
+            self.assertEqual(failures, [])
+
+    def test_malformed_workflow_is_not_passing_evidence(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            (scripts / "export.py").write_text('subprocess.run([')
+            _, failures = guard.audit_ordinary_python(root)
+            self.assertEqual(len(failures), 1)
+            self.assertIn("could not be audited", failures[0])
+
+
 class ReferenceMarkerIsolation(unittest.TestCase):
     def test_reference_link_search_is_allowed_but_library_backend_and_linkage_are_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -165,6 +201,7 @@ class ProductionMediaPolicy(unittest.TestCase):
              mock.patch.object(guard, "audit_ordinary_tests", return_value=([], [])), \
              mock.patch.object(guard, "audit_fixture_generators", return_value=([], [])), \
              mock.patch.object(guard, "audit_native_validators", return_value=([], [])), \
+             mock.patch.object(guard, "audit_ordinary_python", return_value=([], [])), \
              mock.patch("builtins.print"):
             with self.assertRaisesRegex(SystemExit, "production media: FFmpeg dependency reached graph"):
                 guard.main()
@@ -182,6 +219,7 @@ class ProductionMediaPolicy(unittest.TestCase):
              mock.patch.object(guard, "audit_ordinary_tests", return_value=([], [])), \
              mock.patch.object(guard, "audit_fixture_generators", return_value=([], [])), \
              mock.patch.object(guard, "audit_native_validators", return_value=([], [])), \
+             mock.patch.object(guard, "audit_ordinary_python", return_value=([], [])), \
              mock.patch("builtins.print"):
             with self.assertRaisesRegex(SystemExit, "all production features: FFmpeg dependency reached graph"):
                 guard.main()
@@ -196,6 +234,7 @@ class ProductionMediaPolicy(unittest.TestCase):
                      mock.patch.object(guard, "audit_ordinary_tests", return_value=([], [])), \
                      mock.patch.object(guard, "audit_fixture_generators", return_value=([], [])), \
                      mock.patch.object(guard, "audit_native_validators", return_value=([], [])), \
+                     mock.patch.object(guard, "audit_ordinary_python", return_value=([], [])), \
                      mock.patch("builtins.print"):
                     with self.assertRaisesRegex(SystemExit, name + ": FFmpeg dependency reached graph"):
                         guard.main()

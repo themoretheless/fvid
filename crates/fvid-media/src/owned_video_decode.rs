@@ -20,8 +20,8 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
     })
 }
 
-/// No output is published while qualifying an unsupported stream for legacy callers.
-/// Corrupt packets propagate errors; only explicit capability refusals permit fallback.
+/// Qualify an owned container decoder without publishing output.
+/// Unsupported requests return None for dispatch; corrupt packets remain errors.
 pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Option<DecodeStats>> {
     decode_ffv1(source, transform, None, None).map(|result| result.map(|(stats, _)| stats))
 }

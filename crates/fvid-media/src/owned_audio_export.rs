@@ -4,8 +4,7 @@ use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{io::Write, path::Path};
 type Result<T> = std::result::Result<T, String>;
 
-/// Existing legacy entrypoints use this only when all requested policies are
-/// implemented by this path; other formats/policies retain their current backend.
+/// Read-only admission for the owned export's format and policy support.
 pub(crate) fn supports(
     source: &Path,
     destination: &Path,
