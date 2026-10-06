@@ -473,6 +473,9 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-unified-b-8bit-top-init0-temporal-motion-direct",
+            "avc-unified-b-10bit-bottom-init1-spatial-intra-skip-aso",
+            "avc-unified-b-10bit-top-init2-temporal-motion-residual-negative-aso",
             "avc-unified-weight-8bit-top-init0-frame-balanced-skip-fromframe",
             "avc-unified-weight-10bit-bottom-init1-field-negative-coded-aso",
             "avc-unified-weight-10bit-top-init2-both-negative-residual-fromframe-aso",
@@ -626,6 +629,7 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+            let unified_b = name.starts_with("avc-unified-b-");
             let unified = name.starts_with("avc-unified-field-")
                 || name.starts_with("avc-unified-cabac-")
                 || name.starts_with("avc-unified-residual-")
@@ -666,7 +670,9 @@ mod tests {
                 || name.starts_with("avc-field-b-longterm-")
                 || name.starts_with("avc-field-b-gap-")
                 || name.starts_with("avc-field-b-cabac-sub-");
-            let count = if unified {
+            let count = if unified_b {
+                6
+            } else if unified {
                 5
             } else if former_refusal {
                 3
@@ -720,7 +726,9 @@ mod tests {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
                     (
-                        if unified {
+                        if unified_b {
+                            [0, 2, 6, 4, 7, 9][calls]
+                        } else if unified {
                             [0, 2, 4, 5, 7][calls]
                         } else if former_refusal {
                             [0, 2, 4][calls]
@@ -745,7 +753,9 @@ mod tests {
                         } else {
                             calls * 2
                         },
-                        if unified {
+                        if unified_b {
+                            [0, 4, 8, 12, 14, 16][calls]
+                        } else if unified {
                             [0, 8, 12, 14, 16][calls]
                         } else if former_refusal {
                             [0, 8, 12][calls]
@@ -768,7 +778,9 @@ mod tests {
                         } else {
                             calls as i64 * 2
                         },
-                        if unified {
+                        if unified_b {
+                            [4, 4, 4, 2, 2, 1][calls]
+                        } else if unified {
                             [8, 4, 2, 2, 1][calls]
                         } else if former_refusal {
                             [8, 4, 1][calls]
@@ -793,7 +805,9 @@ mod tests {
                 assert_eq!(
                     (start, duration),
                     (
-                        if unified {
+                        if unified_b {
+                            [0, 4, 8, 12, 14, 16][calls] * 20_000_000
+                        } else if unified {
                             [0, 8, 12, 14, 16][calls] * 20_000_000
                         } else if former_refusal {
                             [0, 8, 12][calls] * 20_000_000
@@ -816,7 +830,9 @@ mod tests {
                         } else {
                             calls as u64 * 40_000_000
                         },
-                        if unified {
+                        if unified_b {
+                            [4, 4, 4, 2, 2, 1][calls] * 20_000_000
+                        } else if unified {
                             [8, 4, 2, 2, 1][calls] * 20_000_000
                         } else if former_refusal {
                             [8, 4, 1][calls] * 20_000_000

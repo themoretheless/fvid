@@ -23628,3 +23628,306 @@ fn weighted_cabac_references_survive_field_frame_crossings_and_seek() {
         }
     }
 }
+
+#[test]
+fn cabac_b_direct_crosses_nonpaired_field_storage_and_preserves_later_references() {
+    use fvid::codec::avc_inter_slice::InterMacroblock;
+    use fvid::codec::avc_slice::{MemoryOperation, RefModification};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for depth in [8, 10] {
+        for reverse in [false, true] {
+            for init in 0..3 {
+                for aso in [false, true] {
+                    for spatial in [false, true] {
+                        for source in ["intra", "zero", "motion"] {
+                            for mode in ["skip", "direct", "residual-positive", "residual-negative"]
+                            {
+                                let name = format!(
+                                    "avc-unified-b-{depth}bit-{}-init{init}-{}-{source}-{mode}{}",
+                                    if reverse { "bottom" } else { "top" },
+                                    if spatial { "spatial" } else { "temporal" },
+                                    if aso { "-aso" } else { "" }
+                                );
+                                let video =
+                                    std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                let oracle =
+                                    std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                let size = 1536 * if depth == 10 { 2 } else { 1 };
+                                assert_eq!(oracle.len(), 6 * size);
+                                let mut input =
+                                    Mp4Reader::open(Cursor::new(&video), Default::default())
+                                        .unwrap();
+                                let config = input.tracks()[0].configuration.clone();
+                                let avc = AvcConfig::parse(&config).unwrap();
+                                let sps = Sps::parse(avc.sps[0]).unwrap();
+                                let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                assert!(pps.cabac);
+                                assert_eq!(sps.max_num_ref_frames, 4);
+                                let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                                for _ in 0..2 {
+                                    let mut output = 0;
+                                    for sample in 0..10 {
+                                        let mut packet = Vec::new();
+                                        input.read_packet(0, sample, &mut packet).unwrap();
+                                        for nal in NalUnits::new(&packet, avc.length_size).unwrap()
+                                        {
+                                            let h = SliceHeader::parse(nal.unwrap(), &sps, &pps)
+                                                .unwrap();
+                                            assert_eq!(h.field_pic, ![6, 9].contains(&sample));
+                                            assert_eq!(
+                                                h.frame_num,
+                                                [0, 0, 1, 1, 2, 2, 3, 3, 3, 4][sample]
+                                            );
+                                            if sample == 4 {
+                                                assert_eq!(
+                                                    h.memory_operations,
+                                                    vec![MemoryOperation::ForgetShort(1)]
+                                                );
+                                            }
+                                            if [7, 8].contains(&sample) {
+                                                assert_eq!(
+                                                    h.modifications_l0,
+                                                    vec![RefModification::Subtract(
+                                                        3 + u32::from(h.bottom_field != !reverse)
+                                                    )]
+                                                );
+                                                assert_eq!(
+                                                    h.memory_operations,
+                                                    if sample == 7 {
+                                                        vec![
+                                                            MemoryOperation::ForgetShort(1),
+                                                            MemoryOperation::ForgetShort(2),
+                                                        ]
+                                                    } else {
+                                                        vec![]
+                                                    }
+                                                );
+                                            }
+                                            if sample == 6 {
+                                                assert_eq!(h.slice_type, SliceType::B);
+                                                assert_eq!(h.nal_ref_idc, 0);
+                                                assert_eq!(h.poc_lsb, Some(8));
+                                                assert_eq!(h.direct_spatial_mv_pred, spatial);
+                                                assert_eq!(h.cabac_init_idc, init);
+                                                let mut syntax=fvid::codec::avc_cabac_slice::InterCabacSlice::new(&h,&sps,&pps,8192).unwrap();
+                                                match syntax.read_macroblock().unwrap().unwrap() {
+                                                    InterMacroblock::Skip { .. } => {
+                                                        assert_eq!(mode, "skip")
+                                                    }
+                                                    InterMacroblock::Coded {
+                                                        header,
+                                                        coefficients,
+                                                        ..
+                                                    } => {
+                                                        assert_ne!(mode, "skip");
+                                                        let residual = mode.starts_with("residual");
+                                                        assert_eq!(
+                                                            header.residual.pattern,
+                                                            if residual { 47 } else { 0 }
+                                                        );
+                                                        assert_eq!(
+                                                            coefficients.luma_counts,
+                                                            if residual {
+                                                                [1; 16]
+                                                            } else {
+                                                                [0; 16]
+                                                            }
+                                                        );
+                                                        for c in 0..2 {
+                                                            assert_eq!(
+                                                                coefficients.chroma_counts[c],
+                                                                if residual {
+                                                                    [1; 4]
+                                                                } else {
+                                                                    [0; 4]
+                                                                }
+                                                            );
+                                                        }
+                                                    }
+                                                    _ => panic!("{name}: expected direct B syntax"),
+                                                }
+                                                assert!(
+                                                    syntax.read_macroblock().unwrap().is_none()
+                                                );
+                                            }
+                                        }
+                                        let pic =
+                                            decoder.decode_order(&packet).unwrap_or_else(|e| {
+                                                panic!("{name} sample{sample}: {e}")
+                                            });
+                                        assert_eq!(
+                                            pic.is_some(),
+                                            [1, 3, 5, 6, 8, 9].contains(&sample)
+                                        );
+                                        if let Some(pic) = pic {
+                                            let display = [0, 1, 3, 2, 4, 5][output];
+                                            let mut pixels = Vec::new();
+                                            pic.write_planar(&mut pixels).unwrap();
+                                            assert_eq!(
+                                                pixels,
+                                                &oracle[display * size..(display + 1) * size],
+                                                "{name} sample{sample}"
+                                            );
+                                            output += 1;
+                                        }
+                                    }
+                                    assert_eq!(output, 6);
+                                    assert!(!decoder.has_pending_field());
+                                    decoder.reset();
+                                }
+                                let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                    Cursor::new(&video),
+                                    Default::default(),
+                                    16 << 20,
+                                )
+                                .unwrap();
+                                for _ in 0..2 {
+                                    for display in 0..6 {
+                                        let f = player
+                                            .read_frame()
+                                            .unwrap_or_else(|e| panic!("{name}: {e}"))
+                                            .unwrap();
+                                        assert_eq!(f.sample_index, [0, 2, 6, 4, 7, 9][display]);
+                                        assert_eq!(
+                                            f.presentation_time.ticks,
+                                            [0, 4, 8, 12, 14, 16][display]
+                                        );
+                                        let mut pixels = Vec::new();
+                                        f.picture.write_planar(&mut pixels).unwrap();
+                                        assert_eq!(
+                                            pixels,
+                                            &oracle[display * size..(display + 1) * size]
+                                        );
+                                    }
+                                    assert!(player.read_frame().unwrap().is_none());
+                                    player.rewind();
+                                }
+                                assert_eq!(player.seek_to_sync(8), 0);
+                                for _ in 0..2 {
+                                    player.read_frame().unwrap().unwrap();
+                                }
+                                let mut pixels = Vec::new();
+                                player
+                                    .read_frame()
+                                    .unwrap()
+                                    .unwrap()
+                                    .picture
+                                    .write_planar(&mut pixels)
+                                    .unwrap();
+                                assert_eq!(pixels, &oracle[2 * size..3 * size]);
+                                let direct = std::fs::read(root.join(format!(
+                                    "{}.yuv",
+                                    name.replace(&format!("-{mode}"), "-direct")
+                                )))
+                                .unwrap();
+                                if mode == "skip" {
+                                    assert_eq!(oracle, direct);
+                                } else if mode.starts_with("residual") {
+                                    assert_eq!(&oracle[..2 * size], &direct[..2 * size]);
+                                    assert_ne!(
+                                        &oracle[2 * size..3 * size],
+                                        &direct[2 * size..3 * size]
+                                    );
+                                    assert_eq!(&oracle[3 * size..], &direct[3 * size..]);
+                                }
+                                if source == "motion" {
+                                    let zero = std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.replace("-motion-", "-zero-")
+                                    )))
+                                    .unwrap();
+                                    assert_ne!(
+                                        &oracle[3 * size..4 * size],
+                                        &zero[3 * size..4 * size]
+                                    );
+                                    if !spatial {
+                                        assert_ne!(
+                                            &oracle[2 * size..3 * size],
+                                            &zero[2 * size..3 * size],
+                                            "temporal B must use the retained co-located motion"
+                                        );
+                                    }
+                                    assert_eq!(
+                                        &oracle[4 * size..],
+                                        &zero[4 * size..],
+                                        "non-reference B must leave retained fields intact"
+                                    );
+                                }
+                                if aso {
+                                    let ordered = std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.strip_suffix("-aso").unwrap()
+                                    )))
+                                    .unwrap();
+                                    assert_eq!(oracle, ordered);
+                                }
+                                if init != 0 {
+                                    let zero = std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.replace(&format!("-init{init}-"), "-init0-")
+                                    )))
+                                    .unwrap();
+                                    assert_eq!(oracle, zero);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn nonpaired_temporal_colocated_reference_is_refused_after_valid_field_prefix() {
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let video = std::fs::read(root.join("avc-unified-b-invalid-temporal-reference.mp4")).unwrap();
+    let oracle =
+        std::fs::read(root.join("avc-unified-b-8bit-top-init0-temporal-zero-direct.yuv")).unwrap();
+    let mut input = Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+    let config = input.tracks()[0].configuration.clone();
+    let avc = AvcConfig::parse(&config).unwrap();
+    let sps = Sps::parse(avc.sps[0]).unwrap();
+    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+    for _ in 0..2 {
+        let mut output = 0;
+        for sample in 0..4 {
+            let mut packet = Vec::new();
+            input.read_packet(0, sample, &mut packet).unwrap();
+            let pic = decoder.decode_order(&packet).unwrap();
+            assert_eq!(pic.is_some(), sample % 2 == 1);
+            if let Some(pic) = pic {
+                let mut pixels = Vec::new();
+                pic.write_planar(&mut pixels).unwrap();
+                let display = if output == 0 { 0 } else { 3 };
+                assert_eq!(pixels, &oracle[display * 1536..(display + 1) * 1536]);
+                output += 1;
+            }
+        }
+        assert_eq!(output, 2);
+        let mut packet = Vec::new();
+        input.read_packet(0, 4, &mut packet).unwrap();
+        for nal in NalUnits::new(&packet, avc.length_size).unwrap() {
+            let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+            assert_eq!(h.slice_type, SliceType::B);
+            assert!(!h.field_pic);
+            assert!(!h.direct_spatial_mv_pred);
+        }
+        let error = decoder
+            .decode_order(&packet)
+            .err()
+            .expect("missing temporal reference must fail");
+        assert!(
+            error
+                .to_string()
+                .contains("co-located reference is absent from list0"),
+            "{error}"
+        );
+        let poisoned = decoder.decode_order(&packet).err().unwrap();
+        assert!(poisoned.to_string().contains("reset"), "{poisoned}");
+        decoder.reset();
+    }
+}
