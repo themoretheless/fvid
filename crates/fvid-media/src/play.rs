@@ -1537,7 +1537,6 @@ struct PlayerApp {
     snapshot_dir: Option<PathBuf>,
     snapshot_prefix: String,
     network_cache_ms: u32,
-    buffered_us: i64,
     audio_ordinal: i32,
     subtitle_ordinal: i32,
     logged_sub: String,
@@ -1774,7 +1773,6 @@ impl PlayerApp {
             snapshot_dir,
             snapshot_prefix: String::new(),
             network_cache_ms,
-            buffered_us: 0,
             audio_ordinal,
             subtitle_ordinal,
             logged_sub: String::new(),
@@ -3689,9 +3687,14 @@ impl PlayerApp {
             return;
         }
         
+        // Обновляем buffered_us из размера видео-очереди
+        if let Some(session) = &self.session {
+            let queued_frames = lock(&session.shared.video).len() as i64;
+            self.buffered_us = queued_frames * duration / (duration.max(1) / 30);
+        }
+        
         let played_frac = self.scrub.unwrap_or(self.progress());
         let buffered_frac = (self.buffered_us.max(0) as f32 / duration as f32).clamp(0.0, 1.0);
-        let max_frac = played_frac.max(buffered_frac);
         
         // Кастомная отрисовка с сегментами
         let rect = ui.available_rect_before_wrap();
@@ -3707,8 +3710,8 @@ impl PlayerApp {
         
         // Played segment (зеленый поверх синего если больше буфера)
         if played_frac > 0.0 && played_frac < 1.0 && played_frac > buffered_frac {
+            let start_x = rect.min.x + 2.0 + buffered_frac * (rect.width() - 4.0);
             let played_w = ((played_frac - buffered_frac) * (rect.width() - 4.0)).max(0.0);
-            let start_x = rect.min.x + 2.0 + buffered_frac.max(buffered_frac) * (rect.width() - 4.0);
             let played_rect = egui::Rect::from_min_x_max(start_x, start_x + played_w)
                 .expand(-2.0);
             ui.painter().rect_filled(played_rect, 4.0, egui::Color32::from_rgb(80, 200, 120));
