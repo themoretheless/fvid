@@ -13,7 +13,7 @@ def prediction(bottom, depth, pcm_first, skipped, deblock, poc):
     if deblock!=1: b.se(6); b.se(6)
     for address in range(2):
         if (address==0)==pcm_first:
-            
+
             if not (address==1 and skipped): b.ue(0)
             b.ue(5)
             for _ in range(16): b.u(1)
