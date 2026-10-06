@@ -1,4 +1,5 @@
-//! Owned field DPB foundation. Frame/field mixed streams and playback integration are separate.
+//! Owned field DPB marking, pixel-free gap stores and parity-aware reference lists.
+//! Mixed frame/field reference storage is handled separately.
 use super::{
     avc_field_references::{FieldFrameReference, FieldLists, field_lists},
     avc_slice::{MemoryOperation, SliceHeader},
@@ -8,7 +9,8 @@ use std::sync::Arc;
 struct Field<T> {
     poc: i32,
     long: Option<u32>,
-    picture: Arc<T>,
+    picture: Option<Arc<T>>,
+    known_poc: bool,
 }
 struct Store<T> {
     id: u64,
@@ -54,20 +56,36 @@ impl<T> FieldBuffer<T> {
     pub fn get(&self, id: u64, bottom: bool) -> Option<&Arc<T>> {
         self.stores.iter().find(|s| s.id == id)?.fields[usize::from(bottom)]
             .as_ref()
-            .map(|f| &f.picture)
+            .and_then(|f| f.picture.as_ref())
     }
     /// POC and long-term status of the selected field, in its own parity.
     pub fn order(&self, id: u64, bottom: bool) -> Option<(i32, bool)> {
         let field = self.stores.iter().find(|store| store.id == id)?.fields[usize::from(bottom)]
             .as_ref()?;
-        Some((field.poc, field.long.is_some()))
+        field.known_poc.then_some((field.poc, field.long.is_some()))
     }
     pub fn lists(&self, header: &SliceHeader, poc: i32) -> Result<FieldLists> {
         if !header.field_pic {
             return Err(invalid("field DPB requires field slice"));
         }
+        let references = self
+            .references()
+            .into_iter()
+            .filter(|r| {
+                header.slice_type != super::avc_slice::SliceType::B
+                    || self
+                        .stores
+                        .iter()
+                        .find(|s| s.id == r.id)
+                        .unwrap()
+                        .fields
+                        .iter()
+                        .flatten()
+                        .all(|f| f.known_poc)
+            })
+            .collect::<Vec<_>>();
         field_lists(
-            &self.references(),
+            &references,
             self.bits,
             header.frame_num,
             poc,
@@ -76,6 +94,92 @@ impl<T> FieldBuffer<T> {
             [header.refs_l0 as usize, header.refs_l1 as usize],
             [&header.modifications_l0, &header.modifications_l1],
         )
+    }
+    /// Insert a pixel-free non-existing frame store for a frame_num gap.
+    /// Missing POC (type0) participates in P list order, but not B POC order.
+    pub fn infer_nonexisting_fields(
+        &mut self,
+        frame_num: u32,
+        poc: Option<super::avc_poc::FieldOrder>,
+        id: u64,
+    ) -> Result<()> {
+        if poc.is_some_and(|p| p.top.is_none() || p.bottom.is_none()) {
+            return Err(invalid("AVC inferred frame requires both field POCs"));
+        }
+        let max = 1u32 << self.bits;
+        if !self.initialized || frame_num >= max || self.pending.is_some() {
+            return Err(invalid(
+                "AVC inferred fields need an initialized complete reference pair",
+            ));
+        }
+        let mut stores = self
+            .stores
+            .iter()
+            .map(|s| Store {
+                id: s.id,
+                frame_num: s.frame_num,
+                fields: std::array::from_fn(|i| {
+                    s.fields[i].as_ref().map(|f| Field {
+                        poc: f.poc,
+                        long: f.long,
+                        picture: f.picture.as_ref().map(Arc::clone),
+                        known_poc: f.known_poc,
+                    })
+                }),
+            })
+            .collect::<Vec<_>>();
+        if stores.len() == self.capacity {
+            let oldest = stores
+                .iter()
+                .enumerate()
+                .filter(|(_, s)| s.fields.iter().flatten().any(|f| f.long.is_none()))
+                .min_by_key(|(_, s)| {
+                    i64::from(s.frame_num)
+                        - if s.frame_num > frame_num {
+                            i64::from(max)
+                        } else {
+                            0
+                        }
+                })
+                .map(|(i, _)| i)
+                .ok_or_else(|| invalid("AVC field sliding window has no short reference"))?;
+            for f in &mut stores[oldest].fields {
+                if f.as_ref().is_some_and(|f| f.long.is_none()) {
+                    *f = None;
+                }
+            }
+            stores.retain(|s| s.fields.iter().any(Option::is_some));
+        }
+        if stores.len() >= self.capacity
+            || stores.iter().any(|s| {
+                s.id == id
+                    || (s.frame_num == frame_num
+                        && s.fields.iter().flatten().any(|f| f.long.is_none()))
+            })
+        {
+            return Err(invalid("AVC inferred field capacity or identity conflict"));
+        }
+        let fields = std::array::from_fn(|i| {
+            Some(Field {
+                poc: poc.map_or(0, |p| {
+                    if i == 0 {
+                        p.top.unwrap_or(0)
+                    } else {
+                        p.bottom.unwrap_or(0)
+                    }
+                }),
+                long: None,
+                picture: None,
+                known_poc: poc.is_some(),
+            })
+        });
+        stores.push(Store {
+            id,
+            frame_num,
+            fields,
+        });
+        self.stores = stores;
+        Ok(())
     }
     /// Mark a reconstructed field. Errors leave all stored references/limits unchanged.
     /// `poc` is post-MMCO-5 POC; caller owns display pairing and sample budgets.
@@ -112,7 +216,8 @@ impl<T> FieldBuffer<T> {
                     s.fields[i].as_ref().map(|f| Field {
                         poc: f.poc,
                         long: f.long,
-                        picture: Arc::clone(&f.picture),
+                        picture: f.picture.as_ref().map(Arc::clone),
+                        known_poc: f.known_poc,
                     })
                 }),
             })
@@ -169,6 +274,16 @@ impl<T> FieldBuffer<T> {
                             .ok_or_else(|| invalid("AVC field MMCO selects missing short field"))?;
                         if let MemoryOperation::ShortToLong { index, .. } = *op {
                             check_long(index, limit)?;
+                            if stores[selected.0].fields[selected.1]
+                                .as_ref()
+                                .unwrap()
+                                .picture
+                                .is_none()
+                            {
+                                return Err(invalid(
+                                    "AVC non-existing field cannot become long-term",
+                                ));
+                            }
                             let target_id = stores[selected.0].id;
                             for s in &mut stores {
                                 for p in 0..2 {
@@ -283,15 +398,18 @@ impl<T> FieldBuffer<T> {
         let field = Field {
             poc,
             long: current_long,
-            picture,
+            picture: Some(picture),
+            known_poc: true,
         };
         if let Some(index) = complement {
             stores[index].fields[parity] = Some(field);
         } else {
             if stores.len() >= self.capacity
-                || stores
-                    .iter()
-                    .any(|s| s.frame_num == current_num && s.fields[parity].is_some())
+                || stores.iter().any(|s| {
+                    s.frame_num == current_num
+                        && current_long.is_none()
+                        && s.fields[parity].as_ref().is_some_and(|f| f.long.is_none())
+                })
             {
                 return Err(invalid("AVC field DPB capacity or identity conflict"));
             }
