@@ -901,7 +901,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
             return Ok(());
         }
         let codes = hevc_intra_syntax::read_luma(b, nxn)?;
-        let mut mode = 0;
+        let mut luma_modes = Vec::with_capacity(codes.len());
         for (i, code) in codes.into_iter().enumerate() {
             let log = n.log2_size - u8::from(nxn);
             let p = Node {
@@ -922,9 +922,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 p.y.checked_sub(1).and_then(|y| neighbour(p.x, y))
             };
             let derived = code.resolve(left, top)?;
-            if i == 0 {
-                mode = derived;
-            }
+            luma_modes.push(derived);
             let stride = self.sps.dimensions[0] as usize / 4;
             for y in p.y as usize / 4..(p.y as usize + (1 << p.log2_size)) / 4 {
                 for x in p.x as usize / 4..(p.x as usize + (1 << p.log2_size)) / 4 {
@@ -939,7 +937,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 }
             }
         }
-        let chroma = hevc_intra::chroma_mode(mode, hevc_intra_syntax::read_chroma(b)?)?;
+        let chroma_modes = hevc_intra_syntax::read_chroma_modes(b, &luma_modes, self.sps.chroma_format)?;
         let c = hevc_transform_tree::Config {
             log2_cu: n.log2_size,
             log2_min_transform: self.sps.transform_block_log2[0],
@@ -948,6 +946,11 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
             intra_split: nxn,
         };
         hevc_transform_tree::read_intra(b, [n.x, n.y], c, |b, u| {
+            let index = if self.sps.chroma_format == 3 && nxn {
+                let half = 1u32 << (n.log2_size - 1);
+                ((u.origin[1] - n.y) / half * 2 + (u.origin[0] - n.x) / half) as usize
+            } else { 0 };
+            let chroma = chroma_modes[index];
             let mode = self
                 .cell(u.origin[0] as i32, u.origin[1] as i32)
                 .ok_or_else(|| invalid("HEVC transform has no prediction block"))?
@@ -1029,11 +1032,12 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     } else {
                         self.residual_scratch.clear();
                     }
-                    self.planes[component].reconstruct_intra_with_filters(
+                    self.planes[component].reconstruct_intra_with_full_chroma_filters(
                         origin.map(|v| v as usize),
                         c.log2_size,
                         c.intra_mode.unwrap(),
                         component != 0,
+                        self.sps.chroma_format == 3,
                         self.sps.strong_intra_smoothing,
                         !self.sps.intra_smoothing_disabled,
                         !(self.sps.implicit_rdpcm && bypass),
@@ -1234,11 +1238,12 @@ fn reconstruct_row(
                 } else {
                     residual_scratch.clear();
                 }
-                planes[component].reconstruct_intra_with_filters(
+                planes[component].reconstruct_intra_with_full_chroma_filters(
                     origin,
                     log,
                     mode,
                     component != 0,
+                    sps.chroma_format == 3,
                     sps.strong_intra_smoothing,
                     !sps.intra_smoothing_disabled,
                     filter_boundary,

@@ -2419,3 +2419,24 @@ with its full pixel acceptance ignored. This is not full 4:4:4 playback support.
 
 Offline validation: codec library 372 passed / two ignored; owned media library
 334 passed / one ignored. No failures; normal tests used no FFmpeg or network.
+
+### HEVC full-chroma intra syntax and filtering (2026-10-06)
+
+The intra syntax reader now derives chroma modes with format-aware ownership:
+4:4:4 reads a mode per prediction block and resolves derived/collision modes
+against that block's luma mode; subsampled formats share the first block's mode.
+Interleaved scripted CABAC tests prove ordering, local-luma derivation, every
+truncation, shared-mode consumption and validation before consuming input.
+The picture path now stores all luma/chroma modes and selects the colocated
+chroma prediction block when 4:4:4 geometry is eventually admitted.
+
+Full-resolution chroma reference filtering is separate from luma-only boundary
+correction: weak smoothing is allowed, strong smoothing remains luma-only, and
+DC/horizontal/vertical boundary correction remains luma-only (H.265 8.4.4.2).
+Both synchronous and queued plane reconstruction pass this distinction. Tests
+compare weak/strong/subsampled outputs and exercise all three boundary modes.
+Picture allocation and loop-filter geometry remain incomplete; the existing
+4:4:4 picture refusal and ignored HM pixel acceptance are unchanged.
+
+Offline validation: codec library 374 passed / two ignored; owned media library
+334 passed / one ignored. No failures; normal tests used no FFmpeg or network.

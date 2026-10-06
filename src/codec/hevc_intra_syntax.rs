@@ -48,6 +48,21 @@ pub fn read_chroma(b: &mut impl ResidualBins) -> Result<u8> {
     Ok((u8::from(b.bypass()?) << 1) | u8::from(b.bypass()?))
 }
 
+/// H.265 7.3.8.5: 4:4:4 reads one chroma mode per prediction block;
+/// subsampled chroma shares one mode derived from the first luma block.
+pub fn read_chroma_modes(
+    b: &mut impl ResidualBins, luma_modes: &[u8], chroma_format: u8,
+) -> Result<Vec<u8>> {
+    if !matches!(luma_modes.len(), 1 | 4) || luma_modes.iter().any(|&mode| mode > 34)
+        || !(1..=3).contains(&chroma_format) {
+        return Err(crate::invalid("invalid HEVC chroma mode ownership"));
+    }
+    let count = if chroma_format == 3 { luma_modes.len() } else { 1 };
+    luma_modes[..count].iter().map(|&mode| {
+        hevc_intra::chroma_mode(mode, read_chroma(b)?)
+    }).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -91,6 +106,49 @@ mod tests {
             bits,
             flag: 0,
             bit: 0,
+        }
+    }
+    #[test]
+    fn full_chroma_modes_follow_prediction_block_order_and_local_luma() {
+        use std::collections::VecDeque;
+        struct Interleaved(VecDeque<(bool, bool)>);
+        impl ResidualBins for Interleaved {
+            fn decision(&mut self, syntax: Syntax, context: usize) -> Result<bool> {
+                assert!(matches!(syntax, Syntax::IntraChroma));
+                assert_eq!(context, 0);
+                let (bypass, value) = self.0.pop_front().ok_or_else(|| invalid("truncated chroma mode"))?;
+                assert!(!bypass);
+                Ok(value)
+            }
+            fn bypass(&mut self) -> Result<bool> {
+                let (bypass, value) = self.0.pop_front().ok_or_else(|| invalid("truncated chroma mode"))?;
+                assert!(bypass);
+                Ok(value)
+            }
+        }
+        let events = VecDeque::from([
+            (false,true), (true,false), (true,false), // planar collides with local luma: 34
+            (false,false), // derived from local luma 10
+            (false,true), (true,true), (true,false), // explicit horizontal 10
+            (false,true), (true,true), (true,true), // explicit DC 1
+        ]);
+        let luma = [0,10,26,34];
+        let mut full = Interleaved(events.clone());
+        assert_eq!(read_chroma_modes(&mut full, &luma, 3).unwrap(), [34,10,10,1]);
+        assert!(full.0.is_empty());
+        for cut in 0..events.len() {
+            let mut short = Interleaved(events.iter().take(cut).copied().collect());
+            assert!(read_chroma_modes(&mut short, &luma, 3).is_err());
+        }
+        for format in [1,2] {
+            let mut shared = Interleaved(events.clone());
+            assert_eq!(read_chroma_modes(&mut shared, &luma, format).unwrap(), [34]);
+            assert_eq!(shared.0.len(), events.len() - 3);
+        }
+        for modes in [&[][..], &[0,1][..], &[35][..]] {
+            let mut invalid_modes = Interleaved(events.clone());
+            assert!(read_chroma_modes(&mut invalid_modes, modes, 3).is_err());
+            assert_eq!(invalid_modes.0, events);
         }
     }
     #[test]

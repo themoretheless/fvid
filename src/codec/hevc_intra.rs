@@ -202,6 +202,16 @@ impl References {
         filter_boundary: bool,
         output: &mut [u16],
     ) -> Result<()> {
+        self.predict_with_full_chroma_filters(mode, chroma, false, strong_smoothing,
+            filter_references, filter_boundary, output)
+    }
+    /// 4:4:4 chroma allows weak reference smoothing, while strong smoothing
+    /// and prediction boundary correction remain exclusive to luma.
+    pub fn predict_with_full_chroma_filters(
+        &self, mode: u8, chroma: bool, full_chroma: bool,
+        strong_smoothing: bool, filter_references: bool, filter_boundary: bool,
+        output: &mut [u16],
+    ) -> Result<()> {
         if mode > 34 {
             return Err(invalid("invalid HEVC intra prediction mode"));
         }
@@ -211,7 +221,7 @@ impl References {
         }
         let output = &mut output[..n * n];
         let (corner, top, left) = if filter_references {
-            self.filtered(mode, chroma, strong_smoothing)
+            self.filtered(mode, chroma && !full_chroma, strong_smoothing && !chroma)
         } else {
             (self.corner, self.top.clone(), self.left.clone())
         };
@@ -468,6 +478,30 @@ mod tests {
         assert_eq!(r.filtered(0, false, true), r.filtered(0, false, false));
         assert_eq!(r.filtered(1, false, true).1[0], 255); // DC never smooths
         assert_eq!(r.filtered(0, true, true).1[0], 255); // 4:2:0 chroma never smooths
+    }
+    #[test]
+    fn full_chroma_smooths_references_without_luma_only_corrections() {
+        let mut top: Vec<_> = (0..64).map(|i| Some(102 + i * 2)).collect();
+        let left: Vec<_> = (0..64).map(|i| Some(101 + i)).collect();
+        top[0] = Some(255);
+        let reference = References::new(5, 8, Some(100), &top, &left).unwrap();
+        let mut weak = vec![0; 1024];
+        let mut full = vec![0; 1024];
+        let mut subsampled = vec![0; 1024];
+        reference.predict_with_filters(0, false, false, true, false, &mut weak).unwrap();
+        reference.predict_with_full_chroma_filters(0, true, true, true, true, true, &mut full).unwrap();
+        reference.predict_with_filters(0, true, true, true, true, &mut subsampled).unwrap();
+        assert_eq!(full, weak);
+        assert_ne!(full, subsampled);
+        let reference = References::new(3, 8, Some(120), &[Some(200);16], &[Some(40);16]).unwrap();
+        for mode in [1,10,26] {
+            let mut base = vec![0;64]; let mut full = vec![0;64]; let mut luma = vec![0;64];
+            reference.predict_with_filters(mode, true, true, true, true, &mut base).unwrap();
+            reference.predict_with_full_chroma_filters(mode, true, true, true, true, true, &mut full).unwrap();
+            reference.predict_with_filters(mode, false, true, true, true, &mut luma).unwrap();
+            assert_eq!(full, base);
+            assert_ne!(full, luma);
+        }
     }
     #[test]
     fn invalid_references_and_modes_are_rejected() {
