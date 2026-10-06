@@ -2340,3 +2340,24 @@ No physical GPU or universal HEVC profile/chroma qualification is claimed.
 Offline acceptance validation: codec library 365 passed / one ignored; owned
 media library 334 passed / one ignored; CPU NVDEC HEVC preparation 19 passed.
 All three runs completed without failures and required no FFmpeg or network.
+
+### HEVC aligned bypass foundation (2026-10-06)
+
+The arithmetic engine now implements H.265 9.3.4.3.6 by setting its interval
+to 256 without consuming input bits. Tests cover every legal offset, several
+initial ranges, shift-register bypass decoding, truncation, terminated engines
+and invalid intervals without mutation. This entry point is not yet wired to
+residual syntax and does not enable the SPS flag.
+
+An owned 64x64 4:4:4 12-bit I/B/B fixture uses high-throughput RExt with a 14-bit
+profile constraint, WPP, extended precision and CABAC alignment. The high-bit-
+depth HM encoder validates this configuration and its decoder matches encoder
+reconstruction. HM 18's display code erroneously tests constraint 12 rather
+than 14, printing an invalid-profile label although its admission code tests
+14 and admits the configuration. The fixture reproduces the exact remaining
+SPS range-tool refusal. Pixel/reset acceptance is separately ignored pending
+4:4:4 geometry and residual alignment integration. The owned fixture muxer
+now accepts explicit chroma metadata, preserving the default 4:2:0 behavior.
+
+Offline codec library validation: 368 passed, no failures, two ignored
+(explicit fixture generation and pending aligned 4:4:4 pixel acceptance).

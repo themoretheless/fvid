@@ -83,6 +83,17 @@ impl<'a> Cabac<'a> {
         }
         Ok(())
     }
+    /// H.265 9.3.4.3.6: align the arithmetic interval before coefficient
+    /// bypass syntax. This is not byte alignment and consumes no input bits.
+    pub fn align_hevc_bypass(&mut self) -> Result<()> {
+        self.active()?;
+        if self.offset >= 256 {
+            return Err(invalid("HEVC aligned CABAC offset exceeds coding interval"));
+        }
+        self.range = 256;
+        Ok(())
+    }
+
     /// Decode one context-coded bin. A truncated read leaves engine and context unchanged.
     pub fn decision(&mut self, context: &mut Context) -> Result<bool> {
         self.active()?;
@@ -145,6 +156,46 @@ impl<'a> Cabac<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn hevc_alignment_preserves_input_and_decodes_shift_register_bins() {
+        let data = [0u8, 0x55, 0xaa, 0xff];
+        for range in [256, 300, 510] {
+            for offset in 0..256 {
+                let mut engine = super::Cabac::new(&data, 0).unwrap();
+                engine.range = range;
+                engine.offset = offset;
+                let position = engine.bit_position();
+                engine.align_hevc_bypass().unwrap();
+                assert_eq!(engine.bit_position(), position);
+                assert_eq!(engine.offset, offset);
+                assert_eq!(engine.range, 256);
+                let mut expected = offset;
+                for index in position..data.len() * 8 {
+                    let bit = u16::from((data[index / 8] >> (7 - index % 8)) & 1);
+                    expected = expected * 2 + bit;
+                    let bin = expected >= 256;
+                    if bin { expected -= 256; }
+                    assert_eq!(engine.bypass().unwrap(), bin);
+                    assert_eq!(engine.offset, expected);
+                }
+                assert!(engine.bypass().is_err());
+                assert_eq!(engine.offset, expected);
+            }
+        }
+    }
+    #[test]
+    fn hevc_alignment_rejects_invalid_interval_without_mutation() {
+        let mut engine = super::Cabac::new(&[200, 0], 0).unwrap();
+        assert_eq!(engine.offset, 400);
+        assert!(engine.align_hevc_bypass().is_err());
+        assert_eq!(engine.range, 510);
+        assert_eq!(engine.offset, 400);
+        assert_eq!(engine.bit_position(), 9);
+        engine.terminated = true;
+        engine.offset = 0;
+        assert!(engine.align_hevc_bypass().is_err());
+        assert_eq!(engine.range, 510);
+    }
     use super::*;
     #[test]
     fn independent_wide_interval_encoder_roundtrips_all_states() {

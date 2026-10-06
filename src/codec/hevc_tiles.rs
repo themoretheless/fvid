@@ -395,6 +395,56 @@ mod fixture_tests {
     }
 
     #[test]
+    fn cabac_alignment_fixture_reproduces_exact_sps_refusal() {
+        let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-cabac-alignment-444-rext12.mp4");
+        let input = crate::container::mp4::Mp4Reader::open(
+            std::io::Cursor::new(data), Default::default()).unwrap();
+        let error = match super::super::hevc_decoder::HevcDecoder::from_configuration(
+            &input.tracks()[0].configuration, 16 << 20) {
+            Ok(_) => panic!("CABAC alignment unexpectedly admitted"),
+            Err(error) => error,
+        };
+        assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"), "{error}");
+    }
+
+    #[test]
+    #[ignore = "pending 4:4:4 picture and aligned residual integration"]
+    fn cabac_alignment_pixels_match_hm_and_reset() {
+        macro_rules! fixture {
+            ($stem:literal, $depth:literal) => {
+                (include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".mp4")).as_slice(),
+                 include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".yuv")).as_slice(), $depth)
+            };
+        }
+        for (data, expected, depth) in [
+            fixture!("hevc-cabac-alignment-444-rext12", 12),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data), Default::default()).unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration, 16 << 20).unwrap();
+            assert!(decoder.parameters().0.extended_precision);
+            assert_eq!(decoder.parameters().0.depth, [depth; 2]);
+            for pass in 0..2 {
+                if pass != 0 { decoder.reset(); }
+                let mut actual = Vec::new();
+                let mut packet = Vec::new();
+                for frame in 0..3 {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    for plane in &decoded.picture.planes {
+                        for &sample in plane.samples() {
+                            if depth == 8 { actual.push(u8::try_from(sample).unwrap()); }
+                            else { actual.extend_from_slice(&sample.to_le_bytes()); }
+                        }
+                    }
+                }
+                assert_eq!(actual, expected, "depth {depth}, pass {pass}");
+            }
+        }
+    }
+
+    #[test]
     fn extended_precision_pixels_match_hm_and_reset() {
         macro_rules! fixture {
             ($stem:literal, $depth:literal) => {

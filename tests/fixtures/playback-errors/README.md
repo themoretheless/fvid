@@ -446,3 +446,14 @@ expectation above. Additional streams are `high10-rext10`, `mixed-high12-rext12`
 `hevc-tiles-extended-precision-` prefix. Each contains three owned I/B/B pictures
 and a saved HM pixel oracle. Every sample and decoder reset replay are checked.
 The GPU configuration refusal is separately tested with the 8-bit fixture.
+
+### HEVC CABAC aligned bypass staged regression
+
+`hevc-cabac-alignment-444-rext12.mp4` contains three owned 64x64 4:4:4 I/B/B
+pictures, 12-bit coding in the high-throughput 14-bit constrained profile, WPP,
+extended precision and aligned coefficient bypass syntax. The paired YUV is
+the independent HM decode oracle (also equal to encoder reconstruction).
+The exact SPS refusal test passes; pixel/reset acceptance remains explicitly
+ignored until 4:4:4 and alignment integration. Regenerate separately using
+`scripts/generate_hevc_alignment_sample.py` with a HIGH_BITDEPTH HM build.
+Ordinary tests invoke neither HM nor FFmpeg nor network access.

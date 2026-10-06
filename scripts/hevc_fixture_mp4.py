@@ -25,7 +25,9 @@ def header(size, values, matrix_offset=None):
     return bytes(data)
 
 
-def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None):
+def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1):
+    if chroma_format not in range(4):
+        raise ValueError('invalid fixture chroma format')
     units = [n for n in re.split(b'\x00\x00\x00?\x01', stream) if n]
     parameters = {kind: [] for kind in (32, 33, 34)}
     samples, current, sync, pending = [], [], [], []
@@ -70,7 +72,7 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
     sps = re.sub(b'\x00\x00\x03', b'\x00\x00', sps)
     if (sps[0] >> 1) & 7:
         raise ValueError('fixture muxer requires one temporal layer')
-    hvcc = bytes([1]) + sps[1:13] + bytes.fromhex('f000fcfd') + bytes([0xf8 | (depth - 8)] * 2) + b'\x00\x00' + bytes([0x0f, 3])
+    hvcc = bytes([1]) + sps[1:13] + bytes.fromhex('f000fc') + bytes([0xfc | chroma_format]) + bytes([0xf8 | (depth - 8)] * 2) + b'\x00\x00' + bytes([0x0f, 3])
     for kind, nals in parameters.items():
         hvcc += bytes([(0 if inband_parameters else 0x80) | kind]) + struct.pack('>H', len(nals))
         for nal in nals:
