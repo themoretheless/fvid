@@ -51,13 +51,24 @@ impl<'a> InterCabacSlice<'a> {
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
-            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
+            .and_then(|n| {
+                n.checked_mul(if !sps.frame_mbs_only && !header.field_pic {
+                    2
+                } else {
+                    1
+                })
+            })
             .filter(|n| *n > 0 && *n <= 65536)
             .ok_or_else(|| invalid("CABAC mixed picture geometry exceeds limits"))?;
         let remaining = budget
             .checked_sub(count * 64)
             .ok_or_else(|| invalid("CABAC mixed context budget exceeded"))?;
-        let height = sps.height_map_units as usize * if mbaff { 2 } else { 1 };
+        let height = sps.height_map_units as usize
+            * if !sps.frame_mbs_only && !header.field_pic {
+                2
+            } else {
+                1
+            };
         let motion = if mbaff {
             CabacMotionContexts::new_mbaff(sps.width_mbs as usize, height, remaining)?
         } else {

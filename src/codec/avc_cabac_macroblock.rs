@@ -391,13 +391,13 @@ impl<'a> IntraCabacReader<'a> {
             SliceType::I | SliceType::P | SliceType::B
         ) || (mbaff && header.field_pic)
             || !pps.cabac
-            || (!sps.frame_mbs_only && !mbaff && !header.field_pic)
+            || (sps.mb_adaptive_frame_field && !mbaff && !header.field_pic)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
             || !matches!(pps.slice_groups, SliceGroups::Single)
         {
             return Err(invalid(
-                "CABAC context requires progressive 4:2:0 I/P/B slices without FMO",
+                "CABAC context requires 4:2:0 I/P/B slices without FMO or implicit MBAFF",
             ));
         }
         if header.pps_id != pps.id || pps.sps_id != sps.id {
@@ -405,7 +405,13 @@ impl<'a> IntraCabacReader<'a> {
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
-            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
+            .and_then(|n| {
+                n.checked_mul(if !sps.frame_mbs_only && !header.field_pic {
+                    2
+                } else {
+                    1
+                })
+            })
             .ok_or_else(|| invalid("macroblock count overflow"))?;
         if count == 0 || count > max_macroblocks || count > 65536 {
             return Err(invalid("macroblock context budget exceeded"));

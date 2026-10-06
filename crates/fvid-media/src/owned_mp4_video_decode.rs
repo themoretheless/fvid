@@ -473,6 +473,38 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-paff-cabac-implicit-8bit-implicit-ref0-poc2-16x16-init0-filter0-aso",
+            "avc-paff-cabac-implicit-10bit-implicit-ref1-poc6-8x8-init2-filter2",
+            "avc-paff-cabac-implicit-10bit-average-ref1-poc6-16x8-init1-filter1",
+            "avc-paff-cabac-weight-8bit-weighted-ref0-16x16-init0-filter0-aso",
+            "avc-paff-cabac-weight-10bit-weighted-ref1-8x8-init2-filter2",
+            "avc-paff-cabac-weight-10bit-identity-ref1-16x8-init1-filter1",
+            "avc-paff-implicit-8bit-implicit-ref0-poc2-16x16-filter0-aso",
+            "avc-paff-implicit-10bit-implicit-ref1-poc6-8x8-filter2",
+            "avc-paff-implicit-10bit-average-ref1-poc6-16x8-filter1",
+            "avc-paff-weight-8bit-weighted-ref0-16x16-filter0-aso",
+            "avc-paff-weight-10bit-weighted-ref1-8x8-filter2",
+            "avc-paff-weight-10bit-identity-ref1-16x8-filter1",
+            "avc-paff-fmo-residual-8bit-type0-dir0-all-ac-filter0-aso",
+            "avc-paff-fmo-residual-10bit-type3-dir1-luma-ac-filter2",
+            "avc-paff-fmo-residual-10bit-type6-dir0-chroma-dc-filter1",
+            "avc-paff-fmo-8bit-type0-dir0-temporal-direct-filter0-aso",
+            "avc-paff-fmo-10bit-type3-dir1-spatial-skip-filter2",
+            "avc-paff-fmo-8bit-type6-dir0-spatial-direct-filter1",
+            "avc-paff-cavlc-p-8bit-coded-filter0-aso",
+            "avc-paff-cavlc-p-10bit-skip-filter2-joined",
+            "avc-paff-cavlc-b-8bit-temporal-coded-filter0-joined",
+            "avc-paff-cavlc-b-10bit-spatial-skip-filter2-aso",
+            "avc-paff-b-joined-8bit-init0-temporal-direct-filter0",
+            "avc-paff-b-joined-10bit-init2-spatial-skip-filter2",
+            "avc-paff-inter-joined-8bit-init0-motion-filter0",
+            "avc-paff-inter-joined-10bit-init2-skip-filter2",
+            "avc-paff-b-8bit-init0-temporal-direct-filter0-aso",
+            "avc-paff-b-10bit-init2-spatial-skip-filter2",
+            "avc-paff-cabac-8bit-positive-filter0-aso",
+            "avc-paff-cabac-10bit-negative-filter2",
+            "avc-paff-inter-8bit-init0-motion-filter0-aso",
+            "avc-paff-inter-10bit-init2-skip-filter2",
             "avc-paff-intra-joined-8bit-i4-bias-filter1",
             "avc-paff-intra-joined-10bit-i16-negative-filter2",
             "avc-paff-intra-8bit-i4-ac-filter0",
@@ -568,7 +600,20 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
-            let paff_intra = name.starts_with("avc-paff-intra-");
+            let paff_intra = name.starts_with("avc-paff-intra-")
+                || name.starts_with("avc-paff-cabac-8bit-")
+                || name.starts_with("avc-paff-cabac-10bit-");
+            let implicit_poc = (name.starts_with("avc-paff-implicit-")
+                || name.starts_with("avc-paff-cabac-implicit-"))
+            .then(|| if name.contains("-poc6-") { 6i64 } else { 2i64 });
+            let paff_inter =
+                name.starts_with("avc-paff-inter-") || name.starts_with("avc-paff-cavlc-p-");
+            let paff_b = name.starts_with("avc-paff-b-")
+                || name.starts_with("avc-paff-cavlc-b-")
+                || name.starts_with("avc-paff-fmo-")
+                || name.starts_with("avc-paff-weight-")
+                || name.starts_with("avc-paff-cabac-weight-")
+                || implicit_poc.is_some();
             let frame_to_fields = name.starts_with("avc-frame-to-field-")
                 || name.starts_with("avc-paff-frame-to-field-");
             let reset_gap = name.starts_with("avc-field-b-reset-gap-");
@@ -586,6 +631,8 @@ mod tests {
                 || name.starts_with("avc-field-b-cabac-sub-");
             let count = if paff_intra {
                 1
+            } else if paff_b {
+                3
             } else if reset_gap {
                 5
             } else if reordered_four {
@@ -626,7 +673,9 @@ mod tests {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
                     (
-                        if frame_to_fields {
+                        if paff_b {
+                            [0, 2, 1][calls]
+                        } else if frame_to_fields || paff_inter {
                             [0, 1][calls]
                         } else if reset_gap {
                             [0, 2, 4, 8, 6][calls]
@@ -639,7 +688,9 @@ mod tests {
                         } else {
                             calls * 2
                         },
-                        if reordered_four {
+                        if let Some(poc) = implicit_poc {
+                            [0, poc, 8][calls]
+                        } else if reordered_four {
                             [0, 4, 6, 8][calls]
                         } else if frame_gap {
                             if frame_gap_wrap {
@@ -650,7 +701,10 @@ mod tests {
                         } else {
                             calls as i64 * 2
                         },
-                        if paff_intra {
+                        if let Some(poc) = implicit_poc {
+                            [poc, 8 - poc, 1][calls]
+                        } else if paff_intra || (paff_inter && calls == 1) || (paff_b && calls == 2)
+                        {
                             1
                         } else if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
                             4
@@ -662,7 +716,9 @@ mod tests {
                 assert_eq!(
                     (start, duration),
                     (
-                        if reordered_four {
+                        if let Some(poc) = implicit_poc {
+                            [0, poc as u64, 8][calls] * 20_000_000
+                        } else if reordered_four {
                             [0, 4, 6, 8][calls] * 20_000_000
                         } else if frame_gap {
                             (if frame_gap_wrap {
@@ -673,7 +729,10 @@ mod tests {
                         } else {
                             calls as u64 * 40_000_000
                         },
-                        if paff_intra {
+                        if let Some(poc) = implicit_poc {
+                            [poc as u64, 8 - poc as u64, 1][calls] * 20_000_000
+                        } else if paff_intra || (paff_inter && calls == 1) || (paff_b && calls == 2)
+                        {
                             20_000_000
                         } else if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
                             80_000_000

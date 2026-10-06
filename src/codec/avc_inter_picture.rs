@@ -229,7 +229,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
     ) || header.first_mb != 0
         || header.disable_deblocking_filter_idc > 2
         || header.field_pic
-        || !sps.frame_mbs_only
+        || (!sps.frame_mbs_only && sps.mb_adaptive_frame_field)
         || sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma

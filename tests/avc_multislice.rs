@@ -19923,3 +19923,2206 @@ fn paff_intra_raster_rows_residuals_and_aso_match_jm() {
 fn joined_paff_intra_raster_rows_residuals_and_neighbours_match_jm() {
     qualify_paff_intra_raster_rows(true);
 }
+
+#[test]
+fn paff_cabac_intra_raster_rows_and_aso_match_jm() {
+    use fvid::codec::avc_cabac_macroblock::IntraCabacReader;
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for mode in ["zero", "positive", "negative"] {
+            for filter in 0..3 {
+                for aso in [false, true] {
+                    let name = format!(
+                        "avc-paff-cabac-{depth}bit-{mode}-filter{filter}{}",
+                        if aso { "-aso" } else { "" }
+                    );
+                    let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                    let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                    let mut input =
+                        Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                    let config = input.tracks()[0].configuration.clone();
+                    let avc = AvcConfig::parse(&config).unwrap();
+                    let sps = Sps::parse(avc.sps[0]).unwrap();
+                    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                    assert!(!sps.frame_mbs_only && !sps.mb_adaptive_frame_field && pps.cabac);
+                    let mut packet = Vec::new();
+                    input.read_packet(0, 0, &mut packet).unwrap();
+                    let mut count = 0;
+                    for (wire, nal) in NalUnits::new(&packet, avc.length_size).unwrap().enumerate()
+                    {
+                        let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                        assert!(h.idr && !h.field_pic && h.slice_type == SliceType::I);
+                        assert_eq!(
+                            h.first_mb,
+                            if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                        );
+                        assert!(IntraCabacReader::new(&h, &sps, &pps, 3).is_err());
+                        let mut reader = IntraCabacReader::new(&h, &sps, &pps, 4).unwrap();
+                        let mb = reader.read_macroblock().unwrap().unwrap();
+                        assert_eq!(mb.address, h.first_mb);
+                        assert!(!reader.field_decoding());
+                        assert_eq!(
+                            mb.luma_dc[0],
+                            match mode {
+                                "positive" => 1,
+                                "negative" => -1,
+                                _ => 0,
+                            }
+                        );
+                        assert!(reader.read_macroblock().unwrap().is_none());
+                        count += 1;
+                    }
+                    assert_eq!(count, 4);
+                    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                    for _ in 0..2 {
+                        let picture = decoder.decode_order(&packet).unwrap().unwrap();
+                        assert_eq!(picture.dimensions(), (32, 32));
+                        assert!(!decoder.output_is_field_pair());
+                        let mut pixels = Vec::new();
+                        picture.write_planar(&mut pixels).unwrap();
+                        assert_eq!(pixels, oracle, "{name}");
+                        decoder.reset();
+                    }
+                    let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                        Cursor::new(&video),
+                        Default::default(),
+                        16 << 20,
+                    )
+                    .unwrap();
+                    for _ in 0..2 {
+                        let frame = player.read_frame().unwrap().unwrap();
+                        assert_eq!((frame.sample_index, frame.presentation_time.ticks), (0, 0));
+                        let mut pixels = Vec::new();
+                        frame.picture.write_planar(&mut pixels).unwrap();
+                        assert_eq!(pixels, oracle);
+                        assert!(player.read_frame().unwrap().is_none());
+                        player.rewind();
+                    }
+                    assert_eq!(player.seek_to_sync(0), 0);
+                    let mut pixels = Vec::new();
+                    player
+                        .read_frame()
+                        .unwrap()
+                        .unwrap()
+                        .picture
+                        .write_planar(&mut pixels)
+                        .unwrap();
+                    assert_eq!(pixels, oracle);
+                    if aso {
+                        assert_eq!(
+                            oracle,
+                            std::fs::read(root.join(format!(
+                                "avc-paff-cabac-{depth}bit-{mode}-filter{filter}.yuv"
+                            )))
+                            .unwrap()
+                        );
+                    }
+                    cases += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 36);
+}
+
+#[test]
+fn paff_cabac_inter_frames_motion_skip_and_aso_match_jm() {
+    use fvid::codec::{avc_cabac_slice::InterCabacSlice, avc_inter_slice::InterMacroblock};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for init in 0..3 {
+            for skip in [false, true] {
+                for filter in 0..3 {
+                    for aso in [false, true] {
+                        let name = format!(
+                            "avc-paff-inter-{depth}bit-init{init}-{}-filter{filter}{}",
+                            if skip { "skip" } else { "motion" },
+                            if aso { "-aso" } else { "" }
+                        );
+                        let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                        let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                        let mut input =
+                            Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                        let config = input.tracks()[0].configuration.clone();
+                        let avc = AvcConfig::parse(&config).unwrap();
+                        let sps = Sps::parse(avc.sps[0]).unwrap();
+                        let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                        assert!(!sps.frame_mbs_only && !sps.mb_adaptive_frame_field && pps.cabac);
+                        let mut packets = Vec::new();
+                        for sample in 0..2 {
+                            let mut packet = Vec::new();
+                            input.read_packet(0, sample, &mut packet).unwrap();
+                            packets.push(packet);
+                        }
+                        let mut count = 0;
+                        for (wire, nal) in NalUnits::new(&packets[1], avc.length_size)
+                            .unwrap()
+                            .enumerate()
+                        {
+                            let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                            assert!(!h.idr && !h.field_pic && h.slice_type == SliceType::P);
+                            assert_eq!(h.frame_num, 1);
+                            assert_eq!(h.cabac_init_idc, init);
+                            assert_eq!(
+                                h.first_mb,
+                                if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                            );
+                            let mut reader = InterCabacSlice::new(&h, &sps, &pps, 1 << 20).unwrap();
+                            match reader.read_macroblock().unwrap().unwrap() {
+                                InterMacroblock::Skip { address, .. } => {
+                                    assert!(skip);
+                                    assert_eq!(address, h.first_mb as usize);
+                                }
+                                InterMacroblock::Coded {
+                                    address, header, ..
+                                } => {
+                                    assert!(!skip);
+                                    assert_eq!(address, h.first_mb as usize);
+                                    assert_eq!(header.partitions.len(), 1);
+                                    assert_eq!(header.partitions[0].differences[0], [4, 4]);
+                                }
+                                _ => panic!("P fixture must exercise inter prediction"),
+                            }
+                            assert!(!reader.field_decoding());
+                            assert!(reader.read_macroblock().unwrap().is_none());
+                            count += 1;
+                        }
+                        assert_eq!(count, 4);
+                        let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                        for _ in 0..2 {
+                            let mut pixels = Vec::new();
+                            for packet in &packets {
+                                let picture = decoder.decode_order(packet).unwrap().unwrap();
+                                assert_eq!(picture.dimensions(), (32, 32));
+                                picture.write_planar(&mut pixels).unwrap();
+                            }
+                            assert_eq!(pixels, oracle, "{name}");
+                            decoder.reset();
+                        }
+                        let frame_len = oracle.len() / 2;
+                        if skip {
+                            assert_eq!(&oracle[..frame_len], &oracle[frame_len..]);
+                        } else {
+                            assert_ne!(
+                                &oracle[..frame_len],
+                                &oracle[frame_len..],
+                                "motion must change reference pixels"
+                            );
+                        }
+                        let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                            Cursor::new(&video),
+                            Default::default(),
+                            16 << 20,
+                        )
+                        .unwrap();
+                        for _ in 0..2 {
+                            for index in 0..2 {
+                                let frame = player.read_frame().unwrap().unwrap();
+                                assert_eq!(frame.sample_index, index);
+                                let mut pixels = Vec::new();
+                                frame.picture.write_planar(&mut pixels).unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    oracle[index as usize * frame_len
+                                        ..(index as usize + 1) * frame_len]
+                                );
+                            }
+                            assert!(player.read_frame().unwrap().is_none());
+                            player.rewind();
+                        }
+                        assert_eq!(player.seek_to_sync(2), 0);
+                        for index in 0..2 {
+                            let mut pixels = Vec::new();
+                            player
+                                .read_frame()
+                                .unwrap()
+                                .unwrap()
+                                .picture
+                                .write_planar(&mut pixels)
+                                .unwrap();
+                            assert_eq!(pixels, oracle[index * frame_len..(index + 1) * frame_len]);
+                        }
+                        if aso {
+                            assert_eq!(
+                                oracle,
+                                std::fs::read(root.join(format!(
+                                    "avc-paff-inter-{depth}bit-init{init}-{}-filter{filter}.yuv",
+                                    if skip { "skip" } else { "motion" }
+                                )))
+                                .unwrap()
+                            );
+                        }
+                        cases += 1;
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 72);
+}
+
+#[test]
+fn paff_cabac_b_direct_skip_spatial_temporal_and_aso_match_jm() {
+    use fvid::codec::{avc_cabac_slice::InterCabacSlice, avc_inter_slice::InterMacroblock};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for init in 0..3 {
+            for spatial in [false, true] {
+                for skip in [false, true] {
+                    for filter in 0..3 {
+                        for aso in [false, true] {
+                            let name = format!(
+                                "avc-paff-b-{depth}bit-init{init}-{}-{}-filter{filter}{}",
+                                if spatial { "spatial" } else { "temporal" },
+                                if skip { "skip" } else { "direct" },
+                                if aso { "-aso" } else { "" }
+                            );
+                            let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                            let frame_len = oracle.len() / 3;
+                            let other_mode = format!(
+                                "avc-paff-b-{depth}bit-init{init}-{}-{}-filter{filter}{}.yuv",
+                                if spatial { "temporal" } else { "spatial" },
+                                if skip { "skip" } else { "direct" },
+                                if aso { "-aso" } else { "" }
+                            );
+                            let other = std::fs::read(root.join(other_mode)).unwrap();
+                            assert_ne!(
+                                &oracle[frame_len..frame_len * 2],
+                                &other[frame_len..frame_len * 2],
+                                "direct mode must change B-frame prediction"
+                            );
+
+                            let mut input =
+                                Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                            let config = input.tracks()[0].configuration.clone();
+                            let avc = AvcConfig::parse(&config).unwrap();
+                            let sps = Sps::parse(avc.sps[0]).unwrap();
+                            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                            assert!(
+                                !sps.frame_mbs_only && !sps.mb_adaptive_frame_field && pps.cabac
+                            );
+                            let mut packets = Vec::new();
+                            for sample in 0..3 {
+                                let mut p = Vec::new();
+                                input.read_packet(0, sample, &mut p).unwrap();
+                                packets.push(p);
+                            }
+                            let mut count = 0;
+                            for (wire, nal) in NalUnits::new(&packets[2], avc.length_size)
+                                .unwrap()
+                                .enumerate()
+                            {
+                                let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                assert!(!h.idr && !h.field_pic && h.slice_type == SliceType::B);
+                                assert_eq!(h.frame_num, 2);
+                                assert_eq!(h.direct_spatial_mv_pred, spatial);
+                                assert_eq!(h.cabac_init_idc, init);
+                                assert_eq!(
+                                    h.first_mb,
+                                    if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                                );
+                                let mut reader =
+                                    InterCabacSlice::new(&h, &sps, &pps, 1 << 20).unwrap();
+                                match reader.read_macroblock().unwrap().unwrap() {
+                                    InterMacroblock::Skip { address, .. } => {
+                                        assert!(skip);
+                                        assert_eq!(address, h.first_mb as usize);
+                                    }
+                                    InterMacroblock::Coded {
+                                        address, header, ..
+                                    } => {
+                                        assert!(!skip);
+                                        assert_eq!(address, h.first_mb as usize);
+                                        assert_eq!(header.mb_type, 0);
+                                    }
+                                    _ => panic!("B direct fixture must be inter"),
+                                };
+                                assert!(!reader.field_decoding());
+                                assert!(reader.read_macroblock().unwrap().is_none());
+                                count += 1;
+                            }
+                            assert_eq!(count, 4);
+                            let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                            for _ in 0..2 {
+                                for (index, p) in packets.iter().enumerate() {
+                                    let picture = decoder.decode_order(p).unwrap().unwrap();
+                                    assert_eq!(picture.dimensions(), (32, 32));
+                                    let mut pixels = Vec::new();
+                                    picture.write_planar(&mut pixels).unwrap();
+                                    let oracle_index = [0, 2, 1][index];
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[oracle_index * frame_len
+                                            ..(oracle_index + 1) * frame_len],
+                                        "{name} sample {index}"
+                                    );
+                                }
+                                decoder.reset();
+                            }
+                            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                Cursor::new(&video),
+                                Default::default(),
+                                16 << 20,
+                            )
+                            .unwrap();
+                            for _ in 0..2 {
+                                for index in 0..3 {
+                                    let f = player.read_frame().unwrap().unwrap();
+                                    assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                    assert_eq!(f.presentation_time.ticks, index as i64 * 2);
+                                    let mut pixels = Vec::new();
+                                    f.picture.write_planar(&mut pixels).unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                assert!(player.read_frame().unwrap().is_none());
+                                player.rewind();
+                            }
+                            assert_eq!(player.seek_to_sync(4), 0);
+                            for index in 0..3 {
+                                let mut pixels = Vec::new();
+                                player
+                                    .read_frame()
+                                    .unwrap()
+                                    .unwrap()
+                                    .picture
+                                    .write_planar(&mut pixels)
+                                    .unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    oracle[index * frame_len..(index + 1) * frame_len]
+                                );
+                            }
+                            if skip {
+                                let control = format!(
+                                    "avc-paff-b-{depth}bit-init{init}-{}-direct-filter{filter}{}",
+                                    if spatial { "spatial" } else { "temporal" },
+                                    if aso { "-aso" } else { "" }
+                                );
+                                assert_eq!(
+                                    oracle,
+                                    std::fs::read(root.join(format!("{control}.yuv"))).unwrap()
+                                );
+                            }
+                            if aso {
+                                let control = format!(
+                                    "avc-paff-b-{depth}bit-init{init}-{}-{}-filter{filter}.yuv",
+                                    if spatial { "spatial" } else { "temporal" },
+                                    if skip { "skip" } else { "direct" }
+                                );
+                                assert_eq!(oracle, std::fs::read(root.join(control)).unwrap());
+                            }
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 144);
+}
+
+#[test]
+fn joined_paff_cabac_p_and_b_neighbours_match_jm() {
+    use fvid::codec::{avc_cabac_slice::InterCabacSlice, avc_inter_slice::InterMacroblock};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for b_frame in [false, true] {
+        for depth in [8, 10] {
+            for init in 0..3 {
+                for spatial in if b_frame {
+                    vec![false, true]
+                } else {
+                    vec![false]
+                } {
+                    for skip in [false, true] {
+                        for filter in 0..3 {
+                            let name = if b_frame {
+                                format!(
+                                    "avc-paff-b-joined-{depth}bit-init{init}-{}-{}-filter{filter}",
+                                    if spatial { "spatial" } else { "temporal" },
+                                    if skip { "skip" } else { "direct" }
+                                )
+                            } else {
+                                format!(
+                                    "avc-paff-inter-joined-{depth}bit-init{init}-{}-filter{filter}",
+                                    if skip { "skip" } else { "motion" }
+                                )
+                            };
+                            let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                            let frames = if b_frame { 3 } else { 2 };
+                            let frame_len = oracle.len() / frames;
+                            let mut input =
+                                Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                            let config = input.tracks()[0].configuration.clone();
+                            let avc = AvcConfig::parse(&config).unwrap();
+                            let sps = Sps::parse(avc.sps[0]).unwrap();
+                            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                            assert!(
+                                !sps.frame_mbs_only && !sps.mb_adaptive_frame_field && pps.cabac
+                            );
+                            let mut packets = Vec::new();
+                            for sample in 0..frames {
+                                let mut p = Vec::new();
+                                input.read_packet(0, sample, &mut p).unwrap();
+                                packets.push(p);
+                            }
+                            for sample in 1..frames {
+                                let nals = NalUnits::new(&packets[sample], avc.length_size)
+                                    .unwrap()
+                                    .collect::<Vec<_>>();
+                                assert_eq!(nals.len(), 1);
+                                let h = SliceHeader::parse(nals[0].as_ref().unwrap(), &sps, &pps)
+                                    .unwrap();
+                                assert!(!h.field_pic);
+                                assert_eq!(h.first_mb, 0);
+                                assert_eq!(
+                                    h.slice_type,
+                                    if sample == 2 {
+                                        SliceType::B
+                                    } else {
+                                        SliceType::P
+                                    }
+                                );
+                                assert_eq!(h.cabac_init_idc, init);
+                                if sample == 2 {
+                                    assert_eq!(h.direct_spatial_mv_pred, spatial);
+                                }
+                                let expected_skip = skip && (!b_frame || sample == 2);
+                                let mut reader =
+                                    InterCabacSlice::new(&h, &sps, &pps, 1 << 20).unwrap();
+                                for at in 0..4 {
+                                    match reader
+                                        .read_macroblock()
+                                        .unwrap_or_else(|e| {
+                                            panic!("{name} sample {sample} block {at}: {e}")
+                                        })
+                                        .unwrap()
+                                    {
+                                        InterMacroblock::Skip { address, .. } => {
+                                            assert!(expected_skip);
+                                            assert_eq!(address, at);
+                                        }
+                                        InterMacroblock::Coded {
+                                            address, header, ..
+                                        } => {
+                                            assert!(!expected_skip);
+                                            assert_eq!(address, at);
+                                            if sample == 1 {
+                                                assert_eq!(
+                                                    header.partitions[0].differences[0],
+                                                    if at == 0 { [4, 4] } else { [0, 0] }
+                                                );
+                                            } else {
+                                                assert_eq!(header.mb_type, 0);
+                                            }
+                                        }
+                                        _ => panic!("joined fixture must be inter"),
+                                    };
+                                    assert!(!reader.field_decoding());
+                                }
+                                assert!(reader.read_macroblock().unwrap().is_none());
+                            }
+                            let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                            for _ in 0..2 {
+                                for (index, p) in packets.iter().enumerate() {
+                                    let picture = decoder.decode_order(p).unwrap().unwrap();
+                                    assert_eq!(picture.dimensions(), (32, 32));
+                                    let mut pixels = Vec::new();
+                                    picture.write_planar(&mut pixels).unwrap();
+                                    let order = if b_frame { [0, 2, 1][index] } else { index };
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[order * frame_len..(order + 1) * frame_len],
+                                        "{name} sample {index}"
+                                    );
+                                }
+                                decoder.reset();
+                            }
+                            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                Cursor::new(&video),
+                                Default::default(),
+                                16 << 20,
+                            )
+                            .unwrap();
+                            for _ in 0..2 {
+                                for index in 0..frames {
+                                    let f = player.read_frame().unwrap().unwrap();
+                                    assert_eq!(
+                                        f.sample_index,
+                                        if b_frame { [0, 2, 1][index] } else { index }
+                                    );
+                                    assert_eq!(f.presentation_time.ticks, index as i64 * 2);
+                                    let mut pixels = Vec::new();
+                                    f.picture.write_planar(&mut pixels).unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                assert!(player.read_frame().unwrap().is_none());
+                                player.rewind();
+                            }
+                            assert_eq!(player.seek_to_sync((frames as i64 - 1) * 2), 0);
+                            for index in 0..frames {
+                                let mut pixels = Vec::new();
+                                player
+                                    .read_frame()
+                                    .unwrap()
+                                    .unwrap()
+                                    .picture
+                                    .write_planar(&mut pixels)
+                                    .unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    oracle[index * frame_len..(index + 1) * frame_len]
+                                );
+                            }
+                            if filter == 1 {
+                                let independent = name.replace("-joined-", "-");
+                                assert_eq!(
+                                    oracle,
+                                    std::fs::read(root.join(format!("{independent}.yuv"))).unwrap(),
+                                    "neighbour-predicted motion must match explicit independent vectors"
+                                );
+                            }
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 108);
+}
+
+#[test]
+fn paff_cavlc_p_b_raster_rows_joined_and_aso_match_jm() {
+    use fvid::codec::avc_inter_slice::{InterCavlcSlice, InterMacroblock};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for b_frame in [false, true] {
+        for depth in [8, 10] {
+            for spatial in if b_frame {
+                vec![false, true]
+            } else {
+                vec![false]
+            } {
+                for skip in [false, true] {
+                    for filter in 0..3 {
+                        for layout in ["normal", "aso", "joined"] {
+                            let name = format!(
+                                "avc-paff-cavlc-{}{depth}bit-{}{}-filter{filter}-{layout}",
+                                if b_frame { "b-" } else { "p-" },
+                                if b_frame {
+                                    if spatial { "spatial-" } else { "temporal-" }
+                                } else {
+                                    ""
+                                },
+                                if skip { "skip" } else { "coded" }
+                            );
+                            let joined = layout == "joined";
+                            let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                            let frames = if b_frame { 3 } else { 2 };
+                            let frame_len = oracle.len() / frames;
+                            let mut input =
+                                Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                            let config = input.tracks()[0].configuration.clone();
+                            let avc = AvcConfig::parse(&config).unwrap();
+                            let sps = Sps::parse(avc.sps[0]).unwrap();
+                            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                            assert!(
+                                !sps.frame_mbs_only && !sps.mb_adaptive_frame_field && !pps.cabac
+                            );
+                            let mut packets = Vec::new();
+                            for sample in 0..frames {
+                                let mut p = Vec::new();
+                                input.read_packet(0, sample, &mut p).unwrap();
+                                packets.push(p);
+                            }
+                            for sample in 1..frames {
+                                let mut count = 0;
+                                for (wire, nal) in NalUnits::new(&packets[sample], avc.length_size)
+                                    .unwrap()
+                                    .enumerate()
+                                {
+                                    let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                    assert!(!h.field_pic);
+                                    assert_eq!(
+                                        h.slice_type,
+                                        if sample == 2 {
+                                            SliceType::B
+                                        } else {
+                                            SliceType::P
+                                        }
+                                    );
+                                    assert_eq!(
+                                        h.first_mb,
+                                        if joined {
+                                            0
+                                        } else if layout == "aso" {
+                                            [3, 1, 2, 0][wire]
+                                        } else {
+                                            wire as u32
+                                        }
+                                    );
+                                    if sample == 2 {
+                                        assert_eq!(h.direct_spatial_mv_pred, spatial);
+                                    }
+                                    let expected_skip = skip && (!b_frame || sample == 2);
+                                    let mut reader =
+                                        InterCavlcSlice::new_mixed(&h, &sps, &pps, 1 << 20)
+                                            .unwrap_or_else(|e| {
+                                                panic!("{name} sample {sample}: {e}")
+                                            });
+                                    for local in 0..if joined { 4 } else { 1 } {
+                                        let at = if joined { local } else { h.first_mb as usize };
+                                        match reader.read_macroblock().unwrap().unwrap() {
+                                            InterMacroblock::Skip { address, .. } => {
+                                                assert!(expected_skip);
+                                                assert_eq!(address, at);
+                                            }
+                                            InterMacroblock::Coded {
+                                                address, header, ..
+                                            } => {
+                                                assert!(!expected_skip);
+                                                assert_eq!(address, at);
+                                                if sample == 1 {
+                                                    assert_eq!(
+                                                        header.partitions[0].differences[0],
+                                                        if joined && at != 0 {
+                                                            [0, 0]
+                                                        } else {
+                                                            [4, 4]
+                                                        }
+                                                    );
+                                                } else {
+                                                    assert_eq!(header.mb_type, 0);
+                                                }
+                                            }
+                                            _ => panic!("inter fixture must exercise P/B"),
+                                        };
+                                        count += 1;
+                                    }
+                                    assert!(reader.read_macroblock().unwrap().is_none());
+                                }
+                                assert_eq!(count, 4);
+                            }
+                            let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                            for _ in 0..2 {
+                                for (index, p) in packets.iter().enumerate() {
+                                    let picture = decoder.decode_order(p).unwrap().unwrap();
+                                    assert_eq!(picture.dimensions(), (32, 32));
+                                    let mut pixels = Vec::new();
+                                    picture.write_planar(&mut pixels).unwrap();
+                                    let order = if b_frame { [0, 2, 1][index] } else { index };
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[order * frame_len..(order + 1) * frame_len],
+                                        "{name} sample {index}"
+                                    );
+                                }
+                                decoder.reset();
+                            }
+                            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                Cursor::new(&video),
+                                Default::default(),
+                                16 << 20,
+                            )
+                            .unwrap();
+                            for _ in 0..2 {
+                                for index in 0..frames {
+                                    let f = player.read_frame().unwrap().unwrap();
+                                    assert_eq!(
+                                        f.sample_index,
+                                        if b_frame { [0, 2, 1][index] } else { index }
+                                    );
+                                    assert_eq!(f.presentation_time.ticks, index as i64 * 2);
+                                    let mut pixels = Vec::new();
+                                    f.picture.write_planar(&mut pixels).unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                assert!(player.read_frame().unwrap().is_none());
+                                player.rewind();
+                            }
+                            assert_eq!(player.seek_to_sync((frames as i64 - 1) * 2), 0);
+                            for index in 0..frames {
+                                let mut pixels = Vec::new();
+                                player
+                                    .read_frame()
+                                    .unwrap()
+                                    .unwrap()
+                                    .picture
+                                    .write_planar(&mut pixels)
+                                    .unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    oracle[index * frame_len..(index + 1) * frame_len]
+                                );
+                            }
+                            if layout == "aso" || (joined && filter == 1) {
+                                let control = name.replace(&format!("-{layout}"), "-normal");
+                                assert_eq!(
+                                    oracle,
+                                    std::fs::read(root.join(format!("{control}.yuv"))).unwrap()
+                                );
+                            }
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 108);
+}
+
+#[test]
+fn paff_fmo_full_frame_maps_p_motion_and_b_direct_match_jm() {
+    use fvid::codec::{
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+        avc_macroblock::IntraCavlcReader,
+        avc_slice_group_map,
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for kind in 0..7 {
+            for direction in if (3..=5).contains(&kind) {
+                vec![false, true]
+            } else {
+                vec![false]
+            } {
+                for spatial in [false, true] {
+                    for skip in [false, true] {
+                        for filter in 0..3 {
+                            for aso in [false, true] {
+                                let name = format!(
+                                    "avc-paff-fmo-{depth}bit-type{kind}-dir{}-{}-{}-filter{filter}{}",
+                                    u8::from(direction),
+                                    if spatial { "spatial" } else { "temporal" },
+                                    if skip { "skip" } else { "direct" },
+                                    if aso { "-aso" } else { "" }
+                                );
+                                let video =
+                                    std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                let oracle =
+                                    std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                let frame_len = oracle.len() / 3;
+                                let mut input =
+                                    Mp4Reader::open(Cursor::new(&video), Default::default())
+                                        .unwrap();
+                                let config = input.tracks()[0].configuration.clone();
+                                let avc = AvcConfig::parse(&config).unwrap();
+                                let sps = Sps::parse(avc.sps[0]).unwrap();
+                                let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                assert!(
+                                    !sps.frame_mbs_only
+                                        && !sps.mb_adaptive_frame_field
+                                        && !pps.cabac
+                                );
+                                assert_eq!((sps.width_mbs, sps.height_map_units), (2, 2));
+                                let units = match kind {
+                                    0 | 6 => [0, 1, 0, 1],
+                                    1 => [0, 1, 1, 0],
+                                    2 => [0, 1, 1, 1],
+                                    3 => {
+                                        if direction {
+                                            [0, 1, 0, 1]
+                                        } else {
+                                            [1, 1, 0, 0]
+                                        }
+                                    }
+                                    4 => {
+                                        if direction {
+                                            [1, 1, 0, 0]
+                                        } else {
+                                            [0, 0, 1, 1]
+                                        }
+                                    }
+                                    5 => {
+                                        if direction {
+                                            [1, 0, 1, 0]
+                                        } else {
+                                            [0, 1, 0, 1]
+                                        }
+                                    }
+                                    _ => unreachable!(),
+                                };
+                                use fvid::codec::avc::SliceGroups;
+                                let expected_groups = match kind {
+                                    0 => SliceGroups::Interleaved(vec![1, 1]),
+                                    1 => SliceGroups::Dispersed(2),
+                                    2 => SliceGroups::Foreground(vec![(0, 0)]),
+                                    3..=5 => SliceGroups::Changing {
+                                        map_type: kind,
+                                        direction,
+                                        rate: 1,
+                                    },
+                                    6 => SliceGroups::Explicit {
+                                        groups: 2,
+                                        map: units.to_vec(),
+                                    },
+                                    _ => unreachable!(),
+                                };
+                                assert_eq!(pps.slice_groups, expected_groups);
+                                let mut packets = Vec::new();
+                                for sample in 0..3 {
+                                    let mut p = Vec::new();
+                                    input.read_packet(0, sample, &mut p).unwrap();
+                                    packets.push(p);
+                                }
+                                for sample in 0..3 {
+                                    let mut covered = Vec::new();
+                                    let mut slices = 0;
+                                    for (wire, nal) in
+                                        NalUnits::new(&packets[sample], avc.length_size)
+                                            .unwrap()
+                                            .enumerate()
+                                    {
+                                        let h =
+                                            SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                        assert!(!h.field_pic);
+                                        assert_eq!(
+                                            h.slice_type,
+                                            [SliceType::I, SliceType::P, SliceType::B][sample]
+                                        );
+                                        if sample == 2 {
+                                            assert_eq!(h.direct_spatial_mv_pred, spatial);
+                                        }
+                                        let map = avc_slice_group_map::map_units(
+                                            &pps.slice_groups,
+                                            2,
+                                            2,
+                                            h.slice_group_change_cycle,
+                                            8,
+                                        )
+                                        .unwrap();
+                                        assert_eq!(map, units);
+                                        let mbmap = avc_slice_group_map::macroblocks(
+                                            &map, 2, false, false, false, 8,
+                                        )
+                                        .unwrap();
+                                        let group = if aso { 1 - wire } else { wire };
+                                        let addresses = (0..8)
+                                            .filter(|a| mbmap[*a] == group as u8)
+                                            .collect::<Vec<_>>();
+                                        assert_eq!(h.first_mb, addresses[0] as u32);
+                                        if sample == 0 {
+                                            let mut reader = IntraCavlcReader::new_context_fmo(
+                                                &h, &sps, &pps, 8,
+                                            )
+                                            .unwrap();
+                                            for at in addresses {
+                                                let mb = reader.read_macroblock().unwrap().unwrap();
+                                                assert_eq!(mb.address, at as u32);
+                                                covered.push(at);
+                                            }
+                                            assert!(reader.read_macroblock().unwrap().is_none());
+                                        } else {
+                                            let mut reader =
+                                                InterCavlcSlice::new_fmo(&h, &sps, &pps, 1 << 20)
+                                                    .unwrap();
+                                            for at in addresses {
+                                                match reader.read_macroblock().unwrap().unwrap() {
+                                                    InterMacroblock::Skip { address, .. } => {
+                                                        assert!(skip && sample == 2);
+                                                        assert_eq!(address, at);
+                                                    }
+                                                    InterMacroblock::Coded {
+                                                        address,
+                                                        header,
+                                                        ..
+                                                    } => {
+                                                        assert!(!skip || sample == 1);
+                                                        assert_eq!(address, at);
+                                                        if sample == 1 {
+                                                            assert_eq!(
+                                                                header.partitions[0].differences[0],
+                                                                [4, 4]
+                                                            );
+                                                        } else {
+                                                            assert_eq!(header.mb_type, 0);
+                                                        }
+                                                    }
+                                                    _ => panic!("P/B fixture must exercise inter"),
+                                                };
+                                                covered.push(at);
+                                            }
+                                            assert!(reader.read_macroblock().unwrap().is_none());
+                                        }
+                                        slices += 1;
+                                    }
+                                    covered.sort();
+                                    assert_eq!(covered, (0..8).collect::<Vec<_>>());
+                                    assert_eq!(slices, 2);
+                                }
+                                let mut decoder = AvcDecoder::new(&config, 32 << 20).unwrap();
+                                for _ in 0..2 {
+                                    for (index, p) in packets.iter().enumerate() {
+                                        let picture = decoder
+                                            .decode_order(p)
+                                            .unwrap_or_else(|e| {
+                                                panic!("{name} sample {index}: {e}")
+                                            })
+                                            .unwrap();
+                                        assert_eq!(picture.dimensions(), (32, 64));
+                                        assert!(!decoder.output_is_field_pair());
+                                        let mut pixels = Vec::new();
+                                        picture.write_planar(&mut pixels).unwrap();
+                                        let order = [0, 2, 1][index];
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[order * frame_len..(order + 1) * frame_len],
+                                            "{name} sample {index}"
+                                        );
+                                    }
+                                    decoder.reset();
+                                }
+                                let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                    Cursor::new(&video),
+                                    Default::default(),
+                                    32 << 20,
+                                )
+                                .unwrap();
+                                for _ in 0..2 {
+                                    for index in 0..3 {
+                                        let f = player.read_frame().unwrap().unwrap();
+                                        assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                        assert_eq!(f.presentation_time.ticks, index as i64 * 2);
+                                        let mut pixels = Vec::new();
+                                        f.picture.write_planar(&mut pixels).unwrap();
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[index * frame_len..(index + 1) * frame_len]
+                                        );
+                                    }
+                                    assert!(player.read_frame().unwrap().is_none());
+                                    player.rewind();
+                                }
+                                assert_eq!(player.seek_to_sync(4), 0);
+                                for index in 0..3 {
+                                    let mut pixels = Vec::new();
+                                    player
+                                        .read_frame()
+                                        .unwrap()
+                                        .unwrap()
+                                        .picture
+                                        .write_planar(&mut pixels)
+                                        .unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                if aso {
+                                    let control = name.strip_suffix("-aso").unwrap();
+                                    assert_eq!(
+                                        oracle,
+                                        std::fs::read(root.join(format!("{control}.yuv"))).unwrap()
+                                    );
+                                }
+                                if skip {
+                                    let control = name.replace("-skip-", "-direct-");
+                                    assert_eq!(
+                                        oracle,
+                                        std::fs::read(root.join(format!("{control}.yuv"))).unwrap()
+                                    );
+                                }
+                                cases += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 480);
+}
+
+#[test]
+fn paff_fmo_signed_luma_chroma_residuals_match_jm_and_controls() {
+    use fvid::codec::{
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+        avc_slice_group_map,
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for kind in 0..7 {
+            for direction in if (3..=5).contains(&kind) {
+                vec![false, true]
+            } else {
+                vec![false]
+            } {
+                for mode in ["none", "luma-ac", "chroma-dc", "all-ac"] {
+                    for filter in 0..3 {
+                        for aso in [false, true] {
+                            let name = format!(
+                                "avc-paff-fmo-residual-{depth}bit-type{kind}-dir{}-{mode}-filter{filter}{}",
+                                u8::from(direction),
+                                if aso { "-aso" } else { "" }
+                            );
+                            let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                            let frame_len = oracle.len() / 3;
+                            let mut input =
+                                Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                            let config = input.tracks()[0].configuration.clone();
+                            let avc = AvcConfig::parse(&config).unwrap();
+                            let sps = Sps::parse(avc.sps[0]).unwrap();
+                            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                            assert!(
+                                !sps.frame_mbs_only && !sps.mb_adaptive_frame_field && !pps.cabac
+                            );
+                            assert_eq!(sps.coded_dimensions(), (32, 64));
+                            let control_name = format!(
+                                "avc-paff-fmo-{depth}bit-type{kind}-dir{}-temporal-direct-filter{filter}{}.mp4",
+                                u8::from(direction),
+                                if aso { "-aso" } else { "" }
+                            );
+                            let control = Mp4Reader::open(
+                                Cursor::new(std::fs::read(root.join(control_name)).unwrap()),
+                                Default::default(),
+                            )
+                            .unwrap();
+                            assert_eq!(config, control.tracks()[0].configuration);
+                            let mut packets = Vec::new();
+                            for sample in 0..3 {
+                                let mut p = Vec::new();
+                                input.read_packet(0, sample, &mut p).unwrap();
+                                packets.push(p);
+                            }
+                            for sample in 1..3 {
+                                let mut covered = Vec::new();
+                                let mut slices = 0;
+                                for nal in NalUnits::new(&packets[sample], avc.length_size).unwrap()
+                                {
+                                    let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                    assert!(!h.field_pic);
+                                    assert_eq!(
+                                        h.slice_type,
+                                        if sample == 1 {
+                                            SliceType::P
+                                        } else {
+                                            SliceType::B
+                                        }
+                                    );
+                                    let map = avc_slice_group_map::map_units(
+                                        &pps.slice_groups,
+                                        2,
+                                        2,
+                                        h.slice_group_change_cycle,
+                                        8,
+                                    )
+                                    .unwrap();
+                                    let mbmap = avc_slice_group_map::macroblocks(
+                                        &map, 2, false, false, false, 8,
+                                    )
+                                    .unwrap();
+                                    let group = mbmap[h.first_mb as usize];
+                                    let addresses =
+                                        (0..8).filter(|a| mbmap[*a] == group).collect::<Vec<_>>();
+                                    let mut reader =
+                                        InterCavlcSlice::new_fmo(&h, &sps, &pps, 1 << 20).unwrap();
+                                    for (local, at) in addresses.into_iter().enumerate() {
+                                        match reader.read_macroblock().unwrap().unwrap() {
+                                            InterMacroblock::Coded {
+                                                address,
+                                                header,
+                                                coefficients,
+                                            } => {
+                                                assert_eq!(local, 0);
+                                                assert_eq!(address, at);
+                                                assert_eq!(
+                                                    header.partitions[0].differences[0],
+                                                    [4, if sample == 1 { 4 } else { 0 }]
+                                                );
+                                                assert_eq!(
+                                                    header.residual.pattern,
+                                                    match mode {
+                                                        "luma-ac" => 15,
+                                                        "chroma-dc" => 16,
+                                                        "all-ac" => 47,
+                                                        _ => 0,
+                                                    }
+                                                );
+                                                for (block, levels) in
+                                                    coefficients.luma4.iter().enumerate()
+                                                {
+                                                    assert_eq!(
+                                                        levels[1],
+                                                        if mode == "luma-ac" || mode == "all-ac" {
+                                                            if block % 2 == 0 { 1 } else { -1 }
+                                                        } else {
+                                                            0
+                                                        }
+                                                    );
+                                                    assert_eq!(levels[4], 0);
+                                                }
+                                                for component in 0..2 {
+                                                    assert_eq!(
+                                                        coefficients.chroma_dc[component][0],
+                                                        if mode == "chroma-dc" || mode == "all-ac" {
+                                                            if component == 0 { 1 } else { -1 }
+                                                        } else {
+                                                            0
+                                                        }
+                                                    );
+                                                    for block in 0..4 {
+                                                        assert_eq!(
+                                                            coefficients.chroma_ac[component]
+                                                                [block][1],
+                                                            if mode == "all-ac" {
+                                                                if (block + component) % 2 == 0 {
+                                                                    1
+                                                                } else {
+                                                                    -1
+                                                                }
+                                                            } else {
+                                                                0
+                                                            }
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                            InterMacroblock::Skip { address, .. } => {
+                                                assert_ne!(local, 0);
+                                                assert_eq!(address, at);
+                                            }
+                                            _ => panic!(
+                                                "residual fixture must decode inter coefficients"
+                                            ),
+                                        };
+                                        covered.push(at);
+                                    }
+                                    assert!(reader.read_macroblock().unwrap().is_none());
+                                    slices += 1;
+                                }
+                                covered.sort();
+                                assert_eq!(covered, (0..8).collect::<Vec<_>>());
+                                assert_eq!(slices, 2);
+                            }
+                            let mut decoder = AvcDecoder::new(&config, 32 << 20).unwrap();
+                            for _ in 0..2 {
+                                for (index, p) in packets.iter().enumerate() {
+                                    let picture = decoder.decode_order(p).unwrap().unwrap();
+                                    assert_eq!(picture.dimensions(), (32, 64));
+                                    let mut pixels = Vec::new();
+                                    picture.write_planar(&mut pixels).unwrap();
+                                    let order = [0, 2, 1][index];
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[order * frame_len..(order + 1) * frame_len],
+                                        "{name} sample {index}"
+                                    );
+                                }
+                                decoder.reset();
+                            }
+                            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                Cursor::new(&video),
+                                Default::default(),
+                                32 << 20,
+                            )
+                            .unwrap();
+                            for _ in 0..2 {
+                                for index in 0..3 {
+                                    let f = player.read_frame().unwrap().unwrap();
+                                    assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                    let mut pixels = Vec::new();
+                                    f.picture.write_planar(&mut pixels).unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                assert!(player.read_frame().unwrap().is_none());
+                                player.rewind();
+                            }
+                            assert_eq!(player.seek_to_sync(4), 0);
+                            for index in 0..3 {
+                                let mut pixels = Vec::new();
+                                player
+                                    .read_frame()
+                                    .unwrap()
+                                    .unwrap()
+                                    .picture
+                                    .write_planar(&mut pixels)
+                                    .unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    oracle[index * frame_len..(index + 1) * frame_len]
+                                );
+                            }
+                            if aso {
+                                assert_eq!(
+                                    oracle,
+                                    std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.strip_suffix("-aso").unwrap()
+                                    )))
+                                    .unwrap()
+                                );
+                            }
+                            if filter == 1 && mode != "none" {
+                                let baseline = name.replace(&format!("-{mode}-"), "-none-");
+                                let zero =
+                                    std::fs::read(root.join(format!("{baseline}.yuv"))).unwrap();
+                                assert_eq!(&oracle[..frame_len], &zero[..frame_len]);
+                                assert_ne!(
+                                    &oracle[frame_len * 2..],
+                                    &zero[frame_len * 2..],
+                                    "P residual must change pixels"
+                                );
+                            }
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 480);
+}
+
+#[test]
+fn paff_weighted_multireference_p_b_partitions_match_jm_and_controls() {
+    use fvid::codec::{
+        avc_inter::Prediction,
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for identity in [false, true] {
+            for selected in 0..2 {
+                for mode in ["16x16", "16x8", "8x16", "8x8"] {
+                    for filter in 0..3 {
+                        for aso in [false, true] {
+                            let name = format!(
+                                "avc-paff-weight-{depth}bit-{}-ref{selected}-{mode}-filter{filter}{}",
+                                if identity { "identity" } else { "weighted" },
+                                if aso { "-aso" } else { "" }
+                            );
+                            let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                            let frame_len = oracle.len() / 3;
+                            let mut input =
+                                Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                            let config = input.tracks()[0].configuration.clone();
+                            let avc = AvcConfig::parse(&config).unwrap();
+                            let sps = Sps::parse(avc.sps[0]).unwrap();
+                            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                            assert!(
+                                !sps.frame_mbs_only
+                                    && !sps.mb_adaptive_frame_field
+                                    && !pps.cabac
+                                    && pps.weighted_pred
+                            );
+                            assert_eq!(pps.weighted_bipred, 1);
+                            let mut packets = Vec::new();
+                            for sample in 0..3 {
+                                let mut p = Vec::new();
+                                input.read_packet(0, sample, &mut p).unwrap();
+                                packets.push(p);
+                            }
+                            for sample in 1..3 {
+                                let mut count = 0;
+                                for (wire, nal) in NalUnits::new(&packets[sample], avc.length_size)
+                                    .unwrap()
+                                    .enumerate()
+                                {
+                                    let h = SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                    assert!(!h.field_pic);
+                                    assert_eq!(
+                                        h.slice_type,
+                                        if sample == 1 {
+                                            SliceType::P
+                                        } else {
+                                            SliceType::B
+                                        }
+                                    );
+                                    assert_eq!(
+                                        h.first_mb,
+                                        if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                                    );
+                                    assert_eq!(h.refs_l0, if sample == 1 { 1 } else { 2 });
+                                    if sample == 2 {
+                                        assert_eq!(h.refs_l1, 2);
+                                    }
+                                    let weights = h.weights.as_ref().unwrap();
+                                    assert_eq!((weights.luma_denom, weights.chroma_denom), (2, 1));
+                                    assert_eq!(weights.l0.len(), if sample == 1 { 1 } else { 2 });
+                                    assert_eq!(weights.l1.len(), if sample == 1 { 0 } else { 2 });
+                                    for (list, table) in
+                                        [&weights.l0, &weights.l1].iter().enumerate()
+                                    {
+                                        for (reference, weight) in table.iter().enumerate() {
+                                            let expected = if identity {
+                                                (4, 0)
+                                            } else {
+                                                [[(3, 5), (-2, 90)], [(5, -24), (1, 9)]][list]
+                                                    [reference]
+                                            };
+                                            assert_eq!(weight.luma, expected);
+                                            let chroma = if identity {
+                                                [(2, 0); 2]
+                                            } else {
+                                                [
+                                                    [[(1, -7), (3, 8)], [(0, 24), (-1, 48)]],
+                                                    [[(3, 7), (1, -8)], [(2, -10), (4, 3)]],
+                                                ][list][reference]
+                                            };
+                                            assert_eq!(weight.chroma, chroma);
+                                        }
+                                    }
+                                    let mut reader =
+                                        InterCavlcSlice::new_mixed(&h, &sps, &pps, 1 << 20)
+                                            .unwrap();
+                                    match reader.read_macroblock().unwrap().unwrap() {
+                                        InterMacroblock::Coded {
+                                            address, header, ..
+                                        } => {
+                                            assert_eq!(address, h.first_mb as usize);
+                                            assert_eq!(
+                                                header.partitions.len(),
+                                                match mode {
+                                                    "16x16" => 1,
+                                                    "8x8" => 4,
+                                                    _ => 2,
+                                                }
+                                            );
+                                            for part in header.partitions {
+                                                assert_eq!(
+                                                    part.prediction,
+                                                    if sample == 1 {
+                                                        Prediction::L0
+                                                    } else {
+                                                        Prediction::Bi
+                                                    }
+                                                );
+                                                assert_eq!(
+                                                    part.references,
+                                                    if sample == 1 {
+                                                        [Some(0), None]
+                                                    } else {
+                                                        [Some(selected), Some(selected)]
+                                                    }
+                                                );
+                                                assert_eq!(
+                                                    part.differences[0],
+                                                    [4, if sample == 1 { 4 } else { 0 }]
+                                                );
+                                                if sample == 2 {
+                                                    assert_eq!(part.differences[1], [-4, 0]);
+                                                }
+                                            }
+                                        }
+                                        _ => {
+                                            panic!("weighted fixture must use explicit partitions")
+                                        }
+                                    };
+                                    assert!(reader.read_macroblock().unwrap().is_none());
+                                    count += 1;
+                                }
+                                assert_eq!(count, 4);
+                            }
+                            let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                            for _ in 0..2 {
+                                for (index, p) in packets.iter().enumerate() {
+                                    let picture = decoder.decode_order(p).unwrap().unwrap();
+                                    let mut pixels = Vec::new();
+                                    picture.write_planar(&mut pixels).unwrap();
+                                    let order = [0, 2, 1][index];
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[order * frame_len..(order + 1) * frame_len],
+                                        "{name} sample {index}"
+                                    );
+                                }
+                                decoder.reset();
+                            }
+                            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                Cursor::new(&video),
+                                Default::default(),
+                                16 << 20,
+                            )
+                            .unwrap();
+                            for _ in 0..2 {
+                                for index in 0..3 {
+                                    let f = player.read_frame().unwrap().unwrap();
+                                    assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                    assert_eq!(f.presentation_time.ticks, index as i64 * 2);
+                                    let mut pixels = Vec::new();
+                                    f.picture.write_planar(&mut pixels).unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                assert!(player.read_frame().unwrap().is_none());
+                                player.rewind();
+                            }
+                            assert_eq!(player.seek_to_sync(4), 0);
+                            for index in 0..3 {
+                                let mut pixels = Vec::new();
+                                player
+                                    .read_frame()
+                                    .unwrap()
+                                    .unwrap()
+                                    .picture
+                                    .write_planar(&mut pixels)
+                                    .unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    oracle[index * frame_len..(index + 1) * frame_len]
+                                );
+                            }
+                            if aso {
+                                assert_eq!(
+                                    oracle,
+                                    std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.strip_suffix("-aso").unwrap()
+                                    )))
+                                    .unwrap()
+                                );
+                            }
+                            if !identity {
+                                let baseline = name.replace("-weighted-", "-identity-");
+                                let zero =
+                                    std::fs::read(root.join(format!("{baseline}.yuv"))).unwrap();
+                                assert_eq!(&oracle[..frame_len], &zero[..frame_len]);
+                                assert_ne!(
+                                    &oracle[frame_len * 2..],
+                                    &zero[frame_len * 2..],
+                                    "P weights must change pixels"
+                                );
+                                let other = name.replace(
+                                    &format!("-ref{selected}-"),
+                                    &format!("-ref{}-", 1 - selected),
+                                );
+                                let other =
+                                    std::fs::read(root.join(format!("{other}.yuv"))).unwrap();
+                                assert_ne!(
+                                    &oracle[frame_len..frame_len * 2],
+                                    &other[frame_len..frame_len * 2],
+                                    "selected reference must change B pixels"
+                                );
+                            }
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 192);
+}
+
+#[test]
+fn paff_implicit_bipred_asymmetric_poc_matches_jm_and_average_controls() {
+    use fvid::codec::{
+        avc_inter::Prediction,
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for implicit in [false, true] {
+            for selected in 0..2 {
+                for target in [2, 6] {
+                    for mode in ["16x16", "16x8", "8x16", "8x8"] {
+                        for filter in 0..3 {
+                            for aso in [false, true] {
+                                let name = format!(
+                                    "avc-paff-implicit-{depth}bit-{}-ref{selected}-poc{target}-{mode}-filter{filter}{}",
+                                    if implicit { "implicit" } else { "average" },
+                                    if aso { "-aso" } else { "" }
+                                );
+                                let video =
+                                    std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                let oracle =
+                                    std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                let frame_len = oracle.len() / 3;
+                                let mut input =
+                                    Mp4Reader::open(Cursor::new(&video), Default::default())
+                                        .unwrap();
+                                let config = input.tracks()[0].configuration.clone();
+                                let avc = AvcConfig::parse(&config).unwrap();
+                                let sps = Sps::parse(avc.sps[0]).unwrap();
+                                let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                assert!(
+                                    !sps.frame_mbs_only
+                                        && !sps.mb_adaptive_frame_field
+                                        && !pps.cabac
+                                        && pps.weighted_pred
+                                );
+                                assert_eq!(pps.weighted_bipred, if implicit { 2 } else { 0 });
+                                let mut packets = Vec::new();
+                                for sample in 0..3 {
+                                    let mut p = Vec::new();
+                                    input.read_packet(0, sample, &mut p).unwrap();
+                                    packets.push(p);
+                                }
+                                for sample in 0..3 {
+                                    let mut count = 0;
+                                    for (wire, nal) in
+                                        NalUnits::new(&packets[sample], avc.length_size)
+                                            .unwrap()
+                                            .enumerate()
+                                    {
+                                        let h =
+                                            SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                        assert!(!h.field_pic);
+                                        assert_eq!(h.poc_lsb, Some([0, 8, target][sample]));
+                                        assert_eq!(
+                                            h.slice_type,
+                                            [SliceType::I, SliceType::P, SliceType::B][sample]
+                                        );
+                                        assert_eq!(
+                                            h.first_mb,
+                                            if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                                        );
+                                        if sample == 1 {
+                                            let w = h.weights.as_ref().unwrap();
+                                            assert_eq!((w.luma_denom, w.chroma_denom), (2, 1));
+                                            assert_eq!(w.l0[0].luma, (4, 0));
+                                            assert_eq!(w.l0[0].chroma, [(2, 0); 2]);
+                                        } else {
+                                            assert!(h.weights.is_none());
+                                        }
+                                        if sample == 2 {
+                                            assert_eq!((h.refs_l0, h.refs_l1), (2, 2));
+                                            let mut reader =
+                                                InterCavlcSlice::new_mixed(&h, &sps, &pps, 1 << 20)
+                                                    .unwrap();
+                                            match reader.read_macroblock().unwrap().unwrap() {
+                                                InterMacroblock::Coded {
+                                                    address, header, ..
+                                                } => {
+                                                    assert_eq!(address, h.first_mb as usize);
+                                                    assert_eq!(
+                                                        header.partitions.len(),
+                                                        match mode {
+                                                            "16x16" => 1,
+                                                            "8x8" => 4,
+                                                            _ => 2,
+                                                        }
+                                                    );
+                                                    for part in header.partitions {
+                                                        assert_eq!(part.prediction, Prediction::Bi);
+                                                        assert_eq!(
+                                                            part.references,
+                                                            [Some(selected), Some(selected)]
+                                                        );
+                                                        assert_eq!(
+                                                            part.differences,
+                                                            [[4, 0], [-4, 0]]
+                                                        );
+                                                    }
+                                                }
+                                                _ => panic!(
+                                                    "implicit fixture requires explicit Bi partitions"
+                                                ),
+                                            };
+                                            assert!(reader.read_macroblock().unwrap().is_none());
+                                        }
+                                        count += 1;
+                                    }
+                                    assert_eq!(count, 4);
+                                }
+                                let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                                for _ in 0..2 {
+                                    for (index, p) in packets.iter().enumerate() {
+                                        let picture = decoder.decode_order(p).unwrap().unwrap();
+                                        let mut pixels = Vec::new();
+                                        picture.write_planar(&mut pixels).unwrap();
+                                        let order = [0, 2, 1][index];
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[order * frame_len..(order + 1) * frame_len],
+                                            "{name} sample {index}"
+                                        );
+                                    }
+                                    decoder.reset();
+                                }
+                                let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                    Cursor::new(&video),
+                                    Default::default(),
+                                    16 << 20,
+                                )
+                                .unwrap();
+                                for _ in 0..2 {
+                                    for index in 0..3 {
+                                        let f = player.read_frame().unwrap().unwrap();
+                                        assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                        assert_eq!(
+                                            f.presentation_time.ticks,
+                                            [0, target as i64, 8][index]
+                                        );
+                                        let mut pixels = Vec::new();
+                                        f.picture.write_planar(&mut pixels).unwrap();
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[index * frame_len..(index + 1) * frame_len]
+                                        );
+                                    }
+                                    assert!(player.read_frame().unwrap().is_none());
+                                    player.rewind();
+                                }
+                                assert_eq!(player.seek_to_sync(8), 0);
+                                for index in 0..3 {
+                                    let mut pixels = Vec::new();
+                                    player
+                                        .read_frame()
+                                        .unwrap()
+                                        .unwrap()
+                                        .picture
+                                        .write_planar(&mut pixels)
+                                        .unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                if aso {
+                                    assert_eq!(
+                                        oracle,
+                                        std::fs::read(root.join(format!(
+                                            "{}.yuv",
+                                            name.strip_suffix("-aso").unwrap()
+                                        )))
+                                        .unwrap()
+                                    );
+                                }
+                                if implicit {
+                                    let baseline = name.replace("bit-implicit-", "bit-average-");
+                                    let average =
+                                        std::fs::read(root.join(format!("{baseline}.yuv")))
+                                            .unwrap();
+                                    assert_eq!(&oracle[..frame_len], &average[..frame_len]);
+                                    assert_eq!(&oracle[frame_len * 2..], &average[frame_len * 2..]);
+                                    assert_ne!(
+                                        &oracle[frame_len..frame_len * 2],
+                                        &average[frame_len..frame_len * 2],
+                                        "asymmetric POC must change implicit B weights"
+                                    );
+                                }
+                                cases += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 384);
+}
+
+#[test]
+fn paff_cabac_weighted_multireference_partitions_match_jm_and_controls() {
+    use fvid::codec::{
+        avc_cabac_slice::InterCabacSlice, avc_inter::Prediction, avc_inter_slice::InterMacroblock,
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for init in 0..3 {
+            for identity in [false, true] {
+                for selected in 0..2 {
+                    for mode in ["16x16", "16x8", "8x16", "8x8"] {
+                        for filter in 0..3 {
+                            for aso in [false, true] {
+                                let name = format!(
+                                    "avc-paff-cabac-weight-{depth}bit-{}-ref{selected}-{mode}-init{init}-filter{filter}{}",
+                                    if identity { "identity" } else { "weighted" },
+                                    if aso { "-aso" } else { "" }
+                                );
+                                let video =
+                                    std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                let oracle =
+                                    std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                let cavlc = name
+                                    .replace("avc-paff-cabac-weight-", "avc-paff-weight-")
+                                    .replace(&format!("-init{init}"), "");
+                                assert_eq!(
+                                    oracle,
+                                    std::fs::read(root.join(format!("{cavlc}.yuv"))).unwrap(),
+                                    "entropy coding must preserve weighted pixels"
+                                );
+                                let frame_len = oracle.len() / 3;
+                                let mut input =
+                                    Mp4Reader::open(Cursor::new(&video), Default::default())
+                                        .unwrap();
+                                let config = input.tracks()[0].configuration.clone();
+                                let avc = AvcConfig::parse(&config).unwrap();
+                                let sps = Sps::parse(avc.sps[0]).unwrap();
+                                let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                assert!(
+                                    !sps.frame_mbs_only
+                                        && !sps.mb_adaptive_frame_field
+                                        && pps.cabac
+                                        && pps.weighted_pred
+                                );
+                                assert_eq!(pps.weighted_bipred, 1);
+                                let mut packets = Vec::new();
+                                for sample in 0..3 {
+                                    let mut p = Vec::new();
+                                    input.read_packet(0, sample, &mut p).unwrap();
+                                    packets.push(p);
+                                }
+                                for sample in 1..3 {
+                                    let mut count = 0;
+                                    for (wire, nal) in
+                                        NalUnits::new(&packets[sample], avc.length_size)
+                                            .unwrap()
+                                            .enumerate()
+                                    {
+                                        let h =
+                                            SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                        assert!(!h.field_pic);
+                                        assert_eq!(h.cabac_init_idc, init);
+                                        assert_eq!(
+                                            h.slice_type,
+                                            if sample == 1 {
+                                                SliceType::P
+                                            } else {
+                                                SliceType::B
+                                            }
+                                        );
+                                        assert_eq!(
+                                            h.first_mb,
+                                            if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                                        );
+                                        assert_eq!(h.refs_l0, if sample == 1 { 1 } else { 2 });
+                                        if sample == 2 {
+                                            assert_eq!(h.refs_l1, 2);
+                                        }
+                                        let weights = h.weights.as_ref().unwrap();
+                                        assert_eq!(
+                                            (weights.luma_denom, weights.chroma_denom),
+                                            (2, 1)
+                                        );
+                                        assert_eq!(
+                                            weights.l0.len(),
+                                            if sample == 1 { 1 } else { 2 }
+                                        );
+                                        assert_eq!(
+                                            weights.l1.len(),
+                                            if sample == 1 { 0 } else { 2 }
+                                        );
+                                        for (list, table) in
+                                            [&weights.l0, &weights.l1].iter().enumerate()
+                                        {
+                                            for (reference, weight) in table.iter().enumerate() {
+                                                let expected = if identity {
+                                                    (4, 0)
+                                                } else {
+                                                    [[(3, 5), (-2, 90)], [(5, -24), (1, 9)]][list]
+                                                        [reference]
+                                                };
+                                                assert_eq!(weight.luma, expected);
+                                                let chroma = if identity {
+                                                    [(2, 0); 2]
+                                                } else {
+                                                    [
+                                                        [[(1, -7), (3, 8)], [(0, 24), (-1, 48)]],
+                                                        [[(3, 7), (1, -8)], [(2, -10), (4, 3)]],
+                                                    ][list][reference]
+                                                };
+                                                assert_eq!(weight.chroma, chroma);
+                                            }
+                                        }
+                                        let mut reader =
+                                            InterCabacSlice::new(&h, &sps, &pps, 1 << 20).unwrap();
+                                        match reader.read_macroblock().unwrap().unwrap() {
+                                            InterMacroblock::Coded {
+                                                address, header, ..
+                                            } => {
+                                                assert_eq!(address, h.first_mb as usize);
+                                                assert_eq!(
+                                                    header.partitions.len(),
+                                                    match mode {
+                                                        "16x16" => 1,
+                                                        "8x8" => 4,
+                                                        _ => 2,
+                                                    }
+                                                );
+                                                for part in header.partitions {
+                                                    assert_eq!(
+                                                        part.prediction,
+                                                        if sample == 1 {
+                                                            Prediction::L0
+                                                        } else {
+                                                            Prediction::Bi
+                                                        }
+                                                    );
+                                                    assert_eq!(
+                                                        part.references,
+                                                        if sample == 1 {
+                                                            [Some(0), None]
+                                                        } else {
+                                                            [Some(selected), Some(selected)]
+                                                        }
+                                                    );
+                                                    assert_eq!(
+                                                        part.differences[0],
+                                                        [4, if sample == 1 { 4 } else { 0 }]
+                                                    );
+                                                    if sample == 2 {
+                                                        assert_eq!(part.differences[1], [-4, 0]);
+                                                    }
+                                                }
+                                            }
+                                            _ => {
+                                                panic!(
+                                                    "weighted fixture must use explicit partitions"
+                                                )
+                                            }
+                                        };
+                                        assert!(reader.read_macroblock().unwrap().is_none());
+                                        count += 1;
+                                    }
+                                    assert_eq!(count, 4);
+                                }
+                                let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                                for _ in 0..2 {
+                                    for (index, p) in packets.iter().enumerate() {
+                                        let picture = decoder.decode_order(p).unwrap().unwrap();
+                                        let mut pixels = Vec::new();
+                                        picture.write_planar(&mut pixels).unwrap();
+                                        let order = [0, 2, 1][index];
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[order * frame_len..(order + 1) * frame_len],
+                                            "{name} sample {index}"
+                                        );
+                                    }
+                                    decoder.reset();
+                                }
+                                let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                    Cursor::new(&video),
+                                    Default::default(),
+                                    16 << 20,
+                                )
+                                .unwrap();
+                                for _ in 0..2 {
+                                    for index in 0..3 {
+                                        let f = player.read_frame().unwrap().unwrap();
+                                        assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                        assert_eq!(f.presentation_time.ticks, index as i64 * 2);
+                                        let mut pixels = Vec::new();
+                                        f.picture.write_planar(&mut pixels).unwrap();
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[index * frame_len..(index + 1) * frame_len]
+                                        );
+                                    }
+                                    assert!(player.read_frame().unwrap().is_none());
+                                    player.rewind();
+                                }
+                                assert_eq!(player.seek_to_sync(4), 0);
+                                for index in 0..3 {
+                                    let mut pixels = Vec::new();
+                                    player
+                                        .read_frame()
+                                        .unwrap()
+                                        .unwrap()
+                                        .picture
+                                        .write_planar(&mut pixels)
+                                        .unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        oracle[index * frame_len..(index + 1) * frame_len]
+                                    );
+                                }
+                                if aso {
+                                    assert_eq!(
+                                        oracle,
+                                        std::fs::read(root.join(format!(
+                                            "{}.yuv",
+                                            name.strip_suffix("-aso").unwrap()
+                                        )))
+                                        .unwrap()
+                                    );
+                                }
+                                if !identity {
+                                    let baseline = name.replace("-weighted-", "-identity-");
+                                    let zero = std::fs::read(root.join(format!("{baseline}.yuv")))
+                                        .unwrap();
+                                    assert_eq!(&oracle[..frame_len], &zero[..frame_len]);
+                                    assert_ne!(
+                                        &oracle[frame_len * 2..],
+                                        &zero[frame_len * 2..],
+                                        "P weights must change pixels"
+                                    );
+                                    let other = name.replace(
+                                        &format!("-ref{selected}-"),
+                                        &format!("-ref{}-", 1 - selected),
+                                    );
+                                    let other =
+                                        std::fs::read(root.join(format!("{other}.yuv"))).unwrap();
+                                    assert_ne!(
+                                        &oracle[frame_len..frame_len * 2],
+                                        &other[frame_len..frame_len * 2],
+                                        "selected reference must change B pixels"
+                                    );
+                                }
+                                cases += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 576);
+}
+
+#[test]
+fn paff_cabac_implicit_bipred_matches_jm_cavlc_and_average_controls() {
+    use fvid::codec::{
+        avc_cabac_slice::InterCabacSlice, avc_inter::Prediction, avc_inter_slice::InterMacroblock,
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for init in 0..3 {
+            for implicit in [false, true] {
+                for selected in 0..2 {
+                    for target in [2, 6] {
+                        for mode in ["16x16", "16x8", "8x16", "8x8"] {
+                            for filter in 0..3 {
+                                for aso in [false, true] {
+                                    let name = format!(
+                                        "avc-paff-cabac-implicit-{depth}bit-{}-ref{selected}-poc{target}-{mode}-init{init}-filter{filter}{}",
+                                        if implicit { "implicit" } else { "average" },
+                                        if aso { "-aso" } else { "" }
+                                    );
+                                    let video =
+                                        std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                    let oracle =
+                                        std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                    let cavlc = name
+                                        .replace("avc-paff-cabac-implicit-", "avc-paff-implicit-")
+                                        .replace(&format!("-init{init}"), "");
+                                    assert_eq!(
+                                        oracle,
+                                        std::fs::read(root.join(format!("{cavlc}.yuv"))).unwrap(),
+                                        "CABAC must preserve implicit weighted pixels"
+                                    );
+                                    let frame_len = oracle.len() / 3;
+                                    let mut input =
+                                        Mp4Reader::open(Cursor::new(&video), Default::default())
+                                            .unwrap();
+                                    let config = input.tracks()[0].configuration.clone();
+                                    let avc = AvcConfig::parse(&config).unwrap();
+                                    let sps = Sps::parse(avc.sps[0]).unwrap();
+                                    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                    assert!(
+                                        !sps.frame_mbs_only
+                                            && !sps.mb_adaptive_frame_field
+                                            && pps.cabac
+                                            && pps.weighted_pred
+                                    );
+                                    assert_eq!(pps.weighted_bipred, if implicit { 2 } else { 0 });
+                                    let mut packets = Vec::new();
+                                    for sample in 0..3 {
+                                        let mut p = Vec::new();
+                                        input.read_packet(0, sample, &mut p).unwrap();
+                                        packets.push(p);
+                                    }
+                                    for sample in 0..3 {
+                                        let mut count = 0;
+                                        for (wire, nal) in
+                                            NalUnits::new(&packets[sample], avc.length_size)
+                                                .unwrap()
+                                                .enumerate()
+                                        {
+                                            let h = SliceHeader::parse(nal.unwrap(), &sps, &pps)
+                                                .unwrap();
+                                            assert!(!h.field_pic);
+                                            assert_eq!(
+                                                h.cabac_init_idc,
+                                                if sample == 0 { 0 } else { init }
+                                            );
+                                            assert_eq!(h.poc_lsb, Some([0, 8, target][sample]));
+                                            assert_eq!(
+                                                h.slice_type,
+                                                [SliceType::I, SliceType::P, SliceType::B][sample]
+                                            );
+                                            assert_eq!(
+                                                h.first_mb,
+                                                if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                                            );
+                                            if sample == 1 {
+                                                let w = h.weights.as_ref().unwrap();
+                                                assert_eq!((w.luma_denom, w.chroma_denom), (2, 1));
+                                                assert_eq!(w.l0[0].luma, (4, 0));
+                                                assert_eq!(w.l0[0].chroma, [(2, 0); 2]);
+                                            } else {
+                                                assert!(h.weights.is_none());
+                                            }
+                                            if sample == 2 {
+                                                assert_eq!((h.refs_l0, h.refs_l1), (2, 2));
+                                                let mut reader =
+                                                    InterCabacSlice::new(&h, &sps, &pps, 1 << 20)
+                                                        .unwrap();
+                                                match reader.read_macroblock().unwrap().unwrap() {
+                                                    InterMacroblock::Coded {
+                                                        address,
+                                                        header,
+                                                        ..
+                                                    } => {
+                                                        assert_eq!(address, h.first_mb as usize);
+                                                        assert_eq!(
+                                                            header.partitions.len(),
+                                                            match mode {
+                                                                "16x16" => 1,
+                                                                "8x8" => 4,
+                                                                _ => 2,
+                                                            }
+                                                        );
+                                                        for part in header.partitions {
+                                                            assert_eq!(
+                                                                part.prediction,
+                                                                Prediction::Bi
+                                                            );
+                                                            assert_eq!(
+                                                                part.references,
+                                                                [Some(selected), Some(selected)]
+                                                            );
+                                                            assert_eq!(
+                                                                part.differences,
+                                                                [[4, 0], [-4, 0]]
+                                                            );
+                                                        }
+                                                    }
+                                                    _ => panic!(
+                                                        "implicit fixture requires explicit Bi partitions"
+                                                    ),
+                                                };
+                                                assert!(
+                                                    reader.read_macroblock().unwrap().is_none()
+                                                );
+                                            }
+                                            count += 1;
+                                        }
+                                        assert_eq!(count, 4);
+                                    }
+                                    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                                    for _ in 0..2 {
+                                        for (index, p) in packets.iter().enumerate() {
+                                            let picture = decoder.decode_order(p).unwrap().unwrap();
+                                            let mut pixels = Vec::new();
+                                            picture.write_planar(&mut pixels).unwrap();
+                                            let order = [0, 2, 1][index];
+                                            assert_eq!(
+                                                pixels,
+                                                oracle[order * frame_len..(order + 1) * frame_len],
+                                                "{name} sample {index}"
+                                            );
+                                        }
+                                        decoder.reset();
+                                    }
+                                    let mut player =
+                                        fvid::playback_mp4::Mp4VideoReader::open_software(
+                                            Cursor::new(&video),
+                                            Default::default(),
+                                            16 << 20,
+                                        )
+                                        .unwrap();
+                                    for _ in 0..2 {
+                                        for index in 0..3 {
+                                            let f = player.read_frame().unwrap().unwrap();
+                                            assert_eq!(f.sample_index, [0, 2, 1][index]);
+                                            assert_eq!(
+                                                f.presentation_time.ticks,
+                                                [0, target as i64, 8][index]
+                                            );
+                                            let mut pixels = Vec::new();
+                                            f.picture.write_planar(&mut pixels).unwrap();
+                                            assert_eq!(
+                                                pixels,
+                                                oracle[index * frame_len..(index + 1) * frame_len]
+                                            );
+                                        }
+                                        assert!(player.read_frame().unwrap().is_none());
+                                        player.rewind();
+                                    }
+                                    assert_eq!(player.seek_to_sync(8), 0);
+                                    for index in 0..3 {
+                                        let mut pixels = Vec::new();
+                                        player
+                                            .read_frame()
+                                            .unwrap()
+                                            .unwrap()
+                                            .picture
+                                            .write_planar(&mut pixels)
+                                            .unwrap();
+                                        assert_eq!(
+                                            pixels,
+                                            oracle[index * frame_len..(index + 1) * frame_len]
+                                        );
+                                    }
+                                    if aso {
+                                        assert_eq!(
+                                            oracle,
+                                            std::fs::read(root.join(format!(
+                                                "{}.yuv",
+                                                name.strip_suffix("-aso").unwrap()
+                                            )))
+                                            .unwrap()
+                                        );
+                                    }
+                                    if implicit {
+                                        let baseline =
+                                            name.replace("bit-implicit-", "bit-average-");
+                                        let average =
+                                            std::fs::read(root.join(format!("{baseline}.yuv")))
+                                                .unwrap();
+                                        assert_eq!(&oracle[..frame_len], &average[..frame_len]);
+                                        assert_eq!(
+                                            &oracle[frame_len * 2..],
+                                            &average[frame_len * 2..]
+                                        );
+                                        assert_ne!(
+                                            &oracle[frame_len..frame_len * 2],
+                                            &average[frame_len..frame_len * 2],
+                                            "asymmetric POC must change implicit B weights"
+                                        );
+                                    }
+                                    cases += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 1152);
+}

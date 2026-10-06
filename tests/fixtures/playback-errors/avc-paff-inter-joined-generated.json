@@ -1,0 +1,185 @@
+{
+  "generator": "owned PAFF CABAC P frame writer",
+  "fixtures": [
+    {
+      "file": "avc-paff-inter-joined-8bit-init0-motion-filter0.mp4",
+      "sha256": "3e839d0551d53624c82eed57e95eda55342ec266d4b6fde16180499a02ef158e",
+      "oracle_sha256": "682faee6ddcf87a739d6deb3c94e357f94ee5af476cec1398a1197b59615618a"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init0-motion-filter1.mp4",
+      "sha256": "6c48b69b96d15772b811a3849e57c7366a3b1786f160fa9f094c637ae84a9f25",
+      "oracle_sha256": "363344672adbce3b60ab2fa7b212acf0f0f611592cee5e01b13572a59f43cb74"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init0-motion-filter2.mp4",
+      "sha256": "7f679491a3c2b6457c07716f6695ce127bfd5019c1b96afb47b7c1d2039740c8",
+      "oracle_sha256": "363344672adbce3b60ab2fa7b212acf0f0f611592cee5e01b13572a59f43cb74"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init0-skip-filter0.mp4",
+      "sha256": "e27da4f4b835eab95e88e6f381b7583dfc7bafddf190482f22304e1c5fa3e999",
+      "oracle_sha256": "c5771dbf4cc90e30a8ff968599cf2f955b5944d46ac63be8ae48713a90558d5b"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init0-skip-filter1.mp4",
+      "sha256": "0edea51d5f76be28883291591bfdf7a980919ab5c3a73be425369a370c0609fe",
+      "oracle_sha256": "9c9cbc093415bd110eb0b79560432906e65dec0c14124e855b561a84189b3688"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init0-skip-filter2.mp4",
+      "sha256": "7a05e28801cab2c92e0ea3f827650841ed3e9564adb0b6b2c66825c2a53598b0",
+      "oracle_sha256": "9c9cbc093415bd110eb0b79560432906e65dec0c14124e855b561a84189b3688"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init1-motion-filter0.mp4",
+      "sha256": "66f16c382bc918456f21abbbcca13f150d86f62bdf2f3be3bacf89b2627a5d0f",
+      "oracle_sha256": "682faee6ddcf87a739d6deb3c94e357f94ee5af476cec1398a1197b59615618a"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init1-motion-filter1.mp4",
+      "sha256": "6ba07abc3794a9e25bb5af7b1b6d19b4138dab2d8b193d5bd39eacb0a9da5be1",
+      "oracle_sha256": "363344672adbce3b60ab2fa7b212acf0f0f611592cee5e01b13572a59f43cb74"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init1-motion-filter2.mp4",
+      "sha256": "0b633519e2f17d96076b1bb6953daffec1a8b2f1f9e5c0ec60cc50ad935ba702",
+      "oracle_sha256": "363344672adbce3b60ab2fa7b212acf0f0f611592cee5e01b13572a59f43cb74"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init1-skip-filter0.mp4",
+      "sha256": "b42e1c8e4708c454025cb9e381b9a710ee308253663cd74ecf12920640a9bea8",
+      "oracle_sha256": "c5771dbf4cc90e30a8ff968599cf2f955b5944d46ac63be8ae48713a90558d5b"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init1-skip-filter1.mp4",
+      "sha256": "cbcd1cea894cbc889a16cbda400657c705f4fd75d1737894b533c1d55be71f1d",
+      "oracle_sha256": "9c9cbc093415bd110eb0b79560432906e65dec0c14124e855b561a84189b3688"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init1-skip-filter2.mp4",
+      "sha256": "9d72c27f26e94992e92c05271a2bd99b5c09ffeb4b183aa4df50f80ada6fbeb4",
+      "oracle_sha256": "9c9cbc093415bd110eb0b79560432906e65dec0c14124e855b561a84189b3688"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init2-motion-filter0.mp4",
+      "sha256": "581be49dba623fa9e567cdd9b366c08a8d80e060a05d2bd5036fe72242614a16",
+      "oracle_sha256": "682faee6ddcf87a739d6deb3c94e357f94ee5af476cec1398a1197b59615618a"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init2-motion-filter1.mp4",
+      "sha256": "d8a730f52d66ba71355179ea000bcdaef4ad8808466bde22342f140129493f72",
+      "oracle_sha256": "363344672adbce3b60ab2fa7b212acf0f0f611592cee5e01b13572a59f43cb74"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init2-motion-filter2.mp4",
+      "sha256": "351c5767e02add21dd6986fd601ff213b50e9ff5eace1c14e1582a2d48d5ef80",
+      "oracle_sha256": "363344672adbce3b60ab2fa7b212acf0f0f611592cee5e01b13572a59f43cb74"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init2-skip-filter0.mp4",
+      "sha256": "b9447bff26ec4d173f11564d15eb2784b5fdab48daac7d42fa7a1e3f45890577",
+      "oracle_sha256": "c5771dbf4cc90e30a8ff968599cf2f955b5944d46ac63be8ae48713a90558d5b"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init2-skip-filter1.mp4",
+      "sha256": "13feed055d3b7546fc07538107494c3426caf92fbb525b62e51b52d4e8ebe8dc",
+      "oracle_sha256": "9c9cbc093415bd110eb0b79560432906e65dec0c14124e855b561a84189b3688"
+    },
+    {
+      "file": "avc-paff-inter-joined-8bit-init2-skip-filter2.mp4",
+      "sha256": "ad4a2bc64818019ad5ce75bfbaa2a612d52d969ee4b8b68c2ed44febb9acc7d1",
+      "oracle_sha256": "9c9cbc093415bd110eb0b79560432906e65dec0c14124e855b561a84189b3688"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init0-motion-filter0.mp4",
+      "sha256": "7b68872595af527a59d7ca980fd30543f9701a89ce3bda81a911720d73e923eb",
+      "oracle_sha256": "0855d89c99ffcfd5ca419a918675664cb47c00cbdb950834fb5296600909ce20"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init0-motion-filter1.mp4",
+      "sha256": "49cc43de88b720124fbe32d830af0d7b9e23ff68d8a3ef8f88a9dab78c4dea88",
+      "oracle_sha256": "43af3efc1c0a552cabec3c0c1d2d2405874db67570b078204715f684c0b65319"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init0-motion-filter2.mp4",
+      "sha256": "2ac3aa4dd34070f9eae5f5dbfbe09d910ad84f91a4d4cb79862c3091fee19b05",
+      "oracle_sha256": "43af3efc1c0a552cabec3c0c1d2d2405874db67570b078204715f684c0b65319"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init0-skip-filter0.mp4",
+      "sha256": "b423569f9519992ae7ee348a0ba6c8a98d231877e96a2b324f7206ae9678ea69",
+      "oracle_sha256": "3fb429c7be48a17e2979831e171206813f36a8532ec046b452f04ef95edc08c7"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init0-skip-filter1.mp4",
+      "sha256": "b671615e46f0458688dec1d9789ce459e8c456d2666f2482d5daa00c95e27978",
+      "oracle_sha256": "2452dc61cdfbf9574eb176e384ea3b6d41a9a8cabbdffd0b96d7c29d19b0c816"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init0-skip-filter2.mp4",
+      "sha256": "2a2e98849987c630aabb30d9759ec33c9ed7e70d7477973486393589c36248a7",
+      "oracle_sha256": "2452dc61cdfbf9574eb176e384ea3b6d41a9a8cabbdffd0b96d7c29d19b0c816"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init1-motion-filter0.mp4",
+      "sha256": "d9e7b1a95b2940280ca9eed31b5c0897ae10873cc151919ef51262b2569f0fe5",
+      "oracle_sha256": "0855d89c99ffcfd5ca419a918675664cb47c00cbdb950834fb5296600909ce20"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init1-motion-filter1.mp4",
+      "sha256": "b00569a12334f85a372362dfc8630ed4796555fc2530c0298c62d79597e566af",
+      "oracle_sha256": "43af3efc1c0a552cabec3c0c1d2d2405874db67570b078204715f684c0b65319"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init1-motion-filter2.mp4",
+      "sha256": "c7dbba200a8c22d0780c7d00ebf82aa4687a1ee0bbd8dda832a4e773f80fcb20",
+      "oracle_sha256": "43af3efc1c0a552cabec3c0c1d2d2405874db67570b078204715f684c0b65319"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init1-skip-filter0.mp4",
+      "sha256": "f0d58be997216f5067a63811440367d5b67ff6cbd971b869d6faafb970b9f8ff",
+      "oracle_sha256": "3fb429c7be48a17e2979831e171206813f36a8532ec046b452f04ef95edc08c7"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init1-skip-filter1.mp4",
+      "sha256": "4eff2038ef8da40d3221b8271735c3be5f3c2ed8a1733e27cffc3fd8b3e342d4",
+      "oracle_sha256": "2452dc61cdfbf9574eb176e384ea3b6d41a9a8cabbdffd0b96d7c29d19b0c816"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init1-skip-filter2.mp4",
+      "sha256": "33bb29485428e1cef293ab94ac92633d2d6a884969df82eae7b8bcb6bebf1849",
+      "oracle_sha256": "2452dc61cdfbf9574eb176e384ea3b6d41a9a8cabbdffd0b96d7c29d19b0c816"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init2-motion-filter0.mp4",
+      "sha256": "82483a21a36f19d887ffefb218ead75055eb990ceb505f5b793513b95d78c91c",
+      "oracle_sha256": "0855d89c99ffcfd5ca419a918675664cb47c00cbdb950834fb5296600909ce20"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init2-motion-filter1.mp4",
+      "sha256": "adab0d5e13dbc16b2fb2b48acc34664cc6f6eac01e72fab5fffd5a76808b6ac8",
+      "oracle_sha256": "43af3efc1c0a552cabec3c0c1d2d2405874db67570b078204715f684c0b65319"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init2-motion-filter2.mp4",
+      "sha256": "5b078047efd30960589369b9c908830013407a6864d171b49cf6bf0635d67ec8",
+      "oracle_sha256": "43af3efc1c0a552cabec3c0c1d2d2405874db67570b078204715f684c0b65319"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init2-skip-filter0.mp4",
+      "sha256": "1ad79fe4254dc9b479a8976aeb99e7b716e7a1e0e57bf4d6dfb29feafaec9286",
+      "oracle_sha256": "3fb429c7be48a17e2979831e171206813f36a8532ec046b452f04ef95edc08c7"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init2-skip-filter1.mp4",
+      "sha256": "88802bd7cfb00076e7081944c7e823328553f0b846a013f53b56e5acf9ba5364",
+      "oracle_sha256": "2452dc61cdfbf9574eb176e384ea3b6d41a9a8cabbdffd0b96d7c29d19b0c816"
+    },
+    {
+      "file": "avc-paff-inter-joined-10bit-init2-skip-filter2.mp4",
+      "sha256": "f9897044e6bb558dad5f42d2e7ba431c840ea36f303f3ad9e05be6657f28e49d",
+      "oracle_sha256": "2452dc61cdfbf9574eb176e384ea3b6d41a9a8cabbdffd0b96d7c29d19b0c816"
+    }
+  ]
+}

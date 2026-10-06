@@ -119,7 +119,13 @@ impl<'a> InterCavlcSlice<'a> {
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
-            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
+            .and_then(|n| {
+                n.checked_mul(if !sps.frame_mbs_only && !header.field_pic {
+                    2
+                } else {
+                    1
+                })
+            })
             .ok_or_else(|| invalid("AVC context size overflow"))?;
         let extra = count
             .checked_mul(if allow_fmo { 48 } else { 40 })
@@ -141,7 +147,12 @@ impl<'a> InterCavlcSlice<'a> {
             &header.rbsp,
             header.header_bits,
             sps.width_mbs as usize,
-            sps.height_map_units as usize * if mbaff { 2 } else { 1 },
+            sps.height_map_units as usize
+                * if !sps.frame_mbs_only && !header.field_pic {
+                    2
+                } else {
+                    1
+                },
             (header.first_mb as usize)
                 .checked_mul(if mbaff { 2 } else { 1 })
                 .ok_or_else(|| invalid("MBAFF first macroblock overflow"))?,
