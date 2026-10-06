@@ -2320,3 +2320,23 @@ separate. The SPS flag is not yet admitted.
 
 Offline codec validation: 365 passed, no failures, two ignored (explicit fixture
 generation and pending extended-precision pixel acceptance).
+
+### HEVC extended-precision picture acceptance (2026-10-06)
+
+SPS extended_precision_processing_flag is now admitted and propagated through
+coefficient remainder decoding, inverse scaling and transform reconstruction.
+Both persistent and ordinary Rice paths select the limited EGk primitive;
+queued reconstruction blocks retain their precision mode. The old SPS refusal
+expectation is removed and the pixel/reset acceptance test is enabled.
+
+Six owned HM streams qualify every sample of all I/B/B pictures at 8/10/12 bits,
+including tiled mixed independent/dependent segments, WPP, and an enabled
+transform-skip/persistent-Rice configuration. Tests assert the active SPS mode
+and compare again after reset. This supersedes the staged acceptance notes.
+NVDEC still explicitly refuses this unqualified tool, with a regression using
+the 8-bit fixture so that refusal cannot be attributed to unsupported depth.
+No physical GPU or universal HEVC profile/chroma qualification is claimed.
+
+Offline acceptance validation: codec library 365 passed / one ignored; owned
+media library 334 passed / one ignored; CPU NVDEC HEVC preparation 19 passed.
+All three runs completed without failures and required no FFmpeg or network.

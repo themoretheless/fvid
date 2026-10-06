@@ -56,6 +56,7 @@ pub(crate) struct Coefficients {
     values: Vec<i32>,
     rotate: bool,
     rdpcm: Option<u8>,
+    extended_precision: bool,
 }
 pub(crate) fn read(b: &mut impl ResidualBins, c: Config) -> Result<Coefficients> {
     read_with_rotation(b, c, false)
@@ -76,6 +77,14 @@ pub(crate) fn read_with_tools(
     explicit_rdpcm_enabled: bool,
     max_skip_log2: u8,
     persistent_rice: bool,
+) -> Result<Coefficients> {
+    read_with_precision(b, c, rotation_enabled, context_enabled, rdpcm_enabled,
+        explicit_rdpcm_enabled, max_skip_log2, persistent_rice, false)
+}
+pub(crate) fn read_with_precision(
+    b: &mut impl ResidualBins, c: Config, rotation_enabled: bool,
+    context_enabled: bool, rdpcm_enabled: bool, explicit_rdpcm_enabled: bool,
+    max_skip_log2: u8, persistent_rice: bool, extended_precision: bool,
 ) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(2..=5).contains(&max_skip_log2) {
@@ -100,7 +109,7 @@ pub(crate) fn read_with_tools(
             10
         });
     }
-    let coefficients = hevc_residual::read_block_with_rice(
+    let coefficients = hevc_residual::read_block_with_precision(
         b,
         c.log2_size,
         c.component != 0,
@@ -108,6 +117,7 @@ pub(crate) fn read_with_tools(
         c.sign_hiding && !c.transquant_bypass && rdpcm.is_none(),
         context_enabled && (skip || c.transquant_bypass),
         persistent_rice.then_some(usize::from(c.component != 0) * 2 + usize::from(skip || c.transquant_bypass)),
+        extended_precision.then_some(c.bit_depth),
     )?;
     let transform = if c.transquant_bypass {
         Transform::Bypass
@@ -120,6 +130,7 @@ pub(crate) fn read_with_tools(
     };
     Ok(Coefficients {
         config: c,
+        extended_precision,
         rdpcm,
         transform,
         values: coefficients,
@@ -138,7 +149,7 @@ impl Coefficients {
     ) -> Result<()> {
         let c = self.config;
         let matrix = usize::from(c.component) + if c.intra_mode.is_none() { 3 } else { 0 };
-        hevc_transform::reconstruct(
+        hevc_transform::reconstruct_with_precision(
             &self.values,
             c.log2_size,
             c.bit_depth,
@@ -146,6 +157,7 @@ impl Coefficients {
             self.transform,
             scaling,
             matrix,
+            self.extended_precision,
             scratch,
             out,
         )?;

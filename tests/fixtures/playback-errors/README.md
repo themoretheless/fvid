@@ -439,3 +439,10 @@ The pixel/reset acceptance test is explicitly ignored until full integration.
 Generate separately with the tile generator's `--extended-precision-only` switch
 and HM built with `HIGH_BITDEPTH=ON`; the default fixture set is unchanged.
 No private source media or codec parameter sets were used.
+
+Extended-precision acceptance is now enabled and replaces the SPS refusal
+expectation above. Additional streams are `high10-rext10`, `mixed-high12-rext12`,
+`wpp-high12-rext12` and `skip-rice-high12-rext12` under the same
+`hevc-tiles-extended-precision-` prefix. Each contains three owned I/B/B pictures
+and a saved HM pixel oracle. Every sample and decoder reset replay are checked.
+The GPU configuration refusal is separately tested with the 8-bit fixture.

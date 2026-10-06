@@ -55,7 +55,15 @@ variants = [
 if args.extended_precision_only:
     variants = [(f'extended-precision-high{bits}', -1, 3, True,
                  tile_columns + 'LFCrossTileBoundaryFlag : 0\nExtendedPrecision : 1\n',
-                 bits, 64, 64) for bits in [8, 12]]
+                 bits, 64, 64) for bits in [8, 10, 12]]
+    variants += [
+        ('extended-precision-mixed-high12', -1, 3, True, tile_columns +
+         'ExtendedPrecision : 1\nLFCrossTileBoundaryFlag : 1\nSliceMode : 1\nSliceArgument : 2\nSliceSegmentMode : 1\nSliceSegmentArgument : 1\n', 12, 64, 64),
+        ('extended-precision-wpp-high12', -1, 3, True,
+         'ExtendedPrecision : 1\nWaveFrontSynchro : 1\n', 12, 64, 64),
+        ('extended-precision-skip-rice-high12', -1, 3, True, tile_columns +
+         'ExtendedPrecision : 1\nTransformSkip : 1\nTransformSkipLog2MaxSize : 4\nGolombRiceParameterAdaptation : 1\nLFCrossTileBoundaryFlag : 0\n', 12, 64, 64),
+    ]
 for name, depth, frames, filters, extra, bits, width, height in variants:
     with tempfile.TemporaryDirectory(prefix='fvid-hevc-tiles-') as directory:
         tmp = Path(directory)

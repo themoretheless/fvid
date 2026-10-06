@@ -169,12 +169,19 @@ impl RiceState {
         self.parameter
     }
     pub fn decode(&mut self, b: &mut impl ResidualBins, base_level: u32) -> Result<u32> {
+        self.decode_with_precision(b, base_level, None)
+    }
+    fn decode_with_precision(&mut self, b: &mut impl ResidualBins, base_level: u32,
+        extended_depth: Option<u8>) -> Result<u32> {
         if !(1..=3).contains(&base_level) {
             return Err(invalid("invalid HEVC coefficient base level"));
         }
         let rice =
             (self.parameter + u8::from(self.previous_absolute > (3u32 << self.parameter))).min(4);
-        let remainder = remaining_level(b, rice)?;
+        let remainder = match extended_depth {
+            Some(depth) => remaining_level_extended(b, rice, depth)?,
+            None => remaining_level(b, rice)?,
+        };
         let absolute = base_level
             .checked_add(remainder)
             .ok_or_else(|| invalid("HEVC absolute coefficient overflow"))?;
@@ -255,6 +262,14 @@ pub fn read_block_with_skip_context(
 pub(crate) fn read_block_with_rice(
     b: &mut impl ResidualBins, log2_size: u8, chroma: bool, scan: Scan,
     hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
+) -> Result<Vec<i32>> {
+    read_block_with_precision(b, log2_size, chroma, scan, hide_sign, skip_context,
+        persistent_class, None)
+}
+pub(crate) fn read_block_with_precision(
+    b: &mut impl ResidualBins, log2_size: u8, chroma: bool, scan: Scan,
+    hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
+    extended_depth: Option<u8>,
 ) -> Result<Vec<i32>> {
     let last = last_position(b, log2_size, chroma, scan)?;
     let side = 1usize << log2_size;
@@ -376,12 +391,15 @@ pub(crate) fn read_block_with_rice(
             };
             if levels[n] == threshold {
                 if let Some(ref mut statistic) = statistic {
-                    let remainder = remaining_level(b, rice.parameter)?;
+                    let remainder = match extended_depth {
+                        Some(depth) => remaining_level_extended(b, rice.parameter, depth)?,
+                        None => remaining_level(b, rice.parameter)?,
+                    };
                     levels[n] = levels[n].checked_add(remainder)
                         .ok_or_else(|| invalid("HEVC absolute coefficient overflow"))?;
                     if first_remainder { statistic.observe_first_remainder(remainder); first_remainder = false; }
                     if u64::from(levels[n]) > (3u64 << rice.parameter) { rice.parameter += 1; }
-                } else { levels[n] = rice.decode(b, levels[n])?; }
+                } else { levels[n] = rice.decode_with_precision(b, levels[n], extended_depth)?; }
             }
             sum += u64::from(levels[n]);
             if hidden && n == lowest {

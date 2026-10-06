@@ -213,6 +213,7 @@ pub fn configuration(sps: &Sps, pps: &Pps) -> Result<CUVIDHEVCPICPARAMS, String>
         || sps.implicit_rdpcm
         || sps.explicit_rdpcm
         || sps.persistent_rice
+        || sps.extended_precision
         || sps.vui.as_ref().is_some_and(|vui| vui.field_sequence)
     {
         return Err("NVDEC HEVC configuration currently requires Main/Main10 4:2:0 tools".into());
@@ -514,6 +515,16 @@ mod tests {
             assert_eq!(h.pcm_sample_bit_depth_chroma_minus1, depth - 1);
         }
     }
+    #[test]
+    fn extended_precision_fixture_refuses_unqualified_nvdec_configuration() {
+        let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high8-rext8.mp4");
+        let (sps, pps) = sets(data);
+        assert_eq!(sps.depth, [8, 8]);
+        assert!(sps.extended_precision);
+        let error = configuration(&sps, &pps).err().expect("extended precision needs GPU qualification");
+        assert!(error.contains("requires Main/Main10 4:2:0 tools"), "{error}");
+    }
+
     #[test]
     fn active_chroma_qp_list_refuses_unqualified_nvdec_configuration() {
         let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4");
