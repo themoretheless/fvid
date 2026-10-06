@@ -218,7 +218,8 @@ impl<'a> IntraCavlcReader<'a> {
     fn height_mbs(&self) -> usize {
         self.sps.height_map_units as usize * if self.mbaff { 2 } else { 1 }
     }
-    fn pair_field(&self, pair: usize) -> Option<bool> {
+    /// Parsed field mode for an MBAFF pair, or None before its flag is read.
+    pub fn pair_field(&self, pair: usize) -> Option<bool> {
         self.pair_fields
             .get(pair)
             .copied()

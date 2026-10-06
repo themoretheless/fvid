@@ -1,0 +1,126 @@
+{
+  "generator": "owned PCM/header/CAVLC/CABAC writer; explicit valid IDR selection across inferred gaps",
+  "jm_decoder_sha256": "1a500810093469081a9c7f7a83b69164937d7fc62541052d220872ecda7656e5",
+  "fixtures": [
+    {
+      "file": "avc-frame-num-gap-poc0-frame-cavlc.mp4",
+      "sha256": "dd4bca222b6fa70f684f52f5915e329c33435ff6e6661b8842d5849c69a964fc",
+      "oracle_sha256": "e3c7ebf412c91aa3ed359b4a05f1d1c3e7e9e648d19a5ccf4bb9e097893f5125"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-frame-cavlc.mp4",
+      "sha256": "8418b65cef31322a42dcd656649a0e6adfc789c9cd82dfcad11c892ae3a9cc47",
+      "oracle_sha256": "e3c7ebf412c91aa3ed359b4a05f1d1c3e7e9e648d19a5ccf4bb9e097893f5125"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-frame-cavlc.mp4",
+      "sha256": "5c9bdca730c04fa76d931b4e0405dc493545a273b12a8139ff48dc1417a61c04",
+      "oracle_sha256": "e3c7ebf412c91aa3ed359b4a05f1d1c3e7e9e648d19a5ccf4bb9e097893f5125"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-field-cavlc.mp4",
+      "sha256": "8f5c46bb53ef073793d92c29948764384fc2624f60e23d07a377ef422947e7a7",
+      "oracle_sha256": "2f28bc5131dcc988359284bea13437d733f81c0e383fa411d4c3925e661a20af"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-field-cavlc.mp4",
+      "sha256": "9a102a96b67f42c76cbb91ed0395a7e4c4e8aaa64d4454d0228f363e03d3cae7",
+      "oracle_sha256": "2f28bc5131dcc988359284bea13437d733f81c0e383fa411d4c3925e661a20af"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-field-cavlc.mp4",
+      "sha256": "30eab4077ee62b0829fc143f82809be2a4f5b6ecfd7cabc64e4d0f2f1b85cc77",
+      "oracle_sha256": "2f28bc5131dcc988359284bea13437d733f81c0e383fa411d4c3925e661a20af"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-frame-cabac.mp4",
+      "sha256": "567d71a1fdbfc1f7110fc59a9e5e58b3f762ac27dc3115dc64f155ffb42aa60b",
+      "oracle_sha256": "e3c7ebf412c91aa3ed359b4a05f1d1c3e7e9e648d19a5ccf4bb9e097893f5125"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-frame-cabac.mp4",
+      "sha256": "86c65b4db88a3618eccd17d9b346ea110d26f2e56a16a03f972b7a645f6b41ba",
+      "oracle_sha256": "e3c7ebf412c91aa3ed359b4a05f1d1c3e7e9e648d19a5ccf4bb9e097893f5125"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-frame-cabac.mp4",
+      "sha256": "3a06af003c2dd6f5529c6669e20e4aedc6e18427bd98409d29493bb594464cb9",
+      "oracle_sha256": "e3c7ebf412c91aa3ed359b4a05f1d1c3e7e9e648d19a5ccf4bb9e097893f5125"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-field-cabac.mp4",
+      "sha256": "cd8ba49fa804cef59f58834246f6d0d5d344c6a57f2d730404b5d4af9a9ccca0",
+      "oracle_sha256": "2f28bc5131dcc988359284bea13437d733f81c0e383fa411d4c3925e661a20af"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-field-cabac.mp4",
+      "sha256": "e8a755bcdf8d4a14cfeb96a432f58aa868cdd4e0071f8c704903d213ed8e8224",
+      "oracle_sha256": "2f28bc5131dcc988359284bea13437d733f81c0e383fa411d4c3925e661a20af"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-field-cabac.mp4",
+      "sha256": "a07a20ed2b41bef355551ddf95dbe0a0ab278f7dcd5b5ca84228939733062f34",
+      "oracle_sha256": "2f28bc5131dcc988359284bea13437d733f81c0e383fa411d4c3925e661a20af"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-frame-high10-cavlc.mp4",
+      "sha256": "9b4e106ad84f9306488903ea402e13b0179f6f66dc907843e7836c937cc312cd",
+      "oracle_sha256": "ec990f5531e7fe20b4671966d936f9b478098c2fa967ff68fe2bd3d5e36485d9"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-frame-high10-cavlc.mp4",
+      "sha256": "9f069ab400e625511f87febf77b8bd814b3aa912ce3de5d183953914f6fe83c2",
+      "oracle_sha256": "ec990f5531e7fe20b4671966d936f9b478098c2fa967ff68fe2bd3d5e36485d9"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-frame-high10-cavlc.mp4",
+      "sha256": "6ceadae9d0cf41148917191fea2be50e3d690228a2e88e9dcd4dabd715dc1903",
+      "oracle_sha256": "ec990f5531e7fe20b4671966d936f9b478098c2fa967ff68fe2bd3d5e36485d9"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-field-high10-cavlc.mp4",
+      "sha256": "87fff16f4526845705e6111412dd1ab6d21005c57c83bc21489df5d9b5967e9a",
+      "oracle_sha256": "4a083febb20f93f6d575f6c86a81ead28a86475e38525d4dd5fe44191a5e123c"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-field-high10-cavlc.mp4",
+      "sha256": "af4331785b5722edb0ded9cc80c309bc5c16780074ff646f2746cd8cd44731f6",
+      "oracle_sha256": "4a083febb20f93f6d575f6c86a81ead28a86475e38525d4dd5fe44191a5e123c"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-field-high10-cavlc.mp4",
+      "sha256": "486eb2ff3607e157fab3fb527d862bd13af7cb8b0500d70a9ab66c489bcc471a",
+      "oracle_sha256": "4a083febb20f93f6d575f6c86a81ead28a86475e38525d4dd5fe44191a5e123c"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-frame-high10-cabac.mp4",
+      "sha256": "8153c3f652ed95fd6fa6350035ee35e3cb418449f84224e17d61724eed94b59f",
+      "oracle_sha256": "ec990f5531e7fe20b4671966d936f9b478098c2fa967ff68fe2bd3d5e36485d9"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-frame-high10-cabac.mp4",
+      "sha256": "0d598417ce74d84916d343954ae31aba1ba66eb93f54b4a6a28f279d3637d6f9",
+      "oracle_sha256": "ec990f5531e7fe20b4671966d936f9b478098c2fa967ff68fe2bd3d5e36485d9"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-frame-high10-cabac.mp4",
+      "sha256": "cf313d4c394a89bca7d7763a3f7db9f277ab363b2c762cc9be65fa552962c9da",
+      "oracle_sha256": "ec990f5531e7fe20b4671966d936f9b478098c2fa967ff68fe2bd3d5e36485d9"
+    },
+    {
+      "file": "avc-frame-num-gap-poc0-field-high10-cabac.mp4",
+      "sha256": "ef80a55a525929edda268ce2bc59e308f32fc9c322e3356dc344c1ddbba8c6f5",
+      "oracle_sha256": "4a083febb20f93f6d575f6c86a81ead28a86475e38525d4dd5fe44191a5e123c"
+    },
+    {
+      "file": "avc-frame-num-gap-poc1-field-high10-cabac.mp4",
+      "sha256": "560480dc3f2eea0ff69e239e258020e251c3a9bce9469d0ef5a1949c69302db7",
+      "oracle_sha256": "4a083febb20f93f6d575f6c86a81ead28a86475e38525d4dd5fe44191a5e123c"
+    },
+    {
+      "file": "avc-frame-num-gap-poc2-field-high10-cabac.mp4",
+      "sha256": "028ef46d06e88e217cd2e666fe41174205d45be65dce0cee79a4b8b843bfbb04",
+      "oracle_sha256": "4a083febb20f93f6d575f6c86a81ead28a86475e38525d4dd5fe44191a5e123c"
+    }
+  ]
+}

@@ -42,6 +42,18 @@ pub struct DecodedPoc {
     pub after_marking: FieldOrder,
     pub frame_num_offset: i32,
 }
+#[derive(Default)]
+struct PocParameters {
+    frame_num: u32,
+    nal_ref_idc: u8,
+    idr: bool,
+    field_pic: bool,
+    bottom_field: bool,
+    poc_lsb: Option<u32>,
+    delta_poc_bottom: i32,
+    delta_poc: [i32; 2],
+    reset: bool,
+}
 #[derive(Clone, Default)]
 pub struct PocDecoder {
     config: Option<(u8, PictureOrder)>,
@@ -60,6 +72,51 @@ impl PocDecoder {
     /// Commits only after all calculations and invariants succeed. On a decoding
     /// failure after this call, discard/reset the picture pipeline before reuse.
     pub fn decode(&mut self, sps: &Sps, header: &SliceHeader) -> Result<DecodedPoc> {
+        self.decode_parameters(
+            sps,
+            &PocParameters {
+                frame_num: header.frame_num,
+                nal_ref_idc: header.nal_ref_idc,
+                idr: header.idr,
+                field_pic: header.field_pic,
+                bottom_field: header.bottom_field,
+                poc_lsb: header.poc_lsb,
+                delta_poc_bottom: header.delta_poc_bottom,
+                delta_poc: header.delta_poc,
+                reset: header
+                    .memory_operations
+                    .iter()
+                    .any(|op| matches!(op, MemoryOperation::Reset)),
+            },
+        )
+    }
+    /// Infer frame POC for a non-existing gap frame (8.2.5.2), without decoding
+    /// pixels or publishing a picture. Type 0 has no inferred POC and leaves
+    /// reference LSB/MSB history untouched; types 1/2 advance normal frame history.
+    pub fn infer_nonexisting(&mut self, sps: &Sps, frame_num: u32) -> Result<Option<DecodedPoc>> {
+        if !sps.gaps_allowed
+            || !(4..=16).contains(&sps.frame_num_bits)
+            || frame_num >= (1u32 << sps.frame_num_bits)
+            || !matches!(self.config.as_ref(), Some((bits,order)) if *bits==sps.frame_num_bits && order==&sps.picture_order)
+        {
+            return Err(invalid(
+                "AVC gap POC requires SPS permission, valid frame number and initialized matching sequence",
+            ));
+        }
+        if matches!(sps.picture_order, PictureOrder::Lsb { .. }) {
+            return Ok(None);
+        }
+        self.decode_parameters(
+            sps,
+            &PocParameters {
+                frame_num,
+                nal_ref_idc: 1,
+                ..Default::default()
+            },
+        )
+        .map(Some)
+    }
+    fn decode_parameters(&mut self, sps: &Sps, header: &PocParameters) -> Result<DecodedPoc> {
         if !(4..=16).contains(&sps.frame_num_bits)
             || header.frame_num >= (1u32 << sps.frame_num_bits)
             || (sps.frame_mbs_only && header.field_pic)
@@ -78,10 +135,7 @@ impl PocDecoder {
                 _ => {}
             }
         }
-        let reset = header
-            .memory_operations
-            .iter()
-            .any(|op| matches!(op, MemoryOperation::Reset));
+        let reset = header.reset;
         if reset && header.nal_ref_idc == 0 {
             return Err(invalid("MMCO reset in a non-reference picture"));
         }
@@ -241,6 +295,171 @@ mod tests {
         let pps = Pps::parse(&[0x68, 0xce, 0x09, 0xc8], &sps).unwrap();
         let header = SliceHeader::parse(&[0x65, 0x88, 0x84, 0x3a, 0x27, 0x80], &sps, &pps).unwrap();
         (sps, header)
+    }
+    #[test]
+    fn type_zero_gap_inference_preserves_reference_lsb_msb_and_frame_history() {
+        let (mut s, mut h) = fixture();
+        s.gaps_allowed = true;
+        s.picture_order = PictureOrder::Lsb { bits: 4 };
+        let mut decoder = PocDecoder::new();
+        h.poc_lsb = Some(0);
+        decoder.decode(&s, &h).unwrap();
+        h.idr = false;
+        h.frame_num = 14;
+        h.poc_lsb = Some(14);
+        // Establish a legitimate positive LSB history through six first.
+        h.frame_num = 1;
+        h.poc_lsb = Some(6);
+        decoder.decode(&s, &h).unwrap();
+        h.frame_num = 14;
+        h.poc_lsb = Some(14);
+        decoder.decode(&s, &h).unwrap();
+        let before = (
+            decoder.previous_frame_num,
+            decoder.previous_frame_offset,
+            decoder.reference_msb,
+            decoder.reference_lsb,
+        );
+        for frame in [15, 0, 1] {
+            assert!(decoder.infer_nonexisting(&s, frame).unwrap().is_none());
+        }
+        assert_eq!(
+            (
+                decoder.previous_frame_num,
+                decoder.previous_frame_offset,
+                decoder.reference_msb,
+                decoder.reference_lsb
+            ),
+            before
+        );
+        h.frame_num = 2;
+        h.poc_lsb = Some(2);
+        let poc = decoder.decode(&s, &h).unwrap();
+        assert_eq!(poc.before_marking.picture(), 18);
+        assert_eq!(poc.frame_num_offset, 16);
+    }
+    #[test]
+    fn inferred_cycle_and_decode_order_frames_advance_wrap_and_non_reference_history() {
+        for cycle in [false, true] {
+            let (mut s, mut h) = fixture();
+            s.gaps_allowed = true;
+            s.picture_order = if cycle {
+                PictureOrder::Cycle {
+                    always_zero: true,
+                    non_ref_offset: 0,
+                    top_bottom_offset: 1,
+                    offsets: vec![2],
+                }
+            } else {
+                PictureOrder::DecodeOrder
+            };
+            let mut decoder = PocDecoder::new();
+            decoder.decode(&s, &h).unwrap();
+            for frame in 1..=15 {
+                let poc = decoder.infer_nonexisting(&s, frame).unwrap().unwrap();
+                assert_eq!(
+                    poc.before_marking,
+                    FieldOrder {
+                        top: Some(2 * frame as i32),
+                        bottom: Some(2 * frame as i32 + i32::from(cycle))
+                    }
+                );
+                assert_eq!(poc.after_marking, poc.before_marking);
+                assert_eq!(poc.frame_num_offset, 0);
+            }
+            for (frame, expected) in [(0, 32), (1, 34)] {
+                let poc = decoder.infer_nonexisting(&s, frame).unwrap().unwrap();
+                assert_eq!(poc.before_marking.top, Some(expected));
+                assert_eq!(poc.frame_num_offset, 16);
+            }
+            h.idr = false;
+            h.frame_num = 2;
+            assert_eq!(decoder.decode(&s, &h).unwrap().before_marking.top, Some(36));
+            h.frame_num = 3;
+            h.nal_ref_idc = 0;
+            decoder.decode(&s, &h).unwrap();
+            let inferred = decoder.infer_nonexisting(&s, 3).unwrap().unwrap();
+            assert_eq!(inferred.before_marking.top, Some(38));
+            assert_eq!(inferred.frame_num_offset, 16);
+            assert_eq!(
+                decoder
+                    .infer_nonexisting(&s, 4)
+                    .unwrap()
+                    .unwrap()
+                    .before_marking
+                    .top,
+                Some(40)
+            );
+        }
+    }
+    #[test]
+    fn inferred_cycle_offsets_are_signed_and_mmco_reset_starts_new_history() {
+        let (mut s, mut h) = fixture();
+        s.gaps_allowed = true;
+        s.picture_order = PictureOrder::Cycle {
+            always_zero: true,
+            non_ref_offset: -7,
+            top_bottom_offset: 2,
+            offsets: vec![-3, 5],
+        };
+        let mut decoder = PocDecoder::new();
+        decoder.decode(&s, &h).unwrap();
+        for (frame, top) in (1..=10).zip([-3, 2, -1, 4, 1, 6, 3, 8, 5, 10]) {
+            let poc = decoder.infer_nonexisting(&s, frame).unwrap().unwrap();
+            assert_eq!(
+                poc.before_marking,
+                FieldOrder {
+                    top: Some(top),
+                    bottom: Some(top + 2)
+                }
+            );
+        }
+        h.idr = false;
+        h.frame_num = 11;
+        h.memory_operations = vec![MemoryOperation::Reset];
+        let reset = decoder.decode(&s, &h).unwrap();
+        assert_eq!(reset.after_marking.picture(), 0);
+        assert_eq!(
+            decoder
+                .infer_nonexisting(&s, 1)
+                .unwrap()
+                .unwrap()
+                .before_marking
+                .top,
+            Some(-3)
+        );
+    }
+    #[test]
+    fn invalid_inferred_poc_inputs_and_overflow_do_not_mutate_history() {
+        let (mut s, h) = fixture();
+        s.gaps_allowed = true;
+        s.picture_order = PictureOrder::DecodeOrder;
+        let mut empty = PocDecoder::new();
+        assert!(empty.infer_nonexisting(&s, 1).is_err());
+        let mut decoder = PocDecoder::new();
+        decoder.decode(&s, &h).unwrap();
+        let before = (decoder.previous_frame_num, decoder.previous_frame_offset);
+        let mut forbidden = s.clone();
+        forbidden.gaps_allowed = false;
+        assert!(decoder.infer_nonexisting(&forbidden, 1).is_err());
+        let mut changed = s.clone();
+        changed.picture_order = PictureOrder::Lsb { bits: 4 };
+        assert!(decoder.infer_nonexisting(&changed, 1).is_err());
+        changed = s.clone();
+        changed.frame_num_bits = 3;
+        assert!(decoder.infer_nonexisting(&changed, 1).is_err());
+        assert!(decoder.infer_nonexisting(&s, 16).is_err());
+        assert_eq!(
+            (decoder.previous_frame_num, decoder.previous_frame_offset),
+            before
+        );
+        decoder.previous_frame_offset = i32::MAX;
+        decoder.previous_frame_num = 15;
+        assert!(decoder.infer_nonexisting(&s, 0).is_err());
+        assert_eq!(
+            (decoder.previous_frame_num, decoder.previous_frame_offset),
+            (15, i32::MAX)
+        );
     }
     #[test]
     fn type_zero_reordering_wrap_and_non_reference_history() {

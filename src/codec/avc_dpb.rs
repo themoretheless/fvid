@@ -2,7 +2,7 @@
 //! Output/display reordering is separate; retain an `Arc` for pictures awaiting display.
 use super::{
     avc_references::{FrameReference, ReferenceLists, frame_lists},
-    avc_slice::{MemoryOperation, SliceHeader},
+    avc_slice::{MemoryOperation, RefModification, SliceHeader, SliceType},
 };
 use crate::{Result, invalid};
 use std::sync::Arc;
@@ -13,7 +13,9 @@ pub struct ReferenceBuffer<T> {
     capacity: usize,
     max_long_term_index: Option<u32>,
     initialized: bool,
-    frames: Vec<(FrameReference, Arc<T>)>,
+    // Inferred gap entries have no sample storage. Their POC is absent for
+    // POC type 0, so B-list initialization must exclude those entries.
+    frames: Vec<(FrameReference, Option<Arc<T>>, bool)>,
 }
 impl<T> ReferenceBuffer<T> {
     pub fn new(frame_num_bits: u8, max_num_ref_frames: u32) -> Result<Self> {
@@ -29,17 +31,75 @@ impl<T> ReferenceBuffer<T> {
         })
     }
     pub fn get(&self, id: u64) -> Option<&Arc<T>> {
-        self.frames.iter().find(|(r, _)| r.id == id).map(|(_, p)| p)
+        self.frames
+            .iter()
+            .find(|(r, _, _)| r.id == id)
+            .and_then(|(_, p, _)| p.as_ref())
     }
     pub fn references(&self) -> Vec<FrameReference> {
-        self.frames.iter().map(|(r, _)| *r).collect()
+        self.frames.iter().map(|(r, _, _)| *r).collect()
     }
     pub fn lists(&self, header: &SliceHeader, poc: i32) -> Result<ReferenceLists> {
         if header.field_pic {
-            return Err(crate::unsupported("AVC field reference lists are not implemented"));
+            return Err(crate::unsupported(
+                "AVC field reference lists are not implemented",
+            ));
         }
+        let max = 1u32 << self.frame_num_bits;
+        if header.frame_num >= max {
+            return Err(invalid("AVC reference list frame number out of range"));
+        }
+        if matches!(
+            header.slice_type,
+            SliceType::P | SliceType::Sp | SliceType::B
+        ) {
+            if !self.frames.iter().any(|(_, picture, _)| picture.is_some()) {
+                return Err(invalid("AVC reference list has no existing picture"));
+            }
+            for commands in [&header.modifications_l0, &header.modifications_l1]
+                .into_iter()
+                .take(if header.slice_type == SliceType::B {
+                    2
+                } else {
+                    1
+                })
+            {
+                let mut predicted = i64::from(header.frame_num);
+                for command in commands {
+                    if let RefModification::Subtract(n) | RefModification::Add(n) = *command {
+                        if n >= max {
+                            return Err(invalid(
+                                "AVC reference modification difference out of range",
+                            ));
+                        }
+                        predicted = (predicted
+                            + if matches!(command, RefModification::Subtract(_)) {
+                                -(i64::from(n) + 1)
+                            } else {
+                                i64::from(n) + 1
+                            })
+                        .rem_euclid(i64::from(max));
+                        if self.frames.iter().any(|(reference, picture, _)| {
+                            picture.is_none()
+                                && reference.long_term_index.is_none()
+                                && i64::from(reference.frame_num) == predicted
+                        }) {
+                            return Err(invalid(
+                                "AVC reference modification selects non-existing picture",
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+        let references: Vec<_> = self
+            .frames
+            .iter()
+            .filter(|(_, _, has_poc)| header.slice_type != SliceType::B || *has_poc)
+            .map(|(reference, _, _)| *reference)
+            .collect();
         frame_lists(
-            &self.references(),
+            &references,
             self.frame_num_bits,
             header.frame_num,
             poc,
@@ -47,6 +107,50 @@ impl<T> ReferenceBuffer<T> {
             [header.refs_l0 as usize, header.refs_l1 as usize],
             [&header.modifications_l0, &header.modifications_l1],
         )
+    }
+    /// Mark one gap-inferred frame as non-existing short-term reference (8.2.5.2).
+    /// It consumes a sliding-window slot but owns no pixels and cannot be used
+    /// for prediction. `poc` is None only for pic_order_cnt_type 0. Validation
+    /// or eviction failure leaves the buffer unchanged.
+    pub fn infer_nonexisting(&mut self, frame_num: u32, poc: Option<i32>, id: u64) -> Result<()> {
+        let max = 1u32 << self.frame_num_bits;
+        if !self.initialized || frame_num >= max {
+            return Err(invalid(
+                "AVC inferred reference needs initialized DPB and valid frame number",
+            ));
+        }
+        let mut frames = self.frames.clone();
+        if frames.len() == self.capacity {
+            let index = frames
+                .iter()
+                .enumerate()
+                .filter(|(_, (r, _, _))| r.long_term_index.is_none())
+                .min_by_key(|(_, (r, _, _))| wrapped(r.frame_num, frame_num, max))
+                .map(|(i, _)| i)
+                .ok_or_else(|| invalid("AVC sliding window has no short-term reference"))?;
+            frames.remove(index);
+        }
+        if frames.len() >= self.capacity
+            || frames.iter().any(|(r, _, _)| {
+                r.id == id || (r.long_term_index.is_none() && r.frame_num == frame_num)
+            })
+        {
+            return Err(invalid(
+                "AVC inferred reference capacity or identity conflict",
+            ));
+        }
+        frames.push((
+            FrameReference {
+                id,
+                frame_num,
+                poc: poc.unwrap_or(0),
+                long_term_index: None,
+            },
+            None,
+            poc.is_some(),
+        ));
+        self.frames = frames;
+        Ok(())
     }
     /// Call after reconstructing every slice of a frame. `poc` is the POC after
     /// MMCO 5 adjustment from `PocDecoder`. Non-reference frames are not retained.
@@ -60,7 +164,9 @@ impl<T> ReferenceBuffer<T> {
         picture: Arc<T>,
     ) -> Result<()> {
         if header.field_pic {
-            return Err(crate::unsupported("AVC field reference marking is not implemented"));
+            return Err(crate::unsupported(
+                "AVC field reference marking is not implemented",
+            ));
         }
         let max = 1u32 << self.frame_num_bits;
         if header.frame_num >= max
@@ -103,7 +209,7 @@ impl<T> ReferenceBuffer<T> {
                         let target = i64::from(header.frame_num) - (i64::from(difference) + 1);
                         let index = frames
                             .iter()
-                            .position(|(r, _)| {
+                            .position(|(r, _, _)| {
                                 r.long_term_index.is_none()
                                     && wrapped(r.frame_num, header.frame_num, max) == target
                             })
@@ -111,12 +217,17 @@ impl<T> ReferenceBuffer<T> {
                                 invalid("AVC MMCO selects missing short-term picture")
                             })?;
                         if let MemoryOperation::ShortToLong { index: long, .. } = *op {
+                            if frames[index].1.is_none() {
+                                return Err(invalid(
+                                    "AVC MMCO cannot mark non-existing picture long-term",
+                                ));
+                            }
                             check_long(long, limit)?;
                             let target_id = frames[index].0.id;
-                            frames.retain(|(r, _)| r.long_term_index != Some(long));
+                            frames.retain(|(r, _, _)| r.long_term_index != Some(long));
                             frames
                                 .iter_mut()
-                                .find(|(r, _)| r.id == target_id)
+                                .find(|(r, _, _)| r.id == target_id)
                                 .unwrap()
                                 .0
                                 .long_term_index = Some(long);
@@ -127,7 +238,7 @@ impl<T> ReferenceBuffer<T> {
                     MemoryOperation::ForgetLong(long) => {
                         let index = frames
                             .iter()
-                            .position(|(r, _)| r.long_term_index == Some(long))
+                            .position(|(r, _, _)| r.long_term_index == Some(long))
                             .ok_or_else(|| invalid("AVC MMCO selects missing long-term picture"))?;
                         frames.remove(index);
                     }
@@ -136,7 +247,7 @@ impl<T> ReferenceBuffer<T> {
                             return Err(invalid("AVC long-term limit exceeds reference capacity"));
                         }
                         limit = plus_one.checked_sub(1);
-                        frames.retain(|(r, _)| {
+                        frames.retain(|(r, _, _)| {
                             r.long_term_index
                                 .is_none_or(|n| limit.is_some_and(|l| n <= l))
                         });
@@ -156,7 +267,7 @@ impl<T> ReferenceBuffer<T> {
                         }
                         check_long(long, limit)?;
                         marked_current = true;
-                        frames.retain(|(r, _)| r.long_term_index != Some(long));
+                        frames.retain(|(r, _, _)| r.long_term_index != Some(long));
                         current.long_term_index = Some(long);
                     }
                 }
@@ -165,14 +276,14 @@ impl<T> ReferenceBuffer<T> {
             let index = frames
                 .iter()
                 .enumerate()
-                .filter(|(_, (r, _))| r.long_term_index.is_none())
-                .min_by_key(|(_, (r, _))| wrapped(r.frame_num, header.frame_num, max))
+                .filter(|(_, (r, _, _))| r.long_term_index.is_none())
+                .min_by_key(|(_, (r, _, _))| wrapped(r.frame_num, header.frame_num, max))
                 .map(|(i, _)| i)
                 .ok_or_else(|| invalid("AVC sliding window has no short-term reference"))?;
             frames.remove(index);
         }
         if frames.len() >= self.capacity
-            || frames.iter().any(|(r, _)| {
+            || frames.iter().any(|(r, _, _)| {
                 r.id == id
                     || (r.long_term_index.is_none()
                         && current.long_term_index.is_none()
@@ -183,7 +294,7 @@ impl<T> ReferenceBuffer<T> {
                 "AVC reference buffer capacity or identity conflict",
             ));
         }
-        frames.push((current, picture));
+        frames.push((current, Some(picture), true));
         self.frames = frames;
         self.max_long_term_index = limit;
         self.initialized = true;
@@ -218,6 +329,167 @@ mod tests {
         let s = Sps::parse(&bytes).unwrap();
         let p = Pps::parse(&[0x68, 0xce, 0x09, 0xc8], &s).unwrap();
         SliceHeader::parse(&[0x65, 0x88, 0x84, 0x3a, 0x27, 0x80], &s, &p).unwrap()
+    }
+    #[test]
+    fn inferred_gap_entries_occupy_slots_without_sample_storage() {
+        let mut buffer = ReferenceBuffer::new(4, 3).unwrap();
+        let mut h = header();
+        let shown = Arc::new(123);
+        buffer.finish(&h, 0, 0, shown.clone()).unwrap();
+        buffer.infer_nonexisting(1, None, 1).unwrap();
+        buffer.infer_nonexisting(2, None, 2).unwrap();
+        assert_eq!(
+            buffer.references().iter().map(|r| r.id).collect::<Vec<_>>(),
+            [0, 1, 2]
+        );
+        assert!(buffer.get(1).is_none() && buffer.get(2).is_none());
+        h.idr = false;
+        h.frame_num = 3;
+        h.slice_type = SliceType::P;
+        h.refs_l0 = 1;
+        assert_eq!(buffer.lists(&h, 2).unwrap().l0, [2]);
+        h.modifications_l0 = vec![RefModification::Subtract(2)];
+        assert_eq!(buffer.lists(&h, 2).unwrap().l0, [0]);
+        buffer.finish(&h, 2, 3, Arc::new(456)).unwrap();
+        assert_eq!(
+            buffer.references().iter().map(|r| r.id).collect::<Vec<_>>(),
+            [1, 2, 3]
+        );
+        assert!(buffer.get(0).is_none());
+        assert_eq!(*shown, 123); // output ownership outlives sliding eviction
+    }
+    #[test]
+    fn b_lists_exclude_only_gap_entries_without_inferred_poc() {
+        for known in [false, true] {
+            let mut buffer = ReferenceBuffer::new(4, 4).unwrap();
+            let mut h = header();
+            buffer.finish(&h, 0, 0, Arc::new(0)).unwrap();
+            buffer.infer_nonexisting(1, known.then_some(2), 1).unwrap();
+            buffer.infer_nonexisting(2, known.then_some(4), 2).unwrap();
+            h.idr = false;
+            h.frame_num = 3;
+            buffer.finish(&h, 8, 3, Arc::new(3)).unwrap();
+            h.slice_type = SliceType::B;
+            h.frame_num = 4;
+            h.nal_ref_idc = 0;
+            h.refs_l0 = 1;
+            h.refs_l1 = 1;
+            let lists = buffer.lists(&h, 3).unwrap();
+            assert_eq!(lists.l0, if known { vec![1] } else { vec![0] });
+            assert_eq!(lists.l1, if known { vec![2] } else { vec![3] });
+            assert!(buffer.get(1).is_none() && buffer.get(2).is_none());
+        }
+    }
+    #[test]
+    fn gap_metadata_rejects_modification_and_long_term_assignment_but_allows_forgetting() {
+        let mut buffer = ReferenceBuffer::new(4, 4).unwrap();
+        let mut h = header();
+        buffer.finish(&h, 0, 0, Arc::new(0)).unwrap();
+        buffer.infer_nonexisting(1, None, 1).unwrap();
+        h.idr = false;
+        h.frame_num = 2;
+        h.slice_type = SliceType::P;
+        h.refs_l0 = 1;
+        for command in [RefModification::Subtract(0), RefModification::Add(14)] {
+            h.modifications_l0 = vec![command];
+            assert!(
+                buffer
+                    .lists(&h, 4)
+                    .unwrap_err()
+                    .to_string()
+                    .contains("non-existing")
+            );
+        }
+        h.modifications_l0.clear();
+        let before = buffer.references();
+        h.adaptive_reference_marking = true;
+        h.memory_operations = vec![
+            MemoryOperation::LimitLong(1),
+            MemoryOperation::ShortToLong {
+                difference: 0,
+                index: 0,
+            },
+        ];
+        assert!(
+            buffer
+                .finish(&h, 4, 2, Arc::new(2))
+                .unwrap_err()
+                .to_string()
+                .contains("non-existing")
+        );
+        assert_eq!(buffer.references(), before);
+        assert_eq!(buffer.max_long_term_index, None);
+        h.memory_operations = vec![MemoryOperation::ForgetShort(0)];
+        buffer.finish(&h, 4, 2, Arc::new(2)).unwrap();
+        assert_eq!(
+            buffer.references().iter().map(|r| r.id).collect::<Vec<_>>(),
+            [0, 2]
+        );
+    }
+    #[test]
+    fn inferred_sliding_window_wrap_and_failure_are_atomic() {
+        let mut buffer = ReferenceBuffer::new(4, 2).unwrap();
+        let mut h = header();
+        buffer.finish(&h, 0, 0, Arc::new(0)).unwrap();
+        h.idr = false;
+        h.frame_num = 14;
+        buffer.finish(&h, 28, 14, Arc::new(14)).unwrap();
+        buffer.infer_nonexisting(15, Some(30), 15).unwrap();
+        buffer.infer_nonexisting(0, Some(32), 16).unwrap();
+        assert_eq!(
+            buffer
+                .references()
+                .iter()
+                .map(|r| r.frame_num)
+                .collect::<Vec<_>>(),
+            [15, 0]
+        );
+        let before = buffer.references();
+        assert!(buffer.infer_nonexisting(16, None, 99).is_err());
+        assert!(buffer.infer_nonexisting(1, None, 16).is_err());
+        assert_eq!(buffer.references(), before);
+        let mut uninitialized = ReferenceBuffer::<u8>::new(4, 2).unwrap();
+        assert!(uninitialized.infer_nonexisting(1, None, 1).is_err());
+        h = header();
+        h.long_term_reference = true;
+        let mut long = ReferenceBuffer::new(4, 1).unwrap();
+        long.finish(&h, 0, 0, Arc::new(0)).unwrap();
+        let before = long.references();
+        assert!(long.infer_nonexisting(1, None, 1).is_err());
+        assert_eq!(long.references(), before);
+    }
+    #[test]
+    fn nonexisting_only_buffers_allow_intra_but_require_real_inter_references() {
+        let mut buffer = ReferenceBuffer::new(4, 1).unwrap();
+        let mut h = header();
+        buffer.finish(&h, 0, 0, Arc::new(0)).unwrap();
+        buffer.infer_nonexisting(1, None, 1).unwrap();
+        h.idr = false;
+        h.frame_num = 2;
+        h.slice_type = SliceType::I;
+        assert_eq!(buffer.lists(&h, 4).unwrap().l0, Vec::<u64>::new());
+        h.slice_type = SliceType::P;
+        h.refs_l0 = 1;
+        assert!(
+            buffer
+                .lists(&h, 4)
+                .unwrap_err()
+                .to_string()
+                .contains("no existing")
+        );
+        h.slice_type = SliceType::B;
+        h.refs_l1 = 1;
+        assert!(
+            buffer
+                .lists(&h, 4)
+                .unwrap_err()
+                .to_string()
+                .contains("no existing")
+        );
+        h = header();
+        buffer.finish(&h, 0, 2, Arc::new(2)).unwrap();
+        assert_eq!(buffer.references().len(), 1);
+        assert!(buffer.get(2).is_some());
     }
     #[test]
     fn sliding_window_wrap_and_retained_display_owner() {

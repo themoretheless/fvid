@@ -116,13 +116,21 @@ pub fn reconstruct_inter_macroblock_ready(
     )?;
     readiness.publish_mbaff_complete(address, geometry, field)
 }
-enum MbaffInterReader<'a> {
+enum MbaffSliceReader<'a> {
     Cavlc(super::avc_inter_slice::InterCavlcSlice<'a>),
     Cabac(super::avc_cabac_slice::InterCabacSlice<'a>),
+    IntraCavlc(IntraCavlcReader<'a>),
+    IntraCabac(IntraCabacReader<'a>),
 }
-impl<'a> MbaffInterReader<'a> {
+impl<'a> MbaffSliceReader<'a> {
     fn new(header: &'a SliceHeader, sps: &'a Sps, pps: &'a Pps, count: usize) -> Result<Self> {
-        Ok(if pps.cabac {
+        Ok(if header.slice_type == super::avc_slice::SliceType::I {
+            if pps.cabac {
+                Self::IntraCabac(IntraCabacReader::new_mbaff(header, sps, pps, count)?)
+            } else {
+                Self::IntraCavlc(IntraCavlcReader::new_mbaff(header, sps, pps, count)?)
+            }
+        } else if pps.cabac {
             Self::Cabac(super::avc_cabac_slice::InterCabacSlice::new_mbaff(
                 header,
                 sps,
@@ -142,18 +150,28 @@ impl<'a> MbaffInterReader<'a> {
         match self {
             Self::Cavlc(r) => r.read_macroblock(),
             Self::Cabac(r) => r.read_macroblock(),
+            Self::IntraCavlc(r) => r.read_macroblock().map(|block| {
+                block.map(|mb| super::avc_inter_slice::InterMacroblock::Intra(Box::new(mb)))
+            }),
+            Self::IntraCabac(r) => r.read_macroblock().map(|block| {
+                block.map(|mb| super::avc_inter_slice::InterMacroblock::Intra(Box::new(mb)))
+            }),
         }
     }
     fn field_decoding(&self) -> bool {
         match self {
             Self::Cavlc(r) => r.field_decoding(),
             Self::Cabac(r) => r.field_decoding(),
+            Self::IntraCavlc(r) => r.field_decoding(),
+            Self::IntraCabac(r) => r.field_decoding(),
         }
     }
     fn pair_field(&self, pair: usize) -> Option<bool> {
         match self {
             Self::Cavlc(r) => r.pair_field(pair),
             Self::Cabac(r) => r.pair_field(pair),
+            Self::IntraCavlc(r) => r.pair_field(pair),
+            Self::IntraCabac(r) => r.pair_field(pair),
         }
     }
 }
@@ -179,7 +197,7 @@ pub fn decode_p_slices(
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
     decode_p_slices_impl(headers, sps, pps, references, budget, true, None)
 }
-/// Assemble ordered P/B MBAFF slices with per-slice direct/POC contexts.
+/// Assemble ordered I/P/B MBAFF slices with per-slice direct/POC contexts.
 pub fn decode_inter_slices(
     headers: &[&SliceHeader],
     sps: &Sps,
@@ -220,19 +238,19 @@ fn decode_p_slices_impl(
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
         || headers.iter().any(|h| {
-            !matches!(h.slice_type, SliceType::P | SliceType::B)
+            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
         })
     {
-        return Err(invalid("invalid MBAFF P reconstruction configuration"));
+        return Err(invalid("invalid MBAFF reconstruction configuration"));
     }
     let first = headers[0];
     if headers.iter().any(|h| {
         h.pps_id != first.pps_id
             || h.frame_num != first.frame_num
-            || h.nal_ref_idc != first.nal_ref_idc
+            || (h.nal_ref_idc == 0) != (first.nal_ref_idc == 0)
             || h.idr != first.idr
             || h.idr_pic_id != first.idr_pic_id
             || h.poc_lsb != first.poc_lsb
@@ -240,7 +258,7 @@ fn decode_p_slices_impl(
             || h.delta_poc != first.delta_poc
             || h.colour_plane_id != first.colour_plane_id
     }) {
-        return Err(invalid("MBAFF P slices belong to different pictures"));
+        return Err(invalid("MBAFF slices belong to different pictures"));
     }
     let (w, h) = sps.coded_dimensions();
     let (w, h) = (w as usize, h as usize);
@@ -336,7 +354,7 @@ fn decode_p_slices_impl(
         let refs: [Vec<&Reference420<'_>>; 2] =
             [views[0].iter().collect(), views[1].iter().collect()];
         ready.reset_slice();
-        let mut reader = MbaffInterReader::new(header, sps, pps, count)?;
+        let mut reader = MbaffSliceReader::new(header, sps, pps, count)?;
         while let Some(block) = reader.read_macroblock()? {
             let field = reader.field_decoding();
             if let InterMacroblock::Intra(mb) = block {

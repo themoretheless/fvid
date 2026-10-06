@@ -190,7 +190,7 @@ pub fn decode_inter_resolved_slices_with_motion(
         && !sps.frame_mbs_only
         && headers
             .iter()
-            .all(|h| h.slice_type == SliceType::P && !h.field_pic)
+            .all(|h| matches!(h.slice_type, SliceType::I | SliceType::P) && !h.field_pic)
     {
         return super::avc_mbaff_picture::decode_p_slices(
             headers,
