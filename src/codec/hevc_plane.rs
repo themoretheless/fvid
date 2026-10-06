@@ -9,6 +9,8 @@ pub struct Plane {
     ready: Vec<bool>,
 }
 impl Plane {
+    pub fn dimensions(&self) -> [usize; 2] { [self.width, self.height] }
+
     /// Apply single-slice, single-tile SAO after reconstruction/deblocking.
     /// Neighbours always come from the unchanged input plane. Extra workspace
     /// is two bytes per sample and is accounted for by the picture decoder.

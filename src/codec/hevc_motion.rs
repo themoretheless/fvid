@@ -379,25 +379,23 @@ const CHROMA: [[i32; 4]; 8] = [
     [-2, 10, 58, -2],
 ];
 /// Separable interpolation retains the normative intermediate rounding.
-fn interpolate_block(
-    picture: &Picture,
-    c: usize,
-    rect: [u32; 4],
-    mv: [i16; 2],
-    scratch: &mut Vec<i32>,
-    output: &mut [i32],
+fn interpolate_block_with_format(
+    picture: &Picture, c: usize, rect: [u32; 4], mv: [i16; 2],
+    scratch: &mut Vec<i32>, output: &mut [i32], chroma_format: u8,
 ) {
     let [x, y, w, h] = rect.map(|v| v as usize);
     let chroma = usize::from(c != 0);
-    let bits = 2 + chroma;
-    let width = (picture.dimensions[0] >> chroma) as i32;
-    let height = (picture.dimensions[1] >> chroma) as i32;
+    let shift = usize::from(c != 0 && chroma_format != 3);
+    let bits = 2 + shift;
+    let width = (picture.dimensions[0] >> shift) as i32;
+    let height = (picture.dimensions[1] >> shift) as i32;
     let samples = picture.planes[c].samples();
     let depth = picture.depth[chroma];
     let x = x as i32 + (i32::from(mv[0]) >> bits);
     let y = y as i32 + (i32::from(mv[1]) >> bits);
-    let fx = (i32::from(mv[0]) & ((1 << bits) - 1)) as usize;
-    let fy = (i32::from(mv[1]) & ((1 << bits) - 1)) as usize;
+    let phase_shift = usize::from(c != 0 && chroma_format == 3);
+    let fx = ((i32::from(mv[0]) & ((1 << bits) - 1)) as usize) << phase_shift;
+    let fy = ((i32::from(mv[1]) & ((1 << bits) - 1)) as usize) << phase_shift;
     let filters = |f: usize| -> &[i32] { if c == 0 { &LUMA[f] } else { &CHROMA[f] } };
     let start = if c == 0 { -3 } else { -1 };
     let taps = if c == 0 { 8 } else { 4 };
@@ -496,7 +494,20 @@ pub fn predict(
     weights: Option<&super::hevc_slice::Weights>,
     scratch: &mut Vec<i32>,
 ) -> Result<Vec<u16>> {
-    let shift = usize::from(component != 0);
+    predict_with_chroma_format(lists, motion, rect, component, depth, weights, scratch, 1)
+}
+/// 4:4:4 chroma retains the four-tap filter but uses quarter-sample motion.
+pub fn predict_with_chroma_format(
+    lists: &[Vec<Reference>; 2], motion: Motion, rect: [u32; 4], component: usize,
+    depth: u8, weights: Option<&super::hevc_slice::Weights>,
+    scratch: &mut Vec<i32>, chroma_format: u8,
+) -> Result<Vec<u16>> {
+    if component > 2 || !(8..=12).contains(&depth) || !matches!(chroma_format, 1 | 3)
+        || rect[2] == 0 || rect[3] == 0
+        || (0..2).any(|axis| rect[axis].checked_add(rect[axis + 2]).is_none_or(|end| end > i32::MAX as u32)) {
+        return Err(invalid("invalid HEVC motion prediction geometry or format"));
+    }
+    let shift = usize::from(component != 0 && chroma_format != 3);
     let [x, y, w, h] = rect.map(|v| v >> shift);
     let mut inputs = [None; 2];
     let mut count = 0;
@@ -530,6 +541,14 @@ pub fn predict(
     if count == 0 {
         return Err(invalid("HEVC prediction has no reference"));
     }
+    for input in inputs.iter().flatten() {
+        let picture = &input.0.picture;
+        let expected = picture.dimensions.map(|v| (v >> shift) as usize);
+        if picture.planes[component].dimensions() != expected
+            || picture.depth[usize::from(component != 0)] != depth {
+            return Err(invalid("HEVC reference plane geometry or depth mismatch"));
+        }
+    }
     let first_input = inputs[0].unwrap();
     let second_input = inputs[1];
     let mask = (1 << (2 + shift)) - 1;
@@ -559,13 +578,14 @@ pub fn predict(
     let mut output = vec![0u16; block_size];
     if count == 1 {
         let mut block_output = vec![0i32; block_size];
-        interpolate_block(
+        interpolate_block_with_format(
             &first_input.0.picture,
             component,
             [x, y, w, h],
             first_input.1,
             scratch,
             &mut block_output,
+            chroma_format,
         );
         for (out, &value) in output.iter_mut().zip(block_output.iter()) {
             *out = (((value * first_input.2 + (1 << (precision - 1))) >> precision) + first_input.3)
@@ -574,22 +594,24 @@ pub fn predict(
     } else {
         let second_input = second_input.unwrap();
         let mut first_result = vec![0i32; block_size];
-        interpolate_block(
+        interpolate_block_with_format(
             &first_input.0.picture,
             component,
             [x, y, w, h],
             first_input.1,
             scratch,
             &mut first_result,
+            chroma_format,
         );
         let mut second_result = vec![0i32; block_size];
-        interpolate_block(
+        interpolate_block_with_format(
             &second_input.0.picture,
             component,
             [x, y, w, h],
             second_input.1,
             scratch,
             &mut second_result,
+            chroma_format,
         );
         let offset = (first_input.3 + second_input.3 + 1) << precision;
         for ((out, &a), &b) in output
@@ -658,7 +680,8 @@ mod tests {
 
     #[test]
     fn separable_prediction_matches_scalar_at_all_phases_and_borders() {
-        for depth in [8, 10, 12] {
+        for (depth, chroma_format) in [(8,1), (10,1), (12,1), (8,3), (10,3), (12,3)] {
+            let chroma_side = if chroma_format == 3 { 32 } else { 16 };
             let mut picture = Picture {
                 pcm_luma_samples: 0,
                 dimensions: [32, 32],
@@ -666,8 +689,8 @@ mod tests {
                 depth: [depth; 2],
                 planes: [
                     Plane::new(32, 32, depth, 3072).unwrap(),
-                    Plane::new(16, 16, depth, 768).unwrap(),
-                    Plane::new(16, 16, depth, 768).unwrap(),
+                    Plane::new(chroma_side, chroma_side, depth, 3072).unwrap(),
+                    Plane::new(chroma_side, chroma_side, depth, 3072).unwrap(),
                 ],
                 sao: Vec::new(),
                 motion: Vec::new(),
@@ -681,12 +704,15 @@ mod tests {
                     *value = (state >> 16) as u16 & ((1 << depth) - 1);
                 }
             }
+            let picture = Arc::new(picture);
+            let lists = [vec![Reference { picture: Arc::clone(&picture), poc: 0, long_term: false }],
+                         vec![Reference { picture: Arc::clone(&picture), poc: 0, long_term: false }]];
             for c in 0..3 {
-                let bits = if c == 0 { 2 } else { 3 };
-                let n = if c == 0 { 32 } else { 16 };
+                let bits = if c == 0 || chroma_format == 3 { 2 } else { 3 };
+                let n = if c == 0 { 32 } else { chroma_side as i32 };
                 let start = if c == 0 { -3 } else { -1 };
                 let filter =
-                    |phase: usize| -> &[i32] { if c == 0 { &LUMA[phase] } else { &CHROMA[phase] } };
+                    |phase: usize| -> &[i32] { if c == 0 { &LUMA[phase] } else { &CHROMA[if chroma_format == 3 { phase * 2 } else { phase }] } };
                 for fy in 0..1 << bits {
                     for fx in 0..1 << bits {
                         for (origin, displacement) in [(0, -3), (n - 8, 3)] {
@@ -696,14 +722,16 @@ mod tests {
                             ];
                             let mut scratch = Vec::new();
                             let mut output = vec![0i32; 64];
-                            interpolate_block(
+                            interpolate_block_with_format(
                                 &picture,
                                 c,
                                 [origin as u32, origin as u32, 8, 8],
                                 mv,
                                 &mut scratch,
                                 &mut output,
+                                chroma_format,
                             );
+                            let mut expected_samples = Vec::new();
                             for y in 0..8 {
                                 for x in 0..8 {
                                     let sample = |dx: i32, dy: i32| {
@@ -752,12 +780,24 @@ mod tests {
                                             .sum::<i32>()
                                             >> 6
                                     };
+                                    let precision = 14 - depth;
+                                    expected_samples.push(((expected + (1 << (precision - 1))) >> precision)
+                                        .clamp(0, (1 << depth) - 1) as u16);
                                     assert_eq!(
                                         output[(y * 8 + x) as usize],
                                         expected,
-                                        "depth={depth} c={c} phase={fx},{fy}"
+                                        "depth={depth} format={chroma_format} c={c} phase={fx},{fy}"
                                     );
                                 }
+                            }
+                            let shift = u32::from(c != 0 && chroma_format != 3);
+                            let rect = [(origin as u32) << shift, (origin as u32) << shift, 8 << shift, 8 << shift];
+                            for motion in [[Some(Vector { reference: 0, mv }), None],
+                                           [Some(Vector { reference: 0, mv }), Some(Vector { reference: 0, mv })]] {
+                                let predicted = predict_with_chroma_format(&lists, motion, rect,
+                                    c, depth, None, &mut scratch, chroma_format).unwrap();
+                                assert_eq!(predicted, expected_samples,
+                                    "depth={depth} format={chroma_format} c={c} phase={fx},{fy}");
                             }
                         }
                     }

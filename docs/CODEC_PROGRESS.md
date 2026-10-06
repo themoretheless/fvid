@@ -2401,3 +2401,21 @@ remains ignored and its exact picture-tools refusal test remains passing.
 
 Offline codec library validation: 372 passed, no failures, two ignored
 (explicit fixture generation and pending aligned 4:4:4 pixel acceptance).
+
+### HEVC 4:4:4 motion interpolation foundation (2026-10-06)
+
+Added a format-aware motion prediction entry point preserving the existing
+4:2:0 API. 4:4:4 components use full-resolution reference geometry and quarter-
+sample motion; chroma retains the four-tap filter using even eighth-phase table
+entries. Both the integer-copy path and separable filtering use this geometry.
+Reference component dimensions/depth are validated before indexing.
+
+The independent scalar interpolation test now covers every phase and both
+borders at 8/10/12 bits for 4:2:0 and 4:4:4. It also checks rounded/clipped
+public prediction output for unidirectional and bidirectional references.
+Picture allocation, chroma intra mode ownership and filter integration remain
+incomplete; the existing aligned 4:4:4 HM fixture is still an exact refusal,
+with its full pixel acceptance ignored. This is not full 4:4:4 playback support.
+
+Offline validation: codec library 372 passed / two ignored; owned media library
+334 passed / one ignored. No failures; normal tests used no FFmpeg or network.
