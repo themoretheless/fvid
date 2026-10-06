@@ -473,6 +473,10 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-frame-field-direct-paff-8bit-top-temporal-coded-motion",
+            "avc-frame-field-direct-mbaff-8bit-bottom-spatial-skip-motion",
+            "avc-frame-field-direct-field-10bit-top-temporal-coded-motion",
+            "avc-frame-field-direct-mixed-10bit-bottom-temporal-skip-motion",
             "avc-paff-cabac-implicit-8bit-implicit-ref0-poc2-16x16-init0-filter0-aso",
             "avc-paff-cabac-implicit-10bit-implicit-ref1-poc6-8x8-init2-filter2",
             "avc-paff-cabac-implicit-10bit-average-ref1-poc6-16x8-init1-filter1",
@@ -604,7 +608,8 @@ mod tests {
                 || name.starts_with("avc-paff-cabac-8bit-")
                 || name.starts_with("avc-paff-cabac-10bit-");
             let implicit_poc = (name.starts_with("avc-paff-implicit-")
-                || name.starts_with("avc-paff-cabac-implicit-"))
+                || name.starts_with("avc-paff-cabac-implicit-")
+                || name.starts_with("avc-frame-field-direct-"))
             .then(|| if name.contains("-poc6-") { 6i64 } else { 2i64 });
             let paff_inter =
                 name.starts_with("avc-paff-inter-") || name.starts_with("avc-paff-cavlc-p-");

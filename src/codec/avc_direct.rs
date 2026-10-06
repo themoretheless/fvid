@@ -149,12 +149,15 @@ pub struct FieldDirectReference {
     pub long_term: bool,
 }
 /// Direct prediction in compact separate-field coordinates and vector units.
-/// Mixed frame/field co-located conversion belongs to a different context.
+/// A full-frame co-located source retains its raw vector units until temporal direct.
 pub struct FieldDirectPrediction<'a> {
     pub spatial: bool,
     pub inference8: bool,
     pub current_poc: i32,
     pub lists: [&'a [FieldDirectReference]; 2],
+    pub current_bottom: bool,
+    /// The selected reference field originated in a decoded full frame.
+    pub colocated_is_frame: bool,
     pub colocated: Option<&'a ReferenceMotionField>,
 }
 impl FieldDirectPrediction<'_> {
@@ -173,12 +176,30 @@ impl FieldDirectPrediction<'_> {
         } else {
             position
         };
-        let col = self
+        let located = self
             .colocated
-            .map(|m| m.colocated(selected))
-            .transpose()?
-            .flatten();
-        if col.is_some_and(|m| m.reference_bottom_field.is_none() || m.reference_index > 31) {
+            .map(|m| {
+                if self.colocated_is_frame {
+                    m.colocated_for_field(selected, self.current_bottom)
+                } else {
+                    m.colocated(selected).map(|motion| {
+                        super::avc_reference_motion::MbaffColocated {
+                            motion,
+                            scale: super::avc_reference_motion::ColocatedScale::Same,
+                        }
+                    })
+                }
+            })
+            .transpose()?;
+        let col = located.and_then(|v| v.motion);
+        let scale = located.map_or(super::avc_reference_motion::ColocatedScale::Same, |v| {
+            v.scale
+        });
+        if col.is_some_and(|m| {
+            (scale == super::avc_reference_motion::ColocatedScale::Same
+                && m.reference_bottom_field.is_none())
+                || m.reference_index > 31
+        }) {
             return Err(invalid(
                 "separate-field direct requires field co-located metadata",
             ));
@@ -197,12 +218,20 @@ impl FieldDirectPrediction<'_> {
                 Some(m) => self.lists[0]
                     .iter()
                     .position(|r| {
-                        r.id == m.picture_id && Some(r.bottom) == m.reference_bottom_field
+                        r.id == m.picture_id
+                            && Some(r.bottom)
+                                == if scale
+                                    == super::avc_reference_motion::ColocatedScale::FrameToField
+                                {
+                                    Some(self.current_bottom)
+                                } else {
+                                    m.reference_bottom_field
+                                }
                     })
                     .ok_or_else(|| invalid("co-located field reference is absent from list0"))?,
             };
             let vectors = temporal_direct(
-                col.map_or([0; 2], |m| m.vector),
+                scale.temporal_vector(col.map_or([0; 2], |m| m.vector))?,
                 self.current_poc.into(),
                 self.lists[0][index].poc.into(),
                 self.lists[1][0].poc.into(),
@@ -326,6 +355,116 @@ mod tests {
         }
     }
     #[test]
+    fn migrated_frame_direct_scales_temporal_only_and_maps_current_parity() {
+        use super::super::avc_reference_motion::ReferenceMotion;
+        let l0 = [
+            FieldDirectReference {
+                id: 7,
+                bottom: false,
+                poc: 0,
+                long_term: false,
+            },
+            FieldDirectReference {
+                id: 7,
+                bottom: true,
+                poc: 0,
+                long_term: false,
+            },
+        ];
+        let l1 = [FieldDirectReference {
+            id: 9,
+            bottom: false,
+            poc: 8,
+            long_term: false,
+        }];
+        let empty = Neighbours {
+            left: Neighbour::Unavailable,
+            top: Neighbour::Unavailable,
+            top_right: Neighbour::Unavailable,
+            top_left: Neighbour::Unavailable,
+        };
+        for bottom in [false, true] {
+            let saved = ReferenceMotionField::new(
+                16,
+                32,
+                vec![
+                    [
+                        Some(ReferenceMotion {
+                            picture_id: 7,
+                            reference_index: 0,
+                            reference_bottom_field: None,
+                            vector: [8, -4]
+                        }),
+                        None
+                    ];
+                    32
+                ],
+            )
+            .unwrap();
+            let mut context = FieldDirectPrediction {
+                current_bottom: bottom,
+                colocated_is_frame: true,
+                spatial: false,
+                inference8: true,
+                current_poc: 4,
+                lists: [&l0, &l1],
+                colocated: Some(&saved),
+            };
+            assert_eq!(
+                context.derive([8, 8], [empty; 2]).unwrap(),
+                [
+                    Neighbour::Inter {
+                        reference: u8::from(bottom),
+                        vector: [4, -1]
+                    },
+                    Neighbour::Inter {
+                        reference: 0,
+                        vector: [-4, 1]
+                    }
+                ]
+            );
+            let raw = ReferenceMotionField::new(
+                16,
+                32,
+                vec![
+                    [
+                        Some(ReferenceMotion {
+                            picture_id: 7,
+                            reference_index: 0,
+                            reference_bottom_field: None,
+                            vector: [0, 2]
+                        }),
+                        None
+                    ];
+                    32
+                ],
+            )
+            .unwrap();
+            context.spatial = true;
+            context.colocated = Some(&raw);
+            let neighbour = Neighbours {
+                left: Neighbour::Inter {
+                    reference: 0,
+                    vector: [12, 8],
+                },
+                ..empty
+            };
+            assert_eq!(
+                context.derive([0, 0], [neighbour; 2]).unwrap(),
+                [
+                    Neighbour::Inter {
+                        reference: 0,
+                        vector: [12, 8]
+                    },
+                    Neighbour::Inter {
+                        reference: 0,
+                        vector: [12, 8]
+                    }
+                ]
+            );
+        }
+    }
+    #[test]
     fn separate_field_temporal_mapping_uses_identity_parity_and_selected_poc() {
         use super::super::avc_reference_motion::ReferenceMotion;
         let l0 = [
@@ -364,6 +503,8 @@ mod tests {
             top_left: Neighbour::Unavailable,
         };
         let mut context = FieldDirectPrediction {
+            current_bottom: true,
+            colocated_is_frame: false,
             spatial: false,
             inference8: true,
             current_poc: 4,

@@ -18,7 +18,7 @@ use std::sync::Arc;
 /// have no motion field; co-located lookup treats them as intra at every cell.
 pub struct DecodedReferencePicture {
     pub picture: Arc<IntraPicture>,
-    pub motion: Option<ReferenceMotionField>,
+    pub motion: Option<Arc<ReferenceMotionField>>,
     /// Post-marking field POCs, including MMCO 5 adjustment. Keep both values:
     /// the frame minimum alone is insufficient for MBAFF temporal direct.
     pub field_order: FieldOrder,
@@ -27,7 +27,8 @@ pub struct DecodedReferencePicture {
 /// A selected field owns pixels and co-located motion together.
 struct DecodedReferenceField {
     field: Arc<super::avc_field_picture::PcmField>,
-    motion: Option<ReferenceMotionField>,
+    motion: Option<Arc<ReferenceMotionField>>,
+    motion_is_frame: bool,
 }
 
 /// Owns parameter sets, POC state and reference pictures. No external decoder.
@@ -194,8 +195,17 @@ impl AvcDecoder {
             .and_then(|n| n.checked_mul(3))
             .ok_or_else(|| invalid("AVC field storage overflow"))?;
         let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize / 2)?;
-        let motion_reserve = motion_bytes
-            .checked_mul(2 * sps.max_num_ref_frames.max(1) as usize + 1)
+        // Migrated full-frame maps retain MBAFF pair flags. A full map can
+        // exceed two compact field maps by those flags; reserve the larger
+        // representation without double-counting the Arc shared by parities.
+        let full_motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize)?;
+        let motion_per_reference = motion_bytes
+            .checked_mul(2)
+            .ok_or_else(|| invalid("AVC field motion storage overflow"))?
+            .max(full_motion_bytes);
+        let motion_reserve = motion_per_reference
+            .checked_mul(sps.max_num_ref_frames.max(1) as usize)
+            .and_then(|n| n.checked_add(motion_bytes))
             .ok_or_else(|| invalid("AVC field motion storage overflow"))?;
         let reserved = full
             .checked_mul(sps.max_num_ref_frames.max(1) as usize)
@@ -213,15 +223,6 @@ impl AvcDecoder {
                 .take()
                 .ok_or_else(|| invalid("missing AVC frame references"))?;
             self.field_dpb = Some(frames.into_fields(|metadata, reference| {
-                if reference
-                    .motion
-                    .as_ref()
-                    .is_some_and(|m| !m.is_entirely_intra())
-                {
-                    return Err(crate::unsupported(
-                        "AVC frame-to-field co-located motion conversion is not connected",
-                    ));
-                }
                 let split = |bottom| -> Result<Arc<DecodedReferenceField>> {
                     Ok(Arc::new(DecodedReferenceField {
                         field: Arc::new(super::avc_field_picture::split_frame(
@@ -231,7 +232,8 @@ impl AvcDecoder {
                             header.pps_id,
                             full / 2,
                         )?),
-                        motion: None,
+                        motion: reference.motion.clone(),
+                        motion_is_frame: true,
                     }))
                 };
                 Ok(([split(false)?, split(true)?], reference.field_order))
@@ -308,12 +310,10 @@ impl AvcDecoder {
                         .l1
                         .first()
                         .ok_or_else(|| invalid("empty direct field list1"))?;
-                    colocated.push(
-                        dpb.get(first.id, first.bottom)
-                            .ok_or_else(|| invalid("missing co-located field"))?
-                            .motion
-                            .as_ref(),
-                    );
+                    let source = dpb
+                        .get(first.id, first.bottom)
+                        .ok_or_else(|| invalid("missing co-located field"))?;
+                    colocated.push((source.motion.as_deref(), source.motion_is_frame));
                     direct_refs.push(entries);
                 }
                 reference_ids.push([
@@ -379,11 +379,13 @@ impl AvcDecoder {
                 .iter()
                 .enumerate()
                 .map(|(i, lists)| super::avc_direct::FieldDirectPrediction {
+                    current_bottom: headers[i].bottom_field,
+                    colocated_is_frame: colocated[i].1,
                     spatial: headers[i].direct_spatial_mv_pred,
                     inference8: sps.direct_8x8_inference,
                     current_poc: order.before_marking.picture(),
                     lists: [lists[0].as_slice(), lists[1].as_slice()],
-                    colocated: colocated[i],
+                    colocated: colocated[i].0,
                 })
                 .collect::<Vec<_>>();
             let (picture, motion) = super::avc_field_picture::decode_inter_field_impl(
@@ -466,7 +468,8 @@ impl AvcDecoder {
                 self.next_id,
                 Arc::new(DecodedReferenceField {
                     field: Arc::clone(&field),
-                    motion: retained_motion,
+                    motion: retained_motion.map(Arc::new),
+                    motion_is_frame: false,
                 }),
             )?;
         self.next_id = self
@@ -740,7 +743,7 @@ impl AvcDecoder {
                                 .get(*first)
                                 .ok_or_else(|| invalid("AVC co-located picture is non-existing"))?
                                 .motion
-                                .as_ref(),
+                                .as_deref(),
                         }))
                     })
                     .collect::<Result<Vec<_>>>()?;
@@ -806,7 +809,7 @@ impl AvcDecoder {
                                             invalid("MBAFF co-located picture is non-existing")
                                         })?
                                         .motion
-                                        .as_ref(),
+                                        .as_deref(),
                                 }))
                             })
                             .collect::<Result<Vec<_>>>()?;
@@ -856,7 +859,7 @@ impl AvcDecoder {
             self.next_id,
             Arc::new(DecodedReferencePicture {
                 picture: picture.clone(),
-                motion,
+                motion: motion.map(Arc::new),
                 field_order: order.after_marking,
             }),
         )?;
@@ -904,6 +907,67 @@ mod tests {
             data.extend_from_slice(nal);
         }
         data
+    }
+    #[test]
+    fn frame_migration_shares_motion_between_parities_and_reset_releases_it() {
+        use crate::container::mp4::Mp4Reader;
+        use std::io::Cursor;
+        for (mode,video) in [
+            &include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-frame-field-direct-paff-8bit-top-temporal-coded-motion.mp4"
+            )[..],
+            &include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-frame-field-direct-mbaff-8bit-bottom-temporal-coded-motion.mp4"
+            )[..],
+            &include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-frame-field-direct-field-10bit-top-temporal-coded-motion.mp4"
+            )[..],
+            &include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-frame-field-direct-mixed-10bit-bottom-temporal-coded-motion.mp4"
+            )[..],
+        ].into_iter().enumerate() {
+            let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+            let config = input.tracks()[0].configuration.clone();
+            let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+            for sample in 0..2 {
+                let mut packet = Vec::new();
+                input.read_packet(0, sample, &mut packet).unwrap();
+                assert!(decoder.decode_order(&packet).unwrap().is_some());
+            }
+            let dpb = decoder.dpb.as_ref().unwrap();
+            let reference = dpb
+                .references()
+                .into_iter()
+                .find(|r| r.frame_num == 1)
+                .unwrap();
+            let motion = Arc::downgrade(dpb.get(reference.id).unwrap().motion.as_ref().unwrap());
+            {
+                let saved=motion.upgrade().unwrap();
+                for x in [0,16] {
+                    let field=mode==2 || (mode==3 && x==16);
+                    let selected=saved.colocated_for_field([x,0],false).unwrap();
+                    assert_eq!(selected.scale, if field {
+                        super::super::avc_reference_motion::ColocatedScale::Same
+                    } else {super::super::avc_reference_motion::ColocatedScale::FrameToField});
+                    let cell=selected.motion.unwrap();assert_ne!(cell.vector,[0,0]);
+                    assert_eq!(cell.reference_bottom_field,field.then_some(false));
+                }
+            }
+            let mut packet = Vec::new();
+            input.read_packet(0, 2, &mut packet).unwrap();
+            assert!(decoder.decode_order(&packet).unwrap().is_none());
+            assert!(decoder.dpb.is_none());
+            let fields = decoder.field_dpb.as_ref().unwrap();
+            for bottom in [false, true] {
+                let entry = fields.get(reference.id, bottom).unwrap();
+                assert!(entry.motion_is_frame);
+                assert!(motion.ptr_eq(&Arc::downgrade(entry.motion.as_ref().unwrap())));
+            }
+            input.read_packet(0, 3, &mut packet).unwrap();
+            assert!(decoder.decode_order(&packet).unwrap().is_some());
+            decoder.reset();
+            assert!(motion.upgrade().is_none());
+        }
     }
     #[test]
     fn b_field_reproducer_requires_motion_context_and_native_decode_accepts_it() {

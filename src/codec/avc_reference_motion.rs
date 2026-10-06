@@ -154,6 +154,36 @@ impl ReferenceMotionField {
             scale,
         })
     }
+    /// Table 8-8 FLD/FRM and FLD/AFRM selection from a decoded full frame.
+    /// Coordinates are compact current-field luma coordinates. Preserve raw
+    /// vector units for spatial colZero; temporal direct applies `scale` later.
+    pub fn colocated_for_field(
+        &self,
+        position: [usize; 2],
+        bottom: bool,
+    ) -> Result<MbaffColocated> {
+        if self.height % 32 != 0
+            || position.iter().any(|p| p % 4 != 0)
+            || position[0] >= self.width
+            || position[1] >= self.height / 2
+        {
+            return Err(invalid("invalid frame-to-field co-located position"));
+        }
+        let physical = [position[0], position[1] * 2 + usize::from(bottom)];
+        let (lists, source_field) = if self.is_mbaff() {
+            self.at_mbaff(physical)?
+        } else {
+            (self.at(physical)?, false)
+        };
+        Ok(MbaffColocated {
+            motion: lists[0].or(lists[1]),
+            scale: if source_field {
+                ColocatedScale::Same
+            } else {
+                ColocatedScale::FrameToField
+            },
+        })
+    }
     /// Select the stored 4x4 cell containing this coded-luma position.
     pub fn at(&self, position: [usize; 2]) -> Result<[Option<ReferenceMotion>; 2]> {
         if self.is_mbaff() {
@@ -171,9 +201,6 @@ impl ReferenceMotionField {
     pub fn colocated(&self, position: [usize; 2]) -> Result<Option<ReferenceMotion>> {
         let lists = self.at(position)?;
         Ok(lists[0].or(lists[1]))
-    }
-    pub(super) fn is_entirely_intra(&self) -> bool {
-        self.cells.iter().all(|c| c.iter().all(Option::is_none))
     }
     pub fn dimensions(&self) -> [usize; 2] {
         [self.width, self.height]
@@ -215,6 +242,73 @@ pub fn map_reference_mbaff(
 mod tests {
     use super::super::{avc_motion_field::MotionField, avc_mv::Neighbour};
     use super::*;
+    #[test]
+    fn field_colocated_selection_matches_independent_frame_and_pair_indices() {
+        let fields = vec![false, true, true, false];
+        let cells: Vec<_> = (0..128)
+            .map(|index| {
+                let m = ReferenceMotion {
+                    picture_id: index as u64,
+                    reference_index: 0,
+                    reference_bottom_field: None,
+                    vector: [7, -3],
+                };
+                match index % 3 {
+                    0 => [Some(m), None],
+                    1 => [None, Some(m)],
+                    _ => [None; 2],
+                }
+            })
+            .collect();
+        let frame = ReferenceMotionField::new(32, 64, cells.clone()).unwrap();
+        let mbaff = ReferenceMotionField::new_mbaff(32, 64, cells.clone(), fields.clone()).unwrap();
+        for bottom in [false, true] {
+            for y in (0..32).step_by(4) {
+                for x in (0..32).step_by(4) {
+                    let address = (y / 16) * 2 + x / 16;
+                    let local_y = y % 16;
+                    let frame_index = (2 * y / 4) * 8 + x / 4;
+                    assert_eq!(
+                        frame.colocated_for_field([x, y], bottom).unwrap(),
+                        MbaffColocated {
+                            motion: cells[frame_index][0].or(cells[frame_index][1]),
+                            scale: ColocatedScale::FrameToField
+                        }
+                    );
+                    let field = fields[address];
+                    let source = 2 * address
+                        + if field {
+                            usize::from(bottom)
+                        } else {
+                            local_y / 8
+                        };
+                    let row = if field { local_y } else { 2 * local_y % 16 };
+                    let index = source * 16 + row / 4 * 4 + x % 16 / 4;
+                    assert_eq!(
+                        mbaff.colocated_for_field([x, y], bottom).unwrap(),
+                        MbaffColocated {
+                            motion: cells[index][0].or(cells[index][1]),
+                            scale: if field {
+                                ColocatedScale::Same
+                            } else {
+                                ColocatedScale::FrameToField
+                            }
+                        }
+                    );
+                }
+            }
+        }
+        for bad in [[32, 0], [0, 32], [1, 0], [0, 1], [usize::MAX, 0]] {
+            assert!(frame.colocated_for_field(bad, false).is_err());
+            assert!(mbaff.colocated_for_field(bad, true).is_err());
+        }
+        assert!(
+            ReferenceMotionField::new(16, 16, vec![[None; 2]; 16])
+                .unwrap()
+                .colocated_for_field([0, 0], false)
+                .is_err()
+        );
+    }
     #[test]
     fn mbaff_direct_selection_uses_table_geometry_not_physical_sample_owner() {
         let fields = vec![false, true, true, false];
