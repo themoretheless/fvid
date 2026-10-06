@@ -16,7 +16,7 @@ def leb(n):
         if not n:return bytes(out)
 def obu(kind,payload):return bytes([(kind<<3)|2])+leb(len(payload))+payload
 
-def sequence(ids,model,equal,width=5,delta_bits=2):
+def sequence(ids,model,equal,width=5,delta_bits=2,order_bits=0):
     b=Bits();b.u(0,3);b.u(0);b.u(0);b.u(int(model))
     if model:
         b.u(1,32);b.u(30,32);b.u(int(equal))
@@ -27,7 +27,12 @@ def sequence(ids,model,equal,width=5,delta_bits=2):
     b.u(4,4);b.u(4,4);b.u(31,5);b.u(31,5);b.u(int(ids))
     if ids:b.u(delta_bits-2,4);b.u(width-delta_bits-1,3)
     # 64x64 superblocks, no filter intra, intra edge filter; no inter tools.
-    for value in [0,0,1,0,0,0,0,0,0,0,0,0,0]:b.u(value)
+    for value in [0,0,1,0,0,0,0]:b.u(value)
+    b.u(int(order_bits>0))
+    if order_bits:b.u(0);b.u(0) # joint compound, reference motion fields
+    b.u(0);b.u(0) # force screen-content tools off
+    if order_bits:b.u(order_bits-1,3)
+    b.u(0);b.u(0);b.u(0) # superres, CDEF, restoration
     # 8-bit non-monochrome, unspecified colour, limited range, 4:2:0.
     b.u(0);b.u(0);b.u(0);b.u(0);b.u(0,2);b.u(0);b.u(0)
     return obu(1,b.bytes(True))
@@ -58,9 +63,9 @@ def webm(data):
         while True:
             byte=data[at];at+=1;size|=(byte&127)<<shift;shift+=7
             if not byte&128:break
-        at+=size;piece=data[begin:at]
+        payload_start=at;at+=size;piece=data[begin:at]
         if kind==1:seq=piece;pending+=piece
-        elif kind in [3,6]:packets.append((pending+piece,kind==6));pending=b''
+        elif kind in [3,6]:packets.append((pending+piece,kind==6 and not (data[payload_start]&16)));pending=b''
     header=ebml('1a45dfa3',ebml('4282',b'webm'))
     track=ebml('d7',b'\x01')+ebml('83',b'\x01')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
     track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',bytes([32]))+ebml('ba',bytes([32])))

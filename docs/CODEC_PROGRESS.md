@@ -1265,7 +1265,7 @@ Fixtures and regeneration instructions are in `tests/fixtures/av1/README.md`.
 This is **not full AV1 conformance**. Temporal motion fields, global motion,
 OBMC, masked compound/inter-intra, palette/intrabc, segmentation, quantization
 matrices, restoration, superres/reference scaling, film grain, 4:2:2/4:4:4,
-short reference signaling/inter frame IDs, separate FrameHeader/TileGroup OBUs,
+separate FrameHeader/TileGroup OBUs,
 and layered operating points still return explicit errors. MP4 AV1 dispatch
 and audio remain unimplemented. See `NATIVE_PLAYBACK.md` for playback limits.
 
@@ -3452,5 +3452,31 @@ The pre-fix parser reproduces `AV1 inter frame IDs not implemented` on the
 accepted next-ID fixture. Current-ID malformed fixtures are independently
 refused by libaom. The pre-fix native decoder accepted the repeated-ID malformed
 stream; its new refusal regression failed on the old decoder and passes after
-the fix. Short reference signaling, nonidentity global motion, film
+the fix. At this milestone short reference signaling was still unsupported;
+see the following update. Nonidentity global motion, film
 grain, layered operating points and separate header/tile groups remain gaps.
+
+## AV1 short reference signaling (2026-10-07)
+
+Native AV1 now implements the normative set_frame_refs selection from LAST,
+GOLDEN and all eight stored order hints. It chooses backward and forward
+references with the required slot tie ordering, applies the fallback and
+validates that LAST/GOLDEN are forward references. Order hints remain stored
+when reference IDs invalidate a picture; reset, sequence changes and showing
+an existing key restore the corresponding hint state.
+
+298 owned accepted streams compare short and explicit maps, all eight
+order-hint widths, frame IDs on/off, ties, future/past references, modular wrap
+and boundary/same LAST/GOLDEN slots. Every stream independently passed libaom
+flat-pixel decoding. Native acceptance additionally checks the exact seven-slot
+map and repeat decoding after reset. Two malformed anchor streams assert
+specific refusals and error/reset behavior; libaom independently rejects LAST
+and GOLDEN for the same reason. Ten owned WebM variants verify display clock,
+rewind and sync seek. The original parser reproduces the specific unsupported
+short-reference error on an accepted stream.
+
+33 AV1 unit tests and the three integration suites pass offline. Integration
+verification used a copy of main plus these changes, excluding concurrent
+unqualified transform-pool/HEVC drafts in the primary checkout. Global motion,
+film grain, temporal motion fields, inherited segmentation, layered operating
+points and separate header/tile groups remain outside this completed milestone.

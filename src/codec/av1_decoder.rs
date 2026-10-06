@@ -24,6 +24,7 @@ pub struct Decoder {
     references: [Option<Decoded>; 8],
     showable: [bool; 8],
     reference_types: [u8; 8],
+    reference_order_hints: [u32; 8],
     headers: [Option<Arc<Header>>; 8],
     cdfs: [Option<Arc<Cdfs>>; 8],
     hdr: HdrMetadata,
@@ -40,6 +41,7 @@ impl Decoder {
             references: std::array::from_fn(|_| None),
             showable: [false; 8],
             reference_types: [0; 8],
+            reference_order_hints: [0; 8],
             headers: std::array::from_fn(|_| None),
             cdfs: std::array::from_fn(|_| None),
             hdr: HdrMetadata::default(),
@@ -116,6 +118,7 @@ impl Decoder {
                     }
                     if self.sequence.as_ref().is_some_and(|s| s != &sequence) {
                         self.previous_frame_id = None;
+                        self.reference_order_hints.fill(0);
                         self.references.fill(None);
                         self.showable.fill(false);
                         self.headers.fill(None);
@@ -192,6 +195,8 @@ impl Decoder {
                             let cdf = self.cdfs[index].clone();
                             self.cdfs.fill(cdf);
                             self.reference_types.fill(0);
+                            self.reference_order_hints
+                                .fill(self.headers[index].as_ref().unwrap().order_hint);
                             self.showable.fill(false);
                         }
                         output.push(decoded);
@@ -202,12 +207,13 @@ impl Decoder {
                             ));
                         }
                         let headers = std::array::from_fn(|i| self.headers[i].as_deref());
-                        let h = Header::parse(
+                        let h = Header::parse_with_order_hints(
                             s,
                             obu.payload,
                             obu.temporal_id,
                             obu.spatial_id,
                             &headers,
+                            self.reference_order_hints,
                         )?;
                         if let (Some(previous), Some(current), Some((_, bits))) =
                             (self.previous_frame_id, h.frame_id, s.frame_id_bits)
@@ -300,6 +306,7 @@ impl Decoder {
                         }
                         for i in 0..8 {
                             if h.refresh_flags & (1 << i) != 0 {
+                                self.reference_order_hints[i] = h.order_hint;
                                 self.references[i] = Some(decoded.clone());
                                 self.headers[i] = Some(saved_header.clone());
                                 self.cdfs[i] = Some(saved_cdf.clone());
@@ -447,6 +454,108 @@ mod tests {
                         .unwrap()
                         .to_string()
                         .contains("requires reset")
+                );
+                decoder.reset();
+            }
+        }
+    }
+
+    #[test]
+    fn short_reference_signaling_matches_explicit_owned_streams() {
+        for (name, data, expected) in [
+            (
+                "av1-short-ref-past-short.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-past-short.obu"
+                )[..],
+                [0, 7, 6, 3, 5, 4, 2],
+            ),
+            (
+                "av1-short-ref-past-explicit.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-past-explicit.obu"
+                )[..],
+                [0, 7, 6, 3, 5, 4, 2],
+            ),
+            (
+                "av1-short-ref-future-short.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-future-short.obu"
+                )[..],
+                [0, 2, 1, 3, 4, 5, 7],
+            ),
+            (
+                "av1-short-ref-future-explicit.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-future-explicit.obu"
+                )[..],
+                [0, 2, 1, 3, 4, 5, 7],
+            ),
+            (
+                "av1-short-ref-ties-short.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-ties-short.obu"
+                )[..],
+                [0, 7, 6, 0, 5, 4, 3],
+            ),
+            (
+                "av1-short-ref-ties-explicit.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-ties-explicit.obu"
+                )[..],
+                [0, 7, 6, 0, 5, 4, 3],
+            ),
+            (
+                "av1-short-ref-future-ties-short.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-future-ties-short.obu"
+                )[..],
+                [0, 0, 0, 1, 2, 3, 7],
+            ),
+            (
+                "av1-short-ref-future-ties-explicit.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-future-ties-explicit.obu"
+                )[..],
+                [0, 0, 0, 1, 2, 3, 7],
+            ),
+            (
+                "av1-short-ref-wrap-short.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-wrap-short.obu"
+                )[..],
+                [0, 2, 1, 3, 4, 5, 7],
+            ),
+            (
+                "av1-short-ref-wrap-explicit.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-short-ref-wrap-explicit.obu"
+                )[..],
+                [0, 2, 1, 3, 4, 5, 7],
+            ),
+        ] {
+            let mut decoder = Decoder::new(8 << 20);
+            for _ in 0..2 {
+                let mut shown = 0;
+                let mut offset = 0;
+                for obu in Obus::new(data) {
+                    let obu = obu.unwrap();
+                    let end =
+                        obu.payload.as_ptr() as usize - data.as_ptr() as usize + obu.payload.len();
+                    let output = decoder
+                        .decode_packet(&data[offset..end])
+                        .unwrap_or_else(|e| panic!("{name}: {e}"));
+                    for frame in output {
+                        assert_flat(&frame);
+                        shown += usize::from(frame.show);
+                    }
+                    offset = end;
+                }
+                assert_eq!(shown, 1);
+                assert_eq!(
+                    decoder.headers[0].as_ref().unwrap().references,
+                    expected,
+                    "{name}"
                 );
                 decoder.reset();
             }

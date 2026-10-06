@@ -1169,3 +1169,14 @@ libaom reference helper `scripts/av1_fixture.c`: run the compiled helper with
 The final argument selects reference-ID generation with disabled order hints
 and CDF updates, error resilience and disabled automatic keyframe placement.
 This optional reference generation is separate from the pure-Python fixtures.
+
+### AV1 short reference signaling
+
+`python3 scripts/generate_av1_short_reference_samples.py` writes 298 owned
+acceptance streams, two malformed anchor refusals and ten WebM variants.
+The JSON manifest stores hashes and independent expected reference maps.
+Short and explicit reference signaling are paired across order-hint widths
+1–8, frame IDs, tie ordering, future/past references, wrap and anchor slots.
+`--oracle` optionally validates reconstructed flat pixels through the independent
+libaom helper; ordinary acceptance/refusal/playback tests use saved files only.
+No private media, codec parameters, FFmpeg or network access is used.

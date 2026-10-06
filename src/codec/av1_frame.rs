@@ -67,6 +67,60 @@ pub struct Header {
     pub skip_mode: Option<[usize; 2]>,
     pub warped_motion: bool,
 }
+/// AV1 set_frame_refs: ties follow the normative slot scan order.
+fn short_references(
+    current: u32,
+    bits: u8,
+    last: usize,
+    golden: usize,
+    hints: [u32; 8],
+) -> Result<[usize; 7]> {
+    let midpoint = 1i32 << (bits - 1);
+    let mask = (1i32 << bits) - 1;
+    let shifted = hints.map(|hint| {
+        let distance = (hint.wrapping_sub(current) as i32) & mask;
+        midpoint + ((distance & (midpoint - 1)) - (distance & midpoint))
+    });
+    if shifted[last] >= midpoint || shifted[golden] >= midpoint {
+        return Err(invalid("AV1 short LAST/GOLDEN reference is not forward"));
+    }
+    let mut references = [usize::MAX; 7];
+    references[0] = last;
+    references[3] = golden;
+    let mut used = [false; 8];
+    used[last] = true;
+    used[golden] = true;
+    for (target, latest) in [(6, true), (4, false), (5, false)] {
+        let candidates = (0..8).filter(|&i| !used[i] && shifted[i] >= midpoint);
+        let selected = if latest {
+            candidates.max_by_key(|&i| (shifted[i], i))
+        } else {
+            candidates.min_by_key(|&i| (shifted[i], i))
+        };
+        if let Some(index) = selected {
+            references[target] = index;
+            used[index] = true;
+        }
+    }
+    for target in [1, 2, 4, 5, 6] {
+        if references[target] == usize::MAX {
+            if let Some(index) = (0..8)
+                .filter(|&i| !used[i] && shifted[i] < midpoint)
+                .max_by_key(|&i| (shifted[i], i))
+            {
+                references[target] = index;
+                used[index] = true;
+            }
+        }
+    }
+    let earliest = (0..8).min_by_key(|&i| (shifted[i], i)).unwrap();
+    for index in &mut references {
+        if *index == usize::MAX {
+            *index = earliest;
+        }
+    }
+    Ok(references)
+}
 fn delta_q(b: &mut BitReader<'_>) -> Result<i32> {
     if b.bit()? { signed(b, 7) } else { Ok(0) }
 }
@@ -85,6 +139,23 @@ impl Header {
         temporal_id: u8,
         spatial_id: u8,
         refs: &[Option<&Header>; 8],
+    ) -> Result<Self> {
+        Self::parse_with_order_hints(
+            s,
+            data,
+            temporal_id,
+            spatial_id,
+            refs,
+            refs.map(|reference| reference.map_or(0, |header| header.order_hint)),
+        )
+    }
+    pub(crate) fn parse_with_order_hints(
+        s: &Sequence,
+        data: &[u8],
+        temporal_id: u8,
+        spatial_id: u8,
+        refs: &[Option<&Header>; 8],
+        reference_order_hints: [u32; 8],
     ) -> Result<Self> {
         let b = &mut BitReader::new(data);
         let (frame_type, show, showable, error_resilient) = if s.reduced_header {
@@ -167,13 +238,20 @@ impl Header {
         let mut references = [0usize; 7];
         let mut found_ref = None;
         if !intra {
-            if s.order_hint_bits > 0 && b.bit()? {
-                return Err(crate::unsupported(
-                    "AV1 short reference signaling not implemented",
-                ));
+            let short = s.order_hint_bits > 0 && b.bit()?;
+            if short {
+                references = short_references(
+                    order_hint,
+                    s.order_hint_bits,
+                    b.read(3)? as usize,
+                    b.read(3)? as usize,
+                    reference_order_hints,
+                )?;
             }
             for index in &mut references {
-                *index = b.read(3)? as usize;
+                if !short {
+                    *index = b.read(3)? as usize;
+                }
                 if refs[*index].is_none() {
                     return Err(invalid("AV1 inter frame references missing picture"));
                 }
