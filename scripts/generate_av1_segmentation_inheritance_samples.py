@@ -33,7 +33,7 @@ def inter(slot,primary,enabled,update,features,update_map=False,temporal=False,t
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--oracle',type=Path);args=parser.parse_args()
-    root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors';records=[];refusals=[]
+    root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors';records=[];refusals=[];map_acceptances=[]
     profiles={
         'empty':{},
         'unused-negative':{(1,0):-256,(2,1):-64,(3,2):63,(4,3):0,(5,4):17,(6,5):7,(7,6):0,(7,7):0},
@@ -53,7 +53,7 @@ def main():
     for temporal in [False,True]:
         data=sequence(False,False,False)+key()+inter(0,0,True,False,{},True,temporal)
         filename=f'av1-seg-inherit-map-update-temporal{int(temporal)}.obu';(root/filename).write_bytes(data)
-        refusals.append(dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),error='AV1 segmentation map updates not implemented',acceptance=False,reference_shown=1))
+        map_acceptances.append(dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),acceptance=True,reference_shown=1))
     data=sequence(False,False,False)+key()+inter(0,0,True,True,{(0,0):1})
     filename='av1-seg-inherit-active-alt-q-gap.obu';(root/filename).write_bytes(data)
     active_acceptances=[dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),acceptance=True,reference_shown=1)]
@@ -66,7 +66,7 @@ def main():
             r['webm']=filename;r['webm_sha256']=hashlib.sha256(data).hexdigest()
     if args.oracle:
         for r in records:subprocess.run([str(args.oracle),str(root/r['file']),str(r['shown'])],check=True)
-        for r in refusals+active_acceptances:
+        for r in refusals+active_acceptances+map_acceptances:
             if 'reference_shown' in r:subprocess.run([str(args.oracle),str(root/r['file']),str(r['reference_shown'])],check=True)
-    (root/'av1-seg-inherit-generated.json').write_text(json.dumps(dict(fixtures=records,refusals=refusals,active_acceptances=active_acceptances),indent=2)+'\n')
+    (root/'av1-seg-inherit-generated.json').write_text(json.dumps(dict(fixtures=records,refusals=refusals,active_acceptances=active_acceptances,map_acceptances=map_acceptances),indent=2)+'\n')
 if __name__=='__main__':main()

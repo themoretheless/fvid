@@ -3561,3 +3561,38 @@ a pixel mismatch on av1-alt-lf-f1-d-64-refmode0.obu. Restoring it passes.
 Compound GLOBAL_GLOBALMV mode classification remains a source-audit lead
 requiring its own synthetic reproducer and qualification; these results do
 not claim complete compound filtering or AV1 conformance.
+
+## AV1 spatial, temporal and inherited segmentation maps
+
+The picture decoder now reconstructs and retains 4x4 segment-ID maps with
+reference pictures. Spatial decoding uses tile-bounded neighbor prediction,
+the segment-ID CDF and negative deinterleaving. Temporal updates read the
+prediction flag and use the minimum ID under the current block in the primary
+reference map. Unchanged maps are copied exactly at wrapup; disabling
+segmentation clears the map. Allocation and retained-reference accounting
+include the maps. ALT_Q, lossless selection and all four ALT_LF features now
+use each block's segment instead of assuming segment zero. Forced reference,
+skip and global segment features still fail explicitly.
+
+48 owned streams cover 1–8 active segments, forward/reverse ID patterns,
+intra-key and inter spatial updates, temporal prediction flags both true and
+false, unchanged maps, disabling and re-enabling segmentation, nonzero residuals,
+and per-segment quantizer/filter deltas. All 288 shown pictures compare every
+sample against saved independent libaom pixels. Exact decoded maps are checked
+for all seven coded pictures per stream. 48 WebM variants additionally verify
+pixels, rewind and sync seek. Two old flat map-update refusal expectations
+are promoted to acceptance without changing the fixture bytes.
+
+Fixture generation consumes committed symbol records extracted only from the
+owned ALT_Q synthetic stream, inserts the normative map symbols and optionally
+uses the standalone libaom range writer/reference decoder. Ordinary tests use
+only saved files and run offline without external codecs. The pre-fix decoder
+reproduces the specific map-update refusal on the new valid nonzero-map input.
+Changing dequantization back to segment zero causes an independent pixel
+mismatch on av1-seg-map-n2-q1-lf0.obu; restoring it passes.
+
+35 AV1 core tests and 18 tests across seven root AV1 suites passed. These
+fixtures use disabled CDF adaptation and one tile, so adaptive/multitile map
+qualification, mixed lossless/lossy segments, forced segment tools, delta-LF
+and the other documented AV1 tools remain to qualify or implement. This
+milestone does not establish complete AV1 or cross-codec conformance.

@@ -1827,20 +1827,6 @@
   ],
   "refusals": [
     {
-      "file": "av1-seg-inherit-map-update-temporal0.obu",
-      "sha256": "c022052cf252fe272afe6361ae6d731f7ee9f585e8edbb56bf56bb1227c4f731",
-      "error": "AV1 segmentation map updates not implemented",
-      "acceptance": false,
-      "reference_shown": 1
-    },
-    {
-      "file": "av1-seg-inherit-map-update-temporal1.obu",
-      "sha256": "f89652e3ff9fef4381fac01213950b7af1acc304953c772f5a4c4754aca20231",
-      "error": "AV1 segmentation map updates not implemented",
-      "acceptance": false,
-      "reference_shown": 1
-    },
-    {
       "file": "av1-seg-inherit-invalid-truncated-data.obu",
       "sha256": "439eab26b08c5630b17ded2ed464561b9e551f7b7490d2e9a20408dbb8ee06f3",
       "error": "truncated or oversized bit field",
@@ -1851,6 +1837,20 @@
     {
       "file": "av1-seg-inherit-active-alt-q-gap.obu",
       "sha256": "3a722d274023c64020adf7549af0c8e349f729f9cf6802f7ebbbcddf0d189aa5",
+      "acceptance": true,
+      "reference_shown": 1
+    }
+  ],
+  "map_acceptances": [
+    {
+      "file": "av1-seg-inherit-map-update-temporal0.obu",
+      "sha256": "c022052cf252fe272afe6361ae6d731f7ee9f585e8edbb56bf56bb1227c4f731",
+      "acceptance": true,
+      "reference_shown": 1
+    },
+    {
+      "file": "av1-seg-inherit-map-update-temporal1.obu",
+      "sha256": "f89652e3ff9fef4381fac01213950b7af1acc304953c772f5a4c4754aca20231",
       "acceptance": true,
       "reference_shown": 1
     }

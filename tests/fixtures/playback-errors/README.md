@@ -1231,3 +1231,24 @@ Acceptance checks exact pixels, reset, WebM timestamps, rewind and sync seek.
 The matrix covers all four segment-zero ALT_LF features, signed clipping,
 reference/mode deltas, level-32 scaling and nominal zero plane levels. It uses
 unchanged implicit zero maps; updated segment maps remain unsupported.
+
+## AV1 segmentation maps
+
+`generate_av1_segmentation_map_samples.py --writer WRITER --oracle ORACLE`
+regenerates 48 OBU/YUV/WebM triples and `av1-seg-map-generated.json`. Build
+`scripts/av1_fixture_symbol_writer.c` with the same optional libaom static
+library as `av1_symbol_oracle.c`. ORACLE is the independently compiled
+`av1_show_existing_oracle.c` helper. External tools are generation-only.
+
+`av1-seg-map-owned-symbols.json` records the nonadaptive key/inter symbol
+sequence of the owned `av1-alt-q-target64-base64-delta0.obu` input; block
+markers identify the point after skip syntax where map symbols are inserted.
+No private inputs or parameters are used. The generator calculates spatial
+prediction and negative deinterleaving independently in Python and stores
+expected raster maps along with independent reference pixel hashes.
+
+Acceptance checks segment IDs, all reconstructed shown pixels, decoder reset,
+WebM replay and seek for spatial/temporal updates, unchanged maps and reset.
+The existing temporal0/temporal1 flat map refusals are now listed in
+`map_acceptances`; their bytes remain unchanged. Forced segment tools and
+adaptive/multitile qualification remain separate work.

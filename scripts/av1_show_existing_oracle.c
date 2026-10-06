@@ -16,8 +16,8 @@ int main(int argc,char **argv){
   if(aom_codec_decode(&ctx,data+packet_start,at-packet_start,NULL)){fprintf(stderr,"%s: %s %s\n",argv[1],aom_codec_error(&ctx),aom_codec_error_detail(&ctx));return 1;}
   packet_start=at;
   aom_codec_iter_t iter=NULL;aom_image_t *img;
-  while((img=aom_codec_get_frame(&ctx,&iter))){if(img->d_w!=32||img->d_h!=32||img->bit_depth!=8)return 1;
-   for(int p=0;p<3;p++)for(int y=0;y<(p?16:32);y++)for(int x=0;x<(p?16:32);x++){unsigned char value=img->planes[p][y*img->stride[p]+x];if(output){if(fputc(value,output)==EOF)return 2;}else if(value!=128){fprintf(stderr,"non-flat sample\n");return 1;}}count++;
+  while((img=aom_codec_get_frame(&ctx,&iter))){if(img->bit_depth!=8||(!output&&(img->d_w!=32||img->d_h!=32)))return 1;
+   for(int p=0;p<3;p++)for(int y=0;y<(p?(img->d_h+1)/2:img->d_h);y++)for(int x=0;x<(p?(img->d_w+1)/2:img->d_w);x++){unsigned char value=img->planes[p][y*img->stride[p]+x];if(output){if(fputc(value,output)==EOF)return 2;}else if(value!=128){fprintf(stderr,"non-flat sample\n");return 1;}}count++;
   }
  }
  if(output&&fclose(output))return 2;
