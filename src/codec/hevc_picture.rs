@@ -44,9 +44,6 @@ pub fn decode(
     lists: &[Vec<Reference>; 2],
     budget: usize,
 ) -> Result<Picture> {
-    if slice.cu_chroma_qp_offset_enabled {
-        return Err(crate::unsupported("HEVC CU chroma QP selection is not implemented"));
-    }
     if sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.pcm.is_some()
@@ -118,6 +115,8 @@ pub fn decode(
         slice_start: 0,
         qp: slice.qp,
         chroma_offsets,
+        cu_chroma_offsets: [0; 2],
+        chroma_qp_coded: false,
         qp_coded: false,
         qp_prediction: slice.qp,
         qp_grid: vec![slice.qp; count / 64],
@@ -358,9 +357,6 @@ pub fn decode_slices(
     slice_lists: &[[Vec<Reference>; 2]],
     budget: usize,
 ) -> Result<Picture> {
-    if slices.iter().any(|s| s.cu_chroma_qp_offset_enabled) {
-        return Err(crate::unsupported("HEVC CU chroma QP selection is not implemented"));
-    }
     if slices.len() != slice_lists.len() {
         return Err(invalid("HEVC slice reference count mismatch"));
     }
@@ -476,6 +472,8 @@ pub fn decode_slices(
         slice_start: 0,
         qp: slice.qp,
         chroma_offsets,
+        cu_chroma_offsets: [0; 2],
+        chroma_qp_coded: false,
         qp_coded: false,
         qp_prediction: slice.qp,
         qp_grid: vec![slice.qp; count / 64],
@@ -517,6 +515,9 @@ pub fn decode_slices(
             decoder.qp_coded = false;
             saved = None;
         }
+        // H.265 7.4.7.1 initializes chroma adjustments for each slice segment.
+        decoder.cu_chroma_offsets = [0; 2];
+        decoder.chroma_qp_coded = false;
         decoder.chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
         let expected = if pps.entropy_sync {
             (end - 1) / columns - begin / columns + 1
@@ -683,6 +684,8 @@ struct Decoder<'a> {
     slice_start: u32,
     qp: i32,
     chroma_offsets: [i32; 2],
+    cu_chroma_offsets: [i32; 2],
+    chroma_qp_coded: bool,
     qp_coded: bool,
     qp_prediction: i32,
     qp_grid: Vec<i32>,
@@ -709,6 +712,13 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
         ]
     }
     fn enter(&mut self, n: Node, split: bool) -> Result<()> {
+        if self.slice.cu_chroma_qp_offset_enabled {
+            let table = self.pps.chroma_qp_offset_list.as_ref()
+                .ok_or_else(|| invalid("HEVC active chroma QP selection has no list"))?;
+            if n.log2_size >= self.sps.coding_block_log2[1] - table.depth {
+                self.chroma_qp_coded = false;
+            }
+        }
         if let Some(depth) = self.pps.cu_qp_delta_depth {
             let log = self.sps.coding_block_log2[1] - depth;
             if n.log2_size >= log {
@@ -816,7 +826,10 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 self.edges[(y + k) * stride + x][0] |= 2;
                 self.edges[y * stride + x + k][1] |= 2;
             }
-            let qps = hevc_qp::components(self.qp, self.sps.depth, self.chroma_offsets)?;
+            self.read_chroma_qp(b, u.coded, bypass)?;
+            let qps = hevc_qp::components_with_cu(
+                self.qp, self.sps.depth, self.chroma_offsets, self.cu_chroma_offsets,
+            )?;
             for component in 0..3 {
                 if component != 0 && !u.owns_chroma {
                     continue;
@@ -1178,6 +1191,17 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
 }
 
 impl Decoder<'_> {
+    fn read_chroma_qp(&mut self, b: &mut HevcCabac<'_>, coded: [bool; 3], bypass: bool) -> Result<()> {
+        if self.slice.cu_chroma_qp_offset_enabled && !self.chroma_qp_coded
+            && !bypass && (coded[1] || coded[2]) {
+            let table = self.pps.chroma_qp_offset_list.as_ref()
+                .ok_or_else(|| invalid("HEVC active chroma QP selection has no list"))?;
+            self.cu_chroma_offsets = hevc_qp::read_chroma_offset(b, &table.entries)?;
+            self.chroma_qp_coded = true;
+        }
+        Ok(())
+    }
+
     fn cell(&self, x: i32, y: i32) -> Option<Cell> {
         if x >= 0 && y >= 0 {
             let side = 1u32 << self.sps.coding_block_log2[1];
@@ -1333,7 +1357,10 @@ impl Decoder<'_> {
                         self.cells[yy * stride + xx].cbf = u.coded[0];
                     }
                 }
-                let qps = hevc_qp::components(self.qp, self.sps.depth, self.chroma_offsets)?;
+                self.read_chroma_qp(b, u.coded, bypass)?;
+                let qps = hevc_qp::components_with_cu(
+                    self.qp, self.sps.depth, self.chroma_offsets, self.cu_chroma_offsets,
+                )?;
                 for c in 0..3 {
                     if !u.coded[c] || (c != 0 && !u.owns_chroma) {
                         continue;

@@ -53,17 +53,46 @@ pub fn luma(previous: i32, neighbours: [Option<i32>; 2], delta: i32, depth: u8) 
     let prediction = (a + b + 1) >> 1;
     Ok((prediction + delta + bd).rem_euclid(52 + bd) - bd)
 }
-/// Return nonnegative Y/Cb/Cr QPs for inverse scaling. Chroma offsets are the
-/// validated PPS+slice sums; Main/Main10 has no CU chroma-offset-list extension.
+/// Read the bounded HEVC range-extension chroma adjustment selection.
+pub fn read_chroma_offset(b: &mut impl ResidualBins, entries: &[[i8; 2]]) -> Result<[i32; 2]> {
+    if !(1..=6).contains(&entries.len())
+        || entries.iter().flatten().any(|v| !(-12..=12).contains(v))
+    {
+        return Err(invalid("invalid HEVC chroma QP list"));
+    }
+    if !b.decision(Syntax::ChromaQpOffsetFlag, 0)? {
+        return Ok([0; 2]);
+    }
+    let mut index = 0;
+    while index + 1 < entries.len() && b.decision(Syntax::ChromaQpOffsetIndex, 0)? {
+        index += 1;
+    }
+    Ok(entries[index].map(i32::from))
+}
+/// Return nonnegative Y/Cb/Cr QPs for inverse scaling.
 pub fn components(qp_y: i32, depths: [u8; 2], chroma_offsets: [i32; 2]) -> Result<[u8; 3]> {
+    components_with_cu(qp_y, depths, chroma_offsets, [0; 2])
+}
+/// Keep PPS/slice and CU list bounds separate before adding their offsets.
+pub fn components_with_cu(
+    qp_y: i32,
+    depths: [u8; 2],
+    chroma_offsets: [i32; 2],
+    cu_offsets: [i32; 2],
+) -> Result<[u8; 3]> {
     let ybd = offset(depths[0])?;
     let cbd = offset(depths[1])?;
-    if !(-ybd..=51).contains(&qp_y) || chroma_offsets.iter().any(|v| !(-12..=12).contains(v)) {
+    if !(-ybd..=51).contains(&qp_y)
+        || chroma_offsets
+            .iter()
+            .chain(cu_offsets.iter())
+            .any(|v| !(-12..=12).contains(v))
+    {
         return Err(invalid("invalid HEVC component QP input"));
     }
     let mut result = [(qp_y + ybd) as u8, 0, 0];
     for (i, offset) in chroma_offsets.into_iter().enumerate() {
-        let index = (qp_y + offset).clamp(-cbd, 57);
+        let index = (qp_y + offset + cu_offsets[i]).clamp(-cbd, 57);
         let mapped = match index {
             ..=29 => index,
             30..=43 => {
@@ -155,5 +184,84 @@ mod tests {
         assert_eq!(components(-12, [10, 10], [-12, 0]).unwrap(), [0, 0, 0]);
         assert!(components(52, [8, 8], [0, 0]).is_err());
         assert!(luma(0, [Some(52), None], 0, 8).is_err());
+    }
+}
+
+#[cfg(test)]
+mod chroma_selection_tests {
+    use super::*;
+    struct Bins {
+        bins: std::collections::VecDeque<bool>,
+        calls: usize,
+    }
+    impl ResidualBins for Bins {
+        fn decision(&mut self, syntax: Syntax, context: usize) -> Result<bool> {
+            assert_eq!(context, 0);
+            assert!(matches!(
+                (self.calls, syntax),
+                (0, Syntax::ChromaQpOffsetFlag) | (1.., Syntax::ChromaQpOffsetIndex)
+            ));
+            self.calls += 1;
+            self.bins
+                .pop_front()
+                .ok_or_else(|| invalid("missing chroma selection bin"))
+        }
+        fn bypass(&mut self) -> Result<bool> {
+            panic!("chroma selection never uses bypass bins")
+        }
+    }
+    #[test]
+    fn every_list_size_index_zero_flag_and_truncation() {
+        for len in 1..=6 {
+            let entries: Vec<_> = (0..len).map(|i| [i as i8 - 3, 12 - i as i8]).collect();
+            let mut zero = Bins {
+                bins: [false].into(),
+                calls: 0,
+            };
+            assert_eq!(read_chroma_offset(&mut zero, &entries).unwrap(), [0; 2]);
+            for index in 0..len {
+                let mut encoded = vec![true; index + 1];
+                if index + 1 < len {
+                    encoded.push(false);
+                }
+                for cut in 0..encoded.len() {
+                    let mut short = Bins {
+                        bins: encoded[..cut].iter().copied().collect(),
+                        calls: 0,
+                    };
+                    assert!(read_chroma_offset(&mut short, &entries).is_err());
+                }
+                let mut full = Bins {
+                    bins: encoded.into(),
+                    calls: 0,
+                };
+                assert_eq!(
+                    read_chroma_offset(&mut full, &entries).unwrap(),
+                    entries[index].map(i32::from)
+                );
+                assert!(full.bins.is_empty());
+            }
+        }
+        for entries in [vec![], vec![[0, 0]; 7], vec![[13, 0]]] {
+            let mut bins = Bins {
+                bins: [true].into(),
+                calls: 0,
+            };
+            assert!(read_chroma_offset(&mut bins, &entries).is_err());
+            assert_eq!(bins.calls, 0);
+        }
+    }
+    #[test]
+    fn cu_offsets_add_before_mapping_without_relaxing_base_bounds() {
+        assert_eq!(
+            components_with_cu(24, [8, 8], [12, -12], [12, -12]).unwrap(),
+            [24, 42, 0]
+        );
+        assert_eq!(
+            components_with_cu(-12, [10, 10], [-12, 12], [-12, 12]).unwrap(),
+            [0, 0, 24]
+        );
+        assert!(components_with_cu(24, [8, 8], [13, 0], [-1, 0]).is_err());
+        assert!(components_with_cu(24, [8, 8], [0, 0], [0, -13]).is_err());
     }
 }

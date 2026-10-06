@@ -2105,3 +2105,26 @@ refusal tests pass, but they are not acceptance evidence. The independent HM
 pixel/reset acceptance remains ignored pending CABAC flag/index decoding,
 CU-group state/reset and chroma-QP application. This stage does not close the
 chroma-QP tool gap or the overall codec objective.
+
+### HEVC CU chroma-QP selection acceptance (2026-10-06)
+
+Software decoding now initializes the flag/index CABAC banks per H.265 tables
+9-34/35, decodes bounded truncated-unary indices, resets coding state at the
+configured chroma quantization group, and applies the selected Cb/Cr offsets
+before inverse scaling. Slice-segment adjustments initialize to zero; bypass
+and absent chroma coefficients do not consume selection syntax. Base/slice
+and CU offset bounds remain independently enforced. Chroma deblocking retains
+PPS-only offsets as required by 8.7.2.5 (CU/slice adjustments are excluded).
+
+The previous active-selection refusal test is now acceptance. Saved HM pixels
+match for the original I picture and a new three-picture I/B/B depth-one group
+fixture with SAO/deblocking enabled, including decoder reset. Unit tests cover
+all list sizes and indices, zero flag, truncated bins and combined offset
+bounds. Ordinary tests use committed bytes without external tools. NVDEC
+lists still explicitly refuse as unqualified; these contained 4:2:0 RExt8 cases
+do not qualify every profile, dependent segment, WPP or physical GPU path.
+
+Local offline validation for this change: codec library 348 passed / one
+explicit fixture-generator test ignored; media library without default
+features 334 passed / one ignored; CUDA-feature HEVC admission/scheduler tests
+15 passed. This is CPU-side CUDA configuration evidence, not device decoding.

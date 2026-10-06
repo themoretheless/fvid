@@ -342,7 +342,7 @@ mod chroma_qp_fixture_tests {
         }
     }
     #[test]
-    fn active_chroma_qp_fixture_parses_table_and_refuses_unimplemented_selection() {
+    fn active_chroma_qp_fixture_parses_table_and_decodes_selection() {
         let data = include_bytes!(
             "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4"
         );
@@ -392,48 +392,30 @@ mod chroma_qp_fixture_tests {
         let mut decoder =
             super::super::hevc_decoder::HevcDecoder::from_configuration(&configuration, 16 << 20)
                 .unwrap();
-        let error = decoder
-            .decode_packet(&packet)
-            .err()
-            .expect("selection remains unsupported");
-        assert!(
-            error
-                .to_string()
-                .contains("HEVC CU chroma QP selection is not implemented"),
-            "{error}"
-        );
+        assert!(decoder.decode_packet(&packet).unwrap().is_some());
     }
     #[test]
-    #[ignore = "acceptance awaits CABAC chroma QP selection and CU-group offset application"]
-    fn active_chroma_qp_fixture_matches_hm_pixels_after_selection_is_implemented() {
-        let data = include_bytes!(
-            "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4"
-        );
-        let expected = include_bytes!(
-            "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.yuv"
-        );
-        let mut input =
-            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
-                .unwrap();
-        let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
-            &input.tracks()[0].configuration,
-            16 << 20,
-        )
-        .unwrap();
-        let mut packet = Vec::new();
-        input.read_packet(0, 0, &mut packet).unwrap();
-        for pass in 0..2 {
-            if pass != 0 {
-                decoder.reset();
+    fn active_chroma_qp_fixtures_match_hm_pixels_and_reset() {
+        for (data, expected, frames) in [
+            (include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4").as_slice(),
+             include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.yuv").as_slice(), 1),
+            (include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-groups-filtered-rext8.mp4").as_slice(),
+             include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-groups-filtered-rext8.yuv").as_slice(), 3),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration, 16 << 20).unwrap();
+            let mut packet = Vec::new();
+            for pass in 0..2 {
+                if pass != 0 { decoder.reset(); }
+                let mut pixels = Vec::new();
+                for frame in 0..frames {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    pixels.extend(decoded.picture.planes.iter().flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap())));
+                }
+                assert_eq!(pixels, expected);
             }
-            let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
-            let pixels: Vec<_> = decoded
-                .picture
-                .planes
-                .iter()
-                .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap()))
-                .collect();
-            assert_eq!(pixels, expected);
         }
     }
 }

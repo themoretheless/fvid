@@ -324,21 +324,20 @@ media. HM reconstruction must match decoder output; decoder logs must show
 exactly POCs 0,2,1 and no concealed reference loss before saving oracles.
 Ordinary tests read committed bytes without FFmpeg, HM or network access.
 
-### HEVC CU chroma-QP list: staged syntax, not playback acceptance
+### HEVC CU chroma-QP list acceptance
 
-`hevc-chroma-qp-list-active-rext8.mp4` is one owned 64×64 RExt8 I picture
-with chroma-QP adjustment depth zero, one PPS Cb/Cr entry [6,6] and an active
-CU-adjustment slice flag. Its YUV is independently decoded by HM 18.0 and
-checked against encoder reconstruction. Regenerate explicitly with
+`hevc-chroma-qp-list-active-rext8.mp4` is one owned 64×64 RExt8 I picture,
+with group depth zero and PPS Cb/Cr entry [6,6].
+`hevc-chroma-qp-list-groups-filtered-rext8.mp4` has three owned I/B/B pictures,
+group depth one, and enabled SAO/deblocking. The deterministic YUV patterns
+and configuration are owned by the generator; no private media is included.
+Each saved YUV is independently decoded by HM 18.0 and checked against encoder
+reconstruction. Regenerate explicitly with
 `scripts/generate_hevc_chroma_qp_sample.py --hm-encoder /path/to/TAppEncoder --hm-decoder /path/to/TAppDecoder`.
 
-The initial reproduction verified the raw PPS parser's exact combined
-cross-component/chroma-QP-list refusal, not the decoder constructor's generic
-"PPS has no valid SPS" wrapper. PPS parsing now stores depth/entries with
-bounds (CU depth, at most six pairs, each offset -12..12), and slice parsing
-reads the enable flag. Active selection still explicitly refuses before
-CABAC/picture reconstruction. The passing refusal/bounds tests are not
-playback acceptance: the saved-HM pixel/reset test remains explicitly ignored
-until CABAC selection and CU-group QP application are implemented. NVDEC
-configuration also explicitly refuses these unqualified lists. Ordinary tests
-read committed bytes without HM, FFmpeg or network access.
+The original raw PPS refusal and subsequent picture-selection refusal are now
+replaced by enabled pixel/reset acceptance. Bounds tests cover group depth,
+up to six pairs, signed offsets and CABAC selection/truncation. These cases
+qualify software 4:2:0 RExt8 reconstruction; NVDEC configuration still refuses
+unqualified lists. Ordinary tests read committed bytes without HM, FFmpeg or
+network access.

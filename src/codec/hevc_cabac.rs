@@ -40,6 +40,8 @@ pub enum Syntax {
     Mvd1,
     ExplicitRdpcmFlag,
     ExplicitRdpcmDirection,
+    ChromaQpOffsetFlag,
+    ChromaQpOffsetIndex,
 }
 fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
     use super::hevc_cabac_tables::*;
@@ -107,7 +109,7 @@ fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
             &[107, 139, 126][..],
             &[107, 139, 126][..],
         ][init],
-        Syntax::TransquantBypass => &[154],
+        Syntax::TransquantBypass | Syntax::ChromaQpOffsetFlag | Syntax::ChromaQpOffsetIndex => &[154],
         Syntax::Skip if init != 0 => &[197, 185, 201],
         Syntax::PredMode if init != 0 => {
             if init == 1 {
@@ -179,7 +181,7 @@ impl std::ops::Index<usize> for Bank {
 /// SAO type) while keeping the arithmetic state in the existing CABAC engine.
 pub struct HevcCabac<'a> {
     arithmetic: Cabac<'a>,
-    contexts: [Bank; 30],
+    contexts: [Bank; 32],
     pub(crate) rice_statistics: [super::hevc_residual::PersistentRiceStatistic; 4],
     failed: bool,
 }
@@ -215,12 +217,14 @@ fn index(s: Syntax) -> usize {
         Syntax::Mvd1 => 27,
         Syntax::ExplicitRdpcmFlag => 28,
         Syntax::ExplicitRdpcmDirection => 29,
+        Syntax::ChromaQpOffsetFlag => 30,
+        Syntax::ChromaQpOffsetIndex => 31,
     }
 }
 /// Probability states transferred at the second CTU of a WPP row.
 #[derive(Clone, Copy)]
 pub struct Contexts(
-    [Bank; 30],
+    [Bank; 32],
     [super::hevc_residual::PersistentRiceStatistic; 4],
 );
 impl<'a> HevcCabac<'a> {
@@ -239,7 +243,7 @@ impl<'a> HevcCabac<'a> {
             (SliceType::P, false) | (SliceType::B, true) => 1,
             _ => 2,
         };
-        let mut contexts = [Bank::empty(); 30];
+        let mut contexts = [Bank::empty(); 32];
         for s in [
             Syntax::SaoMerge,
             Syntax::SaoType,
@@ -271,6 +275,8 @@ impl<'a> HevcCabac<'a> {
             Syntax::Mvd1,
             Syntax::ExplicitRdpcmFlag,
             Syntax::ExplicitRdpcmDirection,
+            Syntax::ChromaQpOffsetFlag,
+            Syntax::ChromaQpOffsetIndex,
         ] {
             if let Ok(entries) = values(s, init) {
                 contexts[index(s)] = Bank::initialized(&entries, qp)?;
@@ -425,5 +431,18 @@ mod tests {
         assert!(i.decision(Syntax::Skip, 0).is_err());
         assert!(i.bypass().is_err());
         assert!(HevcCabac::new(&data, 0, SliceType::I, true, 33).is_err());
+    }
+}
+
+#[cfg(test)]
+mod chroma_initialization_tests {
+    use super::*;
+    #[test]
+    fn chroma_selection_has_one_context_for_every_initialization() {
+        for init in 0..3 {
+            for syntax in [Syntax::ChromaQpOffsetFlag, Syntax::ChromaQpOffsetIndex] {
+                assert_eq!(values(syntax, init).unwrap(), [154]);
+            }
+        }
     }
 }
