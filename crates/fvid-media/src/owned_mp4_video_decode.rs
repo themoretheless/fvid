@@ -473,6 +473,11 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-unified-residual-8bit-top-init0-frame-luma-sign0-fromframe",
+            "avc-unified-residual-10bit-bottom-init2-both-all-sign1-fromframe-aso",
+            "avc-unified-residual-8bit-top-init0-frame-luma-sign0",
+            "avc-unified-residual-10bit-bottom-init1-field-chroma-sign1-aso",
+            "avc-unified-residual-10bit-top-init2-both-all-sign1-aso",
             "avc-unified-cabac-8bit-top-init0-framemotion-fieldcoded",
             "avc-unified-cabac-10bit-bottom-init1-frameskip-fieldskip-aso",
             "avc-unified-cabac-10bit-top-init2-framemotion-fieldskip-aso",
@@ -618,8 +623,9 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
-            let unified =
-                name.starts_with("avc-unified-field-") || name.starts_with("avc-unified-cabac-");
+            let unified = name.starts_with("avc-unified-field-")
+                || name.starts_with("avc-unified-cabac-")
+                || name.starts_with("avc-unified-residual-");
             let former_refusal = name == "avc-field-frame-partial-refusal"
                 || name == "avc-field-frame-mixed-refusal";
             let field_frame = name.starts_with("avc-field-frame-");

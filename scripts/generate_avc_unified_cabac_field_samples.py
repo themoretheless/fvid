@@ -6,12 +6,12 @@ from generate_avc_field_cabac_samples import configuration,field
 from generate_avc_mbaff_direct_samples import Writer,CabacWriter
 from generate_avc_field_frame_samples import emit
 
-def prediction(address,number,poc,init,skip,bottom=None,target=None,clear=False):
+def prediction(address,number,poc,init,skip,bottom=None,target=None,clear=False,residual=None,target_frame=0):
     b=Writer();b.ue(address);b.ue(0);b.ue(0);b.u(number,4);b.u(int(bottom is not None))
     if bottom is not None:b.u(int(bottom))
     b.u(poc,4);b.u(0)
     b.u(int(target is not None))
-    if target is not None:b.ue(0);b.ue(5+int(bottom!=target));b.ue(3)
+    if target is not None:b.ue(0);b.ue(5-2*target_frame+int(bottom!=target));b.ue(3)
     ops=[(1,(0,))] if number==2 else ([(1,(1,)),(1,(2,))] if clear else [])
     # Even an empty adaptive list prevents sliding while appending field two.
     adaptive=bool(ops) or bottom is not None
@@ -27,8 +27,39 @@ def prediction(address,number,poc,init,skip,bottom=None,target=None,clear=False)
     if not skip:
         c.decision(14,0);c.decision(15,0);c.decision(16,0)
         for component in range(2):c.mvd(component,0 if bottom is not None else 4,0)
-        for ctx in [73,74,75,76,77]:c.decision(ctx,0)
+        if residual is None:
+            for ctx in [73,74,75,76,77]:c.decision(ctx,0)
+        else:write_residual(c,bottom is not None,*residual)
     b.bits.extend(c.finish());return b.nal(0x41,trailing=False)
+
+def write_residual(c,is_field,mode,negative):
+    luma=mode in ['empty','luma','all'];chroma=mode in ['empty','chroma','all']
+    if luma:
+        for _ in range(4):c.decision(73,1)
+    else:
+        for ctx in [73,74,75,76]:c.decision(ctx,0)
+    c.decision(77,int(chroma))
+    if chroma:c.decision(81,1)
+    c.decision(60,0)
+    if luma:
+        done=set()
+        for block in range(16):
+            bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2
+            inc=int((bx-1,by) in done)+2*int((bx,by-1) in done)
+            c.decision(93+inc,int(mode!='empty'))
+            if mode!='empty':
+                base=306 if is_field else 134;last=367 if is_field else 195
+                c.decision(base,0);c.decision(base+1,1);c.decision(last+1,1);c.decision(248,0);c.bypass((block%2)^negative);done.add((bx,by))
+    if chroma:
+        for component in range(2):
+            c.decision(97,int(mode!='empty'))
+            if mode!='empty':c.decision(321 if is_field else 149,1);c.decision(382 if is_field else 210,1);c.decision(258,0);c.bypass(component^negative)
+        for component in range(2):
+            done=set()
+            for block in range(4):
+                bx=block%2;by=block//2;inc=int((bx-1,by) in done)+2*int((bx,by-1) in done)
+                c.decision(101+inc,int(mode!='empty'))
+                if mode!='empty':c.decision(324 if is_field else 152,1);c.decision(385 if is_field else 213,1);c.decision(267,0);c.bypass(((block+component)%2)^negative);done.add((bx,by))
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--jm-decoder',type=Path,required=True);args=p.parse_args()
