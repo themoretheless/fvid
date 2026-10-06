@@ -473,6 +473,9 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-unified-explicit-b-8bit-top-init0-motion-weighted-ref1-bi16x8",
+            "avc-unified-explicit-b-10bit-bottom-init1-intra-implicit-ref0-bi8x8-aso",
+            "avc-unified-explicit-b-10bit-top-init2-motion-identity-ref1-l1-aso",
             "avc-unified-b-8bit-top-init0-temporal-motion-direct",
             "avc-unified-b-10bit-bottom-init1-spatial-intra-skip-aso",
             "avc-unified-b-10bit-top-init2-temporal-motion-residual-negative-aso",
@@ -629,7 +632,8 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
-            let unified_b = name.starts_with("avc-unified-b-");
+            let unified_b =
+                name.starts_with("avc-unified-b-") || name.starts_with("avc-unified-explicit-b-");
             let unified = name.starts_with("avc-unified-field-")
                 || name.starts_with("avc-unified-cabac-")
                 || name.starts_with("avc-unified-residual-")
