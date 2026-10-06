@@ -53,13 +53,24 @@ pub fn read_chroma(b: &mut impl ResidualBins) -> Result<u8> {
 pub fn read_chroma_modes(
     b: &mut impl ResidualBins, luma_modes: &[u8], chroma_format: u8,
 ) -> Result<Vec<u8>> {
+    Ok(read_chroma_modes_and_codes(b,luma_modes,chroma_format)?.into_iter().map(|(mode,_)|mode).collect())
+}
+pub fn read_chroma_modes_and_codes(
+    b: &mut impl ResidualBins, luma_modes: &[u8], chroma_format: u8,
+) -> Result<Vec<(u8,u8)>> {
     if !matches!(luma_modes.len(), 1 | 4) || luma_modes.iter().any(|&mode| mode > 34)
-        || !(1..=3).contains(&chroma_format) {
+        || chroma_format > 3 {
         return Err(crate::invalid("invalid HEVC chroma mode ownership"));
     }
+    if chroma_format == 0 { return Ok(vec![(0,0)]); }
     let count = if chroma_format == 3 { luma_modes.len() } else { 1 };
     luma_modes[..count].iter().map(|&mode| {
-        hevc_intra::chroma_mode(mode, read_chroma(b)?)
+        let code = read_chroma(b)?;
+        let mode = hevc_intra::chroma_mode(mode, code)?;
+        // H.265 Table 8-3: square chroma TBs represent rectangular luma regions.
+        const CHROMA422: [u8; 35] = [0,1,2,2,2,2,3,5,7,8,10,12,13,15,17,18,19,20,
+            21,22,23,23,24,24,25,25,26,27,27,28,28,29,29,30,31];
+        Ok((if chroma_format == 2 { CHROMA422[mode as usize] } else { mode },code))
     }).collect()
 }
 
@@ -109,6 +120,28 @@ mod tests {
         }
     }
     #[test]
+    fn monochrome_cu_reads_no_chroma_bins() {
+        for modes in [vec![26],vec![0,10,26,34]] {
+            let mut b = bins(vec![],vec![]);
+            assert_eq!(read_chroma_modes_and_codes(&mut b,&modes,0).unwrap(),[(0,0)]);
+            assert_eq!((b.flag,b.bit),(0,0));
+        }
+    }
+    #[test]
+    fn chroma422_derived_angles_match_normative_table() {
+        let expected = [0,1,2,2,2,2,3,5,7,8,10,12,13,15,17,18,19,20,
+            21,22,23,23,24,24,25,25,26,27,27,28,28,29,29,30,31];
+        for (mode, &angle) in expected.iter().enumerate() {
+            for format in [1,2,3] {
+                let mut b = bins(vec![false], vec![]);
+                assert_eq!(read_chroma_modes(&mut b, &[mode as u8], format).unwrap(),
+                    [if format == 2 { angle } else { mode as u8 }]);
+                assert_eq!(b.flag, 1);
+                assert_eq!(b.bit, 0);
+            }
+        }
+    }
+    #[test]
     fn full_chroma_modes_follow_prediction_block_order_and_local_luma() {
         use std::collections::VecDeque;
         struct Interleaved(VecDeque<(bool, bool)>);
@@ -142,7 +175,8 @@ mod tests {
         }
         for format in [1,2] {
             let mut shared = Interleaved(events.clone());
-            assert_eq!(read_chroma_modes(&mut shared, &luma, format).unwrap(), [34]);
+            assert_eq!(read_chroma_modes(&mut shared, &luma, format).unwrap(),
+                [if format == 2 { 31 } else { 34 }]);
             assert_eq!(shared.0.len(), events.len() - 3);
         }
         for modes in [&[][..], &[0,1][..], &[35][..]] {

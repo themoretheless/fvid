@@ -96,7 +96,11 @@ impl PackedPlanar {
         budget: usize,
     ) -> Result<Self> {
         let [left, right, top, bottom] = p.crop;
-        if left % 2 != 0 || top % 2 != 0 || !p.coded_width.is_multiple_of(2) || !p.coded_height.is_multiple_of(2) {
+        if left % 2 != 0
+            || top % 2 != 0
+            || !p.coded_width.is_multiple_of(2)
+            || !p.coded_height.is_multiple_of(2)
+        {
             return Err(invalid("unaligned coded planar crop"));
         }
         let width = p
@@ -251,4 +255,68 @@ impl PackedPlanar {
         }
         Ok(())
     }
+}
+
+/// Preserve HEVC chroma geometry and component precision for display.
+/// Lower-depth components are lifted exactly to the highest component depth.
+pub fn hevc_picture(
+    p: &crate::codec::hevc_picture::Picture,
+    format: u8,
+    colour: AvcColour,
+) -> Result<PackedPlanar> {
+    let depth = if format == 0 {
+        p.depth[0]
+    } else {
+        p.depth[0].max(p.depth[1])
+    };
+    let sub = match format {
+        0 | 1 => [2, 2],
+        2 => [2, 1],
+        3 => [1, 1],
+        _ => return Err(invalid("invalid HEVC display chroma format")),
+    };
+    let [left, right, top, bottom] = p.crop.map(|v| v as usize);
+    let width = (p.dimensions[0] as usize)
+        .checked_sub(left + right)
+        .ok_or_else(|| invalid("HEVC display crop exceeds width"))?;
+    let height = (p.dimensions[1] as usize)
+        .checked_sub(top + bottom)
+        .ok_or_else(|| invalid("HEVC display crop exceeds height"))?;
+    let mut data = Vec::new();
+    for component in 0..3 {
+        let [sx, sy] = if component == 0 { [1, 1] } else { sub };
+        let (w, h) = (width.div_ceil(sx), height.div_ceil(sy));
+        let source_depth = p.depth[usize::from(component != 0)];
+        let plane = &p.planes[component];
+        let stride = plane.dimensions()[0];
+        for y in 0..h {
+            for x in 0..w {
+                let v = if format == 0 && component != 0 {
+                    1u16 << (depth - 1)
+                } else {
+                    let index = (top / sy + y) * stride + left / sx + x;
+                    let sample = *plane
+                        .samples()
+                        .get(index)
+                        .ok_or_else(|| invalid("HEVC display plane is truncated"))?;
+                    sample << (depth - source_depth)
+                };
+                if depth == 8 {
+                    data.push(v as u8);
+                } else {
+                    data.extend_from_slice(&v.to_le_bytes());
+                }
+            }
+        }
+    }
+    PackedPlanar::new(
+        GeometryFrame {
+            width,
+            height,
+            subsampling: Some(sub),
+            data,
+        },
+        depth,
+        colour,
+    )
 }

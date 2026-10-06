@@ -1,5 +1,5 @@
 //! Stateful decoding of length-prefixed AVC access units using FVid codecs.
-//! Accepts one supported progressive I/P/B slice per picture.
+//! Accepts supported progressive I/P/B slices within each access unit.
 //! `decode_order` leaves timestamp association and display reordering to callers.
 use super::{
     avc::{Pps, Sps},
@@ -121,6 +121,9 @@ impl AvcDecoder {
         self.next_id = 0;
         self.failed = false;
     }
+    /// Decodes streams whose picture order counts strictly increase.
+    /// For reordered B pictures, use [`Self::decode_order`] and reorder output
+    /// using container timestamps; the MP4 playback reader does this automatically.
     pub fn decode(&mut self, packet: &[u8]) -> Result<Option<Arc<IntraPicture>>> {
         if self.failed {
             return Err(invalid("AVC decoder requires reset after an error"));
@@ -286,7 +289,7 @@ impl AvcDecoder {
                 .last_poc
                 .is_some_and(|p| order.before_marking.picture() <= p)
         {
-            return Err(crate::unsupported("AVC display reordering is not implemented"));
+            return Err(crate::unsupported("AVC decode requires increasing picture order; use decode_order for reordered pictures"));
         }
         let buffer = self
             .dpb

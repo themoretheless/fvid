@@ -1,4 +1,4 @@
-//! Progressive 4:2:0 CAVLC inter coefficient parsing.
+//! Frame/field 4:2:0 CAVLC inter coefficient parsing.
 use super::{
     avc_macroblock::luma_block_xy, avc_transform::inverse_scan_4x4,
     avc_transform8::inverse_scan_8x8, bits::BitReader, cavlc::read_residual,
@@ -34,6 +34,16 @@ pub fn read_inter_coefficients(
     pattern: u8,
     transform8: bool,
     neighbours: CoefficientNeighbours,
+) -> Result<InterCoefficients> {
+    read_inter_coefficients_field(bits, pattern, transform8, neighbours, false)
+}
+/// The caller supplies neighbours in the current macroblock's sample layout.
+pub fn read_inter_coefficients_field(
+    bits: &mut BitReader<'_>,
+    pattern: u8,
+    transform8: bool,
+    neighbours: CoefficientNeighbours,
+    field: bool,
 ) -> Result<InterCoefficients> {
     if pattern > 47
         || neighbours
@@ -77,12 +87,12 @@ pub fn read_inter_coefficients(
                 out.luma8[block / 4][4 * i + block % 4] = residual.coefficients[i];
             }
         } else {
-            out.luma4[y * 4 + x] = inverse_scan_4x4(&residual.coefficients, false);
+            out.luma4[y * 4 + x] = inverse_scan_4x4(&residual.coefficients, field);
         }
     }
     if transform8 {
         for block in &mut out.luma8 {
-            *block = inverse_scan_8x8(block, false);
+            *block = inverse_scan_8x8(block, field);
         }
     }
     if pattern >> 4 != 0 {
@@ -109,7 +119,7 @@ pub fn read_inter_coefficients(
                 out.chroma_counts[component][block] = residual.total_coefficients;
                 let mut levels = [0; 16];
                 levels[1..].copy_from_slice(&residual.coefficients[..15]);
-                out.chroma_ac[component][block] = inverse_scan_4x4(&levels, false);
+                out.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);
             }
         }
     }
@@ -146,6 +156,80 @@ mod tests {
 #[cfg(test)]
 mod nonzero_tests {
     use super::*;
+    #[test]
+    fn field_residual_uses_vertical_scan_and_preserves_counts() {
+        // coeff_token(1,1)=01, positive sign=0, total_zeros=1 -> 011;
+        // three remaining coded blocks contain zero coefficients.
+        let mut frame_bits = BitReader::new(&[0x4f, 0x80]);
+        let mut field_bits = frame_bits.clone();
+        let frame =
+            read_inter_coefficients(&mut frame_bits, 1, false, CoefficientNeighbours::default())
+                .unwrap();
+        let field = read_inter_coefficients_field(
+            &mut field_bits,
+            1,
+            false,
+            CoefficientNeighbours::default(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(frame_bits.position(), 9);
+        assert_eq!(field_bits.position(), 9);
+        assert_eq!(frame.luma4[0][1], 1);
+        assert_eq!(field.luma4[0][4], 1);
+        assert_eq!(field.luma4[0][1], 0);
+        assert_eq!(frame.luma_counts, field.luma_counts);
+        assert_eq!(field.luma_counts[0], 1);
+        let mut truncated = BitReader::new(&[0x4f]);
+        assert!(
+            read_inter_coefficients_field(
+                &mut truncated,
+                1,
+                false,
+                CoefficientNeighbours::default(),
+                true
+            )
+            .is_err()
+        );
+        assert_eq!(truncated.position(), 0);
+    }
+    #[test]
+    fn field_8x8_interleave_and_chroma_ac_use_selected_scan() {
+        // One coefficient at residual scan position 2 in the first interleave.
+        for (field, position) in [(false, 17), (true, 2)] {
+            let mut bits = BitReader::new(&[0x4b, 0x80]);
+            let c = read_inter_coefficients_field(
+                &mut bits,
+                1,
+                true,
+                CoefficientNeighbours::default(),
+                field,
+            )
+            .unwrap();
+            assert_eq!(bits.position(), 9);
+            assert_eq!(c.luma8[0][position], 1);
+            assert_eq!(c.luma8[0].iter().sum::<i32>(), 1);
+            assert_eq!(c.luma_counts[0], 1);
+        }
+        // Both chroma DC blocks zero (01 each); first AC has one positive
+        // trailing one, no zeros (0101), seven remaining AC blocks zero.
+        for (field, position) in [(false, 1), (true, 4)] {
+            let mut bits = BitReader::new(&[0x55, 0xfe]);
+            let c = read_inter_coefficients_field(
+                &mut bits,
+                32,
+                false,
+                CoefficientNeighbours::default(),
+                field,
+            )
+            .unwrap();
+            assert_eq!(bits.position(), 15);
+            assert_eq!(c.chroma_dc, [[0; 4]; 2]);
+            assert_eq!(c.chroma_ac[0][0][position], 1);
+            assert_eq!(c.chroma_ac[0][0].iter().sum::<i32>(), 1);
+            assert_eq!(c.chroma_counts, [[1, 0, 0, 0], [0; 4]]);
+        }
+    }
     #[test]
     fn one_dc_coefficient_updates_context_and_raster_output() {
         // First 4x4: coeff_token(1,1)=01, sign=0, total_zeros=0 -> 1;

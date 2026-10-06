@@ -44,7 +44,7 @@ pub fn reconstruct_with_precision(
     transform: Transform, scaling: &ScalingLists, matrix_id: usize,
     extended_precision: bool, scratch: &mut Vec<i32>, out: &mut Vec<i32>,
 ) -> Result<()> {
-    if !(2..=5).contains(&log2_size) || !(8..=12).contains(&bit_depth) {
+    if !(2..=5).contains(&log2_size) || !(8..=16).contains(&bit_depth) {
         return Err(invalid("unsupported HEVC transform geometry or bit depth"));
     }
     let range = if extended_precision { (bit_depth + 6).max(15) } else { 15 };
@@ -104,13 +104,20 @@ pub fn reconstruct_with_precision(
         }
         return Ok(());
     }
-    let inverse = |input: &[i32], output: &mut [i32]| {
+    let inverse = |input: &[i32], output: &mut [i64]| {
         if transform == Transform::Dst4 {
-            for (x, value) in output.iter_mut().enumerate() {
-                *value = (0..4).map(|k| i32::from(DST[k][x]) * input[k]).sum();
+            for (x,value) in output.iter_mut().enumerate() {
+                *value=(0..4).map(|k|i64::from(DST[k][x])*i64::from(input[k])).sum();
+            }
+        } else if range > 19 {
+            // 14/16-bit extended precision can overflow i32 before clipping.
+            for (x,value) in output.iter_mut().enumerate() {
+                *value=input.iter().enumerate().map(|(k,&v)|i64::from(v)*i64::from(DCT[k*(32/input.len())][x])).sum();
             }
         } else {
-            inverse_dct(input, output);
+            let mut narrow=[0i32;32];
+            inverse_dct(input,&mut narrow[..input.len()]);
+            for (out,&v) in output.iter_mut().zip(&narrow) {*out=i64::from(v);}
         }
     };
     // Use scratch for intermediate (column-wise inverse output)
@@ -120,7 +127,7 @@ pub fn reconstruct_with_precision(
     scratch.resize(intermediate_start + side * side, 0);
     let (scaled, intermediate) = scratch.split_at_mut(intermediate_start);
     let mut column = [0i32; 32];
-    let mut output_buf = [0i32; 32];
+    let mut output_buf = [0i64; 32];
     for x in 0..side {
         for k in 0..side {
             column[k] = scaled[k * side + x];
@@ -136,14 +143,14 @@ pub fn reconstruct_with_precision(
             &mut output_buf[..side],
         );
         for x in 0..side {
-            out[y * side + x] = (output_buf[x] + round as i32) >> final_shift;
+            out[y * side + x] = ((output_buf[x] + round) >> final_shift) as i32;
         }
     }
     Ok(())
 }
 
 // Even frequencies form the smaller transform; odd frequencies are antisymmetric.
-// Each sum fits i32: at most 32 * 90 * 32768, before normative clipping.
+// Caller bounds the dynamic range to 19 bits: 32 * 90 * 2^18 fits i32.
 fn inverse_dct(input: &[i32], output: &mut [i32]) {
     if input[1..].iter().all(|&v| v == 0) {
         output.fill(input[0] * 64);
@@ -423,7 +430,7 @@ mod tests {
             (0, 8, 0, 0),
             (6, 8, 0, 0),
             (2, 7, 0, 0),
-            (2, 13, 0, 0),
+            (2, 17, 0, 0),
             (2, 8, 52, 0),
             (2, 10, 64, 0),
             (2, 8, 0, 6),

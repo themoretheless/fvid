@@ -190,15 +190,13 @@ pub(crate) fn decode_presented(
                     2 => [true, false],
                     _ => return Err("invalid HEVC chroma format".into()),
                 };
+                let output_depth = if chroma == 0 { picture.depth[0] } else { picture.depth[0].max(picture.depth[1]) };
                 if let Some(spool) = spool.as_mut() {
-                    let current = (size, picture.depth[0], sub, chroma == 0);
+                    let current = (size, output_depth, sub, chroma == 0);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
                     }
                     storage_format = Some(current);
-                    if chroma != 0 && picture.depth[0] != picture.depth[1] {
-                        return Ok(None);
-                    }
                     pixels = pack_hevc(picture, sub, chroma == 0)?;
                     spool.push(&pixels, 0, 0)?;
                 }
@@ -227,7 +225,7 @@ pub(crate) fn decode_presented(
                     duration: i64::from(timing.duration),
                     sample,
                     size,
-                    depth: picture.depth[0],
+                    depth: output_depth,
                     sub,
                     mono: chroma == 0,
                 });
@@ -441,7 +439,7 @@ fn pack_avc(p: &fvid_codecs::codec::avc_picture::IntraPicture) -> Result<Vec<u8>
     pack_cropped(
         [p.coded_width, p.coded_height],
         p.crop,
-        p.bit_depth,
+        [p.bit_depth; 3],
         [true, true],
         false,
         [&p.y, &p.cb, &p.cr],
@@ -455,7 +453,7 @@ fn pack_hevc(
     pack_cropped(
         p.dimensions.map(|v| v as usize),
         p.crop.map(|v| v as usize),
-        p.depth[0],
+        [p.depth[0], p.depth[1], p.depth[1]],
         sub,
         mono,
         p.planes.each_ref().map(|plane| plane.samples()),
@@ -464,11 +462,13 @@ fn pack_hevc(
 fn pack_cropped(
     coded: [usize; 2],
     crop: [usize; 4],
-    depth: u8,
+    depths: [u8; 3],
     sub: [bool; 2],
     mono: bool,
     planes: [&[u16]; 3],
 ) -> Result<Vec<u8>> {
+    if depths.iter().any(|&d| !(8..=16).contains(&d)) { return Err("invalid component depth".into()); }
+    let depth = if mono {depths[0]} else {*depths.iter().max().unwrap()};
     let width = coded[0]
         .checked_sub(crop[0])
         .and_then(|n| n.checked_sub(crop[1]))
@@ -510,7 +510,9 @@ fn pack_cropped(
                         .checked_mul(stride)
                         .and_then(|v| v.checked_add(crop[0] / sx + column))
                         .ok_or("video sample offset overflow")?;
-                    *plane.get(index).ok_or("decoded crop exceeds plane")?
+                    let sample = *plane.get(index).ok_or("decoded crop exceeds plane")?;
+                    if u32::from(sample) >= (1u32 << depths[component]) { return Err("component sample exceeds depth".into()); }
+                    sample << (depth-depths[component])
                 };
                 if depth == 8 {
                     output[cursor] = u8::try_from(sample).map_err(|_| "8-bit sample overflow")?;

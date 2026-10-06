@@ -1,15 +1,22 @@
-//! Progressive 4x4 motion storage with slice and decoding-order availability.
+//! Address-owned 4x4 motion storage with slice and decoding-order availability.
+//! Progressive snapshots and explicit MBAFF publication/neighbour APIs.
 use super::avc_mv::{Neighbour, Neighbours, Partition, add_difference, predict};
 use crate::{Result, invalid};
 #[derive(Clone, Copy)]
 struct Cell {
     slice: u32,
     lists: [Neighbour; 2],
+    field: bool,
 }
 pub struct MotionField {
     width: usize,
     height: usize,
     cells: Vec<Option<Cell>>,
+    mbaff: bool,
+}
+// Address-owned 4x4 cells. Spatial APIs and snapshots keep picture coordinates.
+fn cell_index(width_cells: usize, x: usize, y: usize) -> usize {
+    (y / 4 * (width_cells / 4) + x / 4) * 16 + y % 4 * 4 + x % 4
 }
 impl MotionField {
     /// Dimensions are coded luma samples. Budget covers the complete field.
@@ -35,6 +42,7 @@ impl MotionField {
             width: width / 4,
             height: height / 4,
             cells,
+            mbaff: false,
         })
     }
     /// Freeze a complete picture's vectors for future co-located prediction.
@@ -88,6 +96,11 @@ impl MotionField {
         memory_limit: usize,
         mut resolve: impl FnMut(u32) -> Result<[&'a [u64]; 2]>,
     ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
+        if self.mbaff {
+            return Err(crate::unsupported(
+                "MBAFF reference motion snapshot is not connected",
+            ));
+        }
         use super::avc_reference_motion::{ReferenceMotion, ReferenceMotionField};
         let bytes = ReferenceMotionField::storage_bytes(self.width * 4, self.height * 4)?;
         if bytes > memory_limit {
@@ -97,8 +110,9 @@ impl MotionField {
         output
             .try_reserve_exact(self.cells.len())
             .map_err(|_| invalid("reference motion allocation failed"))?;
-        for cell in &self.cells {
-            let cell = cell.ok_or_else(|| invalid("cannot snapshot incomplete motion field"))?;
+        for raster in 0..self.cells.len() {
+            let cell = self.cells[cell_index(self.width, raster % self.width, raster / self.width)]
+                .ok_or_else(|| invalid("cannot snapshot incomplete motion field"))?;
             let references = resolve(cell.slice)?;
             if references.iter().any(|list| list.len() > 32) {
                 return Err(invalid("invalid snapshot reference list"));
@@ -141,17 +155,6 @@ impl MotionField {
         }
         Ok((at, extent))
     }
-    fn get(&self, x: Option<usize>, y: Option<usize>, slice: u32, list: usize) -> Neighbour {
-        let (Some(x), Some(y)) = (x, y) else {
-            return Neighbour::Unavailable;
-        };
-        if x >= self.width || y >= self.height {
-            return Neighbour::Unavailable;
-        }
-        self.cells[y * self.width + x]
-            .filter(|c| c.slice == slice)
-            .map_or(Neighbour::Unavailable, |c| c.lists[list])
-    }
     pub fn neighbours(
         &self,
         origin: [usize; 2],
@@ -159,15 +162,32 @@ impl MotionField {
         slice: u32,
         list: usize,
     ) -> Result<Neighbours> {
+        if self.mbaff {
+            return Err(invalid("MBAFF motion needs pair-address neighbour lookup"));
+        }
         if list > 1 {
             return Err(invalid("invalid AVC reference list"));
         }
-        let ([x, y], [w, _]) = self.region(origin, size)?;
+        let ([x, y], _) = self.region(origin, size)?;
+        let neighbours = super::avc_mbaff::motion_neighbours(
+            y / 4 * (self.width / 4) + x / 4,
+            [x % 4 * 4, y % 4 * 4],
+            size,
+            self.width / 4,
+            self.height / 4,
+            false,
+            |_| None,
+        )?;
+        let [left, top, top_right, top_left] = neighbours.map(|n| {
+            n.and_then(|(address, local)| self.cells[address * 16 + local[1] * 4 + local[0]])
+                .filter(|cell| cell.slice == slice)
+                .map_or(Neighbour::Unavailable, |cell| cell.lists[list])
+        });
         Ok(Neighbours {
-            left: self.get(x.checked_sub(1), Some(y), slice, list),
-            top: self.get(Some(x), y.checked_sub(1), slice, list),
-            top_right: self.get(Some(x + w), y.checked_sub(1), slice, list),
-            top_left: self.get(x.checked_sub(1), y.checked_sub(1), slice, list),
+            left,
+            top,
+            top_right,
+            top_left,
         })
     }
     /// Publish a completely decoded partition. Available intra/unused-list cells
@@ -179,26 +199,269 @@ impl MotionField {
         slice: u32,
         lists: [Neighbour; 2],
     ) -> Result<()> {
+        if self.mbaff {
+            return Err(invalid("MBAFF motion needs pair-address publication"));
+        }
+        self.store_with_mode(origin, size, slice, lists, false)
+    }
+    fn store_with_mode(
+        &mut self,
+        origin: [usize; 2],
+        size: [usize; 2],
+        slice: u32,
+        lists: [Neighbour; 2],
+        field: bool,
+    ) -> Result<()> {
         let ([x, y], [w, h]) = self.region(origin, size)?;
         if lists.iter().any(|n| {
             matches!(n, Neighbour::Unavailable)
-                || matches!(n,Neighbour::Inter{reference,..} if *reference>31)
+                || matches!(n,Neighbour::Inter{reference,..} if *reference>if field {63} else {31})
         }) {
             return Err(invalid("invalid decoded AVC motion value"));
         }
         for row in y..y + h {
             for col in x..x + w {
-                if self.cells[row * self.width + col].is_some() {
+                if self.cells[cell_index(self.width, col, row)].is_some() {
                     return Err(invalid("AVC motion partition already decoded"));
                 }
             }
         }
         for row in y..y + h {
             for col in x..x + w {
-                self.cells[row * self.width + col] = Some(Cell { slice, lists });
+                self.cells[cell_index(self.width, col, row)] = Some(Cell {
+                    slice,
+                    lists,
+                    field,
+                });
             }
         }
         Ok(())
+    }
+    /// Publish local luma coordinates in a macroblock-pair address space.
+    /// Pair-mode ownership is maintained by the slice reader. Snapshot support
+    /// is separate: progressive snapshots reject a field containing MBAFF data.
+    pub fn store_mbaff(
+        &mut self,
+        address: usize,
+        origin: [usize; 2],
+        size: [usize; 2],
+        slice: u32,
+        field: bool,
+        lists: [Neighbour; 2],
+    ) -> Result<()> {
+        let w = self.width / 4;
+        super::avc_mbaff::layout(address, w, self.height / 4, true, field, [1, 1])?;
+        if !self.mbaff && self.cells.iter().any(Option::is_some) {
+            return Err(invalid(
+                "cannot mix progressive and MBAFF motion publication",
+            ));
+        }
+        if origin.iter().any(|v| *v >= 16) {
+            return Err(invalid("MBAFF motion origin outside block"));
+        }
+        let absolute = [address % w * 16 + origin[0], address / w * 16 + origin[1]];
+        let pair_start = address / 2 * 32;
+        if self.cells[pair_start..pair_start + 32]
+            .iter()
+            .flatten()
+            .any(|c| c.field != field)
+        {
+            return Err(invalid("MBAFF motion pair mode changed"));
+        }
+        self.store_with_mode(absolute, size, slice, lists, field)?;
+        self.mbaff = true;
+        Ok(())
+    }
+    /// Resolve and normalize A/B/C/D using the slice reader's pair modes.
+    pub fn neighbours_mbaff(
+        &self,
+        address: usize,
+        origin: [usize; 2],
+        size: [usize; 2],
+        slice: u32,
+        list: usize,
+        mut pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<Neighbours> {
+        if list > 1 {
+            return Err(invalid("invalid AVC reference list"));
+        }
+        if !self.mbaff && self.cells.iter().any(Option::is_some) {
+            return Err(invalid("cannot query progressive motion as MBAFF"));
+        }
+        let locations = super::avc_mbaff::motion_neighbours(
+            address,
+            origin,
+            size,
+            self.width / 4,
+            self.height / 4,
+            true,
+            &mut pair_field,
+        )?;
+        let current = pair_field(address / 2);
+        let mut values = [Neighbour::Unavailable; 4];
+        if let Some(field) = current {
+            for (slot, location) in values.iter_mut().zip(locations) {
+                if let Some((owner, local)) = location {
+                    if let Some(cell) = self.cells[owner * 16 + local[1] * 4 + local[0]]
+                        .filter(|c| c.slice == slice)
+                    {
+                        if pair_field(owner / 2) != Some(cell.field) {
+                            return Err(invalid("MBAFF motion pair mode mismatch"));
+                        }
+                        *slot = super::avc_mv::normalize_neighbour(
+                            cell.lists[list],
+                            field,
+                            cell.field,
+                        )?;
+                    }
+                }
+            }
+        }
+        let [left, top, top_right, top_left] = values;
+        Ok(Neighbours {
+            left,
+            top,
+            top_right,
+            top_left,
+        })
+    }
+    /// Derive both explicit list vectors in the current pair's units before
+    /// publishing any cell. A failed second list leaves the partition untouched.
+    pub fn decode_mbaff(
+        &mut self,
+        address: usize,
+        origin: [usize; 2],
+        size: [usize; 2],
+        slice: u32,
+        kind: Partition,
+        references: [Option<u8>; 2],
+        differences: [[i32; 2]; 2],
+        mut pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<[Neighbour; 2]> {
+        let field =
+            pair_field(address / 2).ok_or_else(|| invalid("MBAFF partition lacks pair mode"))?;
+        // Validate geometry and ownership even when neither list is used.
+        let first = self.neighbours_mbaff(address, origin, size, slice, 0, &mut pair_field)?;
+        let mut lists = [Neighbour::NoPrediction; 2];
+        for list in 0..2 {
+            if let Some(reference) = references[list] {
+                let neighbours = if list == 0 {
+                    first
+                } else {
+                    self.neighbours_mbaff(address, origin, size, slice, list, &mut pair_field)?
+                };
+                let prediction =
+                    super::avc_mv::predict_for_field(reference, kind, neighbours, field)?;
+                lists[list] = Neighbour::Inter {
+                    reference,
+                    vector: add_difference(prediction, differences[list])?,
+                };
+            }
+        }
+        self.store_mbaff(address, origin, size, slice, field, lists)?;
+        Ok(lists)
+    }
+    /// Decode explicit MBAFF partitions in syntax order, rolling back the whole
+    /// address-local macroblock and storage mode on any failure.
+    pub fn decode_macroblock_mbaff(
+        &mut self,
+        address: usize,
+        slice: u32,
+        parts: &[super::avc_inter::Partition],
+        mut pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<Vec<[Neighbour; 2]>> {
+        use super::avc_inter::Prediction;
+        let field =
+            pair_field(address / 2).ok_or_else(|| invalid("MBAFF macroblock lacks pair mode"))?;
+        super::avc_mbaff::layout(
+            address,
+            self.width / 4,
+            self.height / 4,
+            true,
+            field,
+            [1, 1],
+        )?;
+        if parts.is_empty() || parts.len() > 16 {
+            return Err(invalid("invalid AVC inter macroblock partitions"));
+        }
+        let start = address * 16;
+        if self.cells[start..start + 16].iter().any(Option::is_some) {
+            return Err(invalid("AVC macroblock already has motion data"));
+        }
+        let old_mode = self.mbaff;
+        let decoded = (|| {
+            let mut result = Vec::with_capacity(parts.len());
+            for p in parts {
+                let expected = match p.prediction {
+                    Prediction::L0 => [true, false],
+                    Prediction::L1 => [false, true],
+                    Prediction::Bi => [true, true],
+                    Prediction::Direct => {
+                        return Err(crate::unsupported("MBAFF B-direct motion is not connected"));
+                    }
+                };
+                if p.references.map(|v| v.is_some()) != expected {
+                    return Err(invalid(
+                        "AVC partition references disagree with prediction mode",
+                    ));
+                }
+                let size = p.size.map(usize::from);
+                let kind = match size {
+                    [16, 8] if p.origin[1] == 0 => Partition::Top16x8,
+                    [16, 8] => Partition::Bottom16x8,
+                    [8, 16] if p.origin[0] == 0 => Partition::Left8x16,
+                    [8, 16] => Partition::Right8x16,
+                    _ => Partition::Median,
+                };
+                result.push(self.decode_mbaff(
+                    address,
+                    p.origin.map(usize::from),
+                    size,
+                    slice,
+                    kind,
+                    p.references,
+                    p.differences,
+                    &mut pair_field,
+                )?);
+            }
+            if self.cells[start..start + 16].iter().any(Option::is_none) {
+                return Err(invalid("AVC motion partitions leave gaps"));
+            }
+            Ok(result)
+        })();
+        if decoded.is_err() {
+            self.cells[start..start + 16].fill(None);
+            self.mbaff = old_mode;
+        }
+        decoded
+    }
+    /// Derive and publish a complete MBAFF P-skip block. The slice reader owns
+    /// skipped-pair field-mode inference; an unknown current mode is an error.
+    pub fn decode_p_skip_mbaff(
+        &mut self,
+        address: usize,
+        slice: u32,
+        mut pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<[i16; 2]> {
+        let neighbours =
+            self.neighbours_mbaff(address, [0, 0], [16, 16], slice, 0, &mut pair_field)?;
+        let field = pair_field(address / 2).ok_or_else(|| invalid("MBAFF skip lacks pair mode"))?;
+        let vector = super::avc_mv::p_skip_for_field(neighbours, field)?;
+        self.store_mbaff(
+            address,
+            [0, 0],
+            [16, 16],
+            slice,
+            field,
+            [
+                Neighbour::Inter {
+                    reference: 0,
+                    vector,
+                },
+                Neighbour::NoPrediction,
+            ],
+        )?;
+        Ok(vector)
     }
     /// Derive both non-direct list vectors, then publish the partition atomically.
     /// P-skip/B-direct use their own derivation and call store with final vectors.
@@ -250,7 +513,7 @@ impl MotionField {
         }
         let ([x, y], _) = self.region(origin, [16, 16])?;
         let previous: [Option<Cell>; 16] =
-            std::array::from_fn(|i| self.cells[(y + i / 4) * self.width + x + i % 4]);
+            std::array::from_fn(|i| self.cells[cell_index(self.width, x + i % 4, y + i / 4)]);
         if previous.iter().any(Option::is_some) {
             return Err(invalid("AVC macroblock already has motion data"));
         }
@@ -323,14 +586,14 @@ impl MotionField {
                     p.differences,
                 )?);
             }
-            if (0..16).any(|i| self.cells[(y + i / 4) * self.width + x + i % 4].is_none()) {
+            if (0..16).any(|i| self.cells[cell_index(self.width, x + i % 4, y + i / 4)].is_none()) {
                 return Err(invalid("AVC motion partitions leave gaps"));
             }
             Ok(result)
         })();
         if decoded.is_err() {
             for (i, cell) in previous.into_iter().enumerate() {
-                self.cells[(y + i / 4) * self.width + x + i % 4] = cell;
+                self.cells[cell_index(self.width, x + i % 4, y + i / 4)] = cell;
             }
         }
         decoded
@@ -439,6 +702,353 @@ mod macroblock_tests {
 #[cfg(test)]
 mod slice_snapshot_tests {
     use super::*;
+    #[test]
+    fn mbaff_macroblock_late_failure_rolls_back_cells_and_mode() {
+        use super::super::avc_inter::{Partition as SyntaxPartition, Prediction};
+        let top = SyntaxPartition {
+            origin: [0, 0],
+            size: [16, 8],
+            prediction: Prediction::L0,
+            group: 0,
+            references: [Some(63), None],
+            differences: [[7, -3], [0; 2]],
+        };
+        let mut bottom = SyntaxPartition {
+            origin: [0, 8],
+            group: 1,
+            ..top
+        };
+        let mut field = MotionField::new(16, 32, 65536).unwrap();
+        bottom.differences[0] = [i32::MAX, 0];
+        assert!(
+            field
+                .decode_macroblock_mbaff(0, 4, &[top, bottom], |_| Some(true))
+                .is_err()
+        );
+        assert!(!field.mbaff);
+        assert!(field.cells.iter().all(Option::is_none));
+        assert!(
+            field
+                .decode_macroblock_mbaff(0, 4, &[top], |_| Some(true))
+                .is_err()
+        );
+        assert!(!field.mbaff);
+        bottom.differences[0] = [1, 2];
+        let result = field
+            .decode_macroblock_mbaff(0, 4, &[top, bottom], |_| Some(true))
+            .unwrap();
+        assert_eq!(
+            result[1][0],
+            Neighbour::Inter {
+                reference: 63,
+                vector: [8, -1]
+            }
+        );
+        assert!(field.cells[..16].iter().all(Option::is_some));
+        let saved = field.cells[0].unwrap().lists;
+        assert!(
+            field
+                .decode_macroblock_mbaff(0, 4, &[top, bottom], |_| Some(true))
+                .is_err()
+        );
+        assert_eq!(field.cells[0].unwrap().lists, saved);
+        bottom.prediction = Prediction::Direct;
+        assert!(
+            field
+                .decode_macroblock_mbaff(1, 4, &[top, bottom], |_| Some(true))
+                .is_err()
+        );
+        assert!(field.mbaff);
+        assert!(field.cells[16..].iter().all(Option::is_none));
+        assert_eq!(field.cells[0].unwrap().lists, saved);
+    }
+    #[test]
+    fn mbaff_explicit_lists_normalize_then_add_and_publish_atomically() {
+        let mut field = MotionField::new(32, 32, 65536).unwrap();
+        for (address, y) in [(0, -5), (1, -7)] {
+            field
+                .store_mbaff(
+                    address,
+                    [0, 0],
+                    [16, 16],
+                    7,
+                    false,
+                    [
+                        Neighbour::Inter {
+                            reference: 1,
+                            vector: [3, y],
+                        },
+                        Neighbour::Inter {
+                            reference: 2,
+                            vector: [10, y],
+                        },
+                    ],
+                )
+                .unwrap();
+        }
+        let mode = |p| Some(p == 1);
+        assert!(
+            field
+                .decode_mbaff(
+                    2,
+                    [0, 8],
+                    [8, 8],
+                    7,
+                    Partition::Median,
+                    [Some(2), Some(4)],
+                    [[1, 2], [i32::MAX, 0]],
+                    mode
+                )
+                .is_err()
+        );
+        assert!(field.cells[32..64].iter().all(Option::is_none));
+        let lists = field
+            .decode_mbaff(
+                2,
+                [0, 8],
+                [8, 8],
+                7,
+                Partition::Median,
+                [Some(2), Some(4)],
+                [[1, 2], [-2, 1]],
+                mode,
+            )
+            .unwrap();
+        assert_eq!(
+            lists,
+            [
+                Neighbour::Inter {
+                    reference: 2,
+                    vector: [4, 0]
+                },
+                Neighbour::Inter {
+                    reference: 4,
+                    vector: [8, -1]
+                },
+            ]
+        );
+        for index in [40, 41, 44, 45] {
+            assert_eq!(field.cells[index].unwrap().lists, lists);
+        }
+        assert!(
+            field
+                .decode_mbaff(
+                    2,
+                    [0, 8],
+                    [8, 8],
+                    7,
+                    Partition::Median,
+                    [Some(2), None],
+                    [[0; 2]; 2],
+                    mode
+                )
+                .is_err()
+        );
+        assert!(
+            field
+                .decode_mbaff(
+                    3,
+                    [0, 0],
+                    [4, 4],
+                    7,
+                    Partition::Median,
+                    [None, None],
+                    [[0; 2]; 2],
+                    |_| None
+                )
+                .is_err()
+        );
+        assert!(
+            field
+                .decode_mbaff(
+                    3,
+                    [usize::MAX, 0],
+                    [4, 4],
+                    7,
+                    Partition::Median,
+                    [None, None],
+                    [[0; 2]; 2],
+                    mode
+                )
+                .is_err()
+        );
+        assert!(field.cells[48..64].iter().all(Option::is_none));
+        let high = field
+            .decode_mbaff(
+                3,
+                [0, 0],
+                [4, 4],
+                8,
+                Partition::Median,
+                [Some(62), Some(63)],
+                [[2, -3], [-4, 5]],
+                mode,
+            )
+            .unwrap();
+        assert_eq!(
+            high,
+            [
+                Neighbour::Inter {
+                    reference: 62,
+                    vector: [2, -3]
+                },
+                Neighbour::Inter {
+                    reference: 63,
+                    vector: [-4, 5]
+                },
+            ]
+        );
+    }
+    #[test]
+    fn mbaff_skip_derives_from_normalized_cells_and_publishes_full_block() {
+        let mut field = MotionField::new(32, 64, 65536).unwrap();
+        for (address, vector) in [(1, [12, 13]), (3, [8, 9]), (4, [4, -5])] {
+            field
+                .store_mbaff(
+                    address,
+                    [0, 0],
+                    [16, 16],
+                    7,
+                    false,
+                    [
+                        Neighbour::Inter {
+                            reference: 0,
+                            vector,
+                        },
+                        Neighbour::NoPrediction,
+                    ],
+                )
+                .unwrap();
+        }
+        assert_eq!(
+            field.decode_p_skip_mbaff(6, 7, |p| Some(p == 3)).unwrap(),
+            [8, 4]
+        );
+        for cell in &field.cells[96..112] {
+            assert_eq!(
+                cell.unwrap().lists,
+                [
+                    Neighbour::Inter {
+                        reference: 0,
+                        vector: [8, 4]
+                    },
+                    Neighbour::NoPrediction
+                ]
+            );
+            assert!(cell.unwrap().field);
+        }
+        assert!(field.decode_p_skip_mbaff(6, 7, |p| Some(p == 3)).is_err());
+        assert!(field.decode_p_skip_mbaff(7, 7, |_| None).is_err());
+        assert!(field.cells[112..128].iter().all(Option::is_none));
+    }
+    #[test]
+    fn mbaff_publication_normalizes_mixed_neighbours_and_preserves_slice_boundaries() {
+        let motion = |reference, vector| {
+            [
+                Neighbour::Inter { reference, vector },
+                Neighbour::NoPrediction,
+            ]
+        };
+        let mut field = MotionField::new(32, 32, 65536).unwrap();
+        field
+            .store_mbaff(0, [0, 0], [16, 16], 7, false, motion(1, [3, -5]))
+            .unwrap();
+        field
+            .store_mbaff(1, [0, 0], [16, 16], 7, false, motion(1, [9, -7]))
+            .unwrap();
+        let neighbours = field
+            .neighbours_mbaff(2, [0, 8], [8, 8], 7, 0, |p| Some(p == 1))
+            .unwrap();
+        assert_eq!(neighbours.left, motion(2, [9, -3])[0]);
+        assert_eq!(neighbours.top_left, motion(2, [3, -2])[0]);
+        assert_eq!(neighbours.top, Neighbour::Unavailable);
+        assert_eq!(
+            super::super::avc_mv::predict_for_field(2, Partition::Median, neighbours, true)
+                .unwrap(),
+            [3, -2] // C falls back to D; B contributes the unavailable zero vector.
+        );
+        let other_slice = field
+            .neighbours_mbaff(2, [0, 8], [8, 8], 8, 0, |p| Some(p == 1))
+            .unwrap();
+        assert_eq!(other_slice.left, Neighbour::Unavailable);
+        let unused = field
+            .neighbours_mbaff(2, [0, 8], [8, 8], 7, 1, |p| Some(p == 1))
+            .unwrap();
+        assert_eq!(unused.left, Neighbour::NoPrediction);
+        field
+            .store_mbaff(2, [0, 0], [16, 16], 7, true, motion(63, [7, -7]))
+            .unwrap();
+        assert!(
+            field
+                .store_mbaff(3, [0, 0], [16, 16], 7, false, motion(0, [0; 2]))
+                .is_err()
+        );
+        assert!(field.snapshot([&[1], &[]], 65536).is_err());
+        assert!(field.neighbours([16, 0], [16, 16], 7, 0).is_err());
+        assert!(
+            field
+                .store_mbaff(3, [usize::MAX, 0], [4, 4], 7, true, motion(0, [0; 2]))
+                .is_err()
+        );
+        let mut reverse = MotionField::new(32, 32, 65536).unwrap();
+        reverse
+            .store_mbaff(0, [0, 0], [16, 16], 7, true, motion(63, [6, -7]))
+            .unwrap();
+        let n = reverse
+            .neighbours_mbaff(2, [0, 0], [16, 16], 7, 0, |p| Some(p == 0))
+            .unwrap();
+        assert_eq!(n.left, motion(31, [6, -14])[0]);
+    }
+    #[test]
+    fn address_owned_motion_keeps_raster_colocated_cells_and_slice_identity() {
+        let mut field = MotionField::new(32, 32, 65536).unwrap();
+        for y in (0..32).step_by(4) {
+            for x in (0..32).step_by(4) {
+                field
+                    .store(
+                        [x, y],
+                        [4, 4],
+                        (y / 16 * 2 + x / 16) as u32,
+                        [
+                            Neighbour::Inter {
+                                reference: 0,
+                                vector: [x as i16, y as i16],
+                            },
+                            Neighbour::NoPrediction,
+                        ],
+                    )
+                    .unwrap();
+            }
+        }
+        assert!(matches!(
+            field.cells[16].unwrap().lists[0],
+            Neighbour::Inter {
+                vector: [16, 0],
+                ..
+            }
+        ));
+        assert!(matches!(
+            field.cells[32].unwrap().lists[0],
+            Neighbour::Inter {
+                vector: [0, 16],
+                ..
+            }
+        ));
+        let ids = [100u64, 200, 300, 400];
+        let mappings: Vec<_> = ids
+            .iter()
+            .enumerate()
+            .map(|(i, id)| (i as u32, [std::slice::from_ref(id), &[][..]]))
+            .collect();
+        let saved = field.snapshot_slices(&mappings, 65536).unwrap();
+        for y in (0..32).step_by(4) {
+            for x in (0..32).step_by(4) {
+                let stored = saved.at([x, y]).unwrap()[0].unwrap();
+                assert_eq!(stored.picture_id, ids[y / 16 * 2 + x / 16]);
+                assert_eq!(stored.vector, [x as i16, y as i16]);
+            }
+        }
+    }
     #[test]
     fn independent_slice_lists_resolve_the_same_index_to_different_pictures() {
         let mut field = MotionField::new(32, 16, 65536).unwrap();

@@ -2469,3 +2469,503 @@ Offline validation: codec library 376 passed / one ignored; owned media library
 334 passed / one ignored; CPU NVDEC HEVC preparation 19 passed. The additional
 QP=40 acceptance was rerun after that broad pass and also succeeded. No failures
 and no FFmpeg/network requirement in normal tests.
+
+### HEVC 4:2:2 filtered base-layer decoding (2026-10-06)
+
+Native 4:2:2 I/P/B reconstruction now admits 8/10/12-bit equal-depth components.
+The transform tree reads upper/lower Cb before upper/lower Cr, preserves both
+flags through minimum-size luma splitting, and accounts for both in QP syntax.
+Reconstruction uses normative 4:2:2 intra angle remapping, independent axis
+scales for motion and PCM, rectangular SAO CTUs and direction-dependent chroma
+deblocking geometry. Existing 4:2:0/4:4:4 entry points remain supported.
+
+Three owned 64x64 I/B/B streams with SAO/deblocking match every saved independent
+HM sample and replay after reset. Software MP4 playback matches the same samples
+and replays after rewind. The former picture refusal has been replaced with
+acceptance and the staged pixel test is enabled. No external tools are invoked
+by these tests. This is evidence for these streams, not qualification of every
+4:2:2 tool: WPP, tiled segments and queued reconstruction remain to be covered.
+
+### HEVC 4:2:2 WPP, tiled segments and queued reconstruction (2026-10-06)
+
+Extended the owned 4:2:2 corpus with three 12-bit I/B/B streams: 64x64 WPP,
+64x64 mixed independent/dependent slices in two tile columns with filtering
+across tiles, and 128x96 WPP to enable the existing reconstruction queue.
+Metadata tests assert SAO/deblocking, entropy sync, tile column count, actual
+independent/dependent slice headers and the queue-enabling picture geometry.
+All six 4:2:2 streams match every saved independent HM pixel after decoder
+reset and software-player rewind. These three cases supersede the pending
+WPP/tiled/queue qualification note above. They do not claim all HEVC profiles,
+separate-colour-plane, multilayer coding or deeper-than-12-bit support.
+
+Offline validation: three integration tests exercise six fixture pairs and
+pass; 63 Python policy/generator tests pass. Normal tests require no HM,
+FFmpeg or network. Explicit generation verified HM decoded bytes equal its
+encoder reconstruction before saving each oracle.
+
+### HEVC cross-component CABAC and residual foundations (2026-10-06)
+
+Owned 4:4:4 8/10/12-bit I/B/B streams with the cross-component PPS flag and
+saved HM oracles reproduce the exact PPS refusal. Full pixel/reset acceptance
+is explicitly ignored until integration; an enabled flag alone does not prove
+nonzero alpha and must not be used as such evidence.
+
+Added the normative signed residual modification (H.265 8.6.6) with independent
+integer-formula checks for all alpha values, mixed-depth scaling, negative
+rounding and atomic overflow refusal. Added context-coded truncated-unary alpha
+syntax (0, +/-1, +/-2, +/-4, +/-8), separate Cb/Cr magnitude/sign banks initialized
+to 154 for every slice initialization, and retained banks in entropy snapshots.
+Tests cover exact bin/context order, every syntax truncation, initialization,
+adaptation and invalid-context poisoning. PPS admission and synchronous/queued
+picture residual integration remain outstanding; no cross-component playback
+support is claimed yet.
+
+### HEVC cross-component picture acceptance (2026-10-06)
+
+PPS admission, CABAC alpha syntax and residual modification are connected for
+interleaved 4:4:4. Intra eligibility uses the signalled derived-chroma mode code;
+inter eligibility uses the luma CBF. Alpha is read before each chroma residual,
+including zero-CBF chroma that derives residuals entirely from luma. Original
+inverse-transformed luma residuals are retained before clipping for both chroma
+components. Synchronous and queued reconstruction carry the same alpha and
+residual rules. Other chroma formats and separate-colour-plane remain excluded
+from this tool as required by its format constraints.
+
+Four owned HM streams compare every sample and replay decoder reset/software
+player rewind: 64x64 at 8/10/12 bits and 128x96 12-bit WPP that activates queued
+reconstruction. A test-only picture counter proves nonzero alpha is decoded in
+every stream. The exact PPS refusal test is replaced with PPS/picture acceptance,
+and the formerly ignored pixel test is enabled. These results supersede the
+pending cross-component integration notes above; all HEVC profiles/tools remain
+an open objective.
+
+Offline validation: codec library 387 passed / one ignored; owned media library
+334 passed / one ignored; cross-component integration three passed, 4:2:2 three
+passed and RExt smoothing sixteen passed. No ordinary test invokes external
+codec tools or network.
+
+### HEVC monochrome filtered picture acceptance (2026-10-06)
+
+Native monochrome reconstruction now admits 8/10/12-bit luma with independent
+inferred chroma depth. Chroma planes are absent, no chroma syntax/prediction,
+PCM payload or filters are consumed, and QP is derived only for luma.
+Three owned filtered I/B/B streams match all HM luma samples and replay after
+reset. Software playback/rewind matches luma and supplies neutral chroma for
+display, fixing the previous empty-chroma slice panic with a synthetic regression.
+The former picture refusal is replaced and luma acceptance is enabled.
+This corpus does not independently qualify monochrome WPP/tiled/queued paths.
+
+### HEVC monochrome WPP, tiles and queued acceptance (2026-10-06)
+
+Added owned 12-bit streams for 64x64 WPP, mixed independent/dependent segments
+in two tile columns with cross-tile filtering, and 128x96 WPP that activates
+queued reconstruction. Metadata tests assert the active entropy-sync/tiles
+flags, independent/dependent slice headers and queue-enabling dimensions.
+All six monochrome fixture pairs match HM luma after reset and software-player
+rewind, with neutral chroma for display. This supersedes the pending monochrome
+WPP/tiled/queued note above. Three integration tests pass offline without any
+external codec tools. Other HEVC profiles/tools and the full codec-gap objective
+remain open.
+
+### HEVC monochrome PCM corpus acceptance (2026-10-06)
+
+Extended the explicit PCM generator with a monochrome mode, preserving default
+4:2:0 generation. Fourteen owned streams qualify active 8x8/16x16/32x32 PCM,
+mixed PCM/non-PCM CUs, SAO/deblocking with protected/unprotected PCM, 8-bit PCM
+scaled to 10/12-bit reconstruction, full-depth PCM, 128x96 queued reconstruction,
+WPP, dependent segments and reference-picture reuse. The fixture test asserts
+nonzero actual PCM coverage (partial in mixed streams), absent chroma, every
+saved HM luma sample and replay after reset. The targeted corpus test passes;
+normal tests consume saved bytes without HM, FFmpeg or network.
+
+### HEVC 4:2:2 / 4:4:4 PCM corpus qualification (2026-10-06)
+
+Extended the explicit PCM generator with anisotropic 422 and full-resolution
+444 source geometry and distinct fixture prefixes. Twenty-eight streams cover
+8x8/16x16/32x32 PCM, mixed coding, both filter policies, input/full PCM depths,
+WPP, queued reconstruction, dependent segments and reference reuse.
+Every saved HM sample matches after native decoding and reset. Tests assert
+actual PCM coverage and chroma dimensions, so these streams qualify PCM rather
+than merely PPS admission. The targeted 28-stream acceptance passes, as do 63
+Python checks. Normal tests require no external codec tools or network.
+
+### HEVC mixed component depth native acceptance (2026-10-06)
+
+Removed the blanket equal-component-depth refusal from native single/multi-slice
+picture admission. Existing reconstruction selects component depth per plane.
+Three owned filtered 4:4:4 I/B/B streams at Y/C depths 8/10, 10/8 and 12/10 match
+every saved HM sample and replay after reset. The fixture muxer now accepts an
+explicit chroma depth and writes correct hvcC metadata while preserving its
+equal-depth default. HM generation is separate from ordinary tests.
+
+This is native decoder evidence. Player/export depth transport, mixed-depth
+WPP/tiles/queue and cross-component prediction need separate qualification;
+no complete mixed-depth production workflow claim is made yet.
+
+### HEVC mixed-depth tool combinations (2026-10-06)
+
+Extended the three Y/C depth pairs with WPP, mixed independent/dependent tile
+segments, 128x96 queued WPP reconstruction and cross-component prediction.
+All 15 streams match every saved HM sample after reset. Tests assert active
+PPS tools, segment types and queue-enabling dimensions. The existing test-only
+alpha counter now verifies nonzero alpha in mixed-depth cross-component
+streams, qualifying both directions of luma-to-chroma residual scaling.
+Generation checks decoded oracle bytes against HM encoder reconstruction;
+ordinary tests invoke no external tools. Player/export transport remains open.
+
+### HEVC player component precision and chroma geometry (2026-10-06)
+
+Software MP4 playback now carries explicit packed planar geometry for non-4:2:0
+and mixed-depth HEVC instead of treating every picture as equal-depth 4:2:0. Components with different depths
+are lifted exactly to the larger depth before display; monochrome pictures
+receive neutral chroma. Pending-frame storage accounting includes packed data.
+All fifteen mixed-depth fixture variants compare every packed display sample
+with the owned HM oracle across rewind. The six 4:2:2 fixtures additionally
+check full-height chroma and every packed sample across rewind. These are
+software display-transport checks, not GPU or export qualification.
+
+### HEVC mixed-depth owned lossless export (2026-10-06)
+
+Removed the equal-component-depth rejection from the owned MP4 spool path.
+Export metadata and packed samples use max(Y depth, C depth), lifting lower-depth
+components by an exact left shift. Monochrome continues to use luma depth.
+The root MP4 FFV1 writer now accepts explicit packed planar pictures.
+`hevc_mixed_depth_export` checks all fifteen owned streams through both public
+export entrypoints, with and without negate, against independently scaled HM
+samples and scalar negate expectations; every exported frame is replayed after
+rewind. This covers native MP4 to FFV1/Matroska transport, not mixed-depth HEVC
+encoding or every other export format.
+
+### HEVC 14/16-bit native acceptance (2026-10-06)
+
+Extended native HEVC component admission through 16 bits. Deblocking limits
+scale with sample depth; motion interpolation uses minimum two-bit headroom
+instead of subtracting depth from 14 without a lower bound. High dynamic-range
+inverse transforms accumulate in i64 before normative shifting and clipping,
+while the existing factored i32 transform remains for bounded lower ranges.
+
+Six owned HM streams qualify high-throughput 16-bit intra at actual 14/16-bit
+precision, each with ordinary and 128x96 WPP reconstruction, plus 14-bit
+high-throughput I/B/B at both sizes. Their samples contain information beyond
+12 bits. Acceptance checks every decoder sample, software playback, both
+FFV1/Matroska export APIs, scalar negate and reset/rewind. Fixture generation
+checks HM decoder bytes against encoder reconstruction separately from tests.
+This does not qualify every high-depth chroma/profile/tool combination,
+16-bit inter profiles, hardware paths or HEVC encoding.
+
+### HEVC deep PCM acceptance (2026-10-06)
+
+Added ten owned three-frame 4:4:4 high-throughput intra PCM streams at 14/16
+bits. Each depth covers input-8 PCM, full-depth PCM, mixed PCM/non-PCM with
+filtering enabled on PCM, dependent segments, and 128x96 WPP. Full-depth input
+is generated directly as little-endian 14/16-bit noise; input-8 uses the original
+8-bit source representation. The minimum component QP makes HM actually select
+PCM: QP zero can otherwise bypass PCM due to HM's raw-cost precheck.
+
+Core acceptance asserts actual PCM sample coverage (full or partial), explicit
+PCM depths, dependent headers and WPP, and compares every saved HM sample
+after reset. Player acceptance verifies software playback and FFV1/Matroska
+exports through both public APIs across rewind. These qualify the current
+high-depth PCM implementation; other chroma/profile/tool combinations remain
+separate work. No generator or external codec runs in ordinary tests.
+
+### HEVC SCC base profile admission (2026-10-06)
+
+SPS/PPS now parse SCC extension presence separately from multilayer, 3D and
+unknown extensions. Profile 9 streams with SCC coding tools disabled are
+admitted, including an explicitly empty PPS palette initializer list. Reserved
+motion-resolution value 3 is invalid. Active current-picture prediction, palette
+coding, integer-motion resolution, intra-boundary-filter disable and adaptive
+colour transform still have explicit unsupported errors; no full SCC claim.
+
+Six owned 4:4:4 8/10-bit I/B/B streams cover ordinary coding, 128x96 WPP and
+empty initializers. The explicit generator uses HM for base reconstruction and
+changes PTL plus inert SCC SPS/PPS syntax only, preserving entropy bytes.
+Acceptance compares every saved pre-rewrite HM pixel in decoding, software
+playback and both FFV1 export APIs across reset/rewind. A separate synthetic
+reserved-motion fixture checks invalid syntax refusal, not playback acceptance.
+
+Separate colour planes were investigated against ITU-T H.265 V11 A.3.5/A.3.6:
+standard base-layer RExt/high-throughput profiles constrain their flag to zero.
+The existing refusal has not been removed or described as supported decoding.
+
+### HEVC SCC intra boundary filtering disable (2026-10-06)
+
+SPS retains `intra_boundary_filtering_disabled_flag` and applies it to both
+angular and DC boundary correction in synchronous and queued reconstruction.
+RDPCM's existing angular-only bypass exclusion is preserved separately from
+DC's boundary rule. Reference-sample smoothing remains independent.
+
+Four owned SCC 4:4:4 I/B/B streams at 8/10 bits qualify ordinary and 128x96
+WPP paths. A separate HM18 HIGH_BITDEPTH encoder/decoder build uses the saved
+`hm_scc_boundary_oracle.patch` to suppress angular and DC boundary correction
+for this controlled oracle. This is a patched HM oracle, not unmodified HM SCC
+support. The generator checks encoder reconstruction against decoder output,
+then signals SCC syntax without changing entropy bytes. Binary, patch and
+fixture hashes are saved in `hevc-scc-boundary-oracle.json`. Ordinary tests use
+only the saved bytes.
+
+Acceptance checks every pixel after decode/reset, software playback/rewind,
+and both FFV1 export APIs. Clearing the SPS boundary flag demonstrably changes
+the first-frame samples for each fixture, proving actual feature coverage.
+Independent constant-reference tests check unmodified DC/horizontal/vertical
+predictors with boundary correction disabled at every admitted even depth.
+Other SCC tools (palette, current-picture prediction, integer-motion resolution
+and adaptive colour transform) remain incomplete.
+
+HEVC SCC integer motion: parse SPS resolution control (0/1/2), consume adaptive
+slice selection, floor MVPs before adding integer MVDs with signed-16 wrapping,
+and round selected merge vectors after candidate-list derivation. Eight owned
+SCM 8.8 streams cover 8/10-bit forced, adaptive and WPP decoding/playback/export;
+this does not qualify SCC palette, IBC or adaptive colour transform.
+
+HEVC SCC adaptive colour transform now parses PPS/slice ACT offsets, decodes the
+TU ACT CABAC flag before delta-QP syntax, uses ACT component QPs and applies the
+inverse three-component residual transform before clipping reconstructed pixels.
+Synchronous and queued WPP reconstruction preserve TU ordering. Bypass with mixed
+component depths is rejected as non-conforming. Ten owned official SCM 8.8
+streams qualify 8/10-bit intra/inter, WPP, non-default ACT offsets and lossless
+bypass, with active-block counters, pixel comparison, reset, playback and export.
+SCC palette and current-picture prediction remain incomplete; mixed/deeper ACT
+streams and non-zero slice ACT offsets still need dedicated stream qualification.
+
+ACT qualification now additionally covers 18 owned streams with mixed 8/10-bit
+and 10/14-bit component depths, profile 11 with WPP, and non-zero slice offsets.
+Encoder-only configuration patches select existing slice-offset controls and
+correct SCM's SCC14 admission gate; the unmodified decoder supplies the oracle.
+Every stream uses ACT in both intra and inter blocks. Decoder reset, common-depth
+playback, rewind and both FFV1 exports preserve all samples. This extends the
+previous 8/10-bit qualification, not palette/current-picture support.
+
+SCC current-picture prediction now passes twelve owned 8/10-bit fixtures:
+ordinary/WPP 4:4:4, weighted prediction and odd-vector 4:2:0. Native samples,
+reset, software playback, rewind and both FFV1 exports equal the SCM oracle.
+A logging-only reference probe proves actual IBC use; native counters also prove
+fractional chroma sampling in the 4:2:0 streams. Current references access the
+unfiltered reconstruction without allocating another picture. Source bounds,
+readiness, CU exclusion and WPP availability are checked. Current reference
+weight flags are inferred rather than consumed from the header.
+
+SPS/PPS capability dependencies and reference-list selection remain tested,
+including inert capability fixtures. Mixed ordinary/current references,
+B prediction, tiles, dependent segments and additional depth combinations
+still need dedicated IBC qualification; palette support remains unfinished.
+
+Latest offline IBC validation: codec library 405 passed / one ignored explicit
+fixture-generator test; owned media library 334 passed / one ignored; Python
+policy/generator suite 63 passed. Active IBC integration: two passed, none
+ignored. Ordinary tests invoked no FFmpeg or reference decoder.
+
+Mixed-reference IBC: four additional 8/10-bit ordinary/WPP streams reproduce
+`HEVC current-picture vector violates block availability` before the fix, due
+to incorrectly discarding temporal current-reference predictors. H.265 8.5.3.2.9
+permits matching long-term classifications and copies those vectors without
+POC scaling, including zero POC distance for current references. Native output,
+reset, software playback, rewind and both FFV1 exports now equal SCM. Header
+checks prove active mixed lists; codec counters require actual current and
+completed-picture predictions. B prediction, tiles and dependent segments
+remain separately unqualified.
+
+IBC B/partition qualification: eight further 8/10-bit fixtures cover B slices
+with/without WPP, tiles and dependent segments. B fixtures require actual
+biprediction plus current and completed-reference predictions, not just B
+headers. Tiled/dependent fixtures validate tool flags and dependent headers.
+All twenty-four streams match every SCM sample through reset, software playback,
+rewind and both FFV1 exports. These checks qualify those configurations;
+palette and additional depth/combined-tool coverage remain open.
+
+Palette preparation: four actual SCM palette fixtures (8/10-bit ordinary/WPP)
+now have independent decoder/probe pixel agreement and recorded active counts.
+The exact SPS palette refusal is tested; full pixel/reset acceptance remains
+explicitly ignored. Owned predictor state implements equation 8-79 transactionally,
+with ordered reuse, unused-tail retention, bounded EG0 reuse/new-entry syntax,
+component-major samples and per-component depth checks. Truncation, out-of-range
+runs/counts and invalid state updates reject. Index runs, escapes, CABAC mode
+flags and CU reconstruction are not connected; palette playback remains open.
+
+Palette map/reconstruction primitives now implement alternating-row traversal,
+run expansion and copy-above across row boundaries with full-block coverage
+checks. Reconstructed samples use luma-domain transposition and chroma
+subsampling (8-69..71), bypass escapes and rounded/clipped lossy escape scaling
+(8-72..78), including mixed component depth and bounded 64-bit arithmetic.
+Unit tests cover mono/420/422/444, transpose, row crossing, clipping, malformed
+indices/runs/escapes and geometry. These are not full stream acceptance:
+CABAC index/run syntax, SPS/PPS palette admission and CU integration remain open.
+
+Palette CABAC preparation now includes four independent context banks (mode,
+run-prefix, shared copy-above/final-run flag, transpose), initialized from
+H.265 tables 9-38/40/41/42. Run-prefix context selection follows table 9-51
+including bypass after bin four. Context snapshots/WPP restoration retain all
+palette banks for I/P/B initialization. Bounded TR prefix/TB suffix reading
+implements equations 7-85/86, with inferred zero-maximum runs and truncation
+checks. These helpers are not yet CU-connected; stream acceptance remains
+explicitly ignored and the exact palette refusal remains passing.
+
+Palette index/map parsing now implements bypass Rice/EGk index counts and
+truncated-binary index IDs (9.3.3.13/14), including the reduced alphabet after
+the first index. The map state machine derives explicit/inferred copy-above,
+final-run behavior and omitted-reference-index adjustment (7-83/84), expands
+runs in alternating-row order and rejects unused/exhausted indices or derived
+run bounds. Tests distinguish inferred zero-alphabet paths (no bits consumed),
+truncation, oversized counts and an exact two-color/copied-row map. These parts
+still await palette header/escape/CU integration; no full stream support claim.
+
+Palette escape parsing and CABAC bridge now implement FL samples for bypass CUs,
+EG3 for quantized samples, component-major traversal and chroma location filtering,
+including transposed 4:2:2. Overflow/truncation and invalid maps reject before
+publication. Header::read and Header::samples connect existing palette helpers
+to real HevcCabac decisions/bypass bins, with an explicit shared-QP syntax boundary.
+An empty-palette escape block exercises that bridge. SPS/PPS palette parameters,
+CU invocation, predictor lifetime across tiles/WPP and full fixture acceptance
+are still pending; no stream playback support is claimed.
+
+Palette SPS syntax now parses the enabled flag, bounded palette/predictor maxima,
+component-major initializers and their depth-specific sample widths. Initializer
+counts are checked against predictor size and the caller's allocation budget;
+zero-size palettes cannot signal initializers. Four additional SCM streams carry
+actual nonempty SPS initializer tables (8/10-bit ordinary/WPP), independently
+verified by unmodified decoder and logging-only palette probe. Metadata tests
+accept all eight SPS configurations. Playback refusal remains explicit in
+configuration/in-band SPS admission and direct single/multi-slice reconstruction;
+full pixel/reset acceptance is still ignored pending CU/PPS integration.
+
+Palette PPS syntax now reads nonempty initializer tables, requires SPS palette
+capability, bounds counts against predictor capacity/allocation budget, and
+checks monochrome/depth fields against the active SPS. Four additional owned
+8/10-bit ordinary/WPP PPS-initializer streams agree with SCM/probe pixels.
+Parameter tests reject missing capability and mismatched depth. Predictor
+construction now inherits the SPS table when PPS initialization is absent,
+uses a supplied PPS table, and preserves an explicit empty-table override.
+The preexisting inert zero-entry PPS compatibility case is preserved. Full
+palette reconstruction admission stays closed pending CU/state integration.
+
+Palette CU integration supersedes the preparation/refusal notes above. The mode
+flag is read before intra partition syntax; header/QP/map/escape reconstruction
+and predictor updates are connected for synchronous and queued reconstruction.
+Palette samples are excluded from deblocking as required by 8.7.2; the first
+pixel comparison exposed and fixed incorrect filtering. Predictor snapshots
+follow WPP CABAC snapshots, reset at independent slice/tile starts, and survive
+dependent-segment continuity. All twelve ordinary/WPP 444 8/10-bit fixtures,
+including SPS/PPS initializer variants, match every SCM sample through reset,
+software playback, rewind and both FFV1 exports. Acceptance is enabled and the
+old refusal test removed. Additional chroma/depth, escape-heavy, tiled/dependent
+and combined-tool fixture qualification remains open; this is not universal
+codec/profile completion.
+
+Palette tile/dependent qualification: four additional 8/10-bit owned streams
+contain two tile columns, with dependent-segment variants. Unmodified SCM and
+logging-only palette probe agree; actual palette use is recorded. Enabled
+acceptance compares all sixteen fixture streams, reset, software playback,
+rewind and both FFV1 exports. Header checks require actual dependent segments,
+not merely PPS flags. Tile reset and dependent continuation are now stream
+qualified for these cases; additional chroma/depth and combined tools remain.
+
+Palette chroma qualification adds twelve owned streams: mono/420/422, 8/10-bit,
+ordinary/WPP. SCM reconstruction and logging-only probe agree with recorded
+actual palette blocks. Acceptance compares original codec samples and reset,
+software playback/rewind and both FFV1 exports. Monochrome SPS infers chroma
+depth 8; display adds neutral 420 chroma, root lossless export retains this
+420 representation while the media library promotes monochrome to 444.
+Tests compare all original luma and exact neutral samples at each API's explicit
+representation, rather than equating these different geometries. Other depth,
+escape-heavy and combined-tool qualification remains open.
+
+2026-10-06: Palette escape qualification expanded to 36 owned streams. Eight new 4:4:4 8/10-bit cases exercise actual lossy EG3 and bypass fixed-width escape decoding, ordinary/WPP. Native pixel/reset/playback/rewind and both FFV1 export checks pass (`hevc_scc_palette`: 2 passed, 0 ignored). This does not qualify every depth/chroma/tool combination or establish complete codec coverage.
+
+2026-10-06: Palette escape qualification now includes 16 additional owned 4:2:0/4:2:2 streams (8/10-bit, lossy/bypass, ordinary/WPP). Reference logging proves 2763 lossy and 6738 bypass luma escape reads across the new streams. All 52 palette streams pass exact native pixels, reset, software playback/rewind and both lossless exports in the offline acceptance test (2 passed, 0 ignored). No additional depth or transpose coverage is inferred from these results.
+
+2026-10-06: Eight owned monochrome palette-escape streams extend qualification to 60 total (8/10-bit, lossy/bypass, ordinary/WPP). Logging-only reference probe observed 1151 lossy and 3330 bypass luma escape reads in these eight. Offline native sample/reset/playback/rewind and both lossless-export acceptance checks pass (2 passed, 0 ignored). Display/export neutral chroma follows the existing monochrome API expectations; no chroma input is invented in the oracle. Other depths and tool combinations remain unqualified.
+
+2026-10-06: Logging-only SCM probe now records actual transposed palette escape reads. All 32 escape fixtures (mono/420/422/444, 8/10-bit, lossy/bypass, ordinary/WPP) have nonzero counts. Generator rejects missing coverage, and an offline provenance regression verifies every saved escape case. All 60 streams again pass exact native pixels/reset/playback/rewind/both exports (3 tests passed, 0 ignored). This supersedes the earlier absence of observed transpose qualification for these specific fixtures; broader depths/tools remain unqualified.
+
+2026-10-06: Added 28 owned 12-bit palette streams, bringing the total to 88. SCC high-throughput uses the legal 14-bit profile constraint with actual 12-bit component depths and mandatory WPP; encoder configuration validation uses the documented scm_scc14_config.patch, reference decoder remains unmodified. Tiles/dependent tile cases are excluded at 12-bit because SCM rejects tiles+WPP for this profile. Mono/420/422/444, predictor initializers, lossy/bypass/transposed escapes all pass exact samples, reset, playback/rewind and both exports (3 offline tests passed, 0 ignored). Input is owned 8-bit pattern promoted by the encoder, so arbitrary full-precision 12-bit input remains a separate qualification.
+
+2026-10-06: Eight additional owned full-precision 12-bit palette/escape streams cover mono/420/422/444 lossy and forced bypass under mandatory WPP. Source uses 16-bit little-endian storage with nonzero low four bits, not promoted 8-bit samples. Generator proves low-bit retention in the oracle and source==oracle for bypass; offline provenance regression verifies retained low bits and actual transposed escape reads. All 96 palette streams pass exact native pixels, reset, playback/rewind and both lossless exports (3 tests passed, 0 ignored). This qualifies these full-precision patterns, not arbitrary 12-bit streams or all codec tools.
+
+2026-10-06: 36 new owned 14-bit SCC palette streams extend acceptance to 132 total. Covers mono/420/422/444, SPS/PPS initializers, lossy/bypass/transposed escapes and eight full-precision input cases. High-throughput SCC uses 14-bit constraint and mandatory WPP; forbidden tiles+WPP combinations remain excluded. Generator confirms low-bit oracle retention and exact bypass input preservation. All 132 pass native sample/reset/playback/rewind/both lossless-export acceptance (3 offline tests passed, 0 ignored). Existing AVC field-reference and display-reordering refusals remain in source; this is not completion of the codec-gap objective.
+
+2026-10-06 AVC audit correction: the earlier statement that display reordering is wholly unimplemented was too broad. AvcDecoder::decode_order accepts coded-order I/P/B pictures, and the MP4 playback reader performs presentation ordering using timestamps. AvcDecoder::decode intentionally requires increasing POC; its error now directs callers to decode_order. The owned avc-multislice-ipb fixture proves this specific API refusal, decode-order acceptance, reset, and exact presentation-order oracle playback/rewind in a dedicated regression. avc_multislice: 12 passed, 0 ignored, offline without FFmpeg. Field reference lists/marking remain unsupported; this audit does not remove those gaps.
+
+2026-10-06 MBAFF gap reproduction: avc-mbaff-cabac.mp4 and avc-mbaff-cavlc.mp4 are owned three-picture 64x64 x264 CLI streams, generated explicitly by scripts/generate_avc_mbaff_sample.py (no FFmpeg). avc_mbaff verifies parsed MBAFF SPS and matching entropy mode, then the exact progressive-only reconstruction refusal, excluding unrelated parse failures. This is a passing refusal/reproduction test, NOT playback acceptance or an implemented interlaced decoder. Future support must replace this expectation with pixel acceptance against an independent oracle. Current offline reproduction: 1 passed, 0 ignored.
+
+2026-10-06 MBAFF implementation foundation: src/codec/avc_mbaff.rs provides checked component sample addressing for progressive blocks and frame/field macroblock pairs (H.264 6.4.1). Supports mono/444 geometry and 422/420 subsampling with field row stride. Tests prove mixed frame/field pairs cover every component sample exactly once and reject out-of-picture/overflow/malformed geometry (2 passed offline). This helper is not yet connected to entropy, prediction or deblocking; the owned MBAFF playback refusal remains unchanged.
+
+2026-10-06 MBAFF addressing continuation: added component sample-to-owner mapping for mixed frame/field pairs. Unknown pair mode or out-of-picture sample returns unavailable instead of guessing. Forward/inverse round trips cover each sample of mono/444, 422 and 420 layouts; progressive mapping is now used by existing intra reconstruction. Three geometry tests and 16 integration tests (MBAFF refusal, AVC multislice pixel/rewind/seek and parameter updates) passed offline. Entropy field flags, MBAFF prediction neighbours and deblocking remain incomplete; interlaced playback acceptance is not claimed.
+
+2026-10-06 MBAFF field syntax foundation: PairMode reads mb_field_decoding_flag on even macroblock addresses or an odd address after skipped top, and otherwise inherits the known pair mode (H.264 7.3.4). Reader callback can supply a CAVLC bit or future CABAC decision; no CABAC context implementation is implied. State commits only after successful flag read; missing top mode is an error. Four addressing/state tests and two owned fixture tests passed offline. Actual CAVLC IDR fixture validates flag precedes I macroblock type. This is syntax-prefix qualification, not full coefficient parsing or playback acceptance; progressive-only reconstruction refusal remains.
+
+2026-10-06 MBAFF oracle preparation: generator now saves exact YUV from the independent unmodified JM 19 decoder for both owned CABAC/CAVLC three-frame streams, with executable and oracle hashes. JM decoded all three frames in each. A separate pixel/rewind acceptance test is present but explicitly ignored until native MBAFF reconstruction/prediction/deblocking is connected. Ordinary offline tests: 2 passed, 1 ignored; the passing refusal test remains distinct from acceptance. Generation: python3 scripts/generate_avc_mbaff_sample.py --x264 /path/to/x264 --jm-decoder /path/to/ldecod.exe. No FFmpeg or reference executable is invoked by ordinary tests.
+
+2026-10-06 MBAFF context foundation: component neighbour_location translates local sample offsets with the current field row stride, then resolves ownership in the neighbour pair mode. cavlc_context derives nC from available neighbour 4x4 blocks; missing slice/block counts remain unavailable and counts above 16 are rejected. Six geometry/flag/context tests pass offline, including frame-to-field and field-to-frame luma/chroma transitions. These context helpers are not yet connected to the production MBAFF entropy reader; JM pixel acceptance remains ignored until reconstruction/prediction/deblocking are implemented.
+
+2026-10-06 CAVLC production integration: IntraCavlcReader now derives luma DC/AC and chroma AC nC through the checked component/macroblock neighbour context path. Existing raster coefficient grids provide decoded/slice availability; the duplicate old nc formula was removed and its availability test redirected to the production context helper. 105 AVC core tests and 17 integration tests passed offline; one MBAFF pixel acceptance test remains ignored. This connects the progressive path only: full MBAFF field flags, count-grid ownership, prediction and deblocking are still pending.
+
+2026-10-06 CAVLC macroblock ownership: coefficient-count and intra-mode contexts now use address-major macroblock storage rather than global raster grids. Production mode prediction and nC resolve geometric neighbours through the shared addressing path; PCM/inter publication and count snapshots use the same ownership. Allocated context sizes remain unchanged. 105 AVC core tests and 17 pixel/rewind/parameter/MBAFF-prefix integration tests passed offline; one MBAFF playback acceptance remains ignored. This enables subsequent pair-mode addressing, but does not yet enable interlaced entropy/reconstruction.
+
+2026-10-06 CAVLC intra MBAFF syntax reader: new_mbaff supports explicit intra frame slices with MBAFF. Counts include both macroblocks per map unit, first_mb is converted to pair address, field flags are read at pair starts and inherited below, coefficient contexts/mode neighbours use pair geometry, and luma/chroma 4x4 plus luma 8x8 inverse scans select field order. Incomplete terminal pairs are rejected. Embedded mixed P/B MBAFF dispatch remains unconnected. Added two owned alternating-row field-coded streams (CABAC/CAVLC), independently decoded by JM; x264 reports 100% field macroblocks, and native CAVLC test confirms every parsed IDR block field flag. Both all-frame and all-field CAVLC IDRs consume 16 blocks and exact RBSP trailer. 105 core AVC + 18 integration tests passed offline; one pixel playback acceptance covering all four MBAFF streams remains ignored. No interlaced pixel/reconstruction acceptance is claimed.
+
+2026-10-06 MBAFF sample output foundation: checked write_samples scatters reconstructed component blocks into progressive or every-other-row field layouts. Complete footprint/sample count validation precedes any mutation; invalid/truncated/out-of-plane writes leave the plane unchanged. Existing AVC PCM and reconstructed block writes now use this common checked writer in progressive mode. 106 AVC core and 18 integration tests passed offline; one MBAFF playback pixel acceptance remains ignored. Field-capable writing does not yet connect MBAFF prediction or deblocking.
+
+2026-10-06 MBAFF prediction-edge foundation: prediction_edges reads top/left/corner samples with frame or field row stride and caller-supplied per-sample availability, validates complete block geometry and avoids out-of-plane reads. Existing progressive AVC reconstruction now uses this checked edge gatherer. Test confirms exact field row samples and absent edges when a sample is unavailable. 107 AVC core and 18 integration tests pass offline, with one MBAFF pixel playback test still ignored. Remaining full MBAFF work includes pair-aware reconstruction readiness, prediction assembly, deblocking, CABAC and inter references.
+
+2026-10-06 MBAFF reconstruction readiness: Readiness420 stores slice-local completed 4x4 masks separately for Y/Cb/Cr and each macroblock, with known pair modes and checked memory budget. Publishing inconsistent pair modes or invalid geometry does not expose samples. Combined prediction-edge test proves completed even field rows cannot make undecoded odd rows available; reset_slice clears all availability. Nine MBAFF geometry/syntax/readiness unit tests passed offline. This readiness map is not yet connected to full picture reconstruction; MBAFF pixel acceptance remains ignored and the codec-gap goal remains incomplete.
+
+2026-10-06 first MBAFF pixel acceptance: avc_mbaff_picture implements CAVLC complete intra slice reconstruction with filtering disabled. Uses component frame/field views, slice-local readiness, existing owned intra transforms/prediction and checked sample scatter back into frame storage. Checked budget includes output planes, temporary view and entropy/readiness contexts. New owned avc-mbaff-field-intra-unfiltered-cavlc three-IDR fixture matches every JM sample both via direct reconstruction and native MP4 playback, including two rewind passes. Production intra dispatch enables this path; filtered CAVLC refusal now reports the filtering/complete-slice limit, while CABAC/inter/multi-slice MBAFF remain incomplete. 108 AVC core + 19 integration tests passed offline; one broader filtered/inter/CABAC acceptance test stays ignored. No complete MBAFF, mixed-pair/depth coverage or throughput claim follows from this fixture.
+
+2026-10-06 MBAFF frame/mixed acceptance: added three owned three-IDR unfiltered CAVLC streams: all-frame pairs, field-right/frame-left pairs and field-left/frame-right pairs. Native syntax test verifies exactly 0/8/8 field macroblocks out of 16 in each frame (existing all-field fixture verifies 16/16), so names alone do not imply coverage. All four unfiltered intra streams match every JM sample via direct reconstruction and native MP4 playback, with rewind repeated. Target MBAFF suite: 4 passed, 1 ignored, offline; ignored case remains filtered/inter/CABAC playback. This establishes these mixed spatial patterns at 8-bit, not every pair topology, depth or tool combination.
+
+2026-10-06 MBAFF multi-slice intra support: unfiltered CAVLC intra reconstruction now accepts ordered multiple slices, validates pair-address coverage and resets entropy/readiness for each slice. Added owned three-IDR two-slice field-coded fixture with independent JM oracle; native playback matches every sample and rewinds identically. Target MBAFF tests: 5 passed, 1 ignored (filtered/inter/CABAC). Deblocking/inter/CABAC remain incomplete; this qualifies the saved 8-bit two-slice pattern.
+
+2026-10-06 MBAFF deblocking groundwork: filter_line applies the existing H.264 filter to a checked eight-sample strided line; horizontal field traversal can use twice plane stride. Invalid footprint/parameters fail before mutation. Existing progressive inter/intra traversal now uses this common primitive. Test verifies exact filtered values and untouched opposite-parity rows. 109 AVC core and 20 integration tests passed offline; broader MBAFF filtered/inter/CABAC acceptance still ignored. MBAFF boundary strengths, mixed frame/field edge topology and traversal order remain to implement; no filtered MBAFF acceptance is claimed.
+
+2026-10-06 MBAFF intra boundary strength: added shared H.264 8.7.2.1 derivation for intra/intra edges: external vertical and external frame/frame horizontal bS=4, field-involving horizontal and internal bS=3. Progressive intra grid uses the shared rule. Tests compare the resulting normal versus strong sample outputs for both field modes and mixed flags. 110 AVC core plus 17 integration tests passed offline, with broader filtered/inter/CABAC MBAFF still ignored. Mixed edge topology and traversal remain incomplete; this does not enable filtered MBAFF playback.
+
+2026-10-06 MBAFF deblocking line geometry: added checked q0 position, perpendicular sample stride and p0 macroblock ownership for progressive and mixed frame/field storage. Tests cover field-to-frame vertical ownership and both parity boundaries of a frame top below a field pair, across 444/422/420 component geometry; picture boundary and unknown pair modes remain unavailable. 111 AVC core and 20 integration tests passed offline; one filtered/inter/CABAC acceptance test remains ignored. This supplies neighbour QP/slice lookup geometry, not a connected MBAFF deblocking traversal or filtered playback acceptance.
+
+2026-10-06 MBAFF intra deblocking traversal: added a checked 4:2:0 component filter in macroblock pair address order, vertical before horizontal, deriving each line's neighbour QP and slice identity. Mixed frame-top/field-above boundaries filter both parities with bS=3. Tests compare field traversal against separately filtered progressive field planes for Y/Cb/Cr, verify different frame-owner QPs on a mixed vertical edge, both horizontal parities and slice-boundary disabling; malformed pair modes reject before mutation. 114 AVC core and 20 integration tests passed offline, one filtered/inter/CABAC acceptance test still ignored. The traversal is not connected to reconstruction yet; owned compressed-stream pixel acceptance is the next gate before enabling filtered playback.
+
+2026-10-06 MBAFF filtered CAVLC intra acceptance: production reconstruction now retains pair-address component QPs, field mode, transform size and slice filter controls, and runs intra deblocking after all slices are reconstructed. Its checked memory budget includes deblocking metadata. Added five owned three-IDR 64x64 filtered streams: frame, field, both horizontal mixed layouts, and two field-coded slices, with independent unmodified JM oracle and generator/tool hashes. All match every sample through native playback and two rewind passes; single-slice cases also match direct reconstruction. A same-packet deblocking-disabled comparison proves all four single-slice fixtures actually exercise filtering. Original filtered CAVLC IP fixtures now accept/reset the first intra picture, and their old refusal test checks the still-unsupported inter picture instead. 114 AVC core and 21 integration tests passed offline (one inter/CABAC MBAFF acceptance test remains ignored). This qualifies the saved 8-bit CAVLC intra patterns; inter/CABAC MBAFF, broader pair topology, high depths and tool combinations remain unqualified. Ordinary tests consume saved fixtures and never invoke the generator, x264, JM or FFmpeg.
+
+2026-10-06 MBAFF vertical mixed topology qualification: added two owned three-IDR filtered CAVLC streams with field pairs below frame pairs and the reverse. Syntax assertions verify the actual top/bottom transition and exactly eight field macroblocks per picture, rather than relying on fixture names. Direct reconstruction and native playback match every unmodified JM sample for all three pictures, with two rewind passes; disabling deblocking on the same first packet changes output. This covers the mixed horizontal boundary's two-parity frame-top case and field-top/frame-above case at 8-bit. MBAFF suite: 6 passed, 1 ignored (inter/CABAC); compatibility: 15 multislice/parameter-update tests passed offline; fixture/oracle manifest hashes verified. Inter/CABAC, higher depths and broader tool combinations remain incomplete.
+
+2026-10-06 High10 MBAFF intra qualification: added seven owned filtered three-IDR CAVLC fixtures at actual 10-bit input/output depth (16-bit little-endian source storage, nonzero low bits), covering frame/field, horizontal and vertical mixed topologies in both directions, and field-coded two-slice pictures. Native playback matches every independent JM sample and repeats after rewind. Tests verify SPS depths, actual per-macroblock field flags/topology, all 16 blocks per picture, filtering enabled, at least one decoded 8x8 transform in the corpus, and retained nonzero low-bit precision. MBAFF suite: 7 passed, 1 ignored (inter/CABAC); compatibility: 15 tests passed offline. Fixture/oracle hashes verified. This qualifies these High10 intra streams; MBAFF inter/CABAC, additional chroma formats/depths and wider tool combinations remain incomplete.
+
+2026-10-06 CABAC MBAFF field-flag syntax foundation: field_decoding_flag reads one regular arithmetic bin at context 70 + condTermFlagA + condTermFlagB (H.264 9.3.3.1.1.2). Neighbour availability and skipped-pair inference remain caller responsibilities. Scripted tests cover all neighbour combinations and both flag values; saved owned CABAC frame/field IDR fixtures validate the first pair's actual arithmetic decision, with PairMode bottom inheritance consuming no additional bin. 115 AVC core and 8 MBAFF integration tests passed offline; one full inter/CABAC MBAFF pixel acceptance test remains ignored. This is prefix syntax qualification, not an enabled CABAC macroblock reader or pixel/playback acceptance. CABAC spatial contexts, pair-aware termination and coefficient field dispatch remain to connect.
+
+2026-10-06 CABAC block-context ownership: luma/chroma coded-block flags and intra prediction modes now use macroblock-address/local-cell storage. Progressive spatial lookups translate component raster coordinates into this storage; inter/skip, PCM, 4x4 and 8x8 publications use the same indexing. Allocation sizes are unchanged. Tests cover distinct cross-macroblock luma/chroma neighbours and intra versus inter unavailable coded-context conditions. 116 AVC core and 23 integration tests passed offline; existing CABAC I/P/B, multi-slice pixel/reset/seek and parameter-update behavior is preserved. MBAFF pair-aware spatial derivation, termination and residual field dispatch remain to connect; one full inter/CABAC MBAFF acceptance test remains ignored.
+
+2026-10-06 Shared CABAC/CAVLC component neighbour geometry: avc_mbaff::block_neighbours resolves left/top 4x4 cells into macroblock-address/local-cell ownership with frame/field row steps and subsampling. CAVLC nC and production progressive CABAC coded/mode lookups now use this common geometry. Tests verify mixed vertical luma/chroma transitions, frame-top over field-pair ownership, unavailable unknown neighbouring pair and invalid component cell rejection. 117 AVC core and 23 integration tests passed offline, one inter/CABAC MBAFF acceptance remains ignored. CABAC macroblock-level spatial contexts, pair flags/termination and field residual dispatch remain to connect; this does not enable CABAC MBAFF reconstruction.
+
+2026-10-06 CABAC macroblock neighbour geometry: shared avc_mbaff::macroblock_neighbours resolves left/top origin ownership for progressive and mixed frame/field storage, including unknown mode and picture-edge unavailability. Production progressive CABAC type, transform-size, chroma mode, coded pattern and DC context queries now use this path with checked geometry. Tests cover both blocks of a field pair next to frame storage, frame below field and field below frame, component subsampling and intra/inter unavailable-context conditions. 119 AVC core and 23 integration tests passed offline; one full inter/CABAC MBAFF pixel acceptance remains ignored. Actual MBAFF reader pair modes, pair-aware termination and field coefficient dispatch are not connected yet. Pattern-dependent mixed-boundary context derivation still needs acceptance qualification.
+
+2026-10-06 CABAC MBAFF pair termination rule: shared end_of_slice_flag consumes a termination bin after progressive macroblocks or MBAFF bottom blocks only; top blocks infer continuation without any arithmetic read (H.264 7.3.4 slice_data). Scripted tests cover multiple top/bottom addresses, both termination values and progressive behavior. Existing production progressive end_mb now uses the shared helper; address advances after a successful decision. 120 AVC core and 23 integration tests passed offline, one full inter/CABAC MBAFF acceptance remains ignored. The MBAFF flag is not yet enabled in the macroblock reader, so this is syntax/control-flow foundation rather than MBAFF CABAC pixel acceptance.
+
+2026-10-06 CABAC intra MBAFF syntax reader: explicit new_mbaff accepts I frame slices with MBAFF, doubles map-unit count, converts first_mb to pair address and tracks slice-local pair field modes. Top blocks decode contexts 70-72 from known left/top pairs, bottom blocks inherit; end_of_slice is consumed only after the bottom. Macroblock/component context neighbours use pair geometry, and 4x4/8x8 residual CABAC contexts and inverse scans select field order. Saved owned CABAC frame/field IDRs each parse exactly 16 blocks with expected field flags and precise final slice termination. 120 AVC core and 24 integration tests passed offline; one full inter/CABAC MBAFF pixel acceptance remains ignored. This enables explicit syntax parsing only; production picture reconstruction still refuses CABAC MBAFF. Mixed pair/pattern contexts, high-depth CABAC streams and exact pixel reconstruction remain to qualify before dispatch is enabled.
+
+2026-10-06 CABAC intra MBAFF reconstruction acceptance: production intra dispatch now selects the explicit CABAC reader within the common MBAFF reconstruction/deblocking pipeline. Added seven owned filtered three-IDR CABAC fixtures (frame, field, horizontal/vertical mixed pairs both directions, field two-slice). Actual syntax tests verify per-macroblock pair topology and complete picture coverage; native playback matches every independent JM sample for all three pictures and two rewind passes. Direct first-picture reconstruction also matches JM; disabling deblocking on the same syntax changes every fixture's output. Original CABAC IP fixtures now accept/reset their first intra picture, while old refusal tests check the subsequent unsupported inter picture. 120 AVC core and 25 integration tests passed offline, one full inter MBAFF acceptance remains ignored. CABAC High10, broader pattern/tool combinations and MBAFF inter prediction remain unqualified/incomplete. Generation is explicit with owned source samples, x264 CLI and unmodified JM; ordinary tests need none of those tools or FFmpeg.
+
+2026-10-06 CABAC High10 MBAFF intra qualification: added seven owned filtered three-IDR 10-bit CABAC streams, matching the frame/field, both horizontal/vertical mixed layouts and field two-slice CAVLC corpus. Shared High10 acceptance now checks both entropy modes, actual per-block topology, full 16-block picture coverage, depth and low-bit precision; separate per-entropy counters require actual decoded 8x8 transforms in both corpora. Native playback matches every unmodified JM sample for all three pictures and repeated rewind. 25 integration tests passed offline, one full MBAFF inter acceptance remains ignored; all 37 MBAFF fixture/oracle manifest hashes verified. No codec changes were needed for these samples. Wider tool/pattern combinations and MBAFF inter prediction remain incomplete; High10 intra acceptance is limited to the saved corpus, not universal profile coverage.
+
+2026-10-06 MBAFF inter motion-storage foundation: MotionField now stores 4x4 cells by macroblock address/local raster cell rather than the picture raster. Publication, neighbour reads and transactional save/restore use the same storage indexing; allocation sizes remain unchanged. Persistent ReferenceMotionField snapshots explicitly export picture raster order, preserving co-located B-picture lookup and per-slice reference identities. New 2x2-macroblock test checks distinct vectors in every cell, address-owned storage boundaries and all snapshot positions/identities. 121 AVC core and 25 integration tests passed offline, including existing progressive I/P/B, multislice seek/reset and MBAFF intra coverage. MBAFF motion-neighbour geometry, field/frame vector/ref-index conversion, reference-list construction and inter reconstruction remain incomplete; full MBAFF inter acceptance stays ignored.
+
+2026-10-06 MBAFF motion-neighbour geometry: shared motion_neighbours resolves A/B/C/D (left/top/top-right/top-left) partition positions through current frame/field layout into address-owned local 4x4 cells. Partition extent/alignment are checked; unknown mode and picture-edge samples stay unavailable. Existing progressive MotionField neighbour queries now use this path while retaining slice/decoded availability. Tests cover a field partition crossing between neighbouring frame blocks, a frame top below field pairs, all four neighbour locations and invalid footprints. 122 AVC core and 25 integration tests passed offline; full MBAFF inter acceptance remains ignored. Field/frame vector and reference-index normalization, pair-aware motion publication, reference lists and inter reconstruction remain incomplete.
+
+2026-10-06 MBAFF spatial motion normalization foundation: avc_mv::normalize_neighbour converts frame/field vertical vector units and reference indices (H.264 8.4.1.3.2): frame-to-field y/2 and ref*2; field-to-frame y*2 and ref/2. Unavailable/NoPrediction remain unchanged; same-mode values retain their units. Tests cover negative odd vector division toward zero, every field reference index 0..63, source-list limits and signed-16-bit doubling boundaries/overflow refusal. 123 AVC core and 25 integration tests passed offline, full MBAFF inter acceptance still ignored. This helper is not yet connected to motion-neighbour publication/prediction. Existing progressive predictors still restrict references to 0..31; field-aware prediction, DPB reference-list expansion and complete inter reconstruction remain to implement.
+
+2026-10-06 Field-aware AVC spatial predictor: predict_for_field accepts already-normalized field reference indices 0..63; ordinary predict and frame mode retain 0..31. Both paths share the existing partition preference, single matching reference, top-right fallback and component-median derivation. Tests connect frame-to-field neighbour normalization to predictor selection, exercise references 62/63, top/right partition preferences, missing top-right fallback, invalid reference refusal and progressive compatibility. 124 AVC core and 25 integration tests passed offline; full MBAFF inter acceptance remains ignored. This predictor is not yet called by an MBAFF inter reader. Pair-aware motion storage/publication, field-aware skip/direct paths, DPB list expansion and inter reconstruction remain incomplete.
+
+2026-10-06 MBAFF motion publication/neighbour API: store_mbaff publishes address-local partitions with stored field mode and permits field reference indices 0..63. It validates pair mode consistency, duplicate publication, local footprint and prevents mixing progressive storage. neighbours_mbaff combines A/B/C/D geometry, decoded/slice availability and frame/field vector/reference normalization; conflicting reader/stored modes are rejected. Tests connect actual stored frame neighbours to a field predictor, verify reverse normalization, unused-list/slice isolation, reference 63, mode-change refusal and invalid local origins. Progressive snapshots/neighbour APIs refuse MBAFF storage instead of exporting incorrect co-located data; Cell sizing is included in the existing checked budget. 125 AVC core and 25 integration tests passed offline. No MBAFF inter reader invokes these APIs yet; skip/direct, pair-aware snapshots, field DPB references and motion compensation remain incomplete.
+
+2026-10-06 MBAFF P-skip motion foundation: p_skip_for_field validates expanded field reference indices and applies the existing zero-neighbour/median rule to normalized candidates; ordinary p_skip remains the frame wrapper. MotionField::decode_p_skip_mbaff combines pair-aware lookup, normalization and predictor, then publishes reference-zero L0 and unused L1 across the complete address-local block. Tests cover zero detection after normalization, field reference 63, invalid reference rejection, nonzero median from three stored frame neighbours, all 16 published cells, duplicate publication and unknown pair mode without mutation. 127 AVC core and 25 integration tests passed offline. Slice-reader skipped-pair inference, inter entropy/residual dispatch, field reference lists, compensation and B-direct remain incomplete; full MBAFF inter acceptance stays ignored.
+
+2026-10-06 MBAFF explicit inter motion transactions: decode_mbaff now combines pair-aware neighbour lookup, frame/field normalization, field-aware partition prediction and checked motion differences for both lists before publication. decode_macroblock_mbaff processes explicit L0/L1/Bi partitions in syntax order and restores all address-local cells plus the storage mode on late failure or incomplete coverage. Progressive data cannot be queried as MBAFF. Tests cover mixed frame neighbours, two-list prediction, second-list overflow without publication, references 62/63, unknown modes, invalid geometry, duplicate writes, late partition overflow, incomplete coverage and refusal of unconnected B-direct without disturbing prior blocks. 129 AVC core and 25 integration tests passed offline; one full inter MBAFF acceptance remains ignored. These APIs are not connected to inter entropy dispatch, expanded DPB lists or compensation yet; full MBAFF inter acceptance remains ignored. No production playback capability claim is made by these storage/predictor tests.
+
+2026-10-06 MBAFF CAVLC inter coefficient foundation: read_inter_coefficients_field applies the selected frame/field inverse scan to luma4, interleaved luma8 and chroma AC; progressive entrypoints remain wrappers selecting frame scan. CoefficientField::neighbours_mbaff resolves each external luma/chroma block boundary through actual pair geometry with slice/decoded availability, including boundaries spanning both frame macroblocks. read_inter_mbaff joins those contexts with explicit field-aware prediction/header parsing and commits cursor plus counts only after complete success. Expanded active reference counts are caller-supplied, with a field-only limit of 64 and unchanged progressive limit 32. Unit tests cover mixed-pair nC owners, expanded index63, invalid counts/indices, nonzero 4x4/8x8/chroma scans, truncated residual cursor rollback, duplicate publication and atomic header/count publication. 134 AVC core tests passed offline. Pair flag/skip-run dispatch, embedded intra in mixed MBAFF slices, DPB field-list expansion and reconstruction remain to connect; this is not full inter playback acceptance. No new media failure class was discovered in this step; the existing owned IP MBAFF fixtures and ignored acceptance remain the integration target.
+
+2026-10-06 Embedded intra MBAFF CAVLC context: new_context_mbaff permits I/P/B frame slices using address-owned pair-aware coefficient/mode grids, while new_mbaff retains its I-only contract. record_pair_mode accepts dispatcher-owned modes for intra/inter/skip blocks and rejects changing an established pair. read_embedded_mbaff parses an already-dispatched intra body with that mode, preserves the external cursor on failure and requires the caller to discard failed internal context. Existing ordinary embedded entrypoint still refuses MBAFF use. Saved synthetic fixture tests compare every intra mode, residual level, count, QP and cursor between standalone and embedded readers across eight complete pictures: frame, field, both horizontal/vertical mixed orientations and two mixed High10 layouts. Unit tests exercise P/B context construction, pair consistency, malformed body cursor preservation, invalid addresses and field-picture refusal. 135 AVC core and 25 integration tests passed offline; full MBAFF inter acceptance remains ignored. These tests qualify embedded intra syntax, not mixed P/B playback. Skip-run/pair-mode inference, complete inter dispatch, DPB field lists, compensation and B-direct remain incomplete.
+
+2026-10-06 MBAFF CAVLC mixed slice dispatcher: InterCavlcSlice::new_mbaff now allocates pair-address coefficient/intra contexts and iterates skip, coded inter and embedded intra syntax. For a skipped top with a coded bottom, the top mode is obtained by non-consuming lookahead at the bottom field flag; fully skipped pairs inherit an available same-slice left pair, then above, otherwise frame (H.264 7.4.4). Coded bottom after skipped top consumes its explicit flag; other bottoms inherit the established pair. Field blocks use twice the frame active-reference counts and field residual scans. Pair grids for both the dispatcher and intra context are included in checked allocation accounting. Incomplete pairs, missing coded bottoms, mode mismatch and failed parsing poison the reader. Two original owned IP CAVLC fixtures now parse both P pictures completely, all 16 addresses and RBSP end, twice; frame and field coded syntax are exercised. Synthetic bit tests verify lookahead cursor ownership and both left/top skip inference. 137 AVC core and 27 integration tests passed offline, full inter MBAFF pixel acceptance remains ignored. This qualifies syntax dispatch only; production inter reconstruction still refuses MBAFF pending field DPB lists/snapshots, compensation, inter deblocking and B-direct. Normative source: https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.264-201106-S%21%21PDF-E&lang=e&type=items .
+
+2026-10-06 MBAFF reference selection and compensation: ReferenceLists::select_mbaff resolves the already modified frame list by field index/2 and selects same parity for even indices, opposite for odd; it returns frame identity, parity and explicit-weight frame index without manufacturing field IDs. ReferencePlane/Reference420::field_view borrow alternating rows with doubled checked stride and half height, with no plane copy or heap allocation. predict_macroblock_mbaff derives frame/field logical origin from pair geometry, resolves per-list frame indices, uses the selected field view and applies H.264 Table8-10 chroma vertical motion adjustment (+2 top reference/bottom current, -2 bottom reference/top current); luma motion remains unchanged. Existing frame predictor is a shared wrapper. Tests exercise all 64 field indices on both lists/parities, missing/invalid lists, padded-stride 8/10bit views versus independently packed fields for fractional vectors and edge extension, actual macroblock parity/chroma sample results and frame-mode compatibility. 141 AVC core and 27 integration tests passed offline; full inter MBAFF pixel acceptance stays ignored. Whole-picture inter reconstruction, mixed frame/field inter deblocking, field-aware motion snapshots/direct and CABAC inter dispatch remain unconnected. PAFF field-picture DPB construction/marking remains a separate gap; MBAFF continues to use frame marking. Normative reference selection: H.264 8.4.2.1, https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.264-202408-I%21%21PDF-E&lang=e&type=items ; chroma motion: H.264 Table8-10, https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.264-200903-S%21%21PDF-E&lang=e&type=items .
+
+2026-10-06 MBAFF inter macroblock residual publication: reconstruct_inter_macroblock validates picture geometry, complete plane extents, prediction dimensions/depth/sample range and all target layouts before applying 4x4/8x8 inter residuals or transform bypass. It then scatters the reconstructed macroblock to its own frame rows or field parity. No picture plane changes until validation/residual reconstruction succeeds. Tests cover every address in a 2x2-MB picture, both pair modes, 8/10bit, 4x4/8x8 bypass luma/chroma residuals, all untouched samples, truncated chroma, mismatched depth, invalid address and invalid QP without partial publication. 143 AVC core and 27 integration tests passed offline. This helper still needs the complete mixed-slice picture assembler and inter deblocking/metadata path; full MBAFF inter playback acceptance remains ignored. Existing owned IP fixtures remain the target; no new media failure class was found in this step.

@@ -1,4 +1,4 @@
-//! Progressive CAVLC mixed intra/inter slice iteration.
+//! Frame/MBAFF CAVLC mixed intra/inter slice iteration.
 use super::{
     avc_coefficient_field::CoefficientField,
     avc_inter::{InterHeader, InterSyntax},
@@ -30,6 +30,10 @@ pub struct InterCavlcSlice<'a> {
     need_run: bool,
     finished: bool,
     failed: bool,
+    width: usize,
+    mbaff: bool,
+    pair_fields: Vec<Option<bool>>,
+    previous_skipped: bool,
 }
 impl<'a> InterCavlcSlice<'a> {
     /// RBSP offset follows the slice header. Geometry is in macroblocks; FMO and
@@ -69,6 +73,10 @@ impl<'a> InterCavlcSlice<'a> {
             need_run: true,
             finished: false,
             failed: false,
+            width,
+            mbaff: false,
+            pair_fields: Vec::new(),
+            previous_skipped: false,
         })
     }
     /// Configure complete intra/inter entropy dispatch from actual parameter sets.
@@ -78,14 +86,37 @@ impl<'a> InterCavlcSlice<'a> {
         pps: &'a super::avc::Pps,
         memory_limit: usize,
     ) -> Result<Self> {
+        Self::new_mixed_impl(header, sps, pps, memory_limit, false)
+    }
+    /// Syntax-only MBAFF dispatcher; picture reconstruction is separate.
+    pub fn new_mbaff(
+        header: &'a super::avc_slice::SliceHeader,
+        sps: &'a super::avc::Sps,
+        pps: &'a super::avc::Pps,
+        memory_limit: usize,
+    ) -> Result<Self> {
+        if sps.frame_mbs_only || !sps.mb_adaptive_frame_field {
+            return Err(invalid("MBAFF inter reader requires adaptive frame slices"));
+        }
+        Self::new_mixed_impl(header, sps, pps, memory_limit, true)
+    }
+    fn new_mixed_impl(
+        header: &'a super::avc_slice::SliceHeader,
+        sps: &'a super::avc::Sps,
+        pps: &'a super::avc::Pps,
+        memory_limit: usize,
+        mbaff: bool,
+    ) -> Result<Self> {
         if header.field_pic {
             return Err(crate::unsupported("field slices are not supported"));
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
+            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
             .ok_or_else(|| invalid("AVC context size overflow"))?;
         let extra = count
             .checked_mul(40)
+            .and_then(|n| n.checked_add(if mbaff { count } else { 0 }))
             .ok_or_else(|| invalid("AVC context budget overflow"))?;
         let remaining = memory_limit
             .checked_sub(extra)
@@ -103,15 +134,33 @@ impl<'a> InterCavlcSlice<'a> {
             &header.rbsp,
             header.header_bits,
             sps.width_mbs as usize,
-            sps.height_map_units as usize,
-            header.first_mb as usize,
+            sps.height_map_units as usize * if mbaff { 2 } else { 1 },
+            (header.first_mb as usize)
+                .checked_mul(if mbaff { 2 } else { 1 })
+                .ok_or_else(|| invalid("MBAFF first macroblock overflow"))?,
             syntax,
             remaining,
         )?;
-        reader.intra = Some(super::avc_macroblock::IntraCavlcReader::new_context(
-            header, sps, pps, 65536,
-        )?);
+        reader.intra = Some(if mbaff {
+            super::avc_macroblock::IntraCavlcReader::new_context_mbaff(header, sps, pps, 65536)?
+        } else {
+            super::avc_macroblock::IntraCavlcReader::new_context(header, sps, pps, 65536)?
+        });
+        reader.mbaff = mbaff;
+        if mbaff {
+            reader
+                .pair_fields
+                .try_reserve_exact(count / 2)
+                .map_err(|_| invalid("cannot allocate MBAFF pair modes"))?;
+            reader.pair_fields.resize(count / 2, None);
+        }
         Ok(reader)
+    }
+    pub fn pair_field(&self, pair: usize) -> Option<bool> {
+        self.pair_fields.get(pair).copied().flatten()
+    }
+    pub fn field_decoding(&self) -> bool {
+        self.mbaff && self.address > 0 && self.pair_field((self.address - 1) / 2) == Some(true)
     }
     pub fn bit_position(&self) -> usize {
         self.bits.position()
@@ -132,6 +181,9 @@ impl<'a> InterCavlcSlice<'a> {
         }
         if self.pending == 0 {
             if !self.bits.more_rbsp_data() {
+                if self.mbaff && self.address % 2 != 0 {
+                    return Err(invalid("MBAFF inter slice ends with incomplete pair"));
+                }
                 self.bits.finish_rbsp()?;
                 self.finished = true;
                 return Ok(None);
@@ -149,6 +201,46 @@ impl<'a> InterCavlcSlice<'a> {
             }
         }
         let address = self.address;
+        if self.mbaff {
+            let pair = address / 2;
+            if self.pending > 0 {
+                if address % 2 == 0 {
+                    let mode = if self.pending == 1 {
+                        // The bottom is coded: defer top decoding until its flag
+                        // is available, without consuming bottom syntax here.
+                        if !self.bits.more_rbsp_data() {
+                            return Err(invalid("MBAFF skipped top lacks coded bottom"));
+                        }
+                        let mut probe = self.bits.clone();
+                        probe.bit()?
+                    } else {
+                        let left = if pair % self.width > 0 {
+                            self.pair_field(pair - 1)
+                        } else {
+                            None
+                        };
+                        left.or_else(|| {
+                            pair.checked_sub(self.width)
+                                .and_then(|p| self.pair_field(p))
+                        })
+                        .unwrap_or(false)
+                    };
+                    self.pair_fields[pair] = Some(mode);
+                }
+            } else if address % 2 == 0 || self.previous_skipped {
+                let mode = self.bits.bit()?;
+                if self.pair_field(pair).is_some_and(|old| old != mode) {
+                    return Err(invalid("MBAFF inter pair mode changed"));
+                }
+                self.pair_fields[pair] = Some(mode);
+            }
+            let mode = self
+                .pair_field(pair)
+                .ok_or_else(|| invalid("MBAFF inter lacks pair mode"))?;
+            if let Some(intra) = &mut self.intra {
+                intra.record_pair_mode(address, mode)?;
+            }
+        }
         if self.pending > 0 {
             self.counts.store(address, 0, [0; 16], [[0; 4]; 2])?;
             if let Some(intra) = &mut self.intra {
@@ -156,6 +248,7 @@ impl<'a> InterCavlcSlice<'a> {
             }
             self.pending -= 1;
             self.address += 1;
+            self.previous_skipped = true;
             return Ok(Some(InterMacroblock::Skip {
                 address,
                 qp: self.syntax.previous_qp,
@@ -173,12 +266,22 @@ impl<'a> InterCavlcSlice<'a> {
                 .intra
                 .as_mut()
                 .ok_or_else(|| invalid("intra context was not configured for mixed slice"))?;
-            let block = intra.read_embedded(
-                &mut probe,
-                address as u32,
-                self.syntax.previous_qp,
-                code - offset,
-            )?;
+            let block = if self.mbaff {
+                intra.read_embedded_mbaff(
+                    &mut probe,
+                    address as u32,
+                    self.syntax.previous_qp,
+                    code - offset,
+                    self.pair_fields[address / 2].unwrap(),
+                )?
+            } else {
+                intra.read_embedded(
+                    &mut probe,
+                    address as u32,
+                    self.syntax.previous_qp,
+                    code - offset,
+                )?
+            };
             let (luma, chroma) = intra.counts(address)?;
             self.counts.store(address, 0, luma, chroma)?;
             // I_PCM preserves the preceding QP for following macroblocks.
@@ -188,11 +291,27 @@ impl<'a> InterCavlcSlice<'a> {
             self.bits = probe;
             self.address += 1;
             self.need_run = true;
+            self.previous_skipped = false;
             return Ok(Some(InterMacroblock::Intra(Box::new(block))));
         }
-        let (header, coefficients) =
+        let (header, coefficients) = if self.mbaff {
+            let mut syntax = self.syntax;
+            if self.pair_field(address / 2) == Some(true) {
+                for count in &mut syntax.active_references {
+                    *count = count
+                        .checked_mul(2)
+                        .ok_or_else(|| invalid("MBAFF reference count overflow"))?;
+                }
+            }
+            let modes = &self.pair_fields;
             self.counts
-                .read_inter(&mut self.bits, address, 0, &self.syntax)?;
+                .read_inter_mbaff(&mut self.bits, address, 0, &syntax, |p| {
+                    modes.get(p).copied().flatten()
+                })?
+        } else {
+            self.counts
+                .read_inter(&mut self.bits, address, 0, &self.syntax)?
+        };
         if let Some(intra) = &mut self.intra {
             intra.record_inter(
                 address,
@@ -203,6 +322,7 @@ impl<'a> InterCavlcSlice<'a> {
         self.syntax.previous_qp = header.residual.qp;
         self.address += 1;
         self.need_run = true;
+        self.previous_skipped = false;
         Ok(Some(InterMacroblock::Coded {
             address,
             header,
@@ -213,6 +333,65 @@ impl<'a> InterCavlcSlice<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn pair_reader(data: &[u8], width: usize, height: usize) -> InterCavlcSlice<'_> {
+        let mut reader = InterCavlcSlice::new(data, 0, width, height, 0, syntax(), 8192).unwrap();
+        reader.mbaff = true;
+        reader.pair_fields = vec![None; width * height / 2];
+        reader
+    }
+    #[test]
+    fn skipped_top_looks_ahead_to_bottom_flag_without_consuming_it() {
+        // skip_run=1, field=1, P16x16/ref0/MVD0/CBP0, RBSP stop.
+        let mut r = pair_reader(&[0x5f, 0xc0], 1, 2);
+        assert!(matches!(
+            r.read_macroblock().unwrap(),
+            Some(InterMacroblock::Skip { address: 0, .. })
+        ));
+        assert_eq!(r.bit_position(), 3);
+        assert!(r.field_decoding());
+        let Some(InterMacroblock::Coded {
+            address, header, ..
+        }) = r.read_macroblock().unwrap()
+        else {
+            panic!("expected coded bottom")
+        };
+        assert_eq!(address, 1);
+        assert_eq!(header.partitions[0].references, [Some(0), None]);
+        assert_eq!(r.bit_position(), 9);
+        assert!(r.field_decoding());
+        assert!(r.read_macroblock().unwrap().is_none());
+    }
+    #[test]
+    fn fully_skipped_pairs_inherit_left_then_top_with_frame_default() {
+        let mut empty = pair_reader(&[0x70], 1, 2);
+        for _ in 0..2 {
+            assert!(matches!(
+                empty.read_macroblock().unwrap(),
+                Some(InterMacroblock::Skip { .. })
+            ));
+            assert!(!empty.field_decoding());
+        }
+        assert!(empty.read_macroblock().unwrap().is_none());
+        // Coded field top, then three skips including the next complete pair.
+        for (width, height) in [(2, 2), (1, 4)] {
+            let mut r = pair_reader(&[0xfe, 0x48], width, height);
+            assert!(matches!(
+                r.read_macroblock().unwrap(),
+                Some(InterMacroblock::Coded { address: 0, .. })
+            ));
+            for address in 1..4 {
+                assert!(
+                    matches!(r.read_macroblock().unwrap(), Some(InterMacroblock::Skip { address: a, .. }) if a == address)
+                );
+                assert!(r.field_decoding());
+            }
+            assert_eq!(r.pair_field(1), Some(true));
+            assert!(r.read_macroblock().unwrap().is_none());
+        }
+        let mut bad = pair_reader(&[0x50], 1, 2); // skip top, missing coded bottom
+        assert!(bad.read_macroblock().is_err());
+        assert!(bad.read_macroblock().is_err());
+    }
     fn syntax() -> InterSyntax {
         InterSyntax {
             slice: SliceType::P,

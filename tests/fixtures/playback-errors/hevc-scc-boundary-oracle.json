@@ -1,0 +1,27 @@
+{
+  "patch_sha256": "5ef07bc0e34029402806f775f3547d4eca672c22d4322aa8f0002467045d3b76",
+  "encoder_sha256": "b700d0277b7b0b1d684251c7504f96407aea6dd33dfedbedb9f373fa16e825b7",
+  "decoder_sha256": "7d7459502c14193d684e4572d47234098877eb2ad3684829f152addab7e142ce",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-boundary-disabled-rext8",
+      "reference_sha256": "7aa7b0091e5e096c66c79bf0a9056cd3bc053e9c786b4c89dc875e480baf0be2",
+      "mp4_sha256": "dff595386f1467d072b52b6dc02f060210d8463d04b37406639da4ff67f4f4c5"
+    },
+    {
+      "stem": "hevc-scc-boundary-disabled-parallel-rext8",
+      "reference_sha256": "7845980437ce47d033772405c5b793cca1d82bd16c282aa8f9ad386a1a8e5239",
+      "mp4_sha256": "eb96859bcf511c5aa1059224095d611645c450f4d854e6cb8f819d6a292a598d"
+    },
+    {
+      "stem": "hevc-scc-boundary-disabled-rext10",
+      "reference_sha256": "52b96e9f432a7ae6ea1cfef9ff06d8fb68afeecf7c7f79becfeae5758d8ff8ee",
+      "mp4_sha256": "141c89b24226ea670ca039b5362756f21b4f7394a04f4f0f0eea25776d40a471"
+    },
+    {
+      "stem": "hevc-scc-boundary-disabled-parallel-rext10",
+      "reference_sha256": "0ac327d5be04c0499f449c0a8c8535a5697cf1c6214e785e1b27695365fa8a8f",
+      "mp4_sha256": "2779bdb55e7f029c723b2c9c3fc3d6cf1c784acd0d02b84d2c0724f15193b192"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+--- a/source/Lib/TLibEncoder/TEncTop.cpp
++++ b/source/Lib/TLibEncoder/TEncTop.cpp
+@@ -1100,6 +1100,7 @@
+     pps.setNumRefIdxL0DefaultActive( bestPos + 1 );
+   }
+   pps.getPpsScreenExtension().setUseColourTrans( m_useColourTrans );
++  pps.getPpsScreenExtension().setUseSliceACTOffset(m_useColourTrans);
+   pps.getPpsScreenExtension().setUseIntraBlockCopy(sps.getSpsScreenExtension().getUseIntraBlockCopy());
+ 
+   xInitPPSforTiles(pps);
+--- a/source/Lib/TLibEncoder/TEncSlice.cpp
++++ b/source/Lib/TLibEncoder/TEncSlice.cpp
+@@ -394,6 +394,11 @@
+   rpcSlice->setSliceQpBase       ( iQP );
+ #endif
+   rpcSlice->setSliceQpDelta      ( 0 );
++  if (rpcSlice->getPPS()->getPpsScreenExtension().getUseColourTrans()) {
++    rpcSlice->setSliceActQpDelta(COMPONENT_Y, 3);
++    rpcSlice->setSliceActQpDelta(COMPONENT_Cb, -2);
++    rpcSlice->setSliceActQpDelta(COMPONENT_Cr, 4);
++  }
+   rpcSlice->setUseChromaQpAdj( rpcSlice->getPPS()->getPpsRangeExtension().getChromaQpOffsetListEnabledFlag() );
+   rpcSlice->setNumRefIdx(REF_PIC_LIST_0,m_pcCfg->getGOPEntry(iGOPid).m_numRefPicsActive);
+   rpcSlice->setNumRefIdx(REF_PIC_LIST_1,m_pcCfg->getGOPEntry(iGOPid).m_numRefPicsActive);

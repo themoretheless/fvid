@@ -1,0 +1,1200 @@
+{
+  "encoder_configuration_patch_sha256": "bfa92c8e491cb7c1d9b332ef42b34194e7fdf0f928bd2cd90bf1a00b8f863d0b",
+  "reference": "HM-16.20+SCM-8.8",
+  "reference_config_sha256": "11955e379065589100e4fc6a2cf375854aa2e5b713cb0d62c8e2817da783f5ff",
+  "revision": "cae35dba3dcf8e1b6121a70b397000af36301045",
+  "encoder_sha256": "2a2a82fe8fe1fd2dcdc908be7852a05c0efcf99a3e890bce36196e9932ac3cf0",
+  "decoder_sha256": "877b2303f9e97dcdeceb1813d4d01b8fd0c6543267f9c2af56bb520f3e55f71b",
+  "probe_decoder_sha256": "2249fbdde562f619c16ee0062c4ed5305f12c44bfcf46c77221f35e079d43c56",
+  "probe_patch_sha256": "3d89b830115ea1dda1a79a262324d88af986ac001cc54078300b59b82f4a3ede",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-palette-intra-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "dd61c9ec3cb79acd145030e9d008262ff4657c8fde4109e527cae5716815b31e",
+      "oracle_sha256": "28bdeac0fc71afcd897cc12004694eb4ee0ac60a887a5adc9ed8db4db3d3bf0e"
+    },
+    {
+      "stem": "hevc-scc-palette-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "24f951043f30bad1317117e7b7a092b8dd01e6c2be856e6c08ab75079fd135fd",
+      "oracle_sha256": "95145ef93ae0f420804b16849b474b32668b533838f9e361bc3a6631e4a64f9c"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "31ed2a128dd8fe56e0921d468d582487626afe9ef4d69bd5aba1c40262873791",
+      "oracle_sha256": "28bdeac0fc71afcd897cc12004694eb4ee0ac60a887a5adc9ed8db4db3d3bf0e"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "69e128268dd39f8ad921a5dc0de793e319cab95a9e00316db637e7add7c68c92",
+      "oracle_sha256": "95145ef93ae0f420804b16849b474b32668b533838f9e361bc3a6631e4a64f9c"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "d11012c145e8098c303442895b66a94fc55d5a989dc6892670f99830b6bd3ed9",
+      "oracle_sha256": "28bdeac0fc71afcd897cc12004694eb4ee0ac60a887a5adc9ed8db4db3d3bf0e"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "35e3f67f06622ed8cc482936a53df2d5ad45e9b260c033b9b7620be72e3bc5e5",
+      "oracle_sha256": "95145ef93ae0f420804b16849b474b32668b533838f9e361bc3a6631e4a64f9c"
+    },
+    {
+      "stem": "hevc-scc-palette-tiles-rext8",
+      "active_palette_blocks": 768,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "c236c9dd1c9a9e555cc25284ee9f56869ce8cb76cf0b7fe025108f6f30214361",
+      "oracle_sha256": "395576ad72c562666babf3d5c55fb64bcc7267a4075923ed42d8f4554c66b48a"
+    },
+    {
+      "stem": "hevc-scc-palette-dependent-rext8",
+      "active_palette_blocks": 768,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "4de6964687680928b806d1226422be7a48cbe4ae56495b0d423d2e83a5baf80e",
+      "oracle_sha256": "395576ad72c562666babf3d5c55fb64bcc7267a4075923ed42d8f4554c66b48a"
+    },
+    {
+      "stem": "hevc-scc-palette-420-rext8",
+      "active_palette_blocks": 48,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "10409a31827b20da780404a61960dedf28bfbb6887b9d5377a005a5f47612bf4",
+      "oracle_sha256": "18989b210bb0dcc96f44756519bba4308e3466d2862a9e5455c5720c351cace7"
+    },
+    {
+      "stem": "hevc-scc-palette-420-parallel-rext8",
+      "active_palette_blocks": 144,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "8ec0fd9a4bb39aa705cd65f262d80e154220245ad869278aaf3965036df0ee0f",
+      "oracle_sha256": "0dd7a61f85aa54c3682590e731d018747cd9d4898d8aefb107e89b274165243f"
+    },
+    {
+      "stem": "hevc-scc-palette-422-rext8",
+      "active_palette_blocks": 163,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "c246891fa3db2b1e3348c5ae1ea62e9ec6ddedbf460cfb4ecdcbc5c5086c4aee",
+      "oracle_sha256": "10a1656f9dd92ecfe971bdc07d4b24f575a1741e087abb114e8fab69fc1032c6"
+    },
+    {
+      "stem": "hevc-scc-palette-422-parallel-rext8",
+      "active_palette_blocks": 547,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "fc925dec94985c16616475341b4615a37a8a0c4d013ea457a75d9c0b9d0ef079",
+      "oracle_sha256": "ff3b5f227bf00d44171bcad47ed5d2ff7895ae47a84dd3a8f3c0a5e7d61f2d7b"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "9bc6e91cd7455d86c2d4d59f6181ed7f44c52b6c3cfda51326c503aae3008665",
+      "oracle_sha256": "ee561c148948f13fb80d7830b284e8a62cddb8e077b82d4f9d87403a17f89ecb"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "66703c9b71254b98ce2e225334311580273d6a8dd37465b3a993d0c153828baf",
+      "oracle_sha256": "328ad57a3d8651f8ab20098dc9e2bc27dc36f0b9a12f5209cc445c545af93809"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 344,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 9,
+      "mp4_sha256": "6d0c69bf9647c99fe43a90b8c0aa066c44ffa7dde39f6af98fc80f53acbcbfb1",
+      "oracle_sha256": "e39b0a95de9abf19c518525a1868581d74cd51b71d20254880aa673b6a41ba64"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 1037,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 5,
+      "mp4_sha256": "590c1ef20d5c00402a60717fac0fa4fc6898c96ff9571ca3b31071e6b7b0529c",
+      "oracle_sha256": "66c1042fc6070508445a9d64912b81bb8e252478a51b6bf50d5e7de08a99cd2e"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "05f46ae861211e7be9377e67ef962a766f7470df958212ba9b5683cebedf4ccc",
+      "oracle_sha256": "66acda96faae6f8b9ebceeb9989595604a8ec3d2ecbda256dc5790c4c3135136"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1272,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "6aaa13525bd8bd2b4bb85f7348b47a4d1a385f224c42f53dae94147bc81c08e2",
+      "oracle_sha256": "1b532dace5eaf5b068a5c8d709260116541f482e54519e1be2386dacb5f27476"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-rext8",
+      "active_palette_blocks": 177,
+      "escape_lossy_samples": 158,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 20,
+      "mp4_sha256": "97ff87f75d9cbc14b866d7ecdb4785b558d65f604e2ce891435b0e56ab5a9227",
+      "oracle_sha256": "ea8304c24f051615dac0195ffa1c7fa9ab9e72a7bf6dec216def2173a2594f2a"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-parallel-rext8",
+      "active_palette_blocks": 558,
+      "escape_lossy_samples": 445,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 61,
+      "mp4_sha256": "a2486b8b73f33e20f2ed5b6f5a70a98e2657e320b040c9c5201f3b939efa870a",
+      "oracle_sha256": "41ab7e4f343fa30cefa639121b81bd1aa42f70017634bfee4e20776c1d948bba"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 418,
+      "transpose_escape_samples": 60,
+      "mp4_sha256": "bbd733afa4a8930509db5e640d76ec923d5e637b10d14cf7ad28b87bda85e6a4",
+      "oracle_sha256": "8b6974e2ae2bc09a871c5de74a1b9bf8cf2d42f35c1f4516f5cb8cc23c7db5f8"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1255,
+      "transpose_escape_samples": 181,
+      "mp4_sha256": "c2be722c32b53640a4baea9c825df5ce1d02ba74288d5ba8dd67cde54f28ba6d",
+      "oracle_sha256": "204be855ded97b0561694f177a81e93bbe373564e6dc943defc9134bf12a0465"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-rext8",
+      "active_palette_blocks": 187,
+      "escape_lossy_samples": 115,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 7,
+      "mp4_sha256": "d6d355c3a815893fbf2293d26e518688183c76406e65a3a54c2837e296f2f153",
+      "oracle_sha256": "7ece34a903942feddf50d4a0f0fb70664f31f1ce6ac3a0581e6e188744246616"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-parallel-rext8",
+      "active_palette_blocks": 571,
+      "escape_lossy_samples": 263,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 6,
+      "mp4_sha256": "76e7601ae9560e1ed87d3b999c8ac712d2eaa1cfe02f5efa288680c1c3f78a81",
+      "oracle_sha256": "1666256661bad842ed615f7cb36ad552daf99600a05a367f4bd756422ea382c0"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 425,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "9e601c373cb9dd70b672e51c4ecae1182fadb695883d43fba9d7931d00b2fe24",
+      "oracle_sha256": "a481595e603a0788735c2c53d08cc4e258a5f54672aef56ae9bc97eb78aa96cf"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1271,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "5c36e90485ebc0eb25daf506d77e1a097eaece9ae365ca4e2b7699291fd52138",
+      "oracle_sha256": "173e01b53b89ecab3dc54213b59e7d87c6ed53ed162fd4a9d259a3175f08d7d6"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 70,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 3,
+      "mp4_sha256": "659e6968c967b5ba6004d96d67dd215398ddc28e1c494ff40664ae2e316ecea6",
+      "oracle_sha256": "eb51312123c0daab84cb88ae455aa263c13bb4877c54c84851f04f59f4719a12"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 202,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "93862eee114303d1e0ce6237738ef65d6fc419dfcb5d4291984605e3c5a7fff0",
+      "oracle_sha256": "995bce93c36dd54b38c346966680f8812106651a1e406460cb6f46a32e5a1a3c"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-rext8",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 417,
+      "transpose_escape_samples": 6,
+      "mp4_sha256": "c47bd7106da310c78a07bc73f8fe075c0049f4d72caf66a7c64215cbe2045638",
+      "oracle_sha256": "4d886bc7bc3acf45133a83fa65c6d3c126e2ab6d023dc8778749dc60135d70e8"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-parallel-rext8",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1248,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "b1dadec36fe9c460fc967f29167ca7335221a357c71b183b59946063108d23fa",
+      "oracle_sha256": "8de76d1d4088b7b9b9cf61117300cdfb956b9e5cc61b83bec4213477d02e9e03"
+    },
+    {
+      "stem": "hevc-scc-palette-intra-rext10",
+      "active_palette_blocks": 147,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "47fa0a22add026a9e2c30b70dba7116c37dfe0d91d0961ca40061ac89c9a7352",
+      "oracle_sha256": "65f96f3e2b7a1d7842e00b62ac0bec7b3c98c28f353f24fa0ba09fbb433c1fc1"
+    },
+    {
+      "stem": "hevc-scc-palette-parallel-rext10",
+      "active_palette_blocks": 531,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "360329dd98b30ac267c53ac7569fd051eeab5f6cd98931d6cded27a0762e1004",
+      "oracle_sha256": "20ae819e6f3921e687f53d4a12a817eb2e4e0cf708b6a3ff744bab46bdfa52c4"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "05e7f1a0ee43b55dd204f5dee7311c20eaa10827c651f88677b5f5ebf30d3769",
+      "oracle_sha256": "65f96f3e2b7a1d7842e00b62ac0bec7b3c98c28f353f24fa0ba09fbb433c1fc1"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "9e284e91dffb01f56e0feb7e9ebad8c81d01bbb8b5e4d46397e33feadde1dbe7",
+      "oracle_sha256": "20ae819e6f3921e687f53d4a12a817eb2e4e0cf708b6a3ff744bab46bdfa52c4"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "f6086c051c57e23f86e6bb072bad2bceebaec3bcbec6dcc6a87c1a903465eeed",
+      "oracle_sha256": "65f96f3e2b7a1d7842e00b62ac0bec7b3c98c28f353f24fa0ba09fbb433c1fc1"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "0e6fd879b5cddf50adcfdd4136af8d32ccf5e6db23f26e99cc4ed1abc90cd2de",
+      "oracle_sha256": "20ae819e6f3921e687f53d4a12a817eb2e4e0cf708b6a3ff744bab46bdfa52c4"
+    },
+    {
+      "stem": "hevc-scc-palette-tiles-rext10",
+      "active_palette_blocks": 678,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "12b4b87e9957e8704d7c1bb41fd5d80b6a441e66506f21b57cf947aa14fcbfc4",
+      "oracle_sha256": "0fc28cccc48c9fde3f582ced2d81e95bab29db18908178115c8ff873082db33e"
+    },
+    {
+      "stem": "hevc-scc-palette-dependent-rext10",
+      "active_palette_blocks": 678,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "6c319836eede61a3e00df0a8ea7108b4d4ba1a333143ad3e0986be4023d2fce1",
+      "oracle_sha256": "0fc28cccc48c9fde3f582ced2d81e95bab29db18908178115c8ff873082db33e"
+    },
+    {
+      "stem": "hevc-scc-palette-420-rext10",
+      "active_palette_blocks": 48,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "440c92c28d2af931f5f8e2237aaee4d7dae95d759bded1cb7fba75cecfaf302d",
+      "oracle_sha256": "27b8ceb69d350878d28ebc78a7110a8565f1ca94ba7938fd76273aa53ccea77d"
+    },
+    {
+      "stem": "hevc-scc-palette-420-parallel-rext10",
+      "active_palette_blocks": 144,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "1268aaea9d76f29af6f52edd49741638ce86f5a0330bc0739972447e838757a6",
+      "oracle_sha256": "ba8bfd1534279edd39c516057e21977c5e82ba6f67f7a78f5ba396d66e9c5222"
+    },
+    {
+      "stem": "hevc-scc-palette-422-rext10",
+      "active_palette_blocks": 162,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "463b374cb85cf97eb0c48d251a6ff43e8eb687acc9ed7b7d2994d391451f580c",
+      "oracle_sha256": "d5a171810546c9fd97270041cd77b340467ad312f82e28f4669b2996611979a0"
+    },
+    {
+      "stem": "hevc-scc-palette-422-parallel-rext10",
+      "active_palette_blocks": 546,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "6e34ad5a78ef7ee0ff571db319f584a9d6f20b35dad43881a75b9707e8c44d5b",
+      "oracle_sha256": "2906b4fca0fa9ac8081e85b0860e83da85516dfff77071147cceaff24eb8cfb5"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "73c7f6048235d1db9f71c25fb39f63f63754996a2b0b51763a9a2c55e422cf6c",
+      "oracle_sha256": "5558939a2c71a69a791c563b4c9ddf9333d9c41d2710ca2287ba1db189e7ea20"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "e35b50629dadb3ad83439b821ee4713d85898868029a8100287f863eb724c0d7",
+      "oracle_sha256": "50f07e87f14665d69e38c9c6ef686302b70895ba9d659a6cc2a6a6399d3df532"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 341,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 9,
+      "mp4_sha256": "8243ba3ffe1f717fba8881135001fbeaac2b5df1d7f115f57499384c5ad79886",
+      "oracle_sha256": "ff45fa8f4ee7e71e2c22e1f4ae49169eae8cf1316672e367f7855fd6b8198d96"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 1043,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 5,
+      "mp4_sha256": "9e1ddc6777fc06c54040ed7a5ee7f6eb652509c5ad00e1e5332824e71235fdaf",
+      "oracle_sha256": "43e4324dbb127b242f38e33740229103a6acfdd8ccabd7fbc2cde6449a71bd0f"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "26f74f6b859d4ce471930f5080838055f1f529c1a69b9397e7df25e49a48c279",
+      "oracle_sha256": "d3598dd38ec7d9c6c36a05b5b3f4e9a3d925aa2cfa2b51b86da78b2df0ad8047"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1272,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "afe1f43ba8e34fd54e9e46538a228ba44f68de85b42780ed94fd6c842ee31bab",
+      "oracle_sha256": "d74481b9385679e609ff621141b61f939c8d6f6e473855b47edd00765e9afb79"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-rext10",
+      "active_palette_blocks": 178,
+      "escape_lossy_samples": 268,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 45,
+      "mp4_sha256": "0b7bc92674659a8325a9a1272fa9e3f0886b8136df5e06cb82016c4150cc4810",
+      "oracle_sha256": "65680a3aa7482a5cde22c8836b83a8744d614a62deded7324c63a0b744de13c3"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-parallel-rext10",
+      "active_palette_blocks": 553,
+      "escape_lossy_samples": 771,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 91,
+      "mp4_sha256": "a00b7d9f830d8edab12c8b210f913f74bb4b8e90820e81738d4e938a8fec3e10",
+      "oracle_sha256": "6777dd19de7e8b1a8ccd36ebf5296aeba5079995b100672bb3549d4e1553e0e6"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 418,
+      "transpose_escape_samples": 60,
+      "mp4_sha256": "74d4709ea99cb9103460b52ac2573ad484497e42adb86cffaa2634bc75504a35",
+      "oracle_sha256": "1162e5790be886c300c916e24d2bafe085426ee1b1e3e1687c2d1d54360f2e88"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1255,
+      "transpose_escape_samples": 181,
+      "mp4_sha256": "f527d225c1d9b3dd2096d14a0513b4a00a518238e55ee6729dead7df2e97bfff",
+      "oracle_sha256": "79d46042e447660a56bf6d320fe0f1ab0f4b7db92f7257d617a571f93272f274"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-rext10",
+      "active_palette_blocks": 182,
+      "escape_lossy_samples": 212,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "0130cf79dd037fac33f8dca858bcc8b7d65a63e763e4f24234884f99aa8365d0",
+      "oracle_sha256": "ac1e9d27f4df767d03d565127b3a9644c65ec01b52775830162b1ca84e4b8d5c"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-parallel-rext10",
+      "active_palette_blocks": 564,
+      "escape_lossy_samples": 531,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "4e610180618a252e20e6d8b7759d327fc6cdf3f67eb510080170d26bac557285",
+      "oracle_sha256": "964f87045ce80cd02e5c14c8030fc987b9d17bb158d1033c9d2a988a875d548d"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 425,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "0f576a9149c2be55948b9425f9ba783dd15f1d25aa7f828cbf6c4790107f144f",
+      "oracle_sha256": "f46b98dfb944792b2258edce90d2fdfa073e8f8ac2d644dbecd3ee266eb96bd0"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1271,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "cfc315dd30a909b738f90c16f760788ce6732c5d19bb31fedb8fd127b007113a",
+      "oracle_sha256": "798e8dcfac88be29655fc9d7ea3cf6f7949e0aa7fd5a94f828763ffb472cc3b9"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 224,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 10,
+      "mp4_sha256": "221482e6ad11f4d14b24f72b3a143e11dfdf7a408491e8440d33f225753851d9",
+      "oracle_sha256": "cd229a9d5c96919ea04599b4c408f86f10cfb4da6f30b3acbf8c3e94937e3a6e"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 655,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 9,
+      "mp4_sha256": "7379c326ae6622333686cce6504a3cebf3a3beeae9e31bca798eaeb2a31d6aef",
+      "oracle_sha256": "967cc17063708f9a53144964f45c986514d7a41b09026f049bcbc4d9e7711f0f"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-rext10",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 417,
+      "transpose_escape_samples": 6,
+      "mp4_sha256": "b87a8e97dd08431df31ca3a4ebc54b8ac30c8a95cfebf49cbfc3ed548a31f3c5",
+      "oracle_sha256": "2baa3b612765b32b00028d3f63de07c144ca22b8c3474d6d9b55e689a2088d61"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-parallel-rext10",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1248,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "006283241a141cc4d5228cdfbb0785fa4041cc58a499c4e07377fdf1d53dc9b3",
+      "oracle_sha256": "ab71298072e765080d71eade58ef030627925bb084518aaac00f6486c374c2f8"
+    },
+    {
+      "stem": "hevc-scc-palette-intra-rext12",
+      "active_palette_blocks": 147,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "a9daa725f313a4a4680610fd7e5a8d1b3f6aafa4e0c2f0a04a72bd394aa249a8",
+      "oracle_sha256": "aa53d8a77502102ce8e697277e81f5b073c3449a9e341e19ecd6edbfe8305357"
+    },
+    {
+      "stem": "hevc-scc-palette-parallel-rext12",
+      "active_palette_blocks": 531,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "d62675c16f9f54e3859f273b02dd89dacbdadfb73600f0dfe8d01374b5646da8",
+      "oracle_sha256": "8fd7f41251082e45bcb9eb9ffa53737b1e5e4fd6a7b8dccb32ba3cda42fcf89d"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "06c7e784489682a75a4379a9abd825d9265e1bd6216a70823da21bba642a6c06",
+      "oracle_sha256": "aa53d8a77502102ce8e697277e81f5b073c3449a9e341e19ecd6edbfe8305357"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "85cb55917f0b6fe036e39aa85f046ea6e8937448439a39c2cce60de760df9fd3",
+      "oracle_sha256": "8fd7f41251082e45bcb9eb9ffa53737b1e5e4fd6a7b8dccb32ba3cda42fcf89d"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "367f7fc96f2b1e8c6e18434c5e6d5b1004d990ceed2f00657207067ccdc308c3",
+      "oracle_sha256": "aa53d8a77502102ce8e697277e81f5b073c3449a9e341e19ecd6edbfe8305357"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "28e4ea18ae61cfb98d6e8be762832a92917079f0c3c0d26687ef13e61d4aa88d",
+      "oracle_sha256": "8fd7f41251082e45bcb9eb9ffa53737b1e5e4fd6a7b8dccb32ba3cda42fcf89d"
+    },
+    {
+      "stem": "hevc-scc-palette-420-rext12",
+      "active_palette_blocks": 48,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "3a1d6953a204d7cdacea9debcde9c317c945cc3cb2d4ab33ee4ff10ea298423e",
+      "oracle_sha256": "d40c72e5ff47268a16a4af989bdfa63ba528ca9a7e5e23d73b2ee9bc53857968"
+    },
+    {
+      "stem": "hevc-scc-palette-420-parallel-rext12",
+      "active_palette_blocks": 144,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "5cddf4281cec3964f1143be867fd5b0ded3bfed9fc234f821cfbf949dfd45fc5",
+      "oracle_sha256": "6a200256263f95415fdb7ba5bd1627a5a4393ccb7661e307bde1bf699ae59931"
+    },
+    {
+      "stem": "hevc-scc-palette-422-rext12",
+      "active_palette_blocks": 162,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "bf3480bee6aa00096328001cec90cfb079b9904fa4c00b17c4ec1f6e4bd3dc8a",
+      "oracle_sha256": "56b9a6fc2a1f1116a3fb505e18be2ed2ca6b2d2f1e726c462153b9431837723d"
+    },
+    {
+      "stem": "hevc-scc-palette-422-parallel-rext12",
+      "active_palette_blocks": 546,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "880f257997732c58a034c250d33bb8b57f3b74dbcc036ddcb9e0b98314f6a26b",
+      "oracle_sha256": "d2704391b82bf360693fafe2e42a3e8a0904bb9ed3cddff1c913bfaf77c5da7f"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-rext12",
+      "active_palette_blocks": 191,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "c9650ea3081ff46fdba05905e17f1d8da779edb0449e840ce103e76071444dc1",
+      "oracle_sha256": "4b5cfbcdc53956a2968ae7fdde8f0a02344cbeb74a2d0d4e996c0332f3405a4c"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-parallel-rext12",
+      "active_palette_blocks": 575,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "47cf1bed19821b6681ec40421046c3a802bff2a702234306951d0f515113e796",
+      "oracle_sha256": "deef068d3a352acfed771d2c45cc8dc4e4acf8b7169394c0335eb8576a8c0c63"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-rext12",
+      "active_palette_blocks": 191,
+      "escape_lossy_samples": 340,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 8,
+      "mp4_sha256": "1ae024774cb28dc8970a44288de9395f907cd452d8e9cdc861d19fe86877aced",
+      "oracle_sha256": "970c6ddc4ca00362cc073118a415d63b98d3bf11b305bbec993ce7d08867c24a"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 1042,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 5,
+      "mp4_sha256": "9e9b4cc648774f2dc6d8d6e64c7fc9f9e90ccf9322cc9ada0e3d81b785c7c2f7",
+      "oracle_sha256": "f56f7953db64a319044652aa660c01626443257e60e9c8b55094d7f63f002352"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "cf9f1620b6dba76cb26820f61a8d3c581466dd7df066ed2f49e4733817ed30e0",
+      "oracle_sha256": "a59179ddf19f55a046a7dfd37033ec37939268f9ce04136827dfadc53595a444"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1272,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "eb7b4a02e7fe1e9fc23027392d31981e8bb8e3e7abe622f518754d92ea9a4155",
+      "oracle_sha256": "920d0b723d523ca6086640e5950fa8dd5cf7fd5956025ef7c11f4f878918fb47"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-rext12",
+      "active_palette_blocks": 152,
+      "escape_lossy_samples": 288,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 37,
+      "mp4_sha256": "2587446ca911db27d8fe29cbe21a20a1915094be8526db30530f6a329bee5171",
+      "oracle_sha256": "b09b0a91cfec9a3732e751a8568618b016f38f1b0309b233d68f28f7b6d2d773"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-parallel-rext12",
+      "active_palette_blocks": 537,
+      "escape_lossy_samples": 836,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 78,
+      "mp4_sha256": "ff7a39d5c9c72a8a651337dc09356527b399eade989a376b839791068dda20e9",
+      "oracle_sha256": "6a37879604733c14f6a1d29e6368d9a7386bf9e0194cddde7a0f1a10e29bd350"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 418,
+      "transpose_escape_samples": 60,
+      "mp4_sha256": "3c51bfe09579b8a10365cb49fceee238aec7d4adc21f4328f5d6ccd9ddd46c96",
+      "oracle_sha256": "d8d6b1baa212b8208929cb82388cfaaf84139eeb5ad0b400874c4dc845b48e22"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1255,
+      "transpose_escape_samples": 181,
+      "mp4_sha256": "229ecac4ecc24e2248892a649cbdddc5f6270b4f9439b2c1342ed242489ee647",
+      "oracle_sha256": "bb3561f96314dccbaa33b2bc501280c35a0a3ee915611b8b26da159b48c20e76"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-rext12",
+      "active_palette_blocks": 174,
+      "escape_lossy_samples": 253,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "3a74d0a6aed589602c756257ff1a6d0e6641c03c9f35f92e892821e46b02c3bf",
+      "oracle_sha256": "4c36dfc1cee9843cfe22cea4336f6b2541a429d6723a82ad1a40a94fbe4e2f71"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-parallel-rext12",
+      "active_palette_blocks": 561,
+      "escape_lossy_samples": 571,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 3,
+      "mp4_sha256": "107839aa506469a3add2e62b748d3de9362b2ee3438f63dae58e4948fede1681",
+      "oracle_sha256": "7dd52300cce217ed9d034983f60ac49acffab1f676f71f045ecc5bcb58caed3f"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 425,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "e973abfb6ac68e60fb01b527b7b7752a84e43e9ac1dba816b6f2f4af7e86bafa",
+      "oracle_sha256": "f74662a7767014b09ecf9f638bb909a62234a99f984c6b05263cacd6fc993644"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1271,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "e5f399292b760aa79211ee3a8bf92bb4b1045bd89339c7a516e3d708cbeaea24",
+      "oracle_sha256": "ecc50b3fc86de2093c188c3d10fba49a4bcffc8f0676cc9824c4e8dc59e1f1c0"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 234,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 10,
+      "mp4_sha256": "51322e29d0e7017efaf5a64f636b159507b4308589b78036c745df67a35abf2b",
+      "oracle_sha256": "82c98fbd116d53b2d44fcc777295ed303c0a4c6f8b8ea56bbac9c1c2e3aac4b2"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 708,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 9,
+      "mp4_sha256": "95f05ad2065698cb2817266e09c278958de112ea2aaf6213f3bb68ae1e90b28f",
+      "oracle_sha256": "de1d45f1b7eabef8f90f0576c81d5dd9e977b96bbbae893335b269f4dfc9ee53"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 417,
+      "transpose_escape_samples": 6,
+      "mp4_sha256": "01d2784157ca44fccedd4f011c9572a474d0ed1318d1105fcff54c94f21f0e27",
+      "oracle_sha256": "5337d5afcaa971c6dcdb223d5992a389ff35d23b3d2dec1dc6f4f9c6f82bbf33"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-parallel-rext12",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1248,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "eade9d1fafb0fdb7b73a7b304505f1dac5f56b5bf93dd530cf77f0abb0741b65",
+      "oracle_sha256": "023d2b51d7d792f401bffaf81e9e48d47a54230b613e7d281d425a1ca3c239b9"
+    },
+    {
+      "stem": "hevc-scc-palette-precision-escape-rext12",
+      "active_palette_blocks": 191,
+      "escape_lossy_samples": 341,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 8,
+      "mp4_sha256": "a3d2a93f69a980771896b55e0ea9eb2f9ce91c33ef89861cb57fea18b9faea01",
+      "oracle_sha256": "b81e1b18c9131955e941e7c17a4f11d370db788336d7f304fc89519369cf7ebd"
+    },
+    {
+      "stem": "hevc-scc-palette-precision-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "06fb23dd813767d927c4d8019a5813581998ddc8a36d629240306e27fbae039c",
+      "oracle_sha256": "e74c41604ce21d0544de4882a8d57e88890b61a403381a19c1c63d21856686f2"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-precision-escape-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 236,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 7,
+      "mp4_sha256": "bfa9d930ae0e53169c1a88751fea63a07631bf03df548f5d8527d587914f3f69",
+      "oracle_sha256": "5f074c98f1fd5e92b667b6a1a481d8524f35789d1d1ac2b1f953d588fdb02bd8"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-precision-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "c49de212e3e141b35bcd6de0605cdce0d9b04c2832cb98701ce5a34debc14675",
+      "oracle_sha256": "4927eca491ad155d546e3960cff6c1b9f0fcd0abebf068f5c99ccfcee8df6b79"
+    },
+    {
+      "stem": "hevc-scc-palette-420-precision-escape-rext12",
+      "active_palette_blocks": 152,
+      "escape_lossy_samples": 290,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 38,
+      "mp4_sha256": "d149753ee4c6d5bb96cb8f8088974cbc9c5e012f700857c65ef1f9e47844511f",
+      "oracle_sha256": "193de51e6409beb6fe61990288aa74ee252d1b231a5032da380d130272525328"
+    },
+    {
+      "stem": "hevc-scc-palette-420-precision-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 69,
+      "mp4_sha256": "9c258b78d134ecd5f0a7672e3346a057870d26ac094e1fa2eedab5163ce2b079",
+      "oracle_sha256": "a54067c742d23bc8545a6229374e68670257c6d3d6a31122e54bad398842f818"
+    },
+    {
+      "stem": "hevc-scc-palette-422-precision-escape-rext12",
+      "active_palette_blocks": 174,
+      "escape_lossy_samples": 264,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 5,
+      "mp4_sha256": "3ab129863e9c1ebb6f0348984197a1d681c93a3bd0b0d63eefbedc1fab7c2acc",
+      "oracle_sha256": "e83b47a7dc52d199d50ee8b65c32ae78652e30c9db47b4a1747f56ae76a25f1c"
+    },
+    {
+      "stem": "hevc-scc-palette-422-precision-escape-bypass-rext12",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 432,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "35d1bc51269dd4481297192fd522c50b249fdd5fb8f8b6d2b26434e3cf351b47",
+      "oracle_sha256": "b145a91ba304d9f2724eedf7b3eb71cbe32a5d52dec8297ac7a740df1f12852e"
+    },
+    {
+      "stem": "hevc-scc-palette-intra-rext14",
+      "active_palette_blocks": 147,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "0c947b7e4807c8ef5bb3638f1b1487c58721edc42251f6f06319cfcf6c289f1f",
+      "oracle_sha256": "fe691874d684874f717add0364710a58e28418153580536914e6f9da54b074c3"
+    },
+    {
+      "stem": "hevc-scc-palette-parallel-rext14",
+      "active_palette_blocks": 531,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "0163a66c620ca0249faa164bb050d8dacb951880865e38e450a7af99a6bc6ec6",
+      "oracle_sha256": "b1f6298e98ac4dcfc88d2b85e419e378d22336dffb8750af0550e94edc58d20c"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "acc3a03aab34d271e16af8cb778575f3d39ba64aeb568ee4e29f31dded4ca337",
+      "oracle_sha256": "fe691874d684874f717add0364710a58e28418153580536914e6f9da54b074c3"
+    },
+    {
+      "stem": "hevc-scc-palette-initializers-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "28a1891e8706d416c7ce2a01f4bd40b0ed73fc4e6da77dc2ed71a996c3dce1aa",
+      "oracle_sha256": "b1f6298e98ac4dcfc88d2b85e419e378d22336dffb8750af0550e94edc58d20c"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "e0b3d1f0e6a25709eb2a8b5be01db5db41016c9fec6136e0bf3b923d526a7958",
+      "oracle_sha256": "fe691874d684874f717add0364710a58e28418153580536914e6f9da54b074c3"
+    },
+    {
+      "stem": "hevc-scc-palette-pps-initializers-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "8b686ef4dfa4fab870a93f69484ec5bb7b776abc3a8be4c2722e369ab5cb2708",
+      "oracle_sha256": "b1f6298e98ac4dcfc88d2b85e419e378d22336dffb8750af0550e94edc58d20c"
+    },
+    {
+      "stem": "hevc-scc-palette-420-rext14",
+      "active_palette_blocks": 47,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "f662f5c310207a5cd6348b205e0414afbe5ab235f8bb1696e540a0b9ecd5ebc8",
+      "oracle_sha256": "8f7d07bdcf9419db550888ebc82e08b48c80c21ebd3c7f6208a606396053060d"
+    },
+    {
+      "stem": "hevc-scc-palette-420-parallel-rext14",
+      "active_palette_blocks": 143,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "589d5f84cb285d2388fb8dae10cbdb12ed5b3279986887bb21d2f4f3ae8fba0e",
+      "oracle_sha256": "92837eb2ffa692d5277a1bb70b1055e0ddc31867890f754df0441304598a2642"
+    },
+    {
+      "stem": "hevc-scc-palette-422-rext14",
+      "active_palette_blocks": 162,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "65a9453da2ec9e39a1aa1ff30731510eb426205b8665d5cea5a46983ea6da32c",
+      "oracle_sha256": "d6f2376ec9bb3b935851cadf1827cb4afb553d40c46e1b299fd992ca75761587"
+    },
+    {
+      "stem": "hevc-scc-palette-422-parallel-rext14",
+      "active_palette_blocks": 546,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "c76bf5c305471254a27d08d1e5ae3cfc54889025740d17ba39b03a49cc6d4082",
+      "oracle_sha256": "51f00d65c3b13470940dd93388c960267149b36667b4f317bbd92233d9db9bb6"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-rext14",
+      "active_palette_blocks": 191,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "f4e70986b1b4e764a514e782fbee10e564c0f1f554f905f753710d20524c8f3c",
+      "oracle_sha256": "ef1d900a376e059f61227080e6f0a9d020f63763cca9bac77892a80429e27edc"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-parallel-rext14",
+      "active_palette_blocks": 575,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 0,
+      "mp4_sha256": "a6cd2d617a822c8a28801e525a0d3cb6c2b924f1d7f59ae111168c1aecd76ff5",
+      "oracle_sha256": "444ccfea12cdd7a382c262b71bac7d9d7800264b9e3fc17c01a0cca050ef028e"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-rext14",
+      "active_palette_blocks": 191,
+      "escape_lossy_samples": 340,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 8,
+      "mp4_sha256": "7b014d761fb7a55a036582fe119d8989c5fb540c8e0cca8119d7a104ba49e587",
+      "oracle_sha256": "ae9850cddd3ae1c79ce75cdc554e9ec395a421b56adf48d337c1e6e963069c69"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 1042,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 5,
+      "mp4_sha256": "8a606256720ef9a2744fb3101fe7a62e2e3145464480a65c2dae7f9ec695ff21",
+      "oracle_sha256": "d8ef1ed4de0653302920652c348712d37557db2c0077e7631d8f7963acf742bf"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "c6c15c0cbd76566c9b8e762d21a3542152358cda2e9a2164b4a26ced4b6a933f",
+      "oracle_sha256": "e1a44fc19c90e30970eb248b70d613ecb21a6d08337c733b72176c96150da8bd"
+    },
+    {
+      "stem": "hevc-scc-palette-escape-bypass-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1272,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "e2620aead6f11dd91e55b2efb02072ef54a108529805005fbb47383cf25f301e",
+      "oracle_sha256": "1ab74c355976fb62f37e4a1e176bdb2bb6d67f0dcc704b7039d73bd036f9d6f9"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-rext14",
+      "active_palette_blocks": 156,
+      "escape_lossy_samples": 299,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 49,
+      "mp4_sha256": "a7dd51c2d8024165c91268156b19817670657bcf3fc01ca1985406ff3f58747a",
+      "oracle_sha256": "9166f33466edc41c04b2aaf1a3b1d04304cc1d4f0fcc686e31c2fc596db8b8d4"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-parallel-rext14",
+      "active_palette_blocks": 498,
+      "escape_lossy_samples": 902,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 66,
+      "mp4_sha256": "e1daeb8c2d6e30690e944a8f81a386e75bc99273f774513cc17b8e74d6fc6acf",
+      "oracle_sha256": "e7e6d45eaf27e49ca4a8c829b5a92fb13295fa5271a029aa96b0be702de55afa"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 418,
+      "transpose_escape_samples": 60,
+      "mp4_sha256": "097d13b5cdfc9047c0038db4bb706eb9cd4cd8aad7f8f3509d41378c51742762",
+      "oracle_sha256": "c7826bf0e714d54e0d50c765129c0a56599d1cc736474f293bde10143de001e8"
+    },
+    {
+      "stem": "hevc-scc-palette-420-escape-bypass-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1255,
+      "transpose_escape_samples": 181,
+      "mp4_sha256": "8fda971d2d11a52b055d9eb406822e14fc97160c195164babdbff00051dc44e6",
+      "oracle_sha256": "33109446dd61af25179b4779252ace755b74b5dc0cd32fa0856b6dd13723f0c5"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-rext14",
+      "active_palette_blocks": 171,
+      "escape_lossy_samples": 278,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 2,
+      "mp4_sha256": "7690d2c634574a2654658418561a0aedd1c3004572a8ce65cbc023b003675e2f",
+      "oracle_sha256": "fc5913abee10c5b414f975b1ad06993867d6d43605c29613d3395f8cfb61558a"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-parallel-rext14",
+      "active_palette_blocks": 557,
+      "escape_lossy_samples": 629,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "4bedb89774a9d40b171ff84cc39942edc63d80e6257396131621306a9891d95f",
+      "oracle_sha256": "88240fac20ab5de4c94201ca63c51a8e5ae62b904b67e18775808613bf2d3bc7"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 425,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "93e2dcf4c2d081d75b6292c9a1b1df766f42f63695cf73030f301da1d09fb5f4",
+      "oracle_sha256": "e2fadf81fce686f681da79e38f45b2722e1470eb04e5c900d9025e35a65ff545"
+    },
+    {
+      "stem": "hevc-scc-palette-422-escape-bypass-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1271,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "fef6c28c98bcd52bf381306f8b0740acb50bdeb491ba46d5d482d2c7065fc74f",
+      "oracle_sha256": "e0b062a5ab05a27647f20cc621828a3baa0f59527e88d85471b45211f9ea1ecd"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 240,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 12,
+      "mp4_sha256": "ad701b85392805d2b6fac7302edc5e479c9e767293e604721bbae6b533468572",
+      "oracle_sha256": "949c4fe9bd61686a5032befc56d8c4a1c37b30154777ac1a6a3d8450c1255ed8"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 733,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 9,
+      "mp4_sha256": "15ec0a04c7fd04271ab26505a69579f4deaf8ed9cac1223e1350813e280cc308",
+      "oracle_sha256": "7abc6870cc0191c466bd705a99d9d6d9d4fbfba9ff0bf69240f142e5c795442b"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 417,
+      "transpose_escape_samples": 6,
+      "mp4_sha256": "ac37e6a702e3b705d0345671a7a822b0658795341636d5f7a63ee8f03b8bca5e",
+      "oracle_sha256": "f1563dca8906aa2f8fe36fef1df926554529eb8283ddbdde5a302f73ef349480"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-escape-bypass-parallel-rext14",
+      "active_palette_blocks": 576,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 1248,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "16b903cb1322241b9f148ffa569d64680608824f125cc0e9c43b9c9ab39e7ac2",
+      "oracle_sha256": "4164a9a986ead3092578494a565aee6ef315c02acd28f67d3049a94f7a349ab0"
+    },
+    {
+      "stem": "hevc-scc-palette-precision-escape-rext14",
+      "active_palette_blocks": 191,
+      "escape_lossy_samples": 347,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 12,
+      "mp4_sha256": "f7ed97c2f2c2c9dd792ec49763a19886f7c5867d039ac15a8f3c8b6fb3b99468",
+      "oracle_sha256": "0362c94024a3d29c881eb7564af5d5c5a060b7534f495d9a510698cef264d676"
+    },
+    {
+      "stem": "hevc-scc-palette-precision-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "b0ab9d7b76ef72046f9c0bde2aed01c16ad39ba2de5f74f09426e57c73cecdde",
+      "oracle_sha256": "bfa7ac52a454722652b29ccdf11bcfdece9002434fc066e3bb9195c8911996dd"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-precision-escape-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 241,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 12,
+      "mp4_sha256": "8e23c38f9c1ada16df9225f219fd7f900d5888b1324c3d1f97bf3865d1008d38",
+      "oracle_sha256": "a224fbd2c7c61f24114d212ab0f054348e92361e4e52fe28ae968d63d2cacf9a"
+    },
+    {
+      "stem": "hevc-scc-palette-mono-precision-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 4,
+      "mp4_sha256": "f19b7708f20c5f69a24ef1c0250e2c9e3e3849d6e8a3772dfa538e03e04fe455",
+      "oracle_sha256": "e1771bb2c9c745196f24d7b9078566ed7e8d63ff6ab2d0ec5aa8e78a06ec81e4"
+    },
+    {
+      "stem": "hevc-scc-palette-420-precision-escape-rext14",
+      "active_palette_blocks": 156,
+      "escape_lossy_samples": 300,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 48,
+      "mp4_sha256": "608ed24b5c03c1d69ca1911a5e9cc173412e15c760ee3dfe6a2c19a988d7b21a",
+      "oracle_sha256": "d56ec86b2aa792eb600b517a362540c5deb7aa5e650036910853dac2975c0a59"
+    },
+    {
+      "stem": "hevc-scc-palette-420-precision-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 423,
+      "transpose_escape_samples": 69,
+      "mp4_sha256": "e25d173378d2072955663e65b6ca37a6fbbc966acc0fdf1a48fc079a0557eea5",
+      "oracle_sha256": "095d3ba65ab0c73cda79d32749f3a636a9477a9ae771eee2b74ab18c26646a6c"
+    },
+    {
+      "stem": "hevc-scc-palette-422-precision-escape-rext14",
+      "active_palette_blocks": 171,
+      "escape_lossy_samples": 279,
+      "escape_bypass_samples": 0,
+      "transpose_escape_samples": 2,
+      "mp4_sha256": "a65962e54503e35fe266aabcde67cf5862d046fa6a0f3809fe5c5f200a940152",
+      "oracle_sha256": "72f8826aae94446db37edb7d251714ea05dc03ac64f683b00731029453f50707"
+    },
+    {
+      "stem": "hevc-scc-palette-422-precision-escape-bypass-rext14",
+      "active_palette_blocks": 192,
+      "escape_lossy_samples": 0,
+      "escape_bypass_samples": 432,
+      "transpose_escape_samples": 1,
+      "mp4_sha256": "d0f70f777399687c18c7d65660447052815081e734ad08ec6eeeefd7f2dbdff7",
+      "oracle_sha256": "775ebdd7ad372a8d29316b092a398863407508aabc3ea20d63e152d8d30e45c6"
+    }
+  ]
+}

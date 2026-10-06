@@ -35,6 +35,37 @@ pub struct ReferencePlane<'a> {
     depth: u8,
 }
 impl<'a> ReferencePlane<'a> {
+    /// Borrow one parity from a validated complete frame, without copying.
+    /// Interpolation and edge extension operate in field sample coordinates.
+    pub fn field_view(&self, bottom: bool) -> Result<Self> {
+        if self.height % 2 != 0 {
+            return Err(invalid("AVC reference field requires even frame height"));
+        }
+        let stride = self
+            .stride
+            .checked_mul(2)
+            .ok_or_else(|| invalid("AVC reference field stride overflow"))?;
+        let offset = if bottom { self.stride } else { 0 };
+        let samples = self
+            .samples
+            .get(offset..)
+            .ok_or_else(|| invalid("truncated AVC reference field"))?;
+        let height = self.height / 2;
+        let needed = (height - 1)
+            .checked_mul(stride)
+            .and_then(|n| n.checked_add(self.width))
+            .ok_or_else(|| invalid("AVC reference field size overflow"))?;
+        if samples.len() < needed {
+            return Err(invalid("truncated AVC reference field"));
+        }
+        Ok(Self {
+            samples,
+            width: self.width,
+            height,
+            stride,
+            depth: self.depth,
+        })
+    }
     pub fn new(
         samples: &'a [u16],
         width: usize,

@@ -1,0 +1,48 @@
+{
+  "reference": "HM-16.20+SCM-8.8",
+  "revision": "cae35dba3dcf8e1b6121a70b397000af36301045",
+  "encoder_sha256": "fe5557400655edb464461a14d74d8c75d0180ed011939bc160b5ad5226b0079c",
+  "decoder_sha256": "877b2303f9e97dcdeceb1813d4d01b8fd0c6543267f9c2af56bb520f3e55f71b",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-integer-forced-rext8",
+      "mp4_sha256": "edcd1316a2934d653a2a21fa41135fe496783a63f2a8d38f8b60607ee93bd378",
+      "oracle_sha256": "6bdc995774367a5f0558a4d06928614cb4a48fd337257f61d097ef42807992d0"
+    },
+    {
+      "stem": "hevc-scc-integer-forced-parallel-rext8",
+      "mp4_sha256": "57421c5f89b58fb33d2309b08cd3eeacf6d2cbe959b131256fa14fde4256ccf4",
+      "oracle_sha256": "866a5cfb6ee61f9923f3e5e96e69bdf3aaabd0cc5581d5ab8e8992db09fa70f9"
+    },
+    {
+      "stem": "hevc-scc-integer-adaptive-integer-rext8",
+      "mp4_sha256": "68aeb46af2006a9bd17f6f240698bec017f4bdccd703413cbd620496d7d2d931",
+      "oracle_sha256": "6bdc995774367a5f0558a4d06928614cb4a48fd337257f61d097ef42807992d0"
+    },
+    {
+      "stem": "hevc-scc-integer-adaptive-quarter-rext8",
+      "mp4_sha256": "7b2c900cc0947fc954846fdf3a0162d22f75f86dabf1b23b6204580bf2497ae3",
+      "oracle_sha256": "5b00f2cce527a239d38b51d6575ad6cc08cfb6ebd64b39670825efbfecb11de5"
+    },
+    {
+      "stem": "hevc-scc-integer-forced-rext10",
+      "mp4_sha256": "a63a3f6db8fa5d872f689fc873a030827f05d68d69dbc68114fe841ebf32dc25",
+      "oracle_sha256": "58213c794c7fc2b81d1583818d144c5a9664bf6ff314f20b036e8a68a6864fe4"
+    },
+    {
+      "stem": "hevc-scc-integer-forced-parallel-rext10",
+      "mp4_sha256": "711ed0424f6a9d2729fd84356cba55478c14fdfb38b93b742e2dd87ed27b3080",
+      "oracle_sha256": "195d523553983293fd26426e1f410cce2b0e3b0a75355b40760d2161d2a80ee8"
+    },
+    {
+      "stem": "hevc-scc-integer-adaptive-integer-rext10",
+      "mp4_sha256": "ce1032894df91c95b7f5c49b3bd66220460eef3a5e62477078d109defa8daaa5",
+      "oracle_sha256": "58213c794c7fc2b81d1583818d144c5a9664bf6ff314f20b036e8a68a6864fe4"
+    },
+    {
+      "stem": "hevc-scc-integer-adaptive-quarter-rext10",
+      "mp4_sha256": "4c8e4d7f16a4088569a802e29c92469b7d8c12d182001a6c2d2ce3b039535895",
+      "oracle_sha256": "d8320f12f1ce966871f3a8f71e919afc3d3090876d78fc20e7dcfa7d5ec5cd7f"
+    }
+  ]
+}

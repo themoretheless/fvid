@@ -43,7 +43,7 @@ impl Sao {
     /// PCM/transquant filter exclusions must be handled by the picture caller.
     #[inline]
     pub fn apply(self, sample: u16, neighbours: Option<[u16; 2]>, depth: u8) -> Result<u16> {
-        if !(8..=12).contains(&depth) {
+        if !(8..=16).contains(&depth) {
             return Err(invalid("unsupported SAO bit depth"));
         }
         let max = (1i32 << depth) - 1;
@@ -118,7 +118,7 @@ pub fn read_ctu_with_scale(
     if scales.iter().zip(depths).any(|(&scale, depth)| scale > depth.saturating_sub(10)) {
         return Err(invalid("invalid HEVC SAO offset scale"));
     }
-    if depths.iter().any(|d| !(8..=12).contains(d)) {
+    if depths.iter().any(|d| !(8..=16).contains(d)) {
         return Err(invalid("unsupported HEVC SAO bit depth"));
     }
     if enabled == [false, false] {

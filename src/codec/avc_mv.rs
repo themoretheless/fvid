@@ -26,6 +26,40 @@ impl Neighbour {
         }
     }
 }
+/// Convert a spatial neighbour to the current macroblock's frame/field units
+/// (H.264 8.4.1.3.2). Field references index twice as many entries. Division of
+/// negative vertical vectors truncates toward zero, as specified for `/`.
+/// Conversion rejects values outside this decoder's signed-16-bit storage.
+pub fn normalize_neighbour(
+    value: Neighbour,
+    current_field: bool,
+    neighbour_field: bool,
+) -> Result<Neighbour> {
+    let Neighbour::Inter {
+        mut reference,
+        mut vector,
+    } = value
+    else {
+        return Ok(value);
+    };
+    if reference > if neighbour_field { 63 } else { 31 } {
+        return Err(invalid("motion reference exceeds frame/field list range"));
+    }
+    match (current_field, neighbour_field) {
+        (true, false) => {
+            vector[1] /= 2;
+            reference *= 2;
+        }
+        (false, true) => {
+            vector[1] = vector[1]
+                .checked_mul(2)
+                .ok_or_else(|| invalid("normalized motion vector exceeds signed 16-bit range"))?;
+            reference /= 2;
+        }
+        _ => {}
+    }
+    Ok(Neighbour::Inter { reference, vector })
+}
 #[derive(Clone, Copy, Debug)]
 pub struct Neighbours {
     pub left: Neighbour,
@@ -42,9 +76,14 @@ pub enum Partition {
     Right8x16,
 }
 fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+    candidates_with_limit(n, 31)
+}
+fn candidates_with_limit(n: Neighbours, maximum_reference: u8) -> Result<[Neighbour; 3]> {
     for value in [n.left, n.top, n.top_right, n.top_left] {
-        if value.reference().is_some_and(|r| r > 31) {
-            return Err(invalid("motion reference index exceeds 31"));
+        if value.reference().is_some_and(|r| r > maximum_reference) {
+            return Err(invalid(
+                "motion reference index exceeds predictor list range",
+            ));
         }
     }
     Ok([
@@ -61,10 +100,36 @@ fn median(a: i16, b: i16, c: i16) -> i16 {
     a.max(b).min(a.min(b).max(c))
 }
 pub fn predict(reference: u8, partition: Partition, neighbours: Neighbours) -> Result<[i16; 2]> {
-    if reference > 31 {
-        return Err(invalid("motion reference index exceeds 31"));
+    predict_with_limit(reference, partition, neighbours, 31)
+}
+/// Predict from neighbours already normalized to the current block's units.
+/// Field blocks may index 0..63, while frame blocks retain 0..31. Reference
+/// list construction and neighbour frame/field conversion are separate steps.
+pub fn predict_for_field(
+    reference: u8,
+    partition: Partition,
+    neighbours: Neighbours,
+    field: bool,
+) -> Result<[i16; 2]> {
+    predict_with_limit(
+        reference,
+        partition,
+        neighbours,
+        if field { 63 } else { 31 },
+    )
+}
+fn predict_with_limit(
+    reference: u8,
+    partition: Partition,
+    neighbours: Neighbours,
+    maximum_reference: u8,
+) -> Result<[i16; 2]> {
+    if reference > maximum_reference {
+        return Err(invalid(
+            "motion reference index exceeds predictor list range",
+        ));
     }
-    let [a, mut b, mut c] = candidates(neighbours)?;
+    let [a, mut b, mut c] = candidates_with_limit(neighbours, maximum_reference)?;
     let preferred = match partition {
         Partition::Top16x8 => Some(b),
         Partition::Bottom16x8 | Partition::Left8x16 => Some(a),
@@ -86,7 +151,11 @@ pub fn predict(reference: u8, partition: Partition, neighbours: Neighbours) -> R
     Ok([median(a[0], b[0], c[0]), median(a[1], b[1], c[1])])
 }
 pub fn p_skip(neighbours: Neighbours) -> Result<[i16; 2]> {
-    candidates(neighbours)?;
+    p_skip_for_field(neighbours, false)
+}
+/// P-skip from neighbours normalized into the current frame/field units.
+pub fn p_skip_for_field(neighbours: Neighbours, field: bool) -> Result<[i16; 2]> {
+    candidates_with_limit(neighbours, if field { 63 } else { 31 })?;
     for value in [neighbours.left, neighbours.top] {
         if value == Neighbour::Unavailable
             || value
@@ -98,7 +167,7 @@ pub fn p_skip(neighbours: Neighbours) -> Result<[i16; 2]> {
             return Ok([0; 2]);
         }
     }
-    predict(0, Partition::Median, neighbours)
+    predict_for_field(0, Partition::Median, neighbours, field)
 }
 /// Spatial direct prediction for one progressive co-located subpartition.
 /// Neighbours must be taken at macroblock partition 0 for both lists, even when
@@ -203,6 +272,149 @@ pub fn temporal_direct(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn field_skip_accepts_expanded_indices_and_checks_zero_after_normalization() {
+        let mut n = Neighbours {
+            left: Neighbour::Inter {
+                reference: 63,
+                vector: [7, -3],
+            },
+            top: Neighbour::Inter {
+                reference: 0,
+                vector: [8, 4],
+            },
+            top_right: Neighbour::NoPrediction,
+            top_left: Neighbour::Unavailable,
+        };
+        assert_eq!(p_skip_for_field(n, true).unwrap(), [8, 4]);
+        assert!(p_skip(n).is_err());
+        n.left = normalize_neighbour(
+            Neighbour::Inter {
+                reference: 0,
+                vector: [0, 1],
+            },
+            true,
+            false,
+        )
+        .unwrap();
+        assert_eq!(p_skip_for_field(n, true).unwrap(), [0; 2]);
+        n.left = Neighbour::Unavailable;
+        assert_eq!(p_skip_for_field(n, true).unwrap(), [0; 2]);
+        n.top = Neighbour::Inter {
+            reference: 64,
+            vector: [0; 2],
+        };
+        assert!(p_skip_for_field(n, true).is_err());
+    }
+    #[test]
+    fn field_predictor_uses_normalized_references_and_partition_preferences() {
+        let left = normalize_neighbour(
+            Neighbour::Inter {
+                reference: 31,
+                vector: [7, -7],
+            },
+            true,
+            false,
+        )
+        .unwrap();
+        let neighbours = Neighbours {
+            left,
+            top: Neighbour::Inter {
+                reference: 63,
+                vector: [11, 4],
+            },
+            top_right: Neighbour::Unavailable,
+            top_left: Neighbour::Inter {
+                reference: 63,
+                vector: [15, 6],
+            },
+        };
+        assert_eq!(
+            predict_for_field(62, Partition::Median, neighbours, true).unwrap(),
+            [7, -3]
+        );
+        assert_eq!(
+            predict_for_field(63, Partition::Top16x8, neighbours, true).unwrap(),
+            [11, 4]
+        );
+        assert_eq!(
+            predict_for_field(63, Partition::Right8x16, neighbours, true).unwrap(),
+            [15, 6]
+        );
+        assert_eq!(
+            predict_for_field(63, Partition::Median, neighbours, true).unwrap(),
+            [11, 4]
+        );
+        assert!(predict(62, Partition::Median, neighbours).is_err());
+        assert!(predict_for_field(62, Partition::Median, neighbours, false).is_err());
+        assert!(predict_for_field(64, Partition::Median, neighbours, true).is_err());
+        let invalid = Neighbours {
+            top: Neighbour::Inter {
+                reference: 64,
+                vector: [0; 2],
+            },
+            ..neighbours
+        };
+        assert!(predict_for_field(62, Partition::Median, invalid, true).is_err());
+        let ordinary = Neighbours {
+            left: Neighbour::Inter {
+                reference: 0,
+                vector: [7, -3],
+            },
+            top: Neighbour::Unavailable,
+            top_right: Neighbour::Unavailable,
+            top_left: Neighbour::Unavailable,
+        };
+        assert_eq!(
+            predict_for_field(0, Partition::Median, ordinary, false).unwrap(),
+            predict(0, Partition::Median, ordinary).unwrap()
+        );
+    }
+    #[test]
+    fn mixed_frame_field_normalization_keeps_sign_and_reference_units() {
+        let inter = |reference, y| Neighbour::Inter {
+            reference,
+            vector: [17, y],
+        };
+        for (input, expected) in [(-7, -3), (-3, -1), (-1, 0), (0, 0), (1, 0), (3, 1), (7, 3)] {
+            assert_eq!(
+                normalize_neighbour(inter(31, input), true, false).unwrap(),
+                inter(62, expected)
+            );
+        }
+        for reference in 0..64 {
+            assert_eq!(
+                normalize_neighbour(inter(reference, -7), false, true).unwrap(),
+                inter(reference / 2, -14)
+            );
+            assert_eq!(
+                normalize_neighbour(inter(reference, -7), true, true).unwrap(),
+                inter(reference, -7)
+            );
+        }
+        for value in [Neighbour::Unavailable, Neighbour::NoPrediction] {
+            for current in [false, true] {
+                for neighbour in [false, true] {
+                    assert_eq!(
+                        normalize_neighbour(value, current, neighbour).unwrap(),
+                        value
+                    );
+                }
+            }
+        }
+        assert_eq!(
+            normalize_neighbour(inter(0, -16384), false, true).unwrap(),
+            inter(0, i16::MIN)
+        );
+        assert_eq!(
+            normalize_neighbour(inter(0, 16383), false, true).unwrap(),
+            inter(0, 32766)
+        );
+        assert!(normalize_neighbour(inter(0, 16384), false, true).is_err());
+        assert!(normalize_neighbour(inter(0, -16385), false, true).is_err());
+        assert!(normalize_neighbour(inter(32, 0), true, false).is_err());
+        assert!(normalize_neighbour(inter(64, 0), false, true).is_err());
+    }
     fn inter(reference: u8, vector: [i16; 2]) -> Neighbour {
         Neighbour::Inter { reference, vector }
     }

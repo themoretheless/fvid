@@ -1,0 +1,99 @@
+{
+  "reference": "HM-16.20+SCM-8.8",
+  "revision": "cae35dba3dcf8e1b6121a70b397000af36301045",
+  "encoder_sha256": "2a2a82fe8fe1fd2dcdc908be7852a05c0efcf99a3e890bce36196e9932ac3cf0",
+  "decoder_sha256": "877b2303f9e97dcdeceb1813d4d01b8fd0c6543267f9c2af56bb520f3e55f71b",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-act-depth-y8-c10",
+      "depths": [
+        8,
+        10
+      ],
+      "mp4_sha256": "273d24460ff0a86824409ea6534318e2e45d3ae1a3a254c86fa4cec4f2c2d66f",
+      "oracle_sha256": "05df0337f4f27ce7abf11f16957821e98fcda76ff85be494fab4540a14f7e6d1"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y8-c10-parallel",
+      "depths": [
+        8,
+        10
+      ],
+      "mp4_sha256": "65ea92a3acb93059679b04d21843b0ec92a1103d478362f23e5a219bfc6c94b0",
+      "oracle_sha256": "208dd11af6640cb36e2d813e1f305903b593e5ab52d03bcf648d99687a6447ab"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y10-c8",
+      "depths": [
+        10,
+        8
+      ],
+      "mp4_sha256": "856c53a313c0c94d6bfe0fead163ac448a48b84212ff4b146613fd5ca79a2b02",
+      "oracle_sha256": "1f1c1d3299e9cb77c69fd06238a9667256c9dcfe6c3ffb75ada91e42c370487f"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y10-c8-parallel",
+      "depths": [
+        10,
+        8
+      ],
+      "mp4_sha256": "15653cc3a94b1be2c41e4be6aee08b9fafd41e5eceede0faf20ed9a85e9572b1",
+      "oracle_sha256": "5d70255af09bdcef7933832ecafaa436652101af5d80cb7ab1f9cb478fc76bc2"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y14-c14",
+      "depths": [
+        14,
+        14
+      ],
+      "mp4_sha256": "d1e5f0c64cc8c7befe6933b9eaa959bfaa81a51101af556260f3749dad99b323",
+      "oracle_sha256": "8eb98378322e12e0f43bf5b019c3af9d0878e8e92846079dc29d6b41bde53289"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y14-c14-parallel",
+      "depths": [
+        14,
+        14
+      ],
+      "mp4_sha256": "29609e16f18938842849b9c9d2940df6d68acdc0e3fc895fddf27bb49a70ff66",
+      "oracle_sha256": "6ef6d10ca63137ef6d6b0b4d68393718435724fb1a72a363ba5aaa20adbd67ee"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y14-c10",
+      "depths": [
+        14,
+        10
+      ],
+      "mp4_sha256": "19bd078c22e8427683e016afa87a73e74b41be62ec884d7a2f160e8d56bdccf9",
+      "oracle_sha256": "bcda932ec5db7066901959c61b42bc86d88d09c7dfb5099622e7126e72a1f30a"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y14-c10-parallel",
+      "depths": [
+        14,
+        10
+      ],
+      "mp4_sha256": "605701fc467d11f10a193a1638b0faf5289f010b9ea65a57d7ee54433c5f12ed",
+      "oracle_sha256": "7acc0ca6aab3ecf719bc8a5c60a53634ef694a3c6a6be38ec5906730bdac042c"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y10-c14",
+      "depths": [
+        10,
+        14
+      ],
+      "mp4_sha256": "500419a5a8b49f369bfa736e38bc20c461411d9a84791d9d3aeb11f21be0f760",
+      "oracle_sha256": "f8a50ad7997218e80e7f6a937da1f6f276b7fdc8453a5d34db8abcb80ef3055c"
+    },
+    {
+      "stem": "hevc-scc-act-depth-y10-c14-parallel",
+      "depths": [
+        10,
+        14
+      ],
+      "mp4_sha256": "7e7077954a9cdc8ac2eff96a1e722b194eba06f061a8b1eee6150e9b3ce455b2",
+      "oracle_sha256": "c70f0e978e262833283b852260fb3fd4f36c352377d30621b758331526e33711"
+    }
+  ],
+  "encoder_configuration_patch_sha256": "bfa92c8e491cb7c1d9b332ef42b34194e7fdf0f928bd2cd90bf1a00b8f863d0b"
+}

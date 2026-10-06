@@ -9,6 +9,15 @@ pub struct Plane {
     ready: Vec<bool>,
 }
 impl Plane {
+    pub(crate) fn absent(depth: u8) -> Self {
+        Self {width:0,height:0,depth,samples:Vec::new(),ready:Vec::new()}
+    }
+    pub(crate) fn ready_rect(&self, rect: [usize;4]) -> bool {
+        let [x,y,w,h]=rect;
+        if w==0 || h==0 || x.checked_add(w).is_none_or(|n| n>self.width)
+            || y.checked_add(h).is_none_or(|n| n>self.height) { return false; }
+        (y..y+h).all(|row| self.ready[row*self.width+x..row*self.width+x+w].iter().all(|&r| r))
+    }
     pub fn dimensions(&self) -> [usize; 2] { [self.width, self.height] }
 
     /// Apply single-slice, single-tile SAO after reconstruction/deblocking.
@@ -29,15 +38,24 @@ impl Plane {
         &mut self,
         log2_ctu: u8,
         parameters: &[super::hevc_sao::Sao],
+        available: impl FnMut([usize; 2], [usize; 2]) -> bool,
+        excluded: impl FnMut([usize; 2]) -> bool,
+    ) -> Result<()> {
+        self.apply_sao_rectangular([log2_ctu; 2], parameters, available, excluded)
+    }
+    pub(crate) fn apply_sao_rectangular(
+        &mut self,
+        log2_ctu: [u8; 2],
+        parameters: &[super::hevc_sao::Sao],
         mut available: impl FnMut([usize; 2], [usize; 2]) -> bool,
         mut excluded: impl FnMut([usize; 2]) -> bool,
     ) -> Result<()> {
-        if !(3..=6).contains(&log2_ctu) || !self.complete() {
+        if log2_ctu.iter().any(|v| !(3..=6).contains(v)) || !self.complete() {
             return Err(invalid("invalid SAO plane state"));
         }
-        let side = 1usize << log2_ctu;
-        let columns = self.width.div_ceil(side);
-        let rows = self.height.div_ceil(side);
+        let [ctu_width, ctu_height] = log2_ctu.map(|v| 1usize << v);
+        let columns = self.width.div_ceil(ctu_width);
+        let rows = self.height.div_ceil(ctu_height);
         if columns.checked_mul(rows) != Some(parameters.len()) {
             return Err(invalid("invalid SAO parameter grid"));
         }
@@ -49,10 +67,10 @@ impl Plane {
         let mut output = self.samples.clone();
         let max = (1i32 << self.depth) - 1;
         for (index, &sao) in parameters.iter().enumerate() {
-            let x0 = (index % columns) * side;
-            let y0 = (index / columns) * side;
-            let x1 = (x0 + side).min(self.width);
-            let y1 = (y0 + side).min(self.height);
+            let x0 = (index % columns) * ctu_width;
+            let y0 = (index / columns) * ctu_height;
+            let x1 = (x0 + ctu_width).min(self.width);
+            let y1 = (y0 + ctu_height).min(self.height);
             match sao {
                 Sao::Off => {}
                 Sao::Band { position, offsets } => {
@@ -120,7 +138,7 @@ impl Plane {
             .checked_mul(height)
             .filter(|&n| n > 0 && n <= budget / 3)
             .ok_or_else(|| invalid("HEVC plane exceeds memory budget"))?;
-        if !(8..=12).contains(&depth) {
+        if !(8..=16).contains(&depth) {
             return Err(invalid("unsupported HEVC plane depth"));
         }
         Ok(Self {
@@ -325,6 +343,44 @@ impl Plane {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn rectangular_sao_matches_scalar_for_partial_ctus_and_boundaries() {
+        use super::super::hevc_sao::Sao;
+        for depth in [8,10,12] {
+            let (width,height) = (19usize,35usize);
+            let samples: Vec<u16> = (0..width*height)
+                .map(|i| ((i*73 + i/width*31) & ((1<<depth)-1)) as u16).collect();
+            for class in 0..5 {
+                let parameters: Vec<_> = (0..9).map(|index| if class == 4 {
+                    Sao::Band { position: (index * 3) as u8, offsets: [2,-2,1,-1] }
+                } else { Sao::Edge { class, offsets: [3,1,-1,-3] } }).collect();
+                let mut p = Plane::new(width,height,depth,width*height*3).unwrap();
+                p.samples.clone_from(&samples);
+                p.ready.fill(true);
+                let mut expected = samples.clone();
+                for y in 0..height { for x in 0..width {
+                    if x == 4 { continue; }
+                    let mode = parameters[(y/16)*3 + x/8];
+                    let neighbours = if let Some([a,b]) = mode.neighbours().unwrap() {
+                        let point = |v:[i32;2]| -> Option<[usize;2]> {
+                            let nx = x.checked_add_signed(v[0] as isize)?;
+                            let ny = y.checked_add_signed(v[1] as isize)?;
+                            (nx < width && ny < height && ny/16 == y/16).then_some([nx,ny])
+                        };
+                        let (Some(a),Some(b)) = (point(a),point(b)) else { continue; };
+                        Some([samples[a[1]*width+a[0]],samples[b[1]*width+b[0]]])
+                    } else { None };
+                    expected[y*width+x] = mode.apply(samples[y*width+x],neighbours,depth).unwrap();
+                }}
+                p.apply_sao_rectangular([3,4], &parameters,
+                    |a,b| a[1]/16 == b[1]/16, |p| p[0] == 4).unwrap();
+                assert_eq!(p.samples,expected);
+                let saved = p.samples.clone();
+                assert!(p.apply_sao_rectangular([3,4], &parameters[..8], |_,_|true, |_|false).is_err());
+                assert_eq!(p.samples,saved);
+            }
+        }
+    }
     #[test]
     fn sao_preserves_protected_samples_but_uses_them_as_neighbours() {
         use super::super::hevc_sao::Sao;

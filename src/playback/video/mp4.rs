@@ -28,6 +28,7 @@ impl MediaTime {
 }
 
 pub struct VideoFrame {
+    pub packed: Option<Arc<crate::playback_native::PackedPlanar>>,
     /// Decoded samples. For hardware-decoded frames the planes are empty and
     /// `planes8` carries the picture; the geometry fields are still valid.
     pub picture: Arc<IntraPicture>,
@@ -93,6 +94,7 @@ pub struct Mp4VideoReader<R> {
     failed: bool,
     future_pts: Vec<i64>,
     pending: Vec<VideoFrame>,
+    decoded_planar: Option<Arc<crate::playback_native::PackedPlanar>>,
     pending_bytes: usize,
     queue_budget: usize,
 }
@@ -220,6 +222,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             failed: false,
             future_pts,
             pending: Vec::new(),
+            decoded_planar: None,
             pending_bytes: 0,
             queue_budget,
         };
@@ -409,6 +412,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             Option<Arc<crate::playback_native::Planar8>>,
         )>,
     > {
+        self.decoded_planar = None;
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         if let Some(hardware) = &mut self.hardware {
             if hardware.shared {
@@ -450,6 +454,11 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 let colour = crate::playback_native::AvcColour::from_hevc_vui(
                     d.parameters().0.vui.as_ref(),
                 )?;
+                let explicit_geometry = d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
+                if explicit_geometry {
+                    self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture(
+                        p,d.parameters().0.chroma_format,colour)?));
+                }
                 let coded_width = p.dimensions[0] as usize;
                 let coded_height = p.dimensions[1] as usize;
                 let crop = p.crop.map(|v| v as usize);
@@ -459,20 +468,18 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     crop,
                     bit_depth: p.depth[0],
                     y: p.planes[0].samples().to_vec(),
-                    cb: p.planes[1].samples().to_vec(),
-                    cr: p.planes[2].samples().to_vec(),
+                    cb: if d.parameters().0.chroma_format == 0 {
+                        vec![1 << (p.depth[0]-1); coded_width/2 * (coded_height/2)]
+                    } else { p.planes[1].samples().to_vec() },
+                    cr: if d.parameters().0.chroma_format == 0 {
+                        vec![1 << (p.depth[0]-1); coded_width/2 * (coded_height/2)]
+                    } else { p.planes[2].samples().to_vec() },
                 };
-                let planes = crate::playback_native::coded_planes_to_planar8(
-                    &picture.y,
-                    &picture.cb,
-                    &picture.cr,
-                    coded_width,
-                    coded_height,
-                    crop,
-                    p.depth[0],
-                    colour,
-                );
-                Ok(Some((Arc::new(picture), Some(Arc::new(planes)))))
+                let planes = if explicit_geometry { None } else {
+                    Some(Arc::new(crate::playback_native::coded_planes_to_planar8(
+                        &picture.y,&picture.cb,&picture.cr,coded_width,coded_height,crop,p.depth[0],colour)))
+                };
+                Ok(Some((Arc::new(picture), planes)))
             }
             Decoder::Vp9(d) => {
                 for frame in crate::codec::vp9::frames(&self.packet)? {
@@ -652,6 +659,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             self.sample_index += 1;
             if let Some((picture, planes8)) = picture {
                 let mut frame = VideoFrame {
+                    packed: self.decoded_planar.take(),
                     picture,
                     planes8,
                     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -919,6 +927,7 @@ fn frame_storage(frame: &VideoFrame) -> Result<usize> {
         .and_then(|n| n.checked_add(frame.picture.cr.len()))
         .and_then(|n| n.checked_mul(2))
         .and_then(|n| n.checked_add(planes8))
+        .and_then(|n| n.checked_add(frame.packed.as_ref().map_or(0,|p| p.frame.data.len())))
         .and_then(|n| n.checked_add(surface_bytes))
         .and_then(|n| n.checked_add(std::mem::size_of::<VideoFrame>()))
         .ok_or_else(|| invalid("MP4 output frame size overflow"))

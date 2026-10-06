@@ -1,0 +1,19 @@
+--- a/source/Lib/TLibDecoder/TDecSbac.cpp
++++ b/source/Lib/TLibDecoder/TDecSbac.cpp
+@@ -2128,6 +2128,7 @@
+ Void TDecSbac::parsePaletteModeSyntax(TComDataCU *pcCU, UInt absPartIdx, UInt depth, UInt numComp, Bool& bCodeDQP, Bool& codeChromaQpAdj)
+ {
+   UInt width, height, total;
++  fprintf(stderr, "FVID_PALETTE_BLOCK\n");
+   UInt idx, dictMaxSize, dictIdxBits;
+   UInt sampleBits[3] = { 0 };
+   Pel  *pLevel = 0, *pPalette[3] = { 0 };
+@@ -2442,6 +2443,8 @@
+ 
+         if(comp == compBegin)
+         {
++          fprintf(stderr, "FVID_PALETTE_ESCAPE_%s\n", isLossless ? "BYPASS" : "LOSSY");
++          if (pcCU->getPaletteScanRotationModeFlag(absPartIdx)) fprintf(stderr, "FVID_PALETTE_TRANSPOSE_ESCAPE\n");
+           if ( isLossless )
+           {
+             m_pcTDecBinIf->decodeBinsEP( symbol, pcCU->getSlice()->getSPS()->getBitDepth( comp > 0 ? CHANNEL_TYPE_CHROMA : CHANNEL_TYPE_LUMA ) RExt__DECODER_DEBUG_BIT_STATISTICS_PASS_OPT_ARG( STATS__CABAC_BITS__PALETTE_MODE ) );

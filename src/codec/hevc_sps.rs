@@ -22,6 +22,12 @@ pub struct Pcm {
     pub loop_filter_disabled: bool,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Palette {
+    pub maximum: u8,
+    pub predictor_maximum: u8,
+    pub initial: Vec<[u16;3]>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Sps {
     pub vps_id: u8,
     pub id: u8,
@@ -62,9 +68,20 @@ pub struct Sps {
     pub persistent_rice: bool,
     pub extended_precision: bool,
     pub cabac_bypass_alignment: bool,
+    /// SCC SPS syntax is present.
+    pub scc_extension: bool,
+    pub palette: Option<Palette>,
+    pub current_picture_reference: bool,
+    pub motion_vector_resolution_control: u8,
+    pub intra_boundary_filtering_disabled: bool,
     pub vui: Option<Vui>,
 }
 impl Sps {
+    /// SCC disables DC and angular boundary correction. RDPCM's bypass
+    /// exclusion is angular-only; DC keeps its separate normative rule.
+    pub(crate) fn filter_intra_boundary(&self, mode:u8, bypass:bool) -> bool {
+        !self.intra_boundary_filtering_disabled && (mode==1 || !(self.implicit_rdpcm && bypass))
+    }
     pub fn display_dimensions(&self) -> [u32; 2] {
         [
             self.dimensions[0] - self.crop[0] - self.crop[1],
@@ -200,12 +217,18 @@ impl Sps {
         let mut persistent_rice = false;
         let mut extended_precision = false;
         let mut cabac_bypass_alignment = false;
+        let mut scc_extension = false;
+        let mut palette=None;
+        let mut current_picture_reference = false;
+        let mut motion_vector_resolution_control = 0;
+        let mut intra_boundary_filtering_disabled = false;
         if b.bit()? {
             let range = b.bit()?;
-            if b.read(7)? != 0 {
-                return Err(crate::unsupported(
-                    "HEVC multilayer/3D/SCC/unknown SPS extensions are not implemented",
-                ));
+            let multilayer=b.bit()?;
+            let three_d=b.bit()?;
+            scc_extension=b.bit()?;
+            if multilayer || three_d || b.read(4)?!=0 {
+                return Err(crate::unsupported("HEVC multilayer/3D/unknown SPS extensions are not implemented"));
             }
             if range {
                 let flags = b.read(9)?;
@@ -219,6 +242,34 @@ impl Sps {
                 persistent_rice = flags & (1 << 1) != 0;
                 extended_precision = flags & (1 << 4) != 0;
                 cabac_bypass_alignment = flags & 1 != 0;
+            }
+            if scc_extension {
+                current_picture_reference = b.bit()?;
+                if b.bit()? {
+                    let maximum=ue(b,64)?;
+                    let delta=ue(b,128)?;
+                    let predictor_maximum=maximum+delta;
+                    if predictor_maximum>128 || (maximum==0 && delta!=0) {
+                        return Err(invalid("invalid HEVC palette predictor maximum"));
+                    }
+                    let mut initial=Vec::new();
+                    if b.bit()? {
+                        if maximum==0 {return Err(invalid("HEVC zero palette has initializers"));}
+                        let count=ue(b,127)?+1;
+                        if count>predictor_maximum || count as usize*6>budget {
+                            return Err(invalid("HEVC palette initializer count exceeds limit"));
+                        }
+                        initial.resize(count as usize,[0;3]);
+                        for c in 0..if chroma_format==0 {1} else {3} {
+                            for entry in &mut initial {entry[c]=b.read(depth[usize::from(c!=0)])? as u16;}
+                        }
+                    }
+                    palette=Some(Palette {maximum:maximum as u8,predictor_maximum:predictor_maximum as u8,initial});
+                }
+                let resolution=b.read(2)?;
+                if resolution==3 {return Err(invalid("reserved HEVC SCC motion resolution"));}
+                motion_vector_resolution_control = resolution as u8;
+                intra_boundary_filtering_disabled=b.bit()?;
             }
         }
         b.finish_rbsp()?;
@@ -260,6 +311,11 @@ impl Sps {
             persistent_rice,
             extended_precision,
             cabac_bypass_alignment,
+            scc_extension,
+            palette,
+            current_picture_reference,
+            motion_vector_resolution_control,
+            intra_boundary_filtering_disabled,
             vui,
         })
     }

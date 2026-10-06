@@ -2,7 +2,7 @@
 use super::{hevc_cabac::Syntax, hevc_residual::ResidualBins};
 use crate::{Result, invalid};
 fn offset(depth: u8) -> Result<i32> {
-    if !(8..=12).contains(&depth) {
+    if !(8..=16).contains(&depth) {
         return Err(invalid("unsupported HEVC QP bit depth"));
     }
     Ok(6 * i32::from(depth - 8))
@@ -87,6 +87,11 @@ pub fn components_with_format(
     qp_y: i32, depths: [u8; 2], chroma_offsets: [i32; 2],
     cu_offsets: [i32; 2], chroma_format: u8,
 ) -> Result<[u8; 3]> {
+    if chroma_format == 0 {
+        let bd = offset(depths[0])?;
+        if !(-bd..=51).contains(&qp_y) { return Err(invalid("invalid HEVC monochrome QP")); }
+        return Ok([(qp_y + bd) as u8,0,0]);
+    }
     if !(1..=3).contains(&chroma_format) {
         return Err(invalid("invalid HEVC component QP chroma format"));
     }
@@ -135,7 +140,8 @@ mod tests {
         }
         assert_eq!(super::components_with_format(34, [8; 2], [0; 2], [0; 2], 3).unwrap(), [34; 3]);
         assert_eq!(super::components(34, [8; 2], [0; 2]).unwrap(), [34, 33, 33]);
-        for format in [0, 4] {
+        assert_eq!(super::components_with_format(34,[12,8],[0;2],[0;2],0).unwrap(),[58,0,0]);
+        for format in [4,255] {
             assert!(super::components_with_format(0, [8; 2], [0; 2], [0; 2], format).is_err());
         }
     }

@@ -351,8 +351,8 @@ impl HevcDecoder {
             .references
             .iter()
             .try_fold(0usize, |total, r| {
-                let count = (r.picture.dimensions[0] as usize)
-                    .checked_mul(r.picture.dimensions[1] as usize)?;
+                let count = (r.picture.as_deref()?.dimensions[0] as usize)
+                    .checked_mul(r.picture.as_deref()?.dimensions[1] as usize)?;
                 total.checked_add(count.checked_mul(5)?)
             })
             .ok_or_else(|| invalid("HEVC reference storage size overflow"))?;
@@ -375,7 +375,7 @@ impl HevcDecoder {
             self.references.push(Reference {
                 long_term: false,
                 poc,
-                picture: Arc::clone(&picture),
+                picture: Some(Arc::clone(&picture)),
             });
             let capacity = sps
                 .ordering
@@ -456,18 +456,16 @@ fn reference_lists(
         }
         .cloned()
         .collect();
-        for i in 0..header.references[list] as usize {
-            if base.is_empty() {
-                return Err(invalid("HEVC active reference list is empty"));
+        let selected = super::hevc_reference_list::select(base.len(),
+            header.current_picture_reference, header.references[list] as usize,
+            header.list_modification[list].as_deref(),list)?;
+        for entry in selected {
+            match entry {
+                super::hevc_reference_list::Source::Decoded(index) => lists[list].push(base[index].clone()),
+                super::hevc_reference_list::Source::Current => {
+                    lists[list].push(Reference {poc,long_term:true,picture:None});
+                }
             }
-            let index = header.list_modification[list]
-                .as_ref()
-                .map_or(i % base.len(), |m| m[i] as usize);
-            lists[list].push(
-                base.get(index)
-                    .ok_or_else(|| invalid("HEVC reference-list index out of range"))?
-                    .clone(),
-            );
         }
     }
 
@@ -499,7 +497,7 @@ mod long_term_list_tests {
         header.long_term = vec![LongTermReference { poc_lsb: 3, used: true, msb_cycles: Some(1) }];
         header.references = [3, 3];
         let references: Vec<_> = [34, 36, 19].into_iter().map(|poc| Reference {
-            poc, long_term: false, picture: Arc::clone(&picture),
+            poc, long_term: false, picture: Some(Arc::clone(&picture)),
         }).collect();
         let (retained, lists) = reference_lists(&header, 35, &references, 4).unwrap();
         assert_eq!(retained, [(34, false), (36, false), (19, true)]);

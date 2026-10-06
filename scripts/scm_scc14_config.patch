@@ -1,0 +1,14 @@
+--- a/source/App/TAppEncoder/TAppEncCfg.cpp
++++ b/source/App/TAppEncoder/TAppEncCfg.cpp
+@@ -2151,9 +2151,9 @@
+           xConfirmPara(m_onePictureOnlyConstraintFlag, "one-picture-only constraint flag shall be 0 for SCC profiles");
+ 
+           const UInt sccHighThroughputIdx = m_sccHighThroughputFlag ? 1 : 0;
+-          const UInt bitDepthIdx = (m_bitDepthConstraint == 8 ? 0 : (m_bitDepthConstraint == 10 ? 1 : (m_bitDepthConstraint == 12 ? 2 : (m_bitDepthConstraint == 16 ? 3 : 4))));
++          const UInt bitDepthIdx = (m_bitDepthConstraint == 8 ? 0 : (m_bitDepthConstraint == 10 ? 1 : (m_bitDepthConstraint == 12 ? 2 : (m_bitDepthConstraint == 14 ? 3 : 4))));
+           const UInt chromaFormatIdx = UInt(m_chromaFormatConstraint);
+-          const Bool bValidProfile = (bitDepthIdx > 2 || chromaFormatIdx>3) ? false : (validSCCProfileNames[sccHighThroughputIdx][bitDepthIdx][chromaFormatIdx] != UI_NONE);
++          const Bool bValidProfile = (bitDepthIdx > 3 || chromaFormatIdx>3) ? false : (validSCCProfileNames[sccHighThroughputIdx][bitDepthIdx][chromaFormatIdx] != UI_NONE);
+           xConfirmPara(!bValidProfile, "Invalid intra constraint flag, bit depth constraint flag and chroma format constraint flag combination for a RExt profile");
+ 
+           const Bool bUsingChromaQPTool = m_diffCuChromaQpOffsetDepth >= 0;

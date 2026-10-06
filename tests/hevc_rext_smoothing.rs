@@ -129,7 +129,7 @@ fn rext_intra_reference_filtering_matches_oracles_and_reset() {
 }
 
 #[test]
-fn unsupported_range_tools_are_not_silently_ignored() {
+fn newly_supported_range_tools_are_retained_in_sps() {
     use fvid::codec::hevc_nal::NalRbsp;
     let source = include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-disabled.mp4");
     let input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
@@ -146,7 +146,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
         .rev()
         .find(|&i| rbsp[i / 8] & (1 << (7 - i % 8)) != 0)
         .unwrap();
-    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 3 && i != 5 && i != 6 && i != 7) {
+    for flag in [4, 8] {
         let mut bytes = rbsp.clone();
         let bit = stop - 9 + flag;
         bytes[bit / 8] |= 1 << (7 - bit % 8);
@@ -160,12 +160,9 @@ fn unsupported_range_tools_are_not_silently_ignored() {
             updated.push(byte);
             zeros = if byte == 0 { zeros + 1 } else { 0 };
         }
-        assert!(
-            Sps::parse(&updated, 16 << 20)
-                .unwrap_err()
-                .to_string()
-                .contains("remaining HEVC SPS range-extension tools")
-        );
+        let parsed = Sps::parse(&updated, 16 << 20).unwrap();
+        assert_eq!(parsed.extended_precision, flag == 4);
+        assert_eq!(parsed.cabac_bypass_alignment, flag == 8);
     }
 }
 

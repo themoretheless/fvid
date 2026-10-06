@@ -43,9 +43,12 @@ fn actual_two_slice_ipb_stream_decodes_all_picture_types() {
 }
 #[test]
 fn two_slice_ipb_matches_saved_yuv_and_rewind() {
-    let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(VIDEO), Default::default(), 16 << 20)
-            .unwrap();
+    let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(VIDEO),
+        Default::default(),
+        16 << 20,
+    )
+    .unwrap();
     for _ in 0..2 {
         let mut actual = Vec::new();
         let mut count = 0;
@@ -160,7 +163,9 @@ fn multislice_camera_frames_loop_and_seek_back_without_ffmpeg() {
             (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64,
             reader
                 .rgb()
-                .as_chunks::<3>().0.iter()
+                .as_chunks::<3>()
+                .0
+                .iter()
                 .flat_map(|p| [p[2], p[1], p[0], 255])
                 .collect::<Vec<_>>(),
         ));
@@ -295,9 +300,12 @@ fn encoded_slice_list_modification_selects_different_reference_pictures() {
         slices[1].header.modifications_l0,
         vec![fvid::codec::avc_slice::RefModification::Subtract(1)]
     );
-    let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(VIDEO), Default::default(), 16 << 20)
-            .unwrap();
+    let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(VIDEO),
+        Default::default(),
+        16 << 20,
+    )
+    .unwrap();
     for _ in 0..2 {
         let mut actual = Vec::new();
         let mut count = 0;
@@ -336,9 +344,12 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
         assert!(!slice.header.direct_spatial_mv_pred);
         assert_eq!(slice.header.refs_l0, 2);
     }
-    let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(VIDEO), Default::default(), 16 << 20)
-            .unwrap();
+    let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(VIDEO),
+        Default::default(),
+        16 << 20,
+    )
+    .unwrap();
     for _ in 0..2 {
         let mut actual = Vec::new();
         let mut count = 0;
@@ -351,11 +362,15 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
             actual == ORACLE,
             "temporal direct mismatch: actual {:?}, oracle {:?}",
             actual
-                .as_chunks::<768>().0.iter()
+                .as_chunks::<768>()
+                .0
+                .iter()
                 .map(|f| (f[0], f[16]))
                 .collect::<Vec<_>>(),
             ORACLE
-                .as_chunks::<768>().0.iter()
+                .as_chunks::<768>()
+                .0
+                .iter()
                 .map(|f| (f[0], f[16]))
                 .collect::<Vec<_>>()
         );
@@ -366,9 +381,12 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
 #[test]
 fn temporal_direct_matches_analytic_picture_identity() {
     let video = include_bytes!("fixtures/playback-errors/avc-slice-lists-temporal.mp4");
-    let mut reader =
-        fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(video), Default::default(), 16 << 20)
-            .unwrap();
+    let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(video),
+        Default::default(),
+        16 << 20,
+    )
+    .unwrap();
     let mut actual = Vec::new();
     while let Some(frame) = reader.read_frame().unwrap() {
         frame.picture.write_planar(&mut actual).unwrap();
@@ -422,13 +440,11 @@ fn damaged_last_slice_requires_reset_and_restarts_with_identical_pictures() {
     assert!(decoder.decode_order(&saved[0]).unwrap().is_some());
     let error = decoder.decode_order(&damaged).unwrap_err().to_string();
     assert!(!error.contains("slice header"), "{error}");
-    assert!(
-        decoder
-            .decode_order(&saved[1])
-            .unwrap_err()
-            .to_string()
-            .contains("requires reset")
-    );
+    assert!(decoder
+        .decode_order(&saved[1])
+        .unwrap_err()
+        .to_string()
+        .contains("requires reset"));
     decoder.reset();
     let mut fresh = AvcDecoder::new(&config, 16 << 20).unwrap();
     for packet in &saved {
@@ -445,31 +461,105 @@ fn damaged_last_slice_requires_reset_and_restarts_with_identical_pictures() {
 #[test]
 fn mixed_slice_types_match_jm_and_rewind() {
     for (data, expected) in [
-        (include_bytes!("fixtures/playback-errors/avc-mixed-pb.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-pb-jm.yuv").as_slice()),
-        (include_bytes!("fixtures/playback-errors/avc-mixed-bp.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-bp-jm.yuv").as_slice()),
-        (include_bytes!("fixtures/playback-errors/avc-mixed-ip.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-ip-jm.yuv").as_slice()),
-        (include_bytes!("fixtures/playback-errors/avc-mixed-pi.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-pi-jm.yuv").as_slice()),
-        (include_bytes!("fixtures/playback-errors/avc-mixed-ib.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-ib-jm.yuv").as_slice()),
-        (include_bytes!("fixtures/playback-errors/avc-mixed-bi.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-bi-jm.yuv").as_slice()),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mixed-pb.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mixed-pb-jm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mixed-bp.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mixed-bp-jm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mixed-ip.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mixed-ip-jm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mixed-pi.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mixed-pi-jm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mixed-ib.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mixed-ib-jm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mixed-bi.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mixed-bi-jm.yuv").as_slice(),
+        ),
     ] {
-    let mut packets=Mp4Reader::open(Cursor::new(data),Default::default()).unwrap();
-    let avc=AvcConfig::parse(&packets.tracks()[0].configuration).unwrap();
-    let sps=Sps::parse(avc.sps[0]).unwrap();let pps=Pps::parse(avc.pps[0],&sps).unwrap();
-    let length_size=avc.length_size;
-    let mut last=Vec::new();packets.read_packet(0,3,&mut last).unwrap();
-    let slices=fvid::codec::avc_access_unit::prepare(&last,length_size,&sps,&pps,16<<20).unwrap();
-    assert_eq!(slices.len(),2);
-    assert_ne!(slices[0].header.slice_type,slices[1].header.slice_type);
-    assert!(slices.iter().all(|s|matches!(s.header.slice_type,SliceType::I|SliceType::P|SliceType::B)));
-    let mut reader=fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(data),Default::default(),16<<20).unwrap();
-    for _ in 0..2 {
-        let mut actual=Vec::new();let mut frames=0;
-        while let Some(frame)=reader.read_frame().unwrap() {
-            frame.picture.write_planar(&mut actual).unwrap();frames+=1;
+        let mut packets = Mp4Reader::open(Cursor::new(data), Default::default()).unwrap();
+        let avc = AvcConfig::parse(&packets.tracks()[0].configuration).unwrap();
+        let sps = Sps::parse(avc.sps[0]).unwrap();
+        let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+        let length_size = avc.length_size;
+        let mut last = Vec::new();
+        packets.read_packet(0, 3, &mut last).unwrap();
+        let slices =
+            fvid::codec::avc_access_unit::prepare(&last, length_size, &sps, &pps, 16 << 20)
+                .unwrap();
+        assert_eq!(slices.len(), 2);
+        assert_ne!(slices[0].header.slice_type, slices[1].header.slice_type);
+        assert!(slices.iter().all(|s| matches!(
+            s.header.slice_type,
+            SliceType::I | SliceType::P | SliceType::B
+        )));
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(data),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            let mut frames = 0;
+            while let Some(frame) = reader.read_frame().unwrap() {
+                frame.picture.write_planar(&mut actual).unwrap();
+                frames += 1;
+            }
+            assert_eq!(frames, 4);
+            assert!(
+                actual.as_slice() == expected,
+                "frame luma actual={:?}, expected={:?}",
+                actual
+                    .chunks(768)
+                    .map(|f| (f[0], f[16]))
+                    .collect::<Vec<_>>(),
+                expected
+                    .chunks(768)
+                    .map(|f| (f[0], f[16]))
+                    .collect::<Vec<_>>()
+            );
+            reader.rewind();
         }
-        assert_eq!(frames,4);
-        assert!(actual.as_slice()==expected,"frame luma actual={:?}, expected={:?}",actual.chunks(768).map(|f|(f[0],f[16])).collect::<Vec<_>>(),expected.chunks(768).map(|f|(f[0],f[16])).collect::<Vec<_>>());
-        reader.rewind();
     }
 }
+
+#[test]
+fn reordered_picture_api_refusal_is_distinct_from_playback_acceptance() {
+    let mut input = Mp4Reader::open(Cursor::new(VIDEO), Default::default()).unwrap();
+    let configuration = input.tracks()[0].configuration.clone();
+    let mut monotonic = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+    let mut coded = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+    let mut packet = Vec::new();
+    let mut refusal = None;
+    let count = input.tracks()[0].samples.len();
+    for index in 0..count {
+        input.read_packet(0, index, &mut packet).unwrap();
+        assert!(coded.decode_order(&packet).unwrap().is_some());
+        if refusal.is_none() {
+            match monotonic.decode(&packet) {
+                Ok(Some(_)) => {}
+                Ok(None) => panic!("missing picture"),
+                Err(error) => refusal = Some(error.to_string()),
+            }
+        }
+    }
+    assert!(refusal
+        .unwrap()
+        .contains("use decode_order for reordered pictures"));
+    monotonic.reset();
+    input.read_packet(0, 0, &mut packet).unwrap();
+    assert!(monotonic.decode(&packet).unwrap().is_some());
+    // Acceptance, independent of the narrow API refusal, includes oracle pixels
+    // in presentation order and rewind, using this same owned synthetic stream.
+    two_slice_ipb_matches_saved_yuv_and_rewind();
 }

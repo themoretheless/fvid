@@ -16,6 +16,7 @@ use std::{
 #[path = "packed.rs"]
 mod packed;
 pub use packed::PackedPlanar;
+pub(crate) use packed::hevc_picture;
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
 
@@ -841,6 +842,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         if let Some(surface) = frame.surface {
             return Ok(Some(RawFrame::Surface { surface, colour }));
         }
+        if let Some(packed) = frame.packed { return Ok(Some(RawFrame::Planar(packed))); }
         Ok(Some(match frame.planes8 {
             Some(planes) if frame.picture.bit_depth == 8 => RawFrame::Planar8(planes),
             _ => RawFrame::Avc {

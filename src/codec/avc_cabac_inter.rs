@@ -26,6 +26,22 @@ fn base(slice: SliceType, p: usize, b: usize) -> Result<usize> {
         _ => Err(invalid("CABAC inter syntax needs P/B slice")),
     }
 }
+/// MBAFF mb_field_decoding_flag (H.264 9.3.3.1.1.2). Neighbours
+/// contribute only when available in this slice and field coded; callers
+/// resolve skipped-pair inference before supplying their conditions.
+pub fn field_decoding_flag(bins: &mut impl InterBins, field_neighbours: [bool; 2]) -> Result<bool> {
+    bins.decision(70 + usize::from(field_neighbours[0]) + usize::from(field_neighbours[1]))
+}
+/// end_of_slice_flag follows each progressive macroblock, but only the bottom
+/// macroblock of an MBAFF pair. `address` is the just-decoded block, not the
+/// next address. The top block must not consume a termination bin.
+pub fn end_of_slice_flag(bins: &mut impl InterBins, address: usize, mbaff: bool) -> Result<bool> {
+    if mbaff && address % 2 == 0 {
+        Ok(false)
+    } else {
+        bins.terminate()
+    }
+}
 /// Neighbours contribute only when available and not skipped.
 pub fn skip(bins: &mut impl InterBins, slice: SliceType, non_skip: [bool; 2]) -> Result<bool> {
     bins.decision(base(slice, 11, 24)? + usize::from(non_skip[0]) + usize::from(non_skip[1]))
@@ -247,6 +263,35 @@ mod tests {
         }
         fn terminate(&mut self) -> Result<bool> {
             self.read(-2)
+        }
+    }
+    #[test]
+    fn slice_termination_consumes_bins_only_at_complete_pair_boundaries() {
+        for address in [0, 2, 4, 64] {
+            let mut script = Script::new(&[]);
+            assert!(!end_of_slice_flag(&mut script, address, true).unwrap());
+            script.done();
+        }
+        for (address, mbaff) in [(0, false), (1, false), (2, false), (1, true), (3, true)] {
+            for terminal in [false, true] {
+                let mut script = Script::new(&[(-2, terminal)]);
+                assert_eq!(
+                    end_of_slice_flag(&mut script, address, mbaff).unwrap(),
+                    terminal
+                );
+                script.done();
+            }
+        }
+    }
+    #[test]
+    fn field_flag_uses_one_regular_bin_with_symmetric_neighbours() {
+        for neighbours in [[false, false], [true, false], [false, true], [true, true]] {
+            for value in [false, true] {
+                let context = 70 + i32::from(neighbours[0]) + i32::from(neighbours[1]);
+                let mut script = Script::new(&[(context, value)]);
+                assert_eq!(field_decoding_flag(&mut script, neighbours).unwrap(), value);
+                script.done();
+            }
         }
     }
     #[test]

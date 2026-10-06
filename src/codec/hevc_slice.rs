@@ -36,6 +36,7 @@ pub struct SliceHeader {
     pub short_term_predictor_delta_pocs: usize,
     pub temporal_mvp: bool,
     pub references: [u8; 2],
+    pub current_picture_reference: bool,
     pub list_modification: [Option<Vec<u8>>; 2],
     #[cfg(test)]
     pub(crate) list_modification_bit_range: std::ops::Range<usize>,
@@ -44,6 +45,8 @@ pub struct SliceHeader {
     pub collocated_list: usize,
     pub collocated_ref: u8,
     pub max_merge_candidates: u8,
+    pub use_integer_mv: bool,
+    pub act_qp_offsets: [i8; 3],
     pub weights: Option<Weights>,
     pub first: bool,
     pub no_output_of_prior_pictures: bool,
@@ -218,7 +221,7 @@ impl SliceHeader {
             1 => SliceType::P,
             _ => SliceType::I,
         };
-        if payload.header.is_irap() && slice_type != SliceType::I {
+        if payload.header.is_irap() && slice_type != SliceType::I && !pps.current_picture_reference {
             return Err(invalid("HEVC IRAP slice must be intra"));
         }
         let picture_output = if pps.output_flag_present {
@@ -313,7 +316,7 @@ impl SliceHeader {
                 }
             }
             let total = short_term.iter().filter(|r| r.used).count()
-                + long_term.iter().filter(|r| r.used).count();
+                + long_term.iter().filter(|r| r.used).count() + usize::from(pps.current_picture_reference);
             if total == 0 {
                 return Err(invalid("HEVC inter slice has no current references"));
             }
@@ -366,16 +369,19 @@ impl SliceHeader {
                 };
                 let mut flags = 0;
                 for list in 0..if slice_type == SliceType::B { 2 } else { 1 } {
+                    let selected = super::hevc_reference_list::select(
+                        total-usize::from(pps.current_picture_reference),pps.current_picture_reference,
+                        references[list] as usize,list_modification[list].as_deref(),list)?;
                     let mut luma_flags = Vec::new();
                     let mut chroma_flags = vec![false; references[list] as usize];
-                    for _ in 0..references[list] {
-                        let flag = b.bit()?;
+                    for i in 0..references[list] as usize {
+                        let flag = if selected[i] == super::hevc_reference_list::Source::Current {false} else {b.bit()?};
                         flags += usize::from(flag);
                         luma_flags.push(flag);
                     }
                     if chroma {
-                        for flag in &mut chroma_flags {
-                            *flag = b.bit()?;
+                        for (i,flag) in chroma_flags.iter_mut().enumerate() {
+                            *flag = if selected[i] == super::hevc_reference_list::Source::Current {false} else {b.bit()?};
                             flags += 2 * usize::from(*flag);
                         }
                     }
@@ -420,6 +426,9 @@ impl SliceHeader {
             }
             max_merge_candidates = 5 - ue(b, 4)? as u8;
         }
+        let use_integer_mv = if sps.motion_vector_resolution_control == 2 && slice_type != SliceType::I {
+            b.bit()?
+        } else { sps.motion_vector_resolution_control == 1 };
         let min_qp = -6 * (i32::from(sps.depth[0]) - 8);
         let qp = pps
             .initial_qp
@@ -432,6 +441,16 @@ impl SliceHeader {
                 let sum = i32::from(*value) + se(b, -12, 12)?;
                 if !(-12..=12).contains(&sum) {
                     return Err(invalid("HEVC combined chroma QP offset out of range"));
+                }
+                *value = sum as i8;
+            }
+        }
+        let mut act_qp_offsets = pps.act_qp_offsets;
+        if pps.slice_act_qp_offsets {
+            for value in &mut act_qp_offsets {
+                let sum = i32::from(*value) + se(b, -12, 12)?;
+                if !(-12..=12).contains(&sum) {
+                    return Err(invalid("HEVC combined ACT QP offset outside range"));
                 }
                 *value = sum as i8;
             }
@@ -467,6 +486,7 @@ impl SliceHeader {
             short_term_predictor_delta_pocs,
             temporal_mvp,
             references,
+            current_picture_reference: pps.current_picture_reference,
             list_modification,
             #[cfg(test)]
             list_modification_bit_range,
@@ -475,6 +495,8 @@ impl SliceHeader {
             collocated_list,
             collocated_ref,
             max_merge_candidates,
+            use_integer_mv,
+            act_qp_offsets,
             weights,
             first,
             no_output_of_prior_pictures,

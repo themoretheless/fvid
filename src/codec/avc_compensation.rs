@@ -1,4 +1,4 @@
-//! Progressive 4:2:0 partition prediction from deblocked reference pictures.
+//! Frame/field 4:2:0 partition prediction from deblocked reference pictures.
 use super::avc_motion::{ReferencePlane, Scratch, bipred_block, weight_block};
 use crate::{Result, invalid};
 
@@ -32,6 +32,18 @@ pub struct Prediction420 {
     depth: u8,
 }
 impl<'a> Reference420<'a> {
+    /// Select matching luma/chroma row parity without allocating field planes.
+    /// Motion and origin supplied to this view must be in field coordinates.
+    pub fn field_view(&self, bottom: bool) -> Result<Self> {
+        Ok(Self {
+            planes: [
+                self.planes[0].field_view(bottom)?,
+                self.planes[1].field_view(bottom)?,
+                self.planes[2].field_view(bottom)?,
+            ],
+            depth: self.depth,
+        })
+    }
     /// Plane strides are in samples. Construct once per reference frame, since
     /// validation inspects the sample values in all three planes.
     pub fn new(
@@ -94,6 +106,18 @@ impl<'a> Reference420<'a> {
         out: &mut Prediction420,
         scratch: &mut Scratch,
     ) -> Result<()> {
+        self.predict_into_motion(origin, motion, motion, size, out, scratch)
+    }
+    /// Separate vectors permit the field-parity chroma adjustment in 4:2:0.
+    pub fn predict_into_motion(
+        &self,
+        origin: [i32; 2],
+        motion: [i32; 2],
+        chroma_motion: [i32; 2],
+        size: [usize; 2],
+        out: &mut Prediction420,
+        scratch: &mut Scratch,
+    ) -> Result<()> {
         let [width, height] = size;
         if ![4, 8, 16].contains(&width)
             || ![4, 8, 16].contains(&height)
@@ -109,7 +133,7 @@ impl<'a> Reference420<'a> {
         let chroma_origin = [origin[0] / 2, origin[1] / 2];
         self.planes[1].chroma_with(
             chroma_origin,
-            motion,
+            chroma_motion,
             width / 2,
             height / 2,
             &mut out.cb[..count / 4],
@@ -117,7 +141,7 @@ impl<'a> Reference420<'a> {
         )?;
         self.planes[2].chroma_with(
             chroma_origin,
-            motion,
+            chroma_motion,
             width / 2,
             height / 2,
             &mut out.cr[..count / 4],
@@ -140,6 +164,9 @@ impl Prediction420 {
     }
     pub fn dimensions(&self) -> (usize, usize) {
         (self.width, self.height)
+    }
+    pub fn bit_depth(&self) -> u8 {
+        self.depth
     }
     /// Apply explicit uni-prediction weights in Y/Cb/Cr order.
     pub fn weight(mut self, weights: [ComponentWeight; 3]) -> Result<Self> {
@@ -408,6 +435,56 @@ impl MacroblockPrediction {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn strided_field_views_match_packed_fields_for_fractional_and_edge_prediction() {
+        for depth in [8, 10] {
+            let max = (1u16 << depth) - 1;
+            let make = |width: usize, height: usize, stride: usize, salt: usize| {
+                let mut data = vec![max; stride * height];
+                for y in 0..height {
+                    for x in 0..width {
+                        data[y * stride + x] = ((x * 17 + y * 37 + salt) % usize::from(max)) as u16;
+                    }
+                }
+                data
+            };
+            let y = make(16, 64, 21, 3);
+            let cb = make(8, 32, 13, 31);
+            let cr = make(8, 32, 11, 67);
+            let frame = Reference420::new([&y, &cb, &cr], 16, 64, [21, 13, 11], depth).unwrap();
+            for bottom in [false, true] {
+                let pack = |data: &[u16], width: usize, height: usize, stride: usize| {
+                    (usize::from(bottom)..height)
+                        .step_by(2)
+                        .flat_map(|row| data[row * stride..row * stride + width].iter().copied())
+                        .collect::<Vec<_>>()
+                };
+                let py = pack(&y, 16, 64, 21);
+                let pcb = pack(&cb, 8, 32, 13);
+                let pcr = pack(&cr, 8, 32, 11);
+                let packed =
+                    Reference420::new([&py, &pcb, &pcr], 16, 32, [16, 8, 8], depth).unwrap();
+                let view = frame.field_view(bottom).unwrap();
+                let integer = view.predict([0, 0], [0, 0], [16, 16]).unwrap();
+                assert_eq!(integer.y[0], y[usize::from(bottom) * 21]);
+                assert_eq!(integer.cb[0], cb[usize::from(bottom) * 13]);
+                assert_eq!(integer.cr[0], cr[usize::from(bottom) * 11]);
+                for origin in [[-2, -2], [2, 6], [14, 26]] {
+                    for dy in -4..4 {
+                        for dx in -4..4 {
+                            let a = view.predict(origin, [dx, dy], [8, 8]).unwrap();
+                            let b = packed.predict(origin, [dx, dy], [8, 8]).unwrap();
+                            assert_eq!(a.y, b.y);
+                            assert_eq!(a.cb, b.cb);
+                            assert_eq!(a.cr, b.cr);
+                        }
+                    }
+                }
+            }
+        }
+        let tiny = Reference420::new([&[0; 4], &[0], &[0]], 2, 2, [2, 1, 1], 8).unwrap();
+        assert!(tiny.field_view(false).is_err());
+    }
     #[test]
     fn fractional_luma_chroma_and_bipred() {
         let y: Vec<_> = (0..16)

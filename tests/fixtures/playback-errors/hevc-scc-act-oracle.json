@@ -1,0 +1,58 @@
+{
+  "reference": "HM-16.20+SCM-8.8",
+  "revision": "cae35dba3dcf8e1b6121a70b397000af36301045",
+  "encoder_sha256": "fe5557400655edb464461a14d74d8c75d0180ed011939bc160b5ad5226b0079c",
+  "decoder_sha256": "877b2303f9e97dcdeceb1813d4d01b8fd0c6543267f9c2af56bb520f3e55f71b",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-act-intra-rext8",
+      "mp4_sha256": "5fea3365d6cde29cd47a875010667ec0abf68045d4f4d3a2631b92c105a10c17",
+      "oracle_sha256": "70191920071a8815087129596f46737e3a1d91846c26a3473f9f7647327db4dd"
+    },
+    {
+      "stem": "hevc-scc-act-inter-rext8",
+      "mp4_sha256": "8eb952c842bb116a8b865d74edba78f52c281db46e8cf7e809533c1c8f68793a",
+      "oracle_sha256": "7f98bc3660025a14446663894ea7922a9fae0e03276e34bbebc067ddbfc79262"
+    },
+    {
+      "stem": "hevc-scc-act-parallel-rext8",
+      "mp4_sha256": "5e79c6c37e196e1f2f698a8477dd60cb35170ed1785f116a5904527ff8f02610",
+      "oracle_sha256": "d30e9c920b26e1188b880fa6b216c759214c69152d90f26ce6592161cf2933f5"
+    },
+    {
+      "stem": "hevc-scc-act-offsets-rext8",
+      "mp4_sha256": "47fd3b7bd96c96003228698d60869ff742c5d9d65a640a86e1df0acc68e5faf2",
+      "oracle_sha256": "2d60309a8df9d5b4d113a128ee9b723d09c0f53115f4a85ed98c7ef208d282fd"
+    },
+    {
+      "stem": "hevc-scc-act-bypass-rext8",
+      "mp4_sha256": "abacb077460d6953d6ad146b944cf103d721434636eea7641d8319523218bcaa",
+      "oracle_sha256": "4cd53f04a27d9f466b0435afe36243bb54338dd03b72fd5f12a069193164ebcc"
+    },
+    {
+      "stem": "hevc-scc-act-intra-rext10",
+      "mp4_sha256": "cc593d983438f6a32eb37d91ff5830994d334b77e4845c61e73643ad1acd5e6d",
+      "oracle_sha256": "a4f9347985e7ba01561084ff374a65cf0207ef3ac099d217d6e2fe2abe498a38"
+    },
+    {
+      "stem": "hevc-scc-act-inter-rext10",
+      "mp4_sha256": "e81826bbafdda239da5279cda6f1b893c4001dfb0aede81475ef0d84040ca41e",
+      "oracle_sha256": "a81363a66417c8b65c432ca11571ed8c4b0d68dd9049eeba8b5cb63961be852d"
+    },
+    {
+      "stem": "hevc-scc-act-parallel-rext10",
+      "mp4_sha256": "d65b51f5b941e6e6d3e8e9681c6276af4fada0d9265377024a4bb4d978b8287b",
+      "oracle_sha256": "0d2833a231da5bb4750d847c3f7c7074c1b09067da49a6a2340322e44eb8ab33"
+    },
+    {
+      "stem": "hevc-scc-act-offsets-rext10",
+      "mp4_sha256": "036b4848f6327315e781daa7674059b0c5cd06295b092fa10c5c1ba043a1b179",
+      "oracle_sha256": "5ba9034e7e5d2cc3175dbf9baa6265145b3a07236b5664a2c252622a5239cead"
+    },
+    {
+      "stem": "hevc-scc-act-bypass-rext10",
+      "mp4_sha256": "b6c25ee20b0990d6fd484707beb95c44980902d9c808b33231db7a26d9df5b34",
+      "oracle_sha256": "03fcb7a135a05d5a822ebef1c838b6d897635852ace655cecb75d0bc9d394190"
+    }
+  ]
+}

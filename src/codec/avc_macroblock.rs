@@ -1,4 +1,4 @@
-//! Progressive 4:2:0 intra macroblock syntax for CAVLC slices.
+//! Frame/MBAFF 4:2:0 intra macroblock syntax and mixed CAVLC contexts.
 //! This yields prediction modes and transform levels, not reconstructed or filtered pictures.
 use super::{
     avc::{Pps, SliceGroups, Sps},
@@ -46,30 +46,6 @@ pub fn luma_block_xy(index: usize) -> Result<(usize, usize)> {
         ((index >> 1) & 1) + (index >> 3) * 2,
     ))
 }
-fn neighbour<T: Copy>(grid: &[T], width: usize, x: usize, y: usize) -> (Option<T>, Option<T>) {
-    (
-        if x > 0 {
-            Some(grid[y * width + x - 1])
-        } else {
-            None
-        },
-        if y > 0 {
-            Some(grid[(y - 1) * width + x])
-        } else {
-            None
-        },
-    )
-}
-fn nc(grid: &[u8], width: usize, x: usize, y: usize) -> i8 {
-    let (a, b) = neighbour(grid, width, x, y);
-    let a = a.filter(|&v| v != 255);
-    let b = b.filter(|&v| v != 255);
-    match (a, b) {
-        (Some(a), Some(b)) => ((a + b + 1) >> 1) as i8,
-        (Some(v), None) | (None, Some(v)) => v as i8,
-        _ => 0,
-    }
-}
 pub struct IntraCavlcReader<'a> {
     bits: BitReader<'a>,
     sps: &'a Sps,
@@ -80,6 +56,8 @@ pub struct IntraCavlcReader<'a> {
     chroma_counts: [Vec<u8>; 2],
     modes: Vec<u8>,
     finished: bool,
+    mbaff: bool,
+    pair_fields: Vec<u8>,
 }
 impl<'a> IntraCavlcReader<'a> {
     pub fn new(
@@ -100,8 +78,47 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
+        Self::new_context_impl(header, sps, pps, max_macroblocks, false)
+    }
+    /// Syntax-only intra MBAFF reader. Reconstruction is a separate pipeline.
+    pub fn new_mbaff(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+    ) -> Result<Self> {
+        if header.slice_type != SliceType::I {
+            return Err(invalid("MBAFF CAVLC reader requires an intra frame slice"));
+        }
+        Self::new_context_mbaff(header, sps, pps, max_macroblocks)
+    }
+    /// Pair-address context for an external mixed-slice dispatcher.
+    pub fn new_context_mbaff(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+    ) -> Result<Self> {
+        if !matches!(
+            header.slice_type,
+            SliceType::I | SliceType::P | SliceType::B
+        ) || header.field_pic
+            || sps.frame_mbs_only
+            || !sps.mb_adaptive_frame_field
+        {
+            return Err(invalid("MBAFF CAVLC reader requires an intra frame slice"));
+        }
+        Self::new_context_impl(header, sps, pps, max_macroblocks, true)
+    }
+    fn new_context_impl(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+        mbaff: bool,
+    ) -> Result<Self> {
         if pps.cabac
-            || !sps.frame_mbs_only
+            || (!mbaff && !sps.frame_mbs_only)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
             || !matches!(pps.slice_groups, SliceGroups::Single)
@@ -115,6 +132,7 @@ impl<'a> IntraCavlcReader<'a> {
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
+            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
             .ok_or_else(|| invalid("macroblock count overflow"))?;
         if count == 0 || count > max_macroblocks || count > 65536 {
             return Err(invalid("macroblock context budget exceeded"));
@@ -130,13 +148,88 @@ impl<'a> IntraCavlcReader<'a> {
             bits,
             sps,
             pps,
-            address: header.first_mb,
+            address: header
+                .first_mb
+                .checked_mul(if mbaff { 2 } else { 1 })
+                .ok_or_else(|| invalid("MBAFF slice address overflow"))?,
             qp: header.slice_qp,
             luma_counts: grid(count * 16)?,
             chroma_counts: [grid(count * 4)?, grid(count * 4)?],
             modes: grid(count * 16)?,
             finished: false,
+            mbaff,
+            pair_fields: grid(if mbaff { count / 2 } else { 0 })?,
         })
+    }
+    fn coefficient_context(
+        &self,
+        component: usize,
+        address: usize,
+        block: [usize; 2],
+    ) -> Result<i8> {
+        let width = self.sps.width_mbs as usize;
+        let height = self.height_mbs();
+        let (grid, side, sub) = if component == 0 {
+            (&self.luma_counts, 4, [1, 1])
+        } else {
+            (&self.chroma_counts[component - 1], 2, [2, 2])
+        };
+        super::avc_mbaff::cavlc_context(
+            address,
+            block,
+            width,
+            height,
+            self.mbaff,
+            sub,
+            |pair| self.pair_field(pair),
+            |owner, local| {
+                grid.get(owner * side * side + local[1] * side + local[0])
+                    .copied()
+                    .filter(|count| *count != 255)
+            },
+        )
+    }
+    fn mode_neighbours(
+        &self,
+        address: usize,
+        block: [usize; 2],
+    ) -> Result<(Option<u8>, Option<u8>)> {
+        let mut values = [None; 2];
+        let x = (block[0] * 4) as isize;
+        let y = (block[1] * 4) as isize;
+        for (value, offset) in values.iter_mut().zip([[x - 1, y], [x, y - 1]]) {
+            if let Some((owner, local)) = super::avc_mbaff::neighbour_location(
+                address,
+                offset,
+                self.sps.width_mbs as usize,
+                self.height_mbs(),
+                self.mbaff,
+                [1, 1],
+                |pair| self.pair_field(pair),
+            )? {
+                *value = self
+                    .modes
+                    .get(owner * 16 + local[1] / 4 * 4 + local[0] / 4)
+                    .copied();
+            }
+        }
+        Ok((values[0], values[1]))
+    }
+    fn height_mbs(&self) -> usize {
+        self.sps.height_map_units as usize * if self.mbaff { 2 } else { 1 }
+    }
+    fn pair_field(&self, pair: usize) -> Option<bool> {
+        self.pair_fields
+            .get(pair)
+            .copied()
+            .filter(|v| *v != 255)
+            .map(|v| v != 0)
+    }
+    /// Mode of the most recently parsed macroblock (false for progressive).
+    pub fn field_decoding(&self) -> bool {
+        self.mbaff
+            && self.address > 0
+            && self.pair_field((self.address as usize - 1) / 2) == Some(true)
     }
     pub fn bit_position(&self) -> usize {
         self.bits.position()
@@ -146,9 +239,24 @@ impl<'a> IntraCavlcReader<'a> {
             return Ok(None);
         }
         if !self.bits.more_rbsp_data() {
+            if self.mbaff && self.address % 2 != 0 {
+                return Err(invalid("MBAFF slice ends with incomplete macroblock pair"));
+            }
             self.bits.finish_rbsp()?;
             self.finished = true;
             return Ok(None);
+        }
+        if self.mbaff {
+            let pair = self.address as usize / 2;
+            if self.address % 2 == 0 {
+                let slot = self
+                    .pair_fields
+                    .get_mut(pair)
+                    .ok_or_else(|| invalid("MBAFF macroblock outside picture"))?;
+                *slot = u8::from(self.bits.bit()?);
+            } else if self.pair_field(pair).is_none() {
+                return Err(invalid("MBAFF bottom macroblock lacks field flag"));
+            }
         }
         let mb_type = self.bits.unsigned_golomb()?;
         self.read_body(mb_type)
@@ -157,6 +265,46 @@ impl<'a> IntraCavlcReader<'a> {
     /// it to the I table. Discard this context on error; the caller cursor only
     /// advances after success.
     pub fn read_embedded(
+        &mut self,
+        bits: &mut BitReader<'a>,
+        address: u32,
+        qp: i32,
+        mb_type: u32,
+    ) -> Result<IntraMacroblock> {
+        if self.mbaff {
+            return Err(invalid(
+                "embedded MBAFF mixed-slice syntax is not connected",
+            ));
+        }
+        self.read_embedded_body(bits, address, qp, mb_type)
+    }
+    /// The dispatcher has consumed the pair flag and mb_type. On error discard
+    /// this context; the external bit cursor advances only after success.
+    pub fn read_embedded_mbaff(
+        &mut self,
+        bits: &mut BitReader<'a>,
+        address: u32,
+        qp: i32,
+        mb_type: u32,
+        field: bool,
+    ) -> Result<IntraMacroblock> {
+        self.record_pair_mode(address as usize, field)?;
+        self.read_embedded_body(bits, address, qp, mb_type)
+    }
+    /// Publish the dispatcher-owned mode for coded or skipped macroblocks.
+    /// Both members of a pair must use the same mode.
+    pub fn record_pair_mode(&mut self, address: usize, field: bool) -> Result<()> {
+        if !self.mbaff || address >= self.sps.width_mbs as usize * self.height_mbs() {
+            return Err(invalid("invalid MBAFF intra-context address"));
+        }
+        let slot = &mut self.pair_fields[address / 2];
+        if *slot != 255 && *slot != u8::from(field) {
+            return Err(invalid("MBAFF intra-context pair mode changed"));
+        }
+        *slot = u8::from(field);
+        Ok(())
+    }
+    fn read_embedded_body(
         &mut self,
         bits: &mut BitReader<'a>,
         address: u32,
@@ -181,56 +329,43 @@ impl<'a> IntraCavlcReader<'a> {
         chroma: [[u8; 4]; 2],
     ) -> Result<()> {
         let width = self.sps.width_mbs as usize;
-        if address >= width * self.sps.height_map_units as usize
+        if address >= width * self.height_mbs()
             || luma.iter().chain(chroma.iter().flatten()).any(|&v| v > 16)
         {
             return Err(invalid("invalid mixed-slice coefficient counts"));
         }
-        let (mx, my) = (address % width, address / width);
-        for i in 0..16 {
-            let at = (my * 4 + i / 4) * width * 4 + mx * 4 + i % 4;
-            self.luma_counts[at] = luma[i];
-            // Available inter neighbours contribute DC unless constrained prediction excludes them.
-            self.modes[at] = if self.pps.constrained_intra_pred {
-                255
-            } else {
-                2
-            };
-        }
+        self.luma_counts[address * 16..address * 16 + 16].copy_from_slice(&luma);
+        self.modes[address * 16..address * 16 + 16].fill(if self.pps.constrained_intra_pred {
+            255
+        } else {
+            2
+        });
         for c in 0..2 {
-            for i in 0..4 {
-                self.chroma_counts[c][(my * 2 + i / 2) * width * 2 + mx * 2 + i % 2] = chroma[c][i];
-            }
+            self.chroma_counts[c][address * 4..address * 4 + 4].copy_from_slice(&chroma[c]);
         }
         Ok(())
     }
     pub fn counts(&self, address: usize) -> Result<([u8; 16], [[u8; 4]; 2])> {
         let width = self.sps.width_mbs as usize;
-        if address >= width * self.sps.height_map_units as usize {
+        if address >= width * self.height_mbs() {
             return Err(invalid("AVC count address out of range"));
         }
-        let (mx, my) = (address % width, address / width);
         Ok((
-            std::array::from_fn(|i| {
-                self.luma_counts[(my * 4 + i / 4) * width * 4 + mx * 4 + i % 4]
-            }),
+            std::array::from_fn(|i| self.luma_counts[address * 16 + i]),
             std::array::from_fn(|c| {
-                std::array::from_fn(|i| {
-                    self.chroma_counts[c][(my * 2 + i / 2) * width * 2 + mx * 2 + i % 2]
-                })
+                std::array::from_fn(|i| self.chroma_counts[c][address * 4 + i])
             }),
         ))
     }
+
     fn read_body(&mut self, mb_type: u32) -> Result<Option<IntraMacroblock>> {
         let width = self.sps.width_mbs as usize;
-        let height = self.sps.height_map_units as usize;
+        let height = self.height_mbs();
         let address = self.address as usize;
+        let field = self.mbaff && self.pair_field(address / 2) == Some(true);
         if address >= width * height {
             return Err(invalid("too many macroblocks in slice"));
         }
-        let mx = address % width;
-        let my = address / width;
-        let stride = width * 4;
         if mb_type > 25 {
             return Err(invalid("invalid intra macroblock type"));
         }
@@ -262,19 +397,10 @@ impl<'a> IntraCavlcReader<'a> {
             }
             mb.luma = IntraLuma::Pcm { y, cb, cr };
             mb.qp = 0;
-            for by in 0..4 {
-                for bx in 0..4 {
-                    let at = (my * 4 + by) * stride + mx * 4 + bx;
-                    self.luma_counts[at] = 16;
-                    self.modes[at] = 2;
-                }
-            }
+            self.luma_counts[address * 16..address * 16 + 16].fill(16);
+            self.modes[address * 16..address * 16 + 16].fill(2);
             for grid in &mut self.chroma_counts {
-                for by in 0..2 {
-                    for bx in 0..2 {
-                        grid[(my * 2 + by) * width * 2 + mx * 2 + bx] = 16;
-                    }
-                }
+                grid[address * 4..address * 4 + 4].fill(16);
             }
             self.address += 1;
             return Ok(Some(mb));
@@ -288,9 +414,7 @@ impl<'a> IntraCavlcReader<'a> {
                 } else {
                     luma_block_xy(block)?
                 };
-                let x = mx * 4 + bx;
-                let y = my * 4 + by;
-                let (a, b) = neighbour(&self.modes, stride, x, y);
+                let (a, b) = self.mode_neighbours(address, [bx, by])?;
                 let mode = |v: Option<u8>| v.and_then(|v| Intra4Mode::try_from(v).ok());
                 let predicted = self.bits.bit()?;
                 let rem = if predicted {
@@ -301,7 +425,7 @@ impl<'a> IntraCavlcReader<'a> {
                 let value = derive_intra4_mode(mode(a), mode(b), predicted, rem)?;
                 for dy in 0..if eight { 2 } else { 1 } {
                     for dx in 0..if eight { 2 } else { 1 } {
-                        self.modes[(y + dy) * stride + x + dx] = value as u8;
+                        self.modes[address * 16 + (by + dy) * 4 + bx + dx] = value as u8;
                     }
                 }
                 modes[by * 4 + bx] = value;
@@ -320,7 +444,7 @@ impl<'a> IntraCavlcReader<'a> {
                 ((((mb_type - 1) / 4) % 3) * 16 + ((mb_type - 1) / 12) * 15) as u8;
             for by in 0..4 {
                 for bx in 0..4 {
-                    self.modes[(my * 4 + by) * stride + mx * 4 + bx] = 2;
+                    self.modes[address * 16 + by * 4 + bx] = 2;
                 }
             }
         }
@@ -340,19 +464,17 @@ impl<'a> IntraCavlcReader<'a> {
         }
         mb.qp = self.qp;
         if mb_type != 0 {
-            let context = nc(&self.luma_counts, stride, mx * 4, my * 4);
+            let context = self.coefficient_context(0, address, [0, 0])?;
             mb.luma_dc = inverse_scan_4x4(
                 &read_residual(&mut self.bits, context, 16)?.coefficients,
-                false,
+                field,
             );
         }
         for block in 0..16 {
             let (bx, by) = luma_block_xy(block)?;
-            let x = mx * 4 + bx;
-            let y = my * 4 + by;
             let mut count = 0;
             if mb.coded_block_pattern & (1 << (block / 4)) != 0 {
-                let context = nc(&self.luma_counts, stride, x, y);
+                let context = self.coefficient_context(0, address, [bx, by])?;
                 let r = read_residual(&mut self.bits, context, if mb_type == 0 { 16 } else { 15 })?;
                 count = r.total_coefficients;
                 if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
@@ -365,13 +487,13 @@ impl<'a> IntraCavlcReader<'a> {
                     levels.copy_within(0..15, 1);
                     levels[0] = 0;
                 }
-                mb.luma_levels[by * 4 + bx] = inverse_scan_4x4(&levels, false);
+                mb.luma_levels[by * 4 + bx] = inverse_scan_4x4(&levels, field);
             }
-            self.luma_counts[y * stride + x] = count;
+            self.luma_counts[address * 16 + by * 4 + bx] = count;
         }
         if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
             for block in levels {
-                *block = super::avc_transform8::inverse_scan_8x8(block, false);
+                *block = super::avc_transform8::inverse_scan_8x8(block, field);
             }
         }
         if mb.coded_block_pattern >> 4 != 0 {
@@ -382,18 +504,17 @@ impl<'a> IntraCavlcReader<'a> {
         }
         for component in 0..2 {
             for block in 0..4 {
-                let x = mx * 2 + block % 2;
-                let y = my * 2 + block / 2;
                 let mut count = 0;
                 if mb.coded_block_pattern >> 4 == 2 {
-                    let context = nc(&self.chroma_counts[component], width * 2, x, y);
+                    let context =
+                        self.coefficient_context(component + 1, address, [block % 2, block / 2])?;
                     let r = read_residual(&mut self.bits, context, 15)?;
                     count = r.total_coefficients;
                     let mut levels = [0; 16];
                     levels[1..].copy_from_slice(&r.coefficients[..15]);
-                    mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, false);
+                    mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);
                 }
-                self.chroma_counts[component][y * width * 2 + x] = count;
+                self.chroma_counts[component][address * 4 + block] = count;
             }
         }
         self.address += 1;
@@ -438,6 +559,39 @@ mod tests {
         assert!(IntraCavlcReader::new(&header, &sps, &pps, 4096).is_err());
     }
     #[test]
+    fn mixed_mbaff_context_checks_modes_and_preserves_external_cursor_on_error() {
+        let (mut sps, pps, mut header) = fixture();
+        sps.frame_mbs_only = false;
+        sps.mb_adaptive_frame_field = true;
+        for slice in [SliceType::P, SliceType::B] {
+            header.slice_type = slice;
+            assert!(IntraCavlcReader::new_mbaff(&header, &sps, &pps, 4096).is_err());
+            let mut reader =
+                IntraCavlcReader::new_context_mbaff(&header, &sps, &pps, 4096).unwrap();
+            reader.record_pair_mode(0, true).unwrap();
+            reader.record_inter(0, [0; 16], [[0; 4]; 2]).unwrap();
+            assert!(reader.record_pair_mode(1, false).is_err());
+            let mut bits = BitReader::new(&[]);
+            assert!(
+                reader
+                    .read_embedded_mbaff(&mut bits, 1, 26, 0, true)
+                    .is_err()
+            );
+            assert_eq!(bits.position(), 0);
+            let mut reader =
+                IntraCavlcReader::new_context_mbaff(&header, &sps, &pps, 4096).unwrap();
+            assert!(
+                reader
+                    .read_embedded_mbaff(&mut bits, u32::MAX, 26, 0, true)
+                    .is_err()
+            );
+            assert_eq!(bits.position(), 0);
+            assert!(reader.record_pair_mode(usize::MAX, true).is_err());
+        }
+        header.field_pic = true;
+        assert!(IntraCavlcReader::new_context_mbaff(&header, &sps, &pps, 4096).is_err());
+    }
+    #[test]
     fn inter_neighbour_participates_in_intra_mode_prediction() {
         let (sps, mut pps, header) = fixture();
         for constrained in [false, true] {
@@ -480,8 +634,25 @@ mod tests {
             assert_eq!(luma_block_xy(i).unwrap(), p);
         }
         assert!(luma_block_xy(16).is_err());
-        assert_eq!(nc(&[255, 255, 255, 0], 2, 1, 1), 0);
-        assert_eq!(nc(&[255, 4, 255, 0], 2, 1, 1), 4);
-        assert_eq!(nc(&[255, 4, 7, 0], 2, 1, 1), 6);
+        for (grid, expected) in [
+            ([255, 255, 255, 0], 0),
+            ([255, 4, 255, 0], 4),
+            ([255, 4, 7, 0], 6),
+        ] {
+            assert_eq!(
+                super::super::avc_mbaff::cavlc_context(
+                    0,
+                    [1, 1],
+                    1,
+                    1,
+                    false,
+                    [2, 2],
+                    |_| None,
+                    |_, local| Some(grid[local[1] * 2 + local[0]]).filter(|n| *n != 255)
+                )
+                .unwrap(),
+                expected
+            );
+        }
     }
 }

@@ -52,7 +52,11 @@ pub fn macroblock_type(slice: SliceType, code: u32) -> Result<MacroblockType> {
         SliceType::P | SliceType::Sp => 5,
         SliceType::B => 23,
         SliceType::I => 0,
-        SliceType::Si => return Err(crate::unsupported("SI macroblock syntax is not implemented")),
+        SliceType::Si => {
+            return Err(crate::unsupported(
+                "SI macroblock syntax is not implemented",
+            ));
+        }
     };
     if code >= offset {
         let intra = code - offset;
@@ -167,6 +171,16 @@ pub fn read_prediction(
     code: u32,
     active: [u32; 2],
 ) -> Result<Vec<Partition>> {
+    read_prediction_field(bits, slice, code, active, false)
+}
+/// Active counts already include field-list expansion when field is true.
+pub fn read_prediction_field(
+    bits: &mut BitReader<'_>,
+    slice: SliceType,
+    code: u32,
+    active: [u32; 2],
+    field: bool,
+) -> Result<Vec<Partition>> {
     let mut input = bits.clone();
     let (mut partitions, zero) = match macroblock_type(slice, code)? {
         MacroblockType::Intra(_) => return Err(invalid("expected AVC inter macroblock")),
@@ -192,7 +206,7 @@ pub fn read_prediction(
                 continue;
             }
             let count = active[list];
-            if count == 0 || count > 32 {
+            if count == 0 || count > if field { 64 } else { 32 } {
                 return Err(invalid("AVC active reference count out of range"));
             }
             let index = if count == 1 || (zero && list == 0) {
@@ -312,6 +326,7 @@ pub struct InterHeader {
     pub partitions: Vec<Partition>,
     pub residual: super::avc_residual_syntax::InterResidualControl,
 }
+#[derive(Clone, Copy)]
 pub struct InterSyntax {
     pub slice: SliceType,
     pub active_references: [u32; 2],
@@ -325,9 +340,22 @@ pub struct InterSyntax {
 /// at the returned bit position. Intra macroblocks must use the intra path.
 /// Error restores the cursor, allowing dispatch based on the same mb_type bits.
 pub fn read_inter_header(bits: &mut BitReader<'_>, syntax: &InterSyntax) -> Result<InterHeader> {
+    read_inter_header_field(bits, syntax, false)
+}
+pub fn read_inter_header_field(
+    bits: &mut BitReader<'_>,
+    syntax: &InterSyntax,
+    field: bool,
+) -> Result<InterHeader> {
     let mut input = bits.clone();
     let mb_type = input.unsigned_golomb()?;
-    let partitions = read_prediction(&mut input, syntax.slice, mb_type, syntax.active_references)?;
+    let partitions = read_prediction_field(
+        &mut input,
+        syntax.slice,
+        mb_type,
+        syntax.active_references,
+        field,
+    )?;
     let allowed =
         syntax.transform8_enabled && allows_transform8(&partitions, syntax.direct8_inference);
     let residual = super::avc_residual_syntax::read_inter_control(
@@ -347,6 +375,20 @@ pub fn read_inter_header(bits: &mut BitReader<'_>, syntax: &InterSyntax) -> Resu
 #[cfg(test)]
 mod header_tests {
     use super::*;
+    #[test]
+    fn field_prediction_reads_expanded_reference_index_without_relaxing_frames() {
+        // ref_idx=63 (ue), two zero signed MVDs.
+        let mut bits = BitReader::new(&[0x02, 0x06]);
+        let parts = read_prediction_field(&mut bits, SliceType::P, 0, [64, 0], true).unwrap();
+        assert_eq!(bits.position(), 15);
+        assert_eq!(parts[0].references, [Some(63), None]);
+        assert_eq!(parts[0].differences, [[0; 2]; 2]);
+        for (active, field) in [([64, 0], false), ([63, 0], true), ([65, 0], true)] {
+            let mut input = BitReader::new(&[0x02, 0x06]);
+            assert!(read_prediction_field(&mut input, SliceType::P, 0, active, field).is_err());
+            assert_eq!(input.position(), 0);
+        }
+    }
     #[test]
     fn inter_header_presence_and_transaction() {
         let syntax = InterSyntax {

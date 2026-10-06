@@ -85,6 +85,7 @@ pub struct Pps {
     pub weighted_prediction: bool,
     pub weighted_biprediction: bool,
     pub transquant_bypass: bool,
+    pub cross_component_prediction: bool,
     pub entropy_sync: bool,
     pub tiles: Option<Tiles>,
     pub loop_filter_across_slices: bool,
@@ -95,6 +96,13 @@ pub struct Pps {
     pub(crate) lists_modification_bit: usize,
     pub parallel_merge_log2: u8,
     pub slice_header_extension: bool,
+    pub scc_extension: bool,
+    /// None inherits the SPS; Some(empty) explicitly clears initial entries.
+    pub palette_initial: Option<Vec<[u16;3]>>,
+    pub current_picture_reference: bool,
+    pub adaptive_colour_transform: bool,
+    pub slice_act_qp_offsets: bool,
+    pub act_qp_offsets: [i8; 3],
 }
 impl Pps {
     pub fn parse(nal: &[u8], sps: &Sps, budget: usize) -> Result<Self> {
@@ -184,17 +192,28 @@ impl Pps {
         let mut transform_skip_max_log2 = 2;
         let mut sao_offset_scale = [0; 2];
         let mut chroma_qp_offset_list = None;
+        let mut cross_component_prediction = false;
+        let mut scc_extension = false;
+        let mut palette_initial=None;
+        let mut current_picture_reference = false;
+        let mut adaptive_colour_transform = false;
+        let mut slice_act_qp_offsets = false;
+        let mut act_qp_offsets = [-5, -5, -3];
         if b.bit()? {
             let range = b.bit()?;
-            if b.read(7)? != 0 {
-                return Err(crate::unsupported("HEVC multilayer/3D/SCC/unknown PPS extensions are not implemented"));
+            let multilayer=b.bit()?;
+            let three_d=b.bit()?;
+            scc_extension=b.bit()?;
+            if multilayer || three_d || b.read(4)?!=0 {
+                return Err(crate::unsupported("HEVC multilayer/3D/unknown PPS extensions are not implemented"));
             }
             if range {
                 if transform_skip {
                     transform_skip_max_log2 = ue(b, u32::from(sps.transform_block_log2[1] - 2))? as u8 + 2;
                 }
-                if b.bit()? {
-                    return Err(crate::unsupported("HEVC cross-component prediction is not implemented"));
+                cross_component_prediction = b.bit()?;
+                if cross_component_prediction && (sps.chroma_format != 3 || sps.separate_colour_plane) {
+                    return Err(invalid("HEVC cross-component prediction requires interleaved 4:4:4"));
                 }
                 if b.bit()? {
                     if sps.chroma_format == 0 || sps.separate_colour_plane {
@@ -205,6 +224,46 @@ impl Pps {
                 }
                 for component in 0..2 {
                     sao_offset_scale[component] = ue(b, u32::from(sps.depth[component].saturating_sub(10)))? as u8;
+                }
+            }
+            if scc_extension {
+                current_picture_reference = b.bit()?;
+                if current_picture_reference && !sps.current_picture_reference {
+                    return Err(invalid("HEVC PPS current-picture reference requires SPS capability"));
+                }
+                adaptive_colour_transform = b.bit()?;
+                if adaptive_colour_transform {
+                    if sps.chroma_format != 3 || sps.separate_colour_plane {
+                        return Err(invalid("HEVC ACT requires interleaved 4:4:4"));
+                    }
+                    slice_act_qp_offsets = b.bit()?;
+                    for (value, bias) in act_qp_offsets.iter_mut().zip([5,5,3]) {
+                        let offset = b.signed_golomb()?.checked_sub(bias)
+                            .filter(|v| (-12..=12).contains(v))
+                            .ok_or_else(|| invalid("HEVC ACT PPS QP offset outside range"))?;
+                        *value = offset as i8;
+                    }
+                }
+                if b.bit()? {
+                    let count=ue(b,128)?;
+                    let mut entries=Vec::new();
+                    if count>0 {
+                        let palette=sps.palette.as_ref().filter(|p|p.maximum>0)
+                            .ok_or_else(||invalid("HEVC PPS palette entries require SPS capability"))?;
+                        if count>u32::from(palette.predictor_maximum) || count as usize*6>budget {
+                            return Err(invalid("HEVC PPS palette initializer count exceeds limit"));
+                        }
+                        let mono=b.bit()?;
+                        if mono!=(sps.chroma_format==0) {return Err(invalid("HEVC PPS palette chroma disagrees with SPS"));}
+                        let y=ue(b,8)? as u8+8;
+                        let c=if mono {sps.depth[1]} else {ue(b,8)? as u8+8};
+                        if [y,c]!=sps.depth {return Err(invalid("HEVC PPS palette depth disagrees with SPS"));}
+                        entries.resize(count as usize,[0;3]);
+                        for component in 0..if mono {1} else {3} {
+                            for entry in &mut entries {entry[component]=b.read(sps.depth[usize::from(component!=0)])? as u16;}
+                        }
+                    }
+                    palette_initial=Some(entries);
                 }
             }
         }
@@ -230,6 +289,7 @@ impl Pps {
             weighted_prediction,
             weighted_biprediction,
             transquant_bypass,
+            cross_component_prediction,
             entropy_sync,
             tiles,
             loop_filter_across_slices,
@@ -240,6 +300,12 @@ impl Pps {
             lists_modification_bit,
             parallel_merge_log2,
             slice_header_extension,
+            scc_extension,
+            palette_initial,
+            current_picture_reference,
+            adaptive_colour_transform,
+            slice_act_qp_offsets,
+            act_qp_offsets,
         })
     }
 }
@@ -572,6 +638,167 @@ mod chroma_qp_fixture_tests {
 
 #[cfg(test)]
 mod pcm_fixture_tests {
+    #[test]
+    fn deep_pcm_streams_match_hm_with_active_pcm_and_restart() {
+        macro_rules! fixture { ($stem:literal,$depth:literal,$pcm:literal,$mixed:literal,$mode:literal) => {
+            (include_bytes!(concat!("../../tests/fixtures/playback-errors/",$stem,".mp4")).as_slice(),
+             include_bytes!(concat!("../../tests/fixtures/playback-errors/",$stem,".yuv")).as_slice(),$depth,$pcm,$mixed,$mode)
+        }; }
+        for (data,oracle,depth,pcm_depth,mixed,mode) in [
+            fixture!("hevc-pcm-444-deep-input8-rext14",14,8,false,0),
+            fixture!("hevc-pcm-444-deep-full-rext14",14,14,false,0),
+            fixture!("hevc-pcm-444-deep-mixed-rext14",14,14,true,1),
+            fixture!("hevc-pcm-444-deep-dependent-rext14",14,14,true,2),
+            fixture!("hevc-pcm-444-deep-parallel-rext14",14,14,true,3),
+            fixture!("hevc-pcm-444-deep-input8-rext16",16,8,false,0),
+            fixture!("hevc-pcm-444-deep-full-rext16",16,16,false,0),
+            fixture!("hevc-pcm-444-deep-mixed-rext16",16,16,true,1),
+            fixture!("hevc-pcm-444-deep-dependent-rext16",16,16,true,2),
+            fixture!("hevc-pcm-444-deep-parallel-rext16",16,16,true,3),
+        ] {
+            let mut input=crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+            let mut decoder=super::super::hevc_decoder::HevcDecoder::from_configuration(&input.tracks()[0].configuration,16<<20).unwrap();
+            assert_eq!(input.tracks()[0].samples.len(),3);
+            assert_eq!(decoder.parameters().0.depth,[depth;2]);
+            assert_eq!(decoder.parameters().0.chroma_format,3);
+            let pcm=decoder.parameters().0.pcm.as_ref().unwrap();
+            assert_eq!(pcm.depth,[pcm_depth;2]);
+            assert_eq!(pcm.loop_filter_disabled,mode!=1);
+            assert_eq!(decoder.parameters().1.entropy_sync,mode==3);
+            assert!(decoder.parameters().0.extended_precision);
+            assert!(decoder.parameters().0.cabac_bypass_alignment);
+            for _ in 0..2 {
+                let mut actual=Vec::new();
+                for i in 0..3 {
+                    let mut packet=Vec::new();input.read_packet(0,i,&mut packet).unwrap();
+                    if mode==2 {assert!(decoder.slice_headers(&packet).unwrap().iter().any(|h|h.dependent));}
+                    let frame=decoder.decode_packet(&packet).unwrap().unwrap();
+                    assert!(frame.picture.pcm_luma_samples>0,"depth {depth}, PCM {pcm_depth}, mode {mode}, frame {i}");
+                    let count=frame.picture.planes[0].samples().len();
+                    if mixed {assert!(frame.picture.pcm_luma_samples<count);} else {assert_eq!(frame.picture.pcm_luma_samples,count);}
+                    for plane in &frame.picture.planes {for v in plane.samples(){actual.extend_from_slice(&v.to_le_bytes());}}
+                }
+                assert_eq!(actual,oracle);decoder.reset();
+            }
+        }
+    }
+
+    #[test]
+    fn monochrome_pcm_corpus_matches_hm_and_restarts() {
+        macro_rules! fixture { ($stem:literal,$depth:literal,$mixed:literal) => {
+            (include_bytes!(concat!("../../tests/fixtures/playback-errors/",$stem,".mp4")).as_slice(),
+             include_bytes!(concat!("../../tests/fixtures/playback-errors/",$stem,".yuv")).as_slice(),$depth,$mixed)
+        }; }
+        for (data,expected,depth,mixed) in [
+            fixture!("hevc-pcm-mono-active-rext8",8,false),
+            fixture!("hevc-pcm-mono-small8-rext8",8,false),
+            fixture!("hevc-pcm-mono-small16-rext8",8,false),
+            fixture!("hevc-pcm-mono-mixed-rext8",8,true),
+            fixture!("hevc-pcm-mono-filtered-rext8",8,false),
+            fixture!("hevc-pcm-mono-parallel-rext8",8,true),
+            fixture!("hevc-pcm-mono-high10-rext10",10,false),
+            fixture!("hevc-pcm-mono-high12-rext12",12,false),
+            fixture!("hevc-pcm-mono-full10-rext10",10,false),
+            fixture!("hevc-pcm-mono-full12-rext12",12,false),
+            fixture!("hevc-pcm-mono-wpp-rext8",8,true),
+            fixture!("hevc-pcm-mono-reference-rext8",8,false),
+            fixture!("hevc-pcm-mono-reference-wpp-rext8",8,false),
+            fixture!("hevc-pcm-mono-dependent-rext8",8,true),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(&input.tracks()[0].configuration,16 << 20).unwrap();
+            assert_eq!(decoder.parameters().0.chroma_format,0);
+            assert_eq!(decoder.parameters().0.depth[0],depth);
+            assert!(decoder.parameters().0.pcm.is_some());
+            for _ in 0..2 {
+                let mut pixels = Vec::new();
+                for index in 0..input.tracks()[0].samples.len() {
+                    let mut packet = Vec::new();
+                    input.read_packet(0,index,&mut packet).unwrap();
+                    let frame = decoder.decode_packet(&packet).unwrap().unwrap();
+                    assert!(frame.picture.planes[1..].iter().all(|p|p.samples().is_empty()));
+                    if index == 0 {
+                        let count = frame.picture.planes[0].samples().len();
+                        assert!(frame.picture.pcm_luma_samples > 0);
+                        if mixed { assert!(frame.picture.pcm_luma_samples < count); }
+                        else { assert_eq!(frame.picture.pcm_luma_samples,count); }
+                    }
+                    for &v in frame.picture.planes[0].samples() {
+                        if depth == 8 {pixels.push(v as u8);} else {pixels.extend_from_slice(&v.to_le_bytes());}
+                    }
+                }
+                assert_eq!(pixels.len(),expected.len());
+                assert!(pixels == expected,"first mismatch {:?}",pixels.iter().zip(expected).position(|(a,b)|a!=b));
+                decoder.reset();
+            }
+        }
+    }
+    #[test]
+    fn subsampled_and_full_chroma_pcm_corpus_matches_hm_and_restarts() {
+        macro_rules! fixture { ($stem:literal,$depth:literal,$mixed:literal,$format:literal) => {
+            (include_bytes!(concat!("../../tests/fixtures/playback-errors/",$stem,".mp4")).as_slice(),
+             include_bytes!(concat!("../../tests/fixtures/playback-errors/",$stem,".yuv")).as_slice(),$depth,$mixed,$format)
+        }; }
+        for (data,expected,depth,mixed,format) in [
+            fixture!("hevc-pcm-422-active-rext8",8,false,2),
+            fixture!("hevc-pcm-422-small8-rext8",8,false,2),
+            fixture!("hevc-pcm-422-small16-rext8",8,false,2),
+            fixture!("hevc-pcm-422-mixed-rext8",8,true,2),
+            fixture!("hevc-pcm-422-filtered-rext8",8,false,2),
+            fixture!("hevc-pcm-422-parallel-rext8",8,true,2),
+            fixture!("hevc-pcm-422-high10-rext10",10,false,2),
+            fixture!("hevc-pcm-422-high12-rext12",12,false,2),
+            fixture!("hevc-pcm-422-full10-rext10",10,false,2),
+            fixture!("hevc-pcm-422-full12-rext12",12,false,2),
+            fixture!("hevc-pcm-422-wpp-rext8",8,true,2),
+            fixture!("hevc-pcm-422-reference-rext8",8,false,2),
+            fixture!("hevc-pcm-422-reference-wpp-rext8",8,false,2),
+            fixture!("hevc-pcm-422-dependent-rext8",8,true,2),
+            fixture!("hevc-pcm-444-active-rext8",8,false,3),
+            fixture!("hevc-pcm-444-small8-rext8",8,false,3),
+            fixture!("hevc-pcm-444-small16-rext8",8,false,3),
+            fixture!("hevc-pcm-444-mixed-rext8",8,true,3),
+            fixture!("hevc-pcm-444-filtered-rext8",8,false,3),
+            fixture!("hevc-pcm-444-parallel-rext8",8,true,3),
+            fixture!("hevc-pcm-444-high10-rext10",10,false,3),
+            fixture!("hevc-pcm-444-high12-rext12",12,false,3),
+            fixture!("hevc-pcm-444-full10-rext10",10,false,3),
+            fixture!("hevc-pcm-444-full12-rext12",12,false,3),
+            fixture!("hevc-pcm-444-wpp-rext8",8,true,3),
+            fixture!("hevc-pcm-444-reference-rext8",8,false,3),
+            fixture!("hevc-pcm-444-reference-wpp-rext8",8,false,3),
+            fixture!("hevc-pcm-444-dependent-rext8",8,true,3),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(&input.tracks()[0].configuration,16 << 20).unwrap();
+            assert_eq!(decoder.parameters().0.chroma_format,format);
+            assert_eq!(decoder.parameters().0.depth[0],depth);
+            assert!(decoder.parameters().0.pcm.is_some());
+            for _ in 0..2 {
+                let mut pixels = Vec::new();
+                for index in 0..input.tracks()[0].samples.len() {
+                    let mut packet = Vec::new();
+                    input.read_packet(0,index,&mut packet).unwrap();
+                    let frame = decoder.decode_packet(&packet).unwrap().unwrap();
+                    let dims = frame.picture.dimensions.map(|v|v as usize);
+                    assert_eq!(frame.picture.planes[1].dimensions(),[dims[0] >> usize::from(format==2),dims[1]]);
+                    assert_eq!(frame.picture.planes[2].dimensions(),frame.picture.planes[1].dimensions());
+                    if index == 0 {
+                        let count = frame.picture.planes[0].samples().len();
+                        assert!(frame.picture.pcm_luma_samples > 0);
+                        if mixed { assert!(frame.picture.pcm_luma_samples < count); }
+                        else { assert_eq!(frame.picture.pcm_luma_samples,count); }
+                    }
+                    for plane in &frame.picture.planes { for &v in plane.samples() {
+                        if depth == 8 {pixels.push(v as u8);} else {pixels.extend_from_slice(&v.to_le_bytes());}
+                    }}
+                }
+                assert_eq!(pixels.len(),expected.len());
+                assert!(pixels == expected,"first mismatch {:?}",pixels.iter().zip(expected).position(|(a,b)|a!=b));
+                decoder.reset();
+            }
+        }
+    }
     #[test]
     fn pcm_fixtures_match_hm_samples_restart_and_filter_policy() {
         macro_rules! fixture {

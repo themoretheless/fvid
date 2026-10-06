@@ -23,6 +23,17 @@ const TC2: [i32; 52] = [
     2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 7, 8, 8, 10, 11, 12, 13, 15, 17,
 ];
 
+/// H.264 8.7.2.1: boundary strength when both sides are intra coded.
+/// Horizontal macroblock edges involving a field use bS=3; vertical
+/// macroblock edges and horizontal frame/frame edges use bS=4.
+pub fn intra_strength(macroblock_edge: bool, vertical: bool, field: [bool; 2]) -> u8 {
+    if macroblock_edge && (vertical || !field[0] && !field[1]) {
+        4
+    } else {
+        3
+    }
+}
+
 /// Filter one perpendicular sample line across a progressive edge.
 /// p[0]/q[0] touch the edge; QP is the rounded average of neighbouring
 /// component QPs without the bit-depth offset. Offsets are twice slice syntax.
@@ -56,6 +67,52 @@ pub fn filter_samples(
         strength,
     );
     Ok((p.map(|v| v as u16), q.map(|v| v as u16)))
+}
+
+/// Filter one edge line in frame storage. `step` advances perpendicular to
+/// the edge; a horizontal field edge uses twice the frame plane stride.
+/// Caller derives edge topology and strengths; the complete eight-sample
+/// footprint and filter parameters are validated before any mutation.
+pub fn filter_line(
+    plane: &mut [u16],
+    at: usize,
+    step: usize,
+    qp: i32,
+    offsets: [i32; 2],
+    depth: u8,
+    chroma: bool,
+    strength: u8,
+) -> crate::Result<()> {
+    if step == 0 {
+        return Err(crate::invalid("AVC deblocking sample step is zero"));
+    }
+    let mut pi = [0usize; 4];
+    let mut qi = [0usize; 4];
+    for i in 0..4 {
+        pi[i] = (i + 1)
+            .checked_mul(step)
+            .and_then(|n| at.checked_sub(n))
+            .ok_or_else(|| crate::invalid("AVC deblocking p footprint outside plane"))?;
+        qi[i] = i
+            .checked_mul(step)
+            .and_then(|n| at.checked_add(n))
+            .filter(|n| *n < plane.len())
+            .ok_or_else(|| crate::invalid("AVC deblocking q footprint outside plane"))?;
+    }
+    let (p, q) = filter_samples(
+        pi.map(|index| plane[index]),
+        qi.map(|index| plane[index]),
+        qp,
+        offsets,
+        depth,
+        chroma,
+        strength,
+    )?;
+    for i in 0..3 {
+        plane[pi[i]] = p[i];
+        plane[qi[i]] = q[i];
+    }
+    Ok(())
 }
 
 fn filter(
@@ -166,7 +223,7 @@ pub(super) fn intra_plane(
             transform8: eight[index] != 0,
         };
         for direction in 0..2 {
-            block.strengths[direction][0] = [4; 4];
+            block.strengths[direction][0] = [intra_strength(true, direction == 0, [false; 2]); 4];
             let neighbour = if direction == 0 {
                 if index % mb_width == 0 {
                     None
@@ -194,6 +251,43 @@ pub(super) fn intra_plane(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn field_line_filters_only_its_parity_and_rejects_invalid_footprints_atomically() {
+        let mut plane = [200u16; 24];
+        for i in (0..24).step_by(2) {
+            plane[i] = if i < 12 { 100 } else { 104 };
+        }
+        filter_line(&mut plane, 12, 2, 40, [0; 2], 8, false, 4).unwrap();
+        assert_eq!(
+            [plane[10], plane[8], plane[6], plane[4]],
+            [102, 101, 101, 100]
+        );
+        assert_eq!(
+            [plane[12], plane[14], plane[16], plane[18]],
+            [103, 103, 104, 104]
+        );
+        assert!((1..24).step_by(2).all(|i| plane[i] == 200));
+        let saved = plane;
+        for (at, step) in [(1, 2), (22, 2), (12, 0), (12, usize::MAX)] {
+            assert!(filter_line(&mut plane, at, step, 40, [0; 2], 8, false, 4).is_err());
+            assert_eq!(plane, saved);
+        }
+    }
+    #[test]
+    fn intra_field_horizontal_boundaries_use_normal_filter_strength() {
+        for fields in [[false, false], [false, true], [true, false], [true, true]] {
+            assert_eq!(intra_strength(true, true, fields), 4);
+            assert_eq!(intra_strength(false, false, fields), 3);
+            let strength = intra_strength(true, false, fields);
+            let (p, q) =
+                filter_samples([100; 4], [104; 4], 40, [0; 2], 8, false, strength).unwrap();
+            if fields == [false, false] {
+                assert_eq!((p, q), ([102, 101, 101, 100], [103, 103, 104, 104]));
+            } else {
+                assert_eq!((p, q), ([102, 101, 100, 100], [102, 103, 104, 104]));
+            }
+        }
+    }
     #[test]
     fn strong_and_normal_edges_and_threshold_equality() {
         assert_eq!(
@@ -252,6 +346,111 @@ pub struct MacroblockEdges {
     pub offsets: [i32; 2],
     pub transform8: bool,
 }
+/// Intra-only MBAFF metadata in pair address order. Component QP values exclude
+/// the bit-depth offset; PCM callers supply zero component QPs.
+#[derive(Clone, Copy)]
+pub struct MbaffIntraBlock {
+    pub qp: [i32; 3],
+    pub field: bool,
+    pub transform8: bool,
+    pub slice: usize,
+    pub disable: u8,
+    pub offsets: [i32; 2],
+}
+/// Filter one 4:2:0 component after all intra reconstruction has finished.
+/// Pair address order and vertical-before-horizontal order are significant.
+pub fn mbaff_intra_plane(
+    plane: &mut [u16],
+    width: usize,
+    height: usize,
+    depth: u8,
+    component: usize,
+    blocks: &[MbaffIntraBlock],
+) -> crate::Result<()> {
+    let chroma = component != 0;
+    let size = if chroma { 8 } else { 16 };
+    if component > 2
+        || width == 0
+        || height == 0
+        || width % size != 0
+        || height % (2 * size) != 0
+        || width.checked_mul(height) != Some(plane.len())
+        || !(8..=14).contains(&depth)
+        || blocks.len() != width / size * (height / size)
+        || blocks.iter().any(|b| {
+            b.disable > 2
+                || b.qp.iter().any(|q| !(-36..=51).contains(q))
+                || b.offsets.iter().any(|v| !(-12..=12).contains(v))
+        })
+        || blocks
+            .chunks_exact(2)
+            .any(|pair| pair[0].field != pair[1].field)
+    {
+        return Err(crate::invalid("invalid MBAFF intra deblocking metadata"));
+    }
+    let sub = if chroma { [2, 2] } else { [1, 1] };
+    let w = width / size;
+    let h = height / size;
+    let pair_field = |pair: usize| blocks.get(pair * 2).map(|b| b.field);
+    for (address, block) in blocks.iter().enumerate() {
+        if block.disable == 1 {
+            continue;
+        }
+        for vertical in [true, false] {
+            for edge in 0..4 {
+                if (chroma || block.transform8) && edge % 2 != 0 {
+                    continue;
+                }
+                let offset = edge * size / 4;
+                // A frame top below a field pair is filtered on both parities.
+                let mixed_top = !vertical
+                    && edge == 0
+                    && !block.field
+                    && super::avc_mbaff::deblock_line(
+                        address, w, h, true, sub, false, 0, 0, false, pair_field,
+                    )?
+                    .is_some_and(|line| blocks[line.p_owner.0].field);
+                for extra in 0..if mixed_top { 2 } else { 1 } {
+                    for line in 0..size {
+                        let Some(geometry) = super::avc_mbaff::deblock_line(
+                            address,
+                            w,
+                            h,
+                            true,
+                            sub,
+                            vertical,
+                            offset + extra,
+                            line,
+                            mixed_top,
+                            pair_field,
+                        )?
+                        else {
+                            continue;
+                        };
+                        let neighbour = &blocks[geometry.p_owner.0];
+                        if block.disable == 2 && neighbour.slice != block.slice {
+                            continue;
+                        }
+                        let qp = (block.qp[component] + neighbour.qp[component] + 1) >> 1;
+                        let strength =
+                            intra_strength(edge == 0, vertical, [block.field, neighbour.field]);
+                        filter_line(
+                            plane,
+                            geometry.at,
+                            geometry.step,
+                            qp,
+                            block.offsets,
+                            depth,
+                            chroma,
+                            strength,
+                        )?;
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
+}
 /// Filter a packed progressive luma or 4:2:0 chroma plane in macroblock order.
 /// Chroma uses luma edges 0 and 2, with two chroma samples per strength segment.
 /// Metadata and input samples are checked before any in-place changes.
@@ -306,21 +505,16 @@ pub fn inter_plane(
                     let x = mx * size + if vertical { offset } else { line };
                     let y = my * size + if vertical { line } else { offset };
                     let at = y * width + x;
-                    let p = std::array::from_fn(|i| i32::from(plane[at - (i + 1) * step]));
-                    let q = std::array::from_fn(|i| i32::from(plane[at + i * step]));
-                    let (p, q) = filter(
-                        p,
-                        q,
+                    filter_line(
+                        plane,
+                        at,
+                        step,
                         meta.qp[direction][edge],
                         meta.offsets,
                         depth,
                         chroma,
                         strength,
-                    );
-                    for i in 0..3 {
-                        plane[at - (i + 1) * step] = p[i] as u16;
-                        plane[at + i * step] = q[i] as u16;
-                    }
+                    )?;
                 }
             }
         }
@@ -330,6 +524,168 @@ pub fn inter_plane(
 #[cfg(test)]
 mod traversal_tests {
     use super::*;
+    #[test]
+    fn mixed_horizontal_top_filters_both_parities_with_normal_strength() {
+        let input: Vec<u16> = (0..64)
+            .flat_map(|y| (0..16).map(move |_| if y < 32 { 100 } else { 104 }))
+            .collect();
+        let mut blocks = vec![
+            MbaffIntraBlock {
+                qp: [40; 3],
+                field: false,
+                transform8: true,
+                slice: 0,
+                disable: 0,
+                offsets: [0; 2]
+            };
+            4
+        ];
+        blocks[0].field = true;
+        blocks[1].field = true;
+        blocks[0].qp = [16; 3];
+        let mut expected = input.clone();
+        for parity in 0..2 {
+            for x in 0..16 {
+                filter_line(
+                    &mut expected,
+                    (32 + parity) * 16 + x,
+                    32,
+                    if parity == 0 { 28 } else { 40 },
+                    [0; 2],
+                    8,
+                    false,
+                    3,
+                )
+                .unwrap();
+            }
+        }
+        let mut actual = input.clone();
+        mbaff_intra_plane(&mut actual, 16, 64, 8, 0, &blocks).unwrap();
+        assert_eq!(actual, expected);
+        blocks[2].slice = 1;
+        blocks[3].slice = 1;
+        blocks[2].disable = 2;
+        blocks[3].disable = 2;
+        let mut actual = input.clone();
+        mbaff_intra_plane(&mut actual, 16, 64, 8, 0, &blocks).unwrap();
+        assert_eq!(actual, input);
+    }
+    #[test]
+    fn mixed_vertical_boundary_uses_each_frame_owner_qp_and_slice() {
+        let input: Vec<u16> = (0..32)
+            .flat_map(|_| (0..32).map(|x| if x < 16 { 100 } else { 104 }))
+            .collect();
+        let mut blocks = vec![
+            MbaffIntraBlock {
+                qp: [40; 3],
+                field: false,
+                transform8: true,
+                slice: 0,
+                disable: 0,
+                offsets: [0; 2]
+            };
+            4
+        ];
+        blocks[0].qp = [16; 3];
+        blocks[2].field = true;
+        blocks[3].field = true;
+        let mut expected = input.clone();
+        for row in 0..32 {
+            filter_line(
+                &mut expected,
+                row * 32 + 16,
+                1,
+                if row < 16 { 28 } else { 40 },
+                [0; 2],
+                8,
+                false,
+                4,
+            )
+            .unwrap();
+        }
+        let mut actual = input.clone();
+        mbaff_intra_plane(&mut actual, 32, 32, 8, 0, &blocks).unwrap();
+        assert_eq!(actual, expected);
+        blocks[0].slice = 1;
+        blocks[2].disable = 2;
+        blocks[3].disable = 2;
+        let mut expected = input.clone();
+        for row in 16..32 {
+            filter_line(&mut expected, row * 32 + 16, 1, 40, [0; 2], 8, false, 4).unwrap();
+        }
+        let mut actual = input;
+        mbaff_intra_plane(&mut actual, 32, 32, 8, 0, &blocks).unwrap();
+        assert_eq!(actual, expected);
+    }
+    #[test]
+    fn mbaff_intra_traversal_matches_separate_field_planes() {
+        for component in 0..3 {
+            let size = if component == 0 { 16 } else { 8 };
+            let width = 2 * size;
+            let height = 2 * size;
+            let input: Vec<u16> = (0..height)
+                .flat_map(|y| {
+                    (0..width)
+                        .map(move |x| 80 + (x / 4 * 3 + y / 8 * 2) as u16 + (y % 2 * 24) as u16)
+                })
+                .collect();
+            let blocks = vec![
+                MbaffIntraBlock {
+                    qp: [40; 3],
+                    field: true,
+                    transform8: false,
+                    slice: 0,
+                    disable: 0,
+                    offsets: [0; 2]
+                };
+                4
+            ];
+            let mut actual = input.clone();
+            mbaff_intra_plane(&mut actual, width, height, 8, component, &blocks).unwrap();
+            let mut expected = input.clone();
+            for parity in 0..2 {
+                let mut field: Vec<_> = input
+                    .chunks_exact(width)
+                    .skip(parity)
+                    .step_by(2)
+                    .flatten()
+                    .copied()
+                    .collect();
+                let mut edges = vec![
+                    MacroblockEdges {
+                        strengths: [[[3; 4]; 4]; 2],
+                        qp: [[40; 4]; 2],
+                        offsets: [0; 2],
+                        transform8: false
+                    };
+                    2
+                ];
+                for edge in &mut edges {
+                    edge.strengths[0][0] = [4; 4];
+                }
+                inter_plane(&mut field, width, size, 8, component != 0, &edges).unwrap();
+                for (y, row) in field.chunks_exact(width).enumerate() {
+                    expected[(y * 2 + parity) * width..(y * 2 + parity + 1) * width]
+                        .copy_from_slice(row);
+                }
+            }
+            assert_eq!(actual, expected);
+            assert_ne!(actual, input);
+            let mut invalid = blocks.clone();
+            invalid[3].field = false;
+            let mut unchanged = input.clone();
+            assert!(
+                mbaff_intra_plane(&mut unchanged, width, height, 8, component, &invalid).is_err()
+            );
+            assert_eq!(unchanged, input);
+            for block in &mut invalid {
+                block.field = true;
+                block.disable = 1;
+            }
+            mbaff_intra_plane(&mut unchanged, width, height, 8, component, &invalid).unwrap();
+            assert_eq!(unchanged, input);
+        }
+    }
     #[test]
     fn segment_strength_and_invalid_metadata_atomicity() {
         for chroma in [false, true] {

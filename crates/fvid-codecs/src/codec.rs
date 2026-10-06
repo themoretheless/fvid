@@ -77,6 +77,10 @@ pub mod avc_intra;
 pub mod avc_macroblock;
 #[path = "../../../src/codec/avc_motion.rs"]
 pub mod avc_motion;
+#[path = "../../../src/codec/avc_mbaff_picture.rs"]
+pub mod avc_mbaff_picture;
+#[path = "../../../src/codec/avc_mbaff.rs"]
+pub mod avc_mbaff;
 #[path = "../../../src/codec/avc_motion_field.rs"]
 pub mod avc_motion_field;
 #[path = "../../../src/codec/avc_mv.rs"]
@@ -131,6 +135,8 @@ pub mod hevc_inter_syntax;
 pub mod hevc_intra;
 #[path = "../../../src/codec/hevc_intra_syntax.rs"]
 pub mod hevc_intra_syntax;
+#[path = "../../../src/codec/hevc_cross_component.rs"]
+pub mod hevc_cross_component;
 #[path = "../../../src/codec/hevc_motion.rs"]
 pub mod hevc_motion;
 #[path = "../../../src/codec/hevc_nal.rs"]
@@ -203,3 +209,10 @@ pub mod vp9_transform;
 #[cfg(test)]
 #[path = "../../../src/codec/hevc_long_term_fixture.rs"]
 mod hevc_long_term_fixture;
+
+#[path = "../../../src/codec/hevc_act.rs"]
+pub(crate) mod hevc_act;
+#[path = "../../../src/codec/hevc_palette.rs"]
+pub(crate) mod hevc_palette;
+#[path = "../../../src/codec/hevc_reference_list.rs"]
+pub(crate) mod hevc_reference_list;

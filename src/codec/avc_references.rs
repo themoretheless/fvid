@@ -1,4 +1,4 @@
-//! Frame reference-list construction (H.264 8.2.4). Field lists are not supported.
+//! Frame reference-list construction and MBAFF field selection (H.264 8.2.4/8.4.2.1).
 //! Entries are supplied by the decoded-picture buffer before marking the current frame.
 use super::avc_slice::{RefModification, SliceType};
 use crate::{Result, invalid};
@@ -16,6 +16,43 @@ pub struct FrameReference {
 pub struct ReferenceLists {
     pub l0: Vec<u64>,
     pub l1: Vec<u64>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PictureSelection {
+    pub id: u64,
+    /// None denotes a complete frame; false/true denote top/bottom fields.
+    pub bottom_field: Option<bool>,
+    /// Explicit prediction weights remain indexed by the frame list.
+    pub frame_index: usize,
+}
+impl ReferenceLists {
+    /// MBAFF uses the already modified frame list. Adjacent field indices
+    /// select the same/opposite parity field of one list entry.
+    pub fn select_mbaff(
+        &self,
+        list: usize,
+        reference: u8,
+        field: bool,
+        bottom: bool,
+    ) -> Result<PictureSelection> {
+        let entries = match list {
+            0 => &self.l0,
+            1 => &self.l1,
+            _ => return Err(invalid("invalid AVC reference list")),
+        };
+        if entries.len() > 32 || reference > if field { 63 } else { 31 } {
+            return Err(invalid("invalid MBAFF reference index"));
+        }
+        let frame_index = usize::from(reference) / if field { 2 } else { 1 };
+        let id = *entries
+            .get(frame_index)
+            .ok_or_else(|| invalid("MBAFF reference picture is missing"))?;
+        Ok(PictureSelection {
+            id,
+            bottom_field: field.then_some(bottom ^ (reference % 2 != 0)),
+            frame_index,
+        })
+    }
 }
 
 /// Build and modify lists for progressive frames. `active` gives the two active
@@ -168,6 +205,41 @@ pub fn frame_lists(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn mbaff_selects_frame_entry_and_same_or_opposite_field_for_both_lists() {
+        let lists = ReferenceLists {
+            l0: (100..132).collect(),
+            l1: (200..232).rev().collect(),
+        };
+        for list in 0..2 {
+            let entries = if list == 0 { &lists.l0 } else { &lists.l1 };
+            for bottom in [false, true] {
+                for index in 0..64u8 {
+                    let selected = lists.select_mbaff(list, index, true, bottom).unwrap();
+                    assert_eq!(selected.id, entries[usize::from(index / 2)]);
+                    assert_eq!(selected.frame_index, usize::from(index / 2));
+                    assert_eq!(
+                        selected.bottom_field,
+                        Some(if index % 2 == 0 { bottom } else { !bottom })
+                    );
+                }
+                for index in 0..32u8 {
+                    let selected = lists.select_mbaff(list, index, false, bottom).unwrap();
+                    assert_eq!(selected.id, entries[usize::from(index)]);
+                    assert_eq!(selected.bottom_field, None);
+                }
+            }
+        }
+        assert!(lists.select_mbaff(2, 0, true, false).is_err());
+        assert!(lists.select_mbaff(0, 64, true, false).is_err());
+        assert!(lists.select_mbaff(0, 32, false, false).is_err());
+        let missing = ReferenceLists {
+            l0: vec![77],
+            l1: vec![],
+        };
+        assert!(missing.select_mbaff(0, 2, true, false).is_err());
+        assert!(missing.select_mbaff(1, 0, true, false).is_err());
+    }
     fn r(id: u64, frame_num: u32, poc: i32, long: Option<u32>) -> FrameReference {
         FrameReference {
             id,

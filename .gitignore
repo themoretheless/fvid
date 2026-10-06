@@ -10,3 +10,5 @@
 __pycache__/
 
 /.airbug-bench/
+
+.DS_Store

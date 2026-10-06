@@ -1,0 +1,12 @@
+--- a/source/Lib/TLibCommon/TComPrediction.cpp
++++ b/source/Lib/TLibCommon/TComPrediction.cpp
+@@ -566,6 +566,9 @@
+ Void TComPrediction::xPredInterUni ( TComDataCU* pcCU, UInt uiPartAddr, Int iWidth, Int iHeight, RefPicList eRefPicList, TComYuv* pcYuvPred, Bool bi )
+ {
+   Int         iRefIdx     = pcCU->getCUMvField( eRefPicList )->getRefIdx( uiPartAddr );           assert (iRefIdx >= 0);
++  if (pcCU->getSlice()->getRefPic(eRefPicList, iRefIdx)->getPOC() == pcCU->getSlice()->getPOC()) {
++    fprintf(stderr, "FVID_IBC_BLOCK\n");
++  }
+   TComMv      cMv         = pcCU->getCUMvField( eRefPicList )->getMv( uiPartAddr );
+   pcCU->clipMv(cMv);
+ 

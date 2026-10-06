@@ -1,0 +1,26 @@
+{
+  "encoder_sha256": "fe5557400655edb464461a14d74d8c75d0180ed011939bc160b5ad5226b0079c",
+  "decoder_sha256": "877b2303f9e97dcdeceb1813d4d01b8fd0c6543267f9c2af56bb520f3e55f71b",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-current-capability-rext8",
+      "reference_sha256": "195c1c7ad7de2352b6f1eefddd33760cd940906f48c8411fc13574ab9a63b815",
+      "mp4_sha256": "09afbce40890dfa005e75df5858dd621b60ee1f6ac8a7b6bec019931c8aec3c5"
+    },
+    {
+      "stem": "hevc-scc-current-capability-parallel-rext8",
+      "reference_sha256": "2e027dd8490697e359b85ad1a6842cb3732e606527e2a38fe183f56e0fcef5dc",
+      "mp4_sha256": "c8350f9aa5e8c48de1c5354ac68af6a6e2b472f0a67f2abf1bfde88e55c46594"
+    },
+    {
+      "stem": "hevc-scc-current-capability-rext10",
+      "reference_sha256": "3991ad967ecfbd68d4b1b05d0270b45c20d5efab749847cbac719283aa989569",
+      "mp4_sha256": "59c9b7caaec8f229a0f7f922670f1b64269e725163ef10b4e4855723ca5e9d25"
+    },
+    {
+      "stem": "hevc-scc-current-capability-parallel-rext10",
+      "reference_sha256": "6e57bd150dfebde3ce7cefa0cb32a933cce13d307892f6fb8545cf6cf1483c55",
+      "mp4_sha256": "90263dc80d50352cd97c11be4cd95768384f23c7ee399d65245d61b685556652"
+    }
+  ]
+}

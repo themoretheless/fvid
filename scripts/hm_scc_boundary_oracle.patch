@@ -1,0 +1,20 @@
+--- a/source/Lib/TLibCommon/TComPrediction.cpp
++++ b/source/Lib/TLibCommon/TComPrediction.cpp
+@@ -455,7 +455,7 @@
+       // Create the prediction
+             TComDataCU *const pcCU              = rTu.getCU();
+       const UInt              uiAbsPartIdx      = rTu.GetAbsPartIdxTU();
+-      const Bool              enableEdgeFilters = !(pcCU->isRDPCMEnabled(uiAbsPartIdx) && pcCU->getCUTransquantBypass(uiAbsPartIdx));
++      const Bool              enableEdgeFilters = false; // SCC intra_boundary_filtering_disabled_flag=1 oracle
+ #if O0043_BEST_EFFORT_DECODING
+       const Int channelsBitDepthForPrediction = rTu.getCU()->getSlice()->getSPS()->getStreamBitDepth(channelType);
+ #else
+@@ -463,7 +463,7 @@
+ #endif
+       xPredIntraAng( channelsBitDepthForPrediction, ptrSrc+sw+1, sw, pDst, uiStride, iWidth, iHeight, channelType, uiDirMode, enableEdgeFilters );
+ 
+-      if( uiDirMode == DC_IDX )
++      if( uiDirMode == DC_IDX && enableEdgeFilters )
+       {
+         xDCPredFiltering( ptrSrc+sw+1, sw, pDst, uiStride, iWidth, iHeight, channelType );
+       }

@@ -136,6 +136,7 @@ pub fn write_mp4_selected<W: Write + Seek>(
                 (w, h, picture.bit_depth)
             }
             RawFrame::Planar8(p) => (p.width, p.height, 8),
+            RawFrame::Planar(p) => (p.frame.width,p.frame.height,p.depth),
             _ => return Err(invalid("unexpected FFV1 input picture type")),
         };
         let mut samples = if bake_rotation {
@@ -287,6 +288,7 @@ pub fn write_mp4_selected<W: Write + Seek>(
                 (w, h, picture.bit_depth)
             }
             RawFrame::Planar8(planes) => (planes.width, planes.height, 8),
+            RawFrame::Planar(p) => (p.frame.width,p.frame.height,p.depth),
             _ => return Err(invalid("unexpected FFV1 input picture type")),
         };
         if w != usize::from(tracks[video].width)

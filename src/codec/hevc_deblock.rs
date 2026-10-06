@@ -17,7 +17,7 @@ pub fn luma_thresholds(
     offsets_div2: [i8; 2],
     depth: u8,
 ) -> Result<[i32; 2]> {
-    if !(8..=12).contains(&depth)
+    if !(8..=16).contains(&depth)
         || strength > 2
         || offsets_div2.iter().any(|v| !(-6..=6).contains(v))
     {
@@ -49,9 +49,9 @@ pub fn luma_decision(
     depth: u8,
 ) -> Result<LumaFilter> {
     let [beta, tc] = thresholds;
-    if !(8..=12).contains(&depth)
-        || !(0..=1024).contains(&beta)
-        || !(0..=384).contains(&tc)
+    if !(8..=16).contains(&depth)
+        || !(0..=(64 << (depth-8).max(4))).contains(&beta)
+        || !(0..=(24 << (depth-8).max(4))).contains(&tc)
         || lines
             .iter()
             .flatten()
@@ -93,7 +93,7 @@ pub fn luma_sample(
     filter: LumaFilter,
     enabled: [bool; 2],
 ) -> Result<[[u16; 4]; 2]> {
-    if !(8..=12).contains(&depth) || !(0..=384).contains(&tc) {
+    if !(8..=16).contains(&depth) || !(0..=(24 << (depth-8).max(4))).contains(&tc) {
         return Err(invalid("invalid HEVC luma filter parameters"));
     }
     let max = (1i32 << depth) - 1;
@@ -158,7 +158,7 @@ pub fn chroma_tc(
 pub fn chroma_tc_with_format(qp_p: i32, qp_q: i32, pps_offset: i8,
     tc_offset_div2: i8, depths: [u8;2], chroma_format: u8) -> Result<i32> {
     if !(1..=3).contains(&chroma_format) { return Err(invalid("invalid HEVC deblock chroma format")); }
-    if depths.iter().any(|d| !(8..=12).contains(d))
+    if depths.iter().any(|d| !(8..=16).contains(d))
         || !(-12..=12).contains(&pps_offset)
         || !(-6..=6).contains(&tc_offset_div2)
     {
@@ -188,7 +188,7 @@ pub fn chroma_sample(
     depth: u8,
     enabled: [bool; 2],
 ) -> Result<[u16; 2]> {
-    if !(8..=12).contains(&depth) || !(0..=384).contains(&tc) {
+    if !(8..=16).contains(&depth) || !(0..=(24 << (depth-8).max(4))).contains(&tc) {
         return Err(invalid("invalid HEVC chroma threshold"));
     }
     let max = (1i32 << depth) - 1;

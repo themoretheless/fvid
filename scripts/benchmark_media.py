@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """End-to-end native media benchmark; decoded equality gates every variant."""
 import argparse, datetime, hashlib, json, pathlib, random, statistics, subprocess, tempfile, time
-import validate_media as validation
+import benchmark_media_reference as validation
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 def main():

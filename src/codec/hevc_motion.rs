@@ -10,8 +10,21 @@ use std::sync::Arc;
 pub struct Reference {
     pub long_term: bool,
     pub poc: i32,
-    pub picture: Arc<Picture>,
+    pub picture: Option<Arc<Picture>>,
 }
+#[derive(Clone, Copy)]
+struct View<'a> { dimensions: [u32;2], depth: [u8;2], planes: &'a [super::hevc_plane::Plane;3] }
+impl Reference {
+    fn view<'a>(&'a self, current: Option<(&'a [super::hevc_plane::Plane;3],[u8;2])>) -> Result<View<'a>> {
+        if let Some(p) = self.picture.as_deref() {
+            Ok(View {dimensions:p.dimensions,depth:p.depth,planes:&p.planes})
+        } else {
+            let (planes,depth) = current.ok_or_else(|| invalid("HEVC current-picture source is missing"))?;
+            Ok(View {dimensions:planes[0].dimensions().map(|v| v as u32),depth,planes})
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Vector {
     pub reference: u8,
@@ -60,7 +73,7 @@ impl Spatial<'_> {
         let collocated = self.lists[header.collocated_list]
             .get(header.collocated_ref as usize)
             .ok_or_else(|| invalid("HEVC collocated reference is missing"))?;
-        let p = &collocated.picture;
+        let Some(p) = collocated.picture.as_deref() else { return Ok(None); };
         let [x, y, w, h] = self.rect;
         let low_delay = self.lists.iter().flatten().all(|r| r.poc <= self.poc);
         for (index, [xx, yy]) in [[x + w, y + h], [x + w / 2, y + h / 2]]
@@ -101,6 +114,8 @@ impl Spatial<'_> {
             let source_long = *p.reference_long_term[source_list]
                 .get(vector.reference as usize)
                 .ok_or_else(|| invalid("HEVC collocated reference classification is missing"))?;
+            // 8.5.3.2.9 also admits current-picture references: matching
+            // long-term vectors transfer unchanged, even with zero POC distance.
             if let Some(mv) = reference_predictor(vector.mv,
                 collocated.poc.saturating_sub(source_poc),
                 self.poc.saturating_sub(target.poc), source_long, target.long_term)? {
@@ -257,6 +272,13 @@ impl Spatial<'_> {
                 let mut result = *candidates
                     .get(index as usize)
                     .ok_or_else(|| invalid("HEVC merge index out of range"))?;
+                for (list,vector) in result.iter_mut().enumerate() {
+                    if let Some(v) = vector {
+                        if header.use_integer_mv || self.lists[list][v.reference as usize].picture.is_none() {
+                            v.mv = v.mv.map(|x| (x>>2)<<2);
+                        }
+                    }
+                }
                 if w + h == 12 && result.iter().all(Option::is_some) {
                     result[1] = None;
                 }
@@ -331,7 +353,7 @@ impl Spatial<'_> {
                     result[list] = Some(Vector {
                         reference,
                         mv: std::array::from_fn(|i| {
-                            predicted[i].wrapping_add(differences[list][i])
+                            add_motion_difference(predicted[i], differences[list][i], header.use_integer_mv || self.lists[list][reference as usize].picture.is_none())
                         }),
                     });
                 }
@@ -379,23 +401,28 @@ const CHROMA: [[i32; 4]; 8] = [
     [-2, 10, 58, -2],
 ];
 /// Separable interpolation retains the normative intermediate rounding.
+fn component_shifts(component: usize, chroma_format: u8) -> [usize; 2] {
+    if component == 0 { [0,0] } else {
+        match chroma_format { 1 => [1,1], 2 => [1,0], _ => [0,0] }
+    }
+}
 fn interpolate_block_with_format(
-    picture: &Picture, c: usize, rect: [u32; 4], mv: [i16; 2],
+    picture: View<'_>, c: usize, rect: [u32; 4], mv: [i16; 2],
     scratch: &mut Vec<i32>, output: &mut [i32], chroma_format: u8,
 ) {
     let [x, y, w, h] = rect.map(|v| v as usize);
     let chroma = usize::from(c != 0);
-    let shift = usize::from(c != 0 && chroma_format != 3);
-    let bits = 2 + shift;
-    let width = (picture.dimensions[0] >> shift) as i32;
-    let height = (picture.dimensions[1] >> shift) as i32;
+    let shifts = component_shifts(c, chroma_format);
+    let bits = shifts.map(|shift| 2 + shift);
+    let width = (picture.dimensions[0] >> shifts[0]) as i32;
+    let height = (picture.dimensions[1] >> shifts[1]) as i32;
     let samples = picture.planes[c].samples();
     let depth = picture.depth[chroma];
-    let x = x as i32 + (i32::from(mv[0]) >> bits);
-    let y = y as i32 + (i32::from(mv[1]) >> bits);
-    let phase_shift = usize::from(c != 0 && chroma_format == 3);
-    let fx = ((i32::from(mv[0]) & ((1 << bits) - 1)) as usize) << phase_shift;
-    let fy = ((i32::from(mv[1]) & ((1 << bits) - 1)) as usize) << phase_shift;
+    let x = x as i32 + (i32::from(mv[0]) >> bits[0]);
+    let y = y as i32 + (i32::from(mv[1]) >> bits[1]);
+    let phase_shifts = shifts.map(|shift| usize::from(c != 0 && shift == 0));
+    let fx = ((i32::from(mv[0]) & ((1 << bits[0]) - 1)) as usize) << phase_shifts[0];
+    let fy = ((i32::from(mv[1]) & ((1 << bits[1]) - 1)) as usize) << phase_shifts[1];
     let filters = |f: usize| -> &[i32] { if c == 0 { &LUMA[f] } else { &CHROMA[f] } };
     let start = if c == 0 { -3 } else { -1 };
     let taps = if c == 0 { 8 } else { 4 };
@@ -407,12 +434,12 @@ fn interpolate_block_with_format(
             let out_row = &mut output[row * w..(row + 1) * w];
             if x >= 0 && x as usize + w <= width as usize {
                 for (out, &value) in out_row.iter_mut().zip(&source[x as usize..x as usize + w]) {
-                    *out = i32::from(value) << (14 - depth);
+                    *out = i32::from(value) << (14u8.saturating_sub(depth).max(2));
                 }
             } else {
                 for (col, out) in out_row.iter_mut().enumerate() {
                     *out = i32::from(source[(x + col as i32).clamp(0, width - 1) as usize])
-                        << (14 - depth);
+                        << (14u8.saturating_sub(depth).max(2));
                 }
             }
         }
@@ -429,12 +456,12 @@ fn interpolate_block_with_format(
         if fx == 0 {
             if x >= 0 && x as usize + w <= width as usize {
                 for (out, &value) in target.iter_mut().zip(&source[x as usize..x as usize + w]) {
-                    *out = i32::from(value) << (14 - depth);
+                    *out = i32::from(value) << (14u8.saturating_sub(depth).max(2));
                 }
             } else {
                 for (col, out) in target.iter_mut().enumerate() {
                     *out = i32::from(source[(x + col as i32).clamp(0, width - 1) as usize])
-                        << (14 - depth);
+                        << (14u8.saturating_sub(depth).max(2));
                 }
             }
         } else {
@@ -458,7 +485,7 @@ fn interpolate_block_with_format(
                 }
             }
             for out in target {
-                *out >>= depth - 8;
+                *out >>= 6 - 14u8.saturating_sub(depth).max(2);
             }
         }
     }
@@ -502,13 +529,20 @@ pub fn predict_with_chroma_format(
     depth: u8, weights: Option<&super::hevc_slice::Weights>,
     scratch: &mut Vec<i32>, chroma_format: u8,
 ) -> Result<Vec<u16>> {
-    if component > 2 || !(8..=12).contains(&depth) || !matches!(chroma_format, 1 | 3)
+    predict_with_current(lists,motion,rect,component,depth,weights,scratch,chroma_format,None)
+}
+pub(crate) fn predict_with_current(
+    lists: &[Vec<Reference>;2], motion: Motion, rect:[u32;4], component:usize,
+    depth:u8, weights:Option<&super::hevc_slice::Weights>, scratch:&mut Vec<i32>,chroma_format:u8,
+    current:Option<(&[super::hevc_plane::Plane;3],[u8;2])>,
+)->Result<Vec<u16>> {
+    if component > 2 || !(8..=16).contains(&depth) || (chroma_format > 3 || (chroma_format == 0 && component != 0))
         || rect[2] == 0 || rect[3] == 0
         || (0..2).any(|axis| rect[axis].checked_add(rect[axis + 2]).is_none_or(|end| end > i32::MAX as u32)) {
         return Err(invalid("invalid HEVC motion prediction geometry or format"));
     }
-    let shift = usize::from(component != 0 && chroma_format != 3);
-    let [x, y, w, h] = rect.map(|v| v >> shift);
+    let shifts = component_shifts(component, chroma_format);
+    let [x, y, w, h] = std::array::from_fn(|axis| rect[axis] >> shifts[axis % 2]);
     let mut inputs = [None; 2];
     let mut count = 0;
     for list in 0..2 {
@@ -542,8 +576,19 @@ pub fn predict_with_chroma_format(
         return Err(invalid("HEVC prediction has no reference"));
     }
     for input in inputs.iter().flatten() {
-        let picture = &input.0.picture;
-        let expected = picture.dimensions.map(|v| (v >> shift) as usize);
+        let picture = input.0.view(current)?;
+        if input.0.picture.is_none() {
+            if input.1.iter().any(|v| v & 3 != 0) { return Err(invalid("HEVC current-picture luma vector is fractional")); }
+            let start = [i32::from(input.1[0]) >> (2+shifts[0]),i32::from(input.1[1]) >> (2+shifts[1])];
+            let phase = [input.1[0] & ((1<<(2+shifts[0]))-1) != 0,input.1[1] & ((1<<(2+shifts[1]))-1) != 0];
+            let origin = [i64::from(x)+i64::from(start[0])-i64::from(phase[0]),i64::from(y)+i64::from(start[1])-i64::from(phase[1])];
+            if origin.iter().any(|&v| !(0..=i64::from(i32::MAX)).contains(&v)) || !picture.planes[component].ready_rect([
+                origin[0] as usize,origin[1] as usize,
+                w as usize+3*usize::from(phase[0]),h as usize+3*usize::from(phase[1])]) {
+                return Err(invalid("HEVC current-picture source samples are unavailable"));
+            }
+        }
+        let expected: [usize;2] = std::array::from_fn(|axis| (picture.dimensions[axis] >> shifts[axis]) as usize);
         if picture.planes[component].dimensions() != expected
             || picture.depth[usize::from(component != 0)] != depth {
             return Err(invalid("HEVC reference plane geometry or depth mismatch"));
@@ -551,13 +596,12 @@ pub fn predict_with_chroma_format(
     }
     let first_input = inputs[0].unwrap();
     let second_input = inputs[1];
-    let mask = (1 << (2 + shift)) - 1;
-    if count == 1 && weights.is_none() && first_input.1.iter().all(|v| i32::from(*v) & mask == 0) {
-        let picture = &first_input.0.picture;
-        let width = (picture.dimensions[0] >> shift) as usize;
-        let height = (picture.dimensions[1] >> shift) as i32;
-        let xx = x as i32 + (i32::from(first_input.1[0]) >> (2 + shift));
-        let yy = y as i32 + (i32::from(first_input.1[1]) >> (2 + shift));
+    if count == 1 && weights.is_none() && first_input.1.iter().enumerate().all(|(axis,v)| i32::from(*v) & ((1 << (2 + shifts[axis])) - 1) == 0) {
+        let picture = first_input.0.view(current)?;
+        let width = (picture.dimensions[0] >> shifts[0]) as usize;
+        let height = (picture.dimensions[1] >> shifts[1]) as i32;
+        let xx = x as i32 + (i32::from(first_input.1[0]) >> (2 + shifts[0]));
+        let yy = y as i32 + (i32::from(first_input.1[1]) >> (2 + shifts[1]));
         let mut output = Vec::with_capacity(w as usize * h as usize);
         for row in 0..h {
             let row = (yy + row as i32).clamp(0, height - 1) as usize;
@@ -572,14 +616,14 @@ pub fn predict_with_chroma_format(
         }
         return Ok(output);
     }
-    let precision = 14 - depth + weights.map_or(0, |w| w.denominators[shift]);
+    let precision = 14u8.saturating_sub(depth).max(2) + weights.map_or(0, |w| w.denominators[usize::from(component != 0)]);
     let max = (1 << depth) - 1;
     let block_size = w as usize * h as usize;
     let mut output = vec![0u16; block_size];
     if count == 1 {
         let mut block_output = vec![0i32; block_size];
         interpolate_block_with_format(
-            &first_input.0.picture,
+            first_input.0.view(current)?,
             component,
             [x, y, w, h],
             first_input.1,
@@ -595,7 +639,7 @@ pub fn predict_with_chroma_format(
         let second_input = second_input.unwrap();
         let mut first_result = vec![0i32; block_size];
         interpolate_block_with_format(
-            &first_input.0.picture,
+            first_input.0.view(current)?,
             component,
             [x, y, w, h],
             first_input.1,
@@ -605,7 +649,7 @@ pub fn predict_with_chroma_format(
         );
         let mut second_result = vec![0i32; block_size];
         interpolate_block_with_format(
-            &second_input.0.picture,
+            second_input.0.view(current)?,
             component,
             [x, y, w, h],
             second_input.1,
@@ -661,6 +705,14 @@ mod tests {
         motion[0][0] = Some(Vector { reference: 1, mv: [64, -32] });
         let picture = Arc::new(Picture {
             pcm_luma_samples: 0,
+                cross_component_blocks: 0,
+                act_blocks: 0,
+                current_picture_blocks: 0,
+        #[cfg(test)]
+        completed_picture_blocks: 0,
+        #[cfg(test)]
+        bipredicted_blocks: 0,
+                fractional_current_chroma_blocks: 0,
             dimensions: [64, 32], crop: [0; 4], depth: [8; 2],
             planes: [Plane::new(64, 32, 8, 8192).unwrap(),
                 Plane::new(32, 16, 8, 2048).unwrap(), Plane::new(32, 16, 8, 2048).unwrap()],
@@ -669,8 +721,8 @@ mod tests {
             reference_long_term: [vec![false, true], Vec::new()],
         });
         let lists = [vec![
-            Reference { poc: 8, long_term: false, picture: Arc::clone(&picture) },
-            Reference { poc: 1, long_term: true, picture },
+            Reference { poc: 8, long_term: false, picture: Some(Arc::clone(&picture)) },
+            Reference { poc: 1, long_term: true, picture: Some(picture) },
         ], Vec::new()];
         let spatial = Spatial { rect: [0, 0, 16, 16], cu: [0, 0, 4],
             partition: Partition::Full, part_index: 0, merge_log2: 2, ctu_log2: 6,
@@ -680,17 +732,26 @@ mod tests {
 
     #[test]
     fn separable_prediction_matches_scalar_at_all_phases_and_borders() {
-        for (depth, chroma_format) in [(8,1), (10,1), (12,1), (8,3), (10,3), (12,3)] {
+        for (depth, chroma_format) in [(8,1), (10,1), (12,1), (8,3), (10,3), (12,3), (8,2), (10,2), (12,2), (14,1), (16,1), (14,2), (16,2), (14,3), (16,3)] {
             let chroma_side = if chroma_format == 3 { 32 } else { 16 };
+            let chroma_height = if chroma_format == 1 { 16 } else { 32 };
             let mut picture = Picture {
                 pcm_luma_samples: 0,
+                cross_component_blocks: 0,
+                act_blocks: 0,
+                current_picture_blocks: 0,
+        #[cfg(test)]
+        completed_picture_blocks: 0,
+        #[cfg(test)]
+        bipredicted_blocks: 0,
+                fractional_current_chroma_blocks: 0,
                 dimensions: [32, 32],
                 crop: [0; 4],
                 depth: [depth; 2],
                 planes: [
                     Plane::new(32, 32, depth, 3072).unwrap(),
-                    Plane::new(chroma_side, chroma_side, depth, 3072).unwrap(),
-                    Plane::new(chroma_side, chroma_side, depth, 3072).unwrap(),
+                    Plane::new(chroma_side, chroma_height, depth, 3072).unwrap(),
+                    Plane::new(chroma_side, chroma_height, depth, 3072).unwrap(),
                 ],
                 sao: Vec::new(),
                 motion: Vec::new(),
@@ -701,31 +762,33 @@ mod tests {
             for plane in &mut picture.planes {
                 for value in plane.samples_mut() {
                     state = state.wrapping_mul(1664525).wrapping_add(1013904223);
-                    *value = (state >> 16) as u16 & ((1 << depth) - 1);
+                    *value = (state >> 16) as u16 & (((1u32 << depth) - 1) as u16);
                 }
             }
             let picture = Arc::new(picture);
-            let lists = [vec![Reference { picture: Arc::clone(&picture), poc: 0, long_term: false }],
-                         vec![Reference { picture: Arc::clone(&picture), poc: 0, long_term: false }]];
+            let lists = [vec![Reference { picture: Some(Arc::clone(&picture)), poc: 0, long_term: false }],
+                         vec![Reference { picture: Some(Arc::clone(&picture)), poc: 0, long_term: false }]];
             for c in 0..3 {
-                let bits = if c == 0 || chroma_format == 3 { 2 } else { 3 };
+                let shifts = component_shifts(c, chroma_format);
+                let bits = shifts.map(|shift| 2 + shift);
                 let n = if c == 0 { 32 } else { chroma_side as i32 };
+                let height = if c == 0 { 32 } else { chroma_height as i32 };
                 let start = if c == 0 { -3 } else { -1 };
                 let filter =
-                    |phase: usize| -> &[i32] { if c == 0 { &LUMA[phase] } else { &CHROMA[if chroma_format == 3 { phase * 2 } else { phase }] } };
-                for fy in 0..1 << bits {
-                    for fx in 0..1 << bits {
-                        for (origin, displacement) in [(0, -3), (n - 8, 3)] {
+                    |phase: usize, axis: usize| -> &[i32] { if c == 0 { &LUMA[phase] } else { &CHROMA[if shifts[axis] == 0 { phase * 2 } else { phase }] } };
+                for fy in 0..1 << bits[1] {
+                    for fx in 0..1 << bits[0] {
+                        for ([origin_x, origin_y], displacement) in [([0,0], -3), ([n - 8,height - 8], 3)] {
                             let mv = [
-                                (displacement << bits) + fx as i16,
-                                (displacement << bits) + fy as i16,
+                                (displacement << bits[0]) + fx as i16,
+                                (displacement << bits[1]) + fy as i16,
                             ];
                             let mut scratch = Vec::new();
                             let mut output = vec![0i32; 64];
                             interpolate_block_with_format(
-                                &picture,
+                                View {dimensions:picture.dimensions,depth:picture.depth,planes:&picture.planes},
                                 c,
-                                [origin as u32, origin as u32, 8, 8],
+                                [origin_x as u32, origin_y as u32, 8, 8],
                                 mv,
                                 &mut scratch,
                                 &mut output,
@@ -735,36 +798,36 @@ mod tests {
                             for y in 0..8 {
                                 for x in 0..8 {
                                     let sample = |dx: i32, dy: i32| {
-                                        let xx = (origin + x + i32::from(displacement) + dx)
+                                        let xx = (origin_x + x + i32::from(displacement) + dx)
                                             .clamp(0, n - 1);
-                                        let yy = (origin + y + i32::from(displacement) + dy)
-                                            .clamp(0, n - 1);
+                                        let yy = (origin_y + y + i32::from(displacement) + dy)
+                                            .clamp(0, height - 1);
                                         i32::from(
                                             picture.planes[c].samples()[(yy * n + xx) as usize],
                                         )
                                     };
                                     let expected = if fx == 0 && fy == 0 {
-                                        sample(0, 0) << (14 - depth)
+                                        sample(0, 0) << (14u8.saturating_sub(depth).max(2))
                                     } else if fy == 0 {
-                                        filter(fx)
+                                        filter(fx, 0)
                                             .iter()
                                             .enumerate()
                                             .map(|(k, v)| v * sample(start + k as i32, 0))
                                             .sum::<i32>()
-                                            >> (depth - 8)
+                                            >> (6 - 14u8.saturating_sub(depth).max(2))
                                     } else if fx == 0 {
-                                        filter(fy)
+                                        filter(fy, 1)
                                             .iter()
                                             .enumerate()
                                             .map(|(k, v)| v * sample(0, start + k as i32))
                                             .sum::<i32>()
-                                            >> (depth - 8)
+                                            >> (6 - 14u8.saturating_sub(depth).max(2))
                                     } else {
-                                        filter(fy)
+                                        filter(fy, 1)
                                             .iter()
                                             .enumerate()
                                             .map(|(k, v)| {
-                                                let horizontal = filter(fx)
+                                                let horizontal = filter(fx, 0)
                                                     .iter()
                                                     .enumerate()
                                                     .map(|(j, u)| {
@@ -774,13 +837,13 @@ mod tests {
                                                         )
                                                     })
                                                     .sum::<i32>()
-                                                    >> (depth - 8);
+                                                    >> (6 - 14u8.saturating_sub(depth).max(2));
                                                 v * horizontal
                                             })
                                             .sum::<i32>()
                                             >> 6
                                     };
-                                    let precision = 14 - depth;
+                                    let precision = 14u8.saturating_sub(depth).max(2);
                                     expected_samples.push(((expected + (1 << (precision - 1))) >> precision)
                                         .clamp(0, (1 << depth) - 1) as u16);
                                     assert_eq!(
@@ -790,8 +853,7 @@ mod tests {
                                     );
                                 }
                             }
-                            let shift = u32::from(c != 0 && chroma_format != 3);
-                            let rect = [(origin as u32) << shift, (origin as u32) << shift, 8 << shift, 8 << shift];
+                            let rect = [(origin_x as u32) << shifts[0], (origin_y as u32) << shifts[1], 8 << shifts[0], 8 << shifts[1]];
                             for motion in [[Some(Vector { reference: 0, mv }), None],
                                            [Some(Vector { reference: 0, mv }), Some(Vector { reference: 0, mv })]] {
                                 let predicted = predict_with_chroma_format(&lists, motion, rect,
@@ -841,5 +903,130 @@ mod reference_remap_tests {
         );
         assert!(remap_references(motion, &[vec![], vec![]], &target).is_err());
         assert!(remap_references(motion, &source, &[vec![8], vec![16]]).is_err());
+    }
+}
+
+fn add_motion_difference(predictor: i16, difference: i16, integer: bool) -> i16 {
+    if integer {
+        (predictor >> 2).wrapping_add(difference).wrapping_shl(2)
+    } else {
+        predictor.wrapping_add(difference)
+    }
+}
+
+#[cfg(test)]
+mod integer_precision_tests {
+    #[test]
+    fn predictors_floor_negative_quarters_and_wrap_signed_sixteen_bits() {
+        for (predictor, difference, expected) in [
+            (-1, 0, -4), (-3, 1, 0), (-5, -1, -12),
+            (32767, 1, -32768), (-32768, -1, 32764),
+            (3, 32767, -4),
+        ] {
+            assert_eq!(super::add_motion_difference(predictor, difference, true), expected);
+        }
+        assert_eq!(super::add_motion_difference(-1, 1, false), 0);
+        assert_eq!(super::add_motion_difference(32767, 1, false), -32768);
+    }
+}
+
+pub(crate) fn validate_current_vectors(
+    lists: &[Vec<Reference>;2], motion: Motion, rect: [u32;4], cu: [u32;2],
+    ctu_log: u8, chroma_format: u8, mut available: impl FnMut(i32,i32)->bool,
+) -> Result<()> {
+    if !(4..=6).contains(&ctu_log) || chroma_format>3 || rect[2]==0 || rect[3]==0
+        || (0..2).any(|a| rect[a].checked_add(rect[a+2]).is_none_or(|n| n>i32::MAX as u32) || cu[a]>i32::MAX as u32) {
+        return Err(invalid("invalid HEVC current-picture vector geometry"));
+    }
+    for list in 0..2 {
+        let Some(vector) = motion[list] else {continue;};
+        let reference = lists[list].get(vector.reference as usize)
+            .ok_or_else(|| invalid("HEVC current-picture reference index is invalid"))?;
+        if reference.picture.is_some() {continue;}
+        if vector.mv.iter().any(|v| v & 3 != 0) {
+            return Err(invalid("HEVC current-picture luma vector is fractional"));
+        }
+        let shifts = component_shifts(1,chroma_format);
+        let offset: [i32;2] = std::array::from_fn(|a| if chroma_format!=0 && shifts[a]!=0 && vector.mv[a]&7!=0 {2} else {0});
+        let source: [i64;2] = std::array::from_fn(|a| i64::from(rect[a])+(i64::from(vector.mv[a])>>2));
+        let first: [i64;2] = std::array::from_fn(|a| source[a]-i64::from(offset[a]));
+        let last: [i64;2] = std::array::from_fn(|a| source[a]+i64::from(rect[a+2])-1+i64::from(offset[a]));
+        if first.iter().chain(&last).any(|&x| !(0..=i64::from(i32::MAX)).contains(&x)) {
+            return Err(invalid("HEVC current-picture vector leaves picture bounds"));
+        }
+        let first=first.map(|x| x as i32); let last=last.map(|x| x as i32);
+        if !available(first[0],first[1]) || !available(last[0],last[1])
+            || !(last[0]<cu[0] as i32 || last[1]<cu[1] as i32)
+            || ((last[0]>>ctu_log)-(cu[0] as i32>>ctu_log)
+                > (cu[1] as i32>>ctu_log)-(last[1]>>ctu_log)) {
+            return Err(invalid("HEVC current-picture vector violates block availability"));
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod current_fixture_tests {
+    #[test]
+    fn owned_ibc_streams_copy_current_samples_and_interpolate_odd_chroma() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        for depth in [8u8,10] {
+            for name in ["intra","parallel","weighted","weighted-parallel","420-odd","420-odd-parallel","inter","inter-parallel","bidir","bidir-parallel","tiles","dependent"] {
+                let stem = format!("hevc-scc-ibc-{name}-rext{depth}");
+                let data = std::fs::read(root.join(format!("{stem}.mp4"))).unwrap();
+                let oracle = std::fs::read(root.join(format!("{stem}.yuv"))).unwrap();
+                let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+                let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(&input.tracks()[0].configuration,16<<20).unwrap();
+                for _ in 0..2 {
+                    let mut actual=Vec::new();
+                    let mut active=0;
+                    let mut completed=0;
+                    let mut bipredicted=0;
+                    let mut fractional=0;
+                    for frame in 0..3 {
+                        let mut packet=Vec::new();input.read_packet(0,frame,&mut packet).unwrap();
+                        let decoded=decoder.decode_packet(&packet).unwrap().unwrap();
+                        active+=decoded.picture.current_picture_blocks;
+                        completed+=decoded.picture.completed_picture_blocks;
+                        bipredicted+=decoded.picture.bipredicted_blocks;
+                        fractional+=decoded.picture.fractional_current_chroma_blocks;
+                        for plane in &decoded.picture.planes {
+                            for &v in plane.samples() {
+                                if depth==8 {actual.push(v as u8);} else {actual.extend_from_slice(&v.to_le_bytes());}
+                            }
+                        }
+                    }
+                    assert!(active>0,"{stem}: no current-picture predictions");
+                    if name.starts_with("inter") || name.starts_with("bidir") {assert!(completed>0,"{stem}: no completed-picture predictions");}
+                    if name.starts_with("bidir") {assert!(bipredicted>0,"{stem}: no biprediction");}
+                    if name.starts_with("420") {assert!(fractional>0,"{stem}: no fractional current chroma");}
+                    assert_eq!(actual,oracle,"{stem}");
+                    decoder.reset();
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod current_sampling_contract {
+    use super::*;
+    #[test]
+    fn ready_samples_copy_exactly_and_unavailable_or_overlapping_sources_fail() {
+        let mut planes=std::array::from_fn(|_| super::super::hevc_plane::Plane::new(16,16,8,2048).unwrap());
+        let expected: Vec<_>=(0..64).map(|i| (i*7%256) as u16).collect();
+        for p in &mut planes {p.reconstruct_inter([0,0,8,8],&expected).unwrap();}
+        let lists=[vec![Reference {poc:0,long_term:true,picture:None}],Vec::new()];
+        let motion=[Some(Vector {reference:0,mv:[-32,0]}),None];
+        validate_current_vectors(&lists,motion,[8,0,8,8],[8,0],4,3,|x,y| x>=0 && y>=0 && planes[0].ready_rect([x as usize,y as usize,1,1])).unwrap();
+        for component in 0..3 {
+            assert_eq!(predict_with_current(&lists,motion,[8,0,8,8],component,8,None,&mut Vec::new(),3,Some((&planes,[8;2]))).unwrap(),expected);
+        }
+        for vector in [[-4,0],[0,0],[-68,0]] {
+            let motion=[Some(Vector {reference:0,mv:vector}),None];
+            assert!(validate_current_vectors(&lists,motion,[8,0,8,8],[8,0],4,3,|x,y| x>=0 && y>=0 && planes[0].ready_rect([x as usize,y as usize,1,1])).is_err());
+            assert!(predict_with_current(&lists,motion,[8,0,8,8],0,8,None,&mut Vec::new(),3,Some((&planes,[8;2]))).is_err());
+        }
+        assert!(validate_current_vectors(&lists,motion,[u32::MAX,0,8,8],[8,0],4,3,|_,_|true).is_err());
     }
 }

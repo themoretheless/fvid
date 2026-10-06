@@ -1,17 +1,238 @@
 {
-  "created_utc": "2026-09-05T00:20:23.941129+00:00",
+  "created_utc": "2026-10-06T06:20:00.295875+00:00",
   "runs": 5,
   "seed": 20260905,
   "scope": "Whole CLI wall time, cached input, local file output without fsync, 30 frames; no GPU. Same FFV1 level and pixel format; default and one-thread FFmpeg baselines. No claim of full FFmpeg parity or universal speedup.",
-  "binary_sha256": "723fed574e96257745133bc167e32ea8e2d05d0012de11a50b062a9f04728857",
-  "ffmpeg_version": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "binary_sha256": "796bec7d59b00f22a06c029cd36eb9ccdb0e5d0d0f0081a0ba651735935ff428",
+  "ffmpeg_version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
   "source_sha256": {
-    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
-    "crates/fvid-media/src/lib.rs": "5192cd300748cb89c828c0cc38cab87a5d21723b5651932880c28e7c4faf83eb",
-    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
-    "crates/fvid-media/src/lossless.rs": "2ddc0b112c2e9afb5040646357c2c05d3d761a16af7febb2ac4dcbdbb4b95427",
-    "src/media_cli.rs": "534fdb2ba35d29b8c00edca54c9c5b470e3dde4568b0c9529118c0d1a9660dd4",
-    "scripts/benchmark_media.py": "c9f3a6f68b0c2a7d3020ba70a65ae708d2ef315c711a4bff6393bc3af8edfadd"
+    "crates/fvid-media/src/owned_matroska_aac.rs": "b9675121bf9e56a06f3584ce972d3fb19c0d11b404b1e02daa65df29a9bdd2d2",
+    "crates/fvid-media/src/edit.rs": "0a216d8399c46f0234120ab45722886d71a2bc321b3b5ce7032f018c75b577bc",
+    "crates/fvid-media/src/owned_normalize.rs": "a54c8703bd5d132a397644e6054a3a04a7a0999cd4387ce3632384d18e1eb082",
+    "crates/fvid-media/src/owned_boxblur.rs": "d6ed115b18e43fd2c0bb9701efb55de3ba09e6955074d9b6532099787ffe2336",
+    "crates/fvid-media/src/owned_ffv1_decoder.rs": "d1fce88b038876e2ecacbe1032adb79f8f1d991efa6f9d302979af9cfe2eaa3b",
+    "crates/fvid-media/src/input_policy.rs": "3a2ad52fa6b06861033f13ce833656f0419c286655e426fdb554cf7d27b0c25d",
+    "crates/fvid-media/src/owned_subtitle.rs": "6ad330d7df20b41d74a5e3763f44d15b326e454679f606dbd3d5e7480ca1f530",
+    "crates/fvid-media/src/owned_shuffleframes.rs": "5b15aba1bcab120a7161d5435e529ace1417dba75ee0564e8a64cb3571fb5404",
+    "crates/fvid-media/src/owned_webm_codec.rs": "cdfc25b1a15742f1fb046981955c79fa26d1c96644f1c78fa819a2f77cca5a0c",
+    "crates/fvid-media/src/owned_ima_wav.rs": "4b8983714b071374fe039fe9a408c5645ff4930f61bd05d496aee1684d8cc11a",
+    "crates/fvid-media/src/owned_colorcontrast.rs": "54540fe14d281cbe509b16fcfbd75a2a300b021e235954c3a86eb9fea62b2712",
+    "crates/fvid-media/src/owned_play_controls.rs": "899b5b4a6f5cecdb3a46750e1932add9fa555fa25e39e51ad71da8728faff5ad",
+    "crates/fvid-media/src/owned_codec_config.rs": "75a7b3ab00f27d8cb3709d13b54c6d9d0a9a5a283c43df8aea673440e5daee11",
+    "crates/fvid-media/src/play.rs": "ca3a9784862e15e49eec3eedbebb0aae836a3f7d8672a26eea871d86942b4360",
+    "crates/fvid-media/src/owned_mp4_aac_plan_impl.rs": "978e2282efa88896440f068d0515138632e87b16eee2c63831f6bb196a9f899a",
+    "crates/fvid-media/src/owned_concat.rs": "5011cbc6bb1694beef838a4e09692d5269e9cbdb554e478e13217bf6366b4dd4",
+    "crates/fvid-media/src/owned_pcm_decoder.rs": "6f7fc9701c0b05058123be5fe49bb18e7994ea5b7f5c4557729a00474e06ad45",
+    "crates/fvid-media/src/owned_matroska_constructors_impl.rs": "d80bddd92dcbc0579e3b2adc354a607bd04cbdfbb1668033b28f581f97e3ce61",
+    "crates/fvid-media/src/owned_mp4_audio_schedule.rs": "099981bf08c43677d84bbbbc23428096d3e0ea7a1e03cfd817fc0f587d9e09e8",
+    "crates/fvid-media/src/owned_gradfun.rs": "11c25c319121ac481656653f8b7416fc20f3af7fe664cb456f4b5530cb161a71",
+    "crates/fvid-media/src/audio_layout.rs": "aabcd3a8b6ffc5f83c008d50684fe113ca1c1bfee89f3f8a9f02748f284cf17c",
+    "crates/fvid-media/src/subtitle.rs": "a24ae0e533be8d1b04ba257672f961a76cd2e1de14f2e9b14314afba6303904d",
+    "crates/fvid-media/src/owned_adts_remux.rs": "d0d61a5402a3d00ec4aa05ea7e15b6ffc4dfc924f4b04ba71805ba72c99a2088",
+    "crates/fvid-media/src/owned_opus_packet_impl.rs": "30c870eb75355a8750460e7a8dd0821c758132a9e3efed35eb1c6da63a6c4582",
+    "crates/fvid-media/src/owned_matroska_ebml_impl.rs": "5779b74a1ab5e1d2b00c4e72f047bd8680e8dac94484c4fca1ec040d830ea689",
+    "crates/fvid-media/src/owned_matroska_aac_export.rs": "113bc2ba7fd55c28d11e41621dd1462341f01aa02e8f5a5cac4ccd674eed6cb2",
+    "crates/fvid-media/src/owned_matroska_audio.rs": "93ebb5a8d44cd1603c880a282afda5d9885f0e9fe853b11b9d889af881aa1e4e",
+    "crates/fvid-media/src/budget.rs": "c52a194bac7362c512369a366df6572507088fb22c7af854f2a14586e8acdaa4",
+    "crates/fvid-media/src/owned_perspective.rs": "4c9ac26926da843f1354e9a90c2e31012fdfd16962ae4f5222eaa67aede1f37b",
+    "crates/fvid-media/src/owned_wave_plan.rs": "1d1d2f1348c7b939316605b11d107a6abf7b026b992d56d2dd30d1788e2fc004",
+    "crates/fvid-media/src/owned_exposure.rs": "166c55b9423dff180b08cf9d8f27f24dd77dccde4d9982f6bc363f40f78c7717",
+    "crates/fvid-media/src/owned_wave_remux.rs": "f0536f359071a2d8e84d613f0ea2d0323587b466fc539019cea69543cdbe2bbc",
+    "crates/fvid-media/src/owned_adts_loudnorm.rs": "91b017e08ff924d60060cb1edabffb29572f6eb83860171b53898617466079fb",
+    "crates/fvid-media/src/hw_types.rs": "cf6d5cc79e169cccc8cf3f4e4a4e5e3ec433858c5cd3e450a61a4d651fbe4561",
+    "crates/fvid-media/src/owned_mp4_audio_schedule_impl.rs": "2eaf04bb13645dedbc8a6d62576d633864333508494c7174e77e5a0ca888fe72",
+    "crates/fvid-media/src/owned_mp4_probe_impl.rs": "f7042af409f1c0862e203bfe574d1c3d28d08afce7f2a76cee73acaaded0ca51",
+    "crates/fvid-media/src/owned_alac.rs": "efcb7a9f0baaadcd82ba506d535b171a27b200703f1ff50da893f39444c27dba",
+    "crates/fvid-media/src/owned_adts_export.rs": "7ad2fd276bae98073a4b3e012407b13407305d8006b198ccf62c3b042de83ccd",
+    "crates/fvid-media/src/owned_wav_file.rs": "656eea20903ff6da21a0680277ac80317663152ba85f37f8376c04cb89ed0a43",
+    "crates/fvid-media/src/owned_matroska_track_types_impl.rs": "1c97401d769ae01bb587233602f1e4e5c02804312a30e9ba3ef9cd739c0671c0",
+    "crates/fvid-media/src/owned_framestep.rs": "f3e4a3dc4a81777c00d6e54225e873b2755e502e17912e1aac591b3f08d6f547",
+    "crates/fvid-media/src/owned_bitplanenoise.rs": "a7fbb8e528a99b53015403dd4d959c97e030cd7c5ceb2d2cf0a5158bbe862789",
+    "crates/fvid-media/src/owned_opus_packet.rs": "b71e678676a9f7c27083c2eda882f1427b5a73ff44ad450a5cf2806c52894471",
+    "crates/fvid-media/src/owned_wave_loudness.rs": "69a73de3fa63d076908e0622de9e5f8dce2a0b0a139ebfece97f4af80e776de8",
+    "crates/fvid-media/src/owned_y4m_impl.rs": "05969d5a2c5e00ad81455df6445036baef7ab1409bbbbbf2ba5ba4925f9fc5cc",
+    "crates/fvid-media/src/owned_audio_plan.rs": "240527762ef102fd421ce1150608db01a7c6a58d33d9ae57b86609fee87cbdfb",
+    "crates/fvid-media/src/owned_matroska_opus.rs": "e430f21a90ffdb16bfb950059e7fa7a6f119710ba9fbaaaf63fe531c33f2f079",
+    "crates/fvid-media/src/owned_pcm_channels.rs": "334a3538fae25b03cd5673847c03a55ca2e74f7e8f0388a17d7d8548f136c21e",
+    "crates/fvid-media/src/owned_expression.rs": "f2e7ebccb011907e22997cb4258bdb34d8ac4c9894dba8e3dde3db65eef70490",
+    "crates/fvid-media/src/owned_smartblur.rs": "444f6662073b53d9264faf033878731a0d6e22bd55ebd06757eedb635f552a03",
+    "crates/fvid-media/src/owned_avc_impl.rs": "05ceb562e648933046ba4cdb83a3214453caed811e3a2be0cc08b44d0337cbbe",
+    "crates/fvid-media/src/owned_gblur.rs": "c4136109cb2a85dcbec128385c4d1da53d92ea2eda3c20317ff096c2008f9208",
+    "crates/fvid-media/src/owned_gradient.rs": "a682e9aa12e1410c0cbbffd3ca0a401a071639448e0ddef2c5e06bb9d225481e",
+    "crates/fvid-media/src/legacy.rs": "b693f9d99cd3cfe39c07722f74e57b9f5308f298c864689e29f4c8f65cd185f4",
+    "crates/fvid-media/src/owned_video_timeline.rs": "6e9537e7acffd97adc958a5d70e770d4b571ad680fc4412fd3161089f4ebd0ec",
+    "crates/fvid-media/src/owned_time.rs": "68dda781e0da0f6fac31782b1584399a293c8257457eedfa9607de85b8720194",
+    "crates/fvid-media/src/owned_ebml.rs": "88792bc8662541b6f2b98c0f84b52836dd1978b1acbe3d8273b1787fc252964e",
+    "crates/fvid-media/src/owned_resample.rs": "47d70f920833239baf23eb9048e113e345293eb99a9e4e171b3b42c57f8a25a3",
+    "crates/fvid-media/src/owned_matroska_tracks_impl.rs": "1548f91a826179ff0c512523147ec736ea771097a096710416099a3a118aa16a",
+    "crates/fvid-media/src/owned_codec_metadata.rs": "95d279e7a784611437f413dfc34648ea0d2279f8b9737e545516c44aa4d0dd38",
+    "crates/fvid-media/src/owned_pcm_layout.rs": "d3c27319e0631b8d7cd6ea46c37e1003f33ddd47b97c135f365ad9bcb46bf574",
+    "crates/fvid-media/src/owned_rgba.rs": "d866418350c49212bc5ae97a12eba17c70fdffcfd5fa34b05f56ec28bdea7aa6",
+    "crates/fvid-media/src/owned_y4m_decode.rs": "35b60e3f4e435a68abe5a26129c54c0394cf0225ec4235f0aea6df7c41535f50",
+    "crates/fvid-media/src/owned_matroska_packet_impl.rs": "077947debc3f0d16a0e0eb5b8ce0fd7882fb4a28462c1f32b436554545b042e8",
+    "crates/fvid-media/src/owned_pcm_gain_f64.rs": "8171b0205ca097c73872a852013fd8343f81297d835fb47d07749aa0d930ebf8",
+    "crates/fvid-media/src/owned_webm_multitrack_export.rs": "2810180420396a41db0bc45ca7659db6599dbb25c4de5313020c07bf0940ee77",
+    "crates/fvid-media/src/owned_colorbalance.rs": "7c8c1efd898d21ac6c846255706825d4e195d071bc2afe829870c13487f846fa",
+    "crates/fvid-media/src/owned_capabilities.rs": "0b3ca61301fa6157e2ecbe886455ff5851eb1cc4a4c17c2c1b918cc5fb3daa72",
+    "crates/fvid-media/src/owned_backend_error.rs": "55b367e58b3a937d74a36a823f7743b2503edce4462d0e82b630110ecd8f8393",
+    "crates/fvid-media/src/owned_matroska_video_impl.rs": "f6ada1de1c8c1fd71822e8d5fd5134f57f44d1a766ab82625a40f384f408ec1c",
+    "crates/fvid-media/src/owned_morphology.rs": "4455e845da9919b702a58a74ad89b415c0ae8457949ec7d6d376978843858a0f",
+    "crates/fvid-media/src/lib.rs": "bacdab050af54efede7d394878385737fe77041aa3792fa53fba1eec77f9101a",
+    "crates/fvid-media/src/owned_timeline.rs": "2759fc86d2fb6114a55286f4623e6a0dd03b6fed07aaac0e114c9cd95d5d292b",
+    "crates/fvid-media/src/owned_compressed_video.rs": "5d5ef7d5173e32ed2616d54ac8046d2e84ab4521b6ee1ebc1f6ed087516beab0",
+    "crates/fvid-media/src/pcm.rs": "cc8e52e20c3f671d3c5cec3a97cf621ad0f9d9a68cbed39fe7a652539eb3f36a",
+    "crates/fvid-media/src/owned_gradient_impl.rs": "1031885f7b7dde3dfe0b66261c2b619f52e8b03d640370d6daad8a17cb379891",
+    "crates/fvid-media/src/owned_nvdec_hevc.rs": "587fe5b83893e6f27d7c4733bcad55d750c765cf937d7bbf9a8d1ce0d3b1543e",
+    "crates/fvid-media/src/owned_matroska_copy_impl.rs": "bc48e64301b5a2c18875477a0cd347340ad09ac274f86611337beb5d952ed64a",
+    "crates/fvid-media/src/owned_ffv1_encoder_impl.rs": "072733f5b0d3a8c34ebcc03b8626039bd575c9904a193d07867a5b09540a3783",
+    "crates/fvid-media/src/owned_ms_adpcm.rs": "0480bc60b9d2e78d0507dbda7979b6a7dd14076cc36c6db12f57271d23204d60",
+    "crates/fvid-media/src/owned_pixel_format.rs": "3b6e5ba0cd523dc65420498483ddc9737d70dbe1c1d22876411b22361eaf1620",
+    "crates/fvid-media/src/owned_frame_layout.rs": "8e1e6b6615bc8f6260eda557b278e6eb990025c30b85a5827e6d487f542ebb73",
+    "crates/fvid-media/src/owned_nvdec_hevc_mp4.rs": "a7e1d52284ba5b8c16dbe928c9a79c7c214f83e274d9d0570d9b0e1380e2e96a",
+    "crates/fvid-media/src/owned_matroska_pcm_export.rs": "069eb9d8ed26fcaac6b6c5fa4d1c0476a7f5010b2059400ebb7c8dcb1d1156ad",
+    "crates/fvid-media/src/owned_nvdec_movie.rs": "f336df2fdee39dc3dccbab12e90ba3f0149ffa3acafdbe62bf6c6f5f6e96a3c1",
+    "crates/fvid-media/src/owned_unsharp.rs": "0d3ef1d20cd7cb0cb254286b9ce9d56c2843066c4af8e538f3f1c65003c9cd27",
+    "crates/fvid-media/src/owned_matroska_remux.rs": "c3be757afc03e28bedf8fa8ac9c6415d5cb5195974311e99ab807ccce1e1ba8f",
+    "crates/fvid-media/src/owned_colorchannelmixer.rs": "c1525cd3e7de23d016594e15e556037059e1a1dd9b7ca426b6c63c704fd92687",
+    "crates/fvid-media/src/owned_matroska.rs": "100f895242be87999b8d42d0d51e9e283a3bc4593bb6c9e39945baf6bd7513af",
+    "crates/fvid-media/src/owned_mp4_multitrack_export.rs": "e48881044757324ed2ad974f80705f65f898b6e464bc0040b44e0346011d4941",
+    "crates/fvid-media/src/owned_pixel_context.rs": "6c9bc7a1853a058247d4e360eca447d6eaa6a7886d63f2ab31fb324a511e6a98",
+    "crates/fvid-media/src/owned_hls.rs": "79098d6b678f9182a8aa0c56fca7b758de41783b96e3e729e159ed446ccaccb2",
+    "crates/fvid-media/src/owned_loudnorm.rs": "0d568d27044b768310f9701295deb931a497a80028decf0ff90b0f474421e75b",
+    "crates/fvid-media/src/owned_container_loudnorm.rs": "5ff43d71261435ad4fdfa5534a6cfe2bd6557962f28f4b970ab2ac9a65632647",
+    "crates/fvid-media/src/owned_pcm_format.rs": "de17ce9dea95d1482542371c4c36b37eb86efc1c2ba72fcc3f7cbff9944b47fd",
+    "crates/fvid-media/src/owned_budget.rs": "4ecc20af8b8f5f3f0305c8eefcf7d37268bcf9e091d67d4d491eeaabf5392a77",
+    "crates/fvid-media/src/owned_hqdn3d.rs": "2f9e65b3293c5e9e8b04af2f635663e65dee437f029a4355b8d2fb912c079b31",
+    "crates/fvid-media/src/owned_lagfun.rs": "290c83e739cb06d356e4c8910e5b38eed189e1b8083cb492ed6b7e2998a5145c",
+    "crates/fvid-media/src/owned_overlay_impl.rs": "812c00827b714839711625b4dcc30026274dc48eb2b2d57ec3ebedcbdf87bd0f",
+    "crates/fvid-media/src/owned_webm.rs": "07ffc8d06a5a18032c8267b098d993e2deb657cc6433758b305cf6fb9ff8590c",
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "37edbc5a067fa7c9f3b23e6a5388dbc1ae415d2e6f98c44e144f5c77b25e5935",
+    "crates/fvid-media/src/owned_avgblur_impl.rs": "36d78c89d6ad4dd8c28f3fab35c9b2e59d5e6d47c129c907aaeb42fd85c3051a",
+    "crates/fvid-media/src/owned_file_tags.rs": "627e981ef5dc68c8a1b2973ded2071967804f97f023ecaa187a0bc72898b47f9",
+    "crates/fvid-media/src/owned_k_weight.rs": "56bd2bb9a4713f556f7c100eeafbd9d6b86f31b6686dcebcbede397db95f4014",
+    "crates/fvid-media/src/owned_negate.rs": "4d8069d8a55b308efe1d5266b6d617c6ff1cbefd1c3eeb4ca3ede63769ca0e62",
+    "crates/fvid-media/src/owned_eq.rs": "ba1bade61a567a48469d5e9d651b7eb77295c57b79defbd1124366f572a34a97",
+    "crates/fvid-media/src/owned_boxblur_impl.rs": "409630300734a837ff180bcf1514920c56f729d1f35072f82d924e776bbe5b76",
+    "crates/fvid-media/src/owned_ffv1_encoder.rs": "364cf26e3335efc1d209cc4f7b4cdc111615e2979c69db97955d969927f0245b",
+    "crates/fvid-media/src/owned_webm_probe.rs": "e08fd278c02f05563304dea99c79b319abddf02ad06ed84973dc329922693ac0",
+    "crates/fvid-media/src/owned_mp4_audio_export.rs": "7f5e44d67ce946ca23cc452714bd6a93f0fa096a144a0adb0052bb3e48838895",
+    "crates/fvid-media/src/owned_ebml_impl.rs": "a923a6872d0e7bff674a9a2c8059d9f2b1710586f14166f5391052a90eacf89f",
+    "crates/fvid-media/src/plan.rs": "f69aba6bf79159b2053dfd55649fa455e1874b7cfd8924af4f31f702c774a41b",
+    "crates/fvid-media/src/owned_mp4_video_decode.rs": "9b55d9fea41b81811ac31c9baa39f0b1facd433c3a546878687962d980e81fc7",
+    "crates/fvid-media/src/owned_audio_export.rs": "83c04997b2553be721d02566b52318e33b5570deb436ea95c5345eab973b5419",
+    "crates/fvid-media/src/owned_wave_metadata.rs": "dec9fb15c8e7067de340f48ba5cf08aecf7d2c54b59e959a6d7ff54192374b6b",
+    "crates/fvid-media/src/owned_mp4_matroska_impl.rs": "9f1402d34140b210fe36488aeccd8769473b8105fd496c3bb6c5c670d479ee28",
+    "crates/fvid-media/src/owned_colorcorrect.rs": "1b0f989cf97a0cf5823b52f584e4631ba8ffc295cdb0c75a818eaae9b2492d5a",
+    "crates/fvid-media/src/owned_ffv1_export.rs": "1795257d7a061798a2f79f06772f90a4753c1ef5c8a46d7cf94e2a7c2852f724",
+    "crates/fvid-media/src/owned_color_preserve.rs": "b226dec2604ee6dbef3767dfc69250ac28f9cf0b5854dae54f3d4349f5ab6e11",
+    "crates/fvid-media/src/owned_matroska_metadata_read_impl.rs": "aa2053be6e26ad100a912d7c2f80973d310e9041ab3be33d9b0c13a470908090",
+    "crates/fvid-media/src/owned_yuv_rgb.rs": "3f00b854964a79ca86553028db7f751ac0af6d60f9cc668d98c0e8b720335c9c",
+    "crates/fvid-media/src/owned_mp4.rs": "df4654cc10fae5afe29f3ed61f8349d26e214460944917b3c3b2dcd7be4b3a9e",
+    "crates/fvid-media/src/owned_video_decode.rs": "e4214dd3d1963d92635bdd2034613ff20cd12dc88c0e679178a7031f695ee388",
+    "crates/fvid-media/src/owned_pixelize_impl.rs": "aae4df901bd76f50eefc1f704323001f27f7084772ebdf6cd6b4b605ac2d2e2c",
+    "crates/fvid-media/src/owned_nvdec_mp4.rs": "761a08655e93a3d5325ecdc44e0715aecae48808770927e62c89e9ebfd9ce16c",
+    "crates/fvid-media/src/owned_yaepblur.rs": "0c98875a9dd90bf0164a401d9497c949cc7f29bfc41db038afb68fe2c7e04edf",
+    "crates/fvid-media/src/hw_cuda.rs": "6f4115fb28fb045e46392859c0f28042322df368de6ea8e55b55b66efd0b3d53",
+    "crates/fvid-media/src/owned_frame.rs": "996c9d9c900e86ff6f6fccf3158836744aeb43704c4c576c9ec81ae95cc86168",
+    "crates/fvid-media/src/owned_probe.rs": "298fb45e726a0cb04bca255b493bf52012a67ec6561eb2aaf21328ffab7beb68",
+    "crates/fvid-media/src/owned_overlay.rs": "11bf7f5fd970f71066075c98f71dfed023f4bfa5ed8d2660563dbad183a600c8",
+    "crates/fvid-media/src/owned_curves.rs": "9d31669fdff1f5b829974810218a53e9f71366ea62005701231de8e1ee587e39",
+    "crates/fvid-media/src/owned_pcm_integer.rs": "0a586faab335531c55d094ac0b1de48e899e124d3c6c35f499548782f8ed7e91",
+    "crates/fvid-media/src/owned_chromashift.rs": "046a97d43f5afc88c80c0ddee72f90caba3846d637d6e21aedba8b47d5a3a589",
+    "crates/fvid-media/src/owned_deband.rs": "0be908cfabd00f377c30faf312e03f5c8a40d61c95fe31d3fbf30e48f1e7e6bc",
+    "crates/fvid-media/src/owned_y4m_probe.rs": "83658a31e2daf2519629f9b94418983be826dd6651d5ddc2b562d92b2283385b",
+    "crates/fvid-media/src/owned_matroska_opus_export.rs": "d27ff0ddfba46bf3e561c914be1b3d3a04357feb30fe1e9ae75af11b5422929b",
+    "crates/fvid-media/src/owned_hdr_payload_impl.rs": "906cd711217d766916d90e7144031132a722a6faacaec42a97709c80303ab398",
+    "crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs": "196d25f8fb070152c5e7a36d90af8742b59eee818403acf96339329bf48f761e",
+    "crates/fvid-media/src/owned_text_raster.rs": "7dca391e1707bd66971234ca81c379f7286cfa6487a81740e21844b83fd2ca96",
+    "crates/fvid-media/src/owned_avgblur.rs": "aba39a53c35dd66b28e9479a3c29f8695c0b84d2f8a2544794b2f50551baaa4a",
+    "crates/fvid-media/src/owned_mp4_impl.rs": "ca507e6e6933d018d95d7a5e576aa64de2b1918c508957ba7a1ded5303c14bea",
+    "crates/fvid-media/src/owned_grayworld.rs": "e30b15080b6dced6a2038f1eae11f9b526537baf2e953dda34f10903405cfd2e",
+    "crates/fvid-media/src/owned_nvdec_hevc_decoder.rs": "082914eb1b66e7ed7965d708fd0654c8c8f2697a5a2c810f36eed75a1180f63b",
+    "crates/fvid-media/src/owned_mp4_probe.rs": "8c7da15137f83395e62d701c9c16c6f6f33ed4c13d37de198b124012514fc753",
+    "crates/fvid-media/src/owned_fade.rs": "ec26162ffe9a1a4044501504f443fc73faf922b892368410210564f15172a299",
+    "crates/fvid-media/src/owned_hw_decode.rs": "43ad11d330e232fadf337d83362cc71fcba5c4da25a90316f42ba56bffc0f7bc",
+    "crates/fvid-media/src/owned_mp4_matroska.rs": "2244c448e51f73de57e54df7db7418ee786ea72ceafeac2de07274c0409b6261",
+    "crates/fvid-media/src/owned_draw.rs": "bbe8805ed9869cb84db130f08cbef8543c66157a2d5552095692cfe5ded2b99e",
+    "crates/fvid-media/src/owned_remux.rs": "e55a453252c7307a8b2a5a23bbeec36e9689398ff25e675e7a2a4c4c6375a865",
+    "crates/fvid-media/src/owned_colorize.rs": "28b048de07c96d3414d39b234edd3e75df1d370b994fb126aa8fdb5b98764652",
+    "crates/fvid-media/src/owned_nvdec_source.rs": "cf21bb9607544a9e8125d54e7d8b45757396aaf9f0a236f91f4f330c18220a7f",
+    "crates/fvid-media/src/owned_adts_loudness.rs": "5ca4906570e759b0890dfdea83f288698e68603e6aa584d80f05faf5d13b5330",
+    "crates/fvid-media/src/audio.rs": "e85d84171be3683784631a9bd27d11331880c1a9950611a44cbc6d5adfa4d3b9",
+    "crates/fvid-media/src/owned_hevc_nal_impl.rs": "6ab70a4078c1faa85affc068d1da3e55cec83a045b088e503bf4ddb9681229bb",
+    "crates/fvid-media/src/owned_xfade.rs": "48590c39549cee56107bcee3422a06bd5f72a739163bb5543413952f083dce10",
+    "crates/fvid-media/src/owned_pcm_decoder_impl.rs": "caa1768001aed1939d5bcff5c49d12a0bc03c887d38f7456f7ad0c50d4ffd45c",
+    "crates/fvid-media/src/decode.rs": "88d936a1af65298772ea63c594e88824c20cf33f8c5f2dda13456d159df57a1b",
+    "crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs": "54e0aad1d8e3f763eb6b423a81e3520de89fbe5b113d2748e0322f2114a8abb6",
+    "crates/fvid-media/src/owned_nvdec_avc.rs": "c23ae7ae09f0f4123802275762deaf354e852b4f5cd27ff25e8ae0713379964d",
+    "crates/fvid-media/src/owned_mp4_remux.rs": "63ce35f9362f8256ec52e6f39e51f464f01fe2ba6956f92ab2945e401c046484",
+    "crates/fvid-media/src/owned_dynamic_loudnorm.rs": "a4337c1b7e2ef0be0a4440ad7e07a4cf27ae34307f3c40646fffee239b1df135",
+    "crates/fvid-media/src/owned_vignette.rs": "9039816761ca7ef3c79353922f419455448d02a4fd93ad2f95ea04332154f36d",
+    "crates/fvid-media/src/owned_subtitle_burn.rs": "93811bf9ed7de593d3cb2f207e69505f7bb7b7a46905d692f5943b4a7980b009",
+    "crates/fvid-media/src/owned_matroska_adts_impl.rs": "57dd63e7b118649dc575c7ff5235e43c174815bba58457c075db034b9ed5058e",
+    "crates/fvid-media/src/owned_remux_plan.rs": "ac703945c9b401a597825ebfc061321d8d83078fddaff9b0238d92dce8161dea",
+    "crates/fvid-media/src/owned_hevc_nal.rs": "27b83d966eb4aa8f9b59f84c6394e143711c2aec3653267d56560f9b508ec625",
+    "crates/fvid-media/src/owned_avc.rs": "81782500dadf3a6530b837a368b6d0b570afd55b860acad500c5229af8cab712",
+    "crates/fvid-media/src/owned_ima4.rs": "0c978f40dd7212db7203a8e23927c76e0e7894ce49cd72c23a2813bedbe5ed04",
+    "crates/fvid-media/src/owned_morphology_impl.rs": "88913992a98f00aee612fce1a7df197058bc9a2715f91b15a82b2999c109bb98",
+    "crates/fvid-media/src/owned_hw_filter.rs": "44361e08b0a7f2d3c8d44f1bdea8b89397e0d8201f4cc2bd8bf9c6a4ce6bd81c",
+    "crates/fvid-media/src/audio_mix.rs": "788c91c9126a99b9c9fc855e18cfe7ee630db2118a471d066c7cbed642e942a1",
+    "crates/fvid-media/src/owned_monochrome.rs": "9f1f8d7610724ffae6b261e5eec3e4240672bab5749eedcab5781c486eb27ece",
+    "crates/fvid-media/src/owned_codec_config_impl.rs": "97efa4e59f56fec8443bf38529c433e46f24a36139cf515e9311eeb479d46577",
+    "crates/fvid-media/src/owned_mp4_video_bridge.rs": "3e10251aa24e854ca6e837bba9f250b64c37769b7b22515a60a950e2baace755",
+    "crates/fvid-media/src/owned_reverse.rs": "4bbe2209ce2a48e0ba7f7f94c809fc8b17122d7c333f1f7bbc6cb51f2accb1eb",
+    "crates/fvid-media/src/wav.rs": "56d0e94c7106d39110b951f65b6fd16bb1b038c1af26efa9850a4b9721909d6a",
+    "crates/fvid-media/src/owned_true_peak.rs": "e18149d17337efe845535623a30bab1351892c90d4306342271523fb5c0bad42",
+    "crates/fvid-media/src/owned_bilateral.rs": "d0f5f322839f83bc57d5f873d26ee0c3116030555181eda35b7971463a286b34",
+    "crates/fvid-media/src/owned_removegrain.rs": "b5d790615b77fe791c7cd5f231d9f114b2e4297c5ff3478e1ef8cf6df0b11ec4",
+    "crates/fvid-media/src/owned_hevc_annexb.rs": "482f899f2d26932b0567423c4f2548dc49359baf0325da026dd85f659ab62617",
+    "crates/fvid-media/src/owned_color_names.rs": "fb4253fe6cd33ed4bb1e4f97a7b098d95ecd892ba65b9d406379b02b35dcb22f",
+    "crates/fvid-media/src/owned_tmix.rs": "cef7761e12443b85c1be5609326fa66029ee989ac532ff33fb321407fd3d5339",
+    "crates/fvid-media/src/filter.rs": "3224d8b9de3f016b0672e113dc8198d9ab53183d56dfd30ed0562d0412cfa229",
+    "crates/fvid-media/src/owned_avc_annexb.rs": "e7f32878fc202bf7cfda3a3a72c3e68776afa6a0632eb7168a69ea99d1234677",
+    "crates/fvid-media/src/owned_colorhold.rs": "9ac1497924b56c393ddefca7188917ad5e2772a15ddbeff83ea7c3c2c88bfc4d",
+    "crates/fvid-media/src/owned_subtitle_impl.rs": "a1c119b94d783a4f09636a3484515adb2e4487d2d09055bf53d481a78f503447",
+    "crates/fvid-media/src/owned_matroska_pcm.rs": "ff25331d34df7462d7eda6240b6ebeab0f8babce83cd1a6d261a6a4ff5231933",
+    "crates/fvid-media/src/owned_chromashift_impl.rs": "fbb673ecfb1bfe7000e0a782bcac9a089dc222aabe82adfeb3bf19ecac92aae7",
+    "crates/fvid-media/src/owned_y4m.rs": "50ffce458cb9761b15d2093c39a5ff2dd0fd45dfc842d9d1d83ca7f3d43f9c6d",
+    "crates/fvid-media/src/owned_video_temporary.rs": "fe8442d5a8fc9849475451514a86c62688f876c819adf05ab0fea38de57a9b9e",
+    "crates/fvid-media/src/owned_matroska_file_impl.rs": "da0dabbcd940c1bad3034247e18db421122ad4e8a20b9578828a9b68d90f40a8",
+    "crates/fvid-media/src/owned_hue.rs": "cfb8e7a0c61363b962d1ca4533bf9ac0afecf1c654f4a71d9a0a9a26f36d14b8",
+    "crates/fvid-media/src/owned_lenscorrection.rs": "d13d53819f7f7a318963c55e17ba921f50d0b76324d208c46ba456a1cbd7c212",
+    "crates/fvid-media/src/pcm_format_adapter.rs": "ca3cba552da866b91b00131d741c4d0c4e31c3b8cd113f93f552dad8a6a56de9",
+    "crates/fvid-media/src/owned_matroska_alac_export.rs": "0ce70910347558d9f3d53cb753a767e46fbad8b94a024c3897be431c8e49f056",
+    "crates/fvid-media/src/owned_play_controls_impl.rs": "596251f66d7b7b8b957f5852bd2f22c6dcc68dc393d2fa2b81441e1b9826b3eb",
+    "crates/fvid-media/src/owned_lutyuv.rs": "0ec4a396c92a82062de5bc5348ea4dcd451987de08d918a72bc3306419b21b0a",
+    "crates/fvid-media/src/owned_pixelize.rs": "bab9d2bb9dcb9d28ac0974881970041a6172cdeb46bffb6da0aac27433761eb2",
+    "crates/fvid-media/src/owned_ffv1_decoder_impl.rs": "2fd636c681c6ae8bac65ba68ba93af21c55bf2d402c29ce431e453254ba91ac0",
+    "crates/fvid-media/src/owned_nvdec_avc_decoder.rs": "53babcb5a9ed56c5ed61b13cecbf0a1d8c2d2d1f0680b6542fe94d978ec4f853",
+    "crates/fvid-media/src/owned_opus.rs": "efa6c7279dafb1a646ee1e04ca5a6f2292295919cdbab90c96f695f7455b803f",
+    "crates/fvid-media/src/owned_http.rs": "c8f0e0966b0a3ab74209b11355b0f8f227ff2513b65b77729c9df04d136148a2",
+    "crates/fvid-media/src/lossless.rs": "5644db508176eaa57fbf369347631e478d7ef1a15f9a611f7a0e2290c225ece8",
+    "crates/fvid-media/src/owned_resample_f64.rs": "60a9ea982a9845324519c9ce1975e431cbdef55df92ebfcf3021fd83ecd5c93c",
+    "crates/fvid-media/src/xfade.rs": "54f7869f3499b24b4de3c66e7a4adbf63d77cd66fa6c56d5b2db76a73eb96983",
+    "crates/fvid-media/src/owned_loudness.rs": "a2d20ab40f0f7cd9ae60e36b8a8399a0ea15348771474ffc7f911ee511ef2b08",
+    "crates/fvid-media/src/owned_cas.rs": "04ad1ca63d10cb5e5d50610c5f6f34898e3039ecbaa477e99253037058f619ce",
+    "crates/fvid-media/src/owned_colorlevels.rs": "0959d07ac0e9eaeb02642e4e3468598571065e06eb0e701a5d8ffa1368b36baf",
+    "crates/fvid-media/src/owned_container_loudness.rs": "c66e9c274fa25ca20219113aaf602ae89650c16afe3adbf22ab5e0cbd115872c",
+    "crates/fvid-media/src/owned_matroska_alac.rs": "2bde30808909eadbba6a8b7930bc312a5ad142357ebe2b555e744c4b36caf065",
+    "crates/fvid-media/src/owned_sab.rs": "84bafacfac05714b6a1ab2c262ab4fd3facda9f517f1ed3e7c2bf04e4c408198",
+    "crates/fvid-media/src/loudness.rs": "0799d26a78ac3f2f3c8afa3f504110da678e94ff8d79817cc656e779c23dab2a",
+    "crates/fvid-media/src/owned_mp4_audio.rs": "2d1c0e3fa0ec1ef45b917c201fd65005769df250587b76eb033e05812f8472f0",
+    "crates/fvid-media/src/owned_alac_impl.rs": "e7daba3fdc4df6c85411665802121e85589615970714358914c200da2b2e7895",
+    "crates/fvid-media/src/owned_y4m_overlay.rs": "763b268d2a5e76844963f989465ed811daab94dd2a1a4d021973a44d95ebe649",
+    "crates/fvid-media/src/owned_wav.rs": "b09b18a8f93f9c62d19dcc7666ed115395eab294d86c9e30090aceb71c89ef74",
+    "crates/fvid-media/src/owned_vibrance.rs": "c4ed36cc4894ce4b536bf0707e2d2da3eaee1f1d7ec861fe64c0bc0038513060",
+    "crates/fvid-media/src/owned_rotate.rs": "1c5fd9c7758fa77ce59370cbeee3af236f18b4af3354f68445843759a6ba24a7",
+    "crates/fvid-media/src/owned_wave_inspect.rs": "23488f4f40547112539a3c104ab003a06a7aba318ae40a662cedad7cd9f5db95",
+    "crates/fvid-media/src/owned_pcm_gain.rs": "62091485dfe8c8e83ed5a419a9ed325540afe5546d33ff9e2232c31200452311",
+    "crates/fvid-media/src/owned_lossless.rs": "9eb8b5e6a1b6c0e0607eef7427199a6db237317a0fb0bcc1bcc87fb21ebe019e",
+    "crates/fvid-media/src/owned_matroska_copy.rs": "8577b86c29b7e3462769f3d66447f00cb01310030c271cc94a76598a88c97634",
+    "crates/fvid-media/src/owned_shuffleplanes.rs": "63f9545e7b8b26dee326e63c725e4b14c50fbb6f29086fb34c00ec459a1c00be",
+    "crates/fvid-media/src/owned_audio_mix.rs": "10e4803fb03dac1e4f8edb59dd716fb20b6ddbd1caaa8944ba21ad29f638b347",
+    "crates/fvid-media/src/owned_nvenc_movie.rs": "d4f08483332231189ec8a6f65857c7f028d7da29ab3c5d054006b7f128322d83",
+    "src/media_cli.rs": "52aaa7267f135cd5a79bb1762306a267e8ef7e5fe0c9de46d08cd20f46444d52",
+    "scripts/benchmark_media.py": "c510bf4e6fccca8a44b62a562ed045e39cc3ad0fe437721909e8b4454081148f"
   },
   "results": [
     {
@@ -21,46 +242,46 @@
       "operation": "remux",
       "samples_ms": {
         "fvid": [
-          21.452834,
-          21.721459,
-          22.463541,
-          22.817375,
-          22.055917
+          9.956875,
+          11.224167,
+          10.232417,
+          9.81225,
+          11.629459
         ],
         "ffmpeg_default": [
-          21.704208,
-          21.71825,
-          22.600667,
-          22.675542,
-          23.362792
+          22.405667,
+          21.893875,
+          21.387042,
+          21.820667,
+          21.893291
         ],
         "ffmpeg_1thread": [
-          22.299375,
-          22.443208,
-          22.3075,
-          23.093792,
-          23.066459
+          22.194875,
+          22.699708,
+          21.623708,
+          21.582375,
+          21.912042
         ]
       },
       "median_ms": {
-        "fvid": 22.055917,
-        "ffmpeg_default": 22.600667,
-        "ffmpeg_1thread": 22.443208
+        "fvid": 10.232417,
+        "ffmpeg_default": 21.893291,
+        "ffmpeg_1thread": 21.912042
       },
       "output_bytes": {
-        "fvid": 379043,
+        "fvid": 379194,
         "ffmpeg_default": 379043,
         "ffmpeg_1thread": 379043
       },
       "decoded_equality": true,
-      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "input_sha256": "af1ae65d99c297d1baca8fe4f4f47b417c63c320b642a5405c2cd8f3e4ad4ff0",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "remux",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_default": [
           "ffmpeg",
@@ -68,13 +289,13 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
           "-c:v",
           "copy",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -84,7 +305,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -94,7 +315,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -105,46 +326,46 @@
       "operation": "transcode",
       "samples_ms": {
         "fvid": [
-          59.108334,
-          60.629542,
-          60.5365,
-          63.502166,
-          63.240834
+          729.27175,
+          729.19475,
+          729.271875,
+          735.707916,
+          803.308125
         ],
         "ffmpeg_default": [
-          64.124166,
-          62.525208,
-          61.716333,
-          62.132458,
-          64.233541
+          63.400208,
+          61.8225,
+          61.147459,
+          61.547959,
+          62.478375
         ],
         "ffmpeg_1thread": [
-          146.943458,
-          146.694667,
-          147.3235,
-          147.071125,
-          148.479791
+          148.304708,
+          153.424041,
+          154.515416,
+          148.689125,
+          153.346959
         ]
       },
       "median_ms": {
-        "fvid": 60.629542,
-        "ffmpeg_default": 62.525208,
-        "ffmpeg_1thread": 147.071125
+        "fvid": 729.271875,
+        "ffmpeg_default": 61.8225,
+        "ffmpeg_1thread": 153.346959
       },
       "output_bytes": {
-        "fvid": 2249214,
+        "fvid": 2558709,
         "ffmpeg_default": 2249218,
         "ffmpeg_1thread": 2249218
       },
       "decoded_equality": true,
-      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "input_sha256": "af1ae65d99c297d1baca8fe4f4f47b417c63c320b642a5405c2cd8f3e4ad4ff0",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_default": [
           "ffmpeg",
@@ -152,7 +373,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -162,7 +383,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -172,7 +393,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -186,7 +407,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -197,46 +418,46 @@
       "operation": "crop-vflip",
       "samples_ms": {
         "fvid": [
-          39.259792,
-          39.937125,
-          38.961333,
-          39.0345,
-          38.6475
+          343.940209,
+          348.08225,
+          362.006958,
+          336.787833,
+          349.982709
         ],
         "ffmpeg_default": [
-          44.530541,
-          46.718167,
-          44.219834,
-          43.935375,
-          43.727458
+          48.180792,
+          41.808417,
+          42.685167,
+          42.872416,
+          42.167875
         ],
         "ffmpeg_1thread": [
-          63.966583,
-          64.440125,
-          63.587208,
-          63.754,
-          63.760125
+          62.336125,
+          62.163416,
+          62.434125,
+          63.797041,
+          63.123916
         ]
       },
       "median_ms": {
-        "fvid": 39.0345,
-        "ffmpeg_default": 44.219834,
-        "ffmpeg_1thread": 63.760125
+        "fvid": 348.08225,
+        "ffmpeg_default": 42.685167,
+        "ffmpeg_1thread": 62.434125
       },
       "output_bytes": {
-        "fvid": 313066,
+        "fvid": 318645,
         "ffmpeg_default": 313070,
         "ffmpeg_1thread": 313070
       },
       "decoded_equality": true,
-      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "input_sha256": "af1ae65d99c297d1baca8fe4f4f47b417c63c320b642a5405c2cd8f3e4ad4ff0",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv",
           "--crop",
           "2:2:640:360",
           "--vflip"
@@ -247,7 +468,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -259,7 +480,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -269,7 +490,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -285,7 +506,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -296,46 +517,46 @@
       "operation": "crop-hflip-vflip",
       "samples_ms": {
         "fvid": [
-          42.366875,
-          41.41075,
-          42.02475,
-          41.085125,
-          42.640333
+          347.309375,
+          352.305667,
+          356.126791,
+          361.246917,
+          358.871542
         ],
         "ffmpeg_default": [
-          43.753958,
-          43.757959,
-          45.375792,
-          42.853208,
-          43.352792
+          42.972583,
+          43.286,
+          42.905959,
+          43.93575,
+          44.268542
         ],
         "ffmpeg_1thread": [
-          63.768875,
-          64.840625,
-          64.160917,
-          64.190417,
-          63.464959
+          63.342917,
+          64.326291,
+          64.135417,
+          63.3765,
+          64.976791
         ]
       },
       "median_ms": {
-        "fvid": 42.02475,
-        "ffmpeg_default": 43.753958,
-        "ffmpeg_1thread": 64.160917
+        "fvid": 356.126791,
+        "ffmpeg_default": 43.286,
+        "ffmpeg_1thread": 64.135417
       },
       "output_bytes": {
-        "fvid": 305879,
+        "fvid": 332474,
         "ffmpeg_default": 305883,
         "ffmpeg_1thread": 305883
       },
       "decoded_equality": true,
-      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "input_sha256": "af1ae65d99c297d1baca8fe4f4f47b417c63c320b642a5405c2cd8f3e4ad4ff0",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv",
           "--crop",
           "2:2:640:360",
           "--hflip",
@@ -347,7 +568,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -359,7 +580,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -369,7 +590,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -385,7 +606,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -396,46 +617,46 @@
       "operation": "lossless-trim",
       "samples_ms": {
         "fvid": [
-          50.351458,
-          62.93075,
-          54.489792,
-          55.183125,
-          51.881875
+          2380.346833,
+          2280.147791,
+          2317.330542,
+          2359.1,
+          3062.309875
         ],
         "ffmpeg_default": [
-          56.713209,
-          56.980458,
-          55.888875,
-          57.853917,
-          60.966
+          94.251042,
+          52.866167,
+          52.59425,
+          54.259417,
+          131.211417
         ],
         "ffmpeg_1thread": [
-          109.186958,
-          109.928625,
-          110.464667,
-          113.619208,
-          109.603959
+          109.036667,
+          112.715417,
+          110.917875,
+          109.702625,
+          122.156959
         ]
       },
       "median_ms": {
-        "fvid": 54.489792,
-        "ffmpeg_default": 56.980458,
-        "ffmpeg_1thread": 109.928625
+        "fvid": 2359.1,
+        "ffmpeg_default": 54.259417,
+        "ffmpeg_1thread": 110.917875
       },
       "output_bytes": {
-        "fvid": 1357949,
+        "fvid": 1540127,
         "ffmpeg_default": 1357953,
         "ffmpeg_1thread": 1357953
       },
       "decoded_equality": true,
-      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "input_sha256": "af1ae65d99c297d1baca8fe4f4f47b417c63c320b642a5405c2cd8f3e4ad4ff0",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv",
           "--from",
           "0.2",
           "--to",
@@ -447,7 +668,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -459,7 +680,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -469,7 +690,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -485,7 +706,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -496,46 +717,46 @@
       "operation": "remux",
       "samples_ms": {
         "fvid": [
-          34.891292,
-          30.932792,
-          30.728375,
-          31.090916,
-          35.20875
+          15.652166,
+          15.970667,
+          15.396958,
+          14.331625,
+          14.056375
         ],
         "ffmpeg_default": [
-          33.149833,
-          28.742417,
-          27.451667,
-          32.498333,
-          31.385583
+          28.80925,
+          27.3525,
+          27.151542,
+          26.761375,
+          25.948208
         ],
         "ffmpeg_1thread": [
-          35.027583,
-          29.565208,
-          30.861792,
-          37.106833,
-          35.085667
+          28.064791,
+          26.961541,
+          27.379583,
+          25.966084,
+          26.504125
         ]
       },
       "median_ms": {
-        "fvid": 31.090916,
-        "ffmpeg_default": 31.385583,
-        "ffmpeg_1thread": 35.027583
+        "fvid": 15.396958,
+        "ffmpeg_default": 27.151542,
+        "ffmpeg_1thread": 26.961541
       },
       "output_bytes": {
-        "fvid": 769756,
+        "fvid": 769965,
         "ffmpeg_default": 769756,
         "ffmpeg_1thread": 769756
       },
       "decoded_equality": true,
-      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "input_sha256": "3f39242bf0fdadc1ff26149d66cf1f6640ea095a2b661db7bdaf242f35c6a8eb",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "remux",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_default": [
           "ffmpeg",
@@ -543,13 +764,13 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
           "-c:v",
           "copy",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -559,7 +780,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -569,7 +790,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -580,46 +801,46 @@
       "operation": "transcode",
       "samples_ms": {
         "fvid": [
-          133.72275,
-          131.60625,
-          146.806292,
-          140.404,
-          139.16175
+          1562.012334,
+          1555.147,
+          1554.249333,
+          1553.091584,
+          1542.691334
         ],
         "ffmpeg_default": [
-          136.217916,
-          135.929875,
-          142.081208,
-          132.848208,
-          149.954833
+          90.427708,
+          89.924167,
+          88.180666,
+          88.610584,
+          88.292917
         ],
         "ffmpeg_1thread": [
-          362.388083,
-          333.138958,
-          358.89275,
-          385.292125,
-          429.061083
+          286.22125,
+          287.435334,
+          290.589209,
+          287.287166,
+          290.37875
         ]
       },
       "median_ms": {
-        "fvid": 139.16175,
-        "ffmpeg_default": 136.217916,
-        "ffmpeg_1thread": 362.388083
+        "fvid": 1554.249333,
+        "ffmpeg_default": 88.610584,
+        "ffmpeg_1thread": 287.435334
       },
       "output_bytes": {
-        "fvid": 4229970,
+        "fvid": 4981207,
         "ffmpeg_default": 4229974,
         "ffmpeg_1thread": 4229974
       },
       "decoded_equality": true,
-      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "input_sha256": "3f39242bf0fdadc1ff26149d66cf1f6640ea095a2b661db7bdaf242f35c6a8eb",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_default": [
           "ffmpeg",
@@ -627,7 +848,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -637,7 +858,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -647,7 +868,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -661,7 +882,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -672,46 +893,46 @@
       "operation": "crop-vflip",
       "samples_ms": {
         "fvid": [
-          92.9055,
-          104.0335,
-          88.138208,
-          95.360834,
-          55.568875
+          725.282708,
+          710.943209,
+          708.458916,
+          718.609166,
+          711.566041
         ],
         "ffmpeg_default": [
-          94.75225,
-          91.226791,
-          91.006625,
-          85.105,
-          64.597666
+          61.14525,
+          58.578375,
+          58.988333,
+          58.385416,
+          59.017959
         ],
         "ffmpeg_1thread": [
-          120.685166,
-          126.338041,
-          134.781083,
-          116.43825,
-          113.790459
+          109.686542,
+          108.421916,
+          108.385,
+          107.788041,
+          107.084
         ]
       },
       "median_ms": {
-        "fvid": 92.9055,
-        "ffmpeg_default": 91.006625,
-        "ffmpeg_1thread": 120.685166
+        "fvid": 711.566041,
+        "ffmpeg_default": 58.988333,
+        "ffmpeg_1thread": 108.385
       },
       "output_bytes": {
-        "fvid": 418114,
+        "fvid": 461642,
         "ffmpeg_default": 418118,
         "ffmpeg_1thread": 418118
       },
       "decoded_equality": true,
-      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "input_sha256": "3f39242bf0fdadc1ff26149d66cf1f6640ea095a2b661db7bdaf242f35c6a8eb",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv",
           "--crop",
           "2:2:960:540",
           "--vflip"
@@ -722,7 +943,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -734,7 +955,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -744,7 +965,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -760,7 +981,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -771,46 +992,46 @@
       "operation": "crop-hflip-vflip",
       "samples_ms": {
         "fvid": [
-          73.407625,
-          66.882583,
-          71.73,
-          70.823375,
-          55.374291
+          711.976208,
+          719.983583,
+          727.299417,
+          715.524584,
+          721.363833
         ],
         "ffmpeg_default": [
-          67.8125,
-          74.965667,
-          66.988583,
-          62.602833,
-          71.965458
+          58.443209,
+          58.155791,
+          58.592292,
+          60.897209,
+          59.743083
         ],
         "ffmpeg_1thread": [
-          112.567416,
-          121.930792,
-          113.193917,
-          114.834709,
-          111.441667
+          110.345083,
+          109.401083,
+          109.288125,
+          110.739833,
+          109.603167
         ]
       },
       "median_ms": {
-        "fvid": 70.823375,
-        "ffmpeg_default": 67.8125,
-        "ffmpeg_1thread": 113.193917
+        "fvid": 719.983583,
+        "ffmpeg_default": 58.592292,
+        "ffmpeg_1thread": 109.603167
       },
       "output_bytes": {
-        "fvid": 417754,
+        "fvid": 482922,
         "ffmpeg_default": 417758,
         "ffmpeg_1thread": 417758
       },
       "decoded_equality": true,
-      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "input_sha256": "3f39242bf0fdadc1ff26149d66cf1f6640ea095a2b661db7bdaf242f35c6a8eb",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv",
           "--crop",
           "2:2:960:540",
           "--hflip",
@@ -822,7 +1043,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -834,7 +1055,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -844,7 +1065,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -860,7 +1081,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     },
@@ -871,46 +1092,46 @@
       "operation": "lossless-trim",
       "samples_ms": {
         "fvid": [
-          70.175584,
-          71.109167,
-          69.029459,
-          69.2965,
-          71.527209
+          4933.566875,
+          7694.095792,
+          11855.682375,
+          8525.545625,
+          11575.141375
         ],
         "ffmpeg_default": [
-          78.704666,
-          77.75275,
-          76.845875,
-          83.419625,
-          77.778584
+          79.188083,
+          79.044583,
+          116.403125,
+          140.070958,
+          156.339458
         ],
         "ffmpeg_1thread": [
-          203.586792,
-          203.15075,
-          203.988042,
-          204.539333,
-          204.477292
+          214.371125,
+          213.855625,
+          226.915458,
+          227.571917,
+          242.376125
         ]
       },
       "median_ms": {
-        "fvid": 70.175584,
-        "ffmpeg_default": 77.778584,
-        "ffmpeg_1thread": 203.988042
+        "fvid": 8525.545625,
+        "ffmpeg_default": 116.403125,
+        "ffmpeg_1thread": 226.915458
       },
       "output_bytes": {
-        "fvid": 2543721,
+        "fvid": 2989148,
         "ffmpeg_default": 2543725,
         "ffmpeg_1thread": 2543725
       },
       "decoded_equality": true,
-      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "input_sha256": "3f39242bf0fdadc1ff26149d66cf1f6640ea095a2b661db7bdaf242f35c6a8eb",
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/Sources/fvid/target/release/fvid",
           "media",
           "transcode-lossless",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv",
           "--from",
           "0.2",
           "--to",
@@ -922,7 +1143,7 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -934,7 +1155,7 @@
           "3",
           "-pix_fmt",
           "yuv420p",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ],
         "ffmpeg_1thread": [
           "ffmpeg",
@@ -944,7 +1165,7 @@
           "-threads",
           "1",
           "-i",
-          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/source.mp4",
           "-map",
           "0:v:0",
           "-an",
@@ -960,7 +1181,7 @@
           "1",
           "-filter_threads",
           "1",
-          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+          "/var/folders/jx/ps1h62vx3gdgly_ddwly4mqr0000gn/T/fvid-media-bench-f9nbytt3/output.mkv"
         ]
       }
     }

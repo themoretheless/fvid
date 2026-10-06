@@ -18,6 +18,18 @@ use crate::{Result, invalid};
 pub struct Picture {
     #[cfg(test)]
     pub(crate) pcm_luma_samples: usize,
+    #[cfg(test)]
+    pub(crate) cross_component_blocks: usize,
+    #[cfg(test)]
+    pub(crate) act_blocks: usize,
+    #[cfg(test)]
+    pub(crate) current_picture_blocks: usize,
+    #[cfg(test)]
+    pub(crate) completed_picture_blocks: usize,
+    #[cfg(test)]
+    pub(crate) bipredicted_blocks: usize,
+    #[cfg(test)]
+    pub(crate) fractional_current_chroma_blocks: usize,
     pub dimensions: [u32; 2],
     pub crop: [u32; 4],
     pub depth: [u8; 2],
@@ -28,6 +40,11 @@ pub struct Picture {
     pub(crate) motion: Vec<Motion>,
     pub(crate) reference_pocs: [Vec<i32>; 2],
     pub(crate) reference_long_term: [Vec<bool>; 2],
+}
+fn component_shifts(component: usize, format: u8) -> [usize; 2] {
+    if component == 0 { [0,0] } else {
+        match format { 1 => [1,1], 2 => [1,0], _ => [0,0] }
+    }
 }
 /// Decode a complete Main/Main10 IDR slice, including WPP, QP deltas and filters.
 /// Output planes have coded dimensions; crop is metadata. The supplied budget
@@ -46,7 +63,7 @@ pub fn decode(
     lists: &[Vec<Reference>; 2],
     budget: usize,
 ) -> Result<Picture> {
-    if !matches!(sps.chroma_format, 1 | 3)
+    if sps.chroma_format > 3
         || sps.separate_colour_plane
         || !slice.first
         || slice.address != 0
@@ -57,15 +74,15 @@ pub fn decode(
     if slice.slice_type != SliceType::I && !(1..=5).contains(&slice.max_merge_candidates) {
         return Err(invalid("invalid HEVC merge candidate count"));
     }
-    if sps.depth[0] != sps.depth[1] {
-        return Err(crate::unsupported("HEVC mixed component bit depths are not supported"));
-    }
     for list in 0..2 {
         if lists[list].len() != slice.references[list] as usize {
             return Err(invalid("HEVC reference-list length mismatch"));
         }
         for r in &lists[list] {
-            if r.picture.dimensions != sps.dimensions || r.picture.depth != sps.depth {
+            if r.picture.is_none() && (!pps.current_picture_reference || r.poc!=poc || !r.long_term) {
+                return Err(invalid("invalid HEVC current-picture reference descriptor"));
+            }
+            if r.picture.as_ref().is_some_and(|p| p.dimensions != sps.dimensions || p.depth != sps.depth) {
                 return Err(invalid("HEVC reference geometry mismatch"));
             }
         }
@@ -77,7 +94,7 @@ pub fn decode(
         || !(2..=min_cb.min(5)).contains(&min_tb)
         || !(min_tb..=max_cb.min(5)).contains(&max_tb)
         || sps.transform_hierarchy_depth[1] > max_cb - min_tb
-        || sps.depth.iter().any(|d| !(8..=12).contains(d))
+        || sps.depth.iter().any(|d| !(8..=16).contains(d))
         || sps.id != pps.sps_id
         || pps.id != slice.pps_id
     {
@@ -96,7 +113,7 @@ pub fn decode(
     let count = (w as usize)
         .checked_mul(h as usize)
         .ok_or_else(|| invalid("HEVC picture size overflow"))?;
-    let chroma_shift = usize::from(sps.chroma_format != 3);
+    let [chroma_shift_x, chroma_shift_y] = component_shifts(1, sps.chroma_format);
     let required = count
         .checked_mul(24)
         .and_then(|n| n.checked_add(65536))
@@ -112,6 +129,7 @@ pub fn decode(
     hevc_qp::components_with_format(slice.qp, sps.depth, chroma_offsets, [0;2], sps.chroma_format)?;
 
     let mut decoder = Decoder {
+        palette: if sps.palette.is_some() {Some(super::hevc_palette::Predictor::from_parameters(sps,pps)?)} else {None},
         sps,
         pps,
         slice,
@@ -135,10 +153,22 @@ pub fn decode(
         pred_scratch: Vec::new(),
         transform_scratch: Vec::new(),
         residual_scratch: Vec::new(),
+        #[cfg(test)]
+        cross_component_blocks: 0,
+        #[cfg(test)]
+        act_blocks: 0,
+        #[cfg(test)]
+        current_picture_blocks: 0,
+        #[cfg(test)]
+        completed_picture_blocks: 0,
+        #[cfg(test)]
+        bipredicted_blocks: 0,
+        #[cfg(test)]
+        fractional_current_chroma_blocks: 0,
         planes: [
             Plane::new(w as usize, h as usize, sps.depth[0], count * 3)?,
-            Plane::new(w as usize >> chroma_shift, h as usize >> chroma_shift, sps.depth[1], (count * 3) >> (2 * chroma_shift))?,
-            Plane::new(w as usize >> chroma_shift, h as usize >> chroma_shift, sps.depth[1], (count * 3) >> (2 * chroma_shift))?,
+            if sps.chroma_format == 0 { Plane::absent(sps.depth[1]) } else { Plane::new(w as usize >> chroma_shift_x, h as usize >> chroma_shift_y, sps.depth[1], (count * 3) >> (chroma_shift_x + chroma_shift_y))? },
+            if sps.chroma_format == 0 { Plane::absent(sps.depth[1]) } else { Plane::new(w as usize >> chroma_shift_x, h as usize >> chroma_shift_y, sps.depth[1], (count * 3) >> (chroma_shift_x + chroma_shift_y))? },
         ],
     };
     let side = 1u32 << max_cb;
@@ -170,6 +200,8 @@ pub fn decode(
     )?;
     let initial_contexts = bins.contexts()?;
     let mut saved_contexts = None;
+    let initial_palette=decoder.palette.clone();
+    let mut saved_palette=None;
     if let Some(layout) = decoder.tile_layout.take() {
         sao = decode_tile_ctus(&mut decoder, slice, &layout)?;
         decoder.tile_layout = Some(layout);
@@ -254,6 +286,7 @@ pub fn decode(
             for row in 0..rows {
                 if pps.entropy_sync {
                     if row > 0 {
+                        decoder.palette=saved_palette.clone().unwrap_or_else(||initial_palette.clone());
                         bins = HevcCabac::from_contexts(
                             &slice.rbsp[slice.entropy_substreams[row as usize].clone()],
                             0,
@@ -287,6 +320,7 @@ pub fn decode(
                     )?;
                     if pps.entropy_sync && col == 1 {
                         saved_contexts = Some(bins.contexts()?);
+                        saved_palette=Some(decoder.palette.clone());
                     }
                     let end = bins.terminate()?;
                     let last = row == rows - 1 && col == columns - 1;
@@ -332,23 +366,23 @@ pub fn decode(
         deblock(&mut decoder, slice)?;
     }
     if slice.sao != [false, false] {
-        for (component, plane) in decoder.planes.iter_mut().enumerate() {
+        for (component, plane) in decoder.planes.iter_mut().take(if sps.chroma_format == 0 {1} else {3}).enumerate() {
             let parameters: Vec<_> = sao.iter().map(|p| p[component]).collect();
-            let shift = usize::from(component != 0 && sps.chroma_format != 3);
+            let [shift_x, shift_y] = component_shifts(component, sps.chroma_format);
             let cells = &decoder.cells;
             let stride = sps.dimensions[0] as usize / 4;
-            plane.apply_sao_with_exclusions(max_cb - shift as u8, &parameters,
+            plane.apply_sao_rectangular([max_cb - shift_x as u8, max_cb - shift_y as u8], &parameters,
                 |a, b| {
                     if let Some(layout) = &decoder.tile_layout
                         && !pps.tiles.as_ref().unwrap().loop_filter_across {
                         let side = 1usize << max_cb;
-                        let address = |p: [usize; 2]| ((p[1] << shift) / side) * columns as usize + (p[0] << shift) / side;
+                        let address = |p: [usize; 2]| ((p[1] << shift_y) / side) * columns as usize + (p[0] << shift_x) / side;
                         return layout.tile_ids[address(a)] == layout.tile_ids[address(b)];
                     }
                     true
                 },
                 |p| {
-                    let c = cells[((p[1] << shift) / 4) * stride + (p[0] << shift) / 4];
+                    let c = cells[((p[1] << shift_y) / 4) * stride + (p[0] << shift_x) / 4];
                     c.bypass || (c.pcm && sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled))
                 })?;
         }
@@ -367,6 +401,18 @@ pub fn decode(
     Ok(Picture {
         #[cfg(test)]
         pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
+        #[cfg(test)]
+        cross_component_blocks: decoder.cross_component_blocks,
+        #[cfg(test)]
+        act_blocks: decoder.act_blocks,
+        #[cfg(test)]
+        current_picture_blocks: decoder.current_picture_blocks,
+        #[cfg(test)]
+        completed_picture_blocks: decoder.completed_picture_blocks,
+        #[cfg(test)]
+        bipredicted_blocks: decoder.bipredicted_blocks,
+        #[cfg(test)]
+        fractional_current_chroma_blocks: decoder.fractional_current_chroma_blocks,
         motion,
         reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
         reference_long_term: std::array::from_fn(|l| lists[l].iter().map(|r| r.long_term).collect()),
@@ -413,7 +459,7 @@ pub fn decode_slices(
             }
         }
     }
-    if !matches!(sps.chroma_format, 1 | 3) || sps.separate_colour_plane || sps.depth[0] != sps.depth[1] {
+    if sps.chroma_format > 3 || sps.separate_colour_plane {
         return Err(crate::unsupported(
             "unsupported HEVC multi-slice picture tools",
         ));
@@ -436,17 +482,12 @@ pub fn decode_slices(
         if slice.slice_type != SliceType::I && !(1..=5).contains(&slice.max_merge_candidates) {
             return Err(invalid("invalid HEVC merge candidate count"));
         }
-        if sps.depth[0] != sps.depth[1] {
-            return Err(crate::unsupported(
-                "HEVC mixed component bit depths are not supported",
-            ));
-        }
         for list in 0..2 {
             if reference_lists[list].len() != slice.references[list] as usize {
                 return Err(invalid("HEVC reference-list length mismatch"));
             }
             for r in &reference_lists[list] {
-                if r.picture.dimensions != sps.dimensions || r.picture.depth != sps.depth {
+                if r.picture.as_ref().is_some_and(|p| p.dimensions != sps.dimensions || p.depth != sps.depth) {
                     return Err(invalid("HEVC reference geometry mismatch"));
                 }
             }
@@ -458,7 +499,7 @@ pub fn decode_slices(
             || !(2..=min_cb.min(5)).contains(&min_tb)
             || !(min_tb..=max_cb.min(5)).contains(&max_tb)
             || sps.transform_hierarchy_depth[1] > max_cb - min_tb
-            || sps.depth.iter().any(|d| !(8..=12).contains(d))
+            || sps.depth.iter().any(|d| !(8..=16).contains(d))
             || sps.id != pps.sps_id
             || pps.id != slice.pps_id
         {
@@ -488,7 +529,7 @@ pub fn decode_slices(
     let [min_cb, max_cb] = sps.coding_block_log2;
     let [w, h] = sps.dimensions;
     let count = w as usize * h as usize;
-    let chroma_shift = usize::from(sps.chroma_format != 3);
+    let [chroma_shift_x, chroma_shift_y] = component_shifts(1, sps.chroma_format);
     let tile_layout = pps
         .tiles
         .as_ref()
@@ -506,6 +547,7 @@ pub fn decode_slices(
     hevc_qp::components_with_format(slice.qp, sps.depth, chroma_offsets, [0;2], sps.chroma_format)?;
 
     let mut decoder = Decoder {
+        palette: if sps.palette.is_some() {Some(super::hevc_palette::Predictor::from_parameters(sps,pps)?)} else {None},
         sps,
         pps,
         slice,
@@ -529,10 +571,22 @@ pub fn decode_slices(
         pred_scratch: Vec::new(),
         transform_scratch: Vec::new(),
         residual_scratch: Vec::new(),
+        #[cfg(test)]
+        cross_component_blocks: 0,
+        #[cfg(test)]
+        act_blocks: 0,
+        #[cfg(test)]
+        current_picture_blocks: 0,
+        #[cfg(test)]
+        completed_picture_blocks: 0,
+        #[cfg(test)]
+        bipredicted_blocks: 0,
+        #[cfg(test)]
+        fractional_current_chroma_blocks: 0,
         planes: [
             Plane::new(w as usize, h as usize, sps.depth[0], count * 3)?,
-            Plane::new(w as usize >> chroma_shift, h as usize >> chroma_shift, sps.depth[1], (count * 3) >> (2 * chroma_shift))?,
-            Plane::new(w as usize >> chroma_shift, h as usize >> chroma_shift, sps.depth[1], (count * 3) >> (2 * chroma_shift))?,
+            if sps.chroma_format == 0 { Plane::absent(sps.depth[1]) } else { Plane::new(w as usize >> chroma_shift_x, h as usize >> chroma_shift_y, sps.depth[1], (count * 3) >> (chroma_shift_x + chroma_shift_y))? },
+            if sps.chroma_format == 0 { Plane::absent(sps.depth[1]) } else { Plane::new(w as usize >> chroma_shift_x, h as usize >> chroma_shift_y, sps.depth[1], (count * 3) >> (chroma_shift_x + chroma_shift_y))? },
         ],
     };
     let side = 1u32 << max_cb;
@@ -547,6 +601,8 @@ pub fn decode_slices(
     let mut sao = vec![[hevc_sao::Sao::Off; 3]; total as usize];
     let scan = |raster: u32| tile_scan(&decoder.tile_layout, raster);
     let starts: Vec<_> = slices.iter().map(|s| scan(s.address)).collect();
+    let initial_palette=decoder.palette.clone();
+    let mut saved_palette=None;
     let mut previous_contexts = None;
     let mut saved = None;
     let mut visited = 0;
@@ -559,6 +615,8 @@ pub fn decode_slices(
         decoder.slice = slice;
         decoder.lists = &slice_lists[index];
         if !slice.dependent {
+            decoder.palette=initial_palette.clone();
+            saved_palette=None;
             decoder.slice_start = begin;
             decoder.qp = slice.qp;
             decoder.qp_prediction = slice.qp;
@@ -597,6 +655,7 @@ pub fn decode_slices(
         let (_, _, _, _, tile_start, row_start) =
             ctu_position(&decoder.tile_layout, begin, columns, rows);
         if slice.dependent && !tile_start {
+            if pps.entropy_sync && row_start {decoder.palette=saved_palette.clone().unwrap_or_else(||initial_palette.clone());}
             let contexts = if pps.entropy_sync && row_start {
                 saved.as_ref().unwrap_or(&initial)
             } else {
@@ -619,6 +678,8 @@ pub fn decode_slices(
                 .as_ref()
                 .map(|_| [tx * side, ty * side, tw * side, th * side]);
             if tile_start {
+                decoder.palette=initial_palette.clone();
+                saved_palette=None;
                 saved = None;
                 decoder.qp = slice.qp;
                 decoder.qp_prediction = slice.qp;
@@ -630,6 +691,7 @@ pub fn decode_slices(
                 bins = if tile_start {
                     HevcCabac::new(bytes, 0, slice.slice_type, slice.cabac_init, slice.qp)?
                 } else {
+                    decoder.palette=saved_palette.clone().unwrap_or_else(||initial_palette.clone());
                     HevcCabac::from_contexts(bytes, 0, saved.as_ref().unwrap_or(&initial))?
                 };
                 decoder.qp = slice.qp;
@@ -662,6 +724,7 @@ pub fn decode_slices(
             )?;
             if pps.entropy_sync && col == tx + 1 {
                 saved = Some(bins.contexts()?);
+                saved_palette=Some(decoder.palette.clone());
             }
             let last = address + 1 == end;
             if bins.terminate()? != last {
@@ -703,17 +766,17 @@ pub fn decode_slices(
     decoder.lists = &canonical;
     deblock_slices(&mut decoder, slices)?;
     let owners = independent_owners(slices);
-    for (component, plane) in decoder.planes.iter_mut().enumerate() {
+    for (component, plane) in decoder.planes.iter_mut().take(if sps.chroma_format == 0 {1} else {3}).enumerate() {
         let parameters: Vec<_> = sao.iter().map(|p| p[component]).collect();
-        let shift = usize::from(component != 0 && sps.chroma_format != 3);
+        let [shift_x, shift_y] = component_shifts(component, sps.chroma_format);
         let owner = |p: [usize; 2]| {
-            let address = ((p[1] << shift) / side as usize) * columns as usize
-                + (p[0] << shift) / side as usize;
+            let address = ((p[1] << shift_y) / side as usize) * columns as usize
+                + (p[0] << shift_x) / side as usize;
             let scan = tile_scan(&decoder.tile_layout, address as u32);
             slices.partition_point(|s| tile_scan(&decoder.tile_layout, s.address) <= scan) - 1
         };
-        plane.apply_sao_with_exclusions(
-            max_cb - shift as u8,
+        plane.apply_sao_rectangular(
+            [max_cb - shift_x as u8, max_cb - shift_y as u8],
             &parameters,
             |a, b| {
                 let ia = owner(a);
@@ -725,16 +788,16 @@ pub fn decode_slices(
                         return true;
                     }
                     let raster = |p: [usize; 2]| {
-                        (p[1] << shift) / side as usize * columns as usize
-                            + (p[0] << shift) / side as usize
+                        (p[1] << shift_y) / side as usize * columns as usize
+                            + (p[0] << shift_x) / side as usize
                     };
                     layout.tile_ids[raster(a)] == layout.tile_ids[raster(b)]
                 });
                 slice_allowed && tile_allowed
             },
             |p| {
-                let c = decoder.cells[((p[1] << shift) / 4) * (sps.dimensions[0] as usize / 4)
-                    + (p[0] << shift) / 4];
+                let c = decoder.cells[((p[1] << shift_y) / 4) * (sps.dimensions[0] as usize / 4)
+                    + (p[0] << shift_x) / 4];
                 c.bypass || (c.pcm && sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled))
             },
         )?;
@@ -751,6 +814,18 @@ pub fn decode_slices(
     Ok(Picture {
         #[cfg(test)]
         pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
+        #[cfg(test)]
+        cross_component_blocks: decoder.cross_component_blocks,
+        #[cfg(test)]
+        act_blocks: decoder.act_blocks,
+        #[cfg(test)]
+        current_picture_blocks: decoder.current_picture_blocks,
+        #[cfg(test)]
+        completed_picture_blocks: decoder.completed_picture_blocks,
+        #[cfg(test)]
+        bipredicted_blocks: decoder.bipredicted_blocks,
+        #[cfg(test)]
+        fractional_current_chroma_blocks: decoder.fractional_current_chroma_blocks,
         motion,
         reference_pocs: canonical_pocs,
         reference_long_term: std::array::from_fn(|l| {
@@ -774,6 +849,7 @@ struct Cell {
     cbf: bool,
     bypass: bool,
     pcm: bool,
+    palette: bool,
 }
 struct Decoder<'a> {
     sps: &'a Sps,
@@ -784,6 +860,7 @@ struct Decoder<'a> {
     slice_start: u32,
     tile_bounds: Option<[u32; 4]>,
     tile_layout: Option<super::hevc_tiles::TileLayout>,
+    palette: Option<super::hevc_palette::Predictor>,
     qp: i32,
     chroma_offsets: [i32; 2],
     cu_chroma_offsets: [i32; 2],
@@ -800,6 +877,18 @@ struct Decoder<'a> {
     pred_scratch: Vec<u16>,
     transform_scratch: Vec<i32>,
     residual_scratch: Vec<i32>,
+    #[cfg(test)]
+    cross_component_blocks: usize,
+    #[cfg(test)]
+    act_blocks: usize,
+    #[cfg(test)]
+    current_picture_blocks: usize,
+    #[cfg(test)]
+    completed_picture_blocks: usize,
+    #[cfg(test)]
+    bipredicted_blocks: usize,
+    #[cfg(test)]
+    fractional_current_chroma_blocks: usize,
 }
 impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
     fn neighbouring_depths(&self, n: Node) -> [Option<u8>; 2] {
@@ -861,6 +950,35 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
             self.finish_cu(n, false, skip);
             return Ok(());
         }
+        if self.palette.is_some() && n.log2_size<=self.sps.transform_block_log2[1]
+            && b.decision(Syntax::PaletteMode,0)? {
+            let header=super::hevc_palette::Header::read(self.palette.as_ref().unwrap(),1usize<<n.log2_size,b)?;
+            if header.escapes {
+                if self.pps.cu_qp_delta_depth.is_some() && !self.qp_coded {
+                    let delta=hevc_qp::read_delta(b,self.sps.depth[0])?;
+                    self.qp=hevc_qp::luma(self.qp_prediction,[None;2],delta,self.sps.depth[0])?;
+                    self.qp_coded=true;
+                }
+                self.read_chroma_qp(b,[true;3],bypass)?;
+            }
+            let samples=header.samples(1usize<<n.log2_size,self.sps.chroma_format,self.sps.depth,bypass,self.component_qps(false)?.map(i32::from),b)?;
+            self.palette.as_mut().unwrap().update(&header.entries,&header.reused)?;
+            let stride=self.sps.dimensions[0] as usize/4;
+            let side=1usize<<n.log2_size;
+            for y in n.y as usize/4..(n.y as usize+side)/4 {
+                for x in n.x as usize/4..(n.x as usize+side)/4 {
+                    self.cells[y*stride+x]=Cell {bypass,palette:true,mode:1,..Cell::default()};
+                }
+            }
+            for (component,samples) in samples.into_iter().take(if self.sps.chroma_format==0 {1} else {3}).enumerate() {
+                let [sx,sy]=component_shifts(component,self.sps.chroma_format);
+                let rect=[n.x as usize>>sx,n.y as usize>>sy,side>>sx,side>>sy];
+                if self.jobs.is_some() {self.reconstruction.push(Reconstruction::Pcm {component,rect,samples});}
+                else {self.planes[component].reconstruct_inter(rect,&samples)?;}
+            }
+            self.finish_cu(n,true,false);
+            return Ok(());
+        }
         let nxn =
             n.log2_size == self.sps.coding_block_log2[0] && !b.decision(Syntax::PartMode, 0)?;
         if !nxn
@@ -881,13 +999,13 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     };
                 }
             }
-            for (component, samples) in samples.into_iter().enumerate() {
-                let shift = usize::from(component != 0 && self.sps.chroma_format != 3);
+            for (component, samples) in samples.into_iter().take(if self.sps.chroma_format == 0 {1} else {3}).enumerate() {
+                let [shift_x,shift_y] = component_shifts(component, self.sps.chroma_format);
                 let rect = [
-                    n.x as usize >> shift,
-                    n.y as usize >> shift,
-                    side >> shift,
-                    side >> shift,
+                    n.x as usize >> shift_x,
+                    n.y as usize >> shift_y,
+                    side >> shift_x,
+                    side >> shift_y,
                 ];
                 if self.jobs.is_some() {
                     self.reconstruction.push(Reconstruction::Pcm {
@@ -939,7 +1057,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 }
             }
         }
-        let chroma_modes = hevc_intra_syntax::read_chroma_modes(b, &luma_modes, self.sps.chroma_format)?;
+        let chroma_modes = hevc_intra_syntax::read_chroma_modes_and_codes(b, &luma_modes, self.sps.chroma_format)?;
         let c = hevc_transform_tree::Config {
             log2_cu: n.log2_size,
             log2_min_transform: self.sps.transform_block_log2[0],
@@ -952,11 +1070,22 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 let half = 1u32 << (n.log2_size - 1);
                 ((u.origin[1] - n.y) / half * 2 + (u.origin[0] - n.x) / half) as usize
             } else { 0 };
-            let chroma = chroma_modes[index];
+            let (chroma,chroma_code) = chroma_modes[index];
             let mode = self
                 .cell(u.origin[0] as i32, u.origin[1] as i32)
                 .ok_or_else(|| invalid("HEVC transform has no prediction block"))?
                 .mode;
+            let act = self.pps.adaptive_colour_transform
+                && u.coded.iter().any(|&v| v)
+                && chroma_modes.iter().all(|&(_,code)| code == 4)
+                && b.decision(Syntax::ResidualAct, 0)?;
+            if act && bypass && self.sps.depth[0] != self.sps.depth[1] {
+                return Err(invalid("HEVC bypass ACT requires equal component depths"));
+            }
+            #[cfg(test)]
+            { self.act_blocks += usize::from(act); }
+            let mut act_blocks = std::array::from_fn(|_| None);
+            let mut act_alphas = [0;3];
             if self.pps.cu_qp_delta_depth.is_some() && !self.qp_coded && u.coded.iter().any(|&v| v)
             {
                 let delta = hevc_qp::read_delta(b, self.sps.depth[0])?;
@@ -970,20 +1099,18 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 self.edges[(y + k) * stride + x][0] |= 2;
                 self.edges[y * stride + x + k][1] |= 2;
             }
-            self.read_chroma_qp(b, u.coded, bypass)?;
-            let qps = hevc_qp::components_with_format(
-                self.qp, self.sps.depth, self.chroma_offsets, self.cu_chroma_offsets, self.sps.chroma_format,
-            )?;
-            for component in 0..3 {
-                if component != 0 && !u.owns_chroma {
-                    continue;
-                }
+            self.read_chroma_qp(b, u.coded_components(), bypass)?;
+            let qps = self.component_qps(act)?;
+            let mut luma_residual = Vec::new();
+            for block in u.component_blocks(self.sps.chroma_format) {
+                let component = block.component;
+                let alpha = if component != 0 && self.pps.cross_component_prediction && u.coded[0] && chroma_code == 4 {
+                    super::hevc_cross_component::read_alpha(b,component)?
+                } else { 0 };
+                #[cfg(test)]
+                { self.cross_component_blocks += usize::from(alpha != 0); }
                 let c = hevc_block::Config {
-                    log2_size: if component == 0 {
-                        u.log2_size
-                    } else {
-                        u.log2_chroma_size
-                    },
+                    log2_size: block.log2_size,
                     component: component as u8,
                     bit_depth: self.sps.depth[usize::from(component != 0)],
                     qp: qps[component],
@@ -992,7 +1119,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     transquant_bypass: bypass,
                     sign_hiding: self.pps.sign_data_hiding,
                 };
-                let residual = if u.coded[component] {
+                let residual = if block.coded {
                     Some(hevc_block::read_with_precision(
                         b, c,
                         self.sps.transform_skip_rotation,
@@ -1008,18 +1135,20 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 } else {
                     None
                 };
-                let origin = if component == 0 {
-                    u.origin
-                } else {
-                    u.chroma_origin
-                };
+                let residual = if act {
+                    act_blocks[component] = residual;
+                    act_alphas[component] = alpha;
+                    None
+                } else { residual };
+                let origin = block.origin;
                 if self.jobs.is_some() {
                     self.reconstruction.push(Reconstruction::Intra {
                         component,
                         origin: origin.map(|v| v as usize),
                         log: c.log2_size,
                         mode: c.intra_mode.unwrap(),
-                        filter_boundary: !(self.sps.implicit_rdpcm && bypass),
+                        filter_boundary: self.sps.filter_intra_boundary(c.intra_mode.unwrap(),bypass),
+                        alpha: if act {0} else {alpha},
                         residual,
                     });
                 } else {
@@ -1035,6 +1164,8 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     } else {
                         self.residual_scratch.clear();
                     }
+                    if !act { cross_residual(component,alpha,c.log2_size,self.sps.depth,
+                        self.pps.cross_component_prediction,&mut luma_residual,&mut self.residual_scratch)?; }
                     self.planes[component].reconstruct_intra_with_full_chroma_filters(
                         origin.map(|v| v as usize),
                         c.log2_size,
@@ -1043,18 +1174,18 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                         self.sps.chroma_format == 3,
                         self.sps.strong_intra_smoothing,
                         !self.sps.intra_smoothing_disabled,
-                        !(self.sps.implicit_rdpcm && bypass),
+                        self.sps.filter_intra_boundary(c.intra_mode.unwrap(),bypass),
                         &self.residual_scratch,
                         &mut self.pred_scratch,
                         |x, y| {
-                            let shift = usize::from(component != 0 && self.sps.chroma_format != 3);
+                            let [shift_x,shift_y] = component_shifts(component, self.sps.chroma_format);
                             let side = 1usize << self.sps.coding_block_log2[1];
-                            let address = (y << shift) / side
+                            let address = (y << shift_y) / side
                                 * (self.sps.dimensions[0] as usize).div_ceil(side)
-                                + (x << shift) / side;
+                                + (x << shift_x) / side;
                             if let Some([tx, ty, width, height]) = self.tile_bounds {
-                                let x = (x << shift) as u32;
-                                let y = (y << shift) as u32;
+                                let x = (x << shift_x) as u32;
+                                let y = (y << shift_y) as u32;
                                 if x < tx || y < ty || x >= tx + width || y >= ty + height { return false; }
                             }
                             if tile_scan(&self.tile_layout,address as u32) < self.slice_start {
@@ -1063,13 +1194,14 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                             if !self.pps.constrained_intra {
                                 return true;
                             }
-                            self.cells[((y << shift) / 4) * (self.sps.dimensions[0] as usize / 4)
-                                + (x << shift) / 4]
+                            self.cells[((y << shift_y) / 4) * (self.sps.dimensions[0] as usize / 4)
+                                + (x << shift_x) / 4]
                                 .intra
                         },
                     )?;
                 }
             }
+            if act { self.finish_act(u.origin, u.log2_size, bypass, act_blocks, act_alphas)?; }
             Ok(())
         })?;
         self.finish_cu(n, true, false);
@@ -1109,9 +1241,13 @@ fn decode_tile_ctus<'a>(
         )?;
         let initial = bins.contexts()?;
         let mut saved = None;
+        decoder.palette=if sps.palette.is_some() {Some(super::hevc_palette::Predictor::from_parameters(sps,pps)?)} else {None};
+        let initial_palette=decoder.palette.clone();
+        let mut saved_palette=None;
         stream += 1;
         for row in ty..ty + th {
             if row != ty && pps.entropy_sync {
+                decoder.palette=saved_palette.clone().unwrap_or_else(||initial_palette.clone());
                 bins = HevcCabac::from_contexts(
                     &slice.rbsp[slice.entropy_substreams[stream].clone()],
                     0,
@@ -1148,6 +1284,7 @@ fn decode_tile_ctus<'a>(
                 )?;
                 if pps.entropy_sync && col == tx + 1 {
                     saved = Some(bins.contexts()?);
+                    saved_palette=Some(decoder.palette.clone());
                 }
                 visited += 1;
                 let last = visited == total;
@@ -1170,7 +1307,21 @@ fn decode_tile_ctus<'a>(
 
 // Rows preserve reconstruction order. CABAC and motion metadata can advance
 // independently; intra prediction still sees only previously reconstructed pixels.
+fn cross_residual(component: usize, alpha: i8, log: u8, depths: [u8;2], enabled: bool,
+    luma: &mut Vec<i32>, residual: &mut Vec<i32>) -> Result<()> {
+    if !enabled { return Ok(()); }
+    if component == 0 { luma.clone_from(residual); }
+    else if alpha != 0 {
+        if residual.is_empty() { residual.resize(1usize << (2*log),0); }
+        super::hevc_cross_component::modify(luma,residual,alpha,depths)?;
+    }
+    Ok(())
+}
 enum Reconstruction {
+    Act {
+        origin: [usize;2], log: u8, bypass: bool,
+        blocks: [Option<hevc_block::Coefficients>;3], alphas: [i8;3],
+    },
     Pcm {
         component: usize,
         rect: [usize; 4],
@@ -1187,12 +1338,14 @@ enum Reconstruction {
         mode: u8,
         residual: Option<hevc_block::Coefficients>,
         filter_boundary: bool,
+        alpha: i8,
     },
     Residual {
         component: usize,
         origin: [usize; 2],
         log: u8,
-        residual: hevc_block::Coefficients,
+        residual: Option<hevc_block::Coefficients>,
+        alpha: i8,
     },
 }
 fn reconstruct_row(
@@ -1208,15 +1361,20 @@ fn reconstruct_row(
     residual_scratch: &mut Vec<i32>,
 ) -> Result<()> {
     let scaling = pps.scaling_lists.as_ref().unwrap_or(&sps.scaling_lists);
+    let mut luma_residual = Vec::new();
     for command in commands {
         match command {
+            Reconstruction::Act {origin,log,bypass,blocks,alphas} => {
+                reconstruct_act(planes,origin,log,bypass,blocks,alphas,sps,pps,
+                    transform_scratch,residual_scratch)?;
+            }
             Reconstruction::Pcm { component, rect, samples } => {
                 planes[component].reconstruct_inter(rect, &samples)?;
             }
             Reconstruction::Inter { motion, rect } => {
-                for c in 0..3 {
-                    let shift = usize::from(c != 0 && sps.chroma_format != 3);
-                    let pixels = hevc_motion::predict_with_chroma_format(
+                for c in 0..if sps.chroma_format == 0 {1} else {3} {
+                    let shifts = component_shifts(c, sps.chroma_format);
+                    let pixels = hevc_motion::predict_with_current(
                         lists,
                         motion,
                         rect,
@@ -1225,8 +1383,9 @@ fn reconstruct_row(
                         slice.weights.as_ref(),
                         scratch,
                         sps.chroma_format,
+                        Some((&*planes,sps.depth)),
                     )?;
-                    planes[c].reconstruct_inter(rect.map(|v| v as usize >> shift), &pixels)?;
+                    planes[c].reconstruct_inter(std::array::from_fn(|axis| rect[axis] as usize >> shifts[axis % 2]), &pixels)?;
                 }
             }
             Reconstruction::Intra {
@@ -1236,12 +1395,15 @@ fn reconstruct_row(
                 mode,
                 residual,
                 filter_boundary,
+                alpha,
             } => {
                 if let Some(block) = residual {
                     block.reconstruct(scaling, transform_scratch, residual_scratch)?;
                 } else {
                     residual_scratch.clear();
                 }
+                cross_residual(component,alpha,log,sps.depth,pps.cross_component_prediction,
+                    &mut luma_residual,residual_scratch)?;
                 planes[component].reconstruct_intra_with_full_chroma_filters(
                     origin,
                     log,
@@ -1261,8 +1423,13 @@ fn reconstruct_row(
                 origin,
                 log,
                 residual,
+                alpha,
             } => {
-                residual.reconstruct(scaling, transform_scratch, residual_scratch)?;
+                if let Some(residual) = residual {
+                    residual.reconstruct(scaling, transform_scratch, residual_scratch)?;
+                } else { residual_scratch.clear(); }
+                cross_residual(component,alpha,log,sps.depth,pps.cross_component_prediction,
+                    &mut luma_residual,residual_scratch)?;
                 planes[component].add_residual(origin, log, residual_scratch)?;
             }
         }
@@ -1380,8 +1547,8 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                 let b = decoder.cell_raw(x as i32, y as i32).unwrap();
                 let pcm_excluded = decoder.sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled);
                 let filter_enabled = [
-                    !(a.bypass || (a.pcm && pcm_excluded)),
-                    !(b.bypass || (b.pcm && pcm_excluded)),
+                    !(a.bypass || a.palette || (a.pcm && pcm_excluded)),
+                    !(b.bypass || b.palette || (b.pcm && pcm_excluded)),
                 ];
                 let strength = if a.intra || b.intra {
                     2
@@ -1443,8 +1610,9 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                         }
                     }
                 }
-                if edge % (if decoder.sps.chroma_format == 3 { 8 } else { 16 }) == 0
-                    && (if direction == 0 { y } else { x }) % (if decoder.sps.chroma_format == 3 { 4 } else { 8 }) == 0 && strength == 2
+                let shifts = component_shifts(1, decoder.sps.chroma_format);
+                if edge % (8 << shifts[direction]) == 0
+                    && (if direction == 0 { y } else { x }) % (4 << shifts[1 - direction]) == 0 && strength == 2 && decoder.sps.chroma_format != 0
                 {
                     for c in 1..3 {
                         let tc = d::chroma_tc_with_format(
@@ -1455,7 +1623,7 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                             decoder.sps.depth,
                             decoder.sps.chroma_format,
                         )?;
-                        let shift = usize::from(decoder.sps.chroma_format != 3);
+                        let [shift_x,shift_y] = shifts;
                         let plane = decoder.planes[c].samples_mut();
                         for l in 0..4 {
                             let index = |side: usize, v: usize| {
@@ -1465,11 +1633,11 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                                     v as isize
                                 };
                                 if direction == 0 {
-                                    ((y >> shift) + l) * (width >> shift)
-                                        + (x >> shift).checked_add_signed(delta).unwrap()
+                                    ((y >> shift_y) + l) * (width >> shift_x)
+                                        + (x >> shift_x).checked_add_signed(delta).unwrap()
                                 } else {
-                                    (y >> shift).checked_add_signed(delta).unwrap() * (width >> shift)
-                                        + (x >> shift)
+                                    (y >> shift_y).checked_add_signed(delta).unwrap() * (width >> shift_x)
+                                        + (x >> shift_x)
                                         + l
                                 }
                             };
@@ -1586,13 +1754,31 @@ impl Decoder<'_> {
                     .filter(|c| c.ready && !c.intra)
                     .map(|c| c.motion)
             })?;
+            hevc_motion::validate_current_vectors(self.lists,motion,rect,[n.x,n.y],
+                self.sps.coding_block_log2[1],self.sps.chroma_format,
+                |x,y| self.cell(x,y).is_some_and(|c| c.ready))?;
+            #[cfg(test)]
+            if motion.iter().all(Option::is_some) {self.bipredicted_blocks += 1;}
+            #[cfg(test)]
+            for (list,vector) in motion.iter().enumerate() {
+                if let Some(v) = vector {
+                    if self.lists[list][v.reference as usize].picture.is_none() {
+                        self.current_picture_blocks += 1;
+                        if self.sps.chroma_format==1 && v.mv.iter().any(|x| x & 7 != 0) {
+                            self.fractional_current_chroma_blocks += 1;
+                        }
+                    } else {
+                        self.completed_picture_blocks += 1;
+                    }
+                }
+            }
             if self.jobs.is_some() {
                 self.reconstruction
                     .push(Reconstruction::Inter { motion, rect });
             } else {
-                for c in 0..3 {
-                    let shift = usize::from(c != 0 && self.sps.chroma_format != 3);
-                    let pixels = hevc_motion::predict_with_chroma_format(
+                for c in 0..if self.sps.chroma_format == 0 {1} else {3} {
+                    let shifts = component_shifts(c, self.sps.chroma_format);
+                    let pixels = hevc_motion::predict_with_current(
                         self.lists,
                         motion,
                         rect,
@@ -1601,8 +1787,9 @@ impl Decoder<'_> {
                         self.slice.weights.as_ref(),
                         &mut self.scratch,
                         self.sps.chroma_format,
+                        Some((&self.planes,self.sps.depth)),
                     )?;
-                    self.planes[c].reconstruct_inter(rect.map(|v| v as usize >> shift), &pixels)?;
+                    self.planes[c].reconstruct_inter(std::array::from_fn(|axis| rect[axis] as usize >> shifts[axis % 2]), &pixels)?;
                 }
             }
             let [x, y, w, h] = rect.map(|v| v as usize / 4);
@@ -1642,6 +1829,15 @@ impl Decoder<'_> {
             partition != Partition::Full,
             self.sps.chroma_format,
             |b, u| {
+                let act = self.pps.adaptive_colour_transform && u.coded.iter().any(|&v| v)
+                    && b.decision(Syntax::ResidualAct, 0)?;
+                if act && bypass && self.sps.depth[0] != self.sps.depth[1] {
+                    return Err(invalid("HEVC bypass ACT requires equal component depths"));
+                }
+                #[cfg(test)]
+                { self.act_blocks += usize::from(act); }
+                let mut act_blocks = std::array::from_fn(|_| None);
+                let mut act_alphas = [0;3];
                 if self.pps.cu_qp_delta_depth.is_some()
                     && !self.qp_coded
                     && u.coded.iter().any(|&v| v)
@@ -1663,20 +1859,19 @@ impl Decoder<'_> {
                         self.cells[yy * stride + xx].cbf = u.coded[0];
                     }
                 }
-                self.read_chroma_qp(b, u.coded, bypass)?;
-                let qps = hevc_qp::components_with_format(
-                    self.qp, self.sps.depth, self.chroma_offsets, self.cu_chroma_offsets, self.sps.chroma_format,
-                )?;
-                for c in 0..3 {
-                    if !u.coded[c] || (c != 0 && !u.owns_chroma) {
-                        continue;
-                    }
+                self.read_chroma_qp(b, u.coded_components(), bypass)?;
+                let qps = self.component_qps(act)?;
+                let mut luma_residual = Vec::new();
+                for block in u.component_blocks(self.sps.chroma_format) {
+                    let c = block.component;
+                    let alpha = if c != 0 && self.pps.cross_component_prediction && u.coded[0] {
+                        super::hevc_cross_component::read_alpha(b,c)?
+                    } else { 0 };
+                    #[cfg(test)]
+                    { self.cross_component_blocks += usize::from(alpha != 0); }
+                    if !block.coded && alpha == 0 { continue; }
                     let config = hevc_block::Config {
-                        log2_size: if c == 0 {
-                            u.log2_size
-                        } else {
-                            u.log2_chroma_size
-                        },
+                        log2_size: block.log2_size,
                         component: c as u8,
                         bit_depth: self.sps.depth[usize::from(c != 0)],
                         qp: qps[c],
@@ -1685,7 +1880,7 @@ impl Decoder<'_> {
                         transquant_bypass: bypass,
                         sign_hiding: self.pps.sign_data_hiding,
                     };
-                    let residual = hevc_block::read_with_precision(
+                    let residual = if block.coded { Some(hevc_block::read_with_precision(
                         b, config,
                         self.sps.transform_skip_rotation,
                         self.sps.transform_skip_context,
@@ -1696,17 +1891,22 @@ impl Decoder<'_> {
                         self.sps.extended_precision,
                         self.sps.cabac_bypass_alignment,
                         self.sps.chroma_format == 3,
-                    )?;
-                    let origin = if c == 0 { u.origin } else { u.chroma_origin };
+                    )?) } else { None };
+                    if act {
+                        act_blocks[c] = residual; act_alphas[c] = alpha;
+                        continue;
+                    }
+                    let origin = block.origin;
                     if self.jobs.is_some() {
                         self.reconstruction.push(Reconstruction::Residual {
                             component: c,
                             origin: origin.map(|v| v as usize),
                             log: config.log2_size,
+                            alpha,
                             residual,
                         });
                     } else {
-                        residual.reconstruct(
+                        if let Some(residual) = residual { residual.reconstruct(
                             self.pps
                                 .scaling_lists
                                 .as_ref()
@@ -1714,6 +1914,9 @@ impl Decoder<'_> {
                             &mut self.transform_scratch,
                             &mut self.residual_scratch,
                         )?;
+                        } else { self.residual_scratch.clear(); }
+                        cross_residual(c,alpha,config.log2_size,self.sps.depth,
+                            self.pps.cross_component_prediction,&mut luma_residual,&mut self.residual_scratch)?;
                         self.planes[c].add_residual(
                             origin.map(|v| v as usize),
                             config.log2_size,
@@ -1721,9 +1924,33 @@ impl Decoder<'_> {
                         )?;
                     }
                 }
+                if act { self.finish_act(u.origin, u.log2_size, bypass, act_blocks, act_alphas)?; }
                 Ok(())
             },
         )
+    }
+    fn component_qps(&self, act: bool) -> Result<[u8;3]> {
+        if !act {
+            return hevc_qp::components_with_format(self.qp, self.sps.depth,
+                self.chroma_offsets, self.cu_chroma_offsets, self.sps.chroma_format);
+        }
+        let offsets = self.slice.act_qp_offsets.map(i32::from);
+        let mut qps = hevc_qp::components_with_format(self.qp, self.sps.depth,
+            [offsets[1],offsets[2]], self.cu_chroma_offsets, 3)?;
+        qps[0] = (self.qp + 6*i32::from(self.sps.depth[0]-8) + offsets[0])
+            .clamp(0,51+6*i32::from(self.sps.depth[0]-8)) as u8;
+        Ok(qps)
+    }
+    fn finish_act(&mut self, origin: [u32;2], log: u8, bypass: bool,
+        blocks: [Option<hevc_block::Coefficients>;3], alphas: [i8;3]) -> Result<()> {
+        let origin = origin.map(|v| v as usize);
+        if self.jobs.is_some() {
+            self.reconstruction.push(Reconstruction::Act {origin,log,bypass,blocks,alphas});
+            Ok(())
+        } else {
+            reconstruct_act(&mut self.planes,origin,log,bypass,blocks,alphas,
+                self.sps,self.pps,&mut self.transform_scratch,&mut self.residual_scratch)
+        }
     }
 }
 
@@ -1752,4 +1979,24 @@ fn motion_boundary(a: Motion, b: Motion, lists: &[Vec<Reference>; 2]) -> bool {
         1 => !same(a[0], b[0]),
         _ => !(same(a[0], b[0]) && same(a[1], b[1]) || same(a[0], b[1]) && same(a[1], b[0])),
     }
+}
+
+fn reconstruct_act(planes: &mut [Plane;3], origin: [usize;2], log: u8, bypass: bool,
+    blocks: [Option<hevc_block::Coefficients>;3], alphas: [i8;3], sps: &Sps, pps: &Pps,
+    transform_scratch: &mut Vec<i32>, residual_scratch: &mut Vec<i32>) -> Result<()> {
+    let mut samples = std::array::from_fn(|_| vec![0;1usize << (2*log)]);
+    for (c,block) in blocks.into_iter().enumerate() {
+        if let Some(block) = block {
+            block.reconstruct(pps.scaling_lists.as_ref().unwrap_or(&sps.scaling_lists),
+                transform_scratch,residual_scratch)?;
+            samples[c].copy_from_slice(residual_scratch);
+        }
+        if c != 0 && alphas[c] != 0 {
+            let (y,chroma) = samples.split_at_mut(c);
+            super::hevc_cross_component::modify(&y[0],&mut chroma[0],alphas[c],sps.depth)?;
+        }
+    }
+    super::hevc_act::inverse(&mut samples,sps.depth,sps.extended_precision,bypass)?;
+    for c in 0..3 { planes[c].add_residual(origin,log,&samples[c])?; }
+    Ok(())
 }

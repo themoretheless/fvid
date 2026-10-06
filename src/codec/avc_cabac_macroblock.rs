@@ -1,4 +1,5 @@
-//! Progressive 4:2:0 CABAC I-slice macroblocks with 4x4 transforms.
+//! 4:2:0 CABAC intra macroblocks with frame/field coefficient scans.
+//! The explicit MBAFF intra reader is separate from progressive P/B dispatch.
 use super::{
     avc::{Pps, SliceGroups, Sps},
     avc_cabac::{AvcCabac, ResidualCategory as Cat},
@@ -37,11 +38,39 @@ pub struct IntraCabacReader<'a> {
     luma: Vec<u8>,
     chroma: [Vec<u8>; 2],
     modes: Vec<u8>,
+    mbaff: bool,
+    pair_fields: Vec<u8>,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn macroblock_contexts_preserve_availability_and_component_flags() {
+        let grid = [0, 1, 255, 0];
+        assert_eq!(neighbours(&grid, 2, 1, 1).unwrap(), [255, 1]);
+        assert_eq!(coded_context(&grid, 2, 1, 1, true).unwrap(), 3);
+        assert_eq!(coded_context(&grid, 2, 1, 1, false).unwrap(), 2);
+        assert_eq!(neighbours(&grid, 2, 0, 0).unwrap(), [255; 2]);
+        assert!(neighbours(&grid, 0, 0, 0).is_err());
+        assert!(neighbours(&grid, 2, 2, 0).is_err());
+    }
+    #[test]
+    fn address_owned_cells_keep_cross_macroblock_neighbours() {
+        let luma: Vec<u8> = (0..64).collect();
+        assert_eq!(block_neighbours(&luma, 2, 4, 4, 4).unwrap(), [35, 28]);
+        assert_eq!(block_neighbours(&luma, 2, 4, 5, 5).unwrap(), [52, 49]);
+        assert_eq!(block_neighbours(&luma, 2, 4, 0, 0).unwrap(), [255; 2]);
+        let chroma: Vec<u8> = (0..16).collect();
+        assert_eq!(block_neighbours(&chroma, 2, 2, 2, 2).unwrap(), [9, 6]);
+        let mut flags = vec![255; 64];
+        flags[35] = 1;
+        flags[28] = 0;
+        assert_eq!(block_coded_context(&flags, 2, 4, 4, 4, true).unwrap(), 1);
+        flags[28] = 255;
+        assert_eq!(block_coded_context(&flags, 2, 4, 4, 4, true).unwrap(), 3);
+        assert_eq!(block_coded_context(&flags, 2, 4, 4, 4, false).unwrap(), 1);
+    }
     fn hex(s: &str) -> Vec<u8> {
         (0..s.len())
             .step_by(2)
@@ -196,19 +225,69 @@ mod tests {
         }
     }
 }
-fn neighbours(grid: &[u8], width: usize, x: usize, y: usize) -> [u8; 2] {
-    [
-        if x > 0 { grid[y * width + x - 1] } else { 255 },
-        if y > 0 {
-            grid[(y - 1) * width + x]
-        } else {
-            255
-        },
-    ]
+fn neighbours(grid: &[u8], width: usize, x: usize, y: usize) -> Result<[u8; 2]> {
+    if width == 0 || grid.len() % width != 0 || x >= width {
+        return Err(invalid("invalid CABAC macroblock context geometry"));
+    }
+    let address = y
+        .checked_mul(width)
+        .and_then(|v| v.checked_add(x))
+        .ok_or_else(|| invalid("CABAC macroblock context address overflow"))?;
+    let neighbours = super::avc_mbaff::macroblock_neighbours(
+        address,
+        width,
+        grid.len() / width,
+        false,
+        [1, 1],
+        |_| None,
+    )?;
+    Ok(neighbours.map(|n| n.map_or(255, |owner| grid[owner])))
 }
-fn coded_context(grid: &[u8], width: usize, x: usize, y: usize, intra: bool) -> u8 {
-    let [a, b] = neighbours(grid, width, x, y);
-    u8::from(a != 0 && (a != 255 || intra)) + 2 * u8::from(b != 0 && (b != 255 || intra))
+fn coded_context(grid: &[u8], width: usize, x: usize, y: usize, intra: bool) -> Result<u8> {
+    let [a, b] = neighbours(grid, width, x, y)?;
+    Ok(u8::from(a != 0 && (a != 255 || intra)) + 2 * u8::from(b != 0 && (b != 255 || intra)))
+}
+// Store component blocks by macroblock address and local raster cell. This
+// separates storage ownership from the picture's spatial neighbour geometry.
+fn block_index(width_mbs: usize, side: usize, x: usize, y: usize) -> usize {
+    (y / side * width_mbs + x / side) * side * side + y % side * side + x % side
+}
+fn block_neighbours(
+    grid: &[u8],
+    width_mbs: usize,
+    side: usize,
+    x: usize,
+    y: usize,
+) -> Result<[u8; 2]> {
+    if width_mbs == 0 || !matches!(side, 2 | 4) || grid.len() % (width_mbs * side * side) != 0 {
+        return Err(invalid("invalid CABAC component context geometry"));
+    }
+    let height_mbs = grid.len() / (width_mbs * side * side);
+    let neighbours = super::avc_mbaff::block_neighbours(
+        y / side * width_mbs + x / side,
+        [x % side, y % side],
+        width_mbs,
+        height_mbs,
+        false,
+        [4 / side; 2],
+        |_| None,
+    )?;
+    Ok(neighbours.map(|n| {
+        n.map_or(255, |(owner, local)| {
+            grid[owner * side * side + local[1] * side + local[0]]
+        })
+    }))
+}
+fn block_coded_context(
+    grid: &[u8],
+    width_mbs: usize,
+    side: usize,
+    x: usize,
+    y: usize,
+    intra: bool,
+) -> Result<u8> {
+    let [a, b] = block_neighbours(grid, width_mbs, side, x, y)?;
+    Ok(u8::from(a != 0 && (a != 255 || intra)) + 2 * u8::from(b != 0 && (b != 255 || intra)))
 }
 impl<'a> IntraCabacReader<'a> {
     pub fn new(
@@ -230,12 +309,33 @@ impl<'a> IntraCabacReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
+        Self::new_context_impl(header, sps, pps, max_macroblocks, false)
+    }
+    /// Explicit MBAFF intra syntax reader; mixed P/B dispatch is separate.
+    pub fn new_mbaff(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+    ) -> Result<Self> {
+        if header.slice_type != SliceType::I || sps.frame_mbs_only || !sps.mb_adaptive_frame_field {
+            return Err(invalid("MBAFF CABAC reader requires an intra frame slice"));
+        }
+        Self::new_context_impl(header, sps, pps, max_macroblocks, true)
+    }
+    fn new_context_impl(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+        mbaff: bool,
+    ) -> Result<Self> {
         if !matches!(
             header.slice_type,
             SliceType::I | SliceType::P | SliceType::B
         ) || header.field_pic
             || !pps.cabac
-            || !sps.frame_mbs_only
+            || (!sps.frame_mbs_only && !mbaff)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
             || !matches!(pps.slice_groups, SliceGroups::Single)
@@ -249,6 +349,7 @@ impl<'a> IntraCabacReader<'a> {
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
+            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
             .ok_or_else(|| invalid("macroblock count overflow"))?;
         if count == 0 || count > max_macroblocks || count > 65536 {
             return Err(invalid("macroblock context budget exceeded"));
@@ -268,7 +369,10 @@ impl<'a> IntraCabacReader<'a> {
             )?,
             sps,
             pps,
-            address: header.first_mb as usize,
+            address: (header.first_mb as usize)
+                .checked_mul(if mbaff { 2 } else { 1 })
+                .filter(|a| *a < count)
+                .ok_or_else(|| invalid("CABAC first macroblock outside picture"))?,
             qp: header.slice_qp,
             previous_delta: false,
             slice_type: header.slice_type,
@@ -281,7 +385,89 @@ impl<'a> IntraCabacReader<'a> {
             luma: grid(count * 16)?,
             chroma: [grid(count * 4)?, grid(count * 4)?],
             modes: grid(count * 16)?,
+            mbaff,
+            pair_fields: if mbaff { grid(count / 2)? } else { Vec::new() },
         })
+    }
+    fn pair_field(&self, pair: usize) -> Option<bool> {
+        self.pair_fields
+            .get(pair)
+            .filter(|v| **v != 255)
+            .map(|v| *v != 0)
+    }
+    fn current_field(&self) -> bool {
+        self.mbaff && self.pair_field(self.address / 2) == Some(true)
+    }
+    pub fn field_decoding(&self) -> bool {
+        self.mbaff
+            && self
+                .address
+                .checked_sub(1)
+                .and_then(|a| self.pair_field(a / 2))
+                == Some(true)
+    }
+    fn macro_neighbours(&self, grid: &[u8]) -> Result<[u8; 2]> {
+        let w = self.sps.width_mbs as usize;
+        if !self.mbaff {
+            return neighbours(grid, w, self.address % w, self.address / w);
+        }
+        Ok(super::avc_mbaff::macroblock_neighbours(
+            self.address,
+            w,
+            self.types.len() / w,
+            true,
+            [1, 1],
+            |pair| self.pair_field(pair),
+        )?
+        .map(|n| n.map_or(255, |owner| grid[owner])))
+    }
+    fn component_neighbours(
+        &self,
+        grid: &[u8],
+        side: usize,
+        x: usize,
+        y: usize,
+    ) -> Result<[u8; 2]> {
+        let w = self.sps.width_mbs as usize;
+        if !self.mbaff {
+            return block_neighbours(grid, w, side, x, y);
+        }
+        Ok(super::avc_mbaff::block_neighbours(
+            self.address,
+            [x % side, y % side],
+            w,
+            self.types.len() / w,
+            true,
+            [4 / side; 2],
+            |pair| self.pair_field(pair),
+        )?
+        .map(|n| {
+            n.map_or(255, |(owner, local)| {
+                grid[owner * side * side + local[1] * side + local[0]]
+            })
+        }))
+    }
+    fn macro_coded_context(&self, grid: &[u8], intra: bool) -> Result<u8> {
+        if !self.mbaff {
+            let w = self.sps.width_mbs as usize;
+            return coded_context(grid, w, self.address % w, self.address / w, intra);
+        }
+        let [a, b] = self.macro_neighbours(grid)?;
+        Ok(u8::from(a != 0 && (a != 255 || intra)) + 2 * u8::from(b != 0 && (b != 255 || intra)))
+    }
+    fn component_coded_context(
+        &self,
+        grid: &[u8],
+        side: usize,
+        x: usize,
+        y: usize,
+        intra: bool,
+    ) -> Result<u8> {
+        if !self.mbaff {
+            return block_coded_context(grid, self.sps.width_mbs as usize, side, x, y, intra);
+        }
+        let [a, b] = self.component_neighbours(grid, side, x, y)?;
+        Ok(u8::from(a != 0 && (a != 255 || intra)) + 2 * u8::from(b != 0 && (b != 255 || intra)))
     }
     pub fn arithmetic(&mut self) -> Result<&mut AvcCabac<'a>> {
         if self.finished {
@@ -322,7 +508,7 @@ impl<'a> IntraCabacReader<'a> {
         }
         for y in 0..4 {
             for x in 0..4 {
-                let p = (my * 4 + y) * w * 4 + mx * 4 + x;
+                let p = block_index(w, 4, mx * 4 + x, my * 4 + y);
                 self.luma[p] = u8::from(block.luma_coded[y * 4 + x]);
                 self.modes[p] = if self.pps.constrained_intra_pred {
                     255
@@ -334,7 +520,7 @@ impl<'a> IntraCabacReader<'a> {
         for c in 0..2 {
             for y in 0..2 {
                 for x in 0..2 {
-                    self.chroma[c][(my * 2 + y) * w * 2 + mx * 2 + x] =
+                    self.chroma[c][block_index(w, 2, mx * 2 + x, my * 2 + y)] =
                         u8::from(block.chroma_ac[c][y * 2 + x]);
                 }
             }
@@ -347,8 +533,10 @@ impl<'a> IntraCabacReader<'a> {
         Ok(u8::from(self.cabac.decision(index)?))
     }
     fn end_mb(&mut self) -> Result<()> {
+        let terminal =
+            super::avc_cabac_inter::end_of_slice_flag(&mut self.cabac, self.address, self.mbaff)?;
         self.address += 1;
-        if self.cabac.terminate()? {
+        if terminal {
             self.cabac.finish_slice()?;
             self.finished = true;
         }
@@ -366,8 +554,19 @@ impl<'a> IntraCabacReader<'a> {
         if at >= self.types.len() {
             return Err(invalid("too many CABAC macroblocks"));
         }
-        let (mx, my) = (at % w, at / w);
-        let [a, b] = neighbours(&self.types, w, mx, my);
+        if self.mbaff {
+            let pair = at / 2;
+            if at % 2 == 0 {
+                let left = pair % w != 0 && self.pair_field(pair - 1) == Some(true);
+                let top = pair.checked_sub(w).and_then(|p| self.pair_field(p)) == Some(true);
+                let field =
+                    super::avc_cabac_inter::field_decoding_flag(&mut self.cabac, [left, top])?;
+                self.pair_fields[pair] = u8::from(field);
+            } else if self.pair_field(pair).is_none() {
+                return Err(invalid("MBAFF CABAC bottom block lacks pair field flag"));
+            }
+        }
+        let [a, b] = self.macro_neighbours(&self.types)?;
         let inc = usize::from(a != 255 && a != 0) + usize::from(b != 255 && b != 0);
         let mb_type = if self.bin(3 + inc)? == 0 {
             0
@@ -422,7 +621,7 @@ impl<'a> IntraCabacReader<'a> {
             }
             for y in 0..4 {
                 for x in 0..4 {
-                    let p = (my * 4 + y) * w * 4 + mx * 4 + x;
+                    let p = block_index(w, 4, mx * 4 + x, my * 4 + y);
                     self.modes[p] = 2;
                     self.luma[p] = 1;
                 }
@@ -430,7 +629,7 @@ impl<'a> IntraCabacReader<'a> {
             for plane in &mut self.chroma {
                 for y in 0..2 {
                     for x in 0..2 {
-                        plane[(my * 2 + y) * w * 2 + mx * 2 + x] = 1;
+                        plane[block_index(w, 2, mx * 2 + x, my * 2 + y)] = 1;
                     }
                 }
             }
@@ -438,7 +637,7 @@ impl<'a> IntraCabacReader<'a> {
             return Ok(Some(mb));
         }
         if mb_type == 0 {
-            let [a, b] = neighbours(&self.eight, w, mx, my);
+            let [a, b] = self.macro_neighbours(&self.eight)?;
             let inc = usize::from(a == 1) + usize::from(b == 1);
             let eight = self.pps.transform_8x8 && self.bin(399 + inc)? != 0;
             self.eight[at] = u8::from(eight);
@@ -450,7 +649,7 @@ impl<'a> IntraCabacReader<'a> {
                     luma_block_xy(block)?
                 };
                 let (x, y) = (mx * 4 + bx, my * 4 + by);
-                let [a, b] = neighbours(&self.modes, w * 4, x, y);
+                let [a, b] = self.component_neighbours(&self.modes, 4, x, y)?;
                 let predicted = self.bin(68)? != 0;
                 let remainder = if predicted {
                     0
@@ -465,7 +664,7 @@ impl<'a> IntraCabacReader<'a> {
                 )?;
                 for dy in 0..if eight { 2 } else { 1 } {
                     for dx in 0..if eight { 2 } else { 1 } {
-                        self.modes[(y + dy) * w * 4 + x + dx] = mode as u8;
+                        self.modes[block_index(w, 4, x + dx, y + dy)] = mode as u8;
                     }
                 }
                 modes[by * 4 + bx] = mode;
@@ -483,11 +682,11 @@ impl<'a> IntraCabacReader<'a> {
             mb.coded_block_pattern = ((mb_type - 1) / 4 % 3) * 16 + (mb_type - 1) / 12 * 15;
             for y in 0..4 {
                 for x in 0..4 {
-                    self.modes[(my * 4 + y) * w * 4 + mx * 4 + x] = 2;
+                    self.modes[block_index(w, 4, mx * 4 + x, my * 4 + y)] = 2;
                 }
             }
         }
-        let [a, b] = neighbours(&self.chroma_modes, w, mx, my);
+        let [a, b] = self.macro_neighbours(&self.chroma_modes)?;
         let inc = usize::from(a != 255 && a != 0) + usize::from(b != 255 && b != 0);
         let mode = if self.bin(64 + inc)? == 0 {
             0
@@ -521,7 +720,7 @@ impl<'a> IntraCabacReader<'a> {
         let w = self.sps.width_mbs as usize;
         let (mx, my) = (at % w, at / w);
         let pattern = self.read_pattern()?;
-        let [a, b] = neighbours(&self.eight, w, mx, my);
+        let [a, b] = self.macro_neighbours(&self.eight)?;
         let eight = pattern & 15 != 0
             && self.pps.transform_8x8
             && super::avc_inter::allows_transform8(partitions, self.sps.direct_8x8_inference)
@@ -550,11 +749,12 @@ impl<'a> IntraCabacReader<'a> {
         self.chroma_modes[at] = 0;
         for y in 0..4 {
             for x in 0..4 {
-                self.modes[(my * 4 + y) * w * 4 + mx * 4 + x] = if self.pps.constrained_intra_pred {
-                    255
-                } else {
-                    2
-                };
+                self.modes[block_index(w, 4, mx * 4 + x, my * 4 + y)] =
+                    if self.pps.constrained_intra_pred {
+                        255
+                    } else {
+                        2
+                    };
             }
         }
         let coefficients = super::avc_inter_coefficients::InterCoefficients {
@@ -583,10 +783,8 @@ impl<'a> IntraCabacReader<'a> {
         ))
     }
     fn read_pattern(&mut self) -> Result<u8> {
-        let w = self.sps.width_mbs as usize;
-        let (mx, my) = (self.address % w, self.address / w);
         let mut pattern = 0;
-        let [a, b] = neighbours(&self.patterns, w, mx, my);
+        let [a, b] = self.macro_neighbours(&self.patterns)?;
         for block in 0..4 {
             let bx = block % 2;
             let by = block / 2;
@@ -623,6 +821,7 @@ impl<'a> IntraCabacReader<'a> {
     ) -> Result<()> {
         let w = self.sps.width_mbs as usize;
         let at = self.address;
+        let field = self.current_field();
         let (mx, my) = (at % w, at / w);
         self.patterns[at] = mb.coded_block_pattern;
         let offset = 6 * (i32::from(self.sps.bit_depth_luma) - 8);
@@ -652,25 +851,28 @@ impl<'a> IntraCabacReader<'a> {
         mb.qp = self.qp;
         self.dc[0][at] = 0;
         if mb_type != 0 {
-            let inc = coded_context(&self.dc[0], w, mx, my, intra);
-            let r = self.cabac.residual(Cat::LumaDc, inc, false, false)?;
+            let inc = self.macro_coded_context(&self.dc[0], intra)?;
+            let r = self.cabac.residual(Cat::LumaDc, inc, field, false)?;
             self.dc[0][at] = u8::from(r.total_coefficients != 0);
-            mb.luma_dc = inverse_scan_4x4(&r.coefficients, false);
+            mb.luma_dc = inverse_scan_4x4(&r.coefficients, field);
         }
         if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
             for block in 0..4 {
                 let coded = mb.coded_block_pattern & (1 << block) != 0;
                 if coded {
                     levels[block] = super::avc_transform8::inverse_scan_8x8(
-                        &self.cabac.residual8(false)?.coefficients,
-                        false,
+                        &self.cabac.residual8(field)?.coefficients,
+                        field,
                     );
                 }
                 for by in 0..2 {
                     for bx in 0..2 {
-                        self.luma
-                            [(my * 4 + block / 2 * 2 + by) * w * 4 + mx * 4 + block % 2 * 2 + bx] =
-                            u8::from(coded);
+                        self.luma[block_index(
+                            w,
+                            4,
+                            mx * 4 + block % 2 * 2 + bx,
+                            my * 4 + block / 2 * 2 + by,
+                        )] = u8::from(coded);
                     }
                 }
             }
@@ -680,7 +882,7 @@ impl<'a> IntraCabacReader<'a> {
                 let (x, y) = (mx * 4 + bx, my * 4 + by);
                 let mut coded = 0;
                 if mb.coded_block_pattern & (1 << (block / 4)) != 0 {
-                    let inc = coded_context(&self.luma, w * 4, x, y, intra);
+                    let inc = self.component_coded_context(&self.luma, 4, x, y, intra)?;
                     let r = self.cabac.residual(
                         if mb_type == 0 {
                             Cat::Luma4
@@ -688,7 +890,7 @@ impl<'a> IntraCabacReader<'a> {
                             Cat::LumaAc
                         },
                         inc,
-                        false,
+                        field,
                         false,
                     )?;
                     coded = u8::from(r.total_coefficients != 0);
@@ -697,16 +899,16 @@ impl<'a> IntraCabacReader<'a> {
                         levels.copy_within(0..15, 1);
                         levels[0] = 0;
                     }
-                    mb.luma_levels[by * 4 + bx] = inverse_scan_4x4(&levels, false);
+                    mb.luma_levels[by * 4 + bx] = inverse_scan_4x4(&levels, field);
                 }
-                self.luma[y * w * 4 + x] = coded;
+                self.luma[block_index(w, 4, x, y)] = coded;
             }
         }
         for component in 0..2 {
-            let inc = coded_context(&self.dc[component + 1], w, mx, my, intra);
+            let inc = self.macro_coded_context(&self.dc[component + 1], intra)?;
             self.dc[component + 1][at] = 0;
             if mb.coded_block_pattern >> 4 != 0 {
-                let r = self.cabac.residual(Cat::ChromaDc, inc, false, false)?;
+                let r = self.cabac.residual(Cat::ChromaDc, inc, field, false)?;
                 self.dc[component + 1][at] = u8::from(r.total_coefficients != 0);
                 mb.chroma_dc[component].copy_from_slice(&r.coefficients[..4]);
             }
@@ -716,14 +918,15 @@ impl<'a> IntraCabacReader<'a> {
                 let (x, y) = (mx * 2 + block % 2, my * 2 + block / 2);
                 let mut coded = 0;
                 if mb.coded_block_pattern >> 4 == 2 {
-                    let inc = coded_context(&self.chroma[component], w * 2, x, y, intra);
-                    let r = self.cabac.residual(Cat::ChromaAc, inc, false, false)?;
+                    let inc =
+                        self.component_coded_context(&self.chroma[component], 2, x, y, intra)?;
+                    let r = self.cabac.residual(Cat::ChromaAc, inc, field, false)?;
                     coded = u8::from(r.total_coefficients != 0);
                     let mut levels = [0; 16];
                     levels[1..].copy_from_slice(&r.coefficients[..15]);
-                    mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, false);
+                    mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);
                 }
-                self.chroma[component][y * w * 2 + x] = coded;
+                self.chroma[component][block_index(w, 2, x, y)] = coded;
             }
         }
         Ok(())

@@ -82,7 +82,7 @@ impl References {
         top: &[Option<u16>],
         left: &[Option<u16>],
     ) -> Result<Self> {
-        if !(2..=5).contains(&log2_size) || !(8..=12).contains(&bit_depth) {
+        if !(2..=5).contains(&log2_size) || !(8..=16).contains(&bit_depth) {
             return Err(invalid("unsupported HEVC intra size or bit depth"));
         }
         let side = 1usize << log2_size;
@@ -241,7 +241,7 @@ impl References {
             let dc = (top[..n].iter().sum::<i32>() + left[..n].iter().sum::<i32>() + n as i32)
                 / (2 * n) as i32;
             output.fill(dc as u16);
-            if !chroma && n < 32 {
+            if filter_boundary && !chroma && n < 32 {
                 output[0] = ((left[0] + 2 * dc + top[0] + 2) >> 2) as u16;
                 for i in 1..n {
                     output[i] = ((top[i] + 3 * dc + 2) >> 2) as u16;
@@ -504,9 +504,24 @@ mod tests {
         }
     }
     #[test]
+    fn disabled_dc_and_axial_boundaries_keep_unmodified_predictors_at_every_depth() {
+        for depth in [8,10,12,14,16] {
+            let scale=1u16 << (depth-8);
+            let r=References::new(3,depth,Some(120*scale),&[Some(200*scale);16],&[Some(40*scale);16]).unwrap();
+            for (mode,level) in [(1,120),(10,40),(26,200)] {
+                let mut disabled=vec![0;64];let mut enabled=vec![0;64];
+                r.predict_with_filters(mode,false,false,false,false,&mut disabled).unwrap();
+                r.predict_with_filters(mode,false,false,false,true,&mut enabled).unwrap();
+                assert_eq!(disabled,vec![level*scale;64]);
+                assert_ne!(enabled,disabled);
+            }
+        }
+    }
+
+    #[test]
     fn invalid_references_and_modes_are_rejected() {
         assert!(References::new(1, 8, None, &[], &[]).is_err());
-        assert!(References::new(2, 13, None, &[None; 8], &[None; 8]).is_err());
+        assert!(References::new(2, 17, None, &[None; 8], &[None; 8]).is_err());
         assert!(References::new(2, 8, None, &[None; 7], &[None; 8]).is_err());
         assert!(References::new(2, 8, Some(256), &[None; 8], &[None; 8]).is_err());
         let r = References::new(2, 8, None, &[None; 8], &[None; 8]).unwrap();

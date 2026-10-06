@@ -1,0 +1,81 @@
+{
+  "reference": "HM-16.20+SCM-8.8",
+  "revision": "cae35dba3dcf8e1b6121a70b397000af36301045",
+  "encoder_sha256": "518452dcd719d7e1094c18a2ec81e05e506fb480e2116424028c24d2439ca54e",
+  "decoder_sha256": "877b2303f9e97dcdeceb1813d4d01b8fd0c6543267f9c2af56bb520f3e55f71b",
+  "fixtures": [
+    {
+      "stem": "hevc-scc-act-slice-y8-c8",
+      "depths": [
+        8,
+        8
+      ],
+      "mp4_sha256": "89fcc6dc6e221623f07f552073ae54653f37d10d90cefff145740bdcf60a3a20",
+      "oracle_sha256": "2d60309a8df9d5b4d113a128ee9b723d09c0f53115f4a85ed98c7ef208d282fd"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y8-c8-parallel",
+      "depths": [
+        8,
+        8
+      ],
+      "mp4_sha256": "0805f45ca6d972b64f147aab2afc5e486f841ebb778c22f5da9979067df90a3a",
+      "oracle_sha256": "8a2f82e2232d43aa498f1afde1f807eaff92ff6a49f0b185cb46b07d8330f6b4"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y10-c10",
+      "depths": [
+        10,
+        10
+      ],
+      "mp4_sha256": "d37f6ea9700114bd6a06bb239b330f6492979c8bca41a95e1d25016201c82e20",
+      "oracle_sha256": "5ba9034e7e5d2cc3175dbf9baa6265145b3a07236b5664a2c252622a5239cead"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y10-c10-parallel",
+      "depths": [
+        10,
+        10
+      ],
+      "mp4_sha256": "dc1ee3cb63c165297f41bda3f36dcc375a68fefdebd644a8d1f29758644e6447",
+      "oracle_sha256": "bba8a19054c93f8860b31411b3a30a6717b18390c6dc80389feb2a81fbb02c59"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y8-c10",
+      "depths": [
+        8,
+        10
+      ],
+      "mp4_sha256": "2a74eb85fb6302316ff084df112115b14b1299b5976c2b3944b794cb901370a7",
+      "oracle_sha256": "8e1a1a8e338110b4fe5f46424bcf918e1fbc2cc2426135710836cdb9091a42a7"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y8-c10-parallel",
+      "depths": [
+        8,
+        10
+      ],
+      "mp4_sha256": "48d772db83e0f2a8a739152696c0c3d89c0739f80f6ea598c92ef0c068064a1d",
+      "oracle_sha256": "e4cc80f7a7124844892bd3826502dfbf3b39a28c3520d01c6c153029ffdba6b2"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y10-c8",
+      "depths": [
+        10,
+        8
+      ],
+      "mp4_sha256": "7cb1b60ba42474f445c876b217be9a18f586612e6d66b256a1948954f6f9392d",
+      "oracle_sha256": "56f55ab884117837c014365b3a2bf6c6f9e879f7aae99be4d9800e3b08f9e690"
+    },
+    {
+      "stem": "hevc-scc-act-slice-y10-c8-parallel",
+      "depths": [
+        10,
+        8
+      ],
+      "mp4_sha256": "f62476a15acdbb276448b7ddfe5d16557481147e6bf1e4f46943c65e96662f68",
+      "oracle_sha256": "ce303fffc53de9be96ece83c9e0372b35e9898deec762c3f8dc9e49b94009e6f"
+    }
+  ],
+  "encoder_configuration_patch_sha256": "a8dafc9ffcc76755e33a74a31900a1a2b88817fb775f41a4983f8c3f83c2cb14"
+}
