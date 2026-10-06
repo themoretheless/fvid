@@ -56,7 +56,7 @@ def main():
         refusals.append(dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),error='AV1 segmentation map updates not implemented',acceptance=False,reference_shown=1))
     data=sequence(False,False,False)+key()+inter(0,0,True,True,{(0,0):1})
     filename='av1-seg-inherit-active-alt-q-gap.obu';(root/filename).write_bytes(data)
-    refusals.append(dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),error='AV1 active segmentation features not implemented',acceptance=False,reference_shown=1))
+    active_acceptances=[dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),acceptance=True,reference_shown=1)]
     data=sequence(False,False,False)+key()+inter(0,0,True,True,{},truncated=True)
     filename='av1-seg-inherit-invalid-truncated-data.obu';(root/filename).write_bytes(data)
     refusals.append(dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),error='truncated or oversized bit field',acceptance=False))
@@ -66,7 +66,7 @@ def main():
             r['webm']=filename;r['webm_sha256']=hashlib.sha256(data).hexdigest()
     if args.oracle:
         for r in records:subprocess.run([str(args.oracle),str(root/r['file']),str(r['shown'])],check=True)
-        for r in refusals:
+        for r in refusals+active_acceptances:
             if 'reference_shown' in r:subprocess.run([str(args.oracle),str(root/r['file']),str(r['reference_shown'])],check=True)
-    (root/'av1-seg-inherit-generated.json').write_text(json.dumps(dict(fixtures=records,refusals=refusals),indent=2)+'\n')
+    (root/'av1-seg-inherit-generated.json').write_text(json.dumps(dict(fixtures=records,refusals=refusals,active_acceptances=active_acceptances),indent=2)+'\n')
 if __name__=='__main__':main()

@@ -3514,3 +3514,30 @@ on an accepted stream. All ordinary checks run offline without FFmpeg/libaom.
 34 AV1 unit tests plus the added map-header/refusal test and all four root
 AV1 integration suites passed. Root checks exclude parallel unqualified
 transform-pool/HEVC drafts via an isolated copy of main plus these changes.
+
+## AV1 active ALT_Q on inherited zero maps (2026-10-07)
+
+The native decoder now applies segment-zero ALT_Q to the current qindex, clips
+the result to 0–255 and then applies plane DC/AC deltas. The existing lossless
+array selects the corresponding transform path. Nonzero active filter deltas
+and forced reference/skip/global features still return explicit errors, as do
+updated segment maps. This is another step toward full segmentation, not a
+claim of complete segmentation or AV1 conformance.
+
+25 owned streams with nonzero residuals compare every reconstructed shown pixel
+against independent libaom YUV output: six lower-clamp cases at qindex 0,
+thirteen signed-offset cases at qindex 64 and six upper-clamp cases at 255.
+Their entropy comes only from owned synthetic pattern videos made by
+scripts/av1_fixture.c. A native extraction helper checks the expected template
+configuration; pure Python builds the final segmentation headers. Six WebM
+variants additionally check exact pixels, relative timing, rewind and sync seek.
+The previous flat active-ALT_Q refusal is now native acceptance and its old
+refusal expectation is removed.
+
+The pre-fix decoder reproduces the active-feature unsupported error. Removing
+only ALT_Q from dequantization while retaining its acceptance causes a real
+pixel mismatch on the lower-clamp residual fixture; restoring the change
+passes. 35 AV1 unit tests and five root integration suites pass offline without
+FFmpeg or external codec execution. Root verification isolates these changes
+from parallel unfinished HEVC drafts. Maps and the remaining segment features
+still need implementation and their own acceptance coverage.

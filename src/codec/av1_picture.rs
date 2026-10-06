@@ -120,12 +120,11 @@ pub(crate) fn decode(
     }
     // Every admitted picture currently has an implicit all-zero segment map.
     // Inheriting it consumes no tile symbols. Features in unused segments are
-    // retained as metadata; active segment-zero tools still fail explicitly.
-    if h.segments[0]
-        .iter()
-        .enumerate()
-        .any(|(feature, value)| value.is_some_and(|value| feature >= 5 || value != 0))
-    {
+    // retained as metadata. ALT_Q is applied below; the remaining active
+    // segment-zero tools still fail explicitly.
+    if h.segments[0].iter().enumerate().any(|(feature, value)| {
+        value.is_some_and(|value| feature != 0 && (feature >= 5 || value != 0))
+    }) {
         return Err(crate::unsupported(
             "AV1 active segmentation features not implemented",
         ));
@@ -1290,7 +1289,7 @@ impl Decoder<'_> {
         // the pass over every sample is only needed once a coefficient survives.
         let mut dequant = vec![0; w * h];
         if total != 0 {
-            let base = self.current_q;
+            let base = (self.current_q + self.h.segments[0][0].unwrap_or(0)).clamp(0, 255);
             let dc_delta = self.h.quant.delta[if p == 0 { 0 } else { p * 2 - 1 }];
             let ac_delta = if p == 0 { 0 } else { self.h.quant.delta[p * 2] };
             let depth_index = ((self.s.color.depth - 8) / 2) as usize;

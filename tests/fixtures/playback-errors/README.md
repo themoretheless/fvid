@@ -1184,7 +1184,7 @@ No private media, codec parameters, FFmpeg or network access is used.
 ### AV1 inherited segmentation with unchanged zero maps
 
 `python3 scripts/generate_av1_segmentation_inheritance_samples.py` writes 224
-owned acceptance OBU streams, 16 WebM variants and four refusal/reproduction
+owned acceptance OBU streams, 16 WebM variants and three refusal/reproduction
 streams with a hash manifest. The acceptance streams exercise all reference
 slots/primary roles, inherited tables, signed clipping, disable/reset and
 explicit clearing. Their six shown frames are uniformly 128 in all planes.
@@ -1192,6 +1192,29 @@ explicit clearing. Their six shown frames are uniformly 128 in all planes.
 Two map-update streams are valid according to the optional libaom oracle but
 remain native unsupported-behavior reproductions (`acceptance: false`). They
 must become acceptance checks when native map reconstruction is implemented.
-A separate active ALT_Q stream also passes libaom but remains a native
-refusal/reproduction. The malformed refusal is truncated inherited feature data. Fixture generation and
+The former active ALT_Q reproduction is now in `active_acceptances` and has
+a native acceptance test. The malformed refusal is truncated inherited feature data. Fixture generation and
 optional `--oracle` reference checking are separate from ordinary offline tests.
+
+### Active AV1 ALT_Q and independent residual pixels
+
+`python3 scripts/generate_av1_alt_q_samples.py` writes 25 owned OBU streams and
+six WebM variants from saved entropy templates. Saved independent YUV pixels
+are used by ordinary native tests; generation and external reference execution
+are never part of ordinary testing. `--oracle` invokes the optional reference
+helper, whose third path argument writes the decoded 8-bit 32x32 planar output.
+
+For complete regeneration, compile `scripts/av1_fixture.c` with libaom and
+create three owned inputs using `32 1 Q 0 4 8 0 0 1 1`, with Q = 0, 16, 63.
+Run `cargo run --offline --manifest-path crates/fvid-codecs/Cargo.toml
+--no-default-features --example av1_alt_q_templates -- INPUT0 INPUT16 INPUT63`
+and save its stdout as `av1-alt-q-owned-entropy.json`. The helper verifies
+template headers and extracts the second key and first inter entropy payloads.
+Then run the Python generator with the compiled
+`scripts/av1_show_existing_oracle.c` helper passed through `--oracle`. Only
+owned synthetic inputs are allowed; do not extract templates from private media.
+
+The acceptance matrix covers negative/positive ALT_Q and clipping at 0/255;
+all 25 shown pictures are compared pixel by pixel, including nonzero residuals.
+The old flat active-ALT_Q gap fixture now accepts. Map-update streams remain
+explicit unsupported-behavior reproductions until map decoding is implemented.
