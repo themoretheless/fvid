@@ -173,7 +173,7 @@ impl AvcDecoder {
         let header = headers[0];
         if headers
             .iter()
-            .any(|h| !matches!(h.slice_type, SliceType::I | SliceType::P))
+            .any(|h| !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B))
         {
             return Err(crate::unsupported(
                 "AVC inter field reconstruction is not connected",
@@ -212,7 +212,7 @@ impl AvcDecoder {
             .checked_sub(reserved)
             .ok_or_else(|| invalid("AVC fields exceed decoder memory budget"))?;
         let order = self.poc.decode(sps, header)?;
-        let mut field = if header.slice_type == SliceType::P {
+        let mut field = if matches!(header.slice_type, SliceType::P | SliceType::B) {
             let dpb = self
                 .field_dpb
                 .as_ref()
@@ -221,27 +221,69 @@ impl AvcDecoder {
             references
                 .try_reserve_exact(headers.len())
                 .map_err(|_| invalid("cannot allocate AVC field reference contexts"))?;
+            let implicit = header.slice_type == SliceType::B && pps.weighted_bipred == 2;
+            let mut reference_orders = Vec::new();
+            if implicit {
+                reference_orders
+                    .try_reserve_exact(headers.len())
+                    .map_err(|_| invalid("cannot allocate AVC field orders"))?;
+            }
             for h in headers {
                 let lists = dpb.lists(h, order.before_marking.picture())?;
-                let mut resolved = Vec::new();
-                resolved
-                    .try_reserve_exact(lists.l0.len())
-                    .map_err(|_| invalid("cannot allocate AVC active field references"))?;
-                for selected in &lists.l0 {
-                    let reference = dpb
-                        .get(selected.id, selected.bottom)
-                        .ok_or_else(|| invalid("missing selected AVC field"))?;
-                    let identity = selected
-                        .id
-                        .checked_mul(2)
-                        .and_then(|v| v.checked_add(u64::from(selected.bottom)))
-                        .ok_or_else(|| invalid("AVC field reference identity overflow"))?;
-                    resolved.push((reference.as_ref(), identity));
+                let mut resolved = [Vec::new(), Vec::new()];
+                for (target, list) in resolved.iter_mut().zip([&lists.l0, &lists.l1]) {
+                    target
+                        .try_reserve_exact(list.len())
+                        .map_err(|_| invalid("cannot allocate AVC active field references"))?;
+                    for selected in list {
+                        let reference = dpb
+                            .get(selected.id, selected.bottom)
+                            .ok_or_else(|| invalid("missing selected AVC field"))?;
+                        let identity = selected
+                            .id
+                            .checked_mul(2)
+                            .and_then(|v| v.checked_add(u64::from(selected.bottom)))
+                            .ok_or_else(|| invalid("AVC field reference identity overflow"))?;
+                        target.push((reference.as_ref(), identity));
+                    }
+                }
+                if implicit {
+                    let mut orders = [Vec::new(), Vec::new()];
+                    for (target, list) in orders.iter_mut().zip([&lists.l0, &lists.l1]) {
+                        target
+                            .try_reserve_exact(list.len())
+                            .map_err(|_| invalid("cannot allocate AVC reference field orders"))?;
+                        for selected in list {
+                            target.push(
+                                dpb.order(selected.id, selected.bottom)
+                                    .ok_or_else(|| invalid("missing selected AVC field order"))?,
+                            );
+                        }
+                    }
+                    reference_orders.push(orders);
                 }
                 references.push(resolved);
             }
-            let contexts = references.iter().map(Vec::as_slice).collect::<Vec<_>>();
-            super::avc_field_picture::decode_p_field_lists(headers, sps, pps, &contexts, scratch)?
+            let contexts = references
+                .iter()
+                .map(|lists| [lists[0].as_slice(), lists[1].as_slice()])
+                .collect::<Vec<_>>();
+            let order_views = reference_orders
+                .iter()
+                .map(|lists| [lists[0].as_slice(), lists[1].as_slice()])
+                .collect::<Vec<_>>();
+            let weighting = super::avc_field_picture::ImplicitFieldWeights {
+                poc: order.before_marking.picture(),
+                references: &order_views,
+            };
+            super::avc_field_picture::decode_inter_field_lists_with_order(
+                headers,
+                sps,
+                pps,
+                &contexts,
+                if implicit { Some(&weighting) } else { None },
+                scratch,
+            )?
         } else {
             super::avc_field_picture::decode_intra_slices(headers, sps, pps, scratch)?
         };

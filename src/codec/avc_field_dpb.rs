@@ -56,6 +56,12 @@ impl<T> FieldBuffer<T> {
             .as_ref()
             .map(|f| &f.picture)
     }
+    /// POC and long-term status of the selected field, in its own parity.
+    pub fn order(&self, id: u64, bottom: bool) -> Option<(i32, bool)> {
+        let field = self.stores.iter().find(|store| store.id == id)?.fields[usize::from(bottom)]
+            .as_ref()?;
+        Some((field.poc, field.long.is_some()))
+    }
     pub fn lists(&self, header: &SliceHeader, poc: i32) -> Result<FieldLists> {
         if !header.field_pic {
             return Err(invalid("field DPB requires field slice"));

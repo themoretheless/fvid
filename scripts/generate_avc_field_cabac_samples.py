@@ -5,15 +5,15 @@ from pathlib import Path
 from generate_avc_mbaff_direct_samples import Writer,CabacWriter
 from avc_fixture_mp4 import mux,annexb
 
-def configuration(depth):
+def configuration(depth, constrained=False, weighted=False, bipred=0):
     profile=100 if depth==8 else 110
     b=Writer();b.u(profile,8);b.u(0,8);b.u(10,8);b.ue(0);b.ue(1);b.ue(depth-8);b.ue(depth-8);b.u(0);b.u(0)
     b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(0);b.u(0);b.u(0);b.u(1);b.u(0);b.u(0);sps=b.nal(0x67)
-    b=Writer();b.ue(0);b.ue(0);b.u(1);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(0);b.u(0,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(0);b.u(0);pps=b.nal(0x68)
+    b=Writer();b.ue(0);b.ue(0);b.u(1);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(int(weighted));b.u(bipred,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(int(constrained));b.u(0);pps=b.nal(0x68)
     return bytes([1,profile,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 
-def field(bottom,index,address,mode,deblock):
-    b=Writer();b.ue(address);b.ue(2);b.ue(0);b.u(0,4);b.u(1);b.u(int(bottom))
+def field(bottom,index,address,mode,deblock,biased=False,frame_num=0):
+    b=Writer();b.ue(address);b.ue(2);b.ue(0);b.u(frame_num,4);b.u(1);b.u(int(bottom))
     if index==0:b.ue(0)
     b.u(index,4)
     if index==0:b.u(0);b.u(0)
@@ -27,7 +27,10 @@ def field(bottom,index,address,mode,deblock):
     c.decision(64,0);c.decision(60,0) # chroma DC prediction, zero QP delta
     c.decision(88,int(mode!='zero'))
     if mode!='zero':
-        c.decision(277,0);c.decision(278,1);c.decision(339,1);c.decision(228,0);c.bypass(int(mode=='negative'))
+        c.decision(277,int(biased))
+        if biased:c.decision(338,0)
+        c.decision(278,1);c.decision(339,1);c.decision(228,0);c.bypass(int(mode=='negative'))
+        if biased:c.decision(229,0);c.bypass(int(mode=='negative'))
     b.bits.extend(c.finish())
     return b.nal(0x65 if index==0 else 0x41,trailing=False)
 

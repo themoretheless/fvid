@@ -5,13 +5,13 @@ from pathlib import Path
 from generate_avc_mbaff_direct_samples import Writer,pcm_samples
 from avc_fixture_mp4 import mux,annexb
 
-def configuration(depth):
+def configuration(depth, bipred=0):
     profile=88 if depth==8 else 110
     b=Writer();b.u(profile,8);b.u(0,8);b.u(10,8);b.ue(0)
     if depth>8:b.ue(1);b.ue(depth-8);b.ue(depth-8);b.u(0);b.u(0)
     b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(0);b.u(0);b.u(0);b.u(1);b.u(0);b.u(0)
     sps=b.nal(0x67)
-    b=Writer();b.ue(0);b.ue(0);b.u(0);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(0);b.u(0,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(0);b.u(0)
+    b=Writer();b.ue(0);b.ue(0);b.u(0);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(0);b.u(bipred,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(0);b.u(0)
     pps=b.nal(0x68)
     return bytes([1,profile,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 

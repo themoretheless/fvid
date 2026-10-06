@@ -435,6 +435,22 @@ mod tests {
             "avc-field-opposite-10bit-bottom-first-swap-skip-filter2-aso",
             "avc-field-multiref-8bit-top-first-type3-sub3-r0-filter0-aso",
             "avc-field-multiref-10bit-bottom-first-type1-sub0-r1-filter2-aso",
+            "avc-field-b-implicit-8bit-top-first-bi-cabac-init0-filter0-aso",
+            "avc-field-b-implicit-10bit-bottom-first-l1-cavlc-filter2-aso",
+            "avc-field-b-future-8bit-top-first-bi-cabac-init0-filter0-aso",
+            "avc-field-b-future-10bit-bottom-first-l1-cavlc-filter2-aso",
+            "avc-field-b-explicit-8bit-top-first-bi-cabac-init0-filter0-aso",
+            "avc-field-b-explicit-10bit-bottom-first-l1-cavlc-filter2-aso",
+            "avc-field-cabac-p-weight-8bit-top-first-skip-weighted-init0-filter0-aso",
+            "avc-field-cabac-p-weight-10bit-bottom-first-residual-weighted-init2-filter2-aso",
+            "avc-field-cabac-p-multiref-8bit-top-first-4x4-r0-list0-init0-filter0-aso",
+            "avc-field-cabac-p-multiref-10bit-bottom-first-16x8-r1-list1-init2-filter2-aso",
+            "avc-field-cabac-p-mixed-constrained-8bit-top-first-intra-last-i4-zero-skip-init0-filter0",
+            "avc-field-cabac-p-mixed-constrained-10bit-bottom-first-intra-last-i16-negative-coded-init2-filter2",
+            "avc-field-cabac-p-mixed-8bit-top-first-intra-first-i4-zero-skip-init0-filter0",
+            "avc-field-cabac-p-mixed-10bit-bottom-first-intra-last-i16-negative-coded-init2-filter2",
+            "avc-field-cabac-p-partition-8bit-top-first-4x4-init0-filter0-aso",
+            "avc-field-cabac-p-partition-10bit-bottom-first-16x8-init2-filter2-aso",
             "avc-field-cabac-p-transform8-8bit-top-first-ac-init0-filter0-scale24-aso",
             "avc-field-cabac-p-transform8-10bit-bottom-first-ac-init2-filter2-scale16-aso",
             "avc-field-cabac-p-chroma-8bit-top-first-ac-init0-filter0-aso",
@@ -474,7 +490,8 @@ mod tests {
                 && !name.starts_with("avc-field-cabac-p-")
             {
                 1
-            } else if name.contains("refs")
+            } else if name.starts_with("avc-field-b-")
+                || name.contains("refs")
                 || name.contains("opposite")
                 || name.contains("multiref")
                 || name.contains("weight")
@@ -499,7 +516,17 @@ mod tests {
             let mut visitor = |frame: &FrameMetadata, pixels: &[u8], start, duration| {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
-                    (calls * 2, calls as i64 * 2, 2)
+                    (
+                        if name.starts_with("avc-field-b-future-")
+                            || name.starts_with("avc-field-b-implicit-")
+                        {
+                            [0, 4, 2][calls]
+                        } else {
+                            calls * 2
+                        },
+                        calls as i64 * 2,
+                        2
+                    )
                 );
                 assert_eq!((start, duration), (calls as u64 * 40_000_000, 40_000_000));
                 assert_eq!(

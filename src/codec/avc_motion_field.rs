@@ -13,6 +13,7 @@ pub struct MotionField {
     height: usize,
     cells: Vec<Option<Cell>>,
     mbaff: bool,
+    field_picture: bool,
 }
 // Address-owned 4x4 cells. Spatial APIs and snapshots keep picture coordinates.
 fn cell_index(width_cells: usize, x: usize, y: usize) -> usize {
@@ -43,7 +44,78 @@ impl MotionField {
             height: height / 4,
             cells,
             mbaff: false,
+            field_picture: false,
         })
+    }
+    /// Compact coordinates and field motion units for a separate field picture.
+    pub fn new_field(width: usize, height: usize, memory_limit: usize) -> Result<Self> {
+        let mut motion = Self::new(width, height, memory_limit)?;
+        motion.field_picture = true;
+        Ok(motion)
+    }
+    /// Freeze separate-field motion with per-slice frame identities and reference
+    /// parity. Do not pass parity-tagged identities: parity is stored explicitly.
+    pub fn snapshot_field_slices(
+        &self,
+        mappings: &[(u32, [&[(u64, bool)]; 2])],
+        memory_limit: usize,
+    ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
+        use super::avc_reference_motion::{ReferenceMotion, ReferenceMotionField};
+        if !self.field_picture || self.mbaff || mappings.len() > self.cells.len() / 16 {
+            return Err(invalid(
+                "field motion snapshot requires separate-field geometry",
+            ));
+        }
+        let mut lists = std::collections::BTreeMap::new();
+        for &(id, references) in mappings {
+            if references.iter().any(|list| list.len() > 32)
+                || lists.insert(id, references).is_some()
+            {
+                return Err(invalid(
+                    "invalid or duplicate field slice reference mapping",
+                ));
+            }
+        }
+        if ReferenceMotionField::storage_bytes(self.width * 4, self.height * 4)? > memory_limit {
+            return Err(invalid("field motion snapshot exceeds budget"));
+        }
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(self.cells.len())
+            .map_err(|_| invalid("field motion snapshot allocation failed"))?;
+        for raster in 0..self.cells.len() {
+            let cell = self.cells[cell_index(self.width, raster % self.width, raster / self.width)]
+                .ok_or_else(|| invalid("cannot snapshot incomplete field motion"))?;
+            if !cell.field {
+                return Err(invalid("field snapshot contains frame motion"));
+            }
+            let references = lists
+                .get(&cell.slice)
+                .ok_or_else(|| invalid("missing field slice reference mapping"))?;
+            let mut stored = [None; 2];
+            for list in 0..2 {
+                stored[list] = match cell.lists[list] {
+                    Neighbour::NoPrediction => None,
+                    Neighbour::Inter { reference, vector } => {
+                        let &(id, bottom) =
+                            references[list].get(reference as usize).ok_or_else(|| {
+                                invalid("field snapshot reference index out of range")
+                            })?;
+                        Some(ReferenceMotion {
+                            picture_id: id,
+                            reference_index: reference,
+                            reference_bottom_field: Some(bottom),
+                            vector,
+                        })
+                    }
+                    Neighbour::Unavailable => {
+                        return Err(invalid("cannot snapshot unavailable field motion"));
+                    }
+                };
+            }
+            output.push(stored);
+        }
+        ReferenceMotionField::new(self.width * 4, self.height * 4, output)
     }
     /// Freeze a complete picture's vectors for future co-located prediction.
     /// Slice-local indices are resolved through the supplied list identities.
@@ -159,9 +231,9 @@ impl MotionField {
         memory_limit: usize,
         mut resolve: impl FnMut(u32) -> Result<[&'a [u64]; 2]>,
     ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
-        if self.mbaff {
+        if self.mbaff || self.field_picture {
             return Err(crate::unsupported(
-                "MBAFF reference motion snapshot is not connected",
+                "frame snapshot requires frame motion geometry",
             ));
         }
         use super::avc_reference_motion::{ReferenceMotion, ReferenceMotionField};
@@ -266,7 +338,16 @@ impl MotionField {
         if self.mbaff {
             return Err(invalid("MBAFF motion needs pair-address publication"));
         }
-        self.store_with_mode(origin, size, slice, lists, false)
+        if self.field_picture
+            && lists
+                .iter()
+                .any(|n| matches!(n,Neighbour::Inter{reference,..} if *reference>31))
+        {
+            return Err(invalid(
+                "separate field motion reference exceeds active-list range",
+            ));
+        }
+        self.store_with_mode(origin, size, slice, lists, self.field_picture)
     }
     fn store_with_mode(
         &mut self,

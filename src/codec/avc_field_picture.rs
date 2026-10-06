@@ -382,20 +382,90 @@ pub fn decode_p_field_lists(
     references: &[&[(&PcmField, u64)]],
     budget: usize,
 ) -> Result<PcmField> {
+    if headers.iter().any(|h| h.slice_type != SliceType::P) {
+        return Err(invalid("P field entrypoint requires P slices"));
+    }
+    let lists = references
+        .iter()
+        .map(|list| [*list, &[][..]])
+        .collect::<Vec<_>>();
+    decode_inter_field_lists(headers, sps, pps, &lists, budget)
+}
+/// Reference orders for implicit weighting. POC belongs to the selected field,
+/// never the minimum POC of the containing complementary pair.
+pub struct ImplicitFieldWeights<'a> {
+    pub poc: i32,
+    pub references: &'a [[&'a [(i32, bool)]; 2]],
+}
+/// Explicit P/B prediction without reference POC metadata.
+/// Implicit weighting uses the context-aware entrypoint below.
+pub fn decode_inter_field_lists(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[(&PcmField, u64)]; 2]],
+    budget: usize,
+) -> Result<PcmField> {
+    decode_inter_field_lists_with_order(headers, sps, pps, references, None, budget)
+}
+/// P/B field reconstruction with selected-field POC/long-term metadata.
+/// Direct prediction still requires retained reference motion.
+pub fn decode_inter_field_lists_with_order(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[(&PcmField, u64)]; 2]],
+    implicit: Option<&ImplicitFieldWeights<'_>>,
+    budget: usize,
+) -> Result<PcmField> {
+    decode_inter_field_impl(headers, sps, pps, references, implicit, budget, false)
+        .map(|(picture, _)| picture)
+}
+/// Return complete field motion for a caller that retains reference metadata.
+/// Memory for the persistent snapshot is accounted by that caller separately.
+pub fn decode_inter_field_lists_with_motion(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[(&PcmField, u64)]; 2]],
+    implicit: Option<&ImplicitFieldWeights<'_>>,
+    budget: usize,
+) -> Result<(PcmField, super::avc_motion_field::MotionField)> {
+    let (picture, motion) =
+        decode_inter_field_impl(headers, sps, pps, references, implicit, budget, true)?;
+    Ok((
+        picture,
+        motion.ok_or_else(|| invalid("missing reconstructed field motion"))?,
+    ))
+}
+fn decode_inter_field_impl(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[(&PcmField, u64)]; 2]],
+    implicit: Option<&ImplicitFieldWeights<'_>>,
+    budget: usize,
+    retain_motion: bool,
+) -> Result<(PcmField, Option<super::avc_motion_field::MotionField>)> {
     if references.len() != headers.len() {
         return Err(invalid("AVC field reference contexts differ from slices"));
     }
     let reference = references
         .first()
-        .ok_or_else(|| invalid("missing AVC field reference"))?
+        .ok_or_else(|| invalid("missing AVC field reference"))?[0]
         .first()
         .ok_or_else(|| invalid("empty AVC field reference list"))?
         .0;
-    if headers
-        .iter()
-        .zip(references)
-        .any(|(h, list)| list.len() != h.refs_l0 as usize || list.is_empty() || list.len() > 32)
-    {
+    if headers.iter().zip(references).any(|(h, lists)| {
+        lists[0].len() != h.refs_l0 as usize
+            || lists[0].is_empty()
+            || lists[0].len() > 32
+            || h.slice_type == SliceType::B
+                && (lists[1].len() != h.refs_l1 as usize
+                    || lists[1].is_empty()
+                    || lists[1].len() > 32)
+            || h.slice_type == SliceType::P && !lists[1].is_empty()
+    }) {
         return Err(invalid("invalid AVC field active reference list"));
     }
     let h = *headers
@@ -405,16 +475,19 @@ pub fn decode_p_field_lists(
     bits.skip(h.entropy_bit_offset)?;
     let (w, height) = sps.coded_dimensions();
     let count = w as usize / 16 * (height as usize / 32);
-    if !pps.cabac
+    if !retain_motion
+        && !pps.cabac
+        && h.slice_type == SliceType::P
         && headers.len() == 1
         && h.weights.is_none()
         && reference.bottom == h.bottom_field
         && bits.unsigned_golomb()? as usize == count
     {
-        return decode_skip_field(headers, sps, pps, reference, budget);
+        return decode_skip_field(headers, sps, pps, reference, budget)
+            .map(|picture| (picture, None));
     }
     if !h.field_pic
-        || h.slice_type != SliceType::P
+        || !matches!(h.slice_type, SliceType::P | SliceType::B)
         || h.redundant_pic_cnt != 0
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || h.disable_deblocking_filter_idc > 2
@@ -428,7 +501,7 @@ pub fn decode_p_field_lists(
     }
     for current in headers {
         if !current.field_pic
-            || current.slice_type != SliceType::P
+            || current.slice_type != h.slice_type
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
             || current.pps_id != h.pps_id
@@ -445,6 +518,8 @@ pub fn decode_p_field_lists(
         }
         if let Some(weights) = &current.weights {
             if weights.l0.len() != current.refs_l0 as usize
+                || current.slice_type == SliceType::B
+                    && weights.l1.len() != current.refs_l1 as usize
                 || weights.luma_denom > 7
                 || weights.chroma_denom > 7
             {
@@ -452,6 +527,28 @@ pub fn decode_p_field_lists(
             }
         }
     }
+    let implicit = if h.slice_type == SliceType::B && pps.weighted_bipred == 2 {
+        let context = implicit.ok_or_else(|| {
+            unsupported("implicit weighted B fields require reference POC context")
+        })?;
+        if context.references.len() != references.len()
+            || context
+                .references
+                .iter()
+                .zip(references)
+                .any(|(orders, lists)| {
+                    orders
+                        .iter()
+                        .zip(lists)
+                        .any(|(order, list)| order.len() != list.len())
+                })
+        {
+            return Err(invalid("implicit field reference orders differ from lists"));
+        }
+        Some(context)
+    } else {
+        None
+    };
     let filtered = headers.iter().any(|h| h.disable_deblocking_filter_idc != 1);
     let pixels = reference
         .picture
@@ -471,7 +568,11 @@ pub fn decode_p_field_lists(
             "AVC P field reference configuration is not connected",
         ));
     }
-    for (candidate, _) in references.iter().flat_map(|list| list.iter()) {
+    for (candidate, _) in references
+        .iter()
+        .flat_map(|lists| lists.iter())
+        .flat_map(|list| list.iter())
+    {
         if candidate.picture.coded_width != reference.picture.coded_width
             || candidate.picture.coded_height != reference.picture.coded_height
             || candidate.picture.crop != reference.picture.crop
@@ -482,7 +583,9 @@ pub fn decode_p_field_lists(
     }
     let list_storage = references
         .iter()
-        .try_fold(0usize, |n, list| n.checked_add((list.len() - 1) * 32))
+        .try_fold(0usize, |n, lists| {
+            n.checked_add((lists[0].len() - 1 + lists[1].len()) * 32)
+        })
         .ok_or_else(|| invalid("AVC field reference list storage overflow"))?;
     let required = pixels
         .checked_mul(3)
@@ -517,8 +620,11 @@ pub fn decode_p_field_lists(
         frame_num: h.frame_num,
         pps_id: h.pps_id,
     };
-    let mut motion =
-        super::avc_motion_field::MotionField::new(w as usize, height as usize / 2, count * 960)?;
+    let mut motion = super::avc_motion_field::MotionField::new_field(
+        w as usize,
+        height as usize / 2,
+        count * 960,
+    )?;
     let mut coefficients = super::avc_coefficient_field::CoefficientField::new(
         w as usize / 16,
         height as usize / 32,
@@ -550,7 +656,7 @@ pub fn decode_p_field_lists(
         return Err(invalid("invalid AVC P field slice coverage"));
     }
     for (slice_index, (reference_index, h)) in ordered.iter().enumerate() {
-        let list = references[*reference_index];
+        let lists = references[*reference_index];
         let slice_id = slice_index as u32;
         let end = ordered
             .get(slice_index + 1)
@@ -623,13 +729,14 @@ pub fn decode_p_field_lists(
                 } else if !pps.cabac && step == skipped {
                     let mut probe = bits.clone();
                     let code = probe.unsigned_golomb()?;
-                    if code >= 5 {
+                    let intra_offset = if h.slice_type == SliceType::B { 23 } else { 5 };
+                    if code >= intra_offset {
                         bits = probe;
                         Some(intra.as_mut().unwrap().read_embedded(
                             &mut bits,
                             address as u32,
                             qp,
-                            code - 5,
+                            code - intra_offset,
                         )?)
                     } else {
                         None
@@ -707,7 +814,23 @@ pub fn decode_p_field_lists(
                     if let Some(reader) = &mut intra {
                         reader.record_inter(address, [0; 16], [[0; 4]; 2])?;
                     }
-                    vec![([0, 0], [16, 16], motion.decode_p_skip(origin, slice_id)?, 0)]
+                    if h.slice_type == SliceType::B {
+                        return Err(unsupported(
+                            "B field direct prediction requires reference motion context",
+                        ));
+                    }
+                    let vector = motion.decode_p_skip(origin, slice_id)?;
+                    vec![(
+                        [0, 0],
+                        [16, 16],
+                        [
+                            super::avc_mv::Neighbour::Inter {
+                                vector,
+                                reference: 0,
+                            },
+                            super::avc_mv::Neighbour::NoPrediction,
+                        ],
+                    )]
                 } else {
                     let (header, c) = if pps.cabac {
                         match cabac_block
@@ -728,8 +851,15 @@ pub fn decode_p_field_lists(
                         }
                     } else {
                         let syntax = super::avc_inter::InterSyntax {
-                            slice: SliceType::P,
-                            active_references: [h.refs_l0, 0],
+                            slice: h.slice_type,
+                            active_references: [
+                                h.refs_l0,
+                                if h.slice_type == SliceType::B {
+                                    h.refs_l1
+                                } else {
+                                    0
+                                },
+                            ],
                             previous_qp: qp,
                             bit_depth: sps.bit_depth_luma,
                             chroma_array_type: 1,
@@ -756,20 +886,26 @@ pub fn decode_p_field_lists(
                         residual = Some((c, header.residual.transform8));
                     }
                     let parts = header.partitions;
+                    if parts
+                        .iter()
+                        .any(|p| p.prediction == super::avc_inter::Prediction::Direct)
+                    {
+                        return Err(unsupported(
+                            "B field direct prediction requires reference motion context",
+                        ));
+                    }
                     let neighbour = motion.decode_macroblock(origin, slice_id, &parts)?;
                     parts
                         .iter()
                         .zip(neighbour)
-                        .map(|(part, vectors)| match vectors[0] {
-                            super::avc_mv::Neighbour::Inter { vector, reference } => Ok((
+                        .map(|(part, vectors)| {
+                            (
                                 part.origin.map(usize::from),
                                 part.size.map(usize::from),
-                                vector,
-                                reference,
-                            )),
-                            _ => Err(invalid("missing AVC P field motion")),
+                                vectors,
+                            )
                         })
-                        .collect::<Result<Vec<_>>>()?
+                        .collect::<Vec<_>>()
                 };
                 let mut blocks = [super::avc_boundary::BlockEdge {
                     intra: false,
@@ -777,82 +913,142 @@ pub fn decode_p_field_lists(
                     nonzero_luma: false,
                     motion: [None; 2],
                 }; 16];
-                for (offset, dimensions, vector, reference_index) in predictions {
-                    let (reference, reference_id) = *list
-                        .get(reference_index as usize)
-                        .ok_or_else(|| invalid("AVC field partition reference exceeds list"))?;
-                    let reference_bottom = reference.bottom;
-                    let planes = [
-                        (&reference.picture.y, w as usize, height as usize / 2),
-                        (&reference.picture.cb, w as usize / 2, height as usize / 4),
-                        (&reference.picture.cr, w as usize / 2, height as usize / 4),
-                    ];
-                    if filtered {
-                        for by in offset[1] / 4..(offset[1] + dimensions[1]) / 4 {
-                            for bx in offset[0] / 4..(offset[0] + dimensions[0]) / 4 {
-                                blocks[by * 4 + bx].motion[0] =
-                                    Some(super::avc_boundary::MotionReference {
-                                        picture: reference_id,
-                                        vector,
-                                    });
+                for (offset, dimensions, vectors) in predictions {
+                    let mut selected = [None; 2];
+                    for list in 0..2 {
+                        match vectors[list] {
+                            super::avc_mv::Neighbour::Inter { reference, vector } => {
+                                let (picture, id) =
+                                    *lists[list].get(reference as usize).ok_or_else(|| {
+                                        invalid("AVC field partition reference exceeds list")
+                                    })?;
+                                selected[list] = Some((picture, reference, vector));
+                                if filtered {
+                                    for by in offset[1] / 4..(offset[1] + dimensions[1]) / 4 {
+                                        for bx in offset[0] / 4..(offset[0] + dimensions[0]) / 4 {
+                                            blocks[by * 4 + bx].motion[list] =
+                                                Some(super::avc_boundary::MotionReference {
+                                                    picture: id,
+                                                    vector,
+                                                });
+                                        }
+                                    }
+                                }
                             }
+                            super::avc_mv::Neighbour::NoPrediction => {}
+                            _ => return Err(invalid("missing AVC field motion")),
                         }
                     }
-
-                    for (component, (plane, pw, ph)) in planes.iter().enumerate() {
+                    if selected.iter().all(Option::is_none) {
+                        return Err(invalid("empty AVC field prediction"));
+                    }
+                    let implicit_weights = if selected.iter().all(Option::is_some) {
+                        implicit.map(|context| {
+                            let references = context.references[*reference_index];
+                            let a = references[0][selected[0].unwrap().1 as usize];
+                            let b = references[1][selected[1].unwrap().1 as usize];
+                            super::avc_mv::implicit_weights(
+                                i64::from(context.poc),
+                                i64::from(a.0),
+                                i64::from(b.0),
+                                a.1 || b.1,
+                            )
+                        })
+                    } else {
+                        None
+                    };
+                    for component in 0..3 {
                         let divisor = if component == 0 { 1 } else { 2 };
                         let [bw, bh] = dimensions.map(|v| v / divisor);
                         let xy = [
                             (origin[0] + offset[0]) / divisor,
                             (origin[1] + offset[1]) / divisor,
                         ];
-                        let mut block = [0u16; 256];
-                        let reference = super::avc_motion::ReferencePlane::from_decoded(
-                            plane,
-                            *pw,
-                            *ph,
-                            *pw,
-                            sps.bit_depth_luma,
-                        )?;
-                        let mut mv = vector.map(i32::from);
-                        if component != 0 {
-                            mv[1] += match (reference_bottom, h.bottom_field) {
-                                (false, true) => 2,
-                                (true, false) => -2,
-                                _ => 0,
-                            };
-                        }
-                        if component == 0 {
-                            reference.luma(
-                                xy.map(|v| v as i32),
-                                mv,
-                                bw,
-                                bh,
-                                &mut block[..bw * bh],
-                            )?;
-                        } else {
-                            reference.chroma(
-                                xy.map(|v| v as i32),
-                                mv,
-                                bw,
-                                bh,
-                                &mut block[..bw * bh],
-                            )?;
-                        }
-                        if let Some(weights) = &h.weights {
-                            let entry = weights
-                                .l0
-                                .get(reference_index as usize)
-                                .ok_or_else(|| invalid("missing AVC field partition weight"))?;
-                            let ((weight, offset), denominator) = if component == 0 {
-                                (entry.luma, weights.luma_denom)
+                        let pw = w as usize / divisor;
+                        let ph = height as usize / 2 / divisor;
+                        let mut prediction = [[0u16; 256]; 2];
+                        let mut weights = [(1i16, 0i16); 2];
+                        let denominator = h.weights.as_ref().map_or(0, |weights| {
+                            if component == 0 {
+                                weights.luma_denom
                             } else {
-                                (entry.chroma[component - 1], weights.chroma_denom)
-                            };
+                                weights.chroma_denom
+                            }
+                        });
+                        for list in 0..2 {
+                            if let Some((picture, index, vector)) = selected[list] {
+                                let plane = match component {
+                                    0 => &picture.picture.y,
+                                    1 => &picture.picture.cb,
+                                    _ => &picture.picture.cr,
+                                };
+                                let reference = super::avc_motion::ReferencePlane::from_decoded(
+                                    plane,
+                                    pw,
+                                    ph,
+                                    pw,
+                                    sps.bit_depth_luma,
+                                )?;
+                                let mut mv = vector.map(i32::from);
+                                if component != 0 {
+                                    mv[1] += match (picture.bottom, h.bottom_field) {
+                                        (false, true) => 2,
+                                        (true, false) => -2,
+                                        _ => 0,
+                                    };
+                                }
+                                if component == 0 {
+                                    reference.luma(
+                                        xy.map(|v| v as i32),
+                                        mv,
+                                        bw,
+                                        bh,
+                                        &mut prediction[list][..bw * bh],
+                                    )?;
+                                } else {
+                                    reference.chroma(
+                                        xy.map(|v| v as i32),
+                                        mv,
+                                        bw,
+                                        bh,
+                                        &mut prediction[list][..bw * bh],
+                                    )?;
+                                }
+                                if let Some(table) = &h.weights {
+                                    let entries = if list == 0 { &table.l0 } else { &table.l1 };
+                                    let entry = entries.get(index as usize).ok_or_else(|| {
+                                        invalid("missing AVC field partition weight")
+                                    })?;
+                                    weights[list] = if component == 0 {
+                                        entry.luma
+                                    } else {
+                                        entry.chroma[component - 1]
+                                    };
+                                }
+                            }
+                        }
+                        let denominator = if let Some(implicit) = implicit_weights {
+                            weights = implicit.map(|weight| (weight, 0));
+                            5
+                        } else {
+                            denominator
+                        };
+                        let used = if selected[0].is_some() { 0 } else { 1 };
+                        if selected.iter().all(Option::is_some) {
+                            let (a, b) = prediction.split_at_mut(1);
+                            super::avc_motion::bipred_block(
+                                &mut a[0][..bw * bh],
+                                &b[0][..bw * bh],
+                                weights.map(|w| w.0),
+                                weights.map(|w| w.1),
+                                denominator,
+                                sps.bit_depth_luma,
+                            )?;
+                        } else if h.weights.is_some() {
                             super::avc_motion::weight_block(
-                                &mut block[..bw * bh],
-                                weight,
-                                offset,
+                                &mut prediction[used][..bw * bh],
+                                weights[used].0,
+                                weights[used].1,
                                 denominator,
                                 sps.bit_depth_luma,
                             )?;
@@ -865,7 +1061,7 @@ pub fn decode_p_field_lists(
                         for row in 0..bh {
                             let start = (xy[1] + row) * pw + xy[0];
                             dst[start..start + bw]
-                                .copy_from_slice(&block[row * bw..(row + 1) * bw]);
+                                .copy_from_slice(&prediction[used][row * bw..(row + 1) * bw]);
                         }
                     }
                 }
@@ -1053,5 +1249,5 @@ pub fn decode_p_field_lists(
             )?;
         }
     }
-    Ok(output)
+    Ok((output, if retain_motion { Some(motion) } else { None }))
 }
