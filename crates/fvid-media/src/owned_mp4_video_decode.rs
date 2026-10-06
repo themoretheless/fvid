@@ -441,6 +441,36 @@ mod tests {
             "avc-field-b-cabac-mixed-10bit-bottom-first-spatial-bi-pos1-skip-v1-init2-filter2-infer1",
             "avc-field-b-cabac-residual-8bit-top-first-temporal-all-sign1-init0-filter0-infer1-aso",
             "avc-field-b-cabac-residual-10bit-bottom-first-spatial-chroma-sign1-init2-filter2-infer0-aso",
+            "avc-field-b-cabac-sub-references-8bit-top-first-temporal-type12-pos0-init0-filter0-infer0",
+            "avc-field-b-cabac-sub-references-10bit-bottom-first-spatial-type9-pos3-init2-filter2-infer1",
+            "avc-field-b-cabac-sub-joined-8bit-top-first-temporal-type12-pos0-init0-filter0-infer0",
+            "avc-field-b-cabac-sub-joined-10bit-bottom-first-spatial-type9-pos3-init2-filter2-infer1",
+            "avc-field-b-cabac-sub-8bit-top-first-temporal-type12-pos0-init0-filter0-infer0",
+            "avc-field-b-cabac-sub-10bit-bottom-first-spatial-type9-pos3-init2-filter2-infer1",
+            "avc-field-b-gap-longterm-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-mixed-8bit-top-first-temporal-source-long-coded-cavlc-filter0",
+            "avc-field-b-gap-longterm-mixed-10bit-bottom-first-spatial-colocated-long-skip-cabac-init2-filter2",
+            "avc-field-b-longterm-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-longterm-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-longterm-mixed-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-longterm-mixed-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-bypass8-8bit-top-first-temporal-ac-sign1-init0-filter0-scale24-enabled-aso",
+            "avc-field-b-bypass8-10bit-bottom-first-spatial-ac-sign0-init2-filter2-scale16-enabled",
+            "avc-field-gap-wrap-long-8bit-top-first-skip-filter1",
+            "avc-field-gap-wrap-long-10bit-bottom-first-coded-filter2-aso",
+            "avc-field-gap-wrap-8bit-top-first-skip-filter1",
+            "avc-field-gap-wrap-10bit-bottom-first-coded-filter2-aso",
+            "avc-field-gap-cabac-8bit-top-first-skip-filter1-init0",
+            "avc-field-gap-cabac-10bit-bottom-first-coded-filter2-init2-aso",
+            "avc-field-gap-wrap-cabac-8bit-top-first-skip-filter1-init1",
+            "avc-field-gap-wrap-long-cabac-10bit-bottom-first-coded-filter2-init2-aso",
+            "avc-field-gap-poc1-8bit-top-first-skip-filter1",
+            "avc-field-gap-cabac-poc2-10bit-bottom-first-coded-filter2-init2-aso",
+            "avc-field-gap-wrap-long-cabac-poc1-10bit-bottom-first-coded-filter2-init2-aso",
+            "avc-field-gap-wrap-poc2-8bit-top-first-coded-filter0-aso",
+            "avc-field-gap-8bit-top-first-skip-filter1",
+            "avc-field-gap-10bit-bottom-first-coded-filter2-aso",
             "avc-field-b-transform8-8bit-top-first-temporal-ac-sign1-init0-filter0-scale24-aso",
             "avc-field-b-transform8-10bit-bottom-first-spatial-ac-sign0-init2-filter2-scale16-aso",
             "avc-field-b-residual-8bit-top-first-spatial-all-ac-pos0-sign1-filter0-infer1",
@@ -500,12 +530,18 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+            let frame_gap_wrap = name.starts_with("avc-field-gap-wrap-");
+            let frame_gap = name.starts_with("avc-field-gap-");
             let reordered_four = name.starts_with("avc-field-b-direct-")
                 || name.starts_with("avc-field-b-mixed-")
                 || name.starts_with("avc-field-b-residual-")
                 || name.starts_with("avc-field-b-cabac-mixed-")
                 || name.starts_with("avc-field-b-cabac-residual-")
-                || name.starts_with("avc-field-b-transform8-");
+                || name.starts_with("avc-field-b-transform8-")
+                || name.starts_with("avc-field-b-bypass8-")
+                || name.starts_with("avc-field-b-longterm-")
+                || name.starts_with("avc-field-b-gap-")
+                || name.starts_with("avc-field-b-cabac-sub-");
             let count = if reordered_four {
                 4
             } else if (name.starts_with("avc-field-cabac-")
@@ -516,7 +552,8 @@ mod tests {
                 && !name.starts_with("avc-field-cabac-p-")
             {
                 1
-            } else if name.starts_with("avc-field-b-")
+            } else if frame_gap
+                || name.starts_with("avc-field-b-")
                 || name.contains("refs")
                 || name.contains("opposite")
                 || name.contains("multiref")
@@ -554,10 +591,20 @@ mod tests {
                         },
                         if reordered_four {
                             [0, 4, 6, 8][calls]
+                        } else if frame_gap {
+                            if frame_gap_wrap {
+                                [0, 2, 4][calls]
+                            } else {
+                                [0, 4, 6][calls]
+                            }
                         } else {
                             calls as i64 * 2
                         },
-                        if reordered_four && calls == 0 { 4 } else { 2 }
+                        if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
+                            4
+                        } else {
+                            2
+                        }
                     )
                 );
                 assert_eq!(
@@ -565,10 +612,16 @@ mod tests {
                     (
                         if reordered_four {
                             [0, 4, 6, 8][calls] * 20_000_000
+                        } else if frame_gap {
+                            (if frame_gap_wrap {
+                                [0, 2, 4][calls]
+                            } else {
+                                [0, 4, 6][calls]
+                            }) * 20_000_000
                         } else {
                             calls as u64 * 40_000_000
                         },
-                        if reordered_four && calls == 0 {
+                        if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
                             80_000_000
                         } else {
                             40_000_000

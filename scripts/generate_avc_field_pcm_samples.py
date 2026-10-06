@@ -5,11 +5,17 @@ from pathlib import Path
 from generate_avc_mbaff_direct_samples import Writer,pcm_samples
 from avc_fixture_mp4 import mux,annexb
 
-def configuration(depth, bipred=0, direct8=True,max_refs=3):
+def write_poc_configuration(b,poc_type,bottom_offset=0):
+    b.ue(0);b.ue(poc_type)
+    if poc_type==0:b.ue(0)
+    elif poc_type==1:b.u(0);b.se(-1);b.se(bottom_offset);b.ue(1);b.se(2)
+    elif poc_type!=2:raise ValueError('unsupported fixture POC type')
+
+def configuration(depth, bipred=0, direct8=True,max_refs=3,gaps=False,poc_type=0,poc_bottom_offset=0):
     profile=88 if depth==8 else 110
     b=Writer();b.u(profile,8);b.u(0,8);b.u(10,8);b.ue(0)
     if depth>8:b.ue(1);b.ue(depth-8);b.ue(depth-8);b.u(0);b.u(0)
-    b.ue(0);b.ue(0);b.ue(0);b.ue(max_refs);b.u(0);b.ue(1);b.ue(0);b.u(0);b.u(0);b.u(int(direct8));b.u(0);b.u(0)
+    write_poc_configuration(b,poc_type,poc_bottom_offset);b.ue(max_refs);b.u(int(gaps));b.ue(1);b.ue(0);b.u(0);b.u(0);b.u(int(direct8));b.u(0);b.u(0)
     sps=b.nal(0x67)
     b=Writer();b.ue(0);b.ue(0);b.u(0);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(0);b.u(bipred,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(0);b.u(0)
     pps=b.nal(0x68)
