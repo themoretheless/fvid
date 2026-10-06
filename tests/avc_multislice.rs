@@ -23343,3 +23343,288 @@ fn signed_cabac_residual_survives_canonical_field_frame_crossings() {
         }
     }
 }
+
+#[test]
+fn weighted_cabac_references_survive_field_frame_crossings_and_seek() {
+    use fvid::codec::avc_inter_slice::InterMacroblock;
+    use fvid::codec::avc_slice::{MemoryOperation, RefModification};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for depth in [8, 10] {
+        for reverse in [false, true] {
+            for init in 0..3 {
+                for aso in [false, true] {
+                    for stage in ["frame", "field", "both"] {
+                        for source_frame in [false, true] {
+                            for weight_mode in ["identity", "balanced", "negative"] {
+                                for mode in ["skip", "coded", "residual"] {
+                                    let name = format!(
+                                        "avc-unified-weight-{depth}bit-{}-init{init}-{stage}-{weight_mode}-{mode}{}{}",
+                                        if reverse { "bottom" } else { "top" },
+                                        if source_frame { "-fromframe" } else { "" },
+                                        if aso { "-aso" } else { "" }
+                                    );
+                                    let video =
+                                        std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                    let oracle =
+                                        std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                    let size = 1536 * if depth == 10 { 2 } else { 1 };
+                                    assert_eq!(oracle.len(), 5 * size);
+                                    let mut input =
+                                        Mp4Reader::open(Cursor::new(&video), Default::default())
+                                            .unwrap();
+                                    let config = input.tracks()[0].configuration.clone();
+                                    let avc = AvcConfig::parse(&config).unwrap();
+                                    let sps = Sps::parse(avc.sps[0]).unwrap();
+                                    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                    assert!(pps.cabac);
+                                    assert!(pps.weighted_pred);
+                                    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                                    for _ in 0..2 {
+                                        let mut output = 0;
+                                        for sample in 0..8 {
+                                            let mut packet = Vec::new();
+                                            input.read_packet(0, sample, &mut packet).unwrap();
+                                            if sample >= 4 {
+                                                for nal in
+                                                    NalUnits::new(&packet, avc.length_size).unwrap()
+                                                {
+                                                    let h = SliceHeader::parse(
+                                                        nal.unwrap(),
+                                                        &sps,
+                                                        &pps,
+                                                    )
+                                                    .unwrap();
+                                                    assert_eq!(
+                                                        h.field_pic,
+                                                        [5, 6].contains(&sample)
+                                                    );
+                                                    assert_eq!(h.cabac_init_idc, init);
+                                                    let weights = h.weights.as_ref().unwrap();
+                                                    assert_eq!(
+                                                        (weights.luma_denom, weights.chroma_denom),
+                                                        (2, 1)
+                                                    );
+                                                    assert_eq!(weights.l0.len(), 1);
+                                                    assert!(weights.l1.is_empty());
+                                                    let applied = weight_mode != "identity"
+                                                        && ((sample == 4 && stage != "field")
+                                                            || ([5, 6].contains(&sample)
+                                                                && stage != "frame"));
+                                                    assert_eq!(
+                                                        weights.l0[0].luma,
+                                                        if !applied {
+                                                            (4, 0)
+                                                        } else if weight_mode == "balanced" {
+                                                            (3, 5)
+                                                        } else {
+                                                            (-2, 90)
+                                                        }
+                                                    );
+                                                    assert_eq!(
+                                                        weights.l0[0].chroma,
+                                                        if !applied {
+                                                            [(2, 0); 2]
+                                                        } else if weight_mode == "balanced" {
+                                                            [(1, -7), (3, 8)]
+                                                        } else {
+                                                            [(0, 24), (-1, 48)]
+                                                        }
+                                                    );
+                                                    if sample == 4 {
+                                                        assert_eq!(
+                                                            h.memory_operations,
+                                                            vec![MemoryOperation::ForgetShort(0)]
+                                                        );
+                                                    }
+                                                    if [5, 6].contains(&sample) {
+                                                        assert_eq!(
+                                                            h.modifications_l0,
+                                                            vec![RefModification::Subtract(
+                                                                (if source_frame { 1 } else { 5 })
+                                                                    + u32::from(
+                                                                        h.bottom_field != !reverse
+                                                                    )
+                                                            )]
+                                                        );
+                                                        assert_eq!(
+                                                            h.memory_operations,
+                                                            if sample == 5 && !source_frame {
+                                                                vec![
+                                                                    MemoryOperation::ForgetShort(1),
+                                                                    MemoryOperation::ForgetShort(2),
+                                                                ]
+                                                            } else {
+                                                                vec![]
+                                                            }
+                                                        );
+                                                    }
+                                                    let mut syntax=fvid::codec::avc_cabac_slice::InterCabacSlice::new(&h,&sps,&pps,8192).unwrap();
+                                                    match syntax.read_macroblock().unwrap().unwrap()
+                                                    {
+                                                        InterMacroblock::Skip { .. } => {
+                                                            assert_eq!(mode, "skip")
+                                                        }
+                                                        InterMacroblock::Coded {
+                                                            header,
+                                                            coefficients,
+                                                            ..
+                                                        } => {
+                                                            assert_ne!(mode, "skip");
+                                                            let residual =
+                                                                mode == "residual" && sample != 7;
+                                                            assert_eq!(
+                                                                header.residual.pattern,
+                                                                if residual { 47 } else { 0 }
+                                                            );
+                                                            assert_eq!(
+                                                                coefficients.luma_counts,
+                                                                if residual {
+                                                                    [1; 16]
+                                                                } else {
+                                                                    [0; 16]
+                                                                }
+                                                            );
+                                                            for component in 0..2 {
+                                                                assert_eq!(
+                                                                    coefficients.chroma_counts
+                                                                        [component],
+                                                                    if residual {
+                                                                        [1; 4]
+                                                                    } else {
+                                                                        [0; 4]
+                                                                    }
+                                                                );
+                                                                assert_eq!(
+                                                                    coefficients.chroma_dc
+                                                                        [component][0],
+                                                                    if !residual {
+                                                                        0
+                                                                    } else if component == 0 {
+                                                                        -1
+                                                                    } else {
+                                                                        1
+                                                                    }
+                                                                );
+                                                            }
+                                                        }
+                                                        _ => {
+                                                            panic!("{name}: expected P macroblock")
+                                                        }
+                                                    }
+                                                    assert!(
+                                                        syntax.read_macroblock().unwrap().is_none()
+                                                    );
+                                                }
+                                            }
+                                            let pic =
+                                                decoder.decode_order(&packet).unwrap_or_else(|e| {
+                                                    panic!("{name} sample{sample}: {e}")
+                                                });
+                                            assert_eq!(
+                                                pic.is_some(),
+                                                [1, 3, 4, 6, 7].contains(&sample)
+                                            );
+                                            if let Some(pic) = pic {
+                                                let mut pixels = Vec::new();
+                                                pic.write_planar(&mut pixels).unwrap();
+                                                assert_eq!(
+                                                    pixels,
+                                                    &oracle[output * size..(output + 1) * size],
+                                                    "{name} sample{sample}"
+                                                );
+                                                output += 1;
+                                            }
+                                        }
+                                        assert_eq!(output, 5);
+                                        decoder.reset();
+                                    }
+                                    let mut player =
+                                        fvid::playback_mp4::Mp4VideoReader::open_software(
+                                            Cursor::new(&video),
+                                            Default::default(),
+                                            16 << 20,
+                                        )
+                                        .unwrap();
+                                    for _ in 0..2 {
+                                        for display in 0..5 {
+                                            let f = player
+                                                .read_frame()
+                                                .unwrap_or_else(|e| panic!("{name}: {e}"))
+                                                .unwrap();
+                                            assert_eq!(f.sample_index, [0, 2, 4, 5, 7][display]);
+                                            assert_eq!(
+                                                f.presentation_time.ticks,
+                                                [0, 8, 12, 14, 16][display]
+                                            );
+                                            let mut pixels = Vec::new();
+                                            f.picture.write_planar(&mut pixels).unwrap();
+                                            assert_eq!(
+                                                pixels,
+                                                &oracle[display * size..(display + 1) * size]
+                                            );
+                                        }
+                                        assert!(player.read_frame().unwrap().is_none());
+                                        player.rewind();
+                                    }
+                                    assert_eq!(player.seek_to_sync(14), 0);
+                                    for _ in 0..3 {
+                                        player.read_frame().unwrap().unwrap();
+                                    }
+                                    let mut pixels = Vec::new();
+                                    player
+                                        .read_frame()
+                                        .unwrap()
+                                        .unwrap()
+                                        .picture
+                                        .write_planar(&mut pixels)
+                                        .unwrap();
+                                    assert_eq!(pixels, &oracle[3 * size..4 * size]);
+                                    let identity = std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.replace(&format!("-{weight_mode}-"), "-identity-")
+                                    )))
+                                    .unwrap();
+                                    assert_eq!(&oracle[..2 * size], &identity[..2 * size]);
+                                    if weight_mode != "identity" {
+                                        if stage != "field" {
+                                            assert_ne!(
+                                                &oracle[2 * size..3 * size],
+                                                &identity[2 * size..3 * size]
+                                            );
+                                        }
+                                        if stage != "frame" || source_frame {
+                                            assert_ne!(
+                                                &oracle[3 * size..4 * size],
+                                                &identity[3 * size..4 * size]
+                                            );
+                                            assert_ne!(&oracle[4 * size..], &identity[4 * size..]);
+                                        } else {
+                                            assert_eq!(&oracle[3 * size..], &identity[3 * size..]);
+                                        }
+                                    }
+                                    if aso {
+                                        let ordered = std::fs::read(root.join(format!(
+                                            "{}.yuv",
+                                            name.strip_suffix("-aso").unwrap()
+                                        )))
+                                        .unwrap();
+                                        assert_eq!(oracle, ordered);
+                                    }
+                                    if init != 0 {
+                                        let zero = std::fs::read(root.join(format!(
+                                            "{}.yuv",
+                                            name.replace(&format!("-init{init}-"), "-init0-")
+                                        )))
+                                        .unwrap();
+                                        assert_eq!(oracle, zero);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -6,12 +6,21 @@ from generate_avc_field_cabac_samples import configuration,field
 from generate_avc_mbaff_direct_samples import Writer,CabacWriter
 from generate_avc_field_frame_samples import emit
 
-def prediction(address,number,poc,init,skip,bottom=None,target=None,clear=False,residual=None,target_frame=0):
+def prediction(address,number,poc,init,skip,bottom=None,target=None,clear=False,residual=None,target_frame=0,weights=None):
     b=Writer();b.ue(address);b.ue(0);b.ue(0);b.u(number,4);b.u(int(bottom is not None))
     if bottom is not None:b.u(int(bottom))
     b.u(poc,4);b.u(0)
     b.u(int(target is not None))
     if target is not None:b.ue(0);b.ue(5-2*target_frame+int(bottom!=target));b.ue(3)
+    if weights is not None:
+        b.ue(2);b.ue(1)
+        b.u(int(weights!='identity'))
+        if weights!='identity':
+            for v in ((3,5) if weights=='balanced' else (-2,90)):b.se(v)
+        b.u(int(weights!='identity'))
+        if weights!='identity':
+            for pair in ([(1,-7),(3,8)] if weights=='balanced' else [(0,24),(-1,48)]):
+                for v in pair:b.se(v)
     ops=[(1,(0,))] if number==2 else ([(1,(1,)),(1,(2,))] if clear else [])
     # Even an empty adaptive list prevents sliding while appending field two.
     adaptive=bool(ops) or bottom is not None
