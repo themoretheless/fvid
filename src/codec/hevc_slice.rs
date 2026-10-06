@@ -145,7 +145,13 @@ impl SliceHeader {
             .ok_or_else(|| invalid("HEVC CTU address space exceeds supported range"))?
             as u32;
         let address = b.read((32 - (count - 1).leading_zeros()) as u8)?;
-        if address <= previous.address || address >= count {
+        if address >= count { return Err(invalid("HEVC dependent segment address out of range")); }
+        let increasing = if let Some(tiles) = &pps.tiles {
+            let dimensions = sps.dimensions.map(|v| u64::from(v).div_ceil(side) as u32);
+            super::hevc_tiles::tile_scan_address(tiles, dimensions, address)?
+                > super::hevc_tiles::tile_scan_address(tiles, dimensions, previous.address)?
+        } else { address > previous.address };
+        if !increasing {
             return Err(invalid("HEVC dependent segment address out of range"));
         }
         let (entry_point_offsets, extension, entropy_byte_offset, entropy_substreams) =

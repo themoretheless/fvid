@@ -134,7 +134,14 @@ impl HevcPicture {
                 SliceHeader::parse_with_previous(nal, sps, pps, max_bytes, Some(&previous))
                     .map_err(|e| e.to_string())?
             };
-            if index > 0 && (header.first || header.address <= previous.address)
+            let order = |address| {
+                if let Some(tiles) = &pps.tiles {
+                    let side = 1u32 << sps.coding_block_log2[1];
+                    fvid_codecs::codec::hevc_tiles::tile_scan_address(tiles, sps.dimensions.map(|v| v.div_ceil(side)), address)
+                        .map_err(|e| e.to_string())
+                } else { Ok(address) }
+            };
+            if index > 0 && (header.first || order(header.address)? <= order(previous.address)?)
                 || header.nal != first.nal
                 || header.poc_lsb != first.poc_lsb
                 || header.short_term != first.short_term
@@ -444,6 +451,30 @@ mod tests {
             assert!(surface.pitch >= width * if sps.depth[0] == 10 { 2 } else { 1 });
             decoder.unmap(surface.slot).unwrap();
             decoder.close().unwrap();
+        }
+    }
+    #[test]
+    fn tiled_segment_fixtures_preserve_tile_scan_order_in_driver_submission() {
+        use fvid_codecs::codec::{config::NalUnits, hevc_nal::NalHeader};
+        for data in [
+            include_bytes!("../../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/playback-errors/hevc-tiles-dependent-rext8.mp4").as_slice(),
+        ] {
+            let (sps,pps) = sets(data);
+            let mut input = crate::owned_mp4::Mp4Reader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+            let length_size = fvid_codecs::codec::config::HevcConfig::parse(&input.tracks()[0].configuration).unwrap().length_size;
+            let mut packet = Vec::new(); input.read_packet(0,0,&mut packet).unwrap();
+            let slices: Vec<_> = NalUnits::new(&packet,length_size).unwrap().map(Result::unwrap)
+                .filter(|nal| NalHeader::parse(nal).unwrap().is_vcl()).collect();
+            let picture = HevcPicture::prepare(&sps,&pps,&slices,0,0,&[],1 << 20).unwrap();
+            assert_eq!(picture.offsets.len(),4);
+            for (index,&offset) in picture.offsets.iter().enumerate() {
+                let begin = offset as usize;
+                assert_eq!(&picture.bytes[begin..begin+3],[0,0,1]);
+                assert_eq!(&picture.bytes[begin+3..begin+3+slices[index].len()],slices[index]);
+            }
+            let mut raster_sorted = slices.clone(); raster_sorted.swap(1,2);
+            assert!(HevcPicture::prepare(&sps,&pps,&raster_sorted,0,0,&[],1 << 20).is_err());
         }
     }
     #[test]

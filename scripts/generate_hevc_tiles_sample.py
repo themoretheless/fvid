@@ -38,6 +38,8 @@ variants = [
     ('filtered', -1, 3, True, tile_columns + 'LFCrossTileBoundaryFlag : 0\n', 8, 64, 64),
     ('cross-filtered', -1, 3, True, tile_columns + 'LFCrossTileBoundaryFlag : 1\n', 8, 64, 64),
     ('asymmetric', -1, 3, True, 'NumTileColumnsMinus1 : 1\nNumTileRowsMinus1 : 1\nTileUniformSpacing : 0\nTileColumnWidthArray : 1\nTileRowHeightArray : 2\nLFCrossTileBoundaryFlag : 0\n', 8, 96, 96),
+    ('slices', -1, 3, False, tile_columns + 'LFCrossTileBoundaryFlag : 0\nSliceMode : 1\nSliceArgument : 1\n', 8, 64, 64),
+    ('dependent', -1, 3, False, tile_columns + 'LFCrossTileBoundaryFlag : 0\nSliceSegmentMode : 1\nSliceSegmentArgument : 1\n', 8, 64, 64),
     ('high10', -1, 3, True, tile_columns + 'LFCrossTileBoundaryFlag : 0\n', 10, 64, 64),
     ('high12', -1, 3, True, tile_columns + 'LFCrossTileBoundaryFlag : 0\n', 12, 64, 64),
 ]

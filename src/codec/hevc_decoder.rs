@@ -232,7 +232,13 @@ impl HevcDecoder {
             }
             if let Some(first) = headers.first() {
                 let previous = headers.last().unwrap();
-                if header.first || header.address <= previous.address {
+                let order = |address| {
+                    if let Some(tiles) = &pps.tiles {
+                        let side = 1u32 << sps.coding_block_log2[1];
+                        super::hevc_tiles::tile_scan_address(tiles, sps.dimensions.map(|v| v.div_ceil(side)), address)
+                    } else { Ok(address) }
+                };
+                if header.first || order(header.address)? <= order(previous.address)? {
                     return Err(invalid(
                         "HEVC slice addresses must increase within one picture",
                     ));

@@ -400,3 +400,19 @@ replay. Mutated metadata tests reject stream-count/bounds/truncation errors,
 bad geometry and insufficient total decode budget. Ordinary tests read saved
 bytes without external tools or network access. Multiple slice segments with
 tiles and physical GPU decoding remain unqualified.
+
+### HEVC tiled slice-segment address regression
+
+`hevc-tiles-slices-rext8` / `hevc-tiles-dependent-rext8` contain three owned
+I/B/B pictures with four independent/dependent segments per picture. Their
+raster addresses are 0,2,1,3, correctly increasing in tile-scan order. Filters,
+PCM, chroma-QP lists and WPP are disabled. Saved YUV is independent HM output.
+The shared tile generator reproduces both MP4/YUV pairs.
+
+Before the ordering fix, the independent case refused "slice addresses must
+increase" and the dependent case refused "dependent segment address out of
+range". Header admission now accepts both. Software picture reconstruction
+still explicitly refuses multi-slice tile tools, and the HM pixel/reset
+acceptance remains ignored until that implementation is complete. CPU-side
+NVDEC tests preserve NAL submission order and reject raster-sorted segments;
+no physical GPU acceptance is implied. Ordinary tests use committed bytes.

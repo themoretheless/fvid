@@ -2249,3 +2249,25 @@ made. The overall codec objective remains active.
 Offline validation after tile acceptance: codec library 360 passed / one
 explicit fixture-generator test ignored; media library 334 passed / one
 ignored; CUDA-feature HEVC tests 17 passed. No physical GPU run is claimed.
+
+### HEVC tiled segment address admission (2026-10-06)
+
+Owned independent/dependent four-segment I/B/B streams reproduce two former
+raster-monotonic checks: generic slice ordering and dependent-segment range
+validation. Both now compare tile-scan addresses. A bounded scalar address
+conversion shares partition validation with TileLayout and does not allocate
+full maps for each slice; tests agree with asymmetric inverse maps and cover
+arithmetic at the u32 CTU address limit without allocating a huge picture.
+
+For both files, every picture now parses addresses 0,2,1,3, the expected
+independent/dependent flags and one entropy stream per segment. The exact
+software multi-slice picture-tools refusal remains tested; future HM pixel/reset
+acceptance is explicitly ignored pending tiled segment reconstruction/ownership.
+NVDEC submission preparation uses the same tile-scan check, preserves all four
+NAL units in order and rejects raster-sorted submission. This is CPU-side
+submission validation, not a device decode. Sixteen tiled MP4/YUV files regenerate
+byte identically. This stage does not close multi-segment tile playback.
+
+Offline validation for this stage: codec library 362 passed, two explicit
+ignored tests (fixture generation and pending tiled-segment pixel acceptance);
+CUDA-feature HEVC tests 18 passed. No playback/physical-device completion claim.

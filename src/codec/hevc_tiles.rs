@@ -15,28 +15,56 @@ pub struct TileLayout {
     /// Tile rectangles in CTUs: x, y, width, height.
     pub rectangles: Vec<[u32; 4]>,
 }
+fn validate_partition(tiles: &Tiles, dimensions: [u32; 2]) -> Result<u32> {
+    let [width, height] = dimensions;
+    if width == 0
+        || height == 0
+        || !(1..=20).contains(&tiles.column_widths.len())
+        || !(1..=22).contains(&tiles.row_heights.len())
+        || tiles.column_widths.iter().any(|&v| v == 0)
+        || tiles.row_heights.iter().any(|&v| v == 0)
+        || tiles
+            .column_widths
+            .iter()
+            .map(|&v| u64::from(v))
+            .sum::<u64>()
+            != u64::from(width)
+        || tiles.row_heights.iter().map(|&v| u64::from(v)).sum::<u64>() != u64::from(height)
+    {
+        return Err(invalid("invalid HEVC tile partition"));
+    }
+    let count = width
+        .checked_mul(height)
+        .ok_or_else(|| invalid("HEVC tile CTU count overflow"))?;
+    Ok(count)
+}
+/// Convert a single raster CTU address without allocating a complete map.
+pub fn tile_scan_address(tiles: &Tiles, dimensions: [u32; 2], raster: u32) -> Result<u32> {
+    let count = validate_partition(tiles, dimensions)?;
+    if raster >= count {
+        return Err(invalid("HEVC raster CTU address out of range"));
+    }
+    let width = dimensions[0];
+    let (x, y) = (raster % width, raster / width);
+    let mut y0 = 0;
+    for &h in &tiles.row_heights {
+        if y < y0 + h {
+            let mut x0 = 0;
+            for &w in &tiles.column_widths {
+                if x < x0 + w {
+                    return Ok(y0 * width + x0 * h + (y - y0) * w + (x - x0));
+                }
+                x0 += w;
+            }
+        }
+        y0 += h;
+    }
+    Err(invalid("HEVC CTU is outside tile partition"))
+}
 impl TileLayout {
     pub fn new(tiles: &Tiles, dimensions: [u32; 2], budget: usize) -> Result<Self> {
-        let [width, height] = dimensions;
-        if width == 0
-            || height == 0
-            || !(1..=20).contains(&tiles.column_widths.len())
-            || !(1..=22).contains(&tiles.row_heights.len())
-            || tiles.column_widths.iter().any(|&v| v == 0)
-            || tiles.row_heights.iter().any(|&v| v == 0)
-            || tiles
-                .column_widths
-                .iter()
-                .map(|&v| u64::from(v))
-                .sum::<u64>()
-                != u64::from(width)
-            || tiles.row_heights.iter().map(|&v| u64::from(v)).sum::<u64>() != u64::from(height)
-        {
-            return Err(invalid("invalid HEVC tile partition"));
-        }
-        let count = width
-            .checked_mul(height)
-            .ok_or_else(|| invalid("HEVC tile CTU count overflow"))?;
+        let [width, _] = dimensions;
+        let count = validate_partition(tiles, dimensions)?;
         let number = tiles.column_widths.len() * tiles.row_heights.len();
         let required = (count as usize)
             .checked_mul(10)
@@ -98,6 +126,7 @@ mod tests {
         );
         for (ts, &rs) in layout.tile_scan_to_raster.iter().enumerate() {
             assert_eq!(layout.raster_to_tile_scan[rs as usize], ts as u32);
+            assert_eq!(tile_scan_address(&tiles, [3, 3], rs).unwrap(), ts as u32);
         }
         assert!(
             TileLayout::new(&tiles, [3, 3], 169)
@@ -105,6 +134,19 @@ mod tests {
                 .to_string()
                 .contains("budget")
         );
+    }
+    #[test]
+    fn scalar_tile_address_conversion_does_not_allocate_or_overflow_at_u32_limit() {
+        let tiles = Tiles {
+            column_widths: vec![u32::MAX - 1, 1],
+            row_heights: vec![1],
+            loop_filter_across: false,
+        };
+        assert_eq!(
+            tile_scan_address(&tiles, [u32::MAX, 1], u32::MAX - 1).unwrap(),
+            u32::MAX - 1
+        );
+        assert!(tile_scan_address(&tiles, [u32::MAX, 1], u32::MAX).is_err());
     }
     #[test]
     fn invalid_geometry_and_overflow_refuse_before_allocation() {
@@ -304,5 +346,112 @@ mod fixture_tests {
         assert!(
             decode_error(pps, &header, 64 * 64 * 24 + 65536).contains("tile layout exceeds budget")
         );
+    }
+
+    #[test]
+    fn tiled_segment_headers_accept_tile_scan_order_but_reconstruction_remains_explicit() {
+        for (data, dependent) in [
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.mp4")
+                    .as_slice(),
+                false,
+            ),
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-tiles-dependent-rext8.mp4"
+                )
+                .as_slice(),
+                true,
+            ),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            assert_eq!(decoder.parameters().1.dependent_slices, dependent);
+            let mut packet = Vec::new();
+            for frame in 0..3 {
+                input.read_packet(0, frame, &mut packet).unwrap();
+                let headers = decoder.slice_headers(&packet).unwrap();
+                assert_eq!(
+                    headers.iter().map(|h| h.address).collect::<Vec<_>>(),
+                    [0, 2, 1, 3]
+                );
+                for (index, header) in headers.iter().enumerate() {
+                    assert_eq!(header.dependent, dependent && index != 0);
+                    assert_eq!(header.entropy_substreams.len(), 1);
+                }
+                if frame == 0 {
+                    let error = decoder
+                        .decode_packet(&packet)
+                        .err()
+                        .expect("tile segment reconstruction remains incomplete");
+                    assert!(
+                        error
+                            .to_string()
+                            .contains("unsupported HEVC multi-slice picture tools"),
+                        "{error}"
+                    );
+                }
+            }
+        }
+    }
+    #[test]
+    #[ignore = "acceptance awaits tiled multi-segment reconstruction and boundary ownership"]
+    fn tiled_segments_match_every_hm_sample_after_reconstruction_support() {
+        for (data, expected) in [
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.mp4")
+                    .as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.yuv")
+                    .as_slice(),
+            ),
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-tiles-dependent-rext8.mp4"
+                )
+                .as_slice(),
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-tiles-dependent-rext8.yuv"
+                )
+                .as_slice(),
+            ),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            let mut packet = Vec::new();
+            for pass in 0..2 {
+                if pass != 0 {
+                    decoder.reset();
+                }
+                let mut pixels = Vec::new();
+                for frame in 0..3 {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    pixels.extend(
+                        decoded
+                            .picture
+                            .planes
+                            .iter()
+                            .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap())),
+                    );
+                }
+                assert_eq!(pixels, expected);
+            }
+        }
     }
 }
