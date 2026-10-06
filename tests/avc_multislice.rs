@@ -10630,12 +10630,18 @@ fn unpaired_pcm_field_is_not_silently_discarded_at_eof() {
 // the snapshot being built before DPB marking/eviction.
 fn separate_field_motion_reserve(sps: &Sps) -> usize {
     let (width, height) = sps.coded_dimensions();
-    fvid::codec::avc_reference_motion::ReferenceMotionField::storage_bytes(
-        width as usize,
-        height as usize / 2,
-    )
-    .unwrap()
-        * (2 * sps.max_num_ref_frames.max(1) as usize + 1)
+    let bytes = |height| {
+        fvid::codec::avc_reference_motion::ReferenceMotionField::storage_bytes(
+            width as usize,
+            height,
+        )
+        .unwrap()
+    };
+    let field = bytes(height as usize / 2);
+    // A migrated frame map is shared by the two parities and retains its
+    // MBAFF flags. Tight budgets must include the larger representation.
+    (field * 2).max(bytes(height as usize)) * sps.max_num_ref_frames.max(1) as usize
+        + field
 }
 
 #[test]
