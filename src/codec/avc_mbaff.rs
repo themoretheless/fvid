@@ -474,6 +474,40 @@ impl Readiness420 {
             blocks,
         })
     }
+    /// Validate a complete MBAFF publication without changing availability.
+    pub fn check_mbaff_complete(
+        &self,
+        address: usize,
+        geometry: [usize; 2],
+        field: bool,
+    ) -> Result<()> {
+        if !self.mbaff || geometry != [self.width, self.height] {
+            return Err(invalid("MBAFF readiness geometry mismatch"));
+        }
+        layout(address, self.width, self.height, true, field, [1, 1])?;
+        let mode = self.pair_fields[address / 2];
+        if mode != 255 && mode != u8::from(field) {
+            return Err(invalid("AVC readiness pair mode changed"));
+        }
+        if self.blocks[address] != [0; 3] {
+            return Err(invalid(
+                "MBAFF macroblock already has reconstructed samples",
+            ));
+        }
+        Ok(())
+    }
+    /// Mark all three components together after complete sample publication.
+    pub fn publish_mbaff_complete(
+        &mut self,
+        address: usize,
+        geometry: [usize; 2],
+        field: bool,
+    ) -> Result<()> {
+        self.check_mbaff_complete(address, geometry, field)?;
+        self.pair_fields[address / 2] = u8::from(field);
+        self.blocks[address] = [u16::MAX, 15, 15];
+        Ok(())
+    }
     /// Publish only after component samples have been successfully written.
     pub fn publish(
         &mut self,

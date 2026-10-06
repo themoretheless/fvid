@@ -87,6 +87,376 @@ pub fn reconstruct_inter_macroblock(
     write_samples(&mut picture.cr, w / 2, targets[1], &reconstructed.cr)?;
     Ok(())
 }
+/// Join inter sample publication with complete slice-local readiness. No ready
+/// component or sample is changed if validation/residual reconstruction fails.
+pub fn reconstruct_inter_macroblock_ready(
+    picture: &mut IntraPicture,
+    address: usize,
+    field: bool,
+    prediction: super::avc_compensation::Prediction420,
+    coefficients: Option<&super::avc_inter_coefficients::InterCoefficients>,
+    transform8: bool,
+    qps: [u8; 3],
+    bypass: bool,
+    scaling: &ScalingMatrices,
+    readiness: &mut Readiness420,
+) -> Result<()> {
+    let geometry = [picture.coded_width / 16, picture.coded_height / 16];
+    readiness.check_mbaff_complete(address, geometry, field)?;
+    reconstruct_inter_macroblock(
+        picture,
+        address,
+        field,
+        prediction,
+        coefficients,
+        transform8,
+        qps,
+        bypass,
+        scaling,
+    )?;
+    readiness.publish_mbaff_complete(address, geometry, field)
+}
+/// Assemble ordered MBAFF CAVLC P slices before the deblocking stage.
+/// References are independently resolved frame lists for each slice. This is
+/// an intermediate reconstruction API, not a complete playback admission path.
+pub fn decode_p_slices_unfiltered(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[&IntraPicture]; 2]],
+    budget: usize,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    use super::{
+        avc_compensation::{ComponentWeight, Reference420},
+        avc_inter::{Partition, Prediction},
+        avc_inter_prediction::predict_macroblock_mbaff,
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+        avc_motion_field::MotionField,
+        avc_mv::Neighbour,
+        avc_slice::SliceType,
+    };
+    if headers.is_empty()
+        || headers.len() != references.len()
+        || headers[0].first_mb != 0
+        || pps.cabac
+        || sps.frame_mbs_only
+        || !sps.mb_adaptive_frame_field
+        || sps.chroma_format != 1
+        || sps.separate_colour_plane
+        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || headers
+            .iter()
+            .any(|h| h.slice_type != SliceType::P || h.field_pic || h.redundant_pic_cnt != 0)
+    {
+        return Err(invalid(
+            "invalid MBAFF CAVLC P reconstruction configuration",
+        ));
+    }
+    let (w, h) = sps.coded_dimensions();
+    let (w, h) = (w as usize, h as usize);
+    let pixels = w
+        .checked_mul(h)
+        .ok_or_else(|| invalid("MBAFF picture size overflow"))?;
+    let count = pixels / 256;
+    let reserve = pixels
+        .checked_mul(6)
+        .and_then(|n| n.checked_add(pixels / 16))
+        .and_then(|n| count.checked_mul(80).and_then(|c| n.checked_add(c)))
+        .and_then(|n| n.checked_add(65536))
+        .ok_or_else(|| invalid("MBAFF P budget overflow"))?;
+    let mut motion = MotionField::new(
+        w,
+        h,
+        budget
+            .checked_sub(reserve)
+            .ok_or_else(|| invalid("MBAFF P reconstruction exceeds memory budget"))?,
+    )?;
+    let scaling = ScalingMatrices::new(sps, pps)?;
+    let mut ready = Readiness420::new(w / 16, h / 16, true, count * 7)?;
+    let mut picture = IntraPicture {
+        coded_width: w,
+        coded_height: h,
+        crop: sps.crop.map(|n| n as usize),
+        bit_depth: sps.bit_depth_luma,
+        y: plane(pixels)?,
+        cb: plane(pixels / 4)?,
+        cr: plane(pixels / 4)?,
+    };
+    let mut seen = 0;
+    for (slice, (header, lists)) in headers.iter().zip(references).enumerate() {
+        if header.first_mb as usize * 2 != seen {
+            return Err(invalid("MBAFF P slice coverage gap or overlap"));
+        }
+        let end = headers
+            .get(slice + 1)
+            .map_or(count, |h| h.first_mb as usize * 2);
+        if end <= seen || end > count {
+            return Err(invalid("invalid MBAFF P slice range"));
+        }
+        let mut views: [Vec<Reference420<'_>>; 2] = [Vec::new(), Vec::new()];
+        for list in 0..2 {
+            if lists[list].len() > 32 {
+                return Err(invalid("MBAFF P reference list exceeds 32 frames"));
+            }
+            views[list]
+                .try_reserve_exact(lists[list].len())
+                .map_err(|_| invalid("cannot allocate MBAFF references"))?;
+            for reference in lists[list] {
+                if reference.coded_width != w
+                    || reference.coded_height != h
+                    || reference.bit_depth != picture.bit_depth
+                {
+                    return Err(invalid("MBAFF P reference geometry/depth mismatch"));
+                }
+                views[list].push(Reference420::new(
+                    [&reference.y, &reference.cb, &reference.cr],
+                    w,
+                    h,
+                    [w, w / 2, w / 2],
+                    picture.bit_depth,
+                )?);
+            }
+        }
+        let refs: [Vec<&Reference420<'_>>; 2] =
+            [views[0].iter().collect(), views[1].iter().collect()];
+        ready.reset_slice();
+        let mut reader = InterCavlcSlice::new_mbaff(header, sps, pps, count * 80)?;
+        while let Some(block) = reader.read_macroblock()? {
+            let field = reader.field_decoding();
+            if let InterMacroblock::Intra(mb) = block {
+                let address = mb.address as usize;
+                if address != seen || seen >= end {
+                    return Err(invalid("MBAFF P intra coverage mismatch"));
+                }
+                motion.store_mbaff(
+                    address,
+                    [0, 0],
+                    [16, 16],
+                    slice as u32,
+                    field,
+                    [Neighbour::NoPrediction; 2],
+                )?;
+                reconstruct_intra_macroblock(
+                    &mut picture,
+                    *mb,
+                    field,
+                    sps,
+                    pps,
+                    &scaling,
+                    &mut ready,
+                )?;
+                seen += 1;
+                continue;
+            }
+            let (address, qp, parts, coefficients, eight) = match block {
+                InterMacroblock::Skip { address, qp } => (
+                    address,
+                    qp,
+                    vec![Partition {
+                        origin: [0, 0],
+                        size: [16, 16],
+                        prediction: Prediction::L0,
+                        group: 0,
+                        references: [Some(0), None],
+                        differences: [[0; 2]; 2],
+                    }],
+                    None,
+                    false,
+                ),
+                InterMacroblock::Coded {
+                    address,
+                    header,
+                    coefficients,
+                } => (
+                    address,
+                    header.residual.qp,
+                    header.partitions,
+                    Some(coefficients),
+                    header.residual.transform8,
+                ),
+                InterMacroblock::Intra(_) => unreachable!(),
+            };
+            if address != seen || seen >= end {
+                return Err(invalid("MBAFF P inter coverage mismatch"));
+            }
+            let vectors = if coefficients.is_none() {
+                vec![[
+                    Neighbour::Inter {
+                        reference: 0,
+                        vector: motion
+                            .decode_p_skip_mbaff(address, slice as u32, |p| reader.pair_field(p))?,
+                    },
+                    Neighbour::NoPrediction,
+                ]]
+            } else {
+                motion.decode_macroblock_mbaff(address, slice as u32, &parts, |p| {
+                    reader.pair_field(p)
+                })?
+            };
+            let weights = if pps.weighted_pred {
+                let table = header
+                    .weights
+                    .as_ref()
+                    .ok_or_else(|| invalid("missing MBAFF P weight table"))?;
+                let mut result = Vec::with_capacity(parts.len());
+                for vectors in &vectors {
+                    let mut entry = [[ComponentWeight::default(); 3]; 2];
+                    for list in 0..2 {
+                        if let Neighbour::Inter { reference, .. } = vectors[list] {
+                            let index = usize::from(reference) / if field { 2 } else { 1 };
+                            let weight = [&table.l0, &table.l1][list]
+                                .get(index)
+                                .ok_or_else(|| invalid("missing MBAFF P reference weight"))?;
+                            entry[list] = [
+                                ComponentWeight {
+                                    weight: weight.luma.0,
+                                    offset: weight.luma.1,
+                                    denominator: table.luma_denom,
+                                },
+                                ComponentWeight {
+                                    weight: weight.chroma[0].0,
+                                    offset: weight.chroma[0].1,
+                                    denominator: table.chroma_denom,
+                                },
+                                ComponentWeight {
+                                    weight: weight.chroma[1].0,
+                                    offset: weight.chroma[1].1,
+                                    denominator: table.chroma_denom,
+                                },
+                            ];
+                        }
+                    }
+                    result.push(entry);
+                }
+                Some(result)
+            } else {
+                None
+            };
+            let prediction = predict_macroblock_mbaff(
+                address,
+                [w / 16, h / 16],
+                field,
+                picture.bit_depth,
+                &parts,
+                &vectors,
+                [&refs[0], &refs[1]],
+                weights.as_deref(),
+            )?;
+            let qps = [
+                (super::avc_residual_syntax::update_qp(qp, 0, sps.bit_depth_luma)?
+                    + 6 * (i32::from(sps.bit_depth_luma) - 8)) as u8,
+                super::avc_picture::chroma_qp(qp, pps.chroma_qp_offset, sps.bit_depth_chroma),
+                super::avc_picture::chroma_qp(
+                    qp,
+                    pps.second_chroma_qp_offset,
+                    sps.bit_depth_chroma,
+                ),
+            ];
+            reconstruct_inter_macroblock_ready(
+                &mut picture,
+                address,
+                field,
+                prediction,
+                coefficients.as_deref(),
+                eight,
+                qps,
+                sps.transform_bypass && qps[0] == 0,
+                &scaling,
+                &mut ready,
+            )?;
+            seen += 1;
+        }
+        if seen != end {
+            return Err(invalid("incomplete MBAFF P slice"));
+        }
+    }
+    Ok((picture, motion))
+}
+
+/// Shared address-local intra reconstruction for intra and mixed MBAFF slices.
+/// The picture assembler owns the matching slice-local readiness geometry.
+pub(crate) fn reconstruct_intra_macroblock(
+    picture: &mut IntraPicture,
+    mut mb: super::avc_macroblock::IntraMacroblock,
+    field: bool,
+    sps: &Sps,
+    pps: &Pps,
+    scaling: &ScalingMatrices,
+    readiness: &mut Readiness420,
+) -> Result<()> {
+    let (w, h) = (picture.coded_width, picture.coded_height);
+    let address = mb.address as usize;
+    readiness.check_mbaff_complete(address, [w / 16, h / 16], field)?;
+    let pixels = w
+        .checked_mul(h)
+        .ok_or_else(|| invalid("MBAFF picture size overflow"))?;
+    if sps.coded_dimensions() != (w as u32, h as u32)
+        || picture.bit_depth != sps.bit_depth_luma
+        || picture.y.len() != pixels
+        || picture.cb.len() != pixels / 4
+        || picture.cr.len() != pixels / 4
+    {
+        return Err(invalid("invalid MBAFF intra reconstruction picture"));
+    }
+    layout(address, w / 16, h / 16, true, field, [1, 1])?;
+    let parity = if field { address % 2 } else { 0 };
+    let step = if field { 2 } else { 1 };
+    let view_h = h / step;
+    let mut view = IntraPicture {
+        coded_width: w,
+        coded_height: view_h,
+        crop: [0; 4],
+        bit_depth: picture.bit_depth,
+        y: plane(w * view_h)?,
+        cb: plane(w * view_h / 4)?,
+        cr: plane(w * view_h / 4)?,
+    };
+    for (source, dest, stride) in [
+        (&picture.y, &mut view.y, w),
+        (&picture.cb, &mut view.cb, w / 2),
+        (&picture.cr, &mut view.cr, w / 2),
+    ] {
+        for (row, line) in dest.chunks_exact_mut(stride).enumerate() {
+            let start = (row * step + parity) * stride;
+            line.copy_from_slice(&source[start..start + stride]);
+        }
+    }
+    let mut ready = crate::buffer(w * view_h / 16)?;
+    for by in 0..view_h / 4 {
+        for bx in 0..w / 4 {
+            let mut available = true;
+            for dy in 0..4 {
+                for dx in 0..4 {
+                    available &=
+                        readiness.available(0, [bx * 4 + dx, (by * 4 + dy) * step + parity])?;
+                }
+            }
+            ready[by * (w / 4) + bx] = u8::from(available);
+        }
+    }
+    let geometry = layout(address, w / 16, h / 16, true, field, [1, 1])?;
+    let logical_y = (geometry.origin[1] - parity) / step;
+    mb.address = (logical_y / 16 * (w / 16) + geometry.origin[0] / 16) as u32;
+    reconstruct_macroblock(&mut view, &mb, sps, pps, scaling, &mut ready)?;
+    for (component, source, dest, stride, side) in [
+        (0, &view.y, &mut picture.y, w, 16),
+        (1, &view.cb, &mut picture.cb, w / 2, 8),
+        (2, &view.cr, &mut picture.cr, w / 2, 8),
+    ] {
+        let sub = if component == 0 { [1, 1] } else { [2, 2] };
+        let target = layout(address, w / 16, h / 16, true, field, sub)?;
+        let x = target.origin[0];
+        let y = (target.origin[1] - parity) / step;
+        let mut samples = [0u16; 256];
+        for row in 0..side {
+            samples[row * side..row * side + side]
+                .copy_from_slice(&source[(y + row) * stride + x..(y + row) * stride + x + side]);
+        }
+        write_samples(dest, stride, target, &samples[..side * side])?;
+    }
+    readiness.publish_mbaff_complete(address, [w / 16, h / 16], field)
+}
+
 /// Decode one complete intra MBAFF CAVLC or CABAC slice.
 /// Budget includes frame planes, a temporary prediction view and entropy/readiness
 /// contexts. Input RBSP and caller-held output pictures are outside this budget.
@@ -176,7 +546,7 @@ pub fn decode_intra_slices(
                 (_, Some(reader)) => reader.read_macroblock()?,
                 _ => unreachable!(),
             };
-            let Some(mut mb) = mb else { break };
+            let Some(mb) = mb else { break };
             let address = mb.address as usize;
             if address != seen || seen >= end {
                 return Err(invalid("MBAFF intra slice coverage gap"));
@@ -212,63 +582,15 @@ pub fn decode_intra_slices(
                     .map_err(|_| invalid("invalid MBAFF deblocking disable value"))?,
                 offsets: [header.alpha_offset, header.beta_offset],
             });
-            let parity = if field { address % 2 } else { 0 };
-            let step = if field { 2 } else { 1 };
-            let view_h = h / step;
-            let mut view = IntraPicture {
-                coded_width: w,
-                coded_height: view_h,
-                crop: [0; 4],
-                bit_depth: picture.bit_depth,
-                y: plane(w * view_h)?,
-                cb: plane(w * view_h / 4)?,
-                cr: plane(w * view_h / 4)?,
-            };
-            for (source, dest, stride) in [
-                (&picture.y, &mut view.y, w),
-                (&picture.cb, &mut view.cb, w / 2),
-                (&picture.cr, &mut view.cr, w / 2),
-            ] {
-                for (row, line) in dest.chunks_exact_mut(stride).enumerate() {
-                    let start = (row * step + parity) * stride;
-                    line.copy_from_slice(&source[start..start + stride]);
-                }
-            }
-            let mut ready = crate::buffer(w * view_h / 16)?;
-            for by in 0..view_h / 4 {
-                for bx in 0..w / 4 {
-                    let mut available = true;
-                    for dy in 0..4 {
-                        for dx in 0..4 {
-                            available &= readiness
-                                .available(0, [bx * 4 + dx, (by * 4 + dy) * step + parity])?;
-                        }
-                    }
-                    ready[by * (w / 4) + bx] = u8::from(available);
-                }
-            }
-            let geometry = layout(address, w / 16, h / 16, true, field, [1, 1])?;
-            let logical_y = (geometry.origin[1] - parity) / step;
-            mb.address = (logical_y / 16 * (w / 16) + geometry.origin[0] / 16) as u32;
-            reconstruct_macroblock(&mut view, &mb, sps, pps, &scaling, &mut ready)?;
-            for (component, source, dest, stride, side) in [
-                (0, &view.y, &mut picture.y, w, 16),
-                (1, &view.cb, &mut picture.cb, w / 2, 8),
-                (2, &view.cr, &mut picture.cr, w / 2, 8),
-            ] {
-                let sub = if component == 0 { [1, 1] } else { [2, 2] };
-                let target = layout(address, w / 16, h / 16, true, field, sub)?;
-                let x = target.origin[0];
-                let y = (target.origin[1] - parity) / step;
-                let mut samples = [0u16; 256];
-                for row in 0..side {
-                    samples[row * side..row * side + side].copy_from_slice(
-                        &source[(y + row) * stride + x..(y + row) * stride + x + side],
-                    );
-                }
-                write_samples(dest, stride, target, &samples[..side * side])?;
-                readiness.publish(address, component, [0, 0, side / 4, side / 4], field)?;
-            }
+            reconstruct_intra_macroblock(
+                &mut picture,
+                mb,
+                field,
+                sps,
+                pps,
+                &scaling,
+                &mut readiness,
+            )?;
             seen += 1;
         }
         if seen != end {
@@ -339,12 +661,13 @@ mod inter_tests {
                 for address in 0..4 {
                     for eight in [false, true] {
                         let mut p = picture(depth);
+                        let mut readiness = Readiness420::new(2, 2, true, 28).unwrap();
                         let mut c = coefficients();
                         c.luma4[0][0] = 5;
                         c.luma8[0][0] = 5;
                         c.chroma_dc[0][0] = -2;
                         c.chroma_dc[1][0] = 7;
-                        reconstruct_inter_macroblock(
+                        reconstruct_inter_macroblock_ready(
                             &mut p,
                             address,
                             field,
@@ -354,8 +677,24 @@ mod inter_tests {
                             [0; 3],
                             true,
                             &scaling,
+                            &mut readiness,
                         )
                         .unwrap();
+                        assert!(
+                            reconstruct_inter_macroblock_ready(
+                                &mut p,
+                                address,
+                                field,
+                                reference.predict([0; 2], [0; 2], [16; 2]).unwrap(),
+                                None,
+                                false,
+                                [0; 3],
+                                false,
+                                &scaling,
+                                &mut readiness
+                            )
+                            .is_err()
+                        );
                         for (component, samples, width, height, base, first) in [
                             (0, &p.y, 32usize, 32usize, 50, 55),
                             (1, &p.cb, 16usize, 16usize, 20, 18),
@@ -380,6 +719,10 @@ mod inter_tests {
                                         base
                                     };
                                     assert_eq!(
+                                        readiness.available(component, [x, y]).unwrap(),
+                                        inside
+                                    );
+                                    assert_eq!(
                                         samples[y * width + x],
                                         expected,
                                         "component {component} address {address} field {field} at {x},{y}"
@@ -400,8 +743,10 @@ mod inter_tests {
         };
         let reference =
             Reference420::new([&[50; 256], &[20; 64], &[20; 64]], 16, 16, [16, 8, 8], 8).unwrap();
-        for case in 0..5 {
+        for case in 0..6 {
             let mut p = picture(8);
+            let mut readiness =
+                Readiness420::new(if case == 5 { 1 } else { 2 }, 2, true, 28).unwrap();
             if case == 0 {
                 p.cr.pop();
             }
@@ -414,7 +759,7 @@ mod inter_tests {
                 prediction.cr[0] = 256;
             }
             assert!(
-                reconstruct_inter_macroblock(
+                reconstruct_inter_macroblock_ready(
                     &mut p,
                     if case == 2 { 4 } else { 0 },
                     true,
@@ -423,11 +768,15 @@ mod inter_tests {
                     false,
                     if case == 3 { [255; 3] } else { [0; 3] },
                     false,
-                    &scaling
+                    &scaling,
+                    &mut readiness
                 )
                 .is_err()
             );
             assert!(p.y.iter().chain(&p.cb).chain(&p.cr).all(|&v| v == 9));
+            for component in 0..3 {
+                assert!(!readiness.available(component, [0, 0]).unwrap());
+            }
         }
     }
 }
