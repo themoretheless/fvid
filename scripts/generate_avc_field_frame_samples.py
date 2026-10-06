@@ -18,14 +18,20 @@ def p_field(bottom,poc,address,motion,partial=False,mixed=False,number=1):
     b.se(0);b.ue(1);b.ue(0);b.ue(0);b.se(((8 if not bottom else -4)*(address+1)) if motion else 0);b.se((4 if not bottom else -2) if motion else 0);b.ue(0)
     return b.nal(0x41)
 
-def full_frame(paff,kind,skip,motion,number=None,poc=None):
+def full_frame(paff,kind,skip,motion,number=None,poc=None,memory_operations=()):
     is_b=kind!='p';nals=[]
     for first in range(4 if paff else 2):
         b=Writer();b.ue(first);b.ue(1 if is_b else 0);b.ue(0);b.u((2 if is_b else 1) if number is None else number,4);b.u(0);b.u((4 if is_b else 2) if poc is None else poc,4)
         if is_b:b.u(int(kind=='spatial'))
         b.u(0);b.u(0)
         if is_b:b.u(0)
-        else:b.u(0)
+        else:
+            b.u(int(bool(memory_operations)))
+            if memory_operations:
+                for opcode,values in memory_operations:
+                    b.ue(opcode)
+                    for value in values:b.ue(value)
+                b.ue(0)
         b.se(0);b.ue(1)
         for local in range(1 if paff else 2):
             if skip:

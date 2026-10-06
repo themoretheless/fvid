@@ -473,6 +473,12 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-unified-field-partial-8bit-top-motion-coded",
+            "avc-unified-field-partial-10bit-bottom-motion-skip-aso",
+            "avc-unified-field-mixed-8bit-top-motion-skip",
+            "avc-unified-field-mixed-10bit-bottom-motion-coded-aso",
+            "avc-field-frame-partial-refusal",
+            "avc-field-frame-mixed-refusal",
             "avc-field-frame-paff-8bit-top-long-p-coded-motion",
             "avc-field-frame-paff-10bit-bottom-short-temporal-coded-motion",
             "avc-field-frame-mbaff-8bit-top-long-spatial-skip-motion",
@@ -609,6 +615,9 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+            let unified = name.starts_with("avc-unified-field-");
+            let former_refusal = name == "avc-field-frame-partial-refusal"
+                || name == "avc-field-frame-mixed-refusal";
             let field_frame = name.starts_with("avc-field-frame-");
             let roundtrip = name.starts_with("avc-field-frame-roundtrip-");
             let field_frame_b = field_frame && !roundtrip && !name.contains("-p-");
@@ -643,7 +652,11 @@ mod tests {
                 || name.starts_with("avc-field-b-longterm-")
                 || name.starts_with("avc-field-b-gap-")
                 || name.starts_with("avc-field-b-cabac-sub-");
-            let count = if roundtrip {
+            let count = if unified {
+                5
+            } else if former_refusal {
+                3
+            } else if roundtrip {
                 4
             } else if field_frame_b {
                 3
@@ -693,7 +706,11 @@ mod tests {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
                     (
-                        if roundtrip {
+                        if unified {
+                            [0, 2, 4, 5, 7][calls]
+                        } else if former_refusal {
+                            [0, 2, 4][calls]
+                        } else if roundtrip {
                             [0, 2, 5, 3][calls]
                         } else if field_frame_b {
                             [0, 4, 2][calls]
@@ -714,7 +731,11 @@ mod tests {
                         } else {
                             calls * 2
                         },
-                        if roundtrip {
+                        if unified {
+                            [0, 8, 12, 14, 16][calls]
+                        } else if former_refusal {
+                            [0, 8, 12][calls]
+                        } else if roundtrip {
                             [0, 2, 4, 8][calls]
                         } else if field_frame_b {
                             [0, 4, 8][calls]
@@ -733,7 +754,11 @@ mod tests {
                         } else {
                             calls as i64 * 2
                         },
-                        if roundtrip {
+                        if unified {
+                            [8, 4, 2, 2, 1][calls]
+                        } else if former_refusal {
+                            [8, 4, 1][calls]
+                        } else if roundtrip {
                             [2, 2, 4, 2][calls]
                         } else if field_frame_b {
                             [4, 4, 2][calls]
@@ -754,7 +779,11 @@ mod tests {
                 assert_eq!(
                     (start, duration),
                     (
-                        if roundtrip {
+                        if unified {
+                            [0, 8, 12, 14, 16][calls] * 20_000_000
+                        } else if former_refusal {
+                            [0, 8, 12][calls] * 20_000_000
+                        } else if roundtrip {
                             [0, 2, 4, 8][calls] * 20_000_000
                         } else if field_frame_b {
                             [0, 4, 8][calls] * 20_000_000
@@ -773,7 +802,11 @@ mod tests {
                         } else {
                             calls as u64 * 40_000_000
                         },
-                        if roundtrip {
+                        if unified {
+                            [8, 4, 2, 2, 1][calls] * 20_000_000
+                        } else if former_refusal {
+                            [8, 4, 1][calls] * 20_000_000
+                        } else if roundtrip {
                             [2, 2, 4, 2][calls] * 20_000_000
                         } else if field_frame_b {
                             [4, 4, 2][calls] * 20_000_000

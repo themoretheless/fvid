@@ -22448,60 +22448,71 @@ fn native_field_references_to_frame_prediction_match_jm_and_seek() {
 }
 
 #[test]
-fn incomplete_and_mixed_marked_field_pairs_remain_refusal_not_acceptance() {
+fn incomplete_and_mixed_marked_fields_survive_full_frame_playback() {
     let root =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
-    for (mode, message) in [
-        (
-            "partial",
-            "AVC incomplete field reference pair requires unified frame storage",
-        ),
-        (
-            "mixed",
-            "AVC mixed field reference marking requires unified frame storage",
-        ),
-    ] {
+    for mode in ["partial", "mixed"] {
         let name = format!("avc-field-frame-{mode}-refusal");
         let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
         let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
-        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let mut input = Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
         let config = input.tracks()[0].configuration.clone();
         let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
         for _ in 0..2 {
             let mut output = 0;
-            for sample in 0..4 {
+            for sample in 0..5 {
                 let mut packet = Vec::new();
                 input.read_packet(0, sample, &mut packet).unwrap();
                 let pic = decoder
                     .decode_order(&packet)
                     .unwrap_or_else(|e| panic!("{name} sample{sample}: {e}"));
+                assert_eq!(pic.is_some(), sample == 1 || sample == 3 || sample == 4);
                 if let Some(pic) = pic {
-                    let expected = [0, 1][output];
                     let mut pixels = Vec::new();
                     pic.write_planar(&mut pixels).unwrap();
                     assert_eq!(
                         pixels,
-                        &oracle[expected * 1536..(expected + 1) * 1536],
+                        &oracle[output * 1536..(output + 1) * 1536],
                         "{name} sample{sample}"
                     );
                     output += 1;
                 }
             }
-            assert_eq!(output, 2);
-            let mut packet = Vec::new();
-            input.read_packet(0, 4, &mut packet).unwrap();
-            let error = decoder.decode_order(&packet).err().unwrap().to_string();
-            assert!(error.contains(message), "{name}: {error}");
-            assert!(
-                decoder
-                    .decode_order(&packet)
-                    .err()
-                    .unwrap()
-                    .to_string()
-                    .contains("requires reset")
-            );
+            assert_eq!(output, 3);
+            assert!(!decoder.has_pending_field());
             decoder.reset();
         }
+        let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(&video),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for _ in 0..2 {
+            for display in 0..3 {
+                let f = player.read_frame().unwrap().unwrap();
+                assert_eq!(f.sample_index, [0, 2, 4][display]);
+                assert_eq!(f.presentation_time.ticks, [0, 8, 12][display]);
+                let mut pixels = Vec::new();
+                f.picture.write_planar(&mut pixels).unwrap();
+                assert_eq!(pixels, &oracle[display * 1536..(display + 1) * 1536]);
+            }
+            assert!(player.read_frame().unwrap().is_none());
+            player.rewind();
+        }
+        assert_eq!(player.seek_to_sync(12), 0);
+        for _ in 0..2 {
+            player.read_frame().unwrap().unwrap();
+        }
+        let mut pixels = Vec::new();
+        player
+            .read_frame()
+            .unwrap()
+            .unwrap()
+            .picture
+            .write_planar(&mut pixels)
+            .unwrap();
+        assert_eq!(pixels, &oracle[3072..]);
     }
 }
 
@@ -22641,6 +22652,186 @@ fn repeated_field_frame_migration_keeps_inter_references_and_jm_pixels() {
                                         &control[2 * size..3 * size]
                                     );
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn individual_reference_fields_remain_usable_after_full_frame_marking() {
+    use fvid::codec::avc_slice::{MemoryOperation, RefModification};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for depth in [8, 10] {
+        for reverse in [false, true] {
+            for mode in ["partial", "mixed"] {
+                for motion in [false, true] {
+                    for skip in [false, true] {
+                        for aso in [false, true] {
+                            let name = format!(
+                                "avc-unified-field-{mode}-{depth}bit-{}-{}-{}{}",
+                                if reverse { "bottom" } else { "top" },
+                                if motion { "motion" } else { "zero" },
+                                if skip { "skip" } else { "coded" },
+                                if aso { "-aso" } else { "" }
+                            );
+                            let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                            let size = 1536 * if depth == 10 { 2 } else { 1 };
+                            assert_eq!(oracle.len(), 5 * size);
+                            let mut input =
+                                Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                            let config = input.tracks()[0].configuration.clone();
+                            let avc = AvcConfig::parse(&config).unwrap();
+                            let sps = Sps::parse(avc.sps[0]).unwrap();
+                            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                            let target = if mode == "partial" { !reverse } else { reverse };
+                            let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                            for _ in 0..2 {
+                                let mut output = 0;
+                                for sample in 0..8 {
+                                    let mut packet = Vec::new();
+                                    input.read_packet(0, sample, &mut packet).unwrap();
+                                    for nal in NalUnits::new(&packet, avc.length_size).unwrap() {
+                                        let h =
+                                            SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap();
+                                        assert_eq!(h.field_pic, ![4, 7].contains(&sample));
+                                        assert_eq!(h.frame_num, [0, 0, 1, 1, 2, 3, 3, 4][sample]);
+                                        if sample == 4 {
+                                            assert_eq!(
+                                                h.memory_operations,
+                                                vec![MemoryOperation::ForgetShort(
+                                                    if mode == "partial" { 0 } else { 1 }
+                                                )]
+                                            );
+                                        }
+                                        if sample == 5 || sample == 6 {
+                                            let bottom = reverse ^ (sample == 6);
+                                            assert_eq!(h.bottom_field, bottom);
+                                            assert_eq!(
+                                                h.modifications_l0,
+                                                if mode == "partial" {
+                                                    vec![RefModification::Subtract(
+                                                        5 + u32::from(bottom != target),
+                                                    )]
+                                                } else {
+                                                    vec![RefModification::LongTerm(
+                                                        2 + u32::from(bottom == target),
+                                                    )]
+                                                }
+                                            );
+                                            assert!(h.adaptive_reference_marking);
+                                            assert_eq!(
+                                                h.memory_operations,
+                                                if sample == 5 {
+                                                    if mode == "mixed" {
+                                                        vec![
+                                                            MemoryOperation::ForgetShort(1),
+                                                            MemoryOperation::ForgetShort(2),
+                                                            MemoryOperation::ForgetShort(4),
+                                                        ]
+                                                    } else {
+                                                        vec![
+                                                            MemoryOperation::ForgetShort(1),
+                                                            MemoryOperation::ForgetShort(2),
+                                                        ]
+                                                    }
+                                                } else {
+                                                    vec![]
+                                                }
+                                            );
+                                        }
+                                    }
+                                    let pic = decoder
+                                        .decode_order(&packet)
+                                        .unwrap_or_else(|e| panic!("{name} sample{sample}: {e}"));
+                                    assert_eq!(pic.is_some(), [1, 3, 4, 6, 7].contains(&sample));
+                                    if let Some(pic) = pic {
+                                        let mut pixels = Vec::new();
+                                        pic.write_planar(&mut pixels).unwrap();
+                                        assert_eq!(
+                                            pixels,
+                                            &oracle[output * size..(output + 1) * size],
+                                            "{name} sample{sample}"
+                                        );
+                                        output += 1;
+                                    }
+                                }
+                                assert_eq!(output, 5);
+                                assert!(!decoder.has_pending_field());
+                                decoder.reset();
+                            }
+                            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                                Cursor::new(&video),
+                                Default::default(),
+                                16 << 20,
+                            )
+                            .unwrap();
+                            for _ in 0..2 {
+                                for display in 0..5 {
+                                    let f = player
+                                        .read_frame()
+                                        .unwrap_or_else(|e| panic!("{name}: {e}"))
+                                        .unwrap();
+                                    assert_eq!(f.sample_index, [0, 2, 4, 5, 7][display]);
+                                    assert_eq!(
+                                        f.presentation_time.ticks,
+                                        [0, 8, 12, 14, 16][display]
+                                    );
+                                    let mut pixels = Vec::new();
+                                    f.picture.write_planar(&mut pixels).unwrap();
+                                    assert_eq!(
+                                        pixels,
+                                        &oracle[display * size..(display + 1) * size]
+                                    );
+                                }
+                                assert!(player.read_frame().unwrap().is_none());
+                                player.rewind();
+                            }
+                            assert_eq!(player.seek_to_sync(14), 0);
+                            for _ in 0..3 {
+                                player.read_frame().unwrap().unwrap();
+                            }
+                            let mut pixels = Vec::new();
+                            player
+                                .read_frame()
+                                .unwrap()
+                                .unwrap()
+                                .picture
+                                .write_planar(&mut pixels)
+                                .unwrap();
+                            assert_eq!(pixels, &oracle[3 * size..4 * size]);
+                            if motion {
+                                let control = std::fs::read(
+                                    root.join(format!("{}.yuv", name.replace("-motion", "-zero"))),
+                                )
+                                .unwrap();
+                                assert_eq!(&oracle[..size], &control[..size]);
+                                assert_ne!(&oracle[size..2 * size], &control[size..2 * size]);
+                                if mode == "partial" {
+                                    assert_eq!(
+                                        &oracle[3 * size..4 * size],
+                                        &control[3 * size..4 * size],
+                                        "retained I field is independent of intervening P motion"
+                                    );
+                                } else {
+                                    assert_ne!(
+                                        &oracle[3 * size..4 * size],
+                                        &control[3 * size..4 * size],
+                                        "retained long P field carries source motion"
+                                    );
+                                }
+                            }
+                            if aso {
+                                let control = std::fs::read(
+                                    root.join(format!("{}.yuv", name.trim_end_matches("-aso"))),
+                                )
+                                .unwrap();
+                                assert_eq!(oracle, control);
                             }
                         }
                     }

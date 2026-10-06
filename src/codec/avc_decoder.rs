@@ -50,6 +50,7 @@ pub struct AvcDecoder {
     poc: PocDecoder,
     dpb: Option<ReferenceBuffer<DecodedReferencePicture>>,
     field_dpb: Option<super::avc_field_dpb::FieldBuffer<DecodedReferenceField>>,
+    frame_field_dpb: Option<super::avc_field_dpb::FieldBuffer<DecodedReferenceField>>,
     pending_field: Option<(Arc<super::avc_field_picture::PcmField>, i32)>,
     field_pair_output: bool,
     active_sps: Option<u32>,
@@ -59,6 +60,49 @@ pub struct AvcDecoder {
     failed: bool,
 }
 impl AvcDecoder {
+    fn reference_pair_frame(
+        top: &Arc<DecodedReferenceField>,
+        bottom: &Arc<DecodedReferenceField>,
+        field_order: FieldOrder,
+        w: u32,
+        h: u32,
+        motion_bytes: usize,
+    ) -> Result<Arc<DecodedReferencePicture>> {
+        let full = (w as usize)
+            .checked_mul(h as usize)
+            .and_then(|n| n.checked_mul(3))
+            .ok_or_else(|| invalid("AVC frame view geometry overflow"))?;
+        let motion = if top.motion_is_frame && bottom.motion_is_frame {
+            match (&top.motion, &bottom.motion) {
+                (Some(a), Some(b)) if Arc::ptr_eq(a, b) => Some(Arc::clone(a)),
+                (None, None) => None,
+                _ => return Err(invalid("inconsistent migrated AVC frame motion")),
+            }
+        } else if !top.motion_is_frame && !bottom.motion_is_frame {
+            if top.motion.is_none() && bottom.motion.is_none() {
+                None
+            } else {
+                Some(Arc::new(ReferenceMotionField::weave_fields(
+                    top.motion.as_deref(),
+                    bottom.motion.as_deref(),
+                    w as usize,
+                    h as usize,
+                    motion_bytes,
+                )?))
+            }
+        } else {
+            return Err(invalid("inconsistent complementary AVC motion origins"));
+        };
+        Ok(Arc::new(DecodedReferencePicture {
+            picture: Arc::new(super::avc_field_picture::weave_pair(
+                &top.field,
+                &bottom.field,
+                full,
+            )?),
+            motion,
+            field_order,
+        }))
+    }
     pub fn new(configuration: &[u8], budget: usize) -> Result<Self> {
         let config = AvcConfig::parse(configuration)?;
         let sets: Vec<_> = config
@@ -101,6 +145,7 @@ impl AvcDecoder {
             poc: PocDecoder::new(),
             dpb: None,
             field_dpb: None,
+            frame_field_dpb: None,
             pending_field: None,
             field_pair_output: false,
             active_sps: None,
@@ -132,6 +177,7 @@ impl AvcDecoder {
         self.poc = PocDecoder::new();
         self.dpb = None;
         self.field_dpb = None;
+        self.frame_field_dpb = None;
         self.pending_field = None;
         self.field_pair_output = false;
         self.active_sps = None;
@@ -601,6 +647,10 @@ impl AvcDecoder {
             return Err(invalid("AVC stream/configuration change requires IDR"));
         }
         if header.field_pic {
+            if let Some(canonical) = self.frame_field_dpb.take() {
+                self.field_dpb = Some(canonical);
+                self.dpb = None;
+            }
             let sps = sps.clone();
             let pps = pps.clone();
             return self.decode_fields(
@@ -609,6 +659,22 @@ impl AvcDecoder {
                 &pps,
                 allow_reordering,
             );
+        }
+        if self.pending_field.is_some() {
+            return Err(crate::unsupported(
+                "unpaired AVC field before frame picture",
+            ));
+        }
+        if !header.idr
+            && self
+                .field_dpb
+                .as_ref()
+                .is_some_and(|b| b.has_frame_ineligible_stores())
+        {
+            self.frame_field_dpb = self.field_dpb.take();
+        }
+        if header.idr {
+            self.frame_field_dpb = None;
         }
         if self.field_dpb.is_some() {
             if self.pending_field.is_some() {
@@ -634,36 +700,7 @@ impl AvcDecoder {
                 }
                 let fields = self.field_dpb.take().unwrap();
                 self.dpb = Some(fields.into_frames(|top, bottom, field_order| {
-                    let motion = if top.motion_is_frame && bottom.motion_is_frame {
-                        match (&top.motion, &bottom.motion) {
-                            (Some(a), Some(b)) if Arc::ptr_eq(a, b) => Some(Arc::clone(a)),
-                            (None, None) => None,
-                            _ => return Err(invalid("inconsistent migrated AVC frame motion")),
-                        }
-                    } else if !top.motion_is_frame && !bottom.motion_is_frame {
-                        if top.motion.is_none() && bottom.motion.is_none() {
-                            None
-                        } else {
-                            Some(Arc::new(ReferenceMotionField::weave_fields(
-                                top.motion.as_deref(),
-                                bottom.motion.as_deref(),
-                                w as usize,
-                                h as usize,
-                                motion_bytes,
-                            )?))
-                        }
-                    } else {
-                        return Err(invalid("inconsistent complementary AVC motion origins"));
-                    };
-                    Ok(Arc::new(DecodedReferencePicture {
-                        picture: Arc::new(super::avc_field_picture::weave_pair(
-                            &top.field,
-                            &bottom.field,
-                            full,
-                        )?),
-                        motion,
-                        field_order,
-                    }))
+                    Self::reference_pair_frame(top, bottom, field_order, w, h, motion_bytes)
                 })?);
             } else {
                 self.field_dpb = None;
@@ -677,18 +714,25 @@ impl AvcDecoder {
                 if !sps.gaps_allowed {
                     return Err(invalid("AVC frame-number gap forbidden by SPS"));
                 }
-                let buffer = self
-                    .dpb
-                    .as_mut()
-                    .ok_or_else(|| invalid("AVC gap requires initialized DPB"))?;
                 let mut missing = (previous + 1) % maximum;
                 while missing != header.frame_num {
                     let order = self.poc.infer_nonexisting(sps, missing)?;
-                    buffer.infer_nonexisting_fields(
-                        missing,
-                        order.map(|p| p.after_marking),
-                        self.next_id,
-                    )?;
+                    if let Some(canonical) = self.frame_field_dpb.as_mut() {
+                        canonical.infer_nonexisting_fields(
+                            missing,
+                            order.map(|p| p.after_marking),
+                            self.next_id,
+                        )?;
+                    } else {
+                        self.dpb
+                            .as_mut()
+                            .ok_or_else(|| invalid("AVC gap requires initialized DPB"))?
+                            .infer_nonexisting_fields(
+                                missing,
+                                order.map(|p| p.after_marking),
+                                self.next_id,
+                            )?;
+                    }
                     self.next_id = self
                         .next_id
                         .checked_add(1)
@@ -706,10 +750,23 @@ impl AvcDecoder {
             .and_then(|n| n.checked_add(motion_bytes))
             .and_then(|n| n.checked_mul(sps.max_num_ref_frames.max(1) as usize))
             .ok_or_else(|| invalid("AVC reference memory overflow"))?;
+        let reference_bytes = if self.frame_field_dpb.is_some() {
+            reference_bytes
+                .checked_mul(2)
+                .ok_or_else(|| invalid("canonical AVC frame view memory overflow"))?
+        } else {
+            reference_bytes
+        };
         let scratch_budget = self
             .budget
             .checked_sub(reference_bytes)
             .ok_or_else(|| invalid("AVC references exceed decoder memory budget"))?;
+        if let Some(canonical) = self.frame_field_dpb.as_ref() {
+            self.dpb =
+                Some(canonical.frame_view(|a, b, o| {
+                    Self::reference_pair_frame(a, b, o, w, h, motion_bytes)
+                })?);
+        }
         let order = self.poc.decode(sps, &header)?;
         if header.idr {
             self.dpb = Some(ReferenceBuffer::new(
@@ -916,16 +973,62 @@ impl AvcDecoder {
             _ => unreachable!(),
         };
         let picture = Arc::new(picture);
-        buffer.finish(
-            &header,
-            order.after_marking.picture(),
-            self.next_id,
-            Arc::new(DecodedReferencePicture {
-                picture: picture.clone(),
-                motion: motion.map(Arc::new),
-                field_order: order.after_marking,
-            }),
-        )?;
+        if let Some(canonical) = self.frame_field_dpb.as_mut() {
+            self.dpb = None; // release temporary woven reference views first
+            let motion = motion.map(Arc::new);
+            let retained = if header.nal_ref_idc != 0 {
+                let number = if header
+                    .memory_operations
+                    .iter()
+                    .any(|o| matches!(o, MemoryOperation::Reset))
+                {
+                    0
+                } else {
+                    header.frame_num
+                };
+                let full = (w as usize)
+                    .checked_mul(h as usize)
+                    .and_then(|n| n.checked_mul(3))
+                    .ok_or_else(|| invalid("canonical AVC frame geometry overflow"))?;
+                Some(
+                    [false, true]
+                        .map(|bottom| {
+                            super::avc_field_picture::split_frame(
+                                &picture,
+                                bottom,
+                                number,
+                                header.pps_id,
+                                full / 2,
+                            )
+                            .map(|field| {
+                                Arc::new(DecodedReferenceField {
+                                    field: Arc::new(field),
+                                    motion: motion.clone(),
+                                    motion_is_frame: true,
+                                })
+                            })
+                        })
+                        .into_iter()
+                        .collect::<Result<Vec<_>>>()?
+                        .try_into()
+                        .map_err(|_| invalid("canonical AVC field pair missing"))?,
+                )
+            } else {
+                None
+            };
+            canonical.finish_frame(header, order.after_marking, self.next_id, retained)?;
+        } else {
+            buffer.finish(
+                &header,
+                order.after_marking.picture(),
+                self.next_id,
+                Arc::new(DecodedReferencePicture {
+                    picture: picture.clone(),
+                    motion: motion.map(Arc::new),
+                    field_order: order.after_marking,
+                }),
+            )?;
+        }
         self.next_id = self
             .next_id
             .checked_add(1)
@@ -970,6 +1073,105 @@ mod tests {
             data.extend_from_slice(nal);
         }
         data
+    }
+    #[test]
+    fn canonical_fields_keep_identity_through_frame_views_and_real_later_prediction() {
+        use crate::container::mp4::Mp4Reader;
+        use std::io::Cursor;
+        for (video, number, bottom, long) in [
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-unified-field-partial-8bit-top-motion-coded.mp4"
+                )[..],
+                0,
+                true,
+                false,
+            ),
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-unified-field-partial-10bit-bottom-motion-skip-aso.mp4"
+                )[..],
+                0,
+                false,
+                false,
+            ),
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-unified-field-mixed-8bit-top-motion-skip.mp4"
+                )[..],
+                1,
+                false,
+                true,
+            ),
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-unified-field-mixed-10bit-bottom-motion-coded-aso.mp4"
+                )[..],
+                1,
+                true,
+                true,
+            ),
+        ] {
+            let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+            let config = input.tracks()[0].configuration.clone();
+            let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+            for sample in 0..4 {
+                let mut packet = Vec::new();
+                input.read_packet(0, sample, &mut packet).unwrap();
+                decoder.decode_order(&packet).unwrap();
+            }
+            let owner = decoder.field_dpb.as_ref().unwrap();
+            let target = owner
+                .references()
+                .into_iter()
+                .find(|r| r.frame_num == number)
+                .unwrap();
+            let weak = Arc::downgrade(owner.get(target.id, bottom).unwrap());
+            let order = owner.order(target.id, bottom).unwrap();
+            assert_eq!(order.1, long);
+            let mut packet = Vec::new();
+            input.read_packet(0, 4, &mut packet).unwrap();
+            assert!(decoder.decode_order(&packet).unwrap().is_some());
+            assert!(decoder.dpb.is_none());
+            assert!(decoder.field_dpb.is_none());
+            let owner = decoder.frame_field_dpb.as_ref().unwrap();
+            assert_eq!(owner.order(target.id, bottom), Some(order));
+            assert!(weak.ptr_eq(&Arc::downgrade(owner.get(target.id, bottom).unwrap())));
+            for sample in 5..7 {
+                input.read_packet(0, sample, &mut packet).unwrap();
+                decoder.decode_order(&packet).unwrap();
+            }
+            let owner = decoder.field_dpb.as_ref().unwrap();
+            assert_eq!(owner.order(target.id, bottom), Some(order));
+            let current = owner
+                .references()
+                .into_iter()
+                .find(|r| r.frame_num == 3)
+                .unwrap();
+            for parity in [false, true] {
+                let cell = owner
+                    .get(current.id, parity)
+                    .unwrap()
+                    .motion
+                    .as_ref()
+                    .unwrap()
+                    .colocated([0, 0])
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(
+                    (cell.picture_id, cell.reference_bottom_field, cell.vector),
+                    (target.id, Some(bottom), [0, 0])
+                );
+            }
+            input.read_packet(0, 7, &mut packet).unwrap();
+            assert!(decoder.decode_order(&packet).unwrap().is_some());
+            let owner = decoder.frame_field_dpb.as_ref().unwrap();
+            assert_eq!(owner.order(target.id, bottom), Some(order));
+            assert!(weak.upgrade().is_some());
+            decoder.reset();
+            assert!(weak.upgrade().is_none());
+            assert!(decoder.frame_field_dpb.is_none());
+        }
     }
     #[test]
     fn native_field_migration_keeps_marking_motion_and_releases_old_stores() {
