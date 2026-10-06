@@ -29,6 +29,7 @@ pub struct Decoder {
     hdr: HdrMetadata,
     budget: usize,
     failed: bool,
+    previous_frame_id: Option<u32>,
 }
 impl Decoder {
     pub fn new(budget: usize) -> Self {
@@ -44,6 +45,7 @@ impl Decoder {
             hdr: HdrMetadata::default(),
             budget,
             failed: false,
+            previous_frame_id: None,
         }
     }
     /// Seed configuration OBUs before decoding access units. Reset retains the
@@ -113,6 +115,7 @@ impl Decoder {
                         ));
                     }
                     if self.sequence.as_ref().is_some_and(|s| s != &sequence) {
+                        self.previous_frame_id = None;
                         self.references.fill(None);
                         self.showable.fill(false);
                         self.headers.fill(None);
@@ -181,6 +184,8 @@ impl Decoder {
                             .ok_or_else(|| invalid("missing AV1 reference"))?;
                         decoded.show = true;
                         if self.reference_types[index] == 0 {
+                            self.previous_frame_id =
+                                self.headers[index].as_ref().and_then(|h| h.frame_id);
                             self.references.fill(Some(decoded.clone()));
                             let header = self.headers[index].clone();
                             self.headers.fill(header);
@@ -204,6 +209,17 @@ impl Decoder {
                             obu.spatial_id,
                             &headers,
                         )?;
+                        if let (Some(previous), Some(current), Some((_, bits))) =
+                            (self.previous_frame_id, h.frame_id, s.frame_id_bits)
+                        {
+                            let modulus = 1u32 << bits;
+                            let distance = (current + modulus - previous) % modulus;
+                            if (h.frame_type != 0 || !h.show)
+                                && (distance == 0 || distance >= modulus / 2)
+                            {
+                                return Err(invalid("AV1 invalid current frame ID progression"));
+                            }
+                        }
                         let initial = if h.primary_reference == 7 {
                             None
                         } else {
@@ -257,6 +273,7 @@ impl Decoder {
                             color: s.color.clone(),
                             show: h.show,
                         };
+                        self.previous_frame_id = h.frame_id;
                         if let (Some(current), Some((delta_bits, id_bits))) =
                             (h.frame_id, s.frame_id_bits)
                         {
@@ -306,6 +323,135 @@ impl Decoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn inter_frame_ids_decode_owned_reference_windows() {
+        for (name, data) in [
+            (
+                "av1-inter-id-next-slot0.obu",
+                &include_bytes!("../../tests/fixtures/playback-errors/av1-inter-id-next-slot0.obu")
+                    [..],
+            ),
+            (
+                "av1-inter-id-next-slot7.obu",
+                &include_bytes!("../../tests/fixtures/playback-errors/av1-inter-id-next-slot7.obu")
+                    [..],
+            ),
+            (
+                "av1-inter-id-edge-slot0.obu",
+                &include_bytes!("../../tests/fixtures/playback-errors/av1-inter-id-edge-slot0.obu")
+                    [..],
+            ),
+            (
+                "av1-inter-id-edge-slot7.obu",
+                &include_bytes!("../../tests/fixtures/playback-errors/av1-inter-id-edge-slot7.obu")
+                    [..],
+            ),
+            (
+                "av1-inter-id-wrap-slot0.obu",
+                &include_bytes!("../../tests/fixtures/playback-errors/av1-inter-id-wrap-slot0.obu")
+                    [..],
+            ),
+            (
+                "av1-inter-id-wrap-slot7.obu",
+                &include_bytes!("../../tests/fixtures/playback-errors/av1-inter-id-wrap-slot7.obu")
+                    [..],
+            ),
+        ] {
+            let mut decoder = Decoder::new(8 << 20);
+            for _ in 0..2 {
+                let frames = decoder
+                    .decode_packet(data)
+                    .unwrap_or_else(|e| panic!("{name}: {e}"));
+                assert_eq!(frames.len(), 2);
+                assert!(!frames[0].show);
+                assert!(frames[1].show);
+                for frame in &frames {
+                    assert_flat(frame);
+                }
+                decoder.reset();
+            }
+        }
+    }
+    #[test]
+    fn inter_frame_ids_reject_each_mismatched_reference_and_require_reset() {
+        for (name, data) in [
+            (
+                "av1-inter-id-invalid-reference0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference0.obu"
+                )[..],
+            ),
+            (
+                "av1-inter-id-invalid-reference1.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference1.obu"
+                )[..],
+            ),
+            (
+                "av1-inter-id-invalid-reference2.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference2.obu"
+                )[..],
+            ),
+            (
+                "av1-inter-id-invalid-reference3.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference3.obu"
+                )[..],
+            ),
+            (
+                "av1-inter-id-invalid-reference4.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference4.obu"
+                )[..],
+            ),
+            (
+                "av1-inter-id-invalid-reference5.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference5.obu"
+                )[..],
+            ),
+            (
+                "av1-inter-id-invalid-reference6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-inter-id-invalid-reference6.obu"
+                )[..],
+            ),
+        ] {
+            let mut decoder = Decoder::new(8 << 20);
+            for _ in 0..2 {
+                let mut offset = 0;
+                let mut end = 0;
+                for obu in Obus::new(data) {
+                    let obu = obu.unwrap();
+                    offset = end;
+                    end =
+                        obu.payload.as_ptr() as usize - data.as_ptr() as usize + obu.payload.len();
+                }
+                let prefix = decoder.decode_packet(&data[..offset]).unwrap();
+                assert_eq!(prefix.len(), 1);
+                assert_flat(&prefix[0]);
+                assert!(!prefix[0].show);
+                let error = decoder.decode_packet(&data[offset..]).err().unwrap();
+                assert!(
+                    error
+                        .to_string()
+                        .contains("AV1 inter reference frame ID mismatch"),
+                    "{name}: {error}"
+                );
+                assert!(
+                    decoder
+                        .decode_packet(&data[offset..])
+                        .err()
+                        .unwrap()
+                        .to_string()
+                        .contains("requires reset")
+                );
+                decoder.reset();
+            }
+        }
+    }
     fn assert_flat(frame: &Decoded) {
         assert_eq!(frame.picture.size, [32, 32]);
         assert_eq!(frame.picture.depth, 8);

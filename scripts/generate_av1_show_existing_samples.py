@@ -16,7 +16,7 @@ def leb(n):
         if not n:return bytes(out)
 def obu(kind,payload):return bytes([(kind<<3)|2])+leb(len(payload))+payload
 
-def sequence(ids,model,equal,width=5):
+def sequence(ids,model,equal,width=5,delta_bits=2):
     b=Bits();b.u(0,3);b.u(0);b.u(0);b.u(int(model))
     if model:
         b.u(1,32);b.u(30,32);b.u(int(equal))
@@ -25,7 +25,7 @@ def sequence(ids,model,equal,width=5):
     b.u(0);b.u(0,5);b.u(0,12);b.u(0,5)
     if model:b.u(0)
     b.u(4,4);b.u(4,4);b.u(31,5);b.u(31,5);b.u(int(ids))
-    if ids:b.u(0,4);b.u(width-3,3)
+    if ids:b.u(delta_bits-2,4);b.u(width-delta_bits-1,3)
     # 64x64 superblocks, no filter intra, intra edge filter; no inter tools.
     for value in [0,0,1,0,0,0,0,0,0,0,0,0,0]:b.u(value)
     # 8-bit non-monochrome, unspecified colour, limited range, 4:2:0.

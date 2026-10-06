@@ -15,11 +15,13 @@ int main(int argc, char **argv) {
   int filters=argc>7?atoi(argv[7]):0;
   int tilecols=argc>8?atoi(argv[8]):0;
   int inter=argc>9?atoi(argv[9]):0;
+  int id_reference_mode=argc>10?atoi(argv[10]):0;
   aom_codec_enc_cfg_t cfg;
   check(aom_codec_enc_config_default(aom_codec_av1_cx(), &cfg, AOM_USAGE_GOOD_QUALITY));
   cfg.g_w=size; cfg.g_h=size; cfg.g_timebase.num=1; cfg.g_timebase.den=3;
   cfg.g_threads=1; cfg.g_lag_in_frames=0; cfg.rc_end_usage=AOM_Q;
   cfg.rc_min_quantizer=q; cfg.rc_max_quantizer=q; cfg.kf_max_dist=inter?100:1;
+  if(id_reference_mode) cfg.kf_mode=AOM_KF_DISABLED;
   cfg.g_bit_depth=depth;cfg.g_input_bit_depth=depth;cfg.g_profile=depth==12?2:0;
   aom_codec_ctx_t ctx;
   check(aom_codec_enc_init(&ctx,aom_codec_av1_cx(),&cfg,depth>8?AOM_CODEC_USE_HIGHBITDEPTH:0));
@@ -37,6 +39,11 @@ int main(int argc, char **argv) {
   check(aom_codec_control(&ctx,AV1E_SET_ENABLE_CFL_INTRA,full));
   check(aom_codec_control(&ctx,AV1E_SET_ENABLE_FILTER_INTRA,full));
   check(aom_codec_control(&ctx,AV1E_SET_TILE_COLUMNS,tilecols));
+  if(id_reference_mode) {
+    check(aom_codec_control(&ctx,AV1E_SET_ENABLE_ORDER_HINT,0));
+    check(aom_codec_control(&ctx,AV1E_SET_CDF_UPDATE_MODE,0u));
+    check(aom_codec_control(&ctx,AV1E_SET_ERROR_RESILIENT_MODE,1));
+  }
   if(inter) {
     check(aom_codec_control(&ctx,AV1E_SET_ENABLE_REF_FRAME_MVS,0));
     check(aom_codec_control(&ctx,AV1E_SET_ENABLE_GLOBAL_MOTION,0));

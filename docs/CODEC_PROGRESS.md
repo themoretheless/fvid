@@ -3427,10 +3427,30 @@ The first temporal draft removed part of the co-located source's reference pair,
 Native AV1 now accepts show-existing presentation timestamps and display frame
 IDs for hidden key/intra-only references. Stored IDs are validated and stale
 references are invalidated at the normative ID window, including wraparound.
-Inter frame IDs remain unsupported; this is not full AV1 conformance.
+At that milestone inter frame IDs remained unsupported; see the update below.
+This is not full AV1 conformance.
 
 26 owned OBU acceptance fixtures were independently decoded by libaom; seven
 malformed streams assert specific refusals and reset behavior. The original
 decoder reproduced the timing/frame-ID unsupported error on the valid fixture.
 24 WebM variants verify native pixels, relative display timing, rewind and seek.
 Ordinary tests are offline and require neither FFmpeg nor libaom.
+
+## AV1 inter-frame IDs (2026-10-07)
+
+Native inter headers now read each of the seven reference-ID deltas and validate
+the expected stored ID modulo the declared width. The decoder also validates
+current-ID progression against the previous decoded frame, resets that state
+on sequence changes and decoder reset, and restores it for shown existing keys.
+
+175 owned acceptance streams (six slot/window cases plus shown-key ID restoration and 168 crossings of all
+84 legal delta/ID-width combinations at the reference-window edge and wrap)
+passed native decoding and independent libaom flat-pixel validation. Seven
+specific reference mismatch refusals and three current-ID progression refusals
+are permanent regressions. Tests exercise reset and repeat decoding offline.
+The pre-fix parser reproduces `AV1 inter frame IDs not implemented` on the
+accepted next-ID fixture. Current-ID malformed fixtures are independently
+refused by libaom. The pre-fix native decoder accepted the repeated-ID malformed
+stream; its new refusal regression failed on the old decoder and passes after
+the fix. Short reference signaling, nonidentity global motion, film
+grain, layered operating points and separate header/tile groups remain gaps.

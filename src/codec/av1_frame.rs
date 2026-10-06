@@ -167,9 +167,6 @@ impl Header {
         let mut references = [0usize; 7];
         let mut found_ref = None;
         if !intra {
-            if s.frame_id_bits.is_some() {
-                return Err(crate::unsupported("AV1 inter frame IDs not implemented"));
-            }
             if s.order_hint_bits > 0 && b.bit()? {
                 return Err(crate::unsupported(
                     "AV1 short reference signaling not implemented",
@@ -179,6 +176,14 @@ impl Header {
                 *index = b.read(3)? as usize;
                 if refs[*index].is_none() {
                     return Err(invalid("AV1 inter frame references missing picture"));
+                }
+                if let Some((delta_bits, id_bits)) = s.frame_id_bits {
+                    let delta = b.read(delta_bits)? + 1;
+                    let expected =
+                        (frame_id.unwrap() + (1u32 << id_bits) - delta) % (1u32 << id_bits);
+                    if refs[*index].and_then(|reference| reference.frame_id) != Some(expected) {
+                        return Err(invalid("AV1 inter reference frame ID mismatch"));
+                    }
                 }
             }
             if override_size && !error_resilient {

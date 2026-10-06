@@ -1152,3 +1152,20 @@ For optional independent reference validation, compile
 with `--oracle`; this reference helper is not used by ordinary tests.
 Acceptance checks flat reconstructed pixels, timing, rewind and seek; refusal
 checks truncated metadata, invalid IDs, trailing bits and OBU kind.
+
+### AV1 inter-frame IDs
+
+`python3 scripts/generate_av1_inter_id_samples.py` writes 175 owned flat
+acceptance OBU streams and ten malformed refusals with a hash manifest.
+It covers every legal delta/ID-width combination, exact reference-window edges,
+modular wrap, both boundary reference slots, each of the seven bad deltas,
+repeated current IDs, half-modulus jumps and backward progression.
+`--oracle` optionally uses the independent libaom helper described above.
+Ordinary native regression tests do not generate fixtures or invoke an oracle.
+
+The owned flat inter entropy can be independently regenerated with the existing
+libaom reference helper `scripts/av1_fixture.c`: run the compiled helper with
+`32 0 0 0 4 8 0 0 1 1`. Its third coded frame has tile bytes `8c 70`.
+The final argument selects reference-ID generation with disabled order hints
+and CDF updates, error resilience and disabled automatic keyframe placement.
+This optional reference generation is separate from the pure-Python fixtures.
