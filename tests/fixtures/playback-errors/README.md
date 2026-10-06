@@ -1218,3 +1218,16 @@ The acceptance matrix covers negative/positive ALT_Q and clipping at 0/255;
 all 25 shown pictures are compared pixel by pixel, including nonzero residuals.
 The old flat active-ALT_Q gap fixture now accepts. Map-update streams remain
 explicit unsupported-behavior reproductions until map decoding is implemented.
+
+## AV1 active ALT_LF
+
+`generate_av1_alt_lf_samples.py` writes 82 owned OBU streams using the committed
+owned ALT_Q entropy templates. The manifest records hashes for streams and
+saved independent YUV references; ten cases also have WebM variants. Optional
+`--oracle` points to the separately compiled libaom reference helper. Ordinary
+`av1_alt_lf` tests execute neither the generator nor an external decoder.
+
+Acceptance checks exact pixels, reset, WebM timestamps, rewind and sync seek.
+The matrix covers all four segment-zero ALT_LF features, signed clipping,
+reference/mode deltas, level-32 scaling and nominal zero plane levels. It uses
+unchanged implicit zero maps; updated segment maps remain unsupported.

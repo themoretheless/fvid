@@ -6,7 +6,7 @@ use super::{
     av1_symbol::SymbolDecoder,
     vp9_transform::{self, Kind},
 };
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 #[path = "av1_picture_inter.rs"]
 mod inter;
 
@@ -120,11 +120,13 @@ pub(crate) fn decode(
     }
     // Every admitted picture currently has an implicit all-zero segment map.
     // Inheriting it consumes no tile symbols. Features in unused segments are
-    // retained as metadata. ALT_Q is applied below; the remaining active
-    // segment-zero tools still fail explicitly.
-    if h.segments[0].iter().enumerate().any(|(feature, value)| {
-        value.is_some_and(|value| feature != 0 && (feature >= 5 || value != 0))
-    }) {
+    // retained as metadata. ALT_Q and ALT_LF are applied below; forced
+    // reference/skip/global features still fail explicitly.
+    if h.segments[0]
+        .iter()
+        .enumerate()
+        .any(|(feature, value)| value.is_some() && feature >= 5)
+    {
         return Err(crate::unsupported(
             "AV1 active segmentation features not implemented",
         ));
@@ -837,10 +839,13 @@ impl Decoder<'_> {
     fn filter(&mut self) {
         for pass in 0..2 {
             for p in 0..if self.s.color.monochrome { 1 } else { 3 } {
-                let base = i32::from(self.h.filter.levels[if p == 0 { pass } else { p + 1 }]);
+                let filter_index = if p == 0 { pass } else { p + 1 };
+                let base = i32::from(self.h.filter.levels[filter_index]);
                 if (p > 0 && base == 0) || (p == 0 && self.h.filter.levels[..2] == [0, 0]) {
                     continue;
                 }
+                let segment_level =
+                    (base + self.h.segments[0][1 + filter_index].unwrap_or(0)).clamp(0, 63);
                 let sub = usize::from(p > 0);
                 let plane = &mut self.image.planes[p];
                 let stride = plane.width / 4;
@@ -869,7 +874,7 @@ impl Decoder<'_> {
                         }
                         let strength = |b: Block| {
                             if !self.h.filter.deltas_enabled {
-                                return base;
+                                return segment_level;
                             }
                             let mode = usize::from(b.mode >= 13 && b.mode != 15);
                             let delta = self.h.filter.reference_deltas[b.reference]
@@ -878,7 +883,7 @@ impl Decoder<'_> {
                                 } else {
                                     0
                                 };
-                            (base + (delta << (base >> 5))).clamp(0, 63)
+                            (segment_level + (delta << (segment_level >> 5))).clamp(0, 63)
                         };
                         let mut level = strength(block);
                         if level == 0 {

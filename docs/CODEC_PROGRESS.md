@@ -3519,9 +3519,8 @@ transform-pool/HEVC drafts via an isolated copy of main plus these changes.
 
 The native decoder now applies segment-zero ALT_Q to the current qindex, clips
 the result to 0–255 and then applies plane DC/AC deltas. The existing lossless
-array selects the corresponding transform path. Nonzero active filter deltas
-and forced reference/skip/global features still return explicit errors, as do
-updated segment maps. This is another step toward full segmentation, not a
+array selects the corresponding transform path. Forced reference/skip/global features still return explicit errors, as do
+updated segment maps. Active filter deltas are covered by the next milestone. This is another step toward full segmentation, not a
 claim of complete segmentation or AV1 conformance.
 
 25 owned streams with nonzero residuals compare every reconstructed shown pixel
@@ -3541,3 +3540,24 @@ passes. 35 AV1 unit tests and five root integration suites pass offline without
 FFmpeg or external codec execution. Root verification isolates these changes
 from parallel unfinished HEVC drafts. Maps and the remaining segment features
 still need implementation and their own acceptance coverage.
+
+## AV1 segment-zero ALT_LF acceptance
+
+All four ALT_LF features now adjust segment-zero loop-filter strengths, with
+signed addition and clipping before reference/mode deltas. The delta scale
+uses the adjusted level. Nominal plane-enable rules remain in effect. This
+currently covers inherited implicit all-zero segment maps only. Updated maps,
+forced reference/skip/global features and per-superblock delta-LF remain gaps.
+
+82 owned synthetic streams compare every shown pixel against saved independent
+libaom output, including signed limits, clipping, the level-32 threshold,
+reference/mode deltas and nominal zero levels. Ten WebM variants verify pixels,
+timing, rewind and sync seek. All fixtures are generated separately; ordinary
+tests run offline without FFmpeg or libaom. The old decoder fails with the
+specific active-feature refusal. Removing only the ALT_LF adjustment causes
+a pixel mismatch on av1-alt-lf-f1-d-64-refmode0.obu. Restoring it passes.
+
+35 AV1 core tests and 15 tests across six root AV1 integration suites passed.
+Compound GLOBAL_GLOBALMV mode classification remains a source-audit lead
+requiring its own synthetic reproducer and qualification; these results do
+not claim complete compound filtering or AV1 conformance.

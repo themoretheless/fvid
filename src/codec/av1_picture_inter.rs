@@ -420,7 +420,11 @@ impl Decoder<'_> {
                     5
                 }
             } else if bit(2, &[1, 2], &[3, 4])? {
-                if bit(4, &[3], &[4])? { 4 } else { 3 }
+                if bit(4, &[3], &[4])? {
+                    4
+                } else {
+                    3
+                }
             } else if bit(3, &[1], &[2])? {
                 2
             } else {
