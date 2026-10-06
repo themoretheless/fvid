@@ -3591,8 +3591,32 @@ reproduces the specific map-update refusal on the new valid nonzero-map input.
 Changing dequantization back to segment zero causes an independent pixel
 mismatch on av1-seg-map-n2-q1-lf0.obu; restoring it passes.
 
-35 AV1 core tests and 18 tests across seven root AV1 suites passed. These
-fixtures use disabled CDF adaptation and one tile, so adaptive/multitile map
-qualification, mixed lossless/lossy segments, forced segment tools, delta-LF
+35 AV1 core tests and 18 tests across seven root AV1 suites passed. At this stage these
+fixtures used disabled CDF adaptation and one tile; adaptive qualification
+is covered below. Multitile map qualification, mixed lossless/lossy segments,
+forced segment tools, delta-LF
 and the other documented AV1 tools remain to qualify or implement. This
 milestone does not establish complete AV1 or cross-codec conformance.
+
+## AV1 adaptive segmentation CDFs and reference publication
+
+The map matrix now has 144 owned OBU/YUV/WebM triples: the original 48
+nonadaptive inputs, 48 with tile CDF adaptation and disabled frame-end CDF
+publication, and 48 with both adaptation and reference publication. Header
+assertions verify that these are the actual encoded modes. All 864 shown
+pictures and all decoded segment maps match the saved independent oracle.
+Adaptive and reference-publication variants preserve the same pixels/maps
+as their corresponding nonadaptive inputs, and all original fixture hashes
+remain unchanged. Tests run offline without external codec tools.
+
+The owned symbol records now identify the CDF table and context for each
+adaptive read. The Python generator independently tracks distributions,
+adaptation counts and primary-reference count resets; only the standalone
+fixture range writer and pixel oracle use optional libaom during generation.
+This qualifies the existing native adaptive decoder and CDF-reference state
+without introducing an external codec into production. Discarding updates
+only to SEGMENT_ID/SEGMENT_ID_PREDICTED CDFs reproduces a failure on the valid
+av1-seg-map-n1-q0-lf0-adapt.obu stream. Restoring accumulation passes the
+complete matrix. All 19 tests in seven root AV1 suites passed offline.
+Multitile and mixed lossless/lossy maps, forced segment tools
+and the other codec gaps remain separate implementation/qualification work.

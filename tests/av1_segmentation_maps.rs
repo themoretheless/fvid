@@ -11,7 +11,9 @@ fn manifest() -> serde_json::Value {
 fn explicit_temporal_and_inherited_segment_maps_match_independent_pixels() {
     let m = manifest();
     let records = m["fixtures"].as_array().unwrap();
-    assert_eq!(records.len(), 48);
+    assert_eq!(records.len(), 144);
+    assert_eq!(records.iter().filter(|r| r["adaptive"] == true).count(), 96);
+    assert_eq!(records.iter().filter(|r| r["publish"] == true).count(), 48);
     for r in records {
         let name = r["file"].as_str().unwrap();
         let data = std::fs::read(root().join(name)).unwrap();
@@ -94,5 +96,51 @@ fn previously_refused_flat_map_updates_accept() {
             .planes
             .iter()
             .all(|p| p.samples.iter().all(|&v| v == 128)));
+    }
+}
+
+#[test]
+fn adaptive_fixture_headers_select_tile_updates_and_reference_publication() {
+    use fvid::codec::{av1::Obus, av1_frame::Header, av1_sequence::Sequence};
+    for record in manifest()["fixtures"].as_array().unwrap() {
+        let data = std::fs::read(root().join(record["file"].as_str().unwrap())).unwrap();
+        let mut sequence = None;
+        let mut refs: [Option<Header>; 8] = std::array::from_fn(|_| None);
+        let adaptive = record["adaptive"].as_bool().unwrap();
+        let publish = record["publish"].as_bool().unwrap();
+        let mut shown = 0;
+        for obu in Obus::new(&data) {
+            let obu = obu.unwrap();
+            if obu.kind == 1 {
+                sequence = Some(Sequence::parse(obu.payload).unwrap());
+            }
+            if obu.kind == 6 {
+                let h = Header::parse(
+                    sequence.as_ref().unwrap(),
+                    obu.payload,
+                    0,
+                    0,
+                    &std::array::from_fn(|i| refs[i].as_ref()),
+                )
+                .unwrap();
+                if h.show {
+                    assert_eq!(h.disable_cdf_update, !adaptive);
+                    shown += 1;
+                }
+                if h.show {
+                    assert_eq!(h.disable_frame_end_update, !publish);
+                } else if record["file"].as_str().unwrap().contains("-intra") {
+                    assert_eq!(h.disable_frame_end_update, !publish);
+                } else {
+                    assert!(h.disable_frame_end_update);
+                }
+                for i in 0..8 {
+                    if h.refresh_flags & (1 << i) != 0 {
+                        refs[i] = Some(h.clone());
+                    }
+                }
+            }
+        }
+        assert_eq!(shown, 6);
     }
 }

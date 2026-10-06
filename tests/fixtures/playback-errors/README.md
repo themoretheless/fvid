@@ -1235,7 +1235,7 @@ unchanged implicit zero maps; updated segment maps remain unsupported.
 ## AV1 segmentation maps
 
 `generate_av1_segmentation_map_samples.py --writer WRITER --oracle ORACLE`
-regenerates 48 OBU/YUV/WebM triples and `av1-seg-map-generated.json`. Build
+regenerates 144 OBU/YUV/WebM triples and `av1-seg-map-generated.json`. Build
 `scripts/av1_fixture_symbol_writer.c` with the same optional libaom static
 library as `av1_symbol_oracle.c`. ORACLE is the independently compiled
 `av1_show_existing_oracle.c` helper. External tools are generation-only.
@@ -1251,4 +1251,13 @@ Acceptance checks segment IDs, all reconstructed shown pixels, decoder reset,
 WebM replay and seek for spatial/temporal updates, unchanged maps and reset.
 The existing temporal0/temporal1 flat map refusals are now listed in
 `map_acceptances`; their bytes remain unchanged. Forced segment tools and
-adaptive/multitile qualification remain separate work.
+multitile qualification remain separate work.
+
+The map matrix includes 48 nonadaptive streams, 48 `-adapt` variants and 48
+`-adapt-publish` variants. Typed CDF IDs/contexts in the owned symbol records
+allow Python to encode the same symbols with independently adapted models.
+Frame-end publication variants retain distributions across primary references
+and reset adaptation counts when loading each new frame. Header tests verify
+the adaptation/publication flags, while acceptance compares maps and pixels
+for all modes. No production change was necessary for these qualification
+streams; freezing only the native segment CDF updates makes acceptance fail.
