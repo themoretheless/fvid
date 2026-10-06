@@ -180,6 +180,7 @@ impl std::ops::Index<usize> for Bank {
 /// Separate banks preserve shared contexts for syntax aliases (e.g. luma/chroma
 /// SAO type) while keeping the arithmetic state in the existing CABAC engine.
 pub struct HevcCabac<'a> {
+    rbsp: &'a [u8],
     arithmetic: Cabac<'a>,
     contexts: [Bank; 32],
     pub(crate) rice_statistics: [super::hevc_residual::PersistentRiceStatistic; 4],
@@ -283,6 +284,7 @@ impl<'a> HevcCabac<'a> {
             }
         }
         Ok(Self {
+            rbsp,
             arithmetic: Cabac::new(rbsp, bit_offset)?,
             contexts,
             rice_statistics: Default::default(),
@@ -292,6 +294,7 @@ impl<'a> HevcCabac<'a> {
     /// Restart a WPP arithmetic substream without rebuilding probability banks.
     pub fn from_contexts(rbsp: &'a [u8], bit_offset: usize, saved: &Contexts) -> Result<Self> {
         Ok(Self {
+            rbsp,
             arithmetic: Cabac::new(rbsp, bit_offset)?,
             contexts: saved.0,
             rice_statistics: saved.1,
@@ -332,6 +335,47 @@ impl<'a> HevcCabac<'a> {
             return Err(invalid("HEVC CABAC requires reset after error"));
         }
         let result = self.arithmetic.terminate();
+        self.failed = result.is_err();
+        result
+    }
+    /// Consume byte-aligned 4:2:0 PCM and restart only the arithmetic engine.
+    pub fn read_pcm(
+        &mut self,
+        log: u8,
+        pcm_depth: [u8; 2],
+        depths: [u8; 2],
+    ) -> Result<[Vec<u16>; 3]> {
+        if self.failed
+            || !self.arithmetic.is_terminated()
+            || !(3..=5).contains(&log)
+            || depths.iter().any(|d| !(8..=12).contains(d))
+            || pcm_depth.iter().zip(depths).any(|(&p, d)| p == 0 || p > d)
+        {
+            return Err(invalid("invalid HEVC PCM state or parameters"));
+        }
+        let result = (|| {
+            let mut bits = super::bits::BitReader::new(self.rbsp);
+            bits.skip(self.bit_position())?;
+            while bits.position() % 8 != 0 {
+                if bits.bit()? {
+                    return Err(invalid("nonzero HEVC PCM alignment bit"));
+                }
+            }
+            let mut samples = [Vec::new(), Vec::new(), Vec::new()];
+            for (c, plane) in samples.iter_mut().enumerate() {
+                let chroma = usize::from(c != 0);
+                let count = 1usize << (2 * (log - chroma as u8));
+                plane.reserve_exact(count);
+                for _ in 0..count {
+                    plane.push(
+                        (bits.read(pcm_depth[chroma])? as u16)
+                            << (depths[chroma] - pcm_depth[chroma]),
+                    );
+                }
+            }
+            self.arithmetic = Cabac::new(self.rbsp, bits.position())?;
+            Ok(samples)
+        })();
         self.failed = result.is_err();
         result
     }
@@ -444,5 +488,60 @@ mod chroma_initialization_tests {
                 assert_eq!(values(syntax, init).unwrap(), [154]);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod pcm_tests {
+    use super::*;
+    fn stream() -> Vec<u8> {
+        let mut data = vec![0xfe, 0x80]; // Initial offset 509: terminal bin one, zero alignment.
+        data.extend(0..96); // 8x8 Y + 4x4 Cb + 4x4 Cr, each eight-bit PCM.
+        data.extend([0, 0]); // New arithmetic offset zero.
+        data
+    }
+    #[test]
+    fn pcm_reads_planes_scales_depth_and_preserves_contexts_on_restart() {
+        let data = stream();
+        for depth in [8, 10, 12] {
+            let mut bins = HevcCabac::new(&data, 0, SliceType::P, false, 24).unwrap();
+            let saved = bins.contexts().unwrap();
+            assert!(bins.terminate().unwrap());
+            let samples = bins.read_pcm(3, [8; 2], [depth; 2]).unwrap();
+            assert_eq!(
+                samples.iter().map(Vec::len).collect::<Vec<_>>(),
+                [64, 16, 16]
+            );
+            assert_eq!(
+                samples.into_iter().flatten().collect::<Vec<_>>(),
+                (0u16..96).map(|v| v << (depth - 8)).collect::<Vec<_>>()
+            );
+            assert_eq!(bins.contexts, saved.0);
+            assert_eq!(bins.bit_position(), 98 * 8 + 9);
+            assert!(!bins.terminate().unwrap());
+        }
+    }
+    #[test]
+    fn truncated_pcm_and_alignment_errors_poison_entropy_state() {
+        let data = stream();
+        for cut in 2..data.len() {
+            let mut bins = HevcCabac::new(&data[..cut], 0, SliceType::I, false, 0).unwrap();
+            assert!(bins.terminate().unwrap());
+            assert!(bins.read_pcm(3, [8; 2], [8; 2]).is_err());
+            assert!(bins.bypass().is_err());
+        }
+        let mut invalid = data.clone();
+        invalid[1] |= 1;
+        let mut bins = HevcCabac::new(&invalid, 0, SliceType::I, false, 0).unwrap();
+        assert!(bins.terminate().unwrap());
+        assert!(
+            bins.read_pcm(3, [8; 2], [8; 2])
+                .unwrap_err()
+                .to_string()
+                .contains("PCM alignment")
+        );
+        assert!(bins.contexts().is_err());
+        let mut fresh = HevcCabac::new(&[0; 32], 0, SliceType::I, false, 0).unwrap();
+        assert!(fresh.read_pcm(3, [8; 2], [8; 2]).is_err());
     }
 }

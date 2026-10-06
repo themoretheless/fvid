@@ -447,6 +447,21 @@ mod tests {
         }
     }
     #[test]
+    fn owned_pcm_fixtures_translate_pcm_depth_and_block_bounds() {
+        for (data, depth) in [
+            (include_bytes!("../../../tests/fixtures/playback-errors/hevc-pcm-active-rext8.mp4").as_slice(), 8),
+            (include_bytes!("../../../tests/fixtures/playback-errors/hevc-pcm-full10-rext10.mp4").as_slice(), 10),
+        ] {
+            let (sps, pps) = sets(data);
+            let h = configuration(&sps, &pps).unwrap();
+            assert_eq!(h.pcm_enabled_flag, 1);
+            assert_eq!(h.log2_min_pcm_luma_coding_block_size_minus3, 2);
+            assert_eq!(h.log2_diff_max_min_pcm_luma_coding_block_size, 0);
+            assert_eq!(h.pcm_sample_bit_depth_luma_minus1, depth - 1);
+            assert_eq!(h.pcm_sample_bit_depth_chroma_minus1, depth - 1);
+        }
+    }
+    #[test]
     fn active_chroma_qp_list_refuses_unqualified_nvdec_configuration() {
         let data = include_bytes!("../../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.mp4");
         let (sps, pps) = sets(data);

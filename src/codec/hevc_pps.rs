@@ -569,3 +569,98 @@ mod chroma_qp_fixture_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod pcm_fixture_tests {
+    #[test]
+    fn pcm_fixtures_match_hm_samples_restart_and_filter_policy() {
+        macro_rules! fixture {
+            ($stem:literal, $depth:literal, $mixed:literal, $pcm_depth:literal) => {
+                (
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".mp4"
+                    ))
+                    .as_slice(),
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".yuv"
+                    ))
+                    .as_slice(),
+                    $depth,
+                    $mixed,
+                    $pcm_depth,
+                )
+            };
+        }
+        for (data, expected, depth, mixed, pcm_depth) in [
+            fixture!("hevc-pcm-active-rext8", 8, false, 8),
+            fixture!("hevc-pcm-mixed-rext8", 8, true, 8),
+            fixture!("hevc-pcm-filtered-rext8", 8, false, 8),
+            fixture!("hevc-pcm-parallel-rext8", 8, true, 8),
+            fixture!("hevc-pcm-high10-rext10", 10, false, 8),
+            fixture!("hevc-pcm-high12-rext12", 12, false, 8),
+            fixture!("hevc-pcm-full10-rext10", 10, false, 10),
+            fixture!("hevc-pcm-full12-rext12", 12, false, 12),
+            fixture!("hevc-pcm-wpp-rext8", 8, true, 8),
+            fixture!("hevc-pcm-dependent-rext8", 8, true, 8),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            let (sps, pps) = decoder.parameters();
+            assert_eq!(sps.chroma_format, 1);
+            assert_eq!(sps.depth, [depth; 2]);
+            assert!(!sps.separate_colour_plane && pps.tiles.is_none());
+            assert!(pps.chroma_qp_offset_list.is_none());
+            assert_eq!(sps.pcm.as_ref().unwrap().block_log2, [5, 5]);
+            assert_eq!(sps.pcm.as_ref().unwrap().depth, [pcm_depth; 2]);
+            let total = sps
+                .dimensions
+                .iter()
+                .map(|&v| v as usize)
+                .product::<usize>();
+            let mut packet = Vec::new();
+            input.read_packet(0, 0, &mut packet).unwrap();
+            for pass in 0..2 {
+                if pass != 0 {
+                    decoder.reset();
+                }
+                let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                assert!(decoded.picture.pcm_luma_samples > 0);
+                if mixed {
+                    assert!(decoded.picture.pcm_luma_samples < total);
+                } else {
+                    assert_eq!(decoded.picture.pcm_luma_samples, total);
+                }
+                let pixels: Vec<_> = decoded
+                    .picture
+                    .planes
+                    .iter()
+                    .flat_map(|p| {
+                        p.samples().iter().flat_map(|&v| {
+                            if depth == 8 {
+                                vec![u8::try_from(v).unwrap()]
+                            } else {
+                                v.to_le_bytes().to_vec()
+                            }
+                        })
+                    })
+                    .collect();
+                assert_eq!(
+                    pixels, expected,
+                    "PCM {depth}-bit, mixed={mixed}, pass={pass}"
+                );
+            }
+        }
+    }
+}

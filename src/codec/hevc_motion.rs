@@ -638,6 +638,7 @@ mod tests {
         motion[5][0] = Some(Vector { reference: 0, mv: [12, 8] });
         motion[0][0] = Some(Vector { reference: 1, mv: [64, -32] });
         let picture = Arc::new(Picture {
+            pcm_luma_samples: 0,
             dimensions: [64, 32], crop: [0; 4], depth: [8; 2],
             planes: [Plane::new(64, 32, 8, 8192).unwrap(),
                 Plane::new(32, 16, 8, 2048).unwrap(), Plane::new(32, 16, 8, 2048).unwrap()],
@@ -659,6 +660,7 @@ mod tests {
     fn separable_prediction_matches_scalar_at_all_phases_and_borders() {
         for depth in [8, 10, 12] {
             let mut picture = Picture {
+                pcm_luma_samples: 0,
                 dimensions: [32, 32],
                 crop: [0; 4],
                 depth: [depth; 2],

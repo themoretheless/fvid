@@ -2146,3 +2146,35 @@ NVDEC chroma lists and other HEVC tools/chroma formats remain incomplete.
 
 Offline codec suite after this expansion: 350 passed, no failures, one
 explicit fixture-generation test ignored (25.38 seconds).
+
+### Owned HEVC 4:2:0 PCM reconstruction (2026-10-06)
+
+The former picture-level PCM refusal is replaced by per-CU PCM flag decoding,
+zero alignment validation, bounded raw Y/Cb/Cr reads and arithmetic-engine
+restart preserving probability/Rice contexts. PCM sample depths are scaled to
+sequence depths before reconstruction. PCM writes participate in the existing
+row-worker command stream, allowing later intra blocks to observe their pixels.
+Metadata marks PCM cells (intra mode DC); deblocking/SAO exclude PCM samples
+when the SPS requests filter exclusion. Ordinary non-PCM blocks retain their
+existing QP, residual and reference paths.
+
+Ten owned one-picture streams cover all-PCM and mixed PCM/normal blocks,
+8/10/12-bit raw samples, 8-bit PCM inside 10/12-bit sequences, filter policy,
+WPP, dependent segments and 128x96 parallel reconstruction. Saved HM samples
+match on reset replay. Test-only PCM sample counts require actual PCM coding
+(and actual normal blocks in mixed cases), not merely an SPS enable flag.
+CABAC tests cover raw-plane order, depth scaling, context preservation,
+all payload truncations and nonzero alignment rejection. Explicit generation
+uses HM only; twenty saved MP4/YUV files regenerate identically. PCM fixture
+PPS lists are disabled so they isolate PCM from the chroma-QP extension.
+Restoring the old PCM gate reproduces its exact picture-tools refusal.
+
+NVDEC tests verify owned PCM configuration depth/block-field translation for
+8/10-bit streams. This remains CPU-side SDK evidence, not physical decoding.
+These fixtures do not prove every PCM block size, variable-QP boundary,
+reference/seek sequence, chroma format or effective nonzero filter operation.
+Other HEVC tools and the overall codec objective remain incomplete.
+
+Local offline validation: codec library 353 passed / one fixture-generator
+test ignored; media library 334 passed / one ignored; CUDA-feature HEVC tests
+16 passed. No FFmpeg or network access is needed by these tests.

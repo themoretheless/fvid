@@ -16,6 +16,8 @@ use super::{
 use crate::{Result, invalid};
 
 pub struct Picture {
+    #[cfg(test)]
+    pub(crate) pcm_luma_samples: usize,
     pub dimensions: [u32; 2],
     pub crop: [u32; 4],
     pub depth: [u8; 2],
@@ -46,7 +48,6 @@ pub fn decode(
 ) -> Result<Picture> {
     if sps.chroma_format != 1
         || sps.separate_colour_plane
-        || sps.pcm.is_some()
         || pps.tiles.is_some()
         || !slice.first
         || slice.address != 0
@@ -322,7 +323,10 @@ pub fn decode(
             let stride = sps.dimensions[0] as usize / 4;
             plane.apply_sao_with_exclusions(max_cb - u8::from(component != 0), &parameters,
                 |_, _| true,
-                |p| pps.transquant_bypass && cells[((p[1] << shift) / 4) * stride + (p[0] << shift) / 4].bypass)?;
+                |p| {
+                    let c = cells[((p[1] << shift) / 4) * stride + (p[0] << shift) / 4];
+                    c.bypass || (c.pcm && sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled))
+                })?;
         }
     }
     let motion = if slice.slice_type == SliceType::I {
@@ -337,6 +341,8 @@ pub fn decode(
         grid
     };
     Ok(Picture {
+        #[cfg(test)]
+        pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
         motion,
         reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
         reference_long_term: std::array::from_fn(|l| lists[l].iter().map(|r| r.long_term).collect()),
@@ -385,7 +391,6 @@ pub fn decode_slices(
     }
     if sps.chroma_format != 1
         || sps.separate_colour_plane
-        || sps.pcm.is_some()
         || pps.tiles.is_some()
         || sps.depth[0] != sps.depth[1]
     {
@@ -640,8 +645,11 @@ pub fn decode_slices(
                 let ib = owner(b);
                 owners[ia] == owners[ib] || slices[ia.max(ib)].loop_filter_across_slices
             },
-            |p| pps.transquant_bypass && decoder.cells[((p[1] << shift) / 4) * (sps.dimensions[0] as usize / 4)
-                + (p[0] << shift) / 4].bypass,
+            |p| {
+                let c = decoder.cells[((p[1] << shift) / 4) * (sps.dimensions[0] as usize / 4)
+                    + (p[0] << shift) / 4];
+                c.bypass || (c.pcm && sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled))
+            },
         )?;
     }
     let mut motion = Vec::new();
@@ -654,6 +662,8 @@ pub fn decode_slices(
         }
     }
     Ok(Picture {
+        #[cfg(test)]
+        pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
         motion,
         reference_pocs: canonical_pocs,
         reference_long_term: std::array::from_fn(|l| canonical[l].iter().map(|r| r.long_term).collect()),
@@ -674,6 +684,7 @@ struct Cell {
     motion: Motion,
     cbf: bool,
     bypass: bool,
+    pcm: bool,
 }
 struct Decoder<'a> {
     sps: &'a Sps,
@@ -761,6 +772,45 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
         }
         let nxn =
             n.log2_size == self.sps.coding_block_log2[0] && !b.decision(Syntax::PartMode, 0)?;
+        if !nxn
+            && let Some(pcm) = &self.sps.pcm
+            && (pcm.block_log2[0]..=pcm.block_log2[1]).contains(&n.log2_size)
+            && b.terminate()?
+        {
+            let samples = b.read_pcm(n.log2_size, pcm.depth, self.sps.depth)?;
+            let stride = self.sps.dimensions[0] as usize / 4;
+            let side = 1usize << n.log2_size;
+            for y in n.y as usize / 4..(n.y as usize + side) / 4 {
+                for x in n.x as usize / 4..(n.x as usize + side) / 4 {
+                    self.cells[y * stride + x] = Cell {
+                        pcm: true,
+                        bypass,
+                        mode: 1,
+                        ..Cell::default()
+                    };
+                }
+            }
+            for (component, samples) in samples.into_iter().enumerate() {
+                let shift = usize::from(component != 0);
+                let rect = [
+                    n.x as usize >> shift,
+                    n.y as usize >> shift,
+                    side >> shift,
+                    side >> shift,
+                ];
+                if self.jobs.is_some() {
+                    self.reconstruction.push(Reconstruction::Pcm {
+                        component,
+                        rect,
+                        samples,
+                    });
+                } else {
+                    self.planes[component].reconstruct_inter(rect, &samples)?;
+                }
+            }
+            self.finish_cu(n, true, false);
+            return Ok(());
+        }
         let codes = hevc_intra_syntax::read_luma(b, nxn)?;
         let mut mode = 0;
         for (i, code) in codes.into_iter().enumerate() {
@@ -927,6 +977,11 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
 // Rows preserve reconstruction order. CABAC and motion metadata can advance
 // independently; intra prediction still sees only previously reconstructed pixels.
 enum Reconstruction {
+    Pcm {
+        component: usize,
+        rect: [usize; 4],
+        samples: Vec<u16>,
+    },
     Inter {
         motion: Motion,
         rect: [u32; 4],
@@ -961,6 +1016,9 @@ fn reconstruct_row(
     let scaling = pps.scaling_lists.as_ref().unwrap_or(&sps.scaling_lists);
     for command in commands {
         match command {
+            Reconstruction::Pcm { component, rect, samples } => {
+                planes[component].reconstruct_inter(rect, &samples)?;
+            }
             Reconstruction::Inter { motion, rect } => {
                 for c in 0..3 {
                     let shift = usize::from(c != 0);
@@ -1087,7 +1145,11 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                     )
                     .unwrap();
                 let b = decoder.cell_raw(x as i32, y as i32).unwrap();
-                let filter_enabled = [!a.bypass, !b.bypass];
+                let pcm_excluded = decoder.sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled);
+                let filter_enabled = [
+                    !(a.bypass || (a.pcm && pcm_excluded)),
+                    !(b.bypass || (b.pcm && pcm_excluded)),
+                ];
                 let strength = if a.intra || b.intra {
                     2
                 } else if decoder.edges[y / 4 * (width / 4) + x / 4][direction] & 2 != 0
