@@ -1450,6 +1450,17 @@ fn timestamp_us(ticks: i64, time_base: AVRational, origin_us: i64) -> Option<i64
 
 fn push_video(shared: &Shared, frame: VideoFrame, signaled: &mut bool) -> Result<()> {
     let mut queue = lock(&shared.video);
+    
+    // Prefetch: предвыборка следующего элемента очереди в L3 cache
+    if let Some(next_frame) = queue.back() {
+        if !next_frame.pixels.is_empty() {
+            unsafe {
+                core::hint::prefetch_read(next_frame.pixels.as_ptr(), 0);
+                core::hint::prefetch_read(next_frame.pixels.as_ptr(), 1);
+            }
+        }
+    }
+    
     loop {
         if shared.quit.load(Ordering::Acquire) {
             return Ok(());
@@ -3686,7 +3697,39 @@ impl PlayerApp {
             ui.add(egui::ProgressBar::new(0.0).desired_width(ui.available_width()));
             return;
         }
-        let mut frac = self.scrub.unwrap_or(self.progress());
+        
+        // Обновляем buffered_us из размера видео-очереди
+        if let Some(session) = &self.session {
+            let queued_frames = lock(&session.shared.video).len() as i64;
+            self.buffered_us = queued_frames * duration / (duration.max(1) / 30);
+        }
+        
+        let played_frac = self.scrub.unwrap_or(self.progress());
+        let buffered_frac = (self.buffered_us.max(0) as f32 / duration as f32).clamp(0.0, 1.0);
+        
+        // Кастомная отрисовка с сегментами
+        let rect = ui.available_rect_before_wrap();
+        ui.painter().rect_filled(rect.shrink(2.0), 4.0, egui::Color32::from_rgb(40, 40, 40));
+        
+        // Buffer segment (синий)
+        if buffered_frac > 0.0 && buffered_frac < 1.0 {
+            let buf_w = (buffered_frac * (rect.width() - 4.0)).max(1.0);
+            let buf_rect = egui::Rect::from_min_x_max(rect.min.x + 2.0, rect.min.x + 2.0 + buf_w)
+                .expand(-2.0);
+            ui.painter().rect_filled(buf_rect, 4.0, egui::Color32::from_rgb(64, 128, 255));
+        }
+        
+        // Played segment (зеленый поверх синего если больше буфера)
+        if played_frac > 0.0 && played_frac < 1.0 && played_frac > buffered_frac {
+            let start_x = rect.min.x + 2.0 + buffered_frac * (rect.width() - 4.0);
+            let played_w = ((played_frac - buffered_frac) * (rect.width() - 4.0)).max(0.0);
+            let played_rect = egui::Rect::from_min_x_max(start_x, start_x + played_w)
+                .expand(-2.0);
+            ui.painter().rect_filled(played_rect, 4.0, egui::Color32::from_rgb(80, 200, 120));
+        }
+        
+        // Slider для seek (прозрачный поверх всего)
+        let mut frac = self.scrub.unwrap_or(played_frac);
         let response = ui.add(egui::Slider::new(&mut frac, 0.0..=1.0).show_value(false));
         if response.dragged() {
             self.scrub = Some(frac);

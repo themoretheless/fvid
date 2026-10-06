@@ -13,20 +13,25 @@ def lists(b,markers,current,target):
     b.u(1);pred=current
     for pos,long_term in enumerate(markers):
         if long_term:b.ue(2);b.ue(1-pos)
-        else:b.ue(0);b.ue(pred-(target-pos)-1);pred=target-pos
+        else:b.ue(0);b.ue((pred-(target-pos)-1)%32);pred=target-pos
     b.ue(3)
 
 
-def prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,mixed=False,first_bottom=False):
+def prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,mixed=False,first_bottom=False,gap=False,poc_type=0):
     source=case=='source' and long_term;colocated=case=='colocated' and long_term
     current=not mixed or bottom==first_bottom
     opposite=not mixed or bottom!=first_bottom
-    b=Writer();b.ue(0);b.ue(1 if is_b else 0);b.ue(0);b.u(3 if is_b else 2,4);b.u(1);b.u(int(bottom));b.u(index,4)
+    number=(3 if is_b else 2)+int(gap)
+    if poc_type==2 and is_b:number-=1
+    current_pic_num=2*number+1
+    b=Writer();b.ue(0);b.ue(1 if is_b else 0);b.ue(0);b.u(number,4);b.u(1);b.u(int(bottom))
+    if poc_type==0:b.u(index,4)
+    elif poc_type==1:b.se(index-(2*number-3 if is_b else 2*number))
     if is_b:b.u(int(spatial))
     b.u(1);b.ue(1)
     if is_b:b.ue(1)
-    lists(b,(source and current,source and opposite),7 if is_b else 5,1)
-    if is_b:lists(b,(colocated and current,colocated and opposite),7,5)
+    lists(b,(source and current,source and opposite),current_pic_num,1)
+    if is_b:lists(b,(colocated and current,colocated and opposite),current_pic_num,7 if gap else 5)
     else:
         if colocated and current:b.u(1);b.ue(4);b.ue(1);b.ue(6);b.ue(0);b.ue(0)
         else:b.u(0)
@@ -64,7 +69,7 @@ def prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,mixed=
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--jm-decoder',type=Path,required=True);parser.add_argument('--mixed-parity',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--jm-decoder',type=Path,required=True);parser.add_argument('--mixed-parity',action='store_true');parser.add_argument('--gap',action='store_true');parser.add_argument('--poc-type',type=int,choices=[0,1,2],default=0);args=parser.parse_args();assert not args.poc_type or args.gap
     root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors';records=[]
     with tempfile.TemporaryDirectory(prefix='fvid-longterm-b-fields-') as tmp:
         d=Path(tmp);cfg=d/'decoder.cfg';cfg.write_text('')
@@ -77,20 +82,20 @@ def main():
                                 for skip in [False,True]:
                                     for deblock in [0,1,2]:
                                         order=[True,False] if reverse else [False,True];frames=[]
-                                        for number in [0,1]:
+                                        for stage,number in enumerate([0,2] if args.gap else [0,1]):
                                             for i,bottom in enumerate(order):
-                                                index=number*4+i;mark=number==0 and case=='source' and long_term and (not args.mixed_parity or i==0)
-                                                nals=[intra(bottom,depth,number,index==0,index,long_term=mark)] if init is None else [field(bottom,index,a,'positive' if (a==0)^bottom else 'negative',deblock,biased=number==1,frame_num=number,long_term=mark) for a in [0,1]]
+                                                index=stage*4+i;mark=number==0 and case=='source' and long_term and (not args.mixed_parity or i==0)
+                                                nals=[intra(bottom,depth,number,index==0,index,long_term=mark,poc_type=args.poc_type,poc_delta=index-2*number if args.poc_type==1 else 0)] if init is None else [field(bottom,index,a,'positive' if (a==0)^bottom else 'negative',deblock,biased=stage==1,frame_num=number,long_term=mark,poc_type=args.poc_type,poc_delta=index-2*number if args.poc_type==1 else 0) for a in [0,1]]
                                                 frames.append((index,index==0,b''.join(len(n).to_bytes(4,'big')+n for n in nals)))
                                         for is_b in [False,True]:
                                             for i,bottom in enumerate(order):
-                                                index=(6 if is_b else 8)+i;n=prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,args.mixed_parity,order[0]);frames.append((index,False,len(n).to_bytes(4,'big')+n))
-                                        config=(cavlc_config if init is None else cabac_config)(depth,max_refs=4 if args.mixed_parity else 3);entropy='cavlc' if init is None else f'cabac-init{init}'
-                                        prefix='avc-field-b-longterm-mixed-' if args.mixed_parity else 'avc-field-b-longterm-'
+                                                index=(6 if is_b else 8)+i;n=prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,args.mixed_parity,order[0],args.gap,args.poc_type);frames.append((index,False,len(n).to_bytes(4,'big')+n))
+                                        config=(cavlc_config if init is None else cabac_config)(depth,max_refs=5 if args.gap else 4 if args.mixed_parity else 3,gaps=args.gap,poc_type=args.poc_type);entropy='cavlc' if init is None else f'cabac-init{init}'
+                                        prefix=('avc-field-b-gap-longterm-' if args.gap else 'avc-field-b-longterm-')+('mixed-' if args.mixed_parity else '')+(f'poc{args.poc_type}-' if args.poc_type else '')
                                         name=f'{prefix}{depth}bit-'+('bottom-first' if reverse else 'top-first')+('-spatial' if spatial else '-temporal')+f'-{case}-'+('long' if long_term else 'short')+('-skip' if skip else '-coded')+f'-{entropy}-filter{deblock}'
                                         coded=d/(name+'.264');oracle=d/(name+'.yuv');coded.write_bytes(annexb(config,frames))
                                         subprocess.run([str(args.jm_decoder),'-d',str(cfg),'-p',f'InputFile={coded}','-p',f'OutputFile={oracle}','-p','FileFormat=0','-p','RefFile=nonexistent.yuv'],cwd=d,check=True,stdout=subprocess.DEVNULL)
                                         pixels=oracle.read_bytes();assert len(pixels)==6144*(2 if depth==10 else 1),(name,len(pixels))
                                         data=mux(config,frames,32,32,50);(root/(name+'.mp4')).write_bytes(data);(root/(name+'.yuv')).write_bytes(pixels);records.append(dict(file=name+'.mp4',sha256=hashlib.sha256(data).hexdigest(),oracle_sha256=hashlib.sha256(pixels).hexdigest()))
-    (root/('avc-field-b-longterm-mixed-generated.json' if args.mixed_parity else 'avc-field-b-longterm-generated.json')).write_text(json.dumps(dict(generator='owned long-term source and co-located field direct controls',fixtures=records),indent=2)+'\n')
+    (root/(prefix+'generated.json')).write_text(json.dumps(dict(generator='owned long-term source and co-located field direct controls',fixtures=records),indent=2)+'\n')
 if __name__=='__main__':main()

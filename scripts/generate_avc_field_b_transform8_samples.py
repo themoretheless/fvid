@@ -9,12 +9,12 @@ from generate_avc_mbaff_direct_samples import Writer, CabacWriter
 from avc_fixture_mp4 import mux, annexb
 
 
-def b_field(bottom,index,address,spatial,coded,negative,deblock,init):
+def b_field(bottom,index,address,spatial,coded,negative,deblock,init,qp=50):
     b=Writer();b.ue(address);b.ue(1);b.ue(0);b.u(3,4);b.u(1);b.u(int(bottom));b.u(index,4)
-    b.u(int(spatial));b.u(1);b.ue(3);b.ue(3);b.u(0);b.u(0);b.ue(init);b.se(24);b.ue(deblock)
+    b.u(int(spatial));b.u(1);b.ue(3);b.ue(3);b.u(0);b.u(0);b.ue(init);b.se(qp-26);b.ue(deblock)
     if deblock!=1:b.se(6);b.se(6)
     while len(b.bits)%8:b.u(1)
-    c=CabacWriter(init,50);c.decision(24,0);c.decision(27,0)
+    c=CabacWriter(init,max(0,qp));c.decision(24,0);c.decision(27,0)
     if coded:
         for _ in range(4):c.decision(73,1)
         c.decision(77,0);c.decision(399,1);c.decision(60,0)

@@ -6,10 +6,10 @@ from generate_avc_field_cabac_samples import field
 from generate_avc_mbaff_direct_samples import Writer,CabacWriter
 from avc_fixture_mp4 import mux,annexb
 
-def configuration(depth,scaled=False):
-    profile=100 if depth==8 else 110
+def configuration(depth,scaled=False,bypass=False,high444=False):
+    profile=244 if bypass or high444 else 100 if depth==8 else 110
     b=Writer();b.u(profile,8);b.u(0,8);b.u(10,8);b.ue(0)
-    b.ue(1);b.ue(depth-8);b.ue(depth-8);b.u(0);b.u(0)
+    b.ue(1);b.ue(depth-8);b.ue(depth-8);b.u(int(bypass));b.u(0)
     b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(0);b.u(0);b.u(0);b.u(1);b.u(0);b.u(0)
     sps=b.nal(0x67)
     b=Writer();b.ue(0);b.ue(0);b.u(1);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(0);b.u(0,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(0);b.u(0)

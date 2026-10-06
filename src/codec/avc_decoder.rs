@@ -198,9 +198,28 @@ impl AvcDecoder {
         {
             let max = 1u32 << sps.frame_num_bits;
             if header.frame_num != previous && header.frame_num != (previous + 1) % max {
-                return Err(crate::unsupported(
-                    "AVC field frame-number gap is not connected",
-                ));
+                if !sps.gaps_allowed {
+                    return Err(invalid("AVC frame-number gap forbidden by SPS"));
+                }
+                let buffer = self
+                    .field_dpb
+                    .as_mut()
+                    .ok_or_else(|| invalid("AVC gap requires initialized field DPB"))?;
+                let mut missing = (previous + 1) % max;
+                while missing != header.frame_num {
+                    let order = self.poc.infer_nonexisting(sps, missing)?;
+                    buffer.infer_nonexisting_fields(
+                        missing,
+                        order.map(|p| p.after_marking),
+                        self.next_id,
+                    )?;
+                    self.next_id = self
+                        .next_id
+                        .checked_add(1)
+                        .ok_or_else(|| invalid("AVC picture ID overflow"))?;
+                    self.previous_reference = Some(missing);
+                    missing = (missing + 1) % max;
+                }
             }
         }
         let (w, h) = sps.coded_dimensions();
