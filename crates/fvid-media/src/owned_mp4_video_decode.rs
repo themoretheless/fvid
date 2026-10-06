@@ -435,11 +435,46 @@ mod tests {
             "avc-field-opposite-10bit-bottom-first-swap-skip-filter2-aso",
             "avc-field-multiref-8bit-top-first-type3-sub3-r0-filter0-aso",
             "avc-field-multiref-10bit-bottom-first-type1-sub0-r1-filter2-aso",
+            "avc-field-cabac-p-transform8-8bit-top-first-ac-init0-filter0-scale24-aso",
+            "avc-field-cabac-p-transform8-10bit-bottom-first-ac-init2-filter2-scale16-aso",
+            "avc-field-cabac-p-chroma-8bit-top-first-ac-init0-filter0-aso",
+            "avc-field-cabac-p-chroma-10bit-bottom-first-ac-init2-filter2-aso",
+            "avc-field-cabac-p-residual-8bit-top-first-ac-init0-filter0-aso",
+            "avc-field-cabac-p-residual-10bit-bottom-first-ac-init2-filter2-aso",
+            "avc-field-cabac-p-8bit-top-first-skip-init0-filter0-aso",
+            "avc-field-cabac-p-10bit-bottom-first-coded-init2-filter2-aso",
+            "avc-field-cabac-8bit-top-first-positive-filter0-aso",
+            "avc-field-cabac-10bit-bottom-first-negative-filter2-aso",
+            "avc-field-fmo-8bit-type0-dir0-top-first-dc1-filter0-aso",
+            "avc-field-fmo-10bit-type3-dir1-bottom-first-dc1-filter2-aso",
+            "avc-field-intra-bypass-8bit-top-first-i4-ac-filter1-scale8-enabled-aso",
+            "avc-field-intra-bypass-10bit-bottom-first-i8-ac-filter1-scale16-enabled-aso",
+            "avc-field-intra-bypass-10bit-bottom-first-i16-negative-filter1-scale8-control",
+            "avc-field-intra8-8bit-top-first-i8-ac-filter0-scale8-aso",
+            "avc-field-intra8-10bit-bottom-first-i8-ac-filter2-scale16-aso",
+            "avc-field-intra-chroma-8bit-top-first-i4-ac-filter0-aso",
+            "avc-field-intra-chroma-10bit-bottom-first-i16-negative-filter2-aso",
+            "avc-field-intra-8bit-top-first-i4-ac-filter0-aso",
+            "avc-field-intra-10bit-bottom-first-i16-negative-filter2-aso",
+            "avc-field-intra-residual-8bit-top-first-intra-first-skip-i4-ac-filter0",
+            "avc-field-intra-residual-10bit-bottom-first-intra-last-coded-i16-negative-filter2",
+            "avc-field-mixed-intra4-8bit-top-first-intra-first-skip-filter0",
+            "avc-field-mixed-intra4-10bit-bottom-first-intra-last-coded-filter2",
+            "avc-field-mixed-pcm-8bit-top-first-pcm-first-skip-filter0",
+            "avc-field-mixed-pcm-10bit-bottom-first-pcm-last-coded-filter2",
             "avc-field-weight-8bit-top-first-whole-skip-weighted-filter0",
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
-            let count = if name.contains("refs")
+            let count = if (name.starts_with("avc-field-cabac-")
+                || name.starts_with("avc-field-fmo-")
+                || name.starts_with("avc-field-intra-")
+                || name.starts_with("avc-field-intra8-"))
+                && !name.starts_with("avc-field-intra-residual-")
+                && !name.starts_with("avc-field-cabac-p-")
+            {
+                1
+            } else if name.contains("refs")
                 || name.contains("opposite")
                 || name.contains("multiref")
                 || name.contains("weight")

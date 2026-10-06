@@ -245,7 +245,8 @@ pub(super) fn intra_plane_owned(
             transform8: eight[index] != 0,
         };
         for direction in 0..2 {
-            block.strengths[direction][0] = [intra_strength(true, direction == 0, [false; 2]); 4];
+            block.strengths[direction][0] =
+                [intra_strength(true, direction == 0, [header.field_pic; 2]); 4];
             let neighbour = if direction == 0 {
                 if index % mb_width == 0 {
                     None

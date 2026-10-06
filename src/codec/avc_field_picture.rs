@@ -1,4 +1,4 @@
-//! Compact PCM and whole-field P-skip reconstruction with complementary weaving.
+//! Compact CAVLC fields with intra/inter prediction and complementary weaving.
 use super::{
     avc::{Pps, SliceGroups, Sps},
     avc_picture::IntraPicture,
@@ -22,6 +22,60 @@ fn samples(count: usize) -> Result<Vec<u16>> {
 }
 /// Decode compact field planes. The budget covers output samples and coverage;
 /// caller-owned headers/RBSP and other pictures are excluded. Only PCM is admitted.
+/// CAVLC I fields, including FMO, reconstructed in compact coordinates.
+pub fn decode_intra_slices(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    budget: usize,
+) -> Result<PcmField> {
+    let first = *headers
+        .first()
+        .ok_or_else(|| invalid("missing AVC I field"))?;
+    if sps.frame_mbs_only
+        || sps.chroma_format != 1
+        || sps.separate_colour_plane
+        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || !(8..=14).contains(&sps.bit_depth_luma)
+    {
+        return Err(unsupported("AVC I field configuration is not connected"));
+    }
+    for h in headers {
+        if !h.field_pic
+            || h.slice_type != SliceType::I
+            || h.bottom_field != first.bottom_field
+            || h.frame_num != first.frame_num
+            || h.pps_id != pps.id
+            || pps.sps_id != sps.id
+            || h.idr != first.idr
+            || h.idr_pic_id != first.idr_pic_id
+            || h.poc_lsb != first.poc_lsb
+            || h.delta_poc != first.delta_poc
+            || h.memory_operations != first.memory_operations
+            || h.redundant_pic_cnt != 0
+            || (h.nal_ref_idc == 0) != (first.nal_ref_idc == 0)
+        {
+            return Err(invalid("AVC I field slice identity mismatch"));
+        }
+    }
+    let mut ordered = headers.to_vec();
+    ordered.sort_by_key(|h| h.first_mb);
+    if ordered.iter().all(|h| h.disable_deblocking_filter_idc == 1) {
+        match decode_pcm_slices(&ordered, sps, pps, budget) {
+            Ok(field) => return Ok(field),
+            Err(crate::Error::Unsupported(_)) => {}
+            Err(error) => return Err(error),
+        }
+    }
+    let picture = super::avc_picture::decode_intra_slices(&ordered, sps, pps, budget)?;
+    Ok(PcmField {
+        picture,
+        bottom: first.bottom_field,
+        frame_num: first.frame_num,
+        pps_id: first.pps_id,
+    })
+}
+
 pub fn decode_pcm_slices(
     headers: &[&SliceHeader],
     sps: &Sps,
@@ -351,7 +405,8 @@ pub fn decode_p_field_lists(
     bits.skip(h.entropy_bit_offset)?;
     let (w, height) = sps.coded_dimensions();
     let count = w as usize / 16 * (height as usize / 32);
-    if headers.len() == 1
+    if !pps.cabac
+        && headers.len() == 1
         && h.weights.is_none()
         && reference.bottom == h.bottom_field
         && bits.unsigned_golomb()? as usize == count
@@ -361,7 +416,6 @@ pub fn decode_p_field_lists(
     if !h.field_pic
         || h.slice_type != SliceType::P
         || h.redundant_pic_cnt != 0
-        || pps.cabac
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || h.disable_deblocking_filter_idc > 2
     {
@@ -434,7 +488,13 @@ pub fn decode_p_field_lists(
         .checked_mul(3)
         .and_then(|n| {
             count
-                .checked_mul(if !filtered { 1024 } else { 2048 })
+                .checked_mul(if pps.cabac {
+                    8192
+                } else if !filtered {
+                    1024
+                } else {
+                    2048
+                })
                 .and_then(|m| n.checked_add(m))
         })
         .and_then(|n| n.checked_add(16384))
@@ -496,15 +556,55 @@ pub fn decode_p_field_lists(
             .get(slice_index + 1)
             .map_or(count, |(_, h)| h.first_mb as usize);
         let mut qp = h.slice_qp;
+        let mut intra = if pps.cabac {
+            None
+        } else {
+            Some(super::avc_macroblock::IntraCavlcReader::new_context(
+                h, sps, pps, count,
+            )?)
+        };
+        let mut cabac = if pps.cabac {
+            Some(super::avc_cabac_slice::InterCabacSlice::new(
+                h,
+                sps,
+                pps,
+                count * 4096,
+            )?)
+        } else {
+            None
+        };
+        let mut ready = crate::buffer(pixels / 16)?;
         let mut bits = BitReader::new(&h.rbsp);
         bits.skip(h.entropy_bit_offset)?;
         let mut address = h.first_mb as usize;
-        while address < end && bits.more_rbsp_data() {
-            let skipped = bits.unsigned_golomb()? as usize;
+        while address < end && (pps.cabac || bits.more_rbsp_data()) {
+            let mut cabac_block = if let Some(reader) = &mut cabac {
+                match reader.read_macroblock()? {
+                    Some(block) => Some(block),
+                    None => break,
+                }
+            } else {
+                None
+            };
+            let skipped = if let Some(super::avc_inter_slice::InterMacroblock::Skip {
+                address: at,
+                qp: current,
+            }) = &cabac_block
+            {
+                if *at != address {
+                    return Err(invalid("CABAC field address mismatch"));
+                }
+                qp = *current;
+                1
+            } else if pps.cabac {
+                0
+            } else {
+                bits.unsigned_golomb()? as usize
+            };
             if skipped > end - address {
                 return Err(invalid("AVC P field skip exceeds picture"));
             }
-            for step in 0..=skipped {
+            for step in 0..if pps.cabac { 1 } else { skipped + 1 } {
                 if address == end {
                     break;
                 }
@@ -512,30 +612,145 @@ pub fn decode_p_field_lists(
                     address % (w as usize / 16) * 16,
                     address / (w as usize / 16) * 16,
                 ];
+                let intra_block = if matches!(
+                    cabac_block,
+                    Some(super::avc_inter_slice::InterMacroblock::Intra(_))
+                ) {
+                    match cabac_block.take().unwrap() {
+                        super::avc_inter_slice::InterMacroblock::Intra(block) => Some(*block),
+                        _ => unreachable!(),
+                    }
+                } else if !pps.cabac && step == skipped {
+                    let mut probe = bits.clone();
+                    let code = probe.unsigned_golomb()?;
+                    if code >= 5 {
+                        bits = probe;
+                        Some(intra.as_mut().unwrap().read_embedded(
+                            &mut bits,
+                            address as u32,
+                            qp,
+                            code - 5,
+                        )?)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+                if let Some(block) = intra_block {
+                    if block.address as usize != address {
+                        return Err(invalid("CABAC intra field address mismatch"));
+                    }
+                    if let Some(reader) = &intra {
+                        let (luma, chroma) = reader.counts(address)?;
+                        coefficients.store(address, slice_id, luma, chroma)?;
+                    }
+                    motion.store(
+                        origin,
+                        [16, 16],
+                        slice_id,
+                        [super::avc_mv::Neighbour::NoPrediction; 2],
+                    )?;
+                    super::avc_picture::reconstruct_macroblock(
+                        &mut output.picture,
+                        &block,
+                        sps,
+                        pps,
+                        &scaling,
+                        &mut ready,
+                    )?;
+                    let pcm = matches!(block.luma, super::avc_macroblock::IntraLuma::Pcm { .. });
+                    if !pcm {
+                        qp = block.qp;
+                    }
+                    if filtered {
+                        let bd = 6 * (i32::from(sps.bit_depth_chroma) - 8);
+                        edges.push(super::avc_boundary::DecodedBlockEdges {
+                            blocks: [super::avc_boundary::BlockEdge {
+                                intra: true,
+                                switching_slice: false,
+                                nonzero_luma: false,
+                                motion: [None; 2],
+                            }; 16],
+                            qp: if pcm {
+                                [0; 3]
+                            } else {
+                                [
+                                    qp,
+                                    i32::from(super::avc_picture::chroma_qp(
+                                        qp,
+                                        pps.chroma_qp_offset,
+                                        sps.bit_depth_chroma,
+                                    )) - bd,
+                                    i32::from(super::avc_picture::chroma_qp(
+                                        qp,
+                                        pps.second_chroma_qp_offset,
+                                        sps.bit_depth_chroma,
+                                    )) - bd,
+                                ]
+                            },
+                            offsets: [h.alpha_offset, h.beta_offset],
+                            transform8: matches!(
+                                block.luma,
+                                super::avc_macroblock::IntraLuma::Blocks8 { .. }
+                            ),
+                            slice_id,
+                            disable_filter: h.disable_deblocking_filter_idc as u8,
+                        });
+                    }
+                    address += 1;
+                    continue;
+                }
                 let mut residual = None;
                 let predictions = if step < skipped {
                     coefficients.store(address, slice_id, [0; 16], [[0; 4]; 2])?;
+                    if let Some(reader) = &mut intra {
+                        reader.record_inter(address, [0; 16], [[0; 4]; 2])?;
+                    }
                     vec![([0, 0], [16, 16], motion.decode_p_skip(origin, slice_id)?, 0)]
                 } else {
-                    let syntax = super::avc_inter::InterSyntax {
-                        slice: SliceType::P,
-                        active_references: [h.refs_l0, 0],
-                        previous_qp: qp,
-                        bit_depth: sps.bit_depth_luma,
-                        chroma_array_type: 1,
-                        transform8_enabled: pps.transform_8x8,
-                        direct8_inference: sps.direct_8x8_inference,
+                    let (header, c) = if pps.cabac {
+                        match cabac_block
+                            .take()
+                            .ok_or_else(|| invalid("missing CABAC field block"))?
+                        {
+                            super::avc_inter_slice::InterMacroblock::Coded {
+                                address: at,
+                                header,
+                                coefficients,
+                            } => {
+                                if at != address {
+                                    return Err(invalid("CABAC coded field address mismatch"));
+                                }
+                                (header, *coefficients)
+                            }
+                            _ => return Err(invalid("unexpected CABAC field block")),
+                        }
+                    } else {
+                        let syntax = super::avc_inter::InterSyntax {
+                            slice: SliceType::P,
+                            active_references: [h.refs_l0, 0],
+                            previous_qp: qp,
+                            bit_depth: sps.bit_depth_luma,
+                            chroma_array_type: 1,
+                            transform8_enabled: pps.transform_8x8,
+                            direct8_inference: sps.direct_8x8_inference,
+                        };
+                        let header =
+                            super::avc_inter::read_inter_header_field(&mut bits, &syntax, true)?;
+                        let c = super::avc_inter_coefficients::read_inter_coefficients_field(
+                            &mut bits,
+                            header.residual.pattern,
+                            header.residual.transform8,
+                            coefficients.neighbours(address, slice_id)?,
+                            true,
+                        )?;
+                        (header, c)
                     };
-                    let header =
-                        super::avc_inter::read_inter_header_field(&mut bits, &syntax, true)?;
-                    let c = super::avc_inter_coefficients::read_inter_coefficients_field(
-                        &mut bits,
-                        header.residual.pattern,
-                        header.residual.transform8,
-                        coefficients.neighbours(address, slice_id)?,
-                        true,
-                    )?;
                     coefficients.store(address, slice_id, c.luma_counts, c.chroma_counts)?;
+                    if let Some(reader) = &mut intra {
+                        reader.record_inter(address, c.luma_counts, c.chroma_counts)?;
+                    }
                     qp = header.residual.qp;
                     if header.residual.pattern != 0 {
                         residual = Some((c, header.residual.transform8));
@@ -659,16 +874,9 @@ pub fn decode_p_field_lists(
                     if let Some((c, _)) = &residual {
                         for i in 0..16 {
                             blocks[i].nonzero_luma = if eight {
-                                let bx = (i % 4) / 2 * 2;
-                                let by = (i / 4) / 2 * 2;
-                                [
-                                    by * 4 + bx,
-                                    by * 4 + bx + 1,
-                                    (by + 1) * 4 + bx,
-                                    (by + 1) * 4 + bx + 1,
-                                ]
-                                .iter()
-                                .any(|&j| c.luma_counts[j] != 0)
+                                c.luma8[(i / 4) / 2 * 2 + (i % 4) / 2]
+                                    .iter()
+                                    .any(|&v| v != 0)
                             } else {
                                 c.luma_counts[i] != 0
                             };
@@ -788,13 +996,24 @@ pub fn decode_p_field_lists(
                         }
                     }
                 }
+                if !pps.constrained_intra_pred {
+                    for by in 0..4 {
+                        for bx in 0..4 {
+                            ready[(origin[1] / 4 + by) * (w as usize / 4) + origin[0] / 4 + bx] = 1;
+                        }
+                    }
+                }
                 address += 1;
             }
         }
         if address != end {
             return Err(invalid("incomplete AVC P field slice"));
         }
-        bits.finish_rbsp()?;
+        if !pps.cabac {
+            bits.finish_rbsp()?;
+        } else if cabac.as_mut().unwrap().read_macroblock()?.is_some() {
+            return Err(invalid("CABAC field slice exceeds coverage"));
+        }
     }
     if filtered {
         let mut grids: [Vec<super::avc_deblock::MacroblockEdges>; 3] =

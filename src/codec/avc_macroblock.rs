@@ -1,4 +1,4 @@
-//! Frame/MBAFF 4:2:0 intra macroblock syntax and mixed CAVLC contexts.
+//! Frame/field/MBAFF 4:2:0 intra syntax and mixed CAVLC contexts.
 //! This yields prediction modes and transform levels, not reconstructed or filtered pictures.
 use super::{
     avc::{Pps, SliceGroups, Sps},
@@ -58,6 +58,7 @@ pub struct IntraCavlcReader<'a> {
     modes: Vec<u8>,
     finished: bool,
     mbaff: bool,
+    field_picture: bool,
     pair_fields: Vec<u8>,
     slice_group_map: Vec<u8>,
 }
@@ -121,13 +122,13 @@ impl<'a> IntraCavlcReader<'a> {
         allow_fmo: bool,
     ) -> Result<Self> {
         if pps.cabac
-            || (!mbaff && !sps.frame_mbs_only)
+            || (!mbaff && !sps.frame_mbs_only && !header.field_pic)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
             || (!allow_fmo && !matches!(pps.slice_groups, SliceGroups::Single))
         {
             return Err(invalid(
-                "intra CAVLC reader requires progressive 4:2:0 I slices without FMO",
+                "intra CAVLC reader requires admitted 4:2:0 geometry without FMO or CABAC",
             ));
         }
         if header.pps_id != pps.id || pps.sps_id != sps.id {
@@ -181,6 +182,7 @@ impl<'a> IntraCavlcReader<'a> {
             modes: grid(count * 16)?,
             finished: false,
             mbaff,
+            field_picture: header.field_pic,
             pair_fields: grid(if mbaff { count / 2 } else { 0 })?,
             slice_group_map,
         })
@@ -192,15 +194,15 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
-        if header.slice_type != SliceType::I || header.field_pic {
-            return Err(invalid("FMO reader requires an I frame slice"));
+        if header.slice_type != SliceType::I {
+            return Err(invalid("FMO reader requires an I slice"));
         }
         Self::new_context_impl(
             header,
             sps,
             pps,
             max_macroblocks,
-            sps.mb_adaptive_frame_field && !sps.frame_mbs_only,
+            sps.mb_adaptive_frame_field && !sps.frame_mbs_only && !header.field_pic,
             true,
         )
     }
@@ -224,7 +226,7 @@ impl<'a> IntraCavlcReader<'a> {
             sps,
             pps,
             max_macroblocks,
-            sps.mb_adaptive_frame_field && !sps.frame_mbs_only,
+            sps.mb_adaptive_frame_field && !sps.frame_mbs_only && !header.field_pic,
             true,
         )
     }
@@ -305,10 +307,11 @@ impl<'a> IntraCavlcReader<'a> {
     }
     /// Mode of the most recently parsed macroblock (false for progressive).
     pub fn field_decoding(&self) -> bool {
-        self.mbaff
-            && self
-                .previous_address
-                .is_some_and(|a| self.pair_field(a as usize / 2) == Some(true))
+        self.field_picture
+            || self.mbaff
+                && self
+                    .previous_address
+                    .is_some_and(|a| self.pair_field(a as usize / 2) == Some(true))
     }
     pub fn bit_position(&self) -> usize {
         self.bits.position()
@@ -441,7 +444,7 @@ impl<'a> IntraCavlcReader<'a> {
         let width = self.sps.width_mbs as usize;
         let height = self.height_mbs();
         let address = self.address as usize;
-        let field = self.mbaff && self.pair_field(address / 2) == Some(true);
+        let field = self.field_picture || self.mbaff && self.pair_field(address / 2) == Some(true);
         if address >= width * height {
             return Err(invalid("too many macroblocks in slice"));
         }

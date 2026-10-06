@@ -243,7 +243,7 @@ impl AvcDecoder {
             let contexts = references.iter().map(Vec::as_slice).collect::<Vec<_>>();
             super::avc_field_picture::decode_p_field_lists(headers, sps, pps, &contexts, scratch)?
         } else {
-            super::avc_field_picture::decode_pcm_slices(headers, sps, pps, scratch)?
+            super::avc_field_picture::decode_intra_slices(headers, sps, pps, scratch)?
         };
         if header.idr {
             self.field_dpb = Some(super::avc_field_dpb::FieldBuffer::new(

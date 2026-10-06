@@ -120,7 +120,10 @@ pub fn decode_intra_slices(
     }
     let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
     let (w, h) = sps.coded_dimensions();
-    let (w, h) = (w as usize, h as usize);
+    let (w, h) = (
+        w as usize,
+        h as usize / if header.field_pic { 2 } else { 1 },
+    );
     let pixels = w
         .checked_mul(h)
         .ok_or_else(|| invalid("picture dimensions overflow"))?;
@@ -151,7 +154,12 @@ pub fn decode_intra_slices(
     let mut picture = IntraPicture {
         coded_width: w,
         coded_height: h,
-        crop: sps.crop.map(|n| n as usize),
+        crop: [
+            sps.crop[0] as usize,
+            sps.crop[1] as usize,
+            sps.crop[2] as usize / if header.field_pic { 2 } else { 1 },
+            sps.crop[3] as usize / if header.field_pic { 2 } else { 1 },
+        ],
         bit_depth: sps.bit_depth_luma,
         y: alloc(pixels)?,
         cb: alloc(pixels / 4)?,

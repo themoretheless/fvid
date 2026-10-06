@@ -205,6 +205,18 @@ impl CabacMotionContexts {
         code: u8,
         active: [u32; 2],
     ) -> Result<Vec<Partition>> {
+        self.read_prediction_field(bins, address, slice_id, slice, code, active, false)
+    }
+    pub fn read_prediction_field(
+        &mut self,
+        bins: &mut impl InterBins,
+        address: usize,
+        slice_id: u32,
+        slice: SliceType,
+        code: u8,
+        active: [u32; 2],
+        field: bool,
+    ) -> Result<Vec<Partition>> {
         if self.mbaff {
             return Err(invalid("MBAFF CABAC prediction needs pair-aware dispatch"));
         }
@@ -215,7 +227,7 @@ impl CabacMotionContexts {
             slice,
             code,
             active,
-            false,
+            field,
             &mut |_| None,
         );
         if result.is_err() {

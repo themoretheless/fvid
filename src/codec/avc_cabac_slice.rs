@@ -18,6 +18,7 @@ pub struct InterCabacSlice<'a> {
     active: [u32; 2],
     failed: bool,
     mbaff: bool,
+    field_picture: bool,
     previous_skipped: bool,
 }
 impl<'a> InterCabacSlice<'a> {
@@ -76,6 +77,7 @@ impl<'a> InterCabacSlice<'a> {
             active: [header.refs_l0, header.refs_l1],
             failed: false,
             mbaff,
+            field_picture: header.field_pic,
             previous_skipped: false,
         })
     }
@@ -210,7 +212,7 @@ impl<'a> InterCabacSlice<'a> {
             }
         }
         self.previous_skipped = skipped;
-        let field = self.mbaff && self.pair_field(at / 2) == Some(true);
+        let field = self.field_picture || self.mbaff && self.pair_field(at / 2) == Some(true);
         if skipped {
             if self.mbaff {
                 self.motion.store_non_inter_mbaff(at, 0, field)?;
@@ -267,13 +269,14 @@ impl<'a> InterCabacSlice<'a> {
                 |p| modes.get(p).filter(|v| **v != 255).map(|v| *v != 0),
             )?
         } else {
-            self.motion.read_prediction(
+            self.motion.read_prediction_field(
                 self.reader.arithmetic()?,
                 at,
                 0,
                 self.slice,
                 code,
                 self.active,
+                self.field_picture,
             )?
         };
         let (residual, coefficients) = self.reader.read_inter_residual(&partitions)?;

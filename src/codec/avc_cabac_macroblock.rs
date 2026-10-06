@@ -39,6 +39,7 @@ pub struct IntraCabacReader<'a> {
     chroma: [Vec<u8>; 2],
     modes: Vec<u8>,
     mbaff: bool,
+    field_picture: bool,
     pair_fields: Vec<u8>,
 }
 
@@ -388,9 +389,9 @@ impl<'a> IntraCabacReader<'a> {
         if !matches!(
             header.slice_type,
             SliceType::I | SliceType::P | SliceType::B
-        ) || header.field_pic
+        ) || (mbaff && header.field_pic)
             || !pps.cabac
-            || (!sps.frame_mbs_only && !mbaff)
+            || (!sps.frame_mbs_only && !mbaff && !header.field_pic)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
             || !matches!(pps.slice_groups, SliceGroups::Single)
@@ -441,6 +442,7 @@ impl<'a> IntraCabacReader<'a> {
             chroma: [grid(count * 4)?, grid(count * 4)?],
             modes: grid(count * 16)?,
             mbaff,
+            field_picture: header.field_pic,
             pair_fields: if mbaff { grid(count / 2)? } else { Vec::new() },
         })
     }
@@ -451,15 +453,16 @@ impl<'a> IntraCabacReader<'a> {
             .map(|v| *v != 0)
     }
     fn current_field(&self) -> bool {
-        self.mbaff && self.pair_field(self.address / 2) == Some(true)
+        self.field_picture || self.mbaff && self.pair_field(self.address / 2) == Some(true)
     }
     pub fn field_decoding(&self) -> bool {
-        self.mbaff
-            && self
-                .address
-                .checked_sub(1)
-                .and_then(|a| self.pair_field(a / 2))
-                == Some(true)
+        self.field_picture
+            || self.mbaff
+                && self
+                    .address
+                    .checked_sub(1)
+                    .and_then(|a| self.pair_field(a / 2))
+                    == Some(true)
     }
     fn macro_neighbours(&self, grid: &[u8]) -> Result<[u8; 2]> {
         let w = self.sps.width_mbs as usize;
