@@ -48,7 +48,6 @@ pub fn decode(
 ) -> Result<Picture> {
     if sps.chroma_format != 1
         || sps.separate_colour_plane
-        || pps.tiles.is_some()
         || !slice.first
         || slice.address != 0
         || slice.nal.layer_id != 0
@@ -104,6 +103,10 @@ pub fn decode(
     if required > budget {
         return Err(invalid("HEVC picture exceeds decode budget"));
     }
+    let tile_layout = pps.tiles.as_ref().map(|tiles| {
+        let side = 1u32 << max_cb;
+        super::hevc_tiles::TileLayout::new(tiles, [w.div_ceil(side), h.div_ceil(side)], budget - required)
+    }).transpose()?;
     let chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
     hevc_qp::components(slice.qp, sps.depth, chroma_offsets)?;
 
@@ -114,6 +117,8 @@ pub fn decode(
         poc,
         lists,
         slice_start: 0,
+        tile_bounds: None,
+        tile_layout,
         qp: slice.qp,
         chroma_offsets,
         cu_chroma_offsets: [0; 2],
@@ -139,10 +144,13 @@ pub fn decode(
     let columns = w.div_ceil(side);
     let rows = h.div_ceil(side);
     let mut sao = Vec::with_capacity(columns as usize * rows as usize);
-    let expected = if pps.entropy_sync { rows as usize } else { 1 };
+    let expected = if let Some(layout) = &decoder.tile_layout {
+        if pps.entropy_sync { layout.rectangles.iter().map(|r| r[3] as usize).sum() }
+        else { layout.rectangles.len() }
+    } else if pps.entropy_sync { rows as usize } else { 1 };
     if slice.entropy_substreams.len() != expected {
         return Err(invalid(
-            "HEVC WPP entry-point count does not match CTU rows",
+            "HEVC entropy substream count does not match tile/row layout",
         ));
     }
     if slice
@@ -161,7 +169,14 @@ pub fn decode(
     )?;
     let initial_contexts = bins.contexts()?;
     let mut saved_contexts = None;
+    if let Some(layout) = decoder.tile_layout.take() {
+        sao = decode_tile_ctus(&mut decoder, slice, &layout)?;
+        decoder.tile_layout = Some(layout);
+    }
     std::thread::scope(|scope| -> Result<()> {
+        if decoder.tile_layout.is_some() {
+            return Ok(());
+        }
         let workers = if count >= 128 * 96 && !pps.constrained_intra {
             let (sender, receiver) = std::sync::mpsc::sync_channel(rows as usize);
             let placeholders = [
@@ -322,7 +337,15 @@ pub fn decode(
             let cells = &decoder.cells;
             let stride = sps.dimensions[0] as usize / 4;
             plane.apply_sao_with_exclusions(max_cb - u8::from(component != 0), &parameters,
-                |_, _| true,
+                |a, b| {
+                    if let Some(layout) = &decoder.tile_layout
+                        && !pps.tiles.as_ref().unwrap().loop_filter_across {
+                        let side = 1usize << max_cb;
+                        let address = |p: [usize; 2]| ((p[1] << shift) / side) * columns as usize + (p[0] << shift) / side;
+                        return layout.tile_ids[address(a)] == layout.tile_ids[address(b)];
+                    }
+                    true
+                },
                 |p| {
                     let c = cells[((p[1] << shift) / 4) * stride + (p[0] << shift) / 4];
                     c.bypass || (c.pcm && sps.pcm.as_ref().is_some_and(|p| p.loop_filter_disabled))
@@ -475,6 +498,8 @@ pub fn decode_slices(
         poc,
         lists,
         slice_start: 0,
+        tile_bounds: None,
+        tile_layout: None,
         qp: slice.qp,
         chroma_offsets,
         cu_chroma_offsets: [0; 2],
@@ -693,6 +718,8 @@ struct Decoder<'a> {
     poc: i32,
     lists: &'a [Vec<Reference>; 2],
     slice_start: u32,
+    tile_bounds: Option<[u32; 4]>,
+    tile_layout: Option<super::hevc_tiles::TileLayout>,
     qp: i32,
     chroma_offsets: [i32; 2],
     cu_chroma_offsets: [i32; 2],
@@ -954,6 +981,11 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                             let address = (y << shift) / side
                                 * (self.sps.dimensions[0] as usize).div_ceil(side)
                                 + (x << shift) / side;
+                            if let Some([tx, ty, width, height]) = self.tile_bounds {
+                                let x = (x << shift) as u32;
+                                let y = (y << shift) as u32;
+                                if x < tx || y < ty || x >= tx + width || y >= ty + height { return false; }
+                            }
                             if address < self.slice_start as usize {
                                 return false;
                             }
@@ -972,6 +1004,97 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
         self.finish_cu(n, true, false);
         Ok(())
     }
+}
+
+/// Parse CTUs in tile-scan order; each tile has independent entropy contexts.
+fn decode_tile_ctus<'a>(
+    decoder: &mut Decoder<'a>,
+    slice: &'a SliceHeader,
+    layout: &super::hevc_tiles::TileLayout,
+) -> Result<Vec<hevc_sao::CtuSao>> {
+    let sps = decoder.sps;
+    let pps = decoder.pps;
+    let [w, h] = sps.dimensions;
+    let [min_cb, max_cb] = sps.coding_block_log2;
+    let side = 1u32 << max_cb;
+    let columns = w.div_ceil(side);
+    let total = layout.tile_scan_to_raster.len();
+    let mut sao = vec![[hevc_sao::Sao::Off; 3]; total];
+    let mut stream = 0;
+    let mut visited = 0;
+    for &[tx, ty, tw, th] in &layout.rectangles {
+        decoder.tile_bounds = Some([tx * side, ty * side, tw * side, th * side]);
+        decoder.qp = slice.qp;
+        decoder.qp_prediction = slice.qp;
+        decoder.qp_coded = false;
+        decoder.cu_chroma_offsets = [0; 2];
+        decoder.chroma_qp_coded = false;
+        let mut bins = HevcCabac::new(
+            &slice.rbsp[slice.entropy_substreams[stream].clone()],
+            0,
+            slice.slice_type,
+            slice.cabac_init,
+            slice.qp,
+        )?;
+        let initial = bins.contexts()?;
+        let mut saved = None;
+        stream += 1;
+        for row in ty..ty + th {
+            if row != ty && pps.entropy_sync {
+                bins = HevcCabac::from_contexts(
+                    &slice.rbsp[slice.entropy_substreams[stream].clone()],
+                    0,
+                    saved.as_ref().unwrap_or(&initial),
+                )?;
+                stream += 1;
+                decoder.qp = slice.qp;
+            }
+            for col in tx..tx + tw {
+                let raster = (row * columns + col) as usize;
+                sao[raster] = hevc_sao::read_ctu_with_scale(
+                    &mut bins,
+                    slice.sao,
+                    sps.depth,
+                    pps.sao_offset_scale,
+                    if col > tx {
+                        Some(&sao[raster - 1])
+                    } else {
+                        None
+                    },
+                    if row > ty {
+                        Some(&sao[raster - columns as usize])
+                    } else {
+                        None
+                    },
+                )?;
+                hevc_tree::read_ctu(
+                    &mut bins,
+                    decoder,
+                    [w, h],
+                    [col * side, row * side],
+                    max_cb,
+                    min_cb,
+                )?;
+                if pps.entropy_sync && col == tx + 1 {
+                    saved = Some(bins.contexts()?);
+                }
+                visited += 1;
+                let last = visited == total;
+                if bins.terminate()? != last {
+                    return Err(invalid(
+                        "HEVC tiled slice termination does not match picture extent",
+                    ));
+                }
+                let tile_end = col == tx + tw - 1 && row == ty + th - 1;
+                let row_end = pps.entropy_sync && col == tx + tw - 1;
+                if !last && (tile_end || row_end) && !bins.terminate()? {
+                    return Err(invalid("missing HEVC tile end-of-substream bit"));
+                }
+            }
+        }
+    }
+    decoder.tile_bounds = None;
+    Ok(sao)
 }
 
 // Rows preserve reconstruction order. CABAC and motion metadata can advance
@@ -1117,6 +1240,14 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                 } else {
                     owner(x, y - 1)
                 };
+                if let Some(layout) = &decoder.tile_layout
+                    && !decoder.pps.tiles.as_ref().unwrap().loop_filter_across {
+                    let columns = decoder.sps.dimensions[0].div_ceil(side as u32) as usize;
+                    let q = y / side * columns + x / side;
+                    let p = if direction == 0 { y / side * columns + (x - 1) / side }
+                        else { (y - 1) / side * columns + x / side };
+                    if layout.tile_ids[p] != layout.tile_ids[q] { continue; }
+                }
                 let slice = &slices[q_owner];
                 if slice.deblocking.disabled
                     || (owners[p_owner] != owners[q_owner]
@@ -1265,6 +1396,11 @@ impl Decoder<'_> {
     }
 
     fn cell(&self, x: i32, y: i32) -> Option<Cell> {
+        if let Some([tx, ty, width, height]) = self.tile_bounds {
+            if x < tx as i32 || y < ty as i32 || x as u32 >= tx + width || y as u32 >= ty + height {
+                return None;
+            }
+        }
         if x >= 0 && y >= 0 {
             let side = 1u32 << self.sps.coding_block_log2[1];
             let columns = self.sps.dimensions[0].div_ceil(side);

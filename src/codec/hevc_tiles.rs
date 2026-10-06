@@ -146,10 +146,8 @@ mod fixture_tests {
     use super::*;
     const DATA: &[u8] =
         include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-two-columns-rext8.mp4");
-    const PIXELS: &[u8] =
-        include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-two-columns-rext8.yuv");
     #[test]
-    fn two_column_fixture_reproduces_tile_picture_refusal_and_non_raster_order() {
+    fn two_column_fixture_decodes_tiles_in_non_raster_order() {
         let mut input =
             crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(DATA), Default::default())
                 .unwrap();
@@ -177,44 +175,134 @@ mod fixture_tests {
         assert!(headers[0].first && headers[0].address == 0 && headers[0].nal.layer_id == 0);
         assert_eq!(headers[0].entropy_substreams.len(), 2);
         assert_eq!(headers[0].entry_point_offsets.len(), 1);
-        let error = decoder
-            .decode_packet(&packet)
-            .err()
-            .expect("tile reconstruction remains incomplete");
-        assert!(
-            error.to_string().contains("unsupported HEVC picture tools"),
-            "{error}"
+        assert!(decoder.decode_packet(&packet).unwrap().is_some());
+    }
+
+    #[test]
+    fn tiled_fixtures_match_every_hm_sample_and_reset() {
+        assert_ne!(
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-filtered-rext8.yuv"),
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/hevc-tiles-cross-filtered-rext8.yuv"
+            ),
+            "the filter-boundary policy must affect this owned oracle"
         );
+        macro_rules! fixture {
+            ($stem:literal, $bits:literal) => {
+                (
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".mp4"
+                    ))
+                    .as_slice(),
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".yuv"
+                    ))
+                    .as_slice(),
+                    $bits,
+                    $stem,
+                )
+            };
+        }
+        for (data, expected, bits, name) in [
+            fixture!("hevc-tiles-two-columns-rext8", 8),
+            fixture!("hevc-tiles-filtered-rext8", 8),
+            fixture!("hevc-tiles-cross-filtered-rext8", 8),
+            fixture!("hevc-tiles-asymmetric-rext8", 8),
+            fixture!("hevc-tiles-high10-rext10", 10),
+            fixture!("hevc-tiles-high12-rext12", 12),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            let (sps, pps) = decoder.parameters();
+            assert_eq!(sps.depth, [bits; 2]);
+            let tiles = pps.tiles.as_ref().unwrap();
+            assert_eq!(tiles.loop_filter_across, name.contains("cross-filtered"));
+            let asymmetric = name.contains("asymmetric");
+            assert_eq!(
+                tiles.column_widths,
+                if asymmetric { vec![1, 2] } else { vec![1, 1] }
+            );
+            assert_eq!(
+                tiles.row_heights,
+                if asymmetric { vec![2, 1] } else { vec![2] }
+            );
+            let mut packet = Vec::new();
+            for pass in 0..2 {
+                if pass != 0 {
+                    decoder.reset();
+                }
+                let mut pixels = Vec::new();
+                for frame in 0..3 {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    let headers = decoder.slice_headers(&packet).unwrap();
+                    assert_eq!(headers.len(), 1);
+                    assert_eq!(
+                        headers[0].entropy_substreams.len(),
+                        if asymmetric { 4 } else { 2 }
+                    );
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    assert_eq!(decoded.poc, frame as i32);
+                    pixels.extend(decoded.picture.planes.iter().flat_map(|p| {
+                        p.samples().iter().flat_map(|&v| {
+                            if bits == 8 {
+                                vec![u8::try_from(v).unwrap()]
+                            } else {
+                                v.to_le_bytes().to_vec()
+                            }
+                        })
+                    }));
+                }
+                assert_eq!(pixels, expected, "{name}, pass={pass}");
+            }
+        }
     }
     #[test]
-    #[ignore = "acceptance awaits tile-scan entropy, reconstruction availability and filter boundaries"]
-    fn two_column_fixture_matches_hm_after_tile_reconstruction_is_implemented() {
+    fn tiled_picture_checks_stream_bounds_geometry_and_combined_budget() {
         let mut input =
             crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(DATA), Default::default())
                 .unwrap();
-        let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+        let decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
             &input.tracks()[0].configuration,
             16 << 20,
         )
         .unwrap();
+        let (sps, pps) = decoder.parameters();
         let mut packet = Vec::new();
-        for pass in 0..2 {
-            if pass != 0 {
-                decoder.reset();
-            }
-            let mut pixels = Vec::new();
-            for frame in 0..3 {
-                input.read_packet(0, frame, &mut packet).unwrap();
-                let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
-                pixels.extend(
-                    decoded
-                        .picture
-                        .planes
-                        .iter()
-                        .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap())),
-                );
-            }
-            assert_eq!(pixels, PIXELS);
-        }
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let header = decoder.slice_headers(&packet).unwrap().remove(0);
+        let lists = [Vec::new(), Vec::new()];
+        let decode_error = |pps, header, budget| {
+            super::super::hevc_picture::decode(sps, pps, header, 0, &lists, budget)
+                .err()
+                .expect("invalid tiled input must refuse")
+                .to_string()
+        };
+        let mut missing = header.clone();
+        missing.entropy_substreams.pop();
+        assert!(decode_error(pps, &missing, 16 << 20).contains("substream count"));
+        let mut outside = header.clone();
+        outside.entropy_substreams[1].end = outside.rbsp.len() + 1;
+        assert!(decode_error(pps, &outside, 16 << 20).contains("substream bounds"));
+        let mut short = header.clone();
+        short.entropy_substreams[1].end = short.entropy_substreams[1].start + 1;
+        assert!(super::super::hevc_picture::decode(sps, pps, &short, 0, &lists, 16 << 20).is_err());
+        let mut geometry = pps.clone();
+        geometry.tiles.as_mut().unwrap().column_widths = vec![2, 1];
+        assert!(decode_error(&geometry, &header, 16 << 20).contains("tile partition"));
+        assert!(
+            decode_error(pps, &header, 64 * 64 * 24 + 65536).contains("tile layout exceeds budget")
+        );
     }
 }

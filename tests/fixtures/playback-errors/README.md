@@ -383,15 +383,20 @@ Acceptance verifies actual PCM sample counts and actual motion references,
 then compares every HM sample on original decode and reset replay. The same
 explicit generator writes saved oracles; ordinary tests read committed bytes.
 
-### HEVC tiles: reproduction and staged acceptance
+### HEVC single-slice tiles acceptance
 
-`hevc-tiles-two-columns-rext8.mp4` has three owned 64x64 I/B/B pictures,
-two vertical tiles, tile-scan CTU raster order 0,2,1,3, and two CABAC substreams.
-PCM, chroma-QP lists, WPP and loop filters are disabled to isolate tile handling.
-Its independent HM `.yuv` oracle matches encoder reconstruction. Regenerate
-explicitly with `scripts/generate_hevc_tiles_sample.py --hm-encoder /path/to/TAppEncoder --hm-decoder /path/to/TAppDecoder`.
+Owned `hevc-tiles-*.mp4` fixtures contain three I/B/B pictures and matching
+independent HM `.yuv` oracles. PCM/chroma-QP lists/WPP are disabled.
+The original picture-tools refusal is replaced by enabled pixel/reset tests.
 
-The reproduction verifies PPS geometry and slice entry points, then the exact
-picture-tools refusal. The future HM pixel/reset acceptance is ignored pending
-reconstruction support; the passing reproduction does not imply playback.
-Ordinary tests use saved bytes without external tools or network access.
+- `two-columns-rext8`: 64x64, two vertical tiles, CTU raster addresses visited as 0,2,1,3; filters disabled.
+- `filtered-rext8` / `cross-filtered-rext8`: enabled SAO/deblocking, filtering respectively blocked/allowed across tile boundaries. Oracles differ in 1535 samples.
+- `asymmetric-rext8`: 96x96, column widths [1,2] and row heights [2,1] in CTUs; four nonuniform tiles.
+- `high10-rext10` / `high12-rext12`: two-column filtered 10/12-bit sequences, YUV saved as little-endian 16-bit samples.
+
+Regenerate explicitly with `scripts/generate_hevc_tiles_sample.py --hm-encoder /path/to/TAppEncoder --hm-decoder /path/to/TAppDecoder`.
+Tests validate geometry/entropy metadata, every decoded HM sample and reset
+replay. Mutated metadata tests reject stream-count/bounds/truncation errors,
+bad geometry and insufficient total decode budget. Ordinary tests read saved
+bytes without external tools or network access. Multiple slice segments with
+tiles and physical GPU decoding remain unqualified.

@@ -2219,3 +2219,33 @@ This is a required decoding foundation, not completed HEVC tile support.
 
 Offline codec suite: 358 passed, zero failures, two explicitly ignored
 tests (fixture generation and future tile reconstruction acceptance).
+
+### Native HEVC single-slice tile reconstruction acceptance (2026-10-06)
+
+Software reconstruction now visits CTUs in tile-scan order, restarts CABAC
+at tile boundaries and stores SAO parameters in raster order. CU metadata,
+intra samples and spatial motion candidates exclude neighbours outside the
+current tile. QP/context state initializes at tile starts. Deblocking and SAO
+respect the PPS cross-tile filtering flag. The tile map consumes remaining
+picture budget rather than an independent second full budget. Tiled pictures
+currently reconstruct synchronously; the existing row-worker path remains for
+non-tiled pictures.
+
+The former refusal is now enabled playback/pixel/reset acceptance. Six owned
+I/B/B streams cover two-column and asymmetric 2x2 grids, filters blocked or
+allowed across tile boundaries, and 8/10/12-bit sequences. Every sample matches
+independent HM output. Cross-tile filter oracles differ in 1535 samples, so the
+flag exercises an actual output distinction. Twelve saved MP4/YUV files
+regenerate identically. Tests also reject missing/out-of-range/short entropy
+substreams, malformed tile extents and insufficient combined allocation budget.
+CPU-side NVDEC tests verify uniform/asymmetric geometry translation only.
+
+Multiple slice segments with tiles remain explicitly unsupported. The HM
+encoder refuses tiles+WPP for this 4:2:0 profile (it permits the combination
+for a high-throughput 4:4:4 profile); this change does not qualify that path.
+No physical GPU, arbitrary tile seek, throughput or universal profile claim is
+made. The overall codec objective remains active.
+
+Offline validation after tile acceptance: codec library 360 passed / one
+explicit fixture-generator test ignored; media library 334 passed / one
+ignored; CUDA-feature HEVC tests 17 passed. No physical GPU run is claimed.

@@ -447,6 +447,26 @@ mod tests {
         }
     }
     #[test]
+    fn owned_tile_fixtures_translate_uniform_and_asymmetric_ctu_extents() {
+        for (data, widths, heights) in [
+            (include_bytes!("../../../tests/fixtures/playback-errors/hevc-tiles-two-columns-rext8.mp4").as_slice(), vec![1,1], vec![2]),
+            (include_bytes!("../../../tests/fixtures/playback-errors/hevc-tiles-asymmetric-rext8.mp4").as_slice(), vec![1,2], vec![2,1]),
+        ] {
+            let (sps, pps) = sets(data);
+            let h = configuration(&sps, &pps).unwrap();
+            assert_eq!(h.tiles_enabled_flag, 1);
+            assert_eq!(h.num_tile_columns_minus1 as usize, widths.len()-1);
+            assert_eq!(h.num_tile_rows_minus1 as usize, heights.len()-1);
+            // The final extent is inferred by the driver from picture dimensions.
+            for (index, width) in widths[..widths.len()-1].iter().enumerate() {
+                assert_eq!(h.column_width_minus1[index], width-1);
+            }
+            for (index, height) in heights[..heights.len()-1].iter().enumerate() {
+                assert_eq!(h.row_height_minus1[index], height-1);
+            }
+        }
+    }
+    #[test]
     fn owned_pcm_fixtures_translate_pcm_depth_and_block_bounds() {
         for (data, depth, log) in [
             (include_bytes!("../../../tests/fixtures/playback-errors/hevc-pcm-active-rext8.mp4").as_slice(), 8, 5),
