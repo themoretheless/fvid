@@ -687,7 +687,9 @@ impl Decoder<'_> {
         } else {
             [(w * 4).min(64), (h * 4).min(64)]
         };
-        if self.h.tx_mode == 2 && w * h > 1 {
+        // AV1 read_tx_size returns TX_4X4 immediately for this segment's
+        // lossless blocks; no tx_depth symbol is present even in SELECT mode.
+        if self.h.tx_mode == 2 && w * h > 1 && !self.h.lossless[self.current_segment] {
             let ctx = usize::from(
                 above.is_some_and(|b| (if b.reference > 0 { b.w * 4 } else { b.tx[0] }) >= tx[0]),
             ) + usize::from(

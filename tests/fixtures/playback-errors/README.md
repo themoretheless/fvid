@@ -1261,3 +1261,19 @@ and reset adaptation counts when loading each new frame. Header tests verify
 the adaptation/publication flags, while acceptance compares maps and pixels
 for all modes. No production change was necessary for these qualification
 streams; freezing only the native segment CDF updates makes acceptance fail.
+
+## AV1 mixed lossless/lossy blocks
+
+`generate_av1_mixed_lossless_samples.py --writer WRITER --oracle ORACLE`
+regenerates 504 OBU/YUV/WebM triples and their manifest. The optional tools are
+the same standalone range writer and independent pixel oracle used for maps.
+Python reads the committed normative default CDF arrays, writes its own block,
+segment and coefficient symbols, and optionally adapts the models. It accepts
+no source media. Ordinary `av1_mixed_lossless` tests read only saved fixtures.
+
+Each 32x32 input has four 16x16 intra blocks with one lossless and one lossy
+segment assigned in all fourteen mixed patterns. Qindices 1/64/255, largest
+and SELECT transforms, both CDF modes, and zero/positive/negative DC residuals
+are covered. Signed residuals exercise WHT reconstruction in Y, Cb and Cr.
+The old decoder's invalid CDF access is reproduced specifically on the SELECT
+lossless block; acceptance now verifies actual pixels, maps and WebM replay.

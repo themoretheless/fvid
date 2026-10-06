@@ -3620,3 +3620,34 @@ av1-seg-map-n1-q0-lf0-adapt.obu stream. Restoring accumulation passes the
 complete matrix. All 19 tests in seven root AV1 suites passed offline.
 Multitile and mixed lossless/lossy maps, forced segment tools
 and the other codec gaps remain separate implementation/qualification work.
+
+## AV1 mixed lossless/lossy 16x16 intra blocks
+
+A valid mixed-segment frame with SELECT transform mode exposed an invalid CDF
+access: the intra decoder attempted to read tx_depth for a lossless 16x16
+block. AV1 [read_tx_size](https://aomediacodec.github.io/av1-spec/#tx-size-syntax)
+returns 4x4 immediately for a lossless block and consumes no size symbol.
+The decoder now applies that early condition using the current block's segment.
+The pre-fix native decoder reproduces the specific invalid-CDF error on
+av1-mixed-lossless-q1-mask1-tx1-adapt0.obu; the fixed decoder accepts it.
+
+504 owned short streams cover all fourteen mixed assignments of four 16x16
+blocks, base qindices 1/64/255, largest/selected transform modes, and disabled
+/enabled CDF adaptation. Segment zero has ALT_Q=-base and is lossless; segment
+one has ALT_Q=0 and is lossy. 168 streams have zero residuals and 336 add signed
+DC coefficients in every plane's lossless blocks. Header assertions verify
+that the inputs are truly mixed. Every reconstructed Y/Cb/Cr sample and each
+segment map matches saved independent libaom output. Each signed-residual
+fixture changes samples in all three planes. 504 WebM variants verify pixels,
+rewind and sync seek; ordinary tests execute no generator or external codec.
+
+The pure Python fixture writer emits the normative symbols and uses the optional
+standalone range writer only during generation. No source video is an input.
+Bypassing only the native lossless WHT reconstruction causes a real pixel
+mismatch on av1-mixed-lossless-q1-mask1-tx0-adapt0-dc1.obu; restoration passes.
+35 AV1 core tests and 21 root tests in eight AV1 suites pass offline.
+
+This qualifies the stated 16x16 intra mixed-block cases. Mixed inter prediction,
+other mixed block geometries, multitile maps, forced segment tools and the other
+codec gaps remain to implement or qualify; complete codec conformance is not
+established by this matrix.
