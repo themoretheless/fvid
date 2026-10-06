@@ -100,6 +100,44 @@ pub fn remaining_level(b: &mut impl ResidualBins, rice: u8) -> Result<u32> {
     value += suffix;
     u32::try_from(value).map_err(|_| invalid("HEVC coefficient remainder overflow"))
 }
+/// Extended-precision remainder, H.265 9.3.3.11 and limited EGk (9.3.3.4).
+/// This primitive does not by itself enable extended-precision picture decoding.
+pub fn remaining_level_extended(
+    b: &mut impl ResidualBins,
+    rice: u8,
+    bit_depth: u8,
+) -> Result<u32> {
+    if !(8..=16).contains(&bit_depth) {
+        return Err(invalid("invalid extended HEVC coefficient bit depth"));
+    }
+    let range = (bit_depth + 6).max(15);
+    if rice >= range {
+        return Err(invalid("extended HEVC Rice parameter exceeds transform range"));
+    }
+    let mut prefix = 0u8;
+    while prefix < 4 && b.bypass()? {
+        prefix += 1;
+    }
+    let mut value = u64::from(prefix) << rice;
+    let width = if prefix < 4 {
+        rice
+    } else {
+        let order = rice + 1;
+        let maximum = 28 - range;
+        let mut extension = 0u8;
+        while extension < maximum && b.bypass()? {
+            extension += 1;
+        }
+        value += ((1u64 << extension) - 1) << order;
+        if extension == maximum { range } else { extension + order }
+    };
+    let mut suffix = 0u64;
+    for _ in 0..width {
+        suffix = (suffix << 1) | u64::from(b.bypass()?);
+    }
+    u32::try_from(value + suffix).map_err(|_| invalid("HEVC coefficient remainder overflow"))
+}
+
 /// Non-persistent Rice state resets at each 4x4 coefficient group. Adaptation
 /// uses the previous decoded absolute level, not merely its remainder.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -633,6 +671,52 @@ mod tests {
         assert!(remaining_level(&mut too_long, 0).is_err());
         assert!(remaining_level(&mut Script(VecDeque::new()), 32).is_err());
     }
+    #[test]
+    fn extended_remainder_normative_vectors_and_truncations() {
+        struct Bounded(VecDeque<bool>);
+        impl ResidualBins for Bounded {
+            fn decision(&mut self, _: Syntax, _: usize) -> Result<bool> {
+                Err(invalid("unexpected context bin"))
+            }
+            fn bypass(&mut self) -> Result<bool> {
+                self.0.pop_front().ok_or_else(|| invalid("truncated bypass bins"))
+            }
+        }
+        // TR prefixes followed by limited EGk extension and suffix.
+        for (bits, rice, depth, expected) in [
+            ("0", 0, 12, 0),
+            ("1110", 0, 12, 3),
+            ("11010", 2, 12, 10),
+            ("111100", 0, 12, 4),
+            ("111101", 0, 12, 5),
+            ("11111000", 0, 12, 6),
+            ("11111011", 0, 12, 9),
+            ("1111110000", 0, 12, 10),
+        ] {
+            let bins: VecDeque<_> = bits.bytes().map(|b| b == b'1').collect();
+            let mut full = Bounded(bins.clone());
+            assert_eq!(remaining_level_extended(&mut full, rice, depth).unwrap(), expected);
+            assert!(full.0.is_empty());
+            for cut in 0..bins.len() {
+                let mut short = Bounded(bins.iter().take(cut).cloned().collect());
+                assert!(remaining_level_extended(&mut short, rice, depth).is_err());
+            }
+        }
+        // At the maximum extension no terminating zero is consumed.
+        for depth in [8u8, 10, 12, 16] {
+            let range = (depth + 6).max(15);
+            let maximum = 28 - range;
+            let mut bins = Bounded(std::iter::repeat(true)
+                .take(usize::from(4 + maximum + range)).collect());
+            let expected = 4 + (((1u32 << maximum) - 1) << 1) + (1u32 << range) - 1;
+            assert_eq!(remaining_level_extended(&mut bins, 0, depth).unwrap(), expected);
+            assert!(bins.0.is_empty());
+        }
+        for (rice, depth) in [(0, 7), (0, 17), (18, 12)] {
+            assert!(remaining_level_extended(&mut Bounded(VecDeque::new()), rice, depth).is_err());
+        }
+    }
+
     #[test]
     fn rice_adaptation_uses_previous_absolute_level_and_caps_at_four() {
         let mut state = RiceState::default();

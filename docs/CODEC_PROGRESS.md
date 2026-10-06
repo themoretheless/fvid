@@ -2289,3 +2289,14 @@ unqualified. Benchmark measurements have not yet been run for this change.
 Offline validation: codec library 363 passed / one ignored; owned media library
 334 passed / one ignored; CPU HEVC NVDEC preparation 18 passed. After formatting
 only the changed functions, tiled-segment pixel acceptance was rerun successfully.
+
+### HEVC extended-precision coefficient primitive (2026-10-06)
+
+Added the limited EGk coefficient remainder primitive from H.265 9.3.3.4 and
+9.3.3.11. Tests cover explicit bypass-bin vectors, every truncation of those
+vectors, maximum-length escapes without an extra terminator, and invalid depth
+or Rice inputs. The SPS flag remains refused: this primitive is not connected
+to picture decoding, and extended transform scaling/clipping is still missing.
+The current HM 18 oracle explicitly rejects ExtendedPrecision because it was
+built without RExt__HIGH_BIT_DEPTH_SUPPORT. A high-bit-depth HM build is needed
+to generate the owned pixel-acceptance fixture; no acceptance claim is made.
