@@ -20,9 +20,9 @@
 //! passed over rather than subtracted.
 use super::av1::{Obu, Obus};
 use super::av1_sequence::Sequence;
+use crate::Result;
 use crate::color::hdr::{ColourDescription, HdrMetadata, MasteringDisplay};
 use crate::invalid;
-use crate::Result;
 
 /// An OBU carrying a `metadata_type` and the syntax that type names.
 pub const OBU_METADATA: u8 = 5;
@@ -321,19 +321,23 @@ mod tests {
         let av1 = hdr_from_packet(&metadata_obu(METADATA_HDR_MDCV, &bytes)).unwrap();
         assert!(!av1.mastering.unwrap().is_hdr10());
         assert!((av1.mastering.unwrap().red.x - 0.1297).abs() < 0.001);
-        assert!(HdrMetadata::from_mdcv(&bytes)
-            .unwrap()
-            .mastering
-            .unwrap()
-            .is_hdr10());
+        assert!(
+            HdrMetadata::from_mdcv(&bytes)
+                .unwrap()
+                .mastering
+                .unwrap()
+                .is_hdr10()
+        );
     }
 
     #[test]
     fn other_metadata_types_and_obus_of_other_kinds_state_nothing() {
         for kind in [3u64, 4, 5, 255] {
-            assert!(hdr_from_packet(&metadata_obu(kind, &[0; MDCV_BODY_LEN]))
-                .unwrap()
-                .is_empty());
+            assert!(
+                hdr_from_packet(&metadata_obu(kind, &[0; MDCV_BODY_LEN]))
+                    .unwrap()
+                    .is_empty()
+            );
         }
         // A sequence header OBU is not read for metadata.
         let packet = vec![0x0a, 0x04, 0x1f, 0x00, 0x00, 0x00];

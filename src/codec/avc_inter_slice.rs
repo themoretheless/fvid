@@ -25,6 +25,7 @@ pub struct InterCavlcSlice<'a> {
     counts: CoefficientField,
     intra: Option<super::avc_macroblock::IntraCavlcReader<'a>>,
     address: usize,
+    previous_address: Option<usize>,
     limit: usize,
     pending: usize,
     need_run: bool,
@@ -70,6 +71,7 @@ impl<'a> InterCavlcSlice<'a> {
             counts,
             intra: None,
             address: first,
+            previous_address: None,
             limit,
             pending: 0,
             need_run: true,
@@ -208,6 +210,7 @@ impl<'a> InterCavlcSlice<'a> {
         )
     }
     fn advance_address(&mut self) -> Result<()> {
+        self.previous_address = Some(self.address);
         self.address = if self.slice_group_map.is_empty() {
             self.address + 1
         } else {
@@ -219,7 +222,10 @@ impl<'a> InterCavlcSlice<'a> {
         self.pair_fields.get(pair).copied().flatten()
     }
     pub fn field_decoding(&self) -> bool {
-        self.mbaff && self.address > 0 && self.pair_field((self.address - 1) / 2) == Some(true)
+        self.mbaff
+            && self
+                .previous_address
+                .is_some_and(|a| self.pair_field(a / 2) == Some(true))
     }
     pub fn bit_position(&self) -> usize {
         self.bits.position()

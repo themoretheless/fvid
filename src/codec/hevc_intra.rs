@@ -190,7 +190,12 @@ impl References {
         output: &mut [u16],
     ) -> Result<()> {
         self.predict_with_filters(
-            mode, chroma, strong_smoothing, filter_references, true, output,
+            mode,
+            chroma,
+            strong_smoothing,
+            filter_references,
+            true,
+            output,
         )
     }
     pub fn predict_with_filters(
@@ -202,14 +207,26 @@ impl References {
         filter_boundary: bool,
         output: &mut [u16],
     ) -> Result<()> {
-        self.predict_with_full_chroma_filters(mode, chroma, false, strong_smoothing,
-            filter_references, filter_boundary, output)
+        self.predict_with_full_chroma_filters(
+            mode,
+            chroma,
+            false,
+            strong_smoothing,
+            filter_references,
+            filter_boundary,
+            output,
+        )
     }
     /// 4:4:4 chroma allows weak reference smoothing, while strong smoothing
     /// and prediction boundary correction remain exclusive to luma.
     pub fn predict_with_full_chroma_filters(
-        &self, mode: u8, chroma: bool, full_chroma: bool,
-        strong_smoothing: bool, filter_references: bool, filter_boundary: bool,
+        &self,
+        mode: u8,
+        chroma: bool,
+        full_chroma: bool,
+        strong_smoothing: bool,
+        filter_references: bool,
+        filter_boundary: bool,
         output: &mut [u16],
     ) -> Result<()> {
         if mode > 34 {
@@ -488,32 +505,57 @@ mod tests {
         let mut weak = vec![0; 1024];
         let mut full = vec![0; 1024];
         let mut subsampled = vec![0; 1024];
-        reference.predict_with_filters(0, false, false, true, false, &mut weak).unwrap();
-        reference.predict_with_full_chroma_filters(0, true, true, true, true, true, &mut full).unwrap();
-        reference.predict_with_filters(0, true, true, true, true, &mut subsampled).unwrap();
+        reference
+            .predict_with_filters(0, false, false, true, false, &mut weak)
+            .unwrap();
+        reference
+            .predict_with_full_chroma_filters(0, true, true, true, true, true, &mut full)
+            .unwrap();
+        reference
+            .predict_with_filters(0, true, true, true, true, &mut subsampled)
+            .unwrap();
         assert_eq!(full, weak);
         assert_ne!(full, subsampled);
-        let reference = References::new(3, 8, Some(120), &[Some(200);16], &[Some(40);16]).unwrap();
-        for mode in [1,10,26] {
-            let mut base = vec![0;64]; let mut full = vec![0;64]; let mut luma = vec![0;64];
-            reference.predict_with_filters(mode, true, true, true, true, &mut base).unwrap();
-            reference.predict_with_full_chroma_filters(mode, true, true, true, true, true, &mut full).unwrap();
-            reference.predict_with_filters(mode, false, true, true, true, &mut luma).unwrap();
+        let reference =
+            References::new(3, 8, Some(120), &[Some(200); 16], &[Some(40); 16]).unwrap();
+        for mode in [1, 10, 26] {
+            let mut base = vec![0; 64];
+            let mut full = vec![0; 64];
+            let mut luma = vec![0; 64];
+            reference
+                .predict_with_filters(mode, true, true, true, true, &mut base)
+                .unwrap();
+            reference
+                .predict_with_full_chroma_filters(mode, true, true, true, true, true, &mut full)
+                .unwrap();
+            reference
+                .predict_with_filters(mode, false, true, true, true, &mut luma)
+                .unwrap();
             assert_eq!(full, base);
             assert_ne!(full, luma);
         }
     }
     #[test]
     fn disabled_dc_and_axial_boundaries_keep_unmodified_predictors_at_every_depth() {
-        for depth in [8,10,12,14,16] {
-            let scale=1u16 << (depth-8);
-            let r=References::new(3,depth,Some(120*scale),&[Some(200*scale);16],&[Some(40*scale);16]).unwrap();
-            for (mode,level) in [(1,120),(10,40),(26,200)] {
-                let mut disabled=vec![0;64];let mut enabled=vec![0;64];
-                r.predict_with_filters(mode,false,false,false,false,&mut disabled).unwrap();
-                r.predict_with_filters(mode,false,false,false,true,&mut enabled).unwrap();
-                assert_eq!(disabled,vec![level*scale;64]);
-                assert_ne!(enabled,disabled);
+        for depth in [8, 10, 12, 14, 16] {
+            let scale = 1u16 << (depth - 8);
+            let r = References::new(
+                3,
+                depth,
+                Some(120 * scale),
+                &[Some(200 * scale); 16],
+                &[Some(40 * scale); 16],
+            )
+            .unwrap();
+            for (mode, level) in [(1, 120), (10, 40), (26, 200)] {
+                let mut disabled = vec![0; 64];
+                let mut enabled = vec![0; 64];
+                r.predict_with_filters(mode, false, false, false, false, &mut disabled)
+                    .unwrap();
+                r.predict_with_filters(mode, false, false, false, true, &mut enabled)
+                    .unwrap();
+                assert_eq!(disabled, vec![level * scale; 64]);
+                assert_ne!(enabled, disabled);
             }
         }
     }

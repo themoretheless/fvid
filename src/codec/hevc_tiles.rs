@@ -396,11 +396,17 @@ mod fixture_tests {
 
     #[test]
     fn cabac_alignment_fixture_admits_full_chroma_metadata_and_picture() {
-        let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-cabac-alignment-444-rext12.mp4");
-        let mut input = crate::container::mp4::Mp4Reader::open(
-            std::io::Cursor::new(data), Default::default()).unwrap();
+        let data = include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-cabac-alignment-444-rext12.mp4"
+        );
+        let mut input =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
         let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
-            &input.tracks()[0].configuration, 16 << 20).unwrap();
+            &input.tracks()[0].configuration,
+            16 << 20,
+        )
+        .unwrap();
         let (sps, _) = decoder.parameters();
         assert!(sps.cabac_bypass_alignment && sps.extended_precision);
         assert_eq!(sps.chroma_format, 3);
@@ -408,15 +414,34 @@ mod fixture_tests {
         let mut packet = Vec::new();
         input.read_packet(0, 0, &mut packet).unwrap();
         let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
-        assert!(decoded.picture.planes.iter().all(|p| p.dimensions() == [64,64]));
+        assert!(
+            decoded
+                .picture
+                .planes
+                .iter()
+                .all(|p| p.dimensions() == [64, 64])
+        );
     }
 
     #[test]
     fn full_chroma_pixels_match_hm_and_reset() {
         macro_rules! fixture {
             ($stem:literal, $depth:literal) => {
-                (include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".mp4")).as_slice(),
-                 include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".yuv")).as_slice(), $depth)
+                (
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".mp4"
+                    ))
+                    .as_slice(),
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".yuv"
+                    ))
+                    .as_slice(),
+                    $depth,
+                )
             };
         }
         for (data, expected, depth) in [
@@ -430,13 +455,21 @@ mod fixture_tests {
             fixture!("hevc-full-chroma-parallel-rext12", 12),
         ] {
             let mut input = crate::container::mp4::Mp4Reader::open(
-                std::io::Cursor::new(data), Default::default()).unwrap();
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
             let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
-                &input.tracks()[0].configuration, 16 << 20).unwrap();
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
             assert_eq!(decoder.parameters().0.chroma_format, 3);
             assert_eq!(decoder.parameters().0.depth, [depth; 2]);
             for pass in 0..2 {
-                if pass != 0 { decoder.reset(); }
+                if pass != 0 {
+                    decoder.reset();
+                }
                 let mut actual = Vec::new();
                 let mut packet = Vec::new();
                 for frame in 0..3 {
@@ -444,15 +477,25 @@ mod fixture_tests {
                     let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
                     for plane in &decoded.picture.planes {
                         for &sample in plane.samples() {
-                            if depth == 8 { actual.push(u8::try_from(sample).unwrap()); }
-                            else { actual.extend_from_slice(&sample.to_le_bytes()); }
+                            if depth == 8 {
+                                actual.push(u8::try_from(sample).unwrap());
+                            } else {
+                                actual.extend_from_slice(&sample.to_le_bytes());
+                            }
                         }
                     }
                 }
                 assert_eq!(actual.len(), expected.len());
                 if actual != expected {
-                    let index = actual.iter().zip(expected).position(|(a,b)| a != b).unwrap();
-                    panic!("depth {depth}, pass {pass}: first pixel byte mismatch {index}: {} != {}", actual[index], expected[index]);
+                    let index = actual
+                        .iter()
+                        .zip(expected)
+                        .position(|(a, b)| a != b)
+                        .unwrap();
+                    panic!(
+                        "depth {depth}, pass {pass}: first pixel byte mismatch {index}: {} != {}",
+                        actual[index], expected[index]
+                    );
                 }
             }
         }
@@ -462,8 +505,21 @@ mod fixture_tests {
     fn extended_precision_pixels_match_hm_and_reset() {
         macro_rules! fixture {
             ($stem:literal, $depth:literal) => {
-                (include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".mp4")).as_slice(),
-                 include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".yuv")).as_slice(), $depth)
+                (
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".mp4"
+                    ))
+                    .as_slice(),
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".yuv"
+                    ))
+                    .as_slice(),
+                    $depth,
+                )
             };
         }
         for (data, expected, depth) in [
@@ -475,13 +531,21 @@ mod fixture_tests {
             fixture!("hevc-tiles-extended-precision-skip-rice-high12-rext12", 12),
         ] {
             let mut input = crate::container::mp4::Mp4Reader::open(
-                std::io::Cursor::new(data), Default::default()).unwrap();
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
             let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
-                &input.tracks()[0].configuration, 16 << 20).unwrap();
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
             assert!(decoder.parameters().0.extended_precision);
             assert_eq!(decoder.parameters().0.depth, [depth; 2]);
             for pass in 0..2 {
-                if pass != 0 { decoder.reset(); }
+                if pass != 0 {
+                    decoder.reset();
+                }
                 let mut actual = Vec::new();
                 let mut packet = Vec::new();
                 for frame in 0..3 {
@@ -489,8 +553,11 @@ mod fixture_tests {
                     let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
                     for plane in &decoded.picture.planes {
                         for &sample in plane.samples() {
-                            if depth == 8 { actual.push(u8::try_from(sample).unwrap()); }
-                            else { actual.extend_from_slice(&sample.to_le_bytes()); }
+                            if depth == 8 {
+                                actual.push(u8::try_from(sample).unwrap());
+                            } else {
+                                actual.extend_from_slice(&sample.to_le_bytes());
+                            }
                         }
                     }
                 }
@@ -565,9 +632,11 @@ mod fixture_tests {
                 false
             ),
         ] {
-            let mut input =
-                crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
-                    .unwrap();
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
             let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
                 &input.tracks()[0].configuration,
                 16 << 20,

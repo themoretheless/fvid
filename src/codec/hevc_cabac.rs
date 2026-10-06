@@ -118,9 +118,14 @@ fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
         ][init],
         Syntax::CrossComponentMagnitude => &[154; 8],
         Syntax::CrossComponentSign => &[154; 2],
-        Syntax::ResidualAct | Syntax::PaletteMode | Syntax::PaletteCopyAbove | Syntax::PaletteTranspose => &[154],
-        Syntax::PaletteRun => &[154;8],
-        Syntax::TransquantBypass | Syntax::ChromaQpOffsetFlag | Syntax::ChromaQpOffsetIndex => &[154],
+        Syntax::ResidualAct
+        | Syntax::PaletteMode
+        | Syntax::PaletteCopyAbove
+        | Syntax::PaletteTranspose => &[154],
+        Syntax::PaletteRun => &[154; 8],
+        Syntax::TransquantBypass | Syntax::ChromaQpOffsetFlag | Syntax::ChromaQpOffsetIndex => {
+            &[154]
+        }
         Syntax::Skip if init != 0 => &[197, 185, 201],
         Syntax::PredMode if init != 0 => {
             if init == 1 {
@@ -348,7 +353,9 @@ impl<'a> HevcCabac<'a> {
         result
     }
     pub fn align_coefficient_bypass(&mut self) -> Result<()> {
-        if self.failed { return Err(invalid("HEVC CABAC requires reset after error")); }
+        if self.failed {
+            return Err(invalid("HEVC CABAC requires reset after error"));
+        }
         let result = self.arithmetic.align_hevc_bypass();
         self.failed = result.is_err();
         result
@@ -378,8 +385,13 @@ impl<'a> HevcCabac<'a> {
     ) -> Result<[Vec<u16>; 3]> {
         self.read_pcm_with_chroma(log, pcm_depth, depths, 1)
     }
-    pub fn read_pcm_with_chroma(&mut self, log: u8, pcm_depth: [u8;2], depths: [u8;2], chroma_format: u8)
-        -> Result<[Vec<u16>;3]> {
+    pub fn read_pcm_with_chroma(
+        &mut self,
+        log: u8,
+        pcm_depth: [u8; 2],
+        depths: [u8; 2],
+        chroma_format: u8,
+    ) -> Result<[Vec<u16>; 3]> {
         if self.failed
             || !self.arithmetic.is_terminated()
             || !(3..=5).contains(&log)
@@ -398,9 +410,21 @@ impl<'a> HevcCabac<'a> {
                 }
             }
             let mut samples = [Vec::new(), Vec::new(), Vec::new()];
-            for (c, plane) in samples.iter_mut().take(if chroma_format == 0 {1} else {3}).enumerate() {
+            for (c, plane) in samples
+                .iter_mut()
+                .take(if chroma_format == 0 { 1 } else { 3 })
+                .enumerate()
+            {
                 let chroma = usize::from(c != 0);
-                let subsampling = if c == 0 { 0 } else { match chroma_format { 1 => 2, 2 => 1, _ => 0 } };
+                let subsampling = if c == 0 {
+                    0
+                } else {
+                    match chroma_format {
+                        1 => 2,
+                        2 => 1,
+                        _ => 0,
+                    }
+                };
                 let count = 1usize << (2 * log - subsampling);
                 plane.reserve_exact(count);
                 for _ in 0..count {
@@ -520,26 +544,37 @@ mod tests {
     #[test]
     fn cross_component_banks_initialize_adapt_and_survive_context_snapshots() {
         let data = [0u8; 64];
-        for (slice,swap) in [(SliceType::I,false),(SliceType::P,false),
-            (SliceType::P,true),(SliceType::B,false),(SliceType::B,true)] {
-            for qp in [0,24,51] {
-                let mut b = HevcCabac::new(&data,0,slice,swap,qp).unwrap();
-                for (syntax,length) in [(Syntax::CrossComponentMagnitude,8),(Syntax::CrossComponentSign,2)] {
+        for (slice, swap) in [
+            (SliceType::I, false),
+            (SliceType::P, false),
+            (SliceType::P, true),
+            (SliceType::B, false),
+            (SliceType::B, true),
+        ] {
+            for qp in [0, 24, 51] {
+                let mut b = HevcCabac::new(&data, 0, slice, swap, qp).unwrap();
+                for (syntax, length) in [
+                    (Syntax::CrossComponentMagnitude, 8),
+                    (Syntax::CrossComponentSign, 2),
+                ] {
                     let bank = index(syntax);
-                    assert_eq!(b.contexts[bank].len(),length);
+                    assert_eq!(b.contexts[bank].len(), length);
                     for context in 0..length {
-                        assert_eq!(b.contexts[bank][context],Context::hevc(154,qp));
-                        b.decision(syntax,context).unwrap();
+                        assert_eq!(b.contexts[bank][context], Context::hevc(154, qp));
+                        b.decision(syntax, context).unwrap();
                     }
                 }
                 let saved = b.contexts().unwrap();
-                let restored = HevcCabac::from_contexts(&data,0,&saved).unwrap();
-                assert_eq!(restored.contexts,b.contexts);
+                let restored = HevcCabac::from_contexts(&data, 0, &saved).unwrap();
+                assert_eq!(restored.contexts, b.contexts);
             }
         }
-        for (syntax,length) in [(Syntax::CrossComponentMagnitude,8),(Syntax::CrossComponentSign,2)] {
-            let mut b = HevcCabac::new(&data,0,SliceType::I,false,24).unwrap();
-            assert!(b.decision(syntax,length).is_err());
+        for (syntax, length) in [
+            (Syntax::CrossComponentMagnitude, 8),
+            (Syntax::CrossComponentSign, 2),
+        ] {
+            let mut b = HevcCabac::new(&data, 0, SliceType::I, false, 24).unwrap();
+            assert!(b.decision(syntax, length).is_err());
             assert!(b.bypass().is_err());
         }
     }
@@ -594,8 +629,10 @@ mod pcm_tests {
             assert!(bins.terminate().unwrap());
             let planes = bins.read_pcm_with_chroma(3, [8; 2], [depth; 2], 2).unwrap();
             assert_eq!(planes.each_ref().map(Vec::len), [64, 32, 32]);
-            assert_eq!(planes.into_iter().flatten().collect::<Vec<_>>(),
-                (0u16..128).map(|v| v << (depth - 8)).collect::<Vec<_>>());
+            assert_eq!(
+                planes.into_iter().flatten().collect::<Vec<_>>(),
+                (0u16..128).map(|v| v << (depth - 8)).collect::<Vec<_>>()
+            );
             assert_eq!(bins.contexts, banks);
             assert_eq!(bins.bit_position(), 130 * 8 + 9);
             assert!(!bins.bypass().unwrap());
@@ -611,12 +648,12 @@ mod pcm_tests {
     fn full_chroma_pcm_reads_three_equal_planes_and_restarts_entropy() {
         let mut data = vec![0xfe, 0x80];
         data.extend(0..192);
-        data.extend([0,0]);
-        for depth in [8,10,12] {
+        data.extend([0, 0]);
+        for depth in [8, 10, 12] {
             let mut bins = HevcCabac::new(&data, 0, SliceType::I, false, 24).unwrap();
             let banks = bins.contexts;
             assert!(bins.terminate().unwrap());
-            let planes = bins.read_pcm_with_chroma(3, [8;2], [depth;2], 3).unwrap();
+            let planes = bins.read_pcm_with_chroma(3, [8; 2], [depth; 2], 3).unwrap();
             for (component, plane) in planes.iter().enumerate() {
                 assert_eq!(plane.len(), 64);
                 for (index, &sample) in plane.iter().enumerate() {
@@ -630,7 +667,7 @@ mod pcm_tests {
         for cut in 2..data.len() {
             let mut bins = HevcCabac::new(&data[..cut], 0, SliceType::I, false, 24).unwrap();
             assert!(bins.terminate().unwrap());
-            assert!(bins.read_pcm_with_chroma(3, [8;2], [12;2], 3).is_err());
+            assert!(bins.read_pcm_with_chroma(3, [8; 2], [12; 2], 3).is_err());
             assert!(bins.bypass().is_err());
         }
     }
@@ -686,20 +723,37 @@ mod palette_context_tests {
     #[test]
     fn palette_banks_follow_tables_and_survive_substream_restore() {
         for init in 0..3 {
-            for (syntax,n) in [(Syntax::PaletteMode,1),(Syntax::PaletteRun,8),
-                (Syntax::PaletteCopyAbove,1),(Syntax::PaletteTranspose,1)] {
-                assert_eq!(values(syntax,init).unwrap(),vec![154;n]);
+            for (syntax, n) in [
+                (Syntax::PaletteMode, 1),
+                (Syntax::PaletteRun, 8),
+                (Syntax::PaletteCopyAbove, 1),
+                (Syntax::PaletteTranspose, 1),
+            ] {
+                assert_eq!(values(syntax, init).unwrap(), vec![154; n]);
             }
         }
-        for slice in [SliceType::I,SliceType::P,SliceType::B] {
-            let mut cabac=HevcCabac::new(&[0;64],0,slice,false,22).unwrap();
-            for syntax in [Syntax::PaletteMode,Syntax::PaletteRun,Syntax::PaletteCopyAbove,Syntax::PaletteTranspose] {
-                cabac.decision(syntax,0).unwrap();
+        for slice in [SliceType::I, SliceType::P, SliceType::B] {
+            let mut cabac = HevcCabac::new(&[0; 64], 0, slice, false, 22).unwrap();
+            for syntax in [
+                Syntax::PaletteMode,
+                Syntax::PaletteRun,
+                Syntax::PaletteCopyAbove,
+                Syntax::PaletteTranspose,
+            ] {
+                cabac.decision(syntax, 0).unwrap();
             }
-            let saved=cabac.contexts().unwrap();
-            let resumed=HevcCabac::from_contexts(&[0;64],0,&saved).unwrap();
-            for syntax in [Syntax::PaletteMode,Syntax::PaletteRun,Syntax::PaletteCopyAbove,Syntax::PaletteTranspose] {
-                assert_eq!(cabac.contexts[index(syntax)],resumed.contexts[index(syntax)]);
+            let saved = cabac.contexts().unwrap();
+            let resumed = HevcCabac::from_contexts(&[0; 64], 0, &saved).unwrap();
+            for syntax in [
+                Syntax::PaletteMode,
+                Syntax::PaletteRun,
+                Syntax::PaletteCopyAbove,
+                Syntax::PaletteTranspose,
+            ] {
+                assert_eq!(
+                    cabac.contexts[index(syntax)],
+                    resumed.contexts[index(syntax)]
+                );
             }
         }
     }

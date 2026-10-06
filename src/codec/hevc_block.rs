@@ -20,7 +20,9 @@ pub struct Config {
     pub sign_hiding: bool,
 }
 impl Config {
-    pub fn scan(self) -> Result<Scan> { self.scan_with_full_chroma(false) }
+    pub fn scan(self) -> Result<Scan> {
+        self.scan_with_full_chroma(false)
+    }
     pub fn scan_with_full_chroma(self, full_chroma: bool) -> Result<Scan> {
         if !(2..=5).contains(&self.log2_size)
             || self.component > 2
@@ -29,7 +31,10 @@ impl Config {
             return Err(invalid("invalid HEVC residual block configuration"));
         }
         Ok(match self.intra_mode {
-            Some(mode) if self.log2_size == 2 || (self.log2_size == 3 && (self.component == 0 || full_chroma)) => {
+            Some(mode)
+                if self.log2_size == 2
+                    || (self.log2_size == 3 && (self.component == 0 || full_chroma)) =>
+            {
                 match mode {
                     6..=14 => Scan::Vertical,
                     22..=30 => Scan::Horizontal,
@@ -79,13 +84,32 @@ pub(crate) fn read_with_tools(
     max_skip_log2: u8,
     persistent_rice: bool,
 ) -> Result<Coefficients> {
-    read_with_precision(b, c, rotation_enabled, context_enabled, rdpcm_enabled,
-        explicit_rdpcm_enabled, max_skip_log2, persistent_rice, false, false, false)
+    read_with_precision(
+        b,
+        c,
+        rotation_enabled,
+        context_enabled,
+        rdpcm_enabled,
+        explicit_rdpcm_enabled,
+        max_skip_log2,
+        persistent_rice,
+        false,
+        false,
+        false,
+    )
 }
 pub(crate) fn read_with_precision(
-    b: &mut impl ResidualBins, c: Config, rotation_enabled: bool,
-    context_enabled: bool, rdpcm_enabled: bool, explicit_rdpcm_enabled: bool,
-    max_skip_log2: u8, persistent_rice: bool, extended_precision: bool, alignment: bool, full_chroma: bool,
+    b: &mut impl ResidualBins,
+    c: Config,
+    rotation_enabled: bool,
+    context_enabled: bool,
+    rdpcm_enabled: bool,
+    explicit_rdpcm_enabled: bool,
+    max_skip_log2: u8,
+    persistent_rice: bool,
+    extended_precision: bool,
+    alignment: bool,
+    full_chroma: bool,
 ) -> Result<Coefficients> {
     let scan = c.scan_with_full_chroma(full_chroma)?;
     if !(2..=5).contains(&max_skip_log2) {
@@ -98,17 +122,24 @@ pub(crate) fn read_with_precision(
         && c.transform_skip_enabled
         && c.log2_size <= max_skip_log2
         && b.decision(Syntax::TransformSkip, usize::from(c.component != 0))?;
-    let mut rdpcm = c.intra_mode.filter(|&mode| {
-        rdpcm_enabled && (skip || c.transquant_bypass) && matches!(mode, 10 | 26)
-    });
-    if c.intra_mode.is_none() && explicit_rdpcm_enabled && (skip || c.transquant_bypass)
+    let mut rdpcm = c
+        .intra_mode
+        .filter(|&mode| rdpcm_enabled && (skip || c.transquant_bypass) && matches!(mode, 10 | 26));
+    if c.intra_mode.is_none()
+        && explicit_rdpcm_enabled
+        && (skip || c.transquant_bypass)
         && b.decision(Syntax::ExplicitRdpcmFlag, usize::from(c.component != 0))?
     {
-        rdpcm = Some(if b.decision(Syntax::ExplicitRdpcmDirection, usize::from(c.component != 0))? {
-            26
-        } else {
-            10
-        });
+        rdpcm = Some(
+            if b.decision(
+                Syntax::ExplicitRdpcmDirection,
+                usize::from(c.component != 0),
+            )? {
+                26
+            } else {
+                10
+            },
+        );
     }
     let coefficients = hevc_residual::read_block_with_precision(
         b,
@@ -117,7 +148,9 @@ pub(crate) fn read_with_precision(
         scan,
         c.sign_hiding && !c.transquant_bypass && rdpcm.is_none(),
         context_enabled && (skip || c.transquant_bypass),
-        persistent_rice.then_some(usize::from(c.component != 0) * 2 + usize::from(skip || c.transquant_bypass)),
+        persistent_rice.then_some(
+            usize::from(c.component != 0) * 2 + usize::from(skip || c.transquant_bypass),
+        ),
         extended_precision.then_some(c.bit_depth),
         alignment,
     )?;
@@ -178,7 +211,8 @@ impl Coefficients {
                         (y > 0).then(|| (y - 1) * n + x)
                     };
                     if let Some(previous) = previous {
-                        out[y * n + x] = out[y * n + x].checked_add(out[previous])
+                        out[y * n + x] = out[y * n + x]
+                            .checked_add(out[previous])
                             .ok_or_else(|| invalid("HEVC RDPCM residual overflow"))?;
                     }
                 }
@@ -265,8 +299,10 @@ mod tests {
             ]));
             let mut scratch = Vec::new();
             let mut out = Vec::new();
-            read_with_tools(&mut b, c, false, false, false, false, log, false).unwrap()
-                .reconstruct(&ScalingLists::default(), &mut scratch, &mut out).unwrap();
+            read_with_tools(&mut b, c, false, false, false, false, log, false)
+                .unwrap()
+                .reconstruct(&ScalingLists::default(), &mut scratch, &mut out)
+                .unwrap();
             assert_eq!(out[0], -1);
             assert!(out[1..].iter().all(|&v| v == 0));
             assert!(b.0.is_empty());
@@ -292,8 +328,10 @@ mod tests {
                 ]);
                 let mut scratch = Vec::new();
                 let mut out = Vec::new();
-                read_with_rotation(&mut b, c, true).unwrap()
-                    .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out).unwrap();
+                read_with_rotation(&mut b, c, true)
+                    .unwrap()
+                    .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
+                    .unwrap();
                 let mut expected = vec![0; 16];
                 expected[if intra { 15 } else { 0 }] = if bypass { -2 } else { -1 };
                 assert_eq!(out, expected);
@@ -327,9 +365,13 @@ mod tests {
                     .unwrap();
                 let value = if bypass { -2 } else { -1 };
                 let expected = if mode == 10 {
-                    vec![value, value, value, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    vec![
+                        value, value, value, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ]
                 } else {
-                    vec![value, 0, 0, 0, value, 0, 0, 0, value, 0, 0, 0, value, 0, 0, 0]
+                    vec![
+                        value, 0, 0, 0, value, 0, 0, 0, value, 0, 0, 0, value, 0, 0, 0,
+                    ]
                 };
                 assert_eq!(out, expected);
                 assert!(b.0.is_empty());

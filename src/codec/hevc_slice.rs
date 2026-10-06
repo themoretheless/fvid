@@ -148,12 +148,16 @@ impl SliceHeader {
             .ok_or_else(|| invalid("HEVC CTU address space exceeds supported range"))?
             as u32;
         let address = b.read((32 - (count - 1).leading_zeros()) as u8)?;
-        if address >= count { return Err(invalid("HEVC dependent segment address out of range")); }
+        if address >= count {
+            return Err(invalid("HEVC dependent segment address out of range"));
+        }
         let increasing = if let Some(tiles) = &pps.tiles {
             let dimensions = sps.dimensions.map(|v| u64::from(v).div_ceil(side) as u32);
             super::hevc_tiles::tile_scan_address(tiles, dimensions, address)?
                 > super::hevc_tiles::tile_scan_address(tiles, dimensions, previous.address)?
-        } else { address > previous.address };
+        } else {
+            address > previous.address
+        };
         if !increasing {
             return Err(invalid("HEVC dependent segment address out of range"));
         }
@@ -221,7 +225,8 @@ impl SliceHeader {
             1 => SliceType::P,
             _ => SliceType::I,
         };
-        if payload.header.is_irap() && slice_type != SliceType::I && !pps.current_picture_reference {
+        if payload.header.is_irap() && slice_type != SliceType::I && !pps.current_picture_reference
+        {
             return Err(invalid("HEVC IRAP slice must be intra"));
         }
         let picture_output = if pps.output_flag_present {
@@ -272,13 +277,19 @@ impl SliceHeader {
                 short_term_bit_range = short_term_start..b.position();
             }
             if sps.long_term_present {
-                let capacity = sps.ordering.last()
+                let capacity = sps
+                    .ordering
+                    .last()
                     .ok_or_else(|| invalid("HEVC SPS has no DPB ordering"))?
-                    .max_decoded_pictures.saturating_sub(1);
-                let remaining = usize::from(capacity).checked_sub(short_term.len())
+                    .max_decoded_pictures
+                    .saturating_sub(1);
+                let remaining = usize::from(capacity)
+                    .checked_sub(short_term.len())
                     .ok_or_else(|| invalid("HEVC short-term reference count exceeds DPB"))?;
                 long_term = super::hevc_long_term::read_long_term(
-                    b, &sps.long_term, sps.poc_bits,
+                    b,
+                    &sps.long_term,
+                    sps.poc_bits,
                     u8::try_from(remaining).map_err(|_| invalid("HEVC DPB capacity overflow"))?,
                 )?;
             }
@@ -316,7 +327,8 @@ impl SliceHeader {
                 }
             }
             let total = short_term.iter().filter(|r| r.used).count()
-                + long_term.iter().filter(|r| r.used).count() + usize::from(pps.current_picture_reference);
+                + long_term.iter().filter(|r| r.used).count()
+                + usize::from(pps.current_picture_reference);
             if total == 0 {
                 return Err(invalid("HEVC inter slice has no current references"));
             }
@@ -339,7 +351,9 @@ impl SliceHeader {
                 }
             }
             #[cfg(test)]
-            { list_modification_bit_range = list_modification_start..b.position(); }
+            {
+                list_modification_bit_range = list_modification_start..b.position();
+            }
             mvd_l1_zero = slice_type == SliceType::B && b.bit()?;
             cabac_init = pps.cabac_init_present && b.bit()?;
             if temporal_mvp {
@@ -370,18 +384,30 @@ impl SliceHeader {
                 let mut flags = 0;
                 for list in 0..if slice_type == SliceType::B { 2 } else { 1 } {
                     let selected = super::hevc_reference_list::select(
-                        total-usize::from(pps.current_picture_reference),pps.current_picture_reference,
-                        references[list] as usize,list_modification[list].as_deref(),list)?;
+                        total - usize::from(pps.current_picture_reference),
+                        pps.current_picture_reference,
+                        references[list] as usize,
+                        list_modification[list].as_deref(),
+                        list,
+                    )?;
                     let mut luma_flags = Vec::new();
                     let mut chroma_flags = vec![false; references[list] as usize];
                     for i in 0..references[list] as usize {
-                        let flag = if selected[i] == super::hevc_reference_list::Source::Current {false} else {b.bit()?};
+                        let flag = if selected[i] == super::hevc_reference_list::Source::Current {
+                            false
+                        } else {
+                            b.bit()?
+                        };
                         flags += usize::from(flag);
                         luma_flags.push(flag);
                     }
                     if chroma {
-                        for (i,flag) in chroma_flags.iter_mut().enumerate() {
-                            *flag = if selected[i] == super::hevc_reference_list::Source::Current {false} else {b.bit()?};
+                        for (i, flag) in chroma_flags.iter_mut().enumerate() {
+                            *flag = if selected[i] == super::hevc_reference_list::Source::Current {
+                                false
+                            } else {
+                                b.bit()?
+                            };
                             flags += 2 * usize::from(*flag);
                         }
                     }
@@ -426,9 +452,12 @@ impl SliceHeader {
             }
             max_merge_candidates = 5 - ue(b, 4)? as u8;
         }
-        let use_integer_mv = if sps.motion_vector_resolution_control == 2 && slice_type != SliceType::I {
-            b.bit()?
-        } else { sps.motion_vector_resolution_control == 1 };
+        let use_integer_mv =
+            if sps.motion_vector_resolution_control == 2 && slice_type != SliceType::I {
+                b.bit()?
+            } else {
+                sps.motion_vector_resolution_control == 1
+            };
         let min_qp = -6 * (i32::from(sps.depth[0]) - 8);
         let qp = pps
             .initial_qp

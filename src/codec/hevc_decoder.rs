@@ -235,8 +235,14 @@ impl HevcDecoder {
                 let order = |address| {
                     if let Some(tiles) = &pps.tiles {
                         let side = 1u32 << sps.coding_block_log2[1];
-                        super::hevc_tiles::tile_scan_address(tiles, sps.dimensions.map(|v| v.div_ceil(side)), address)
-                    } else { Ok(address) }
+                        super::hevc_tiles::tile_scan_address(
+                            tiles,
+                            sps.dimensions.map(|v| v.div_ceil(side)),
+                            address,
+                        )
+                    } else {
+                        Ok(address)
+                    }
                 };
                 if header.first || order(header.address)? <= order(previous.address)? {
                     return Err(invalid(
@@ -337,15 +343,21 @@ impl HevcDecoder {
         let (retained, lists) = reference_lists(&header, poc, &self.references, sps.poc_bits)?;
         let mut slice_lists = vec![lists];
         for other in headers.iter().skip(1) {
-            let (other_retained, other_lists) = reference_lists(other, poc, &self.references, sps.poc_bits)?;
+            let (other_retained, other_lists) =
+                reference_lists(other, poc, &self.references, sps.poc_bits)?;
             if other_retained != retained {
                 return Err(invalid("HEVC slices disagree on reference picture set"));
             }
             slice_lists.push(other_lists);
         }
-        self.references.retain(|r| retained.iter().any(|&(poc, _)| poc == r.poc));
+        self.references
+            .retain(|r| retained.iter().any(|&(poc, _)| poc == r.poc));
         for reference in &mut self.references {
-            reference.long_term = retained.iter().find(|&&(poc, _)| poc == reference.poc).unwrap().1;
+            reference.long_term = retained
+                .iter()
+                .find(|&&(poc, _)| poc == reference.poc)
+                .unwrap()
+                .1;
         }
         let retained_bytes = self
             .references
@@ -440,8 +452,11 @@ fn reference_lists(
             }
             retained.push((target, true));
             if entry.used {
-                let mut reference = references.iter().find(|r| r.poc == target)
-                    .ok_or_else(|| invalid("HEVC long-term current reference is missing"))?.clone();
+                let mut reference = references
+                    .iter()
+                    .find(|r| r.poc == target)
+                    .ok_or_else(|| invalid("HEVC long-term current reference is missing"))?
+                    .clone();
                 reference.long_term = true;
                 long.push(reference);
             }
@@ -456,14 +471,24 @@ fn reference_lists(
         }
         .cloned()
         .collect();
-        let selected = super::hevc_reference_list::select(base.len(),
-            header.current_picture_reference, header.references[list] as usize,
-            header.list_modification[list].as_deref(),list)?;
+        let selected = super::hevc_reference_list::select(
+            base.len(),
+            header.current_picture_reference,
+            header.references[list] as usize,
+            header.list_modification[list].as_deref(),
+            list,
+        )?;
         for entry in selected {
             match entry {
-                super::hevc_reference_list::Source::Decoded(index) => lists[list].push(base[index].clone()),
+                super::hevc_reference_list::Source::Decoded(index) => {
+                    lists[list].push(base[index].clone())
+                }
                 super::hevc_reference_list::Source::Current => {
-                    lists[list].push(Reference {poc,long_term:true,picture:None});
+                    lists[list].push(Reference {
+                        poc,
+                        long_term: true,
+                        picture: None,
+                    });
                 }
             }
         }
@@ -474,52 +499,102 @@ fn reference_lists(
 
 #[cfg(test)]
 mod long_term_list_tests {
-    use super::*;
     use super::super::{hevc_long_term::LongTermReference, hevc_rps::ShortTermReference};
+    use super::*;
     #[test]
     fn mixed_reference_lists_append_long_term_pictures_and_apply_modifications() {
         let data = include_bytes!("../../tests/fixtures/playback-errors/shared-hevc-main.mp4");
-        let mut input = crate::container::mp4::Mp4Reader::open(
-            std::io::Cursor::new(data), Default::default(),
-        ).unwrap();
-        let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+        let mut input =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
+        let mut decoder =
+            HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
         let mut packet = Vec::new();
         input.read_packet(0, 0, &mut packet).unwrap();
         let picture = decoder.decode_packet(&packet).unwrap().unwrap().picture;
         let (sps, pps) = decoder.parameters();
-        let nal = NalUnits::new(&packet, decoder.length).unwrap()
-            .map(|n| n.unwrap()).find(|n| NalHeader::parse(n).unwrap().is_vcl()).unwrap();
+        let nal = NalUnits::new(&packet, decoder.length)
+            .unwrap()
+            .map(|n| n.unwrap())
+            .find(|n| NalHeader::parse(n).unwrap().is_vcl())
+            .unwrap();
         let mut header = SliceHeader::parse(nal, sps, pps, 16 << 20).unwrap();
         header.short_term = vec![
-            ShortTermReference { delta_poc: -1, used: true },
-            ShortTermReference { delta_poc: 1, used: true },
+            ShortTermReference {
+                delta_poc: -1,
+                used: true,
+            },
+            ShortTermReference {
+                delta_poc: 1,
+                used: true,
+            },
         ];
-        header.long_term = vec![LongTermReference { poc_lsb: 3, used: true, msb_cycles: Some(1) }];
+        header.long_term = vec![LongTermReference {
+            poc_lsb: 3,
+            used: true,
+            msb_cycles: Some(1),
+        }];
         header.references = [3, 3];
-        let references: Vec<_> = [34, 36, 19].into_iter().map(|poc| Reference {
-            poc, long_term: false, picture: Some(Arc::clone(&picture)),
-        }).collect();
+        let references: Vec<_> = [34, 36, 19]
+            .into_iter()
+            .map(|poc| Reference {
+                poc,
+                long_term: false,
+                picture: Some(Arc::clone(&picture)),
+            })
+            .collect();
         let (retained, lists) = reference_lists(&header, 35, &references, 4).unwrap();
         assert_eq!(retained, [(34, false), (36, false), (19, true)]);
-        assert_eq!(lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(), [34, 36, 19]);
-        assert_eq!(lists[1].iter().map(|r| r.poc).collect::<Vec<_>>(), [36, 34, 19]);
-        assert_eq!(lists[0].iter().map(|r| r.long_term).collect::<Vec<_>>(), [false, false, true]);
+        assert_eq!(
+            lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(),
+            [34, 36, 19]
+        );
+        assert_eq!(
+            lists[1].iter().map(|r| r.poc).collect::<Vec<_>>(),
+            [36, 34, 19]
+        );
+        assert_eq!(
+            lists[0].iter().map(|r| r.long_term).collect::<Vec<_>>(),
+            [false, false, true]
+        );
         header.list_modification[0] = Some(vec![2, 0, 1]);
         let (_, lists) = reference_lists(&header, 35, &references, 4).unwrap();
-        assert_eq!(lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(), [19, 34, 36]);
+        assert_eq!(
+            lists[0].iter().map(|r| r.poc).collect::<Vec<_>>(),
+            [19, 34, 36]
+        );
         assert!(reference_lists(&header, 35, &references[..2], 4).is_err());
-        header.long_term[0] = LongTermReference { poc_lsb: 2, used: true, msb_cycles: Some(0) };
-        assert!(reference_lists(&header, 35, &references, 4).err().unwrap().to_string().contains("repeats"));
+        header.long_term[0] = LongTermReference {
+            poc_lsb: 2,
+            used: true,
+            msb_cycles: Some(0),
+        };
+        assert!(
+            reference_lists(&header, 35, &references, 4)
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("repeats")
+        );
         // The same retained POC with a different classification is a different RPS.
-        header.short_term = vec![ShortTermReference { delta_poc: -1, used: true }];
+        header.short_term = vec![ShortTermReference {
+            delta_poc: -1,
+            used: true,
+        }];
         header.long_term.clear();
         header.references = [1, 1];
         header.list_modification = [None, None];
         let (short_set, _) = reference_lists(&header, 35, &references, 4).unwrap();
         header.short_term.clear();
-        header.long_term = vec![LongTermReference { poc_lsb: 2, used: true, msb_cycles: Some(0) }];
+        header.long_term = vec![LongTermReference {
+            poc_lsb: 2,
+            used: true,
+            msb_cycles: Some(0),
+        }];
         let (long_set, _) = reference_lists(&header, 35, &references, 4).unwrap();
-        assert_ne!(short_set, long_set, "slices cannot change a retained picture's classification");
-
+        assert_ne!(
+            short_set, long_set,
+            "slices cannot change a retained picture's classification"
+        );
     }
 }

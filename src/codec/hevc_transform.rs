@@ -34,25 +34,48 @@ pub fn reconstruct(
     scratch: &mut Vec<i32>,
     out: &mut Vec<i32>,
 ) -> Result<()> {
-    reconstruct_with_precision(coefficients, log2_size, bit_depth, qp, transform,
-        scaling, matrix_id, false, scratch, out)
+    reconstruct_with_precision(
+        coefficients,
+        log2_size,
+        bit_depth,
+        qp,
+        transform,
+        scaling,
+        matrix_id,
+        false,
+        scratch,
+        out,
+    )
 }
 
 /// Extended dynamic range as specified by H.265 8.6.2–8.6.4.
 pub fn reconstruct_with_precision(
-    coefficients: &[i32], log2_size: u8, bit_depth: u8, qp: u8,
-    transform: Transform, scaling: &ScalingLists, matrix_id: usize,
-    extended_precision: bool, scratch: &mut Vec<i32>, out: &mut Vec<i32>,
+    coefficients: &[i32],
+    log2_size: u8,
+    bit_depth: u8,
+    qp: u8,
+    transform: Transform,
+    scaling: &ScalingLists,
+    matrix_id: usize,
+    extended_precision: bool,
+    scratch: &mut Vec<i32>,
+    out: &mut Vec<i32>,
 ) -> Result<()> {
     if !(2..=5).contains(&log2_size) || !(8..=16).contains(&bit_depth) {
         return Err(invalid("unsupported HEVC transform geometry or bit depth"));
     }
-    let range = if extended_precision { (bit_depth + 6).max(15) } else { 15 };
+    let range = if extended_precision {
+        (bit_depth + 6).max(15)
+    } else {
+        15
+    };
     let minimum = -(1i64 << range);
     let maximum = (1i64 << range) - 1;
     let side = 1usize << log2_size;
     if coefficients.len() != side * side
-        || coefficients.iter().any(|&c| !(minimum..=maximum).contains(&i64::from(c)))
+        || coefficients
+            .iter()
+            .any(|&c| !(minimum..=maximum).contains(&i64::from(c)))
         || qp > 51 + 6 * (bit_depth - 8)
         || matrix_id > 5
     {
@@ -61,9 +84,7 @@ pub fn reconstruct_with_precision(
         ));
     }
     if transform == Transform::Dst4 && side != 4 {
-        return Err(invalid(
-            "HEVC DST requires 4x4 blocks",
-        ));
+        return Err(invalid("HEVC DST requires 4x4 blocks"));
     }
     out.resize(side * side, 0);
     if transform == Transform::Bypass {
@@ -82,7 +103,10 @@ pub fn reconstruct_with_precision(
             16
         } else {
             i64::from(scaling.factor(
-                usize::from(log2_size - 2), matrix_id, index % side, index / side,
+                usize::from(log2_size - 2),
+                matrix_id,
+                index % side,
+                index / side,
             )?)
         };
         let product = (i64::from(coefficient) * factor * level_scale) << (qp / 6);
@@ -106,18 +130,26 @@ pub fn reconstruct_with_precision(
     }
     let inverse = |input: &[i32], output: &mut [i64]| {
         if transform == Transform::Dst4 {
-            for (x,value) in output.iter_mut().enumerate() {
-                *value=(0..4).map(|k|i64::from(DST[k][x])*i64::from(input[k])).sum();
+            for (x, value) in output.iter_mut().enumerate() {
+                *value = (0..4)
+                    .map(|k| i64::from(DST[k][x]) * i64::from(input[k]))
+                    .sum();
             }
         } else if range > 19 {
             // 14/16-bit extended precision can overflow i32 before clipping.
-            for (x,value) in output.iter_mut().enumerate() {
-                *value=input.iter().enumerate().map(|(k,&v)|i64::from(v)*i64::from(DCT[k*(32/input.len())][x])).sum();
+            for (x, value) in output.iter_mut().enumerate() {
+                *value = input
+                    .iter()
+                    .enumerate()
+                    .map(|(k, &v)| i64::from(v) * i64::from(DCT[k * (32 / input.len())][x]))
+                    .sum();
             }
         } else {
-            let mut narrow=[0i32;32];
-            inverse_dct(input,&mut narrow[..input.len()]);
-            for (out,&v) in output.iter_mut().zip(&narrow) {*out=i64::from(v);}
+            let mut narrow = [0i32; 32];
+            inverse_dct(input, &mut narrow[..input.len()]);
+            for (out, &v) in output.iter_mut().zip(&narrow) {
+                *out = i64::from(v);
+            }
         }
     };
     // Use scratch for intermediate (column-wise inverse output)
@@ -134,7 +166,8 @@ pub fn reconstruct_with_precision(
         }
         inverse(&column[..side], &mut output_buf[..side]);
         for y in 0..side {
-            intermediate[y * side + x] = ((i64::from(output_buf[y]) + 64) >> 7).clamp(minimum, maximum) as i32;
+            intermediate[y * side + x] =
+                ((i64::from(output_buf[y]) + 64) >> 7).clamp(minimum, maximum) as i32;
         }
     }
     for y in 0..side {
@@ -317,7 +350,14 @@ mod tests {
         }
         let flat = ScalingLists::flat();
         let mut state = 719u32;
-        for (depth, extended) in [(8, false), (10, false), (12, false), (8, true), (10, true), (12, true)] {
+        for (depth, extended) in [
+            (8, false),
+            (10, false),
+            (12, false),
+            (8, true),
+            (10, true),
+            (12, true),
+        ] {
             let range = if extended { (depth + 6).max(15) } else { 15 };
             let minimum = -(1i64 << range);
             let maximum = (1i64 << range) - 1;
@@ -481,8 +521,18 @@ mod tests {
         for log in 3..=5 {
             let coefficients = vec![16; 1 << (2 * log)];
             for depth in [8, 10, 12] {
-                reconstruct(&coefficients, log, depth, 0, Transform::Skip,
-                    &ScalingLists::default(), 0, &mut scratch, &mut out).unwrap();
+                reconstruct(
+                    &coefficients,
+                    log,
+                    depth,
+                    0,
+                    Transform::Skip,
+                    &ScalingLists::default(),
+                    0,
+                    &mut scratch,
+                    &mut out,
+                )
+                .unwrap();
                 let expected = if depth == 12 && log == 5 { 12 } else { 10 };
                 assert!(out.iter().all(|&value| value == expected));
             }

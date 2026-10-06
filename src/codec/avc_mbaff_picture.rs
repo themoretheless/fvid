@@ -128,7 +128,13 @@ impl<'a> MbaffSliceReader<'a> {
             if pps.cabac {
                 Self::IntraCabac(IntraCabacReader::new_mbaff(header, sps, pps, count)?)
             } else {
-                Self::IntraCavlc(IntraCavlcReader::new_mbaff(header, sps, pps, count)?)
+                Self::IntraCavlc(
+                    if matches!(pps.slice_groups, super::avc::SliceGroups::Single) {
+                        IntraCavlcReader::new_mbaff(header, sps, pps, count)?
+                    } else {
+                        IntraCavlcReader::new_fmo(header, sps, pps, count)?
+                    },
+                )
             }
         } else if pps.cabac {
             Self::Cabac(super::avc_cabac_slice::InterCabacSlice::new_mbaff(
@@ -138,12 +144,18 @@ impl<'a> MbaffSliceReader<'a> {
                 count * 1024,
             )?)
         } else {
-            Self::Cavlc(super::avc_inter_slice::InterCavlcSlice::new_mbaff(
-                header,
-                sps,
-                pps,
-                count * 80,
-            )?)
+            Self::Cavlc(
+                if matches!(pps.slice_groups, super::avc::SliceGroups::Single) {
+                    super::avc_inter_slice::InterCavlcSlice::new_mbaff(
+                        header,
+                        sps,
+                        pps,
+                        count * 80,
+                    )?
+                } else {
+                    super::avc_inter_slice::InterCavlcSlice::new_fmo(header, sps, pps, count * 96)?
+                },
+            )
         })
     }
     fn read_macroblock(&mut self) -> Result<Option<super::avc_inter_slice::InterMacroblock>> {
@@ -303,6 +315,10 @@ fn decode_optional_slices_impl(
     }) {
         return Err(invalid("MBAFF slices belong to different pictures"));
     }
+    let fmo = !matches!(pps.slice_groups, super::avc::SliceGroups::Single);
+    if fmo && pps.cabac {
+        return Err(invalid("MBAFF FMO requires CAVLC"));
+    }
     let (w, h) = sps.coded_dimensions();
     let (w, h) = (w as usize, h as usize);
     let pixels = w
@@ -315,7 +331,13 @@ fn decode_optional_slices_impl(
         .and_then(|n| {
             count
                 .checked_mul(
-                    (if pps.cabac { 1024 } else { 80 }) + std::mem::size_of::<MbaffBlockEdges>(),
+                    (if pps.cabac {
+                        1024
+                    } else if fmo {
+                        97
+                    } else {
+                        80
+                    }) + std::mem::size_of::<MbaffBlockEdges>(),
                 )
                 .and_then(|c| n.checked_add(c))
         })
@@ -354,6 +376,26 @@ fn decode_optional_slices_impl(
             offsets: [header.alpha_offset, header.beta_offset],
         },
     };
+    deblocking.resize_with(count, || {
+        edge_state(
+            [BlockEdge {
+                intra: false,
+                switching_slice: false,
+                nonzero_luma: false,
+                motion: [None; 2],
+            }; 16],
+            [0; 3],
+            false,
+            false,
+            0,
+            first,
+        )
+    });
+    let mut covered = if fmo {
+        crate::buffer(count)?
+    } else {
+        Vec::new()
+    };
     let mut seen = 0;
     for (slice, (header, lists)) in headers.iter().zip(references).enumerate() {
         let direct = direct_by_slice.and_then(|v| v[slice]);
@@ -361,13 +403,13 @@ fn decode_optional_slices_impl(
         if is_b && direct.is_none() {
             return Err(invalid("MBAFF B slice lacks direct context"));
         }
-        if header.first_mb as usize * 2 != seen {
+        if !fmo && header.first_mb as usize * 2 != seen {
             return Err(invalid("MBAFF P slice coverage gap or overlap"));
         }
         let end = headers
             .get(slice + 1)
             .map_or(count, |h| h.first_mb as usize * 2);
-        if end <= seen || end > count {
+        if !fmo && (end <= seen || end > count) {
             return Err(invalid("invalid MBAFF P slice range"));
         }
         let mut views: [Vec<Reference420<'_>>; 2] = [Vec::new(), Vec::new()];
@@ -406,8 +448,14 @@ fn decode_optional_slices_impl(
             let field = reader.field_decoding();
             if let InterMacroblock::Intra(mb) = block {
                 let address = mb.address as usize;
-                if address != seen || seen >= end {
+                if address >= count
+                    || (!fmo && (address != seen || seen >= end))
+                    || (fmo && covered[address] != 0)
+                {
                     return Err(invalid("MBAFF P intra coverage mismatch"));
+                }
+                if fmo {
+                    covered[address] = 1;
                 }
                 motion.store_mbaff(
                     address,
@@ -436,7 +484,7 @@ fn decode_optional_slices_impl(
                         )) - bd,
                     ]
                 };
-                deblocking.push(edge_state(
+                deblocking[address] = edge_state(
                     [BlockEdge {
                         intra: true,
                         switching_slice: false,
@@ -448,7 +496,7 @@ fn decode_optional_slices_impl(
                     matches!(mb.luma, IntraLuma::Blocks8 { .. }),
                     slice as u32,
                     header,
-                ));
+                );
                 reconstruct_intra_macroblock(
                     &mut picture,
                     *mb,
@@ -498,8 +546,14 @@ fn decode_optional_slices_impl(
                 ),
                 InterMacroblock::Intra(_) => unreachable!(),
             };
-            if address != seen || seen >= end {
+            if address >= count
+                || (!fmo && (address != seen || seen >= end))
+                || (fmo && covered[address] != 0)
+            {
                 return Err(invalid("MBAFF P inter coverage mismatch"));
+            }
+            if fmo {
+                covered[address] = 1;
             }
             let vectors = if coefficients.is_none() && !is_b {
                 vec![[
@@ -594,14 +648,14 @@ fn decode_optional_slices_impl(
                 }
             }
             let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
-            deblocking.push(edge_state(
+            deblocking[address] = edge_state(
                 blocks,
                 qps.map(|q| i32::from(q) - bd),
                 field,
                 eight,
                 slice as u32,
                 header,
-            ));
+            );
             reconstruct_inter_macroblock_ready(
                 &mut picture,
                 address,
@@ -616,9 +670,12 @@ fn decode_optional_slices_impl(
             )?;
             seen += 1;
         }
-        if seen != end {
+        if !fmo && seen != end {
             return Err(invalid("incomplete MBAFF P slice"));
         }
+    }
+    if seen != count {
+        return Err(invalid("incomplete MBAFF inter picture"));
     }
     if filtered {
         mbaff_inter_plane(&mut picture.y, w, h, picture.bit_depth, 0, &deblocking)?;
@@ -775,6 +832,18 @@ pub fn decode_intra_slices(
         return Err(invalid("MBAFF reconstruction exceeds memory budget"));
     }
 
+    let fmo = !matches!(pps.slice_groups, super::avc::SliceGroups::Single);
+    if fmo && pps.cabac {
+        return Err(invalid("MBAFF FMO requires CAVLC"));
+    }
+    if fmo && storage.checked_add(count).is_none_or(|n| n > budget) {
+        return Err(invalid("MBAFF FMO coverage exceeds memory budget"));
+    }
+    let mut covered = if fmo {
+        crate::buffer(count)?
+    } else {
+        Vec::new()
+    };
     let scaling = ScalingMatrices::new(sps, pps)?;
     let mut readiness = Readiness420::new(w / 16, h / 16, true, count * 7)?;
     let mut picture = IntraPicture {
@@ -791,8 +860,16 @@ pub fn decode_intra_slices(
     deblocking
         .try_reserve_exact(count)
         .map_err(|_| invalid("cannot allocate MBAFF deblocking metadata"))?;
+    deblocking.resize_with(count, || MbaffIntraBlock {
+        qp: [0; 3],
+        field: false,
+        transform8: false,
+        slice: 0,
+        disable: 1,
+        offsets: [0; 2],
+    });
     for (index, header) in headers.iter().enumerate() {
-        if header.first_mb as usize * 2 != seen {
+        if !fmo && header.first_mb as usize * 2 != seen {
             return Err(invalid("MBAFF slice coverage gap or overlap"));
         }
         let end = headers
@@ -802,7 +879,11 @@ pub fn decode_intra_slices(
         let mut cavlc = if pps.cabac {
             None
         } else {
-            Some(IntraCavlcReader::new_mbaff(header, sps, pps, count)?)
+            Some(if fmo {
+                IntraCavlcReader::new_fmo(header, sps, pps, count)?
+            } else {
+                IntraCavlcReader::new_mbaff(header, sps, pps, count)?
+            })
         };
         let mut cabac = if pps.cabac {
             Some(IntraCabacReader::new_mbaff(header, sps, pps, count)?)
@@ -817,8 +898,14 @@ pub fn decode_intra_slices(
             };
             let Some(mb) = mb else { break };
             let address = mb.address as usize;
-            if address != seen || seen >= end {
+            if address >= count
+                || (!fmo && (address != seen || seen >= end))
+                || (fmo && covered[address] != 0)
+            {
                 return Err(invalid("MBAFF intra slice coverage gap"));
+            }
+            if fmo {
+                covered[address] = 1;
             }
             let field = match (&cavlc, &cabac) {
                 (Some(reader), _) => reader.field_decoding(),
@@ -834,7 +921,7 @@ pub fn decode_intra_slices(
                     sps.bit_depth_chroma,
                 )) - 6 * (i32::from(sps.bit_depth_chroma) - 8)
             };
-            deblocking.push(MbaffIntraBlock {
+            deblocking[address] = MbaffIntraBlock {
                 qp: if pcm {
                     [0; 3]
                 } else {
@@ -850,7 +937,7 @@ pub fn decode_intra_slices(
                 disable: u8::try_from(header.disable_deblocking_filter_idc)
                     .map_err(|_| invalid("invalid MBAFF deblocking disable value"))?,
                 offsets: [header.alpha_offset, header.beta_offset],
-            });
+            };
             reconstruct_intra_macroblock(
                 &mut picture,
                 mb,
@@ -862,7 +949,7 @@ pub fn decode_intra_slices(
             )?;
             seen += 1;
         }
-        if seen != end {
+        if !fmo && seen != end {
             return Err(invalid("incomplete MBAFF intra slice"));
         }
     }

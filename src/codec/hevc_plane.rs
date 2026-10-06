@@ -10,15 +10,32 @@ pub struct Plane {
 }
 impl Plane {
     pub(crate) fn absent(depth: u8) -> Self {
-        Self {width:0,height:0,depth,samples:Vec::new(),ready:Vec::new()}
+        Self {
+            width: 0,
+            height: 0,
+            depth,
+            samples: Vec::new(),
+            ready: Vec::new(),
+        }
     }
-    pub(crate) fn ready_rect(&self, rect: [usize;4]) -> bool {
-        let [x,y,w,h]=rect;
-        if w==0 || h==0 || x.checked_add(w).is_none_or(|n| n>self.width)
-            || y.checked_add(h).is_none_or(|n| n>self.height) { return false; }
-        (y..y+h).all(|row| self.ready[row*self.width+x..row*self.width+x+w].iter().all(|&r| r))
+    pub(crate) fn ready_rect(&self, rect: [usize; 4]) -> bool {
+        let [x, y, w, h] = rect;
+        if w == 0
+            || h == 0
+            || x.checked_add(w).is_none_or(|n| n > self.width)
+            || y.checked_add(h).is_none_or(|n| n > self.height)
+        {
+            return false;
+        }
+        (y..y + h).all(|row| {
+            self.ready[row * self.width + x..row * self.width + x + w]
+                .iter()
+                .all(|&r| r)
+        })
     }
-    pub fn dimensions(&self) -> [usize; 2] { [self.width, self.height] }
+    pub fn dimensions(&self) -> [usize; 2] {
+        [self.width, self.height]
+    }
 
     /// Apply single-slice, single-tile SAO after reconstruction/deblocking.
     /// Neighbours always come from the unchanged input plane. Extra workspace
@@ -80,7 +97,9 @@ impl Plane {
                     }
                     for y in y0..y1 {
                         for x in x0..x1 {
-                            if excluded([x, y]) { continue; }
+                            if excluded([x, y]) {
+                                continue;
+                            }
                             let k = y * self.width + x;
                             let value = self.samples[k];
                             output[k] = (i32::from(value)
@@ -107,7 +126,9 @@ impl Plane {
                     let db = delta(b);
                     for y in y0..y1 {
                         for x in x0..x1 {
-                            if excluded([x, y]) { continue; }
+                            if excluded([x, y]) {
+                                continue;
+                            }
                             let neighbour = |v: [i32; 2]| {
                                 [
                                     x.checked_add_signed(v[0] as isize).unwrap(),
@@ -227,7 +248,15 @@ impl Plane {
         available: impl Fn(usize, usize) -> bool,
     ) -> Result<()> {
         self.reconstruct_intra_with_reference_filtering(
-            origin, log, mode, chroma, strong, true, residual, pred_scratch, available,
+            origin,
+            log,
+            mode,
+            chroma,
+            strong,
+            true,
+            residual,
+            pred_scratch,
+            available,
         )
     }
 
@@ -244,8 +273,16 @@ impl Plane {
         available: impl Fn(usize, usize) -> bool,
     ) -> Result<()> {
         self.reconstruct_intra_with_filters(
-            origin, log, mode, chroma, strong,
-            filter_references, true, residual, pred_scratch, available,
+            origin,
+            log,
+            mode,
+            chroma,
+            strong,
+            filter_references,
+            true,
+            residual,
+            pred_scratch,
+            available,
         )
     }
     pub fn reconstruct_intra_with_filters(
@@ -261,13 +298,32 @@ impl Plane {
         pred_scratch: &mut Vec<u16>,
         available: impl Fn(usize, usize) -> bool,
     ) -> Result<()> {
-        self.reconstruct_intra_with_full_chroma_filters(origin, log, mode, chroma,
-            false, strong, filter_references, filter_boundary, residual, pred_scratch, available)
+        self.reconstruct_intra_with_full_chroma_filters(
+            origin,
+            log,
+            mode,
+            chroma,
+            false,
+            strong,
+            filter_references,
+            filter_boundary,
+            residual,
+            pred_scratch,
+            available,
+        )
     }
     pub fn reconstruct_intra_with_full_chroma_filters(
-        &mut self, origin: [usize; 2], log: u8, mode: u8, chroma: bool,
-        full_chroma: bool, strong: bool, filter_references: bool, filter_boundary: bool,
-        residual: &[i32], pred_scratch: &mut Vec<u16>,
+        &mut self,
+        origin: [usize; 2],
+        log: u8,
+        mode: u8,
+        chroma: bool,
+        full_chroma: bool,
+        strong: bool,
+        filter_references: bool,
+        filter_boundary: bool,
+        residual: &[i32],
+        pred_scratch: &mut Vec<u16>,
         available: impl Fn(usize, usize) -> bool,
     ) -> Result<()> {
         if !(2..=5).contains(&log) {
@@ -318,7 +374,13 @@ impl Plane {
         )?;
         pred_scratch.resize(n * n, 0);
         references.predict_with_full_chroma_filters(
-            mode, chroma, full_chroma, strong, filter_references, filter_boundary, pred_scratch,
+            mode,
+            chroma,
+            full_chroma,
+            strong,
+            filter_references,
+            filter_boundary,
+            pred_scratch,
         )?;
         let max = (1i32 << self.depth) - 1;
         for yy in 0..n {
@@ -346,38 +408,69 @@ mod tests {
     #[test]
     fn rectangular_sao_matches_scalar_for_partial_ctus_and_boundaries() {
         use super::super::hevc_sao::Sao;
-        for depth in [8,10,12] {
-            let (width,height) = (19usize,35usize);
-            let samples: Vec<u16> = (0..width*height)
-                .map(|i| ((i*73 + i/width*31) & ((1<<depth)-1)) as u16).collect();
+        for depth in [8, 10, 12] {
+            let (width, height) = (19usize, 35usize);
+            let samples: Vec<u16> = (0..width * height)
+                .map(|i| ((i * 73 + i / width * 31) & ((1 << depth) - 1)) as u16)
+                .collect();
             for class in 0..5 {
-                let parameters: Vec<_> = (0..9).map(|index| if class == 4 {
-                    Sao::Band { position: (index * 3) as u8, offsets: [2,-2,1,-1] }
-                } else { Sao::Edge { class, offsets: [3,1,-1,-3] } }).collect();
-                let mut p = Plane::new(width,height,depth,width*height*3).unwrap();
+                let parameters: Vec<_> = (0..9)
+                    .map(|index| {
+                        if class == 4 {
+                            Sao::Band {
+                                position: (index * 3) as u8,
+                                offsets: [2, -2, 1, -1],
+                            }
+                        } else {
+                            Sao::Edge {
+                                class,
+                                offsets: [3, 1, -1, -3],
+                            }
+                        }
+                    })
+                    .collect();
+                let mut p = Plane::new(width, height, depth, width * height * 3).unwrap();
                 p.samples.clone_from(&samples);
                 p.ready.fill(true);
                 let mut expected = samples.clone();
-                for y in 0..height { for x in 0..width {
-                    if x == 4 { continue; }
-                    let mode = parameters[(y/16)*3 + x/8];
-                    let neighbours = if let Some([a,b]) = mode.neighbours().unwrap() {
-                        let point = |v:[i32;2]| -> Option<[usize;2]> {
-                            let nx = x.checked_add_signed(v[0] as isize)?;
-                            let ny = y.checked_add_signed(v[1] as isize)?;
-                            (nx < width && ny < height && ny/16 == y/16).then_some([nx,ny])
+                for y in 0..height {
+                    for x in 0..width {
+                        if x == 4 {
+                            continue;
+                        }
+                        let mode = parameters[(y / 16) * 3 + x / 8];
+                        let neighbours = if let Some([a, b]) = mode.neighbours().unwrap() {
+                            let point = |v: [i32; 2]| -> Option<[usize; 2]> {
+                                let nx = x.checked_add_signed(v[0] as isize)?;
+                                let ny = y.checked_add_signed(v[1] as isize)?;
+                                (nx < width && ny < height && ny / 16 == y / 16).then_some([nx, ny])
+                            };
+                            let (Some(a), Some(b)) = (point(a), point(b)) else {
+                                continue;
+                            };
+                            Some([samples[a[1] * width + a[0]], samples[b[1] * width + b[0]]])
+                        } else {
+                            None
                         };
-                        let (Some(a),Some(b)) = (point(a),point(b)) else { continue; };
-                        Some([samples[a[1]*width+a[0]],samples[b[1]*width+b[0]]])
-                    } else { None };
-                    expected[y*width+x] = mode.apply(samples[y*width+x],neighbours,depth).unwrap();
-                }}
-                p.apply_sao_rectangular([3,4], &parameters,
-                    |a,b| a[1]/16 == b[1]/16, |p| p[0] == 4).unwrap();
-                assert_eq!(p.samples,expected);
+                        expected[y * width + x] = mode
+                            .apply(samples[y * width + x], neighbours, depth)
+                            .unwrap();
+                    }
+                }
+                p.apply_sao_rectangular(
+                    [3, 4],
+                    &parameters,
+                    |a, b| a[1] / 16 == b[1] / 16,
+                    |p| p[0] == 4,
+                )
+                .unwrap();
+                assert_eq!(p.samples, expected);
                 let saved = p.samples.clone();
-                assert!(p.apply_sao_rectangular([3,4], &parameters[..8], |_,_|true, |_|false).is_err());
-                assert_eq!(p.samples,saved);
+                assert!(
+                    p.apply_sao_rectangular([3, 4], &parameters[..8], |_, _| true, |_| false)
+                        .is_err()
+                );
+                assert_eq!(p.samples, saved);
             }
         }
     }
@@ -386,13 +479,29 @@ mod tests {
         use super::super::hevc_sao::Sao;
         let samples: Vec<u16> = (0..64).map(|i| if i % 2 == 0 { 10 } else { 20 }).collect();
         for (mode, expected) in [
-            (Sao::Edge { class: 0, offsets: [7, 0, 0, -7] }, [10, 20, 10, 20, 17, 13, 17, 20]),
-            (Sao::Band { position: 1, offsets: [2, 0, 0, 0] }, [10, 20, 10, 20, 12, 20, 12, 20]),
+            (
+                Sao::Edge {
+                    class: 0,
+                    offsets: [7, 0, 0, -7],
+                },
+                [10, 20, 10, 20, 17, 13, 17, 20],
+            ),
+            (
+                Sao::Band {
+                    position: 1,
+                    offsets: [2, 0, 0, 0],
+                },
+                [10, 20, 10, 20, 12, 20, 12, 20],
+            ),
         ] {
             let mut plane = Plane::new(8, 8, 8, 4096).unwrap();
             plane.reconstruct_inter([0, 0, 8, 8], &samples).unwrap();
-            plane.apply_sao_with_exclusions(3, &[mode], |_, _| true, |p| p[0] < 4).unwrap();
-            for row in plane.samples().chunks_exact(8) { assert_eq!(row, expected); }
+            plane
+                .apply_sao_with_exclusions(3, &[mode], |_, _| true, |p| p[0] < 4)
+                .unwrap();
+            for row in plane.samples().chunks_exact(8) {
+                assert_eq!(row, expected);
+            }
         }
     }
     #[test]

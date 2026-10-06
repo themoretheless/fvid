@@ -91,7 +91,9 @@ impl Vps {
         #[cfg(test)]
         let ordering_bit_range = ordering_start..bits.position();
         if bits.read(6)? != 0 || bits.unsigned_golomb()? != 0 {
-            return Err(crate::unsupported("multiple HEVC layer sets are not implemented"));
+            return Err(crate::unsupported(
+                "multiple HEVC layer sets are not implemented",
+            ));
         }
         let mut hrd = None;
         let timing = if bits.bit()? {

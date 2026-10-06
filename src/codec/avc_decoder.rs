@@ -42,6 +42,9 @@ pub struct AvcDecoder {
     budget: usize,
     poc: PocDecoder,
     dpb: Option<ReferenceBuffer<DecodedReferencePicture>>,
+    field_dpb: Option<super::avc_field_dpb::FieldBuffer<super::avc_field_picture::PcmField>>,
+    pending_field: Option<(Arc<super::avc_field_picture::PcmField>, i32)>,
+    field_pair_output: bool,
     active_sps: Option<u32>,
     previous_reference: Option<u32>,
     last_poc: Option<i32>,
@@ -90,6 +93,9 @@ impl AvcDecoder {
             budget,
             poc: PocDecoder::new(),
             dpb: None,
+            field_dpb: None,
+            pending_field: None,
+            field_pair_output: false,
             active_sps: None,
             previous_reference: None,
             last_poc: None,
@@ -118,6 +124,9 @@ impl AvcDecoder {
         self.decoded_sps = None;
         self.poc = PocDecoder::new();
         self.dpb = None;
+        self.field_dpb = None;
+        self.pending_field = None;
+        self.field_pair_output = false;
         self.active_sps = None;
         self.previous_reference = None;
         self.last_poc = None;
@@ -131,6 +140,7 @@ impl AvcDecoder {
         if self.failed {
             return Err(invalid("AVC decoder requires reset after an error"));
         }
+        self.field_pair_output = false;
         let result = self.decode_inner(packet, false);
         self.failed = result.is_err();
         result
@@ -141,9 +151,123 @@ impl AvcDecoder {
         if self.failed {
             return Err(invalid("AVC decoder requires reset after an error"));
         }
+        self.field_pair_output = false;
         let result = self.decode_inner(packet, true);
         self.failed = result.is_err();
         result
+    }
+    /// A field pair emits one full picture when its second field arrives.
+    pub fn output_is_field_pair(&self) -> bool {
+        self.field_pair_output
+    }
+    pub fn has_pending_field(&self) -> bool {
+        self.pending_field.is_some()
+    }
+    fn decode_pcm_fields(
+        &mut self,
+        headers: &[&SliceHeader],
+        sps: &Sps,
+        pps: &Pps,
+        allow_reordering: bool,
+    ) -> Result<Option<Arc<IntraPicture>>> {
+        let header = headers[0];
+        if headers.iter().any(|h| h.slice_type != SliceType::I) {
+            return Err(crate::unsupported(
+                "AVC inter field reconstruction is not connected",
+            ));
+        }
+        if header.idr && self.pending_field.is_some() {
+            return Err(crate::unsupported("unpaired AVC field before IDR"));
+        }
+        if !header.idr && self.field_dpb.is_none() {
+            return Err(crate::unsupported(
+                "AVC mixed frame/field reference storage is not connected",
+            ));
+        }
+        if !header.idr
+            && let Some(previous) = self.previous_reference
+        {
+            let max = 1u32 << sps.frame_num_bits;
+            if header.frame_num != previous && header.frame_num != (previous + 1) % max {
+                return Err(crate::unsupported(
+                    "AVC field frame-number gap is not connected",
+                ));
+            }
+        }
+        let (w, h) = sps.coded_dimensions();
+        let full = (w as usize)
+            .checked_mul(h as usize)
+            .and_then(|n| n.checked_mul(3))
+            .ok_or_else(|| invalid("AVC field storage overflow"))?;
+        let reserved = full
+            .checked_mul(sps.max_num_ref_frames.max(1) as usize)
+            .and_then(|n| n.checked_add(full))
+            .and_then(|n| n.checked_add(full / 2))
+            .ok_or_else(|| invalid("AVC field reference storage overflow"))?;
+        let scratch = self
+            .budget
+            .checked_sub(reserved)
+            .ok_or_else(|| invalid("AVC fields exceed decoder memory budget"))?;
+        let mut field = super::avc_field_picture::decode_pcm_slices(headers, sps, pps, scratch)?;
+        let order = self.poc.decode(sps, header)?;
+        if header.idr {
+            self.field_dpb = Some(super::avc_field_dpb::FieldBuffer::new(
+                sps.frame_num_bits,
+                sps.max_num_ref_frames,
+            )?);
+            self.dpb = None;
+            self.active_sps = Some(sps.id);
+            self.decoded_sps = Some(sps.clone());
+            self.previous_reference = None;
+            self.last_poc = None;
+        }
+        if header
+            .memory_operations
+            .iter()
+            .any(|op| matches!(op, MemoryOperation::Reset))
+        {
+            field.frame_num = 0;
+        }
+        let field = Arc::new(field);
+        let output = if let Some((first, first_poc)) = &self.pending_field {
+            let poc = (*first_poc).min(order.after_marking.picture());
+            if !allow_reordering && self.last_poc.is_some_and(|last| poc <= last) {
+                return Err(crate::unsupported(
+                    "AVC field pair requires increasing picture order",
+                ));
+            }
+            Some((
+                Arc::new(super::avc_field_picture::weave_pair(first, &field, full)?),
+                poc,
+            ))
+        } else {
+            None
+        };
+        self.field_dpb
+            .as_mut()
+            .ok_or_else(|| invalid("AVC field DPB missing"))?
+            .finish(
+                header,
+                order.after_marking.picture(),
+                self.next_id,
+                Arc::clone(&field),
+            )?;
+        self.next_id = self
+            .next_id
+            .checked_add(1)
+            .ok_or_else(|| invalid("AVC field picture ID overflow"))?;
+        if header.nal_ref_idc != 0 {
+            self.previous_reference = Some(field.frame_num);
+        }
+        if let Some((picture, poc)) = output {
+            self.pending_field = None;
+            self.last_poc = Some(poc);
+            self.field_pair_output = true;
+            Ok(Some(picture))
+        } else {
+            self.pending_field = Some((field, order.after_marking.picture()));
+            Ok(None)
+        }
     }
     fn updated_parameters(&self, packet: &[u8]) -> Result<Option<Parameters>> {
         let mut updated: Option<Parameters> = None;
@@ -255,6 +379,27 @@ impl AvcDecoder {
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))
         {
             return Err(invalid("AVC stream/configuration change requires IDR"));
+        }
+        if header.field_pic {
+            let sps = sps.clone();
+            let pps = pps.clone();
+            return self.decode_pcm_fields(
+                &slices.iter().map(|s| &s.header).collect::<Vec<_>>(),
+                &sps,
+                &pps,
+                allow_reordering,
+            );
+        }
+        if self.field_dpb.is_some() {
+            if !header.idr {
+                return Err(crate::unsupported(
+                    "AVC mixed field/frame reference storage is not connected",
+                ));
+            }
+            if self.pending_field.is_some() {
+                return Err(crate::unsupported("unpaired AVC field before frame IDR"));
+            }
+            self.field_dpb = None;
         }
         if !header.idr
             && let Some(previous) = self.previous_reference

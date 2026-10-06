@@ -25,7 +25,7 @@ pub struct Pcm {
 pub struct Palette {
     pub maximum: u8,
     pub predictor_maximum: u8,
-    pub initial: Vec<[u16;3]>,
+    pub initial: Vec<[u16; 3]>,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Sps {
@@ -79,8 +79,8 @@ pub struct Sps {
 impl Sps {
     /// SCC disables DC and angular boundary correction. RDPCM's bypass
     /// exclusion is angular-only; DC keeps its separate normative rule.
-    pub(crate) fn filter_intra_boundary(&self, mode:u8, bypass:bool) -> bool {
-        !self.intra_boundary_filtering_disabled && (mode==1 || !(self.implicit_rdpcm && bypass))
+    pub(crate) fn filter_intra_boundary(&self, mode: u8, bypass: bool) -> bool {
+        !self.intra_boundary_filtering_disabled && (mode == 1 || !(self.implicit_rdpcm && bypass))
     }
     pub fn display_dimensions(&self) -> [u32; 2] {
         [
@@ -218,17 +218,19 @@ impl Sps {
         let mut extended_precision = false;
         let mut cabac_bypass_alignment = false;
         let mut scc_extension = false;
-        let mut palette=None;
+        let mut palette = None;
         let mut current_picture_reference = false;
         let mut motion_vector_resolution_control = 0;
         let mut intra_boundary_filtering_disabled = false;
         if b.bit()? {
             let range = b.bit()?;
-            let multilayer=b.bit()?;
-            let three_d=b.bit()?;
-            scc_extension=b.bit()?;
-            if multilayer || three_d || b.read(4)?!=0 {
-                return Err(crate::unsupported("HEVC multilayer/3D/unknown SPS extensions are not implemented"));
+            let multilayer = b.bit()?;
+            let three_d = b.bit()?;
+            scc_extension = b.bit()?;
+            if multilayer || three_d || b.read(4)? != 0 {
+                return Err(crate::unsupported(
+                    "HEVC multilayer/3D/unknown SPS extensions are not implemented",
+                ));
             }
             if range {
                 let flags = b.read(9)?;
@@ -246,30 +248,40 @@ impl Sps {
             if scc_extension {
                 current_picture_reference = b.bit()?;
                 if b.bit()? {
-                    let maximum=ue(b,64)?;
-                    let delta=ue(b,128)?;
-                    let predictor_maximum=maximum+delta;
-                    if predictor_maximum>128 || (maximum==0 && delta!=0) {
+                    let maximum = ue(b, 64)?;
+                    let delta = ue(b, 128)?;
+                    let predictor_maximum = maximum + delta;
+                    if predictor_maximum > 128 || (maximum == 0 && delta != 0) {
                         return Err(invalid("invalid HEVC palette predictor maximum"));
                     }
-                    let mut initial=Vec::new();
+                    let mut initial = Vec::new();
                     if b.bit()? {
-                        if maximum==0 {return Err(invalid("HEVC zero palette has initializers"));}
-                        let count=ue(b,127)?+1;
-                        if count>predictor_maximum || count as usize*6>budget {
+                        if maximum == 0 {
+                            return Err(invalid("HEVC zero palette has initializers"));
+                        }
+                        let count = ue(b, 127)? + 1;
+                        if count > predictor_maximum || count as usize * 6 > budget {
                             return Err(invalid("HEVC palette initializer count exceeds limit"));
                         }
-                        initial.resize(count as usize,[0;3]);
-                        for c in 0..if chroma_format==0 {1} else {3} {
-                            for entry in &mut initial {entry[c]=b.read(depth[usize::from(c!=0)])? as u16;}
+                        initial.resize(count as usize, [0; 3]);
+                        for c in 0..if chroma_format == 0 { 1 } else { 3 } {
+                            for entry in &mut initial {
+                                entry[c] = b.read(depth[usize::from(c != 0)])? as u16;
+                            }
                         }
                     }
-                    palette=Some(Palette {maximum:maximum as u8,predictor_maximum:predictor_maximum as u8,initial});
+                    palette = Some(Palette {
+                        maximum: maximum as u8,
+                        predictor_maximum: predictor_maximum as u8,
+                        initial,
+                    });
                 }
-                let resolution=b.read(2)?;
-                if resolution==3 {return Err(invalid("reserved HEVC SCC motion resolution"));}
+                let resolution = b.read(2)?;
+                if resolution == 3 {
+                    return Err(invalid("reserved HEVC SCC motion resolution"));
+                }
                 motion_vector_resolution_control = resolution as u8;
-                intra_boundary_filtering_disabled=b.bit()?;
+                intra_boundary_filtering_disabled = b.bit()?;
             }
         }
         b.finish_rbsp()?;

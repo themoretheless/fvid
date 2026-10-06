@@ -5,15 +5,25 @@ pub trait ResidualBins {
     fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool>;
     fn bypass(&mut self) -> Result<bool>;
     fn align_coefficient_bypass(&mut self) -> Result<()> {
-        Err(invalid("residual bin reader does not implement HEVC alignment"))
+        Err(invalid(
+            "residual bin reader does not implement HEVC alignment",
+        ))
     }
-    fn rice_statistic(&self, _class: usize) -> PersistentRiceStatistic { Default::default() }
+    fn rice_statistic(&self, _class: usize) -> PersistentRiceStatistic {
+        Default::default()
+    }
     fn set_rice_statistic(&mut self, _class: usize, _value: PersistentRiceStatistic) {}
 }
 impl ResidualBins for HevcCabac<'_> {
-    fn align_coefficient_bypass(&mut self) -> Result<()> { HevcCabac::align_coefficient_bypass(self) }
-    fn rice_statistic(&self, class: usize) -> PersistentRiceStatistic { self.rice_statistics[class] }
-    fn set_rice_statistic(&mut self, class: usize, value: PersistentRiceStatistic) { self.rice_statistics[class] = value; }
+    fn align_coefficient_bypass(&mut self) -> Result<()> {
+        HevcCabac::align_coefficient_bypass(self)
+    }
+    fn rice_statistic(&self, class: usize) -> PersistentRiceStatistic {
+        self.rice_statistics[class]
+    }
+    fn set_rice_statistic(&mut self, class: usize, value: PersistentRiceStatistic) {
+        self.rice_statistics[class] = value;
+    }
     fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool> {
         HevcCabac::decision(self, syntax, increment)
     }
@@ -106,17 +116,15 @@ pub fn remaining_level(b: &mut impl ResidualBins, rice: u8) -> Result<u32> {
 }
 /// Extended-precision remainder, H.265 9.3.3.11 and limited EGk (9.3.3.4).
 /// This primitive does not by itself enable extended-precision picture decoding.
-pub fn remaining_level_extended(
-    b: &mut impl ResidualBins,
-    rice: u8,
-    bit_depth: u8,
-) -> Result<u32> {
+pub fn remaining_level_extended(b: &mut impl ResidualBins, rice: u8, bit_depth: u8) -> Result<u32> {
     if !(8..=16).contains(&bit_depth) {
         return Err(invalid("invalid extended HEVC coefficient bit depth"));
     }
     let range = (bit_depth + 6).max(15);
     if rice >= range {
-        return Err(invalid("extended HEVC Rice parameter exceeds transform range"));
+        return Err(invalid(
+            "extended HEVC Rice parameter exceeds transform range",
+        ));
     }
     let mut prefix = 0u8;
     while prefix < 4 && b.bypass()? {
@@ -133,7 +141,11 @@ pub fn remaining_level_extended(
             extension += 1;
         }
         value += ((1u64 << extension) - 1) << order;
-        if extension == maximum { range } else { extension + order }
+        if extension == maximum {
+            range
+        } else {
+            extension + order
+        }
     };
     let mut suffix = 0u64;
     for _ in 0..width {
@@ -175,8 +187,12 @@ impl RiceState {
     pub fn decode(&mut self, b: &mut impl ResidualBins, base_level: u32) -> Result<u32> {
         self.decode_with_precision(b, base_level, None)
     }
-    fn decode_with_precision(&mut self, b: &mut impl ResidualBins, base_level: u32,
-        extended_depth: Option<u8>) -> Result<u32> {
+    fn decode_with_precision(
+        &mut self,
+        b: &mut impl ResidualBins,
+        base_level: u32,
+        extended_depth: Option<u8>,
+    ) -> Result<u32> {
         if !(1..=3).contains(&base_level) {
             return Err(invalid("invalid HEVC coefficient base level"));
         }
@@ -264,16 +280,36 @@ pub fn read_block_with_skip_context(
     read_block_with_rice(b, log2_size, chroma, scan, hide_sign, skip_context, None)
 }
 pub(crate) fn read_block_with_rice(
-    b: &mut impl ResidualBins, log2_size: u8, chroma: bool, scan: Scan,
-    hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
+    b: &mut impl ResidualBins,
+    log2_size: u8,
+    chroma: bool,
+    scan: Scan,
+    hide_sign: bool,
+    skip_context: bool,
+    persistent_class: Option<usize>,
 ) -> Result<Vec<i32>> {
-    read_block_with_precision(b, log2_size, chroma, scan, hide_sign, skip_context,
-        persistent_class, None, false)
+    read_block_with_precision(
+        b,
+        log2_size,
+        chroma,
+        scan,
+        hide_sign,
+        skip_context,
+        persistent_class,
+        None,
+        false,
+    )
 }
 pub(crate) fn read_block_with_precision(
-    b: &mut impl ResidualBins, log2_size: u8, chroma: bool, scan: Scan,
-    hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
-    extended_depth: Option<u8>, alignment: bool,
+    b: &mut impl ResidualBins,
+    log2_size: u8,
+    chroma: bool,
+    scan: Scan,
+    hide_sign: bool,
+    skip_context: bool,
+    persistent_class: Option<usize>,
+    extended_depth: Option<u8>,
+    alignment: bool,
 ) -> Result<Vec<i32>> {
     let last = last_position(b, log2_size, chroma, scan)?;
     let side = 1usize << log2_size;
@@ -375,10 +411,18 @@ pub(crate) fn read_block_with_precision(
         // H.265 7.3.8.11: escapeDataPresent is set when a remainder is
         // coded. Alignment precedes the first sign and preserves input position.
         let escape = indices.iter().enumerate().any(|(ordinal, &n)| {
-            let threshold = if ordinal >= 8 { 1 } else if Some(n) == first_greater { 3 } else { 2 };
+            let threshold = if ordinal >= 8 {
+                1
+            } else if Some(n) == first_greater {
+                3
+            } else {
+                2
+            };
             levels[n] == threshold
         });
-        if alignment && escape { b.align_coefficient_bypass()?; }
+        if alignment && escape {
+            b.align_coefficient_bypass()?;
+        }
         let lowest = *indices.last().unwrap();
         let hidden = hide_sign && indices[0] - lowest > 3;
         let mut negative = [false; 16];
@@ -390,7 +434,9 @@ pub(crate) fn read_block_with_precision(
         let mut statistic = persistent_class.map(|class| b.rice_statistic(class));
         let mut first_remainder = true;
         let mut rice = RiceState::default();
-        if let Some(statistic) = statistic { rice.parameter = statistic.parameter(); }
+        if let Some(statistic) = statistic {
+            rice.parameter = statistic.parameter();
+        }
         let mut sum = 0u64;
         for (ordinal, &n) in indices.iter().enumerate() {
             let threshold = if ordinal >= 8 {
@@ -406,11 +452,19 @@ pub(crate) fn read_block_with_precision(
                         Some(depth) => remaining_level_extended(b, rice.parameter, depth)?,
                         None => remaining_level(b, rice.parameter)?,
                     };
-                    levels[n] = levels[n].checked_add(remainder)
+                    levels[n] = levels[n]
+                        .checked_add(remainder)
                         .ok_or_else(|| invalid("HEVC absolute coefficient overflow"))?;
-                    if first_remainder { statistic.observe_first_remainder(remainder); first_remainder = false; }
-                    if u64::from(levels[n]) > (3u64 << rice.parameter) { rice.parameter += 1; }
-                } else { levels[n] = rice.decode_with_precision(b, levels[n], extended_depth)?; }
+                    if first_remainder {
+                        statistic.observe_first_remainder(remainder);
+                        first_remainder = false;
+                    }
+                    if u64::from(levels[n]) > (3u64 << rice.parameter) {
+                        rice.parameter += 1;
+                    }
+                } else {
+                    levels[n] = rice.decode_with_precision(b, levels[n], extended_depth)?;
+                }
             }
             sum += u64::from(levels[n]);
             if hidden && n == lowest {
@@ -421,7 +475,9 @@ pub(crate) fn read_block_with_precision(
             let [x, y] = inner[n];
             output[(gy * 4 + y) * side + gx * 4 + x] = if negative[n] { -level } else { level };
         }
-        if let (Some(class), Some(statistic)) = (persistent_class, statistic) { b.set_rice_statistic(class, statistic); }
+        if let (Some(class), Some(statistic)) = (persistent_class, statistic) {
+            b.set_rice_statistic(class, statistic);
+        }
     }
     Ok(output)
 }
@@ -534,7 +590,10 @@ mod tests {
     struct Script(VecDeque<Bin>);
     impl ResidualBins for Script {
         fn align_coefficient_bypass(&mut self) -> Result<()> {
-            assert!(matches!(self.0.pop_front(), Some(Bin::Align)), "wrong alignment order");
+            assert!(
+                matches!(self.0.pop_front(), Some(Bin::Align)),
+                "wrong alignment order"
+            );
             Ok(())
         }
         fn decision(&mut self, s: Syntax, c: usize) -> Result<bool> {
@@ -590,12 +649,29 @@ mod tests {
                 Bin::Context(Syntax::LastY, 0, false),
                 Bin::Context(Syntax::Greater1, 1, level > 1),
             ]));
-            if level > 1 { bins.0.push_back(Bin::Context(Syntax::Greater2, 0, level > 2)); }
-            if level == 3 { bins.0.push_back(Bin::Align); }
+            if level > 1 {
+                bins.0
+                    .push_back(Bin::Context(Syntax::Greater2, 0, level > 2));
+            }
+            if level == 3 {
+                bins.0.push_back(Bin::Align);
+            }
             bins.0.push_back(Bin::Bypass(true));
-            if level == 3 { bins.0.push_back(Bin::Bypass(false)); }
-            let block = read_block_with_precision(&mut bins, 2, false, Scan::Diagonal,
-                true, false, None, Some(12), true).unwrap();
+            if level == 3 {
+                bins.0.push_back(Bin::Bypass(false));
+            }
+            let block = read_block_with_precision(
+                &mut bins,
+                2,
+                false,
+                Scan::Diagonal,
+                true,
+                false,
+                None,
+                Some(12),
+                true,
+            )
+            .unwrap();
             assert_eq!(block[0], -level);
             assert!(block[1..].iter().all(|&v| v == 0));
             assert!(bins.0.is_empty());
@@ -698,8 +774,14 @@ mod tests {
                 }
             }
             let block = read_block_with_skip_context(
-                &mut script, 3, false, Scan::Diagonal, true, skip_context,
-            ).unwrap();
+                &mut script,
+                3,
+                false,
+                Scan::Diagonal,
+                true,
+                skip_context,
+            )
+            .unwrap();
             assert_eq!(block[4 * 8 + 4], 4);
             assert_eq!(block[4 * 8], -3);
             assert_eq!(block[0], 2);
@@ -732,7 +814,9 @@ mod tests {
                 Err(invalid("unexpected context bin"))
             }
             fn bypass(&mut self) -> Result<bool> {
-                self.0.pop_front().ok_or_else(|| invalid("truncated bypass bins"))
+                self.0
+                    .pop_front()
+                    .ok_or_else(|| invalid("truncated bypass bins"))
             }
         }
         // TR prefixes followed by limited EGk extension and suffix.
@@ -748,7 +832,10 @@ mod tests {
         ] {
             let bins: VecDeque<_> = bits.bytes().map(|b| b == b'1').collect();
             let mut full = Bounded(bins.clone());
-            assert_eq!(remaining_level_extended(&mut full, rice, depth).unwrap(), expected);
+            assert_eq!(
+                remaining_level_extended(&mut full, rice, depth).unwrap(),
+                expected
+            );
             assert!(full.0.is_empty());
             for cut in 0..bins.len() {
                 let mut short = Bounded(bins.iter().take(cut).cloned().collect());
@@ -759,10 +846,16 @@ mod tests {
         for depth in [8u8, 10, 12, 16] {
             let range = (depth + 6).max(15);
             let maximum = 28 - range;
-            let mut bins = Bounded(std::iter::repeat(true)
-                .take(usize::from(4 + maximum + range)).collect());
+            let mut bins = Bounded(
+                std::iter::repeat(true)
+                    .take(usize::from(4 + maximum + range))
+                    .collect(),
+            );
             let expected = 4 + (((1u32 << maximum) - 1) << 1) + (1u32 << range) - 1;
-            assert_eq!(remaining_level_extended(&mut bins, 0, depth).unwrap(), expected);
+            assert_eq!(
+                remaining_level_extended(&mut bins, 0, depth).unwrap(),
+                expected
+            );
             assert!(bins.0.is_empty());
         }
         for (rice, depth) in [(0, 7), (0, 17), (18, 12)] {

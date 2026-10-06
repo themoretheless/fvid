@@ -1,0 +1,95 @@
+{
+  "generator": "owned Extended-profile MBAFF FMO I/P/B motion writer",
+  "fixtures": [
+    {
+      "file": "avc-mbaff-fmo-inter-frame-filter0.mp4",
+      "sha256": "b72a8e40c15697013e6fe7d803fb1c5dec8d430f8d950cd8989c65282e83f787",
+      "oracle_sha256": "0744cdb239c9cec30342e8225fc15b50860c3ba26854ac12bd43d0e42232cfc1"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-frame-filter1.mp4",
+      "sha256": "d5a763ffa4cecf9b49643d0ee2232f233fcd3de4255656a1949979c6bc72f934",
+      "oracle_sha256": "20d36a4b5e8bc67fb3d293e97db5576b4f6512a268225b5453edc6866d953c67"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-frame-filter2.mp4",
+      "sha256": "30c456d72c4b7934333ff45c1a820ccade4bad90e710741de4fdf6cb10eb1c88",
+      "oracle_sha256": "5c46ed0864cf89248220995d90b47b56181e64e3f91f925100ef9d1f82b454be"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-frame-filter0-aso.mp4",
+      "sha256": "11d114823509813782838da55739f7b5c59d6bd3654b2fa66d9b019bebc9886f",
+      "oracle_sha256": "0744cdb239c9cec30342e8225fc15b50860c3ba26854ac12bd43d0e42232cfc1"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-frame-filter1-aso.mp4",
+      "sha256": "e5f822331d1e45b5346b9524f70b59becd32b0e6ee0d37012fbc6af83a091fea",
+      "oracle_sha256": "20d36a4b5e8bc67fb3d293e97db5576b4f6512a268225b5453edc6866d953c67"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-frame-filter2-aso.mp4",
+      "sha256": "9468cef4fb21fc1a0e136d731d918b7ecba4d947678d676df9de2b27f7abb9c9",
+      "oracle_sha256": "5c46ed0864cf89248220995d90b47b56181e64e3f91f925100ef9d1f82b454be"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-field-filter0.mp4",
+      "sha256": "eba791d881eaf0583fa3a33c94176a873511c5f796905ca5716b1f13137f837d",
+      "oracle_sha256": "ca85f155da5d5430436f68c788ad4234585fd6e8cd4ad02b33923595442b9a3f"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-field-filter1.mp4",
+      "sha256": "2e9f1d8bf69a232aee0f38b88e3ea45495ae69d6f97074ef2210717a444c6506",
+      "oracle_sha256": "77f6a39ab174016c1edb18a7759831a7fa7e68c4cb98efe58fa0579600610601"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-field-filter2.mp4",
+      "sha256": "d595bd93692c3b54d49e1afcb21ecc20942406e285cfe9a06f04ee317b903bdb",
+      "oracle_sha256": "2466027a07197c21ac6710891f41ab1a5cdf9405bb83d7282ede3eed6952af72"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-field-filter0-aso.mp4",
+      "sha256": "0b333943b7794891d0e9d5792362409bfd686e1003dfb08ef1cf341c156880fc",
+      "oracle_sha256": "ca85f155da5d5430436f68c788ad4234585fd6e8cd4ad02b33923595442b9a3f"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-field-filter1-aso.mp4",
+      "sha256": "674511ec56bc7830ee473b237a82fc193eb8e390fd29db6c3cad56c1a38a1422",
+      "oracle_sha256": "77f6a39ab174016c1edb18a7759831a7fa7e68c4cb98efe58fa0579600610601"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-field-filter2-aso.mp4",
+      "sha256": "7923e84fb094dc61c563bcd031d56f429e31e56ceae5bf488879e3ff8b19b41e",
+      "oracle_sha256": "2466027a07197c21ac6710891f41ab1a5cdf9405bb83d7282ede3eed6952af72"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-mixed-filter0.mp4",
+      "sha256": "eb0d6a765e30c9e6b8c87f38486d46a4db6640d686fa37427e1941f597705f20",
+      "oracle_sha256": "a456aab7f454c5955522779cf1b02c109ccc58a04defaddef1eaab1dfab2c5e4"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-mixed-filter1.mp4",
+      "sha256": "17de52363e76091aaa1d006ea420dcc3e2e94e6d1b82ad8b8f893fb44ac23eda",
+      "oracle_sha256": "c3a288744aed3148e7d6107d544274f3cc257430fe3cae10d3f2e2c83cd367b3"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-mixed-filter2.mp4",
+      "sha256": "ec58bfb91cd747898b923ab1de52f8d5e1ccdfa1fd78af678a867bcf83036aa3",
+      "oracle_sha256": "21b71dd968966c6de671fabfcce5afe2c1e84333915174a9b5fb4dc472aa19c2"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-mixed-filter0-aso.mp4",
+      "sha256": "727ba6ca77edad39c8e4230567181a26f2c5caa1ee7065fd7ea85edfbb174233",
+      "oracle_sha256": "a456aab7f454c5955522779cf1b02c109ccc58a04defaddef1eaab1dfab2c5e4"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-mixed-filter1-aso.mp4",
+      "sha256": "9edefadf91c91d1ccb66b2b0bda595225bc7cc07a8fd6884d660444a0cf43313",
+      "oracle_sha256": "c3a288744aed3148e7d6107d544274f3cc257430fe3cae10d3f2e2c83cd367b3"
+    },
+    {
+      "file": "avc-mbaff-fmo-inter-mixed-filter2-aso.mp4",
+      "sha256": "5634b5fac97a38ec28aceaf4c8385fa2516db138fd4756e43081d3fda82bd59d",
+      "oracle_sha256": "21b71dd968966c6de671fabfcce5afe2c1e84333915174a9b5fb4dc472aa19c2"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "generator": "owned complementary field PCM writer",
+  "fixtures": [
+    {
+      "file": "avc-field-pcm-8bit-top-first.mp4",
+      "sha256": "03ddeb96a8a10eb8588b490cc2f0171f0ca6059c0aa8f00fd3c1d14a1125bb79",
+      "oracle_sha256": "169b10fc4dbad493ca2947d78af734e3aaf1201c45c0a5b2e80c68c6884e783f"
+    },
+    {
+      "file": "avc-field-pcm-8bit-top-first-mixed-long.mp4",
+      "sha256": "38b397e88b060b885f9bd7955424354b3810e40d9aab04dea19da01817f4ebf7",
+      "oracle_sha256": "169b10fc4dbad493ca2947d78af734e3aaf1201c45c0a5b2e80c68c6884e783f"
+    },
+    {
+      "file": "avc-field-pcm-8bit-bottom-first.mp4",
+      "sha256": "c9770faf659587297b0343cf7ae3c4e53cc21dbad7394f32ea8ce692096ca896",
+      "oracle_sha256": "169b10fc4dbad493ca2947d78af734e3aaf1201c45c0a5b2e80c68c6884e783f"
+    },
+    {
+      "file": "avc-field-pcm-8bit-bottom-first-mixed-long.mp4",
+      "sha256": "c0882f4ade1b91de1e25462f243a93987fb4c60b2b3ceac49811d9e30e2e5a02",
+      "oracle_sha256": "169b10fc4dbad493ca2947d78af734e3aaf1201c45c0a5b2e80c68c6884e783f"
+    },
+    {
+      "file": "avc-field-pcm-10bit-top-first.mp4",
+      "sha256": "53f143403ccfde4deffc8d8e4b50bb14720cff0127f5c5bc68e86887d175b251",
+      "oracle_sha256": "55ddbe8a2adda1ade9085b02cbe30d1db7e83655c6f78b94780c5fcabb8d0cfa"
+    },
+    {
+      "file": "avc-field-pcm-10bit-top-first-mixed-long.mp4",
+      "sha256": "44c6dd801d0edbf6ef0fd43dd721955cf00590e48e7625a3a9d5dedc2800751c",
+      "oracle_sha256": "55ddbe8a2adda1ade9085b02cbe30d1db7e83655c6f78b94780c5fcabb8d0cfa"
+    },
+    {
+      "file": "avc-field-pcm-10bit-bottom-first.mp4",
+      "sha256": "3b1747490bbe4a99f47a27425c01f865967ce8c86b45b2cd74ab35b3a0ba5cc6",
+      "oracle_sha256": "55ddbe8a2adda1ade9085b02cbe30d1db7e83655c6f78b94780c5fcabb8d0cfa"
+    },
+    {
+      "file": "avc-field-pcm-10bit-bottom-first-mixed-long.mp4",
+      "sha256": "39a654786d54c812e76cc8e6ac0fb67c796d8e7fdfb8f2fd468c7781a74e4f7d",
+      "oracle_sha256": "55ddbe8a2adda1ade9085b02cbe30d1db7e83655c6f78b94780c5fcabb8d0cfa"
+    }
+  ]
+}

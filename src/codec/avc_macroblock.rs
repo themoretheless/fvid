@@ -51,6 +51,7 @@ pub struct IntraCavlcReader<'a> {
     sps: &'a Sps,
     pps: &'a Pps,
     address: u32,
+    previous_address: Option<u32>,
     qp: i32,
     luma_counts: Vec<u8>,
     chroma_counts: [Vec<u8>; 2],
@@ -173,6 +174,7 @@ impl<'a> IntraCavlcReader<'a> {
                 .first_mb
                 .checked_mul(if mbaff { 2 } else { 1 })
                 .ok_or_else(|| invalid("MBAFF slice address overflow"))?,
+            previous_address: None,
             qp: header.slice_qp,
             luma_counts: grid(count * 16)?,
             chroma_counts: [grid(count * 4)?, grid(count * 4)?],
@@ -227,6 +229,7 @@ impl<'a> IntraCavlcReader<'a> {
         )
     }
     fn advance_address(&mut self) -> Result<()> {
+        self.previous_address = Some(self.address);
         self.address = if self.slice_group_map.is_empty() {
             self.address + 1
         } else {
@@ -303,8 +306,9 @@ impl<'a> IntraCavlcReader<'a> {
     /// Mode of the most recently parsed macroblock (false for progressive).
     pub fn field_decoding(&self) -> bool {
         self.mbaff
-            && self.address > 0
-            && self.pair_field((self.address as usize - 1) / 2) == Some(true)
+            && self
+                .previous_address
+                .is_some_and(|a| self.pair_field(a as usize / 2) == Some(true))
     }
     pub fn bit_position(&self) -> usize {
         self.bits.position()
