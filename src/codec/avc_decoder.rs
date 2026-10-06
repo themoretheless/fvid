@@ -379,6 +379,8 @@ impl AvcDecoder {
                 .iter()
                 .enumerate()
                 .map(|(i, lists)| super::avc_direct::FieldDirectPrediction {
+                    current_bottom: headers[i].bottom_field,
+                    colocated_is_frame: false,
                     spatial: headers[i].direct_spatial_mv_pred,
                     inference8: sps.direct_8x8_inference,
                     current_poc: order.before_marking.picture(),

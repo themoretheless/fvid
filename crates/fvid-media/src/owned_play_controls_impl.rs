@@ -9,6 +9,33 @@ const RATE_MAX_MILLI: u32 = 4_000;
 /// VLC's Qt slider goes to 200%. 1000 is unity.
 pub const VOLUME_MAX_MILLI: u32 = 2_000;
 
+// HDR tonemap curve lookup table cache for performance
+use std::collections::HashMap;
+use std::sync::{Mutex, OnceLock};
+
+static TONEMAP_LUT_CACHE: OnceLock<Mutex<HashMap<(u32, i32), Vec<f32>>>> = OnceLock::new();
+
+/// Get or create cached tonemap LUT for given bits and strength
+fn get_tonemap_lut(bits: u32, strength_milli: i32) -> Vec<f32> {
+    let key = (bits, strength_milli);
+    
+    TONEMAP_LUT_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+        .lock().unwrap()
+        .entry(key)
+        .or_insert_with(|| {
+            let lut_size = 1u32 << bits;
+            let mut lut = Vec::with_capacity(lut_size as usize);
+            
+            for i in 0..lut_size {
+                let value = i as f32 / lut_size as f32;
+                let toned = mobius_tonemap(value, strength_milli as f32 / 1000.0);
+                lut.push(toned);
+            }
+            
+            lut
+        }).clone()
+}
+
 pub fn clamp_volume_milli(value: i32) -> u32 {
     value.clamp(0, VOLUME_MAX_MILLI as i32) as u32
 }

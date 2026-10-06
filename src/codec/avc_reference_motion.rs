@@ -154,6 +154,36 @@ impl ReferenceMotionField {
             scale,
         })
     }
+    /// Table 8-8 FLD/FRM and FLD/AFRM selection from a decoded full frame.
+    /// Coordinates are compact current-field luma coordinates. Preserve raw
+    /// vector units for spatial colZero; temporal direct applies `scale` later.
+    pub fn colocated_for_field(
+        &self,
+        position: [usize; 2],
+        bottom: bool,
+    ) -> Result<MbaffColocated> {
+        if self.height % 32 != 0
+            || position.iter().any(|p| p % 4 != 0)
+            || position[0] >= self.width
+            || position[1] >= self.height / 2
+        {
+            return Err(invalid("invalid frame-to-field co-located position"));
+        }
+        let physical = [position[0], position[1] * 2 + usize::from(bottom)];
+        let (lists, source_field) = if self.is_mbaff() {
+            self.at_mbaff(physical)?
+        } else {
+            (self.at(physical)?, false)
+        };
+        Ok(MbaffColocated {
+            motion: lists[0].or(lists[1]),
+            scale: if source_field {
+                ColocatedScale::Same
+            } else {
+                ColocatedScale::FrameToField
+            },
+        })
+    }
     /// Select the stored 4x4 cell containing this coded-luma position.
     pub fn at(&self, position: [usize; 2]) -> Result<[Option<ReferenceMotion>; 2]> {
         if self.is_mbaff() {
