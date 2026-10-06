@@ -33,7 +33,7 @@ pub fn read_intra<B: ResidualBins>(
     config: Config,
     leaf: impl FnMut(&mut B, Unit) -> Result<()>,
 ) -> Result<()> {
-    read(bins, origin, config, true, false, leaf)
+    read(bins, origin, config, true, false, false, leaf)
 }
 pub fn read_inter<B: ResidualBins>(
     bins: &mut B,
@@ -42,7 +42,20 @@ pub fn read_inter<B: ResidualBins>(
     partitioned: bool,
     leaf: impl FnMut(&mut B, Unit) -> Result<()>,
 ) -> Result<()> {
-    read(bins, origin, config, false, partitioned, leaf)
+    read(bins, origin, config, false, partitioned, false, leaf)
+}
+/// 4:4:4 components own a residual block at every luma leaf, including 4x4.
+pub fn read_intra_444<B: ResidualBins>(
+    bins: &mut B, origin: [u32; 2], config: Config,
+    leaf: impl FnMut(&mut B, Unit) -> Result<()>,
+) -> Result<()> {
+    read(bins, origin, config, true, false, true, leaf)
+}
+pub fn read_inter_444<B: ResidualBins>(
+    bins: &mut B, origin: [u32; 2], config: Config, partitioned: bool,
+    leaf: impl FnMut(&mut B, Unit) -> Result<()>,
+) -> Result<()> {
+    read(bins, origin, config, false, partitioned, true, leaf)
 }
 fn read<B: ResidualBins>(
     bins: &mut B,
@@ -50,6 +63,7 @@ fn read<B: ResidualBins>(
     config: Config,
     intra: bool,
     partitioned: bool,
+    full_chroma: bool,
     mut leaf: impl FnMut(&mut B, Unit) -> Result<()>,
 ) -> Result<()> {
     let c = config;
@@ -74,6 +88,7 @@ fn read<B: ResidualBins>(
         c: Config,
         intra: bool,
         partitioned: bool,
+        full_chroma: bool,
         p: [u32; 2],
         base: [u32; 2],
         log: u8,
@@ -93,7 +108,7 @@ fn read<B: ResidualBins>(
             false
         };
         let mut chroma = parent;
-        if log > 2 {
+        if log > 2 || full_chroma {
             for flag in &mut chroma {
                 *flag = if depth == 0 || *flag {
                     b.decision(Syntax::CbfChroma, usize::from(depth))?
@@ -110,6 +125,7 @@ fn read<B: ResidualBins>(
                     c,
                     intra,
                     partitioned,
+                    full_chroma,
                     [p[0] + dx * half, p[1] + dy * half],
                     p,
                     log - 1,
@@ -126,7 +142,7 @@ fn read<B: ResidualBins>(
             } else {
                 true
             };
-            let cp = if log == 2 { base } else { p };
+            let cp = if log == 2 && !full_chroma { base } else { p };
             leaf(
                 b,
                 Unit {
@@ -134,9 +150,9 @@ fn read<B: ResidualBins>(
                     log2_size: log,
                     depth,
                     coded: [y, chroma[0], chroma[1]],
-                    owns_chroma: log > 2 || index == 3,
-                    chroma_origin: [cp[0] / 2, cp[1] / 2],
-                    log2_chroma_size: (log - 1).max(2),
+                    owns_chroma: full_chroma || log > 2 || index == 3,
+                    chroma_origin: if full_chroma { cp } else { [cp[0] / 2, cp[1] / 2] },
+                    log2_chroma_size: if full_chroma { log } else { (log - 1).max(2) },
                 },
             )
         }
@@ -146,6 +162,7 @@ fn read<B: ResidualBins>(
         c,
         intra,
         partitioned,
+        full_chroma,
         origin,
         origin,
         c.log2_cu,
@@ -176,6 +193,42 @@ mod tests {
         }
         fn bypass(&mut self) -> Result<bool> {
             panic!("unexpected bypass")
+        }
+    }
+    #[test]
+    fn full_chroma_four_by_four_leaves_read_own_flags_and_coordinates() {
+        let c = Config { log2_cu: 3, log2_min_transform: 2,
+            log2_max_transform: 5, max_depth: 1, intra_split: true };
+        let mut decisions = VecDeque::from([
+            (Syntax::CbfChroma, 0, true), (Syntax::CbfChroma, 0, false),
+        ]);
+        for index in 0..4 {
+            decisions.push_back((Syntax::CbfChroma, 1, index % 2 == 0));
+            // Cr's false parent suppresses all descendant Cr syntax.
+            decisions.push_back((Syntax::CbfLuma, 0, index == 3));
+        }
+        let mut bins = Bins(decisions.clone());
+        let mut units = Vec::new();
+        read_intra_444(&mut bins, [8, 16], c, |_, unit| { units.push(unit); Ok(()) }).unwrap();
+        assert_eq!(units.len(), 4);
+        for (index, unit) in units.iter().enumerate() {
+            assert_eq!(unit.origin, [[8,16], [12,16], [8,20], [12,20]][index]);
+            assert_eq!(unit.chroma_origin, unit.origin);
+            assert_eq!(unit.log2_chroma_size, 2);
+            assert!(unit.owns_chroma);
+            assert_eq!(unit.coded, [index == 3, index % 2 == 0, false]);
+        }
+        assert!(bins.0.is_empty());
+        let mut inter = Bins(decisions.clone());
+        let mut inter_units = Vec::new();
+        read_inter_444(&mut inter, [8, 16], Config {
+            intra_split: false, max_depth: 0, ..c
+        }, true, |_, unit| { inter_units.push(unit); Ok(()) }).unwrap();
+        assert_eq!(inter_units, units);
+        assert!(inter.0.is_empty());
+        for cut in 0..decisions.len() {
+            let mut short = Bins(decisions.iter().take(cut).copied().collect());
+            assert!(read_intra_444(&mut short, [8,16], c, |_, _| Ok(())).is_err());
         }
     }
     #[test]

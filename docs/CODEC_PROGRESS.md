@@ -2381,3 +2381,23 @@ is made for this fixture. This supersedes the unconnected alignment notes.
 Offline validation: codec library 370 passed / two ignored; owned media
 library 334 passed / one ignored; CPU NVDEC HEVC preparation 19 passed.
 No failures; ordinary tests required neither FFmpeg nor network access.
+
+### HEVC 4:4:4 transform-tree and QP foundation (2026-10-06)
+
+Added 4:4:4 intra/inter transform-tree entry points preserving the existing
+4:2:0 API. Every 4:4:4 leaf owns same-resolution chroma blocks, including 4x4;
+chroma CBF syntax follows each node with parent-flag inference. Scripted
+CABAC tests cover four distinct child coordinates, alternating child flags,
+false-parent suppression, inter partition-forced splitting and every truncation
+of the scripted tree. H.265 7.3.8.8–7.3.8.9 defines these distinctions.
+
+Component QP mapping now has a format-aware entry point: 4:2:2/4:4:4 use linear
+mapping capped at 51 (H.265 8.6.1), while 4:2:0 retains Table 8-10. Tests cover
+every supported luma QP at 8/10/12 bits, combined slice/CU offset extrema and
+the nonlinear 4:2:0 versus linear 4:4:4 distinction. Picture integration is not
+yet enabled: allocation, prediction, motion/filter geometry and intra chroma
+mode ownership still need conversion. The existing 4:4:4 HM pixel acceptance
+remains ignored and its exact picture-tools refusal test remains passing.
+
+Offline codec library validation: 372 passed, no failures, two ignored
+(explicit fixture generation and pending aligned 4:4:4 pixel acceptance).

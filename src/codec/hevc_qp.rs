@@ -80,6 +80,16 @@ pub fn components_with_cu(
     chroma_offsets: [i32; 2],
     cu_offsets: [i32; 2],
 ) -> Result<[u8; 3]> {
+    components_with_format(qp_y, depths, chroma_offsets, cu_offsets, 1)
+}
+/// H.265 8.6.1: only 4:2:0 applies Table 8-10's nonlinear chroma mapping.
+pub fn components_with_format(
+    qp_y: i32, depths: [u8; 2], chroma_offsets: [i32; 2],
+    cu_offsets: [i32; 2], chroma_format: u8,
+) -> Result<[u8; 3]> {
+    if !(1..=3).contains(&chroma_format) {
+        return Err(invalid("invalid HEVC component QP chroma format"));
+    }
     let ybd = offset(depths[0])?;
     let cbd = offset(depths[1])?;
     if !(-ybd..=51).contains(&qp_y)
@@ -93,13 +103,13 @@ pub fn components_with_cu(
     let mut result = [(qp_y + ybd) as u8, 0, 0];
     for (i, offset) in chroma_offsets.into_iter().enumerate() {
         let index = (qp_y + offset + cu_offsets[i]).clamp(-cbd, 57);
-        let mapped = match index {
+        let mapped = if chroma_format != 1 { index.min(51) } else { match index {
             ..=29 => index,
             30..=43 => {
                 [29, 30, 31, 32, 33, 33, 34, 34, 35, 35, 36, 36, 37, 37][(index - 30) as usize]
             }
             _ => index - 6,
-        };
+        } };
         result[i + 1] = (mapped + cbd) as u8;
     }
     Ok(result)
@@ -107,6 +117,28 @@ pub fn components_with_cu(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn full_chroma_qp_uses_linear_mapping_and_saturation() {
+        for format in [2, 3] {
+            for depth in [8, 10, 12] {
+                let bd = 6 * i32::from(depth - 8);
+                for qp in -bd..=51 {
+                    for delta in [-12, 0, 12] {
+                        let actual = super::components_with_format(qp, [depth; 2],
+                            [delta, -delta], [12, -12], format).unwrap();
+                        assert_eq!(actual, [(qp + bd) as u8,
+                            ((qp + delta + 12).clamp(-bd, 51) + bd) as u8,
+                            ((qp - delta - 12).clamp(-bd, 51) + bd) as u8]);
+                    }
+                }
+            }
+        }
+        assert_eq!(super::components_with_format(34, [8; 2], [0; 2], [0; 2], 3).unwrap(), [34; 3]);
+        assert_eq!(super::components(34, [8; 2], [0; 2]).unwrap(), [34, 33, 33]);
+        for format in [0, 4] {
+            assert!(super::components_with_format(0, [8; 2], [0; 2], [0; 2], format).is_err());
+        }
+    }
     use super::*;
     use std::collections::VecDeque;
     struct Bins {
