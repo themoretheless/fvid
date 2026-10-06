@@ -663,4 +663,133 @@ mod pcm_fixture_tests {
             }
         }
     }
+    #[test]
+    fn pcm_reference_pictures_feed_inter_motion_with_and_without_wpp() {
+        for (data, expected, wpp) in [
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-reference-rext8.mp4")
+                    .as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv")
+                    .as_slice(),
+                false,
+            ),
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-pcm-reference-wpp-rext8.mp4"
+                )
+                .as_slice(),
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-pcm-reference-wpp-rext8.yuv"
+                )
+                .as_slice(),
+                true,
+            ),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            assert_eq!(decoder.parameters().1.entropy_sync, wpp);
+            let mut packet = Vec::new();
+            for pass in 0..2 {
+                if pass != 0 {
+                    decoder.reset();
+                }
+                let mut pixels = Vec::new();
+                for frame in 0..3 {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    let headers = decoder.slice_headers(&packet).unwrap();
+                    assert_eq!(headers.len(), 1);
+                    assert_eq!(headers[0].entropy_substreams.len(), if wpp { 2 } else { 1 });
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    assert_eq!(decoded.poc, frame as i32);
+                    assert_eq!(
+                        decoded.picture.pcm_luma_samples,
+                        if frame == 0 { 4096 } else { 0 }
+                    );
+                    if frame != 0 {
+                        assert_eq!(
+                            headers[0].slice_type,
+                            super::super::hevc_cabac::SliceType::B
+                        );
+                        assert!(decoded.picture.motion.iter().flatten().any(Option::is_some));
+                        if frame == 1 {
+                            assert!(decoded.picture.motion.iter().any(|motion| {
+                                motion.iter().enumerate().any(|(list, vector)| {
+                                    vector.is_some_and(|v| {
+                                        decoded.picture.reference_pocs[list][v.reference as usize]
+                                            == 0
+                                    })
+                                })
+                            }));
+                        }
+                    }
+                    pixels.extend(
+                        decoded
+                            .picture
+                            .planes
+                            .iter()
+                            .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap())),
+                    );
+                }
+                assert_eq!(pixels, expected, "PCM reference WPP={wpp}, pass={pass}");
+            }
+        }
+    }
+    #[test]
+    fn small_pcm_coding_units_match_every_hm_sample() {
+        for (data, expected, log) in [
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-small8-rext8.mp4")
+                    .as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-small8-rext8.yuv")
+                    .as_slice(),
+                3,
+            ),
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-small16-rext8.mp4")
+                    .as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-small16-rext8.yuv")
+                    .as_slice(),
+                4,
+            ),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            assert_eq!(
+                decoder.parameters().0.pcm.as_ref().unwrap().block_log2,
+                [log; 2]
+            );
+            let mut packet = Vec::new();
+            input.read_packet(0, 0, &mut packet).unwrap();
+            for pass in 0..2 {
+                if pass != 0 {
+                    decoder.reset();
+                }
+                let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                assert_eq!(decoded.picture.pcm_luma_samples, 4096);
+                let pixels: Vec<_> = decoded
+                    .picture
+                    .planes
+                    .iter()
+                    .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap()))
+                    .collect();
+                assert_eq!(pixels, expected, "PCM block log={log}, pass={pass}");
+            }
+        }
+    }
 }

@@ -2178,3 +2178,23 @@ Other HEVC tools and the overall codec objective remain incomplete.
 Local offline validation: codec library 353 passed / one fixture-generator
 test ignored; media library 334 passed / one ignored; CUDA-feature HEVC tests
 16 passed. No FFmpeg or network access is needed by these tests.
+
+### HEVC PCM reference pictures and smaller coding units (2026-10-06)
+
+Owned three-picture I/B/B streams now confirm that an all-PCM I picture is
+used by actual motion-compensated B reconstruction, with WPP both disabled
+and enabled. Metadata requires actual PCM in the first picture, zero PCM in
+the later pictures, a B slice, populated motion and a resolved motion reference
+to POC zero in the first B. Every picture matches independent HM samples on
+initial decode and reset replay. The WPP case requires two entropy substreams.
+
+Additional owned one-picture fixtures force PCM bounds to 8x8 and 16x16.
+Acceptance requires all luma samples to come from PCM and matches every saved
+HM pixel after reset. Together with the original 32x32 case this covers all
+base-layer PCM coding-unit sizes. CPU-side NVDEC tests check the corresponding
+minimum-size fields. Twenty-eight MP4/YUV files regenerate byte identically.
+This does not qualify physical GPU decoding or arbitrary seeks, variable-QP
+PCM boundaries, other chroma formats or the remaining codec tools.
+
+Offline validation: codec library 355 passed / one explicit generation test
+ignored; CUDA-feature HEVC admission/SDK tests 16 passed. No device run is claimed.

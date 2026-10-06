@@ -35,6 +35,8 @@ MaxCUChromaQpAdjustmentDepth : -1
 pcm_config = 'PCMEnabledFlag : 1\nPCMLog2MinSize : 5\nPCMLog2MaxSize : 5\nPCMFilterDisableFlag : 1\n'
 variants = [
     ('active', 64, 64, 8, False, False, ''),
+    ('small8', 64, 64, 8, True, False, 'PCMLog2MinSize : 3\nPCMLog2MaxSize : 3\n'),
+    ('small16', 64, 64, 8, True, False, 'PCMLog2MinSize : 4\nPCMLog2MaxSize : 4\n'),
     ('mixed', 64, 64, 8, True, True, ''),
     ('filtered', 64, 64, 8, True, False, 'PCMFilterDisableFlag : 0\n'),
     ('parallel', 128, 96, 8, True, True, ''),
@@ -43,12 +45,14 @@ variants = [
     ('full10', 64, 64, 10, True, False, 'PCMInputBitDepthFlag : 0\n'),
     ('full12', 64, 64, 12, True, False, 'PCMInputBitDepthFlag : 0\n'),
     ('wpp', 64, 64, 8, True, True, 'WaveFrontSynchro : 1\n'),
+    ('reference', 64, 64, 8, True, False, ''),
+    ('reference-wpp', 64, 64, 8, True, False, 'WaveFrontSynchro : 1\n'),
     ('dependent', 64, 64, 8, True, True, 'SliceSegmentMode : 1\nSliceSegmentArgument : 1\n'),
 ]
 for name, width, height, bits, filters, mixed, options in variants:
-    depth, frames = 0, 1
+    frames = 3 if name.startswith('reference') else 1
     extra = pcm_config + options
-    with tempfile.TemporaryDirectory(prefix='fvid-hevc-chroma-qp-') as directory:
+    with tempfile.TemporaryDirectory(prefix='fvid-hevc-pcm-') as directory:
         tmp = Path(directory)
         config = tmp / 'owned.cfg'
         config.write_text(config_text.replace('SAO : 0', f'SAO : {int(filters)}').replace('LoopFilterDisable : 1', f'LoopFilterDisable : {int(not filters)}') + extra)
@@ -62,7 +66,7 @@ for name, width, height, bits, filters, mixed, options in variants:
                     state = (1664525 * state + 1013904223) & 0xffffffff
                     noise = not mixed or ((x * scale // 32 + y * scale // 32) % 2 == 0)
                     raw.append(state >> 24 if noise else 32 + plane * 40)
-        source.write_bytes(raw)
+        source.write_bytes(raw * frames)
         stream, recon, oracle = tmp / 'active.hevc', tmp / 'recon.yuv', tmp / 'oracle.yuv'
         subprocess.run([str(args.hm_encoder.resolve()), '-c', str(config), '-i', str(source),
                         '-b', str(stream), '-o', str(recon), '-wdt', str(width), '-hgt', str(height), '-fr', '25',
