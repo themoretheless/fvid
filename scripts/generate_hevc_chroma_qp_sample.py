@@ -32,11 +32,19 @@ SAO : 0
 LoopFilterDisable : 1
 MaxCUChromaQpAdjustmentDepth : 0
 '''
-for name, depth, frames, filters in [('active', 0, 1, False), ('groups-filtered', 1, 3, True)]:
+variants = [
+    ('active', 0, 1, False, '', 8),
+    ('groups-filtered', 1, 3, True, '', 8),
+    ('wpp', 1, 3, True, 'WaveFrontSynchro : 1\n', 8),
+    ('slices', 1, 3, True, 'SliceMode : 1\nSliceArgument : 1\n', 8),
+    ('dependent', 1, 3, True, 'SliceSegmentMode : 1\nSliceSegmentArgument : 1\n', 8),
+]
+variants += [('high10', 1, 3, True, '', 10), ('high12', 1, 3, True, '', 12)]
+for name, depth, frames, filters, extra, bits in variants:
     with tempfile.TemporaryDirectory(prefix='fvid-hevc-chroma-qp-') as directory:
         tmp = Path(directory)
         config = tmp / 'owned.cfg'
-        config.write_text(config_text.replace('MaxCUChromaQpAdjustmentDepth : 0', f'MaxCUChromaQpAdjustmentDepth : {depth}').replace('SAO : 0', f'SAO : {int(filters)}').replace('LoopFilterDisable : 1', f'LoopFilterDisable : {int(not filters)}'))
+        config.write_text(config_text.replace('MaxCUChromaQpAdjustmentDepth : 0', f'MaxCUChromaQpAdjustmentDepth : {depth}').replace('SAO : 0', f'SAO : {int(filters)}').replace('LoopFilterDisable : 1', f'LoopFilterDisable : {int(not filters)}') + extra)
         source = tmp / 'source.yuv'
         raw = bytearray()
         for frame in range(frames):
@@ -49,14 +57,14 @@ for name, depth, frames, filters in [('active', 0, 1, False), ('groups-filtered'
         stream, recon, oracle = tmp / 'active.hevc', tmp / 'recon.yuv', tmp / 'oracle.yuv'
         subprocess.run([str(args.hm_encoder.resolve()), '-c', str(config), '-i', str(source),
                         '-b', str(stream), '-o', str(recon), '-wdt', '64', '-hgt', '64', '-fr', '25',
-                        '-f', str(frames), '--InputBitDepth=8', '--InternalBitDepth=8', '--InputChromaFormat=420'], check=True)
+                        '-f', str(frames), '--InputBitDepth=8', f'--InternalBitDepth={bits}', '--InputChromaFormat=420'], check=True)
         result = subprocess.run([str(args.hm_decoder.resolve()), '-b', str(stream), '-o', str(oracle),
-                                 '--OutputBitDepth=8', '--OutputBitDepthC=8', '--SEIDecodedPictureHash=0'],
+                                 f'--OutputBitDepth={bits}', f'--OutputBitDepthC={bits}', '--SEIDecodedPictureHash=0'],
                                 check=True, capture_output=True, text=True)
         print(result.stdout)
         assert 'inserting lost poc' not in (result.stdout + result.stderr).lower()
         pixels = oracle.read_bytes()
-        assert len(pixels) == frames * 64 * 64 * 3 // 2
+        assert len(pixels) == frames * 64 * 64 * 3 // 2 * (1 if bits == 8 else 2)
         assert pixels == recon.read_bytes()
-        (fixtures / f'hevc-chroma-qp-list-{name}-rext8.mp4').write_bytes(mux(stream.read_bytes(), 8))
-        (fixtures / f'hevc-chroma-qp-list-{name}-rext8.yuv').write_bytes(pixels)
+        (fixtures / f'hevc-chroma-qp-list-{name}-rext{bits}.mp4').write_bytes(mux(stream.read_bytes(), bits))
+        (fixtures / f'hevc-chroma-qp-list-{name}-rext{bits}.yuv').write_bytes(pixels)

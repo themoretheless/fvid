@@ -2128,3 +2128,21 @@ Local offline validation for this change: codec library 348 passed / one
 explicit fixture-generator test ignored; media library without default
 features 334 passed / one ignored; CUDA-feature HEVC admission/scheduler tests
 15 passed. This is CPU-side CUDA configuration evidence, not device decoding.
+
+### HEVC chroma-QP entropy paths and high-depth qualification (2026-10-06)
+
+Five additional owned HM-oracle streams cover WPP (two entropy substreams),
+four independent slice segments, four dependent segments, and RExt10/RExt12.
+Each has three I/B/B pictures with depth-one chroma-QP groups and enabled
+SAO/deblocking. Metadata tests require the actual configured group depth,
+active chroma selection, WPP/dependent PPS flags, segment addresses/counts
+and substream counts; the names alone are not qualification evidence.
+
+All samples match independent HM output on both original decode and reset
+replay. High-depth tests compare little-endian 16-bit samples without truncating
+them to eight bits. All fourteen MP4/YUV files regenerate byte identically
+using explicit HM generation. This extends the software acceptance evidence;
+NVDEC chroma lists and other HEVC tools/chroma formats remain incomplete.
+
+Offline codec suite after this expansion: 350 passed, no failures, one
+explicit fixture-generation test ignored (25.38 seconds).

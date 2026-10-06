@@ -401,6 +401,21 @@ mod chroma_qp_fixture_tests {
              include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-active-rext8.yuv").as_slice(), 1),
             (include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-groups-filtered-rext8.mp4").as_slice(),
              include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-groups-filtered-rext8.yuv").as_slice(), 3),
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-wpp-rext8.mp4").as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-wpp-rext8.yuv").as_slice(),
+                3,
+            ),
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-slices-rext8.mp4").as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-slices-rext8.yuv").as_slice(),
+                3,
+            ),
+            (
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-dependent-rext8.mp4").as_slice(),
+                include_bytes!("../../tests/fixtures/playback-errors/hevc-chroma-qp-list-dependent-rext8.yuv").as_slice(),
+                3,
+            ),
         ] {
             let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
             let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
@@ -415,6 +430,141 @@ mod chroma_qp_fixture_tests {
                     pixels.extend(decoded.picture.planes.iter().flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap())));
                 }
                 assert_eq!(pixels, expected);
+            }
+        }
+    }
+    #[test]
+    fn chroma_qp_partition_fixtures_exercise_the_named_entropy_paths() {
+        for (data, wpp, dependent, segments) in [
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-wpp-rext8.mp4"
+                )
+                .as_slice(),
+                true,
+                false,
+                1,
+            ),
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-slices-rext8.mp4"
+                )
+                .as_slice(),
+                false,
+                false,
+                4,
+            ),
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-dependent-rext8.mp4"
+                )
+                .as_slice(),
+                false,
+                true,
+                4,
+            ),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            let (_, pps) = decoder.parameters();
+            assert_eq!(pps.entropy_sync, wpp);
+            assert_eq!(pps.dependent_slices, dependent);
+            assert_eq!(pps.chroma_qp_offset_list.as_ref().unwrap().depth, 1);
+            let mut packet = Vec::new();
+            for frame in 0..3 {
+                input.read_packet(0, frame, &mut packet).unwrap();
+                let headers = decoder.slice_headers(&packet).unwrap();
+                assert_eq!(headers.len(), segments);
+                for (index, header) in headers.iter().enumerate() {
+                    assert!(header.cu_chroma_qp_offset_enabled);
+                    assert_eq!(header.dependent, dependent && index != 0);
+                    assert_eq!(header.entropy_substreams.len(), if wpp { 2 } else { 1 });
+                    assert_eq!(header.address, if wpp { 0 } else { index as u32 });
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn chroma_qp_high_depth_fixtures_match_every_hm_sample_and_reset() {
+        for (data, expected, depth) in [
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-high10-rext10.mp4"
+                )
+                .as_slice(),
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-high10-rext10.yuv"
+                )
+                .as_slice(),
+                10,
+            ),
+            (
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-high12-rext12.mp4"
+                )
+                .as_slice(),
+                include_bytes!(
+                    "../../tests/fixtures/playback-errors/hevc-chroma-qp-list-high12-rext12.yuv"
+                )
+                .as_slice(),
+                12,
+            ),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data),
+                Default::default(),
+            )
+            .unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration,
+                16 << 20,
+            )
+            .unwrap();
+            assert_eq!(decoder.parameters().0.depth, [depth; 2]);
+            assert_eq!(
+                decoder
+                    .parameters()
+                    .1
+                    .chroma_qp_offset_list
+                    .as_ref()
+                    .unwrap()
+                    .depth,
+                1
+            );
+            let mut packet = Vec::new();
+            for pass in 0..2 {
+                if pass != 0 {
+                    decoder.reset();
+                }
+                let mut pixels = Vec::new();
+                for frame in 0..3 {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    assert!(
+                        decoder
+                            .slice_headers(&packet)
+                            .unwrap()
+                            .iter()
+                            .all(|h| h.cu_chroma_qp_offset_enabled)
+                    );
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    pixels.extend(
+                        decoded
+                            .picture
+                            .planes
+                            .iter()
+                            .flat_map(|p| p.samples().iter().flat_map(|v| v.to_le_bytes())),
+                    );
+                }
+                assert_eq!(pixels, expected, "RExt{depth} pass {pass}");
             }
         }
     }
