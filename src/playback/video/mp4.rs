@@ -82,6 +82,7 @@ pub struct Mp4VideoReader<R> {
     decoded_surface: Option<fvid_vt::Surface>,
     track_index: usize,
     sample_index: usize,
+    pending_avc_field_sample: Option<usize>,
     packet: Vec<u8>,
     /// What an AV1 track states about its own pictures in bytes this reader can
     /// see the moment the file is open: the signal of its sequence header and
@@ -190,7 +191,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 &track.configuration,
                 work_budget,
             )?)),
-            b"avc1" | b"avc3" => Decoder::Avc(Box::new(AvcDecoder::new(&track.configuration, work_budget)?)),
+            b"avc1" | b"avc3" => Decoder::Avc(Box::new(AvcDecoder::new(
+                &track.configuration,
+                work_budget,
+            )?)),
             b"vp09" => Decoder::Vp9(Box::new(vp9::Decoder::new(work_budget))),
             b"av01" => Decoder::Av1(Box::new(av1::Decoder::new(work_budget))),
             _ => unreachable!(),
@@ -217,6 +221,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             decoded_surface: None,
             track_index: index,
             sample_index: 0,
+            pending_avc_field_sample: None,
             packet: Vec::new(),
             open_signal: None,
             failed: false,
@@ -454,10 +459,14 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 let colour = crate::playback_native::AvcColour::from_hevc_vui(
                     d.parameters().0.vui.as_ref(),
                 )?;
-                let explicit_geometry = d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
+                let explicit_geometry =
+                    d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
                 if explicit_geometry {
                     self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture(
-                        p,d.parameters().0.chroma_format,colour)?));
+                        p,
+                        d.parameters().0.chroma_format,
+                        colour,
+                    )?));
                 }
                 let coded_width = p.dimensions[0] as usize;
                 let coded_height = p.dimensions[1] as usize;
@@ -469,15 +478,29 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     bit_depth: p.depth[0],
                     y: p.planes[0].samples().to_vec(),
                     cb: if d.parameters().0.chroma_format == 0 {
-                        vec![1 << (p.depth[0]-1); coded_width/2 * (coded_height/2)]
-                    } else { p.planes[1].samples().to_vec() },
+                        vec![1 << (p.depth[0] - 1); coded_width / 2 * (coded_height / 2)]
+                    } else {
+                        p.planes[1].samples().to_vec()
+                    },
                     cr: if d.parameters().0.chroma_format == 0 {
-                        vec![1 << (p.depth[0]-1); coded_width/2 * (coded_height/2)]
-                    } else { p.planes[2].samples().to_vec() },
+                        vec![1 << (p.depth[0] - 1); coded_width / 2 * (coded_height / 2)]
+                    } else {
+                        p.planes[2].samples().to_vec()
+                    },
                 };
-                let planes = if explicit_geometry { None } else {
+                let planes = if explicit_geometry {
+                    None
+                } else {
                     Some(Arc::new(crate::playback_native::coded_planes_to_planar8(
-                        &picture.y,&picture.cb,&picture.cr,coded_width,coded_height,crop,p.depth[0],colour)))
+                        &picture.y,
+                        &picture.cb,
+                        &picture.cr,
+                        coded_width,
+                        coded_height,
+                        crop,
+                        p.depth[0],
+                        colour,
+                    )))
                 };
                 Ok(Some((Arc::new(picture), planes)))
             }
@@ -593,6 +616,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         self.packet.clear();
         self.pending.clear();
         self.pending_bytes = 0;
+        self.pending_avc_field_sample = None;
     }
     /// Restart decoding at the sync sample with the greatest presentation time
     /// at or before `pts` (the first sample when none qualifies), dropping all
@@ -650,13 +674,38 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 }
             }
             let index = self.sample_index;
-            let Some(sample) = self.track().samples.get(index) else {
+            let Some(mut sample) = self.track().samples.get(index) else {
+                if matches!(&self.decoder, Decoder::Avc(d) if d.has_pending_field()) {
+                    return Err(invalid("unpaired AVC field at end of MP4"));
+                }
                 return Ok(None);
             };
             self.demuxer
                 .read_packet(self.track_index, index, &mut self.packet)?;
             let picture = self.decode_packet()?;
             self.sample_index += 1;
+            let mut output_index = index;
+            if let Decoder::Avc(decoder) = &self.decoder {
+                if decoder.has_pending_field() {
+                    self.pending_avc_field_sample.get_or_insert(index);
+                }
+                if decoder.output_is_field_pair() {
+                    output_index = self
+                        .pending_avc_field_sample
+                        .take()
+                        .ok_or_else(|| invalid("missing AVC first-field timing"))?;
+                    let first = self
+                        .track()
+                        .samples
+                        .get(output_index)
+                        .ok_or_else(|| invalid("missing AVC first-field sample"))?;
+                    sample.pts = first.pts;
+                    sample.duration = sample
+                        .duration
+                        .checked_add(first.duration)
+                        .ok_or_else(|| invalid("AVC field-pair duration overflow"))?;
+                }
+            }
             if let Some((picture, planes8)) = picture {
                 let mut frame = VideoFrame {
                     packed: self.decoded_planar.take(),
@@ -672,7 +721,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                         ticks: i64::from(sample.duration),
                         timescale: self.track().timescale,
                     },
-                    sample_index: index,
+                    sample_index: output_index,
                 };
                 while let Some(duplicate) = self
                     .pending
@@ -927,7 +976,7 @@ fn frame_storage(frame: &VideoFrame) -> Result<usize> {
         .and_then(|n| n.checked_add(frame.picture.cr.len()))
         .and_then(|n| n.checked_mul(2))
         .and_then(|n| n.checked_add(planes8))
-        .and_then(|n| n.checked_add(frame.packed.as_ref().map_or(0,|p| p.frame.data.len())))
+        .and_then(|n| n.checked_add(frame.packed.as_ref().map_or(0, |p| p.frame.data.len())))
         .and_then(|n| n.checked_add(surface_bytes))
         .and_then(|n| n.checked_add(std::mem::size_of::<VideoFrame>()))
         .ok_or_else(|| invalid("MP4 output frame size overflow"))

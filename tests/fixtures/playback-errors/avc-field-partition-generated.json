@@ -1,0 +1,205 @@
+{
+  "generator": "owned I/P partitioned field motion writer",
+  "fixtures": [
+    {
+      "file": "avc-field-partition-8bit-top-first-type1-sub0.mp4",
+      "sha256": "0410503419069c85de1a22dfc02f10acfb8ebec4a166faae61076862df52eb2f",
+      "oracle_sha256": "6816a05fc4f706c9d092c3ba4b139727fc4b6d96b8995d1af99230989c9db751"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type2-sub0.mp4",
+      "sha256": "acc09e0f168a2d2d20ee2a986788806d6a823f7d29c89fb82d2cca555c85bad0",
+      "oracle_sha256": "6ee63f93e82170aebfed7ccd8dc9fd033c38439f689536df9b23280875ae1b6d"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type3-sub0.mp4",
+      "sha256": "7ff4081b4bd96a01e75516fb08d8357cf7229394106baac22c0e374dd27c3550",
+      "oracle_sha256": "6fb9c55392349233401b198f4abea9d36c056bdec3fb6b8aea54948959d8f237"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type3-sub1.mp4",
+      "sha256": "f54d51689eaf1ab4f038b01868bb05358571005fd59341fd26a47b69f56dd724",
+      "oracle_sha256": "90d4cfde2e99ba4ac8cc53b7f4baa69d604badc6d00f7679ccd25571b21ca61c"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type3-sub2.mp4",
+      "sha256": "29563754e1ba5152c2e042bda947bff26587882d222990b75c45a125ce7400ad",
+      "oracle_sha256": "a586b27f5adf5d6661b2421749f42c8920495491624b58df320c26a15c6af77e"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type3-sub3.mp4",
+      "sha256": "6d5136421e5f1b6ee2075acd87da6aebe6d2d6f27b91106728ccf6711e1f5047",
+      "oracle_sha256": "3ce21aaa0f2a8788533627b2ac55697f8cf258c12d0cbff9d3ae96b6ba30329f"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type4-sub0.mp4",
+      "sha256": "f9d7ab496da3cbf4120dc02425c4e59f98cdeb66af8c5552e66cdf7109738f48",
+      "oracle_sha256": "6fb9c55392349233401b198f4abea9d36c056bdec3fb6b8aea54948959d8f237"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type4-sub1.mp4",
+      "sha256": "afd2d6302527526134ebeed7ea40eaf42f41943b2b1af4d1dba441c41c017248",
+      "oracle_sha256": "90d4cfde2e99ba4ac8cc53b7f4baa69d604badc6d00f7679ccd25571b21ca61c"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type4-sub2.mp4",
+      "sha256": "85d9eab128ae874aad5c2b22d9dc031d139c8b634eea538a4bf5dc2d2bebfa57",
+      "oracle_sha256": "a586b27f5adf5d6661b2421749f42c8920495491624b58df320c26a15c6af77e"
+    },
+    {
+      "file": "avc-field-partition-8bit-top-first-type4-sub3.mp4",
+      "sha256": "925d221bc8fbe9a7b146d2e2213d4e115f09152cb9207bfdb6f00ecf73854927",
+      "oracle_sha256": "3ce21aaa0f2a8788533627b2ac55697f8cf258c12d0cbff9d3ae96b6ba30329f"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type1-sub0.mp4",
+      "sha256": "1f644c48284b69e9f58a434be5a2ae9e82bb560ff327e01a503fe7dbbfb8fa56",
+      "oracle_sha256": "6816a05fc4f706c9d092c3ba4b139727fc4b6d96b8995d1af99230989c9db751"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type2-sub0.mp4",
+      "sha256": "e8291ded120b8530b004f83a52876d88f0e2b1340476cb1f88397b02f95bb958",
+      "oracle_sha256": "6ee63f93e82170aebfed7ccd8dc9fd033c38439f689536df9b23280875ae1b6d"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type3-sub0.mp4",
+      "sha256": "95bae7cf47f6e109ddbcc0177f4358eb076b81758a2c3132ac3d17205fae33f7",
+      "oracle_sha256": "6fb9c55392349233401b198f4abea9d36c056bdec3fb6b8aea54948959d8f237"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type3-sub1.mp4",
+      "sha256": "bd6842c21ff19770d5104436432861f363266f3293f313e0475d34868c1ed454",
+      "oracle_sha256": "90d4cfde2e99ba4ac8cc53b7f4baa69d604badc6d00f7679ccd25571b21ca61c"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type3-sub2.mp4",
+      "sha256": "8f24dd60484723c55902c062a8e16d30a2959e76ef86ac114ec890de79d0899f",
+      "oracle_sha256": "a586b27f5adf5d6661b2421749f42c8920495491624b58df320c26a15c6af77e"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type3-sub3.mp4",
+      "sha256": "9ecf221e0066b58befe4850eb24a4dc0ef3aac2d860cf3b477de7ef50cec6f1f",
+      "oracle_sha256": "3ce21aaa0f2a8788533627b2ac55697f8cf258c12d0cbff9d3ae96b6ba30329f"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type4-sub0.mp4",
+      "sha256": "28d3bd014b3743a840567d7c7dac33e62fc612cb50ada755346694a510cb7735",
+      "oracle_sha256": "6fb9c55392349233401b198f4abea9d36c056bdec3fb6b8aea54948959d8f237"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type4-sub1.mp4",
+      "sha256": "792c862edf6daf388f143b8fa311f79ecab37cb8dde23a4b7969f4566df59538",
+      "oracle_sha256": "90d4cfde2e99ba4ac8cc53b7f4baa69d604badc6d00f7679ccd25571b21ca61c"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type4-sub2.mp4",
+      "sha256": "7e733d8049012a8c8d281d4378a8a3d836824148f8aab07ce88a44559cd06ade",
+      "oracle_sha256": "a586b27f5adf5d6661b2421749f42c8920495491624b58df320c26a15c6af77e"
+    },
+    {
+      "file": "avc-field-partition-8bit-bottom-first-type4-sub3.mp4",
+      "sha256": "38dae3343cc79dea9a2d2fcde0db2f4b0069bc227c7e6c00f414397deb51a246",
+      "oracle_sha256": "3ce21aaa0f2a8788533627b2ac55697f8cf258c12d0cbff9d3ae96b6ba30329f"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type1-sub0.mp4",
+      "sha256": "9e74ed13c9ff9c008be28e271bd4319281a9db7455d6e962f47cd5061c0e6917",
+      "oracle_sha256": "1fab4f46e33c4ea8ecb2cfb123cab1f217745bdd0680afb9aa9e8e7727d8010d"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type2-sub0.mp4",
+      "sha256": "b70e22ad91fc6e029a7b3682a7d22e627a1e895b8394cd8eaafd43dff9fb0114",
+      "oracle_sha256": "556af23b2a7341f9a641b517dde7a8cf415f5f91f5b2ab53c4880859dbbcf08e"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type3-sub0.mp4",
+      "sha256": "767e54df1e0b68f9038c643743998a345f00afb505d6c654c684a7dc34884022",
+      "oracle_sha256": "8900fb50794932bde763428f78eaddc857905149b9e2f44003886322ed5dc0a3"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type3-sub1.mp4",
+      "sha256": "07cfe4006fcae67c214b57243bd946863ab678fbb4dda967360b4af029d6ca84",
+      "oracle_sha256": "296b645dd5348eb94600490d2daf861e88c847b51c9ee4252ea9fef22fe49c5b"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type3-sub2.mp4",
+      "sha256": "d51138a77eab821e2b54662c938663b67e4fe0b8518dd0290c5f8d954e98ebd0",
+      "oracle_sha256": "09f44ad9cd9df8a54faed9c4bd8efc2fb388a295b2cf49abd8ab1ac29eeee416"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type3-sub3.mp4",
+      "sha256": "ace5592fdaa7a8f972c0039440285d2e5bc0be167e692748782ea5539b83843f",
+      "oracle_sha256": "64bf0e9a211f28de3569a26ede49d404083ca02bd7fed63b91fb95b1877413df"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type4-sub0.mp4",
+      "sha256": "5153ef520ea4e6354455f5e49d9a5676e24fec024bdc88e3910850f3bf8628e5",
+      "oracle_sha256": "8900fb50794932bde763428f78eaddc857905149b9e2f44003886322ed5dc0a3"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type4-sub1.mp4",
+      "sha256": "55941c6b50da4b54cce694231ed4e030ca97c7e6349aa9dbc0e0e03518c4e67f",
+      "oracle_sha256": "296b645dd5348eb94600490d2daf861e88c847b51c9ee4252ea9fef22fe49c5b"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type4-sub2.mp4",
+      "sha256": "ab73c534f1dad1f4ed622ab74dd14475a1927554a16e39bd86633e2df96d4b80",
+      "oracle_sha256": "09f44ad9cd9df8a54faed9c4bd8efc2fb388a295b2cf49abd8ab1ac29eeee416"
+    },
+    {
+      "file": "avc-field-partition-10bit-top-first-type4-sub3.mp4",
+      "sha256": "bf9a2c31cb0257cafad3e4fcaf63cc8ec6b1f4d07976a73477cd1d4f37332bdf",
+      "oracle_sha256": "64bf0e9a211f28de3569a26ede49d404083ca02bd7fed63b91fb95b1877413df"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type1-sub0.mp4",
+      "sha256": "e3abc5b903b73fc39e6d12e0eb39c9f3f23fe455ab68823d8818578b7ff55818",
+      "oracle_sha256": "1fab4f46e33c4ea8ecb2cfb123cab1f217745bdd0680afb9aa9e8e7727d8010d"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type2-sub0.mp4",
+      "sha256": "32de46959af405afec7ae646912b5b551c01277b16cf23843054041b122e23bc",
+      "oracle_sha256": "556af23b2a7341f9a641b517dde7a8cf415f5f91f5b2ab53c4880859dbbcf08e"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type3-sub0.mp4",
+      "sha256": "578ab5eb0818b09fadce21513f4ae97134f4134e8c0cf8ef37e91290e93cce2a",
+      "oracle_sha256": "8900fb50794932bde763428f78eaddc857905149b9e2f44003886322ed5dc0a3"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type3-sub1.mp4",
+      "sha256": "58d5f5ca003024f740e943ff7ca54a8d37d5454b9da58e27541af8444b5e7dcd",
+      "oracle_sha256": "296b645dd5348eb94600490d2daf861e88c847b51c9ee4252ea9fef22fe49c5b"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type3-sub2.mp4",
+      "sha256": "0a4a72b8d8995d60259411400080df35be8468b7cb6b8942ea1458601cb2c6ca",
+      "oracle_sha256": "09f44ad9cd9df8a54faed9c4bd8efc2fb388a295b2cf49abd8ab1ac29eeee416"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type3-sub3.mp4",
+      "sha256": "3a94c93513c8167d9d979f6f6ccf1d381a9287a2292c155ca992dd6bc858262e",
+      "oracle_sha256": "64bf0e9a211f28de3569a26ede49d404083ca02bd7fed63b91fb95b1877413df"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type4-sub0.mp4",
+      "sha256": "9a93ff7bd7d9305ec200f0cf043cfc17d82ea69ef46bb5cedab329e6b2786cb3",
+      "oracle_sha256": "8900fb50794932bde763428f78eaddc857905149b9e2f44003886322ed5dc0a3"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type4-sub1.mp4",
+      "sha256": "212749b20dd2703d3271ecfb468a422655e2cd27032f8bbf795e7206f6b9752b",
+      "oracle_sha256": "296b645dd5348eb94600490d2daf861e88c847b51c9ee4252ea9fef22fe49c5b"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type4-sub2.mp4",
+      "sha256": "4c450eef0fa7809eb5f8b1f39d9ccfe5b9693f9c72573968fc590ab61cfa37de",
+      "oracle_sha256": "09f44ad9cd9df8a54faed9c4bd8efc2fb388a295b2cf49abd8ab1ac29eeee416"
+    },
+    {
+      "file": "avc-field-partition-10bit-bottom-first-type4-sub3.mp4",
+      "sha256": "66499588313f80de3cd147f61eebd4fbd9dbf5f4be3721bf51dc325f7a004f18",
+      "oracle_sha256": "64bf0e9a211f28de3569a26ede49d404083ca02bd7fed63b91fb95b1877413df"
+    }
+  ]
+}

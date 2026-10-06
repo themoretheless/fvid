@@ -1,0 +1,25 @@
+{
+  "generator": "owned I/P field writer",
+  "fixtures": [
+    {
+      "file": "avc-field-skip-8bit-top-first.mp4",
+      "sha256": "b5ec141a0eb268931ef891bddb08b32cdf4b4157411b2954cf6eec4a03855603",
+      "oracle_sha256": "59f6b6467c29d8a58dfab4ac86c86c3ad7a4adb0fb3be16fea568296c032bd82"
+    },
+    {
+      "file": "avc-field-skip-8bit-bottom-first.mp4",
+      "sha256": "8a40758adc3f1f5b39beb7f9299ab8eb817ac8863a5d02bc2bfc964bf3a53fe8",
+      "oracle_sha256": "59f6b6467c29d8a58dfab4ac86c86c3ad7a4adb0fb3be16fea568296c032bd82"
+    },
+    {
+      "file": "avc-field-skip-10bit-top-first.mp4",
+      "sha256": "c2d5d62358758ecc61d8d6605eff2c460060613733d08093692dbc019dd35758",
+      "oracle_sha256": "5728794a20c9da215adcd03b85836d4e3ba022fca39cd4e4cb47e4720fc1068d"
+    },
+    {
+      "file": "avc-field-skip-10bit-bottom-first.mp4",
+      "sha256": "0c5f65f24a24a03989ea684ae8e87897662b9f8d5771631374c7d0ce6528b5ed",
+      "oracle_sha256": "5728794a20c9da215adcd03b85836d4e3ba022fca39cd4e4cb47e4720fc1068d"
+    }
+  ]
+}

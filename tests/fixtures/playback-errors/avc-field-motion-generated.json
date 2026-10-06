@@ -1,0 +1,85 @@
+{
+  "generator": "owned I/P fractional field motion writer",
+  "fixtures": [
+    {
+      "file": "avc-field-motion-8bit-top-first-x1-y1.mp4",
+      "sha256": "5d0d39063dff32d9ee329d5caa9a1dbfd23fa8ff2a3d4e570305ab083e3d8a35",
+      "oracle_sha256": "1e4d7ab11214d4b528c040adbf3bbd4cf0386594d48d9631c494833ec70a0fad"
+    },
+    {
+      "file": "avc-field-motion-8bit-top-first-x-1-y-1.mp4",
+      "sha256": "2bec60ad67fdbf6d6cadc8c3ca61c3fe08430e445355aa9a40d2b5204c0cfa5a",
+      "oracle_sha256": "a8bc20125d036e85f62c101f45e00d40ede248607d67db0e339835b88496a2b5"
+    },
+    {
+      "file": "avc-field-motion-8bit-top-first-x5-y-3.mp4",
+      "sha256": "effc018d809af3cba2e3c0b3b2457a0a45fd74f785b3b69c7011de8217e05253",
+      "oracle_sha256": "0ba9677824208c96d5fa745e15948ea3bf4af64b512c9d85cc45944f67754e42"
+    },
+    {
+      "file": "avc-field-motion-8bit-top-first-x-7-y6.mp4",
+      "sha256": "3844e44e30ed84973aa3ee5c69c70ae28f91846015212262b9e93b8c1bb609cf",
+      "oracle_sha256": "6b3939d26684ce74bf90ef503197873a5708571cf074f318cc4301d221b47864"
+    },
+    {
+      "file": "avc-field-motion-8bit-bottom-first-x1-y1.mp4",
+      "sha256": "e89fcecc2c182eadc1289f7f36edea7d4e6e8be6e5eb102e60c7c08f7f1c3773",
+      "oracle_sha256": "1e4d7ab11214d4b528c040adbf3bbd4cf0386594d48d9631c494833ec70a0fad"
+    },
+    {
+      "file": "avc-field-motion-8bit-bottom-first-x-1-y-1.mp4",
+      "sha256": "bad4d8e9ea80b1abea793b8485725bfe665a38ed9cc303e08515b227171fd740",
+      "oracle_sha256": "a8bc20125d036e85f62c101f45e00d40ede248607d67db0e339835b88496a2b5"
+    },
+    {
+      "file": "avc-field-motion-8bit-bottom-first-x5-y-3.mp4",
+      "sha256": "73eaf78cc1821b1cfc6069544bf5b22822938b5e2936145a41a959663e6dcc4b",
+      "oracle_sha256": "0ba9677824208c96d5fa745e15948ea3bf4af64b512c9d85cc45944f67754e42"
+    },
+    {
+      "file": "avc-field-motion-8bit-bottom-first-x-7-y6.mp4",
+      "sha256": "50bd5b76627059b46d73146bb981176b41e073a9911e4c72123e423e0ecb928f",
+      "oracle_sha256": "6b3939d26684ce74bf90ef503197873a5708571cf074f318cc4301d221b47864"
+    },
+    {
+      "file": "avc-field-motion-10bit-top-first-x1-y1.mp4",
+      "sha256": "cc37698a97a200586ec4a45378480b0f90f0d2718209d78fa5b4d385e43cd2f8",
+      "oracle_sha256": "730b99db56dbd0cf5b41e9e8fca094048e3bffb2093df759146ddc21246b9813"
+    },
+    {
+      "file": "avc-field-motion-10bit-top-first-x-1-y-1.mp4",
+      "sha256": "df6e075ac165d5c2a87b1a7a31b046306d1e61fa64ed82228b11ecd3dec63f7d",
+      "oracle_sha256": "3cda35a4731722e83fdf143c9b806d41a4fa8774a2aeb24f1c05a7c12d6fbaac"
+    },
+    {
+      "file": "avc-field-motion-10bit-top-first-x5-y-3.mp4",
+      "sha256": "e3ff5c2345b3492122d51c834a2ca1577b7983e08eb6828dd95020442978ca4e",
+      "oracle_sha256": "f1ac97eda82d92f2cc493149b8a832d673e02efe49f3993ff7d023c28b5b165b"
+    },
+    {
+      "file": "avc-field-motion-10bit-top-first-x-7-y6.mp4",
+      "sha256": "98643fdb535f96bc93524e333e5960d7f8cf02f046a682ef429eca83e396f55c",
+      "oracle_sha256": "1e1a1bac15928b738993ca5b5ba1280aa5b864b4aa1fb788e1997e40a3c55e83"
+    },
+    {
+      "file": "avc-field-motion-10bit-bottom-first-x1-y1.mp4",
+      "sha256": "d2b4ce4fd90e23d186ea37a072fd3a47f9db265022f2e7c49f05374e114bb933",
+      "oracle_sha256": "730b99db56dbd0cf5b41e9e8fca094048e3bffb2093df759146ddc21246b9813"
+    },
+    {
+      "file": "avc-field-motion-10bit-bottom-first-x-1-y-1.mp4",
+      "sha256": "1202e009d91500a75bcb609c53e580accd4a3c5e5d9a3d0acd04d56b9cf0c8e6",
+      "oracle_sha256": "3cda35a4731722e83fdf143c9b806d41a4fa8774a2aeb24f1c05a7c12d6fbaac"
+    },
+    {
+      "file": "avc-field-motion-10bit-bottom-first-x5-y-3.mp4",
+      "sha256": "a7ab0a0673f130318bc359f96a1cc2819a7e6aeff6242cd38a797c9d4d36d370",
+      "oracle_sha256": "f1ac97eda82d92f2cc493149b8a832d673e02efe49f3993ff7d023c28b5b165b"
+    },
+    {
+      "file": "avc-field-motion-10bit-bottom-first-x-7-y6.mp4",
+      "sha256": "4c537c338624ce3a20d4cc5f367c33ce44b4c2e93f51744bd8280120e7ef3a85",
+      "oracle_sha256": "1e1a1bac15928b738993ca5b5ba1280aa5b864b4aa1fb788e1997e40a3c55e83"
+    }
+  ]
+}

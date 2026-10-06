@@ -340,6 +340,20 @@ pub fn row_edges(
     previous: Option<&[DecodedBlockEdges]>,
     current: &[DecodedBlockEdges],
 ) -> Result<[Vec<super::avc_deblock::MacroblockEdges>; 3]> {
+    row_edges_layout(previous, current, false)
+}
+/// Edges in one compact field: vertical motion uses the field threshold.
+pub fn row_edges_field(
+    previous: Option<&[DecodedBlockEdges]>,
+    current: &[DecodedBlockEdges],
+) -> Result<[Vec<super::avc_deblock::MacroblockEdges>; 3]> {
+    row_edges_layout(previous, current, true)
+}
+fn row_edges_layout(
+    previous: Option<&[DecodedBlockEdges]>,
+    current: &[DecodedBlockEdges],
+    field: bool,
+) -> Result<[Vec<super::avc_deblock::MacroblockEdges>; 3]> {
     if current.is_empty()
         || previous.is_some_and(|p| p.len() != current.len())
         || current
@@ -400,8 +414,17 @@ pub fn row_edges(
                         } else {
                             (if edge == 0 { 3 } else { edge - 1 }) * 4 + segment
                         };
-                        luma.strengths[direction][edge][segment] =
-                            strength(prev.blocks[p], mb.blocks[q], edge == 0)?;
+                        luma.strengths[direction][edge][segment] = if field {
+                            strength_mbaff(
+                                prev.blocks[p],
+                                mb.blocks[q],
+                                edge == 0,
+                                direction == 0,
+                                [true, true],
+                            )?
+                        } else {
+                            strength(prev.blocks[p], mb.blocks[q], edge == 0)?
+                        };
                     }
                 }
             }

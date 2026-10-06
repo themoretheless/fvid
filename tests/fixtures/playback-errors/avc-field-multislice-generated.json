@@ -1,0 +1,245 @@
+{
+  "generator": "owned I/P field multislice writer",
+  "fixtures": [
+    {
+      "file": "avc-field-multislice-8bit-top-first-motion-filter0.mp4",
+      "sha256": "0c53ba431fa41b7f31eb0d259a342156eb4f9b2b03e80377d280527f008c40c9",
+      "oracle_sha256": "bdaa6976621c980d70408f0c733efe1e9b4f1e33ea668e6618d49788a4e554f7"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-motion-filter0-aso.mp4",
+      "sha256": "48a3afaf46eff25532b1dd84e1a12e0c3dcf9d3184459638998129b0411ec13f",
+      "oracle_sha256": "bdaa6976621c980d70408f0c733efe1e9b4f1e33ea668e6618d49788a4e554f7"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-motion-filter1.mp4",
+      "sha256": "4297eb04f2a7b15c8baf000b64fd2e91b63cc512c6f1cba9656bcf6c2c9ad4a0",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-motion-filter1-aso.mp4",
+      "sha256": "92c8a7e2b0c7c549f0bce4e4b01704b23d52a7c0f4eb39d66cca21c097853e10",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-motion-filter2.mp4",
+      "sha256": "3916cdd51eb6fa7e5a83a82ba109751e533407e443d3956f601c893d08cca7a5",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-motion-filter2-aso.mp4",
+      "sha256": "b9b8cf4f383f47818f5136d44704d3420efcfcac40cabcb0aa53257aed976fb0",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-all-ac-filter0.mp4",
+      "sha256": "77d82c4a3989412a01de7778959191eb541bf41a0a4bd9847553012b8ecfb553",
+      "oracle_sha256": "a576390126271597be8236723fc9f1ae39609d509026c00b3fab7e7ed4470a69"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-all-ac-filter0-aso.mp4",
+      "sha256": "66c1e56542dfaa0462c4d881f5afe6e072b0691ce835a7363e8860d059ca9d7c",
+      "oracle_sha256": "a576390126271597be8236723fc9f1ae39609d509026c00b3fab7e7ed4470a69"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-all-ac-filter1.mp4",
+      "sha256": "ee6c9177435211695c81cd480cddae0198b47c16783c6a2d19edff3da91747c2",
+      "oracle_sha256": "8db42ab640f36424aab400a14d4b089229bcac002771f550fd3b054e5aac7650"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-all-ac-filter1-aso.mp4",
+      "sha256": "5d8db0e391f738c71ce38dc5c450663bc81654cecdb4dedaa1c3ca1bab07093f",
+      "oracle_sha256": "8db42ab640f36424aab400a14d4b089229bcac002771f550fd3b054e5aac7650"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-all-ac-filter2.mp4",
+      "sha256": "810da341d40b4f7c85837548f61ea3d0def70b8bcb70d1e6943692dd184f0481",
+      "oracle_sha256": "63e030c5f53ac7ce6fbba0b2f39cb90344d518b426c7ec6c62184b6762226e6e"
+    },
+    {
+      "file": "avc-field-multislice-8bit-top-first-all-ac-filter2-aso.mp4",
+      "sha256": "305518457e2c9cd9597e087bea911ef0bb672616bde3db6b03182864471675ff",
+      "oracle_sha256": "63e030c5f53ac7ce6fbba0b2f39cb90344d518b426c7ec6c62184b6762226e6e"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-motion-filter0.mp4",
+      "sha256": "0f45ea35c8739ddd5c838bfad5180099a470de56c87916807688d24f3548d794",
+      "oracle_sha256": "bdaa6976621c980d70408f0c733efe1e9b4f1e33ea668e6618d49788a4e554f7"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-motion-filter0-aso.mp4",
+      "sha256": "536f32175c63352131cddf3e8051c8e8f3299278338d0c967bfb7e09caa7c4ba",
+      "oracle_sha256": "bdaa6976621c980d70408f0c733efe1e9b4f1e33ea668e6618d49788a4e554f7"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-motion-filter1.mp4",
+      "sha256": "3e4843bb531e50727deb61dcef7beb98523945b1e085e755501366e3cfba6436",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-motion-filter1-aso.mp4",
+      "sha256": "282fc9d2373b29f325ce05f67adec97af5c6df51fac46c0316977139e155b28c",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-motion-filter2.mp4",
+      "sha256": "a93929cf8950708a149a20a4f63d7f02038631554449a74768a603c838c3a88c",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-motion-filter2-aso.mp4",
+      "sha256": "b0d28d0f7fa0cddf3d6f231f9754d2901746322200e24e06b380d3b55190b890",
+      "oracle_sha256": "8ec0c4dae7a55b2491f45cce2faff8a1fce2d9a52f1ac59d5bf5bedbc09cf911"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-all-ac-filter0.mp4",
+      "sha256": "a4fd4899fb2351a7a22787ba1527cc5b53fd8774bf1620e09d4e997187115ec6",
+      "oracle_sha256": "a576390126271597be8236723fc9f1ae39609d509026c00b3fab7e7ed4470a69"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-all-ac-filter0-aso.mp4",
+      "sha256": "0d7dd62c04aa138e98b5d3627fe51dbad508a57941cba65278800d9b0077d317",
+      "oracle_sha256": "a576390126271597be8236723fc9f1ae39609d509026c00b3fab7e7ed4470a69"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-all-ac-filter1.mp4",
+      "sha256": "fbf2b776ed7feb0ff29bbc89a5dcbe81d268a6400d63f55402423bf27d84227f",
+      "oracle_sha256": "8db42ab640f36424aab400a14d4b089229bcac002771f550fd3b054e5aac7650"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-all-ac-filter1-aso.mp4",
+      "sha256": "4cd969eb7d797c28e845fc17c6aa32fcf07e04a3830f4800003ff19c4e7a1ab5",
+      "oracle_sha256": "8db42ab640f36424aab400a14d4b089229bcac002771f550fd3b054e5aac7650"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-all-ac-filter2.mp4",
+      "sha256": "22f8f2ea90edec6f845875b5369f08f92b104fe2c60788f98f96faa62e597229",
+      "oracle_sha256": "63e030c5f53ac7ce6fbba0b2f39cb90344d518b426c7ec6c62184b6762226e6e"
+    },
+    {
+      "file": "avc-field-multislice-8bit-bottom-first-all-ac-filter2-aso.mp4",
+      "sha256": "5203469cbe53621427cb76a37ab29f4d7eeade7f3c9aaee8fc78d1534b494d8a",
+      "oracle_sha256": "63e030c5f53ac7ce6fbba0b2f39cb90344d518b426c7ec6c62184b6762226e6e"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-motion-filter0.mp4",
+      "sha256": "e65a78465430a6776bda5c4d3a0bc56f95e949dce6402fc83ab57f8c2025a3c3",
+      "oracle_sha256": "66d7f5c19394d93ab052db3899ce899e006568c349c9089429a8c90099584d91"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-motion-filter0-aso.mp4",
+      "sha256": "d168528a405e283f20624b60ae05d4d075d30687003bcf2b39577436d5af350c",
+      "oracle_sha256": "66d7f5c19394d93ab052db3899ce899e006568c349c9089429a8c90099584d91"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-motion-filter1.mp4",
+      "sha256": "e3cb112d1fac9aa4c27034121029f2005fc49cd2d4893aebece3d0f20946268d",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-motion-filter1-aso.mp4",
+      "sha256": "bcf606cbc0d90e9c01cb65976e4b1f2dae854cf1e088b79113e904f2f421e9e2",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-motion-filter2.mp4",
+      "sha256": "9f225045e70c285ec1f76a9a50b1e4e9264307fae3b555a4463e972f56dfe0cc",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-motion-filter2-aso.mp4",
+      "sha256": "4781caa993233ec5d62042ae38bd0ca73484242956d5c645d8e3ac1c98d9913d",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-all-ac-filter0.mp4",
+      "sha256": "dc3a5b915bd259a6049f38a979eb2e15df351dec328a8d8150251f05524f041e",
+      "oracle_sha256": "1b05989b70ba8c841a9afb4eadffacde0c505df67dc1928e1d75bac9b1b79fe5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-all-ac-filter0-aso.mp4",
+      "sha256": "fb590d76d15d4118059edf6ca85792e3005ea043fc9cb4494e1d1c618ffb7021",
+      "oracle_sha256": "1b05989b70ba8c841a9afb4eadffacde0c505df67dc1928e1d75bac9b1b79fe5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-all-ac-filter1.mp4",
+      "sha256": "6d1b2e87b830a773cfdb77c5ed5e8e4bd8345d5521d2afe6d45a4a84183236d7",
+      "oracle_sha256": "f124f3e1f260d1e6572631dbe57fb5ae51ae508e867974010c736ffe1f1b1c5d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-all-ac-filter1-aso.mp4",
+      "sha256": "f204d48f46408b55aa180a17e54ba2548b1331e7c981c11df58629866dc4f04a",
+      "oracle_sha256": "f124f3e1f260d1e6572631dbe57fb5ae51ae508e867974010c736ffe1f1b1c5d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-all-ac-filter2.mp4",
+      "sha256": "655eedea162a7492b035c75a6c95ce38e684f4acd7ed1bfca6904e0394c68588",
+      "oracle_sha256": "910b0020b3870f0d703619705ef7c6cda104826253c3b16f87422f4544ee73d5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-top-first-all-ac-filter2-aso.mp4",
+      "sha256": "36ccd36ccabaa7833b915031e7361c0f65fd26eeaa6417bed91f7e658bcabd44",
+      "oracle_sha256": "910b0020b3870f0d703619705ef7c6cda104826253c3b16f87422f4544ee73d5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-motion-filter0.mp4",
+      "sha256": "b68468298aaee279b51c51c2b7164d5ac518ac8bac9946749c8eafe729062e45",
+      "oracle_sha256": "66d7f5c19394d93ab052db3899ce899e006568c349c9089429a8c90099584d91"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-motion-filter0-aso.mp4",
+      "sha256": "fd1c8b68f2e2701050a6f6439cb72ae8712f8fb4b71c912c87f5c8963810573f",
+      "oracle_sha256": "66d7f5c19394d93ab052db3899ce899e006568c349c9089429a8c90099584d91"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-motion-filter1.mp4",
+      "sha256": "f76eb102dc3e6bebcf530170ef27c9172090451885dedec4cfc7bbccb4ad06de",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-motion-filter1-aso.mp4",
+      "sha256": "f65524670b3548747b4d2298ebb32e458354efc3008da0e11525dc0f9cedb2fd",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-motion-filter2.mp4",
+      "sha256": "89d554c39fdfd43ed248acb492cc6d32352a2ed4cb04ce59f6aa5f3967db4f78",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-motion-filter2-aso.mp4",
+      "sha256": "2ded643581f3d6ac7f3ca47521be3b0a18c8ffd1d9690b69d733ace37b469602",
+      "oracle_sha256": "4952df85035f8df98ba2d03479a791c1b62bdcdd8e816185af09bd02b2488a3d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-all-ac-filter0.mp4",
+      "sha256": "47b89b1f4caf5192152a0d62434632338a7ec8d3d5f9b3cfd4130da0956c0e02",
+      "oracle_sha256": "1b05989b70ba8c841a9afb4eadffacde0c505df67dc1928e1d75bac9b1b79fe5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-all-ac-filter0-aso.mp4",
+      "sha256": "5cd19561d265d440f125d24cfce63c68c9a86864ccf1fc439887c9d42fb634f3",
+      "oracle_sha256": "1b05989b70ba8c841a9afb4eadffacde0c505df67dc1928e1d75bac9b1b79fe5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-all-ac-filter1.mp4",
+      "sha256": "d38d321d06ce611c1949cb49d307121c498661c93dda52af3f2955f893bbc310",
+      "oracle_sha256": "f124f3e1f260d1e6572631dbe57fb5ae51ae508e867974010c736ffe1f1b1c5d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-all-ac-filter1-aso.mp4",
+      "sha256": "6762819408dc8a1ac68cea9bc241ec0a0a586a9b5c1666c96da3e611dbb09f05",
+      "oracle_sha256": "f124f3e1f260d1e6572631dbe57fb5ae51ae508e867974010c736ffe1f1b1c5d"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-all-ac-filter2.mp4",
+      "sha256": "93ac99e668dc39b5c36eb5179c50be537c53f605d7755c78ee9dd33eab4c5a1a",
+      "oracle_sha256": "910b0020b3870f0d703619705ef7c6cda104826253c3b16f87422f4544ee73d5"
+    },
+    {
+      "file": "avc-field-multislice-10bit-bottom-first-all-ac-filter2-aso.mp4",
+      "sha256": "e6ec85ffc7bb3b2bf945a383977b5aa1626856f6500eb632f4a0407a9dcf8702",
+      "oracle_sha256": "910b0020b3870f0d703619705ef7c6cda104826253c3b16f87422f4544ee73d5"
+    }
+  ]
+}

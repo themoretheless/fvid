@@ -1,0 +1,85 @@
+{
+  "generator": "owned I/P signed field residual writer",
+  "fixtures": [
+    {
+      "file": "avc-field-residual-8bit-top-first-zero.mp4",
+      "sha256": "6a04fd9011497009ac8905e8c6355ef4bc5017034f4fd04ad0951a7f47bafcb9",
+      "oracle_sha256": "d11692ce52d30f5b9e405515fcef092c630c3f7387bd20e8796d10746e9d16fa"
+    },
+    {
+      "file": "avc-field-residual-8bit-top-first-luma-ac.mp4",
+      "sha256": "b507b42eb356ba1030faf7152f159ae3e6b224d91706c88998525322962400b2",
+      "oracle_sha256": "8cfdab423b03c31416bd3ac7c2bb12a6c6bf3b980f55e4877f4b7fa5ff72e0ad"
+    },
+    {
+      "file": "avc-field-residual-8bit-top-first-chroma-dc.mp4",
+      "sha256": "f33c1ad1fc2a9a828dfc19b93b3a73e202ed95e513c866b34d0d344f838caa13",
+      "oracle_sha256": "a6f7d9d44ab41780624425c7dc2b54a1f1dd155c3a655dac365cc4525368fbc5"
+    },
+    {
+      "file": "avc-field-residual-8bit-top-first-all-ac.mp4",
+      "sha256": "bd558efd52d1ef5714c0576a7b7c75bcc968ecacab57f3ba787a180b90721a96",
+      "oracle_sha256": "c39db32e197c556f79528ab8463927e789159a24efa70e454bdc4a72c8304b4c"
+    },
+    {
+      "file": "avc-field-residual-8bit-bottom-first-zero.mp4",
+      "sha256": "33411b51aa474c6c7a856d4e8b7fd7d1fbc81e67b1b5402c7f2d9491eeb5d52d",
+      "oracle_sha256": "d11692ce52d30f5b9e405515fcef092c630c3f7387bd20e8796d10746e9d16fa"
+    },
+    {
+      "file": "avc-field-residual-8bit-bottom-first-luma-ac.mp4",
+      "sha256": "f86835f37190510cbd029141f80e02ece3ed687017a72199796f219b5ffcfd6e",
+      "oracle_sha256": "8cfdab423b03c31416bd3ac7c2bb12a6c6bf3b980f55e4877f4b7fa5ff72e0ad"
+    },
+    {
+      "file": "avc-field-residual-8bit-bottom-first-chroma-dc.mp4",
+      "sha256": "f4cdc7b7abfc26e5473e67954589c907c2a5602fdbf9ada70700cbb76b0e5a49",
+      "oracle_sha256": "a6f7d9d44ab41780624425c7dc2b54a1f1dd155c3a655dac365cc4525368fbc5"
+    },
+    {
+      "file": "avc-field-residual-8bit-bottom-first-all-ac.mp4",
+      "sha256": "5d2f515e262c96856a8fa612e433c465df81d39790bafb4f540453eb973dce01",
+      "oracle_sha256": "c39db32e197c556f79528ab8463927e789159a24efa70e454bdc4a72c8304b4c"
+    },
+    {
+      "file": "avc-field-residual-10bit-top-first-zero.mp4",
+      "sha256": "f3ac1939f6f4dc8dcf1298cab2a8d0c2b11059b4330d537d9c56a1f5b5b314f2",
+      "oracle_sha256": "ccf63ffe7baa5e36fe1fb1c4c6f8a7d7739b316bbee7d4cc5fa5a748e8669566"
+    },
+    {
+      "file": "avc-field-residual-10bit-top-first-luma-ac.mp4",
+      "sha256": "edc0fc19fa4d49e61806dcaedbe0e9808ebf5e1cc59f259be99d6686699d0906",
+      "oracle_sha256": "948824c53708095a131be55ff1d0160bcda2300298884b84cc06173c3c1e63ae"
+    },
+    {
+      "file": "avc-field-residual-10bit-top-first-chroma-dc.mp4",
+      "sha256": "a8aa647fd4328315080871a2f4830d31528bfb7bb716a5397536bca541787524",
+      "oracle_sha256": "41c5237c89c03c4d1414dfbcc5396b17022aada8e640efbef7d65ef4e55b61ea"
+    },
+    {
+      "file": "avc-field-residual-10bit-top-first-all-ac.mp4",
+      "sha256": "53c3117eaad1e533023d7ee1b389e3e7fd99f92cc630cdd6b3954def7ec9a3d3",
+      "oracle_sha256": "4f3666a82e8e8d0e9d1a4aed53cc8a7656eef6a44995cd71b9d79ddc07afb40d"
+    },
+    {
+      "file": "avc-field-residual-10bit-bottom-first-zero.mp4",
+      "sha256": "77ff25e887b4fd9906b5ca67ebfa1ea1c421e6fc50499ac9b751e1c3d3826600",
+      "oracle_sha256": "ccf63ffe7baa5e36fe1fb1c4c6f8a7d7739b316bbee7d4cc5fa5a748e8669566"
+    },
+    {
+      "file": "avc-field-residual-10bit-bottom-first-luma-ac.mp4",
+      "sha256": "c4849d73faff67f2e29b9d2ed62b8660168899d61249850b83b2b153fe186eca",
+      "oracle_sha256": "948824c53708095a131be55ff1d0160bcda2300298884b84cc06173c3c1e63ae"
+    },
+    {
+      "file": "avc-field-residual-10bit-bottom-first-chroma-dc.mp4",
+      "sha256": "d725fee181f2099e62a08b047ae2cad9a2b4be27332369e49ba6477046212fe0",
+      "oracle_sha256": "41c5237c89c03c4d1414dfbcc5396b17022aada8e640efbef7d65ef4e55b61ea"
+    },
+    {
+      "file": "avc-field-residual-10bit-bottom-first-all-ac.mp4",
+      "sha256": "79cf061ecd7c6849906d28568b412dd1d06a4ab575708b116a87f7f05c97b50a",
+      "oracle_sha256": "4f3666a82e8e8d0e9d1a4aed53cc8a7656eef6a44995cd71b9d79ddc07afb40d"
+    }
+  ]
+}

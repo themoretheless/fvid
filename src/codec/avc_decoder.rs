@@ -163,7 +163,7 @@ impl AvcDecoder {
     pub fn has_pending_field(&self) -> bool {
         self.pending_field.is_some()
     }
-    fn decode_pcm_fields(
+    fn decode_fields(
         &mut self,
         headers: &[&SliceHeader],
         sps: &Sps,
@@ -171,7 +171,10 @@ impl AvcDecoder {
         allow_reordering: bool,
     ) -> Result<Option<Arc<IntraPicture>>> {
         let header = headers[0];
-        if headers.iter().any(|h| h.slice_type != SliceType::I) {
+        if headers
+            .iter()
+            .any(|h| !matches!(h.slice_type, SliceType::I | SliceType::P))
+        {
             return Err(crate::unsupported(
                 "AVC inter field reconstruction is not connected",
             ));
@@ -208,8 +211,40 @@ impl AvcDecoder {
             .budget
             .checked_sub(reserved)
             .ok_or_else(|| invalid("AVC fields exceed decoder memory budget"))?;
-        let mut field = super::avc_field_picture::decode_pcm_slices(headers, sps, pps, scratch)?;
         let order = self.poc.decode(sps, header)?;
+        let mut field = if header.slice_type == SliceType::P {
+            let dpb = self
+                .field_dpb
+                .as_ref()
+                .ok_or_else(|| invalid("missing AVC field references"))?;
+            let mut references = Vec::new();
+            references
+                .try_reserve_exact(headers.len())
+                .map_err(|_| invalid("cannot allocate AVC field reference contexts"))?;
+            for h in headers {
+                let lists = dpb.lists(h, order.before_marking.picture())?;
+                let mut resolved = Vec::new();
+                resolved
+                    .try_reserve_exact(lists.l0.len())
+                    .map_err(|_| invalid("cannot allocate AVC active field references"))?;
+                for selected in &lists.l0 {
+                    let reference = dpb
+                        .get(selected.id, selected.bottom)
+                        .ok_or_else(|| invalid("missing selected AVC field"))?;
+                    let identity = selected
+                        .id
+                        .checked_mul(2)
+                        .and_then(|v| v.checked_add(u64::from(selected.bottom)))
+                        .ok_or_else(|| invalid("AVC field reference identity overflow"))?;
+                    resolved.push((reference.as_ref(), identity));
+                }
+                references.push(resolved);
+            }
+            let contexts = references.iter().map(Vec::as_slice).collect::<Vec<_>>();
+            super::avc_field_picture::decode_p_field_lists(headers, sps, pps, &contexts, scratch)?
+        } else {
+            super::avc_field_picture::decode_pcm_slices(headers, sps, pps, scratch)?
+        };
         if header.idr {
             self.field_dpb = Some(super::avc_field_dpb::FieldBuffer::new(
                 sps.frame_num_bits,
@@ -383,7 +418,7 @@ impl AvcDecoder {
         if header.field_pic {
             let sps = sps.clone();
             let pps = pps.clone();
-            return self.decode_pcm_fields(
+            return self.decode_fields(
                 &slices.iter().map(|s| &s.header).collect::<Vec<_>>(),
                 &sps,
                 &pps,

@@ -94,9 +94,10 @@ pub(crate) fn decode_presented(
             Err(Error::Unsupported(_)) => return Ok(None),
             Err(error) => return Err(error.to_string()),
         };
+        let mut pending_field = None;
         for sample in 0..samples {
             check_options(options, sample)?;
-            let timing = reader.tracks()[index]
+            let mut timing = reader.tracks()[index]
                 .samples
                 .get(sample)
                 .ok_or("missing MP4 sample timing")?;
@@ -108,6 +109,24 @@ pub(crate) fn decode_presented(
                 Err(Error::Unsupported(_)) => return Ok(None),
                 Err(error) => return Err(error.to_string()),
             };
+            let mut output_sample = sample;
+            if decoder.has_pending_field() {
+                pending_field.get_or_insert(sample);
+            }
+            if decoder.output_is_field_pair() {
+                output_sample = pending_field
+                    .take()
+                    .ok_or("missing AVC first-field timing")?;
+                let first = reader.tracks()[index]
+                    .samples
+                    .get(output_sample)
+                    .ok_or("missing AVC first-field sample")?;
+                timing.pts = first.pts;
+                timing.duration = timing
+                    .duration
+                    .checked_add(first.duration)
+                    .ok_or("AVC field-pair duration overflow")?;
+            }
             if let Some(picture) = decoded {
                 let (width, height) = picture.dimensions();
                 if let Some(spool) = spool.as_mut() {
@@ -139,7 +158,7 @@ pub(crate) fn decode_presented(
                     slot: spool_count,
                     pts: timing.pts,
                     duration: i64::from(timing.duration),
-                    sample,
+                    sample: output_sample,
                     size: [
                         u32::try_from(width).map_err(|_| "AVC width overflow")?,
                         u32::try_from(height).map_err(|_| "AVC height overflow")?,
@@ -150,6 +169,9 @@ pub(crate) fn decode_presented(
                 });
                 spool_count += 1;
             }
+        }
+        if decoder.has_pending_field() {
+            return Err("unpaired AVC field at end of MP4".into());
         }
     } else {
         let mut decoder = match HevcDecoder::from_configuration(&configuration, usize::MAX) {
@@ -190,7 +212,11 @@ pub(crate) fn decode_presented(
                     2 => [true, false],
                     _ => return Err("invalid HEVC chroma format".into()),
                 };
-                let output_depth = if chroma == 0 { picture.depth[0] } else { picture.depth[0].max(picture.depth[1]) };
+                let output_depth = if chroma == 0 {
+                    picture.depth[0]
+                } else {
+                    picture.depth[0].max(picture.depth[1])
+                };
                 if let Some(spool) = spool.as_mut() {
                     let current = (size, output_depth, sub, chroma == 0);
                     if storage_format.is_some_and(|previous| previous != current) {
@@ -377,6 +403,98 @@ mod tests {
         }
     }
     #[test]
+    fn complementary_fields_preserve_first_timing_and_pixels() {
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        for name in [
+            "avc-field-pcm-8bit-top-first",
+            "avc-field-pcm-10bit-bottom-first-mixed-long",
+            "avc-field-skip-8bit-top-first",
+            "avc-field-skip-8bit-bottom-first",
+            "avc-field-skip-10bit-top-first",
+            "avc-field-skip-10bit-bottom-first",
+            "avc-field-motion-8bit-top-first-x1-y1",
+            "avc-field-motion-10bit-bottom-first-x-7-y6",
+            "avc-field-partition-8bit-top-first-type3-sub3",
+            "avc-field-partition-10bit-bottom-first-type4-sub2",
+            "avc-field-residual-8bit-top-first-all-ac",
+            "avc-field-residual-10bit-bottom-first-all-ac",
+            "avc-field-transform-8bit-top-first-t8-qp40-scale24",
+            "avc-field-transform-10bit-bottom-first-t4-qp18-scale24",
+            "avc-field-bypass-8bit-top-first-t8-enabled-scale24",
+            "avc-field-bypass-10bit-bottom-first-t4-enabled-scale24",
+            "avc-field-filter-8bit-top-first-motion-filter0",
+            "avc-field-filter-10bit-bottom-first-all-ac-filter2",
+            "avc-field-multislice-8bit-top-first-motion-filter0-aso",
+            "avc-field-multislice-10bit-bottom-first-all-ac-filter2-aso",
+            "avc-field-rows-8bit-top-first-all-ac-one-filter0",
+            "avc-field-rows-10bit-bottom-first-motion-rows-filter2-aso",
+            "avc-field-refs-8bit-top-first-normal-coded-filter0-aso",
+            "avc-field-refs-10bit-bottom-first-swap-skip-filter2-aso",
+            "avc-field-opposite-8bit-top-first-normal-coded-filter0-aso",
+            "avc-field-opposite-10bit-bottom-first-swap-skip-filter2-aso",
+            "avc-field-multiref-8bit-top-first-type3-sub3-r0-filter0-aso",
+            "avc-field-multiref-10bit-bottom-first-type1-sub0-r1-filter2-aso",
+            "avc-field-weight-8bit-top-first-whole-skip-weighted-filter0",
+            "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
+        ] {
+            let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+            let count = if name.contains("refs")
+                || name.contains("opposite")
+                || name.contains("multiref")
+                || name.contains("weight")
+            {
+                3
+            } else if name.contains("skip")
+                || name.contains("motion")
+                || name.contains("partition")
+                || name.contains("residual")
+                || name.contains("transform")
+                || name.contains("bypass")
+                || name.contains("filter")
+                || name.contains("multislice")
+                || name.contains("rows")
+            {
+                2
+            } else {
+                1
+            };
+            let frame_bytes = oracle.len() / count;
+            let mut calls = 0usize;
+            let mut visitor = |frame: &FrameMetadata, pixels: &[u8], start, duration| {
+                assert_eq!(
+                    (frame.sample, frame.pts, frame.duration),
+                    (calls * 2, calls as i64 * 2, 2)
+                );
+                assert_eq!((start, duration), (calls as u64 * 40_000_000, 40_000_000));
+                assert_eq!(
+                    pixels,
+                    &oracle[calls * frame_bytes..(calls + 1) * frame_bytes]
+                );
+                calls += 1;
+                Ok(())
+            };
+            let stats = decode_presented(
+                &root.join(format!("{name}.mp4")),
+                &DecodeTransform::default(),
+                Some(&mut visitor),
+                None,
+            )
+            .unwrap()
+            .unwrap();
+            assert_eq!(stats.video_frames, count as u64);
+            assert_eq!(calls, count);
+        }
+        assert!(
+            try_decode(
+                &root.join("avc-field-pcm-unpaired.mp4"),
+                &DecodeTransform::default()
+            )
+            .unwrap_err()
+            .contains("unpaired AVC field at end of MP4")
+        );
+    }
+    #[test]
     fn duplicate_pts_replace_metadata_and_keep_terminal_nominal_span() {
         let mut frames = vec![frame(2, 1, 0), frame(0, 0, 1), frame(2, 2, 2)];
         normalize_presentations(&mut frames).unwrap();
@@ -467,8 +585,14 @@ fn pack_cropped(
     mono: bool,
     planes: [&[u16]; 3],
 ) -> Result<Vec<u8>> {
-    if depths.iter().any(|&d| !(8..=16).contains(&d)) { return Err("invalid component depth".into()); }
-    let depth = if mono {depths[0]} else {*depths.iter().max().unwrap()};
+    if depths.iter().any(|&d| !(8..=16).contains(&d)) {
+        return Err("invalid component depth".into());
+    }
+    let depth = if mono {
+        depths[0]
+    } else {
+        *depths.iter().max().unwrap()
+    };
     let width = coded[0]
         .checked_sub(crop[0])
         .and_then(|n| n.checked_sub(crop[1]))
@@ -511,8 +635,10 @@ fn pack_cropped(
                         .and_then(|v| v.checked_add(crop[0] / sx + column))
                         .ok_or("video sample offset overflow")?;
                     let sample = *plane.get(index).ok_or("decoded crop exceeds plane")?;
-                    if u32::from(sample) >= (1u32 << depths[component]) { return Err("component sample exceeds depth".into()); }
-                    sample << (depth-depths[component])
+                    if u32::from(sample) >= (1u32 << depths[component]) {
+                        return Err("component sample exceeds depth".into());
+                    }
+                    sample << (depth - depths[component])
                 };
                 if depth == 8 {
                     output[cursor] = u8::try_from(sample).map_err(|_| "8-bit sample overflow")?;

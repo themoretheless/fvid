@@ -44,5 +44,7 @@ def main():
                 pixels=oracle.read_bytes();assert len(pixels)==1536*(2 if depth>8 else 1), (name,len(pixels))
                 data=mux(config,frames,32,32,50);(out/(name+'.mp4')).write_bytes(data);(out/(name+'.yuv')).write_bytes(pixels)
                 records.append(dict(file=name+'.mp4',sha256=hashlib.sha256(data).hexdigest(),oracle_sha256=hashlib.sha256(pixels).hexdigest()))
+    config=configuration(8);n=field(False,8,True)
+    (out/'avc-field-pcm-unpaired.mp4').write_bytes(mux(config,[(0,True,len(n).to_bytes(4,'big')+n)],32,32,50))
     (out/'avc-field-pcm-generated.json').write_text(json.dumps(dict(generator='owned complementary field PCM writer',fixtures=records),indent=2)+'\n')
 if __name__=='__main__':main()
