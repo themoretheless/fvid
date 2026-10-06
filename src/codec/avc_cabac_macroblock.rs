@@ -1,5 +1,5 @@
 //! 4:2:0 CABAC intra macroblocks with frame/field coefficient scans.
-//! The explicit MBAFF intra reader is separate from progressive P/B dispatch.
+//! Explicit MBAFF contexts serve intra and mixed P dispatch.
 use super::{
     avc::{Pps, SliceGroups, Sps},
     avc_cabac::{AvcCabac, ResidualCategory as Cat},
@@ -45,6 +45,40 @@ pub struct IntraCabacReader<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn mbaff_cbp_neighbours_select_actual_8x8_owner_across_mixed_rows() {
+        let mut sps = Sps::parse(&hex("674d400ad91e84000003000400000300c83c489920")).unwrap();
+        let pps = Pps::parse(&hex("68eb81b2c8"), &sps).unwrap();
+        let header = SliceHeader::parse(&hex("419a39ff5d2e09a431c3d011f0"), &sps, &pps).unwrap();
+        // Synthetic context geometry only; compressed-stream acceptance is in
+        // avc_mbaff.rs and uses the independent saved JM pixel oracle.
+        sps.width_mbs = 2;
+        sps.height_map_units = 1;
+        sps.frame_mbs_only = false;
+        sps.mb_adaptive_frame_field = true;
+        for source_field in [false, true] {
+            let mut reader = IntraCabacReader::new_context_mbaff(&header, &sps, &pps, 4).unwrap();
+            reader.pair_fields[0] = u8::from(source_field);
+            reader.pair_fields[1] = u8::from(!source_field);
+            reader.patterns[0] = if source_field { 2 } else { 10 };
+            reader.patterns[1] = 0;
+            reader.address = 2;
+            assert_eq!(reader.mbaff_pattern_bit([-1, 0]).unwrap(), Some(1));
+            // A field block's lower half sees the bottom frame macroblock;
+            // a frame top's lower half still sees the field's upper 8x8 block.
+            assert_eq!(
+                reader.mbaff_pattern_bit([-1, 8]).unwrap(),
+                Some(u8::from(source_field))
+            );
+            if source_field {
+                reader.address = 3;
+                assert_eq!(reader.mbaff_pattern_bit([-1, 0]).unwrap(), Some(0));
+                assert_eq!(reader.mbaff_pattern_bit([-1, 8]).unwrap(), Some(0));
+            }
+            reader.patterns.fill(255);
+            assert_eq!(reader.mbaff_pattern_bit([-1, 0]).unwrap(), None);
+        }
+    }
     #[test]
     fn macroblock_contexts_preserve_availability_and_component_flags() {
         let grid = [0, 1, 255, 0];
@@ -323,6 +357,27 @@ impl<'a> IntraCabacReader<'a> {
         }
         Self::new_context_impl(header, sps, pps, max_macroblocks, true)
     }
+    /// Shared MBAFF arithmetic/context state for explicit mixed-slice dispatch.
+    pub fn new_context_mbaff(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+    ) -> Result<Self> {
+        if sps.frame_mbs_only || !sps.mb_adaptive_frame_field {
+            return Err(invalid(
+                "MBAFF CABAC context requires adaptive frame slices",
+            ));
+        }
+        Self::new_context_impl(header, sps, pps, max_macroblocks, true)
+    }
+    pub(crate) fn set_pair_field(&mut self, field: bool) -> Result<()> {
+        if !self.mbaff || self.finished || self.address >= self.types.len() {
+            return Err(invalid("invalid CABAC pair mode publication"));
+        }
+        self.pair_fields[self.address / 2] = u8::from(field);
+        Ok(())
+    }
     fn new_context_impl(
         header: &'a SliceHeader,
         sps: &'a Sps,
@@ -389,7 +444,7 @@ impl<'a> IntraCabacReader<'a> {
             pair_fields: if mbaff { grid(count / 2)? } else { Vec::new() },
         })
     }
-    fn pair_field(&self, pair: usize) -> Option<bool> {
+    pub fn pair_field(&self, pair: usize) -> Option<bool> {
         self.pair_fields
             .get(pair)
             .filter(|v| **v != 255)
@@ -474,6 +529,12 @@ impl<'a> IntraCabacReader<'a> {
             return Err(invalid("CABAC slice already finished"));
         }
         Ok(&mut self.cabac)
+    }
+    pub(crate) fn arithmetic_with_pair_fields(&mut self) -> Result<(&mut AvcCabac<'a>, &[u8])> {
+        if self.finished {
+            return Err(invalid("CABAC slice already finished"));
+        }
+        Ok((&mut self.cabac, &self.pair_fields))
     }
     pub fn is_finished(&self) -> bool {
         self.finished
@@ -782,6 +843,22 @@ impl<'a> IntraCabacReader<'a> {
             coefficients,
         ))
     }
+    fn mbaff_pattern_bit(&self, offset: [isize; 2]) -> Result<Option<u8>> {
+        let w = self.sps.width_mbs as usize;
+        let neighbour = super::avc_mbaff::neighbour_location(
+            self.address,
+            offset,
+            w,
+            self.types.len() / w,
+            true,
+            [1, 1],
+            |pair| self.pair_field(pair),
+        )?;
+        Ok(neighbour.and_then(|(address, local)| {
+            let pattern = self.patterns[address];
+            (pattern != 255).then_some((pattern >> (local[1] / 8 * 2 + local[0] / 8)) & 1)
+        }))
+    }
     fn read_pattern(&mut self) -> Result<u8> {
         let mut pattern = 0;
         let [a, b] = self.macro_neighbours(&self.patterns)?;
@@ -790,6 +867,8 @@ impl<'a> IntraCabacReader<'a> {
             let by = block / 2;
             let left = if bx > 0 {
                 Some((pattern >> (block - 1)) & 1)
+            } else if self.mbaff {
+                self.mbaff_pattern_bit([-1, (by * 8) as isize])?
             } else if a != 255 {
                 Some((a >> (by * 2 + 1)) & 1)
             } else {
@@ -797,6 +876,8 @@ impl<'a> IntraCabacReader<'a> {
             };
             let top = if by > 0 {
                 Some((pattern >> (block - 2)) & 1)
+            } else if self.mbaff {
+                self.mbaff_pattern_bit([(bx * 8) as isize, -1])?
             } else if b != 255 {
                 Some((b >> (2 + bx)) & 1)
             } else {

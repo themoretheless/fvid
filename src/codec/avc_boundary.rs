@@ -40,6 +40,47 @@ pub fn strength(p: BlockEdge, q: BlockEdge, macroblock_edge: bool) -> Result<u8>
     let swapped = equal(p.motion[0], q.motion[1]) && equal(p.motion[1], q.motion[0]);
     Ok(u8::from(!direct && !swapped))
 }
+/// MBAFF bS derivation, H.264 8.7.2.1. Vectors remain in each block's
+/// quarter-sample units; field vertical differences therefore use threshold 2.
+pub fn strength_mbaff(
+    p: BlockEdge,
+    q: BlockEdge,
+    macroblock_edge: bool,
+    vertical: bool,
+    fields: [bool; 2],
+) -> Result<u8> {
+    if p.intra || q.intra || p.switching_slice || q.switching_slice {
+        return Ok(super::avc_deblock::intra_strength(
+            macroblock_edge,
+            vertical,
+            fields,
+        ));
+    }
+    if p.nonzero_luma || q.nonzero_luma {
+        return Ok(2);
+    }
+    if fields[0] != fields[1] {
+        return Ok(1);
+    }
+    if p.motion.iter().all(Option::is_none) || q.motion.iter().all(Option::is_none) {
+        return Err(invalid("AVC inter edge has no motion reference"));
+    }
+    let equal = |a: Option<MotionReference>, b: Option<MotionReference>| match (a, b) {
+        (None, None) => true,
+        (Some(a), Some(b)) => {
+            a.picture == b.picture
+                && (i32::from(a.vector[0]) - i32::from(b.vector[0])).abs() < 4
+                && (i32::from(a.vector[1]) - i32::from(b.vector[1])).abs()
+                    < if fields[0] { 2 } else { 4 }
+        }
+        _ => false,
+    };
+    Ok(u8::from(
+        !(equal(p.motion[0], q.motion[0]) && equal(p.motion[1], q.motion[1]))
+            && !(equal(p.motion[0], q.motion[1]) && equal(p.motion[1], q.motion[0])),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -100,6 +141,87 @@ mod tests {
             )
             .unwrap(),
             1
+        );
+    }
+    #[test]
+    fn mbaff_strength_priority_field_threshold_and_pairings() {
+        let p = edge([mv(1, 0, 0), None]);
+        for vertical in [false, true] {
+            for external in [false, true] {
+                for fields in [[false, false], [true, true], [false, true], [true, false]] {
+                    let expected = if external && (vertical || fields == [false, false]) {
+                        4
+                    } else {
+                        3
+                    };
+                    assert_eq!(
+                        strength_mbaff(
+                            BlockEdge { intra: true, ..p },
+                            p,
+                            external,
+                            vertical,
+                            fields
+                        )
+                        .unwrap(),
+                        expected
+                    );
+                    assert_eq!(
+                        strength_mbaff(
+                            BlockEdge {
+                                nonzero_luma: true,
+                                ..p
+                            },
+                            p,
+                            external,
+                            vertical,
+                            fields
+                        )
+                        .unwrap(),
+                        2
+                    );
+                    assert_eq!(
+                        strength_mbaff(p, p, external, vertical, fields).unwrap(),
+                        u8::from(fields[0] != fields[1])
+                    );
+                }
+            }
+        }
+        for y in [-4, -3, -2, -1, 0, 1, 2, 3, 4] {
+            let q = edge([None, mv(1, 0, y)]);
+            assert_eq!(
+                strength_mbaff(p, q, true, false, [true, true]).unwrap(),
+                u8::from(y.abs() >= 2)
+            );
+            assert_eq!(
+                strength_mbaff(p, q, true, false, [false, false]).unwrap(),
+                strength(p, q, true).unwrap()
+            );
+        }
+        let p = edge([mv(1, 0, 0), mv(2, 8, 0)]);
+        assert_eq!(
+            strength_mbaff(
+                p,
+                edge([mv(2, 9, 1), mv(1, 1, 1)]),
+                true,
+                false,
+                [true, true]
+            )
+            .unwrap(),
+            0
+        );
+        assert_eq!(
+            strength_mbaff(
+                p,
+                edge([mv(2, 9, 2), mv(1, 1, 1)]),
+                true,
+                false,
+                [true, true]
+            )
+            .unwrap(),
+            1
+        );
+        assert!(
+            strength_mbaff(edge([None; 2]), edge([None; 2]), false, false, [true, true]).is_err()
         );
     }
     #[test]

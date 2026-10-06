@@ -187,6 +187,171 @@
       "file": "avc-mbaff-field-multislice-intra-filtered-high10-cabac.mp4",
       "sha256": "34607a174fa462591ee5eb640aed827bfcfb88197d3a63f7a15878bc9fa18861",
       "oracle_sha256": "17cba485f36f18568d3832437cdac0c0f04d602c8672b4ea8945e79299db25a0"
+    },
+    {
+      "file": "avc-mbaff-frame-unfiltered-cavlc.mp4",
+      "sha256": "5c61f9c6ccaa1acc24cd4dfd701e2d1de2902f4314f16c2a98ecfc8b67563f32",
+      "oracle_sha256": "bd61277b55052b1bd7b8d11fd0b479682cfc54b6b4f2e5665bbb2e7c047450fd"
+    },
+    {
+      "file": "avc-mbaff-field-unfiltered-cavlc.mp4",
+      "sha256": "e273beb7bcd2a4f01adcb49dba5b993518c62366ebb05c2a791f52e88e2b2d17",
+      "oracle_sha256": "c9f82dae544cec6b59d0b91845b5c44d6b34fd155a39fe130ffaee755871743e"
+    },
+    {
+      "file": "avc-mbaff-frame-inter-filtered-cavlc.mp4",
+      "sha256": "52046c348fb6719d6d42510241b6508566a5220213c72b024378e60114696544",
+      "oracle_sha256": "b7e987b2a53e297301adb8ef620b82968742762c73810071c33bfed49e6cf4de"
+    },
+    {
+      "file": "avc-mbaff-field-inter-filtered-cavlc.mp4",
+      "sha256": "67e9b2e10033d363dae4e135a7542adb5084b9ddb0f07bcc13e241cb59b61a3c",
+      "oracle_sha256": "34ae759d68a7fd23585018a5420937d4734e87a0582bb0bc9e609b6edc359177"
+    },
+    {
+      "file": "avc-mbaff-mixed-inter-filtered-cavlc.mp4",
+      "sha256": "2d7659c12961d301843d55285962add1686f756ba1722a65bbec93f54265bb23",
+      "oracle_sha256": "3f4c21ba268202bf022514798b42a1dfce87308a111b93d7cfa14f3ae225c22f"
+    },
+    {
+      "file": "avc-mbaff-mixed-reverse-inter-filtered-cavlc.mp4",
+      "sha256": "25187107894f23552f8afe0d83190724676cb39eb10fd5d182e7100c9215d787",
+      "oracle_sha256": "93e07d838a3b595e82e32e7dfd9c65252057a8d57ffa92f8ba54e393a01b6805"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-inter-filtered-cavlc.mp4",
+      "sha256": "218e29eaec306fbd1cc7aac048075594ffe172abb7855faa981259985bba866c",
+      "oracle_sha256": "d342f48b4118bf9483d2c104401ecb9860a92c039c50271100b4a7f144366ca0"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-reverse-inter-filtered-cavlc.mp4",
+      "sha256": "4ca15c96000ac546b58d12d962a18b6c0fe8f735963f29012337c42f526569c6",
+      "oracle_sha256": "7326411e170f87e45fe91622cfbaf2c6eb91155f010b4ef98d31e13fc06150d5"
+    },
+    {
+      "file": "avc-mbaff-field-multislice-inter-filtered-cavlc.mp4",
+      "sha256": "a7ad5644e68d0fefbbab72bf6a7c6bcd5924064c533ddb85a8809faa38d7a0ea",
+      "oracle_sha256": "90b576dba3eb8c2d1060e22e2fc715bbca0ed8c6c59e734d77e0131318e6c0b0"
+    },
+    {
+      "file": "avc-mbaff-frame-inter-filtered-high10-cavlc.mp4",
+      "sha256": "12eb19113c6519a00ca0a8d03298fcf607569b7589ddcb3550c9a8826c579222",
+      "oracle_sha256": "0f137fccf6c05d47fef1920ebfd0d9a911d78923a50303798d1f5a3373deb4f1"
+    },
+    {
+      "file": "avc-mbaff-field-inter-filtered-high10-cavlc.mp4",
+      "sha256": "cf45cb69bfb62f202b04558f3ca69f7f8e7bafbfef3dd1499b2150039238a767",
+      "oracle_sha256": "ff1ab59b96db5b809803e50df7c1ea82d7e0443c13d17c208f221483fdfd5187"
+    },
+    {
+      "file": "avc-mbaff-mixed-inter-filtered-high10-cavlc.mp4",
+      "sha256": "df31d11c9c1b2ae213409dc0ecf4ede9d4568f8f67c7cb140ed5ec456b8d1c96",
+      "oracle_sha256": "326a3e162b0bbf34d8785bae2a82cc49be0535e7e529b57b490419711438837b"
+    },
+    {
+      "file": "avc-mbaff-mixed-reverse-inter-filtered-high10-cavlc.mp4",
+      "sha256": "0d71551c3c7ddc48de74ffcc04d3558c3fd81cf38b0347cb4fb5693b01792cf2",
+      "oracle_sha256": "79a71bcc25dcc756f00a1a5fcc091bb518a6874d881b6ac893e5ce32697d1a81"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-inter-filtered-high10-cavlc.mp4",
+      "sha256": "c43ad8707c45493919d336e4cd3258c9cf34e6375e4a7b0427a230d5a3500696",
+      "oracle_sha256": "49b8eef86535e1f0ef46b7abc3aef0b1e5560f1ff7d855ff14165b9c05c011b5"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-reverse-inter-filtered-high10-cavlc.mp4",
+      "sha256": "0c612662d7878bb9502034aef07d80df4dcc85c7d3aa97de926ee7382edf8505",
+      "oracle_sha256": "dfbfb577e87bb233a760531c04c6bb0079f0c98db5e62af0c83c8041ddbe6d67"
+    },
+    {
+      "file": "avc-mbaff-field-multislice-inter-filtered-high10-cavlc.mp4",
+      "sha256": "c0d22661b7e54df1612fdfa175b0c02361fbed1c67f6b5c80d199af70b055466",
+      "oracle_sha256": "c00f0f4ac8076ea57570cea5ac4863330da76f891c6bf2074263e4370d2bcd70"
+    },
+    {
+      "file": "avc-mbaff-frame-inter-skipped-cabac.mp4",
+      "sha256": "10c7fcffc6887fc9d049f9dd1230f5cf78a9131b99082a0435a84ea6bd2d49da",
+      "oracle_sha256": "559a1bb8aef649ece22985fda2eeb5f91fe8cc1deeff9757e938a58fba4bc4d1"
+    },
+    {
+      "file": "avc-mbaff-field-inter-skipped-cabac.mp4",
+      "sha256": "fdcdc622f7b2c7386dfb0f266ee3ae88d238d34976c53dff7e311c16304cdef7",
+      "oracle_sha256": "3deefa58ff086fb2135b922bf87816b2e0856d841445597b11e29549f39b608e"
+    },
+    {
+      "file": "avc-mbaff-field-inter-topskip-cabac.mp4",
+      "sha256": "163b16541631d65855ee010a02aa66ca3d714a6ac4e35f74e63e47e6c56b5950",
+      "oracle_sha256": "2b0c8ff7ae1b83ba07ff89f3dd6c564e6e079d4eb329206494b4c8b23a840237"
+    },
+    {
+      "file": "avc-mbaff-frame-inter-filtered-cabac.mp4",
+      "sha256": "df1166a606ed3419b71eed4ddf2a1871710f442a31fd63fd4f730a71feca99f8",
+      "oracle_sha256": "a53ae03c67be661e60d912ac288359182db7b38b67c12a11e463e4933e1d335e"
+    },
+    {
+      "file": "avc-mbaff-field-inter-filtered-cabac.mp4",
+      "sha256": "ebcd595605bf5f08ce9dbf5c74462a0f40d1ec5e6815d270a9c72544fbeb50ea",
+      "oracle_sha256": "bbf7297b113f75ea312edeb7ba70e71e3203017f310571bc67dab8dd1c896a16"
+    },
+    {
+      "file": "avc-mbaff-mixed-inter-filtered-cabac.mp4",
+      "sha256": "651c799d41a34eb421d31e68c3b6984d93f0a69dff2e2eb61ef5a01467a1a6f1",
+      "oracle_sha256": "b3dd46c0ab13301348751c241b2caca37d1b2047d58f6ec67d9d9a2a8bb0d681"
+    },
+    {
+      "file": "avc-mbaff-mixed-reverse-inter-filtered-cabac.mp4",
+      "sha256": "28c1918921021ff45ae3e5c9d1cdebd031f4d1a5daf9a1882cec34be6c06b4c2",
+      "oracle_sha256": "12d93624018dd57506dee2f7d734af93ceda5c50c728f822c5763a826e488b0f"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-inter-filtered-cabac.mp4",
+      "sha256": "2aafb0de50b7862c9a4f34473359e3730e4fb04e61d96f612234d463745d2f33",
+      "oracle_sha256": "a97c3f87cc3ca9452218bf6a2bc9369a1407c33f8ebc00f216130e22f8cdb08d"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-reverse-inter-filtered-cabac.mp4",
+      "sha256": "41760bb276945e168c4915ec12ca7e9242aa40a7c1a74b0b02237bdbe6551922",
+      "oracle_sha256": "7ebe2d212a5d0c4f301e5f59ad9ef85933fd29b890f70e0b3ebd671bf0804f8b"
+    },
+    {
+      "file": "avc-mbaff-field-multislice-inter-filtered-cabac.mp4",
+      "sha256": "16414ca46cb57ea0aed63ff8520c10cc00d56d55c1605974643711baae7ed593",
+      "oracle_sha256": "2ed5d14af1a1c0e216edf5c7ddb51da3286a4644fd46281c8201224ea97e5a0e"
+    },
+    {
+      "file": "avc-mbaff-frame-inter-filtered-high10-cabac.mp4",
+      "sha256": "2f71cf40e493e70dd7d7c20dcaad336bcb91ae823210b9b5434f4210b6dffc2e",
+      "oracle_sha256": "11813fc37f7f4427a329376253b3b142ab3583c698590365b4bc72c0ed17a74d"
+    },
+    {
+      "file": "avc-mbaff-field-inter-filtered-high10-cabac.mp4",
+      "sha256": "efd74128f57da1f5b5b92f2d726d71a81f7408e932d7ab1e0b9d559cb0723910",
+      "oracle_sha256": "114b3c8113e831421cddec71b5680daab2f756f444c9e40722e4d60c1cb2e81c"
+    },
+    {
+      "file": "avc-mbaff-mixed-inter-filtered-high10-cabac.mp4",
+      "sha256": "2b0a6ba83f84a887967351934afc9972054556bc2dc435597a28634471a0acf1",
+      "oracle_sha256": "c9897bc126c46b9c588e52bd18f315833230e046ffb4c32e92d622301c62f102"
+    },
+    {
+      "file": "avc-mbaff-mixed-reverse-inter-filtered-high10-cabac.mp4",
+      "sha256": "4ad12e3747c121ba4f45f7fd4660ab583f9ffdc65f2c33b9059d767c274a92bd",
+      "oracle_sha256": "99209dc063e1350375df6a09a1752048d5c4273e239fb45c57d186f5e9f4e88b"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-inter-filtered-high10-cabac.mp4",
+      "sha256": "fdb704b9dbd5c9dce30f7bc8afc4a497ecee3a7d703cf27cc1b7b3233114e858",
+      "oracle_sha256": "facdd6ea61d978d4ea33793eeb142ecdb5186a935b41e9cf410cd43c5c47c49c"
+    },
+    {
+      "file": "avc-mbaff-mixed-vertical-reverse-inter-filtered-high10-cabac.mp4",
+      "sha256": "57ef2d02bcb9a1cb5580b111a9b3cb7df2b7eb12b2e01d66086ae39783aebd72",
+      "oracle_sha256": "645ea391df45410713d1bccf419da0af75da85479a7f83a5f778c95f92bbead5"
+    },
+    {
+      "file": "avc-mbaff-field-multislice-inter-filtered-high10-cabac.mp4",
+      "sha256": "124c264ee1c0a4311f294fc44b86c25c19e452943a189a36150f0fa0e2ba88f4",
+      "oracle_sha256": "2aaf16b8f652faa86e127ef018186b7a4c9596e23426133c455d212fcffa4a4e"
     }
   ]
 }

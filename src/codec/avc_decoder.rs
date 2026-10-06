@@ -1,5 +1,5 @@
 //! Stateful decoding of length-prefixed AVC access units using FVid codecs.
-//! Accepts supported progressive I/P/B slices within each access unit.
+//! Accepts supported progressive I/P/B and MBAFF intra/P access units.
 //! `decode_order` leaves timestamp association and display reordering to callers.
 use super::{
     avc::{Pps, Sps},
@@ -259,7 +259,9 @@ impl AvcDecoder {
                     && header.frame_num != (previous + 1) % (1 << sps.frame_num_bits)
             })
         {
-            return Err(crate::unsupported("AVC frame-number gaps are not implemented"));
+            return Err(crate::unsupported(
+                "AVC frame-number gaps are not implemented",
+            ));
         }
         let (w, h) = sps.coded_dimensions();
         let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize)?;
@@ -289,14 +291,16 @@ impl AvcDecoder {
                 .last_poc
                 .is_some_and(|p| order.before_marking.picture() <= p)
         {
-            return Err(crate::unsupported("AVC decode requires increasing picture order; use decode_order for reordered pictures"));
+            return Err(crate::unsupported(
+                "AVC decode requires increasing picture order; use decode_order for reordered pictures",
+            ));
         }
         let buffer = self
             .dpb
             .as_mut()
             .ok_or_else(|| invalid("AVC stream must begin with IDR"))?;
         let (picture, motion) = match header.slice_type {
-            SliceType::I if slices.iter().all(|s|s.header.slice_type==SliceType::I) => (
+            SliceType::I if slices.iter().all(|s| s.header.slice_type == SliceType::I) => (
                 decode_intra_slices(
                     &slices.iter().map(|slice| &slice.header).collect::<Vec<_>>(),
                     sps,
@@ -376,18 +380,16 @@ impl AvcDecoder {
                     reconstruction_budget,
                 )?;
                 let motion = if retain {
-                    Some(
-                        working.snapshot_slices(
-                            &lists
-                                .iter()
-                                .enumerate()
-                                .map(|(i, lists)| {
-                                    (i as u32, [lists.l0.as_slice(), lists.l1.as_slice()])
-                                })
-                                .collect::<Vec<_>>(),
-                            motion_bytes,
-                        )?,
-                    )
+                    let mappings = lists
+                        .iter()
+                        .enumerate()
+                        .map(|(i, lists)| (i as u32, [lists.l0.as_slice(), lists.l1.as_slice()]))
+                        .collect::<Vec<_>>();
+                    Some(if sps.mb_adaptive_frame_field && !header.field_pic {
+                        working.snapshot_mbaff_slices(&mappings, motion_bytes)?
+                    } else {
+                        working.snapshot_slices(&mappings, motion_bytes)?
+                    })
                 } else {
                     None
                 };

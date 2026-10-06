@@ -116,7 +116,48 @@ pub fn reconstruct_inter_macroblock_ready(
     )?;
     readiness.publish_mbaff_complete(address, geometry, field)
 }
-/// Assemble ordered MBAFF CAVLC P slices before the deblocking stage.
+enum MbaffPReader<'a> {
+    Cavlc(super::avc_inter_slice::InterCavlcSlice<'a>),
+    Cabac(super::avc_cabac_slice::InterCabacSlice<'a>),
+}
+impl<'a> MbaffPReader<'a> {
+    fn new(header: &'a SliceHeader, sps: &'a Sps, pps: &'a Pps, count: usize) -> Result<Self> {
+        Ok(if pps.cabac {
+            Self::Cabac(super::avc_cabac_slice::InterCabacSlice::new_mbaff(
+                header,
+                sps,
+                pps,
+                count * 1024,
+            )?)
+        } else {
+            Self::Cavlc(super::avc_inter_slice::InterCavlcSlice::new_mbaff(
+                header,
+                sps,
+                pps,
+                count * 80,
+            )?)
+        })
+    }
+    fn read_macroblock(&mut self) -> Result<Option<super::avc_inter_slice::InterMacroblock>> {
+        match self {
+            Self::Cavlc(r) => r.read_macroblock(),
+            Self::Cabac(r) => r.read_macroblock(),
+        }
+    }
+    fn field_decoding(&self) -> bool {
+        match self {
+            Self::Cavlc(r) => r.field_decoding(),
+            Self::Cabac(r) => r.field_decoding(),
+        }
+    }
+    fn pair_field(&self, pair: usize) -> Option<bool> {
+        match self {
+            Self::Cavlc(r) => r.pair_field(pair),
+            Self::Cabac(r) => r.pair_field(pair),
+        }
+    }
+}
+/// Assemble ordered MBAFF P slices before the deblocking stage.
 /// References are independently resolved frame lists for each slice. This is
 /// an intermediate reconstruction API, not a complete playback admission path.
 pub fn decode_p_slices_unfiltered(
@@ -126,11 +167,33 @@ pub fn decode_p_slices_unfiltered(
     references: &[[&[&IntraPicture]; 2]],
     budget: usize,
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    decode_p_slices_impl(headers, sps, pps, references, budget, false)
+}
+/// Reconstruct and deblock ordered MBAFF P slices with resolved frame lists.
+pub fn decode_p_slices(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[&IntraPicture]; 2]],
+    budget: usize,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    decode_p_slices_impl(headers, sps, pps, references, budget, true)
+}
+fn decode_p_slices_impl(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[&IntraPicture]; 2]],
+    budget: usize,
+    filtered: bool,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
     use super::{
+        avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
         avc_compensation::{ComponentWeight, Reference420},
+        avc_deblock::{MbaffBlockEdges, mbaff_inter_plane},
         avc_inter::{Partition, Prediction},
         avc_inter_prediction::predict_macroblock_mbaff,
-        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+        avc_inter_slice::InterMacroblock,
         avc_motion_field::MotionField,
         avc_mv::Neighbour,
         avc_slice::SliceType,
@@ -138,19 +201,33 @@ pub fn decode_p_slices_unfiltered(
     if headers.is_empty()
         || headers.len() != references.len()
         || headers[0].first_mb != 0
-        || pps.cabac
         || sps.frame_mbs_only
         || !sps.mb_adaptive_frame_field
         || sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
-        || headers
-            .iter()
-            .any(|h| h.slice_type != SliceType::P || h.field_pic || h.redundant_pic_cnt != 0)
+        || headers.iter().any(|h| {
+            h.slice_type != SliceType::P
+                || h.field_pic
+                || h.redundant_pic_cnt != 0
+                || h.disable_deblocking_filter_idc > 2
+        })
     {
-        return Err(invalid(
-            "invalid MBAFF CAVLC P reconstruction configuration",
-        ));
+        return Err(invalid("invalid MBAFF P reconstruction configuration"));
+    }
+    let first = headers[0];
+    if headers.iter().any(|h| {
+        h.pps_id != first.pps_id
+            || h.frame_num != first.frame_num
+            || h.nal_ref_idc != first.nal_ref_idc
+            || h.idr != first.idr
+            || h.idr_pic_id != first.idr_pic_id
+            || h.poc_lsb != first.poc_lsb
+            || h.delta_poc_bottom != first.delta_poc_bottom
+            || h.delta_poc != first.delta_poc
+            || h.colour_plane_id != first.colour_plane_id
+    }) {
+        return Err(invalid("MBAFF P slices belong to different pictures"));
     }
     let (w, h) = sps.coded_dimensions();
     let (w, h) = (w as usize, h as usize);
@@ -161,7 +238,13 @@ pub fn decode_p_slices_unfiltered(
     let reserve = pixels
         .checked_mul(6)
         .and_then(|n| n.checked_add(pixels / 16))
-        .and_then(|n| count.checked_mul(80).and_then(|c| n.checked_add(c)))
+        .and_then(|n| {
+            count
+                .checked_mul(
+                    (if pps.cabac { 1024 } else { 80 }) + std::mem::size_of::<MbaffBlockEdges>(),
+                )
+                .and_then(|c| n.checked_add(c))
+        })
         .and_then(|n| n.checked_add(65536))
         .ok_or_else(|| invalid("MBAFF P budget overflow"))?;
     let mut motion = MotionField::new(
@@ -181,6 +264,21 @@ pub fn decode_p_slices_unfiltered(
         y: plane(pixels)?,
         cb: plane(pixels / 4)?,
         cr: plane(pixels / 4)?,
+    };
+    let mut deblocking = Vec::new();
+    deblocking
+        .try_reserve_exact(count)
+        .map_err(|_| invalid("cannot allocate MBAFF P deblocking metadata"))?;
+    let edge_state = |blocks, qp, field, transform8, slice, header: &SliceHeader| MbaffBlockEdges {
+        field,
+        edges: DecodedBlockEdges {
+            blocks,
+            qp,
+            transform8,
+            slice_id: slice,
+            disable_filter: header.disable_deblocking_filter_idc as u8,
+            offsets: [header.alpha_offset, header.beta_offset],
+        },
     };
     let mut seen = 0;
     for (slice, (header, lists)) in headers.iter().zip(references).enumerate() {
@@ -220,7 +318,7 @@ pub fn decode_p_slices_unfiltered(
         let refs: [Vec<&Reference420<'_>>; 2] =
             [views[0].iter().collect(), views[1].iter().collect()];
         ready.reset_slice();
-        let mut reader = InterCavlcSlice::new_mbaff(header, sps, pps, count * 80)?;
+        let mut reader = MbaffPReader::new(header, sps, pps, count)?;
         while let Some(block) = reader.read_macroblock()? {
             let field = reader.field_decoding();
             if let InterMacroblock::Intra(mb) = block {
@@ -236,6 +334,38 @@ pub fn decode_p_slices_unfiltered(
                     field,
                     [Neighbour::NoPrediction; 2],
                 )?;
+                let pcm = matches!(mb.luma, IntraLuma::Pcm { .. });
+                let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+                let qps = if pcm {
+                    [0; 3]
+                } else {
+                    [
+                        mb.qp,
+                        i32::from(super::avc_picture::chroma_qp(
+                            mb.qp,
+                            pps.chroma_qp_offset,
+                            sps.bit_depth_chroma,
+                        )) - bd,
+                        i32::from(super::avc_picture::chroma_qp(
+                            mb.qp,
+                            pps.second_chroma_qp_offset,
+                            sps.bit_depth_chroma,
+                        )) - bd,
+                    ]
+                };
+                deblocking.push(edge_state(
+                    [BlockEdge {
+                        intra: true,
+                        switching_slice: false,
+                        nonzero_luma: false,
+                        motion: [None; 2],
+                    }; 16],
+                    qps,
+                    field,
+                    matches!(mb.luma, IntraLuma::Blocks8 { .. }),
+                    slice as u32,
+                    header,
+                ));
                 reconstruct_intra_macroblock(
                     &mut picture,
                     *mb,
@@ -352,6 +482,63 @@ pub fn decode_p_slices_unfiltered(
                     sps.bit_depth_chroma,
                 ),
             ];
+            let mut blocks = [BlockEdge {
+                intra: false,
+                switching_slice: false,
+                nonzero_luma: false,
+                motion: [None; 2],
+            }; 16];
+            for (part, vectors) in parts.iter().zip(&vectors) {
+                let mut identities = [None; 2];
+                for list in 0..2 {
+                    if let Neighbour::Inter { reference, vector } = vectors[list] {
+                        let frame = lists[list]
+                            .get(usize::from(reference) / if field { 2 } else { 1 })
+                            .ok_or_else(|| invalid("missing MBAFF deblocking reference"))?;
+                        let identity = references
+                            .iter()
+                            .flat_map(|l| l.iter().flat_map(|r| r.iter()))
+                            .position(|r| std::ptr::eq(*r, *frame))
+                            .ok_or_else(|| invalid("unknown MBAFF reference identity"))?;
+                        identities[list] = Some(MotionReference {
+                            picture: identity as u64 * 3
+                                + if field {
+                                    1 + ((address % 2) ^ (usize::from(reference) % 2)) as u64
+                                } else {
+                                    0
+                                },
+                            vector,
+                        });
+                    }
+                }
+                for y in
+                    usize::from(part.origin[1]) / 4..usize::from(part.origin[1] + part.size[1]) / 4
+                {
+                    for x in usize::from(part.origin[0]) / 4
+                        ..usize::from(part.origin[0] + part.size[0]) / 4
+                    {
+                        blocks[y * 4 + x].motion = identities;
+                    }
+                }
+            }
+            if let Some(c) = &coefficients {
+                for (i, block) in blocks.iter_mut().enumerate() {
+                    block.nonzero_luma = if eight {
+                        c.luma8[i / 4 / 2 * 2 + i % 4 / 2].iter().any(|&v| v != 0)
+                    } else {
+                        c.luma_counts[i] != 0
+                    };
+                }
+            }
+            let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+            deblocking.push(edge_state(
+                blocks,
+                qps.map(|q| i32::from(q) - bd),
+                field,
+                eight,
+                slice as u32,
+                header,
+            ));
             reconstruct_inter_macroblock_ready(
                 &mut picture,
                 address,
@@ -369,6 +556,25 @@ pub fn decode_p_slices_unfiltered(
         if seen != end {
             return Err(invalid("incomplete MBAFF P slice"));
         }
+    }
+    if filtered {
+        mbaff_inter_plane(&mut picture.y, w, h, picture.bit_depth, 0, &deblocking)?;
+        mbaff_inter_plane(
+            &mut picture.cb,
+            w / 2,
+            h / 2,
+            picture.bit_depth,
+            1,
+            &deblocking,
+        )?;
+        mbaff_inter_plane(
+            &mut picture.cr,
+            w / 2,
+            h / 2,
+            picture.bit_depth,
+            2,
+            &deblocking,
+        )?;
     }
     Ok((picture, motion))
 }

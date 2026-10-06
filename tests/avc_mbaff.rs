@@ -1,4 +1,4 @@
-//! MBAFF intra pixel acceptance and distinct remaining inter/CABAC refusals.
+//! MBAFF intra/P pixel acceptance with independent saved JM references.
 use fvid::{
     codec::{
         avc::{Pps, Sps},
@@ -279,27 +279,15 @@ fn filtered_first_intra_matches_jm_and_reset() {
     }
 }
 #[test]
-fn owned_mbaff_streams_reach_the_specific_entropy_reconstruction_limit() {
-    for (bytes, cabac, expected) in [
+fn owned_mbaff_cabac_inter_reconstruction_succeeds_and_resets() {
+    for (bytes, cabac) in [
         (
             include_bytes!("fixtures/playback-errors/avc-mbaff-cabac.mp4").as_slice(),
             true,
-            "unsupported inter-picture reconstruction tools",
-        ),
-        (
-            include_bytes!("fixtures/playback-errors/avc-mbaff-cavlc.mp4").as_slice(),
-            false,
-            "unsupported inter-picture reconstruction tools",
         ),
         (
             include_bytes!("fixtures/playback-errors/avc-mbaff-field-cabac.mp4").as_slice(),
             true,
-            "unsupported inter-picture reconstruction tools",
-        ),
-        (
-            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cavlc.mp4").as_slice(),
-            false,
-            "unsupported inter-picture reconstruction tools",
         ),
     ] {
         let mut input = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
@@ -314,10 +302,13 @@ fn owned_mbaff_streams_reach_the_specific_entropy_reconstruction_limit() {
         let mut packet = Vec::new();
         input.read_packet(0, 0, &mut packet).unwrap();
         let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
-        assert!(decoder.decode_order(&packet).unwrap().is_some());
-        input.read_packet(0, 1, &mut packet).unwrap();
-        let error = decoder.decode_order(&packet).unwrap_err().to_string();
-        assert!(error.contains(expected), "unrelated error: {error}");
+        for _ in 0..2 {
+            for index in 0..3 {
+                input.read_packet(0, index, &mut packet).unwrap();
+                assert!(decoder.decode_order(&packet).unwrap().is_some());
+            }
+            decoder.reset();
+        }
     }
 }
 
@@ -362,7 +353,6 @@ fn actual_cavlc_mbaff_slice_reads_field_flag_before_macroblock_type() {
 }
 
 #[test]
-#[ignore = "Inter MBAFF playback is not connected yet"]
 fn mbaff_playback_matches_every_jm_sample_and_rewinds() {
     for (video, oracle) in [
         (
@@ -370,16 +360,8 @@ fn mbaff_playback_matches_every_jm_sample_and_rewinds() {
             include_bytes!("fixtures/playback-errors/avc-mbaff-cabac.yuv").as_slice(),
         ),
         (
-            include_bytes!("fixtures/playback-errors/avc-mbaff-cavlc.mp4").as_slice(),
-            include_bytes!("fixtures/playback-errors/avc-mbaff-cavlc.yuv").as_slice(),
-        ),
-        (
             include_bytes!("fixtures/playback-errors/avc-mbaff-field-cabac.mp4").as_slice(),
             include_bytes!("fixtures/playback-errors/avc-mbaff-field-cabac.yuv").as_slice(),
-        ),
-        (
-            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cavlc.mp4").as_slice(),
-            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cavlc.yuv").as_slice(),
         ),
     ] {
         let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
@@ -882,4 +864,667 @@ fn cabac_filtered_intra_topologies_match_jm_and_rewind() {
             playback.rewind();
         }
     }
+}
+
+#[test]
+fn cavlc_mbaff_p_pictures_match_jm_and_restart() {
+    use fvid::codec::{
+        avc_mbaff_picture::{decode_intra_slices, decode_p_slices, decode_p_slices_unfiltered},
+        avc_slice::{SliceHeader, SliceType},
+        config::NalUnits,
+    };
+    for (case, (video, oracle)) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-frame-unfiltered-cavlc.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-frame-unfiltered-cavlc.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-unfiltered-cavlc.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-unfiltered-cavlc.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-cavlc.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-cavlc.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-cavlc.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-cavlc.yuv")
+                .as_slice(),
+        ),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let mut playback = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(video),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            let mut frames = 0;
+            while let Some(frame) = playback.read_frame().unwrap() {
+                frame.picture.write_planar(&mut actual).unwrap();
+                frames += 1;
+            }
+            assert_eq!(frames, 3);
+            assert_eq!(actual, oracle, "native playback case {case}");
+            playback.rewind();
+        }
+        for _ in 0..2 {
+            let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+            let configuration = input.tracks()[0].configuration.clone();
+            let config = AvcConfig::parse(&configuration).unwrap();
+            let sps = Sps::parse(config.sps[0]).unwrap();
+            let pps = Pps::parse(config.pps[0], &sps).unwrap();
+            let mut previous = None;
+            for index in 0..3 {
+                let mut packet = Vec::new();
+                input.read_packet(0, index, &mut packet).unwrap();
+                let headers: Vec<_> = NalUnits::new(&packet, config.length_size)
+                    .unwrap()
+                    .map(|n| n.unwrap())
+                    .filter(|n| matches!(n[0] & 31, 1 | 5))
+                    .map(|n| SliceHeader::parse(n, &sps, &pps).unwrap())
+                    .collect();
+                assert_eq!(headers.len(), 1);
+                assert_eq!(
+                    headers[0].disable_deblocking_filter_idc,
+                    if case < 2 { 1 } else { 0 }
+                );
+                let borrowed: Vec<_> = headers.iter().collect();
+                let picture = if index == 0 {
+                    assert_eq!(headers[0].slice_type, SliceType::I);
+                    decode_intra_slices(&borrowed, &sps, &pps, 1 << 20).unwrap()
+                } else {
+                    assert_eq!(headers[0].slice_type, SliceType::P);
+                    let mut syntax = fvid::codec::avc_inter_slice::InterCavlcSlice::new_mbaff(
+                        &headers[0],
+                        &sps,
+                        &pps,
+                        65536,
+                    )
+                    .unwrap();
+                    let mut fields = 0;
+                    let mut coded = 0;
+                    let mut total = 0;
+                    while let Some(block) = syntax.read_macroblock().unwrap() {
+                        fields += usize::from(syntax.field_decoding());
+                        coded += usize::from(matches!(
+                            block,
+                            fvid::codec::avc_inter_slice::InterMacroblock::Coded { .. }
+                        ));
+                        total += 1;
+                    }
+                    assert_eq!(total, 16);
+                    assert_eq!(fields, if case % 2 == 0 { 0 } else { 16 });
+                    assert!(coded > 0);
+                    let refs = [previous.as_ref().unwrap()];
+                    for changed in 0..5 {
+                        let nal = NalUnits::new(&packet, config.length_size)
+                            .unwrap()
+                            .map(|n| n.unwrap())
+                            .find(|n| n[0] & 31 == 1)
+                            .unwrap();
+                        let mut other = SliceHeader::parse(nal, &sps, &pps).unwrap();
+                        other.first_mb = 1;
+                        match changed {
+                            0 => other.frame_num += 1,
+                            1 => other.pps_id += 1,
+                            2 => other.poc_lsb = Some(other.poc_lsb.unwrap_or(0) + 1),
+                            3 => other.delta_poc[0] += 1,
+                            _ => other.nal_ref_idc ^= 1,
+                        }
+                        let error = decode_p_slices_unfiltered(
+                            &[&headers[0], &other],
+                            &sps,
+                            &pps,
+                            &[[&refs, &[]], [&refs, &[]]],
+                            1 << 20,
+                        )
+                        .err()
+                        .unwrap();
+                        assert!(error.to_string().contains("different pictures"));
+                    }
+                    let unfiltered =
+                        decode_p_slices_unfiltered(&borrowed, &sps, &pps, &[[&refs, &[]]], 1 << 20)
+                            .unwrap()
+                            .0;
+                    if case >= 2 {
+                        let filtered =
+                            decode_p_slices(&borrowed, &sps, &pps, &[[&refs, &[]]], 1 << 20)
+                                .unwrap()
+                                .0;
+                        assert!(
+                            filtered.y != unfiltered.y
+                                || filtered.cb != unfiltered.cb
+                                || filtered.cr != unfiltered.cr,
+                            "P fixture must exercise filtering"
+                        );
+                        filtered
+                    } else {
+                        unfiltered
+                    }
+                };
+                let actual: Vec<_> = picture
+                    .y
+                    .iter()
+                    .chain(&picture.cb)
+                    .chain(&picture.cr)
+                    .copied()
+                    .collect();
+                let expected = &oracle[index * 6144..(index + 1) * 6144];
+                for (sample, (&a, &b)) in actual.iter().zip(expected).enumerate() {
+                    assert_eq!(a, u16::from(b), "case {case} frame {index} sample {sample}");
+                }
+                previous = Some(picture);
+            }
+        }
+    }
+}
+
+#[test]
+fn original_cavlc_mbaff_playback_matches_every_jm_sample_and_rewinds() {
+    for (video, oracle) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-cavlc.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-cavlc.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cavlc.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cavlc.yuv").as_slice(),
+        ),
+    ] {
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(video),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            let mut frames = 0;
+            while let Some(frame) = reader.read_frame().unwrap() {
+                frame.picture.write_planar(&mut actual).unwrap();
+                frames += 1;
+            }
+            assert_eq!(frames, 3);
+            assert!(
+                actual == oracle,
+                "MBAFF pixels differ from independent JM decoder"
+            );
+            reader.rewind();
+        }
+    }
+}
+
+#[test]
+fn cavlc_mbaff_inter_mixed_high10_and_multislice_match_jm_and_rewind() {
+    use fvid::codec::{
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+        avc_macroblock::{IntraCavlcReader, IntraLuma},
+        avc_slice::{SliceHeader, SliceType},
+        config::NalUnits,
+    };
+    let mut high10_eight = 0;
+    for (name,video,oracle) in [
+        ("mixed-inter-filtered-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-cavlc.yuv").as_slice()),
+        ("mixed-reverse-inter-filtered-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-cavlc.yuv").as_slice()),
+        ("mixed-vertical-inter-filtered-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-cavlc.yuv").as_slice()),
+        ("mixed-vertical-reverse-inter-filtered-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-cavlc.yuv").as_slice()),
+        ("field-multislice-inter-filtered-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-cavlc.yuv").as_slice()),
+        ("frame-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-high10-cavlc.yuv").as_slice()),
+        ("field-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-high10-cavlc.yuv").as_slice()),
+        ("mixed-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-high10-cavlc.yuv").as_slice()),
+        ("mixed-reverse-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-high10-cavlc.yuv").as_slice()),
+        ("mixed-vertical-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-high10-cavlc.yuv").as_slice()),
+        ("mixed-vertical-reverse-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-high10-cavlc.yuv").as_slice()),
+        ("field-multislice-inter-filtered-high10-cavlc", include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-high10-cavlc.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-high10-cavlc.yuv").as_slice()),
+    ] {
+        let mut input=Mp4Reader::open(Cursor::new(video),Default::default()).unwrap();
+        let configuration=input.tracks()[0].configuration.clone();
+        let config=AvcConfig::parse(&configuration).unwrap();
+        let sps=Sps::parse(config.sps[0]).unwrap();
+        let pps=Pps::parse(config.pps[0],&sps).unwrap();
+        let depth=if name.contains("high10") {10} else {8};
+        assert_eq!(sps.bit_depth_luma,depth);assert_eq!(sps.bit_depth_chroma,depth);
+        assert!(!pps.cabac && sps.mb_adaptive_frame_field);
+        let mut coded_inter=0;
+        for index in 0..3 {
+            let mut packet=Vec::new();input.read_packet(0,index,&mut packet).unwrap();
+            let headers:Vec<_>=NalUnits::new(&packet,config.length_size).unwrap().map(|n|n.unwrap())
+                .filter(|n|matches!(n[0]&31,1|5)).map(|n|SliceHeader::parse(n,&sps,&pps).unwrap()).collect();
+            assert_eq!(headers.len(),if name.contains("multislice") {2} else {1});
+            let mut count=0;let mut fields=0;
+            for header in &headers {
+                assert_eq!(header.disable_deblocking_filter_idc,0);
+                assert_eq!(header.first_mb as usize*2,count);
+                let mut intra=if index==0 {Some(IntraCavlcReader::new_mbaff(header,&sps,&pps,16).unwrap())} else {None};
+                let mut inter=if index!=0 {Some(InterCavlcSlice::new_mbaff(header,&sps,&pps,65536).unwrap())} else {None};
+                loop {
+                    let (address,field)=if let Some(reader)=&mut intra {
+                        let Some(mb)=reader.read_macroblock().unwrap() else {break};
+                        if depth==10 {high10_eight+=usize::from(matches!(mb.luma,IntraLuma::Blocks8{..}));}
+                        (mb.address as usize,reader.field_decoding())
+                    } else {
+                        assert_eq!(header.slice_type,SliceType::P);
+                        let reader=inter.as_mut().unwrap();
+                        let Some(block)=reader.read_macroblock().unwrap() else {break};
+                        let address=match block {
+                            InterMacroblock::Skip{address,..}=>address,
+                            InterMacroblock::Intra(mb)=>mb.address as usize,
+                            InterMacroblock::Coded{address,header,..}=>{coded_inter+=1;if depth==10 {high10_eight+=usize::from(header.residual.transform8);}address}
+                        };
+                        (address,reader.field_decoding())
+                    };
+                    assert_eq!(address,count);
+                    let expected=if name.starts_with("field") {true} else if name.starts_with("frame") {false}
+                        else if name.contains("vertical-reverse") {address<8}
+                        else if name.contains("vertical") {address>=8}
+                        else if name.starts_with("mixed-reverse") {address/2%4<2}
+                        else {address/2%4>=2};
+                    assert_eq!(field,expected,"{name} frame {index} address {address}");
+                    fields+=usize::from(field);count+=1;
+                }
+            }
+            assert_eq!(count,16);
+            assert_eq!(fields,if name.starts_with("field") {16} else if name.starts_with("frame") {0} else {8});
+        }
+        assert!(coded_inter>0);
+        let mut playback=fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(video),Default::default(),16<<20).unwrap();
+        for _ in 0..2 {
+            let mut actual=Vec::new();let mut frames=0;
+            while let Some(frame)=playback.read_frame().unwrap() {frame.picture.write_planar(&mut actual).unwrap();frames+=1;}
+            assert_eq!(frames,3);
+            assert!(actual==oracle,"{name} mismatch at {:?}",actual.iter().zip(oracle).position(|(a,b)|a!=b));
+            if depth==10 {assert!(actual.chunks_exact(2).any(|v|u16::from_le_bytes([v[0],v[1]])%4!=0));}
+            playback.rewind();
+        }
+    }
+    assert!(
+        high10_eight > 0,
+        "High10 inter corpus must exercise 8x8 transforms"
+    );
+}
+
+#[test]
+fn cabac_mbaff_first_p_pair_flag_and_motion_prefix_use_field_contexts() {
+    use fvid::codec::{
+        avc_cabac::AvcCabac,
+        avc_cabac_inter as syntax,
+        avc_cabac_motion::CabacMotionContexts,
+        avc_slice::{SliceHeader, SliceType},
+        config::NalUnits,
+    };
+    for (video, field) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-cabac.mp4").as_slice(),
+            false,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cabac.mp4").as_slice(),
+            true,
+        ),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        for index in 1..3 {
+            let mut packet = Vec::new();
+            input.read_packet(0, index, &mut packet).unwrap();
+            let nal = NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(|n| n.unwrap())
+                .find(|n| n[0] & 31 == 1)
+                .unwrap();
+            let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+            assert_eq!(header.slice_type, SliceType::P);
+            for _ in 0..2 {
+                let mut bins = AvcCabac::new(
+                    &header.rbsp,
+                    header.entropy_bit_offset,
+                    header.slice_type,
+                    header.cabac_init_idc as u8,
+                    header.slice_qp,
+                )
+                .unwrap();
+                assert!(
+                    !syntax::skip(&mut bins, SliceType::P, [false; 2]).unwrap(),
+                    "owned first P block must be coded"
+                );
+                assert_eq!(
+                    syntax::field_decoding_flag(&mut bins, [false; 2]).unwrap(),
+                    field
+                );
+                let code = syntax::macroblock_type(&mut bins, SliceType::P, [false; 2]).unwrap();
+                assert!(code < 5, "owned prefix must use inter motion syntax");
+                let mut motion = CabacMotionContexts::new_mbaff(4, 4, 65536).unwrap();
+                let parts = motion
+                    .read_prediction_mbaff(
+                        &mut bins,
+                        0,
+                        0,
+                        code,
+                        [header.refs_l0 * if field { 2 } else { 1 }, 0],
+                        field,
+                        |pair| if pair == 0 { Some(field) } else { None },
+                    )
+                    .unwrap();
+                assert!(!parts.is_empty());
+                assert!(parts.iter().all(|p| p.references[0].is_some()));
+            }
+        }
+    }
+}
+
+#[test]
+fn cabac_mbaff_inter_dispatch_consumes_complete_owned_p_slices() {
+    use fvid::codec::{
+        avc_cabac_slice::InterCabacSlice, avc_inter_slice::InterMacroblock, avc_slice::SliceHeader,
+        config::NalUnits,
+    };
+    let mut coded = 0;
+    for (video, field) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-cabac.mp4").as_slice(),
+            false,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-cabac.mp4").as_slice(),
+            true,
+        ),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        for index in 1..3 {
+            let mut packet = Vec::new();
+            input.read_packet(0, index, &mut packet).unwrap();
+            let nal = NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(|n| n.unwrap())
+                .find(|n| n[0] & 31 == 1)
+                .unwrap();
+            let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+            for _ in 0..2 {
+                let mut reader = InterCabacSlice::new_mbaff(&header, &sps, &pps, 65536).unwrap();
+                for address in 0..16 {
+                    let block = reader.read_macroblock().unwrap().unwrap();
+                    let actual = match block {
+                        InterMacroblock::Skip { address, .. } => address,
+                        InterMacroblock::Intra(mb) => mb.address as usize,
+                        InterMacroblock::Coded { address, .. } => {
+                            coded += 1;
+                            address
+                        }
+                    };
+                    assert_eq!(actual, address);
+                    assert_eq!(reader.field_decoding(), field);
+                }
+                assert!(reader.read_macroblock().unwrap().is_none());
+            }
+        }
+    }
+    assert!(coded > 0);
+}
+
+#[test]
+fn cabac_mbaff_skipped_pairs_and_skipped_top_use_correct_mode_and_pixels() {
+    use fvid::codec::{
+        avc_cabac_slice::InterCabacSlice, avc_inter_slice::InterMacroblock, avc_slice::SliceHeader,
+        config::NalUnits,
+    };
+    for (topskip, video, oracle) in [
+        (
+            false,
+            include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-skipped-cabac.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-skipped-cabac.yuv")
+                .as_slice(),
+        ),
+        (
+            false,
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-skipped-cabac.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-skipped-cabac.yuv")
+                .as_slice(),
+        ),
+        (
+            true,
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-topskip-cabac.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-topskip-cabac.yuv")
+                .as_slice(),
+        ),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        for index in 1..3 {
+            let mut packet = Vec::new();
+            input.read_packet(0, index, &mut packet).unwrap();
+            let nal = NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(|n| n.unwrap())
+                .find(|n| n[0] & 31 == 1)
+                .unwrap();
+            let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+            let mut reader = InterCabacSlice::new_mbaff(&header, &sps, &pps, 65536).unwrap();
+            let mut skipped = [false; 16];
+            let mut fields = [false; 16];
+            for address in 0..16 {
+                let block = reader.read_macroblock().unwrap().unwrap();
+                let actual = match &block {
+                    InterMacroblock::Skip { address, .. }
+                    | InterMacroblock::Coded { address, .. } => *address,
+                    InterMacroblock::Intra(mb) => mb.address as usize,
+                };
+                assert_eq!(actual, address);
+                skipped[address] = matches!(block, InterMacroblock::Skip { .. });
+                fields[address] = reader.field_decoding();
+            }
+            assert!(reader.read_macroblock().unwrap().is_none());
+            if topskip {
+                assert!(
+                    (0..8).any(|pair| skipped[pair * 2]
+                        && !skipped[pair * 2 + 1]
+                        && fields[pair * 2]
+                        && fields[pair * 2 + 1]),
+                    "fixture must exercise skipped top before coded field bottom"
+                );
+            } else {
+                assert!(
+                    (0..8).any(|pair| skipped[pair * 2] && skipped[pair * 2 + 1]),
+                    "fixture must contain a fully skipped pair"
+                );
+                for pair in 0..8 {
+                    if skipped[pair * 2] && skipped[pair * 2 + 1] {
+                        let expected = if pair % 4 != 0 {
+                            fields[(pair - 1) * 2]
+                        } else if pair >= 4 {
+                            fields[(pair - 4) * 2]
+                        } else {
+                            false
+                        };
+                        assert_eq!(fields[pair * 2], expected);
+                        assert_eq!(fields[pair * 2 + 1], expected);
+                    }
+                }
+            }
+        }
+        let mut playback = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(video),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            let mut frames = 0;
+            while let Some(frame) = playback.read_frame().unwrap() {
+                frame.picture.write_planar(&mut actual).unwrap();
+                frames += 1;
+            }
+            assert_eq!(frames, 3);
+            assert!(
+                actual == oracle,
+                "skip pixels differ at {:?}",
+                actual.iter().zip(oracle).position(|(a, b)| a != b)
+            );
+            playback.rewind();
+        }
+    }
+}
+
+#[test]
+fn truncated_cabac_mbaff_dispatch_cannot_resume_after_entropy_failure() {
+    use fvid::codec::{avc_cabac_slice::InterCabacSlice, avc_slice::SliceHeader, config::NalUnits};
+    let video = include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-topskip-cabac.mp4");
+    let mut input = Mp4Reader::open(Cursor::new(video.as_slice()), Default::default()).unwrap();
+    let configuration = input.tracks()[0].configuration.clone();
+    let config = AvcConfig::parse(&configuration).unwrap();
+    let sps = Sps::parse(config.sps[0]).unwrap();
+    let pps = Pps::parse(config.pps[0], &sps).unwrap();
+    let mut packet = Vec::new();
+    input.read_packet(0, 1, &mut packet).unwrap();
+    let nal = NalUnits::new(&packet, config.length_size)
+        .unwrap()
+        .map(|n| n.unwrap())
+        .find(|n| n[0] & 31 == 1)
+        .unwrap();
+    let original = SliceHeader::parse(nal, &sps, &pps).unwrap();
+    let minimum = original.entropy_bit_offset.div_ceil(8) + 2;
+    let mut failures = 0;
+    for cut in (minimum..original.rbsp.len()).step_by(((original.rbsp.len() - minimum) / 16).max(1))
+    {
+        let mut header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+        header.rbsp.truncate(cut);
+        let mut reader = InterCabacSlice::new_mbaff(&header, &sps, &pps, 65536).unwrap();
+        for _ in 0..17 {
+            match reader.read_macroblock() {
+                Ok(Some(_)) => {}
+                Ok(None) => break,
+                Err(_) => {
+                    failures += 1;
+                    assert!(
+                        reader
+                            .read_macroblock()
+                            .err()
+                            .unwrap()
+                            .to_string()
+                            .contains("previously failed")
+                    );
+                    break;
+                }
+            }
+        }
+    }
+    assert!(failures > 0);
+}
+
+#[test]
+fn cabac_mbaff_inter_mixed_high10_and_multislice_match_jm_and_rewind() {
+    use fvid::codec::{
+        avc_cabac_macroblock::IntraCabacReader,
+        avc_cabac_slice::InterCabacSlice,
+        avc_inter_slice::InterMacroblock,
+        avc_macroblock::IntraLuma,
+        avc_slice::{SliceHeader, SliceType},
+        config::NalUnits,
+    };
+    let mut high10_eight = 0;
+    for (name,video,oracle) in [
+        ("frame-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-cabac.yuv").as_slice()),
+        ("field-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-cabac.yuv").as_slice()),
+        ("mixed-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-cabac.yuv").as_slice()),
+        ("mixed-reverse-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-cabac.yuv").as_slice()),
+        ("mixed-vertical-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-cabac.yuv").as_slice()),
+        ("mixed-vertical-reverse-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-cabac.yuv").as_slice()),
+        ("field-multislice-inter-filtered-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-cabac.yuv").as_slice()),
+        ("frame-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-frame-inter-filtered-high10-cabac.yuv").as_slice()),
+        ("field-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-inter-filtered-high10-cabac.yuv").as_slice()),
+        ("mixed-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-inter-filtered-high10-cabac.yuv").as_slice()),
+        ("mixed-reverse-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-reverse-inter-filtered-high10-cabac.yuv").as_slice()),
+        ("mixed-vertical-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-inter-filtered-high10-cabac.yuv").as_slice()),
+        ("mixed-vertical-reverse-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-mixed-vertical-reverse-inter-filtered-high10-cabac.yuv").as_slice()),
+        ("field-multislice-inter-filtered-high10-cabac", include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-high10-cabac.mp4").as_slice(), include_bytes!("fixtures/playback-errors/avc-mbaff-field-multislice-inter-filtered-high10-cabac.yuv").as_slice()),
+    ] {
+        let mut input=Mp4Reader::open(Cursor::new(video),Default::default()).unwrap();
+        let configuration=input.tracks()[0].configuration.clone();
+        let config=AvcConfig::parse(&configuration).unwrap();
+        let sps=Sps::parse(config.sps[0]).unwrap();
+        let pps=Pps::parse(config.pps[0],&sps).unwrap();
+        let depth=if name.contains("high10") {10} else {8};
+        assert_eq!(sps.bit_depth_luma,depth);assert_eq!(sps.bit_depth_chroma,depth);
+        assert!(pps.cabac && sps.mb_adaptive_frame_field);
+        let mut coded_inter=0;
+        for index in 0..3 {
+            let mut packet=Vec::new();input.read_packet(0,index,&mut packet).unwrap();
+            let headers:Vec<_>=NalUnits::new(&packet,config.length_size).unwrap().map(|n|n.unwrap())
+                .filter(|n|matches!(n[0]&31,1|5)).map(|n|SliceHeader::parse(n,&sps,&pps).unwrap()).collect();
+            assert_eq!(headers.len(),if name.contains("multislice") {2} else {1});
+            let mut count=0;let mut fields=0;
+            for header in &headers {
+                assert_eq!(header.disable_deblocking_filter_idc,0);
+                assert_eq!(header.first_mb as usize*2,count);
+                let mut intra=if index==0 {Some(IntraCabacReader::new_mbaff(header,&sps,&pps,16).unwrap())} else {None};
+                let mut inter=if index!=0 {Some(InterCabacSlice::new_mbaff(header,&sps,&pps,65536).unwrap())} else {None};
+                loop {
+                    let (address,field)=if let Some(reader)=&mut intra {
+                        let Some(mb)=reader.read_macroblock().unwrap_or_else(|e|panic!("{name} frame {index} address {count}: {e}")) else {break};
+                        if depth==10 {high10_eight+=usize::from(matches!(mb.luma,IntraLuma::Blocks8{..}));}
+                        (mb.address as usize,reader.field_decoding())
+                    } else {
+                        assert_eq!(header.slice_type,SliceType::P);
+                        let reader=inter.as_mut().unwrap();
+                        let Some(block)=reader.read_macroblock().unwrap_or_else(|e|panic!("{name} frame {index} address {count}: {e}")) else {break};
+                        let address=match block {
+                            InterMacroblock::Skip{address,..}=>address,
+                            InterMacroblock::Intra(mb)=>mb.address as usize,
+                            InterMacroblock::Coded{address,header,..}=>{coded_inter+=1;if depth==10 {high10_eight+=usize::from(header.residual.transform8);}address}
+                        };
+                        (address,reader.field_decoding())
+                    };
+                    assert_eq!(address,count);
+                    let expected=if name.starts_with("field") {true} else if name.starts_with("frame") {false}
+                        else if name.contains("vertical-reverse") {address<8}
+                        else if name.contains("vertical") {address>=8}
+                        else if name.starts_with("mixed-reverse") {address/2%4<2}
+                        else {address/2%4>=2};
+                    assert_eq!(field,expected,"{name} frame {index} address {address}");
+                    fields+=usize::from(field);count+=1;
+                }
+            }
+            assert_eq!(count,16);
+            assert_eq!(fields,if name.starts_with("field") {16} else if name.starts_with("frame") {0} else {8});
+        }
+        assert!(coded_inter>0);
+        let mut playback=fvid::playback_mp4::Mp4VideoReader::open_software(Cursor::new(video),Default::default(),16<<20).unwrap();
+        for _ in 0..2 {
+            let mut actual=Vec::new();let mut frames=0;
+            while let Some(frame)=playback.read_frame().unwrap() {frame.picture.write_planar(&mut actual).unwrap();frames+=1;}
+            assert_eq!(frames,3);
+            assert!(actual==oracle,"{name} mismatch at {:?}",actual.iter().zip(oracle).position(|(a,b)|a!=b));
+            if depth==10 {assert!(actual.chunks_exact(2).any(|v|u16::from_le_bytes([v[0],v[1]])%4!=0));}
+            playback.rewind();
+        }
+    }
+    assert!(
+        high10_eight > 0,
+        "High10 inter corpus must exercise 8x8 transforms"
+    );
 }

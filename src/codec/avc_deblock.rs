@@ -367,6 +367,85 @@ pub fn mbaff_intra_plane(
     component: usize,
     blocks: &[MbaffIntraBlock],
 ) -> crate::Result<()> {
+    mbaff_plane(
+        plane,
+        width,
+        height,
+        depth,
+        component,
+        blocks.len(),
+        |address| blocks[address],
+        |p, _, q, _, external, vertical| {
+            Ok(intra_strength(
+                external,
+                vertical,
+                [blocks[p].field, blocks[q].field],
+            ))
+        },
+    )
+}
+/// Complete address-local inter/intra state for MBAFF loop filtering.
+pub struct MbaffBlockEdges {
+    pub edges: super::avc_boundary::DecodedBlockEdges,
+    pub field: bool,
+}
+/// Filter one complete packed 4:2:0 component using pair-aware boundary ownership.
+pub fn mbaff_inter_plane(
+    plane: &mut [u16],
+    width: usize,
+    height: usize,
+    depth: u8,
+    component: usize,
+    blocks: &[MbaffBlockEdges],
+) -> crate::Result<()> {
+    if blocks.iter().any(|b| {
+        b.edges.blocks.iter().any(|cell| {
+            !cell.intra && !cell.switching_slice && cell.motion.iter().all(Option::is_none)
+        })
+    }) {
+        return Err(crate::invalid(
+            "MBAFF inter deblocking block has no reference",
+        ));
+    }
+    mbaff_plane(
+        plane,
+        width,
+        height,
+        depth,
+        component,
+        blocks.len(),
+        |address| {
+            let b = &blocks[address];
+            MbaffIntraBlock {
+                qp: b.edges.qp,
+                field: b.field,
+                transform8: b.edges.transform8,
+                slice: b.edges.slice_id as usize,
+                disable: b.edges.disable_filter,
+                offsets: b.edges.offsets,
+            }
+        },
+        |p, pl, q, ql, external, vertical| {
+            super::avc_boundary::strength_mbaff(
+                blocks[p].edges.blocks[pl[1] / 4 * 4 + pl[0] / 4],
+                blocks[q].edges.blocks[ql[1] / 4 * 4 + ql[0] / 4],
+                external,
+                vertical,
+                [blocks[p].field, blocks[q].field],
+            )
+        },
+    )
+}
+fn mbaff_plane(
+    plane: &mut [u16],
+    width: usize,
+    height: usize,
+    depth: u8,
+    component: usize,
+    count: usize,
+    metadata: impl Fn(usize) -> MbaffIntraBlock,
+    strength: impl Fn(usize, [usize; 2], usize, [usize; 2], bool, bool) -> crate::Result<u8>,
+) -> crate::Result<()> {
     let chroma = component != 0;
     let size = if chroma { 8 } else { 16 };
     if component > 2
@@ -376,23 +455,24 @@ pub fn mbaff_intra_plane(
         || height % (2 * size) != 0
         || width.checked_mul(height) != Some(plane.len())
         || !(8..=14).contains(&depth)
-        || blocks.len() != width / size * (height / size)
-        || blocks.iter().any(|b| {
+        || count != width / size * (height / size)
+        || (0..count).any(|address| {
+            let b = metadata(address);
             b.disable > 2
                 || b.qp.iter().any(|q| !(-36..=51).contains(q))
                 || b.offsets.iter().any(|v| !(-12..=12).contains(v))
         })
-        || blocks
-            .chunks_exact(2)
-            .any(|pair| pair[0].field != pair[1].field)
+        || (0..count / 2).any(|pair| metadata(pair * 2).field != metadata(pair * 2 + 1).field)
     {
         return Err(crate::invalid("invalid MBAFF intra deblocking metadata"));
     }
     let sub = if chroma { [2, 2] } else { [1, 1] };
     let w = width / size;
     let h = height / size;
-    let pair_field = |pair: usize| blocks.get(pair * 2).map(|b| b.field);
-    for (address, block) in blocks.iter().enumerate() {
+    let pair_field = |pair: usize| (pair * 2 < count).then(|| metadata(pair * 2).field);
+    for address in 0..count {
+        let block = metadata(address);
+        let layout = super::avc_mbaff::layout(address, w, h, true, block.field, sub)?;
         if block.disable == 1 {
             continue;
         }
@@ -409,7 +489,7 @@ pub fn mbaff_intra_plane(
                     && super::avc_mbaff::deblock_line(
                         address, w, h, true, sub, false, 0, 0, false, pair_field,
                     )?
-                    .is_some_and(|line| blocks[line.p_owner.0].field);
+                    .is_some_and(|line| metadata(line.p_owner.0).field);
                 for extra in 0..if mixed_top { 2 } else { 1 } {
                     for line in 0..size {
                         let Some(geometry) = super::avc_mbaff::deblock_line(
@@ -427,13 +507,24 @@ pub fn mbaff_intra_plane(
                         else {
                             continue;
                         };
-                        let neighbour = &blocks[geometry.p_owner.0];
+                        let neighbour = metadata(geometry.p_owner.0);
                         if block.disable == 2 && neighbour.slice != block.slice {
                             continue;
                         }
                         let qp = (block.qp[component] + neighbour.qp[component] + 1) >> 1;
-                        let strength =
-                            intra_strength(edge == 0, vertical, [block.field, neighbour.field]);
+                        let pl = geometry.p_owner.1;
+                        let ql = [
+                            geometry.q[0] - layout.origin[0],
+                            (geometry.q[1] - layout.origin[1]) / layout.row_step,
+                        ];
+                        let strength = strength(
+                            geometry.p_owner.0,
+                            [pl[0] * sub[0], pl[1] * sub[1]],
+                            address,
+                            [ql[0] * sub[0], ql[1] * sub[1]],
+                            edge == 0,
+                            vertical,
+                        )?;
                         filter_line(
                             plane,
                             geometry.at,
@@ -524,6 +615,90 @@ pub fn inter_plane(
 #[cfg(test)]
 mod traversal_tests {
     use super::*;
+    #[test]
+    fn mixed_inter_walker_preserves_intra_filtering_and_rejects_missing_motion_before_mutation() {
+        use super::super::avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference};
+        for component in 0..3 {
+            let side = if component == 0 { 16 } else { 8 };
+            for depth in [8, 10, 12, 14] {
+                let scale = 1u16 << (depth - 8);
+                for modes in [[false, false], [true, true], [false, true], [true, false]] {
+                    let intra: Vec<_> = (0..4)
+                        .map(|address| MbaffIntraBlock {
+                            qp: [40; 3],
+                            field: modes[address / 2],
+                            transform8: false,
+                            slice: 0,
+                            disable: 0,
+                            offsets: [0; 2],
+                        })
+                        .collect();
+                    let mut blocks: Vec<_> = intra
+                        .iter()
+                        .map(|b| MbaffBlockEdges {
+                            field: b.field,
+                            edges: DecodedBlockEdges {
+                                blocks: [BlockEdge {
+                                    intra: true,
+                                    switching_slice: false,
+                                    nonzero_luma: false,
+                                    motion: [None; 2],
+                                }; 16],
+                                qp: b.qp,
+                                slice_id: 0,
+                                disable_filter: b.disable,
+                                offsets: b.offsets,
+                                transform8: b.transform8,
+                            },
+                        })
+                        .collect();
+                    let input: Vec<_> = (0..side * 2)
+                        .flat_map(|y| {
+                            (0..side * 2).map(move |x| {
+                                (100 + if x >= side { 4 } else { 0 }
+                                    + if y >= side { 4 } else { 0 })
+                                    * scale
+                            })
+                        })
+                        .collect();
+                    let mut expected = input.clone();
+                    let mut actual = input.clone();
+                    mbaff_intra_plane(&mut expected, side * 2, side * 2, depth, component, &intra)
+                        .unwrap();
+                    mbaff_inter_plane(&mut actual, side * 2, side * 2, depth, component, &blocks)
+                        .unwrap();
+                    assert_eq!(actual, expected);
+                    for b in &mut blocks {
+                        for cell in &mut b.edges.blocks {
+                            cell.intra = false;
+                            cell.nonzero_luma = true;
+                            cell.motion = [
+                                Some(MotionReference {
+                                    picture: 1,
+                                    vector: [0; 2],
+                                }),
+                                None,
+                            ];
+                        }
+                    }
+                    blocks[3].edges.blocks[15].motion = [None; 2];
+                    let mut rejected = input.clone();
+                    assert!(
+                        mbaff_inter_plane(
+                            &mut rejected,
+                            side * 2,
+                            side * 2,
+                            depth,
+                            component,
+                            &blocks
+                        )
+                        .is_err()
+                    );
+                    assert_eq!(rejected, input);
+                }
+            }
+        }
+    }
     #[test]
     fn mixed_horizontal_top_filters_both_parities_with_normal_strength() {
         let input: Vec<u16> = (0..64)

@@ -155,7 +155,17 @@ pub fn sub_macroblock_type(bins: &mut impl InterBins, slice: SliceType) -> Resul
 /// Conditions are true for available, non-direct neighbours using this list
 /// with a positive reference index (progressive-frame derivation).
 pub fn reference_index(bins: &mut impl InterBins, positive: [bool; 2], active: u32) -> Result<u8> {
-    if active == 0 || active > 32 {
+    reference_index_for_field(bins, positive, active, false)
+}
+/// Expanded MBAFF field lists permit 64 reference indices; context conditions
+/// are derived separately by the pair-aware spatial context owner.
+pub fn reference_index_for_field(
+    bins: &mut impl InterBins,
+    positive: [bool; 2],
+    active: u32,
+    field: bool,
+) -> Result<u8> {
+    if active == 0 || active > if field { 64 } else { 32 } {
         return Err(invalid("invalid CABAC active reference count"));
     }
     if active == 1 {

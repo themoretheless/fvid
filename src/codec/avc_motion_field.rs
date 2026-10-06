@@ -1,5 +1,5 @@
 //! Address-owned 4x4 motion storage with slice and decoding-order availability.
-//! Progressive snapshots and explicit MBAFF publication/neighbour APIs.
+//! Progressive and MBAFF snapshots with explicit pair-aware publication APIs.
 use super::avc_mv::{Neighbour, Neighbours, Partition, add_difference, predict};
 use crate::{Result, invalid};
 #[derive(Clone, Copy)]
@@ -91,6 +91,69 @@ impl MotionField {
                 .ok_or_else(|| invalid("missing slice reference mapping"))
         })
     }
+    /// Freeze MBAFF address-local cells, retaining source mode and reference parity.
+    /// Frame-list identities are supplied separately for each decoded slice.
+    pub fn snapshot_mbaff_slices(
+        &self,
+        mappings: &[(u32, [&[u64]; 2])],
+        memory_limit: usize,
+    ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
+        use super::avc_reference_motion::{ReferenceMotion, ReferenceMotionField};
+        if !self.mbaff || self.height % 8 != 0 || mappings.len() > self.cells.len() / 16 {
+            return Err(invalid("invalid MBAFF motion snapshot geometry"));
+        }
+        let mut lists = std::collections::BTreeMap::new();
+        for &(id, references) in mappings {
+            if references.iter().any(|l| l.len() > 32) || lists.insert(id, references).is_some() {
+                return Err(invalid("invalid or duplicate MBAFF reference mapping"));
+            }
+        }
+        let bytes = ReferenceMotionField::storage_bytes(self.width * 4, self.height * 4)?;
+        if bytes > memory_limit {
+            return Err(invalid("MBAFF motion snapshot exceeds budget"));
+        }
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(self.cells.len())
+            .map_err(|_| invalid("MBAFF motion allocation failed"))?;
+        let mut fields = Vec::new();
+        fields
+            .try_reserve_exact(self.cells.len() / 32)
+            .map_err(|_| invalid("MBAFF pair mode allocation failed"))?;
+        for (index, cell) in self.cells.iter().enumerate() {
+            let cell = cell.ok_or_else(|| invalid("cannot snapshot incomplete MBAFF motion"))?;
+            if index % 32 == 0 {
+                fields.push(cell.field);
+            }
+            if fields[index / 32] != cell.field {
+                return Err(invalid("MBAFF snapshot pair mode mismatch"));
+            }
+            let references = lists
+                .get(&cell.slice)
+                .ok_or_else(|| invalid("missing MBAFF slice mapping"))?;
+            let mut stored = [None; 2];
+            for list in 0..2 {
+                stored[list] = match cell.lists[list] {
+                    Neighbour::NoPrediction => None,
+                    Neighbour::Unavailable => {
+                        return Err(invalid("cannot snapshot unavailable MBAFF motion"));
+                    }
+                    Neighbour::Inter { reference, vector } => Some(ReferenceMotion {
+                        picture_id: *references[list]
+                            .get(usize::from(reference) / if cell.field { 2 } else { 1 })
+                            .ok_or_else(|| invalid("MBAFF snapshot reference out of range"))?,
+                        reference_index: reference,
+                        vector,
+                        reference_bottom_field: cell
+                            .field
+                            .then_some((index / 16 % 2) ^ (usize::from(reference) % 2) != 0),
+                    }),
+                };
+            }
+            output.push(stored);
+        }
+        ReferenceMotionField::new_mbaff(self.width * 4, self.height * 4, output, fields)
+    }
     fn snapshot_resolved<'a>(
         &self,
         memory_limit: usize,
@@ -126,6 +189,7 @@ impl MotionField {
                             .get(reference as usize)
                             .ok_or_else(|| invalid("snapshot reference index out of range"))?,
                         reference_index: reference,
+                        reference_bottom_field: None,
                         vector,
                     }),
                     Neighbour::Unavailable => {

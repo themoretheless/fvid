@@ -6,6 +6,7 @@ use super::{
 };
 use crate::{Result, invalid};
 
+#[derive(Clone)]
 pub struct AvcCabac<'a> {
     rbsp: &'a [u8],
     engine: Cabac<'a>,

@@ -31,6 +31,7 @@ impl Context {
     }
 }
 
+#[derive(Clone)]
 pub struct Cabac<'a> {
     bits: BitReader<'a>,
     range: u16,
@@ -174,7 +175,9 @@ mod tests {
                     let bit = u16::from((data[index / 8] >> (7 - index % 8)) & 1);
                     expected = expected * 2 + bit;
                     let bin = expected >= 256;
-                    if bin { expected -= 256; }
+                    if bin {
+                        expected -= 256;
+                    }
                     assert_eq!(engine.bypass().unwrap(), bin);
                     assert_eq!(engine.offset, expected);
                 }

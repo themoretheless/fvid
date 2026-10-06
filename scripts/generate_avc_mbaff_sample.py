@@ -8,9 +8,11 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--x264', type=Path, required=True)
     p.add_argument('--jm-decoder', type=Path, required=True)
+    p.add_argument('--only', action='append', help='Generate only named cases; preserve other manifest entries')
     a=p.parse_args()
     output=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
-    records=[]
+    manifest=output/'avc-mbaff-generated.json'
+    records=json.loads(manifest.read_text())['fixtures'] if a.only and manifest.exists() else []
     with tempfile.TemporaryDirectory(prefix='fvid-avc-mbaff-') as temporary:
         directory=Path(temporary)
         source=directory/'owned.yuv'
@@ -38,9 +40,21 @@ def main():
                         'mixed-intra-filtered-high10-cabac','mixed-reverse-intra-filtered-high10-cabac',
                         'mixed-vertical-intra-filtered-high10-cabac',
                         'mixed-vertical-reverse-intra-filtered-high10-cabac',
-                        'field-multislice-intra-filtered-high10-cabac']:
+                        'field-multislice-intra-filtered-high10-cabac',
+                        'frame-unfiltered-cavlc','field-unfiltered-cavlc',
+                        'frame-inter-filtered-cavlc','field-inter-filtered-cavlc',
+                        'frame-inter-skipped-cabac','field-inter-skipped-cabac','field-inter-topskip-cabac'] + [
+                        f'{topology}-inter-filtered{depth}-{entropy_mode}'
+                        for entropy_mode in ['cavlc','cabac']
+                        for depth in ['', '-high10']
+                        for topology in ['frame','field','mixed','mixed-reverse',
+                                         'mixed-vertical','mixed-vertical-reverse','field-multislice']
+                        if entropy_mode=='cabac' or depth or topology not in ['frame','field']]:
+            if a.only and entropy not in a.only: continue
             depth=10 if 'high10' in entropy else 8
             def sample(x,y,frame,component):
+                if 'skipped' in entropy: frame=0
+                if 'topskip' in entropy and y%2==0: frame=0
                 width=64 if component==0 else 32
                 coordinate=y if 'vertical' in entropy else x
                 field=entropy.startswith('field') or (entropy.startswith('mixed') and
@@ -59,10 +73,12 @@ def main():
                 '--input-res','64x64','--fps','25','--frames','3','--threads','1',
                 '--keyint','30','--bframes','0','--tff','--profile','high10' if depth==10 else 'main',
                 '--muxer','mkv','-o',str(stream)]
+            if '-inter-' in entropy or entropy in ['frame-unfiltered-cavlc','field-unfiltered-cavlc']: command+=['--ref','1']
             if depth==10: command+=['--input-depth','10','--output-depth','10']
             if entropy.endswith('cavlc'): command+=['--no-cabac']
             if 'intra' in entropy: command+=['--keyint','1']
             if 'unfiltered' in entropy: command+=['--no-deblock']
+            if 'topskip' in entropy: command+=['--scenecut','0']
             if 'multislice' in entropy: command+=['--slices','2']
             subprocess.run(command+[str(source)],check=True)
             configuration,frames=read_mkv(stream.read_bytes(),25)
@@ -80,6 +96,7 @@ def main():
             data=mux(configuration,frames,64,64)
             name=f'avc-mbaff-{entropy}.mp4'
             (output/name).write_bytes(data)
+            records=[record for record in records if record['file']!=name]
             records.append(dict(file=name,sha256=hashlib.sha256(data).hexdigest(),oracle_sha256=hashlib.sha256(pixels).hexdigest()))
     (output/'avc-mbaff-generated.json').write_text(json.dumps(dict(
         generator='owned synthetic pattern; x264 CLI',
