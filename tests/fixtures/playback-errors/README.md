@@ -429,3 +429,13 @@ substreams in its first segment. Mixed cases contain both independent and
 dependent segments and disable filtering across independent slice boundaries.
 These fixtures replace the previous multi-segment reconstruction refusal;
 ordinary tests consume committed MP4/YUV bytes without HM, FFmpeg or network.
+
+### HEVC extended-precision staged acceptance
+
+`hevc-tiles-extended-precision-high8-rext8` and
+`hevc-tiles-extended-precision-high12-rext12` contain owned 64x64 I/B/B pictures
+and saved HM pixel oracles. They reproduce the exact SPS range-tool refusal.
+The pixel/reset acceptance test is explicitly ignored until full integration.
+Generate separately with the tile generator's `--extended-precision-only` switch
+and HM built with `HIGH_BITDEPTH=ON`; the default fixture set is unchanged.
+No private source media or codec parameter sets were used.

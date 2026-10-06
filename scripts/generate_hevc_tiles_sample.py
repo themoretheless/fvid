@@ -12,6 +12,8 @@ from hevc_fixture_mp4 import mux
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--hm-encoder', type=Path, required=True)
 parser.add_argument('--hm-decoder', type=Path, required=True)
+parser.add_argument('--extended-precision-only', action='store_true',
+                    help='Requires HM built with HIGH_BITDEPTH=ON; generates staged acceptance streams')
 args = parser.parse_args()
 fixtures = Path(__file__).resolve().parents[1] / 'tests/fixtures/playback-errors'
 config_text = '''Profile : main-RExt
@@ -50,6 +52,10 @@ variants = [
     ('high10', -1, 3, True, tile_columns + 'LFCrossTileBoundaryFlag : 0\n', 10, 64, 64),
     ('high12', -1, 3, True, tile_columns + 'LFCrossTileBoundaryFlag : 0\n', 12, 64, 64),
 ]
+if args.extended_precision_only:
+    variants = [(f'extended-precision-high{bits}', -1, 3, True,
+                 tile_columns + 'LFCrossTileBoundaryFlag : 0\nExtendedPrecision : 1\n',
+                 bits, 64, 64) for bits in [8, 12]]
 for name, depth, frames, filters, extra, bits, width, height in variants:
     with tempfile.TemporaryDirectory(prefix='fvid-hevc-tiles-') as directory:
         tmp = Path(directory)

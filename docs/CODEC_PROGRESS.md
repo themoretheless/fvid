@@ -2300,3 +2300,23 @@ to picture decoding, and extended transform scaling/clipping is still missing.
 The current HM 18 oracle explicitly rejects ExtendedPrecision because it was
 built without RExt__HIGH_BIT_DEPTH_SUPPORT. A high-bit-depth HM build is needed
 to generate the owned pixel-acceptance fixture; no acceptance claim is made.
+
+### HEVC extended-precision transform foundation and fixtures (2026-10-06)
+
+HM 18 was rebuilt from the official HM-18.0 source with HIGH_BITDEPTH=ON
+for x86_64/Rosetta. Only warning-as-error build policy was relaxed for newer
+Clang diagnostics. Owned 8/12-bit tiled I/B/B streams and decoded HM oracles
+now reproduce the exact SPS extended-precision refusal. Generation is explicit
+via generate_hevc_tiles_sample.py --extended-precision-only and a high-bit-depth
+HM encoder/decoder; normal tests do not invoke external tools.
+
+Inverse scaling and transforms now have an extended-range entry point: derived
+coefficient bounds, scaling shift, intermediate clipping and final shift follow
+H.265 8.6.2–8.6.4. The independent factored 4x4 reference exercises both ranges
+at every supported depth and QP with dense saturated coefficients. The existing
+entry point retains base-range behavior. Picture integration remains incomplete:
+the passing exact-refusal test and ignored full pixel/reset acceptance test are
+separate. The SPS flag is not yet admitted.
+
+Offline codec validation: 365 passed, no failures, two ignored (explicit fixture
+generation and pending extended-precision pixel acceptance).

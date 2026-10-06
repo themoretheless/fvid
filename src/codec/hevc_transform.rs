@@ -34,12 +34,25 @@ pub fn reconstruct(
     scratch: &mut Vec<i32>,
     out: &mut Vec<i32>,
 ) -> Result<()> {
+    reconstruct_with_precision(coefficients, log2_size, bit_depth, qp, transform,
+        scaling, matrix_id, false, scratch, out)
+}
+
+/// Extended dynamic range as specified by H.265 8.6.2–8.6.4.
+pub fn reconstruct_with_precision(
+    coefficients: &[i32], log2_size: u8, bit_depth: u8, qp: u8,
+    transform: Transform, scaling: &ScalingLists, matrix_id: usize,
+    extended_precision: bool, scratch: &mut Vec<i32>, out: &mut Vec<i32>,
+) -> Result<()> {
     if !(2..=5).contains(&log2_size) || !(8..=12).contains(&bit_depth) {
         return Err(invalid("unsupported HEVC transform geometry or bit depth"));
     }
+    let range = if extended_precision { (bit_depth + 6).max(15) } else { 15 };
+    let minimum = -(1i64 << range);
+    let maximum = (1i64 << range) - 1;
     let side = 1usize << log2_size;
     if coefficients.len() != side * side
-        || coefficients.iter().any(|&c| !(-32768..=32767).contains(&c))
+        || coefficients.iter().any(|&c| !(minimum..=maximum).contains(&i64::from(c)))
         || qp > 51 + 6 * (bit_depth - 8)
         || matrix_id > 5
     {
@@ -57,7 +70,7 @@ pub fn reconstruct(
         out.copy_from_slice(coefficients);
         return Ok(());
     }
-    let shift = bit_depth + log2_size - 5;
+    let shift = bit_depth + log2_size + 10 - range;
     let level_scale = [40i64, 45, 51, 57, 64, 72][usize::from(qp % 6)];
     scratch.resize(side * side, 0);
     for (index, &coefficient) in coefficients.iter().enumerate() {
@@ -73,9 +86,9 @@ pub fn reconstruct(
             )?)
         };
         let product = (i64::from(coefficient) * factor * level_scale) << (qp / 6);
-        scratch[index] = ((product + (1 << (shift - 1))) >> shift).clamp(-32768, 32767) as i32;
+        scratch[index] = ((product + (1 << (shift - 1))) >> shift).clamp(minimum, maximum) as i32;
     }
-    let final_shift = 20 - bit_depth;
+    let final_shift = (20 - bit_depth).max(if extended_precision { 11 } else { 0 });
     let round = 1i64 << (final_shift - 1);
     if transform == Transform::Skip {
         for (i, &v) in scratch.iter().enumerate() {
@@ -84,7 +97,7 @@ pub fn reconstruct(
         return Ok(());
     }
     if transform == Transform::Dct && scratch[1..].iter().all(|&v| v == 0) {
-        let first = ((scratch[0] as i64 * 64 + 64) >> 7).clamp(-32768, 32767);
+        let first = ((scratch[0] as i64 * 64 + 64) >> 7).clamp(minimum, maximum);
         let value = ((first * 64 + round) >> final_shift) as i32;
         for v in out.iter_mut() {
             *v = value;
@@ -114,7 +127,7 @@ pub fn reconstruct(
         }
         inverse(&column[..side], &mut output_buf[..side]);
         for y in 0..side {
-            intermediate[y * side + x] = ((output_buf[y] + 64) >> 7).clamp(-32768, 32767);
+            intermediate[y * side + x] = ((i64::from(output_buf[y]) + 64) >> 7).clamp(minimum, maximum) as i32;
         }
     }
     for y in 0..side {
@@ -297,30 +310,33 @@ mod tests {
         }
         let flat = ScalingLists::flat();
         let mut state = 719u32;
-        for depth in [8, 10, 12] {
+        for (depth, extended) in [(8, false), (10, false), (12, false), (8, true), (10, true), (12, true)] {
+            let range = if extended { (depth + 6).max(15) } else { 15 };
+            let minimum = -(1i64 << range);
+            let maximum = (1i64 << range) - 1;
             for qp in 0..=51 + 6 * (depth - 8) {
                 let mut block = [0i32; 16];
                 for value in &mut block {
                     state = state.wrapping_mul(1664525).wrapping_add(1013904223);
-                    *value = i32::from((state >> 16) as i16);
+                    *value = ((u64::from(state) % (1u64 << (range + 1))) as i64 + minimum) as i32;
                 }
-                let divisor = 2i64.pow(u32::from(depth - 3));
+                let divisor = 2i64.pow(u32::from(depth + 12 - range));
                 let multiplier = [40, 45, 51, 57, 64, 72][usize::from(qp % 6)]
                     * 16
                     * 2i64.pow(u32::from(qp / 6));
                 let scaled = block.map(|v| {
                     ((i64::from(v) * multiplier + divisor / 2).div_euclid(divisor))
-                        .clamp(-32768, 32767)
+                        .clamp(minimum, maximum)
                 });
                 let mut intermediate = [0i64; 16];
                 for x in 0..4 {
                     let values = inverse(std::array::from_fn(|y| scaled[y * 4 + x]));
                     for y in 0..4 {
                         intermediate[y * 4 + x] =
-                            (values[y] + 64).div_euclid(128).clamp(-32768, 32767);
+                            (values[y] + 64).div_euclid(128).clamp(minimum, maximum);
                     }
                 }
-                let divisor = 2i64.pow(u32::from(20 - depth));
+                let divisor = 2i64.pow(u32::from((20 - depth).max(if extended { 11 } else { 0 })));
                 let mut expected = [0i32; 16];
                 for y in 0..4 {
                     let values = inverse(std::array::from_fn(|x| intermediate[y * 4 + x]));
@@ -330,7 +346,7 @@ mod tests {
                 }
                 let mut scratch = Vec::new();
                 let mut out = Vec::new();
-                reconstruct(
+                reconstruct_with_precision(
                     &block,
                     2,
                     depth,
@@ -338,6 +354,7 @@ mod tests {
                     Transform::Dct,
                     &flat,
                     0,
+                    extended,
                     &mut scratch,
                     &mut out,
                 )

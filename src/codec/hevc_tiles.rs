@@ -395,6 +395,55 @@ mod fixture_tests {
     }
 
     #[test]
+    fn extended_precision_streams_reproduce_the_exact_sps_refusal() {
+        for data in [
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high8-rext8.mp4").as_slice(),
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high12-rext12.mp4").as_slice(),
+        ] {
+            let input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data), Default::default()).unwrap();
+            let error = match super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration, 16 << 20) {
+                Ok(_) => panic!("extended precision unexpectedly admitted"),
+                Err(error) => error,
+            };
+            assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"), "{error}");
+        }
+    }
+
+    #[test]
+    #[ignore = "pending extended-precision residual/picture integration"]
+    fn extended_precision_pixels_match_hm_and_reset() {
+        for (data, expected, depth) in [
+            (include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high8-rext8.mp4").as_slice(),
+             include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high8-rext8.yuv").as_slice(), 8),
+            (include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high12-rext12.mp4").as_slice(),
+             include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-extended-precision-high12-rext12.yuv").as_slice(), 12),
+        ] {
+            let mut input = crate::container::mp4::Mp4Reader::open(
+                std::io::Cursor::new(data), Default::default()).unwrap();
+            let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+                &input.tracks()[0].configuration, 16 << 20).unwrap();
+            for pass in 0..2 {
+                if pass != 0 { decoder.reset(); }
+                let mut actual = Vec::new();
+                let mut packet = Vec::new();
+                for frame in 0..3 {
+                    input.read_packet(0, frame, &mut packet).unwrap();
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    for plane in &decoded.picture.planes {
+                        for &sample in plane.samples() {
+                            if depth == 8 { actual.push(u8::try_from(sample).unwrap()); }
+                            else { actual.extend_from_slice(&sample.to_le_bytes()); }
+                        }
+                    }
+                }
+                assert_eq!(actual, expected, "depth {depth}, pass {pass}");
+            }
+        }
+    }
+
+    #[test]
     fn tiled_segments_match_every_hm_sample_and_reset() {
         macro_rules! fixture {
             ($stem:literal, $dependent:literal, $filtered:literal, $cross:literal, $slice_cross:literal) => {
