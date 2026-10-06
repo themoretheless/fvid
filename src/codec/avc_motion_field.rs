@@ -705,6 +705,40 @@ impl MotionField {
         parts: &[super::avc_inter::Partition],
         direct: Option<&super::avc_direct::DirectPrediction<'_>>,
     ) -> Result<Vec<[Neighbour; 2]>> {
+        if self.field_picture && direct.is_some() {
+            return Err(invalid("progressive direct context cannot decode a field"));
+        }
+        self.decode_macroblock_derive(origin, slice, parts, |at, neighbours| {
+            direct
+                .ok_or_else(|| invalid("missing B-direct context"))?
+                .derive(at, neighbours)
+        })
+    }
+    pub fn decode_field_macroblock_with_direct(
+        &mut self,
+        origin: [usize; 2],
+        slice: u32,
+        parts: &[super::avc_inter::Partition],
+        direct: Option<&super::avc_direct::FieldDirectPrediction<'_>>,
+    ) -> Result<Vec<[Neighbour; 2]>> {
+        if !self.field_picture || self.mbaff {
+            return Err(invalid(
+                "field direct requires separate-field motion geometry",
+            ));
+        }
+        self.decode_macroblock_derive(origin, slice, parts, |at, neighbours| {
+            direct
+                .ok_or_else(|| invalid("missing B-field direct context"))?
+                .derive(at, neighbours)
+        })
+    }
+    fn decode_macroblock_derive(
+        &mut self,
+        origin: [usize; 2],
+        slice: u32,
+        parts: &[super::avc_inter::Partition],
+        mut derive: impl FnMut([usize; 2], [Neighbours; 2]) -> Result<[Neighbour; 2]>,
+    ) -> Result<Vec<[Neighbour; 2]>> {
         use super::avc_inter::Prediction;
         if origin.iter().any(|n| n % 16 != 0) || parts.is_empty() || parts.len() > 16 {
             return Err(invalid("invalid AVC inter macroblock partitions"));
@@ -734,9 +768,7 @@ impl MotionField {
                         origin[0] + usize::from(p.origin[0]),
                         origin[1] + usize::from(p.origin[1]),
                     ];
-                    let vectors = direct
-                        .ok_or_else(|| invalid("missing B-direct context"))?
-                        .derive(at, direct_neighbours)?;
+                    let vectors = derive(at, direct_neighbours)?;
                     self.store(at, [4, 4], slice, vectors)?;
                     result.push(vectors);
                     continue;

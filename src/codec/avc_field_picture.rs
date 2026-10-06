@@ -418,7 +418,7 @@ pub fn decode_inter_field_lists_with_order(
     implicit: Option<&ImplicitFieldWeights<'_>>,
     budget: usize,
 ) -> Result<PcmField> {
-    decode_inter_field_impl(headers, sps, pps, references, implicit, budget, false)
+    decode_inter_field_impl(headers, sps, pps, references, implicit, None, budget, false)
         .map(|(picture, _)| picture)
 }
 /// Return complete field motion for a caller that retains reference metadata.
@@ -432,23 +432,27 @@ pub fn decode_inter_field_lists_with_motion(
     budget: usize,
 ) -> Result<(PcmField, super::avc_motion_field::MotionField)> {
     let (picture, motion) =
-        decode_inter_field_impl(headers, sps, pps, references, implicit, budget, true)?;
+        decode_inter_field_impl(headers, sps, pps, references, implicit, None, budget, true)?;
     Ok((
         picture,
         motion.ok_or_else(|| invalid("missing reconstructed field motion"))?,
     ))
 }
-fn decode_inter_field_impl(
+pub(super) fn decode_inter_field_impl(
     headers: &[&SliceHeader],
     sps: &Sps,
     pps: &Pps,
     references: &[[&[(&PcmField, u64)]; 2]],
     implicit: Option<&ImplicitFieldWeights<'_>>,
+    direct: Option<&[super::avc_direct::FieldDirectPrediction<'_>]>,
     budget: usize,
     retain_motion: bool,
 ) -> Result<(PcmField, Option<super::avc_motion_field::MotionField>)> {
     if references.len() != headers.len() {
         return Err(invalid("AVC field reference contexts differ from slices"));
+    }
+    if direct.is_some_and(|contexts| contexts.len() != headers.len()) {
+        return Err(invalid("AVC field direct contexts differ from slices"));
     }
     let reference = references
         .first()
@@ -475,16 +479,50 @@ fn decode_inter_field_impl(
     bits.skip(h.entropy_bit_offset)?;
     let (w, height) = sps.coded_dimensions();
     let count = w as usize / 16 * (height as usize / 32);
-    if !retain_motion
-        && !pps.cabac
+    if !pps.cabac
         && h.slice_type == SliceType::P
         && headers.len() == 1
         && h.weights.is_none()
         && reference.bottom == h.bottom_field
         && bits.unsigned_golomb()? as usize == count
     {
-        return decode_skip_field(headers, sps, pps, reference, budget)
-            .map(|picture| (picture, None));
+        if !retain_motion {
+            return decode_skip_field(headers, sps, pps, reference, budget)
+                .map(|picture| (picture, None));
+        }
+        // Every macroblock is skipped in one slice, hence all predictors are
+        // zero with L0[0]. Keep the copy path and retain its real reference
+        // identity through the caller's slice mapping.
+        let working = count
+            .checked_mul(960)
+            .ok_or_else(|| invalid("AVC skip field motion storage overflow"))?;
+        let pixels_budget = budget
+            .checked_sub(working)
+            .ok_or_else(|| invalid("AVC skip field motion exceeds budget"))?;
+        let picture = decode_skip_field(headers, sps, pps, reference, pixels_budget)?;
+        let mut motion = super::avc_motion_field::MotionField::new_field(
+            w as usize,
+            height as usize / 2,
+            working,
+        )?;
+        for address in 0..count {
+            motion.store(
+                [
+                    address % (w as usize / 16) * 16,
+                    address / (w as usize / 16) * 16,
+                ],
+                [16, 16],
+                0,
+                [
+                    super::avc_mv::Neighbour::Inter {
+                        reference: 0,
+                        vector: [0, 0],
+                    },
+                    super::avc_mv::Neighbour::NoPrediction,
+                ],
+            )?;
+        }
+        return Ok((picture, Some(motion)));
     }
     if !h.field_pic
         || !matches!(h.slice_type, SliceType::P | SliceType::B)
@@ -657,6 +695,7 @@ fn decode_inter_field_impl(
     }
     for (slice_index, (reference_index, h)) in ordered.iter().enumerate() {
         let lists = references[*reference_index];
+        let direct_context = direct.map(|contexts| &contexts[*reference_index]);
         let slice_id = slice_index as u32;
         let end = ordered
             .get(slice_index + 1)
@@ -815,22 +854,42 @@ fn decode_inter_field_impl(
                         reader.record_inter(address, [0; 16], [[0; 4]; 2])?;
                     }
                     if h.slice_type == SliceType::B {
-                        return Err(unsupported(
-                            "B field direct prediction requires reference motion context",
-                        ));
+                        if direct_context.is_none() {
+                            return Err(unsupported(
+                                "B field direct prediction requires reference motion context",
+                            ));
+                        }
+                        let super::avc_inter::MacroblockType::Inter {
+                            partitions: parts, ..
+                        } = super::avc_inter::macroblock_type(SliceType::B, 0)?
+                        else {
+                            return Err(invalid("invalid B skip partition layout"));
+                        };
+                        let vectors = motion.decode_field_macroblock_with_direct(
+                            origin,
+                            slice_id,
+                            &parts,
+                            direct_context,
+                        )?;
+                        parts
+                            .iter()
+                            .zip(vectors)
+                            .map(|(p, v)| (p.origin.map(usize::from), p.size.map(usize::from), v))
+                            .collect::<Vec<_>>()
+                    } else {
+                        let vector = motion.decode_p_skip(origin, slice_id)?;
+                        vec![(
+                            [0, 0],
+                            [16, 16],
+                            [
+                                super::avc_mv::Neighbour::Inter {
+                                    vector,
+                                    reference: 0,
+                                },
+                                super::avc_mv::Neighbour::NoPrediction,
+                            ],
+                        )]
                     }
-                    let vector = motion.decode_p_skip(origin, slice_id)?;
-                    vec![(
-                        [0, 0],
-                        [16, 16],
-                        [
-                            super::avc_mv::Neighbour::Inter {
-                                vector,
-                                reference: 0,
-                            },
-                            super::avc_mv::Neighbour::NoPrediction,
-                        ],
-                    )]
                 } else {
                     let (header, c) = if pps.cabac {
                         match cabac_block
@@ -889,12 +948,18 @@ fn decode_inter_field_impl(
                     if parts
                         .iter()
                         .any(|p| p.prediction == super::avc_inter::Prediction::Direct)
+                        && direct_context.is_none()
                     {
                         return Err(unsupported(
                             "B field direct prediction requires reference motion context",
                         ));
                     }
-                    let neighbour = motion.decode_macroblock(origin, slice_id, &parts)?;
+                    let neighbour = motion.decode_field_macroblock_with_direct(
+                        origin,
+                        slice_id,
+                        &parts,
+                        direct_context,
+                    )?;
                     parts
                         .iter()
                         .zip(neighbour)

@@ -435,6 +435,24 @@ mod tests {
             "avc-field-opposite-10bit-bottom-first-swap-skip-filter2-aso",
             "avc-field-multiref-8bit-top-first-type3-sub3-r0-filter0-aso",
             "avc-field-multiref-10bit-bottom-first-type1-sub0-r1-filter2-aso",
+            "avc-field-b-cabac-mixed-8bit-top-first-spatial-l0-pos0-coded-v1-init0-filter0-infer1",
+            "avc-field-b-cabac-mixed-10bit-bottom-first-temporal-i16-negative-pos1-skip-v1-init2-filter2-infer0",
+            "avc-field-b-cabac-mixed-8bit-top-first-spatial-i4-zero-pos1-coded-v1-init1-filter1-infer0",
+            "avc-field-b-cabac-mixed-10bit-bottom-first-spatial-bi-pos1-skip-v1-init2-filter2-infer1",
+            "avc-field-b-cabac-residual-8bit-top-first-temporal-all-sign1-init0-filter0-infer1-aso",
+            "avc-field-b-cabac-residual-10bit-bottom-first-spatial-chroma-sign1-init2-filter2-infer0-aso",
+            "avc-field-b-transform8-8bit-top-first-temporal-ac-sign1-init0-filter0-scale24-aso",
+            "avc-field-b-transform8-10bit-bottom-first-spatial-ac-sign0-init2-filter2-scale16-aso",
+            "avc-field-b-residual-8bit-top-first-spatial-all-ac-pos0-sign1-filter0-infer1",
+            "avc-field-b-residual-10bit-bottom-first-temporal-chroma-dc-pos1-sign1-filter2-infer0",
+            "avc-field-b-mixed-8bit-top-first-spatial-adjacent-type3-pos0-v1-filter0-infer1",
+            "avc-field-b-mixed-10bit-bottom-first-temporal-pcm-type0-pos0-v1-filter2-infer0",
+            "avc-field-b-mixed-8bit-top-first-spatial-sub-type12-pos3-v1-filter0-infer1",
+            "avc-field-b-mixed-10bit-bottom-first-temporal-sub-type9-pos1-v1-filter2-infer0",
+            "avc-field-b-direct-8bit-top-first-temporal-coded-cavlc-filter0-infer0",
+            "avc-field-b-direct-10bit-bottom-first-spatial-skip-cabac-init2-filter2-infer1-aso",
+            "avc-field-b-direct-8bit-top-first-temporal-skip-cabac-init0-filter1-infer1",
+            "avc-field-b-direct-10bit-bottom-first-spatial-coded-cavlc-filter1-infer0-aso",
             "avc-field-b-implicit-8bit-top-first-bi-cabac-init0-filter0-aso",
             "avc-field-b-implicit-10bit-bottom-first-l1-cavlc-filter2-aso",
             "avc-field-b-future-8bit-top-first-bi-cabac-init0-filter0-aso",
@@ -482,7 +500,15 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
-            let count = if (name.starts_with("avc-field-cabac-")
+            let reordered_four = name.starts_with("avc-field-b-direct-")
+                || name.starts_with("avc-field-b-mixed-")
+                || name.starts_with("avc-field-b-residual-")
+                || name.starts_with("avc-field-b-cabac-mixed-")
+                || name.starts_with("avc-field-b-cabac-residual-")
+                || name.starts_with("avc-field-b-transform8-");
+            let count = if reordered_four {
+                4
+            } else if (name.starts_with("avc-field-cabac-")
                 || name.starts_with("avc-field-fmo-")
                 || name.starts_with("avc-field-intra-")
                 || name.starts_with("avc-field-intra8-"))
@@ -517,18 +543,38 @@ mod tests {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
                     (
-                        if name.starts_with("avc-field-b-future-")
+                        if reordered_four {
+                            [0, 2, 6, 4][calls]
+                        } else if name.starts_with("avc-field-b-future-")
                             || name.starts_with("avc-field-b-implicit-")
                         {
                             [0, 4, 2][calls]
                         } else {
                             calls * 2
                         },
-                        calls as i64 * 2,
-                        2
+                        if reordered_four {
+                            [0, 4, 6, 8][calls]
+                        } else {
+                            calls as i64 * 2
+                        },
+                        if reordered_four && calls == 0 { 4 } else { 2 }
                     )
                 );
-                assert_eq!((start, duration), (calls as u64 * 40_000_000, 40_000_000));
+                assert_eq!(
+                    (start, duration),
+                    (
+                        if reordered_four {
+                            [0, 4, 6, 8][calls] * 20_000_000
+                        } else {
+                            calls as u64 * 40_000_000
+                        },
+                        if reordered_four && calls == 0 {
+                            80_000_000
+                        } else {
+                            40_000_000
+                        }
+                    )
+                );
                 assert_eq!(
                     pixels,
                     &oracle[calls * frame_bytes..(calls + 1) * frame_bytes]

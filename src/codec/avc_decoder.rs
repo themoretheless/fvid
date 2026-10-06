@@ -24,6 +24,12 @@ pub struct DecodedReferencePicture {
     pub field_order: FieldOrder,
 }
 
+/// A selected field owns pixels and co-located motion together.
+struct DecodedReferenceField {
+    field: Arc<super::avc_field_picture::PcmField>,
+    motion: Option<ReferenceMotionField>,
+}
+
 /// Owns parameter sets, POC state and reference pictures. No external decoder.
 /// The budget covers decoded reference storage and picture reconstruction;
 /// input/configuration bytes and output Arcs retained by callers are excluded.
@@ -42,7 +48,7 @@ pub struct AvcDecoder {
     budget: usize,
     poc: PocDecoder,
     dpb: Option<ReferenceBuffer<DecodedReferencePicture>>,
-    field_dpb: Option<super::avc_field_dpb::FieldBuffer<super::avc_field_picture::PcmField>>,
+    field_dpb: Option<super::avc_field_dpb::FieldBuffer<DecodedReferenceField>>,
     pending_field: Option<(Arc<super::avc_field_picture::PcmField>, i32)>,
     field_pair_output: bool,
     active_sps: Option<u32>,
@@ -202,21 +208,30 @@ impl AvcDecoder {
             .checked_mul(h as usize)
             .and_then(|n| n.checked_mul(3))
             .ok_or_else(|| invalid("AVC field storage overflow"))?;
+        let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize / 2)?;
+        let motion_reserve = motion_bytes
+            .checked_mul(2 * sps.max_num_ref_frames.max(1) as usize + 1)
+            .ok_or_else(|| invalid("AVC field motion storage overflow"))?;
         let reserved = full
             .checked_mul(sps.max_num_ref_frames.max(1) as usize)
             .and_then(|n| n.checked_add(full))
             .and_then(|n| n.checked_add(full / 2))
+            .and_then(|n| n.checked_add(motion_reserve))
             .ok_or_else(|| invalid("AVC field reference storage overflow"))?;
         let scratch = self
             .budget
             .checked_sub(reserved)
             .ok_or_else(|| invalid("AVC fields exceed decoder memory budget"))?;
         let order = self.poc.decode(sps, header)?;
+        let mut retained_motion = None;
         let mut field = if matches!(header.slice_type, SliceType::P | SliceType::B) {
             let dpb = self
                 .field_dpb
                 .as_ref()
                 .ok_or_else(|| invalid("missing AVC field references"))?;
+            let mut reference_ids = Vec::new();
+            let mut direct_refs = Vec::new();
+            let mut colocated = Vec::new();
             let mut references = Vec::new();
             references
                 .try_reserve_exact(headers.len())
@@ -230,6 +245,45 @@ impl AvcDecoder {
             }
             for h in headers {
                 let lists = dpb.lists(h, order.before_marking.picture())?;
+                if header.slice_type == SliceType::B {
+                    let mut entries = [Vec::new(), Vec::new()];
+                    for (target, list) in entries.iter_mut().zip([&lists.l0, &lists.l1]) {
+                        for r in list {
+                            let (poc, long_term) = dpb
+                                .order(r.id, r.bottom)
+                                .ok_or_else(|| invalid("missing direct field order"))?;
+                            target.push(super::avc_direct::FieldDirectReference {
+                                id: r.id,
+                                bottom: r.bottom,
+                                poc,
+                                long_term,
+                            });
+                        }
+                    }
+                    let first = lists
+                        .l1
+                        .first()
+                        .ok_or_else(|| invalid("empty direct field list1"))?;
+                    colocated.push(
+                        dpb.get(first.id, first.bottom)
+                            .ok_or_else(|| invalid("missing co-located field"))?
+                            .motion
+                            .as_ref(),
+                    );
+                    direct_refs.push(entries);
+                }
+                reference_ids.push([
+                    lists
+                        .l0
+                        .iter()
+                        .map(|r| (r.id, r.bottom))
+                        .collect::<Vec<_>>(),
+                    lists
+                        .l1
+                        .iter()
+                        .map(|r| (r.id, r.bottom))
+                        .collect::<Vec<_>>(),
+                ]);
                 let mut resolved = [Vec::new(), Vec::new()];
                 for (target, list) in resolved.iter_mut().zip([&lists.l0, &lists.l1]) {
                     target
@@ -244,7 +298,7 @@ impl AvcDecoder {
                             .checked_mul(2)
                             .and_then(|v| v.checked_add(u64::from(selected.bottom)))
                             .ok_or_else(|| invalid("AVC field reference identity overflow"))?;
-                        target.push((reference.as_ref(), identity));
+                        target.push((reference.field.as_ref(), identity));
                     }
                 }
                 if implicit {
@@ -276,14 +330,53 @@ impl AvcDecoder {
                 poc: order.before_marking.picture(),
                 references: &order_views,
             };
-            super::avc_field_picture::decode_inter_field_lists_with_order(
+            let implicit_context = if implicit { Some(&weighting) } else { None };
+            let direct_contexts = direct_refs
+                .iter()
+                .enumerate()
+                .map(|(i, lists)| super::avc_direct::FieldDirectPrediction {
+                    spatial: headers[i].direct_spatial_mv_pred,
+                    inference8: sps.direct_8x8_inference,
+                    current_poc: order.before_marking.picture(),
+                    lists: [lists[0].as_slice(), lists[1].as_slice()],
+                    colocated: colocated[i],
+                })
+                .collect::<Vec<_>>();
+            let (picture, motion) = super::avc_field_picture::decode_inter_field_impl(
                 headers,
                 sps,
                 pps,
                 &contexts,
-                if implicit { Some(&weighting) } else { None },
+                implicit_context,
+                if header.slice_type == SliceType::B {
+                    Some(&direct_contexts)
+                } else {
+                    None
+                },
                 scratch,
-            )?
+                header.nal_ref_idc != 0,
+            )?;
+            if let Some(motion) = motion {
+                // Reconstruction assigns slice IDs in macroblock address order,
+                // independently of wire order (ASO).
+                let mut sorted = (0..headers.len()).collect::<Vec<_>>();
+                sorted.sort_by_key(|&i| headers[i].first_mb);
+                let mappings = sorted
+                    .iter()
+                    .enumerate()
+                    .map(|(slice, &i)| {
+                        (
+                            slice as u32,
+                            [
+                                reference_ids[i][0].as_slice(),
+                                reference_ids[i][1].as_slice(),
+                            ],
+                        )
+                    })
+                    .collect::<Vec<_>>();
+                retained_motion = Some(motion.snapshot_field_slices(&mappings, motion_bytes)?);
+            }
+            picture
         } else {
             super::avc_field_picture::decode_intra_slices(headers, sps, pps, scratch)?
         };
@@ -327,7 +420,10 @@ impl AvcDecoder {
                 header,
                 order.after_marking.picture(),
                 self.next_id,
-                Arc::clone(&field),
+                Arc::new(DecodedReferenceField {
+                    field: Arc::clone(&field),
+                    motion: retained_motion,
+                }),
             )?;
         self.next_id = self
             .next_id
@@ -764,6 +860,189 @@ mod tests {
             data.extend_from_slice(nal);
         }
         data
+    }
+    #[test]
+    fn b_field_reproducer_requires_motion_context_and_native_decode_accepts_it() {
+        use crate::container::mp4::Mp4Reader;
+        use std::io::Cursor;
+        for video in [
+            &include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-field-b-direct-8bit-top-first-temporal-coded-cavlc-filter0-infer0.mp4"
+            )[..],
+            &include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-field-b-direct-10bit-bottom-first-spatial-skip-cabac-init2-filter2-infer1-aso.mp4"
+            )[..],
+        ] {
+            let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+            let config = input.tracks()[0].configuration.clone();
+            let avc = AvcConfig::parse(&config).unwrap();
+            let sps = Sps::parse(avc.sps[0]).unwrap();
+            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+            let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+            for sample in 0..8 {
+                let mut packet = Vec::new();
+                input.read_packet(0, sample, &mut packet).unwrap();
+                if sample >= 6 {
+                    let headers = NalUnits::new(&packet, avc.length_size)
+                        .unwrap()
+                        .map(|n| SliceHeader::parse(n.unwrap(), &sps, &pps).unwrap())
+                        .collect::<Vec<_>>();
+                    let dpb = decoder.field_dpb.as_ref().unwrap();
+                    let selected = headers
+                        .iter()
+                        .map(|h| dpb.lists(h, h.poc_lsb.unwrap() as i32).unwrap())
+                        .collect::<Vec<_>>();
+                    for lists in &selected {
+                        let first = lists.l1[0];
+                        assert!(dpb.get(first.id, first.bottom).unwrap().motion.is_some());
+                    }
+                    let references = selected
+                        .iter()
+                        .map(|lists| {
+                            [&lists.l0, &lists.l1].map(|list| {
+                                list.iter()
+                                    .map(|r| {
+                                        (
+                                            dpb.get(r.id, r.bottom).unwrap().field.as_ref(),
+                                            r.id * 2 + u64::from(r.bottom),
+                                        )
+                                    })
+                                    .collect::<Vec<_>>()
+                            })
+                        })
+                        .collect::<Vec<_>>();
+                    let contexts = references
+                        .iter()
+                        .map(|l| [l[0].as_slice(), l[1].as_slice()])
+                        .collect::<Vec<_>>();
+                    let views = headers.iter().collect::<Vec<_>>();
+                    let error =
+                        super::super::avc_field_picture::decode_inter_field_lists_with_order(
+                            &views,
+                            &sps,
+                            &pps,
+                            &contexts,
+                            None,
+                            1 << 20,
+                        )
+                        .err()
+                        .expect("legacy entrypoint lacks direct context");
+                    assert!(
+                        error.to_string().contains(
+                            "B field direct prediction requires reference motion context"
+                        ),
+                        "{error}"
+                    );
+                }
+                let picture = decoder.decode_order(&packet).unwrap();
+                assert_eq!(picture.is_some(), sample % 2 == 1);
+            }
+        }
+    }
+    #[test]
+    fn field_dpb_retains_slice_motion_and_reset_releases_it() {
+        use crate::container::mp4::Mp4Reader;
+        use std::io::Cursor;
+        for (video, oracle) in [
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-field-cabac-p-multiref-8bit-top-first-4x4-r1-list1-init0-filter0-aso.mp4"
+                )[..],
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-field-cabac-p-multiref-8bit-top-first-4x4-r1-list1-init0-filter0-aso.yuv"
+                )[..],
+            ),
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-field-cabac-p-multiref-10bit-bottom-first-4x4-r1-list1-init2-filter2-aso.mp4"
+                )[..],
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-field-cabac-p-multiref-10bit-bottom-first-4x4-r1-list1-init2-filter2-aso.yuv"
+                )[..],
+            ),
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-field-skip-8bit-top-first.mp4"
+                )[..],
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/avc-field-skip-8bit-top-first.yuv"
+                )[..],
+            ),
+        ] {
+            let mut reader = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+            let config = reader.tracks()[0].configuration.clone();
+            let avc = AvcConfig::parse(&config).unwrap();
+            let sps = Sps::parse(avc.sps[0]).unwrap();
+            let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+            let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+            for _ in 0..2 {
+                let mut pixels = Vec::new();
+                let mut retained = Vec::new();
+                for sample in 0..reader.tracks()[0].samples.len() {
+                    let mut packet = Vec::new();
+                    reader.read_packet(0, sample, &mut packet).unwrap();
+                    let mut headers = NalUnits::new(&packet, avc.length_size)
+                        .unwrap()
+                        .map(|n| SliceHeader::parse(n.unwrap(), &sps, &pps).unwrap())
+                        .collect::<Vec<_>>();
+                    headers.sort_by_key(|h| h.first_mb);
+                    let selected = if headers[0].slice_type == SliceType::P {
+                        headers
+                            .iter()
+                            .map(|h| {
+                                decoder
+                                    .field_dpb
+                                    .as_ref()
+                                    .unwrap()
+                                    .lists(h, h.poc_lsb.unwrap() as i32)
+                                    .unwrap()
+                            })
+                            .collect::<Vec<_>>()
+                    } else {
+                        Vec::new()
+                    };
+                    if let Some(picture) = decoder.decode_order(&packet).unwrap() {
+                        picture.write_planar(&mut pixels).unwrap();
+                    }
+                    let dpb = decoder.field_dpb.as_ref().unwrap();
+                    let store = dpb
+                        .references()
+                        .into_iter()
+                        .find(|r| r.frame_num == headers[0].frame_num)
+                        .unwrap();
+                    let decoded = dpb.get(store.id, headers[0].bottom_field).unwrap();
+                    if headers[0].slice_type == SliceType::I {
+                        assert!(decoded.motion.is_none());
+                    } else {
+                        let motion = decoded
+                            .motion
+                            .as_ref()
+                            .expect("reference P field retains motion");
+                        for y in (0..16).step_by(4) {
+                            for x in (0..32).step_by(4) {
+                                let address = x / 16;
+                                let slice = headers
+                                    .iter()
+                                    .rposition(|h| h.first_mb as usize <= address)
+                                    .unwrap();
+                                let cell = motion.at([x, y]).unwrap();
+                                assert!(cell[1].is_none());
+                                let value = cell[0].unwrap();
+                                let reference = selected[slice].l0[value.reference_index as usize];
+                                assert_eq!(value.picture_id, reference.id);
+                                assert_eq!(value.reference_bottom_field, Some(reference.bottom));
+                            }
+                        }
+                        retained.push(Arc::downgrade(decoded));
+                    }
+                }
+                assert_eq!(pixels, oracle);
+                assert!(!retained.is_empty());
+                decoder.reset();
+                assert!(decoder.field_dpb.is_none());
+                assert!(retained.iter().all(|weak| weak.upgrade().is_none()));
+            }
+        }
     }
     #[test]
     fn dpb_retains_motion_identity_and_releases_evicted_metadata() {

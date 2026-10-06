@@ -6,11 +6,12 @@ from generate_avc_field_pcm_samples import configuration,Writer
 from generate_avc_mbaff_direct_samples import pcm_samples
 from avc_fixture_mp4 import mux,annexb
 
-def intra(bottom,depth,number,idr,poc):
+def intra(bottom,depth,number,idr,poc,long_term=False):
     b=Writer();b.ue(0);b.ue(2);b.ue(0);b.u(number,4);b.u(1);b.u(int(bottom))
     if idr:b.ue(0)
     b.u(poc,4)
-    if idr:b.u(0);b.u(0)
+    if idr:b.u(0);b.u(int(long_term))
+    elif long_term:b.u(1);b.ue(6);b.ue(0);b.ue(0)
     else:b.u(0)
     b.se(0);b.ue(1)
     for address in range(2):b.ue(25);b.align();b.bits.extend(pcm_samples(depth,int(bottom)+2*number,address))

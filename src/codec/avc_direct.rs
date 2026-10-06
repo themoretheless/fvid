@@ -140,6 +140,97 @@ impl MbaffDirectPrediction<'_> {
     }
 }
 
+/// One active separate-field reference, with its selected-parity order.
+#[derive(Clone, Copy)]
+pub struct FieldDirectReference {
+    pub id: u64,
+    pub bottom: bool,
+    pub poc: i32,
+    pub long_term: bool,
+}
+/// Direct prediction in compact separate-field coordinates and vector units.
+/// Mixed frame/field co-located conversion belongs to a different context.
+pub struct FieldDirectPrediction<'a> {
+    pub spatial: bool,
+    pub inference8: bool,
+    pub current_poc: i32,
+    pub lists: [&'a [FieldDirectReference]; 2],
+    pub colocated: Option<&'a ReferenceMotionField>,
+}
+impl FieldDirectPrediction<'_> {
+    pub fn derive(
+        &self,
+        position: [usize; 2],
+        neighbours: [Neighbours; 2],
+    ) -> Result<[Neighbour; 2]> {
+        if self.lists.iter().any(|l| l.is_empty() || l.len() > 32)
+            || position.iter().any(|p| p % 4 != 0)
+        {
+            return Err(invalid("invalid separate-field direct context"));
+        }
+        let selected = if self.inference8 {
+            position.map(|p| p / 16 * 16 + if p % 16 < 8 { 0 } else { 12 })
+        } else {
+            position
+        };
+        let col = self
+            .colocated
+            .map(|m| m.colocated(selected))
+            .transpose()?
+            .flatten();
+        if col.is_some_and(|m| m.reference_bottom_field.is_none() || m.reference_index > 31) {
+            return Err(invalid(
+                "separate-field direct requires field co-located metadata",
+            ));
+        }
+        let result = if self.spatial {
+            spatial_direct_for_field(
+                neighbours,
+                col.map(|m| (m.reference_index, m.vector)),
+                self.lists[1][0].long_term,
+                true,
+                true,
+            )?
+        } else {
+            let index = match col {
+                None => 0,
+                Some(m) => self.lists[0]
+                    .iter()
+                    .position(|r| {
+                        r.id == m.picture_id && Some(r.bottom) == m.reference_bottom_field
+                    })
+                    .ok_or_else(|| invalid("co-located field reference is absent from list0"))?,
+            };
+            let vectors = temporal_direct(
+                col.map_or([0; 2], |m| m.vector),
+                self.current_poc.into(),
+                self.lists[0][index].poc.into(),
+                self.lists[1][0].poc.into(),
+                self.lists[0][index].long_term,
+            )?;
+            [
+                Neighbour::Inter {
+                    reference: index as u8,
+                    vector: vectors[0],
+                },
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: vectors[1],
+                },
+            ]
+        };
+        for list in 0..2 {
+            if matches!(result[list], Neighbour::Inter { reference, .. } if usize::from(reference) >= self.lists[list].len())
+            {
+                return Err(invalid(
+                    "derived direct field reference exceeds active list",
+                ));
+            }
+        }
+        Ok(result)
+    }
+}
+
 pub struct DirectPrediction<'a> {
     pub spatial: bool,
     pub inference8: bool,
@@ -233,6 +324,83 @@ mod tests {
             poc,
             long_term_index: None,
         }
+    }
+    #[test]
+    fn separate_field_temporal_mapping_uses_identity_parity_and_selected_poc() {
+        use super::super::avc_reference_motion::ReferenceMotion;
+        let l0 = [
+            FieldDirectReference {
+                id: 7,
+                bottom: false,
+                poc: 1,
+                long_term: false,
+            },
+            FieldDirectReference {
+                id: 7,
+                bottom: true,
+                poc: 0,
+                long_term: false,
+            },
+        ];
+        let l1 = [FieldDirectReference {
+            id: 9,
+            bottom: true,
+            poc: 8,
+            long_term: false,
+        }];
+        let mut cells = vec![[None; 2]; 16];
+        // L1-only co-located prediction must be used when L0 is absent.
+        cells[15][1] = Some(ReferenceMotion {
+            picture_id: 7,
+            reference_index: 1,
+            reference_bottom_field: Some(true),
+            vector: [8, -4],
+        });
+        let saved = ReferenceMotionField::new(16, 16, cells).unwrap();
+        let neighbours = Neighbours {
+            left: Neighbour::Unavailable,
+            top: Neighbour::Unavailable,
+            top_right: Neighbour::Unavailable,
+            top_left: Neighbour::Unavailable,
+        };
+        let mut context = FieldDirectPrediction {
+            spatial: false,
+            inference8: true,
+            current_poc: 4,
+            lists: [&l0, &l1],
+            colocated: Some(&saved),
+        };
+        assert_eq!(
+            context.derive([8, 8], [neighbours; 2]).unwrap(),
+            [
+                Neighbour::Inter {
+                    reference: 1,
+                    vector: [4, -2]
+                },
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [-4, 2]
+                }
+            ]
+        );
+        context.inference8 = false;
+        assert_eq!(
+            context.derive([8, 8], [neighbours; 2]).unwrap(),
+            [
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [0, 0]
+                },
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [0, 0]
+                }
+            ]
+        );
+        context.inference8 = true;
+        let missing = [l0[0]];
+        context.lists[0] = &missing;
+        assert!(context.derive([8, 8], [neighbours; 2]).is_err());
     }
     #[test]
     fn mbaff_direct_uses_selected_field_pocs_and_reference_parity() {
