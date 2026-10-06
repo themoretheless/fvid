@@ -47,6 +47,10 @@ pub struct Header {
     pub tiles: Layout,
     pub quant: Quantization,
     pub segments: [[Option<i32>; 8]; 8],
+    pub segmentation_enabled: bool,
+    pub segmentation_update_map: bool,
+    pub segmentation_temporal_update: bool,
+    pub segmentation_update_data: bool,
     pub lossless: [bool; 8],
     pub filter: LoopFilter,
     pub cdef: Cdef,
@@ -346,23 +350,36 @@ impl Header {
             None
         };
         let mut segments = [[None; 8]; 8];
-        if b.bit()? {
-            if primary_reference != 7 {
-                return Err(crate::unsupported(
-                    "AV1 inherited segmentation not implemented",
-                ));
+        let segmentation_enabled = b.bit()?;
+        let mut segmentation_update_map = false;
+        let mut segmentation_temporal_update = false;
+        let mut segmentation_update_data = false;
+        if segmentation_enabled {
+            if primary_reference == 7 {
+                segmentation_update_map = true;
+                segmentation_update_data = true;
+            } else {
+                segmentation_update_map = b.bit()?;
+                segmentation_temporal_update = segmentation_update_map && b.bit()?;
+                segmentation_update_data = b.bit()?;
+                segments = primary
+                    .ok_or_else(|| invalid("missing AV1 primary segmentation reference"))?
+                    .segments;
             }
-            for segment in &mut segments {
-                for (j, feature) in segment.iter_mut().enumerate() {
-                    if b.bit()? {
-                        let n = [8, 6, 6, 6, 6, 3, 0, 0][j];
-                        let limit = [255, 63, 63, 63, 63, 7, 0, 0][j];
-                        let value = if j < 5 {
-                            signed(b, n + 1)?
-                        } else {
-                            b.read(n)? as i32
-                        };
-                        *feature = Some(value.clamp(-limit, limit));
+            if segmentation_update_data {
+                segments = [[None; 8]; 8];
+                for segment in &mut segments {
+                    for (j, feature) in segment.iter_mut().enumerate() {
+                        if b.bit()? {
+                            let n = [8, 6, 6, 6, 6, 3, 0, 0][j];
+                            let limit = [255, 63, 63, 63, 63, 7, 0, 0][j];
+                            let value = if j < 5 {
+                                signed(b, n + 1)?
+                            } else {
+                                b.read(n)? as i32
+                            };
+                            *feature = Some(value.clamp(-limit, limit));
+                        }
                     }
                 }
             }
@@ -534,6 +551,10 @@ impl Header {
             tiles,
             quant,
             segments,
+            segmentation_enabled,
+            segmentation_update_map,
+            segmentation_temporal_update,
+            segmentation_update_data,
             lossless,
             filter,
             cdef,

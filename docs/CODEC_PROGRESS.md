@@ -3478,5 +3478,39 @@ short-reference error on an accepted stream.
 33 AV1 unit tests and the three integration suites pass offline. Integration
 verification used a copy of main plus these changes, excluding concurrent
 unqualified transform-pool/HEVC drafts in the primary checkout. Global motion,
-film grain, temporal motion fields, inherited segmentation, layered operating
+film grain, temporal motion fields, updated segmentation maps and active
+segment features (see the following partial inheritance milestone), layered operating
 points and separate header/tile groups remain outside this completed milestone.
+
+## AV1 segmentation inheritance foundation (2026-10-07)
+
+Header parsing now implements segmentation update-map/temporal/update-data
+flags, inherits the selected primary reference feature table, replaces it on
+update-data and clears it when segmentation is disabled. Signed values retain
+normative clipping. The flags and feature table are stored with each header.
+
+Native playback accepts inherited, unchanged all-zero segment maps. Features
+in unused segments are retained correctly, including positive/negative ALT_Q,
+filter deltas, forced reference, skip/global flags, and zero-valued active
+ALT_Q/filter deltas. Map updates and nonzero/forced active-segment tools still
+return explicit unsupported errors. This does not complete segmentation.
+Every admitted native picture at this milestone has an implicit zero map;
+future map reconstruction must replace this invariant with stored segment IDs
+and per-block feature application before accepting nonzero maps.
+
+224 owned seven-frame acceptance streams cover all eight reference slots and
+seven primary roles, publishing/inheriting data, disable/reenable, signed
+clipping, restoration and explicit data clearing. Independent libaom validation
+checks six shown flat frames in each stream. Native tests check pixels, reset
+and repeat, with additional header-level assertions on flags and exact tables.
+Sixteen WebM variants verify relative display intervals, rewind and sync seek.
+
+Two valid map-update streams (temporal off/on) and an active ALT_Q stream pass
+libaom but are native refusal/reproduction tests, not acceptance. Enable their
+native acceptance with the eventual map/active-feature fixes. A separate
+truncated-data stream has a specific parsing
+refusal. The pre-fix parser reproduces its exact inherited-segmentation refusal
+on an accepted stream. All ordinary checks run offline without FFmpeg/libaom.
+34 AV1 unit tests plus the added map-header/refusal test and all four root
+AV1 integration suites passed. Root checks exclude parallel unqualified
+transform-pool/HEVC drafts via an isolated copy of main plus these changes.

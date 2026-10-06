@@ -1180,3 +1180,18 @@ Short and explicit reference signaling are paired across order-hint widths
 `--oracle` optionally validates reconstructed flat pixels through the independent
 libaom helper; ordinary acceptance/refusal/playback tests use saved files only.
 No private media, codec parameters, FFmpeg or network access is used.
+
+### AV1 inherited segmentation with unchanged zero maps
+
+`python3 scripts/generate_av1_segmentation_inheritance_samples.py` writes 224
+owned acceptance OBU streams, 16 WebM variants and four refusal/reproduction
+streams with a hash manifest. The acceptance streams exercise all reference
+slots/primary roles, inherited tables, signed clipping, disable/reset and
+explicit clearing. Their six shown frames are uniformly 128 in all planes.
+
+Two map-update streams are valid according to the optional libaom oracle but
+remain native unsupported-behavior reproductions (`acceptance: false`). They
+must become acceptance checks when native map reconstruction is implemented.
+A separate active ALT_Q stream also passes libaom but remains a native
+refusal/reproduction. The malformed refusal is truncated inherited feature data. Fixture generation and
+optional `--oracle` reference checking are separate from ordinary offline tests.

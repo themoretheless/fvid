@@ -561,6 +561,262 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn segmentation_data_inherits_replaces_and_clears_without_map_symbols() {
+        for (profile, name, data) in [
+            (
+                "empty",
+                "av1-seg-inherit-empty-slot0-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-empty-slot0-primary0.obu"
+                )[..],
+            ),
+            (
+                "empty",
+                "av1-seg-inherit-empty-slot0-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-empty-slot0-primary6.obu"
+                )[..],
+            ),
+            (
+                "empty",
+                "av1-seg-inherit-empty-slot7-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-empty-slot7-primary0.obu"
+                )[..],
+            ),
+            (
+                "empty",
+                "av1-seg-inherit-empty-slot7-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-empty-slot7-primary6.obu"
+                )[..],
+            ),
+            (
+                "unused-negative",
+                "av1-seg-inherit-unused-negative-slot0-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-negative-slot0-primary0.obu"
+                )[..],
+            ),
+            (
+                "unused-negative",
+                "av1-seg-inherit-unused-negative-slot0-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-negative-slot0-primary6.obu"
+                )[..],
+            ),
+            (
+                "unused-negative",
+                "av1-seg-inherit-unused-negative-slot7-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-negative-slot7-primary0.obu"
+                )[..],
+            ),
+            (
+                "unused-negative",
+                "av1-seg-inherit-unused-negative-slot7-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-negative-slot7-primary6.obu"
+                )[..],
+            ),
+            (
+                "unused-positive",
+                "av1-seg-inherit-unused-positive-slot0-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-positive-slot0-primary0.obu"
+                )[..],
+            ),
+            (
+                "unused-positive",
+                "av1-seg-inherit-unused-positive-slot0-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-positive-slot0-primary6.obu"
+                )[..],
+            ),
+            (
+                "unused-positive",
+                "av1-seg-inherit-unused-positive-slot7-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-positive-slot7-primary0.obu"
+                )[..],
+            ),
+            (
+                "unused-positive",
+                "av1-seg-inherit-unused-positive-slot7-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-unused-positive-slot7-primary6.obu"
+                )[..],
+            ),
+            (
+                "active-zero",
+                "av1-seg-inherit-active-zero-slot0-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-active-zero-slot0-primary0.obu"
+                )[..],
+            ),
+            (
+                "active-zero",
+                "av1-seg-inherit-active-zero-slot0-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-active-zero-slot0-primary6.obu"
+                )[..],
+            ),
+            (
+                "active-zero",
+                "av1-seg-inherit-active-zero-slot7-primary0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-active-zero-slot7-primary0.obu"
+                )[..],
+            ),
+            (
+                "active-zero",
+                "av1-seg-inherit-active-zero-slot7-primary6.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-active-zero-slot7-primary6.obu"
+                )[..],
+            ),
+        ] {
+            let mut expected = [[None; 8]; 8];
+            match profile {
+                "unused-negative" => {
+                    expected[1][0] = Some(-255);
+                    expected[2][1] = Some(-63);
+                    expected[3][2] = Some(63);
+                    expected[4][3] = Some(0);
+                    expected[5][4] = Some(17);
+                    expected[6][5] = Some(7);
+                    expected[7][6] = Some(0);
+                    expected[7][7] = Some(0);
+                }
+                "unused-positive" => {
+                    expected[1][0] = Some(255);
+                    expected[2][1] = Some(63);
+                    expected[3][2] = Some(-63);
+                    expected[4][3] = Some(0);
+                    expected[5][4] = Some(-17);
+                    expected[6][5] = Some(0);
+                    expected[7][6] = Some(0);
+                    expected[7][7] = Some(0);
+                }
+                "active-zero" => {
+                    for feature in 0..5 {
+                        expected[0][feature] = Some(0);
+                    }
+                }
+                "empty" => {}
+                _ => unreachable!(),
+            }
+            let mut decoder = Decoder::new(8 << 20);
+            for _ in 0..2 {
+                let mut offset = 0;
+                let mut index = 0;
+                let mut shown = 0;
+                for obu in Obus::new(data) {
+                    let obu = obu.unwrap();
+                    let end =
+                        obu.payload.as_ptr() as usize - data.as_ptr() as usize + obu.payload.len();
+                    if obu.kind == 6 {
+                        let refs = std::array::from_fn(|i| decoder.headers[i].as_deref());
+                        let header = Header::parse(
+                            decoder.sequence.as_ref().unwrap(),
+                            obu.payload,
+                            0,
+                            0,
+                            &refs,
+                        )
+                        .unwrap();
+                        let (enabled, update) = [
+                            (false, false),
+                            (true, true),
+                            (true, false),
+                            (false, false),
+                            (true, false),
+                            (true, true),
+                            (true, true),
+                        ][index];
+                        assert_eq!(header.segmentation_enabled, enabled, "{name} frame {index}");
+                        assert_eq!(
+                            header.segmentation_update_data, update,
+                            "{name} frame {index}"
+                        );
+                        assert!(!header.segmentation_update_map);
+                        assert!(!header.segmentation_temporal_update);
+                        assert_eq!(
+                            header.segments,
+                            if [1, 2, 5].contains(&index) {
+                                expected
+                            } else {
+                                [[None; 8]; 8]
+                            },
+                            "{name} frame {index}"
+                        );
+                        index += 1;
+                    }
+                    for frame in decoder
+                        .decode_packet(&data[offset..end])
+                        .unwrap_or_else(|e| panic!("{name}: {e}"))
+                    {
+                        assert_flat(&frame);
+                        shown += usize::from(frame.show);
+                    }
+                    offset = end;
+                }
+                assert_eq!(index, 7);
+                assert_eq!(shown, 6);
+                decoder.reset();
+            }
+        }
+    }
+
+    #[test]
+    fn segmentation_map_update_headers_parse_but_picture_decode_refuses() {
+        for (data, temporal) in [
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-map-update-temporal0.obu"
+                )[..],
+                false,
+            ),
+            (
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-seg-inherit-map-update-temporal1.obu"
+                )[..],
+                true,
+            ),
+        ] {
+            let mut decoder = Decoder::new(8 << 20);
+            let mut offset = 0;
+            for (index, obu) in Obus::new(data).enumerate() {
+                let obu = obu.unwrap();
+                let end =
+                    obu.payload.as_ptr() as usize - data.as_ptr() as usize + obu.payload.len();
+                if index == 2 {
+                    let refs = std::array::from_fn(|i| decoder.headers[i].as_deref());
+                    let header =
+                        Header::parse(decoder.sequence.as_ref().unwrap(), obu.payload, 0, 0, &refs)
+                            .unwrap();
+                    assert!(header.segmentation_enabled);
+                    assert!(header.segmentation_update_map);
+                    assert_eq!(header.segmentation_temporal_update, temporal);
+                    assert!(!header.segmentation_update_data);
+                    assert_eq!(header.segments, [[None; 8]; 8]);
+                    let error = decoder.decode_packet(&data[offset..end]).err().unwrap();
+                    assert!(
+                        error
+                            .to_string()
+                            .contains("AV1 segmentation map updates not implemented")
+                    );
+                } else {
+                    for frame in decoder.decode_packet(&data[offset..end]).unwrap() {
+                        assert_flat(&frame);
+                    }
+                }
+                offset = end;
+            }
+        }
+    }
     fn assert_flat(frame: &Decoded) {
         assert_eq!(frame.picture.size, [32, 32]);
         assert_eq!(frame.picture.depth, 8);

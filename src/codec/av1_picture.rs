@@ -113,7 +113,24 @@ pub(crate) fn decode(
             "AV1 quantization matrices or in-loop filtering not implemented",
         ));
     }
-    if h.segments.iter().flatten().any(Option::is_some) || h.intrabc || h.superres_denom != 8 {
+    if h.segmentation_enabled && h.segmentation_update_map {
+        return Err(crate::unsupported(
+            "AV1 segmentation map updates not implemented",
+        ));
+    }
+    // Every admitted picture currently has an implicit all-zero segment map.
+    // Inheriting it consumes no tile symbols. Features in unused segments are
+    // retained as metadata; active segment-zero tools still fail explicitly.
+    if h.segments[0]
+        .iter()
+        .enumerate()
+        .any(|(feature, value)| value.is_some_and(|value| feature >= 5 || value != 0))
+    {
+        return Err(crate::unsupported(
+            "AV1 active segmentation features not implemented",
+        ));
+    }
+    if h.intrabc || h.superres_denom != 8 {
         return Err(crate::unsupported(
             "AV1 segmentation/intrabc/superres reconstruction not implemented",
         ));
