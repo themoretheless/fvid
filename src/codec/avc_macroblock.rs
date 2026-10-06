@@ -122,7 +122,7 @@ impl<'a> IntraCavlcReader<'a> {
         allow_fmo: bool,
     ) -> Result<Self> {
         if pps.cabac
-            || (!mbaff && !sps.frame_mbs_only && !header.field_pic)
+            || (!mbaff && sps.mb_adaptive_frame_field && !header.field_pic)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
             || (!allow_fmo && !matches!(pps.slice_groups, SliceGroups::Single))
@@ -136,7 +136,13 @@ impl<'a> IntraCavlcReader<'a> {
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
-            .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
+            .and_then(|n| {
+                n.checked_mul(if !sps.frame_mbs_only && !header.field_pic {
+                    2
+                } else {
+                    1
+                })
+            })
             .ok_or_else(|| invalid("macroblock count overflow"))?;
         if count == 0 || count > max_macroblocks || count > 65536 {
             return Err(invalid("macroblock context budget exceeded"));
@@ -295,7 +301,12 @@ impl<'a> IntraCavlcReader<'a> {
         Ok((values[0], values[1]))
     }
     fn height_mbs(&self) -> usize {
-        self.sps.height_map_units as usize * if self.mbaff { 2 } else { 1 }
+        self.sps.height_map_units as usize
+            * if !self.sps.frame_mbs_only && !self.field_picture {
+                2
+            } else {
+                1
+            }
     }
     /// Parsed field mode for an MBAFF pair, or None before its flag is read.
     pub fn pair_field(&self, pair: usize) -> Option<bool> {

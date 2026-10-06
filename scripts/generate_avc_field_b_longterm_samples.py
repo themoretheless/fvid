@@ -13,23 +13,33 @@ def lists(b,markers,current,target):
     b.u(1);pred=current
     for pos,long_term in enumerate(markers):
         if long_term:b.ue(2);b.ue(1-pos)
-        else:b.ue(0);b.ue(pred-(target-pos)-1);pred=target-pos
+        else:b.ue(0);b.ue((pred-(target-pos)-1)%32);pred=target-pos
     b.ue(3)
 
 
-def prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,mixed=False,first_bottom=False,gap=False):
+def prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,mixed=False,first_bottom=False,gap=False,poc_type=0,wrap=False):
     source=case=='source' and long_term;colocated=case=='colocated' and long_term
     current=not mixed or bottom==first_bottom
     opposite=not mixed or bottom!=first_bottom
-    number=(3 if is_b else 2)+int(gap);current_pic_num=2*number+1
-    b=Writer();b.ue(0);b.ue(1 if is_b else 0);b.ue(0);b.u(number,4);b.u(1);b.u(int(bottom));b.u(index,4)
+    number=(3 if is_b else 2)+int(gap)
+    if poc_type==2 and is_b:number-=1
+    if wrap:number=1 if is_b and poc_type!=2 else 0
+    current_pic_num=2*number+1
+    b=Writer();b.ue(0);b.ue(1 if is_b else 0);b.ue(0);b.u(number,4);b.u(1);b.u(int(bottom))
+    if poc_type==0:b.u(index,4)
+    elif poc_type==1:b.se(index+int(wrap)*28-(2*number+int(wrap)*32-3 if is_b else 2*number+int(wrap)*32))
     if is_b:b.u(int(spatial))
     b.u(1);b.ue(1)
     if is_b:b.ue(1)
-    lists(b,(source and current,source and opposite),current_pic_num,1)
-    if is_b:lists(b,(colocated and current,colocated and opposite),current_pic_num,7 if gap else 5)
+    lists(b,(source and current,source and opposite),current_pic_num,29 if wrap else 1)
+    if is_b:lists(b,(colocated and current,colocated and opposite),current_pic_num,1 if wrap else 7 if gap else 5)
     else:
-        if colocated and current:b.u(1);b.ue(4);b.ue(1);b.ue(6);b.ue(0);b.ue(0)
+        if wrap or (colocated and current):
+            b.u(1)
+            if wrap and bottom==first_bottom:
+                for delta in [9,10,7,8]:b.ue(1);b.ue(delta)
+            if colocated and current:b.ue(4);b.ue(1);b.ue(6);b.ue(0)
+            b.ue(0)
         else:b.u(0)
     if init is not None:b.ue(init)
     b.se(24);b.ue(deblock)
@@ -65,7 +75,7 @@ def prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,mixed=
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--jm-decoder',type=Path,required=True);parser.add_argument('--mixed-parity',action='store_true');parser.add_argument('--gap',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--jm-decoder',type=Path,required=True);parser.add_argument('--mixed-parity',action='store_true');parser.add_argument('--gap',action='store_true');parser.add_argument('--poc-type',type=int,choices=[0,1,2],default=0);parser.add_argument('--wrap',action='store_true');args=parser.parse_args();assert not args.poc_type or args.gap;assert not args.wrap or args.gap
     root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors';records=[]
     with tempfile.TemporaryDirectory(prefix='fvid-longterm-b-fields-') as tmp:
         d=Path(tmp);cfg=d/'decoder.cfg';cfg.write_text('')
@@ -78,16 +88,16 @@ def main():
                                 for skip in [False,True]:
                                     for deblock in [0,1,2]:
                                         order=[True,False] if reverse else [False,True];frames=[]
-                                        for stage,number in enumerate([0,2] if args.gap else [0,1]):
+                                        for stage,number in enumerate([0,14] if args.wrap else [0,2] if args.gap else [0,1]):
                                             for i,bottom in enumerate(order):
-                                                index=stage*4+i;mark=number==0 and case=='source' and long_term and (not args.mixed_parity or i==0)
-                                                nals=[intra(bottom,depth,number,index==0,index,long_term=mark)] if init is None else [field(bottom,index,a,'positive' if (a==0)^bottom else 'negative',deblock,biased=stage==1,frame_num=number,long_term=mark) for a in [0,1]]
+                                                index=stage*4+i;mark=(number==0 or args.wrap) and case=='source' and long_term and (not args.mixed_parity or i==0 or args.wrap and stage==0)
+                                                nals=[intra(bottom,depth,number,index==0,index,long_term=mark,poc_type=args.poc_type,poc_delta=i if args.wrap and args.poc_type==1 else index-2*number if args.poc_type==1 else 0,forget_short=(9,10,7,8) if args.wrap and stage==1 and i==0 else (),forget_long=(0,) if args.wrap and stage==1 and i==0 and case=='source' and long_term else ())] if init is None else [field(bottom,index,a,'positive' if (a==0)^bottom else 'negative',deblock,biased=stage==1,frame_num=number,long_term=mark,poc_type=args.poc_type,poc_delta=i if args.wrap and args.poc_type==1 else index-2*number if args.poc_type==1 else 0,forget_short=(9,10,7,8) if args.wrap and stage==1 and i==0 else (),forget_long=(0,) if args.wrap and stage==1 and i==0 and case=='source' and long_term else ()) for a in [0,1]]
                                                 frames.append((index,index==0,b''.join(len(n).to_bytes(4,'big')+n for n in nals)))
                                         for is_b in [False,True]:
                                             for i,bottom in enumerate(order):
-                                                index=(6 if is_b else 8)+i;n=prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,args.mixed_parity,order[0],args.gap);frames.append((index,False,len(n).to_bytes(4,'big')+n))
-                                        config=(cavlc_config if init is None else cabac_config)(depth,max_refs=5 if args.gap else 4 if args.mixed_parity else 3,gaps=args.gap);entropy='cavlc' if init is None else f'cabac-init{init}'
-                                        prefix=('avc-field-b-gap-longterm-' if args.gap else 'avc-field-b-longterm-')+('mixed-' if args.mixed_parity else '')
+                                                index=(6 if is_b else 8)+i;n=prediction(bottom,index,spatial,case,long_term,skip,deblock,init,is_b,args.mixed_parity,order[0],args.gap,args.poc_type,args.wrap);frames.append((index,False,len(n).to_bytes(4,'big')+n))
+                                        config=(cavlc_config if init is None else cabac_config)(depth,max_refs=6 if args.wrap else 5 if args.gap else 4 if args.mixed_parity else 3,gaps=args.gap,poc_type=args.poc_type);entropy='cavlc' if init is None else f'cabac-init{init}'
+                                        prefix=('avc-field-b-gap-longterm-' if args.gap else 'avc-field-b-longterm-')+('wrap-' if args.wrap else '')+('mixed-' if args.mixed_parity else '')+(f'poc{args.poc_type}-' if args.poc_type else '')
                                         name=f'{prefix}{depth}bit-'+('bottom-first' if reverse else 'top-first')+('-spatial' if spatial else '-temporal')+f'-{case}-'+('long' if long_term else 'short')+('-skip' if skip else '-coded')+f'-{entropy}-filter{deblock}'
                                         coded=d/(name+'.264');oracle=d/(name+'.yuv');coded.write_bytes(annexb(config,frames))
                                         subprocess.run([str(args.jm_decoder),'-d',str(cfg),'-p',f'InputFile={coded}','-p',f'OutputFile={oracle}','-p','FileFormat=0','-p','RefFile=nonexistent.yuv'],cwd=d,check=True,stdout=subprocess.DEVNULL)

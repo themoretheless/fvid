@@ -39,6 +39,67 @@ impl<T> FieldBuffer<T> {
             pending: None,
         })
     }
+    pub(super) fn from_frame_storage<F>(
+        bits: u8,
+        capacity: usize,
+        limit: Option<u32>,
+        initialized: bool,
+        frames: Vec<(
+            super::avc_references::FrameReference,
+            Option<Arc<F>>,
+            bool,
+            Option<super::avc_poc::FieldOrder>,
+        )>,
+        convert: impl Fn(
+            super::avc_references::FrameReference,
+            &Arc<F>,
+        ) -> Result<([Arc<T>; 2], super::avc_poc::FieldOrder)>,
+    ) -> Result<Self> {
+        let mut result = Self::new(bits, capacity as u32)?;
+        result.limit = limit;
+        result.initialized = initialized;
+        result
+            .stores
+            .try_reserve_exact(frames.len())
+            .map_err(|_| invalid("cannot allocate AVC migrated field stores"))?;
+        for (r, picture, known, inferred) in frames {
+            let (pictures, order) = if let Some(p) = picture {
+                let (pictures, order) = convert(r, &p)?;
+                (
+                    [
+                        Some(Arc::clone(&pictures[0])),
+                        Some(Arc::clone(&pictures[1])),
+                    ],
+                    Some(order),
+                )
+            } else {
+                ([None, None], inferred)
+            };
+            if order.is_some_and(|o| o.top.is_none() || o.bottom.is_none()) {
+                return Err(invalid("migrated AVC frame needs both field POCs"));
+            }
+            let fields = std::array::from_fn(|i| {
+                Some(Field {
+                    poc: order.map_or(r.poc, |o| {
+                        if i == 0 {
+                            o.top.unwrap()
+                        } else {
+                            o.bottom.unwrap()
+                        }
+                    }),
+                    long: r.long_term_index,
+                    picture: pictures[i].as_ref().map(Arc::clone),
+                    known_poc: known,
+                })
+            });
+            result.stores.push(Store {
+                id: r.id,
+                frame_num: r.frame_num,
+                fields,
+            });
+        }
+        Ok(result)
+    }
     pub fn references(&self) -> Vec<FieldFrameReference> {
         self.stores
             .iter()

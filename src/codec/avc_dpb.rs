@@ -31,6 +31,23 @@ impl<T> ReferenceBuffer<T> {
             frames: Vec::new(),
         })
     }
+    /// Move frame marking state into parity-aware storage without changing IDs.
+    pub(super) fn into_fields<U>(
+        self,
+        convert: impl Fn(
+            super::avc_references::FrameReference,
+            &Arc<T>,
+        ) -> Result<([Arc<U>; 2], FieldOrder)>,
+    ) -> Result<super::avc_field_dpb::FieldBuffer<U>> {
+        super::avc_field_dpb::FieldBuffer::from_frame_storage(
+            self.frame_num_bits,
+            self.capacity,
+            self.max_long_term_index,
+            self.initialized,
+            self.frames,
+            convert,
+        )
+    }
     pub fn get(&self, id: u64) -> Option<&Arc<T>> {
         self.frames
             .iter()
@@ -645,5 +662,65 @@ mod tests {
         buffer.infer_nonexisting_fields(3, Some(order), 3).unwrap();
         buffer.infer_nonexisting_fields(4, Some(order), 4).unwrap();
         assert_eq!(buffer.inferred_field_order(1), None);
+    }
+    #[test]
+    fn migration_preserves_long_limits_gap_orders_and_reference_ids() {
+        let mut h = header();
+        h.long_term_reference = true;
+        let mut frames = ReferenceBuffer::new(4, 4).unwrap();
+        frames.finish(&h, 0, 50, Arc::new(7u8)).unwrap();
+        frames.infer_nonexisting_fields(1, None, 51).unwrap();
+        frames
+            .infer_nonexisting_fields(
+                2,
+                Some(FieldOrder {
+                    top: Some(4),
+                    bottom: Some(4),
+                }),
+                52,
+            )
+            .unwrap();
+        let mut fields = frames
+            .into_fields(|r, p| {
+                assert_eq!(r.id, 50);
+                assert_eq!(r.long_term_index, Some(0));
+                Ok((
+                    [Arc::new(**p), Arc::new(**p + 1)],
+                    FieldOrder {
+                        top: Some(0),
+                        bottom: Some(1),
+                    },
+                ))
+            })
+            .unwrap();
+        assert_eq!(**fields.get(50, false).unwrap(), 7);
+        assert_eq!(**fields.get(50, true).unwrap(), 8);
+        assert_eq!(fields.order(50, false), Some((0, true)));
+        assert_eq!(fields.order(50, true), Some((1, true)));
+        for bottom in [false, true] {
+            assert!(fields.get(51, bottom).is_none());
+            assert!(fields.get(52, bottom).is_none());
+            assert_eq!(fields.order(51, bottom), None);
+            assert_eq!(fields.order(52, bottom), Some((4, false)));
+        }
+        h.idr = false;
+        h.field_pic = true;
+        h.bottom_field = false;
+        h.frame_num = 3;
+        h.slice_type = SliceType::P;
+        h.refs_l0 = 1;
+        h.modifications_l0 = vec![RefModification::LongTerm(1)];
+        h.adaptive_reference_marking = true;
+        h.memory_operations = vec![MemoryOperation::CurrentLong(1)];
+        assert_eq!(fields.lists(&h, 6).unwrap().l0[0].id, 50);
+        let before = fields.references();
+        assert!(fields.finish(&h, 6, 53, Arc::new(9)).is_err());
+        assert_eq!(fields.references(), before);
+        h.memory_operations = vec![
+            MemoryOperation::LimitLong(2),
+            MemoryOperation::CurrentLong(1),
+        ];
+        fields.finish(&h, 6, 53, Arc::new(9)).unwrap();
+        assert_eq!(fields.order(53, false), Some((6, true)));
     }
 }

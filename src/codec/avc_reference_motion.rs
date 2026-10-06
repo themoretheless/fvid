@@ -172,6 +172,9 @@ impl ReferenceMotionField {
         let lists = self.at(position)?;
         Ok(lists[0].or(lists[1]))
     }
+    pub(super) fn is_entirely_intra(&self) -> bool {
+        self.cells.iter().all(|c| c.iter().all(Option::is_none))
+    }
     pub fn dimensions(&self) -> [usize; 2] {
         [self.width, self.height]
     }

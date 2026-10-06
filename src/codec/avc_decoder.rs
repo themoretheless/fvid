@@ -188,10 +188,54 @@ impl AvcDecoder {
         if header.idr && self.pending_field.is_some() {
             return Err(crate::unsupported("unpaired AVC field before IDR"));
         }
+        let (w, h) = sps.coded_dimensions();
+        let full = (w as usize)
+            .checked_mul(h as usize)
+            .and_then(|n| n.checked_mul(3))
+            .ok_or_else(|| invalid("AVC field storage overflow"))?;
+        let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize / 2)?;
+        let motion_reserve = motion_bytes
+            .checked_mul(2 * sps.max_num_ref_frames.max(1) as usize + 1)
+            .ok_or_else(|| invalid("AVC field motion storage overflow"))?;
+        let reserved = full
+            .checked_mul(sps.max_num_ref_frames.max(1) as usize)
+            .and_then(|n| n.checked_add(full))
+            .and_then(|n| n.checked_add(full / 2))
+            .and_then(|n| n.checked_add(motion_reserve))
+            .ok_or_else(|| invalid("AVC field reference storage overflow"))?;
+        let scratch = self
+            .budget
+            .checked_sub(reserved)
+            .ok_or_else(|| invalid("AVC fields exceed decoder memory budget"))?;
         if !header.idr && self.field_dpb.is_none() {
-            return Err(crate::unsupported(
-                "AVC mixed frame/field reference storage is not connected",
-            ));
+            let frames = self
+                .dpb
+                .take()
+                .ok_or_else(|| invalid("missing AVC frame references"))?;
+            self.field_dpb = Some(frames.into_fields(|metadata, reference| {
+                if reference
+                    .motion
+                    .as_ref()
+                    .is_some_and(|m| !m.is_entirely_intra())
+                {
+                    return Err(crate::unsupported(
+                        "AVC frame-to-field co-located motion conversion is not connected",
+                    ));
+                }
+                let split = |bottom| -> Result<Arc<DecodedReferenceField>> {
+                    Ok(Arc::new(DecodedReferenceField {
+                        field: Arc::new(super::avc_field_picture::split_frame(
+                            &reference.picture,
+                            bottom,
+                            metadata.frame_num,
+                            header.pps_id,
+                            full / 2,
+                        )?),
+                        motion: None,
+                    }))
+                };
+                Ok(([split(false)?, split(true)?], reference.field_order))
+            })?);
         }
         if !header.idr
             && let Some(previous) = self.previous_reference
@@ -222,25 +266,6 @@ impl AvcDecoder {
                 }
             }
         }
-        let (w, h) = sps.coded_dimensions();
-        let full = (w as usize)
-            .checked_mul(h as usize)
-            .and_then(|n| n.checked_mul(3))
-            .ok_or_else(|| invalid("AVC field storage overflow"))?;
-        let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize / 2)?;
-        let motion_reserve = motion_bytes
-            .checked_mul(2 * sps.max_num_ref_frames.max(1) as usize + 1)
-            .ok_or_else(|| invalid("AVC field motion storage overflow"))?;
-        let reserved = full
-            .checked_mul(sps.max_num_ref_frames.max(1) as usize)
-            .and_then(|n| n.checked_add(full))
-            .and_then(|n| n.checked_add(full / 2))
-            .and_then(|n| n.checked_add(motion_reserve))
-            .ok_or_else(|| invalid("AVC field reference storage overflow"))?;
-        let scratch = self
-            .budget
-            .checked_sub(reserved)
-            .ok_or_else(|| invalid("AVC fields exceed decoder memory budget"))?;
         let order = self.poc.decode(sps, header)?;
         let mut retained_motion = None;
         let mut field = if matches!(header.slice_type, SliceType::P | SliceType::B) {

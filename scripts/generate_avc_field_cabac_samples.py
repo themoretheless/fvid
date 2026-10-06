@@ -13,13 +13,19 @@ def configuration(depth, constrained=False, weighted=False, bipred=0, direct8=Tr
     b=Writer();b.ue(0);b.ue(0);b.u(1);b.u(0);b.ue(0);b.ue(0);b.ue(0);b.u(int(weighted));b.u(bipred,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(int(constrained));b.u(0);pps=b.nal(0x68)
     return bytes([1,profile,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 
-def field(bottom,index,address,mode,deblock,biased=False,frame_num=0,long_term=False,poc_type=0,poc_delta=0):
+def field(bottom,index,address,mode,deblock,biased=False,frame_num=0,long_term=False,poc_type=0,poc_delta=0,forget_short=(),forget_long=(),reset=False):
     b=Writer();b.ue(address);b.ue(2);b.ue(0);b.u(frame_num,4);b.u(1);b.u(int(bottom))
     if index==0:b.ue(0)
     if poc_type==0:b.u(index,4)
     elif poc_type==1:b.se(poc_delta)
     if index==0:b.u(0);b.u(int(long_term))
-    elif long_term:b.u(1);b.ue(6);b.ue(0);b.ue(0)
+    elif long_term or forget_short or forget_long or reset:
+        b.u(1)
+        for delta in forget_short:b.ue(1);b.ue(delta)
+        for pic in forget_long:b.ue(2);b.ue(pic)
+        if long_term:b.ue(6);b.ue(0)
+        if reset:b.ue(5)
+        b.ue(0)
     else:b.u(0)
     b.se(24);b.ue(deblock)
     if deblock!=1:b.se(6);b.se(6)

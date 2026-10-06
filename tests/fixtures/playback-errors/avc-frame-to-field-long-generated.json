@@ -1,0 +1,125 @@
+{
+  "generator": "owned PCM frame to separate P fields",
+  "fixtures": [
+    {
+      "file": "avc-frame-to-field-long-8bit-top-first-coded-filter0.mp4",
+      "sha256": "bf5fa27ed638247d01e27ef473b94966d614cc222879cad00f2a506b6593d948",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-top-first-coded-filter1.mp4",
+      "sha256": "950d10a6fc18dd2a2860b744d43494196336ab91be8ee499ae807396fdc5700d",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-top-first-coded-filter2.mp4",
+      "sha256": "374605efe5aa0ca0fe764eb78a83b6d7c07a5226a7319bb55c5cc939d2f584eb",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-top-first-skip-filter0.mp4",
+      "sha256": "1c6b26d6cd4fdb56be7689642bd9c1166d68be018423112125ffbe46eec6dc3a",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-top-first-skip-filter1.mp4",
+      "sha256": "bbe0338c94060a33c8745292d47e79ebc3b3ab3195b944af84b7e00f81afec7a",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-top-first-skip-filter2.mp4",
+      "sha256": "2b9d0f3d58f6175d391a242d4fd5dc3e32baeb70e856487746cd40bd5a5fa41a",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-bottom-first-coded-filter0.mp4",
+      "sha256": "430c9a7b9d894a4df47fadeae6fdc4e7de761fbf7e5e3583faa1814858c3b3d9",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-bottom-first-coded-filter1.mp4",
+      "sha256": "79c49c84ced1424a15ca1ea3ee6f8dc0cab7c608e420c35f3ba6275fbf6b5eb0",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-bottom-first-coded-filter2.mp4",
+      "sha256": "8c2b6ee1c975894a3d2192240f8e6ae9eaa1d30f00edf9f8113df076189109d5",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-bottom-first-skip-filter0.mp4",
+      "sha256": "06836eae8ad34609ab97ad025b40ffbbf999abffaa9e803ca38989742f7aee7a",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-bottom-first-skip-filter1.mp4",
+      "sha256": "89edf345c08e5bbe50bc3e722709a689587e932177ad518753647a166d4ffb85",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-8bit-bottom-first-skip-filter2.mp4",
+      "sha256": "166f1efbb73120461db87e282d2f540e2b6523bff1449a3fe0f7cdfbe22507d6",
+      "oracle_sha256": "7f8f66561457cb41b31d804b8735f438f1d077e5ea7cf8bfc301a685a1216250"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-top-first-coded-filter0.mp4",
+      "sha256": "4c8890900f882d06c601cedff4d71e1173fa655042157489b8c0ff2c48588966",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-top-first-coded-filter1.mp4",
+      "sha256": "a82d689021e14e7a36298790a4edb4413c1271c248f2a91ab713b8ff3e9099ce",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-top-first-coded-filter2.mp4",
+      "sha256": "1d2b349a76f3ef2a6320cb68184933fec8ac95ae7a6b774e2d01ead1ca5fb3e8",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-top-first-skip-filter0.mp4",
+      "sha256": "37a0a5d54ca4178ba81d5927826b74c19acc04d3e291f1c3f2b66f6fb80f961f",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-top-first-skip-filter1.mp4",
+      "sha256": "e09501110d26369132ec09a3c42b040ae8f034183e116e5731ddb50b17b4d27d",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-top-first-skip-filter2.mp4",
+      "sha256": "6248dea043fa10f866d09922586188ffb91e182adc921ac3d7fa70941f74cb35",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-bottom-first-coded-filter0.mp4",
+      "sha256": "9c0a00e290c3f73e9656a45d6102dcce03cce90a80efc6cae53bc15c91616b18",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-bottom-first-coded-filter1.mp4",
+      "sha256": "5e4f6ec735807d9c4ad8a33dcc07b36aff8195d62322e488507f091683ae7962",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-bottom-first-coded-filter2.mp4",
+      "sha256": "de7fefcfa1cd089cce706221c4f85b34c1cd413395aa51a166eb56f675676f62",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-bottom-first-skip-filter0.mp4",
+      "sha256": "367e54f7e880e2953f2125580e47dac3e08d931d39d4ea9ff669255c33cc8870",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-bottom-first-skip-filter1.mp4",
+      "sha256": "67616c336b15829b807a569a442fe08ec3b99e854d0551adb2a0fe9ebb4ab05c",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    },
+    {
+      "file": "avc-frame-to-field-long-10bit-bottom-first-skip-filter2.mp4",
+      "sha256": "fdd248d4d2c8e88d912ba40727d1884e746f91b55830473f309ed771592a065b",
+      "oracle_sha256": "8a93390cda139eff5e8d887dd76314a1577742ffd510d201fd7ae12217250352"
+    }
+  ]
+}

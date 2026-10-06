@@ -447,6 +447,44 @@ mod tests {
             "avc-field-b-cabac-sub-joined-10bit-bottom-first-spatial-type9-pos3-init2-filter2-infer1",
             "avc-field-b-cabac-sub-8bit-top-first-temporal-type12-pos0-init0-filter0-infer0",
             "avc-field-b-cabac-sub-10bit-bottom-first-spatial-type9-pos3-init2-filter2-infer1",
+            "avc-field-b-gap-longterm-poc1-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-poc1-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-mixed-poc1-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-mixed-poc1-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-poc2-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-poc2-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-mixed-poc2-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-mixed-poc2-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-wrap-poc1-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-wrap-poc1-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-wrap-mixed-poc1-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-wrap-mixed-poc1-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-wrap-poc2-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-wrap-poc2-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-wrap-mixed-poc2-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-wrap-mixed-poc2-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-wrap-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-wrap-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-gap-longterm-wrap-mixed-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
+            "avc-field-b-gap-longterm-wrap-mixed-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
+            "avc-field-b-reset-gap-poc1-8bit-top-first-temporal-coded-cabac-init0-filter0-initiallong",
+            "avc-field-b-reset-gap-poc1-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
+            "avc-field-b-reset-gap-poc2-8bit-top-first-temporal-coded-cabac-init0-filter0-initiallong",
+            "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
+            "avc-frame-to-field-long-8bit-top-first-coded-filter0",
+            "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-paff-intra-joined-8bit-i4-bias-filter1",
+            "avc-paff-intra-joined-10bit-i16-negative-filter2",
+            "avc-paff-intra-8bit-i4-ac-filter0",
+            "avc-paff-intra-10bit-i16-negative-filter2-aso",
+            "avc-paff-frame-to-field-8bit-top-first-coded-filter0",
+            "avc-paff-frame-to-field-10bit-bottom-first-skip-filter2",
+            "avc-paff-frame-to-field-long-8bit-top-first-coded-filter0",
+            "avc-paff-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-frame-to-field-8bit-top-first-coded-filter0",
+            "avc-frame-to-field-10bit-bottom-first-skip-filter2",
+            "avc-field-b-reset-gap-8bit-top-first-temporal-coded-cabac-init0-filter0-initiallong",
+            "avc-field-b-reset-gap-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-field-b-gap-longterm-8bit-top-first-temporal-source-long-coded-cabac-init0-filter0",
             "avc-field-b-gap-longterm-10bit-bottom-first-spatial-colocated-long-skip-cavlc-filter2",
             "avc-field-b-gap-longterm-mixed-8bit-top-first-temporal-source-long-coded-cavlc-filter0",
@@ -530,6 +568,10 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+            let paff_intra = name.starts_with("avc-paff-intra-");
+            let frame_to_fields = name.starts_with("avc-frame-to-field-")
+                || name.starts_with("avc-paff-frame-to-field-");
+            let reset_gap = name.starts_with("avc-field-b-reset-gap-");
             let frame_gap_wrap = name.starts_with("avc-field-gap-wrap-");
             let frame_gap = name.starts_with("avc-field-gap-");
             let reordered_four = name.starts_with("avc-field-b-direct-")
@@ -542,7 +584,11 @@ mod tests {
                 || name.starts_with("avc-field-b-longterm-")
                 || name.starts_with("avc-field-b-gap-")
                 || name.starts_with("avc-field-b-cabac-sub-");
-            let count = if reordered_four {
+            let count = if paff_intra {
+                1
+            } else if reset_gap {
+                5
+            } else if reordered_four {
                 4
             } else if (name.starts_with("avc-field-cabac-")
                 || name.starts_with("avc-field-fmo-")
@@ -580,7 +626,11 @@ mod tests {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
                     (
-                        if reordered_four {
+                        if frame_to_fields {
+                            [0, 1][calls]
+                        } else if reset_gap {
+                            [0, 2, 4, 8, 6][calls]
+                        } else if reordered_four {
                             [0, 2, 6, 4][calls]
                         } else if name.starts_with("avc-field-b-future-")
                             || name.starts_with("avc-field-b-implicit-")
@@ -600,7 +650,9 @@ mod tests {
                         } else {
                             calls as i64 * 2
                         },
-                        if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
+                        if paff_intra {
+                            1
+                        } else if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
                             4
                         } else {
                             2
@@ -621,7 +673,9 @@ mod tests {
                         } else {
                             calls as u64 * 40_000_000
                         },
-                        if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
+                        if paff_intra {
+                            20_000_000
+                        } else if (reordered_four || (frame_gap && !frame_gap_wrap)) && calls == 0 {
                             80_000_000
                         } else {
                             40_000_000

@@ -8,11 +8,11 @@ from generate_avc_field_cabac_samples import configuration as cabac_config, fiel
 from generate_avc_mbaff_direct_samples import CabacWriter
 from avc_fixture_mp4 import mux,annexb
 
-def prediction(bottom,address,number,poc,skip,deblock,init=None,poc_type=0,poc_delta=0):
+def prediction(bottom,address,number,poc,skip,deblock,init=None,poc_type=0,poc_delta=0,long_target=False):
     b=Writer();b.ue(address);b.ue(0);b.ue(0);b.u(number,4);b.u(1);b.u(int(bottom))
     if poc_type==0:b.u(poc,4)
     elif poc_type==1:b.se(poc_delta)
-    b.u(0);b.u(1);b.ue(0);b.ue(3 if number in [0,2] else 1);b.ue(3);b.u(0)
+    b.u(0);b.u(1);b.ue(2 if long_target else 0);b.ue(1 if long_target else 3 if number in [0,2] else 1);b.ue(3);b.u(0)
     if init is not None:b.ue(init)
     b.se(24);b.ue(deblock)
     if deblock!=1:b.se(6);b.se(6)

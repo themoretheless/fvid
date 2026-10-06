@@ -193,6 +193,69 @@ pub fn decode_pcm_slices(
         pps_id: first.pps_id,
     })
 }
+/// Compact one parity of a validated full-frame reference. Samples remain in
+/// field coordinates; chroma is separated by its own plane row parity.
+pub(super) fn split_frame(
+    picture: &IntraPicture,
+    bottom: bool,
+    frame_num: u32,
+    pps_id: u32,
+    budget: usize,
+) -> Result<PcmField> {
+    let w = picture.coded_width;
+    let h = picture.coded_height;
+    if w == 0
+        || w % 16 != 0
+        || h == 0
+        || h % 32 != 0
+        || picture.crop[2] % 2 != 0
+        || picture.crop[3] % 2 != 0
+    {
+        return Err(invalid("invalid AVC frame-to-field geometry"));
+    }
+    let bytes = w
+        .checked_mul(h)
+        .and_then(|n| n.checked_mul(3))
+        .ok_or_else(|| invalid("AVC frame split storage overflow"))?
+        / 2;
+    if bytes > budget {
+        return Err(invalid("AVC frame split exceeds budget"));
+    }
+    let split = |plane: &[u16], width: usize, height: usize| -> Result<Vec<u16>> {
+        if plane.len()
+            != width
+                .checked_mul(height)
+                .ok_or_else(|| invalid("AVC frame plane overflow"))?
+        {
+            return Err(invalid("invalid AVC frame plane length"));
+        }
+        let mut out = samples(width * (height / 2))?;
+        for row in 0..height / 2 {
+            let source = (2 * row + usize::from(bottom)) * width;
+            out[row * width..(row + 1) * width].copy_from_slice(&plane[source..source + width]);
+        }
+        Ok(out)
+    };
+    Ok(PcmField {
+        picture: IntraPicture {
+            coded_width: w,
+            coded_height: h / 2,
+            crop: [
+                picture.crop[0],
+                picture.crop[1],
+                picture.crop[2] / 2,
+                picture.crop[3] / 2,
+            ],
+            bit_depth: picture.bit_depth,
+            y: split(&picture.y, w, h)?,
+            cb: split(&picture.cb, w / 2, h / 2)?,
+            cr: split(&picture.cr, w / 2, h / 2)?,
+        },
+        bottom,
+        frame_num,
+        pps_id,
+    })
+}
 /// Weave complementary compact fields. Budget covers the new frame only.
 pub fn weave_pair(first: &PcmField, second: &PcmField, budget: usize) -> Result<IntraPicture> {
     let (top, bottom) = if first.bottom {

@@ -1,0 +1,10 @@
+{
+  "generator": "owned PCM frame to separate P fields",
+  "fixtures": [
+    {
+      "file": "avc-frame-to-field-inter-8bit-top-first-coded-filter0.mp4",
+      "sha256": "851b00a386ba29e7d20fbe91baef2e7cf05eadfd1adcf8e48ff916a4d14e2fff",
+      "oracle_sha256": "104ce8f7a183425b77610dca1c20bd590f41e238798e93b84dd594f68261e6ea"
+    }
+  ]
+}

@@ -17962,7 +17962,7 @@ fn cabac_mixed_b_fields_match_jm_and_neighbour_controls() {
     }
 }
 
-fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
+fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool, poc_type: u8, wrap: bool) {
     use fvid::codec::{
         avc_field_dpb::FieldBuffer,
         avc_slice::{MemoryOperation as M, RefModification as R},
@@ -17978,6 +17978,22 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
     } else {
         "avc-field-b-longterm-"
     };
+    let family = if wrap {
+        format!(
+            "avc-field-b-gap-longterm-wrap-{}",
+            if mixed { "mixed-" } else { "" }
+        )
+    } else {
+        family.to_string()
+    };
+    let family = format!(
+        "{family}{}",
+        if poc_type == 0 {
+            String::new()
+        } else {
+            format!("poc{poc_type}-")
+        }
+    );
     for depth in [8, 10] {
         for order in ["top-first", "bottom-first"] {
             for entropy in ["cavlc", "cabac-init0", "cabac-init1", "cabac-init2"] {
@@ -18006,7 +18022,9 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                     let sps = Sps::parse(avc.sps[0]).unwrap();
                                     assert_eq!(
                                         sps.max_num_ref_frames,
-                                        if gap {
+                                        if wrap {
+                                            6
+                                        } else if gap {
                                             5
                                         } else if mixed {
                                             4
@@ -18022,6 +18040,7 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                         sps.max_num_ref_frames,
                                     )
                                     .unwrap();
+                                    let mut observed_poc = fvid::codec::avc_poc::PocDecoder::new();
                                     for sample in 0..8 {
                                         let mut packet = Vec::new();
                                         input.read_packet(0, sample, &mut packet).unwrap();
@@ -18034,20 +18053,73 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                         let h = &headers[0];
                                         assert_eq!(
                                             h.frame_num,
-                                            if gap {
-                                                [0, 0, 2, 2, 3, 3, 4, 4][sample as usize]
+                                            if wrap {
+                                                if poc_type == 2 {
+                                                    [0, 0, 14, 14, 0, 0, 0, 0][sample as usize]
+                                                } else {
+                                                    [0, 0, 14, 14, 0, 0, 1, 1][sample as usize]
+                                                }
+                                            } else if gap {
+                                                if poc_type == 2 {
+                                                    [0, 0, 2, 2, 3, 3, 3, 3][sample as usize]
+                                                } else {
+                                                    [0, 0, 2, 2, 3, 3, 4, 4][sample as usize]
+                                                }
                                             } else {
                                                 [0, 0, 1, 1, 2, 2, 3, 3][sample as usize]
                                             }
                                         );
-                                        if gap && sample == 2 {
-                                            dpb.infer_nonexisting_fields(1, None, 100).unwrap();
-                                            assert!(
-                                                dpb.get(100, false).is_none()
-                                                    && dpb.get(100, true).is_none()
-                                            );
+                                        if gap && (sample == 2 || (wrap && sample == 4)) {
+                                            let missing_numbers = if wrap {
+                                                if sample == 2 {
+                                                    (1..14).collect::<Vec<_>>()
+                                                } else {
+                                                    vec![15]
+                                                }
+                                            } else {
+                                                vec![1]
+                                            };
+                                            for missing in missing_numbers {
+                                                let inferred = observed_poc
+                                                    .infer_nonexisting(&sps, missing)
+                                                    .unwrap()
+                                                    .map(|v| v.after_marking);
+                                                if poc_type > 0 {
+                                                    assert_eq!(
+                                                        inferred.unwrap(),
+                                                        fvid::codec::avc_poc::FieldOrder {
+                                                            top: Some(2 * missing as i32),
+                                                            bottom: Some(2 * missing as i32)
+                                                        }
+                                                    );
+                                                }
+                                                let id = 100 + missing as u64;
+                                                dpb.infer_nonexisting_fields(missing, inferred, id)
+                                                    .unwrap();
+                                                assert!(
+                                                    dpb.get(id, false).is_none()
+                                                        && dpb.get(id, true).is_none()
+                                                );
+                                            }
                                         }
 
+                                        let decoded_poc = observed_poc.decode(&sps, h).unwrap();
+                                        assert_eq!(
+                                            decoded_poc.frame_num_offset,
+                                            if wrap && sample >= 4 { 16 } else { 0 }
+                                        );
+                                        let poc = decoded_poc.before_marking.picture();
+                                        let expected_poc = if wrap && poc_type == 1 {
+                                            [0, 1, 28, 29, 36, 37, 34, 35][sample as usize]
+                                        } else if wrap && poc_type == 2 {
+                                            [0, 0, 28, 28, 32, 32, 31, 31][sample as usize]
+                                        } else if poc_type == 2 {
+                                            [0, 0, 4, 4, 6, 6, 5, 5][sample as usize]
+                                        } else {
+                                            [0, 1, 4, 5, 8, 9, 6, 7][sample as usize]
+                                        };
+                                        assert_eq!(poc, expected_poc, "{name}: sample {sample}");
+                                        assert_eq!(h.poc_lsb.is_none(), poc_type > 0);
                                         assert_eq!(
                                             h.slice_type,
                                             if sample < 4 {
@@ -18074,7 +18146,8 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                                             R::LongTerm(1 - opposite)
                                                         } else {
                                                             let pic = target - opposite;
-                                                            let delta = predicted - pic - 1;
+                                                            let delta =
+                                                                (predicted + 32 - pic - 1) % 32;
                                                             predicted = pic;
                                                             R::Subtract(delta)
                                                         }
@@ -18083,11 +18156,45 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                             };
                                         if sample == 0 {
                                             assert_eq!(h.long_term_reference, source_long);
-                                        } else if sample == 1 && source_long && !mixed {
+                                        } else if sample == 1 && source_long && (!mixed || wrap) {
                                             assert_eq!(
                                                 h.memory_operations,
                                                 vec![M::CurrentLong(0)]
                                             );
+                                        } else if wrap && (2..4).contains(&sample) {
+                                            let mut expected = if current_first {
+                                                vec![
+                                                    M::ForgetShort(9),
+                                                    M::ForgetShort(10),
+                                                    M::ForgetShort(7),
+                                                    M::ForgetShort(8),
+                                                ]
+                                            } else {
+                                                vec![]
+                                            };
+                                            if source_long && current_first {
+                                                expected.push(M::ForgetLong(0));
+                                            }
+                                            if source_long && (!mixed || current_first) {
+                                                expected.push(M::CurrentLong(0));
+                                            }
+                                            assert_eq!(h.memory_operations, expected);
+                                        } else if wrap && (4..6).contains(&sample) {
+                                            let mut expected = if current_first {
+                                                vec![
+                                                    M::ForgetShort(9),
+                                                    M::ForgetShort(10),
+                                                    M::ForgetShort(7),
+                                                    M::ForgetShort(8),
+                                                ]
+                                            } else {
+                                                vec![]
+                                            };
+                                            if col_long && (!mixed || current_first) {
+                                                expected
+                                                    .extend([M::LimitLong(1), M::CurrentLong(0)]);
+                                            }
+                                            assert_eq!(h.memory_operations, expected);
                                         } else if (4..6).contains(&sample)
                                             && col_long
                                             && (!mixed || current_first)
@@ -18105,27 +18212,36 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                                 h.modifications_l0,
                                                 modifications(
                                                     source_long,
-                                                    if gap {
-                                                        if sample >= 6 { 9 } else { 7 }
+                                                    if wrap {
+                                                        if sample >= 6 && poc_type != 2 {
+                                                            3
+                                                        } else {
+                                                            1
+                                                        }
+                                                    } else if gap {
+                                                        if sample >= 6 && poc_type != 2 {
+                                                            9
+                                                        } else {
+                                                            7
+                                                        }
                                                     } else {
                                                         if sample >= 6 { 7 } else { 5 }
                                                     },
-                                                    1
+                                                    if wrap { 29 } else { 1 }
                                                 )
                                             );
-                                            let lists =
-                                                dpb.lists(h, h.poc_lsb.unwrap() as i32).unwrap();
+                                            let lists = dpb.lists(h, poc).unwrap();
                                             if gap {
                                                 assert!(
                                                     lists
                                                         .l0
                                                         .iter()
                                                         .chain(&lists.l1)
-                                                        .all(|r| r.id != 100)
+                                                        .all(|r| r.id < 100)
                                                 );
                                             }
                                             for (index, selected) in lists.l0.iter().enumerate() {
-                                                assert_eq!(selected.id, 0);
+                                                assert_eq!(selected.id, if wrap { 2 } else { 0 });
                                                 assert_eq!(
                                                     selected.bottom,
                                                     h.bottom_field ^ (index == 1)
@@ -18134,10 +18250,24 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                                     dpb.order(selected.id, selected.bottom)
                                                         .unwrap(),
                                                     (
-                                                        i32::from(
-                                                            selected.bottom
-                                                                != (order == "bottom-first")
-                                                        ),
+                                                        if wrap {
+                                                            if poc_type == 2 {
+                                                                28
+                                                            } else {
+                                                                (if poc_type == 1 { 28 } else { 4 })
+                                                                    + i32::from(
+                                                                        selected.bottom
+                                                                            != first_bottom,
+                                                                    )
+                                                            }
+                                                        } else if poc_type == 2 {
+                                                            0
+                                                        } else {
+                                                            i32::from(
+                                                                selected.bottom
+                                                                    != (order == "bottom-first"),
+                                                            )
+                                                        },
                                                         source_long
                                                             && (!mixed
                                                                 || selected.bottom == first_bottom)
@@ -18151,8 +18281,20 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                                     h.modifications_l1,
                                                     modifications(
                                                         col_long,
-                                                        if gap { 9 } else { 7 },
-                                                        if gap { 7 } else { 5 }
+                                                        if wrap {
+                                                            if poc_type == 2 { 1 } else { 3 }
+                                                        } else if gap && poc_type != 2 {
+                                                            9
+                                                        } else {
+                                                            7
+                                                        },
+                                                        if wrap {
+                                                            1
+                                                        } else if gap {
+                                                            7
+                                                        } else {
+                                                            5
+                                                        }
                                                     )
                                                 );
                                                 for (index, selected) in lists.l1.iter().enumerate()
@@ -18166,10 +18308,21 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                                         dpb.order(selected.id, selected.bottom)
                                                             .unwrap(),
                                                         (
-                                                            8 + i32::from(
-                                                                selected.bottom
-                                                                    != (order == "bottom-first")
-                                                            ),
+                                                            if wrap && poc_type == 1 {
+                                                                36 + i32::from(
+                                                                    selected.bottom != first_bottom,
+                                                                )
+                                                            } else if wrap && poc_type == 2 {
+                                                                32
+                                                            } else if poc_type == 2 {
+                                                                6
+                                                            } else {
+                                                                8 + i32::from(
+                                                                    selected.bottom
+                                                                        != (order
+                                                                            == "bottom-first"),
+                                                                )
+                                                            },
                                                             col_long
                                                                 && (!mixed
                                                                     || selected.bottom
@@ -18218,13 +18371,8 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
                                                 );
                                             }
                                         }
-                                        dpb.finish(
-                                            h,
-                                            h.poc_lsb.unwrap() as i32,
-                                            sample as u64,
-                                            std::sync::Arc::new(()),
-                                        )
-                                        .unwrap();
+                                        dpb.finish(h, poc, sample as u64, std::sync::Arc::new(()))
+                                            .unwrap();
                                     }
                                     qualify_owned_reordered_field_b_video(&video, &oracle, &name);
                                     if !skip {
@@ -18314,11 +18462,11 @@ fn qualify_longterm_b_direct_fields(mixed: bool, gap: bool) {
 
 #[test]
 fn separate_longterm_b_direct_fields_match_jm_and_status_controls() {
-    qualify_longterm_b_direct_fields(false, false);
+    qualify_longterm_b_direct_fields(false, false, 0, false);
 }
 #[test]
 fn separate_mixed_parity_longterm_b_fields_match_jm_and_status_controls() {
-    qualify_longterm_b_direct_fields(true, false);
+    qualify_longterm_b_direct_fields(true, false, 0, false);
 }
 
 fn qualify_cabac_b_subpartition_fields(joined: bool, references: bool) {
@@ -19110,6 +19258,668 @@ fn invalid_poc_one_idr_bottom_is_a_refusal_not_playback_acceptance() {
 
 #[test]
 fn separate_b_gap_longterm_direct_fields_match_jm_and_controls() {
-    qualify_longterm_b_direct_fields(false, true);
-    qualify_longterm_b_direct_fields(true, true);
+    qualify_longterm_b_direct_fields(false, true, 0, false);
+    qualify_longterm_b_direct_fields(true, true, 0, false);
+}
+
+#[test]
+fn separate_b_gap_poc_one_two_longterm_fields_match_jm_and_controls() {
+    for poc in [1, 2] {
+        for mixed in [false, true] {
+            qualify_longterm_b_direct_fields(mixed, true, poc, false);
+        }
+    }
+}
+
+#[test]
+fn separate_b_gap_wrap_longterm_fields_match_jm_and_controls() {
+    for mixed in [false, true] {
+        qualify_longterm_b_direct_fields(mixed, true, 0, true);
+    }
+}
+
+#[test]
+fn separate_b_gap_wrap_poc_one_two_longterm_fields_match_jm_and_controls() {
+    for poc in [1, 2] {
+        for mixed in [false, true] {
+            qualify_longterm_b_direct_fields(mixed, true, poc, true);
+        }
+    }
+}
+
+fn qualify_owned_reset_gap_b_video(video: &[u8], oracle: &[u8], name: &str) {
+    let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+    let config = input.tracks()[0].configuration.clone();
+    let bytes = oracle.len() / 5;
+    let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+    for _ in 0..2 {
+        let mut decoded = 0;
+        for sample in 0..10 {
+            let mut packet = Vec::new();
+            input.read_packet(0, sample, &mut packet).unwrap();
+            let picture = decoder
+                .decode_order(&packet)
+                .unwrap_or_else(|e| panic!("{name} sample{sample}: {e}"));
+            assert_eq!(picture.is_some(), sample % 2 == 1);
+            if let Some(picture) = picture {
+                let mut pixels = Vec::new();
+                picture.write_planar(&mut pixels).unwrap();
+                let display = [0, 1, 2, 4, 3][decoded];
+                assert!(
+                    pixels == oracle[display * bytes..(display + 1) * bytes],
+                    "{name} decoded{decoded}: mismatch {:?}",
+                    pixels
+                        .iter()
+                        .zip(&oracle[display * bytes..(display + 1) * bytes])
+                        .position(|(a, b)| a != b)
+                );
+                decoded += 1;
+            }
+        }
+        assert_eq!(decoded, 5);
+        decoder.reset();
+    }
+    let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(video),
+        Default::default(),
+        16 << 20,
+    )
+    .unwrap();
+    for _ in 0..2 {
+        for display in 0..5 {
+            let frame = player.read_frame().unwrap().unwrap();
+            assert_eq!(
+                (
+                    frame.sample_index,
+                    frame.presentation_time.ticks,
+                    frame.duration.ticks
+                ),
+                ([0, 2, 4, 8, 6][display], [0, 2, 4, 6, 8][display], 2)
+            );
+            let mut pixels = Vec::new();
+            frame.picture.write_planar(&mut pixels).unwrap();
+            assert!(
+                pixels == oracle[display * bytes..(display + 1) * bytes],
+                "{name} display{display}"
+            );
+        }
+        assert!(player.read_frame().unwrap().is_none());
+        player.rewind();
+    }
+    assert_eq!(player.seek_to_sync(6), 0);
+    player.read_frame().unwrap().unwrap();
+    player.read_frame().unwrap().unwrap();
+    player.read_frame().unwrap().unwrap();
+    let mut pixels = Vec::new();
+    player
+        .read_frame()
+        .unwrap()
+        .unwrap()
+        .picture
+        .write_planar(&mut pixels)
+        .unwrap();
+    assert!(pixels == oracle[3 * bytes..4 * bytes], "{name} seek B");
+}
+
+fn qualify_field_mmco_five_reset_gaps_and_b_fields(poc_type: u8) {
+    use fvid::codec::{
+        avc_field_dpb::FieldBuffer, avc_poc::PocDecoder, avc_slice::MemoryOperation as M,
+    };
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for order in ["top-first", "bottom-first"] {
+            for entropy in ["cavlc", "cabac-init0", "cabac-init1", "cabac-init2"] {
+                for spatial in [false, true] {
+                    for skip in [false, true] {
+                        for filter in 0..3 {
+                            for long in [false, true] {
+                                let name = format!(
+                                    "avc-field-b-reset-gap-{}{depth}bit-{order}-{}-{}-{entropy}-filter{filter}-initial{}",
+                                    if poc_type == 0 {
+                                        String::new()
+                                    } else {
+                                        format!("poc{poc_type}-")
+                                    },
+                                    if spatial { "spatial" } else { "temporal" },
+                                    if skip { "skip" } else { "coded" },
+                                    if long { "long" } else { "short" }
+                                );
+                                let video =
+                                    std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                                let oracle =
+                                    std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                                let mut input =
+                                    Mp4Reader::open(Cursor::new(&video), Default::default())
+                                        .unwrap();
+                                let config = input.tracks()[0].configuration.clone();
+                                let avc = AvcConfig::parse(&config).unwrap();
+                                let sps = Sps::parse(avc.sps[0]).unwrap();
+                                let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                                assert!(sps.gaps_allowed);
+                                assert_eq!(sps.max_num_ref_frames, 5);
+                                assert_eq!(pps.cabac, entropy != "cavlc");
+                                let mut poc = PocDecoder::new();
+                                let mut dpb: FieldBuffer<()> =
+                                    FieldBuffer::new(sps.frame_num_bits, sps.max_num_ref_frames)
+                                        .unwrap();
+                                let mut gaps = 0;
+                                for sample in 0..10 {
+                                    let mut packet = Vec::new();
+                                    input.read_packet(0, sample, &mut packet).unwrap();
+                                    let headers = NalUnits::new(&packet, avc.length_size)
+                                        .unwrap()
+                                        .map(|n| {
+                                            SliceHeader::parse(n.unwrap(), &sps, &pps).unwrap()
+                                        })
+                                        .collect::<Vec<_>>();
+                                    let h = &headers[0];
+                                    assert_eq!(
+                                        h.frame_num,
+                                        if poc_type == 2 {
+                                            [0, 0, 15, 15, 0, 0, 2, 2, 2, 2][sample as usize]
+                                        } else {
+                                            [0, 0, 15, 15, 0, 0, 2, 2, 3, 3][sample as usize]
+                                        }
+                                    );
+                                    assert_eq!(
+                                        h.bottom_field,
+                                        (order == "bottom-first") ^ (sample % 2 == 1)
+                                    );
+                                    if sample == 2 || sample == 6 {
+                                        let missing = if sample == 2 {
+                                            (1..15).collect::<Vec<_>>()
+                                        } else {
+                                            vec![1]
+                                        };
+                                        for n in missing {
+                                            let inferred = poc
+                                                .infer_nonexisting(&sps, n)
+                                                .unwrap()
+                                                .map(|v| v.after_marking);
+                                            if poc_type == 0 {
+                                                assert!(inferred.is_none());
+                                            } else {
+                                                assert_eq!(
+                                                    inferred.unwrap(),
+                                                    fvid::codec::avc_poc::FieldOrder {
+                                                        top: Some(2 * n as i32),
+                                                        bottom: Some(2 * n as i32)
+                                                    }
+                                                );
+                                            }
+                                            let id = 100 + sample as u64 * 20 + n as u64;
+                                            dpb.infer_nonexisting_fields(n, inferred, id).unwrap();
+                                            assert!(
+                                                dpb.get(id, false).is_none()
+                                                    && dpb.get(id, true).is_none()
+                                            );
+                                            gaps += 1;
+                                        }
+                                    }
+                                    let decoded = poc.decode(&sps, h).unwrap();
+                                    assert_eq!(
+                                        decoded.before_marking.picture(),
+                                        if poc_type == 1 {
+                                            [0, 1, 30, 31, 32, 1, 8, 9, 6, 7][sample as usize]
+                                        } else if poc_type == 2 {
+                                            [0, 0, 30, 30, 32, 0, 4, 4, 3, 3][sample as usize]
+                                        } else {
+                                            [0, 1, 4, 5, 8, 1, 8, 9, 6, 7][sample as usize]
+                                        }
+                                    );
+                                    assert_eq!(
+                                        decoded.after_marking.picture(),
+                                        if sample == 4 {
+                                            0
+                                        } else {
+                                            decoded.before_marking.picture()
+                                        }
+                                    );
+                                    assert_eq!(
+                                        decoded.frame_num_offset,
+                                        if sample == 4 { 16 } else { 0 }
+                                    );
+                                    let expected = if sample == 4 {
+                                        vec![M::Reset]
+                                    } else if sample == 1 && long {
+                                        vec![M::CurrentLong(0)]
+                                    } else {
+                                        vec![]
+                                    };
+                                    for h in &headers {
+                                        assert_eq!(h.memory_operations, expected);
+                                    }
+                                    if sample >= 6 {
+                                        let lists =
+                                            dpb.lists(h, decoded.before_marking.picture()).unwrap();
+                                        assert!(lists.l0.iter().all(|r| r.id == 4));
+                                        if sample >= 8 {
+                                            assert!(lists.l1.iter().all(|r| r.id == 6));
+                                            assert_eq!(h.direct_spatial_mv_pred, spatial);
+                                        }
+                                    }
+                                    dpb.finish(
+                                        h,
+                                        decoded.after_marking.picture(),
+                                        sample as u64,
+                                        std::sync::Arc::new(()),
+                                    )
+                                    .unwrap();
+                                    if sample == 4 {
+                                        for old in [0, 2] {
+                                            assert!(
+                                                dpb.get(old, false).is_none()
+                                                    && dpb.get(old, true).is_none()
+                                            );
+                                        }
+                                        assert_eq!(dpb.order(4, h.bottom_field), Some((0, false)));
+                                    }
+                                }
+                                assert_eq!(gaps, 15);
+                                qualify_owned_reset_gap_b_video(&video, &oracle, &name);
+                                if long {
+                                    let control = std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.replace("-initiallong", "-initialshort")
+                                    )))
+                                    .unwrap();
+                                    assert_eq!(
+                                        oracle, control,
+                                        "old long-term status must be cleared by MMCO5"
+                                    );
+                                }
+                                if !skip {
+                                    let control = std::fs::read(root.join(format!(
+                                        "{}.yuv",
+                                        name.replace("-coded-", "-skip-")
+                                    )))
+                                    .unwrap();
+                                    assert_eq!(oracle, control);
+                                }
+                                cases += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 384);
+}
+
+#[test]
+fn separate_field_mmco_five_reset_gaps_and_b_fields_match_jm() {
+    qualify_field_mmco_five_reset_gaps_and_b_fields(0);
+}
+#[test]
+fn separate_field_poc_one_two_mmco_five_reset_gaps_and_b_fields_match_jm() {
+    for poc in [1, 2] {
+        qualify_field_mmco_five_reset_gaps_and_b_fields(poc);
+    }
+}
+
+fn qualify_frame_pcm_to_separate_prediction_fields(long: bool, paff: bool) {
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for depth in [8, 10] {
+        for order in ["top-first", "bottom-first"] {
+            for skip in [false, true] {
+                for filter in 0..3 {
+                    let name = format!(
+                        "avc-{}frame-to-field-{}{depth}bit-{order}-{}-filter{filter}",
+                        if paff { "paff-" } else { "" },
+                        if long { "long-" } else { "" },
+                        if skip { "skip" } else { "coded" }
+                    );
+                    let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                    let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                    if long {
+                        assert_eq!(
+                            oracle,
+                            std::fs::read(
+                                root.join(format!("{}.yuv", name.replace("-long-", "-")))
+                            )
+                            .unwrap()
+                        );
+                    }
+                    let size = oracle.len() / 2;
+                    let mut input =
+                        Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                    let config = input.tracks()[0].configuration.clone();
+                    let avc = AvcConfig::parse(&config).unwrap();
+                    let sps = Sps::parse(avc.sps[0]).unwrap();
+                    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                    assert!(!sps.frame_mbs_only);
+                    assert_eq!(sps.mb_adaptive_frame_field, !paff);
+                    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                    for _ in 0..2 {
+                        let mut output = 0;
+                        for sample in 0..3 {
+                            let mut packet = Vec::new();
+                            input.read_packet(0, sample, &mut packet).unwrap();
+                            let nal = NalUnits::new(&packet, avc.length_size)
+                                .unwrap()
+                                .next()
+                                .unwrap()
+                                .unwrap();
+                            let h = SliceHeader::parse(nal, &sps, &pps).unwrap();
+                            if sample == 0 {
+                                assert_eq!(h.long_term_reference, long);
+                            } else {
+                                assert_eq!(
+                                    h.modifications_l0,
+                                    if long {
+                                        vec![fvid::codec::avc_slice::RefModification::LongTerm(1)]
+                                    } else {
+                                        vec![fvid::codec::avc_slice::RefModification::Subtract(1)]
+                                    }
+                                );
+                            }
+                            assert_eq!(h.field_pic, sample > 0);
+                            assert_eq!(h.frame_num, u32::from(sample > 0));
+                            if sample > 0 {
+                                assert_eq!(h.slice_type, SliceType::P);
+                                assert_eq!(
+                                    h.bottom_field,
+                                    (order == "bottom-first") ^ (sample == 2)
+                                );
+                            }
+                            let pic = decoder
+                                .decode_order(&packet)
+                                .unwrap_or_else(|e| panic!("{name} sample{sample}: {e}"));
+                            assert_eq!(pic.is_some(), sample != 1);
+                            if let Some(pic) = pic {
+                                let mut pixels = Vec::new();
+                                pic.write_planar(&mut pixels).unwrap();
+                                assert_eq!(
+                                    pixels,
+                                    &oracle[output * size..(output + 1) * size],
+                                    "{name} output{output}"
+                                );
+                                assert_eq!(decoder.output_is_field_pair(), sample == 2);
+                                output += 1;
+                            }
+                        }
+                        assert_eq!(output, 2);
+                        assert!(!decoder.has_pending_field());
+                        decoder.reset();
+                    }
+                    let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                        Cursor::new(&video),
+                        Default::default(),
+                        16 << 20,
+                    )
+                    .unwrap();
+                    for _ in 0..2 {
+                        for display in 0..2 {
+                            let frame = player.read_frame().unwrap().unwrap();
+                            assert_eq!(
+                                (
+                                    frame.sample_index,
+                                    frame.presentation_time.ticks,
+                                    frame.duration.ticks
+                                ),
+                                ([0, 1][display], [0, 2][display], 2)
+                            );
+                            let mut pixels = Vec::new();
+                            frame.picture.write_planar(&mut pixels).unwrap();
+                            assert_eq!(pixels, &oracle[display * size..(display + 1) * size]);
+                        }
+                        assert!(player.read_frame().unwrap().is_none());
+                        player.rewind();
+                    }
+                    assert_eq!(player.seek_to_sync(2), 0);
+                    player.read_frame().unwrap().unwrap();
+                    let mut pixels = Vec::new();
+                    player
+                        .read_frame()
+                        .unwrap()
+                        .unwrap()
+                        .picture
+                        .write_planar(&mut pixels)
+                        .unwrap();
+                    assert_eq!(pixels, &oracle[size..]);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn frame_pcm_to_separate_prediction_fields_matches_jm_and_seek() {
+    qualify_frame_pcm_to_separate_prediction_fields(false, false);
+}
+#[test]
+fn longterm_frame_pcm_to_separate_prediction_fields_matches_jm_and_seek() {
+    qualify_frame_pcm_to_separate_prediction_fields(true, false);
+}
+
+#[test]
+fn inter_frame_to_field_motion_refusal_is_not_acceptance() {
+    let video = include_bytes!(
+        "fixtures/playback-errors/avc-frame-to-field-inter-8bit-top-first-coded-filter0.mp4"
+    );
+    let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+    let config = input.tracks()[0].configuration.clone();
+    let avc = AvcConfig::parse(&config).unwrap();
+    let sps = Sps::parse(avc.sps[0]).unwrap();
+    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+    for _ in 0..2 {
+        for sample in 0..2 {
+            let mut packet = Vec::new();
+            input.read_packet(0, sample, &mut packet).unwrap();
+            let h = SliceHeader::parse(
+                NalUnits::new(&packet, avc.length_size)
+                    .unwrap()
+                    .next()
+                    .unwrap()
+                    .unwrap(),
+                &sps,
+                &pps,
+            )
+            .unwrap();
+            assert!(!h.field_pic);
+            assert_eq!(
+                h.slice_type,
+                if sample == 0 {
+                    SliceType::I
+                } else {
+                    SliceType::P
+                }
+            );
+            assert!(decoder.decode_order(&packet).unwrap().is_some());
+        }
+        let mut packet = Vec::new();
+        input.read_packet(0, 2, &mut packet).unwrap();
+        let h = SliceHeader::parse(
+            NalUnits::new(&packet, avc.length_size)
+                .unwrap()
+                .next()
+                .unwrap()
+                .unwrap(),
+            &sps,
+            &pps,
+        )
+        .unwrap();
+        assert!(h.field_pic && h.slice_type == SliceType::P);
+        assert_eq!(h.frame_num, 2);
+        let error = decoder.decode_order(&packet).err().unwrap().to_string();
+        assert!(
+            error.contains("AVC frame-to-field co-located motion conversion is not connected"),
+            "{error}"
+        );
+        assert!(
+            decoder
+                .decode_order(&packet)
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("requires reset")
+        );
+        decoder.reset();
+    }
+}
+
+#[test]
+fn paff_frame_pcm_to_separate_prediction_fields_matches_jm_and_seek() {
+    qualify_frame_pcm_to_separate_prediction_fields(false, true);
+}
+
+#[test]
+fn longterm_paff_frame_pcm_to_separate_prediction_fields_matches_jm_and_seek() {
+    qualify_frame_pcm_to_separate_prediction_fields(true, true);
+}
+
+fn qualify_paff_intra_raster_rows(joined: bool) {
+    use fvid::codec::avc_macroblock::{IntraCavlcReader, IntraLuma};
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let mut cases = 0;
+    for depth in [8, 10] {
+        for mode in [
+            "i4-zero",
+            "i4-ac",
+            "i4-bias",
+            "i16-zero",
+            "i16-positive",
+            "i16-negative",
+        ] {
+            for filter in 0..3 {
+                for aso in if joined {
+                    vec![false]
+                } else {
+                    vec![false, true]
+                } {
+                    let name = format!(
+                        "avc-paff-intra-{}{depth}bit-{mode}-filter{filter}{}",
+                        if joined { "joined-" } else { "" },
+                        if aso { "-aso" } else { "" }
+                    );
+                    let video = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+                    let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+                    let mut input =
+                        Mp4Reader::open(Cursor::new(&video), Default::default()).unwrap();
+                    let config = input.tracks()[0].configuration.clone();
+                    let avc = AvcConfig::parse(&config).unwrap();
+                    let sps = Sps::parse(avc.sps[0]).unwrap();
+                    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+                    assert!(!sps.frame_mbs_only && !sps.mb_adaptive_frame_field);
+                    let mut packet = Vec::new();
+                    input.read_packet(0, 0, &mut packet).unwrap();
+                    let headers = NalUnits::new(&packet, avc.length_size)
+                        .unwrap()
+                        .map(|n| SliceHeader::parse(n.unwrap(), &sps, &pps).unwrap())
+                        .collect::<Vec<_>>();
+                    assert_eq!(headers.len(), if joined { 1 } else { 4 });
+                    for (wire, h) in headers.iter().enumerate() {
+                        assert!(h.idr && !h.field_pic && h.slice_type == SliceType::I);
+                        assert_eq!(
+                            h.first_mb,
+                            if aso { [3, 1, 2, 0][wire] } else { wire as u32 }
+                        );
+                        assert!(IntraCavlcReader::new(h, &sps, &pps, 3).is_err());
+                        let mut reader = IntraCavlcReader::new(h, &sps, &pps, 4).unwrap();
+                        assert!(!reader.field_decoding());
+                        for block in 0..if joined { 4 } else { 1 } {
+                            let mb = reader.read_macroblock().unwrap().unwrap();
+                            assert_eq!(mb.address, if joined { block } else { h.first_mb });
+                            if mode.starts_with("i4") {
+                                assert!(matches!(mb.luma, IntraLuma::Blocks4(_)));
+                                for levels in mb.luma_levels {
+                                    assert_eq!(levels[1].abs(), i32::from(mode != "i4-zero"));
+                                    assert_eq!(levels[4], 0);
+                                    if mode == "i4-bias" {
+                                        assert_eq!(levels[1], 1);
+                                    }
+                                }
+                            } else {
+                                assert!(matches!(mb.luma, IntraLuma::Block16(2)));
+                                assert_eq!(
+                                    mb.luma_dc[0],
+                                    match mode {
+                                        "i16-positive" => 1,
+                                        "i16-negative" => -1,
+                                        _ => 0,
+                                    }
+                                );
+                            }
+                        }
+                        assert!(reader.read_macroblock().unwrap().is_none());
+                    }
+                    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+                    for _ in 0..2 {
+                        let picture = decoder.decode_order(&packet).unwrap().unwrap();
+                        assert_eq!(picture.dimensions(), (32, 32));
+                        assert!(!decoder.output_is_field_pair());
+                        let mut pixels = Vec::new();
+                        picture.write_planar(&mut pixels).unwrap();
+                        assert_eq!(pixels, oracle, "{name}");
+                        decoder.reset();
+                    }
+                    let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                        Cursor::new(&video),
+                        Default::default(),
+                        16 << 20,
+                    )
+                    .unwrap();
+                    for _ in 0..2 {
+                        let frame = player.read_frame().unwrap().unwrap();
+                        assert_eq!((frame.sample_index, frame.presentation_time.ticks), (0, 0));
+                        let mut pixels = Vec::new();
+                        frame.picture.write_planar(&mut pixels).unwrap();
+                        assert_eq!(pixels, oracle);
+                        assert!(player.read_frame().unwrap().is_none());
+                        player.rewind();
+                    }
+                    assert_eq!(player.seek_to_sync(0), 0);
+                    let mut pixels = Vec::new();
+                    player
+                        .read_frame()
+                        .unwrap()
+                        .unwrap()
+                        .picture
+                        .write_planar(&mut pixels)
+                        .unwrap();
+                    assert_eq!(pixels, oracle);
+                    if aso {
+                        assert_eq!(
+                            oracle,
+                            std::fs::read(root.join(format!(
+                                "avc-paff-intra-{depth}bit-{mode}-filter{filter}.yuv"
+                            )))
+                            .unwrap()
+                        );
+                    }
+                    if joined && filter == 1 {
+                        let independent = std::fs::read(root.join(format!(
+                            "avc-paff-intra-{depth}bit-{mode}-filter{filter}.yuv"
+                        )))
+                        .unwrap();
+                        if mode.ends_with("zero") || mode == "i4-ac" {
+                            assert_eq!(oracle, independent);
+                        } else {
+                            assert_ne!(
+                                oracle, independent,
+                                "joined prediction must use raster neighbours"
+                            );
+                        }
+                    }
+                    cases += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(cases, if joined { 36 } else { 72 });
+}
+
+#[test]
+fn paff_intra_raster_rows_residuals_and_aso_match_jm() {
+    qualify_paff_intra_raster_rows(false);
+}
+#[test]
+fn joined_paff_intra_raster_rows_residuals_and_neighbours_match_jm() {
+    qualify_paff_intra_raster_rows(true);
 }
