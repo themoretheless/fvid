@@ -144,10 +144,23 @@ impl Decoder {
                         let b = &mut BitReader::new(obu.payload);
                         b.bit()?;
                         let index = b.read(3)? as usize;
-                        if s.decoder_model.is_some() || s.frame_id_bits.is_some() {
-                            return Err(crate::unsupported(
-                                "AV1 show-existing timing/frame IDs not implemented",
-                            ));
+                        if s.timing
+                            .as_ref()
+                            .is_none_or(|t| t.ticks_per_picture.is_none())
+                        {
+                            if let Some(model) = &s.decoder_model {
+                                b.read(model.presentation_bits)?;
+                            }
+                        }
+                        if let Some((_, total)) = s.frame_id_bits {
+                            let display_id = b.read(total)?;
+                            if self.headers[index].as_ref().and_then(|h| h.frame_id)
+                                != Some(display_id)
+                            {
+                                return Err(invalid(
+                                    "AV1 show-existing frame ID does not match reference",
+                                ));
+                            }
                         }
                         if !self.showable[index] {
                             return Err(invalid("AV1 reference is not showable"));
@@ -244,6 +257,30 @@ impl Decoder {
                             color: s.color.clone(),
                             show: h.show,
                         };
+                        if let (Some(current), Some((delta_bits, id_bits))) =
+                            (h.frame_id, s.frame_id_bits)
+                        {
+                            let window = 1u32 << delta_bits;
+                            let modulus = 1u32 << id_bits;
+                            for i in 0..8 {
+                                let stale = self.headers[i]
+                                    .as_ref()
+                                    .and_then(|r| r.frame_id)
+                                    .is_some_and(|id| {
+                                        if current > window {
+                                            id > current || id < current - window
+                                        } else {
+                                            id > current && id < modulus + current - window
+                                        }
+                                    });
+                                if stale {
+                                    self.references[i] = None;
+                                    self.headers[i] = None;
+                                    self.cdfs[i] = None;
+                                    self.showable[i] = false;
+                                }
+                            }
+                        }
                         for i in 0..8 {
                             if h.refresh_flags & (1 << i) != 0 {
                                 self.references[i] = Some(decoded.clone());
@@ -269,6 +306,314 @@ impl Decoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn assert_flat(frame: &Decoded) {
+        assert_eq!(frame.picture.size, [32, 32]);
+        assert_eq!(frame.picture.depth, 8);
+        for plane in &frame.picture.planes {
+            assert!(plane.samples.iter().all(|&v| v == 128));
+        }
+    }
+    #[test]
+    fn show_existing_timing_ids_and_reference_window_decode_owned_streams() {
+        for (name, data, shown) in [
+            (
+                "av1-show-existing-plain-key-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-plain-key-slot0.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-plain-key-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-plain-key-slot7.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-plain-intra-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-plain-intra-slot0.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-plain-intra-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-plain-intra-slot7.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-id-key-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-id-key-slot0.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-id-key-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-id-key-slot7.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-id-intra-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-id-intra-slot0.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-id-intra-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-id-intra-slot7.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-time-key-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-key-slot0.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-time-key-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-key-slot7.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-time-intra-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-intra-slot0.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-time-intra-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-intra-slot7.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-time-id-key-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-id-key-slot0.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-time-id-key-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-id-key-slot7.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-time-id-intra-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-id-intra-slot0.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-time-id-intra-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-time-id-intra-slot7.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-equal-key-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-key-slot0.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-equal-key-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-key-slot7.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-equal-intra-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-intra-slot0.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-equal-intra-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-intra-slot7.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-equal-id-key-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-id-key-slot0.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-equal-id-key-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-id-key-slot7.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-equal-id-intra-slot0.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-id-intra-slot0.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-equal-id-intra-slot7.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-equal-id-intra-slot7.obu"
+                )[..],
+                2,
+            ),
+            (
+                "av1-show-existing-window-edge.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-window-edge.obu"
+                )[..],
+                1,
+            ),
+            (
+                "av1-show-existing-window-wrap.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-window-wrap.obu"
+                )[..],
+                1,
+            ),
+        ] {
+            let mut decoder = Decoder::new(8 << 20);
+            for _ in 0..2 {
+                let output = decoder
+                    .decode_packet(data)
+                    .unwrap_or_else(|e| panic!("{name}: {e}"));
+                assert_eq!(output.iter().filter(|f| f.show).count(), shown, "{name}");
+                for frame in &output {
+                    assert_flat(frame);
+                }
+                let displayed: Vec<_> = output.iter().filter(|f| f.show).collect();
+                if shown == 2 {
+                    assert!(Arc::ptr_eq(&displayed[0].picture, &displayed[1].picture));
+                }
+                decoder.reset();
+                assert!(decoder.references.iter().all(Option::is_none));
+            }
+        }
+    }
+    #[test]
+    fn malformed_show_existing_metadata_has_specific_refusal_and_reset() {
+        for (name, data, message) in [
+            (
+                "av1-show-existing-invalid-id-mismatch.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-id-mismatch.obu"
+                )[..],
+                "AV1 show-existing frame ID does not match reference",
+            ),
+            (
+                "av1-show-existing-invalid-stale-id.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-stale-id.obu"
+                )[..],
+                "AV1 show-existing frame ID does not match reference",
+            ),
+            (
+                "av1-show-existing-invalid-truncated-time.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-truncated-time.obu"
+                )[..],
+                "truncated or oversized bit field",
+            ),
+            (
+                "av1-show-existing-invalid-missing-trailing.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-missing-trailing.obu"
+                )[..],
+                "missing AV1 frame header trailing bit",
+            ),
+            (
+                "av1-show-existing-invalid-nonzero-trailing.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-nonzero-trailing.obu"
+                )[..],
+                "nonzero AV1 frame header trailing bits",
+            ),
+            (
+                "av1-show-existing-invalid-wrong-obu-kind.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-wrong-obu-kind.obu"
+                )[..],
+                "AV1 show-existing requires frame header OBU",
+            ),
+            (
+                "av1-show-existing-invalid-truncated-id.obu",
+                &include_bytes!(
+                    "../../tests/fixtures/playback-errors/av1-show-existing-invalid-truncated-id.obu"
+                )[..],
+                "truncated or oversized bit field",
+            ),
+        ] {
+            let mut decoder = Decoder::new(8 << 20);
+            for _ in 0..2 {
+                let mut packets = Vec::new();
+                let mut offset = 0;
+                for obu in Obus::new(data) {
+                    let obu = obu.unwrap();
+                    let end =
+                        obu.payload.as_ptr() as usize - data.as_ptr() as usize + obu.payload.len();
+                    packets.push(&data[offset..end]);
+                    offset = end;
+                }
+                for packet in &packets[..packets.len() - 1] {
+                    let output = decoder
+                        .decode_packet(packet)
+                        .unwrap_or_else(|e| panic!("{name} prefix: {e}"));
+                    for frame in output {
+                        assert!(!frame.show);
+                        assert_flat(&frame);
+                    }
+                }
+                if name.contains("stale-id") {
+                    assert!(decoder.references[7].is_none());
+                    assert!(decoder.headers[7].is_none());
+                    assert!(decoder.cdfs[7].is_none());
+                    assert!(!decoder.showable[7]);
+                }
+                let packet = packets.last().unwrap();
+                let error = decoder
+                    .decode_packet(packet)
+                    .err()
+                    .expect("malformed metadata must fail");
+                assert!(error.to_string().contains(message), "{name}: {error}");
+                assert!(
+                    decoder
+                        .decode_packet(packet)
+                        .err()
+                        .unwrap()
+                        .to_string()
+                        .contains("requires reset")
+                );
+                decoder.reset();
+            }
+        }
+    }
     #[test]
     fn sequences_tiles_inter_prediction_and_high_depth_match_oracle() {
         for (name, bytes, expected) in [

@@ -1,0 +1,220 @@
+{
+  "generator": "owned flat AV1 show-existing timing/frame IDs",
+  "fixtures": [
+    {
+      "file": "av1-show-existing-plain-key-slot0.obu",
+      "sha256": "f9089451fbb85661c50a2c81e973085f67e84595538c90ea0d0f3c3795705cca",
+      "shown": 1,
+      "webm": "av1-show-existing-plain-key-slot0.webm",
+      "webm_sha256": "82cc2a47071f438df1d747f18e075a8abe28f1acaa64891c2158fd60771e37a5"
+    },
+    {
+      "file": "av1-show-existing-plain-key-slot7.obu",
+      "sha256": "cc0355606905c925805b39897c811a15c29157c3ed270deb7ac1e46d83478988",
+      "shown": 1,
+      "webm": "av1-show-existing-plain-key-slot7.webm",
+      "webm_sha256": "9daa9b46ff2af8464f81fa6126f70a0b86c170f4d46dc9fff1508e9dd4f2aae1"
+    },
+    {
+      "file": "av1-show-existing-plain-intra-slot0.obu",
+      "sha256": "56166ecc94700d29006e301a1abfd5e11175b9655d5e15ba1ad3df631eddcbbe",
+      "shown": 2,
+      "webm": "av1-show-existing-plain-intra-slot0.webm",
+      "webm_sha256": "809d977781fcf1910712f54691c8cba52af0230d3a9571e8be9d5deb22d84444"
+    },
+    {
+      "file": "av1-show-existing-plain-intra-slot7.obu",
+      "sha256": "36d24a51d3023ffd95549d6cd59c7f01a38a5e64261208f54511e4be2f77227d",
+      "shown": 2,
+      "webm": "av1-show-existing-plain-intra-slot7.webm",
+      "webm_sha256": "a7448ff5d1f10ffc150f918b59e1cbf2686b7d8927c984739873faffc53a507b"
+    },
+    {
+      "file": "av1-show-existing-id-key-slot0.obu",
+      "sha256": "4af95d3259fb4537c74b32a5e21afe974658cf1eaf3e54abb294f2f3f79238d7",
+      "shown": 1,
+      "webm": "av1-show-existing-id-key-slot0.webm",
+      "webm_sha256": "011ee5c7319bc38c2a66ed488aa267b83dfe3a5653a2bc0719bac6ec8f9fb209"
+    },
+    {
+      "file": "av1-show-existing-id-key-slot7.obu",
+      "sha256": "855bb27194bc0f5b8dd6b4722e2171ffd1308da8e2f2aca5465f159d0cc5d90c",
+      "shown": 1,
+      "webm": "av1-show-existing-id-key-slot7.webm",
+      "webm_sha256": "e2ab8580831933098030d5310244b122b087c76662eba5b69a6ca25ef2e7906d"
+    },
+    {
+      "file": "av1-show-existing-id-intra-slot0.obu",
+      "sha256": "e45f88a3bd142f359cf08ed9f0d2b822b3f5fd6eb125fddadb8aad9170e8514a",
+      "shown": 2,
+      "webm": "av1-show-existing-id-intra-slot0.webm",
+      "webm_sha256": "ba3c01bab05ba22a2dd66df7fba385e2d3bce288cd4b257cc284de1043b173e8"
+    },
+    {
+      "file": "av1-show-existing-id-intra-slot7.obu",
+      "sha256": "fe32c9cd1e1cf3697cd171e2f8ae8938d57e45401559fdd645f63114c3b19530",
+      "shown": 2,
+      "webm": "av1-show-existing-id-intra-slot7.webm",
+      "webm_sha256": "6e104b85962de15b0090e060efee88783a9dda34b3d8dd8e50bc08fd4df7bfc8"
+    },
+    {
+      "file": "av1-show-existing-time-key-slot0.obu",
+      "sha256": "d4f7a4f674dfee34fd4bf1f728aa82f48bd301177b36d9f3ab3407fb24d3399d",
+      "shown": 1,
+      "webm": "av1-show-existing-time-key-slot0.webm",
+      "webm_sha256": "3a21e5365bbe1bf1258519598d99198df17cd6249efa2e7881933c05ff0e7608"
+    },
+    {
+      "file": "av1-show-existing-time-key-slot7.obu",
+      "sha256": "4b542136c781b150f75afa3d4dcd9eb5c4f37559f1b99339301ecbdf19b6127d",
+      "shown": 1,
+      "webm": "av1-show-existing-time-key-slot7.webm",
+      "webm_sha256": "39168b60826da712f2943715963f55dc4fdfffda88700857aa629aef1f107f1d"
+    },
+    {
+      "file": "av1-show-existing-time-intra-slot0.obu",
+      "sha256": "63968d420511ddc705a064483453b2e4b5223f5a8da6e2c5f0070d47c7603e66",
+      "shown": 2,
+      "webm": "av1-show-existing-time-intra-slot0.webm",
+      "webm_sha256": "9b7cfe99e80bbe993edc048baa5ca22679cda473ae43b52baec27c116fc769f4"
+    },
+    {
+      "file": "av1-show-existing-time-intra-slot7.obu",
+      "sha256": "31b43fe46d1bc36bb5cbfbc826f646504028c68680432f1defd818fbf234638c",
+      "shown": 2,
+      "webm": "av1-show-existing-time-intra-slot7.webm",
+      "webm_sha256": "38c53884d68a6fc4239b44d32ab1bf4c8b4cfc165a035fdaad25d664d2d99cad"
+    },
+    {
+      "file": "av1-show-existing-time-id-key-slot0.obu",
+      "sha256": "38fc5f59c658d2687d6b417a636718053808c3c8ec6dffa528892a9abde5c6df",
+      "shown": 1,
+      "webm": "av1-show-existing-time-id-key-slot0.webm",
+      "webm_sha256": "dd42b7aa8fa40632d1fe64a03f92109e08158a1dd6a21575f39da4a6daf491d2"
+    },
+    {
+      "file": "av1-show-existing-time-id-key-slot7.obu",
+      "sha256": "6f5a26cd92cfdcdfe6af0474aafb664af414b543fa367f7b7e2bb4d29c49146d",
+      "shown": 1,
+      "webm": "av1-show-existing-time-id-key-slot7.webm",
+      "webm_sha256": "5f49b4f114b9158cef9670c3aa04ef26fdc0e22419d41d399aba825fecec6bc9"
+    },
+    {
+      "file": "av1-show-existing-time-id-intra-slot0.obu",
+      "sha256": "67ea2f831f1970f960f316740251cb0d2bc1a9c35a3623b94c36400885e81f5a",
+      "shown": 2,
+      "webm": "av1-show-existing-time-id-intra-slot0.webm",
+      "webm_sha256": "4381e30f7608abc0b8e8d6b7fb8ca92f9cbfa7b2a445f34433c0511a572ccb40"
+    },
+    {
+      "file": "av1-show-existing-time-id-intra-slot7.obu",
+      "sha256": "62181aeaedbf64d4c89ae00bdaccb94a52b7b065e32243b738d97c3e46fe982c",
+      "shown": 2,
+      "webm": "av1-show-existing-time-id-intra-slot7.webm",
+      "webm_sha256": "588835bac26aa4e81036b9580d9b0e98ac9d985d51396afb92e3abc76999ff81"
+    },
+    {
+      "file": "av1-show-existing-equal-key-slot0.obu",
+      "sha256": "7e153de11b31091f5e0261cc9f86efe6e8c1b01e56a4e52b74b6c60b1600ccee",
+      "shown": 1,
+      "webm": "av1-show-existing-equal-key-slot0.webm",
+      "webm_sha256": "43a02f0430e44ed868f57eeb0524d66068bb621a47d0d05f61b95dfde4ea75d0"
+    },
+    {
+      "file": "av1-show-existing-equal-key-slot7.obu",
+      "sha256": "126c690dbdc21f08f75e0a53ba010356b8c1af87fa90b5a559c885b800e13a93",
+      "shown": 1,
+      "webm": "av1-show-existing-equal-key-slot7.webm",
+      "webm_sha256": "05eac2b3fe85765d610c5c7e309e23363bae18421d6d1c50926cc15a757a8b39"
+    },
+    {
+      "file": "av1-show-existing-equal-intra-slot0.obu",
+      "sha256": "f07a0341fea3e20cb78bd38884fe89fd16b1305c92f0466eff6266f2d992bf79",
+      "shown": 2,
+      "webm": "av1-show-existing-equal-intra-slot0.webm",
+      "webm_sha256": "17e3f0653ff5a4a0ab40a58917b941135a3a87b90fe8ea12a0f4c31c9ab1ef46"
+    },
+    {
+      "file": "av1-show-existing-equal-intra-slot7.obu",
+      "sha256": "2ea38c96081d859c4585dec064504bfb51d022d29cac13aeb1ae21ab70e633ec",
+      "shown": 2,
+      "webm": "av1-show-existing-equal-intra-slot7.webm",
+      "webm_sha256": "7b3b4e9f04800d73ba64f5e9cb15174ffd2d9b2d6ba16c07108aea730d444f70"
+    },
+    {
+      "file": "av1-show-existing-equal-id-key-slot0.obu",
+      "sha256": "09a0a9d9684f1b5c30029817b1c35c44a47cfa7e9a479785d5fc3c0369ab2233",
+      "shown": 1,
+      "webm": "av1-show-existing-equal-id-key-slot0.webm",
+      "webm_sha256": "0d5ed03a1e56ac6def4a4f9fe32f67d13b63d03b0bd6e8e4e238ab9559ab02f5"
+    },
+    {
+      "file": "av1-show-existing-equal-id-key-slot7.obu",
+      "sha256": "b09b4b9eac24d6b56c5c5e397868e69684c678c5e5fd2c66c656c6d6f7dd0e82",
+      "shown": 1,
+      "webm": "av1-show-existing-equal-id-key-slot7.webm",
+      "webm_sha256": "4d9bbaf028cb69005ec4627912bcdd7a1f65566e650674e7c0944bfedfb74a6e"
+    },
+    {
+      "file": "av1-show-existing-equal-id-intra-slot0.obu",
+      "sha256": "63dda31f2dd75768dddabc7f532b463b6d275475bd71319a53b634e01efebbad",
+      "shown": 2,
+      "webm": "av1-show-existing-equal-id-intra-slot0.webm",
+      "webm_sha256": "3878fde3a3b41a22648c28e71880670c5ab88801d8b1ba3808cb3cd548210f89"
+    },
+    {
+      "file": "av1-show-existing-equal-id-intra-slot7.obu",
+      "sha256": "cdc26c8cee29b8a8f387c51fa87bc05760dac8298f9ef620209cdba669a40d97",
+      "shown": 2,
+      "webm": "av1-show-existing-equal-id-intra-slot7.webm",
+      "webm_sha256": "21ad8019f8f2fc6e8d9e7b61a93c3d88746bdfe92ee3557920bdcfd1820cc6a6"
+    },
+    {
+      "file": "av1-show-existing-window-edge.obu",
+      "sha256": "2061cf1d13053765606bf63bf7ecb3138aef56c06324670a6156083632821e1b",
+      "shown": 1
+    },
+    {
+      "file": "av1-show-existing-window-wrap.obu",
+      "sha256": "768e2324beac4bd22318796833ed22ebd33329d33783c4d435f651386c70ce53",
+      "shown": 1
+    }
+  ],
+  "refusals": [
+    {
+      "file": "av1-show-existing-invalid-id-mismatch.obu",
+      "sha256": "f121a90f6d03384791a2a3e6ef0b8bd9364a509bba06221af7b879a02fde8365",
+      "error": "AV1 show-existing frame ID does not match reference"
+    },
+    {
+      "file": "av1-show-existing-invalid-stale-id.obu",
+      "sha256": "ae48a2e63b1790fa16d7953c576d64fb527d33a83017131f56a55eed56433c47",
+      "error": "AV1 show-existing frame ID does not match reference"
+    },
+    {
+      "file": "av1-show-existing-invalid-truncated-time.obu",
+      "sha256": "f770397a49844febeec7a959f0cfef69f0fdb2f42085b6c4ae3936f906847f40",
+      "error": "truncated or oversized bit field"
+    },
+    {
+      "file": "av1-show-existing-invalid-missing-trailing.obu",
+      "sha256": "093d6a658a597dc212cba4e9ab89020915680cd191dc7b3ad31a0908afa8ff43",
+      "error": "missing AV1 frame header trailing bit"
+    },
+    {
+      "file": "av1-show-existing-invalid-nonzero-trailing.obu",
+      "sha256": "4705d34772cb9e2f0c62c2f572e759412ee7e0ebc81fc29c34e7801d8775f10a",
+      "error": "nonzero AV1 frame header trailing bits"
+    },
+    {
+      "file": "av1-show-existing-invalid-wrong-obu-kind.obu",
+      "sha256": "17762cf5750ff835ab4606ec7df0bd75662d5a4e50f857cb174c1e49a1f8dbfb",
+      "error": "AV1 show-existing requires frame header OBU"
+    },
+    {
+      "file": "av1-show-existing-invalid-truncated-id.obu",
+      "sha256": "d4cac3f0ae952580e3d5831398cab7dcb97c194ea5690374cc93d9c8e8625c0c",
+      "error": "truncated or oversized bit field"
+    }
+  ]
+}

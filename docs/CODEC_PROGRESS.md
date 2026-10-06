@@ -3421,3 +3421,16 @@ The first temporal draft removed part of the co-located source's reference pair,
 
 
 2026-10-07 explicit/weighted CABAC B canonical non-paired reference qualification: 2,304 owned streams retain a complete initial I pair and a non-paired field from a different I pair while forming the newer complete I/P pair, a non-reference full B picture, later fields explicitly selecting the old non-paired field, and a final full P frame. Coverage includes 8/10-bit, both field orders, three init banks, ASO, intra/motion source pairs, two selected reference indices, L0/L1 16x16 and Bi16x16/16x8/8x16/8x8 partitions, ordinary averaging, explicit identity/non-identity and implicit weighting. Acceptance gates actual PPS mode, both active list counts, every explicit per-plane weight/offset, partition shapes/directions/selected references/MVD, zero residual, native frame/field boundaries, marking and later individual-field selection. Every native pixel (mapped from decode to presentation order), software picture identity/PTS, reset/rewind/seek matches saved JM output. Explicit identity equals ordinary averaging; implicit weighting equals averaging for single-list prediction and changes bidirectional B output. Changing selected reference indices changes the B picture in all 1,152 matched controls while other pictures remain identical. Weighting leaves the other pictures and later retained-field output unchanged; init/ASO controls match. All 2,304 video/oracle hash pairs were verified, and selected media timing/pixel visitors pass. No decoder implementation change was required. Generation alone uses explicitly supplied local JM; ordinary tests are offline without external codecs. Scope: full PAFF B frames crossing canonical field ownership, split single-MB slices, QP50/filter-disabled 8/10-bit 4:2:0, explicit motion with zero residual. Weighted B-field crossings, richer residual/subpartition/transform8/bypass/filtering combinations and other codec/profile/tool gaps remain open; overall codec completeness is not achieved.
+
+## AV1 show-existing metadata (2026-10-07)
+
+Native AV1 now accepts show-existing presentation timestamps and display frame
+IDs for hidden key/intra-only references. Stored IDs are validated and stale
+references are invalidated at the normative ID window, including wraparound.
+Inter frame IDs remain unsupported; this is not full AV1 conformance.
+
+26 owned OBU acceptance fixtures were independently decoded by libaom; seven
+malformed streams assert specific refusals and reset behavior. The original
+decoder reproduced the timing/frame-ID unsupported error on the valid fixture.
+24 WebM variants verify native pixels, relative display timing, rewind and seek.
+Ordinary tests are offline and require neither FFmpeg nor libaom.

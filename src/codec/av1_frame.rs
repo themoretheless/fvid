@@ -30,6 +30,7 @@ pub struct Cdef {
 #[derive(Clone, Debug)]
 pub struct Header {
     pub frame_type: u8,
+    pub frame_id: Option<u32>,
     pub show: bool,
     pub showable: bool,
     pub error_resilient: bool,
@@ -124,9 +125,10 @@ impl Header {
             false
         };
         let integer_mv = integer_mv || intra;
-        if let Some((_, total)) = s.frame_id_bits {
-            b.read(total)?;
-        }
+        let frame_id = s
+            .frame_id_bits
+            .map(|(_, total)| b.read(total))
+            .transpose()?;
         let override_size = frame_type == 3 || (!s.reduced_header && b.bit()?);
         let order_hint = b.read(s.order_hint_bits)?;
         let primary_reference = if intra || error_resilient {
@@ -432,6 +434,7 @@ impl Header {
         align(b)?;
         Ok(Self {
             frame_type,
+            frame_id,
             show,
             showable,
             error_resilient,

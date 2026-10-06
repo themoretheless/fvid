@@ -1140,3 +1140,15 @@ Scope correction for historical mixed-long fixtures: H.264 7.4.3.3 requires both
 
 
 `avc-unified-explicit-b-*`: 2,304 owned CABAC full B pictures through canonical non-paired field storage. Generate separately with `scripts/generate_avc_unified_explicit_b_samples.py --jm-decoder /path/to/ldecod.exe`. Acceptance `explicit_weighted_b_crosses_canonical_nonpaired_fields_and_matches_jm` gates weights, active references, partitions/MVD and marking, then verifies saved pixels, reordered native/playback output, timing, reset/rewind/seek and identity/reference/init/ASO controls. Includes L0/L1 and Bi16x16/16x8/8x16/8x8, explicit and implicit weighting. Scope: PAFF full B frames, QP50, no filtering, zero residual, single-MB slices and 8/10-bit 4:2:0; B-field and additional transform/residual combinations remain separate. Ordinary tests invoke no external decoder or network.
+
+### AV1 show-existing timing and frame IDs
+
+`python3 scripts/generate_av1_show_existing_samples.py` writes 26 owned OBU
+acceptance streams, seven malformed refusal streams and 24 WebM variants.
+The WebM blocks mark coded hidden frames invisible. The manifest records hashes.
+No source video or external codec is needed for generation or ordinary tests.
+For optional independent reference validation, compile
+`scripts/av1_show_existing_oracle.c` against libaom and pass its executable
+with `--oracle`; this reference helper is not used by ordinary tests.
+Acceptance checks flat reconstructed pixels, timing, rewind and seek; refusal
+checks truncated metadata, invalid IDs, trailing bits and OBU kind.
