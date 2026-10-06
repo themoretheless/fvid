@@ -1,7 +1,38 @@
 //! Planar YUV sample conversion for owned RGB filters.
 use crate::owned_frame::GeometryFrame;
+use std::collections::HashMap;
+use std::sync::{Mutex, OnceLock};
+
 type Result<T> = std::result::Result<T, String>;
-#[derive(Clone, Copy, Debug)]
+
+// Chroma upsampling LUTs for 4:2:0 and 4:2:2
+static CHROMA_LUTS: OnceLock<HashMap<Matrix, [f32; 4]>> = OnceLock::new();
+
+fn get_chroma_lut(matrix: Matrix) -> &'static [f32; 4] {
+    CHROMA_LUTS.get_or_init(|| {
+        let mut luts = HashMap::new();
+        
+        // Precompute chroma interpolation weights for each color matrix
+        for &mat in &[Matrix::Bt601, Matrix::Bt709, Matrix::Bt2020] {
+            let kr = match mat {
+                Matrix::Bt601 => 0.299_f32,
+                Matrix::Bt709 => 0.2126_f32,
+                Matrix::Bt2020 => 0.2627_f32,
+            };
+            let kb = match mat {
+                Matrix::Bt601 => 0.114_f32,
+                Matrix::Bt709 => 0.0722_f32,
+                Matrix::Bt2020 => 0.0593_f32,
+            };
+            let kg = 1.0 - kr - kb;
+            
+            luts.insert(mat, [kr, kb, kg, 1.0]);
+        }
+        luts
+    }).get(&matrix).expect("all supported colour matrices are initialized")
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Matrix {
     Bt601,
     Bt709,
