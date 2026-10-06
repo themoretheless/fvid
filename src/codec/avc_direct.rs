@@ -267,6 +267,7 @@ pub struct DirectPrediction<'a> {
     pub list0: &'a [FrameReference],
     pub list1: &'a [FrameReference],
     /// Motion of list1[0]; None means an entirely intra-coded reference picture.
+    pub colocated_field_pocs: [i32; 2],
     pub colocated: Option<&'a ReferenceMotionField>,
 }
 impl DirectPrediction<'_> {
@@ -290,11 +291,14 @@ impl DirectPrediction<'_> {
         } else {
             position
         };
-        let col = self
+        let located = self
             .colocated
-            .map(|field| field.colocated(selected))
-            .transpose()?
-            .flatten();
+            .map(|field| {
+                field.colocated_for_frame(selected, self.current_poc, self.colocated_field_pocs)
+            })
+            .transpose()?;
+        let col = located.and_then(|c| c.motion);
+        let scale = located.map_or(ColocatedScale::Same, |c| c.scale);
         let result = if self.spatial {
             spatial_direct(
                 neighbours,
@@ -311,7 +315,7 @@ impl DirectPrediction<'_> {
                     .ok_or_else(|| invalid("co-located reference is absent from list0"))?,
             };
             let vectors = temporal_direct(
-                col.map_or([0; 2], |m| m.vector),
+                scale.temporal_vector(col.map_or([0; 2], |m| m.vector))?,
                 self.current_poc.into(),
                 self.list0[index].poc.into(),
                 self.list1[0].poc.into(),
@@ -353,6 +357,106 @@ mod tests {
             poc,
             long_term_index: None,
         }
+    }
+    #[test]
+    fn joined_field_frame_direct_selects_poc_and_scales_temporal_only() {
+        use super::super::avc_reference_motion::ReferenceMotion;
+        let make = |bottom, vector| {
+            ReferenceMotionField::new(
+                16,
+                16,
+                vec![
+                    [
+                        Some(ReferenceMotion {
+                            picture_id: 7,
+                            reference_index: 0,
+                            reference_bottom_field: Some(bottom),
+                            vector
+                        }),
+                        None
+                    ];
+                    16
+                ],
+            )
+            .unwrap()
+        };
+        let top = make(false, [8, -4]);
+        let bottom = make(true, [16, 2]);
+        let joined =
+            ReferenceMotionField::weave_fields(Some(&top), Some(&bottom), 16, 32, 65536).unwrap();
+        let l0 = [reference(99, -4), reference(7, 0)];
+        let l1 = [reference(9, 8)];
+        let empty = Neighbours {
+            left: Neighbour::Unavailable,
+            top: Neighbour::Unavailable,
+            top_right: Neighbour::Unavailable,
+            top_left: Neighbour::Unavailable,
+        };
+        let mut context = DirectPrediction {
+            spatial: false,
+            inference8: true,
+            current_poc: 4,
+            list0: &l0,
+            list1: &l1,
+            colocated_field_pocs: [0, 8],
+            colocated: Some(&joined),
+        };
+        // Equal distances select bottom; the stable reference is L0[1], and
+        // its field vertical vector doubles before temporal POC weighting.
+        assert_eq!(
+            context.derive([8, 24], [empty; 2]).unwrap(),
+            [
+                Neighbour::Inter {
+                    reference: 1,
+                    vector: [8, 2]
+                },
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [-8, -2]
+                }
+            ]
+        );
+        context.current_poc = 3;
+        assert_eq!(
+            context.derive([0, 0], [empty; 2]).unwrap(),
+            [
+                Neighbour::Inter {
+                    reference: 1,
+                    vector: [3, -3]
+                },
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [-5, 5]
+                }
+            ]
+        );
+        let raw = make(false, [0, 1]);
+        let joined_raw =
+            ReferenceMotionField::weave_fields(Some(&raw), Some(&raw), 16, 32, 65536).unwrap();
+        context.spatial = true;
+        context.colocated = Some(&joined_raw);
+        let neighbour = Neighbours {
+            left: Neighbour::Inter {
+                reference: 0,
+                vector: [12, 8],
+            },
+            ..empty
+        };
+        // Eager field-to-frame doubling would turn [0,1] into [0,2] and
+        // incorrectly suppress spatial colZeroFlag.
+        assert_eq!(
+            context.derive([0, 0], [neighbour; 2]).unwrap(),
+            [
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [0, 0]
+                },
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: [0, 0]
+                }
+            ]
+        );
     }
     #[test]
     fn migrated_frame_direct_scales_temporal_only_and_maps_current_parity() {
@@ -807,6 +911,7 @@ mod tests {
             current_poc: 2,
             list0: &list0,
             list1: &list1,
+            colocated_field_pocs: [0, 0],
             colocated: Some(&stored),
         };
         let MacroblockType::Inter { mut partitions, .. } =

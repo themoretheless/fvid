@@ -100,6 +100,57 @@ impl<T> FieldBuffer<T> {
         }
         Ok(result)
     }
+    /// Transfer complete, equally marked pairs without changing decoded IDs.
+    /// An incomplete or mixed-marked store needs unified field/frame storage;
+    /// do not silently omit a live reference during this conversion.
+    pub(super) fn into_frames<U>(
+        self,
+        convert: impl Fn(&Arc<T>, &Arc<T>, super::avc_poc::FieldOrder) -> Result<Arc<U>>,
+    ) -> Result<super::avc_dpb::ReferenceBuffer<U>> {
+        let mut frames = Vec::new();
+        frames
+            .try_reserve_exact(self.stores.len())
+            .map_err(|_| invalid("cannot allocate migrated AVC frames"))?;
+        for store in self.stores {
+            let [Some(top), Some(bottom)] = store.fields else {
+                return Err(crate::unsupported(
+                    "AVC incomplete field reference pair requires unified frame storage",
+                ));
+            };
+            if top.long != bottom.long {
+                return Err(crate::unsupported(
+                    "AVC mixed field reference marking requires unified frame storage",
+                ));
+            }
+            let order = super::avc_poc::FieldOrder {
+                top: Some(top.poc),
+                bottom: Some(bottom.poc),
+            };
+            let picture = match (&top.picture, &bottom.picture) {
+                (Some(a), Some(b)) => Some(convert(a, b, order)?),
+                (None, None) => None,
+                _ => return Err(invalid("AVC migrated reference has only one decoded field")),
+            };
+            frames.push((
+                super::avc_references::FrameReference {
+                    id: store.id,
+                    frame_num: store.frame_num,
+                    poc: order.picture(),
+                    long_term_index: top.long,
+                },
+                picture,
+                top.known_poc && bottom.known_poc,
+                (top.known_poc && bottom.known_poc).then_some(order),
+            ));
+        }
+        super::avc_dpb::ReferenceBuffer::from_field_storage(
+            self.bits,
+            self.capacity,
+            self.limit,
+            self.initialized,
+            frames,
+        )
+    }
     pub fn references(&self) -> Vec<FieldFrameReference> {
         self.stores
             .iter()
@@ -510,5 +561,150 @@ impl<T> FieldBuffer<T> {
         self.limit = limit;
         self.initialized = true;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod migration_tests {
+    use super::super::avc_poc::FieldOrder;
+    use super::*;
+    #[test]
+    fn complete_pairs_transfer_ids_marking_pocs_and_pixel_free_gaps() {
+        let mut fields = FieldBuffer::new(4, 3).unwrap();
+        fields.limit = Some(2);
+        fields.initialized = true;
+        fields.stores = vec![
+            Store {
+                id: 7,
+                frame_num: 15,
+                fields: [
+                    Some(Field {
+                        poc: 8,
+                        long: Some(2),
+                        picture: Some(Arc::new(10)),
+                        known_poc: true,
+                    }),
+                    Some(Field {
+                        poc: 4,
+                        long: Some(2),
+                        picture: Some(Arc::new(20)),
+                        known_poc: true,
+                    }),
+                ],
+            },
+            Store {
+                id: 8,
+                frame_num: 0,
+                fields: [
+                    Some(Field {
+                        poc: 10,
+                        long: None,
+                        picture: None,
+                        known_poc: false,
+                    }),
+                    Some(Field {
+                        poc: 11,
+                        long: None,
+                        picture: None,
+                        known_poc: false,
+                    }),
+                ],
+            },
+        ];
+        let old = Arc::downgrade(fields.get(7, false).unwrap());
+        let frames = fields
+            .into_frames(|a, b, order| {
+                assert_eq!(
+                    order,
+                    FieldOrder {
+                        top: Some(8),
+                        bottom: Some(4)
+                    }
+                );
+                Ok(Arc::new(**a + **b))
+            })
+            .unwrap();
+        assert!(old.upgrade().is_none());
+        assert_eq!(**frames.get(7).unwrap(), 30);
+        assert!(frames.get(8).is_none());
+        assert_eq!(
+            frames.references(),
+            vec![
+                super::super::avc_references::FrameReference {
+                    id: 7,
+                    frame_num: 15,
+                    poc: 4,
+                    long_term_index: Some(2)
+                },
+                super::super::avc_references::FrameReference {
+                    id: 8,
+                    frame_num: 0,
+                    poc: 10,
+                    long_term_index: None
+                },
+            ]
+        );
+        assert_eq!(frames.inferred_field_order(8), None);
+        let restored = frames
+            .into_fields(|_, a| {
+                Ok((
+                    [Arc::clone(a), Arc::clone(a)],
+                    FieldOrder {
+                        top: Some(8),
+                        bottom: Some(4),
+                    },
+                ))
+            })
+            .unwrap();
+        assert_eq!(restored.limit, Some(2));
+        assert!(restored.initialized);
+        assert!(restored.pending.is_none());
+        for p in 0..2 {
+            assert!(!restored.stores[1].fields[p].as_ref().unwrap().known_poc);
+            assert_eq!(
+                restored.order(7, p != 0),
+                Some((if p == 0 { 8 } else { 4 }, true))
+            );
+        }
+    }
+    #[test]
+    fn unsupported_pair_shapes_are_not_silently_discarded() {
+        for mixed in [false, true] {
+            let mut fields = FieldBuffer::new(4, 3).unwrap();
+            fields.initialized = true;
+            fields.stores.push(Store {
+                id: 1,
+                frame_num: 0,
+                fields: [
+                    Some(Field {
+                        poc: 0,
+                        long: None,
+                        picture: Some(Arc::new(1)),
+                        known_poc: true,
+                    }),
+                    mixed.then(|| Field {
+                        poc: 1,
+                        long: Some(1),
+                        picture: Some(Arc::new(2)),
+                        known_poc: true,
+                    }),
+                ],
+            });
+            let error = fields
+                .into_frames::<i32>(|_, _, _| {
+                    panic!("unsupported metadata must fail before conversion")
+                })
+                .err()
+                .unwrap()
+                .to_string();
+            assert!(
+                error.contains(if mixed {
+                    "mixed field reference marking"
+                } else {
+                    "incomplete field reference pair"
+                }),
+                "{error}"
+            );
+        }
     }
 }

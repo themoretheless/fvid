@@ -465,6 +465,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                         current_poc: context.current_poc,
                         list0: context.list0,
                         list1: context.list1,
+                        colocated_field_pocs: context.colocated_field_pocs,
                         colocated: context.colocated,
                     });
                     let direct = slice_direct.as_ref();
@@ -975,6 +976,7 @@ mod tests {
                 current_poc: 2,
                 list0: &l0,
                 list1: &l1,
+                colocated_field_pocs: [0, 0],
                 colocated: None,
             };
             for implicit in [false, true] {
@@ -1165,6 +1167,7 @@ mod tests {
             current_poc: 2,
             list0: &l0,
             list1: &l1,
+            colocated_field_pocs: [0, 0],
             colocated: Some(&colocated),
         };
         let (picture, motion) = decode_inter_slices_with_motion(

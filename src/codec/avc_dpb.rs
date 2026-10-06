@@ -48,6 +48,19 @@ impl<T> ReferenceBuffer<T> {
             convert,
         )
     }
+    pub(super) fn from_field_storage(
+        bits: u8,
+        capacity: usize,
+        limit: Option<u32>,
+        initialized: bool,
+        frames: Vec<(FrameReference, Option<Arc<T>>, bool, Option<FieldOrder>)>,
+    ) -> Result<Self> {
+        let mut result = Self::new(bits, capacity as u32)?;
+        result.max_long_term_index = limit;
+        result.initialized = initialized;
+        result.frames = frames;
+        Ok(result)
+    }
     pub fn get(&self, id: u64) -> Option<&Arc<T>> {
         self.frames
             .iter()

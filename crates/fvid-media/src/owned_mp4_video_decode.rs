@@ -473,6 +473,11 @@ mod tests {
             "avc-field-b-reset-gap-poc2-10bit-bottom-first-spatial-skip-cavlc-filter2-initialshort",
             "avc-frame-to-field-long-8bit-top-first-coded-filter0",
             "avc-frame-to-field-long-10bit-bottom-first-skip-filter2",
+            "avc-field-frame-paff-8bit-top-long-p-coded-motion",
+            "avc-field-frame-paff-10bit-bottom-short-temporal-coded-motion",
+            "avc-field-frame-mbaff-8bit-top-long-spatial-skip-motion",
+            "avc-field-frame-roundtrip-mbaff-10bit-bottom-temporal-coded-motion",
+            "avc-field-frame-roundtrip-paff-8bit-top-spatial-skip-motion",
             "avc-frame-field-direct-paff-8bit-top-temporal-coded-motion",
             "avc-frame-field-direct-mbaff-8bit-bottom-spatial-skip-motion",
             "avc-frame-field-direct-field-10bit-top-temporal-coded-motion",
@@ -604,6 +609,10 @@ mod tests {
             "avc-field-weight-10bit-bottom-first-residual-weighted-filter2-aso",
         ] {
             let oracle = std::fs::read(root.join(format!("{name}.yuv"))).unwrap();
+            let field_frame = name.starts_with("avc-field-frame-");
+            let roundtrip = name.starts_with("avc-field-frame-roundtrip-");
+            let field_frame_b = field_frame && !roundtrip && !name.contains("-p-");
+            let field_frame_p = field_frame && !roundtrip && !field_frame_b;
             let paff_intra = name.starts_with("avc-paff-intra-")
                 || name.starts_with("avc-paff-cabac-8bit-")
                 || name.starts_with("avc-paff-cabac-10bit-");
@@ -634,7 +643,13 @@ mod tests {
                 || name.starts_with("avc-field-b-longterm-")
                 || name.starts_with("avc-field-b-gap-")
                 || name.starts_with("avc-field-b-cabac-sub-");
-            let count = if paff_intra {
+            let count = if roundtrip {
+                4
+            } else if field_frame_b {
+                3
+            } else if field_frame_p {
+                2
+            } else if paff_intra {
                 1
             } else if paff_b {
                 3
@@ -678,7 +693,13 @@ mod tests {
                 assert_eq!(
                     (frame.sample, frame.pts, frame.duration),
                     (
-                        if paff_b {
+                        if roundtrip {
+                            [0, 2, 5, 3][calls]
+                        } else if field_frame_b {
+                            [0, 4, 2][calls]
+                        } else if field_frame_p {
+                            [0, 2][calls]
+                        } else if paff_b {
                             [0, 2, 1][calls]
                         } else if frame_to_fields || paff_inter {
                             [0, 1][calls]
@@ -693,7 +714,13 @@ mod tests {
                         } else {
                             calls * 2
                         },
-                        if let Some(poc) = implicit_poc {
+                        if roundtrip {
+                            [0, 2, 4, 8][calls]
+                        } else if field_frame_b {
+                            [0, 4, 8][calls]
+                        } else if field_frame_p {
+                            [0, 2][calls]
+                        } else if let Some(poc) = implicit_poc {
                             [0, poc, 8][calls]
                         } else if reordered_four {
                             [0, 4, 6, 8][calls]
@@ -706,7 +733,13 @@ mod tests {
                         } else {
                             calls as i64 * 2
                         },
-                        if let Some(poc) = implicit_poc {
+                        if roundtrip {
+                            [2, 2, 4, 2][calls]
+                        } else if field_frame_b {
+                            [4, 4, 2][calls]
+                        } else if field_frame_p {
+                            [2, 1][calls]
+                        } else if let Some(poc) = implicit_poc {
                             [poc, 8 - poc, 1][calls]
                         } else if paff_intra || (paff_inter && calls == 1) || (paff_b && calls == 2)
                         {
@@ -721,7 +754,13 @@ mod tests {
                 assert_eq!(
                     (start, duration),
                     (
-                        if let Some(poc) = implicit_poc {
+                        if roundtrip {
+                            [0, 2, 4, 8][calls] * 20_000_000
+                        } else if field_frame_b {
+                            [0, 4, 8][calls] * 20_000_000
+                        } else if field_frame_p {
+                            [0, 2][calls] * 20_000_000
+                        } else if let Some(poc) = implicit_poc {
                             [0, poc as u64, 8][calls] * 20_000_000
                         } else if reordered_four {
                             [0, 4, 6, 8][calls] * 20_000_000
@@ -734,7 +773,13 @@ mod tests {
                         } else {
                             calls as u64 * 40_000_000
                         },
-                        if let Some(poc) = implicit_poc {
+                        if roundtrip {
+                            [2, 2, 4, 2][calls] * 20_000_000
+                        } else if field_frame_b {
+                            [4, 4, 2][calls] * 20_000_000
+                        } else if field_frame_p {
+                            [2, 1][calls] * 20_000_000
+                        } else if let Some(poc) = implicit_poc {
                             [poc as u64, 8 - poc as u64, 1][calls] * 20_000_000
                         } else if paff_intra || (paff_inter && calls == 1) || (paff_b && calls == 2)
                         {

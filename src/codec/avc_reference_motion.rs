@@ -184,6 +184,84 @@ impl ReferenceMotionField {
             },
         })
     }
+    /// Join native compact-field maps in pair-addressed storage. Raw field
+    /// vectors and selected reference parity remain intact for spatial direct.
+    pub(super) fn weave_fields(
+        top: Option<&Self>,
+        bottom: Option<&Self>,
+        width: usize,
+        height: usize,
+        budget: usize,
+    ) -> Result<Self> {
+        let bytes = Self::storage_bytes(width, height)?;
+        if height % 32 != 0
+            || bytes > budget
+            || [top, bottom]
+                .into_iter()
+                .flatten()
+                .any(|m| m.is_mbaff() || m.dimensions() != [width, height / 2])
+        {
+            return Err(invalid("invalid woven AVC field motion geometry or budget"));
+        }
+        let count = width / 4 * (height / 4);
+        let mut cells = Vec::new();
+        cells
+            .try_reserve_exact(count)
+            .map_err(|_| invalid("cannot allocate woven AVC motion"))?;
+        for pair in 0..width / 16 * (height / 32) {
+            for source in [top, bottom] {
+                for row in 0..4 {
+                    for column in 0..4 {
+                        let position = [
+                            pair % (width / 16) * 16 + column * 4,
+                            pair / (width / 16) * 16 + row * 4,
+                        ];
+                        cells.push(
+                            source
+                                .map(|m| m.at(position))
+                                .transpose()?
+                                .unwrap_or([None; 2]),
+                        );
+                    }
+                }
+            }
+        }
+        let mut flags = Vec::new();
+        flags
+            .try_reserve_exact(count / 32)
+            .map_err(|_| invalid("cannot allocate woven AVC pair flags"))?;
+        flags.resize(count / 32, true);
+        Self::new_mbaff(width, height, cells, flags)
+    }
+    /// Full-frame current coordinates against a stored full frame or joined
+    /// separate fields. The nearest co-located field uses bottom on POC ties.
+    pub fn colocated_for_frame(
+        &self,
+        position: [usize; 2],
+        current_poc: i32,
+        reference_pocs: [i32; 2],
+    ) -> Result<MbaffColocated> {
+        if position.iter().any(|p| p % 4 != 0)
+            || position[0] >= self.width
+            || position[1] >= self.height
+        {
+            return Err(invalid("invalid frame co-located position"));
+        }
+        if !self.is_mbaff() {
+            return Ok(MbaffColocated {
+                motion: self.colocated(position)?,
+                scale: ColocatedScale::Same,
+            });
+        }
+        let pair = position[1] / 32 * (self.width / 16) + position[0] / 16;
+        self.colocated_mbaff(
+            pair * 2 + position[1] / 16 % 2,
+            [position[0] % 16, position[1] % 16],
+            false,
+            current_poc,
+            reference_pocs,
+        )
+    }
     /// Select the stored 4x4 cell containing this coded-luma position.
     pub fn at(&self, position: [usize; 2]) -> Result<[Option<ReferenceMotion>; 2]> {
         if self.is_mbaff() {
@@ -242,6 +320,85 @@ pub fn map_reference_mbaff(
 mod tests {
     use super::super::{avc_motion_field::MotionField, avc_mv::Neighbour};
     use super::*;
+    #[test]
+    fn woven_field_motion_keeps_parity_raw_vectors_and_frame_selection() {
+        let make = |bottom| {
+            let cells = (0..64)
+                .map(|i| {
+                    let m = ReferenceMotion {
+                        picture_id: (100 * usize::from(bottom) + i) as u64,
+                        reference_index: 0,
+                        reference_bottom_field: Some(bottom),
+                        vector: [7, -3],
+                    };
+                    match i % 3 {
+                        0 => [Some(m), None],
+                        1 => [None, Some(m)],
+                        _ => [None; 2],
+                    }
+                })
+                .collect();
+            ReferenceMotionField::new(32, 32, cells).unwrap()
+        };
+        let top = make(false);
+        let bottom = make(true);
+        let bytes = ReferenceMotionField::storage_bytes(32, 64).unwrap();
+        let joined =
+            ReferenceMotionField::weave_fields(Some(&top), Some(&bottom), 32, 64, bytes).unwrap();
+        for parity in [false, true] {
+            for y in (0..32).step_by(4) {
+                for x in (0..32).step_by(4) {
+                    let expected = if parity {
+                        bottom.at([x, y])
+                    } else {
+                        top.at([x, y])
+                    }
+                    .unwrap();
+                    assert_eq!(
+                        joined.at_mbaff([x, 2 * y + usize::from(parity)]).unwrap(),
+                        (expected, true)
+                    );
+                }
+            }
+        }
+        for current in [0, 6, 12] {
+            for y in (0..64).step_by(4) {
+                for x in (0..32).step_by(4) {
+                    // Table 8-8's current-frame block selects a field 8x8 row,
+                    // independently of the physical interleaving used for pixels.
+                    let selected_bottom = current >= 6;
+                    let source = if selected_bottom { &bottom } else { &top };
+                    let source_y = y / 32 * 16 + (y / 16 % 2) * 8 + (y % 16 / 8) * 4;
+                    let expected = source.colocated([x, source_y]).unwrap();
+                    assert_eq!(
+                        joined
+                            .colocated_for_frame([x, y], current, [2, 10])
+                            .unwrap(),
+                        MbaffColocated {
+                            motion: expected,
+                            scale: ColocatedScale::FieldToFrame
+                        }
+                    );
+                }
+            }
+        }
+        let mixed = ReferenceMotionField::weave_fields(None, Some(&bottom), 32, 64, bytes).unwrap();
+        assert!(
+            mixed
+                .colocated_for_field([0, 0], false)
+                .unwrap()
+                .motion
+                .is_none()
+        );
+        assert!(
+            ReferenceMotionField::weave_fields(Some(&top), Some(&bottom), 32, 64, bytes - 1)
+                .is_err()
+        );
+        assert!(
+            ReferenceMotionField::weave_fields(Some(&top), Some(&bottom), 16, 64, bytes).is_err()
+        );
+        assert!(joined.colocated_for_frame([32, 0], 0, [2, 10]).is_err());
+    }
     #[test]
     fn field_colocated_selection_matches_independent_frame_and_pair_indices() {
         let fields = vec![false, true, true, false];
