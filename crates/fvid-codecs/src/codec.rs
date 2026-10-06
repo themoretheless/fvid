@@ -171,6 +171,8 @@ mod hevc_transform_tables;
 pub mod hevc_transform_tree;
 #[path = "../../../src/codec/hevc_tree.rs"]
 pub mod hevc_tree;
+#[path = "../../../src/codec/hevc_tiles.rs"]
+pub mod hevc_tiles;
 #[path = "../../../src/codec/hevc_vps.rs"]
 pub mod hevc_vps;
 #[path = "../../../src/codec/hevc_vui.rs"]

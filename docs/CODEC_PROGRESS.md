@@ -2198,3 +2198,24 @@ PCM boundaries, other chroma formats or the remaining codec tools.
 
 Offline validation: codec library 355 passed / one explicit generation test
 ignored; CUDA-feature HEVC admission/SDK tests 16 passed. No device run is claimed.
+
+### HEVC tile-scan mapping and explicit reproduction (2026-10-06)
+
+The owned 64x64 I/B/B fixture has two vertical tiles, two entropy substreams
+per picture, no PCM/chroma-QP list/WPP, and disabled filters. Its tile-scan
+CTU raster addresses are 0,2,1,3; this is deliberately non-raster order.
+Metadata checks the tile geometry and entry-point structure before reproducing
+the existing picture-tools refusal. Independent HM pixels are saved and
+regenerate byte identically; their future pixel/reset acceptance is explicitly
+ignored until tile entropy/reconstruction/filter-boundary support is connected.
+A passing refusal is not playback acceptance.
+
+The new bounded native TileLayout derives inverse raster/tile-scan maps,
+raster tile IDs, tile starts and CTU rectangles. It validates nonempty positive
+partitions, level tile-count limits, exact extents, CTU arithmetic and storage
+budget before construction. An asymmetric 3x3/four-tile test checks every map,
+rectangle and inverse address, and rejects insufficient budget/invalid extents.
+This is a required decoding foundation, not completed HEVC tile support.
+
+Offline codec suite: 358 passed, zero failures, two explicitly ignored
+tests (fixture generation and future tile reconstruction acceptance).
