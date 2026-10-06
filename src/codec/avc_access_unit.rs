@@ -1,4 +1,4 @@
-//! Bounded raster-ordered AVC access-unit preparation before reconstruction.
+//! Bounded AVC access-unit preparation; arbitrary slice order is normalized before reconstruction.
 use super::{
     avc::{Pps, Sps},
     avc_slice::SliceHeader,
@@ -41,7 +41,7 @@ pub fn prepare<'a>(
         if header.first_mb >= count {
             return Err(invalid("AVC slice starts outside picture"));
         }
-        if let Some(previous) = slices.last() {
+        if !slices.is_empty() {
             let first = &slices[0].header;
             if header.pps_id != first.pps_id
                 || header.frame_num != first.frame_num
@@ -53,6 +53,7 @@ pub fn prepare<'a>(
                 || header.poc_lsb != first.poc_lsb
                 || header.delta_poc_bottom != first.delta_poc_bottom
                 || header.delta_poc != first.delta_poc
+                || header.slice_group_change_cycle != first.slice_group_change_cycle
                 || (header.nal_ref_idc == 0) != (first.nal_ref_idc == 0)
                 || header.no_output_of_prior_pics != first.no_output_of_prior_pics
                 || header.long_term_reference != first.long_term_reference
@@ -63,14 +64,6 @@ pub fn prepare<'a>(
                     "AVC slices disagree on picture identity or reference marking",
                 ));
             }
-            if header.first_mb <= previous.header.first_mb {
-                return Err(invalid(
-                    "AVC slice macroblock addresses overlap or are not raster ordered",
-                ));
-            }
-            slices.last_mut().unwrap().macroblocks.end = header.first_mb;
-        } else if header.first_mb != 0 {
-            return Err(invalid("AVC access unit must begin at macroblock zero"));
         }
         let start = header.first_mb;
         slices.push(Slice {
@@ -78,6 +71,17 @@ pub fn prepare<'a>(
             header,
             macroblocks: start..count,
         });
+    }
+    slices.sort_unstable_by_key(|slice| slice.header.first_mb);
+    if slices.first().is_some_and(|s| s.header.first_mb != 0) {
+        return Err(invalid("AVC access unit must cover macroblock zero"));
+    }
+    for index in 0..slices.len().saturating_sub(1) {
+        let end = slices[index + 1].header.first_mb;
+        if slices[index].header.first_mb == end {
+            return Err(invalid("AVC slice macroblock addresses overlap"));
+        }
+        slices[index].macroblocks.end = end;
     }
     Ok(slices)
 }

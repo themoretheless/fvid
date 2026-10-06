@@ -172,6 +172,29 @@ pub fn decode_inter_resolved_slices_with_motion(
     direct_by_slice: &[Option<&super::avc_direct::DirectPrediction<'_>>],
     budget: usize,
 ) -> Result<(IntraPicture, MotionField)> {
+    let owned: Vec<_> = references_by_slice
+        .iter()
+        .map(|lists| {
+            [
+                lists[0].iter().map(|p| Some(*p)).collect::<Vec<_>>(),
+                lists[1].iter().map(|p| Some(*p)).collect::<Vec<_>>(),
+            ]
+        })
+        .collect();
+    let views: Vec<_> = owned
+        .iter()
+        .map(|lists| [lists[0].as_slice(), lists[1].as_slice()])
+        .collect();
+    decode_inter_optional_slices_with_motion(headers, sps, pps, &views, direct_by_slice, budget)
+}
+pub(crate) fn decode_inter_optional_slices_with_motion(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references_by_slice: &[[&[Option<&IntraPicture>]; 2]],
+    direct_by_slice: &[Option<&super::avc_direct::DirectPrediction<'_>>],
+    budget: usize,
+) -> Result<(IntraPicture, MotionField)> {
     let header = *headers
         .first()
         .ok_or_else(|| invalid("missing inter slices"))?;
@@ -192,7 +215,7 @@ pub fn decode_inter_resolved_slices_with_motion(
             .iter()
             .all(|h| matches!(h.slice_type, SliceType::I | SliceType::P) && !h.field_pic)
     {
-        return super::avc_mbaff_picture::decode_p_slices(
+        return super::avc_mbaff_picture::decode_optional_p_slices(
             headers,
             sps,
             pps,
@@ -210,7 +233,7 @@ pub fn decode_inter_resolved_slices_with_motion(
         || sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
-        || !matches!(pps.slice_groups, SliceGroups::Single)
+        || (pps.cabac && !matches!(pps.slice_groups, SliceGroups::Single))
         || header.redundant_pic_cnt != 0
     {
         return Err(invalid("unsupported inter-picture reconstruction tools"));
@@ -270,6 +293,10 @@ pub fn decode_inter_resolved_slices_with_motion(
         let mut planes = [Vec::new(), Vec::new()];
         for list in 0..2 {
             for r in references[list] {
+                let Some(r) = r else {
+                    planes[list].push(Reference420::unavailable(sps.bit_depth_luma)?);
+                    continue;
+                };
                 if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma {
                     return Err(invalid("inter-picture reference format mismatch"));
                 }
@@ -314,14 +341,33 @@ pub fn decode_inter_resolved_slices_with_motion(
     // reconstructed afterwards in decode order (pass B below).
     let mut order: Vec<Order> = Vec::with_capacity(count);
     let edge_rows: Vec<Mutex<Vec<DecodedBlockEdges>>> = (0..row_count)
-        .map(|_| Mutex::new(Vec::with_capacity(width_mbs)))
+        .map(|_| {
+            Mutex::new(
+                (0..width_mbs)
+                    .map(|_| DecodedBlockEdges {
+                        blocks: [BlockEdge {
+                            intra: false,
+                            switching_slice: false,
+                            nonzero_luma: false,
+                            motion: [None; 2],
+                        }; 16],
+                        qp: [0; 3],
+                        slice_id: u32::MAX,
+                        disable_filter: 1,
+                        offsets: [0; 2],
+                        transform8: false,
+                    })
+                    .collect(),
+            )
+        })
         .collect();
     let grid_rows: Vec<Mutex<Option<[Vec<MacroblockEdges>; 3]>>> =
         (0..row_count).map(|_| Mutex::new(None)).collect();
     // Rows the parser has completed; `usize::MAX` tells workers to stop.
     let progress = (Mutex::new(0usize), Condvar::new());
+    let fmo = !matches!(pps.slice_groups, SliceGroups::Single);
     let row_done = |seen: usize| {
-        if seen % width_mbs == 0 {
+        if !fmo && seen % width_mbs == 0 {
             let (rows, signal) = &progress;
             *rows.lock().unwrap_or_else(|e| e.into_inner()) = seen / width_mbs;
             signal.notify_all();
@@ -392,6 +438,7 @@ pub fn decode_inter_resolved_slices_with_motion(
                 .collect();
             let parsed: Result<()> = (|| {
                 let mut seen = 0;
+                let mut covered = vec![false; count];
                 for (slice_index, header) in headers.iter().enumerate() {
                     let slice_id = slice_index as u32;
                     let is_b = header.slice_type == SliceType::B;
@@ -421,13 +468,13 @@ pub fn decode_inter_resolved_slices_with_motion(
                         colocated: context.colocated,
                     });
                     let direct = slice_direct.as_ref();
-                    if header.first_mb as usize != seen {
+                    if !fmo && header.first_mb as usize != seen {
                         return Err(invalid("inter slice coverage gap or overlap"));
                     }
                     let end = headers
                         .get(slice_index + 1)
                         .map_or(count, |next| next.first_mb as usize);
-                    if end <= seen || end > count {
+                    if !fmo && (end <= seen || end > count) {
                         return Err(invalid("invalid inter slice range"));
                     }
                     if explicit_weights
@@ -442,7 +489,11 @@ pub fn decode_inter_resolved_slices_with_motion(
                     let mut cavlc = if pps.cabac || header.slice_type == SliceType::I {
                         None
                     } else {
-                        Some(InterCavlcSlice::new_mixed(header, sps, pps, count * 4096)?)
+                        Some(if fmo {
+                            InterCavlcSlice::new_fmo(header, sps, pps, count * 4096)?
+                        } else {
+                            InterCavlcSlice::new_mixed(header, sps, pps, count * 4096)?
+                        })
                     };
                     let mut cabac = if pps.cabac && header.slice_type != SliceType::I {
                         Some(super::avc_cabac_slice::InterCabacSlice::new(
@@ -456,12 +507,21 @@ pub fn decode_inter_resolved_slices_with_motion(
                     };
 
                     let mut intra_cavlc = if !pps.cabac && header.slice_type == SliceType::I {
-                        Some(super::avc_macroblock::IntraCavlcReader::new(
-                            header,
-                            sps,
-                            pps,
-                            count * 4096,
-                        )?)
+                        Some(if fmo {
+                            super::avc_macroblock::IntraCavlcReader::new_fmo(
+                                header,
+                                sps,
+                                pps,
+                                count * 4096,
+                            )?
+                        } else {
+                            super::avc_macroblock::IntraCavlcReader::new(
+                                header,
+                                sps,
+                                pps,
+                                count * 4096,
+                            )?
+                        })
                     } else {
                         None
                     };
@@ -490,7 +550,10 @@ pub fn decode_inter_resolved_slices_with_motion(
                     {
                         if let InterMacroblock::Intra(block) = mb {
                             let address = block.address as usize;
-                            if address != seen || seen >= end {
+                            if address >= count
+                                || covered[address]
+                                || (!fmo && (address != seen || seen >= end))
+                            {
                                 return Err(invalid("inter slice exceeds assigned range"));
                             }
                             motion.store(
@@ -515,8 +578,8 @@ pub fn decode_inter_resolved_slices_with_motion(
                             ];
                             edge_rows[address / width_mbs]
                                 .lock()
-                                .unwrap_or_else(|e| e.into_inner())
-                                .push(DecodedBlockEdges {
+                                .unwrap_or_else(|e| e.into_inner())[address % width_mbs] =
+                                DecodedBlockEdges {
                                     blocks: [BlockEdge {
                                         intra: true,
                                         switching_slice: false,
@@ -531,8 +594,9 @@ pub fn decode_inter_resolved_slices_with_motion(
                                         block.luma,
                                         super::avc_macroblock::IntraLuma::Blocks8 { .. }
                                     ),
-                                });
+                                };
                             order.push(Order::Intra(block));
+                            covered[address] = true;
                             seen += 1;
                             row_done(seen);
                             continue;
@@ -578,7 +642,10 @@ pub fn decode_inter_resolved_slices_with_motion(
                                 header.residual.transform8,
                             ),
                         };
-                        if address != seen || seen >= end {
+                        if address >= count
+                            || covered[address]
+                            || (!fmo && (address != seen || seen >= end))
+                        {
                             return Err(invalid("inter slice exceeds assigned range"));
                         }
                         let origin = [address % (w / 16) * 16, address / (w / 16) * 16];
@@ -689,9 +756,10 @@ pub fn decode_inter_resolved_slices_with_motion(
                                                     .iter()
                                                     .position(|r| {
                                                         std::ptr::eq(
-                                                            *r,
+                                                            r.expect("sampled reference exists"),
                                                             references[list]
-                                                                [usize::from(reference)],
+                                                                [usize::from(reference)]
+                                                            .expect("sampled reference exists"),
                                                         )
                                                     })
                                                     .unwrap()
@@ -718,15 +786,15 @@ pub fn decode_inter_resolved_slices_with_motion(
                         }
                         edge_rows[address / width_mbs]
                             .lock()
-                            .unwrap_or_else(|e| e.into_inner())
-                            .push(DecodedBlockEdges {
+                            .unwrap_or_else(|e| e.into_inner())[address % width_mbs] =
+                            DecodedBlockEdges {
                                 blocks,
                                 qp: qps.map(|q| i32::from(q) - bd),
                                 slice_id,
                                 disable_filter: header.disable_deblocking_filter_idc as u8,
                                 offsets: [header.alpha_offset, header.beta_offset],
                                 transform8: eight,
-                            });
+                            };
                         order.push(Order::Inter(origin));
                         bands[origin[1] / 16]
                             .lock()
@@ -743,10 +811,11 @@ pub fn decode_inter_resolved_slices_with_motion(
                                 bypass: sps.transform_bypass && qps[0] == 0,
                                 qps,
                             });
+                        covered[address] = true;
                         seen += 1;
                         row_done(seen);
                     }
-                    if seen != end {
+                    if !fmo && seen != end {
                         return Err(invalid("incomplete inter slice"));
                     }
                 }

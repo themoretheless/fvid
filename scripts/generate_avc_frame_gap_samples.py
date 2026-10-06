@@ -14,18 +14,23 @@ def main():
         for depth in [8,10]:
             for cabac in [False,True]:
                 for field in [False,True]:
-                    for poc_type in [0,1,2]:
+                    for poc_type, active_l0 in [(p,a) for p in [0,1,2] for a in [1,3]]:
                         configuration=config(depth,False,cabac,gaps_allowed=True,poc_type=poc_type)
                         nals=[picture(depth,'I',0,0,False,True,False,cabac=cabac,poc_type=poc_type),
-                              picture(depth,'P',3,2,field,True,False,cabac=cabac,l0_to_idr=True,poc_type=poc_type),
+                              picture(depth,'P',3,2,field,True,False,cabac=cabac,l0_to_idr=True,poc_type=poc_type,active_l0=active_l0),
                               picture(depth,'P',4,4,field,True,False,cabac=cabac,poc_type=poc_type)]
                         frames=[(index,index==0,len(n).to_bytes(4,'big')+n) for index,n in enumerate(nals)]
-                        name='avc-frame-num-gap-poc'+str(poc_type)+'-'+('field' if field else 'frame')+('-high10' if depth==10 else '')+'-'+('cabac' if cabac else 'cavlc')
+                        name=('avc-frame-num-gap-unused-' if active_l0>1 else 'avc-frame-num-gap-')+'poc'+str(poc_type)+'-'+('field' if field else 'frame')+('-high10' if depth==10 else '')+'-'+('cabac' if cabac else 'cavlc')
                         coded=directory/(name+'.264'); oracle=directory/(name+'.yuv'); coded.write_bytes(annexb(configuration,frames))
                         subprocess.run([str(args.jm_decoder),'-d',str(cfg),'-p',f'InputFile={coded}','-p',f'OutputFile={oracle}','-p','FileFormat=0','-p','RefFile=nonexistent.yuv'],cwd=directory,check=True)
                         pixels=oracle.read_bytes(); assert len(pixels)==3*16*32*3//2*(2 if depth>8 else 1)
                         data=mux(configuration,frames,16,32,25)
                         (output/(name+'.mp4')).write_bytes(data); (output/(name+'.yuv')).write_bytes(pixels)
                         records.append(dict(file=name+'.mp4',sha256=hashlib.sha256(data).hexdigest(),oracle_sha256=hashlib.sha256(pixels).hexdigest()))
+    configuration=config(8,False,False,gaps_allowed=True,poc_type=0)
+    nals=[picture(8,'I',0,0,False,True,False),
+          picture(8,'P',3,2,False,True,False,l0_to_idr=True,active_l0=3,selected_ref=1)]
+    frames=[(index,index==0,len(n).to_bytes(4,'big')+n) for index,n in enumerate(nals)]
+    (output/'avc-frame-num-gap-selected-missing.mp4').write_bytes(mux(configuration,frames,16,32,25))
     (output/'avc-frame-num-gap-generated.json').write_text(json.dumps(dict(generator='owned PCM/header/CAVLC/CABAC writer; explicit valid IDR selection across inferred gaps',jm_decoder_sha256=hashlib.sha256(args.jm_decoder.read_bytes()).hexdigest(),fixtures=records),indent=2)+'\n')
 if __name__=='__main__':main()

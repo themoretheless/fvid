@@ -131,7 +131,9 @@ pub fn decode_intra_slices(
             count
                 .checked_mul(
                     (if pps.cabac { 76 } else { 69 })
-                        + std::mem::size_of::<super::avc_deblock::MacroblockEdges>(),
+                        + std::mem::size_of::<super::avc_deblock::MacroblockEdges>()
+                        + std::mem::size_of::<usize>()
+                        + 2,
                 )
                 .and_then(|c| n.checked_add(c))
         })
@@ -158,9 +160,11 @@ pub fn decode_intra_slices(
     let mut ready = crate::buffer(count * 16)?;
     let mut eight = crate::buffer(count)?;
     let mut qps = [vec![0; count], vec![0; count], vec![0; count]];
+    let fmo = !matches!(pps.slice_groups, super::avc::SliceGroups::Single);
+    let mut owners = vec![usize::MAX; count];
     let mut seen = 0;
     for (slice_index, header) in headers.iter().enumerate() {
-        if header.first_mb as usize != seen {
+        if !fmo && header.first_mb as usize != seen {
             return Err(invalid("intra slice coverage gap or overlap"));
         }
         let end = headers
@@ -170,7 +174,11 @@ pub fn decode_intra_slices(
         let mut cavlc = if pps.cabac {
             None
         } else {
-            Some(IntraCavlcReader::new(header, sps, pps, 65536)?)
+            Some(if fmo {
+                IntraCavlcReader::new_fmo(header, sps, pps, 65536)?
+            } else {
+                IntraCavlcReader::new(header, sps, pps, 65536)?
+            })
         };
         let mut cabac = if pps.cabac {
             Some(super::avc_cabac_macroblock::IntraCabacReader::new(
@@ -185,9 +193,13 @@ pub fn decode_intra_slices(
             _ => unreachable!(),
         };
         while let Some(mb) = read_macroblock()? {
-            if mb.address as usize != seen || seen >= end {
+            if mb.address as usize >= count
+                || owners[mb.address as usize] != usize::MAX
+                || (!fmo && (mb.address as usize != seen || seen >= end))
+            {
                 return Err(invalid("intra slice exceeds assigned macroblock range"));
             }
+            owners[mb.address as usize] = slice_index;
             qps[0][mb.address as usize] = mb.qp;
             for component in 0..2 {
                 let offset = if component == 0 {
@@ -203,7 +215,7 @@ pub fn decode_intra_slices(
             reconstruct_macroblock(&mut picture, &mb, sps, pps, &scaling, &mut ready)?;
             seen += 1;
         }
-        if seen != end {
+        if !fmo && seen != end {
             return Err(invalid("incomplete intra slice"));
         }
     }
@@ -211,7 +223,7 @@ pub fn decode_intra_slices(
         return Err(invalid("incomplete intra picture"));
     }
     {
-        super::avc_deblock::intra_plane(
+        super::avc_deblock::intra_plane_owned(
             &mut picture.y,
             w,
             h,
@@ -220,8 +232,9 @@ pub fn decode_intra_slices(
             headers,
             false,
             &eight,
+            Some(&owners),
         )?;
-        super::avc_deblock::intra_plane(
+        super::avc_deblock::intra_plane_owned(
             &mut picture.cb,
             w / 2,
             h / 2,
@@ -230,8 +243,9 @@ pub fn decode_intra_slices(
             headers,
             true,
             &eight,
+            Some(&owners),
         )?;
-        super::avc_deblock::intra_plane(
+        super::avc_deblock::intra_plane_owned(
             &mut picture.cr,
             w / 2,
             h / 2,
@@ -240,6 +254,7 @@ pub fn decode_intra_slices(
             headers,
             true,
             &eight,
+            Some(&owners),
         )?;
     }
     Ok(picture)
@@ -270,11 +285,13 @@ mod tests {
     fn full_neutral_picture_and_visible_crop() {
         let (mut sps, pps, header) = fixture();
         sps.crop = [2, 4, 2, 6];
+        let old_budget = 837 + std::mem::size_of::<super::super::avc_deblock::MacroblockEdges>();
+        assert!(decode_intra_picture(&header, &sps, &pps, old_budget).is_err());
         let picture = decode_intra_picture(
             &header,
             &sps,
             &pps,
-            837 + std::mem::size_of::<super::super::avc_deblock::MacroblockEdges>(),
+            old_budget + std::mem::size_of::<usize>() + 2,
         )
         .unwrap();
         assert_eq!(picture.dimensions(), (10, 8));

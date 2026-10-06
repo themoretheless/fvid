@@ -1,6 +1,7 @@
 //! Progressive AVC reference-frame storage and marking (H.264 8.2.5).
 //! Output/display reordering is separate; retain an `Arc` for pictures awaiting display.
 use super::{
+    avc_poc::FieldOrder,
     avc_references::{FrameReference, ReferenceLists, frame_lists},
     avc_slice::{MemoryOperation, RefModification, SliceHeader, SliceType},
 };
@@ -15,7 +16,7 @@ pub struct ReferenceBuffer<T> {
     initialized: bool,
     // Inferred gap entries have no sample storage. Their POC is absent for
     // POC type 0, so B-list initialization must exclude those entries.
-    frames: Vec<(FrameReference, Option<Arc<T>>, bool)>,
+    frames: Vec<(FrameReference, Option<Arc<T>>, bool, Option<FieldOrder>)>,
 }
 impl<T> ReferenceBuffer<T> {
     pub fn new(frame_num_bits: u8, max_num_ref_frames: u32) -> Result<Self> {
@@ -33,11 +34,35 @@ impl<T> ReferenceBuffer<T> {
     pub fn get(&self, id: u64) -> Option<&Arc<T>> {
         self.frames
             .iter()
-            .find(|(r, _, _)| r.id == id)
-            .and_then(|(_, p, _)| p.as_ref())
+            .find(|(r, _, _, _)| r.id == id)
+            .and_then(|(_, p, _, _)| p.as_ref())
+    }
+    pub fn inferred_field_order(&self, id: u64) -> Option<FieldOrder> {
+        self.frames
+            .iter()
+            .find(|(r, _, _, _)| r.id == id)
+            .and_then(|(_, _, _, order)| *order)
+    }
+    /// Retain exact inferred field POCs alongside the pixel-free gap slot.
+    pub fn infer_nonexisting_fields(
+        &mut self,
+        frame_num: u32,
+        order: Option<FieldOrder>,
+        id: u64,
+    ) -> Result<()> {
+        if order.is_some_and(|o| o.top.is_none() || o.bottom.is_none()) {
+            return Err(invalid("AVC inferred frame requires both field POCs"));
+        }
+        self.infer_nonexisting(frame_num, order.map(FieldOrder::picture), id)?;
+        self.frames
+            .iter_mut()
+            .find(|(r, _, _, _)| r.id == id)
+            .expect("inserted gap slot")
+            .3 = order;
+        Ok(())
     }
     pub fn references(&self) -> Vec<FrameReference> {
-        self.frames.iter().map(|(r, _, _)| *r).collect()
+        self.frames.iter().map(|(r, _, _, _)| *r).collect()
     }
     pub fn lists(&self, header: &SliceHeader, poc: i32) -> Result<ReferenceLists> {
         if header.field_pic {
@@ -53,7 +78,11 @@ impl<T> ReferenceBuffer<T> {
             header.slice_type,
             SliceType::P | SliceType::Sp | SliceType::B
         ) {
-            if !self.frames.iter().any(|(_, picture, _)| picture.is_some()) {
+            if !self
+                .frames
+                .iter()
+                .any(|(_, picture, _, _)| picture.is_some())
+            {
                 return Err(invalid("AVC reference list has no existing picture"));
             }
             for commands in [&header.modifications_l0, &header.modifications_l1]
@@ -79,7 +108,7 @@ impl<T> ReferenceBuffer<T> {
                                 i64::from(n) + 1
                             })
                         .rem_euclid(i64::from(max));
-                        if self.frames.iter().any(|(reference, picture, _)| {
+                        if self.frames.iter().any(|(reference, picture, _, _)| {
                             picture.is_none()
                                 && reference.long_term_index.is_none()
                                 && i64::from(reference.frame_num) == predicted
@@ -95,8 +124,8 @@ impl<T> ReferenceBuffer<T> {
         let references: Vec<_> = self
             .frames
             .iter()
-            .filter(|(_, _, has_poc)| header.slice_type != SliceType::B || *has_poc)
-            .map(|(reference, _, _)| *reference)
+            .filter(|(_, _, has_poc, _)| header.slice_type != SliceType::B || *has_poc)
+            .map(|(reference, _, _, _)| *reference)
             .collect();
         frame_lists(
             &references,
@@ -124,14 +153,14 @@ impl<T> ReferenceBuffer<T> {
             let index = frames
                 .iter()
                 .enumerate()
-                .filter(|(_, (r, _, _))| r.long_term_index.is_none())
-                .min_by_key(|(_, (r, _, _))| wrapped(r.frame_num, frame_num, max))
+                .filter(|(_, (r, _, _, _))| r.long_term_index.is_none())
+                .min_by_key(|(_, (r, _, _, _))| wrapped(r.frame_num, frame_num, max))
                 .map(|(i, _)| i)
                 .ok_or_else(|| invalid("AVC sliding window has no short-term reference"))?;
             frames.remove(index);
         }
         if frames.len() >= self.capacity
-            || frames.iter().any(|(r, _, _)| {
+            || frames.iter().any(|(r, _, _, _)| {
                 r.id == id || (r.long_term_index.is_none() && r.frame_num == frame_num)
             })
         {
@@ -148,6 +177,7 @@ impl<T> ReferenceBuffer<T> {
             },
             None,
             poc.is_some(),
+            None,
         ));
         self.frames = frames;
         Ok(())
@@ -209,7 +239,7 @@ impl<T> ReferenceBuffer<T> {
                         let target = i64::from(header.frame_num) - (i64::from(difference) + 1);
                         let index = frames
                             .iter()
-                            .position(|(r, _, _)| {
+                            .position(|(r, _, _, _)| {
                                 r.long_term_index.is_none()
                                     && wrapped(r.frame_num, header.frame_num, max) == target
                             })
@@ -224,10 +254,10 @@ impl<T> ReferenceBuffer<T> {
                             }
                             check_long(long, limit)?;
                             let target_id = frames[index].0.id;
-                            frames.retain(|(r, _, _)| r.long_term_index != Some(long));
+                            frames.retain(|(r, _, _, _)| r.long_term_index != Some(long));
                             frames
                                 .iter_mut()
-                                .find(|(r, _, _)| r.id == target_id)
+                                .find(|(r, _, _, _)| r.id == target_id)
                                 .unwrap()
                                 .0
                                 .long_term_index = Some(long);
@@ -238,7 +268,7 @@ impl<T> ReferenceBuffer<T> {
                     MemoryOperation::ForgetLong(long) => {
                         let index = frames
                             .iter()
-                            .position(|(r, _, _)| r.long_term_index == Some(long))
+                            .position(|(r, _, _, _)| r.long_term_index == Some(long))
                             .ok_or_else(|| invalid("AVC MMCO selects missing long-term picture"))?;
                         frames.remove(index);
                     }
@@ -247,7 +277,7 @@ impl<T> ReferenceBuffer<T> {
                             return Err(invalid("AVC long-term limit exceeds reference capacity"));
                         }
                         limit = plus_one.checked_sub(1);
-                        frames.retain(|(r, _, _)| {
+                        frames.retain(|(r, _, _, _)| {
                             r.long_term_index
                                 .is_none_or(|n| limit.is_some_and(|l| n <= l))
                         });
@@ -267,7 +297,7 @@ impl<T> ReferenceBuffer<T> {
                         }
                         check_long(long, limit)?;
                         marked_current = true;
-                        frames.retain(|(r, _, _)| r.long_term_index != Some(long));
+                        frames.retain(|(r, _, _, _)| r.long_term_index != Some(long));
                         current.long_term_index = Some(long);
                     }
                 }
@@ -276,14 +306,14 @@ impl<T> ReferenceBuffer<T> {
             let index = frames
                 .iter()
                 .enumerate()
-                .filter(|(_, (r, _, _))| r.long_term_index.is_none())
-                .min_by_key(|(_, (r, _, _))| wrapped(r.frame_num, header.frame_num, max))
+                .filter(|(_, (r, _, _, _))| r.long_term_index.is_none())
+                .min_by_key(|(_, (r, _, _, _))| wrapped(r.frame_num, header.frame_num, max))
                 .map(|(i, _)| i)
                 .ok_or_else(|| invalid("AVC sliding window has no short-term reference"))?;
             frames.remove(index);
         }
         if frames.len() >= self.capacity
-            || frames.iter().any(|(r, _, _)| {
+            || frames.iter().any(|(r, _, _, _)| {
                 r.id == id
                     || (r.long_term_index.is_none()
                         && current.long_term_index.is_none()
@@ -294,7 +324,7 @@ impl<T> ReferenceBuffer<T> {
                 "AVC reference buffer capacity or identity conflict",
             ));
         }
-        frames.push((current, Some(picture), true));
+        frames.push((current, Some(picture), true, None));
         self.frames = frames;
         self.max_long_term_index = limit;
         self.initialized = true;
@@ -581,5 +611,39 @@ mod tests {
         b.finish(&h, 0, 2, Arc::new(2)).unwrap();
         assert!(b.get(0).is_none());
         assert!(b.get(2).is_some());
+    }
+    #[test]
+    fn inferred_field_orders_preserve_asymmetric_pocs_and_atomic_validation() {
+        let mut buffer = ReferenceBuffer::new(4, 3).unwrap();
+        let mut header = header();
+        header.idr = true;
+        buffer.finish(&header, 0, 0, Arc::new(())).unwrap();
+        let order = FieldOrder {
+            top: Some(7),
+            bottom: Some(3),
+        };
+        buffer.infer_nonexisting_fields(1, Some(order), 1).unwrap();
+        assert_eq!(buffer.inferred_field_order(1), Some(order));
+        assert!(buffer.get(1).is_none());
+        assert_eq!(buffer.references()[1].poc, 3);
+        let before = buffer.references();
+        assert!(
+            buffer
+                .infer_nonexisting_fields(
+                    2,
+                    Some(FieldOrder {
+                        top: Some(9),
+                        bottom: None
+                    }),
+                    2
+                )
+                .is_err()
+        );
+        assert_eq!(buffer.references(), before);
+        buffer.infer_nonexisting_fields(2, None, 2).unwrap();
+        assert_eq!(buffer.inferred_field_order(2), None);
+        buffer.infer_nonexisting_fields(3, Some(order), 3).unwrap();
+        buffer.infer_nonexisting_fields(4, Some(order), 4).unwrap();
+        assert_eq!(buffer.inferred_field_order(1), None);
     }
 }

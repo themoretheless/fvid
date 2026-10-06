@@ -82,7 +82,7 @@ def direct_cabac(field, init_idc, top_skip, qp=26):
         b.decision(77,0) # chroma coded_block_pattern=0
     return b.finish()
 
-def explicit_b_cabac(field, init_idc, qp=26):
+def explicit_b_cabac(field, init_idc, qp=26, active_l0=1):
     b=CabacWriter(init_idc,qp)
     for address in range(2):
         frame_bottom=address==1 and not field
@@ -92,6 +92,7 @@ def explicit_b_cabac(field, init_idc, qp=26):
         b.decision(27+int(frame_bottom),1); b.decision(30,0); b.decision(32,0)
         if field:
             b.decision(54,1); b.decision(58,0) # expanded reference 1
+        elif active_l0>1: b.decision(54,0)
         vector=(0,0) if frame_bottom else (8,4)
         for component, value in enumerate(vector):
             b.mvd(component,value,(8,4)[component] if frame_bottom else 0)
@@ -124,7 +125,7 @@ def pcm_cabac(depth,field,first_mb,qp=26):
     bits.extend(b.finish()) # end_of_slice_flag after the bottom PCM block
     return bits
 
-def explicit_p_cabac(field,init_idc,qp=26):
+def explicit_p_cabac(field,init_idc,qp=26,active_l0=1):
     b=CabacWriter(init_idc,qp)
     for address in range(2):
         frame_bottom=address==1 and not field
@@ -132,6 +133,7 @@ def explicit_p_cabac(field,init_idc,qp=26):
         if address==0: b.decision(70,int(field))
         b.decision(14,0); b.decision(15,0); b.decision(16,0) # P_L0_16x16
         if field: b.decision(54,1); b.decision(58,0)
+        elif active_l0>1: b.decision(54,0)
         vector=(0,0) if frame_bottom else (8,4)
         for component,value in enumerate(vector): b.mvd(component,value,(8,4)[component] if frame_bottom else 0)
         for ctx in ([75,76,75,76] if frame_bottom else [73,74,75,76]): b.decision(ctx,0)
@@ -158,7 +160,7 @@ def config(depth, explicit, cabac_target=False, width_mbs=1, gaps_allowed=False,
         pps.append(b.nal(0x68))
     return bytes([1,profile,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([len(pps)])+b''.join(len(p).to_bytes(2,'big')+p for p in pps)
 
-def picture(depth, kind, frame_num, poc, field, reference, explicit, cabac=False, init_idc=0, top_skip=False, first_mb=0, idr=None, deblock=1, qp=26, l0_to_idr=False, filter_offsets=(0,0), poc_type=0):
+def picture(depth, kind, frame_num, poc, field, reference, explicit, cabac=False, init_idc=0, top_skip=False, first_mb=0, idr=None, deblock=1, qp=26, l0_to_idr=False, filter_offsets=(0,0), poc_type=0, active_l0=1, selected_ref=None, l1_to_idr=False):
     idr=(kind=='I') if idr is None else idr
     b=Writer(); b.ue(first_mb); b.ue(2 if kind=='I' else 0 if kind=='P' else 1); b.ue(int(cabac))
     b.u(frame_num,4); b.u(0)
@@ -166,12 +168,18 @@ def picture(depth, kind, frame_num, poc, field, reference, explicit, cabac=False
     if poc_type==0: b.u(poc,4)
     if kind.startswith('B'): b.u(0) # temporal direct
     if kind!='I':
-        b.u(0) # default reference counts
+        b.u(int(active_l0!=1))
+        if active_l0!=1:
+            b.ue(active_l0-1)
+            if kind.startswith('B'): b.ue(active_l0-1)
         b.u(int(l0_to_idr))
         if l0_to_idr:
             assert frame_num>0
             b.ue(0); b.ue(frame_num-1); b.ue(3) # subtract to frame_num 0
-        if kind.startswith('B'): b.u(0) # list1 unmodified
+        if kind.startswith('B'):
+            b.u(int(l1_to_idr))
+            if l1_to_idr:
+                b.ue(0); b.ue(frame_num-1); b.ue(3)
     if explicit and kind.startswith('B'):
         b.ue(1); b.ue(1) # luma/chroma weight denominators
         for weight, offsets in [(3,(1,2,-1)), (1,(-3,-2,3))]:
@@ -187,7 +195,7 @@ def picture(depth, kind, frame_num, poc, field, reference, explicit, cabac=False
             b.se(offset//2)
     if cabac:
         while len(b.bits)%8: b.u(1)
-        payload=pcm_cabac(depth,field,first_mb,qp) if kind=='I' else explicit_p_cabac(field,init_idc,qp) if kind=='P' else direct_cabac(field,init_idc,top_skip,qp) if kind=='Bdirect' else explicit_b_cabac(field,init_idc,qp)
+        payload=pcm_cabac(depth,field,first_mb,qp) if kind=='I' else explicit_p_cabac(field,init_idc,qp,active_l0) if kind=='P' else direct_cabac(field,init_idc,top_skip,qp) if kind=='Bdirect' else explicit_b_cabac(field,init_idc,qp,active_l0)
         b.bits.extend(payload)
         return b.nal(0x65 if idr else 0x41 if reference else 0x01, trailing=False)
     for address in range(2):
@@ -199,7 +207,8 @@ def picture(depth, kind, frame_num, poc, field, reference, explicit, cabac=False
         else:
             b.ue(0 if kind in ['P','Bdirect'] else 1)
             if kind!='Bdirect':
-                if field: b.u(0) # expanded ref_idx_l0=1 (opposite parity)
+                if active_l0>1: b.ue(selected_ref if selected_ref is not None else 1 if field else 0)
+                elif field: b.u(0) # expanded ref_idx_l0=1 (opposite parity)
                 vector=(8,4) if address==0 or field else (0,0)
                 b.se(vector[0]); b.se(vector[1])
             b.ue(0) # inter coded_block_pattern=0

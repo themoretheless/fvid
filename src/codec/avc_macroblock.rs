@@ -58,6 +58,7 @@ pub struct IntraCavlcReader<'a> {
     finished: bool,
     mbaff: bool,
     pair_fields: Vec<u8>,
+    slice_group_map: Vec<u8>,
 }
 impl<'a> IntraCavlcReader<'a> {
     pub fn new(
@@ -78,7 +79,7 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
-        Self::new_context_impl(header, sps, pps, max_macroblocks, false)
+        Self::new_context_impl(header, sps, pps, max_macroblocks, false, false)
     }
     /// Syntax-only intra MBAFF reader. Reconstruction is a separate pipeline.
     pub fn new_mbaff(
@@ -108,7 +109,7 @@ impl<'a> IntraCavlcReader<'a> {
         {
             return Err(invalid("MBAFF CAVLC reader requires an intra frame slice"));
         }
-        Self::new_context_impl(header, sps, pps, max_macroblocks, true)
+        Self::new_context_impl(header, sps, pps, max_macroblocks, true, false)
     }
     fn new_context_impl(
         header: &'a SliceHeader,
@@ -116,12 +117,13 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
         mbaff: bool,
+        allow_fmo: bool,
     ) -> Result<Self> {
         if pps.cabac
             || (!mbaff && !sps.frame_mbs_only)
             || sps.chroma_format != 1
             || sps.separate_colour_plane
-            || !matches!(pps.slice_groups, SliceGroups::Single)
+            || (!allow_fmo && !matches!(pps.slice_groups, SliceGroups::Single))
         {
             return Err(invalid(
                 "intra CAVLC reader requires progressive 4:2:0 I slices without FMO",
@@ -137,6 +139,25 @@ impl<'a> IntraCavlcReader<'a> {
         if count == 0 || count > max_macroblocks || count > 65536 {
             return Err(invalid("macroblock context budget exceeded"));
         }
+        let slice_group_map = if matches!(pps.slice_groups, SliceGroups::Single) {
+            Vec::new()
+        } else {
+            let map = super::avc_slice_group_map::map_units(
+                &pps.slice_groups,
+                sps.width_mbs as usize,
+                sps.height_map_units as usize,
+                header.slice_group_change_cycle,
+                count,
+            )?;
+            super::avc_slice_group_map::macroblocks(
+                &map,
+                sps.width_mbs as usize,
+                sps.frame_mbs_only,
+                header.field_pic,
+                mbaff,
+                count,
+            )?
+        };
         let mut bits = BitReader::new(&header.rbsp);
         bits.skip(header.entropy_bit_offset)?;
         let grid = |size| -> Result<Vec<u8>> {
@@ -159,7 +180,60 @@ impl<'a> IntraCavlcReader<'a> {
             finished: false,
             mbaff,
             pair_fields: grid(if mbaff { count / 2 } else { 0 })?,
+            slice_group_map,
         })
+    }
+    /// Syntax-only FMO I-slice reader. Picture reconstruction remains separate.
+    pub fn new_fmo(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+    ) -> Result<Self> {
+        if header.slice_type != SliceType::I || header.field_pic {
+            return Err(invalid("FMO reader requires an I frame slice"));
+        }
+        Self::new_context_impl(
+            header,
+            sps,
+            pps,
+            max_macroblocks,
+            sps.mb_adaptive_frame_field && !sps.frame_mbs_only,
+            true,
+        )
+    }
+    /// FMO mixed-slice intra context; the external dispatcher supplies mb_type.
+    pub fn new_context_fmo(
+        header: &'a SliceHeader,
+        sps: &'a Sps,
+        pps: &'a Pps,
+        max_macroblocks: usize,
+    ) -> Result<Self> {
+        if header.field_pic
+            || !matches!(
+                header.slice_type,
+                SliceType::I | SliceType::P | SliceType::B
+            )
+        {
+            return Err(invalid("invalid FMO mixed intra context"));
+        }
+        Self::new_context_impl(
+            header,
+            sps,
+            pps,
+            max_macroblocks,
+            sps.mb_adaptive_frame_field && !sps.frame_mbs_only,
+            true,
+        )
+    }
+    fn advance_address(&mut self) -> Result<()> {
+        self.address = if self.slice_group_map.is_empty() {
+            self.address + 1
+        } else {
+            super::avc_slice_group_map::next_address(&self.slice_group_map, self.address as usize)?
+                as u32
+        };
+        Ok(())
     }
     fn coefficient_context(
         &self,
@@ -403,7 +477,7 @@ impl<'a> IntraCavlcReader<'a> {
             for grid in &mut self.chroma_counts {
                 grid[address * 4..address * 4 + 4].fill(16);
             }
-            self.address += 1;
+            self.advance_address()?;
             return Ok(Some(mb));
         }
         if mb_type == 0 {
@@ -518,7 +592,7 @@ impl<'a> IntraCavlcReader<'a> {
                 self.chroma_counts[component][address * 4 + block] = count;
             }
         }
-        self.address += 1;
+        self.advance_address()?;
         Ok(Some(mb))
     }
 }

@@ -216,3 +216,6 @@ pub(crate) mod hevc_act;
 pub(crate) mod hevc_palette;
 #[path = "../../../src/codec/hevc_reference_list.rs"]
 pub(crate) mod hevc_reference_list;
+
+#[path = "../../../src/codec/avc_slice_group_map.rs"]
+pub mod avc_slice_group_map;

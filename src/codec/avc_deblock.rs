@@ -191,6 +191,21 @@ pub(super) fn intra_plane(
     chroma: bool,
     eight: &[u8],
 ) -> crate::Result<()> {
+    intra_plane_owned(
+        plane, width, height, qps, depth, headers, chroma, eight, None,
+    )
+}
+pub(super) fn intra_plane_owned(
+    plane: &mut [u16],
+    width: usize,
+    height: usize,
+    qps: &[i32],
+    depth: u8,
+    headers: &[&super::avc_slice::SliceHeader],
+    chroma: bool,
+    eight: &[u8],
+    owners: Option<&[usize]>,
+) -> crate::Result<()> {
     let size = if chroma { 8 } else { 16 };
     if width == 0
         || width % size != 0
@@ -214,7 +229,14 @@ pub(super) fn intra_plane(
         .try_reserve_exact(qps.len())
         .map_err(|_| crate::invalid("cannot allocate deblocking grid"))?;
     for (index, &qp) in qps.iter().enumerate() {
-        let slice = headers.partition_point(|h| h.first_mb as usize <= index) - 1;
+        let slice = if let Some(owners) = owners {
+            *owners
+                .get(index)
+                .filter(|id| **id < headers.len())
+                .ok_or_else(|| crate::invalid("invalid intra slice owner"))?
+        } else {
+            headers.partition_point(|h| h.first_mb as usize <= index) - 1
+        };
         let header = headers[slice];
         let mut block = MacroblockEdges {
             strengths: [[[3; 4]; 4]; 2],
@@ -235,7 +257,13 @@ pub(super) fn intra_plane(
             };
             if let Some(n) = neighbour {
                 block.qp[direction][0] = (qp + qps[n] + 1) >> 1;
-                if header.disable_deblocking_filter_idc == 2 && n < header.first_mb as usize {
+                if header.disable_deblocking_filter_idc == 2
+                    && if let Some(owners) = owners {
+                        owners[n] != slice
+                    } else {
+                        n < header.first_mb as usize
+                    }
+                {
                     block.strengths[direction][0] = [0; 4];
                 }
             }

@@ -75,6 +75,8 @@ fn prepare_two_slice_picture_ranges_and_reject_mixed_frames() {
     let pps = Pps::parse(avc.pps[0], &sps).unwrap();
     let mut packet = Vec::new();
     let mut first = Vec::new();
+    let mut raster_decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+    let mut aso_decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
     for index in 0..reader.tracks()[0].samples.len() {
         reader.read_packet(0, index, &mut packet).unwrap();
         let slices = prepare(&packet, avc.length_size, &sps, &pps, packet.len()).unwrap();
@@ -98,12 +100,29 @@ fn prepare_two_slice_picture_ranges_and_reject_mixed_frames() {
         let mut reversed = Vec::new();
         encode(slices[1].nal, &mut reversed);
         encode(slices[0].nal, &mut reversed);
-        assert!(
-            prepare(&reversed, avc.length_size, &sps, &pps, reversed.len())
-                .err()
-                .unwrap()
-                .to_string()
-                .contains("macroblock zero")
+        let normalized = prepare(&reversed, avc.length_size, &sps, &pps, reversed.len()).unwrap();
+        assert_eq!(normalized.len(), slices.len());
+        for (actual, expected) in normalized.iter().zip(&slices) {
+            assert_eq!(actual.nal, expected.nal);
+            assert_eq!(actual.macroblocks, expected.macroblocks);
+        }
+        let mut expected_pixels = Vec::new();
+        raster_decoder
+            .decode_order(&packet)
+            .unwrap()
+            .unwrap()
+            .write_planar(&mut expected_pixels)
+            .unwrap();
+        let mut aso_pixels = Vec::new();
+        aso_decoder
+            .decode_order(&reversed)
+            .unwrap()
+            .unwrap()
+            .write_planar(&mut aso_pixels)
+            .unwrap();
+        assert_eq!(
+            aso_pixels, expected_pixels,
+            "progressive ASO picture {index}"
         );
         if index == 0 {
             encode(slices[0].nal, &mut first);
@@ -440,11 +459,13 @@ fn damaged_last_slice_requires_reset_and_restarts_with_identical_pictures() {
     assert!(decoder.decode_order(&saved[0]).unwrap().is_some());
     let error = decoder.decode_order(&damaged).unwrap_err().to_string();
     assert!(!error.contains("slice header"), "{error}");
-    assert!(decoder
-        .decode_order(&saved[1])
-        .unwrap_err()
-        .to_string()
-        .contains("requires reset"));
+    assert!(
+        decoder
+            .decode_order(&saved[1])
+            .unwrap_err()
+            .to_string()
+            .contains("requires reset")
+    );
     decoder.reset();
     let mut fresh = AvcDecoder::new(&config, 16 << 20).unwrap();
     for packet in &saved {
@@ -553,13 +574,3189 @@ fn reordered_picture_api_refusal_is_distinct_from_playback_acceptance() {
             }
         }
     }
-    assert!(refusal
-        .unwrap()
-        .contains("use decode_order for reordered pictures"));
+    assert!(
+        refusal
+            .unwrap()
+            .contains("use decode_order for reordered pictures")
+    );
     monotonic.reset();
     input.read_packet(0, 0, &mut packet).unwrap();
     assert!(monotonic.decode(&packet).unwrap().is_some());
     // Acceptance, independent of the narrow API refusal, includes oracle pixels
     // in presentation order and rewind, using this same owned synthetic stream.
     two_slice_ipb_matches_saved_yuv_and_rewind();
+}
+
+#[test]
+fn fmo_cavlc_syntax_preserves_group_addresses_and_owned_pcm_pixels() {
+    use fvid::codec::avc_macroblock::{IntraCavlcReader, IntraLuma};
+    for (video, oracle) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm-aso.yuv").as_slice(),
+        ),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert!(
+            matches!(&pps.slice_groups,fvid::codec::avc::SliceGroups::Explicit{groups:2,map} if map==&[0,1,0,1])
+        );
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let mut playback = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+        let mut playback_pixels = Vec::new();
+        playback
+            .decode_order(&packet)
+            .unwrap()
+            .unwrap()
+            .write_planar(&mut playback_pixels)
+            .unwrap();
+        assert_eq!(playback_pixels, oracle);
+        let mut pixels = vec![0u8; 1536];
+        let mut seen = [false; 4];
+        for nal in NalUnits::new(&packet, config.length_size)
+            .unwrap()
+            .map(Result::unwrap)
+        {
+            let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+            // Existing playback constructor must remain an explicit refusal,
+            // independent of syntax-only acceptance below.
+            assert!(
+                IntraCavlcReader::new(&header, &sps, &pps, 4)
+                    .err()
+                    .unwrap()
+                    .to_string()
+                    .contains("without FMO")
+            );
+            let mut reader = IntraCavlcReader::new_fmo(&header, &sps, &pps, 4).unwrap();
+            for address in [header.first_mb, header.first_mb + 2] {
+                let block = reader.read_macroblock().unwrap().unwrap();
+                assert_eq!(block.address, address);
+                assert!(!seen[address as usize]);
+                seen[address as usize] = true;
+                let IntraLuma::Pcm { y, cb, cr } = block.luma else {
+                    panic!("expected owned PCM")
+                };
+                for (component, plane) in [y.as_slice(), cb.as_slice(), cr.as_slice()]
+                    .into_iter()
+                    .enumerate()
+                {
+                    let side = if component == 0 { 16 } else { 8 };
+                    let stride = side * 2;
+                    let offset = [0, 1024, 1280][component];
+                    for row in 0..side {
+                        for column in 0..side {
+                            pixels[offset
+                                + (address as usize / 2 * side + row) * stride
+                                + address as usize % 2 * side
+                                + column] = plane[row * side + column] as u8;
+                        }
+                    }
+                }
+            }
+            assert!(reader.read_macroblock().unwrap().is_none());
+        }
+        assert!(seen.into_iter().all(|v| v));
+        assert_eq!(pixels, oracle);
+    }
+}
+
+#[test]
+fn all_fmo_map_types_reconstruct_owned_pcm_and_reset() {
+    for (video, oracle) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type0-dir0-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type0-dir0-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type0-dir0-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type0-dir0-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type1-dir0-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type1-dir0-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type1-dir0-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type1-dir0-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type2-dir0-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type2-dir0-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type2-dir0-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type2-dir0-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir0-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir0-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir0-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir0-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir1-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir1-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir1-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type3-dir1-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir0-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir0-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir0-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir0-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir1-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir1-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir1-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type4-dir1-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir0-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir0-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir0-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir0-pcm.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir1-pcm-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir1-pcm-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir1-pcm.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-type5-dir1-pcm.yuv").as_slice(),
+        ),
+    ] {
+        let mut reader = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = reader.tracks()[0].configuration.clone();
+        let mut packet = Vec::new();
+        reader.read_packet(0, 0, &mut packet).unwrap();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert!(!matches!(
+            pps.slice_groups,
+            fvid::codec::avc::SliceGroups::Single
+        ));
+        let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+        for _ in 0..2 {
+            let mut pixels = Vec::new();
+            decoder
+                .decode_order(&packet)
+                .unwrap()
+                .unwrap()
+                .write_planar(&mut pixels)
+                .unwrap();
+            assert_eq!(pixels, oracle);
+            decoder.reset();
+        }
+    }
+}
+
+#[test]
+fn missing_fmo_group_never_publishes_a_partial_picture() {
+    let video = include_bytes!("fixtures/playback-errors/avc-fmo-explicit-pcm.mp4");
+    let mut input = Mp4Reader::open(Cursor::new(video.as_slice()), Default::default()).unwrap();
+    let configuration = input.tracks()[0].configuration.clone();
+    let config = AvcConfig::parse(&configuration).unwrap();
+    let mut packet = Vec::new();
+    input.read_packet(0, 0, &mut packet).unwrap();
+    let nal = NalUnits::new(&packet, config.length_size)
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap();
+    let mut partial = (nal.len() as u32).to_be_bytes().to_vec();
+    partial.extend_from_slice(nal);
+    let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+    let error = decoder.decode_order(&partial).err().unwrap();
+    assert!(
+        error.to_string().contains("incomplete intra picture"),
+        "{error}"
+    );
+    assert!(
+        decoder
+            .decode_order(&packet)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("requires reset")
+    );
+    decoder.reset();
+    assert!(decoder.decode_order(&packet).unwrap().is_some());
+}
+
+#[test]
+fn fmo_intra_prediction_dc_residual_and_slice_filters_match_jm() {
+    let mut filtered = Vec::new();
+    for (name, video, oracle, residual, filter) in [
+        (
+            "avc-fmo-intra-type0-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type0-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type0-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type1-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type1-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type2-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type2-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type3-dir1-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type3-dir1-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type4-dir1-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type4-dir1-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type5-dir1-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type5-dir1-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter0-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter0-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc0.yuv")
+                .as_slice(),
+            false,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter0-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter0-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter0-dc1.yuv")
+                .as_slice(),
+            true,
+            0,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter1-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter1-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc0.yuv")
+                .as_slice(),
+            false,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter1-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter1-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter1-dc1.yuv")
+                .as_slice(),
+            true,
+            1,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter2-dc0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc0-aso.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter2-dc0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc0.yuv")
+                .as_slice(),
+            false,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter2-dc1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc1-aso.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+        (
+            "avc-fmo-intra-type6-dir0-filter2-dc1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc1.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-intra-type6-dir0-filter2-dc1.yuv")
+                .as_slice(),
+            true,
+            2,
+        ),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let mut anchors = Vec::new();
+        let mut pcm = 0;
+        let mut predicted = 0;
+        for nal in NalUnits::new(&packet, config.length_size)
+            .unwrap()
+            .map(Result::unwrap)
+        {
+            let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+            assert_eq!(header.slice_qp, 50);
+            assert_eq!(header.disable_deblocking_filter_idc, filter);
+            if filter != 1 {
+                assert_eq!([header.alpha_offset, header.beta_offset], [12, 12]);
+            }
+            let mut reader =
+                fvid::codec::avc_macroblock::IntraCavlcReader::new_fmo(&header, &sps, &pps, 4)
+                    .unwrap();
+            while let Some(block) = reader.read_macroblock().unwrap() {
+                match block.luma {
+                    fvid::codec::avc_macroblock::IntraLuma::Pcm { y, cb, cr } => {
+                        pcm += 1;
+                        anchors.push(block.address as u16);
+                        anchors.extend(y);
+                        anchors.extend(cb);
+                        anchors.extend(cr);
+                    }
+                    fvid::codec::avc_macroblock::IntraLuma::Block16(2) => {
+                        predicted += 1;
+                        assert_eq!(
+                            block.luma_dc.iter().filter(|v| **v != 0).count(),
+                            usize::from(residual)
+                        );
+                        assert_eq!(block.luma_dc.iter().sum::<i32>(), i32::from(residual));
+                    }
+                    _ => panic!("unexpected syntax in {name}"),
+                }
+            }
+        }
+        assert_eq!((pcm, predicted), (2, 2));
+        if filter != 1 {
+            filtered.push((name, filter, oracle, anchors));
+        }
+        let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+        for _ in 0..2 {
+            let mut pixels = Vec::new();
+            decoder
+                .decode_order(&packet)
+                .unwrap()
+                .unwrap()
+                .write_planar(&mut pixels)
+                .unwrap();
+            assert!(
+                pixels == oracle,
+                "{name}: difference at {:?}",
+                pixels.iter().zip(oracle).position(|(a, b)| a != b)
+            );
+            decoder.reset();
+        }
+    }
+    let mut categories = 0;
+    for (name, filter, oracle, anchors) in &filtered {
+        if *filter != 0 {
+            continue;
+        }
+        let corresponding = name.replace("-filter0-", "-filter2-");
+        let other = filtered
+            .iter()
+            .find(|(name, _, _, _)| *name == corresponding)
+            .unwrap();
+        assert_eq!(
+            *anchors, other.3,
+            "PCM anchors must not change across filter modes"
+        );
+        assert!(*oracle != other.2, "inactive cross-slice filter in {name}");
+        categories += 1;
+    }
+    assert_eq!(categories, 40);
+}
+
+#[test]
+fn fmo_inter_cavlc_reads_motion_and_skip_in_group_address_order() {
+    use fvid::codec::avc_inter_slice::{InterCavlcSlice, InterMacroblock};
+    for video in [
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-aso.mp4").as_slice(),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert_eq!(sps.profile, 88);
+        for index in 1..3 {
+            let mut packet = Vec::new();
+            input.read_packet(0, index, &mut packet).unwrap();
+            let mut seen = [false; 4];
+            for nal in NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(Result::unwrap)
+            {
+                let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+                assert_eq!(
+                    header.slice_type,
+                    if index == 1 {
+                        SliceType::P
+                    } else {
+                        SliceType::B
+                    }
+                );
+                let mut reader = InterCavlcSlice::new_fmo(&header, &sps, &pps, 65536).unwrap();
+                let first = header.first_mb as usize;
+                let InterMacroblock::Coded {
+                    address,
+                    header: inter,
+                    coefficients,
+                } = reader.read_macroblock().unwrap().unwrap()
+                else {
+                    panic!("expected motion")
+                };
+                assert_eq!(address, first);
+                seen[address] = true;
+                assert_eq!(inter.partitions.len(), 1);
+                assert_eq!(
+                    inter.partitions[0].differences[0],
+                    if index == 1 { [8, 4] } else { [4, 0] }
+                );
+                assert!(coefficients.luma_counts.iter().all(|v| *v == 0));
+                let InterMacroblock::Skip { address, .. } =
+                    reader.read_macroblock().unwrap().unwrap()
+                else {
+                    panic!("expected skip")
+                };
+                assert_eq!(address, first + 2);
+                seen[address] = true;
+                assert!(reader.read_macroblock().unwrap().is_none());
+            }
+            assert!(seen.into_iter().all(|v| v));
+        }
+    }
+}
+
+#[test]
+fn fmo_skip_run_cannot_escape_its_group_and_poisoned_reader_refuses_more_data() {
+    let video = include_bytes!("fixtures/playback-errors/avc-fmo-inter-invalid-skip.mp4");
+    let mut input = Mp4Reader::open(Cursor::new(video.as_slice()), Default::default()).unwrap();
+    let configuration = input.tracks()[0].configuration.clone();
+    let config = AvcConfig::parse(&configuration).unwrap();
+    let sps = Sps::parse(config.sps[0]).unwrap();
+    let pps = Pps::parse(config.pps[0], &sps).unwrap();
+    let mut packet = Vec::new();
+    input.read_packet(0, 1, &mut packet).unwrap();
+    let nal = NalUnits::new(&packet, config.length_size)
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap();
+    let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+    let mut reader =
+        fvid::codec::avc_inter_slice::InterCavlcSlice::new_fmo(&header, &sps, &pps, 65536).unwrap();
+    assert!(matches!(
+        reader.read_macroblock().unwrap(),
+        Some(fvid::codec::avc_inter_slice::InterMacroblock::Coded { address: 0, .. })
+    ));
+    let error = reader.read_macroblock().err().unwrap();
+    assert!(
+        error.to_string().contains("skip run exceeds slice group"),
+        "{error}"
+    );
+    assert!(
+        reader
+            .read_macroblock()
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("previously failed")
+    );
+    let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+    let mut idr = Vec::new();
+    input.read_packet(0, 0, &mut idr).unwrap();
+    assert!(decoder.decode_order(&idr).unwrap().is_some());
+    let error = decoder.decode_order(&packet).err().unwrap();
+    assert!(
+        error.to_string().contains("skip run exceeds slice group"),
+        "{error}"
+    );
+    assert!(
+        decoder
+            .decode_order(&idr)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("requires reset")
+    );
+    decoder.reset();
+    assert!(decoder.decode_order(&idr).unwrap().is_some());
+}
+
+#[test]
+fn fmo_inter_playback_matches_jm_and_reset() {
+    for (video, oracle) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter2.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-aso.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-aso.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1.yuv").as_slice(),
+        ),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+        for _ in 0..2 {
+            let mut frames = Vec::new();
+            for index in 0..3 {
+                let mut packet = Vec::new();
+                input.read_packet(0, index, &mut packet).unwrap();
+                let mut pixels = Vec::new();
+                decoder
+                    .decode_order(&packet)
+                    .unwrap()
+                    .unwrap()
+                    .write_planar(&mut pixels)
+                    .unwrap();
+                frames.push(([0, 2, 1][index], pixels));
+            }
+            frames.sort_by_key(|f| f.0);
+            let actual: Vec<_> = frames.into_iter().flat_map(|f| f.1).collect();
+            assert!(
+                actual == oracle,
+                "pixel mismatch at {:?}",
+                actual.iter().zip(oracle).position(|(a, b)| a != b)
+            );
+            decoder.reset();
+        }
+    }
+    for (all, isolated) in [
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter0.yuv").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter2.yuv").as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-skip-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0-aso.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0.yuv")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2.yuv")
+                .as_slice(),
+        ),
+    ] {
+        assert_eq!(&all[..1536], &isolated[..1536]);
+        for frame in [1, 2] {
+            assert_ne!(
+                &all[frame * 1536..frame * 1536 + 512],
+                &isolated[frame * 1536..frame * 1536 + 512],
+                "active B/P top-row cross-slice filter"
+            );
+        }
+    }
+}
+
+#[test]
+fn fmo_all_inter_maps_gate_motion_skip_and_complete_group_coverage() {
+    for video in [
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type0-dir0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type1-dir0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type2-dir0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type3-dir1.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type4-dir1.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-aso.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter0.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2-aso.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1-filter2.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-fmo-inter-type5-dir1.mp4").as_slice(),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert_eq!(sps.profile, 88);
+        assert_eq!(sps.max_num_ref_frames, 2);
+        for index in 1..3 {
+            let mut packet = Vec::new();
+            input.read_packet(0, index, &mut packet).unwrap();
+            let mut seen = [false; 4];
+            for nal in NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(Result::unwrap)
+            {
+                let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+                assert_eq!(
+                    header.slice_type,
+                    if index == 1 {
+                        SliceType::P
+                    } else {
+                        SliceType::B
+                    }
+                );
+                let map = fvid::codec::avc_slice_group_map::map_units(
+                    &pps.slice_groups,
+                    2,
+                    2,
+                    header.slice_group_change_cycle,
+                    4,
+                )
+                .unwrap();
+                let group = map[header.first_mb as usize];
+                let expected: Vec<_> = map
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(i, g)| (*g == group).then_some(i))
+                    .collect();
+                let mut reader = fvid::codec::avc_inter_slice::InterCavlcSlice::new_fmo(
+                    &header, &sps, &pps, 65536,
+                )
+                .unwrap();
+                for (position, address) in expected.iter().enumerate() {
+                    let block = reader.read_macroblock().unwrap().unwrap();
+                    match block {
+                        fvid::codec::avc_inter_slice::InterMacroblock::Coded {
+                            address: actual,
+                            header: motion,
+                            coefficients,
+                        } if position == 0 => {
+                            assert_eq!(actual, *address);
+                            assert_eq!(motion.partitions.len(), 1);
+                            let extra = if header.disable_deblocking_filter_idc == 1 {
+                                0
+                            } else {
+                                i32::from(group) * 4
+                            };
+                            assert_eq!(
+                                motion.partitions[0].differences[0],
+                                if index == 1 {
+                                    [8 + extra, 4]
+                                } else {
+                                    [4 + extra, 0]
+                                }
+                            );
+                            assert!(coefficients.luma_counts.iter().all(|v| *v == 0));
+                        }
+                        fvid::codec::avc_inter_slice::InterMacroblock::Skip {
+                            address: actual,
+                            ..
+                        } if position > 0 => assert_eq!(actual, *address),
+                        _ => panic!("unexpected group syntax"),
+                    }
+                    assert!(!seen[*address]);
+                    seen[*address] = true;
+                }
+                assert!(reader.read_macroblock().unwrap().is_none());
+            }
+            assert!(seen.into_iter().all(|v| v));
+        }
+    }
+}
+
+#[test]
+fn fmo_three_to_eight_groups_match_jm_with_motion_skip_and_reset() {
+    let mut cases = 0;
+    let mut filtered = Vec::new();
+    for (name, video, oracle) in [
+        (
+            "avc-fmo-groups3-type0-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type0-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type0-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type0-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type0-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type0-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type0-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type1-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type1-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type1-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type1-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type1-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type1-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type1-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type2-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type2-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type2-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type2-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type2-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type2-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type2-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type6-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type6-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type6-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type6-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type6-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups3-type6-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups3-type6-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type0-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type0-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type0-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type0-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type0-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type0-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type0-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type1-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type1-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type1-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type1-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type1-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type1-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type1-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type2-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type2-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type2-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type2-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type2-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type2-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type2-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type6-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type6-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type6-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type6-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type6-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups4-type6-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups4-type6-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type0-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type0-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type0-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type0-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type0-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type0-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type0-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type1-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type1-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type1-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type1-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type1-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type1-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type1-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type2-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type2-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type2-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type2-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type2-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type2-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type2-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type6-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type6-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type6-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type6-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type6-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups5-type6-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups5-type6-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type0-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type0-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type0-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type0-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type0-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type0-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type0-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type1-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type1-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type1-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type1-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type1-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type1-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type1-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type2-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type2-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type2-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type2-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type2-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type2-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type2-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type6-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type6-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type6-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type6-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type6-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups6-type6-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups6-type6-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type0-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type0-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type0-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type0-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type0-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type0-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type0-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type1-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type1-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type1-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type1-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type1-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type1-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type1-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type2-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type2-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type2-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type2-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type2-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type2-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type2-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type6-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type6-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type6-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type6-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type6-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups7-type6-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups7-type6-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type0-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type0-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type0-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type0-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type0-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type0-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type0-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type1-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type1-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type1-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type1-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type1-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type1-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type1-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type2-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type2-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type2-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type2-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type2-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type2-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type2-filter2.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type6-filter0-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter0-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter0-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type6-filter0.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter0.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter0.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type6-filter1-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter1-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter1-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type6-filter1.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter1.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter1.yuv").as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type6-filter2-aso.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter2-aso.mp4")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter2-aso.yuv")
+                .as_slice(),
+        ),
+        (
+            "avc-fmo-groups8-type6-filter2.mp4",
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter2.mp4").as_slice(),
+            include_bytes!("fixtures/playback-errors/avc-fmo-groups8-type6-filter2.yuv").as_slice(),
+        ),
+    ] {
+        cases += 1;
+        if name.contains("-filter0") || name.contains("-filter2") {
+            filtered.push((name, oracle));
+        }
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert_eq!(sps.profile, 88);
+        assert_eq!(sps.coded_dimensions(), (64, 64));
+        let map =
+            fvid::codec::avc_slice_group_map::map_units(&pps.slice_groups, 4, 4, None, 16).unwrap();
+        let groups = usize::from(*map.iter().max().unwrap()) + 1;
+        assert_eq!(
+            groups,
+            name.split("groups")
+                .nth(1)
+                .unwrap()
+                .chars()
+                .next()
+                .unwrap()
+                .to_digit(10)
+                .unwrap() as usize
+        );
+        let mut decoder = AvcDecoder::new(&configuration, 16 << 20).unwrap();
+        for pass in 0..2 {
+            let mut pictures = Vec::new();
+            for index in 0..3 {
+                let mut packet = Vec::new();
+                input.read_packet(0, index, &mut packet).unwrap();
+                if pass == 0 && index > 0 {
+                    let mut covered = [false; 16];
+                    let mut slice_groups = Vec::new();
+                    for nal in NalUnits::new(&packet, config.length_size)
+                        .unwrap()
+                        .map(Result::unwrap)
+                    {
+                        let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+                        assert_eq!(
+                            header.disable_deblocking_filter_idc,
+                            name.split("-filter")
+                                .nth(1)
+                                .unwrap()
+                                .chars()
+                                .next()
+                                .unwrap()
+                                .to_digit(10)
+                                .unwrap()
+                        );
+                        let group = map[header.first_mb as usize];
+                        slice_groups.push(group);
+                        assert_eq!(
+                            header.slice_type,
+                            if index == 1 {
+                                SliceType::P
+                            } else {
+                                SliceType::B
+                            }
+                        );
+                        let expected: Vec<_> = map
+                            .iter()
+                            .enumerate()
+                            .filter_map(|(i, g)| (*g == group).then_some(i))
+                            .collect();
+                        let mut reader = fvid::codec::avc_inter_slice::InterCavlcSlice::new_fmo(
+                            &header, &sps, &pps, 65536,
+                        )
+                        .unwrap();
+                        for (position, address) in expected.iter().enumerate() {
+                            let block = reader.read_macroblock().unwrap().unwrap();
+                            match block {
+                                fvid::codec::avc_inter_slice::InterMacroblock::Coded {
+                                    address: actual,
+                                    header: motion,
+                                    ..
+                                } if position == 0 => {
+                                    assert_eq!(actual, *address);
+                                    assert_eq!(motion.partitions.len(), 1);
+                                    let extra = if header.disable_deblocking_filter_idc == 1 {
+                                        0
+                                    } else {
+                                        i32::from(group) * 4
+                                    };
+                                    assert_eq!(
+                                        motion.partitions[0].differences[0],
+                                        if index == 1 {
+                                            [8 + extra, 4]
+                                        } else {
+                                            [4 + extra, 0]
+                                        }
+                                    );
+                                }
+                                fvid::codec::avc_inter_slice::InterMacroblock::Skip {
+                                    address: actual,
+                                    ..
+                                } if position > 0 => assert_eq!(actual, *address),
+                                _ => panic!("unexpected syntax in {name}"),
+                            }
+                            assert!(!covered[*address]);
+                            covered[*address] = true;
+                        }
+                        assert!(reader.read_macroblock().unwrap().is_none());
+                    }
+                    let mut expected: Vec<_> = (0..groups as u8).collect();
+                    if name.contains("-aso") {
+                        expected.reverse();
+                    }
+                    assert_eq!(slice_groups, expected);
+                    assert!(covered.into_iter().all(|v| v));
+                }
+                let mut pixels = Vec::new();
+                decoder
+                    .decode_order(&packet)
+                    .unwrap()
+                    .unwrap()
+                    .write_planar(&mut pixels)
+                    .unwrap();
+                pictures.push(([0, 2, 1][index], pixels));
+            }
+            pictures.sort_by_key(|v| v.0);
+            let actual: Vec<_> = pictures.into_iter().flat_map(|v| v.1).collect();
+            assert!(
+                actual == oracle,
+                "{name}: mismatch at {:?}",
+                actual.iter().zip(oracle).position(|(a, b)| a != b)
+            );
+            decoder.reset();
+        }
+    }
+    assert_eq!(cases, 144);
+    let mut active = 0;
+    for (name, all) in &filtered {
+        if !name.contains("-filter0") {
+            continue;
+        }
+        let matching = name.replace("-filter0", "-filter2");
+        let isolated = filtered
+            .iter()
+            .find(|(name, _)| *name == matching)
+            .unwrap()
+            .1;
+        assert_eq!(&all[..6144], &isolated[..6144], "unchanged PCM anchor");
+        for frame in [1, 2] {
+            assert_ne!(
+                &all[frame * 6144..frame * 6144 + 4096],
+                &isolated[frame * 6144..frame * 6144 + 4096],
+                "active B/P filter in {name}"
+            );
+        }
+        active += 1;
+    }
+    assert_eq!(active, 48);
 }

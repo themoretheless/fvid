@@ -34,6 +34,8 @@ pub struct InterCavlcSlice<'a> {
     mbaff: bool,
     pair_fields: Vec<Option<bool>>,
     previous_skipped: bool,
+    slice_group_map: Vec<u8>,
+    remaining_group: Vec<u32>,
 }
 impl<'a> InterCavlcSlice<'a> {
     /// RBSP offset follows the slice header. Geometry is in macroblocks; FMO and
@@ -77,6 +79,8 @@ impl<'a> InterCavlcSlice<'a> {
             mbaff: false,
             pair_fields: Vec::new(),
             previous_skipped: false,
+            slice_group_map: Vec::new(),
+            remaining_group: Vec::new(),
         })
     }
     /// Configure complete intra/inter entropy dispatch from actual parameter sets.
@@ -86,7 +90,7 @@ impl<'a> InterCavlcSlice<'a> {
         pps: &'a super::avc::Pps,
         memory_limit: usize,
     ) -> Result<Self> {
-        Self::new_mixed_impl(header, sps, pps, memory_limit, false)
+        Self::new_mixed_impl(header, sps, pps, memory_limit, false, false)
     }
     /// Syntax-only MBAFF dispatcher; picture reconstruction is separate.
     pub fn new_mbaff(
@@ -98,7 +102,7 @@ impl<'a> InterCavlcSlice<'a> {
         if sps.frame_mbs_only || !sps.mb_adaptive_frame_field {
             return Err(invalid("MBAFF inter reader requires adaptive frame slices"));
         }
-        Self::new_mixed_impl(header, sps, pps, memory_limit, true)
+        Self::new_mixed_impl(header, sps, pps, memory_limit, true, false)
     }
     fn new_mixed_impl(
         header: &'a super::avc_slice::SliceHeader,
@@ -106,6 +110,7 @@ impl<'a> InterCavlcSlice<'a> {
         pps: &'a super::avc::Pps,
         memory_limit: usize,
         mbaff: bool,
+        allow_fmo: bool,
     ) -> Result<Self> {
         if header.field_pic {
             return Err(crate::unsupported("field slices are not supported"));
@@ -115,7 +120,7 @@ impl<'a> InterCavlcSlice<'a> {
             .and_then(|n| n.checked_mul(if mbaff { 2 } else { 1 }))
             .ok_or_else(|| invalid("AVC context size overflow"))?;
         let extra = count
-            .checked_mul(40)
+            .checked_mul(if allow_fmo { 48 } else { 40 })
             .and_then(|n| n.checked_add(if mbaff { count } else { 0 }))
             .ok_or_else(|| invalid("AVC context budget overflow"))?;
         let remaining = memory_limit
@@ -141,7 +146,34 @@ impl<'a> InterCavlcSlice<'a> {
             syntax,
             remaining,
         )?;
-        reader.intra = Some(if mbaff {
+        if allow_fmo {
+            let map = super::avc_slice_group_map::map_units(
+                &pps.slice_groups,
+                sps.width_mbs as usize,
+                sps.height_map_units as usize,
+                header.slice_group_change_cycle,
+                count,
+            )?;
+            reader.slice_group_map = super::avc_slice_group_map::macroblocks(
+                &map,
+                sps.width_mbs as usize,
+                sps.frame_mbs_only,
+                header.field_pic,
+                mbaff,
+                count,
+            )?;
+            let mut remaining = vec![0u32; count];
+            let mut counts = [0u32; 8];
+            for i in (0..count).rev() {
+                let group = reader.slice_group_map[i] as usize;
+                counts[group] += 1;
+                remaining[i] = counts[group];
+            }
+            reader.remaining_group = remaining;
+        }
+        reader.intra = Some(if allow_fmo {
+            super::avc_macroblock::IntraCavlcReader::new_context_fmo(header, sps, pps, 65536)?
+        } else if mbaff {
             super::avc_macroblock::IntraCavlcReader::new_context_mbaff(header, sps, pps, 65536)?
         } else {
             super::avc_macroblock::IntraCavlcReader::new_context(header, sps, pps, 65536)?
@@ -155,6 +187,33 @@ impl<'a> InterCavlcSlice<'a> {
             reader.pair_fields.resize(count / 2, None);
         }
         Ok(reader)
+    }
+    /// FMO P/B CAVLC syntax, including embedded intra macroblocks. Reconstruction is separate.
+    pub fn new_fmo(
+        header: &'a super::avc_slice::SliceHeader,
+        sps: &'a super::avc::Sps,
+        pps: &'a super::avc::Pps,
+        memory_limit: usize,
+    ) -> Result<Self> {
+        if pps.cabac {
+            return Err(invalid("FMO CAVLC reader requires CAVLC PPS"));
+        }
+        Self::new_mixed_impl(
+            header,
+            sps,
+            pps,
+            memory_limit,
+            sps.mb_adaptive_frame_field && !sps.frame_mbs_only,
+            true,
+        )
+    }
+    fn advance_address(&mut self) -> Result<()> {
+        self.address = if self.slice_group_map.is_empty() {
+            self.address + 1
+        } else {
+            super::avc_slice_group_map::next_address(&self.slice_group_map, self.address)?
+        };
+        Ok(())
     }
     pub fn pair_field(&self, pair: usize) -> Option<bool> {
         self.pair_fields.get(pair).copied().flatten()
@@ -193,8 +252,17 @@ impl<'a> InterCavlcSlice<'a> {
             }
             if self.need_run {
                 self.pending = self.bits.unsigned_golomb()? as usize;
-                if self.pending > self.limit - self.address {
-                    return Err(invalid("AVC skip run exceeds picture"));
+                if self.pending
+                    > self
+                        .remaining_group
+                        .get(self.address)
+                        .map_or(self.limit - self.address, |n| *n as usize)
+                {
+                    return Err(invalid(if self.remaining_group.is_empty() {
+                        "AVC skip run exceeds picture"
+                    } else {
+                        "AVC skip run exceeds slice group"
+                    }));
                 }
                 self.need_run = false;
                 // Even run=0 requires a following macroblock, not trailing bits.
@@ -247,7 +315,7 @@ impl<'a> InterCavlcSlice<'a> {
                 intra.record_inter(address, [0; 16], [[0; 4]; 2])?;
             }
             self.pending -= 1;
-            self.address += 1;
+            self.advance_address()?;
             self.previous_skipped = true;
             return Ok(Some(InterMacroblock::Skip {
                 address,
@@ -289,7 +357,7 @@ impl<'a> InterCavlcSlice<'a> {
                 self.syntax.previous_qp = block.qp;
             }
             self.bits = probe;
-            self.address += 1;
+            self.advance_address()?;
             self.need_run = true;
             self.previous_skipped = false;
             return Ok(Some(InterMacroblock::Intra(Box::new(block))));
@@ -320,7 +388,7 @@ impl<'a> InterCavlcSlice<'a> {
             )?;
         }
         self.syntax.previous_qp = header.residual.qp;
-        self.address += 1;
+        self.advance_address()?;
         self.need_run = true;
         self.previous_skipped = false;
         Ok(Some(InterMacroblock::Coded {

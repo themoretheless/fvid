@@ -1,0 +1,105 @@
+{
+  "generator": "owned explicit FMO headers and PCM writer",
+  "fixtures": [
+    {
+      "file": "avc-fmo-type0-dir0-pcm.mp4",
+      "sha256": "208c8d589e8bd68f6e7b006716e8094f080a7fd0395e684cae23e62bb92c26ec",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type0-dir0-pcm-aso.mp4",
+      "sha256": "60ac250d715b1aed04ea81deef475034ce9039e521c0677a3035ebd29210cffb",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type1-dir0-pcm.mp4",
+      "sha256": "c4e041351eb8c98682442f60b593874e2e8caaa60ad4b76dc33ce785d2e023e6",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type1-dir0-pcm-aso.mp4",
+      "sha256": "b52da0f291283ab23590c4113c6956b0561dd72cd920205913de74804d4b6746",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type2-dir0-pcm.mp4",
+      "sha256": "99d90b81ed78c8a805ecaae9ffedb7f0185a7e45ecf06b0fafbcb8264ab4bc38",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type2-dir0-pcm-aso.mp4",
+      "sha256": "08817f23d6a684cddadf7a8a0646643157134ae3987220e8a65036af0fecfa5b",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type3-dir0-pcm.mp4",
+      "sha256": "ecdad2ff190980924eccf7ed1b43f8ca5c9e29fe6e5733862354c268386f900d",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type3-dir0-pcm-aso.mp4",
+      "sha256": "8aa5cb94ad2e4ce5725b6c6927a0321d3e4141d7dfeefe7464801d547791c090",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type3-dir1-pcm.mp4",
+      "sha256": "f6435eb5524a60df69d763a5e7aa4cef247ae1aecc5eb1a876a79418ca97e6b6",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type3-dir1-pcm-aso.mp4",
+      "sha256": "54b661cbf528efbb6126ff9d901f785eaae19a6d09d8cb1ce09f6e4d1419aa62",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type4-dir0-pcm.mp4",
+      "sha256": "875101cf3b26caa1037d72e5baa4ed49b47f05af93fdfd661bb06568c9e273b8",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type4-dir0-pcm-aso.mp4",
+      "sha256": "cbdcaf7c02259617d5e3af0be2c1c9d3268ec16e02a6d2f9b8d205089907e1e5",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type4-dir1-pcm.mp4",
+      "sha256": "e25d9c60c744456dc6b9ab5ce5273db44b7413e8c54df15752a7991f0cf91dfa",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type4-dir1-pcm-aso.mp4",
+      "sha256": "263ffbb56d609e6a005db5821e7dd76065bf717379780efc8e142227094b43eb",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type5-dir0-pcm.mp4",
+      "sha256": "5fc4cd239998178f7ac852e4a3bb2119db18505099a236508175a2e78e3fb6f8",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type5-dir0-pcm-aso.mp4",
+      "sha256": "a8f77cc88db706af521432e716463226a9899425bbaccd8675179697b73f87a1",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type5-dir1-pcm.mp4",
+      "sha256": "ea0944a1003acbc48c524ec4fa710b3cb7f0b5f8598d4cddd05377ca5c4663bd",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-type5-dir1-pcm-aso.mp4",
+      "sha256": "3a4ef608e6025e4bc67c3704375d27c39b1f8bf7f2e8fd01ac97264548d9e50d",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-explicit-pcm.mp4",
+      "sha256": "a50ec62ca5a244b3dade6dc521b70382e8a295ddcecfb90eaf1db9419bd9b9ac",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    },
+    {
+      "file": "avc-fmo-explicit-pcm-aso.mp4",
+      "sha256": "0e0c7b1867ea61abc16551461c106d9bf666ae396ba81b2133e979a3c9607bad",
+      "oracle_sha256": "22c099e98a3ba4892ca5ce81f9c44d28c79c29332e684a7227fef3c77a93afc0"
+    }
+  ]
+}

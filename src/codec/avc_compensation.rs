@@ -3,7 +3,7 @@ use super::avc_motion::{ReferencePlane, Scratch, bipred_block, weight_block};
 use crate::{Result, invalid};
 
 pub struct Reference420<'a> {
-    planes: [ReferencePlane<'a>; 3],
+    planes: Option<[ReferencePlane<'a>; 3]>,
     depth: u8,
 }
 #[derive(Clone, Copy, Debug)]
@@ -36,12 +36,26 @@ impl<'a> Reference420<'a> {
     /// Motion and origin supplied to this view must be in field coordinates.
     pub fn field_view(&self, bottom: bool) -> Result<Self> {
         Ok(Self {
-            planes: [
-                self.planes[0].field_view(bottom)?,
-                self.planes[1].field_view(bottom)?,
-                self.planes[2].field_view(bottom)?,
-            ],
+            planes: match &self.planes {
+                Some(planes) => Some([
+                    planes[0].field_view(bottom)?,
+                    planes[1].field_view(bottom)?,
+                    planes[2].field_view(bottom)?,
+                ]),
+                None => None,
+            },
             depth: self.depth,
+        })
+    }
+    /// A non-existing DPB slot carries no pixels. It may remain unused in an
+    /// active list, but every attempt to sample it is a bitstream error.
+    pub(crate) fn unavailable(depth: u8) -> Result<Self> {
+        if !(8..=14).contains(&depth) {
+            return Err(invalid("invalid unavailable AVC reference depth"));
+        }
+        Ok(Self {
+            planes: None,
+            depth,
         })
     }
     /// Plane strides are in samples. Construct once per reference frame, since
@@ -57,11 +71,11 @@ impl<'a> Reference420<'a> {
             return Err(invalid("AVC 4:2:0 reference dimensions must be even"));
         }
         Ok(Self {
-            planes: [
+            planes: Some([
                 ReferencePlane::new(planes[0], width, height, strides[0], depth)?,
                 ReferencePlane::new(planes[1], width / 2, height / 2, strides[1], depth)?,
                 ReferencePlane::new(planes[2], width / 2, height / 2, strides[2], depth)?,
-            ],
+            ]),
             depth,
         })
     }
@@ -78,11 +92,11 @@ impl<'a> Reference420<'a> {
             return Err(invalid("AVC 4:2:0 reference dimensions must be even"));
         }
         Ok(Self {
-            planes: [
+            planes: Some([
                 ReferencePlane::from_decoded(planes[0], width, height, strides[0], depth)?,
                 ReferencePlane::from_decoded(planes[1], width / 2, height / 2, strides[1], depth)?,
                 ReferencePlane::from_decoded(planes[2], width / 2, height / 2, strides[2], depth)?,
-            ],
+            ]),
             depth,
         })
     }
@@ -118,6 +132,10 @@ impl<'a> Reference420<'a> {
         out: &mut Prediction420,
         scratch: &mut Scratch,
     ) -> Result<()> {
+        let planes = self
+            .planes
+            .as_ref()
+            .ok_or_else(|| invalid("AVC prediction selects non-existing reference picture"))?;
         let [width, height] = size;
         if ![4, 8, 16].contains(&width)
             || ![4, 8, 16].contains(&height)
@@ -129,9 +147,9 @@ impl<'a> Reference420<'a> {
         out.height = height;
         out.depth = self.depth;
         let count = width * height;
-        self.planes[0].luma_with(origin, motion, width, height, &mut out.y[..count], scratch)?;
+        planes[0].luma_with(origin, motion, width, height, &mut out.y[..count], scratch)?;
         let chroma_origin = [origin[0] / 2, origin[1] / 2];
-        self.planes[1].chroma_with(
+        planes[1].chroma_with(
             chroma_origin,
             chroma_motion,
             width / 2,
@@ -139,7 +157,7 @@ impl<'a> Reference420<'a> {
             &mut out.cb[..count / 4],
             scratch,
         )?;
-        self.planes[2].chroma_with(
+        planes[2].chroma_with(
             chroma_origin,
             chroma_motion,
             width / 2,
@@ -614,5 +632,44 @@ mod residual_tests {
         assert_eq!(result.y, y);
         assert_eq!(result.cb, cb);
         assert_eq!(result.cr, cr);
+    }
+}
+
+#[cfg(test)]
+mod unavailable_tests {
+    use super::*;
+    #[test]
+    fn absent_reference_has_no_planes_and_refuses_sampling_without_writing_output() {
+        for depth in [8, 10, 12, 14] {
+            let reference = Reference420::unavailable(depth).unwrap();
+            assert!(reference.planes.is_none());
+            for field in [None, Some(false), Some(true)] {
+                let reference = match field {
+                    None => Reference420::unavailable(depth).unwrap(),
+                    Some(bottom) => reference.field_view(bottom).unwrap(),
+                };
+                let mut output = Prediction420::empty(depth);
+                output.y.fill(123);
+                output.cb.fill(45);
+                output.cr.fill(67);
+                let error = reference
+                    .predict_into_motion(
+                        [0, 0],
+                        [0, 0],
+                        [0, 2],
+                        [16, 16],
+                        &mut output,
+                        &mut Scratch::new(),
+                    )
+                    .err()
+                    .unwrap();
+                assert!(error.to_string().contains("non-existing reference"));
+                assert_eq!(output.y, [123; 256]);
+                assert_eq!(output.cb, [45; 64]);
+                assert_eq!(output.cr, [67; 64]);
+            }
+        }
+        assert!(Reference420::unavailable(7).is_err());
+        assert!(Reference420::unavailable(15).is_err());
     }
 }

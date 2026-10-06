@@ -4,7 +4,7 @@
 use super::{
     avc::{Pps, Sps},
     avc_dpb::ReferenceBuffer,
-    avc_inter_picture::decode_inter_resolved_slices_with_motion,
+    avc_inter_picture::decode_inter_optional_slices_with_motion,
     avc_picture::{IntraPicture, decode_intra_slices},
     avc_poc::{FieldOrder, PocDecoder},
     avc_reference_motion::ReferenceMotionField,
@@ -257,14 +257,33 @@ impl AvcDecoder {
             return Err(invalid("AVC stream/configuration change requires IDR"));
         }
         if !header.idr
-            && self.previous_reference.is_some_and(|previous| {
-                header.frame_num != previous
-                    && header.frame_num != (previous + 1) % (1 << sps.frame_num_bits)
-            })
+            && let Some(previous) = self.previous_reference
         {
-            return Err(crate::unsupported(
-                "AVC frame-number gaps are not implemented",
-            ));
+            let maximum = 1u32 << sps.frame_num_bits;
+            if header.frame_num != previous && header.frame_num != (previous + 1) % maximum {
+                if !sps.gaps_allowed {
+                    return Err(invalid("AVC frame-number gap forbidden by SPS"));
+                }
+                let buffer = self
+                    .dpb
+                    .as_mut()
+                    .ok_or_else(|| invalid("AVC gap requires initialized DPB"))?;
+                let mut missing = (previous + 1) % maximum;
+                while missing != header.frame_num {
+                    let order = self.poc.infer_nonexisting(sps, missing)?;
+                    buffer.infer_nonexisting_fields(
+                        missing,
+                        order.map(|p| p.after_marking),
+                        self.next_id,
+                    )?;
+                    self.next_id = self
+                        .next_id
+                        .checked_add(1)
+                        .ok_or_else(|| invalid("AVC picture ID overflow"))?;
+                    self.previous_reference = Some(missing);
+                    missing = (missing + 1) % maximum;
+                }
+            }
         }
         let (w, h) = sps.coded_dimensions();
         let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize)?;
@@ -325,12 +344,7 @@ impl AvcDecoder {
                     let mut metadata = [Vec::new(), Vec::new()];
                     for (list, ids) in [&lists.l0, &lists.l1].into_iter().enumerate() {
                         for id in ids {
-                            refs[list].push(
-                                buffer
-                                    .get(*id)
-                                    .map(|r| r.picture.as_ref())
-                                    .ok_or_else(|| invalid("missing decoded AVC reference"))?,
-                            );
+                            refs[list].push(buffer.get(*id).map(|r| r.picture.as_ref()));
                             metadata[list].push(
                                 *entries
                                     .iter()
@@ -360,7 +374,11 @@ impl AvcDecoder {
                             current_poc: order.before_marking.picture(),
                             list0: &metadata[0],
                             list1: &metadata[1],
-                            colocated: buffer.get(*first).and_then(|r| r.motion.as_ref()),
+                            colocated: buffer
+                                .get(*first)
+                                .ok_or_else(|| invalid("AVC co-located picture is non-existing"))?
+                                .motion
+                                .as_ref(),
                         }))
                     })
                     .collect::<Result<Vec<_>>>()?;
@@ -377,17 +395,22 @@ impl AvcDecoder {
                     if sps.mb_adaptive_frame_field && !sps.frame_mbs_only && !header.field_pic {
                         let orders = lists
                             .iter()
-                            .map(|lists| {
+                            .zip(&slices)
+                            .map(|(lists, slice)| {
                                 let mut result = [Vec::new(), Vec::new()];
+                                if slice.header.slice_type != SliceType::B {
+                                    return Ok(result);
+                                }
                                 for (list, ids) in [&lists.l0, &lists.l1].into_iter().enumerate() {
                                     for id in ids {
                                         result[list].push(
                                             buffer
                                                 .get(*id)
+                                                .map(|r| r.field_order)
+                                                .or_else(|| buffer.inferred_field_order(*id))
                                                 .ok_or_else(|| {
                                                     invalid("missing MBAFF field POC reference")
-                                                })?
-                                                .field_order,
+                                                })?,
                                         );
                                     }
                                 }
@@ -415,11 +438,17 @@ impl AvcDecoder {
                                     list1: &metadata[1],
                                     list0_orders: &orders[0],
                                     list1_orders: &orders[1],
-                                    colocated: buffer.get(*id).and_then(|r| r.motion.as_ref()),
+                                    colocated: buffer
+                                        .get(*id)
+                                        .ok_or_else(|| {
+                                            invalid("MBAFF co-located picture is non-existing")
+                                        })?
+                                        .motion
+                                        .as_ref(),
                                 }))
                             })
                             .collect::<Result<Vec<_>>>()?;
-                        super::avc_mbaff_picture::decode_inter_slices(
+                        super::avc_mbaff_picture::decode_optional_inter_slices(
                             &slice_headers,
                             sps,
                             pps,
@@ -428,7 +457,7 @@ impl AvcDecoder {
                             reconstruction_budget,
                         )?
                     } else {
-                        decode_inter_resolved_slices_with_motion(
+                        decode_inter_optional_slices_with_motion(
                             &slice_headers,
                             sps,
                             pps,

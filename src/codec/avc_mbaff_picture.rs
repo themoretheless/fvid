@@ -217,6 +217,49 @@ fn decode_p_slices_impl(
     filtered: bool,
     direct_by_slice: Option<&[Option<&super::avc_direct::MbaffDirectPrediction<'_>>]>,
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    let owned: Vec<_> = references
+        .iter()
+        .map(|lists| {
+            [
+                lists[0].iter().map(|p| Some(*p)).collect::<Vec<_>>(),
+                lists[1].iter().map(|p| Some(*p)).collect::<Vec<_>>(),
+            ]
+        })
+        .collect();
+    let views: Vec<_> = owned
+        .iter()
+        .map(|lists| [lists[0].as_slice(), lists[1].as_slice()])
+        .collect();
+    decode_optional_slices_impl(headers, sps, pps, &views, budget, filtered, direct_by_slice)
+}
+pub(crate) fn decode_optional_p_slices(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[Option<&IntraPicture>]; 2]],
+    budget: usize,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    decode_optional_slices_impl(headers, sps, pps, references, budget, true, None)
+}
+pub(crate) fn decode_optional_inter_slices(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[Option<&IntraPicture>]; 2]],
+    direct: &[Option<&super::avc_direct::MbaffDirectPrediction<'_>>],
+    budget: usize,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    decode_optional_slices_impl(headers, sps, pps, references, budget, true, Some(direct))
+}
+fn decode_optional_slices_impl(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[Option<&IntraPicture>]; 2]],
+    budget: usize,
+    filtered: bool,
+    direct_by_slice: Option<&[Option<&super::avc_direct::MbaffDirectPrediction<'_>>]>,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
     use super::{
         avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
         avc_compensation::Reference420,
@@ -336,6 +379,10 @@ fn decode_p_slices_impl(
                 .try_reserve_exact(lists[list].len())
                 .map_err(|_| invalid("cannot allocate MBAFF references"))?;
             for reference in lists[list] {
+                let Some(reference) = reference else {
+                    views[list].push(Reference420::unavailable(picture.bit_depth)?);
+                    continue;
+                };
                 if reference.coded_width != w
                     || reference.coded_height != h
                     || reference.bit_depth != picture.bit_depth
@@ -511,7 +558,10 @@ fn decode_p_slices_impl(
                         let identity = references
                             .iter()
                             .flat_map(|l| l.iter().flat_map(|r| r.iter()))
-                            .position(|r| std::ptr::eq(*r, *frame))
+                            .position(|r| match (r, frame) {
+                                (Some(a), Some(b)) => std::ptr::eq(*a, *b),
+                                _ => false,
+                            })
                             .ok_or_else(|| invalid("unknown MBAFF reference identity"))?;
                         identities[list] = Some(MotionReference {
                             picture: identity as u64 * 3
