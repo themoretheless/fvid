@@ -214,6 +214,7 @@ pub fn configuration(sps: &Sps, pps: &Pps) -> Result<CUVIDHEVCPICPARAMS, String>
         || sps.explicit_rdpcm
         || sps.persistent_rice
         || sps.extended_precision
+        || sps.cabac_bypass_alignment
         || sps.vui.as_ref().is_some_and(|vui| vui.field_sequence)
     {
         return Err("NVDEC HEVC configuration currently requires Main/Main10 4:2:0 tools".into());

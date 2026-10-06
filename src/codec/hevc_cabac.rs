@@ -322,6 +322,12 @@ impl<'a> HevcCabac<'a> {
         self.failed = result.is_err();
         result
     }
+    pub fn align_coefficient_bypass(&mut self) -> Result<()> {
+        if self.failed { return Err(invalid("HEVC CABAC requires reset after error")); }
+        let result = self.arithmetic.align_hevc_bypass();
+        self.failed = result.is_err();
+        result
+    }
     pub fn bypass(&mut self) -> Result<bool> {
         if self.failed {
             return Err(invalid("HEVC CABAC requires reset after error"));
@@ -386,6 +392,26 @@ impl<'a> HevcCabac<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn aligned_bypass_preserves_banks_and_poisoning_requires_reset() {
+        let data = [0u8; 8];
+        let mut valid = HevcCabac::new(&data, 0, SliceType::I, false, 24).unwrap();
+        valid.rice_statistics[0].observe_first_remainder(3);
+        let banks = valid.contexts;
+        let rice = valid.rice_statistics;
+        let position = valid.arithmetic.bit_position();
+        valid.align_coefficient_bypass().unwrap();
+        assert_eq!(valid.contexts, banks);
+        assert_eq!(valid.rice_statistics, rice);
+        assert_eq!(valid.arithmetic.bit_position(), position);
+        assert!(!valid.bypass().unwrap());
+        let bad = [200u8, 0, 0, 0];
+        let mut invalid = HevcCabac::new(&bad, 0, SliceType::I, false, 24).unwrap();
+        assert!(invalid.align_coefficient_bypass().is_err());
+        assert!(invalid.bypass().is_err());
+        assert!(invalid.decision(Syntax::SplitCu, 0).is_err());
+        assert!(invalid.terminate().is_err());
+    }
     #[test]
     fn persistent_rice_statistics_follow_entropy_context_snapshots() {
         let data = [0u8; 8];

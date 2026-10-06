@@ -395,20 +395,24 @@ mod fixture_tests {
     }
 
     #[test]
-    fn cabac_alignment_fixture_reproduces_exact_sps_refusal() {
+    fn cabac_alignment_fixture_admits_sps_and_reproduces_444_picture_refusal() {
         let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-cabac-alignment-444-rext12.mp4");
-        let input = crate::container::mp4::Mp4Reader::open(
+        let mut input = crate::container::mp4::Mp4Reader::open(
             std::io::Cursor::new(data), Default::default()).unwrap();
-        let error = match super::super::hevc_decoder::HevcDecoder::from_configuration(
-            &input.tracks()[0].configuration, 16 << 20) {
-            Ok(_) => panic!("CABAC alignment unexpectedly admitted"),
-            Err(error) => error,
-        };
-        assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"), "{error}");
+        let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
+            &input.tracks()[0].configuration, 16 << 20).unwrap();
+        let (sps, _) = decoder.parameters();
+        assert!(sps.cabac_bypass_alignment && sps.extended_precision);
+        assert_eq!(sps.chroma_format, 3);
+        assert_eq!(sps.depth, [12, 12]);
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let error = decoder.decode_packet(&packet).err().expect("4:4:4 picture tools remain incomplete");
+        assert!(error.to_string().contains("unsupported HEVC picture tools"), "{error}");
     }
 
     #[test]
-    #[ignore = "pending 4:4:4 picture and aligned residual integration"]
+    #[ignore = "pending 4:4:4 picture geometry integration"]
     fn cabac_alignment_pixels_match_hm_and_reset() {
         macro_rules! fixture {
             ($stem:literal, $depth:literal) => {

@@ -61,6 +61,7 @@ pub struct Sps {
     pub high_precision_offsets: bool,
     pub persistent_rice: bool,
     pub extended_precision: bool,
+    pub cabac_bypass_alignment: bool,
     pub vui: Option<Vui>,
 }
 impl Sps {
@@ -198,6 +199,7 @@ impl Sps {
         let mut high_precision_offsets = false;
         let mut persistent_rice = false;
         let mut extended_precision = false;
+        let mut cabac_bypass_alignment = false;
         if b.bit()? {
             let range = b.bit()?;
             if b.read(7)? != 0 {
@@ -208,11 +210,6 @@ impl Sps {
             if range {
                 let flags = b.read(9)?;
                 // 7.3.2.2.2: the sixth of nine flags disables reference filtering.
-                if flags & !((1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1)) != 0 {
-                    return Err(crate::unsupported(
-                        "remaining HEVC SPS range-extension tools are not implemented",
-                    ));
-                }
                 intra_smoothing_disabled = flags & (1 << 3) != 0;
                 transform_skip_rotation = flags & (1 << 8) != 0;
                 transform_skip_context = flags & (1 << 7) != 0;
@@ -221,6 +218,7 @@ impl Sps {
                 high_precision_offsets = flags & (1 << 2) != 0;
                 persistent_rice = flags & (1 << 1) != 0;
                 extended_precision = flags & (1 << 4) != 0;
+                cabac_bypass_alignment = flags & 1 != 0;
             }
         }
         b.finish_rbsp()?;
@@ -261,6 +259,7 @@ impl Sps {
             high_precision_offsets,
             persistent_rice,
             extended_precision,
+            cabac_bypass_alignment,
             vui,
         })
     }

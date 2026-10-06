@@ -4,10 +4,14 @@ use crate::{Result, invalid};
 pub trait ResidualBins {
     fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool>;
     fn bypass(&mut self) -> Result<bool>;
+    fn align_coefficient_bypass(&mut self) -> Result<()> {
+        Err(invalid("residual bin reader does not implement HEVC alignment"))
+    }
     fn rice_statistic(&self, _class: usize) -> PersistentRiceStatistic { Default::default() }
     fn set_rice_statistic(&mut self, _class: usize, _value: PersistentRiceStatistic) {}
 }
 impl ResidualBins for HevcCabac<'_> {
+    fn align_coefficient_bypass(&mut self) -> Result<()> { HevcCabac::align_coefficient_bypass(self) }
     fn rice_statistic(&self, class: usize) -> PersistentRiceStatistic { self.rice_statistics[class] }
     fn set_rice_statistic(&mut self, class: usize, value: PersistentRiceStatistic) { self.rice_statistics[class] = value; }
     fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool> {
@@ -264,12 +268,12 @@ pub(crate) fn read_block_with_rice(
     hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
 ) -> Result<Vec<i32>> {
     read_block_with_precision(b, log2_size, chroma, scan, hide_sign, skip_context,
-        persistent_class, None)
+        persistent_class, None, false)
 }
 pub(crate) fn read_block_with_precision(
     b: &mut impl ResidualBins, log2_size: u8, chroma: bool, scan: Scan,
     hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
-    extended_depth: Option<u8>,
+    extended_depth: Option<u8>, alignment: bool,
 ) -> Result<Vec<i32>> {
     let last = last_position(b, log2_size, chroma, scan)?;
     let side = 1usize << log2_size;
@@ -368,6 +372,13 @@ pub(crate) fn read_block_with_precision(
             levels[n] +=
                 u32::from(b.decision(Syntax::Greater2, usize::from(chroma) * 4 + ctx_set)?);
         }
+        // H.265 7.3.8.11: escapeDataPresent is set when a remainder is
+        // coded. Alignment precedes the first sign and preserves input position.
+        let escape = indices.iter().enumerate().any(|(ordinal, &n)| {
+            let threshold = if ordinal >= 8 { 1 } else if Some(n) == first_greater { 3 } else { 2 };
+            levels[n] == threshold
+        });
+        if alignment && escape { b.align_coefficient_bypass()?; }
         let lowest = *indices.last().unwrap();
         let hidden = hide_sign && indices[0] - lowest > 3;
         let mut negative = [false; 16];
@@ -518,9 +529,14 @@ mod tests {
     enum Bin {
         Context(Syntax, usize, bool),
         Bypass(bool),
+        Align,
     }
     struct Script(VecDeque<Bin>);
     impl ResidualBins for Script {
+        fn align_coefficient_bypass(&mut self) -> Result<()> {
+            assert!(matches!(self.0.pop_front(), Some(Bin::Align)), "wrong alignment order");
+            Ok(())
+        }
         fn decision(&mut self, s: Syntax, c: usize) -> Result<bool> {
             let Some(Bin::Context(expected, index, value)) = self.0.pop_front() else {
                 panic!("wrong bin order")
@@ -565,6 +581,25 @@ mod tests {
             output.push_back(Bin::Bypass(suffix & (1 << bit) != 0));
         }
         Script(output)
+    }
+    #[test]
+    fn alignment_precedes_sign_only_when_escape_data_is_present() {
+        for level in 1..=3 {
+            let mut bins = Script(VecDeque::from([
+                Bin::Context(Syntax::LastX, 0, false),
+                Bin::Context(Syntax::LastY, 0, false),
+                Bin::Context(Syntax::Greater1, 1, level > 1),
+            ]));
+            if level > 1 { bins.0.push_back(Bin::Context(Syntax::Greater2, 0, level > 2)); }
+            if level == 3 { bins.0.push_back(Bin::Align); }
+            bins.0.push_back(Bin::Bypass(true));
+            if level == 3 { bins.0.push_back(Bin::Bypass(false)); }
+            let block = read_block_with_precision(&mut bins, 2, false, Scan::Diagonal,
+                true, false, None, Some(12), true).unwrap();
+            assert_eq!(block[0], -level);
+            assert!(block[1..].iter().all(|&v| v == 0));
+            assert!(bins.0.is_empty());
+        }
     }
     #[test]
     fn complete_dc_block_reads_level_sign_and_remainder() {

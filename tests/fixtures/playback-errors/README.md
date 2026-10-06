@@ -457,3 +457,8 @@ The exact SPS refusal test passes; pixel/reset acceptance remains explicitly
 ignored until 4:4:4 and alignment integration. Regenerate separately using
 `scripts/generate_hevc_alignment_sample.py` with a HIGH_BITDEPTH HM build.
 Ordinary tests invoke neither HM nor FFmpeg nor network access.
+
+CABAC alignment syntax is now connected. The staged fixture test asserts active
+alignment/extended-precision metadata and 4:4:4 12-bit SPS geometry, then checks
+the exact remaining picture-tools refusal. The old SPS refusal expectation was
+replaced; full pixel/reset acceptance remains ignored pending 4:4:4 geometry.

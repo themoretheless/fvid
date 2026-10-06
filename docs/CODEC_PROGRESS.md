@@ -2361,3 +2361,23 @@ now accepts explicit chroma metadata, preserving the default 4:2:0 behavior.
 
 Offline codec library validation: 368 passed, no failures, two ignored
 (explicit fixture generation and pending aligned 4:4:4 pixel acceptance).
+
+### HEVC aligned coefficient syntax integration (2026-10-06)
+
+SPS CABAC alignment metadata is admitted and passed into block decoding. The
+coefficient reader derives escapeDataPresent from significant coefficient count
+and greater1/greater2 syntax, then aligns the engine before sign and remainder
+bypass bins for that group. Tests prove the event precedes signs for escaped
+levels and is absent for level-1/level-2 groups. Arithmetic alignment preserves
+context banks, Rice statistics and input position; errors poison HEVC entropy
+state until reset. The NVDEC adapter continues refusing this unqualified tool.
+
+The high-throughput 4:4:4 fixture now parses SPS successfully and fails at the
+exact unsupported picture geometry gate, replacing its former SPS refusal
+expectation. Full pixel/reset acceptance remains ignored pending 4:4:4 planes,
+transform-tree semantics and motion/filter geometry. No full playback claim
+is made for this fixture. This supersedes the unconnected alignment notes.
+
+Offline validation: codec library 370 passed / two ignored; owned media
+library 334 passed / one ignored; CPU NVDEC HEVC preparation 19 passed.
+No failures; ordinary tests required neither FFmpeg nor network access.

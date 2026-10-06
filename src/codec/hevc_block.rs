@@ -79,12 +79,12 @@ pub(crate) fn read_with_tools(
     persistent_rice: bool,
 ) -> Result<Coefficients> {
     read_with_precision(b, c, rotation_enabled, context_enabled, rdpcm_enabled,
-        explicit_rdpcm_enabled, max_skip_log2, persistent_rice, false)
+        explicit_rdpcm_enabled, max_skip_log2, persistent_rice, false, false)
 }
 pub(crate) fn read_with_precision(
     b: &mut impl ResidualBins, c: Config, rotation_enabled: bool,
     context_enabled: bool, rdpcm_enabled: bool, explicit_rdpcm_enabled: bool,
-    max_skip_log2: u8, persistent_rice: bool, extended_precision: bool,
+    max_skip_log2: u8, persistent_rice: bool, extended_precision: bool, alignment: bool,
 ) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(2..=5).contains(&max_skip_log2) {
@@ -118,6 +118,7 @@ pub(crate) fn read_with_precision(
         context_enabled && (skip || c.transquant_bypass),
         persistent_rice.then_some(usize::from(c.component != 0) * 2 + usize::from(skip || c.transquant_bypass)),
         extended_precision.then_some(c.bit_depth),
+        alignment,
     )?;
     let transform = if c.transquant_bypass {
         Transform::Bypass
