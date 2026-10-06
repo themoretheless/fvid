@@ -412,12 +412,10 @@ pub fn decode_slices(
             }
         }
     }
-    if sps.chroma_format != 1
-        || sps.separate_colour_plane
-        || pps.tiles.is_some()
-        || sps.depth[0] != sps.depth[1]
-    {
-        return Err(crate::unsupported("unsupported HEVC multi-slice picture tools"));
+    if sps.chroma_format != 1 || sps.separate_colour_plane || sps.depth[0] != sps.depth[1] {
+        return Err(crate::unsupported(
+            "unsupported HEVC multi-slice picture tools",
+        ));
     }
     for (index, slice) in slices.iter().enumerate() {
         if slice.first != (index == 0)
@@ -438,7 +436,9 @@ pub fn decode_slices(
             return Err(invalid("invalid HEVC merge candidate count"));
         }
         if sps.depth[0] != sps.depth[1] {
-            return Err(crate::unsupported("HEVC mixed component bit depths are not supported"));
+            return Err(crate::unsupported(
+                "HEVC mixed component bit depths are not supported",
+            ));
         }
         for list in 0..2 {
             if reference_lists[list].len() != slice.references[list] as usize {
@@ -487,6 +487,18 @@ pub fn decode_slices(
     let [min_cb, max_cb] = sps.coding_block_log2;
     let [w, h] = sps.dimensions;
     let count = w as usize * h as usize;
+    let tile_layout = pps
+        .tiles
+        .as_ref()
+        .map(|tiles| {
+            let side = 1u32 << max_cb;
+            super::hevc_tiles::TileLayout::new(
+                tiles,
+                [w.div_ceil(side), h.div_ceil(side)],
+                budget - (count * 24 + 65536),
+            )
+        })
+        .transpose()?;
     let lists = first_lists;
     let chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
     hevc_qp::components(slice.qp, sps.depth, chroma_offsets)?;
@@ -499,7 +511,7 @@ pub fn decode_slices(
         lists,
         slice_start: 0,
         tile_bounds: None,
-        tile_layout: None,
+        tile_layout,
         qp: slice.qp,
         chroma_offsets,
         cu_chroma_offsets: [0; 2],
@@ -527,13 +539,19 @@ pub fn decode_slices(
     let total = columns
         .checked_mul(rows)
         .ok_or_else(|| invalid("HEVC CTU grid overflow"))?;
-    let mut sao = Vec::with_capacity(total as usize);
+    if slices.iter().any(|s| s.address >= total) {
+        return Err(invalid("HEVC slice address is outside the picture"));
+    }
+    let mut sao = vec![[hevc_sao::Sao::Off; 3]; total as usize];
+    let scan = |raster: u32| tile_scan(&decoder.tile_layout, raster);
+    let starts: Vec<_> = slices.iter().map(|s| scan(s.address)).collect();
     let mut previous_contexts = None;
     let mut saved = None;
+    let mut visited = 0;
     for (index, slice) in slices.iter().enumerate() {
-        let begin = slice.address;
-        let end = slices.get(index + 1).map_or(total, |s| s.address);
-        if begin != sao.len() as u32 || begin >= end || end > total || slice.pps_id != pps.id {
+        let begin = starts[index];
+        let end = starts.get(index + 1).copied().unwrap_or(total);
+        if begin != visited || begin >= end || end > total || slice.pps_id != pps.id {
             return Err(invalid("HEVC slices do not partition the picture"));
         }
         decoder.slice = slice;
@@ -545,17 +563,26 @@ pub fn decode_slices(
             decoder.qp_coded = false;
             saved = None;
         }
-        // H.265 7.4.7.1 initializes chroma adjustments for each slice segment.
         decoder.cu_chroma_offsets = [0; 2];
         decoder.chroma_qp_coded = false;
         decoder.chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
-        let expected = if pps.entropy_sync {
-            (end - 1) / columns - begin / columns + 1
-        } else {
-            1
-        };
-        if slice.entropy_substreams.len() != expected as usize {
-            return Err(invalid("HEVC slice WPP substream count mismatch"));
+        let expected = 1
+            + (begin + 1..end)
+                .filter(|&a| {
+                    let (_, _, _, _, tile_start, row_start) =
+                        ctu_position(&decoder.tile_layout, a, columns, rows);
+                    tile_start || (pps.entropy_sync && row_start)
+                })
+                .count();
+        if slice.entropy_substreams.len() != expected
+            || slice
+                .entropy_substreams
+                .iter()
+                .any(|r| r.start >= r.end || r.end > slice.rbsp.len())
+        {
+            return Err(invalid(
+                "HEVC segment entropy substreams do not match tile/row layout",
+            ));
         }
         let mut bins = HevcCabac::new(
             &slice.rbsp[slice.entropy_substreams[0].clone()],
@@ -565,8 +592,10 @@ pub fn decode_slices(
             slice.qp,
         )?;
         let initial = bins.contexts()?;
-        if slice.dependent {
-            let contexts = if pps.entropy_sync && begin % columns == 0 {
+        let (_, _, _, _, tile_start, row_start) =
+            ctu_position(&decoder.tile_layout, begin, columns, rows);
+        if slice.dependent && !tile_start {
+            let contexts = if pps.entropy_sync && row_start {
                 saved.as_ref().unwrap_or(&initial)
             } else {
                 previous_contexts
@@ -579,36 +608,48 @@ pub fn decode_slices(
                 contexts,
             )?;
         }
+        let mut stream = 0;
         for address in begin..end {
-            let row = address / columns;
-            let col = address % columns;
-            if pps.entropy_sync && col == 0 && address != begin {
-                let substream = (row - begin / columns) as usize;
-                bins = HevcCabac::from_contexts(
-                    &slice.rbsp[slice.entropy_substreams[substream].clone()],
-                    0,
-                    saved.as_ref().unwrap_or(&initial),
-                )?;
+            let (raster, row, col, [tx, ty, tw, th], tile_start, row_start) =
+                ctu_position(&decoder.tile_layout, address, columns, rows);
+            decoder.tile_bounds = decoder
+                .tile_layout
+                .as_ref()
+                .map(|_| [tx * side, ty * side, tw * side, th * side]);
+            if tile_start {
+                saved = None;
+                decoder.qp = slice.qp;
+                decoder.qp_prediction = slice.qp;
+                decoder.qp_coded = false;
+            }
+            if address != begin && (tile_start || (pps.entropy_sync && row_start)) {
+                stream += 1;
+                let bytes = &slice.rbsp[slice.entropy_substreams[stream].clone()];
+                bins = if tile_start {
+                    HevcCabac::new(bytes, 0, slice.slice_type, slice.cabac_init, slice.qp)?
+                } else {
+                    HevcCabac::from_contexts(bytes, 0, saved.as_ref().unwrap_or(&initial))?
+                };
                 decoder.qp = slice.qp;
             }
-            let available = |other: u32| other >= decoder.slice_start;
-            let parameters = hevc_sao::read_ctu_with_scale(
+            let available =
+                |other: u32| tile_scan(&decoder.tile_layout, other) >= decoder.slice_start;
+            sao[raster as usize] = hevc_sao::read_ctu_with_scale(
                 &mut bins,
                 slice.sao,
                 sps.depth,
                 pps.sao_offset_scale,
-                if col > 0 && available(address - 1) {
-                    sao.get(address as usize - 1)
+                if col > tx && available(raster - 1) {
+                    Some(&sao[raster as usize - 1])
                 } else {
                     None
                 },
-                if row > 0 && available(address - columns) {
-                    sao.get((address - columns) as usize)
+                if row > ty && available(raster - columns) {
+                    Some(&sao[(raster - columns) as usize])
                 } else {
                     None
                 },
             )?;
-            sao.push(parameters);
             hevc_tree::read_ctu(
                 &mut bins,
                 &mut decoder,
@@ -617,7 +658,7 @@ pub fn decode_slices(
                 max_cb,
                 min_cb,
             )?;
-            if pps.entropy_sync && col == 1 {
+            if pps.entropy_sync && col == tx + 1 {
                 saved = Some(bins.contexts()?);
             }
             let last = address + 1 == end;
@@ -626,12 +667,16 @@ pub fn decode_slices(
                     "HEVC slice termination does not match segment extent",
                 ));
             }
-            if pps.entropy_sync && col + 1 == columns && !last && !bins.terminate()? {
+            let tile_end = col == tx + tw - 1 && row == ty + th - 1;
+            let row_end = pps.entropy_sync && col == tx + tw - 1;
+            if !last && (tile_end || row_end) && !bins.terminate()? {
                 return Err(invalid("missing HEVC end-of-substream bit"));
             }
+            visited += 1;
         }
         previous_contexts = Some(bins.contexts()?);
     }
+    decoder.tile_bounds = None;
     if !decoder.planes.iter().all(Plane::complete) {
         return Err(invalid("incomplete HEVC multi-slice picture"));
     }
@@ -644,7 +689,9 @@ pub fn decode_slices(
     for y in (0..h).step_by(4) {
         for x in (0..w).step_by(4) {
             let address = y / side * columns + x / side;
-            let owner = slices.partition_point(|s| s.address <= address) - 1;
+            let scan = tile_scan(&decoder.tile_layout, address);
+            let owner =
+                slices.partition_point(|s| tile_scan(&decoder.tile_layout, s.address) <= scan) - 1;
             let source_pocs = &slice_pocs[owner];
             let cell = &mut decoder.cells[y as usize / 4 * (w as usize / 4) + x as usize / 4];
             cell.motion =
@@ -660,7 +707,8 @@ pub fn decode_slices(
         let owner = |p: [usize; 2]| {
             let address = ((p[1] << shift) / side as usize) * columns as usize
                 + (p[0] << shift) / side as usize;
-            slices.partition_point(|s| s.address as usize <= address) - 1
+            let scan = tile_scan(&decoder.tile_layout, address as u32);
+            slices.partition_point(|s| tile_scan(&decoder.tile_layout, s.address) <= scan) - 1
         };
         plane.apply_sao_with_exclusions(
             max_cb - u8::from(component != 0),
@@ -668,7 +716,19 @@ pub fn decode_slices(
             |a, b| {
                 let ia = owner(a);
                 let ib = owner(b);
-                owners[ia] == owners[ib] || slices[ia.max(ib)].loop_filter_across_slices
+                let slice_allowed =
+                    owners[ia] == owners[ib] || slices[ia.max(ib)].loop_filter_across_slices;
+                let tile_allowed = decoder.tile_layout.as_ref().is_none_or(|layout| {
+                    if pps.tiles.as_ref().unwrap().loop_filter_across {
+                        return true;
+                    }
+                    let raster = |p: [usize; 2]| {
+                        (p[1] << shift) / side as usize * columns as usize
+                            + (p[0] << shift) / side as usize
+                    };
+                    layout.tile_ids[raster(a)] == layout.tile_ids[raster(b)]
+                });
+                slice_allowed && tile_allowed
             },
             |p| {
                 let c = decoder.cells[((p[1] << shift) / 4) * (sps.dimensions[0] as usize / 4)
@@ -691,7 +751,9 @@ pub fn decode_slices(
         pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
         motion,
         reference_pocs: canonical_pocs,
-        reference_long_term: std::array::from_fn(|l| canonical[l].iter().map(|r| r.long_term).collect()),
+        reference_long_term: std::array::from_fn(|l| {
+            canonical[l].iter().map(|r| r.long_term).collect()
+        }),
         dimensions: [w, h],
         crop: sps.crop,
         depth: sps.depth,
@@ -986,7 +1048,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                                 let y = (y << shift) as u32;
                                 if x < tx || y < ty || x >= tx + width || y >= ty + height { return false; }
                             }
-                            if address < self.slice_start as usize {
+                            if tile_scan(&self.tile_layout,address as u32) < self.slice_start {
                                 return false;
                             }
                             if !self.pps.constrained_intra {
@@ -1197,6 +1259,35 @@ fn reconstruct_row(
     Ok(())
 }
 
+fn ctu_position(
+    layout: &Option<super::hevc_tiles::TileLayout>,
+    address: u32,
+    columns: u32,
+    rows: u32,
+) -> (u32, u32, u32, [u32; 4], bool, bool) {
+    let raster = layout
+        .as_ref()
+        .map_or(address, |l| l.tile_scan_to_raster[address as usize]);
+    let row = raster / columns;
+    let col = raster % columns;
+    let rectangle = layout.as_ref().map_or([0, 0, columns, rows], |l| {
+        l.rectangles[l.tile_ids[raster as usize] as usize]
+    });
+    let [tx, ty, _, _] = rectangle;
+    (
+        raster,
+        row,
+        col,
+        rectangle,
+        col == tx && row == ty,
+        col == tx,
+    )
+}
+fn tile_scan(layout: &Option<super::hevc_tiles::TileLayout>, raster: u32) -> u32 {
+    layout
+        .as_ref()
+        .map_or(raster, |l| l.raster_to_tile_scan[raster as usize])
+}
 fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
     deblock_slices(decoder, std::slice::from_ref(slice))
 }
@@ -1231,7 +1322,7 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                 let side = 1usize << decoder.sps.coding_block_log2[1];
                 let owner = |x: usize, y: usize| {
                     slices.partition_point(|s| {
-                        s.address as usize <= y / side * width.div_ceil(side) + x / side
+                        tile_scan(&decoder.tile_layout,s.address) <= tile_scan(&decoder.tile_layout,(y / side * width.div_ceil(side) + x / side) as u32)
                     }) - 1
                 };
                 let q_owner = owner(x, y);
@@ -1396,6 +1487,7 @@ impl Decoder<'_> {
     }
 
     fn cell(&self, x: i32, y: i32) -> Option<Cell> {
+        if x<0 || y<0 || x as u32>=self.sps.dimensions[0] || y as u32>=self.sps.dimensions[1] { return None; }
         if let Some([tx, ty, width, height]) = self.tile_bounds {
             if x < tx as i32 || y < ty as i32 || x as u32 >= tx + width || y as u32 >= ty + height {
                 return None;
@@ -1404,7 +1496,7 @@ impl Decoder<'_> {
         if x >= 0 && y >= 0 {
             let side = 1u32 << self.sps.coding_block_log2[1];
             let columns = self.sps.dimensions[0].div_ceil(side);
-            if y as u32 / side * columns + (x as u32 / side) < self.slice_start {
+            if tile_scan(&self.tile_layout,y as u32 / side * columns + (x as u32 / side)) < self.slice_start {
                 return None;
             }
         }

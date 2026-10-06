@@ -2271,3 +2271,21 @@ byte identically. This stage does not close multi-segment tile playback.
 Offline validation for this stage: codec library 362 passed, two explicit
 ignored tests (fixture generation and pending tiled-segment pixel acceptance);
 CUDA-feature HEVC tests 18 passed. No playback/physical-device completion claim.
+
+### HEVC tiled segment reconstruction (2026-10-06)
+
+The previously staged tiled-segment pixel acceptance test is now enabled.
+Independent, dependent and mixed segments reconstruct in tile-scan order, with
+CABAC restarts at tile boundaries, reference ownership and filter availability
+following independent slice and tile boundaries. Nine committed synthetic
+I/B/B streams compare every decoded sample against HM, including reset replay,
+8/10/12-bit mixed segments and a dependent segment spanning two complete tiles.
+The spanning stream has segment raster starts [0,2] and entropy substream counts
+[2,1]. Filtered cases exercise both enabled and disabled cross-tile/slice policy.
+This supersedes the pending multi-segment tile acceptance status above.
+Physical GPU decoding, combined tiles/WPP and universal HEVC profiles remain
+unqualified. Benchmark measurements have not yet been run for this change.
+
+Offline validation: codec library 363 passed / one ignored; owned media library
+334 passed / one ignored; CPU HEVC NVDEC preparation 18 passed. After formatting
+only the changed functions, tiled-segment pixel acceptance was rerun successfully.

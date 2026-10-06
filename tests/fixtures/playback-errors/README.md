@@ -416,3 +416,16 @@ still explicitly refuses multi-slice tile tools, and the HM pixel/reset
 acceptance remains ignored until that implementation is complete. CPU-side
 NVDEC tests preserve NAL submission order and reject raster-sorted segments;
 no physical GPU acceptance is implied. Ordinary tests use committed bytes.
+
+### HEVC tiled segment pixel acceptance
+
+The former ignored tiled-segment acceptance is enabled. The shared HM generator
+also produces `slices-filtered`, `dependent-filtered`, `cross-segments`,
+`mixed-segments`, `spanning-segments` (all `rext8`) and
+`mixed-segments-high10-rext10` / `mixed-segments-high12-rext12`.
+Tests compare every sample of all three pictures and repeat after decoder reset.
+The spanning case uses three vertical tiles and two segments, with two entropy
+substreams in its first segment. Mixed cases contain both independent and
+dependent segments and disable filtering across independent slice boundaries.
+These fixtures replace the previous multi-segment reconstruction refusal;
+ordinary tests consume committed MP4/YUV bytes without HM, FFmpeg or network.

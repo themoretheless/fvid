@@ -349,7 +349,7 @@ mod fixture_tests {
     }
 
     #[test]
-    fn tiled_segment_headers_accept_tile_scan_order_but_reconstruction_remains_explicit() {
+    fn tiled_segment_headers_accept_tile_scan_order_and_reconstruct() {
         for (data, dependent) in [
             (
                 include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.mp4")
@@ -388,51 +388,98 @@ mod fixture_tests {
                     assert_eq!(header.entropy_substreams.len(), 1);
                 }
                 if frame == 0 {
-                    let error = decoder
-                        .decode_packet(&packet)
-                        .err()
-                        .expect("tile segment reconstruction remains incomplete");
-                    assert!(
-                        error
-                            .to_string()
-                            .contains("unsupported HEVC multi-slice picture tools"),
-                        "{error}"
-                    );
+                    assert!(decoder.decode_packet(&packet).unwrap().is_some());
                 }
             }
         }
     }
+
     #[test]
-    #[ignore = "acceptance awaits tiled multi-segment reconstruction and boundary ownership"]
-    fn tiled_segments_match_every_hm_sample_after_reconstruction_support() {
-        for (data, expected) in [
-            (
-                include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.mp4")
+    fn tiled_segments_match_every_hm_sample_and_reset() {
+        macro_rules! fixture {
+            ($stem:literal, $dependent:literal, $filtered:literal, $cross:literal, $slice_cross:literal) => {
+                (
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".mp4"
+                    ))
                     .as_slice(),
-                include_bytes!("../../tests/fixtures/playback-errors/hevc-tiles-slices-rext8.yuv")
+                    include_bytes!(concat!(
+                        "../../tests/fixtures/playback-errors/",
+                        $stem,
+                        ".yuv"
+                    ))
                     .as_slice(),
+                    $dependent,
+                    $filtered,
+                    $cross,
+                    $slice_cross,
+                    $stem,
+                )
+            };
+        }
+        for (data, expected, dependent, filtered, cross, slice_cross, name) in [
+            fixture!("hevc-tiles-slices-rext8", false, false, false, true),
+            fixture!("hevc-tiles-dependent-rext8", true, false, false, true),
+            fixture!(
+                "hevc-tiles-slices-filtered-rext8",
+                false,
+                true,
+                false,
+                false
             ),
-            (
-                include_bytes!(
-                    "../../tests/fixtures/playback-errors/hevc-tiles-dependent-rext8.mp4"
-                )
-                .as_slice(),
-                include_bytes!(
-                    "../../tests/fixtures/playback-errors/hevc-tiles-dependent-rext8.yuv"
-                )
-                .as_slice(),
+            fixture!(
+                "hevc-tiles-dependent-filtered-rext8",
+                true,
+                true,
+                false,
+                true
+            ),
+            fixture!("hevc-tiles-cross-segments-rext8", false, true, true, true),
+            fixture!("hevc-tiles-mixed-segments-rext8", true, true, true, false),
+            fixture!(
+                "hevc-tiles-spanning-segments-rext8",
+                true,
+                true,
+                false,
+                true
+            ),
+            fixture!(
+                "hevc-tiles-mixed-segments-high10-rext10",
+                true,
+                true,
+                true,
+                false
+            ),
+            fixture!(
+                "hevc-tiles-mixed-segments-high12-rext12",
+                true,
+                true,
+                true,
+                false
             ),
         ] {
-            let mut input = crate::container::mp4::Mp4Reader::open(
-                std::io::Cursor::new(data),
-                Default::default(),
-            )
-            .unwrap();
+            let mut input =
+                crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                    .unwrap();
             let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
                 &input.tracks()[0].configuration,
                 16 << 20,
             )
             .unwrap();
+            assert_eq!(decoder.parameters().1.dependent_slices, dependent);
+            assert_eq!(
+                decoder
+                    .parameters()
+                    .1
+                    .tiles
+                    .as_ref()
+                    .unwrap()
+                    .loop_filter_across,
+                cross
+            );
+            let bits = decoder.parameters().0.depth[0];
             let mut packet = Vec::new();
             for pass in 0..2 {
                 if pass != 0 {
@@ -441,16 +488,61 @@ mod fixture_tests {
                 let mut pixels = Vec::new();
                 for frame in 0..3 {
                     input.read_packet(0, frame, &mut packet).unwrap();
-                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
-                    pixels.extend(
-                        decoded
-                            .picture
-                            .planes
-                            .iter()
-                            .flat_map(|p| p.samples().iter().map(|&v| u8::try_from(v).unwrap())),
+                    let headers = decoder.slice_headers(&packet).unwrap();
+                    assert_eq!(
+                        headers.iter().map(|h| h.address).collect::<Vec<_>>(),
+                        if name.contains("spanning-segments") {
+                            vec![0, 2]
+                        } else {
+                            vec![0, 2, 1, 3]
+                        }
                     );
+                    if name.contains("spanning-segments") {
+                        assert_eq!(
+                            headers
+                                .iter()
+                                .map(|h| h.entropy_substreams.len())
+                                .collect::<Vec<_>>(),
+                            [2, 1]
+                        );
+                    }
+                    let expected_dependent: Vec<_> = (0..headers.len())
+                        .map(|index| {
+                            dependent
+                                && if name.contains("mixed-segments") {
+                                    index % 2 == 1
+                                } else {
+                                    index != 0
+                                }
+                        })
+                        .collect();
+                    assert_eq!(
+                        headers.iter().map(|h| h.dependent).collect::<Vec<_>>(),
+                        expected_dependent
+                    );
+                    if filtered {
+                        assert!(
+                            headers.iter().all(|h| !h.deblocking.disabled
+                                && h.loop_filter_across_slices == slice_cross),
+                            "{name}: {:?}",
+                            headers
+                                .iter()
+                                .map(|h| (h.deblocking.disabled, h.loop_filter_across_slices))
+                                .collect::<Vec<_>>()
+                        );
+                    }
+                    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                    pixels.extend(decoded.picture.planes.iter().flat_map(|p| {
+                        p.samples().iter().flat_map(|&v| {
+                            if bits == 8 {
+                                vec![u8::try_from(v).unwrap()]
+                            } else {
+                                v.to_le_bytes().to_vec()
+                            }
+                        })
+                    }));
                 }
-                assert_eq!(pixels, expected);
+                assert_eq!(pixels, expected, "{name}, pass={pass}");
             }
         }
     }
