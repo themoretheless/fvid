@@ -395,7 +395,7 @@ mod fixture_tests {
     }
 
     #[test]
-    fn cabac_alignment_fixture_admits_sps_and_reproduces_444_picture_refusal() {
+    fn cabac_alignment_fixture_admits_full_chroma_metadata_and_picture() {
         let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-cabac-alignment-444-rext12.mp4");
         let mut input = crate::container::mp4::Mp4Reader::open(
             std::io::Cursor::new(data), Default::default()).unwrap();
@@ -407,13 +407,12 @@ mod fixture_tests {
         assert_eq!(sps.depth, [12, 12]);
         let mut packet = Vec::new();
         input.read_packet(0, 0, &mut packet).unwrap();
-        let error = decoder.decode_packet(&packet).err().expect("4:4:4 picture tools remain incomplete");
-        assert!(error.to_string().contains("unsupported HEVC picture tools"), "{error}");
+        let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+        assert!(decoded.picture.planes.iter().all(|p| p.dimensions() == [64,64]));
     }
 
     #[test]
-    #[ignore = "pending 4:4:4 picture geometry integration"]
-    fn cabac_alignment_pixels_match_hm_and_reset() {
+    fn full_chroma_pixels_match_hm_and_reset() {
         macro_rules! fixture {
             ($stem:literal, $depth:literal) => {
                 (include_bytes!(concat!("../../tests/fixtures/playback-errors/", $stem, ".mp4")).as_slice(),
@@ -422,12 +421,19 @@ mod fixture_tests {
         }
         for (data, expected, depth) in [
             fixture!("hevc-cabac-alignment-444-rext12", 12),
+            fixture!("hevc-full-chroma-filtered-rext8", 8),
+            fixture!("hevc-full-chroma-filtered-rext10", 10),
+            fixture!("hevc-full-chroma-filtered-rext12", 12),
+            fixture!("hevc-full-chroma-high-qp-rext12", 12),
+            fixture!("hevc-full-chroma-wpp-rext12", 12),
+            fixture!("hevc-full-chroma-mixed-tiles-rext12", 12),
+            fixture!("hevc-full-chroma-parallel-rext12", 12),
         ] {
             let mut input = crate::container::mp4::Mp4Reader::open(
                 std::io::Cursor::new(data), Default::default()).unwrap();
             let mut decoder = super::super::hevc_decoder::HevcDecoder::from_configuration(
                 &input.tracks()[0].configuration, 16 << 20).unwrap();
-            assert!(decoder.parameters().0.extended_precision);
+            assert_eq!(decoder.parameters().0.chroma_format, 3);
             assert_eq!(decoder.parameters().0.depth, [depth; 2]);
             for pass in 0..2 {
                 if pass != 0 { decoder.reset(); }
@@ -443,7 +449,11 @@ mod fixture_tests {
                         }
                     }
                 }
-                assert_eq!(actual, expected, "depth {depth}, pass {pass}");
+                assert_eq!(actual.len(), expected.len());
+                if actual != expected {
+                    let index = actual.iter().zip(expected).position(|(a,b)| a != b).unwrap();
+                    panic!("depth {depth}, pass {pass}: first pixel byte mismatch {index}: {} != {}", actual[index], expected[index]);
+                }
             }
         }
     }

@@ -153,6 +153,11 @@ pub fn chroma_tc(
     tc_offset_div2: i8,
     depths: [u8; 2],
 ) -> Result<i32> {
+    chroma_tc_with_format(qp_p, qp_q, pps_offset, tc_offset_div2, depths, 1)
+}
+pub fn chroma_tc_with_format(qp_p: i32, qp_q: i32, pps_offset: i8,
+    tc_offset_div2: i8, depths: [u8;2], chroma_format: u8) -> Result<i32> {
+    if !(1..=3).contains(&chroma_format) { return Err(invalid("invalid HEVC deblock chroma format")); }
     if depths.iter().any(|d| !(8..=12).contains(d))
         || !(-12..=12).contains(&pps_offset)
         || !(-6..=6).contains(&tc_offset_div2)
@@ -164,11 +169,11 @@ pub fn chroma_tc(
         return Err(invalid("invalid HEVC deblock QP"));
     }
     let index = ((qp_p + qp_q + 1) >> 1) + i32::from(pps_offset);
-    let qp = match index {
+    let qp = if chroma_format != 1 { index.min(51) } else { match index {
         ..=29 => index,
         30..=43 => [29, 30, 31, 32, 33, 33, 34, 34, 35, 35, 36, 36, 37, 37][(index - 30) as usize],
         _ => index - 6,
-    };
+    } };
     let index = (qp + 2 + 2 * i32::from(tc_offset_div2)).clamp(0, 53) as usize;
     Ok(TC[index] << (depths[1] - 8))
 }

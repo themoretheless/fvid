@@ -2440,3 +2440,32 @@ Picture allocation and loop-filter geometry remain incomplete; the existing
 
 Offline validation: codec library 374 passed / two ignored; owned media library
 334 passed / one ignored. No failures; normal tests used no FFmpeg or network.
+
+### HEVC 4:4:4 picture acceptance (2026-10-06)
+
+Base-layer interleaved 4:4:4 at 8/10/12 bits is now admitted into owned picture
+reconstruction. Full-resolution plane allocation, CTU/SAO coordinates, PCM
+component counts, intra/inter transform trees, 8x8 chroma coefficient scans,
+linear chroma QP, motion prediction and queued reconstruction are connected.
+Chroma deblocking uses full-resolution edge spacing and linear threshold QP.
+The former picture refusal is replaced by metadata/picture acceptance; the
+previously ignored aligned 4:4:4 pixel test is enabled.
+
+Eight owned HM I/B/B streams compare every pixel and replay after reset:
+high-throughput 14-bit constrained alignment/extended-precision coding at
+12-bit sample depth; ordinary filtered 4:4:4 at 8/10/12 bits; QP=40; WPP;
+mixed independent/dependent segments in tiles; and 128x96 WPP that activates
+queued reconstruction. The QP=40 case exercises the distinction from 4:2:0's
+nonlinear QP mapping. Raw PCM entropy tests separately cover three equal
+planes, sample depth scaling, restart/context preservation and every truncation.
+
+Generate explicitly with generate_hevc_alignment_sample.py --full-chroma-suite
+and HIGH_BITDEPTH HM. Ordinary tests consume only committed owned MP4/YUV.
+NVDEC remains restricted to its qualified Main/Main10 4:2:0 tools; no physical
+GPU, all profiles, 4:2:2, separate-colour-plane or 14/16-bit sample claim is made.
+These results supersede the pending 4:4:4 picture acceptance notes above.
+
+Offline validation: codec library 376 passed / one ignored; owned media library
+334 passed / one ignored; CPU NVDEC HEVC preparation 19 passed. The additional
+QP=40 acceptance was rerun after that broad pass and also succeeded. No failures
+and no FFmpeg/network requirement in normal tests.

@@ -462,3 +462,19 @@ CABAC alignment syntax is now connected. The staged fixture test asserts active
 alignment/extended-precision metadata and 4:4:4 12-bit SPS geometry, then checks
 the exact remaining picture-tools refusal. The old SPS refusal expectation was
 replaced; full pixel/reset acceptance remains ignored pending 4:4:4 geometry.
+
+### HEVC full-resolution chroma acceptance
+
+The aligned 4:4:4 acceptance is now enabled, replacing its old refusal.
+The same explicit HM generator's `--full-chroma-suite` option also saves:
+
+- `hevc-full-chroma-filtered-rext8/rext10/rext12`: SAO and deblocking.
+- `hevc-full-chroma-high-qp-rext12`: QP=40 and linear chroma QP mapping.
+- `hevc-full-chroma-wpp-rext12`: entropy row synchronization.
+- `hevc-full-chroma-mixed-tiles-rext12`: independent/dependent tiled segments.
+- `hevc-full-chroma-parallel-rext12`: 128x96 activates queued reconstruction.
+
+Every fixture contains three owned I/B/B pictures and a paired decoded HM YUV
+oracle; tests compare every sample and repeat after decoder reset. Generation
+requires explicit HIGH_BITDEPTH HM paths. Tests invoke no external executables
+or network. Separate-colour-plane, 4:2:2 and deeper sample formats remain open.

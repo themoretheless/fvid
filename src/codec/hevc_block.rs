@@ -20,7 +20,8 @@ pub struct Config {
     pub sign_hiding: bool,
 }
 impl Config {
-    pub fn scan(self) -> Result<Scan> {
+    pub fn scan(self) -> Result<Scan> { self.scan_with_full_chroma(false) }
+    pub fn scan_with_full_chroma(self, full_chroma: bool) -> Result<Scan> {
         if !(2..=5).contains(&self.log2_size)
             || self.component > 2
             || self.intra_mode.is_some_and(|m| m > 34)
@@ -28,7 +29,7 @@ impl Config {
             return Err(invalid("invalid HEVC residual block configuration"));
         }
         Ok(match self.intra_mode {
-            Some(mode) if self.log2_size == 2 || (self.log2_size == 3 && self.component == 0) => {
+            Some(mode) if self.log2_size == 2 || (self.log2_size == 3 && (self.component == 0 || full_chroma)) => {
                 match mode {
                     6..=14 => Scan::Vertical,
                     22..=30 => Scan::Horizontal,
@@ -79,14 +80,14 @@ pub(crate) fn read_with_tools(
     persistent_rice: bool,
 ) -> Result<Coefficients> {
     read_with_precision(b, c, rotation_enabled, context_enabled, rdpcm_enabled,
-        explicit_rdpcm_enabled, max_skip_log2, persistent_rice, false, false)
+        explicit_rdpcm_enabled, max_skip_log2, persistent_rice, false, false, false)
 }
 pub(crate) fn read_with_precision(
     b: &mut impl ResidualBins, c: Config, rotation_enabled: bool,
     context_enabled: bool, rdpcm_enabled: bool, explicit_rdpcm_enabled: bool,
-    max_skip_log2: u8, persistent_rice: bool, extended_precision: bool, alignment: bool,
+    max_skip_log2: u8, persistent_rice: bool, extended_precision: bool, alignment: bool, full_chroma: bool,
 ) -> Result<Coefficients> {
-    let scan = c.scan()?;
+    let scan = c.scan_with_full_chroma(full_chroma)?;
     if !(2..=5).contains(&max_skip_log2) {
         return Err(invalid("invalid HEVC transform skip limit"));
     }

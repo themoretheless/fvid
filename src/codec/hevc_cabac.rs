@@ -351,9 +351,14 @@ impl<'a> HevcCabac<'a> {
         pcm_depth: [u8; 2],
         depths: [u8; 2],
     ) -> Result<[Vec<u16>; 3]> {
+        self.read_pcm_with_chroma(log, pcm_depth, depths, 1)
+    }
+    pub fn read_pcm_with_chroma(&mut self, log: u8, pcm_depth: [u8;2], depths: [u8;2], chroma_format: u8)
+        -> Result<[Vec<u16>;3]> {
         if self.failed
             || !self.arithmetic.is_terminated()
             || !(3..=5).contains(&log)
+            || !matches!(chroma_format, 1 | 3)
             || depths.iter().any(|d| !(8..=12).contains(d))
             || pcm_depth.iter().zip(depths).any(|(&p, d)| p == 0 || p > d)
         {
@@ -370,7 +375,8 @@ impl<'a> HevcCabac<'a> {
             let mut samples = [Vec::new(), Vec::new(), Vec::new()];
             for (c, plane) in samples.iter_mut().enumerate() {
                 let chroma = usize::from(c != 0);
-                let count = 1usize << (2 * (log - chroma as u8));
+                let shift = u8::from(c != 0 && chroma_format != 3);
+                let count = 1usize << (2 * (log - shift));
                 plane.reserve_exact(count);
                 for _ in 0..count {
                     plane.push(
@@ -525,6 +531,33 @@ mod pcm_tests {
         data.extend(0..96); // 8x8 Y + 4x4 Cb + 4x4 Cr, each eight-bit PCM.
         data.extend([0, 0]); // New arithmetic offset zero.
         data
+    }
+    #[test]
+    fn full_chroma_pcm_reads_three_equal_planes_and_restarts_entropy() {
+        let mut data = vec![0xfe, 0x80];
+        data.extend(0..192);
+        data.extend([0,0]);
+        for depth in [8,10,12] {
+            let mut bins = HevcCabac::new(&data, 0, SliceType::I, false, 24).unwrap();
+            let banks = bins.contexts;
+            assert!(bins.terminate().unwrap());
+            let planes = bins.read_pcm_with_chroma(3, [8;2], [depth;2], 3).unwrap();
+            for (component, plane) in planes.iter().enumerate() {
+                assert_eq!(plane.len(), 64);
+                for (index, &sample) in plane.iter().enumerate() {
+                    assert_eq!(sample, ((component * 64 + index) as u16) << (depth - 8));
+                }
+            }
+            assert_eq!(bins.contexts, banks);
+            assert_eq!(bins.bit_position(), 194 * 8 + 9);
+            assert!(!bins.bypass().unwrap());
+        }
+        for cut in 2..data.len() {
+            let mut bins = HevcCabac::new(&data[..cut], 0, SliceType::I, false, 24).unwrap();
+            assert!(bins.terminate().unwrap());
+            assert!(bins.read_pcm_with_chroma(3, [8;2], [12;2], 3).is_err());
+            assert!(bins.bypass().is_err());
+        }
     }
     #[test]
     fn pcm_reads_planes_scales_depth_and_preserves_contexts_on_restart() {

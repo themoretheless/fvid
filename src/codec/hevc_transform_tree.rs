@@ -57,6 +57,20 @@ pub fn read_inter_444<B: ResidualBins>(
 ) -> Result<()> {
     read(bins, origin, config, false, partitioned, true, leaf)
 }
+pub fn read_intra_with_chroma<B: ResidualBins>(
+    bins: &mut B, origin: [u32;2], config: Config, chroma_format: u8,
+    leaf: impl FnMut(&mut B, Unit) -> Result<()>,
+) -> Result<()> {
+    if !matches!(chroma_format, 1 | 3) { return Err(crate::unsupported("unsupported HEVC transform-tree chroma format")); }
+    read(bins, origin, config, true, false, chroma_format == 3, leaf)
+}
+pub fn read_inter_with_chroma<B: ResidualBins>(
+    bins: &mut B, origin: [u32;2], config: Config, partitioned: bool, chroma_format: u8,
+    leaf: impl FnMut(&mut B, Unit) -> Result<()>,
+) -> Result<()> {
+    if !matches!(chroma_format, 1 | 3) { return Err(crate::unsupported("unsupported HEVC transform-tree chroma format")); }
+    read(bins, origin, config, false, partitioned, chroma_format == 3, leaf)
+}
 fn read<B: ResidualBins>(
     bins: &mut B,
     origin: [u32; 2],
