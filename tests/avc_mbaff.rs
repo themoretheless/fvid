@@ -1,4 +1,4 @@
-//! MBAFF intra/P pixel acceptance with independent saved JM references.
+//! MBAFF I/P/B pixel acceptance with independent saved JM references.
 use fvid::{
     codec::{
         avc::{Pps, Sps},
@@ -1527,4 +1527,655 @@ fn cabac_mbaff_inter_mixed_high10_and_multislice_match_jm_and_rewind() {
         high10_eight > 0,
         "High10 inter corpus must exercise 8x8 transforms"
     );
+}
+
+#[test]
+fn mbaff_b_spatial_temporal_match_every_jm_sample_and_rewind() {
+    macro_rules! case {
+        ($name:literal) => {
+            (
+                $name,
+                include_bytes!(concat!(
+                    "fixtures/playback-errors/avc-mbaff-",
+                    $name,
+                    ".mp4"
+                ))
+                .as_slice(),
+                include_bytes!(concat!(
+                    "fixtures/playback-errors/avc-mbaff-",
+                    $name,
+                    ".yuv"
+                ))
+                .as_slice(),
+            )
+        };
+    }
+    let mut high10_eight = 0;
+    let mut expected_direct_cases = std::collections::HashSet::new();
+    let mut actual_direct_cases = std::collections::HashSet::new();
+    let mut expected_co_direct_cases = std::collections::HashSet::new();
+    let mut actual_co_direct_cases = std::collections::HashSet::new();
+    for (name, video, oracle) in [
+        case!("frame-b-spatial-cavlc"),
+        case!("field-b-spatial-cavlc"),
+        case!("mixed-b-spatial-cavlc"),
+        case!("mixed-reverse-b-spatial-cavlc"),
+        case!("mixed-vertical-b-spatial-cavlc"),
+        case!("mixed-vertical-reverse-b-spatial-cavlc"),
+        case!("field-multislice-b-spatial-cavlc"),
+        case!("frame-b-spatial-high10-cavlc"),
+        case!("field-b-spatial-high10-cavlc"),
+        case!("mixed-b-spatial-high10-cavlc"),
+        case!("mixed-reverse-b-spatial-high10-cavlc"),
+        case!("mixed-vertical-b-spatial-high10-cavlc"),
+        case!("mixed-vertical-reverse-b-spatial-high10-cavlc"),
+        case!("field-multislice-b-spatial-high10-cavlc"),
+        case!("frame-b-temporal-cavlc"),
+        case!("field-b-temporal-cavlc"),
+        case!("mixed-b-temporal-cavlc"),
+        case!("mixed-reverse-b-temporal-cavlc"),
+        case!("mixed-vertical-b-temporal-cavlc"),
+        case!("mixed-vertical-reverse-b-temporal-cavlc"),
+        case!("field-multislice-b-temporal-cavlc"),
+        case!("frame-b-temporal-high10-cavlc"),
+        case!("field-b-temporal-high10-cavlc"),
+        case!("mixed-b-temporal-high10-cavlc"),
+        case!("mixed-reverse-b-temporal-high10-cavlc"),
+        case!("mixed-vertical-b-temporal-high10-cavlc"),
+        case!("mixed-vertical-reverse-b-temporal-high10-cavlc"),
+        case!("field-multislice-b-temporal-high10-cavlc"),
+        case!("frame-b-spatial-cabac"),
+        case!("field-b-spatial-cabac"),
+        case!("mixed-b-spatial-cabac"),
+        case!("mixed-reverse-b-spatial-cabac"),
+        case!("mixed-vertical-b-spatial-cabac"),
+        case!("mixed-vertical-reverse-b-spatial-cabac"),
+        case!("field-multislice-b-spatial-cabac"),
+        case!("frame-b-spatial-high10-cabac"),
+        case!("field-b-spatial-high10-cabac"),
+        case!("mixed-b-spatial-high10-cabac"),
+        case!("mixed-reverse-b-spatial-high10-cabac"),
+        case!("mixed-vertical-b-spatial-high10-cabac"),
+        case!("mixed-vertical-reverse-b-spatial-high10-cabac"),
+        case!("field-multislice-b-spatial-high10-cabac"),
+        case!("frame-b-temporal-cabac"),
+        case!("field-b-temporal-cabac"),
+        case!("mixed-b-temporal-cabac"),
+        case!("mixed-reverse-b-temporal-cabac"),
+        case!("mixed-vertical-b-temporal-cabac"),
+        case!("mixed-vertical-reverse-b-temporal-cabac"),
+        case!("field-multislice-b-temporal-cabac"),
+        case!("frame-b-temporal-high10-cabac"),
+        case!("field-b-temporal-high10-cabac"),
+        case!("mixed-b-temporal-high10-cabac"),
+        case!("mixed-reverse-b-temporal-high10-cabac"),
+        case!("mixed-vertical-b-temporal-high10-cabac"),
+        case!("mixed-vertical-reverse-b-temporal-high10-cabac"),
+        case!("field-multislice-b-temporal-high10-cabac"),
+        case!("field-multislice-b-temporal-skipped-cavlc"),
+        case!("field-multislice-b-temporal-skipped-high10-cavlc"),
+        case!("field-multislice-b-temporal-skipped-cabac"),
+        case!("field-multislice-b-temporal-skipped-high10-cabac"),
+        case!("frame-b-pyramid-spatial-cavlc"),
+        case!("frame-b-pyramid-spatial-high10-cavlc"),
+        case!("frame-b-pyramid-temporal-cavlc"),
+        case!("frame-b-pyramid-temporal-high10-cavlc"),
+        case!("frame-b-pyramid-spatial-cabac"),
+        case!("frame-b-pyramid-spatial-high10-cabac"),
+        case!("frame-b-pyramid-temporal-cabac"),
+        case!("frame-b-pyramid-temporal-high10-cabac"),
+        case!("field-b-pyramid-spatial-cavlc"),
+        case!("field-b-pyramid-spatial-high10-cavlc"),
+        case!("field-b-pyramid-temporal-cavlc"),
+        case!("field-b-pyramid-temporal-high10-cavlc"),
+        case!("field-b-pyramid-spatial-cabac"),
+        case!("field-b-pyramid-spatial-high10-cabac"),
+        case!("field-b-pyramid-temporal-cabac"),
+        case!("field-b-pyramid-temporal-high10-cabac"),
+        case!("mixed-b-pyramid-spatial-cavlc"),
+        case!("mixed-b-pyramid-spatial-high10-cavlc"),
+        case!("mixed-b-pyramid-temporal-cavlc"),
+        case!("mixed-b-pyramid-temporal-high10-cavlc"),
+        case!("mixed-b-pyramid-spatial-cabac"),
+        case!("mixed-b-pyramid-spatial-high10-cabac"),
+        case!("mixed-b-pyramid-temporal-cabac"),
+        case!("mixed-b-pyramid-temporal-high10-cabac"),
+        case!("field-b-pyramid-temporal-skipped-high10-cabac"),
+        case!("mixed-b-pyramid-temporal-skipped-cavlc"),
+        case!("mixed-b-pyramid-temporal-skipped-high10-cavlc"),
+        case!("changing-b-pyramid-spatial-cavlc"),
+        case!("changing-b-pyramid-spatial-high10-cavlc"),
+        case!("changing-b-pyramid-temporal-cavlc"),
+        case!("changing-b-pyramid-temporal-high10-cavlc"),
+        case!("changing-b-pyramid-spatial-cabac"),
+        case!("changing-b-pyramid-spatial-high10-cabac"),
+        case!("changing-b-pyramid-temporal-cabac"),
+        case!("changing-b-pyramid-temporal-high10-cabac"),
+    ] {
+        use fvid::codec::{
+            avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+            avc_slice::{SliceHeader, SliceType},
+            config::NalUnits,
+        };
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let timescale = input.tracks()[0].timescale;
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert_eq!(
+            pps.weighted_bipred, 2,
+            "{name} must exercise implicit B weighting"
+        );
+        assert!(sps.mb_adaptive_frame_field && !sps.frame_mbs_only);
+        assert_eq!(
+            sps.bit_depth_luma,
+            if name.contains("high10") { 10 } else { 8 }
+        );
+        let frame_count = if name.contains("pyramid") { 9 } else { 3 };
+        let expected_b = if name.contains("pyramid") { 6 } else { 1 };
+        let mut reference_b = 0;
+        let mut nonzero_frame_indices = 0;
+        let mut b_nonzero_frame_indices = 0;
+        let mut active_multiple = false;
+        let mut picture_types = [0usize; 3];
+        let mut b_count = 0;
+        let mut b_slices = 0;
+        let mut direct_blocks = 0;
+        let mut direct_by_mode = [0usize; 2];
+        let mut colocated_b = 0;
+        let mut co_direct_by_mode = [0usize; 2];
+        let mut reference_types = std::collections::HashMap::new();
+        let mut dpb =
+            fvid::codec::avc_dpb::ReferenceBuffer::new(sps.frame_num_bits, sps.max_num_ref_frames)
+                .unwrap();
+        let mut poc = fvid::codec::avc_poc::PocDecoder::default();
+        for packet_index in 0..frame_count {
+            let mut packet = Vec::new();
+            input.read_packet(0, packet_index, &mut packet).unwrap();
+            let mut expected_address = 0;
+            let mut headers_seen = 0;
+            let mut first_header = None;
+            let mut packet_order = None;
+            for nal in NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(|n| n.unwrap())
+                .filter(|n| matches!(n[0] & 31, 1 | 5))
+            {
+                let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+                let is_b = header.slice_type == SliceType::B;
+                if header.first_mb == 0 {
+                    picture_types[match header.slice_type {
+                        SliceType::I => 0,
+                        SliceType::P => 1,
+                        SliceType::B => 2,
+                        _ => panic!("unexpected fixture picture type"),
+                    }] += 1;
+                }
+                let spatial_mode = header.direct_spatial_mv_pred;
+                let before_direct = direct_blocks;
+                let order = *packet_order.get_or_insert_with(|| poc.decode(&sps, &header).unwrap());
+                let mut uses_colocated_b = false;
+                if is_b {
+                    let lists = dpb.lists(&header, order.before_marking.picture()).unwrap();
+                    if lists
+                        .l1
+                        .first()
+                        .is_some_and(|id| reference_types.get(id) == Some(&SliceType::B))
+                    {
+                        colocated_b += 1;
+                        uses_colocated_b = true;
+                    }
+                }
+                assert_eq!(header.first_mb as usize * 2, expected_address);
+                assert_eq!(header.disable_deblocking_filter_idc, 0);
+                headers_seen += 1;
+                if is_b {
+                    if header.first_mb == 0 {
+                        b_count += 1;
+                    }
+                    b_slices += 1;
+                    if header.first_mb == 0 && header.nal_ref_idc != 0 {
+                        reference_b += 1;
+                    }
+                    active_multiple |= header.refs_l0 > 1 || header.refs_l1 > 1;
+                    if !name.contains("pyramid") || name.contains("spatial") {
+                        assert_eq!(
+                            spatial_mode,
+                            name.contains("spatial"),
+                            "{name} packet {packet_index}"
+                        );
+                    }
+                }
+                let mut decoded = Vec::new();
+                if header.slice_type == SliceType::I {
+                    if pps.cabac {
+                        let mut syntax =
+                            fvid::codec::avc_cabac_macroblock::IntraCabacReader::new_mbaff(
+                                &header, &sps, &pps, 16,
+                            )
+                            .unwrap();
+                        while let Some(block) = syntax.read_macroblock().unwrap() {
+                            decoded.push((
+                                InterMacroblock::Intra(Box::new(block)),
+                                syntax.field_decoding(),
+                            ));
+                        }
+                    } else {
+                        let mut syntax = fvid::codec::avc_macroblock::IntraCavlcReader::new_mbaff(
+                            &header, &sps, &pps, 16,
+                        )
+                        .unwrap();
+                        while let Some(block) = syntax.read_macroblock().unwrap() {
+                            decoded.push((
+                                InterMacroblock::Intra(Box::new(block)),
+                                syntax.field_decoding(),
+                            ));
+                        }
+                    }
+                } else if pps.cabac {
+                    let mut syntax = fvid::codec::avc_cabac_slice::InterCabacSlice::new_mbaff(
+                        &header, &sps, &pps, 65536,
+                    )
+                    .unwrap();
+                    while let Some(block) = syntax.read_macroblock().unwrap() {
+                        decoded.push((block, syntax.field_decoding()));
+                    }
+                } else {
+                    let mut syntax =
+                        InterCavlcSlice::new_mbaff(&header, &sps, &pps, 65536).unwrap();
+                    while let Some(block) = syntax.read_macroblock().unwrap() {
+                        decoded.push((block, syntax.field_decoding()));
+                    }
+                }
+                let mut count = header.first_mb as usize * 2;
+                let start = count;
+                let mut fields = 0;
+                for (block, field) in decoded {
+                    let address = match block {
+                        InterMacroblock::Skip { address, .. } => {
+                            direct_blocks += usize::from(is_b);
+                            address
+                        }
+                        InterMacroblock::Coded {
+                            address, header, ..
+                        } => {
+                            let used_nonzero = header
+                                .partitions
+                                .iter()
+                                .flat_map(|p| p.references)
+                                .flatten()
+                                .filter(|&r| usize::from(r) / if field { 2 } else { 1 } > 0)
+                                .count();
+                            nonzero_frame_indices += used_nonzero;
+                            if is_b {
+                                b_nonzero_frame_indices += used_nonzero;
+                            }
+                            high10_eight += usize::from(
+                                is_b && name.contains("high10") && header.residual.transform8,
+                            );
+                            direct_blocks += usize::from(
+                                is_b && header.partitions.iter().any(|p| {
+                                    p.prediction == fvid::codec::avc_inter::Prediction::Direct
+                                }),
+                            );
+                            address
+                        }
+                        InterMacroblock::Intra(mb) => mb.address as usize,
+                    };
+                    assert_eq!(address, count);
+                    count += 1;
+                    let expected = if name.starts_with("changing") {
+                        [false, true, true, false, false, false, false, true, true][packet_index]
+                    } else if name.starts_with("field") {
+                        true
+                    } else if name.starts_with("frame") {
+                        false
+                    } else if name.contains("vertical-reverse") {
+                        address < 8
+                    } else if name.contains("vertical") {
+                        address >= 8
+                    } else if name.starts_with("mixed-reverse") {
+                        address / 2 % 4 < 2
+                    } else {
+                        address / 2 % 4 >= 2
+                    };
+                    assert_eq!(field, expected, "{name} B address {address}");
+                    fields += usize::from(field);
+                }
+                expected_address = count;
+                assert_eq!(
+                    count - start,
+                    if name.contains("multislice") { 8 } else { 16 }
+                );
+
+                assert_eq!(
+                    fields,
+                    if name.starts_with("changing") {
+                        if [false, true, true, false, false, false, false, true, true][packet_index]
+                        {
+                            count - start
+                        } else {
+                            0
+                        }
+                    } else if name.starts_with("field") {
+                        count - start
+                    } else if name.starts_with("frame") {
+                        0
+                    } else {
+                        8
+                    }
+                );
+                if is_b {
+                    direct_by_mode[usize::from(!spatial_mode)] += direct_blocks - before_direct;
+                    if uses_colocated_b {
+                        co_direct_by_mode[usize::from(!spatial_mode)] +=
+                            direct_blocks - before_direct;
+                    }
+                }
+                if first_header.is_none() {
+                    first_header = Some(header);
+                }
+            }
+            assert_eq!(expected_address, 16);
+            assert_eq!(
+                headers_seen,
+                if name.contains("multislice") { 2 } else { 1 }
+            );
+            let first = first_header.unwrap();
+            let order = packet_order.unwrap();
+            dpb.finish(
+                &first,
+                order.after_marking.picture(),
+                packet_index as u64,
+                std::sync::Arc::new(()),
+            )
+            .unwrap();
+            if first.nal_ref_idc != 0 {
+                reference_types.insert(packet_index as u64, first.slice_type);
+            }
+        }
+        let direct_key = name.replace("-skipped", "");
+        let qualified_direct = !name.starts_with("changing") || name.contains("spatial");
+        if qualified_direct {
+            expected_direct_cases.insert(direct_key.clone());
+        }
+        if qualified_direct && direct_by_mode[usize::from(name.contains("temporal"))] > 0 {
+            actual_direct_cases.insert(direct_key.clone());
+        }
+        if name.contains("pyramid") && qualified_direct {
+            expected_co_direct_cases.insert(direct_key.clone());
+            if co_direct_by_mode[usize::from(name.contains("temporal"))] > 0 {
+                actual_co_direct_cases.insert(direct_key);
+            }
+        }
+        assert_eq!(
+            b_count, expected_b,
+            "{name} must contain the expected B pictures"
+        );
+        assert_eq!(
+            picture_types,
+            if name.contains("pyramid") {
+                [1, 2, 6]
+            } else {
+                [1, 1, 1]
+            }
+        );
+        if name.contains("pyramid") {
+            assert_eq!(reference_b, 2, "{name}");
+            assert!(
+                colocated_b > 0,
+                "{name} must actually use a retained B co-located picture"
+            );
+            assert!(
+                active_multiple,
+                "{name} must declare multiple active references"
+            );
+            assert!(
+                name.contains("skipped")
+                    || (nonzero_frame_indices > 0 && b_nonzero_frame_indices > 0),
+                "{name} must actually use a nonzero frame reference"
+            );
+        }
+        assert_eq!(
+            b_slices,
+            expected_b * if name.contains("multislice") { 2 } else { 1 }
+        );
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(video),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for pass in 0..2 {
+            let mut actual = Vec::new();
+            let mut count = 0;
+            while let Some(frame) = reader
+                .read_frame()
+                .unwrap_or_else(|e| panic!("{name} pass {pass} frame {count}: {e}"))
+            {
+                assert_eq!(
+                    frame.presentation_time.ticks, count as i64,
+                    "{name} output timestamp"
+                );
+                assert_eq!(frame.presentation_time.timescale, timescale);
+                assert_eq!(frame.duration.ticks, 1);
+                assert_eq!(frame.duration.timescale, timescale);
+                frame.picture.write_planar(&mut actual).unwrap();
+                count += 1;
+            }
+            assert_eq!(count, frame_count, "{name}");
+            if actual != oracle {
+                let first = actual.iter().zip(oracle).position(|(a, b)| a != b).unwrap();
+                panic!(
+                    "{name} pass {pass} mismatch byte {first}: native {} JM {}",
+                    actual[first], oracle[first]
+                );
+            }
+            if name.contains("high10") {
+                assert!(
+                    actual
+                        .chunks_exact(2)
+                        .any(|v| u16::from_le_bytes([v[0], v[1]]) % 4 != 0)
+                );
+            }
+            reader.rewind();
+        }
+    }
+    assert!(
+        high10_eight > 0,
+        "High10 B corpus must exercise 8x8 transforms"
+    );
+    let missing: Vec<_> = expected_direct_cases
+        .difference(&actual_direct_cases)
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "cases missing actual direct: {missing:?}"
+    );
+    let missing: Vec<_> = expected_co_direct_cases
+        .difference(&actual_co_direct_cases)
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "pyramid cases missing actual direct from B motion: {missing:?}"
+    );
+}
+
+#[test]
+fn owned_cross_mode_temporal_direct_from_b_motion_matches_jm_and_rewind() {
+    use fvid::codec::{
+        avc_dpb::ReferenceBuffer,
+        avc_inter::Prediction,
+        avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+        avc_poc::PocDecoder,
+        avc_slice::{SliceHeader, SliceType},
+        config::NalUnits,
+    };
+    macro_rules! case {
+        ($name:literal) => {
+            (
+                $name,
+                include_bytes!(concat!(
+                    "fixtures/playback-errors/avc-mbaff-colocated-",
+                    $name,
+                    "-cavlc.mp4"
+                ))
+                .as_slice(),
+                include_bytes!(concat!(
+                    "fixtures/playback-errors/avc-mbaff-colocated-",
+                    $name,
+                    "-cavlc.yuv"
+                ))
+                .as_slice(),
+            )
+        };
+    }
+    for (name, video, oracle) in [
+        case!("field-to-frame"),
+        case!("frame-to-field"),
+        case!("field-to-frame-high10"),
+        case!("frame-to-field-high10"),
+        case!("field-to-frame-explicit"),
+        case!("frame-to-field-explicit"),
+        case!("field-to-frame-explicit-high10"),
+        case!("frame-to-field-explicit-high10"),
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(video), Default::default()).unwrap();
+        let configuration = input.tracks()[0].configuration.clone();
+        let config = AvcConfig::parse(&configuration).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        assert!(sps.mb_adaptive_frame_field && !pps.cabac);
+        assert_eq!(
+            pps.weighted_bipred,
+            if name.contains("explicit") { 1 } else { 2 }
+        );
+        assert_eq!(sps.coded_dimensions(), (16, 32));
+        assert_eq!(
+            sps.bit_depth_luma,
+            if name.contains("high10") { 10 } else { 8 }
+        );
+        let source_field = name.starts_with("field");
+        let mut poc = PocDecoder::default();
+        let mut dpb = ReferenceBuffer::new(sps.frame_num_bits, sps.max_num_ref_frames).unwrap();
+        for index in 0..5 {
+            let mut packet = Vec::new();
+            input.read_packet(0, index, &mut packet).unwrap();
+            let nal = NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .next()
+                .unwrap()
+                .unwrap();
+            let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
+            let order = poc.decode(&sps, &header).unwrap();
+            assert_eq!(order.before_marking.picture(), [0, 8, 4, 2, 6][index]);
+            if index == 2 || index == 3 {
+                assert_eq!(header.slice_type, SliceType::B);
+                if name.contains("explicit") {
+                    let weights = header.weights.as_ref().unwrap();
+                    assert_eq!((weights.luma_denom, weights.chroma_denom), (1, 1));
+                    assert_eq!(weights.l0[0].luma, (3, 1));
+                    assert_eq!(weights.l1[0].luma, (1, -3));
+                    assert_eq!(weights.l0[0].chroma, [(3, 2), (3, -1)]);
+                    assert_eq!(weights.l1[0].chroma, [(1, -2), (1, 3)]);
+                } else {
+                    assert!(header.weights.is_none());
+                }
+                assert!(!header.direct_spatial_mv_pred);
+                assert_eq!(header.nal_ref_idc != 0, index == 2);
+                let lists = dpb.lists(&header, order.before_marking.picture()).unwrap();
+                if index == 3 {
+                    assert_eq!(lists.l1[0], 2, "co-located picture must be retained B");
+                    assert_eq!(lists.l0[0], 0);
+                }
+                let mut reader = InterCavlcSlice::new_mbaff(&header, &sps, &pps, 65536).unwrap();
+                for address in 0..2 {
+                    let InterMacroblock::Coded {
+                        address: actual,
+                        header: mb,
+                        ..
+                    } = reader.read_macroblock().unwrap().unwrap()
+                    else {
+                        panic!("expected owned coded block")
+                    };
+                    assert_eq!(actual, address);
+                    assert_eq!(
+                        reader.field_decoding(),
+                        if index == 2 {
+                            source_field
+                        } else {
+                            !source_field
+                        }
+                    );
+                    if index == 2 {
+                        assert_eq!(mb.partitions.len(), 1);
+                        assert_eq!(mb.partitions[0].prediction, Prediction::L0);
+                        assert_eq!(mb.partitions[0].references[0], Some(u8::from(source_field)));
+                        assert_eq!(
+                            mb.partitions[0].differences[0],
+                            if address == 0 || source_field {
+                                [8, 4]
+                            } else {
+                                [0, 0]
+                            }
+                        );
+                    } else {
+                        assert_eq!(mb.partitions.len(), 16);
+                        assert!(
+                            mb.partitions
+                                .iter()
+                                .all(|p| p.prediction == Prediction::Direct)
+                        );
+                    }
+                }
+                assert!(reader.read_macroblock().unwrap().is_none());
+            }
+            dpb.finish(
+                &header,
+                order.after_marking.picture(),
+                index as u64,
+                std::sync::Arc::new(()),
+            )
+            .unwrap();
+        }
+        if name.contains("explicit") {
+            if name.contains("high10") {
+                assert!(
+                    oracle
+                        .chunks_exact(2)
+                        .any(|v| u16::from_le_bytes([v[0], v[1]]) == 1023)
+                );
+            } else {
+                assert!(oracle.contains(&255));
+            }
+        }
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(video),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for pass in 0..2 {
+            let mut actual = Vec::new();
+            let mut count = 0;
+            while let Some(frame) = reader
+                .read_frame()
+                .unwrap_or_else(|e| panic!("{name} pass {pass} frame {count}: {e}"))
+            {
+                assert_eq!(frame.presentation_time.ticks, count);
+                assert_eq!(frame.presentation_time.timescale, 25);
+                frame.picture.write_planar(&mut actual).unwrap();
+                count += 1;
+            }
+            assert_eq!(count, 5);
+            assert_eq!(actual.len(), oracle.len());
+            assert!(
+                actual == oracle,
+                "{name} pass {pass} first byte mismatch {:?}",
+                actual.iter().zip(oracle).position(|(a, b)| a != b)
+            );
+            reader.rewind();
+        }
+    }
 }

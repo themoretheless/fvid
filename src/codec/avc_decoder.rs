@@ -1,12 +1,12 @@
 //! Stateful decoding of length-prefixed AVC access units using FVid codecs.
-//! Accepts supported progressive I/P/B and MBAFF intra/P access units.
+//! Accepts supported progressive and MBAFF I/P/B access units.
 //! `decode_order` leaves timestamp association and display reordering to callers.
 use super::{
     avc::{Pps, Sps},
     avc_dpb::ReferenceBuffer,
     avc_inter_picture::decode_inter_resolved_slices_with_motion,
     avc_picture::{IntraPicture, decode_intra_slices},
-    avc_poc::PocDecoder,
+    avc_poc::{FieldOrder, PocDecoder},
     avc_reference_motion::ReferenceMotionField,
     avc_slice::{MemoryOperation, SliceHeader, SliceType},
     config::{AvcConfig, NalUnits},
@@ -19,6 +19,9 @@ use std::sync::Arc;
 pub struct DecodedReferencePicture {
     pub picture: Arc<IntraPicture>,
     pub motion: Option<ReferenceMotionField>,
+    /// Post-marking field POCs, including MMCO 5 adjustment. Keep both values:
+    /// the frame minimum alone is insufficient for MBAFF temporal direct.
+    pub field_order: FieldOrder,
 }
 
 /// Owns parameter sets, POC state and reference pictures. No external decoder.
@@ -365,20 +368,78 @@ impl AvcDecoder {
                 let reconstruction_budget = scratch_budget
                     .checked_sub(if retain { motion_bytes } else { 0 })
                     .ok_or_else(|| invalid("AVC motion snapshot exceeds decoder budget"))?;
-                let (picture, working) = decode_inter_resolved_slices_with_motion(
-                    &slices.iter().map(|s| &s.header).collect::<Vec<_>>(),
-                    sps,
-                    pps,
-                    &refs_by_slice
-                        .iter()
-                        .map(|refs| [refs[0].as_slice(), refs[1].as_slice()])
-                        .collect::<Vec<_>>(),
-                    &direct_by_slice
-                        .iter()
-                        .map(Option::as_ref)
-                        .collect::<Vec<_>>(),
-                    reconstruction_budget,
-                )?;
+                let slice_headers = slices.iter().map(|s| &s.header).collect::<Vec<_>>();
+                let reference_views = refs_by_slice
+                    .iter()
+                    .map(|refs| [refs[0].as_slice(), refs[1].as_slice()])
+                    .collect::<Vec<_>>();
+                let (picture, working) =
+                    if sps.mb_adaptive_frame_field && !sps.frame_mbs_only && !header.field_pic {
+                        let orders = lists
+                            .iter()
+                            .map(|lists| {
+                                let mut result = [Vec::new(), Vec::new()];
+                                for (list, ids) in [&lists.l0, &lists.l1].into_iter().enumerate() {
+                                    for id in ids {
+                                        result[list].push(
+                                            buffer
+                                                .get(*id)
+                                                .ok_or_else(|| {
+                                                    invalid("missing MBAFF field POC reference")
+                                                })?
+                                                .field_order,
+                                        );
+                                    }
+                                }
+                                Ok(result)
+                            })
+                            .collect::<Result<Vec<_>>>()?;
+                        let contexts = slices
+                            .iter()
+                            .zip(&lists)
+                            .zip(&metadata_by_slice)
+                            .zip(&orders)
+                            .map(|(((slice, lists), metadata), orders)| {
+                                if slice.header.slice_type != SliceType::B {
+                                    return Ok(None);
+                                }
+                                let id = lists
+                                    .l1
+                                    .first()
+                                    .ok_or_else(|| invalid("MBAFF B slice has no L1 reference"))?;
+                                Ok(Some(super::avc_direct::MbaffDirectPrediction {
+                                    spatial: slice.header.direct_spatial_mv_pred,
+                                    inference8: sps.direct_8x8_inference,
+                                    current_order: order.before_marking,
+                                    list0: &metadata[0],
+                                    list1: &metadata[1],
+                                    list0_orders: &orders[0],
+                                    list1_orders: &orders[1],
+                                    colocated: buffer.get(*id).and_then(|r| r.motion.as_ref()),
+                                }))
+                            })
+                            .collect::<Result<Vec<_>>>()?;
+                        super::avc_mbaff_picture::decode_inter_slices(
+                            &slice_headers,
+                            sps,
+                            pps,
+                            &reference_views,
+                            &contexts.iter().map(Option::as_ref).collect::<Vec<_>>(),
+                            reconstruction_budget,
+                        )?
+                    } else {
+                        decode_inter_resolved_slices_with_motion(
+                            &slice_headers,
+                            sps,
+                            pps,
+                            &reference_views,
+                            &direct_by_slice
+                                .iter()
+                                .map(Option::as_ref)
+                                .collect::<Vec<_>>(),
+                            reconstruction_budget,
+                        )?
+                    };
                 let motion = if retain {
                     let mappings = lists
                         .iter()
@@ -405,6 +466,7 @@ impl AvcDecoder {
             Arc::new(DecodedReferencePicture {
                 picture: picture.clone(),
                 motion,
+                field_order: order.after_marking,
             }),
         )?;
         self.next_id = self
@@ -485,6 +547,14 @@ mod tests {
         );
         assert_eq!(decoder.decode(&p1).unwrap().unwrap().y, vec![66; 256]);
         let old = decoder.dpb.as_ref().unwrap().get(1).unwrap();
+        // Retained timing belongs to the same decoded picture as its motion;
+        // reference-list reordering/eviction must not replace it with output POC.
+        let retained_order = old.field_order;
+        assert!(retained_order.top.is_some() && retained_order.bottom.is_some());
+        assert_eq!(
+            retained_order.picture(),
+            decoder.dpb.as_ref().unwrap().references()[0].poc
+        );
         let motion = old
             .motion
             .as_ref()

@@ -432,7 +432,20 @@ impl MotionField {
         address: usize,
         slice: u32,
         parts: &[super::avc_inter::Partition],
+        pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<Vec<[Neighbour; 2]>> {
+        self.decode_macroblock_mbaff_with_direct(address, slice, parts, pair_field, None)
+    }
+    /// Mixed explicit/direct MBAFF motion is one address-local transaction.
+    /// Spatial direct always uses the macroblock's original external neighbours,
+    /// regardless of earlier explicit/direct subpartition publication.
+    pub fn decode_macroblock_mbaff_with_direct(
+        &mut self,
+        address: usize,
+        slice: u32,
+        parts: &[super::avc_inter::Partition],
         mut pair_field: impl FnMut(usize) -> Option<bool>,
+        direct: Option<&super::avc_direct::MbaffDirectPrediction<'_>>,
     ) -> Result<Vec<[Neighbour; 2]>> {
         use super::avc_inter::Prediction;
         let field =
@@ -452,16 +465,56 @@ impl MotionField {
         if self.cells[start..start + 16].iter().any(Option::is_some) {
             return Err(invalid("AVC macroblock already has motion data"));
         }
+        let direct_neighbours = if parts.iter().any(|p| p.prediction == Prediction::Direct) {
+            let context = direct.ok_or_else(|| invalid("missing MBAFF B-direct context"))?;
+            if context
+                .colocated
+                .is_some_and(|c| c.dimensions() != [self.width * 4, self.height * 4])
+            {
+                return Err(invalid("MBAFF co-located motion geometry mismatch"));
+            }
+            Some([
+                self.neighbours_mbaff(address, [0, 0], [16, 16], slice, 0, &mut pair_field)?,
+                self.neighbours_mbaff(address, [0, 0], [16, 16], slice, 1, &mut pair_field)?,
+            ])
+        } else {
+            None
+        };
         let old_mode = self.mbaff;
         let decoded = (|| {
             let mut result = Vec::with_capacity(parts.len());
             for p in parts {
+                if p.prediction == Prediction::Direct {
+                    if p.size != [4, 4] || p.references != [None; 2] || p.differences != [[0; 2]; 2]
+                    {
+                        return Err(invalid("invalid MBAFF direct partition syntax"));
+                    }
+                    let vectors = direct
+                        .ok_or_else(|| invalid("missing MBAFF B-direct context"))?
+                        .derive(
+                            address,
+                            p.origin.map(usize::from),
+                            field,
+                            direct_neighbours
+                                .ok_or_else(|| invalid("missing MBAFF direct neighbours"))?,
+                        )?;
+                    self.store_mbaff(
+                        address,
+                        p.origin.map(usize::from),
+                        [4, 4],
+                        slice,
+                        field,
+                        vectors,
+                    )?;
+                    result.push(vectors);
+                    continue;
+                }
                 let expected = match p.prediction {
                     Prediction::L0 => [true, false],
                     Prediction::L1 => [false, true],
                     Prediction::Bi => [true, true],
                     Prediction::Direct => {
-                        return Err(crate::unsupported("MBAFF B-direct motion is not connected"));
+                        return Err(invalid("invalid MBAFF direct dispatch"));
                     }
                 };
                 if p.references.map(|v| v.is_some()) != expected {
@@ -766,6 +819,259 @@ mod macroblock_tests {
 #[cfg(test)]
 mod slice_snapshot_tests {
     use super::*;
+    #[test]
+    fn mbaff_temporal_direct_snapshot_retains_derived_field_reference_identity() {
+        use super::super::{
+            avc_direct::MbaffDirectPrediction,
+            avc_inter::{MacroblockType, macroblock_type},
+            avc_poc::FieldOrder,
+            avc_reference_motion::{ReferenceMotion, ReferenceMotionField},
+            avc_references::FrameReference,
+            avc_slice::SliceType,
+        };
+        let MacroblockType::Inter { partitions, .. } = macroblock_type(SliceType::B, 0).unwrap()
+        else {
+            panic!()
+        };
+        let list0 = [FrameReference {
+            id: 42,
+            frame_num: 0,
+            poc: 0,
+            long_term_index: None,
+        }];
+        let list1 = [FrameReference {
+            id: 70,
+            frame_num: 1,
+            poc: 8,
+            long_term_index: None,
+        }];
+        let orders0 = [FieldOrder {
+            top: Some(0),
+            bottom: Some(4),
+        }];
+        let orders1 = [FieldOrder {
+            top: Some(8),
+            bottom: Some(12),
+        }];
+        let source = ReferenceMotionField::new_mbaff(
+            16,
+            32,
+            (0..32)
+                .map(|cell| {
+                    [
+                        Some(ReferenceMotion {
+                            picture_id: 42,
+                            reference_index: 0,
+                            reference_bottom_field: Some(false),
+                            vector: [(cell % 16 * 4) as i16, 4],
+                        }),
+                        None,
+                    ]
+                })
+                .collect(),
+            vec![true],
+        )
+        .unwrap();
+        let context = MbaffDirectPrediction {
+            spatial: false,
+            inference8: true,
+            current_order: FieldOrder {
+                top: Some(2),
+                bottom: Some(8),
+            },
+            list0: &list0,
+            list1: &list1,
+            list0_orders: &orders0,
+            list1_orders: &orders1,
+            colocated: Some(&source),
+        };
+        let mut working = MotionField::new(16, 32, 65536).unwrap();
+        for address in 0..2 {
+            working
+                .decode_macroblock_mbaff_with_direct(
+                    address,
+                    5,
+                    &partitions,
+                    |_| Some(true),
+                    Some(&context),
+                )
+                .unwrap();
+        }
+        let saved = working
+            .snapshot_mbaff_slices(&[(5, [&[42], &[70]])], 65536)
+            .unwrap();
+        for (bottom, vector, reference) in [(0, [15, 1], 0), (1, [40, 3], 1)] {
+            let (lists, field) = saved.at_mbaff([12, 24 + bottom]).unwrap();
+            assert!(field);
+            assert_eq!(
+                lists[0].unwrap(),
+                ReferenceMotion {
+                    picture_id: 42,
+                    reference_index: reference,
+                    reference_bottom_field: Some(false),
+                    vector
+                }
+            );
+            assert_eq!(
+                lists[1].unwrap(),
+                ReferenceMotion {
+                    picture_id: 70,
+                    reference_index: 0,
+                    reference_bottom_field: Some(bottom != 0),
+                    vector: [vector[0] - 60, vector[1] - 4]
+                }
+            );
+        }
+    }
+    #[test]
+    fn mbaff_direct_publication_is_complete_and_late_failures_restore_storage() {
+        use super::super::{
+            avc_direct::MbaffDirectPrediction,
+            avc_inter::{MacroblockType, Prediction, macroblock_type},
+            avc_poc::FieldOrder,
+            avc_references::FrameReference,
+            avc_slice::SliceType,
+        };
+        let MacroblockType::Inter { partitions, .. } = macroblock_type(SliceType::B, 0).unwrap()
+        else {
+            panic!()
+        };
+        let references = [FrameReference {
+            id: 42,
+            frame_num: 0,
+            poc: 0,
+            long_term_index: None,
+        }];
+        let orders = [FieldOrder {
+            top: Some(0),
+            bottom: Some(2),
+        }];
+        let context = MbaffDirectPrediction {
+            spatial: true,
+            inference8: true,
+            current_order: FieldOrder {
+                top: Some(4),
+                bottom: Some(6),
+            },
+            list0: &references,
+            list1: &references,
+            list0_orders: &orders,
+            list1_orders: &orders,
+            colocated: None,
+        };
+        for field_mode in [false, true] {
+            let mut field = MotionField::new(16, 32, 65536).unwrap();
+            let mut mixed = partitions.clone();
+            mixed[0].prediction = Prediction::L0;
+            mixed[0].references = [Some(0), None];
+            mixed[0].differences = [[100, -7], [0, 0]];
+            let mut damaged = mixed.clone();
+            damaged.last_mut().unwrap().references = [Some(0), None];
+            assert!(
+                field
+                    .decode_macroblock_mbaff_with_direct(
+                        0,
+                        3,
+                        &damaged,
+                        |_| Some(field_mode),
+                        Some(&context)
+                    )
+                    .is_err()
+            );
+            assert!(!field.mbaff);
+            assert!(field.cells.iter().all(Option::is_none));
+            assert!(
+                field
+                    .decode_macroblock_mbaff_with_direct(
+                        0,
+                        3,
+                        &mixed[..15],
+                        |_| Some(field_mode),
+                        Some(&context)
+                    )
+                    .is_err()
+            );
+            assert!(!field.mbaff);
+            assert!(field.cells.iter().all(Option::is_none));
+            let output = field
+                .decode_macroblock_mbaff_with_direct(
+                    0,
+                    3,
+                    &mixed,
+                    |_| Some(field_mode),
+                    Some(&context),
+                )
+                .unwrap();
+            assert_eq!(
+                output[0],
+                [
+                    Neighbour::Inter {
+                        reference: 0,
+                        vector: [100, -7]
+                    },
+                    Neighbour::NoPrediction
+                ]
+            );
+            // Earlier explicit cells must not contaminate spatial direct's
+            // macroblock-partition-0 external neighbours.
+            assert!(output[1..].iter().all(|v| *v
+                == [Neighbour::Inter {
+                    reference: 0,
+                    vector: [0, 0]
+                }; 2]));
+            assert!(
+                field.cells[..16]
+                    .iter()
+                    .all(|c| c.is_some_and(|c| c.field == field_mode && c.slice == 3))
+            );
+            let saved: Vec<_> = field.cells[..16].iter().map(|c| c.unwrap().lists).collect();
+            assert!(
+                field
+                    .decode_macroblock_mbaff_with_direct(
+                        1,
+                        3,
+                        &damaged,
+                        |_| Some(field_mode),
+                        Some(&context)
+                    )
+                    .is_err()
+            );
+            assert!(field.mbaff);
+            assert!(field.cells[16..].iter().all(Option::is_none));
+            assert_eq!(
+                field.cells[..16]
+                    .iter()
+                    .map(|c| c.unwrap().lists)
+                    .collect::<Vec<_>>(),
+                saved
+            );
+            let decoded = field
+                .decode_macroblock_mbaff_with_direct(
+                    1,
+                    4,
+                    &partitions,
+                    |_| Some(field_mode),
+                    Some(&context),
+                )
+                .unwrap();
+            assert!(decoded.iter().all(|v| *v
+                == [Neighbour::Inter {
+                    reference: 0,
+                    vector: [0, 0]
+                }; 2]));
+            let snapshot = field
+                .snapshot_mbaff_slices(&[(3, [&[42], &[42]]), (4, [&[42], &[42]])], 65536)
+                .unwrap();
+            assert!(snapshot.is_mbaff());
+        }
+        let mut field = MotionField::new(16, 32, 65536).unwrap();
+        assert!(
+            field
+                .decode_macroblock_mbaff_with_direct(0, 0, &partitions, |_| Some(true), None)
+                .is_err()
+        );
+        assert!(field.cells.iter().all(Option::is_none));
+    }
     #[test]
     fn mbaff_macroblock_late_failure_rolls_back_cells_and_mode() {
         use super::super::avc_inter::{Partition as SyntaxPartition, Prediction};

@@ -231,6 +231,30 @@ impl CabacMotionContexts {
         code: u8,
         active: [u32; 2],
         field: bool,
+        pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<Vec<Partition>> {
+        self.read_prediction_mbaff_for_slice(
+            bins,
+            address,
+            slice,
+            SliceType::P,
+            code,
+            active,
+            field,
+            pair_field,
+        )
+    }
+    /// Both B lists use the same pair-aware context geometry and field units.
+    /// Direct partitions have no ref_idx or MVD bins and publish zero conditions.
+    pub fn read_prediction_mbaff_for_slice(
+        &mut self,
+        bins: &mut impl InterBins,
+        address: usize,
+        slice: u32,
+        slice_type: SliceType,
+        code: u8,
+        active: [u32; 2],
+        field: bool,
         mut pair_field: impl FnMut(usize) -> Option<bool>,
     ) -> Result<Vec<Partition>> {
         if !self.mbaff {
@@ -240,7 +264,7 @@ impl CabacMotionContexts {
             bins,
             address,
             slice,
-            SliceType::P,
+            slice_type,
             code,
             active,
             field,
@@ -415,6 +439,56 @@ mod tests {
         assert_eq!(parts[0].differences[0], [3, 0]);
         assert_eq!(parts[1].differences[0], [0, 0]);
         assert!(parts.iter().all(|p| p.references == [Some(1), None]));
+    }
+    #[test]
+    fn mbaff_b_motion_reads_both_lists_and_direct_has_no_motion_bins() {
+        for field in [false, true] {
+            let mut grid = CabacMotionContexts::new_mbaff(1, 2, 65536).unwrap();
+            // B_Bi_16x16, one active reference per list: no ref_idx bins.
+            // Each list consumes horizontal then vertical zero MVD decisions.
+            let mut bins = Bins::new(&[(40, false), (47, false), (40, false), (47, false)]);
+            let parts = grid
+                .read_prediction_mbaff_for_slice(
+                    &mut bins,
+                    0,
+                    5,
+                    SliceType::B,
+                    3,
+                    [1, 1],
+                    field,
+                    |_| Some(field),
+                )
+                .unwrap();
+            bins.done();
+            assert_eq!(parts.len(), 1);
+            assert_eq!(parts[0].references, [Some(0), Some(0)]);
+            assert_eq!(parts[0].differences, [[0; 2]; 2]);
+            let mut no_bins = Bins::new(&[]);
+            let direct = grid
+                .read_prediction_mbaff_for_slice(
+                    &mut no_bins,
+                    1,
+                    5,
+                    SliceType::B,
+                    0,
+                    [1, 1],
+                    field,
+                    |_| Some(field),
+                )
+                .unwrap();
+            no_bins.done();
+            assert_eq!(direct.len(), 16);
+            assert!(direct.iter().all(|p| p.prediction == Prediction::Direct
+                && p.references == [None; 2]
+                && p.differences == [[0; 2]; 2]));
+            assert!(
+                grid.cells[16..]
+                    .iter()
+                    .all(|c| c.is_some_and(|c| c.references == [None; 2]
+                        && c.magnitudes == [[0; 2]; 2]
+                        && c.field == field))
+            );
+        }
     }
     #[test]
     fn mbaff_reference_conditions_and_vertical_mvd_use_normative_units() {

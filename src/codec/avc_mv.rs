@@ -177,12 +177,33 @@ pub fn spatial_direct(
     colocated: Option<(u8, [i16; 2])>,
     colocated_picture_long_term: bool,
 ) -> Result<[Neighbour; 2]> {
-    if colocated.is_some_and(|(reference, _)| reference > 31) {
-        return Err(invalid("co-located reference index exceeds 31"));
+    spatial_direct_for_field(
+        neighbours,
+        colocated,
+        colocated_picture_long_term,
+        false,
+        false,
+    )
+}
+/// MBAFF neighbours are already normalized to the current macroblock mode.
+/// Co-located values retain their source mode for colZeroFlag (8.4.1.2.2).
+pub fn spatial_direct_for_field(
+    neighbours: [Neighbours; 2],
+    colocated: Option<(u8, [i16; 2])>,
+    colocated_picture_long_term: bool,
+    current_field: bool,
+    colocated_field: bool,
+) -> Result<[Neighbour; 2]> {
+    let maximum = if current_field { 63 } else { 31 };
+    let col_maximum = if colocated_field { 63 } else { 31 };
+    if colocated.is_some_and(|(reference, _)| reference > col_maximum) {
+        return Err(invalid(
+            "co-located reference index exceeds source list limit",
+        ));
     }
     let mut references = [None; 2];
     for list in 0..2 {
-        references[list] = candidates(neighbours[list])?
+        references[list] = candidates_with_limit(neighbours[list], maximum)?
             .into_iter()
             .filter_map(Neighbour::reference)
             .min();
@@ -201,7 +222,12 @@ pub fn spatial_direct(
             let vector = if direct_zero || (reference == 0 && col_zero) {
                 [0; 2]
             } else {
-                predict(reference, Partition::Median, neighbours[list])?
+                predict_for_field(
+                    reference,
+                    Partition::Median,
+                    neighbours[list],
+                    current_field,
+                )?
             };
             result[list] = Neighbour::Inter { reference, vector };
         }
@@ -272,6 +298,71 @@ pub fn temporal_direct(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn mbaff_spatial_direct_keeps_raw_colzero_units_and_expanded_references() {
+        let n = Neighbours {
+            left: Neighbour::Inter {
+                reference: 63,
+                vector: [7, -3],
+            },
+            top: Neighbour::Inter {
+                reference: 63,
+                vector: [9, -5],
+            },
+            top_right: Neighbour::Inter {
+                reference: 63,
+                vector: [11, -7],
+            },
+            top_left: Neighbour::Unavailable,
+        };
+        assert_eq!(
+            spatial_direct_for_field([n; 2], Some((63, [0, 0])), false, true, true).unwrap(),
+            [Neighbour::Inter {
+                reference: 63,
+                vector: [9, -5]
+            }; 2]
+        );
+        assert!(spatial_direct_for_field([n; 2], None, false, false, true).is_err());
+        let zero_ref = Neighbours {
+            left: Neighbour::Inter {
+                reference: 0,
+                vector: [7, 9],
+            },
+            top: Neighbour::NoPrediction,
+            top_right: Neighbour::NoPrediction,
+            top_left: Neighbour::Unavailable,
+        };
+        // Raw field y=1 is zero even though temporal conversion would give y=2.
+        assert_eq!(
+            spatial_direct_for_field([zero_ref; 2], Some((0, [1, 1])), false, false, true).unwrap(),
+            [Neighbour::Inter {
+                reference: 0,
+                vector: [0, 0]
+            }; 2]
+        );
+        // Raw frame y=2 is nonzero even though temporal conversion gives y=1.
+        assert_eq!(
+            spatial_direct_for_field([zero_ref; 2], Some((0, [1, 2])), false, true, false).unwrap(),
+            [Neighbour::Inter {
+                reference: 0,
+                vector: [7, 9]
+            }; 2]
+        );
+        assert_eq!(
+            spatial_direct_for_field([zero_ref; 2], Some((0, [1, 1])), true, true, true).unwrap(),
+            [Neighbour::Inter {
+                reference: 0,
+                vector: [7, 9]
+            }; 2]
+        );
+        assert!(
+            spatial_direct_for_field([zero_ref; 2], Some((32, [0, 0])), false, true, false)
+                .is_err()
+        );
+        assert!(
+            spatial_direct_for_field([zero_ref; 2], Some((64, [0, 0])), false, true, true).is_err()
+        );
+    }
     #[test]
     fn field_skip_accepts_expanded_indices_and_checks_zero_after_normalization() {
         let mut n = Neighbours {

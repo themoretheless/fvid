@@ -116,11 +116,11 @@ pub fn reconstruct_inter_macroblock_ready(
     )?;
     readiness.publish_mbaff_complete(address, geometry, field)
 }
-enum MbaffPReader<'a> {
+enum MbaffInterReader<'a> {
     Cavlc(super::avc_inter_slice::InterCavlcSlice<'a>),
     Cabac(super::avc_cabac_slice::InterCabacSlice<'a>),
 }
-impl<'a> MbaffPReader<'a> {
+impl<'a> MbaffInterReader<'a> {
     fn new(header: &'a SliceHeader, sps: &'a Sps, pps: &'a Pps, count: usize) -> Result<Self> {
         Ok(if pps.cabac {
             Self::Cabac(super::avc_cabac_slice::InterCabacSlice::new_mbaff(
@@ -167,7 +167,7 @@ pub fn decode_p_slices_unfiltered(
     references: &[[&[&IntraPicture]; 2]],
     budget: usize,
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
-    decode_p_slices_impl(headers, sps, pps, references, budget, false)
+    decode_p_slices_impl(headers, sps, pps, references, budget, false, None)
 }
 /// Reconstruct and deblock ordered MBAFF P slices with resolved frame lists.
 pub fn decode_p_slices(
@@ -177,7 +177,18 @@ pub fn decode_p_slices(
     references: &[[&[&IntraPicture]; 2]],
     budget: usize,
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
-    decode_p_slices_impl(headers, sps, pps, references, budget, true)
+    decode_p_slices_impl(headers, sps, pps, references, budget, true, None)
+}
+/// Assemble ordered P/B MBAFF slices with per-slice direct/POC contexts.
+pub fn decode_inter_slices(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    references: &[[&[&IntraPicture]; 2]],
+    direct: &[Option<&super::avc_direct::MbaffDirectPrediction<'_>>],
+    budget: usize,
+) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    decode_p_slices_impl(headers, sps, pps, references, budget, true, Some(direct))
 }
 fn decode_p_slices_impl(
     headers: &[&SliceHeader],
@@ -186,10 +197,11 @@ fn decode_p_slices_impl(
     references: &[[&[&IntraPicture]; 2]],
     budget: usize,
     filtered: bool,
+    direct_by_slice: Option<&[Option<&super::avc_direct::MbaffDirectPrediction<'_>>]>,
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
     use super::{
         avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
-        avc_compensation::{ComponentWeight, Reference420},
+        avc_compensation::Reference420,
         avc_deblock::{MbaffBlockEdges, mbaff_inter_plane},
         avc_inter::{Partition, Prediction},
         avc_inter_prediction::predict_macroblock_mbaff,
@@ -200,6 +212,7 @@ fn decode_p_slices_impl(
     };
     if headers.is_empty()
         || headers.len() != references.len()
+        || direct_by_slice.is_some_and(|v| v.len() != headers.len())
         || headers[0].first_mb != 0
         || sps.frame_mbs_only
         || !sps.mb_adaptive_frame_field
@@ -207,7 +220,7 @@ fn decode_p_slices_impl(
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
         || headers.iter().any(|h| {
-            h.slice_type != SliceType::P
+            !matches!(h.slice_type, SliceType::P | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
@@ -282,6 +295,11 @@ fn decode_p_slices_impl(
     };
     let mut seen = 0;
     for (slice, (header, lists)) in headers.iter().zip(references).enumerate() {
+        let direct = direct_by_slice.and_then(|v| v[slice]);
+        let is_b = header.slice_type == SliceType::B;
+        if is_b && direct.is_none() {
+            return Err(invalid("MBAFF B slice lacks direct context"));
+        }
         if header.first_mb as usize * 2 != seen {
             return Err(invalid("MBAFF P slice coverage gap or overlap"));
         }
@@ -318,7 +336,7 @@ fn decode_p_slices_impl(
         let refs: [Vec<&Reference420<'_>>; 2] =
             [views[0].iter().collect(), views[1].iter().collect()];
         ready.reset_slice();
-        let mut reader = MbaffPReader::new(header, sps, pps, count)?;
+        let mut reader = MbaffInterReader::new(header, sps, pps, count)?;
         while let Some(block) = reader.read_macroblock()? {
             let field = reader.field_decoding();
             if let InterMacroblock::Intra(mb) = block {
@@ -382,14 +400,23 @@ fn decode_p_slices_impl(
                 InterMacroblock::Skip { address, qp } => (
                     address,
                     qp,
-                    vec![Partition {
-                        origin: [0, 0],
-                        size: [16, 16],
-                        prediction: Prediction::L0,
-                        group: 0,
-                        references: [Some(0), None],
-                        differences: [[0; 2]; 2],
-                    }],
+                    if is_b {
+                        let super::avc_inter::MacroblockType::Inter { partitions, .. } =
+                            super::avc_inter::macroblock_type(SliceType::B, 0)?
+                        else {
+                            return Err(invalid("invalid B skip partitions"));
+                        };
+                        partitions
+                    } else {
+                        vec![Partition {
+                            origin: [0, 0],
+                            size: [16, 16],
+                            prediction: Prediction::L0,
+                            group: 0,
+                            references: [Some(0), None],
+                            differences: [[0; 2]; 2],
+                        }]
+                    },
                     None,
                     false,
                 ),
@@ -409,7 +436,7 @@ fn decode_p_slices_impl(
             if address != seen || seen >= end {
                 return Err(invalid("MBAFF P inter coverage mismatch"));
             }
-            let vectors = if coefficients.is_none() {
+            let vectors = if coefficients.is_none() && !is_b {
                 vec![[
                     Neighbour::Inter {
                         reference: 0,
@@ -419,49 +446,17 @@ fn decode_p_slices_impl(
                     Neighbour::NoPrediction,
                 ]]
             } else {
-                motion.decode_macroblock_mbaff(address, slice as u32, &parts, |p| {
-                    reader.pair_field(p)
-                })?
+                motion.decode_macroblock_mbaff_with_direct(
+                    address,
+                    slice as u32,
+                    &parts,
+                    |p| reader.pair_field(p),
+                    direct,
+                )?
             };
-            let weights = if pps.weighted_pred {
-                let table = header
-                    .weights
-                    .as_ref()
-                    .ok_or_else(|| invalid("missing MBAFF P weight table"))?;
-                let mut result = Vec::with_capacity(parts.len());
-                for vectors in &vectors {
-                    let mut entry = [[ComponentWeight::default(); 3]; 2];
-                    for list in 0..2 {
-                        if let Neighbour::Inter { reference, .. } = vectors[list] {
-                            let index = usize::from(reference) / if field { 2 } else { 1 };
-                            let weight = [&table.l0, &table.l1][list]
-                                .get(index)
-                                .ok_or_else(|| invalid("missing MBAFF P reference weight"))?;
-                            entry[list] = [
-                                ComponentWeight {
-                                    weight: weight.luma.0,
-                                    offset: weight.luma.1,
-                                    denominator: table.luma_denom,
-                                },
-                                ComponentWeight {
-                                    weight: weight.chroma[0].0,
-                                    offset: weight.chroma[0].1,
-                                    denominator: table.chroma_denom,
-                                },
-                                ComponentWeight {
-                                    weight: weight.chroma[1].0,
-                                    offset: weight.chroma[1].1,
-                                    denominator: table.chroma_denom,
-                                },
-                            ];
-                        }
-                    }
-                    result.push(entry);
-                }
-                Some(result)
-            } else {
-                None
-            };
+            let weights = super::avc_inter_prediction::mbaff_weights(
+                address, field, header, pps, &vectors, direct,
+            )?;
             let prediction = predict_macroblock_mbaff(
                 address,
                 [w / 16, h / 16],
@@ -827,6 +822,126 @@ pub fn decode_intra_slices(
 mod inter_tests {
     use super::super::{avc_compensation::Reference420, avc_inter_coefficients::InterCoefficients};
     use super::*;
+    #[test]
+    fn complete_mbaff_b_skip_pair_reconstructs_spatial_temporal_and_weighted_samples() {
+        use super::super::{
+            avc_direct::MbaffDirectPrediction, avc_poc::FieldOrder, avc_references::FrameReference,
+            avc_slice::SliceType,
+        };
+        fn hex(s: &str) -> Vec<u8> {
+            (0..s.len())
+                .step_by(2)
+                .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+                .collect()
+        }
+        let mut sps =
+            Sps::parse(&hex("6742c01fda03c045fbc044000003000400000300f03c60ca80")).unwrap();
+        let mut pps = Pps::parse(&[0x68, 0xce, 0x09, 0xc8], &sps).unwrap();
+        let mut header =
+            SliceHeader::parse(&[0x65, 0x88, 0x84, 0x3a, 0x27, 0x80], &sps, &pps).unwrap();
+        sps.width_mbs = 1;
+        sps.height_map_units = 1;
+        sps.crop = [0; 4];
+        sps.frame_mbs_only = false;
+        sps.mb_adaptive_frame_field = true;
+        header.slice_type = SliceType::B;
+        header.idr = false;
+        header.refs_l0 = 1;
+        header.refs_l1 = 1;
+        header.header_bits = 0;
+        header.entropy_bit_offset = 0;
+        header.first_mb = 0;
+        header.rbsp = vec![0x70]; // owned syntax: mb_skip_run=2, rbsp_stop_one_bit.
+        let a = IntraPicture {
+            coded_width: 16,
+            coded_height: 32,
+            crop: [0; 4],
+            bit_depth: 8,
+            y: vec![20; 512],
+            cb: vec![60; 128],
+            cr: vec![100; 128],
+        };
+        let b = IntraPicture {
+            y: vec![100; 512],
+            cb: vec![180; 128],
+            cr: vec![220; 128],
+            coded_width: 16,
+            coded_height: 32,
+            crop: [0; 4],
+            bit_depth: 8,
+        };
+        let l0 = [FrameReference {
+            id: 42,
+            frame_num: 0,
+            poc: 0,
+            long_term_index: None,
+        }];
+        let l1 = [FrameReference {
+            id: 70,
+            frame_num: 1,
+            poc: 8,
+            long_term_index: None,
+        }];
+        let o0 = [FieldOrder {
+            top: Some(0),
+            bottom: Some(4),
+        }];
+        let o1 = [FieldOrder {
+            top: Some(8),
+            bottom: Some(12),
+        }];
+        for spatial in [false, true] {
+            for implicit in [false, true] {
+                pps.weighted_bipred = if implicit { 2 } else { 0 };
+                let direct = MbaffDirectPrediction {
+                    spatial,
+                    inference8: true,
+                    current_order: FieldOrder {
+                        top: Some(2),
+                        bottom: Some(6),
+                    },
+                    list0: &l0,
+                    list1: &l1,
+                    list0_orders: &o0,
+                    list1_orders: &o1,
+                    colocated: None,
+                };
+                let (picture, motion) = decode_inter_slices(
+                    &[&header],
+                    &sps,
+                    &pps,
+                    &[[&[&a], &[&b]]],
+                    &[Some(&direct)],
+                    1 << 20,
+                )
+                .unwrap();
+                assert_eq!(picture.y, vec![if implicit { 40 } else { 60 }; 512]);
+                assert_eq!(picture.cb, vec![if implicit { 90 } else { 120 }; 128]);
+                assert_eq!(picture.cr, vec![if implicit { 130 } else { 160 }; 128]);
+                let saved = motion
+                    .snapshot_mbaff_slices(&[(0, [&[42], &[70]])], 65536)
+                    .unwrap();
+                for y in [0, 15, 16, 31] {
+                    let (lists, field) = saved.at_mbaff([0, y]).unwrap();
+                    assert!(!field);
+                    assert_eq!(lists[0].unwrap().picture_id, 42);
+                    assert_eq!(lists[1].unwrap().picture_id, 70);
+                    assert_eq!(lists[0].unwrap().vector, [0, 0]);
+                }
+                assert!(
+                    decode_inter_slices(
+                        &[&header],
+                        &sps,
+                        &pps,
+                        &[[&[&a], &[&b]]],
+                        &[None],
+                        1 << 20
+                    )
+                    .is_err()
+                );
+            }
+        }
+    }
     fn picture(depth: u8) -> IntraPicture {
         IntraPicture {
             coded_width: 32,

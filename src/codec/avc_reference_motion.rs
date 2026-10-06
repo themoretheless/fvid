@@ -10,6 +10,31 @@ pub struct ReferenceMotion {
     pub reference_bottom_field: Option<bool>,
     pub vector: [i16; 2],
 }
+/// H.264 Table 8-8 conversion, applied only by temporal direct prediction.
+/// Spatial direct's colZeroFlag must inspect the original vector units.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ColocatedScale {
+    Same,
+    FrameToField,
+    FieldToFrame,
+}
+impl ColocatedScale {
+    pub fn temporal_vector(self, mut vector: [i16; 2]) -> Result<[i16; 2]> {
+        vector[1] = match self {
+            Self::Same => vector[1],
+            Self::FrameToField => vector[1] / 2,
+            Self::FieldToFrame => vector[1]
+                .checked_mul(2)
+                .ok_or_else(|| invalid("co-located vertical motion overflow"))?,
+        };
+        Ok(vector)
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MbaffColocated {
+    pub motion: Option<ReferenceMotion>,
+    pub scale: ColocatedScale,
+}
 pub struct ReferenceMotionField {
     width: usize,
     height: usize,
@@ -85,6 +110,50 @@ impl ReferenceMotionField {
     pub fn is_mbaff(&self) -> bool {
         self.mbaff_fields.is_some()
     }
+    /// AFRM/AFRM co-located selection (H.264 8.4.1.2.1, Table 8-8).
+    /// `local` is the selected 4x4 origin after direct_8x8 inference.
+    /// POCs are those of CurrPic and the two fields of the decoded L1[0] frame.
+    /// Separate field pictures and progressive/MBAFF crossings are not admitted.
+    pub fn colocated_mbaff(
+        &self,
+        address: usize,
+        local: [usize; 2],
+        current_field: bool,
+        current_picture_poc: i32,
+        reference_field_pocs: [i32; 2],
+    ) -> Result<MbaffColocated> {
+        let fields = self
+            .mbaff_fields
+            .as_ref()
+            .ok_or_else(|| invalid("co-located reference is not MBAFF"))?;
+        if address >= self.cells.len() / 16 || local.iter().any(|&v| v >= 16 || v % 4 != 0) {
+            return Err(invalid("invalid MBAFF direct block position"));
+        }
+        let source_field = fields[address / 2];
+        let (source_address, y, scale) = match (current_field, source_field) {
+            (false, true) => {
+                let distance = reference_field_pocs
+                    .map(|poc| (i64::from(poc) - i64::from(current_picture_poc)).abs());
+                // Equal distances select the bottom field, not current parity.
+                (
+                    address / 2 * 2 + usize::from(distance[0] >= distance[1]),
+                    8 * (address % 2) + 4 * (local[1] / 8),
+                    ColocatedScale::FieldToFrame,
+                )
+            }
+            (true, false) => (
+                address / 2 * 2 + local[1] / 8,
+                (2 * local[1]) % 16,
+                ColocatedScale::FrameToField,
+            ),
+            _ => (address, local[1], ColocatedScale::Same),
+        };
+        let lists = self.cells[source_address * 16 + y / 4 * 4 + local[0] / 4];
+        Ok(MbaffColocated {
+            motion: lists[0].or(lists[1]),
+            scale,
+        })
+    }
     /// Select the stored 4x4 cell containing this coded-luma position.
     pub fn at(&self, position: [usize; 2]) -> Result<[Option<ReferenceMotion>; 2]> {
         if self.is_mbaff() {
@@ -119,11 +188,180 @@ pub fn map_reference(motion: ReferenceMotion, list0: &[u64]) -> Result<u8> {
         .map(|i| i as u8)
         .ok_or_else(|| invalid("co-located reference is absent from list0"))
 }
+/// Map a selected MBAFF co-located reference to the current expanded list.
+/// Frame-to-field conversion selects the current parity; same-field conversion
+/// retains the source reference parity (H.264 8.4.1.2.3).
+pub fn map_reference_mbaff(
+    motion: ReferenceMotion,
+    list0: &[u64],
+    scale: ColocatedScale,
+    current_bottom: bool,
+) -> Result<u8> {
+    let frame_index = map_reference(motion, list0)?;
+    match (scale, motion.reference_bottom_field) {
+        (ColocatedScale::FrameToField, None) => Ok(frame_index * 2),
+        (ColocatedScale::Same, Some(bottom)) => {
+            Ok(frame_index * 2 + u8::from(bottom != current_bottom))
+        }
+        (ColocatedScale::Same, None) | (ColocatedScale::FieldToFrame, Some(_)) => Ok(frame_index),
+        _ => Err(invalid("co-located motion reference mode mismatch")),
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::super::{avc_motion_field::MotionField, avc_mv::Neighbour};
     use super::*;
+    #[test]
+    fn mbaff_direct_selection_uses_table_geometry_not_physical_sample_owner() {
+        let fields = vec![false, true, true, false];
+        let cells = (0..128)
+            .map(|index| {
+                let motion = ReferenceMotion {
+                    picture_id: index as u64,
+                    reference_index: 0,
+                    reference_bottom_field: fields[index / 32].then_some(index / 16 % 2 != 0),
+                    vector: [index as i16, -1],
+                };
+                // Independently exercise L0 preference, L1 fallback and intra.
+                match index % 3 {
+                    0 => [
+                        Some(motion),
+                        Some(ReferenceMotion {
+                            picture_id: 999,
+                            ..motion
+                        }),
+                    ],
+                    1 => [None, Some(motion)],
+                    _ => [None, None],
+                }
+            })
+            .collect::<Vec<_>>();
+        let saved = ReferenceMotionField::new_mbaff(32, 64, cells.clone(), fields.clone()).unwrap();
+        for address in 0..8 {
+            for current_field in [false, true] {
+                // Top closer, bottom closer, tie, and full signed POC range.
+                for (poc, field_pocs, selected_parity) in [
+                    (0, [1, 3], 0),
+                    (0, [-3, -1], 1),
+                    (0, [-1, 1], 1),
+                    (i32::MIN, [i32::MAX, i32::MIN + 1], 1),
+                ] {
+                    for y in [0, 4, 8, 12] {
+                        for x in [0, 4, 8, 12] {
+                            let source_field = fields[address / 2];
+                            let (source, row, scale) = match (current_field, source_field) {
+                                (false, true) => (
+                                    address / 2 * 2 + selected_parity,
+                                    [0, 0, 1, 1][y / 4] + (address % 2) * 2,
+                                    ColocatedScale::FieldToFrame,
+                                ),
+                                (true, false) => (
+                                    address / 2 * 2 + usize::from(y >= 8),
+                                    [0, 2, 0, 2][y / 4],
+                                    ColocatedScale::FrameToField,
+                                ),
+                                _ => (address, y / 4, ColocatedScale::Same),
+                            };
+                            let lists = cells[source * 16 + row * 4 + x / 4];
+                            let actual = saved
+                                .colocated_mbaff(address, [x, y], current_field, poc, field_pocs)
+                                .unwrap();
+                            assert_eq!(actual.motion, lists[0].or(lists[1]));
+                            assert_eq!(actual.scale, scale);
+                            // Selection never normalizes the raw spatial colZero vector.
+                            assert_eq!(
+                                actual.motion.map(|m| m.vector[1]),
+                                actual.motion.map(|_| -1)
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        for (address, local) in [(8, [0, 0]), (usize::MAX, [0, 0]), (0, [1, 0]), (0, [0, 16])] {
+            assert!(
+                saved
+                    .colocated_mbaff(address, local, false, 0, [0, 0])
+                    .is_err()
+            );
+        }
+        let progressive = ReferenceMotionField::new(32, 64, cells).unwrap();
+        assert!(
+            progressive
+                .colocated_mbaff(0, [0, 0], false, 0, [0, 0])
+                .is_err()
+        );
+    }
+    #[test]
+    fn mbaff_temporal_mapping_retains_identity_and_field_parity() {
+        let ids: Vec<_> = (100..132).collect();
+        for index in 0..32 {
+            for bottom in [false, true] {
+                let frame = ReferenceMotion {
+                    picture_id: ids[index],
+                    reference_index: 0,
+                    reference_bottom_field: None,
+                    vector: [7, -3],
+                };
+                assert_eq!(
+                    map_reference_mbaff(frame, &ids, ColocatedScale::Same, bottom).unwrap(),
+                    index as u8
+                );
+                assert_eq!(
+                    map_reference_mbaff(frame, &ids, ColocatedScale::FrameToField, bottom).unwrap(),
+                    (index * 2) as u8
+                );
+                assert!(
+                    map_reference_mbaff(frame, &ids, ColocatedScale::FieldToFrame, bottom).is_err()
+                );
+                for reference_bottom in [false, true] {
+                    let field = ReferenceMotion {
+                        reference_bottom_field: Some(reference_bottom),
+                        ..frame
+                    };
+                    assert_eq!(
+                        map_reference_mbaff(field, &ids, ColocatedScale::Same, bottom).unwrap(),
+                        (index * 2) as u8 + u8::from(bottom != reference_bottom)
+                    );
+                    assert_eq!(
+                        map_reference_mbaff(field, &ids, ColocatedScale::FieldToFrame, bottom)
+                            .unwrap(),
+                        index as u8
+                    );
+                    assert!(
+                        map_reference_mbaff(field, &ids, ColocatedScale::FrameToField, bottom)
+                            .is_err()
+                    );
+                }
+            }
+        }
+        for y in [i16::MIN, -16384, -3, -1, 0, 1, 3, 16383, i16::MAX] {
+            assert_eq!(
+                ColocatedScale::Same.temporal_vector([9, y]).unwrap(),
+                [9, y]
+            );
+            assert_eq!(
+                ColocatedScale::FrameToField
+                    .temporal_vector([9, y])
+                    .unwrap(),
+                [9, y / 2]
+            );
+            assert_eq!(
+                ColocatedScale::FieldToFrame.temporal_vector([9, y]).ok(),
+                y.checked_mul(2).map(|v| [9, v])
+            );
+        }
+        let missing = ReferenceMotion {
+            picture_id: 999,
+            reference_index: 0,
+            reference_bottom_field: None,
+            vector: [0, 0],
+        };
+        assert!(map_reference_mbaff(missing, &ids, ColocatedScale::Same, false).is_err());
+        assert!(map_reference_mbaff(missing, &[], ColocatedScale::Same, false).is_err());
+        assert!(map_reference_mbaff(missing, &[999; 33], ColocatedScale::Same, false).is_err());
+    }
     #[test]
     fn mbaff_snapshot_retains_address_mode_vectors_and_reference_field_parity() {
         for mixed in [false, true] {

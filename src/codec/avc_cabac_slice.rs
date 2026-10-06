@@ -30,8 +30,11 @@ impl<'a> InterCabacSlice<'a> {
         pps: &'a Pps,
         budget: usize,
     ) -> Result<Self> {
-        if header.slice_type != SliceType::P || sps.frame_mbs_only || !sps.mb_adaptive_frame_field {
-            return Err(invalid("MBAFF CABAC dispatcher requires a P frame slice"));
+        if !matches!(header.slice_type, SliceType::P | SliceType::B)
+            || sps.frame_mbs_only
+            || !sps.mb_adaptive_frame_field
+        {
+            return Err(invalid("MBAFF CABAC dispatcher requires a P/B frame slice"));
         }
         Self::new_impl(header, sps, pps, budget, true)
     }
@@ -253,10 +256,11 @@ impl<'a> InterCabacSlice<'a> {
         }
         let partitions = if self.mbaff {
             let (arithmetic, modes) = self.reader.arithmetic_with_pair_fields()?;
-            self.motion.read_prediction_mbaff(
+            self.motion.read_prediction_mbaff_for_slice(
                 arithmetic,
                 at,
                 0,
+                self.slice,
                 code,
                 self.active.map(|n| n * if field { 2 } else { 1 }),
                 field,

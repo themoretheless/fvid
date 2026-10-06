@@ -1,0 +1,46 @@
+{
+  "generator": "owned PCM/header/CAVLC writer; no external encoder",
+  "jm_decoder_sha256": "1a500810093469081a9c7f7a83b69164937d7fc62541052d220872ecda7656e5",
+  "fixtures": [
+    {
+      "file": "avc-mbaff-colocated-frame-to-field-cavlc.mp4",
+      "sha256": "1efab39fadb9b49924f02e3f10a3692ca215fdb243bf13b003fd660ad8ee77da",
+      "oracle_sha256": "349baf6f82bd34b00d2ddd1c5f56bd392e9bf54ffbf202808493780edbb7aa0f"
+    },
+    {
+      "file": "avc-mbaff-colocated-frame-to-field-explicit-cavlc.mp4",
+      "sha256": "76bca4b966514b1c5e35963315245b3ca005da9b553e6d3fb28e2856a228b4cc",
+      "oracle_sha256": "601965fa46d21cd30f32127f6fc501d762d2265a0219df8c1c551c5ee78bfa17"
+    },
+    {
+      "file": "avc-mbaff-colocated-field-to-frame-cavlc.mp4",
+      "sha256": "4d385dba391cc68a711a8e332614c13bf98d1e11fc19a6c677d6633937802ac0",
+      "oracle_sha256": "a575263d21728f82d4c6ff40799e20a2ac025df7959fc0e6617a727ea280c941"
+    },
+    {
+      "file": "avc-mbaff-colocated-field-to-frame-explicit-cavlc.mp4",
+      "sha256": "d55daf485fbdeca4f29d6a3644aa8cda7368dd5b189ba5fdc45f45bf75697cdd",
+      "oracle_sha256": "4bc2541e1086168ec75b4e2dc08105a7f43be58064fb230c48d9777577682a91"
+    },
+    {
+      "file": "avc-mbaff-colocated-frame-to-field-high10-cavlc.mp4",
+      "sha256": "f52c70eeadd30bfbf44b3721443abc8c7f425b525bfbf9b146ca470d12c7d5d7",
+      "oracle_sha256": "4d454c71ccdd73da6c2aef3dac069fa6b89f1e5e1e93be4550c18c77c3077d97"
+    },
+    {
+      "file": "avc-mbaff-colocated-frame-to-field-explicit-high10-cavlc.mp4",
+      "sha256": "9cabce1ae95acb4e5ffc066e3cb89a30e61bd2f8a7142988db9fe7c9fc1fdafb",
+      "oracle_sha256": "dd7e1bda37996a3dc9d7e317ce0e4c17bab54f0dfd4fc26e24f468ff06f11714"
+    },
+    {
+      "file": "avc-mbaff-colocated-field-to-frame-high10-cavlc.mp4",
+      "sha256": "b2d4fdb98f3a9e6f08de22fc32e8d3773b4eee19ca0216153e171e55722f3f8e",
+      "oracle_sha256": "ab88929f1452d427dc4a1c501e82b70b3e0672bb0311e1d117af6ad54b1277b8"
+    },
+    {
+      "file": "avc-mbaff-colocated-field-to-frame-explicit-high10-cavlc.mp4",
+      "sha256": "d858f279ed050d087fddbf65be5ddf6c94dcfb7f2bd95b76f35b1c49338cae85",
+      "oracle_sha256": "31f8bfaa56d12d6bf66e407789b980c2733e57d0c779713a278e457654f7c7f0"
+    }
+  ]
+}
