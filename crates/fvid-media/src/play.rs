@@ -1537,6 +1537,7 @@ struct PlayerApp {
     snapshot_dir: Option<PathBuf>,
     snapshot_prefix: String,
     network_cache_ms: u32,
+    buffered_us: i64,
     audio_ordinal: i32,
     subtitle_ordinal: i32,
     logged_sub: String,
@@ -1773,6 +1774,7 @@ impl PlayerApp {
             snapshot_dir,
             snapshot_prefix: String::new(),
             network_cache_ms,
+            buffered_us: 0,
             audio_ordinal,
             subtitle_ordinal,
             logged_sub: String::new(),
@@ -3686,7 +3688,34 @@ impl PlayerApp {
             ui.add(egui::ProgressBar::new(0.0).desired_width(ui.available_width()));
             return;
         }
-        let mut frac = self.scrub.unwrap_or(self.progress());
+        
+        let played_frac = self.scrub.unwrap_or(self.progress());
+        let buffered_frac = (self.buffered_us.max(0) as f32 / duration as f32).clamp(0.0, 1.0);
+        let max_frac = played_frac.max(buffered_frac);
+        
+        // Кастомная отрисовка с сегментами
+        let rect = ui.available_rect_before_wrap();
+        ui.painter().rect_filled(rect.shrink(2.0), 4.0, egui::Color32::from_rgb(40, 40, 40));
+        
+        // Buffer segment (синий)
+        if buffered_frac > 0.0 && buffered_frac < 1.0 {
+            let buf_w = (buffered_frac * (rect.width() - 4.0)).max(1.0);
+            let buf_rect = egui::Rect::from_min_x_max(rect.min.x + 2.0, rect.min.x + 2.0 + buf_w)
+                .expand(-2.0);
+            ui.painter().rect_filled(buf_rect, 4.0, egui::Color32::from_rgb(64, 128, 255));
+        }
+        
+        // Played segment (зеленый поверх синего если больше буфера)
+        if played_frac > 0.0 && played_frac < 1.0 && played_frac > buffered_frac {
+            let played_w = ((played_frac - buffered_frac) * (rect.width() - 4.0)).max(0.0);
+            let start_x = rect.min.x + 2.0 + buffered_frac.max(buffered_frac) * (rect.width() - 4.0);
+            let played_rect = egui::Rect::from_min_x_max(start_x, start_x + played_w)
+                .expand(-2.0);
+            ui.painter().rect_filled(played_rect, 4.0, egui::Color32::from_rgb(80, 200, 120));
+        }
+        
+        // Slider для seek (прозрачный поверх всего)
+        let mut frac = self.scrub.unwrap_or(played_frac);
         let response = ui.add(egui::Slider::new(&mut frac, 0.0..=1.0).show_value(false));
         if response.dragged() {
             self.scrub = Some(frac);
