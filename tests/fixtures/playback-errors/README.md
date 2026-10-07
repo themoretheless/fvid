@@ -1277,3 +1277,19 @@ and SELECT transforms, both CDF modes, and zero/positive/negative DC residuals
 are covered. Signed residuals exercise WHT reconstruction in Y, Cb and Cr.
 The old decoder's invalid CDF access is reproduced specifically on the SELECT
 lossless block; acceptance now verifies actual pixels, maps and WebM replay.
+
+## AV1 mixed lossless/lossy inter blocks
+
+`generate_av1_mixed_inter_samples.py --writer WRITER --oracle ORACLE`
+regenerates 672 owned OBU/YUV/WebM triples and their SHA-256 manifest.
+The optional standalone range writer and independent libaom pixel oracle
+are generation-only tools. The generator accepts no source media.
+
+Two hidden contrasting references seed physical slots 0 and 7. Each of seven
+logical reference roles selects slot 7; shown frames refresh that slot and
+change the segment map. Four 16x16 identity GLOBALMV blocks cover mixed
+lossless/lossy segments, qindices 1/64/255, largest/SELECT transforms, CDF
+adaptation and positive/negative DC residuals in every plane.
+`av1_mixed_inter` reads saved fixtures offline and checks maps, exact pixels,
+reference routing, WebM timing, rewind and seek. Selecting slot 0 instead
+of the declared reference causes a real pixel mismatch.

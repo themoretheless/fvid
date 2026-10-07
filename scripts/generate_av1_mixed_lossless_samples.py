@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1):
     symbols=[];grid=[0]*64;txs={};above=[[(0,0)]*8 for _ in range(3)];left=[[(0,0)]*8 for _ in range(3)];qi=0 if base<=20 else 1 if base<=60 else 2 if base<=120 else 3
     def s(id,indices,name,offset,length,value):symbols.append(dict(model=[id,indices],cdf=table(name,offset,length),symbol=value))
     s(8,[0],'DEFAULT_PARTITION_W32_CDF',0,11,3)
@@ -24,11 +24,30 @@ def encode(writer,base,mask,selected,adaptive,residual=0):
         ctx=0 if ul is None else 2 if ul==u==l else 1 if ul==u or ul==l or u==l else 0
         diff=next(d for d in range(2) if unmap(d,pred,2)==segment)
         symbols.append(dict(model=[18,[ctx]],cdf=CDF[ctx],symbol=diff))
-        s(0,[0,0],'DEFAULT_INTRA_FRAME_Y_MODE_CDF',0,14,0)
-        s(2 if lossless else 3,[0],'DEFAULT_UV_MODE_CFL_NOT_ALLOWED_CDF' if lossless else 'DEFAULT_UV_MODE_CFL_ALLOWED_CDF',0,14 if lossless else 15,0)
-        if selected and not lossless:
-            ctx=int(y>0 and txs[(x,y-4)]>=16)+int(x>0 and txs[(x-4,y)]>=16)
-            s(12,[ctx],'DEFAULT_TX_16X16_CDF',ctx*4,4,0)
+        if inter:
+            s(29,[0],'DEFAULT_IS_INTER_CDF',0,3,1)
+            n=int(x>0)+int(y>0)
+            def bit(branch,a,b,value):
+                ac=n*int(reference in a);bc=n*int(reference in b);ctx=0 if ac<bc else 2 if ac>bc else 1
+                s(35,[ctx,branch],'DEFAULT_SINGLE_REF_CDF',(ctx*6+branch)*3,3,value)
+            backward=reference>=5;bit(0,[1,2,3,4],[5,6,7],int(backward))
+            if backward:
+                bit(1,[5,6],[7],int(reference==7))
+                if reference!=7:bit(5,[5],[6],int(reference==6))
+            else:
+                high=reference>=3;bit(2,[1,2],[3,4],int(high));bit(4 if high else 3,[3] if high else [1],[4] if high else [2],int(reference in [2,4]))
+            newctx=[0,3,3,5][i]
+            s(25,[newctx],'DEFAULT_NEW_MV_CDF',newctx*3,3,1)
+            s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,0)
+            if selected and not lossless:
+                ctx=12+int(y>0 and txs[(x,y-4)]<16)+int(x>0 and txs[(x-4,y)]<16)
+                s(15,[ctx],'DEFAULT_TXFM_SPLIT_CDF',ctx*3,3,0)
+        else:
+            s(0,[0,0],'DEFAULT_INTRA_FRAME_Y_MODE_CDF',0,14,0)
+            s(2 if lossless else 3,[0],'DEFAULT_UV_MODE_CFL_NOT_ALLOWED_CDF' if lossless else 'DEFAULT_UV_MODE_CFL_ALLOWED_CDF',0,14 if lossless else 15,0)
+            if selected and not lossless:
+                ctx=int(y>0 and txs[(x,y-4)]>=16)+int(x>0 and txs[(x-4,y)]>=16)
+                s(12,[ctx],'DEFAULT_TX_16X16_CDF',ctx*4,4,0)
         txs[(x,y)]=4 if lossless else 16
         for p in range(3):
             bw=4 if p==0 else 2;bx=x if p==0 else x//2;by=y if p==0 else y//2
@@ -55,8 +74,8 @@ def encode(writer,base,mask,selected,adaptive,residual=0):
     text=''.join(f"{len(r['cdf'])} {r['symbol']} "+' '.join(map(str,r['cdf']))+'\n' for r in symbols)
     return subprocess.run([str(writer)],input=text.encode(),stdout=subprocess.PIPE,check=True).stdout,grid
 
-def key(entropy,base,selected,adaptive):
-    b=Bits();b.u(0);b.u(0,2);b.u(0);b.u(1);b.u(1);b.u(int(not adaptive));b.u(0);b.u(255,8);b.u(0)
+def key(entropy,base,selected,adaptive,kind=0,refresh=255):
+    b=Bits();b.u(0);b.u(kind,2);b.u(0);b.u(1);b.u(1);b.u(int(not adaptive));b.u(0);b.u(refresh,8);b.u(0)
     if adaptive:b.u(1)
     b.u(1);b.u(base,8);b.u(0,4);b.u(1)
     for seg in range(8):

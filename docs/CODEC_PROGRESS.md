@@ -3647,7 +3647,30 @@ Bypassing only the native lossless WHT reconstruction causes a real pixel
 mismatch on av1-mixed-lossless-q1-mask1-tx0-adapt0-dc1.obu; restoration passes.
 35 AV1 core tests and 21 root tests in eight AV1 suites pass offline.
 
-This qualifies the stated 16x16 intra mixed-block cases. Mixed inter prediction,
+This qualifies the stated 16x16 intra mixed-block cases. Broader inter prediction,
 other mixed block geometries, multitile maps, forced segment tools and the other
 codec gaps remain to implement or qualify; complete codec conformance is not
 established by this matrix.
+
+## AV1 mixed lossless/lossy single-reference inter blocks
+
+672 owned synthetic 32x32 streams qualify four 16x16 identity GLOBALMV
+blocks with mixed lossless/lossy segments. The matrix covers all seven logical
+reference roles, qindices 1/64/255, four mixed maps and their complements,
+largest/SELECT transforms, CDF adaptation off/on, and signed DC residuals in
+all three planes. Two hidden frames seed distinct pixels in physical slots
+0 and 7; every selected role maps to slot 7, which each shown frame refreshes.
+This distinguishes correct reference selection from accidentally using slot 0.
+
+Native acceptance compares every shown pixel with saved independent libaom
+output and every frame's segment map, then verifies WebM timestamps, rewind
+and sync seek. Ordinary tests use no FFmpeg, libav, libaom or generation tool.
+Forcing only physical reference selection to slot 0 makes pixel acceptance
+fail; restoring the native implementation passes. This stage qualifies the
+existing inter path and adds no external production codec dependency.
+All 23 tests in nine root AV1 suites pass offline. The 504 previous intra
+streams remain byte-identical after sharing the fixture writer.
+
+Nonzero motion, compound prediction, other mixed block geometries, multitile
+maps and forced segment tools remain outside this matrix. It does not prove
+complete AV1 or overall codec conformance.
