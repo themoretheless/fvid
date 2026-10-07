@@ -1308,3 +1308,16 @@ their complements, qindices 1/64, largest/SELECT, adaptation and signed
 residuals. `av1_mixed_motion` verifies saved exact pixels, maps, WebM timing,
 rewind and seek offline. It does not establish vertical/compound motion or
 complete motion-tool conformance.
+
+## AV1 mixed-block vertical and diagonal motion
+
+`generate_av1_mixed_axes_samples.py --writer WRITER --oracle ORACLE`
+creates 768 owned OBU/YUV/WebM triples. Both NEWMV components and MV_JOINT
+are written explicitly. Vertical and opposite-sign diagonal vectors cover
+quarter, half and full pixels in both directions, LAST/ALTREF, qindices
+1/64, mixed segment maps, largest/SELECT, adaptation and signed residuals.
+Magnitude-14 reference detail makes movement observable; independent
+stationary controls must differ. No source media is accepted.
+
+`av1_mixed_axes` reads saved fixtures only and verifies exact pixels, maps,
+timestamps, rewind and seek. Optional libaom tools run during generation only.

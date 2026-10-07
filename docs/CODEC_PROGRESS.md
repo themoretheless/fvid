@@ -3697,3 +3697,28 @@ All six tests across the three mixed-block suites pass offline.
 This is horizontal single-reference spatial prediction qualification. Vertical
 motion, broader motion-vector classes/precision, compound prediction and
 other unsupported AV1 tools still require implementation or qualification.
+
+## AV1 mixed-block vertical and diagonal motion
+
+The owned fixture writer now encodes both NEWMV components and their
+MV_JOINT symbols. `av1_mixed_axes` covers 768 vertical and opposite-sign
+diagonal streams at +/-1, +/-1/2 and +/-1/4 luma pixels. Each vector has
+64 combinations of LAST/ALTREF routing, qindices 1/64, two mixed maps,
+largest/SELECT transforms, CDF adaptation and signed residuals.
+
+The first 16x16 block moves against signed magnitude-14 DC references;
+other blocks use identity GLOBALMV. Every generated first shown frame must
+differ from a separately decoded stationary control. Pixel references are
+saved independent libaom output. Generation is separate from ordinary offline
+acceptance, which reads only owned streams and checks Y/Cb/Cr pixels, segment
+maps, WebM clock, rewind and seek.
+
+This expands Class-0 quarter/half/full-pixel single-reference qualification.
+Eight tests across the four mixed-block suites pass offline in the verification
+checkout, whose AV1 decoder matches main. Previous 504 intra and 384
+horizontal streams remain byte-identical. Removing vertical motion causes
+a pixel mismatch on y-8-x0; removing horizontal motion causes a mismatch
+on y-8-x8. These checks distinguish both axes of diagonal prediction.
+
+It does not establish other motion classes, eighth-pixel precision, compound
+prediction, OBMC, inter-intra or complete AV1 conformance.
