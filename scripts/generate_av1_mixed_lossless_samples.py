@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0):
     symbols=[];grid=[0]*64;txs={};above=[[(0,0)]*8 for _ in range(3)];left=[[(0,0)]*8 for _ in range(3)];qi=0 if base<=20 else 1 if base<=60 else 2 if base<=120 else 3
     def s(id,indices,name,offset,length,value):symbols.append(dict(model=[id,indices],cdf=table(name,offset,length),symbol=value))
     s(8,[0],'DEFAULT_PARTITION_W32_CDF',0,11,3)
@@ -36,9 +36,16 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                 if reference!=7:bit(5,[5],[6],int(reference==6))
             else:
                 high=reference>=3;bit(2,[1,2],[3,4],int(high));bit(4 if high else 3,[3] if high else [1],[4] if high else [2],int(reference in [2,4]))
-            newctx=[0,3,3,5][i]
-            s(25,[newctx],'DEFAULT_NEW_MV_CDF',newctx*3,3,1)
-            s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,0)
+            newctx=([0,2,2,5] if motion else [0,3,3,5])[i]
+            moving=bool(motion and i==0)
+            s(25,[newctx],'DEFAULT_NEW_MV_CDF',newctx*3,3,0 if moving else 1)
+            if moving:
+                s(39,[0],'DEFAULT_MV_JOINT_CDF',0,5,1)
+                s(22,[0,1],'DEFAULT_MV_SIGN_CDF',0,3,int(motion<0))
+                s(40,[0,1],'DEFAULT_MV_CLASS_CDF',12,12,0)
+                s(24,[0,1],'DEFAULT_MV_CLASS0_BIT_CDF',0,3,0)
+                s(41,[0,1,0],'DEFAULT_MV_CLASS0_FR_CDF',10,5,abs(motion)//2-1)
+            else:s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,0)
             if selected and not lossless:
                 ctx=12+int(y>0 and txs[(x,y-4)]<16)+int(x>0 and txs[(x-4,y)]<16)
                 s(15,[ctx],'DEFAULT_TXFM_SPLIT_CDF',ctx*3,3,0)
@@ -64,9 +71,15 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                     if nonzero:
                         pt=int(p>0);dc=sum(-1 if sign==1 else 1 if sign==2 else 0 for _,sign in top+side);dcctx=1 if dc<0 else 2 if dc>0 else 0
                         s(84,[pt,0],'DEFAULT_EOB_PT_16_CDF',qi*24+pt*12,6,0)
-                        s(93,[0,pt,0],'DEFAULT_COEFF_BASE_EOB_CDF',qi*160+pt*16,4,0)
+                        level=abs(residual);assert 1<=level<=14
+                        s(93,[0,pt,0],'DEFAULT_COEFF_BASE_EOB_CDF',qi*160+pt*16,4,min(level,3)-1)
+                        if level>=3:
+                            rest=level-3
+                            for _ in range(4):
+                                v=min(rest,3);s(95,[0,pt,0],'DEFAULT_COEFF_BR_CDF',qi*1050+pt*105,5,v);rest-=v
+                                if v<3:break
                         s(92,[pt,dcctx],'DEFAULT_DC_SIGN_CDF',qi*18+(pt*3+dcctx)*3,3,int(residual<0))
-                        state=(1,1 if residual<0 else 2)
+                        state=(level,1 if residual<0 else 2)
                     for k in range(step):above[p][xx+k]=state;left[p][yy+k]=state
         for yy in range(y,y+4):
             for xx in range(x,x+4):grid[yy*8+xx]=segment

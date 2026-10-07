@@ -3674,3 +3674,26 @@ streams remain byte-identical after sharing the fixture writer.
 Nonzero motion, compound prediction, other mixed block geometries, multitile
 maps and forced segment tools remain outside this matrix. It does not prove
 complete AV1 or overall codec conformance.
+
+## AV1 mixed-block nonzero single-reference motion
+
+384 additional owned 32x32 streams exercise NEWMV on the first 16x16 block,
+with horizontal displacements of +/-1, +/-1/2 and +/-1/4 luma pixels. Other
+blocks use identity GLOBALMV. Logical LAST/ALTREF select physical slot 7;
+qindices 1/64, two mixed maps and their complements, largest/SELECT
+transforms, both CDF modes and positive/negative residuals are covered.
+The hidden references use signed DC magnitude 14, instead of 1, so rounding
+cannot erase the movement signal. During generation every first shown frame
+is compared with an independent zero-motion control and must differ.
+
+Native acceptance checks the exact saved independent Y/Cb/Cr output, maps,
+WebM timestamps, rewind and seek. The fixture writer now supports owned
+DC magnitudes 1..14 through COEFF_BASE_EOB/COEFF_BR symbols. The previous
+504 intra streams remain byte-identical. Ordinary tests use no generator,
+network or external decoder. Removing only horizontal motion from native
+prediction causes a pixel mismatch; restoration passes both acceptance tests.
+All six tests across the three mixed-block suites pass offline.
+
+This is horizontal single-reference spatial prediction qualification. Vertical
+motion, broader motion-vector classes/precision, compound prediction and
+other unsupported AV1 tools still require implementation or qualification.

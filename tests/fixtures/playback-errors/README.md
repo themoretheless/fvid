@@ -1293,3 +1293,18 @@ adaptation and positive/negative DC residuals in every plane.
 `av1_mixed_inter` reads saved fixtures offline and checks maps, exact pixels,
 reference routing, WebM timing, rewind and seek. Selecting slot 0 instead
 of the declared reference causes a real pixel mismatch.
+
+## AV1 mixed-block nonzero motion
+
+`generate_av1_mixed_motion_samples.py --writer WRITER --oracle ORACLE`
+generates 384 OBU/YUV/WebM triples. Optional libaom tools run only during
+generation; no input media is accepted. Signed magnitude-14 DC in hidden
+references makes +/-1, +/-1/2 and +/-1/4 pixel horizontal NEWMV observable
+on the first 16x16 block. An independent stationary control must produce
+different pixels for every fixture. Remaining blocks use identity GLOBALMV.
+
+The matrix covers LAST/ALTREF routing, two mixed lossless/lossy maps and
+their complements, qindices 1/64, largest/SELECT, adaptation and signed
+residuals. `av1_mixed_motion` verifies saved exact pixels, maps, WebM timing,
+rewind and seek offline. It does not establish vertical/compound motion or
+complete motion-tool conformance.
