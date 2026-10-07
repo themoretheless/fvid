@@ -1498,3 +1498,25 @@ need additional fixture qualification. This does not establish full AV1
 conformance or close the remaining codec gaps.
 
 Validation: 27 tests across 13 AV1 integration suites and 35 AV1 core tests passed offline, including the scaled-reference pixel, map, dimension, rewind, timestamp and seek acceptance tests.
+
+## Scaled AV1 masked compound qualification
+
+The scaled-reference implementation now also has independent pixel acceptance
+coverage for two-reference masked compound prediction. The 544 owned fixtures
+exercise all 16 wedge indices, both signs, difference masks, adaptive tile CDFs,
+four interpolation filters, opposite synthetic residuals and four configurations
+of differently sized LAST/ALTREF references. Sizes include odd dimensions,
+rectangular axes, upscale, downscale, and a scaled/unscaled reference combination.
+The two references stay distinct: shown frames refresh no reference slots.
+
+`tests/av1_scaled_compound.rs` checks all hidden/shown dimensions, segment maps,
+all displayed Y/Cb/Cr pixels against saved independent oracle output, decoder
+reset, WebM rewind, timestamps and seek. All 544 cases passed offline. All 1,632
+fixture hashes were verified. Deliberately replacing the sampling step with unity
+or adding one filter phase made the pixel test fail; the restored decoder passed.
+The optional generator uses libaom only to write entropy and save reference pixels;
+ordinary tests read checked-in files and need no FFmpeg, libav, libaom or network.
+
+This extends the preceding single-reference qualification; it does not establish
+full AV1 conformance. Scaled OBMC/inter-intra, distance-weighted compound,
+higher depths, chroma formats and extreme valid size ratios still need coverage.
