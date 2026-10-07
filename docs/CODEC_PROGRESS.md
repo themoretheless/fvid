@@ -3722,3 +3722,31 @@ on y-8-x8. These checks distinguish both axes of diagonal prediction.
 
 It does not establish other motion classes, eighth-pixel precision, compound
 prediction, OBMC, inter-intra or complete AV1 conformance.
+
+## AV1 forced segment reference selection
+
+SEG_LVL_REF_FRAME is now applied by native block decoding. When a frame's
+segmentation features require pre-skip IDs, the segment is read before skip.
+A forced reference suppresses skip-mode/is_inter/reference-selection symbols
+and compound reference selection, then uses the normal single-reference
+mode and reconstruction paths. Forced INTRA selects the existing intra path;
+forced skip/global segmentation tools remain explicitly unsupported.
+
+256 owned 32x32 streams cover forced INTRA and all seven inter reference roles, two mixed
+segment maps and their complements, qindices 1/64, largest/SELECT, CDF
+adaptation off/on and signed DC residuals. Two contrasting hidden references
+distinguish physical reference selection. Independent libaom accepts every
+stream and supplies saved pixel output. The old native decoder specifically
+refuses av1-forced-reference-ref1-q1-mask2-tx0-adapt0-dc1.obu with
+“AV1 active segmentation features not implemented”; acceptance with the fix
+checks every displayed pixel, segment map, WebM timestamps, rewind and seek.
+Ordinary tests use saved fixtures and require no external codec or network.
+35 AV1 unit tests and 17 tests in seven root suites pass offline in the
+verification checkout, whose decoder matches main. The 504 existing intra
+and 672 inter streams remain byte-identical with the extended generator.
+
+The acceptance matrix directly qualifies all eight forced-reference values.
+Skipped blocks with temporal maps, inherited forced tables and other
+block geometries still need additional qualification. SEG_LVL_SKIP/GLOBALMV,
+compound prediction tools, OBMC/inter-intra and remaining codec gaps are
+not established by this change.

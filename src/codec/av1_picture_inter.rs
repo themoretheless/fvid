@@ -272,7 +272,10 @@ impl Decoder<'_> {
         skip_mode: bool,
     ) -> Result<()> {
         let (above, left) = self.neighbors(x, y);
-        let compound = if skip_mode {
+        let forced_reference = self.h.segments[self.current_segment][5];
+        let compound = if forced_reference.is_some() {
+            false
+        } else if skip_mode {
             true
         } else if self.h.reference_select && w.min(h) >= 2 {
             let ctx = match (above, left) {
@@ -311,7 +314,9 @@ impl Decoder<'_> {
                 2
             }
         };
-        let refs = if skip_mode {
+        let refs = if let Some(reference) = forced_reference {
+            [reference as usize, 0]
+        } else if skip_mode {
             self.h.skip_mode.unwrap()
         } else if compound {
             let a = above.unwrap_or_default();

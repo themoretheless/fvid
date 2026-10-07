@@ -1321,3 +1321,18 @@ stationary controls must differ. No source media is accepted.
 
 `av1_mixed_axes` reads saved fixtures only and verifies exact pixels, maps,
 timestamps, rewind and seek. Optional libaom tools run during generation only.
+
+## AV1 forced segment reference
+
+`generate_av1_forced_reference_samples.py --writer WRITER --oracle ORACLE`
+creates 256 owned OBU/YUV/WebM triples with SEG_LVL_REF_FRAME. Segment IDs
+precede skip, and forced-reference syntax omits is_inter/reference-selection
+symbols. The matrix covers forced INTRA and every inter reference role, mixed maps and their
+complements, qindices 1/64, largest/SELECT, adaptation and signed residuals.
+The optional independent oracle accepts every generated stream.
+
+`av1_forced_reference` enables native acceptance for a former specific
+“active segmentation features not implemented” refusal. It compares exact
+pixels/maps and WebM timing, rewind and seek offline; generation remains
+separate and accepts no source media. Skip/global segmentation tools remain
+outside this fixture matrix.

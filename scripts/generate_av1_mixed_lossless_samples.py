@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     symbols=[];grid=[0]*64;txs={};above=[[(0,0)]*8 for _ in range(3)];left=[[(0,0)]*8 for _ in range(3)];qi=0 if base<=20 else 1 if base<=60 else 2 if base<=120 else 3
@@ -20,24 +20,26 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
     for i,(x,y) in enumerate([(0,0),(4,0),(0,4),(4,4)]):
         segment=(mask>>i)&1;lossless=segment==0
         s(7,[0],'DEFAULT_PARTITION_W16_CDF',0,11,0)
-        s(32,[0],'DEFAULT_SKIP_CDF',0,3,0)
+        if not forced_reference:s(32,[0],'DEFAULT_SKIP_CDF',0,3,0)
         u=grid[(y-1)*8+x] if y else None;l=grid[y*8+x-1] if x else None;ul=grid[(y-1)*8+x-1] if x and y else None
         pred=(l if u is None else u if l is None or ul==u else l) or 0
         ctx=0 if ul is None else 2 if ul==u==l else 1 if ul==u or ul==l or u==l else 0
         diff=next(d for d in range(2) if unmap(d,pred,2)==segment)
         symbols.append(dict(model=[18,[ctx]],cdf=CDF[ctx],symbol=diff))
-        if inter:
-            s(29,[0],'DEFAULT_IS_INTER_CDF',0,3,1)
+        if forced_reference:s(32,[0],'DEFAULT_SKIP_CDF',0,3,0)
+        if inter and not (forced_reference and reference==0):
+            if not forced_reference:s(29,[0],'DEFAULT_IS_INTER_CDF',0,3,1)
             n=int(x>0)+int(y>0)
             def bit(branch,a,b,value):
                 ac=n*int(reference in a);bc=n*int(reference in b);ctx=0 if ac<bc else 2 if ac>bc else 1
                 s(35,[ctx,branch],'DEFAULT_SINGLE_REF_CDF',(ctx*6+branch)*3,3,value)
-            backward=reference>=5;bit(0,[1,2,3,4],[5,6,7],int(backward))
-            if backward:
-                bit(1,[5,6],[7],int(reference==7))
-                if reference!=7:bit(5,[5],[6],int(reference==6))
-            else:
-                high=reference>=3;bit(2,[1,2],[3,4],int(high));bit(4 if high else 3,[3] if high else [1],[4] if high else [2],int(reference in [2,4]))
+            if not forced_reference:
+                backward=reference>=5;bit(0,[1,2,3,4],[5,6,7],int(backward))
+                if backward:
+                    bit(1,[5,6],[7],int(reference==7))
+                    if reference!=7:bit(5,[5],[6],int(reference==6))
+                else:
+                    high=reference>=3;bit(2,[1,2],[3,4],int(high));bit(4 if high else 3,[3] if high else [1],[4] if high else [2],int(reference in [2,4]))
             newctx=([0,2,2,5] if any(vector) else [0,3,3,5])[i]
             moving=bool(any(vector) and i==0)
             s(25,[newctx],'DEFAULT_NEW_MV_CDF',newctx*3,3,0 if moving else 1)
@@ -55,7 +57,8 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                 ctx=12+int(y>0 and txs[(x,y-4)]<16)+int(x>0 and txs[(x-4,y)]<16)
                 s(15,[ctx],'DEFAULT_TXFM_SPLIT_CDF',ctx*3,3,0)
         else:
-            s(0,[0,0],'DEFAULT_INTRA_FRAME_Y_MODE_CDF',0,14,0)
+            if inter:s(1,[2],'DEFAULT_Y_MODE_CDF',28,14,0)
+            else:s(0,[0,0],'DEFAULT_INTRA_FRAME_Y_MODE_CDF',0,14,0)
             s(2 if lossless else 3,[0],'DEFAULT_UV_MODE_CFL_NOT_ALLOWED_CDF' if lossless else 'DEFAULT_UV_MODE_CFL_ALLOWED_CDF',0,14 if lossless else 15,0)
             if selected and not lossless:
                 ctx=int(y>0 and txs[(x,y-4)]>=16)+int(x>0 and txs[(x-4,y)]>=16)
