@@ -1520,3 +1520,25 @@ ordinary tests read checked-in files and need no FFmpeg, libav, libaom or networ
 This extends the preceding single-reference qualification; it does not establish
 full AV1 conformance. Scaled OBMC/inter-intra, distance-weighted compound,
 higher depths, chroma formats and extreme valid size ratios still need coverage.
+
+## Scaled AV1 inter-intra qualification
+
+The native scaled-reference predictor is independently qualified with inter-intra
+blending in 1,632 owned streams. The matrix covers DC, vertical, horizontal and
+smooth modes; all 16 wedge masks; LAST and ALTREF logical references; 12 pairs of
+reference/current dimensions including odd dimensions, downscale, upscale and
+unequal horizontal/vertical factors. Interpolation filters and adaptive CDFs vary
+across the matrix. Hidden reference pixels have a synthetic spatial pattern.
+Shown frames refresh no references, preserving the intended size difference.
+
+`tests/av1_scaled_interintra.rs` compares all displayed Y/Cb/Cr pixels with saved
+independent oracle output and checks sizes, segment maps, decoder reset, WebM
+rewind, timestamps and seek. All 1,632 cases passed offline, and all 4,896 hashes
+were verified. Disabling inter-intra blending in the isolated verification copy
+caused a pixel mismatch; restored source is rechecked before qualification.
+Fixtures are generated separately with optional libaom entropy/oracle helpers;
+ordinary tests require no FFmpeg, libav, libaom or network and contain no private
+media. This extends the preceding scaled-reference coverage; scaled OBMC,
+distance-weighted compound, higher depths/chroma and full AV1 conformance remain
+unproven. The explicit film-grain, temporal motion-field and separate frame-header
+limitations are still implementation gaps, not passing playback acceptance.
