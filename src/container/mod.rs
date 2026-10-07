@@ -14,6 +14,8 @@ pub mod opus_packet;
 pub mod smf;
 pub mod webm;
 pub mod xm;
+mod string_interner;
+pub use string_interner::{InternedString, StringInterner};
 
 /// Reduce a ratio to the smallest pair that states it, which is what lets a
 /// player name the shape on screen. A zero part states nothing, and a ratio too
