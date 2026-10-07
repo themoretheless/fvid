@@ -24,6 +24,11 @@ pub struct Picture {
     pub segment_ids: Vec<u8>,
     pub planes: [Plane; 3],
 }
+#[derive(Clone, Copy)]
+enum CompoundMask {
+    Wedge { index: usize, sign: bool },
+    Difference { invert: bool },
+}
 #[derive(Clone, Copy, Default)]
 struct Block {
     w: usize,
@@ -39,6 +44,7 @@ struct Block {
     mv2: [i32; 2],
     skip_mode: bool,
     compound_average: bool,
+    compound_mask: Option<CompoundMask>,
     warp: Option<[i64; 6]>,
     filters: [usize; 2],
 }
@@ -78,6 +84,7 @@ struct Decoder<'a> {
     lossless_out: Vec<i32>,
     inter_pred: Vec<i32>,
     inter_pred2: Vec<i32>,
+    compound_weights: Vec<i32>,
 }
 fn neg_deinterleave(diff: usize, reference: usize, max: usize) -> usize {
     if reference == 0 {
@@ -229,6 +236,7 @@ pub(crate) fn decode(
         lossless_out: Vec::new(),
         inter_pred: Vec::new(),
         inter_pred2: Vec::new(),
+        compound_weights: Vec::new(),
     };
     let mut next = 0;
     let mut initial = initial.cloned().unwrap_or_else(|| Cdfs::new(h.quant.base));

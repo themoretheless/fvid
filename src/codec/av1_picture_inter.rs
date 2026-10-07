@@ -1,4 +1,6 @@
 //! AV1 single-reference motion compensation and spatial motion-vector prediction.
+#[path = "av1_interintra.rs"]
+mod blend;
 use super::*;
 const SIZES: [(usize, usize); 22] = [
     (1, 1),
@@ -618,23 +620,22 @@ impl Decoder<'_> {
             .iter()
             .position(|v| *v == (w, h))
             .ok_or_else(|| invalid("invalid AV1 inter block size"))?;
-        if !compound
-            && self.s.interintra_compound
-            && (3..=9).contains(&size_id)
-            && symbol(
-                d,
-                c,
-                av1_cdfs::INTER_INTRA,
-                [(w.min(h).ilog2() as usize) - 1],
-            )? != 0
-        {
-            return Err(crate::unsupported(
-                "AV1 inter-intra blending not implemented",
-            ));
+        let mut interintra_mode = None;
+        let mut interintra_wedge = None;
+        if !skip_mode && !compound && self.s.interintra_compound && (3..=9).contains(&size_id) {
+            let context = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3][size_id] - 1;
+            if symbol(d, c, av1_cdfs::INTER_INTRA, [context])? != 0 {
+                interintra_mode = Some(symbol(d, c, av1_cdfs::INTER_INTRA_MODE, [context])?);
+                if symbol(d, c, av1_cdfs::WEDGE_INTER_INTRA, [size_id])? != 0 {
+                    interintra_wedge = Some(symbol(d, c, av1_cdfs::WEDGE_INDEX, [size_id])?);
+                }
+            }
         }
         let mut warp = None;
         let mut local_warp = false;
+        let mut obmc = false;
         if !compound
+            && interintra_mode.is_none()
             && self.h.motion_mode_switchable
             && w.min(h) >= 2
             && !(mode == 15 && !self.h.integer_mv && self.h.global_types[reference - 1] > 1)
@@ -650,6 +651,7 @@ impl Decoder<'_> {
             if overlap {
                 let motion = if self.h.warped_motion
                     && !self.h.integer_mv
+                    && !self.reference_is_scaled(reference)?
                     && !self.warp_samples(x, y, w, h, reference, mv).is_empty()
                 {
                     symbol(d, c, av1_cdfs::MOTION_MODE, [size_id])?
@@ -666,20 +668,19 @@ impl Decoder<'_> {
                     );
                 }
                 if motion == 1 {
-                    return Err(crate::unsupported(
-                        "AV1 overlapped motion compensation not implemented",
-                    ));
+                    obmc = true;
                 }
             }
         }
         let mut compound_average = true;
+        let mut compound_mask = None;
         if compound && !skip_mode {
             let ctx = above
                 .into_iter()
                 .chain(left)
                 .map(|b| {
                     if b.reference2 > 0 {
-                        0
+                        usize::from(b.compound_mask.is_some())
                     } else {
                         3 * usize::from(b.reference == 7)
                     }
@@ -687,11 +688,20 @@ impl Decoder<'_> {
                 .sum::<usize>()
                 .min(5);
             if self.s.masked_compound && symbol(d, c, av1_cdfs::COMP_GROUP_IDX, [ctx])? != 0 {
-                return Err(crate::unsupported(
-                    "AV1 masked compound prediction not implemented",
-                ));
+                let wedge = matches!(size_id, 3..=9 | 18 | 19)
+                    && symbol(d, c, av1_cdfs::COMPOUND_TYPE, [size_id])? == 0;
+                compound_mask = Some(if wedge {
+                    CompoundMask::Wedge {
+                        index: symbol(d, c, av1_cdfs::WEDGE_INDEX, [size_id])?,
+                        sign: d.literal(1)? != 0,
+                    }
+                } else {
+                    CompoundMask::Difference {
+                        invert: d.literal(1)? != 0,
+                    }
+                });
             }
-            if self.s.joint_compound {
+            if compound_mask.is_none() && self.s.joint_compound {
                 let equal = self.distances[refs[0]].abs() == self.distances[refs[1]].abs();
                 let ctx = 3 * usize::from(equal)
                     + above
@@ -758,6 +768,7 @@ impl Decoder<'_> {
             mv2: mvs[1],
             skip_mode,
             compound_average,
+            compound_mask,
             warp,
             mv,
             filters,
@@ -774,6 +785,7 @@ impl Decoder<'_> {
                 }
             }
         }
+        let wedge_mask = interintra_wedge.map(|index| blend::wedge([w * 4, h * 4], index));
         let chroma = !self.s.color.monochrome && !(w == 1 && x % 2 == 0 || h == 1 && y % 2 == 0);
         for p in 0..if chroma { 3 } else { 1 } {
             let sub = usize::from(p > 0);
@@ -804,6 +816,52 @@ impl Decoder<'_> {
                         ));
                     }
                     self.motion_predict(p, px + xx, py + yy, [step_x, step_y], b)?;
+                    if obmc {
+                        self.overlap_predict(p, [x, y], [w, h], [pw, ph])?;
+                    }
+                    if let Some(mode) = interintra_mode {
+                        self.predict(
+                            p,
+                            px + xx,
+                            py + yy,
+                            [step_x, step_y],
+                            [0, 1, 2, 9][mode],
+                            0,
+                            None,
+                            false,
+                        )?;
+                        let plane = &mut self.image.planes[p];
+                        let scale = 128 / step_x.max(step_y);
+                        for row in 0..step_y.min(plane.height.saturating_sub(py + yy)) {
+                            for col in 0..step_x.min(plane.width.saturating_sub(px + xx)) {
+                                let weight = if let Some(mask) = &wedge_mask {
+                                    if p == 0 {
+                                        mask[row][col]
+                                    } else {
+                                        (mask[2 * row][2 * col]
+                                            + mask[2 * row][2 * col + 1]
+                                            + mask[2 * row + 1][2 * col]
+                                            + mask[2 * row + 1][2 * col + 1]
+                                            + 2)
+                                            >> 2
+                                    }
+                                } else {
+                                    match mode {
+                                        1 => INTERINTRA_WEIGHTS[row * scale],
+                                        2 => INTERINTRA_WEIGHTS[col * scale],
+                                        3 => INTERINTRA_WEIGHTS[row.min(col) * scale],
+                                        _ => 32,
+                                    }
+                                };
+                                let at = (py + yy + row) * plane.width + px + xx + col;
+                                let intra = i32::from(plane.samples[at]);
+                                let inter = self.inter_pred[row * step_x + col]
+                                    .clamp(0, (1 << self.s.color.depth) - 1);
+                                plane.samples[at] =
+                                    ((weight * intra + (64 - weight) * inter + 32) >> 6) as u16;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1148,6 +1206,58 @@ impl Decoder<'_> {
                 &mut self.inter_pred2,
             )?;
         }
+        if let Some(mask) = b.compound_mask {
+            let [w, h] = size;
+            if p == 0 {
+                self.compound_weights.resize(w * h, 0);
+                match mask {
+                    CompoundMask::Wedge { index, sign } => {
+                        let weights = blend::wedge(size, index);
+                        for row in 0..h {
+                            for col in 0..w {
+                                let value = weights[row][col];
+                                self.compound_weights[row * w + col] =
+                                    if sign { 64 - value } else { value };
+                            }
+                        }
+                    }
+                    CompoundMask::Difference { invert } => {
+                        let post = if color_depth == 12 { 2 } else { 4 };
+                        let shift = color_depth as usize - 8 + post;
+                        for i in 0..w * h {
+                            let diff = (self.inter_pred[i] - self.inter_pred2[i]).abs();
+                            let diff = (diff + (1 << (shift - 1))) >> shift;
+                            let weight = (38 + diff / 16).clamp(0, 64);
+                            self.compound_weights[i] = if invert { 64 - weight } else { weight };
+                        }
+                    }
+                }
+            }
+            let stride = b.w * 4;
+            let dst = &mut self.image.planes[p];
+            let post = if color_depth == 12 { 2 } else { 4 };
+            for row in 0..h.min(dst.height.saturating_sub(y)) {
+                for col in 0..w.min(dst.width.saturating_sub(x)) {
+                    let weight = if p == 0 {
+                        self.compound_weights[row * stride + col]
+                    } else {
+                        let at = 2 * row * stride + 2 * col;
+                        (self.compound_weights[at]
+                            + self.compound_weights[at + 1]
+                            + self.compound_weights[at + stride]
+                            + self.compound_weights[at + stride + 1]
+                            + 2)
+                            >> 2
+                    };
+                    let i = row * w + col;
+                    let sum = weight * self.inter_pred[i] + (64 - weight) * self.inter_pred2[i];
+                    dst.samples[(y + row) * dst.width + x + col] =
+                        ((sum + (1 << (post + 5))) >> (post + 6)).clamp(0, (1 << color_depth) - 1)
+                            as u16;
+                }
+            }
+            return Ok(());
+        }
         let first = &self.inter_pred;
         let second = if compound {
             Some(&self.inter_pred2)
@@ -1202,6 +1312,161 @@ impl Decoder<'_> {
         }
         Ok(())
     }
+    fn overlap_predict(
+        &mut self,
+        p: usize,
+        origin: [usize; 2],
+        luma_size: [usize; 2],
+        plane_size: [usize; 2],
+    ) -> Result<()> {
+        let [x, y] = origin;
+        let [w4, h4] = luma_size;
+        let [w, h] = plane_size;
+        let sub = usize::from(p > 0);
+        let above_size = SIZES.iter().position(|&size| size == (w / 4, h / 4));
+        for pass in 0..2 {
+            let available = if pass == 0 {
+                y > self.y0 && above_size.is_some_and(|id| id >= 3)
+            } else {
+                x > self.x0
+            };
+            if !available {
+                continue;
+            }
+            let start = if pass == 0 { x } else { y };
+            let extent = if pass == 0 { w4 } else { h4 };
+            let limit = extent.ilog2().min(4) as usize;
+            let end = (start + extent).min(if pass == 0 { self.cols } else { self.rows });
+            let mut cursor = start;
+            let mut count = 0;
+            while cursor < end && count < limit {
+                let candidate = if pass == 0 {
+                    self.blocks[(y - 1) * self.cols + (cursor | 1)]
+                } else {
+                    self.blocks[(cursor | 1) * self.cols + x - 1]
+                };
+                let step = if pass == 0 { candidate.w } else { candidate.h }.clamp(2, 16);
+                if candidate.reference > 0 {
+                    count += 1;
+                    let size = if pass == 0 {
+                        [w.min(step * 4 >> sub), (h / 2).min(32 >> sub)]
+                    } else {
+                        [(w / 2).min(32 >> sub), h.min(step * 4 >> sub)]
+                    };
+                    let point = if pass == 0 {
+                        [cursor * 4 >> sub, y * 4 >> sub]
+                    } else {
+                        [x * 4 >> sub, cursor * 4 >> sub]
+                    };
+                    Self::motion_samples(
+                        self.references,
+                        self.h.references,
+                        self.h.size,
+                        self.s.color.depth,
+                        p,
+                        point[0],
+                        point[1],
+                        size,
+                        Block {
+                            warp: None,
+                            ..candidate
+                        },
+                        false,
+                        &mut self.scratch,
+                        &mut self.inter_pred2,
+                    )?;
+                    let mask = overlap_mask(size[pass ^ 1]);
+                    let dst = &mut self.image.planes[p];
+                    for row in 0..size[1].min(dst.height.saturating_sub(point[1])) {
+                        for col in 0..size[0].min(dst.width.saturating_sub(point[0])) {
+                            let weight = mask[if pass == 0 { row } else { col }];
+                            let at = (point[1] + row) * dst.width + point[0] + col;
+                            let predictor = self.inter_pred2[row * size[0] + col]
+                                .clamp(0, (1 << self.s.color.depth) - 1);
+                            dst.samples[at] = ((weight * i32::from(dst.samples[at])
+                                + (64 - weight) * predictor
+                                + 32)
+                                >> 6) as u16;
+                        }
+                    }
+                }
+                cursor += step;
+            }
+        }
+        Ok(())
+    }
+    fn reference_is_scaled(&self, reference: usize) -> Result<bool> {
+        let picture = self.references[self.h.references[reference - 1]]
+            .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
+        Ok(reference_scale(picture.size, self.h.size)? != [16384, 16384])
+    }
+    fn scaled_motion_samples(
+        reference: &Picture,
+        p: usize,
+        origin: [usize; 2],
+        size: [usize; 2],
+        b: Block,
+        scale: [i64; 2],
+        depth: u8,
+        compound: bool,
+        temp: &mut Vec<i32>,
+        out: &mut Vec<i32>,
+    ) -> Result<()> {
+        use super::super::av1_tables::SUBPEL_FILTERS;
+        let sub = usize::from(p > 0);
+        let [w, h] = size;
+        let coordinates = [0, 1].map(|axis| {
+            let mv = b.mv[1 - axis] as i64;
+            let original = origin[axis] as i64 * 16 + ((2 * mv) >> sub) + 8;
+            let base = original * scale[axis] - (8 << 14);
+            let start = base.signum() * ((base.abs() + 128) >> 8) + 32;
+            let step = (scale[axis] + 8) >> 4;
+            (start, step)
+        });
+        let [(start_x, step_x), (start_y, step_y)] = coordinates;
+        let rows = (((h - 1) as i64 * step_y + 1023) >> 10) as usize + 8;
+        let filter = |dir: usize, length: usize| match (length <= 4, b.filters[dir]) {
+            (true, 0 | 2) => 4,
+            (true, 1) => 5,
+            (_, value) => value,
+        };
+        let fx = &SUBPEL_FILTERS[filter(1, w)];
+        let fy = &SUBPEL_FILTERS[filter(0, h)];
+        let src = &reference.planes[p];
+        let last_x = (reference.size[0] as i64 + sub as i64) / (1 << sub) - 1;
+        let last_y = (reference.size[1] as i64 + sub as i64) / (1 << sub) - 1;
+        let round0 = if depth == 12 { 5 } else { 3 };
+        let round1 = if compound { 7 } else { 14 - round0 };
+        temp.resize(rows * w, 0);
+        for row in 0..rows {
+            let sy = ((start_y >> 10) + row as i64 - 3).clamp(0, last_y) as usize;
+            for col in 0..w {
+                let coordinate = start_x + step_x * col as i64;
+                let taps = &fx[((coordinate >> 6) & 15) as usize];
+                let mut sum = 0;
+                for (tap, coefficient) in taps.iter().enumerate() {
+                    let sx = ((coordinate >> 10) + tap as i64 - 3).clamp(0, last_x) as usize;
+                    sum += coefficient * i32::from(src.samples[sy * src.width + sx]);
+                }
+                temp[row * w + col] = (sum + (1 << (round0 - 1))) >> round0;
+            }
+        }
+        out.resize(w * h, 0);
+        for row in 0..h {
+            let coordinate = (start_y & 1023) + step_y * row as i64;
+            let taps = &fy[((coordinate >> 6) & 15) as usize];
+            let base = (coordinate >> 10) as usize;
+            for col in 0..w {
+                let sum: i32 = taps
+                    .iter()
+                    .enumerate()
+                    .map(|(tap, coefficient)| coefficient * temp[(base + tap) * w + col])
+                    .sum();
+                out[row * w + col] = (sum + (1 << (round1 - 1))) >> round1;
+            }
+        }
+        Ok(())
+    }
     fn motion_samples(
         references: [Option<&Picture>; 8],
         h_references: [usize; 7],
@@ -1219,10 +1484,20 @@ impl Decoder<'_> {
         use super::super::av1_tables::SUBPEL_FILTERS;
         let reference = references[h_references[b.reference - 1]]
             .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
-        if reference.size != h_size {
-            return Err(crate::unsupported(
-                "AV1 scaled reference prediction not implemented",
-            ));
+        let scale = reference_scale(reference.size, h_size)?;
+        if scale != [16384, 16384] {
+            return Self::scaled_motion_samples(
+                reference,
+                p,
+                [x, y],
+                size,
+                b,
+                scale,
+                color_depth,
+                compound,
+                temp,
+                out,
+            );
         }
         if size[0] >= 8 && size[1] >= 8 {
             if let Some(params) = b.warp {
@@ -1296,4 +1571,40 @@ impl Decoder<'_> {
         }
         Ok(())
     }
+}
+
+const INTERINTRA_WEIGHTS: [i32; 128] = [
+    60, 58, 56, 54, 52, 50, 48, 47, 45, 44, 42, 41, 39, 38, 37, 35, 34, 33, 32, 31, 30, 29, 28, 27,
+    26, 25, 24, 23, 22, 22, 21, 20, 19, 19, 18, 18, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 12,
+    11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 4,
+    4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+];
+
+fn overlap_mask(length: usize) -> &'static [i32] {
+    match length {
+        2 => &[45, 64],
+        4 => &[39, 50, 59, 64],
+        8 => &[36, 42, 48, 53, 57, 61, 64, 64],
+        16 => &[
+            34, 37, 40, 43, 46, 49, 52, 54, 56, 58, 60, 61, 64, 64, 64, 64,
+        ],
+        32 => &[
+            33, 35, 36, 38, 40, 41, 43, 44, 45, 47, 48, 50, 51, 52, 53, 55, 56, 57, 58, 59, 60, 60,
+            61, 62, 64, 64, 64, 64, 64, 64, 64, 64,
+        ],
+        _ => unreachable!("AV1 OBMC overlap extent"),
+    }
+}
+
+fn reference_scale(reference: [u32; 2], current: [u32; 2]) -> Result<[i64; 2]> {
+    let mut out = [0; 2];
+    for axis in 0..2 {
+        let (r, c) = (u64::from(reference[axis]), u64::from(current[axis]));
+        if r == 0 || c == 0 || 2 * c < r || c > 16 * r {
+            return Err(invalid("AV1 reference scaling ratio out of range"));
+        }
+        out[axis] = (((r << 14) + c / 2) / c) as i64;
+    }
+    Ok(out)
 }
