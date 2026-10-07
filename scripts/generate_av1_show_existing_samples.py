@@ -16,7 +16,7 @@ def leb(n):
         if not n:return bytes(out)
 def obu(kind,payload):return bytes([(kind<<3)|2])+leb(len(payload))+payload
 
-def sequence(ids,model,equal,width=5,delta_bits=2,order_bits=0,interintra=False):
+def sequence(ids,model,equal,width=5,delta_bits=2,order_bits=0,interintra=False,masked_compound=False):
     b=Bits();b.u(0,3);b.u(0);b.u(0);b.u(int(model))
     if model:
         b.u(1,32);b.u(30,32);b.u(int(equal))
@@ -27,7 +27,7 @@ def sequence(ids,model,equal,width=5,delta_bits=2,order_bits=0,interintra=False)
     b.u(4,4);b.u(4,4);b.u(31,5);b.u(31,5);b.u(int(ids))
     if ids:b.u(delta_bits-2,4);b.u(width-delta_bits-1,3)
     # 64x64 superblocks, no filter intra, intra edge filter; no inter tools.
-    for value in [0,0,1,int(interintra),0,0,0]:b.u(value)
+    for value in [0,0,1,int(interintra),int(masked_compound),0,0]:b.u(value)
     b.u(int(order_bits>0))
     if order_bits:b.u(0);b.u(0) # joint compound, reference motion fields
     b.u(0);b.u(0) # force screen-content tools off

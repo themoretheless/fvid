@@ -11,11 +11,11 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     pre_skip=forced_reference or any(forced_tools)
-    skips={}
+    skips={};groups={}
     symbols=[];grid=[0]*64;txs={};above=[[(0,0)]*8 for _ in range(3)];left=[[(0,0)]*8 for _ in range(3)];qi=0 if base<=20 else 1 if base<=60 else 2 if base<=120 else 3
     def s(id,indices,name,offset,length,value):symbols.append(dict(model=[id,indices],cdf=table(name,offset,length),symbol=value))
     s(8,[0],'DEFAULT_PARTITION_W32_CDF',0,11,3)
@@ -37,14 +37,29 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
             def bit(branch,a,b,value):
                 ac=n*int(reference in a);bc=n*int(reference in b);ctx=0 if ac<bc else 2 if ac>bc else 1
                 s(35,[ctx,branch],'DEFAULT_SINGLE_REF_CDF',(ctx*6+branch)*3,3,value)
-            if not forced_reference and not tools:
+            if compound_mask is not None:
+                ctx=[1,3,3,4][i];s(30,[ctx],'DEFAULT_COMP_MODE_CDF',ctx*3,3,1)
+                ctx=2 if i==0 else 4;s(76,[ctx],'DEFAULT_COMP_REF_TYPE_CDF',ctx*3,3,0)
+                ctx=1 if i==0 else 2;s(77,[ctx,0],'DEFAULT_UNI_COMP_REF_CDF',(ctx*3)*3,3,0)
+                s(77,[ctx,1],'DEFAULT_UNI_COMP_REF_CDF',(ctx*3+1)*3,3,0)
+            elif not forced_reference and not tools:
                 backward=reference>=5;bit(0,[1,2,3,4],[5,6,7],int(backward))
                 if backward:
                     bit(1,[5,6],[7],int(reference==7))
                     if reference!=7:bit(5,[5],[6],int(reference==6))
                 else:
                     high=reference>=3;bit(2,[1,2],[3,4],int(high));bit(4 if high else 3,[3] if high else [1],[4] if high else [2],int(reference in [2,4]))
-            if not tools:
+            if compound_mask is not None:
+                ctx=[0,4,4,7][i];s(36,[ctx],'DEFAULT_COMPOUND_MODE_CDF',ctx*9,9,6)
+                group=(masked_blocks>>i)&1
+                ctx=int(groups.get((x,y-4),0))+int(groups.get((x-4,y),0));s(69,[ctx],'DEFAULT_COMP_GROUP_IDX_CDF',ctx*3,3,group)
+                groups[(x,y)]=group
+                if group:
+                    kind,index,sign=compound_mask
+                    s(70,[6],'DEFAULT_COMPOUND_TYPE_CDF',18,3,kind)
+                    if kind==0:s(73,[6],'DEFAULT_WEDGE_INDEX_CDF',102,17,index)
+                    symbols.append(dict(cdf=[16384,32768],symbol=sign))
+            elif not tools:
                 newctx=([0,2,2,5] if any(vector) else [0,3,3,5])[i]
                 moving=bool(any(vector) and i==0)
                 s(25,[newctx],'DEFAULT_NEW_MV_CDF',newctx*3,3,0 if moving else 1)
@@ -93,7 +108,7 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                     if nonzero and not skip:
                         pt=int(p>0);dc=sum(-1 if sign==1 else 1 if sign==2 else 0 for _,sign in top+side);dcctx=1 if dc<0 else 2 if dc>0 else 0
                         s(84,[pt,0],'DEFAULT_EOB_PT_16_CDF',qi*24+pt*12,6,0)
-                        level=abs(residual);assert 1<=level<=14
+                        level=abs(residual);assert 1<=level<=1024
                         s(93,[0,pt,0],'DEFAULT_COEFF_BASE_EOB_CDF',qi*160+pt*16,4,min(level,3)-1)
                         if level>=3:
                             rest=level-3
@@ -101,7 +116,10 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                                 v=min(rest,3);s(95,[0,pt,0],'DEFAULT_COEFF_BR_CDF',qi*1050+pt*105,5,v);rest-=v
                                 if v<3:break
                         s(92,[pt,dcctx],'DEFAULT_DC_SIGN_CDF',qi*18+(pt*3+dcctx)*3,3,int(residual<0))
-                        state=(level,1 if residual<0 else 2)
+                        if level>=15:
+                            value=level-14;bits=value.bit_length()-1
+                            for bit in [0]*bits+[(value>>i)&1 for i in range(bits,-1,-1)]:symbols.append(dict(cdf=[16384,32768],symbol=bit))
+                        state=(min(level,63),1 if residual<0 else 2)
                     for k in range(step):above[p][xx+k]=state;left[p][yy+k]=state
         skips[(x,y)]=skip
         for yy in range(y,y+4):

@@ -673,13 +673,14 @@ impl Decoder<'_> {
             }
         }
         let mut compound_average = true;
+        let mut compound_mask = None;
         if compound && !skip_mode {
             let ctx = above
                 .into_iter()
                 .chain(left)
                 .map(|b| {
                     if b.reference2 > 0 {
-                        0
+                        usize::from(b.compound_mask.is_some())
                     } else {
                         3 * usize::from(b.reference == 7)
                     }
@@ -687,11 +688,20 @@ impl Decoder<'_> {
                 .sum::<usize>()
                 .min(5);
             if self.s.masked_compound && symbol(d, c, av1_cdfs::COMP_GROUP_IDX, [ctx])? != 0 {
-                return Err(crate::unsupported(
-                    "AV1 masked compound prediction not implemented",
-                ));
+                let wedge = matches!(size_id, 3..=9 | 18 | 19)
+                    && symbol(d, c, av1_cdfs::COMPOUND_TYPE, [size_id])? == 0;
+                compound_mask = Some(if wedge {
+                    CompoundMask::Wedge {
+                        index: symbol(d, c, av1_cdfs::WEDGE_INDEX, [size_id])?,
+                        sign: d.literal(1)? != 0,
+                    }
+                } else {
+                    CompoundMask::Difference {
+                        invert: d.literal(1)? != 0,
+                    }
+                });
             }
-            if self.s.joint_compound {
+            if compound_mask.is_none() && self.s.joint_compound {
                 let equal = self.distances[refs[0]].abs() == self.distances[refs[1]].abs();
                 let ctx = 3 * usize::from(equal)
                     + above
@@ -758,6 +768,7 @@ impl Decoder<'_> {
             mv2: mvs[1],
             skip_mode,
             compound_average,
+            compound_mask,
             warp,
             mv,
             filters,
@@ -1191,6 +1202,58 @@ impl Decoder<'_> {
                 &mut self.scratch,
                 &mut self.inter_pred2,
             )?;
+        }
+        if let Some(mask) = b.compound_mask {
+            let [w, h] = size;
+            if p == 0 {
+                self.compound_weights.resize(w * h, 0);
+                match mask {
+                    CompoundMask::Wedge { index, sign } => {
+                        let weights = blend::wedge(size, index);
+                        for row in 0..h {
+                            for col in 0..w {
+                                let value = weights[row][col];
+                                self.compound_weights[row * w + col] =
+                                    if sign { 64 - value } else { value };
+                            }
+                        }
+                    }
+                    CompoundMask::Difference { invert } => {
+                        let post = if color_depth == 12 { 2 } else { 4 };
+                        let shift = color_depth as usize - 8 + post;
+                        for i in 0..w * h {
+                            let diff = (self.inter_pred[i] - self.inter_pred2[i]).abs();
+                            let diff = (diff + (1 << (shift - 1))) >> shift;
+                            let weight = (38 + diff / 16).clamp(0, 64);
+                            self.compound_weights[i] = if invert { 64 - weight } else { weight };
+                        }
+                    }
+                }
+            }
+            let stride = b.w * 4;
+            let dst = &mut self.image.planes[p];
+            let post = if color_depth == 12 { 2 } else { 4 };
+            for row in 0..h.min(dst.height.saturating_sub(y)) {
+                for col in 0..w.min(dst.width.saturating_sub(x)) {
+                    let weight = if p == 0 {
+                        self.compound_weights[row * stride + col]
+                    } else {
+                        let at = 2 * row * stride + 2 * col;
+                        (self.compound_weights[at]
+                            + self.compound_weights[at + 1]
+                            + self.compound_weights[at + stride]
+                            + self.compound_weights[at + stride + 1]
+                            + 2)
+                            >> 2
+                    };
+                    let i = row * w + col;
+                    let sum = weight * self.inter_pred[i] + (64 - weight) * self.inter_pred2[i];
+                    dst.samples[(y + row) * dst.width + x + col] =
+                        ((sum + (1 << (post + 5))) >> (post + 6)).clamp(0, (1 << color_depth) - 1)
+                            as u16;
+                }
+            }
+            return Ok(());
         }
         let first = &self.inter_pred;
         let second = if compound {

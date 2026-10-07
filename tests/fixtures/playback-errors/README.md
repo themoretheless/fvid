@@ -1400,3 +1400,35 @@ Validation: all 23 regression tests in ten AV1 suites and all 35 AV1 core
 tests pass offline. The integration executable has no libav, FFmpeg or libaom
 dynamic linkage. Existing sequence and entropy generator defaults remain
 byte-identical in the checked compatibility cases.
+
+## AV1 masked compound prediction
+
+The owned reproducer for `AV1 masked compound prediction not implemented`
+now decodes through native reconstruction. Two inter predictors blend using all
+16 wedge indices with either sign, or using a difference-weighted mask with
+either inversion. Difference weights are computed before clipping predictors,
+with bit-depth/post-round normalization; chroma reuses the rounded subsampled
+luma mask. Neighbor compound-group state contributes to later CDF contexts,
+and joint distance-weight syntax is read only for the unmasked group.
+
+`generate_av1_masked_compound_samples.py` produces 1056 owned OBU/WebM/YUV
+triples. Coverage includes two distinct physical references selected as the
+unidirectional LAST/LAST2 pair, all-masked and alternating masked/average
+blocks, adaptive CDFs, mixed lossless/lossy segments, signed residuals and
+strong hidden-reference contrast. The stronger difference cases exercise
+spatially varying weights instead of only the constant base weight.
+`tests/av1_masked_compound.rs` checks saved independent pixels, all segment maps,
+decoder reset, displayed WebM timestamps, rewind and exact pixels after seek.
+Ordinary tests require no encoder, external decoder, FFmpeg/libav or network.
+The generator optionally uses libaom only as range writer and pixel oracle.
+
+This matrix establishes 8-bit 16x16 blocks in 32x32 pictures and LAST/LAST2
+routing. High-depth and rectangular compound blocks, alternate reference pairs
+and interaction with global/local affine models still need further fixture
+qualification. OBMC and scaled-reference prediction remain unresolved gaps.
+
+Validation: 24 regression tests in eleven AV1 suites and 35 AV1 core tests
+pass offline. A controlled fixed-weight counterfactual fails the strong-contrast
+fixture with a pixel mismatch; restoring the difference-weighted implementation
+passes. The integration executable links no FFmpeg, libav or libaom. Checked
+legacy sequence/frame/entropy generator defaults remain byte-identical.
