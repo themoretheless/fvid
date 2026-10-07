@@ -3892,3 +3892,37 @@ tests pass offline, including the final expanded 2048-stream matrix. Controlled
 counterfactuals disabling OBMC or reversing the above/left passes each fail with
 a pixel mismatch; restoring the canonical implementation passes. Checked legacy
 generator defaults remain byte-identical.
+
+## AV1 prediction from scaled references
+
+The owned stream formerly refused with `AV1 scaled reference prediction not
+implemented` now reconstructs natively. Reference/current ratios use 14-bit
+precision; signed sample-center mapping, phase rounding and independent X/Y
+steps use 10-bit coordinates. Horizontal/vertical filters vary their phases
+per output sample, with a correctly sized intermediate buffer and reference
+border clipping. Unscaled prediction retains its existing path. Local-warp
+mode syntax is gated by the computed reference scale, and scaled prediction
+uses the motion-vector path rather than the affine warp kernel. Ratios outside
+the normative reference/current size limits fail as invalid input.
+
+`generate_av1_scaled_reference_samples.py` writes 768 owned OBU/WebM/YUV
+triples and one invalid-ratio OBU. Twelve size pairs cover enlargement,
+reduction, crossed horizontal/vertical scaling and odd reference dimensions.
+The matrix varies LAST/ALTREF, all four fixed interpolation filters, zero and
+fractional translation, adaptive CDFs and segment maps. The generator also
+handles hidden 16x16/rectangular references and explicit frame-size overrides;
+legacy defaults remain byte-identical in the checked compatibility cases.
+`tests/av1_scaled_reference.rs` compares every displayed sample, reference and
+output dimensions, segment maps, decoder reset, WebM dimensions/timestamps,
+rewind and exact pixels after seek. The invalid-ratio test is a refusal test,
+separate from the successful playback acceptance test. Ordinary offline tests
+need no FFmpeg/libav, external decoder, encoder or network; optional libaom
+is limited to fixture-generation range writing and independent pixel oracle.
+
+This matrix establishes 8-bit single-reference prediction in 16x16/32x32 and
+rectangular pictures. High depth, larger pictures, more extreme valid ratios
+and scaled references combined with compound/OBMC/inter-intra tools still
+need additional fixture qualification. This does not establish full AV1
+conformance or close the remaining codec gaps.
+
+Validation: 27 tests across 13 AV1 integration suites and 35 AV1 core tests passed offline, including the scaled-reference pixel, map, dimension, rewind, timestamp and seek acceptance tests.

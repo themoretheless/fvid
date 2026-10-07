@@ -23,9 +23,12 @@ def signed_subexp(b,low,high,reference,value):
         if not more:b.u(v-offset,bits);return
         offset+=a;i+=1
 
-def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0,reference_select=False,segment_references=None,motion_switchable=False):
-    b=Bits();b.u(0);b.u(1,2);b.u(1);b.u(0);b.u(int(not adaptive));b.u(0);b.u(0,3);b.u(128,8)
+def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0,reference_select=False,segment_references=None,motion_switchable=False,size=None,refresh=128):
+    b=Bits();b.u(0);b.u(1,2);b.u(1);b.u(0);b.u(int(not adaptive));b.u(int(size is not None));b.u(0,3);b.u(refresh,8)
     for logical in range(1,8):b.u(7 if logical==reference else 0,3)
+    if size is not None:
+        for _ in range(7):b.u(0)
+        b.u(size[0]-1,5);b.u(size[1]-1,5)
     b.u(0);b.u(0);b.u(int(interpolation==4))
     if interpolation!=4:b.u(interpolation,2)
     b.u(int(motion_switchable))

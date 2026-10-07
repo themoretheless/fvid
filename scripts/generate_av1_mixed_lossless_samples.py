@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15,segment_references=None,obmc_blocks=None,residual_everywhere=False):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15,segment_references=None,obmc_blocks=None,residual_everywhere=False,frame_size=(32,32)):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     pre_skip=forced_reference or any(forced_tools)
@@ -19,8 +19,16 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
     skips={};groups={}
     symbols=[];grid=[0]*64;txs={};above=[[(0,0)]*8 for _ in range(3)];left=[[(0,0)]*8 for _ in range(3)];qi=0 if base<=20 else 1 if base<=60 else 2 if base<=120 else 3
     def s(id,indices,name,offset,length,value):symbols.append(dict(model=[id,indices],cdf=table(name,offset,length),symbol=value))
-    s(8,[0],'DEFAULT_PARTITION_W32_CDF',0,11,3)
+    cols=2*((frame_size[0]+7)//8);rows=2*((frame_size[1]+7)//8)
+    assert cols in [4,8] and rows in [4,8]
+    if cols==rows==8:s(8,[0],'DEFAULT_PARTITION_W32_CDF',0,11,3)
+    elif cols!=rows:
+        cdf=table('DEFAULT_PARTITION_W32_CDF',0,11)
+        indexes=[2,3,4,6,7,9] if rows==4 else [1,3,4,5,6,8]
+        total=sum(cdf[i]-cdf[i-1] for i in indexes)
+        symbols.append(dict(cdf=[32768-total,32768],symbol=1))
     for i,(x,y) in enumerate([(0,0),(4,0),(0,4),(4,4)]):
+        if x>=cols or y>=rows:continue
         segment=(mask>>i)&1;lossless=segment==0
         reference=segment_references[segment] if segment_references is not None else base_reference
         tools=forced_tools[segment];skip=bool(tools&1)
@@ -130,10 +138,12 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
             for xx in range(x,x+4):grid[yy*8+xx]=segment
     if adaptive:symbols,_=adapt_symbols(symbols)
     text=''.join(f"{len(r['cdf'])} {r['symbol']} "+' '.join(map(str,r['cdf']))+'\n' for r in symbols)
-    return subprocess.run([str(writer)],input=text.encode(),stdout=subprocess.PIPE,check=True).stdout,grid
+    return subprocess.run([str(writer)],input=text.encode(),stdout=subprocess.PIPE,check=True).stdout,[grid[y*8+x] for y in range(rows) for x in range(cols)]
 
-def key(entropy,base,selected,adaptive,kind=0,refresh=255):
-    b=Bits();b.u(0);b.u(kind,2);b.u(0);b.u(1);b.u(1);b.u(int(not adaptive));b.u(0);b.u(refresh,8);b.u(0)
+def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None):
+    b=Bits();b.u(0);b.u(kind,2);b.u(0);b.u(1);b.u(1);b.u(int(not adaptive));b.u(int(size is not None));b.u(refresh,8)
+    if size is not None:b.u(size[0]-1,5);b.u(size[1]-1,5)
+    b.u(0)
     if adaptive:b.u(1)
     b.u(1);b.u(base,8);b.u(0,4);b.u(1)
     for seg in range(8):

@@ -55,7 +55,7 @@ def show(ids,model,equal,frame_id,slot,width=5):
     if ids:b.u(frame_id,width)
     return obu(3,b.bytes(True))
 
-def webm(data):
+def webm(data,dimensions=(32,32)):
     from generate_audio_resample_window_fixture import ebml
     packets=[];at=0;seq=b'';pending=b''
     while at<len(data):
@@ -68,7 +68,7 @@ def webm(data):
         elif kind in [3,6]:packets.append((pending+piece,kind==6 and not (data[payload_start]&16)));pending=b''
     header=ebml('1a45dfa3',ebml('4282',b'webm'))
     track=ebml('d7',b'\x01')+ebml('83',b'\x01')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
-    track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',bytes([32]))+ebml('ba',bytes([32])))
+    track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',bytes([dimensions[0]]))+ebml('ba',bytes([dimensions[1]])))
     cluster=ebml('e7',b'\x00')
     for i,(packet,hidden_frame) in enumerate(packets):cluster+=ebml('a3',b'\x81'+(i*20).to_bytes(2,'big')+bytes([(128 if i==0 else 0)|(8 if hidden_frame else 0)])+packet)
     segment=ebml('1549a966',ebml('2ad7b1',(1000000).to_bytes(3,'big')))+ebml('1654ae6b',ebml('ae',track))+ebml('1f43b675',cluster)

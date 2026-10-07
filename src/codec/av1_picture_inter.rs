@@ -651,6 +651,7 @@ impl Decoder<'_> {
             if overlap {
                 let motion = if self.h.warped_motion
                     && !self.h.integer_mv
+                    && !self.reference_is_scaled(reference)?
                     && !self.warp_samples(x, y, w, h, reference, mv).is_empty()
                 {
                     symbol(d, c, av1_cdfs::MOTION_MODE, [size_id])?
@@ -1394,6 +1395,78 @@ impl Decoder<'_> {
         }
         Ok(())
     }
+    fn reference_is_scaled(&self, reference: usize) -> Result<bool> {
+        let picture = self.references[self.h.references[reference - 1]]
+            .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
+        Ok(reference_scale(picture.size, self.h.size)? != [16384, 16384])
+    }
+    fn scaled_motion_samples(
+        reference: &Picture,
+        p: usize,
+        origin: [usize; 2],
+        size: [usize; 2],
+        b: Block,
+        scale: [i64; 2],
+        depth: u8,
+        compound: bool,
+        temp: &mut Vec<i32>,
+        out: &mut Vec<i32>,
+    ) -> Result<()> {
+        use super::super::av1_tables::SUBPEL_FILTERS;
+        let sub = usize::from(p > 0);
+        let [w, h] = size;
+        let coordinates = [0, 1].map(|axis| {
+            let mv = b.mv[1 - axis] as i64;
+            let original = origin[axis] as i64 * 16 + ((2 * mv) >> sub) + 8;
+            let base = original * scale[axis] - (8 << 14);
+            let start = base.signum() * ((base.abs() + 128) >> 8) + 32;
+            let step = (scale[axis] + 8) >> 4;
+            (start, step)
+        });
+        let [(start_x, step_x), (start_y, step_y)] = coordinates;
+        let rows = (((h - 1) as i64 * step_y + 1023) >> 10) as usize + 8;
+        let filter = |dir: usize, length: usize| match (length <= 4, b.filters[dir]) {
+            (true, 0 | 2) => 4,
+            (true, 1) => 5,
+            (_, value) => value,
+        };
+        let fx = &SUBPEL_FILTERS[filter(1, w)];
+        let fy = &SUBPEL_FILTERS[filter(0, h)];
+        let src = &reference.planes[p];
+        let last_x = (reference.size[0] as i64 + sub as i64) / (1 << sub) - 1;
+        let last_y = (reference.size[1] as i64 + sub as i64) / (1 << sub) - 1;
+        let round0 = if depth == 12 { 5 } else { 3 };
+        let round1 = if compound { 7 } else { 14 - round0 };
+        temp.resize(rows * w, 0);
+        for row in 0..rows {
+            let sy = ((start_y >> 10) + row as i64 - 3).clamp(0, last_y) as usize;
+            for col in 0..w {
+                let coordinate = start_x + step_x * col as i64;
+                let taps = &fx[((coordinate >> 6) & 15) as usize];
+                let mut sum = 0;
+                for (tap, coefficient) in taps.iter().enumerate() {
+                    let sx = ((coordinate >> 10) + tap as i64 - 3).clamp(0, last_x) as usize;
+                    sum += coefficient * i32::from(src.samples[sy * src.width + sx]);
+                }
+                temp[row * w + col] = (sum + (1 << (round0 - 1))) >> round0;
+            }
+        }
+        out.resize(w * h, 0);
+        for row in 0..h {
+            let coordinate = (start_y & 1023) + step_y * row as i64;
+            let taps = &fy[((coordinate >> 6) & 15) as usize];
+            let base = (coordinate >> 10) as usize;
+            for col in 0..w {
+                let sum: i32 = taps
+                    .iter()
+                    .enumerate()
+                    .map(|(tap, coefficient)| coefficient * temp[(base + tap) * w + col])
+                    .sum();
+                out[row * w + col] = (sum + (1 << (round1 - 1))) >> round1;
+            }
+        }
+        Ok(())
+    }
     fn motion_samples(
         references: [Option<&Picture>; 8],
         h_references: [usize; 7],
@@ -1411,10 +1484,20 @@ impl Decoder<'_> {
         use super::super::av1_tables::SUBPEL_FILTERS;
         let reference = references[h_references[b.reference - 1]]
             .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
-        if reference.size != h_size {
-            return Err(crate::unsupported(
-                "AV1 scaled reference prediction not implemented",
-            ));
+        let scale = reference_scale(reference.size, h_size)?;
+        if scale != [16384, 16384] {
+            return Self::scaled_motion_samples(
+                reference,
+                p,
+                [x, y],
+                size,
+                b,
+                scale,
+                color_depth,
+                compound,
+                temp,
+                out,
+            );
         }
         if size[0] >= 8 && size[1] >= 8 {
             if let Some(params) = b.warp {
@@ -1512,4 +1595,16 @@ fn overlap_mask(length: usize) -> &'static [i32] {
         ],
         _ => unreachable!("AV1 OBMC overlap extent"),
     }
+}
+
+fn reference_scale(reference: [u32; 2], current: [u32; 2]) -> Result<[i64; 2]> {
+    let mut out = [0; 2];
+    for axis in 0..2 {
+        let (r, c) = (u64::from(reference[axis]), u64::from(current[axis]));
+        if r == 0 || c == 0 || 2 * c < r || c > 16 * r {
+            return Err(invalid("AV1 reference scaling ratio out of range"));
+        }
+        out[axis] = (((r << 14) + c / 2) / c) as i64;
+    }
+    Ok(out)
 }
