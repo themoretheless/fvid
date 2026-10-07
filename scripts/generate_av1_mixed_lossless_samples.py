@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     pre_skip=forced_reference or any(forced_tools)
@@ -60,6 +60,11 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                 else:
                     near=near_second and i==1;s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,int(near))
                     if near:s(27,[3],'DEFAULT_REF_MV_CDF',9,3,1)
+            if interintra_mode is not None:
+                s(71,[1],'DEFAULT_INTER_INTRA_CDF',3,3,1)
+                s(72,[1],'DEFAULT_INTER_INTRA_MODE_CDF',5,5,interintra_mode)
+                s(74,[6],'DEFAULT_WEDGE_INTER_INTRA_CDF',18,3,int(interintra_wedge is not None))
+                if interintra_wedge is not None:s(73,[6],'DEFAULT_WEDGE_INDEX_CDF',102,17,interintra_wedge)
             if switchable_filter:
                 ctx=3 if i==0 else 0;s(37,[ctx],'DEFAULT_INTERP_FILTER_CDF',ctx*4,4,0)
             if selected and not lossless and not skip:

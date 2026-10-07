@@ -1371,3 +1371,32 @@ routing. It does not establish full AV1 conformance: high-precision motion,
 scaled references, OBMC, inter-intra and general compound profiles remain outside
 this qualification. Earlier nonidentity-global-motion limitations above are
 superseded only within this documented scope.
+
+## AV1 inter-intra prediction and wedge masks
+
+The former `AV1 inter-intra blending not implemented` refusal is reproduced
+by an owned 32x32 stream and replaced with native prediction. DC, vertical,
+horizontal and smooth intra predictors blend with the inter predictor using
+the normative mode weights. All 16 wedge masks are constructed from the master
+profiles and shape codebook; 4:2:0 chroma uses rounded four-sample mask averaging.
+Inter-intra suppresses overlapped/local-warp mode syntax, and size-group contexts
+follow the block-size table rather than the shorter dimension alone.
+
+`generate_av1_interintra_samples.py` writes 1152 synthetic OBU/WebM/YUV triples.
+The matrix covers all four intra modes and all 16 wedge indices, LAST/ALTREF,
+contrasting hidden references, mixed lossless/lossy segmentation, adaptive CDFs
+and signed residuals. `tests/av1_interintra.rs` compares every displayed pixel
+against saved oracle output, resets the decoder and checks WebM timestamps,
+rewind and sync seek. Generation stays separate from ordinary offline tests;
+production and tests do not load FFmpeg/libav/libaom. Optional libaom is used
+only during generation for range writing and independent oracle pixels.
+
+The pixel matrix qualifies 8-bit 16x16 inter-intra blocks in 32x32 pictures.
+Rectangular block masks and other bit depths use the native implementation but
+are not established by this matrix. OBMC, general masked inter-inter compound
+and scaled-reference prediction remain separate unresolved AV1 gaps.
+
+Validation: all 23 regression tests in ten AV1 suites and all 35 AV1 core
+tests pass offline. The integration executable has no libav, FFmpeg or libaom
+dynamic linkage. Existing sequence and entropy generator defaults remain
+byte-identical in the checked compatibility cases.

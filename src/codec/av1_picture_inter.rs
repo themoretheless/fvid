@@ -1,4 +1,6 @@
 //! AV1 single-reference motion compensation and spatial motion-vector prediction.
+#[path = "av1_interintra.rs"]
+mod blend;
 use super::*;
 const SIZES: [(usize, usize); 22] = [
     (1, 1),
@@ -618,23 +620,21 @@ impl Decoder<'_> {
             .iter()
             .position(|v| *v == (w, h))
             .ok_or_else(|| invalid("invalid AV1 inter block size"))?;
-        if !compound
-            && self.s.interintra_compound
-            && (3..=9).contains(&size_id)
-            && symbol(
-                d,
-                c,
-                av1_cdfs::INTER_INTRA,
-                [(w.min(h).ilog2() as usize) - 1],
-            )? != 0
-        {
-            return Err(crate::unsupported(
-                "AV1 inter-intra blending not implemented",
-            ));
+        let mut interintra_mode = None;
+        let mut interintra_wedge = None;
+        if !skip_mode && !compound && self.s.interintra_compound && (3..=9).contains(&size_id) {
+            let context = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3][size_id] - 1;
+            if symbol(d, c, av1_cdfs::INTER_INTRA, [context])? != 0 {
+                interintra_mode = Some(symbol(d, c, av1_cdfs::INTER_INTRA_MODE, [context])?);
+                if symbol(d, c, av1_cdfs::WEDGE_INTER_INTRA, [size_id])? != 0 {
+                    interintra_wedge = Some(symbol(d, c, av1_cdfs::WEDGE_INDEX, [size_id])?);
+                }
+            }
         }
         let mut warp = None;
         let mut local_warp = false;
         if !compound
+            && interintra_mode.is_none()
             && self.h.motion_mode_switchable
             && w.min(h) >= 2
             && !(mode == 15 && !self.h.integer_mv && self.h.global_types[reference - 1] > 1)
@@ -774,6 +774,7 @@ impl Decoder<'_> {
                 }
             }
         }
+        let wedge_mask = interintra_wedge.map(|index| blend::wedge([w * 4, h * 4], index));
         let chroma = !self.s.color.monochrome && !(w == 1 && x % 2 == 0 || h == 1 && y % 2 == 0);
         for p in 0..if chroma { 3 } else { 1 } {
             let sub = usize::from(p > 0);
@@ -804,6 +805,49 @@ impl Decoder<'_> {
                         ));
                     }
                     self.motion_predict(p, px + xx, py + yy, [step_x, step_y], b)?;
+                    if let Some(mode) = interintra_mode {
+                        self.predict(
+                            p,
+                            px + xx,
+                            py + yy,
+                            [step_x, step_y],
+                            [0, 1, 2, 9][mode],
+                            0,
+                            None,
+                            false,
+                        )?;
+                        let plane = &mut self.image.planes[p];
+                        let scale = 128 / step_x.max(step_y);
+                        for row in 0..step_y.min(plane.height.saturating_sub(py + yy)) {
+                            for col in 0..step_x.min(plane.width.saturating_sub(px + xx)) {
+                                let weight = if let Some(mask) = &wedge_mask {
+                                    if p == 0 {
+                                        mask[row][col]
+                                    } else {
+                                        (mask[2 * row][2 * col]
+                                            + mask[2 * row][2 * col + 1]
+                                            + mask[2 * row + 1][2 * col]
+                                            + mask[2 * row + 1][2 * col + 1]
+                                            + 2)
+                                            >> 2
+                                    }
+                                } else {
+                                    match mode {
+                                        1 => INTERINTRA_WEIGHTS[row * scale],
+                                        2 => INTERINTRA_WEIGHTS[col * scale],
+                                        3 => INTERINTRA_WEIGHTS[row.min(col) * scale],
+                                        _ => 32,
+                                    }
+                                };
+                                let at = (py + yy + row) * plane.width + px + xx + col;
+                                let intra = i32::from(plane.samples[at]);
+                                let inter = self.inter_pred[row * step_x + col]
+                                    .clamp(0, (1 << self.s.color.depth) - 1);
+                                plane.samples[at] =
+                                    ((weight * intra + (64 - weight) * inter + 32) >> 6) as u16;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1297,3 +1341,11 @@ impl Decoder<'_> {
         Ok(())
     }
 }
+
+const INTERINTRA_WEIGHTS: [i32; 128] = [
+    60, 58, 56, 54, 52, 50, 48, 47, 45, 44, 42, 41, 39, 38, 37, 35, 34, 33, 32, 31, 30, 29, 28, 27,
+    26, 25, 24, 23, 22, 22, 21, 20, 19, 19, 18, 18, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 12,
+    11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 4,
+    4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+];
