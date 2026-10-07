@@ -273,7 +273,10 @@ impl Decoder<'_> {
     ) -> Result<()> {
         let (above, left) = self.neighbors(x, y);
         let forced_reference = self.h.segments[self.current_segment][5];
-        let compound = if forced_reference.is_some() {
+        let forced_global_mode = self.h.segments[self.current_segment][6..]
+            .iter()
+            .any(Option::is_some);
+        let compound = if forced_reference.is_some() || forced_global_mode {
             false
         } else if skip_mode {
             true
@@ -316,6 +319,8 @@ impl Decoder<'_> {
         };
         let refs = if let Some(reference) = forced_reference {
             [reference as usize, 0]
+        } else if forced_global_mode {
+            [1, 0]
         } else if skip_mode {
             self.h.skip_mode.unwrap()
         } else if compound {
@@ -441,6 +446,8 @@ impl Decoder<'_> {
         let stack = self.motion_stack(x, y, w, h, refs);
         let mode = if skip_mode {
             17
+        } else if forced_global_mode {
+            15
         } else if compound {
             let ctx = [[0, 1, 1, 1, 1], [1, 2, 3, 4, 4], [4, 4, 5, 6, 7]][stack.reference >> 1]
                 [stack.new.min(4)];

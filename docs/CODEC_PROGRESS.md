@@ -3750,3 +3750,32 @@ Skipped blocks with temporal maps, inherited forced tables and other
 block geometries still need additional qualification. SEG_LVL_SKIP/GLOBALMV,
 compound prediction tools, OBMC/inter-intra and remaining codec gaps are
 not established by this change.
+
+## AV1 forced skip and global segment tools
+
+Native block decoding now applies SEG_LVL_SKIP and SEG_LVL_GLOBALMV using
+pre-skip segment IDs. Forced skip omits the skip symbol and residuals. Both
+tools suppress skip-mode and inter mode/reference symbols, select LAST and
+GLOBALMV unless a segment reference overrides LAST, and disable compound
+selection. Existing forced-reference priority is preserved, including INTRA.
+Otherwise GLOBALMV forces is_inter; SKIP alone still reads is_inter.
+The blanket active-segmentation-feature refusal has been removed.
+
+160 owned streams cover skip/global/both on both segments and opposite
+skip/global assignments across mixed lossless/lossy segments. Qindices 1/64,
+two maps and their complements, largest/SELECT, CDF adaptation and signed
+residuals are included. Independent libaom accepts every stream and provides
+saved pixels. The old native decoder specifically refuses the first valid
+forced-skip input with “AV1 active segmentation features not implemented”.
+Acceptance compares every Y/Cb/Cr sample, segment map, WebM timestamp, rewind
+and seek. Ordinary tests read saved fixtures without external codec tools.
+
+The writer's SELECT context uses skipped neighbors' block dimensions, even
+when their segment is lossless; the independent oracle checks this mixed
+case before fixtures are accepted. 35 AV1 unit tests and 19 tests in eight
+root suites pass offline in the verification checkout, whose decoder matches
+main. The 504 prior intra streams remain byte-identical.
+GLOBALMV uses the identity global model
+in this matrix. Nonidentity global motion, inherited forced tables, forced
+INTRA combined with skip/global, other geometries, OBMC/inter-intra and
+remaining codec tools are not qualified by these streams.

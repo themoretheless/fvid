@@ -5,7 +5,7 @@ from pathlib import Path
 from generate_av1_show_existing_samples import Bits,obu,sequence,webm
 from generate_av1_mixed_lossless_samples import encode,key
 
-def frame(entropy,base,selected,adaptive,reference,forced_reference=False):
+def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0)):
     b=Bits();b.u(0);b.u(1,2);b.u(1);b.u(0);b.u(int(not adaptive));b.u(0);b.u(0,3);b.u(128,8)
     for logical in range(1,8):b.u(7 if logical==reference else 0,3)
     b.u(0);b.u(0);b.u(0);b.u(0,2);b.u(0)
@@ -13,8 +13,8 @@ def frame(entropy,base,selected,adaptive,reference,forced_reference=False):
     b.u(1);b.u(base,8);b.u(0,4);b.u(1);b.u(1);b.u(0);b.u(1)
     for seg in range(8):
         for feature in range(8):
-            active=seg<2 and (feature==0 or forced_reference and feature==5);b.u(int(active))
-            if active:b.u((-base if seg==0 else 0) if feature==0 else reference,9 if feature==0 else 3)
+            active=seg<2 and (feature==0 or forced_reference and feature==5 or feature==6 and forced_tools[seg]&1 or feature==7 and forced_tools[seg]&2);b.u(int(bool(active)))
+            if active and feature<6:b.u((-base if seg==0 else 0) if feature==0 else reference,9 if feature==0 else 3)
     b.u(0);b.u(0,16);b.u(int(selected));b.u(0);b.u(0);b.u(0,7)
     return obu(6,b.bytes()+entropy)
 

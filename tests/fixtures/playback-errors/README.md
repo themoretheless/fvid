@@ -1336,3 +1336,18 @@ The optional independent oracle accepts every generated stream.
 pixels/maps and WebM timing, rewind and seek offline; generation remains
 separate and accepts no source media. Skip/global segmentation tools remain
 outside this fixture matrix.
+
+## AV1 forced skip/global segments
+
+`generate_av1_forced_tools_samples.py --writer WRITER --oracle ORACLE`
+creates 160 owned OBU/YUV/WebM triples with skip/global/both and opposite
+assignments across two segments. It writes pre-skip segment IDs, omits
+forced mode/reference/skip symbols where required, and handles skipped
+neighbors' transform contexts. The independent oracle accepts all inputs.
+No source media is accepted; optional libaom tools run only during generation.
+
+`av1_forced_tools` replaces the old active-feature refusal with acceptance
+for exact pixels, maps, WebM clock, rewind and seek. Fixtures use identity
+GLOBALMV, qindices 1/64, mixed maps and complements, largest/SELECT, both
+CDF modes and signed residuals on unskipped lossless blocks. Nonidentity
+global motion remains outside this matrix.

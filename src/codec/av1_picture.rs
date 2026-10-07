@@ -141,17 +141,7 @@ pub(crate) fn decode(
             "AV1 quantization matrices or in-loop filtering not implemented",
         ));
     }
-    // Forced skip/global tools remain explicit gaps. Forced reference changes
-    // mode syntax and is applied after reading the pre-skip segment ID.
-    if h.segmentation_update_map
-        && h.segments
-            .iter()
-            .any(|segment| segment[6..].iter().any(Option::is_some))
-    {
-        return Err(crate::unsupported(
-            "AV1 active segmentation features not implemented",
-        ));
-    }
+    // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     if h.intrabc || h.superres_denom != 8 {
         return Err(crate::unsupported(
             "AV1 segmentation/intrabc/superres reconstruction not implemented",
@@ -528,9 +518,13 @@ impl Decoder<'_> {
             self.current_segment = self.read_segment(d, c, x, y, w, h, false)?;
         }
         let forced_reference = self.h.segments[self.current_segment][5];
+        let forced_skip = self.h.segments[self.current_segment][6].is_some();
+        let forced_global = self.h.segments[self.current_segment][7].is_some();
         let skip_ctx =
             usize::from(above.is_some_and(|b| b.skip)) + usize::from(left.is_some_and(|b| b.skip));
-        let skip_mode = forced_reference.is_none()
+        let skip_mode = !forced_skip
+            && !forced_global
+            && forced_reference.is_none()
             && self.h.skip_mode.is_some()
             && w >= 2
             && h >= 2
@@ -541,17 +535,9 @@ impl Decoder<'_> {
                 [usize::from(above.is_some_and(|b| b.skip_mode))
                     + usize::from(left.is_some_and(|b| b.skip_mode))],
             )? != 0;
-        let skip = skip_mode || symbol(d, c, av1_cdfs::SKIP, [skip_ctx])? != 0;
+        let skip = forced_skip || skip_mode || symbol(d, c, av1_cdfs::SKIP, [skip_ctx])? != 0;
         if !pre_skip {
             self.current_segment = self.read_segment(d, c, x, y, w, h, skip)?;
-        }
-        if self.h.segments[self.current_segment][6..]
-            .iter()
-            .any(Option::is_some)
-        {
-            return Err(crate::unsupported(
-                "AV1 active segmentation features not implemented",
-            ));
         }
         if !skip && !self.h.lossless.iter().all(|v| *v) && self.s.cdef && !self.h.intrabc {
             let stride = self.cols.div_ceil(16);
@@ -598,6 +584,8 @@ impl Decoder<'_> {
             };
             let is_inter = if let Some(reference) = forced_reference {
                 reference != 0
+            } else if forced_global {
+                true
             } else {
                 skip_mode || symbol(d, c, av1_cdfs::IS_INTER, [ctx])? != 0
             };
