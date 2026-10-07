@@ -6,7 +6,7 @@ use super::{
     av1_symbol::SymbolDecoder,
     vp9_transform::{self, Kind},
 };
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 #[path = "av1_picture_inter.rs"]
 mod inter;
 
@@ -20,12 +20,15 @@ pub struct Plane {
 pub struct Picture {
     pub size: [u32; 2],
     pub depth: u8,
+    /// Segment IDs in padded 4x4 raster order, retained with reference pictures.
+    pub segment_ids: Vec<u8>,
     pub planes: [Plane; 3],
 }
 #[derive(Clone, Copy, Default)]
 struct Block {
     w: usize,
     h: usize,
+    segment: usize,
     mode: usize,
     skip: bool,
     tx: [usize; 2],
@@ -61,6 +64,10 @@ struct Decoder<'a> {
     cdef_indexes: Vec<i8>,
     read_deltas: bool,
     current_q: i32,
+    current_segment: usize,
+    previous_segments: Vec<u8>,
+    segment_pred_above: Vec<usize>,
+    segment_pred_left: Vec<usize>,
     current_block: [usize; 2],
     scratch: Vec<i32>,
     pred_scratch: Vec<u16>,
@@ -70,6 +77,26 @@ struct Decoder<'a> {
     lossless_out: Vec<i32>,
     inter_pred: Vec<i32>,
     inter_pred2: Vec<i32>,
+}
+fn neg_deinterleave(diff: usize, reference: usize, max: usize) -> usize {
+    if reference == 0 {
+        return diff;
+    }
+    if reference >= max - 1 {
+        return max - diff - 1;
+    }
+    if 2 * reference < max {
+        if diff > 2 * reference {
+            return diff;
+        }
+    } else if diff > 2 * (max - reference - 1) {
+        return max - diff - 1;
+    }
+    if diff & 1 != 0 {
+        reference + (diff + 1) / 2
+    } else {
+        reference - diff / 2
+    }
 }
 const MODE_CONTEXT: [usize; 13] = [0, 1, 2, 3, 4, 4, 4, 4, 3, 0, 1, 2, 0];
 fn symbol<const K: usize>(
@@ -113,18 +140,13 @@ pub(crate) fn decode(
             "AV1 quantization matrices or in-loop filtering not implemented",
         ));
     }
-    if h.segmentation_enabled && h.segmentation_update_map {
-        return Err(crate::unsupported(
-            "AV1 segmentation map updates not implemented",
-        ));
-    }
-    // Every admitted picture currently has an implicit all-zero segment map.
-    // Inheriting it consumes no tile symbols. Features in unused segments are
-    // retained as metadata. ALT_Q is applied below; the remaining active
-    // segment-zero tools still fail explicitly.
-    if h.segments[0].iter().enumerate().any(|(feature, value)| {
-        value.is_some_and(|value| feature != 0 && (feature >= 5 || value != 0))
-    }) {
+    // Forced reference/skip/global tools change mode syntax and remain explicit
+    // gaps. ALT_Q and ALT_LF are applied using each block's decoded segment.
+    if h.segmentation_update_map
+        && h.segments
+            .iter()
+            .any(|segment| segment[5..].iter().any(Option::is_some))
+    {
         return Err(crate::unsupported(
             "AV1 active segmentation features not implemented",
         ));
@@ -158,9 +180,23 @@ pub(crate) fn decode(
             samples: vec![0; width * height],
         }
     });
+    let mut previous_segments = vec![0; cols * rows];
+    if h.primary_reference != 7 {
+        if let Some(primary) = references[h.references[h.primary_reference]] {
+            if primary.size == h.size && primary.segment_ids.len() == previous_segments.len() {
+                previous_segments.copy_from_slice(&primary.segment_ids);
+            }
+        }
+    }
+    let segment_ids = if h.segmentation_enabled && !h.segmentation_update_map {
+        previous_segments.clone()
+    } else {
+        vec![0; cols * rows]
+    };
     let image = Picture {
         size: h.size,
         depth: s.color.depth,
+        segment_ids,
         planes,
     };
     let mut dec = Decoder {
@@ -185,6 +221,10 @@ pub(crate) fn decode(
         cdef_indexes: vec![-1; cols.div_ceil(16) * rows.div_ceil(16)],
         read_deltas: false,
         current_q: i32::from(h.quant.base),
+        current_segment: 0,
+        previous_segments,
+        segment_pred_above: vec![0; cols],
+        segment_pred_left: vec![0; rows],
         current_block: [0; 2],
         scratch: Vec::new(),
         pred_scratch: Vec::new(),
@@ -216,6 +256,7 @@ pub(crate) fn decode(
                 a.fill((0, 0));
             }
             dec.current_q = i32::from(h.quant.base);
+            dec.segment_pred_above.fill(0);
             let mut c = initial.clone();
             let mut d = SymbolDecoder::new(payload, !h.disable_cdf_update)?;
             let sb = if s.superblock128 { 32 } else { 16 };
@@ -223,6 +264,7 @@ pub(crate) fn decode(
                 for l in &mut dec.left {
                     l.fill((0, 0));
                 }
+                dec.segment_pred_left.fill(0);
                 for col in (dec.x0..dec.x1).step_by(sb) {
                     dec.read_deltas = h.quant.delta_resolution.is_some();
                     dec.partition(&mut d, &mut c, col, r, sb)?;
@@ -249,6 +291,95 @@ pub(crate) fn decode(
     Ok((dec.image, saved))
 }
 impl Decoder<'_> {
+    fn read_segment(
+        &mut self,
+        d: &mut SymbolDecoder<'_>,
+        c: &mut Cdfs,
+        x: usize,
+        y: usize,
+        w: usize,
+        h: usize,
+        skip: bool,
+    ) -> Result<usize> {
+        if !self.h.segmentation_enabled {
+            return Ok(0);
+        }
+        let intra = matches!(self.h.frame_type, 0 | 2);
+        let mut predicted = 7;
+        for yy in y..(y + h).min(self.rows) {
+            for xx in x..(x + w).min(self.cols) {
+                predicted = predicted.min(usize::from(self.previous_segments[yy * self.cols + xx]));
+            }
+        }
+        if !intra && !self.h.segmentation_update_map {
+            return Ok(predicted);
+        }
+        let temporal = !intra && self.h.segmentation_temporal_update && !skip;
+        let use_previous = temporal
+            && symbol(
+                d,
+                c,
+                av1_cdfs::SEGMENT_ID_PREDICTED,
+                [self.segment_pred_above[x] + self.segment_pred_left[y]],
+            )? != 0;
+        let segment = if use_previous {
+            predicted
+        } else {
+            let u =
+                (y > self.y0).then(|| usize::from(self.image.segment_ids[(y - 1) * self.cols + x]));
+            let l =
+                (x > self.x0).then(|| usize::from(self.image.segment_ids[y * self.cols + x - 1]));
+            let ul = (y > self.y0 && x > self.x0)
+                .then(|| usize::from(self.image.segment_ids[(y - 1) * self.cols + x - 1]));
+            let pred = match (u, l) {
+                (None, None) => 0,
+                (Some(v), None) | (None, Some(v)) => v,
+                (Some(a), Some(b)) => {
+                    if ul == Some(a) {
+                        a
+                    } else {
+                        b
+                    }
+                }
+            };
+            if skip {
+                pred
+            } else {
+                let ctx = if ul.is_none() {
+                    0
+                } else if ul == u && ul == l {
+                    2
+                } else if ul == u || ul == l || u == l {
+                    1
+                } else {
+                    0
+                };
+                let diff = symbol(d, c, av1_cdfs::SEGMENT_ID, [ctx])?;
+                let max = self
+                    .h
+                    .segments
+                    .iter()
+                    .rposition(|s| s.iter().any(Option::is_some))
+                    .unwrap_or(0)
+                    + 1;
+                if diff >= max || pred >= max {
+                    return Err(invalid("AV1 segment ID exceeds active segments"));
+                }
+                neg_deinterleave(diff, pred, max)
+            }
+        };
+        for xx in x..(x + w).min(self.cols) {
+            self.segment_pred_above[xx] = usize::from(use_previous);
+        }
+        for yy in y..(y + h).min(self.rows) {
+            self.segment_pred_left[yy] = usize::from(use_previous);
+            for xx in x..(x + w).min(self.cols) {
+                self.image.segment_ids[yy * self.cols + xx] = segment as u8;
+            }
+        }
+        Ok(segment)
+    }
+
     fn neighbors(&self, x: usize, y: usize) -> (Option<Block>, Option<Block>) {
         (
             if y > self.y0 {
@@ -400,6 +531,15 @@ impl Decoder<'_> {
                     + usize::from(left.is_some_and(|b| b.skip_mode))],
             )? != 0;
         let skip = skip_mode || symbol(d, c, av1_cdfs::SKIP, [skip_ctx])? != 0;
+        self.current_segment = self.read_segment(d, c, x, y, w, h, skip)?;
+        if self.h.segments[self.current_segment][5..]
+            .iter()
+            .any(Option::is_some)
+        {
+            return Err(crate::unsupported(
+                "AV1 active segmentation features not implemented",
+            ));
+        }
         if !skip && !self.h.lossless.iter().all(|v| *v) && self.s.cdef && !self.h.intrabc {
             let stride = self.cols.div_ceil(16);
             let index = (y / 16) * stride + x / 16;
@@ -464,7 +604,7 @@ impl Decoder<'_> {
         let mut uv_angle = 0;
         let mut cfl = [0i32; 2];
         if has_chroma {
-            let cfl_allowed = if self.h.lossless[0] {
+            let cfl_allowed = if self.h.lossless[self.current_segment] {
                 w <= 2 && h <= 2
             } else {
                 w.max(h) <= 8
@@ -542,12 +682,14 @@ impl Decoder<'_> {
                 filter_mode = Some(symbol(d, c, av1_cdfs::FILTER_INTRA_MODE, [])?);
             }
         }
-        let mut tx = if self.h.lossless[0] {
+        let mut tx = if self.h.lossless[self.current_segment] {
             [4, 4]
         } else {
             [(w * 4).min(64), (h * 4).min(64)]
         };
-        if self.h.tx_mode == 2 && w * h > 1 {
+        // AV1 read_tx_size returns TX_4X4 immediately for this segment's
+        // lossless blocks; no tx_depth symbol is present even in SELECT mode.
+        if self.h.tx_mode == 2 && w * h > 1 && !self.h.lossless[self.current_segment] {
             let ctx = usize::from(
                 above.is_some_and(|b| (if b.reference > 0 { b.w * 4 } else { b.tx[0] }) >= tx[0]),
             ) + usize::from(
@@ -578,6 +720,7 @@ impl Decoder<'_> {
                     w,
                     h,
                     mode,
+                    segment: self.current_segment,
                     skip,
                     tx,
                     uv_mode: uv,
@@ -595,7 +738,7 @@ impl Decoder<'_> {
                     let chunk_h = (h.min(16) >> sub).max(1);
                     let base_x = (x >> sub) + cx * (16 >> sub);
                     let base_y = (y >> sub) + cy * (16 >> sub);
-                    let size = if self.h.lossless[0] {
+                    let size = if self.h.lossless[self.current_segment] {
                         [4, 4]
                     } else if p == 0 {
                         tx
@@ -659,7 +802,7 @@ impl Decoder<'_> {
                                     },
                                 )?
                             };
-                            let residual: &[i32] = if self.h.lossless[0] {
+                            let residual: &[i32] = if self.h.lossless[self.current_segment] {
                                 vp9_transform::inverse(
                                     &dequant,
                                     4,
@@ -837,7 +980,8 @@ impl Decoder<'_> {
     fn filter(&mut self) {
         for pass in 0..2 {
             for p in 0..if self.s.color.monochrome { 1 } else { 3 } {
-                let base = i32::from(self.h.filter.levels[if p == 0 { pass } else { p + 1 }]);
+                let filter_index = if p == 0 { pass } else { p + 1 };
+                let base = i32::from(self.h.filter.levels[filter_index]);
                 if (p > 0 && base == 0) || (p == 0 && self.h.filter.levels[..2] == [0, 0]) {
                     continue;
                 }
@@ -868,8 +1012,11 @@ impl Decoder<'_> {
                             continue;
                         }
                         let strength = |b: Block| {
+                            let segment_level = (base
+                                + self.h.segments[b.segment][1 + filter_index].unwrap_or(0))
+                            .clamp(0, 63);
                             if !self.h.filter.deltas_enabled {
-                                return base;
+                                return segment_level;
                             }
                             let mode = usize::from(b.mode >= 13 && b.mode != 15);
                             let delta = self.h.filter.reference_deltas[b.reference]
@@ -878,7 +1025,7 @@ impl Decoder<'_> {
                                 } else {
                                     0
                                 };
-                            (base + (delta << (base >> 5))).clamp(0, 63)
+                            (segment_level + (delta << (segment_level >> 5))).clamp(0, 63)
                         };
                         let mut level = strength(block);
                         if level == 0 {
@@ -1049,7 +1196,7 @@ impl Decoder<'_> {
             let inter = self.blocks[self.current_block[1] * self.cols + self.current_block[0]]
                 .reference
                 != 0;
-            if inter && !self.h.lossless[0] && w.max(h) <= 32 {
+            if inter && !self.h.lossless[self.current_segment] && w.max(h) <= 32 {
                 if p == 0 && self.h.quant.base > 0 {
                     kind = if self.h.reduced_tx_set || w.max(h) == 32 {
                         [9, 0][symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET3, [min_log])?]
@@ -1069,7 +1216,7 @@ impl Decoder<'_> {
                         kind = 0;
                     }
                 }
-            } else if !inter && !self.h.lossless[0] && w.max(h) < 32 {
+            } else if !inter && !self.h.lossless[self.current_segment] && w.max(h) < 32 {
                 if p == 0 && self.h.quant.base > 0 {
                     kind = if self.h.reduced_tx_set || w.min(h) == 16 {
                         [9, 0, 3, 1, 2]
@@ -1289,7 +1436,8 @@ impl Decoder<'_> {
         // the pass over every sample is only needed once a coefficient survives.
         let mut dequant = vec![0; w * h];
         if total != 0 {
-            let base = (self.current_q + self.h.segments[0][0].unwrap_or(0)).clamp(0, 255);
+            let base = (self.current_q + self.h.segments[self.current_segment][0].unwrap_or(0))
+                .clamp(0, 255);
             let dc_delta = self.h.quant.delta[if p == 0 { 0 } else { p * 2 - 1 }];
             let ac_delta = if p == 0 { 0 } else { self.h.quant.delta[p * 2] };
             let depth_index = ((self.s.color.depth - 8) / 2) as usize;

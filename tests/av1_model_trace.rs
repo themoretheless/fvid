@@ -1,0 +1,1 @@
+#[test] fn trace_owned_models() {let bytes=std::fs::read("tests/fixtures/playback-errors/av1-alt-q-target64-base64-delta0.obu").unwrap();fvid::codec::av1_decoder::Decoder::new(8<<20).decode_packet(&bytes).unwrap();}

@@ -1,0 +1,1356 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-alt-lf-f1-d-64-refmode0.obu",
+      "sha256": "91460341d7e74c7b3f58072c01671fbdcde10b1ff773b9c082f80c12f1033770",
+      "reference": "av1-alt-lf-f1-d-64-refmode0.yuv",
+      "reference_sha256": "c50d94ef55094709f542dbb5a7fa2cd042b30d1982d7619608f4ae6585e648d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -64
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d-64-refmode1.obu",
+      "sha256": "c08284f0c80f82717a8dbbb77f40d0c4569027619969f11016adfc7f39a5ad5a",
+      "reference": "av1-alt-lf-f1-d-64-refmode1.yuv",
+      "reference_sha256": "c50d94ef55094709f542dbb5a7fa2cd042b30d1982d7619608f4ae6585e648d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -64
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d-63-refmode0.obu",
+      "sha256": "aac28fa7a9b36b10c1fac647b4e3ef26b0635d06680d69a88f21aa4ee692985d",
+      "reference": "av1-alt-lf-f1-d-63-refmode0.yuv",
+      "reference_sha256": "c50d94ef55094709f542dbb5a7fa2cd042b30d1982d7619608f4ae6585e648d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d-63-refmode1.obu",
+      "sha256": "d14b3887387bed0d2950059db005d8c26ad8483c33f8a77c0b514e2811f7bf2f",
+      "reference": "av1-alt-lf-f1-d-63-refmode1.yuv",
+      "reference_sha256": "c50d94ef55094709f542dbb5a7fa2cd042b30d1982d7619608f4ae6585e648d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d-16-refmode0.obu",
+      "sha256": "5622990d695f323449113139fb774a33ba09dff66b5720328b921c88e420923b",
+      "reference": "av1-alt-lf-f1-d-16-refmode0.yuv",
+      "reference_sha256": "c50d94ef55094709f542dbb5a7fa2cd042b30d1982d7619608f4ae6585e648d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d-16-refmode1.obu",
+      "sha256": "481a995a094528b3522eb17147c4d7b4b862c6e4c39d5f12c99d70501d00d84c",
+      "reference": "av1-alt-lf-f1-d-16-refmode1.yuv",
+      "reference_sha256": "c50d94ef55094709f542dbb5a7fa2cd042b30d1982d7619608f4ae6585e648d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d-1-refmode0.obu",
+      "sha256": "785fbff81836455bb15e57339e4d9a635329b7718c3be4bcbaa5d47dc2f91bc0",
+      "reference": "av1-alt-lf-f1-d-1-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d-1-refmode1.obu",
+      "sha256": "2eced7626ec7ec0d8157fbc09fa2366fcc0da44488948b3ec3882a5a8deae070",
+      "reference": "av1-alt-lf-f1-d-1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": -1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d0-refmode0.obu",
+      "sha256": "29301e9f3ed59b4263aedeb7a349abddd1fd55e994590dbb20dcbb327cb670e9",
+      "reference": "av1-alt-lf-f1-d0-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 0
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d0-refmode1.obu",
+      "sha256": "e03f169b1611f10b25916e68b8ac3b9c78b25da65851459a894760deaac8761f",
+      "reference": "av1-alt-lf-f1-d0-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 0
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d1-refmode0.obu",
+      "sha256": "c63495f5f915fefe3854f8f744c6561a3426bb5373cb0294507ceccd5ffb1126",
+      "reference": "av1-alt-lf-f1-d1-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d1-refmode1.obu",
+      "sha256": "ed02da7f71da7d6c3f457b2843373797f86aa16335e24c5ee10866a8aa14272b",
+      "reference": "av1-alt-lf-f1-d1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d16-refmode0.obu",
+      "sha256": "752dd9250c9c74a1dacb4ef52cadf1597d1da0b86e0e3009367d6a402530236a",
+      "reference": "av1-alt-lf-f1-d16-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d16-refmode1.obu",
+      "sha256": "52bcd4afa8bf5f56fa56c28d6057df722a9b96ff7f9f845947c1e5a1950ae4d6",
+      "reference": "av1-alt-lf-f1-d16-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d31-refmode0.obu",
+      "sha256": "be320c22228a4a208f4d786fcede6a949187f79dc051cd17bf1d74f10523e461",
+      "reference": "av1-alt-lf-f1-d31-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 31
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d31-refmode1.obu",
+      "sha256": "26dd2ccb0402cfccac721cf3fde26878bd62dde5905355ca074ed4f827b2ebea",
+      "reference": "av1-alt-lf-f1-d31-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 31
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f1-d63-refmode0.obu",
+      "sha256": "4a47b44e829d9d2021de26b6ef57472d991cfb4e390195df9084fc799369c937",
+      "reference": "av1-alt-lf-f1-d63-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f1-d63-refmode1.obu",
+      "sha256": "91c9f21b0bea28a0e7a249515ea4261741e6c5e646d473c9069ffd322180ed58",
+      "reference": "av1-alt-lf-f1-d63-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "1": 63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d-64-refmode0.obu",
+      "sha256": "a98eb862605257afd85caab1eff9d3ea347e0963411887bd9001b585339f2c51",
+      "reference": "av1-alt-lf-f2-d-64-refmode0.yuv",
+      "reference_sha256": "56b8da11bb3e65eb5632f9d4b770ecf117e4ac850996fd4440652c987b4caf9d",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -64
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d-64-refmode1.obu",
+      "sha256": "682c9214aae057ee57f69391adeed5ca408115131f4cf3e927d7d06cf07f52ac",
+      "reference": "av1-alt-lf-f2-d-64-refmode1.yuv",
+      "reference_sha256": "077d8e2c9f14799f673be32288850b2d9479047c592cbe9c4135c2bb2c8fda19",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -64
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d-63-refmode0.obu",
+      "sha256": "d98142d4f197273940baa66090c40acdfd2c51e494ffd8b429f09809849e4d3c",
+      "reference": "av1-alt-lf-f2-d-63-refmode0.yuv",
+      "reference_sha256": "56b8da11bb3e65eb5632f9d4b770ecf117e4ac850996fd4440652c987b4caf9d",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d-63-refmode1.obu",
+      "sha256": "22fe815c707e701a1b903d286550b32aa36866b01a244fcdc955eff9f6f456ce",
+      "reference": "av1-alt-lf-f2-d-63-refmode1.yuv",
+      "reference_sha256": "077d8e2c9f14799f673be32288850b2d9479047c592cbe9c4135c2bb2c8fda19",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d-16-refmode0.obu",
+      "sha256": "d5c41d47a6d7668750b811c0228115c8d3256297f61c72951fc49d0e65680931",
+      "reference": "av1-alt-lf-f2-d-16-refmode0.yuv",
+      "reference_sha256": "56b8da11bb3e65eb5632f9d4b770ecf117e4ac850996fd4440652c987b4caf9d",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d-16-refmode1.obu",
+      "sha256": "4429006e662bdf3d0eb1cf24619b74987b1bdfdf93642a5c8e0ece0177015355",
+      "reference": "av1-alt-lf-f2-d-16-refmode1.yuv",
+      "reference_sha256": "077d8e2c9f14799f673be32288850b2d9479047c592cbe9c4135c2bb2c8fda19",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d-1-refmode0.obu",
+      "sha256": "b6249f5e9c749f39f5901d802bd03e7739eac385398bbba6ddd2abe071666621",
+      "reference": "av1-alt-lf-f2-d-1-refmode0.yuv",
+      "reference_sha256": "68b892bee98c0a54b41b3ef43c722634374049d8b4f782e36c4474a09e950aee",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d-1-refmode1.obu",
+      "sha256": "ecda1deb7db58c10ca076079d37ecbdadedff3f6810588c4e50d4e636dad245f",
+      "reference": "av1-alt-lf-f2-d-1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": -1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d0-refmode0.obu",
+      "sha256": "0013ab854f031ea711ddbf6293d34920f2181f5c9dc51e67fd5e06729b880597",
+      "reference": "av1-alt-lf-f2-d0-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 0
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d0-refmode1.obu",
+      "sha256": "209a12840b06ff2055796080adeb46e570c0444a046089d077ac73a6a5fdd8a0",
+      "reference": "av1-alt-lf-f2-d0-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 0
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d1-refmode0.obu",
+      "sha256": "af24d18b989e074e5fcc5994ebce113aed3cb7adb31baaed45606a8b01f22d56",
+      "reference": "av1-alt-lf-f2-d1-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d1-refmode1.obu",
+      "sha256": "7f39c5bbec1b5630eb0f0bb2f732451c6d03273595aff6a93f0e3bd4ab30ad35",
+      "reference": "av1-alt-lf-f2-d1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d16-refmode0.obu",
+      "sha256": "2fc052f3d64a917054b9dd210605ef7f86c3c2f3a6de0ebcece5fd174c282e18",
+      "reference": "av1-alt-lf-f2-d16-refmode0.yuv",
+      "reference_sha256": "56c34b632e045538f370cb979526de1424dce336a1be58b4bd75ec130937f6fb",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d16-refmode1.obu",
+      "sha256": "81bf24f226f1f9158ae8661d7f6d04943b16e7bdb201cf0d9133cd10a2cad261",
+      "reference": "av1-alt-lf-f2-d16-refmode1.yuv",
+      "reference_sha256": "56c34b632e045538f370cb979526de1424dce336a1be58b4bd75ec130937f6fb",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d31-refmode0.obu",
+      "sha256": "b3e77a0c207194183dcd29f05a6d5561279f5c73205e74a6959642bc505f285e",
+      "reference": "av1-alt-lf-f2-d31-refmode0.yuv",
+      "reference_sha256": "56c34b632e045538f370cb979526de1424dce336a1be58b4bd75ec130937f6fb",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 31
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d31-refmode1.obu",
+      "sha256": "55b15b38587f8427d00e85bc05b45b037bdc8607e3349e7fd53e778181a828b0",
+      "reference": "av1-alt-lf-f2-d31-refmode1.yuv",
+      "reference_sha256": "6cf98404934999ffc6583872f88f2d9882d35a33e2237a4b8adf371497fc7fa6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 31
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f2-d63-refmode0.obu",
+      "sha256": "c52f47900585da7a88872a3a6cd3d9444023c6ffb1cb5ad9ae124c3786874d20",
+      "reference": "av1-alt-lf-f2-d63-refmode0.yuv",
+      "reference_sha256": "6cf98404934999ffc6583872f88f2d9882d35a33e2237a4b8adf371497fc7fa6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f2-d63-refmode1.obu",
+      "sha256": "27115fa71b6b120389bd6c94eb67e9f12f99a793e5b52684dc7d4ee00941223a",
+      "reference": "av1-alt-lf-f2-d63-refmode1.yuv",
+      "reference_sha256": "6cf98404934999ffc6583872f88f2d9882d35a33e2237a4b8adf371497fc7fa6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "2": 63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d-64-refmode0.obu",
+      "sha256": "0c720f168d0227309996137e2dc13f67d810bc6874fe3a9280c5961bf578054b",
+      "reference": "av1-alt-lf-f3-d-64-refmode0.yuv",
+      "reference_sha256": "20041abae4316a910a1ff0305c4a38882a326afe53b61392863511a33aa20a5c",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -64
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d-64-refmode1.obu",
+      "sha256": "82d27ba1cfd3e8e83e168fdaaf173bf1c011fd8e1070ed93f59bade6d3080a88",
+      "reference": "av1-alt-lf-f3-d-64-refmode1.yuv",
+      "reference_sha256": "91c1c20dc5ac3ff64d9190f94c6f880dea53518ac806375e7ad62898d887b539",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -64
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d-63-refmode0.obu",
+      "sha256": "582ee8735179187b7c7ac898cfa027ff69e0d2deb76704b01dbf420cc8e76d2c",
+      "reference": "av1-alt-lf-f3-d-63-refmode0.yuv",
+      "reference_sha256": "20041abae4316a910a1ff0305c4a38882a326afe53b61392863511a33aa20a5c",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d-63-refmode1.obu",
+      "sha256": "64be37c898744bf23c6a07a3900d88e2fe1170b4a841d28911ab7b34c184d2d9",
+      "reference": "av1-alt-lf-f3-d-63-refmode1.yuv",
+      "reference_sha256": "91c1c20dc5ac3ff64d9190f94c6f880dea53518ac806375e7ad62898d887b539",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d-16-refmode0.obu",
+      "sha256": "c33cda2519942761eb2abccc5b392b4286ee1658ab4ddca06474379fd255ccd0",
+      "reference": "av1-alt-lf-f3-d-16-refmode0.yuv",
+      "reference_sha256": "20041abae4316a910a1ff0305c4a38882a326afe53b61392863511a33aa20a5c",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d-16-refmode1.obu",
+      "sha256": "35ed4abf43060d1e188371eb22e18ae5f09a10178b82764df3272863c86a4767",
+      "reference": "av1-alt-lf-f3-d-16-refmode1.yuv",
+      "reference_sha256": "91c1c20dc5ac3ff64d9190f94c6f880dea53518ac806375e7ad62898d887b539",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d-1-refmode0.obu",
+      "sha256": "f83b640a807519d4dcf57763ad0de0d956e2612a07f21884eb687cb6ed538b49",
+      "reference": "av1-alt-lf-f3-d-1-refmode0.yuv",
+      "reference_sha256": "bb95a7203d9411ea73b3d96889685b6568c50bf5d0beb881343d08665bcf917d",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d-1-refmode1.obu",
+      "sha256": "fed8a57f1a19ccc9515d7a2aa015b0f1b0e7d78b300bf7d24a9dfe0e0146a5bf",
+      "reference": "av1-alt-lf-f3-d-1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": -1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d0-refmode0.obu",
+      "sha256": "4eb1cc56abfd4c85d9fca15916bcda3b9e4da64573045e428eee82b0dca151b8",
+      "reference": "av1-alt-lf-f3-d0-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 0
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d0-refmode1.obu",
+      "sha256": "bb7128d951f50e60f33e5d7230c97db7b163412d1d673200809fc0b15dd0b9a5",
+      "reference": "av1-alt-lf-f3-d0-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 0
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d1-refmode0.obu",
+      "sha256": "5ad76ee8ab49152398cee91d15621e7cf47fd21180ba6a5b66256880388beb6a",
+      "reference": "av1-alt-lf-f3-d1-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d1-refmode1.obu",
+      "sha256": "8df6e536eae4b418020fd1c020f74b149815e15b7e9d86eab7ea27dbb3e9379c",
+      "reference": "av1-alt-lf-f3-d1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d16-refmode0.obu",
+      "sha256": "b665997309c433b5fa60ddf13db8eafac2f29cb8ae8c4e4bc2da936356887eb3",
+      "reference": "av1-alt-lf-f3-d16-refmode0.yuv",
+      "reference_sha256": "9cc4c28877c758517bc3ea84db05b0f2ea4588968f2b04057562add569cabd60",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d16-refmode1.obu",
+      "sha256": "de28893b65698fc03677cbc5742abfaccbd0ad12af9e4251087af34f86c60561",
+      "reference": "av1-alt-lf-f3-d16-refmode1.yuv",
+      "reference_sha256": "9cc4c28877c758517bc3ea84db05b0f2ea4588968f2b04057562add569cabd60",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d31-refmode0.obu",
+      "sha256": "d51aa6703126b54a10f5557f19b099869af5c20998fe83e21ca0de41fd23d116",
+      "reference": "av1-alt-lf-f3-d31-refmode0.yuv",
+      "reference_sha256": "9cc4c28877c758517bc3ea84db05b0f2ea4588968f2b04057562add569cabd60",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 31
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d31-refmode1.obu",
+      "sha256": "5c807427ef84f2fe155effd0587743206bbee5ff89b34b1e29b187ac5d27eae2",
+      "reference": "av1-alt-lf-f3-d31-refmode1.yuv",
+      "reference_sha256": "7bf6d88e668d5db933344cf6f1ab52a32f371b4bb5647bfb15c1775b92393e57",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 31
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f3-d63-refmode0.obu",
+      "sha256": "841a516c60e73e25990d705e983f78a5a279c710c1270c1f09f390321c6d7935",
+      "reference": "av1-alt-lf-f3-d63-refmode0.yuv",
+      "reference_sha256": "7bf6d88e668d5db933344cf6f1ab52a32f371b4bb5647bfb15c1775b92393e57",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f3-d63-refmode1.obu",
+      "sha256": "baaa71d579fef330f0ae9d83ec58c16a61a7b2f3f21be2c02d4079b638bcf02a",
+      "reference": "av1-alt-lf-f3-d63-refmode1.yuv",
+      "reference_sha256": "7bf6d88e668d5db933344cf6f1ab52a32f371b4bb5647bfb15c1775b92393e57",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "3": 63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d-64-refmode0.obu",
+      "sha256": "956b88736275dcaa28779b98983a226d1ac6f422d42492a41e750ff8854fd9dd",
+      "reference": "av1-alt-lf-f4-d-64-refmode0.yuv",
+      "reference_sha256": "f093c4673d1504cd05a56f534a28ca96c87a1ded6287ead0f1eab4296c6e48d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -64
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d-64-refmode1.obu",
+      "sha256": "dff2766b803c1fb4e1499642eedbcdcf27bf85d20ae89b3d005ba0d762d3d00f",
+      "reference": "av1-alt-lf-f4-d-64-refmode1.yuv",
+      "reference_sha256": "4cb80dfd6de362ecafca5edb625ccf148d2e2a80699991b67232aff06104376a",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -64
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d-63-refmode0.obu",
+      "sha256": "5bee790b0088cb0b533f408eb362b27d8d001147b0db7c4ca33839943c4a9d42",
+      "reference": "av1-alt-lf-f4-d-63-refmode0.yuv",
+      "reference_sha256": "f093c4673d1504cd05a56f534a28ca96c87a1ded6287ead0f1eab4296c6e48d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d-63-refmode1.obu",
+      "sha256": "5449e65699ca5666d2b51ddd0c3b1cca4ca01c47842a84601578136df3086438",
+      "reference": "av1-alt-lf-f4-d-63-refmode1.yuv",
+      "reference_sha256": "4cb80dfd6de362ecafca5edb625ccf148d2e2a80699991b67232aff06104376a",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d-16-refmode0.obu",
+      "sha256": "08f8ce5a52c7bdd59b3576f24b531de2caf9b052bdad7ddd6e5dc1a2579b8b5b",
+      "reference": "av1-alt-lf-f4-d-16-refmode0.yuv",
+      "reference_sha256": "f093c4673d1504cd05a56f534a28ca96c87a1ded6287ead0f1eab4296c6e48d6",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d-16-refmode1.obu",
+      "sha256": "4950960706e084d2ec92de41e839c80dc2601165e2247cdd8b869fb685c6b4b2",
+      "reference": "av1-alt-lf-f4-d-16-refmode1.yuv",
+      "reference_sha256": "4cb80dfd6de362ecafca5edb625ccf148d2e2a80699991b67232aff06104376a",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d-1-refmode0.obu",
+      "sha256": "30be674bf5708cdf5eb2d274b2ca2a4ce2a674e4f376b773b8926a010bbd1591",
+      "reference": "av1-alt-lf-f4-d-1-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d-1-refmode1.obu",
+      "sha256": "e349884749e4516a6cc67c8e0d989d8542488e12524979f64e3349652bde6a28",
+      "reference": "av1-alt-lf-f4-d-1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": -1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d0-refmode0.obu",
+      "sha256": "81dda2a0e662cb2682994ab733cf8af1f1811b0808acbc74a52d46ea8670489d",
+      "reference": "av1-alt-lf-f4-d0-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 0
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d0-refmode1.obu",
+      "sha256": "5d0aaf2471268ff2775afdf2f9b9486d3c3dab6d32b35162d14f7c7b92e21dc0",
+      "reference": "av1-alt-lf-f4-d0-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 0
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d1-refmode0.obu",
+      "sha256": "2289aa9de231324c648e5505f831588cebb4f105548e60048a48a447d5dc994b",
+      "reference": "av1-alt-lf-f4-d1-refmode0.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 1
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d1-refmode1.obu",
+      "sha256": "936838206a931c59c7c14a8169fd1584ceb578611a71daf4c844560ee68d5722",
+      "reference": "av1-alt-lf-f4-d1-refmode1.yuv",
+      "reference_sha256": "8ec31e5c7824c115b4d6dc7d9c2235bf619422c9b97d7e6f1dfd65bedca3add7",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 1
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d16-refmode0.obu",
+      "sha256": "1d897717a080c0f5867b5387aa5c7590f750ab5877b442a52d4b84221a037807",
+      "reference": "av1-alt-lf-f4-d16-refmode0.yuv",
+      "reference_sha256": "b8ab92adf1494729537de3a281ef7f83a77c3902113cb069d911c7fc813d6833",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 16
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d16-refmode1.obu",
+      "sha256": "56e36b4bd95bf78f5f55321e94c5c9b469530cf0b1cd917b337e5f1367cfe0f3",
+      "reference": "av1-alt-lf-f4-d16-refmode1.yuv",
+      "reference_sha256": "b8ab92adf1494729537de3a281ef7f83a77c3902113cb069d911c7fc813d6833",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 16
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d31-refmode0.obu",
+      "sha256": "63e05da01cb5a327fd560807f6bf71d2cce366d5049cddddc59a7f2f833fca79",
+      "reference": "av1-alt-lf-f4-d31-refmode0.yuv",
+      "reference_sha256": "b8ab92adf1494729537de3a281ef7f83a77c3902113cb069d911c7fc813d6833",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 31
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d31-refmode1.obu",
+      "sha256": "a95424ae1ce928dba49eef0d6df0baa32b5fe0b2b549f24106339005c760a245",
+      "reference": "av1-alt-lf-f4-d31-refmode1.yuv",
+      "reference_sha256": "2c6d0346d8df552ac026301c2ab2c7b3d1eee482f5c7407410b8f39362084b21",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 31
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-f4-d63-refmode0.obu",
+      "sha256": "f9969bf5021773feddeebc534d24faabf4177d06e69b46f7224e6df2de406b97",
+      "reference": "av1-alt-lf-f4-d63-refmode0.yuv",
+      "reference_sha256": "2c6d0346d8df552ac026301c2ab2c7b3d1eee482f5c7407410b8f39362084b21",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 63
+      },
+      "refmode": false
+    },
+    {
+      "file": "av1-alt-lf-f4-d63-refmode1.obu",
+      "sha256": "0f46b4a5c98c570da6a5169dc0c0289960c1f6670fb1b3d8f4a5c0ec31246939",
+      "reference": "av1-alt-lf-f4-d63-refmode1.yuv",
+      "reference_sha256": "2c6d0346d8df552ac026301c2ab2c7b3d1eee482f5c7407410b8f39362084b21",
+      "levels": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "features": {
+        "4": 63
+      },
+      "refmode": true
+    },
+    {
+      "file": "av1-alt-lf-mixed-refmode0.obu",
+      "sha256": "0d761edc4dac18ee0883c7a2b43eafa38f7b0be9c75fe688241245322d3e7a95",
+      "reference": "av1-alt-lf-mixed-refmode0.yuv",
+      "reference_sha256": "230d20d6d2f7257ddb4d1b73fed78b52876f87d9b072ee5400effc3413644e67",
+      "levels": [
+        16,
+        24,
+        8,
+        32
+      ],
+      "features": {
+        "1": 31,
+        "2": -16,
+        "3": 63,
+        "4": -63
+      },
+      "refmode": false,
+      "webm": "av1-alt-lf-mixed-refmode0.webm",
+      "webm_sha256": "fa1e51e6299e9099406ed59216d2fce1623cbebd73cbe18f3c5784f0f0f0c7a1"
+    },
+    {
+      "file": "av1-alt-lf-mixed-refmode1.obu",
+      "sha256": "6998c159bbd635075c256e779e32efa1063fb9fb6ab4556c669aab603375e8db",
+      "reference": "av1-alt-lf-mixed-refmode1.yuv",
+      "reference_sha256": "e64d99028108e5072ea2e14bfc491b1ef7eb11362d3d8219af6b91090554228e",
+      "levels": [
+        16,
+        24,
+        8,
+        32
+      ],
+      "features": {
+        "1": 31,
+        "2": -16,
+        "3": 63,
+        "4": -63
+      },
+      "refmode": true,
+      "webm": "av1-alt-lf-mixed-refmode1.webm",
+      "webm_sha256": "9520e180d4c3d7895835f143c57ec26865961c83a5b5b8f1c96e59532a1b4b60"
+    },
+    {
+      "file": "av1-alt-lf-vertical-zero-refmode0.obu",
+      "sha256": "48c02600822b8605cdb95427ef13a357e3b1364f6847b637b0e56e6633c816d4",
+      "reference": "av1-alt-lf-vertical-zero-refmode0.yuv",
+      "reference_sha256": "0cef9951c53d1fa2dae5dba46d5d7b2d7ddb47928432976081789525f97ac2ce",
+      "levels": [
+        0,
+        16,
+        8,
+        8
+      ],
+      "features": {
+        "1": 32
+      },
+      "refmode": false,
+      "webm": "av1-alt-lf-vertical-zero-refmode0.webm",
+      "webm_sha256": "4253bda453b1b2ab450877d17b452de1596c235cb07e51ee2ce31d51ae8ca38a"
+    },
+    {
+      "file": "av1-alt-lf-vertical-zero-refmode1.obu",
+      "sha256": "bc8d88610dc0e8a1a2497729637fdbb4138ee54d11eaa146e610c87c9b5a8633",
+      "reference": "av1-alt-lf-vertical-zero-refmode1.yuv",
+      "reference_sha256": "beb1f19b334d94e5c4b9fca5a3158f2fc87ace780c229c14ba9d64ff9c62a0f8",
+      "levels": [
+        0,
+        16,
+        8,
+        8
+      ],
+      "features": {
+        "1": 32
+      },
+      "refmode": true,
+      "webm": "av1-alt-lf-vertical-zero-refmode1.webm",
+      "webm_sha256": "f5ebaf7732445ce3946d52b7430071fe47dbbdc71a85033ba0034583702073ae"
+    },
+    {
+      "file": "av1-alt-lf-chroma-zero-refmode0.obu",
+      "sha256": "85052825d2e01c34d5f4dfabee686e50f035d4c59d4c9275cf4fba633f3d1f7e",
+      "reference": "av1-alt-lf-chroma-zero-refmode0.yuv",
+      "reference_sha256": "76b01ecdffb4f09b2b005d279393e4150f5b02c2688fab13b41bec964563c186",
+      "levels": [
+        16,
+        16,
+        0,
+        0
+      ],
+      "features": {
+        "3": 63,
+        "4": 63
+      },
+      "refmode": false,
+      "webm": "av1-alt-lf-chroma-zero-refmode0.webm",
+      "webm_sha256": "964d4f2053e1ea8c4af6b688eb1abbb5cc681843bb61a95a4d6731911f8e3ecc"
+    },
+    {
+      "file": "av1-alt-lf-chroma-zero-refmode1.obu",
+      "sha256": "95922584cdfa16f7ae98877c8087a414f2411a7e499e865f7bb70cfd3f0c5cbf",
+      "reference": "av1-alt-lf-chroma-zero-refmode1.yuv",
+      "reference_sha256": "76b01ecdffb4f09b2b005d279393e4150f5b02c2688fab13b41bec964563c186",
+      "levels": [
+        16,
+        16,
+        0,
+        0
+      ],
+      "features": {
+        "3": 63,
+        "4": 63
+      },
+      "refmode": true,
+      "webm": "av1-alt-lf-chroma-zero-refmode1.webm",
+      "webm_sha256": "eebba4b783cf4a3581290bff90e31690b046e9721bd75c89ddcab5ac312aa68b"
+    },
+    {
+      "file": "av1-alt-lf-all-zero-refmode0.obu",
+      "sha256": "649c32eae1267bc21ecef0ed6fd66b8a4020fbab6f8f3f343bca526b9a5c9d2e",
+      "reference": "av1-alt-lf-all-zero-refmode0.yuv",
+      "reference_sha256": "9273d1f8a2a7951d079c2e5c6bd0a470bf8c7a0088853ee298fdec4944c78c25",
+      "levels": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "features": {
+        "1": 63,
+        "2": 63,
+        "3": 63,
+        "4": 63
+      },
+      "refmode": false,
+      "webm": "av1-alt-lf-all-zero-refmode0.webm",
+      "webm_sha256": "dc6d2e8af5701bcafff2f9e0a230596d3c5b1d7cc4458b59e2070b998461e728"
+    },
+    {
+      "file": "av1-alt-lf-all-zero-refmode1.obu",
+      "sha256": "d60efc6d13b4a1dbf0bdf5b9a89d835c80181bea012d2448659e0c3b2b990820",
+      "reference": "av1-alt-lf-all-zero-refmode1.yuv",
+      "reference_sha256": "9273d1f8a2a7951d079c2e5c6bd0a470bf8c7a0088853ee298fdec4944c78c25",
+      "levels": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "features": {
+        "1": 63,
+        "2": 63,
+        "3": 63,
+        "4": 63
+      },
+      "refmode": true,
+      "webm": "av1-alt-lf-all-zero-refmode1.webm",
+      "webm_sha256": "cbdde7b8d1ae8725915b0af9034f2e751dfa8ff1ab5c07298c90f3409720fe87"
+    },
+    {
+      "file": "av1-alt-lf-shift-cross-refmode0.obu",
+      "sha256": "59b7f1a23b106eda4ea64dfc2526993fbd613f359ce97568f6290691e498f6f6",
+      "reference": "av1-alt-lf-shift-cross-refmode0.yuv",
+      "reference_sha256": "de9c50809ce8d7147c48cee46dce6bdc78cbb4f6c64cef0017b3c5799f400593",
+      "levels": [
+        31,
+        31,
+        31,
+        31
+      ],
+      "features": {
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1
+      },
+      "refmode": false,
+      "webm": "av1-alt-lf-shift-cross-refmode0.webm",
+      "webm_sha256": "e9a186e351966454e236b0b018e0ef6e3cc5dcc1ffe0fad65ff44b80593f07be"
+    },
+    {
+      "file": "av1-alt-lf-shift-cross-refmode1.obu",
+      "sha256": "45a53c91537c00c3ce25f5e24e27fda32e3e21533aa49c3c0c79cd996b73f8f4",
+      "reference": "av1-alt-lf-shift-cross-refmode1.yuv",
+      "reference_sha256": "de9c50809ce8d7147c48cee46dce6bdc78cbb4f6c64cef0017b3c5799f400593",
+      "levels": [
+        31,
+        31,
+        31,
+        31
+      ],
+      "features": {
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1
+      },
+      "refmode": true,
+      "webm": "av1-alt-lf-shift-cross-refmode1.webm",
+      "webm_sha256": "deb6322a41e2d78df72402f5941f2b1c31d892fbe5278456f7121984ad0c48b1"
+    }
+  ]
+}

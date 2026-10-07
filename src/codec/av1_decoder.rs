@@ -9,7 +9,7 @@ use super::{
     bits::BitReader,
 };
 use crate::color::hdr::HdrMetadata;
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 use std::sync::Arc;
 #[derive(Clone)]
 pub struct Decoded {
@@ -252,7 +252,7 @@ impl Decoder {
                                     .map(|p| p.samples.len() * 2)
                                     .sum::<usize>();
                                 retained = retained
-                                    .checked_add(bytes + 256_000)
+                                    .checked_add(bytes + frame.picture.segment_ids.len() + 256_000)
                                     .ok_or_else(|| invalid("AV1 memory accounting overflow"))?;
                             }
                         }
@@ -447,14 +447,12 @@ mod tests {
                         .contains("AV1 inter reference frame ID mismatch"),
                     "{name}: {error}"
                 );
-                assert!(
-                    decoder
-                        .decode_packet(&data[offset..])
-                        .err()
-                        .unwrap()
-                        .to_string()
-                        .contains("requires reset")
-                );
+                assert!(decoder
+                    .decode_packet(&data[offset..])
+                    .err()
+                    .unwrap()
+                    .to_string()
+                    .contains("requires reset"));
                 decoder.reset();
             }
         }
@@ -771,7 +769,7 @@ mod tests {
     }
 
     #[test]
-    fn segmentation_map_update_headers_parse_but_picture_decode_refuses() {
+    fn segmentation_map_update_headers_and_flat_pictures_decode() {
         for (data, temporal) in [
             (
                 &include_bytes!(
@@ -802,12 +800,10 @@ mod tests {
                     assert_eq!(header.segmentation_temporal_update, temporal);
                     assert!(!header.segmentation_update_data);
                     assert_eq!(header.segments, [[None; 8]; 8]);
-                    let error = decoder.decode_packet(&data[offset..end]).err().unwrap();
-                    assert!(
-                        error
-                            .to_string()
-                            .contains("AV1 segmentation map updates not implemented")
-                    );
+                    let frames = decoder.decode_packet(&data[offset..end]).unwrap();
+                    assert_eq!(frames.len(), 1);
+                    assert_flat(&frames[0]);
+                    assert!(frames[0].picture.segment_ids.iter().all(|&id| id == 0));
                 } else {
                     for frame in decoder.decode_packet(&data[offset..end]).unwrap() {
                         assert_flat(&frame);

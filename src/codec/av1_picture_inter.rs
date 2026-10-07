@@ -420,7 +420,11 @@ impl Decoder<'_> {
                     5
                 }
             } else if bit(2, &[1, 2], &[3, 4])? {
-                if bit(4, &[3], &[4])? { 4 } else { 3 }
+                if bit(4, &[3], &[4])? {
+                    4
+                } else {
+                    3
+                }
             } else if bit(3, &[1], &[2])? {
                 2
             } else {
@@ -653,12 +657,13 @@ impl Decoder<'_> {
                 filters[1] = filters[0];
             }
         }
-        let tx = if self.h.lossless[0] {
+        let tx = if self.h.lossless[self.current_segment] {
             [4; 2]
         } else {
             [(w * 4).min(64), (h * 4).min(64)]
         };
         let block = Block {
+            segment: self.current_segment,
             w,
             h,
             mode,
@@ -679,7 +684,7 @@ impl Decoder<'_> {
                 self.blocks[yy * self.cols + xx] = block;
             }
         }
-        if self.h.tx_mode == 2 && !skip && !self.h.lossless[0] {
+        if self.h.tx_mode == 2 && !skip && !self.h.lossless[self.current_segment] {
             for yy in (y..y + h).step_by(tx[1] / 4) {
                 for xx in (x..x + w).step_by(tx[0] / 4) {
                     self.read_var_tx(d, c, xx, yy, tx, 0, [x, y], [w, h])?;
@@ -729,7 +734,7 @@ impl Decoder<'_> {
                     let ch = (h.min(16) >> sub).max(1);
                     let bx = (x >> sub) + cx * (16 >> sub);
                     let by = (y >> sub) + cy * (16 >> sub);
-                    let size = if self.h.lossless[0] {
+                    let size = if self.h.lossless[self.current_segment] {
                         [4; 2]
                     } else if p == 0 {
                         tx
@@ -737,7 +742,7 @@ impl Decoder<'_> {
                         [(bw * 4).min(32), (bh * 4).min(32)]
                     };
                     let mut transforms = Vec::new();
-                    if p == 0 && !self.h.lossless[0] {
+                    if p == 0 && !self.h.lossless[self.current_segment] {
                         self.transform_order(bx, by, [cw * 4, ch * 4], &mut transforms);
                     } else {
                         for yy in (by..by + ch).step_by(size[1] / 4) {
@@ -764,7 +769,7 @@ impl Decoder<'_> {
                         } else {
                             let (coeff, kind) =
                                 self.coefficients(d, c, p, xx, yy, bw, bh, size, 0)?;
-                            if self.h.lossless[0] {
+                            if self.h.lossless[self.current_segment] {
                                 vp9_transform::inverse(
                                     &coeff,
                                     4,
