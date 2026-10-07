@@ -17,6 +17,15 @@ pub struct Decoded {
     pub color: Color,
     pub show: bool,
 }
+struct PendingFrame {
+    header: Header,
+    groups: Vec<Vec<u8>>,
+    header_payload: Vec<u8>,
+    temporal_id: u8,
+    spatial_id: u8,
+    next_tile: usize,
+    bytes: usize,
+}
 pub struct Decoder {
     sequence: Option<Sequence>,
     initial_sequence: Option<Sequence>,
@@ -30,7 +39,15 @@ pub struct Decoder {
     hdr: HdrMetadata,
     budget: usize,
     failed: bool,
+    pending: Option<PendingFrame>,
     previous_frame_id: Option<u32>,
+}
+fn trim_padding(bytes: &[u8]) -> &[u8] {
+    let length = bytes
+        .iter()
+        .rposition(|byte| *byte != 0)
+        .map_or(0, |n| n + 1);
+    &bytes[..length]
 }
 impl Decoder {
     pub fn new(budget: usize) -> Self {
@@ -47,6 +64,7 @@ impl Decoder {
             hdr: HdrMetadata::default(),
             budget,
             failed: false,
+            pending: None,
             previous_frame_id: None,
         }
     }
@@ -63,7 +81,7 @@ impl Decoder {
                     "unsupported AV1 codec configuration version",
                 ));
             }
-            if !decoder.decode_packet(&record[4..])?.is_empty() {
+            if !decoder.decode_packet(&record[4..])?.is_empty() || decoder.pending.is_some() {
                 return Err(invalid("AV1 codec configuration contains coded frames"));
             }
             decoder.initial_sequence = decoder.sequence.clone();
@@ -94,6 +112,18 @@ impl Decoder {
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
     }
+    /// Validate stream completion when the transport reaches end of input.
+    /// Packet boundaries alone do not end a frame split across tile-group OBUs.
+    pub fn finish(&mut self) -> Result<()> {
+        if self.failed {
+            return Err(invalid("AV1 decoder requires reset after error"));
+        }
+        if self.pending.is_some() {
+            self.failed = true;
+            return Err(invalid("AV1 end of stream before tile completion"));
+        }
+        Ok(())
+    }
     pub fn decode_packet(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
         if self.failed {
             return Err(invalid("AV1 decoder requires reset after error"));
@@ -104,10 +134,31 @@ impl Decoder {
         }
         result
     }
+    fn retained_picture_bytes(&self, output: &[Decoded]) -> Result<usize> {
+        let mut seen = std::collections::HashSet::new();
+        let mut retained = 0usize;
+        for frame in self.references.iter().flatten().chain(output.iter()) {
+            if seen.insert(Arc::as_ptr(&frame.picture)) {
+                let bytes = frame
+                    .picture
+                    .planes
+                    .iter()
+                    .map(|p| p.samples.len() * 2)
+                    .sum::<usize>();
+                retained = retained
+                    .checked_add(bytes + frame.picture.segment_ids.len() + 256_000)
+                    .ok_or_else(|| invalid("AV1 memory accounting overflow"))?;
+            }
+        }
+        Ok(retained)
+    }
     fn decode_inner(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
         let mut output = Vec::new();
         for obu in Obus::new(data) {
             let obu = obu?;
+            if self.pending.is_some() && matches!(obu.kind, 1 | 2 | 3 | 6) {
+                return Err(invalid("AV1 new frame or delimiter before tile completion"));
+            }
             match obu.kind {
                 1 => {
                     let sequence = Sequence::parse(obu.payload)?;
@@ -135,7 +186,19 @@ impl Decoder {
                         self.hdr.merge(hdr);
                     }
                 }
-                3 | 6 => {
+                7 => {
+                    let pending = self
+                        .pending
+                        .as_ref()
+                        .ok_or_else(|| invalid("AV1 redundant header without frame header"))?;
+                    if obu.temporal_id != pending.temporal_id
+                        || obu.spatial_id != pending.spatial_id
+                        || trim_padding(obu.payload) != trim_padding(&pending.header_payload)
+                    {
+                        return Err(invalid("AV1 redundant frame header mismatch"));
+                    }
+                }
+                3 | 4 | 6 => {
                     if output.len() >= 8 {
                         return Err(invalid("too many AV1 frames per packet"));
                     }
@@ -146,7 +209,10 @@ impl Decoder {
                     if obu.spatial_id != 0 {
                         return Err(crate::unsupported("AV1 spatial layering not implemented"));
                     }
-                    if !s.reduced_header && obu.payload.first().is_some_and(|v| v & 128 != 0) {
+                    if obu.kind != 4
+                        && !s.reduced_header
+                        && obu.payload.first().is_some_and(|v| v & 128 != 0)
+                    {
                         let b = &mut BitReader::new(obu.payload);
                         b.bit()?;
                         let index = b.read(3)? as usize;
@@ -201,20 +267,86 @@ impl Decoder {
                         }
                         output.push(decoded);
                     } else {
-                        if obu.kind != 6 {
-                            return Err(crate::unsupported(
-                                "AV1 separate frame header/tile groups not implemented",
-                            ));
-                        }
                         let headers = std::array::from_fn(|i| self.headers[i].as_deref());
-                        let h = Header::parse_with_order_hints(
-                            s,
-                            obu.payload,
-                            obu.temporal_id,
-                            obu.spatial_id,
-                            &headers,
-                            self.reference_order_hints,
-                        )?;
+                        let mut owned_groups = Vec::new();
+                        let h = if obu.kind == 4 {
+                            let available = self
+                                .budget
+                                .checked_sub(self.retained_picture_bytes(&output)?)
+                                .ok_or_else(|| {
+                                    invalid("AV1 reference pictures exceed memory budget")
+                                })?;
+                            let pending = self
+                                .pending
+                                .as_mut()
+                                .ok_or_else(|| invalid("AV1 tile group without frame header"))?;
+                            if obu.temporal_id != pending.temporal_id
+                                || obu.spatial_id != pending.spatial_id
+                            {
+                                return Err(invalid("AV1 tile group layer mismatch"));
+                            }
+                            let tiles = pending.header.tiles.group(obu.payload)?;
+                            if tiles.first().map(|t| t.0) != Some(pending.next_tile) {
+                                return Err(invalid("AV1 tile groups out of order"));
+                            }
+                            pending.bytes = pending
+                                .bytes
+                                .checked_add(obu.payload.len())
+                                .ok_or_else(|| invalid("AV1 pending tile size overflow"))?;
+                            if pending.bytes > available {
+                                return Err(invalid("AV1 pending tiles exceed memory budget"));
+                            }
+                            pending.next_tile += tiles.len();
+                            pending.groups.push(obu.payload.to_vec());
+                            if pending.next_tile < pending.header.tiles.count() {
+                                continue;
+                            }
+                            let pending = self.pending.take().unwrap();
+                            owned_groups = pending.groups;
+                            pending.header
+                        } else if obu.kind == 3 {
+                            let header = Header::parse_separate(
+                                s,
+                                obu.payload,
+                                obu.temporal_id,
+                                obu.spatial_id,
+                                &headers,
+                                self.reference_order_hints,
+                            )?;
+                            let available = self
+                                .budget
+                                .checked_sub(self.retained_picture_bytes(&output)?)
+                                .ok_or_else(|| {
+                                    invalid("AV1 reference pictures exceed memory budget")
+                                })?;
+                            if obu.payload.len() > available {
+                                return Err(invalid("AV1 pending header exceeds memory budget"));
+                            }
+                            self.pending = Some(PendingFrame {
+                                header,
+                                groups: Vec::new(),
+                                header_payload: obu.payload.to_vec(),
+                                temporal_id: obu.temporal_id,
+                                spatial_id: obu.spatial_id,
+                                next_tile: 0,
+                                bytes: obu.payload.len(),
+                            });
+                            continue;
+                        } else {
+                            Header::parse_with_order_hints(
+                                s,
+                                obu.payload,
+                                obu.temporal_id,
+                                obu.spatial_id,
+                                &headers,
+                                self.reference_order_hints,
+                            )?
+                        };
+                        let groups: Vec<&[u8]> = if obu.kind == 4 {
+                            owned_groups.iter().map(Vec::as_slice).collect()
+                        } else {
+                            vec![&obu.payload[h.header_bytes..]]
+                        };
                         if let (Some(previous), Some(current), Some((_, bits))) =
                             (self.previous_frame_id, h.frame_id, s.frame_id_bits)
                         {
@@ -241,23 +373,16 @@ impl Decoder {
                                 (diff << shift) >> shift
                             }
                         });
-                        let mut seen = std::collections::HashSet::new();
-                        let mut retained = 0usize;
-                        for frame in self.references.iter().flatten().chain(output.iter()) {
-                            if seen.insert(Arc::as_ptr(&frame.picture)) {
-                                let bytes = frame
-                                    .picture
-                                    .planes
-                                    .iter()
-                                    .map(|p| p.samples.len() * 2)
-                                    .sum::<usize>();
-                                retained = retained
-                                    .checked_add(bytes + frame.picture.segment_ids.len() + 256_000)
-                                    .ok_or_else(|| invalid("AV1 memory accounting overflow"))?;
-                            }
-                        }
-                        let working_budget =
-                            self.budget.checked_sub(retained).ok_or_else(|| {
+                        let retained = self.retained_picture_bytes(&output)?;
+                        let compressed = owned_groups.iter().try_fold(0usize, |n, group| {
+                            n.checked_add(group.len())
+                                .ok_or_else(|| invalid("AV1 pending tile size overflow"))
+                        })?;
+                        let working_budget = self
+                            .budget
+                            .checked_sub(retained)
+                            .and_then(|n| n.checked_sub(compressed))
+                            .ok_or_else(|| {
                                 invalid("AV1 reference pictures exceed memory budget")
                             })?;
                         let refs = std::array::from_fn(|i| {
@@ -266,7 +391,7 @@ impl Decoder {
                         let (picture, cdf) = av1_picture::decode(
                             s,
                             &h,
-                            &[&obu.payload[h.header_bytes..]],
+                            &groups,
                             working_budget,
                             initial,
                             refs,

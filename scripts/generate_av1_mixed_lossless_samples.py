@@ -140,7 +140,7 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
     text=''.join(f"{len(r['cdf'])} {r['symbol']} "+' '.join(map(str,r['cdf']))+'\n' for r in symbols)
     return subprocess.run([str(writer)],input=text.encode(),stdout=subprocess.PIPE,check=True).stdout,[grid[y*8+x] for y in range(rows) for x in range(cols)]
 
-def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None):
+def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None,separate=False,redundant=False):
     b=Bits();b.u(0);b.u(kind,2);b.u(0);b.u(1);b.u(1);b.u(int(not adaptive));b.u(int(size is not None));b.u(refresh,8)
     if size is not None:b.u(size[0]-1,5);b.u(size[1]-1,5)
     b.u(0)
@@ -151,6 +151,9 @@ def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None):
             active=seg<2 and feature==0;b.u(int(active))
             if active:b.u(-base if seg==0 else 0,9)
     b.u(0);b.u(0,16);b.u(int(selected));b.u(0)
+    if separate:
+        header=b.bytes(trailing=True)
+        return obu(3,header)+(obu(7,header) if redundant else b'')+obu(4,entropy)
     return obu(6,b.bytes()+entropy)
 
 def main():

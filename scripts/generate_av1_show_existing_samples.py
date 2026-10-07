@@ -57,7 +57,7 @@ def show(ids,model,equal,frame_id,slot,width=5):
 
 def webm(data,dimensions=(32,32)):
     from generate_audio_resample_window_fixture import ebml
-    packets=[];at=0;seq=b'';pending=b''
+    packets=[];at=0;seq=b'';pending=b'';separate_hidden=None
     while at<len(data):
         begin=at;kind=data[at]>>3;at+=1;size=0;shift=0
         while True:
@@ -65,10 +65,17 @@ def webm(data,dimensions=(32,32)):
             if not byte&128:break
         payload_start=at;at+=size;piece=data[begin:at]
         if kind==1:seq=piece;pending+=piece
-        elif kind in [3,6]:packets.append((pending+piece,kind==6 and not (data[payload_start]&16)));pending=b''
+        elif kind==3 and not (data[payload_start]&128):
+            if separate_hidden is not None:packets.append((pending,separate_hidden));pending=b''
+            pending+=piece;separate_hidden=not (data[payload_start]&16)
+        elif kind in [4,7]:pending+=piece
+        elif kind in [3,6]:
+            if separate_hidden is not None:packets.append((pending,separate_hidden));pending=b'';separate_hidden=None
+            packets.append((pending+piece,kind==6 and not (data[payload_start]&16)));pending=b''
+    if separate_hidden is not None:packets.append((pending,separate_hidden))
     header=ebml('1a45dfa3',ebml('4282',b'webm'))
     track=ebml('d7',b'\x01')+ebml('83',b'\x01')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
-    track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',bytes([dimensions[0]]))+ebml('ba',bytes([dimensions[1]])))
+    track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',dimensions[0].to_bytes(max(1,(dimensions[0].bit_length()+7)//8),'big'))+ebml('ba',dimensions[1].to_bytes(max(1,(dimensions[1].bit_length()+7)//8),'big')))
     cluster=ebml('e7',b'\x00')
     for i,(packet,hidden_frame) in enumerate(packets):cluster+=ebml('a3',b'\x81'+(i*20).to_bytes(2,'big')+bytes([(128 if i==0 else 0)|(8 if hidden_frame else 0)])+packet)
     segment=ebml('1549a966',ebml('2ad7b1',(1000000).to_bytes(3,'big')))+ebml('1654ae6b',ebml('ae',track))+ebml('1f43b675',cluster)

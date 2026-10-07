@@ -3,16 +3,19 @@
 #include <aom/aomdx.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 int main(int argc,char **argv){
- if(argc!=3&&argc!=4)return 2;
- FILE *output=argc==4?fopen(argv[3],"wb"):NULL;if(argc==4&&!output)return 2;
+ if(argc!=3&&argc!=4&&argc!=5)return 2;
+ if(argc==5&&strcmp(argv[4],"whole-packet"))return 2;
+ FILE *output=argc>=4?fopen(argv[3],"wb"):NULL;if(argc>=4&&!output)return 2;
  FILE *f=fopen(argv[1],"rb");if(!f)return 2;fseek(f,0,SEEK_END);long n=ftell(f);rewind(f);unsigned char *data=malloc(n);if(!data||fread(data,1,n,f)!=(size_t)n)return 2;fclose(f);
  aom_codec_ctx_t ctx={0};if(aom_codec_dec_init(&ctx,aom_codec_av1_dx(),NULL,0))return 2;
  size_t at=0,packet_start=0;int count=0;
  while(at<(size_t)n){unsigned header=data[at++];if(header&4)at++;size_t size=0;unsigned shift=0;
   do{if(at>=(size_t)n||shift>56)return 2;unsigned byte=data[at++];size|=(size_t)(byte&127)<<shift;shift+=7;if(!(byte&128))break;}while(1);
-  if(size>(size_t)n-at)return 2;at+=size;
-  if((header>>3)!=3&&(header>>3)!=6)continue;
+  if(size>(size_t)n-at)return 2;size_t payload_start=at;at+=size;
+  if(argc==5&&at<(size_t)n)continue;
+  if(argc!=5&&(header>>3)!=4&&(header>>3)!=6&& !((header>>3)==3&&size&&(data[payload_start]&128)))continue;
   if(aom_codec_decode(&ctx,data+packet_start,at-packet_start,NULL)){fprintf(stderr,"%s: %s %s\n",argv[1],aom_codec_error(&ctx),aom_codec_error_detail(&ctx));return 1;}
   packet_start=at;
   aom_codec_iter_t iter=NULL;aom_image_t *img;

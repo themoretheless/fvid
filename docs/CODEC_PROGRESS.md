@@ -3970,3 +3970,41 @@ media. This extends the preceding scaled-reference coverage; scaled OBMC,
 distance-weighted compound, higher depths/chroma and full AV1 conformance remain
 unproven. The explicit film-grain, temporal motion-field and separate frame-header
 limitations are still implementation gaps, not passing playback acceptance.
+
+## Native AV1 separate frame-header and tile-group OBUs
+
+The decoder now accepts coded OBU_FRAME_HEADER followed by ordered OBU_TILE_GROUP
+units, including groups delivered in separate decode calls. It parses the header's
+trailing-one bit and zero padding separately from OBU_FRAME byte alignment.
+Header/CDF/reference state is published only after all tiles validate. Compatible
+OBU_REDUNDANT_FRAME_HEADER copies are accepted, including extra zero padding;
+layer mismatches, different header contents, missing/repeated/out-of-order groups
+and a new header or delimiter before frame completion are specific errors.
+Pending compressed data shares the decoder budget with retained reference pictures.
+Reset drops pending state. A configuration record cannot hide an unfinished coded
+frame. `Decoder::finish()` validates transport EOF, and native MP4/WebM readers
+call it so an unfinished frame cannot silently become successful EOF.
+
+The owned generator `scripts/generate_av1_separate_frame_samples.py` saves 96
+scaled-reference/inter streams (12 size pairs, LAST/ALTREF, fixed/adaptive CDFs,
+with/without redundant headers) and four lossless synthetic tile layouts with
+2, 4 or 8 groups covering 4 or 8 tiles. Ten invalid streams exercise exact parser
+failures; four partially delivered tile layouts reproduce incomplete EOF in raw
+OBU, WebM and MP4. All fixture parameters and pixels are owned synthetic data.
+No private source media or codec parameter sets are used.
+
+`tests/av1_separate_frame.rs` checks exact oracle Y/Cb/Cr pixels, segment maps,
+dimensions, publication at packet boundaries, reset, WebM/MP4 clocks, rewind,
+seek, specific malformed-input failures, redundant-header padding, pending-byte
+limits, configuration refusal and incomplete EOF. The pre-fix acceptance test
+reproduced `AV1 separate frame header/tile groups not implemented`, rather than
+an unrelated entropy error. Ordinary tests use only saved data and need no
+FFmpeg, libav, libaom or network. Optional libaom tools are generator/reference
+helpers; the generator's input images are synthesized internally. The generator
+also preserves existing key/inter-header and WebM bytes for checked defaults.
+
+This removes the separate-header refusal, not the remaining AV1 temporal-motion,
+film-grain, palette, intrabc, super-resolution, restoration/profile/chroma and
+layering gaps. Full codec conformance remains unproven.
+
+Final validation: all 47 tests across 21 checked-in AV1 integration suites and 35 AV1 core tests passed offline on the final source. The six new tests passed; all 326 fixture/container hashes were verified. The regression executable has no FFmpeg/libav/libaom linkage. Verification and canonical AV1/MP4/WebM sources match.

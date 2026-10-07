@@ -700,6 +700,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 return Ok(visible);
             }
         }
+        if let VideoDecoder::Av1(d) = &mut self.decoder {
+            d.finish()?;
+        }
         Ok(None)
     }
     pub fn read_frame(&mut self) -> Result<bool> {

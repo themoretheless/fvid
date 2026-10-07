@@ -7,16 +7,16 @@ from generate_av1_mixed_lossless_samples import encode,key
 from generate_av1_mixed_inter_samples import frame
 
 CASES=[((16,16),(32,32)),((15,15),(32,32)),((13,16),(32,32)),((16,13),(32,32)),((32,32),(16,16)),((31,31),(16,16)),((29,32),(16,16)),((32,29),(16,16)),((16,32),(32,16)),((32,16),(16,32)),((15,31),(32,16)),((31,15),(16,32))]
-def stream(writer,reference_size,current_size,logical,base,mask,selected,adaptive,level,movement,interpolation,residual):
+def stream(writer,reference_size,current_size,logical,base,mask,selected,adaptive,level,movement,interpolation,residual,separate=False,redundant=False):
     entropy,initial=encode(writer,base,0,False,False,level*residual,residual_everywhere=True,frame_size=reference_size)
-    data=sequence(False,False,False)+key(entropy,base,False,False,size=reference_size);maps=[initial]
+    data=sequence(False,False,False)+key(entropy,base,False,False,size=reference_size,separate=separate,redundant=redundant);maps=[initial]
     for frame_index,current in enumerate([mask,15-mask]):
         models=[(0,[0,0,65536,0,0,65536]) for _ in range(7)]
         if movement:
             direction=1 if frame_index==0 else -1
             models[logical-1]=(1,[direction*16384,-direction*32768,65536,0,0,65536])
         entropy,grid=encode(writer,base,current,selected,adaptive,residual,inter=True,reference=logical,forced_reference=True,forced_tools=(2,2),frame_size=current_size)
-        data+=frame(entropy,base,selected,adaptive,logical,forced_reference=True,forced_tools=(2,2),global_models=models,interpolation=interpolation,size=current_size,refresh=0);maps.append(grid)
+        data+=frame(entropy,base,selected,adaptive,logical,forced_reference=True,forced_tools=(2,2),global_models=models,interpolation=interpolation,size=current_size,refresh=0,separate=separate,redundant=redundant);maps.append(grid)
     return data,maps
 
 def main():

@@ -678,6 +678,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 if matches!(&self.decoder, Decoder::Avc(d) if d.has_pending_field()) {
                     return Err(invalid("unpaired AVC field at end of MP4"));
                 }
+                if let Decoder::Av1(d) = &mut self.decoder {
+                    d.finish()?;
+                }
                 return Ok(None);
             };
             self.demuxer

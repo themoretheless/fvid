@@ -23,7 +23,7 @@ def signed_subexp(b,low,high,reference,value):
         if not more:b.u(v-offset,bits);return
         offset+=a;i+=1
 
-def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0,reference_select=False,segment_references=None,motion_switchable=False,size=None,refresh=128):
+def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0,reference_select=False,segment_references=None,motion_switchable=False,size=None,refresh=128,separate=False,redundant=False):
     b=Bits();b.u(0);b.u(1,2);b.u(1);b.u(0);b.u(int(not adaptive));b.u(int(size is not None));b.u(0,3);b.u(refresh,8)
     for logical in range(1,8):b.u(7 if logical==reference else 0,3)
     if size is not None:
@@ -53,6 +53,9 @@ def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced
             shift=16-precision;center=65536 if index%3==2 else 0;sub=1<<precision if center else 0
             maximum=1<<absolute;value=(params[index]-center)>>shift;reference=(old[index]>>shift)-sub
             signed_subexp(b,-maximum,maximum+1,reference,value)
+    if separate:
+        header=b.bytes(trailing=True)
+        return obu(3,header)+(obu(7,header) if redundant else b'')+obu(4,entropy)
     return obu(6,b.bytes()+entropy)
 
 def main():
