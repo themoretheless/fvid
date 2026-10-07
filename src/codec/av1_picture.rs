@@ -65,6 +65,7 @@ struct Decoder<'a> {
     read_deltas: bool,
     current_q: i32,
     current_segment: usize,
+    segment_pre_skip: bool,
     previous_segments: Vec<u8>,
     segment_pred_above: Vec<usize>,
     segment_pred_left: Vec<usize>,
@@ -140,17 +141,7 @@ pub(crate) fn decode(
             "AV1 quantization matrices or in-loop filtering not implemented",
         ));
     }
-    // Forced reference/skip/global tools change mode syntax and remain explicit
-    // gaps. ALT_Q and ALT_LF are applied using each block's decoded segment.
-    if h.segmentation_update_map
-        && h.segments
-            .iter()
-            .any(|segment| segment[5..].iter().any(Option::is_some))
-    {
-        return Err(crate::unsupported(
-            "AV1 active segmentation features not implemented",
-        ));
-    }
+    // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     if h.intrabc || h.superres_denom != 8 {
         return Err(crate::unsupported(
             "AV1 segmentation/intrabc/superres reconstruction not implemented",
@@ -222,6 +213,10 @@ pub(crate) fn decode(
         read_deltas: false,
         current_q: i32::from(h.quant.base),
         current_segment: 0,
+        segment_pre_skip: h
+            .segments
+            .iter()
+            .any(|segment| segment[5..].iter().any(Option::is_some)),
         previous_segments,
         segment_pred_above: vec![0; cols],
         segment_pred_left: vec![0; rows],
@@ -518,9 +513,19 @@ impl Decoder<'_> {
     ) -> Result<()> {
         let (above, left) = self.neighbors(x, y);
         self.current_block = [x, y];
+        let pre_skip = self.segment_pre_skip;
+        if pre_skip {
+            self.current_segment = self.read_segment(d, c, x, y, w, h, false)?;
+        }
+        let forced_reference = self.h.segments[self.current_segment][5];
+        let forced_skip = self.h.segments[self.current_segment][6].is_some();
+        let forced_global = self.h.segments[self.current_segment][7].is_some();
         let skip_ctx =
             usize::from(above.is_some_and(|b| b.skip)) + usize::from(left.is_some_and(|b| b.skip));
-        let skip_mode = self.h.skip_mode.is_some()
+        let skip_mode = !forced_skip
+            && !forced_global
+            && forced_reference.is_none()
+            && self.h.skip_mode.is_some()
             && w >= 2
             && h >= 2
             && symbol(
@@ -530,15 +535,9 @@ impl Decoder<'_> {
                 [usize::from(above.is_some_and(|b| b.skip_mode))
                     + usize::from(left.is_some_and(|b| b.skip_mode))],
             )? != 0;
-        let skip = skip_mode || symbol(d, c, av1_cdfs::SKIP, [skip_ctx])? != 0;
-        self.current_segment = self.read_segment(d, c, x, y, w, h, skip)?;
-        if self.h.segments[self.current_segment][5..]
-            .iter()
-            .any(Option::is_some)
-        {
-            return Err(crate::unsupported(
-                "AV1 active segmentation features not implemented",
-            ));
+        let skip = forced_skip || skip_mode || symbol(d, c, av1_cdfs::SKIP, [skip_ctx])? != 0;
+        if !pre_skip {
+            self.current_segment = self.read_segment(d, c, x, y, w, h, skip)?;
         }
         if !skip && !self.h.lossless.iter().all(|v| *v) && self.s.cdef && !self.h.intrabc {
             let stride = self.cols.div_ceil(16);
@@ -583,7 +582,14 @@ impl Decoder<'_> {
                 (Some(a), None) | (None, Some(a)) => 2 * usize::from(a.reference == 0),
                 _ => 0,
             };
-            if skip_mode || symbol(d, c, av1_cdfs::IS_INTER, [ctx])? != 0 {
+            let is_inter = if let Some(reference) = forced_reference {
+                reference != 0
+            } else if forced_global {
+                true
+            } else {
+                skip_mode || symbol(d, c, av1_cdfs::IS_INTER, [ctx])? != 0
+            };
+            if is_inter {
                 return self.inter_block(d, c, x, y, w, h, skip, skip_mode);
             }
         }
