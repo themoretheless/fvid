@@ -633,6 +633,7 @@ impl Decoder<'_> {
         }
         let mut warp = None;
         let mut local_warp = false;
+        let mut obmc = false;
         if !compound
             && interintra_mode.is_none()
             && self.h.motion_mode_switchable
@@ -666,9 +667,7 @@ impl Decoder<'_> {
                     );
                 }
                 if motion == 1 {
-                    return Err(crate::unsupported(
-                        "AV1 overlapped motion compensation not implemented",
-                    ));
+                    obmc = true;
                 }
             }
         }
@@ -816,6 +815,9 @@ impl Decoder<'_> {
                         ));
                     }
                     self.motion_predict(p, px + xx, py + yy, [step_x, step_y], b)?;
+                    if obmc {
+                        self.overlap_predict(p, [x, y], [w, h], [pw, ph])?;
+                    }
                     if let Some(mode) = interintra_mode {
                         self.predict(
                             p,
@@ -1309,6 +1311,89 @@ impl Decoder<'_> {
         }
         Ok(())
     }
+    fn overlap_predict(
+        &mut self,
+        p: usize,
+        origin: [usize; 2],
+        luma_size: [usize; 2],
+        plane_size: [usize; 2],
+    ) -> Result<()> {
+        let [x, y] = origin;
+        let [w4, h4] = luma_size;
+        let [w, h] = plane_size;
+        let sub = usize::from(p > 0);
+        let above_size = SIZES.iter().position(|&size| size == (w / 4, h / 4));
+        for pass in 0..2 {
+            let available = if pass == 0 {
+                y > self.y0 && above_size.is_some_and(|id| id >= 3)
+            } else {
+                x > self.x0
+            };
+            if !available {
+                continue;
+            }
+            let start = if pass == 0 { x } else { y };
+            let extent = if pass == 0 { w4 } else { h4 };
+            let limit = extent.ilog2().min(4) as usize;
+            let end = (start + extent).min(if pass == 0 { self.cols } else { self.rows });
+            let mut cursor = start;
+            let mut count = 0;
+            while cursor < end && count < limit {
+                let candidate = if pass == 0 {
+                    self.blocks[(y - 1) * self.cols + (cursor | 1)]
+                } else {
+                    self.blocks[(cursor | 1) * self.cols + x - 1]
+                };
+                let step = if pass == 0 { candidate.w } else { candidate.h }.clamp(2, 16);
+                if candidate.reference > 0 {
+                    count += 1;
+                    let size = if pass == 0 {
+                        [w.min(step * 4 >> sub), (h / 2).min(32 >> sub)]
+                    } else {
+                        [(w / 2).min(32 >> sub), h.min(step * 4 >> sub)]
+                    };
+                    let point = if pass == 0 {
+                        [cursor * 4 >> sub, y * 4 >> sub]
+                    } else {
+                        [x * 4 >> sub, cursor * 4 >> sub]
+                    };
+                    Self::motion_samples(
+                        self.references,
+                        self.h.references,
+                        self.h.size,
+                        self.s.color.depth,
+                        p,
+                        point[0],
+                        point[1],
+                        size,
+                        Block {
+                            warp: None,
+                            ..candidate
+                        },
+                        false,
+                        &mut self.scratch,
+                        &mut self.inter_pred2,
+                    )?;
+                    let mask = overlap_mask(size[pass ^ 1]);
+                    let dst = &mut self.image.planes[p];
+                    for row in 0..size[1].min(dst.height.saturating_sub(point[1])) {
+                        for col in 0..size[0].min(dst.width.saturating_sub(point[0])) {
+                            let weight = mask[if pass == 0 { row } else { col }];
+                            let at = (point[1] + row) * dst.width + point[0] + col;
+                            let predictor = self.inter_pred2[row * size[0] + col]
+                                .clamp(0, (1 << self.s.color.depth) - 1);
+                            dst.samples[at] = ((weight * i32::from(dst.samples[at])
+                                + (64 - weight) * predictor
+                                + 32)
+                                >> 6) as u16;
+                        }
+                    }
+                }
+                cursor += step;
+            }
+        }
+        Ok(())
+    }
     fn motion_samples(
         references: [Option<&Picture>; 8],
         h_references: [usize; 7],
@@ -1412,3 +1497,19 @@ const INTERINTRA_WEIGHTS: [i32; 128] = [
     4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 ];
+
+fn overlap_mask(length: usize) -> &'static [i32] {
+    match length {
+        2 => &[45, 64],
+        4 => &[39, 50, 59, 64],
+        8 => &[36, 42, 48, 53, 57, 61, 64, 64],
+        16 => &[
+            34, 37, 40, 43, 46, 49, 52, 54, 56, 58, 60, 61, 64, 64, 64, 64,
+        ],
+        32 => &[
+            33, 35, 36, 38, 40, 41, 43, 44, 45, 47, 48, 50, 51, 52, 53, 55, 56, 57, 58, 59, 60, 60,
+            61, 62, 64, 64, 64, 64, 64, 64, 64, 64,
+        ],
+        _ => unreachable!("AV1 OBMC overlap extent"),
+    }
+}

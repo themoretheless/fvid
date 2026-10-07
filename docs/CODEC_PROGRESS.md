@@ -3860,3 +3860,35 @@ pass offline. A controlled fixed-weight counterfactual fails the strong-contrast
 fixture with a pixel mismatch; restoring the difference-weighted implementation
 passes. The integration executable links no FFmpeg, libav or libaom. Checked
 legacy sequence/frame/entropy generator defaults remain byte-identical.
+
+## AV1 overlapped motion compensation (OBMC)
+
+The owned stream previously refused with `AV1 overlapped motion compensation
+not implemented` now reconstructs natively. Above-neighbor blending precedes
+left-neighbor blending, with normative masks, candidate stepping and neighbor
+limits. Each overlap uses the neighbor's first reference, stored vector and
+interpolation filters; neighboring warp and compound blends are excluded.
+Tile boundaries and the small-plane restriction on the above pass are retained.
+
+`generate_av1_obmc_samples.py` writes 2048 synthetic OBU/WebM/YUV triples.
+Coverage includes left-only, above-only and both-pass blocks, two segment
+reference assignments, four segment maps, adaptive CDFs, selected transform
+sizes, signed residuals and contrasting hidden references, with zero and fractional global translation
+vectors. Quarter- and half-pixel motion exercises overlap interpolation. Additional maps
+make the top and left candidates use different references, so pass ordering
+changes the output. `tests/av1_obmc.rs` checks saved independent pixels, segment
+maps, decoder reset, WebM timestamps, rewind and exact pixels after sync seek.
+Ordinary tests need no FFmpeg/libav, external decoder, encoder or network.
+Optional libaom is limited to generator-side range writing and pixel oracle.
+
+This matrix establishes 8-bit 16x16 blocks in 32x32 pictures, with 8-pixel luma
+and 4-pixel chroma overlaps, regular interpolation and LAST/ALTREF routing. Additional block sizes,
+high depth, small chroma planes, tile boundaries, compound/local-warp neighbors
+and multiple candidates still need wider fixture qualification. Scaled reference
+prediction remains an explicit unresolved AV1 gap.
+
+Validation: 25 regression tests across twelve AV1 suites and all 35 AV1 core
+tests pass offline, including the final expanded 2048-stream matrix. Controlled
+counterfactuals disabling OBMC or reversing the above/left passes each fail with
+a pixel mismatch; restoring the canonical implementation passes. Checked legacy
+generator defaults remain byte-identical.

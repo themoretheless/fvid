@@ -23,18 +23,18 @@ def signed_subexp(b,low,high,reference,value):
         if not more:b.u(v-offset,bits);return
         offset+=a;i+=1
 
-def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0,reference_select=False):
+def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0,reference_select=False,segment_references=None,motion_switchable=False):
     b=Bits();b.u(0);b.u(1,2);b.u(1);b.u(0);b.u(int(not adaptive));b.u(0);b.u(0,3);b.u(128,8)
     for logical in range(1,8):b.u(7 if logical==reference else 0,3)
     b.u(0);b.u(0);b.u(int(interpolation==4))
     if interpolation!=4:b.u(interpolation,2)
-    b.u(0)
+    b.u(int(motion_switchable))
     if adaptive:b.u(1)
     b.u(1);b.u(base,8);b.u(0,4);b.u(1);b.u(1);b.u(0);b.u(1)
     for seg in range(8):
         for feature in range(8):
             active=seg<2 and (feature==0 or forced_reference and feature==5 or feature==6 and forced_tools[seg]&1 or feature==7 and forced_tools[seg]&2);b.u(int(bool(active)))
-            if active and feature<6:b.u((-base if seg==0 else 0) if feature==0 else reference,9 if feature==0 else 3)
+            if active and feature<6:b.u((-base if seg==0 else 0) if feature==0 else (segment_references[seg] if segment_references is not None else reference),9 if feature==0 else 3)
     b.u(0);b.u(0,16);b.u(int(selected));b.u(int(reference_select));b.u(0)
     identity=[0,0,65536,0,0,65536]
     for logical in range(7):

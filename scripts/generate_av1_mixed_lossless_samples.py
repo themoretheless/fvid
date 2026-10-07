@@ -11,16 +11,18 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15,segment_references=None,obmc_blocks=None,residual_everywhere=False):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     pre_skip=forced_reference or any(forced_tools)
+    base_reference=reference
     skips={};groups={}
     symbols=[];grid=[0]*64;txs={};above=[[(0,0)]*8 for _ in range(3)];left=[[(0,0)]*8 for _ in range(3)];qi=0 if base<=20 else 1 if base<=60 else 2 if base<=120 else 3
     def s(id,indices,name,offset,length,value):symbols.append(dict(model=[id,indices],cdf=table(name,offset,length),symbol=value))
     s(8,[0],'DEFAULT_PARTITION_W32_CDF',0,11,3)
     for i,(x,y) in enumerate([(0,0),(4,0),(0,4),(4,4)]):
         segment=(mask>>i)&1;lossless=segment==0
+        reference=segment_references[segment] if segment_references is not None else base_reference
         tools=forced_tools[segment];skip=bool(tools&1)
         skipctx=int(skips.get((x,y-4),False))+int(skips.get((x-4,y),False))
         s(7,[0],'DEFAULT_PARTITION_W16_CDF',0,11,0)
@@ -75,6 +77,8 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                 else:
                     near=near_second and i==1;s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,int(near))
                     if near:s(27,[3],'DEFAULT_REF_MV_CDF',9,3,1)
+            if obmc_blocks is not None and i>0:
+                s(75,[6],'DEFAULT_USE_OBMC_CDF',18,3,(obmc_blocks>>i)&1)
             if interintra_mode is not None:
                 s(71,[1],'DEFAULT_INTER_INTRA_CDF',3,3,1)
                 s(72,[1],'DEFAULT_INTER_INTRA_MODE_CDF',5,5,interintra_mode)
@@ -102,7 +106,7 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                     if p==0:
                         ctx=0 if bw==step else 1 if t==0 and l==0 else 2+int(max(t,l)>3) if t==0 or l==0 else 4 if max(t,l)<=3 else 5 if min(t,l)<=3 else 6
                     else:ctx=7+int(any(a|b for a,b in top))+int(any(a|b for a,b in side))+3*int(bw>step)
-                    nonzero=bool(residual) and lossless and xx==bx+bw-1 and yy==by+bw-1
+                    nonzero=bool(residual) and lossless and (residual_everywhere or xx==bx+bw-1 and yy==by+bw-1)
                     if not skip:s(83,[txctx,ctx],'DEFAULT_TXB_SKIP_CDF',qi*195+(txctx*13+ctx)*3,3,int(not nonzero))
                     state=(0,0)
                     if nonzero and not skip:
