@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0)):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     pre_skip=forced_reference or any(forced_tools)
@@ -57,7 +57,11 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
                         s(40,[0,comp],'DEFAULT_MV_CLASS_CDF',comp*12,12,0)
                         s(24,[0,comp],'DEFAULT_MV_CLASS0_BIT_CDF',0,3,0)
                         s(41,[0,comp,0],'DEFAULT_MV_CLASS0_FR_CDF',comp*10,5,abs(magnitude)//2-1)
-                else:s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,0)
+                else:
+                    near=near_second and i==1;s(26,[0],'DEFAULT_ZERO_MV_CDF',0,3,int(near))
+                    if near:s(27,[3],'DEFAULT_REF_MV_CDF',9,3,1)
+            if switchable_filter:
+                ctx=3 if i==0 else 0;s(37,[ctx],'DEFAULT_INTERP_FILTER_CDF',ctx*4,4,0)
             if selected and not lossless and not skip:
                 ctx=12+int(y>0 and txs[(x,y-4)]<16)+int(x>0 and txs[(x-4,y)]<16)
                 s(15,[ctx],'DEFAULT_TXFM_SPLIT_CDF',ctx*3,3,0)

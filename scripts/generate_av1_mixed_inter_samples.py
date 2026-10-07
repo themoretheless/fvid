@@ -5,17 +5,51 @@ from pathlib import Path
 from generate_av1_show_existing_samples import Bits,obu,sequence,webm
 from generate_av1_mixed_lossless_samples import encode,key
 
-def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0)):
+def signed_subexp(b,low,high,reference,value):
+    n=high-low;r=reference-low;x=value-low
+    assert 0<=r<n and 0<=x<n
+    if 2*r>n:r=n-1-r;x=n-1-x
+    v=x if x>2*r else 2*(x-r) if x>=r else 2*(r-x)-1
+    i=0;offset=0
+    while True:
+        bits=3 if i==0 else i+2;a=1<<bits
+        if n<=offset+3*a:
+            count=n-offset;value=v-offset;w=count.bit_length();m=(1<<w)-count
+            if value<m:b.u(value,w-1)
+            else:
+                value+=m;b.u(value>>1,w-1);b.u(value&1)
+            return
+        more=v>=offset+a;b.u(int(more))
+        if not more:b.u(v-offset,bits);return
+        offset+=a;i+=1
+
+def frame(entropy,base,selected,adaptive,reference,forced_reference=False,forced_tools=(0,0),global_models=None,previous_globals=None,interpolation=0):
     b=Bits();b.u(0);b.u(1,2);b.u(1);b.u(0);b.u(int(not adaptive));b.u(0);b.u(0,3);b.u(128,8)
     for logical in range(1,8):b.u(7 if logical==reference else 0,3)
-    b.u(0);b.u(0);b.u(0);b.u(0,2);b.u(0)
+    b.u(0);b.u(0);b.u(int(interpolation==4))
+    if interpolation!=4:b.u(interpolation,2)
+    b.u(0)
     if adaptive:b.u(1)
     b.u(1);b.u(base,8);b.u(0,4);b.u(1);b.u(1);b.u(0);b.u(1)
     for seg in range(8):
         for feature in range(8):
             active=seg<2 and (feature==0 or forced_reference and feature==5 or feature==6 and forced_tools[seg]&1 or feature==7 and forced_tools[seg]&2);b.u(int(bool(active)))
             if active and feature<6:b.u((-base if seg==0 else 0) if feature==0 else reference,9 if feature==0 else 3)
-    b.u(0);b.u(0,16);b.u(int(selected));b.u(0);b.u(0);b.u(0,7)
+    b.u(0);b.u(0,16);b.u(int(selected));b.u(0);b.u(0)
+    identity=[0,0,65536,0,0,65536]
+    for logical in range(7):
+        kind,params=(global_models or [(0,identity)]*7)[logical]
+        old=(previous_globals or [identity]*7)[logical]
+        b.u(int(kind!=0))
+        if not kind:continue
+        b.u(int(kind==2))
+        if kind!=2:b.u(int(kind==1))
+        indices=([2,3]+([4,5] if kind==3 else []) if kind>=2 else [])+[0,1]
+        for index in indices:
+            absolute,precision=(12,15) if index>=2 else (8,2) if kind==1 else (12,6)
+            shift=16-precision;center=65536 if index%3==2 else 0;sub=1<<precision if center else 0
+            maximum=1<<absolute;value=(params[index]-center)>>shift;reference=(old[index]>>shift)-sub
+            signed_subexp(b,-maximum,maximum+1,reference,value)
     return obu(6,b.bytes()+entropy)
 
 def main():

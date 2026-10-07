@@ -60,7 +60,23 @@ impl Search<'_, '_> {
         if self.refs[1] > 0 {
             if [b.reference, b.reference2] == self.refs {
                 self.add(
-                    [b.mv, b.mv2].map(|mv| {
+                    [0, 1].map(|list| {
+                        let mv = [b.mv, b.mv2][list];
+                        let reference = self.refs[list];
+                        let mv = if matches!(b.mode, 15 | 23)
+                            && b.w.min(b.h) >= 2
+                            && self.decoder.h.global_types[reference - 1] > 1
+                        {
+                            self.decoder.global_vector(
+                                self.origin[0],
+                                self.origin[1],
+                                self.size[0],
+                                self.size[1],
+                                reference,
+                            )
+                        } else {
+                            mv
+                        };
                         lower(
                             mv,
                             self.decoder.h.integer_mv,
@@ -75,6 +91,20 @@ impl Search<'_, '_> {
         } else {
             for (reference, mv) in [(b.reference, b.mv), (b.reference2, b.mv2)] {
                 if reference == self.refs[0] {
+                    let mv = if matches!(b.mode, 15 | 23)
+                        && b.w.min(b.h) >= 2
+                        && self.decoder.h.global_types[reference - 1] > 1
+                    {
+                        self.decoder.global_vector(
+                            self.origin[0],
+                            self.origin[1],
+                            self.size[0],
+                            self.size[1],
+                            reference,
+                        )
+                    } else {
+                        mv
+                    };
                     self.add(
                         [
                             lower(
@@ -146,6 +176,32 @@ impl Decoder<'_> {
         let b = self.blocks[y as usize * self.cols + x as usize];
         (b.w != 0).then_some(b)
     }
+    fn global_vector(&self, x: usize, y: usize, w: usize, h: usize, reference: usize) -> [i32; 2] {
+        if reference == 0 {
+            return [0; 2];
+        }
+        let kind = self.h.global_types[reference - 1];
+        let m = self.h.global_params[reference - 1];
+        let mv = if kind == 0 {
+            [0; 2]
+        } else if kind == 1 {
+            [(m[0] >> 13) as i32, (m[1] >> 13) as i32]
+        } else {
+            let x = (x * 4 + w * 2 - 1) as i64;
+            let y = (y * 4 + h * 2 - 1) as i64;
+            let round = |v: i64| {
+                let shift = if self.h.high_precision_mv { 13 } else { 14 };
+                (v.signum()
+                    * ((v.abs() + (1 << (shift - 1))) >> shift)
+                    * if self.h.high_precision_mv { 1 } else { 2 }) as i32
+            };
+            [
+                round(m[4] * x + (m[5] - 65536) * y + m[1]),
+                round((m[2] - 65536) * x + m[3] * y + m[0]),
+            ]
+        };
+        lower(mv, self.h.integer_mv, self.h.high_precision_mv)
+    }
     fn motion_stack(&self, x: usize, y: usize, w: usize, h: usize, refs: [usize; 2]) -> Stack {
         let mut search = Search {
             decoder: self,
@@ -216,7 +272,10 @@ impl Decoder<'_> {
                 }
             }
             if refs[1] > 0 {
-                let mut combined = [[[0; 2]; 2]; 2];
+                let mut combined = [[
+                    self.global_vector(x, y, w, h, refs[0]),
+                    self.global_vector(x, y, w, h, refs[1]),
+                ]; 2];
                 for list in 0..2 {
                     for (i, mv) in same[list].iter().chain(&diff[list]).take(2).enumerate() {
                         combined[i][list] = *mv;
@@ -502,9 +561,12 @@ impl Decoder<'_> {
                 index
             };
             let mut mv = if single == 15 {
-                [0; 2]
+                self.global_vector(x, y, w, h, refs[list])
             } else {
-                stack.mv.get(pos).map_or([0; 2], |v| v.0[list])
+                stack
+                    .mv
+                    .get(pos)
+                    .map_or_else(|| self.global_vector(x, y, w, h, refs[list]), |v| v.0[list])
             };
             if single == 16 {
                 let joint = symbol(d, c, av1_cdfs::MV_JOINT, [0])?;
@@ -572,7 +634,11 @@ impl Decoder<'_> {
         }
         let mut warp = None;
         let mut local_warp = false;
-        if !compound && self.h.motion_mode_switchable && w.min(h) >= 2 {
+        if !compound
+            && self.h.motion_mode_switchable
+            && w.min(h) >= 2
+            && !(mode == 15 && !self.h.integer_mv && self.h.global_types[reference - 1] > 1)
+        {
             let overlap = (y > self.y0
                 && (x..(x + w).min(self.cols))
                     .step_by(2)
@@ -645,7 +711,12 @@ impl Decoder<'_> {
         let mut filters = [self.h.interpolation_filter; 2];
         if filters[0] == 4 {
             filters = [0; 2];
-            if !skip_mode && !local_warp && !(w.min(h) >= 2 && matches!(mode, 15 | 23)) {
+            let no_global_filter = w.min(h) >= 2
+                && ((mode == 15 && self.h.global_types[reference - 1] != 1)
+                    || (mode == 23
+                        && self.h.global_types[refs[0] - 1] != 1
+                        && self.h.global_types[refs[1] - 1] != 1));
+            if !skip_mode && !local_warp && !no_global_filter {
                 for dir in 0..if self.s.dual_filter { 2 } else { 1 } {
                     let a = above
                         .filter(|b| b.reference == reference || b.reference2 == reference)
@@ -1027,6 +1098,18 @@ impl Decoder<'_> {
         let h_references = self.h.references;
         let h_size = self.h.size;
         let color_depth = self.s.color.depth;
+        let warp_for = |reference: usize| {
+            let params = self.h.global_params[reference - 1];
+            if matches!(b.mode, 15 | 23)
+                && self.h.global_types[reference - 1] > 1
+                && !self.h.integer_mv
+                && super::super::av1_warp::valid(params)
+            {
+                Some(params)
+            } else {
+                b.warp
+            }
+        };
         Self::motion_samples(
             references,
             h_references,
@@ -1036,7 +1119,10 @@ impl Decoder<'_> {
             x,
             y,
             size,
-            b,
+            Block {
+                warp: warp_for(b.reference),
+                ..b
+            },
             compound,
             &mut self.scratch,
             &mut self.inter_pred,
@@ -1054,6 +1140,7 @@ impl Decoder<'_> {
                 Block {
                     reference: b.reference2,
                     mv: b.mv2,
+                    warp: warp_for(b.reference2),
                     ..b
                 },
                 true,

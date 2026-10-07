@@ -3779,3 +3779,23 @@ GLOBALMV uses the identity global model
 in this matrix. Nonidentity global motion, inherited forced tables, forced
 INTRA combined with skip/global, other geometries, OBMC/inter-intra and
 remaining codec tools are not qualified by these streams.
+
+## AV1 nonidentity global motion qualification
+
+Native parsing now accepts translation, rotation/zoom and affine global models,
+including differential parameters inherited from the primary reference. Prediction
+uses projected motion vectors and the owned affine warp implementation; invalid
+shear falls back to projected motion. Translation also consumes switchable filter
+symbols, fixing the reproduced truncated-entropy failure.
+
+`tests/av1_global_motion.rs` checks 768 owned global-motion streams and four
+GLOBALMV/NEARMV streams against saved independent pixels. Coverage includes header
+parameters, mixed segment maps, reset, WebM timestamps, rewind and sync seek.
+Generators are separate from tests; ordinary offline tests use no FFmpeg, libav
+or libaom. Optional libaom is only a generator-side range writer and pixel oracle.
+
+This matrix covers 32x32 8-bit pictures, mixed 16x16 segments and LAST/ALTREF
+routing. It does not establish full AV1 conformance: high-precision motion,
+scaled references, OBMC, inter-intra and general compound profiles remain outside
+this qualification. Earlier nonidentity-global-motion limitations above are
+superseded only within this documented scope.

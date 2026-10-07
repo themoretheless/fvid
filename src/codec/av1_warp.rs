@@ -3,9 +3,13 @@ use super::{
     av1_picture::Picture,
     av1_tables::{DIV_LUT, WARPED_FILTERS},
 };
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 fn round(v: i64, n: u32) -> i64 {
-    if n == 0 { v } else { (v + (1 << (n - 1))) >> n }
+    if n == 0 {
+        v
+    } else {
+        (v + (1 << (n - 1))) >> n
+    }
 }
 fn signed(v: i64, n: u32) -> i64 {
     v.signum() * round(v.abs(), n)
@@ -81,6 +85,9 @@ fn shear(p: [i64; 6]) -> Option<[i64; 4]> {
     let d = (p[5] - signed(p[3] * p[4] * factor, shift) - 65536).clamp(-32768, 32767);
     let [a, b, g, d] = [a, b, g, d].map(|v| signed(v, 6) << 6);
     (4 * a.abs() + 7 * b.abs() < 65536 && 4 * g.abs() + 4 * d.abs() < 65536).then_some([a, b, g, d])
+}
+pub(super) fn valid(params: [i64; 6]) -> bool {
+    shear(params).is_some()
 }
 pub(super) fn predict(
     reference: &Picture,

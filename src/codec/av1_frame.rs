@@ -1,10 +1,10 @@
 //! AV1 frame header syntax with explicit reference metadata.
 use super::{
     av1_sequence::Sequence,
-    av1_tiles::{Layout, align, signed},
+    av1_tiles::{align, signed, Layout},
     bits::BitReader,
 };
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 #[derive(Clone, Debug)]
 pub struct Quantization {
     pub base: u8,
@@ -70,6 +70,58 @@ pub struct Header {
     pub reference_select: bool,
     pub skip_mode: Option<[usize; 2]>,
     pub warped_motion: bool,
+    pub global_types: [u8; 7],
+    pub global_params: [[i64; 6]; 7],
+}
+const IDENTITY_GLOBAL: [i64; 6] = [0, 0, 65536, 0, 0, 65536];
+fn global_unsigned(b: &mut BitReader<'_>, n: u32) -> Result<u32> {
+    if n == 1 {
+        return Ok(0);
+    }
+    let w = n.ilog2() + 1;
+    let m = (1 << w) - n;
+    let v = b.read((w - 1) as u8)?;
+    if v < m {
+        Ok(v)
+    } else {
+        Ok((v << 1) - m + b.read(1)?)
+    }
+}
+fn global_parameter(b: &mut BitReader<'_>, low: i64, high: i64, reference: i64) -> Result<i64> {
+    let n = (high - low) as u32;
+    let mut i = 0;
+    let mut offset = 0;
+    let value = loop {
+        let bits = if i == 0 { 3 } else { i + 2 };
+        let a = 1u32 << bits;
+        if n <= offset + 3 * a {
+            break offset + global_unsigned(b, n - offset)?;
+        }
+        if !b.bit()? {
+            break offset + b.read(bits as u8)?;
+        }
+        offset += a;
+        i += 1;
+    } as i64;
+    let r = reference - low;
+    if !(0..high - low).contains(&r) {
+        return Err(invalid("invalid AV1 global motion reference parameter"));
+    }
+    let recenter = |r: i64, v: i64| {
+        if v > 2 * r {
+            v
+        } else if v & 1 != 0 {
+            r - (v + 1) / 2
+        } else {
+            r + v / 2
+        }
+    };
+    Ok(low
+        + if 2 * r <= i64::from(n) {
+            recenter(r, value)
+        } else {
+            i64::from(n) - 1 - recenter(i64::from(n) - 1 - r, value)
+        })
 }
 /// AV1 set_frame_refs: ties follow the normative slot scan order.
 fn short_references(
@@ -126,7 +178,11 @@ fn short_references(
     Ok(references)
 }
 fn delta_q(b: &mut BitReader<'_>) -> Result<i32> {
-    if b.bit()? { signed(b, 7) } else { Ok(0) }
+    if b.bit()? {
+        signed(b, 7)
+    } else {
+        Ok(0)
+    }
 }
 impl Header {
     /// Parse an intra frame in an OBU_FRAME payload (zero byte alignment).
@@ -517,12 +573,46 @@ impl Header {
         }
         let warped_motion = !intra && !error_resilient && s.warped_motion && b.bit()?;
         let reduced_tx_set = b.bit()?;
+        let mut global_types = [0; 7];
+        let mut global_params = [IDENTITY_GLOBAL; 7];
         if !intra {
-            for _ in 0..7 {
-                if b.bit()? {
-                    return Err(crate::unsupported(
-                        "AV1 nonidentity global motion not implemented",
-                    ));
+            let previous = primary.map_or([IDENTITY_GLOBAL; 7], |h| h.global_params);
+            for reference in 0..7 {
+                let kind = if !b.bit()? {
+                    0
+                } else if b.bit()? {
+                    2
+                } else if b.bit()? {
+                    1
+                } else {
+                    3
+                };
+                global_types[reference] = kind;
+                for index in [2, 3, 4, 5, 0, 1].into_iter().filter(|&index| {
+                    kind >= 1 && (index < 2 || kind >= 2 && (index < 4 || kind == 3))
+                }) {
+                    let (abs, precision) = if index >= 2 {
+                        (12, 15)
+                    } else if kind == 1 {
+                        (
+                            9 - u32::from(!high_precision_mv),
+                            3 - u32::from(!high_precision_mv),
+                        )
+                    } else {
+                        (12, 6)
+                    };
+                    let shift = 16 - precision;
+                    let diagonal = index % 3 == 2;
+                    let center = if diagonal { 65536 } else { 0 };
+                    let sub = if diagonal { 1 << precision } else { 0 };
+                    let r = (previous[reference][index] >> shift) - sub;
+                    let maximum = 1i64 << abs;
+                    global_params[reference][index] =
+                        (global_parameter(b, -maximum, maximum + 1, r)? << shift) + center;
+                }
+                if kind == 2 {
+                    global_params[reference][4] = -global_params[reference][3];
+                    global_params[reference][5] = global_params[reference][2];
                 }
             }
         }
@@ -573,6 +663,8 @@ impl Header {
             reference_select,
             skip_mode,
             warped_motion,
+            global_types,
+            global_params,
         })
     }
 }
@@ -593,11 +685,9 @@ mod tests {
         assert_eq!(h.tiles.count(), 1);
         assert_eq!(h.refresh_flags, 255);
         assert_eq!(h.quant.base, 86);
-        assert!(
-            !h.tiles.group(&o.payload[h.header_bytes..]).unwrap()[0]
-                .1
-                .is_empty()
-        );
+        assert!(!h.tiles.group(&o.payload[h.header_bytes..]).unwrap()[0]
+            .1
+            .is_empty());
         for end in 0..h.header_bytes {
             assert!(Header::parse_intra(&s, &o.payload[..end], 0, 0).is_err());
         }
