@@ -64,5 +64,8 @@
       "file": "av1-tile-list-cdf-q32-d8-c422-sb128-multi-list.yuv",
       "sha256": "7f3840b2d07ebeaca0bb4e0c04a2f76233dd1364d5aca139082ef0076d72bb99"
     }
-  }
+  },
+  "require_nonzero_motion": false,
+  "require_border_motion": false,
+  "require_fractional_motion": false
 }

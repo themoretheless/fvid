@@ -149,10 +149,30 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     assert_eq!(output.size, [sb * 2, sb * 2]);
     assert!(output.nonzero_motion_blocks <= output.inter_blocks);
     assert!(output.fractional_motion_blocks <= output.nonzero_motion_blocks);
+    assert!(output.border_motion_blocks <= output.nonzero_motion_blocks);
+    let manifest: serde_json::Value = serde_json::from_slice(&bytes("generated.json")).unwrap();
+    assert_eq!(manifest["require_nonzero_motion"].as_bool(), Some(motion));
+    assert_eq!(manifest["require_border_motion"].as_bool(), Some(motion));
+    let fractional = motion
+        && ((q == 0 && depth == 8 && chroma == 422) || (q > 0 && (sb == 128 || chroma == 422)));
+    assert_eq!(
+        manifest["require_fractional_motion"].as_bool(),
+        Some(fractional)
+    );
     if motion {
         assert!(
             output.nonzero_motion_blocks > 0,
             "{prefix}: fixture must exercise actual nonzero motion"
+        );
+        assert!(
+            output.border_motion_blocks > 0,
+            "{prefix}: coded reference rectangle must cross the frame edge"
+        );
+    }
+    if fractional {
+        assert!(
+            output.fractional_motion_blocks > 0,
+            "{prefix}: coded luma displacement must be fractional"
         );
     }
     assert_eq!(sequence.superblock128, sb == 128);
@@ -333,6 +353,7 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     assert_eq!(sparse.decoded_tiles, 1);
     assert!(sparse.nonzero_motion_blocks <= sparse.inter_blocks);
     assert!(sparse.fractional_motion_blocks <= sparse.nonzero_motion_blocks);
+    assert!(sparse.border_motion_blocks <= sparse.nonzero_motion_blocks);
     let mut indexed = obu.payload.to_vec();
     indexed[4] = 127;
     let many = vec![anchors[0].clone(); 128];

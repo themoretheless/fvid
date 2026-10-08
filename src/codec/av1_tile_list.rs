@@ -62,6 +62,7 @@ pub struct Output {
     pub inter_blocks: u64,
     pub nonzero_motion_blocks: u64,
     pub fractional_motion_blocks: u64,
+    pub border_motion_blocks: u64,
     pub size: [usize; 2],
     pub depth: u8,
     pub subsampling: [bool; 2],
@@ -240,6 +241,7 @@ pub(crate) fn decode(
             inter_blocks: 0,
             nonzero_motion_blocks: 0,
             fractional_motion_blocks: 0,
+            border_motion_blocks: 0,
             size,
             depth: s.color.depth,
             subsampling: s.color.subsampling,
@@ -254,6 +256,7 @@ pub(crate) fn decode(
     output.inter_blocks = 0;
     output.nonzero_motion_blocks = 0;
     output.fractional_motion_blocks = 0;
+    output.border_motion_blocks = 0;
     for (index, entry) in list.entries.iter().enumerate() {
         let mut references = references;
         references[h.references[0]] = Some(anchors[entry.anchor]);
@@ -265,6 +268,7 @@ pub(crate) fn decode(
         output.nonzero_motion_blocks += u64::from(picture.inter_prediction.nonzero_motion_blocks);
         output.fractional_motion_blocks +=
             u64::from(picture.inter_prediction.fractional_motion_blocks);
+        output.border_motion_blocks += u64::from(picture.inter_prediction.border_motion_blocks);
         for p in 0..3 {
             let sx = if p == 0 {
                 0

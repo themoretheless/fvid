@@ -94,6 +94,11 @@ def main():
                         "order": ORDER, "oracle": "stock libaom", "motion_shift": [4, 2] if motion else [0, 0], "cpu_used": 0 if motion else 6,
                         "multi_anchor_offsets": [0, 9 << (depth - 8)],
                         "multi_anchor_indices": [0, 1, 0, 1], "artifacts": records}
+            manifest["require_nonzero_motion"] = bool(motion)
+            manifest["require_border_motion"] = bool(motion)
+            manifest["require_fractional_motion"] = bool(motion and (
+                (q == 0 and depth == 8 and chroma == 422) or
+                (q > 0 and (sb == 128 or chroma == 422))))
             (root / (name_prefix + "generated.json")).write_text(json.dumps(manifest, indent=2) + "\n")
 
 

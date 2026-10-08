@@ -64,5 +64,8 @@
       "file": "av1-tile-list-cdf-d12-c420-sb128-multi-list.yuv",
       "sha256": "1bc8bfbce4594005381ef4c7d88cf4b829da061d802f416fa3087a1021b5295c"
     }
-  }
+  },
+  "require_nonzero_motion": false,
+  "require_border_motion": false,
+  "require_fractional_motion": false
 }

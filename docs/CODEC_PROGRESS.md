@@ -5289,3 +5289,25 @@ context refusal. Forty-six AV1 units and full-chroma/spatial/spatiotemporal
 integration regressions pass. Fractional motion is counted but not yet a required
 fixture property; coded off-frame vectors, additional motion tools/interactions
 and automatic container external context remain separate qualifications.
+
+
+## AV1 tile-list coded border and fractional motion acceptance (2026-10-08)
+
+The inter-block path now counts unscaled translation blocks whose visible
+coded reference rectangle crosses the frame boundary. It excludes scaled/warp
+geometry and zero-MV frame padding, and increments only after successful
+reconstruction. Tile-list outputs expose the count and reset it for each call,
+including sparse updates.
+
+All 108 moving fixtures require border_motion_blocks>0, alongside nonzero
+motion and exact stock pixels. Forty-two also require fractional luma motion:
+lossless 8-bit 422 at both SB sizes; Q32 422 at SB64 for all depths; Q32 at SB128
+for all depths/chroma. Each group spans default, adapted-LAST and encoded
+PRIMARY_REF_NONE camera contexts. Requirements are explicit in manifests and
+asserted by offline acceptance; diagnostics alone are no longer the evidence.
+
+All 216 camera cases, 46 AV1 units and full-chroma/inter/spatial/spatiotemporal
+regressions pass without external decoders. Existing fixture binaries were
+unchanged on regeneration. This qualifies the observed coded border/fractional
+paths, not every direction/phase/filter combination, scaled/warped boundary
+interaction or all remaining codec gaps.

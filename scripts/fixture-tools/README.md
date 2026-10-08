@@ -177,3 +177,10 @@ uses cpu-used 0, with properly extended external-reference image borders.
 Native moving acceptance requires actual nonzero coded motion; matching
 pixels alone is insufficient. Motion/depth/chroma/SB/context details and
 artifact hashes are recorded in each `mv-` manifest.
+
+Tile-list manifests explicitly record positive coded-feature requirements.
+All 108 moving cases must decode nonzero and border-crossing motion; the
+pinned 42 fractional cases must also decode fractional luma displacement.
+Regenerating with different stock encoder settings must retain these properties
+or update fixtures and qualification deliberately; matching pixels alone does
+not satisfy the required motion coverage.

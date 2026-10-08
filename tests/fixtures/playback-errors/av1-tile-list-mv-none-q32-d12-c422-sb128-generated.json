@@ -64,5 +64,8 @@
       "file": "av1-tile-list-mv-none-q32-d12-c422-sb128-multi-list.yuv",
       "sha256": "1f6b1accb6d1ef10d6618bf4decd0ad37b09a3ea46d581bb30702cdf04d8ad52"
     }
-  }
+  },
+  "require_nonzero_motion": true,
+  "require_border_motion": true,
+  "require_fractional_motion": true
 }

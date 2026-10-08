@@ -1442,3 +1442,24 @@ An initial generation-only aggregate buffer was too small for four valid
 entries; it now allows four 65536-byte payloads while checking each entry's
 16-bit length. All 216 cases have seven-artifact SHA-256 manifests. No private
 media, external runtime decoders, FFmpeg or network are needed for tests.
+
+
+### Tile-list border/fractional motion requirements
+
+The already-owned 108 moving cases contain actual unscaled coded reference
+rectangles crossing the frame edge. Native instrumentation counts this after
+successful reconstruction, uses the visible block extent and excludes warped
+and scaled predictions. Zero-motion frame padding is not counted as border
+coverage. Every moving case now requires a positive border count, comparing
+all stock pixels and the prior independent lossless/source controls.
+
+42 pinned cases also contain fractional luma vectors: lossless depth8/c422
+with either SB; Q32/c422/SB64 at all depths; Q32/SB128 at all depth/chroma
+combinations, each across the three existing CDF contexts.
+`require_nonzero_motion`, `require_border_motion`, and
+`require_fractional_motion` record positive acceptance requirements in manifests.
+False means the feature is not required, not that it cannot be present.
+Rust tests assert these requirements, real decoded counters, exact pixels,
+sparse counter bounds and all prior controls. Regeneration changed metadata
+only; no original OBU/YUV binaries or private source material were substituted.
+Ordinary tests use checked-in artifacts without external codecs or network.

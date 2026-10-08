@@ -875,6 +875,30 @@ impl Decoder<'_> {
                         && self.h.global_types[*r - 1] > 1
                         && super::super::av1_warp::valid(self.h.global_params[*r - 1])
                 });
+        // Use the visible block extent, so frame padding with zero MV does not
+        // masquerade as an out-of-frame prediction. Warp/scaled paths have
+        // different geometry and are deliberately excluded from this counter.
+        let border_motion = !global_warp
+            && !(local_warp && warp.is_some())
+            && mvs
+                .iter()
+                .zip(scaled_refs)
+                .take(if compound { 2 } else { 1 })
+                .any(|(mv, scaled)| {
+                    if scaled || *mv == [0, 0] {
+                        return false;
+                    }
+                    let start = [(x * 4) as i64 * 8, (y * 4) as i64 * 8];
+                    let end = [
+                        ((x + w) * 4).min(self.h.size[0] as usize) as i64 * 8,
+                        ((y + h) * 4).min(self.h.size[1] as usize) as i64 * 8,
+                    ];
+                    let delta = [i64::from(mv[1]), i64::from(mv[0])];
+                    (0..2).any(|axis| {
+                        start[axis] + delta[axis] < 0
+                            || end[axis] + delta[axis] > i64::from(self.h.size[axis]) * 8
+                    })
+                });
         let stats = &mut self.image.inter_prediction;
         if compound {
             match compound_mask {
@@ -890,6 +914,7 @@ impl Decoder<'_> {
         stats.nonzero_motion_blocks += u32::from(coded_motion.clone().any(|v| *v != [0, 0]));
         stats.fractional_motion_blocks +=
             u32::from(coded_motion.clone().any(|v| v.iter().any(|c| c % 8 != 0)));
+        stats.border_motion_blocks += u32::from(border_motion);
         stats.obmc_blocks += u32::from(obmc);
         stats.interintra_blocks += u32::from(interintra_mode.is_some());
         stats.local_warp_blocks +=

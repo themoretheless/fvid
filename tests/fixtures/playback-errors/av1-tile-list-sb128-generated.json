@@ -64,5 +64,8 @@
       "file": "av1-tile-list-sb128-multi-list.yuv",
       "sha256": "48b517b8c4f18efda1155e42fc630bc1c6aebcfb528520a3f9e0b668828ffb31"
     }
-  }
+  },
+  "require_nonzero_motion": false,
+  "require_border_motion": false,
+  "require_fractional_motion": false
 }

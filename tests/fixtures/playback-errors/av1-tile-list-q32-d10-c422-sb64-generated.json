@@ -64,5 +64,8 @@
       "file": "av1-tile-list-q32-d10-c422-sb64-multi-list.yuv",
       "sha256": "3f74b8cd2eca125f8494c7d4ee70e1372107547b711d0d7d8408a6629f49ebb6"
     }
-  }
+  },
+  "require_nonzero_motion": false,
+  "require_border_motion": false,
+  "require_fractional_motion": false
 }
