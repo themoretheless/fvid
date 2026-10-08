@@ -4464,3 +4464,19 @@ instead of the actual coded extent fails on the first fixture's restored
 pixels. The source was restored before final acceptance validation. These
 fixtures are generated separately and ordinary tests require no FFmpeg or
 reference decoder. Other dimensions and AV1 tools remain unqualified.
+
+
+### AV1 super-resolution owned reproductions
+
+Eighteen owned 192x128 output fixtures force super-resolution denominators
+9, 12 and 16 at 8/10/12 bits, with two deterministic noise patterns each.
+Their headers prove actual scaled coded width and exclude intrabc and
+restoration to isolate this tool. libaom and dav1d agree on all reference
+pixels; all 54 fixture hashes were verified. The default regression pins
+the current native super-resolution refusal and reset behavior.
+
+A distinct ignored acceptance test requires full 192x128 native pixels,
+reset, WebM replay, timestamps, rewind and seek. This is an unimplemented
+reconstruction tool, not supported playback; enable acceptance and remove
+the refusal expectation with its implementation. Generating these owned
+fixtures is separate from offline tests and uses no FFmpeg.
