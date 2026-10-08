@@ -39,35 +39,45 @@ fn main() {
         frame.spatial_id,
     )
     .unwrap();
-    assert_eq!(intended.quant.matrix, Some([7; 3]));
+    let had_matrix = intended.quant.matrix.is_some();
+    assert!(intended.quant.matrix.is_none() || intended.quant.matrix == Some([7; 3]));
     assert_eq!(intended.quant.delta[1..3], intended.quant.delta[3..5]);
     let uv_bits = 1 + intended.quant.delta[1..3]
         .iter()
         .map(|&v| if v == 0 { 1 } else { 8 })
         .sum::<usize>();
+    let old_matrix_bits = if had_matrix { 8 } else { 1 };
+    let prefix_bits = if had_matrix { uv_bits } else { uv_bits - 1 };
     let old_header_bytes = intended.header_bytes;
     intended.quant.matrix = Some(levels);
     let original_bits = bits(&frame.payload[..old_header_bytes]);
     let mut matches = Vec::new();
-    for bit in uv_bits..original_bits.len() - 8 {
-        if original_bits[bit..bit + 8] != [0, 1, 1, 1, 0, 1, 1, 1] {
+    for bit in prefix_bits..original_bits.len() - old_matrix_bits {
+        if (had_matrix && original_bits[bit..bit + 8] != [0, 1, 1, 1, 0, 1, 1, 1])
+            || (!had_matrix && original_bits[bit] != 0)
+        {
             continue;
         }
         for padding in 0..8 {
-            if original_bits.len() - padding < bit + 8
+            if original_bits.len() - padding < bit + old_matrix_bits
                 || original_bits[original_bits.len() - padding..]
                     .iter()
                     .any(|&v| v != 0)
             {
                 continue;
             }
-            let mut b = original_bits[..bit - uv_bits].to_vec();
+            let mut b = original_bits[..bit - prefix_bits].to_vec();
             b.push(0);
-            b.extend_from_slice(&original_bits[bit - uv_bits..bit]);
+            b.extend_from_slice(&original_bits[bit - prefix_bits..bit]);
+            if !had_matrix {
+                b.push(1);
+            }
             for level in levels {
                 b.extend((0..4).rev().map(|i| (level >> i) & 1));
             }
-            b.extend_from_slice(&original_bits[bit + 8..original_bits.len() - padding]);
+            b.extend_from_slice(
+                &original_bits[bit + old_matrix_bits..original_bits.len() - padding],
+            );
             while b.len() % 8 != 0 {
                 b.push(0);
             }

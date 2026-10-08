@@ -1,5 +1,5 @@
 /* Owned AV1 distinct-plane matrix fixture generator. libaom is generation-only.
- * Arguments: size pattern quality full frames depth filters tilecols inter id_mode. Baseline matrices are fixed to level 7. */
+ * Arguments: size pattern quality full frames depth filters tilecols inter id_mode. Lossy baseline matrices are level 7; lossless baseline omits matrices. */
 #include <aom/aom_encoder.h>
 #include <aom/aomcx.h>
 #include <stdio.h>
@@ -55,10 +55,12 @@ int main(int argc, char **argv) {
     check(aom_codec_control(&ctx,AV1E_SET_ENABLE_AB_PARTITIONS,0));
     check(aom_codec_control(&ctx,AV1E_SET_ENABLE_1TO4_PARTITIONS,0));
   }
+  if(q!=0) {
   check(aom_codec_control(&ctx,AV1E_SET_ENABLE_CHROMA_DELTAQ,1));
   check(aom_codec_control(&ctx,AV1E_SET_ENABLE_QM,1u));
   check(aom_codec_control(&ctx,AV1E_SET_QM_MIN,7u));
   check(aom_codec_control(&ctx,AV1E_SET_QM_MAX,7u));
+  }
   aom_image_t *img=aom_img_alloc(NULL,depth>8?AOM_IMG_FMT_I42016:AOM_IMG_FMT_I420,size,size,1);
   if(!img) return 1;
   for(int frame=0;frame<frames;frame++) {
