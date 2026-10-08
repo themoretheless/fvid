@@ -94,6 +94,7 @@ pub struct AudioPacket {
 pub struct WebmAudioReader<R> {
     demuxer: WebmReader<R>,
     track_number: u64,
+    in_band_ps: bool,
     packet_index: usize,
     presentation_floor: Option<i64>,
     /// The setup bytes the decoder asks for, in the layout it reads.
@@ -148,7 +149,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
     }
 
     /// Open a track the demuxer already listed.
-    fn from_track(demuxer: WebmReader<R>, track_number: u64) -> Result<Self> {
+    fn from_track(mut demuxer: WebmReader<R>, track_number: u64) -> Result<Self> {
         let track = demuxer
             .tracks
             .iter()
@@ -166,7 +167,27 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         if track.channels == 0 || track.channels > u64::from(u16::MAX) {
             return Err(invalid("WebM audio track has no usable channel count"));
         }
+        let candidate = if codec_tag == "mp4a" {
+            let asc = crate::codec::config::aac_specific_config(&extra_data)?;
+            let config = crate::codec::config::AudioSpecificConfig::parse(asc)?;
+            if config.ps_present.is_none() && config.sbr_present != Some(false) {
+                crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(asc, track.sample_rate as u32).ok()
+            } else { None }
+        } else { None };
+        let mut in_band_ps = false;
+        if let Some(mut probe) = candidate {
+            let mut index = 0;
+            while index < demuxer.packets.len() || demuxer.scan_more()? {
+                if demuxer.packets[index].track == track_number {
+                    let payload = demuxer.read_packet(index)?;
+                    if probe.decode(&payload).is_err() { probe.reset(); }
+                    else if probe.ps_detected() { in_band_ps = true; break; }
+                }
+                index += 1;
+            }
+        }
         Ok(Self {
+            in_band_ps,
             demuxer,
             track_number,
             packet_index: 0,
@@ -775,6 +796,16 @@ mod tests {
 }
 
 impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
+    fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.in_band_ps {
+            Ok(Box::new(crate::codec::aac_ps_playback::PsAacDecoder::new_with_in_band_ps(
+                &self.extra_data, self.sample_rate(), 2,
+            )?))
+        } else {
+            crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())
+        }
+    }
+
     fn preroll_target(&self) -> Option<i64> {
         (self.codec_tag == "mp4a").then(|| self.presentation_floor.unwrap_or(0))
     }
@@ -811,7 +842,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn channels(&self) -> u16 {
-        self.track().channels as u16
+        if self.in_band_ps { 2 } else { self.track().channels as u16 }
     }
 
     /// How long the track is, as its own blocks say: the span between the first

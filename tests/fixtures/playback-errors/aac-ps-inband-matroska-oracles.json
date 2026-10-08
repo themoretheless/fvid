@@ -1,0 +1,88 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-inband-lc-960-synthetic.mkv",
+      "slots": 15,
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        80000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "abd2e69996bb09799fc07e8cc643a16a4cf0a69353fd15e15e5f3c08cf913a92"
+    },
+    {
+      "file": "he-aac-ps-inband-sbr-960-synthetic.mkv",
+      "slots": 15,
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        80000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "1f6b98cfdfd9eedbc6f8cdf5a0b798da116b3a83eaafbe15e9d5fccb1632e253"
+    },
+    {
+      "file": "he-aac-ps-inband-lc-1024-synthetic.mkv",
+      "slots": 16,
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        80000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "85a85ff49b69c6f848232cc9c5af914392fdd28ef100a84cd411e6774145b7ac"
+    },
+    {
+      "file": "he-aac-ps-inband-sbr-1024-synthetic.mkv",
+      "slots": 16,
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        80000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "0aebcbb478b1fe8d2a58e804cc9567ef57f1db7d1f227790064ef84cee0698d4"
+    }
+  ]
+}

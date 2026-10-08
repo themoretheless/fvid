@@ -296,3 +296,94 @@ fn mp4_reader_discovers_unhinted_ps_before_decoder_creation_without_consuming_pa
         assert_eq!(replay, pcm);
     }
 }
+
+#[cfg(feature = "player")]
+#[test]
+fn matroska_reader_discovers_unhinted_ps_and_retains_negative_source_timestamps() {
+    use fvid::audio::AudioStream;
+    let manifest: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-inband-matroska-oracles.json"
+    ))
+    .unwrap();
+    for case in manifest["cases"].as_array().unwrap() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(case["file"].as_str().unwrap());
+        let mut stream = fvid::playback_webm_audio::WebmAudioReader::open(
+            std::fs::File::open(path).unwrap(),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!((stream.sample_rate(), stream.channels()), (48000, 2));
+        let original = stream.extra_data().to_vec();
+        let mut legacy = fvid::codec::make_audio_decoder("mp4a", &original, 48000, 1, 0).unwrap();
+        let mut legacy_error = None;
+        let mut decoder = stream.make_decoder().unwrap();
+        let mut pcm = Vec::new();
+        let mut source = Vec::new();
+        let mut count = 0;
+        while let Some(packet) = stream.next_packet().unwrap() {
+            assert_eq!(packet.pts, case["source_pts_ns"][count].as_i64().unwrap());
+            if legacy_error.is_none() {
+                if let Err(error) = legacy.decode_packet(
+                    &packet.data,
+                    packet.pts,
+                    u64::try_from(packet.duration).unwrap(),
+                ) {
+                    legacy_error = Some(error.to_string());
+                }
+            }
+            source.push((packet.pts, u64::try_from(packet.duration).unwrap()));
+            count += 1;
+            if let Some(frame) = decoder
+                .decode_packet(
+                    &packet.data,
+                    packet.pts,
+                    u64::try_from(packet.duration).unwrap(),
+                )
+                .unwrap()
+            {
+                assert_eq!((frame.source_pts, frame.source_duration), source[pcm.len()]);
+                pcm.push(frame.packet.data);
+            }
+        }
+        let tail = decoder.finish_packet().unwrap().unwrap();
+        assert_eq!((tail.source_pts, tail.source_duration), source[2]);
+        pcm.push(tail.packet.data);
+        assert!(
+            legacy_error
+                .unwrap()
+                .contains("SBR extended audio/PS synthesis is not yet implemented")
+        );
+        assert_eq!(count, 3);
+        assert_eq!(pcm.len(), 3);
+        assert!(decoder.finish_packet().unwrap().is_none());
+        let oracle = include_bytes!("fixtures/playback-errors/aac-ps-absence-pcm.bin");
+        for (n, bytes) in pcm.iter().flat_map(|p| p.chunks_exact(4)).enumerate() {
+            let actual = f32::from_le_bytes(bytes.try_into().unwrap());
+            let descriptor = &case["pcm"][n % 2];
+            let start = descriptor[0].as_u64().unwrap() as usize + (n / 2) * 8;
+            let expected = f64::from_le_bytes(oracle[start..start + 8].try_into().unwrap()) as f32;
+            assert!((actual - expected).abs() <= 2. * f32::EPSILON * expected.abs() + 2e-16);
+        }
+
+        assert_eq!(stream.extra_data(), original);
+        stream.rewind();
+        decoder.reset();
+        let mut replay = vec![];
+        while let Some(packet) = stream.next_packet().unwrap() {
+            if let Some(frame) = decoder
+                .decode_packet(
+                    &packet.data,
+                    packet.pts,
+                    u64::try_from(packet.duration).unwrap(),
+                )
+                .unwrap()
+            {
+                replay.push(frame.packet.data);
+            }
+        }
+        replay.push(decoder.finish_packet().unwrap().unwrap().packet.data);
+        assert_eq!(replay, pcm);
+    }
+}

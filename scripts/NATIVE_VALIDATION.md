@@ -770,3 +770,15 @@ This does not yet qualify output-clock changes, missing SBR fills in a selected
 PS stream, PCE/coupling layouts, or Matroska implicit-PS discovery. The current
 probe decodes eligible packets and may scan the complete track; startup cost
 still needs a syntax-only probe and performance qualification.
+
+Matroska in-band PS reader dispatch (2026-10-09): four additional original
+AVC/AAC fixtures declare mono Audio metadata and unspecified PS in LC/SBR ASC,
+then carry late PS payload with 960/1024 framing and negative source timestamps.
+The reader's decoder factory negotiates stereo on actual accepted payload.
+The integration regression first reproduces the former exact normal-AAC error
+`SBR extended audio/PS synthesis is not yet implemented`, then accepts all
+independently referenced stereo PCM through EOF and byte-identical rewind,
+retaining original source timestamps and configuration. Generation is offline
+and deterministic. Output-clock changes, missing SBR fill playback, complex
+AAC layouts, implicit-PS export dispatch and probe startup performance remain
+unqualified; this supersedes the Matroska discovery limitation above only.
