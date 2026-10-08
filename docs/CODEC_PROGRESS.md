@@ -6564,3 +6564,43 @@ Validation: 829 tests passed offline (root lib 347, owned media lib 432,
 The player build check, rustfmt, Python syntax and diff checks passed. Seven
 new/current reference assets regenerate identically, and both original
 1024-sample PS MP4 wrappers remain byte-identical.
+
+### Native complete AAC-LC/SBR/PS packet API (2026-10-09)
+
+`fvid::codec::aac_ps_native::NativePsAacDecoder` now accepts complete original
+raw_data_blocks, without extracting SCE bits or supplying core PCM externally.
+It uses the canonical owned channel parser, spectral/noise/TNS reconstruction
+and IMDCT/window synthesis, then the transactional SBR/PS bridge through the
+owned bounded FIL reader. ID_END and remaining-byte validation occur before
+committing any core/extension/queued state. Both explicit AOT29 and sync-extension
+SBR/PS signalling are accepted for one mono AAC-LC core and single/double output
+rate. The API returns interleaved finite f32 stereo with original `frame_index`;
+initial decode returns None, subsequent decode emits the prior packet's frame,
+and `finish()` emits the last frame once. Output sample rate/mask/channels are
+explicit. Opaque checkpoints include core overlap/noise, SBR/PS, pending frame
+and EOF status; another core/output format is rejected without state changes.
+
+Four original MP4 packet sequences qualify 960/1024 core samples, 30/32 PS
+slots, both rates and both signalling forms (16 cases). Every stereo PCM sample
+matches the independently saved SBR/PS reference after final f32 conversion.
+Replay, reset, EOF restoration, frame identities, incompatible checkpoints and
+all strict packet truncations are covered. Six short original malformed MP4s
+reproduce trailing bytes, missing fill, duplicate SCE, a late element after the
+SBR/PS DSP advanced, fill before SCE and truncated fill. Each test asserts its
+specific error and verifies that the next valid packet and EOF match the saved
+baseline, including core/extension and queued PCM. Eight newly generated assets
+regenerate byte-identically; ordinary tests neither generate nor access network
+or FFmpeg.
+
+These fixtures use silent native LC cores with nonzero authored SBR noise.
+Independent nonzero-core PS PCM conformance remains open. The general
+`NativeAacDecoder`/production factories still refuse PS until they can carry
+delayed frame identity, EOF, startup trimming, checkpoints/memory and seek
+correctly. This packet API does not by itself qualify production playback or
+close missing/late PS, coupling/PCE or other codec/profile gaps.
+
+Validation: 832 tests passed offline (root lib 347, owned media lib 432,
+12 HE-AAC integration suites 53); one existing owned test remains ignored.
+The player build, formatting, Python syntax and diff checks passed. The native
+PS regression binary links only libiconv/libSystem, with no FFmpeg/libav codec
+library. All eight new native packet fixture assets regenerate identically.

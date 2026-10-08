@@ -1,0 +1,262 @@
+{
+  "kind": "full native SCE/SBR/PS packet API cases; original synthetic malformed MP4s",
+  "cases": [
+    {
+      "file": "he-aac-ps-matrix-retain-synthetic.mp4",
+      "slots": 16,
+      "configurations": [
+        {
+          "signalling": "explicit",
+          "output_rate": 24000,
+          "asc": "eb0b0800"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 24000,
+          "asc": "130856e5b54880"
+        },
+        {
+          "signalling": "explicit",
+          "output_rate": 48000,
+          "asc": "eb098800"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 48000,
+          "asc": "130856e59d4880"
+        }
+      ]
+    },
+    {
+      "file": "he-aac-ps-matrix-grid-retain-synthetic.mp4",
+      "slots": 16,
+      "configurations": [
+        {
+          "signalling": "explicit",
+          "output_rate": 24000,
+          "asc": "eb0b0800"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 24000,
+          "asc": "130856e5b54880"
+        },
+        {
+          "signalling": "explicit",
+          "output_rate": 48000,
+          "asc": "eb098800"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 48000,
+          "asc": "130856e59d4880"
+        }
+      ]
+    },
+    {
+      "file": "he-aac-sbr-ps-960-retain-synthetic.mp4",
+      "slots": 15,
+      "configurations": [
+        {
+          "signalling": "explicit",
+          "output_rate": 24000,
+          "asc": "eb0b0a00"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 24000,
+          "asc": "130c56e5b54880"
+        },
+        {
+          "signalling": "explicit",
+          "output_rate": 48000,
+          "asc": "eb098a00"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 48000,
+          "asc": "130c56e59d4880"
+        }
+      ]
+    },
+    {
+      "file": "he-aac-sbr-ps-960-grid-retain-synthetic.mp4",
+      "slots": 15,
+      "configurations": [
+        {
+          "signalling": "explicit",
+          "output_rate": 24000,
+          "asc": "eb0b0a00"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 24000,
+          "asc": "130c56e5b54880"
+        },
+        {
+          "signalling": "explicit",
+          "output_rate": 48000,
+          "asc": "eb098a00"
+        },
+        {
+          "signalling": "sync",
+          "output_rate": 48000,
+          "asc": "130c56e59d4880"
+        }
+      ]
+    }
+  ],
+  "malformed": [
+    {
+      "name": "trailing-byte",
+      "video": {
+        "file": "he-aac-ps-native-trailing-byte-synthetic.mp4",
+        "sha256": "aa864b9a2f3de13244860af6dea389f7328076106b5a05d3f64ac1b19b547588",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 136
+        },
+        {
+          "offset": 136,
+          "bytes": 18
+        },
+        {
+          "offset": 154,
+          "bytes": 16
+        }
+      ],
+      "error": "trailing bytes after PS AAC END",
+      "failing_packet": 1
+    },
+    {
+      "name": "missing-fill",
+      "video": {
+        "file": "he-aac-ps-native-missing-fill-synthetic.mp4",
+        "sha256": "d915f57d57351da51d71ab4018ac77bdc84d9290b5605107844d2c6ab5290b23",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "frames": [
+        {
+          "offset": 170,
+          "bytes": 136
+        },
+        {
+          "offset": 306,
+          "bytes": 4
+        },
+        {
+          "offset": 310,
+          "bytes": 16
+        }
+      ],
+      "error": "PS AAC block requires SBR/PS fill",
+      "failing_packet": 1
+    },
+    {
+      "name": "duplicate-sce",
+      "video": {
+        "file": "he-aac-ps-native-duplicate-sce-synthetic.mp4",
+        "sha256": "3b2b440b83233193ce4eff39a7f3e9766b8f564f9b7bfa956b4c7fd470012cec",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "frames": [
+        {
+          "offset": 326,
+          "bytes": 136
+        },
+        {
+          "offset": 462,
+          "bytes": 21
+        },
+        {
+          "offset": 483,
+          "bytes": 16
+        }
+      ],
+      "error": "duplicate PS AAC mono element",
+      "failing_packet": 1
+    },
+    {
+      "name": "late-element",
+      "video": {
+        "file": "he-aac-ps-native-late-element-synthetic.mp4",
+        "sha256": "00edb6143800c6ee8e4f59ba7296e21b76b4d7a6aa68b180137d4497a7bc8a07",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "frames": [
+        {
+          "offset": 499,
+          "bytes": 136
+        },
+        {
+          "offset": 635,
+          "bytes": 17
+        },
+        {
+          "offset": 652,
+          "bytes": 16
+        }
+      ],
+      "error": "PS AAC block requires a sole mono SCE",
+      "failing_packet": 1
+    },
+    {
+      "name": "fill-before-sce",
+      "video": {
+        "file": "he-aac-ps-native-fill-before-sce-synthetic.mp4",
+        "sha256": "26ef9b5ac5c4d75090b68dbcadff03272fc3a44d2a76b4836048d1080043586c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "frames": [
+        {
+          "offset": 668,
+          "bytes": 136
+        },
+        {
+          "offset": 804,
+          "bytes": 14
+        },
+        {
+          "offset": 818,
+          "bytes": 16
+        }
+      ],
+      "error": "PS SBR fill precedes mono element",
+      "failing_packet": 1
+    },
+    {
+      "name": "truncated-fill",
+      "video": {
+        "file": "he-aac-ps-native-truncated-fill-synthetic.mp4",
+        "sha256": "a42ce5142213cacfc4dd8f569fcde09ba953b42ba74b398b1c09c5300a75cc30",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "frames": [
+        {
+          "offset": 834,
+          "bytes": 136
+        },
+        {
+          "offset": 970,
+          "bytes": 16
+        },
+        {
+          "offset": 986,
+          "bytes": 16
+        }
+      ],
+      "error": "truncated AAC fill payload",
+      "failing_packet": 1
+    }
+  ],
+  "packet_sha256": "89946aca47f42ba09d51bf0d2e52234f215da12637a7dac90edba1d102bba8e1"
+}

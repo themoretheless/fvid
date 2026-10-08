@@ -1641,3 +1641,15 @@ Tests decode original SCE bits natively and compare the streamed SBR/PS bridge
 against both PCM channels, real lookahead, zero EOF and rollback. Native combined
 PS packet playback remains refused until its buffering/timeline integration.
 No ordinary test runs generation, FFmpeg or network access.
+
+## Native PS complete packet API regressions
+
+`generate_aac_ps_native_fixtures.py` adds `aac-ps-native-oracles.json`,
+`he-aac-ps-native-malformed-packets.bin` and six original three-packet MP4s.
+They derive only from prior authored SCE/SBR/PS packets and video/container seeds.
+The acceptance cases decode full original packets for both output rates and
+explicit/sync signalling; the saved independent DSP references supply stereo
+PCM expectations. Malformed MP4 cases separately require exact END/FIL/element
+errors and unchanged subsequent audio. Full packet acceptance is distinct from
+production factory/timestamp/seek support and nonzero-core PS conformance.
+Generation is explicit, offline and absent from ordinary test execution.
