@@ -1357,3 +1357,23 @@ header, anchor/camera/list OBUs and one/two-anchor oracle images. The 18 native
 acceptance cases recompute each sample in Rust, compare every oracle sample,
 require inter blocks, reject identical-anchor mutation, exercise sparse canvas
 and malformed/budget cases. Private data and runtime generators are absent.
+
+
+### Lossy AV1 external camera tile lists
+
+The original camera generator accepts optional Q and adds Q32 variants
+for the same 18 depth/chroma/SB combinations. Normal anchors and the discarded
+priming picture remain lossless. The camera's source formula adds
+`((x/8 + y/8 + plane) % 7 - 3) << (depth-8)` to the previously authored camera
+pattern. Camera quantization is set with stock libaom's one-pass quantizer
+control after priming, while large-scale normative loop/CDF constraints remain.
+
+Temporary per-entry camera-tile stock reconstructions are independently
+assembled and compared to the stock tile-list output before admission. Lossy
+oracles must differ from authored source, and two-anchor output must differ
+from one-anchor output. The `q32-d*-c*-sb*-generated.json` manifests record
+seven admitted artifacts each. The temporary individual-tile images stay
+outside the repository. Offline acceptance checks all pixels, actual lossy
+source differences, successfully reconstructed dequantization mutations,
+anchor-selection mutations and the existing sparse/malformed/memory coverage.
+No private inputs, FFmpeg, network or runtime generation are used.

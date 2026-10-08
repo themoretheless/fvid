@@ -10,11 +10,11 @@ fn bytes(name: &str) -> Vec<u8> {
 }
 #[test]
 fn owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output() {
-    camera_tile_list_case("", 64, 8, 420);
+    camera_tile_list_case("", 64, 8, 420, 0);
 }
 #[test]
 fn sb128_camera_tile_list_pixels_distinct_anchors_and_sparse_canvas() {
-    camera_tile_list_case("sb128-", 128, 8, 420);
+    camera_tile_list_case("sb128-", 128, 8, 420, 0);
 }
 #[test]
 fn camera_tile_list_high_depth_and_full_chroma_matrix() {
@@ -24,12 +24,28 @@ fn camera_tile_list_high_depth_and_full_chroma_matrix() {
                 if depth == 8 && chroma == 420 {
                     continue;
                 }
-                camera_tile_list_case(&format!("d{depth}-c{chroma}-sb{sb}-"), sb, depth, chroma);
+                camera_tile_list_case(&format!("d{depth}-c{chroma}-sb{sb}-"), sb, depth, chroma, 0);
             }
         }
     }
 }
-fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize) {
+#[test]
+fn lossy_camera_tile_list_transform_reconstruction_matrix() {
+    for sb in [64, 128] {
+        for depth in [8, 10, 12] {
+            for chroma in [420, 422, 444] {
+                camera_tile_list_case(
+                    &format!("q32-d{depth}-c{chroma}-sb{sb}-"),
+                    sb,
+                    depth,
+                    chroma,
+                    32,
+                );
+            }
+        }
+    }
+}
+fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u8) {
     let bytes = |name: &str| bytes(&format!("{prefix}{name}"));
     let anchor = bytes("anchor.obu");
     let header = bytes("header.obu");
@@ -56,6 +72,7 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize) {
     let camera = Header::parse(&sequence, frame.payload, 0, 0, &[Some(&ah); 8]).unwrap();
     assert_eq!(camera.frame_type, 1);
     assert_eq!(camera.refresh_flags, 0);
+    assert_eq!(camera.quant.base > 0, q > 0);
     assert!(camera.disable_cdf_update && camera.disable_frame_end_update);
     let obu = Obus::new(&list).next().unwrap().unwrap();
     assert_eq!(obu.kind, 8);
@@ -121,6 +138,7 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize) {
     let multi_pixels = pixels(&multi);
     assert_eq!(multi_pixels, bytes("multi-list.yuv"));
     assert_ne!(multi_pixels, golden);
+    let mut differs_from_source = false;
     for p in 0..3 {
         let width = sb >> usize::from(p != 0 && chroma != 444);
         let height = sb >> usize::from(p != 0 && chroma == 420);
@@ -134,16 +152,39 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize) {
                     ((71 + (3 * source_x + 5 * source_y + 23 * p) % 96) << (depth - 8)) as u16;
                 let offset = (9 << (depth - 8)) * (index % 2) as u16;
                 let i = y * width * 2 + x;
-                assert_eq!(
-                    output.planes[p].samples[i], authored,
-                    "{prefix}, plane {p}, {x},{y}"
-                );
-                assert_eq!(
-                    multi.planes[p].samples[i],
-                    output.planes[p].samples[i] + offset
-                );
+                if q == 0 {
+                    assert_eq!(
+                        output.planes[p].samples[i], authored,
+                        "{prefix}, plane {p}, {x},{y}"
+                    );
+                    assert_eq!(
+                        multi.planes[p].samples[i],
+                        output.planes[p].samples[i] + offset
+                    );
+                } else {
+                    let detail = ((source_x / 8 + source_y / 8 + p) % 7) as i32 - 3;
+                    let source_sample = (i32::from(authored) + (detail << (depth - 8))) as u16;
+                    differs_from_source |= output.planes[p].samples[i] != source_sample;
+                }
             }
         }
+    }
+    assert_eq!(
+        differs_from_source,
+        q > 0,
+        "{prefix}: quantization must be observable"
+    );
+    if q > 0 {
+        let mut wrong_quant = camera.clone();
+        wrong_quant.quant.base = wrong_quant.quant.base.saturating_add(16);
+        let changed = decoder
+            .decode_tile_list(&wrong_quant, &anchors, obu.payload, None)
+            .expect("dequantization control must reconstruct, not merely refuse");
+        assert_ne!(
+            pixels(&changed),
+            golden,
+            "{prefix}: dequantization mutation"
+        );
     }
     // Mutation sensitivity: identical pointers cannot accidentally pass this oracle.
     let wrong = decoder

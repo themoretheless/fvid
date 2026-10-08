@@ -10,6 +10,7 @@
   "superblock": 128,
   "depth": 8,
   "chroma": 444,
+  "quantizer": 0,
   "order": [
     3,
     0,

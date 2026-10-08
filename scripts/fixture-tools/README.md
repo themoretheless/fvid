@@ -150,3 +150,9 @@ and chroma 420/422/444. The original 8-bit 420 filenames remain stable; other
 cases use `d<depth>-c<chroma>-sb<sb>` suffixes. Each has a SHA-256 manifest,
 explicit camera header and one/two-anchor goldens independently validated
 before admission. High-depth goldens contain little-endian 16-bit samples.
+
+Tile-list generation includes Q32 camera variants, for 36 total cases.
+Anchors stay lossless; lossy source images add an owned spatial residual.
+Temporary individual camera-tile reconstructions must assemble to the exact
+stock tile-list oracle before artifacts are admitted. Lossy output must differ
+from authored source. Ordinary tests read only admitted fixtures.

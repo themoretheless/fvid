@@ -5201,3 +5201,22 @@ packet refusal without external camera context. This closes the unqualified
 depth/chroma/SB matrix for these camera lists, not remaining codec tools: other
 CDF contexts, lossy camera combinations, motion/border cases and automatic
 container external-context provisioning still need qualification.
+
+
+## Native AV1 lossy external camera tile-list reconstruction (2026-10-08)
+
+The owned Q32 camera matrix now covers all 18 SB64/SB128, 8/10/12-bit and
+4:2:0/4:2:2/4:4:4 combinations. Anchors remain lossless authored pictures;
+camera samples add a spatial 8x8 variation before quantization. Generation
+compares stock tile-list output to separate stock camera-tile reconstruction,
+and requires lossy output to differ from source. Native acceptance compares
+every one/two-anchor oracle sample, requires nonzero quantization and inter
+blocks, preserves sparse canvas and repeats malformed/budget/state checks.
+
+A dequantization mutation must successfully reconstruct different pixels,
+not merely refuse the modified header. Replacing the second external anchor
+with the first also changes pixels. Five offline test functions now cover 36
+lossless/lossy camera cases plus ordinary missing-context refusal. No external
+codec is called or linked in ordinary tests. Further motion/border, CDF-state,
+quantizer/tool combinations and container-side external context remain open;
+this stage does not claim complete codec conformance.

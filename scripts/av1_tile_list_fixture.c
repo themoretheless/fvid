@@ -15,7 +15,8 @@ static unsigned sample(const aom_image_t *img,int p,int x,int y){return img->fmt
 static void put(aom_image_t *img,int p,int x,int y,unsigned value){if(img->fmt&AOM_IMG_FMT_HIGHBITDEPTH)((unsigned short*)(img->planes[p]+y*img->stride[p]))[x]=value;else img->planes[p][y*img->stride[p]+x]=value;}
 static void save_image(const char *prefix,const char *suffix,const aom_image_t *img,int depth){size_t capacity=(size_t)img->d_w*img->d_h*6;unsigned char *raw=malloc(capacity);if(!raw)exit(2);size_t at=0;for(int p=0;p<3;p++)for(unsigned y=0;y<(img->d_h>>(p?img->y_chroma_shift:0));y++)for(unsigned x=0;x<(img->d_w>>(p?img->x_chroma_shift:0));x++){unsigned v=sample(img,p,x,y);raw[at++]=v&255;if(depth>8)raw[at++]=v>>8;}save(prefix,suffix,raw,at);free(raw);}
 int main(int argc,char **argv){
- if(argc!=2&&argc!=3&&argc!=5)return 2;const char *prefix=argv[1];int sb=argc>=3?atoi(argv[2]):64;int depth=argc==5?atoi(argv[3]):8;int chroma=argc==5?atoi(argv[4]):420;
+ if(argc!=2&&argc!=3&&argc!=5&&argc!=6)return 2;const char *prefix=argv[1];int sb=argc>=3?atoi(argv[2]):64;int depth=argc>=5?atoi(argv[3]):8;int chroma=argc>=5?atoi(argv[4]):420;int q=argc==6?atoi(argv[5]):0;
+ if(q<0||q>63)return 2;
  if((sb!=64&&sb!=128)||(depth!=8&&depth!=10&&depth!=12)||(chroma!=420&&chroma!=422&&chroma!=444))return 2;int dimension=2*sb;int sx=chroma==444?0:1;int sy=chroma==420?1:0;int shift=depth-8;
  aom_img_fmt_t input_format=chroma==420?AOM_IMG_FMT_I420:chroma==422?AOM_IMG_FMT_I422:AOM_IMG_FMT_I444;if(depth>8)input_format|=AOM_IMG_FMT_HIGHBITDEPTH;
  aom_codec_enc_cfg_t cfg;check(aom_codec_enc_config_default(aom_codec_av1_cx(),&cfg,AOM_USAGE_REALTIME));
@@ -32,7 +33,8 @@ int main(int argc,char **argv){
  cfg.large_scale_tile=1;check(aom_codec_enc_config_set(&enc,&cfg));check(aom_codec_control(&enc,AV1E_SET_TILE_COLUMNS,1u));check(aom_codec_control(&enc,AV1E_SET_TILE_ROWS,1u));check(aom_codec_control(&enc,AV1E_SET_SINGLE_TILE_DECODING,1u));
  check(aom_codec_encode(&enc,img,1,1,AOM_EFLAG_FORCE_KF));size_t prime_size;unsigned char *prime=packet(&enc,&prime_size);free(prime);
  av1_ref_frame_t forced={0};forced.idx=0;forced.img=*img;check(aom_codec_control(&enc,AV1_SET_REFERENCE,&forced));check(aom_codec_control(&enc,AV1E_SET_FRAME_PARALLEL_DECODING,1u));
- for(int p=0;p<3;p++)for(int y=0;y<(dimension>>(p?sy:0));y++)for(int x=0;x<(dimension>>(p?sx:0));x++)put(img,p,x,y,(71+(3*x+5*y+23*p)%96)<<shift);
+ if(q){check(aom_codec_control(&enc,AV1E_SET_LOSSLESS,0u));check(aom_codec_control(&enc,AV1E_SET_QUANTIZER_ONE_PASS,q));}
+ for(int p=0;p<3;p++)for(int y=0;y<(dimension>>(p?sy:0));y++)for(int x=0;x<(dimension>>(p?sx:0));x++)put(img,p,x,y,(71+(3*x+5*y+23*p)%96+(q?((x/8+y/8+p)%7-3):0))<<shift);
  int flags=AOM_EFLAG_NO_REF_LAST2|AOM_EFLAG_NO_REF_LAST3|AOM_EFLAG_NO_REF_GF|AOM_EFLAG_NO_REF_ARF|AOM_EFLAG_NO_REF_BWD|AOM_EFLAG_NO_REF_ARF2|AOM_EFLAG_NO_UPD_LAST|AOM_EFLAG_NO_UPD_GF|AOM_EFLAG_NO_UPD_ARF|AOM_EFLAG_NO_UPD_ENTROPY;
  aom_svc_ref_frame_config_t refs={0};refs.reference[0]=1;
  check(aom_codec_control(&enc,AV1E_SET_SVC_REF_FRAME_CONFIG,&refs));
@@ -43,7 +45,7 @@ int main(int argc,char **argv){
  unsigned char *hb=malloc(hn);memcpy(hb,cb,hn);size_t n=hs;for(size_t i=0;i<header.coded_tile_data_size;i++){hb[offset+i]=(n&127)|(i+1<header.coded_tile_data_size?128:0);n>>=7;}save(prefix,"-header.obu",hb,hn);
  unsigned char payload[65536];size_t at=4;payload[0]=1;payload[1]=1;payload[2]=0;payload[3]=3;
  const int order[4]={3,0,2,1};
- for(int i=0;i<4;i++){int tile=order[i];check(aom_codec_control(&dec,AV1_SET_DECODE_TILE_ROW,tile/2));check(aom_codec_control(&dec,AV1_SET_DECODE_TILE_COL,tile%2));check(aom_codec_decode(&dec,cb,cn,NULL));aom_tile_data td={0};check(aom_codec_control(&dec,AV1D_GET_TILE_DATA,&td));if(!td.coded_tile_data_size||at+5+td.coded_tile_data_size>sizeof(payload))return 2;payload[at++]=0;payload[at++]=tile/2;payload[at++]=tile%2;payload[at++]=(td.coded_tile_data_size-1)>>8;payload[at++]=(td.coded_tile_data_size-1)&255;memcpy(payload+at,td.coded_tile_data,td.coded_tile_data_size);at+=td.coded_tile_data_size;}
+ for(int i=0;i<4;i++){int tile=order[i];check(aom_codec_control(&dec,AV1_SET_DECODE_TILE_ROW,tile/2));check(aom_codec_control(&dec,AV1_SET_DECODE_TILE_COL,tile%2));check(aom_codec_decode(&dec,cb,cn,NULL));aom_codec_iter_t tile_it=NULL;aom_image_t *tile_image=aom_codec_get_frame(&dec,&tile_it);if(!tile_image||tile_image->d_w!=(unsigned)sb||tile_image->d_h!=(unsigned)sb)return 2;char tile_suffix[32];snprintf(tile_suffix,sizeof(tile_suffix),"-tile%d.yuv",i);save_image(prefix,tile_suffix,tile_image,depth);aom_tile_data td={0};check(aom_codec_control(&dec,AV1D_GET_TILE_DATA,&td));if(!td.coded_tile_data_size||at+5+td.coded_tile_data_size>sizeof(payload))return 2;payload[at++]=0;payload[at++]=tile/2;payload[at++]=tile%2;payload[at++]=(td.coded_tile_data_size-1)>>8;payload[at++]=(td.coded_tile_data_size-1)&255;memcpy(payload+at,td.coded_tile_data,td.coded_tile_data_size);at+=td.coded_tile_data_size;}
  unsigned char list[65548];list[0]=0x42;size_t ln=1+leb(list+1,at);memcpy(list+ln,payload,at);ln+=at;save(prefix,"-list.obu",list,ln);
  aom_codec_ctx_t oracle;check(aom_codec_dec_init(&oracle,aom_codec_av1_dx(),NULL,0));check(aom_codec_decode(&oracle,ab,an,NULL));
  aom_img_fmt_t format=0;check(aom_codec_control(&oracle,AV1D_GET_IMG_FORMAT,&format));
