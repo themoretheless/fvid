@@ -8063,6 +8063,78 @@
         125,
         117
       ]
+    },
+    {
+      "file": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.obu",
+      "sha256": "ae4fbe207d8b7e3b069680341769321c41f268735501e33267f1a992e0a9c2a0",
+      "reference": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.yuv",
+      "reference_sha256": "6b43f9e80eb218fca218674644e073caf36df29ab1ce1ec7149b4b9805ea7f58",
+      "source_sha256": "2b4091b309778559d4d33b6be3c324a890d449986545bfb0ad445254cafd1c99",
+      "source_exact": false,
+      "quality": 48,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.webm",
+      "webm_sha256": "4dab66ed172e2e7027b8738551479b234a59d2be36d94685845014c09c003cb5",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        125,
+        117
+      ]
+    },
+    {
+      "file": "av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip1-q48.obu",
+      "sha256": "fa5eac5f307fa347216ba96b4396a48c315ff815003cb8e58a993aa71b84e8c4",
+      "reference": "av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip1-q48.yuv",
+      "reference_sha256": "cd6698fd4455e1c9922fae51fd2dba450236429774d3496994d5ddf1ca3424a4",
+      "source_sha256": "7dc9796aeb5ee773132cb66e2bce8f268ba5a80b2de55ebf1e0a8a37e88a290a",
+      "source_exact": false,
+      "quality": 48,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip1-q48.webm",
+      "webm_sha256": "76248bd31bf76d77be442341b077c159758cb9cb0d73a89e6434c23eb4db8076",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        125,
+        117
+      ]
+    },
+    {
+      "file": "av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip1-q48.obu",
+      "sha256": "d8d293006731c0879a33503c4d20177c1e3afa6a7bc74a3eebf3819a93d75806",
+      "reference": "av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip1-q48.yuv",
+      "reference_sha256": "a615df2938cc43660b953ca69f473f96b02af1bdc52e2ce191bd3152e6e95005",
+      "source_sha256": "cb7fea94ebc48c263d5d1afd98bec4fb14f3253de9c48dae3157f052efce9802",
+      "source_exact": false,
+      "quality": 48,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip1-q48.webm",
+      "webm_sha256": "fb9ce24f028cca00ac1c2465061c8c0a8891814f2536c059e75099b53007cd05",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        125,
+        117
+      ]
     }
   ]
 }
