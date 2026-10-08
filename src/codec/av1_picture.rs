@@ -20,6 +20,9 @@ mod restoration;
 #[path = "av1_superres.rs"]
 mod superres;
 
+#[path = "av1_chroma_geometry.rs"]
+mod chroma_geometry;
+
 #[derive(Clone, Copy, Debug, Default)]
 pub struct SavedMotion {
     pub reference: u8,
@@ -200,10 +203,11 @@ pub(crate) fn decode(
     } else {
         0
     };
+    let storage_bytes = chroma_geometry::storage_bytes(&s.color, [storage_cols, storage_rows])?;
     let required = cols
         .checked_mul(rows)
         .and_then(|n| n.checked_mul(448))
-        .and_then(|n| n.checked_add(storage_cols.checked_mul(storage_rows)?.checked_mul(100)?))
+        .and_then(|n| n.checked_add(storage_bytes))
         .and_then(|n| n.checked_add(500_000))
         .and_then(|n| n.checked_add(restoration_bytes))
         .and_then(|n| n.checked_add(upscale_bytes))
@@ -219,8 +223,8 @@ pub(crate) fn decode(
         return Err(invalid("AV1 image exceeds memory budget"));
     }
     let planes = std::array::from_fn(|p| {
-        let width = storage_cols * 4 >> usize::from(p > 0);
-        let height = storage_rows * 4 >> usize::from(p > 0);
+        let [width, height] =
+            chroma_geometry::plane_size(&s.color, p, [storage_cols * 4, storage_rows * 4]);
         Plane {
             width,
             height,
@@ -369,9 +373,7 @@ pub(crate) fn decode(
     motion_field::save(&mut dec);
     // Keep public picture storage and filtering grids at their original MI extent.
     for p in 0..3 {
-        let sub = usize::from(p > 0);
-        let width = cols * 4 >> sub;
-        let height = rows * 4 >> sub;
+        let [width, height] = chroma_geometry::plane_size(&s.color, p, [cols * 4, rows * 4]);
         let plane = &mut dec.image.planes[p];
         let old_width = plane.width;
         for y in 0..height {

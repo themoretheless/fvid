@@ -4835,3 +4835,31 @@ zero ignored tests. All 27 new asset hashes and generator syntax were verified.
 The mixed-sub8 test binary links only libSystem/libiconv, not libav, libaom or
 dav1d. The two controlled mutations failed for the intended chroma selection
 errors, and production code was restored before the final regression run.
+
+### AV1 4:2:2/4:4:4 geometry foundation (2026-10-08, playback pending)
+
+Twelve owned two-frame 64x48 streams cover 4:2:2/4:4:4 at 8/10/12 bits in
+lossless and lossy modes. Unmodified aomdec and dav1d emit identical packed
+plane goldens; all six lossless goldens also equal the original source bytes.
+The offline reproduction confirms actual sequence profile/depth/subsampling,
+frame-header dimensions/lossless flags and the specific current native refusal
+`AV1 native reconstruction requires 4:2:0`. This is a refusal test, not playback
+acceptance. The goldens are checked in for enabling native acceptance with the
+complete reconstruction fix.
+
+Owned `av1_chroma_geometry.rs` now computes plane extents with separate horizontal
+and vertical subsampling, including odd last samples. Reconstruction allocation
+and final plane/transform-grid cropping use that geometry. Storage admission
+counts plane samples and the existing transform/decoded maps instead of assuming
+all chroma is 4:2:0. It preserves the former 4:2:0 margin and rejects arithmetic
+overflow; unit expectations account for both 32-bit and 64-bit map element sizes.
+
+The production format gate remains until block/transform/chroma-reference
+geometry, intra/CFL/inter prediction, filters, intrabc, restoration/superres and
+raw/player output paths have all been generalized and pixel/reset/WebM/seek
+acceptance enabled. These streams must not be reported as successfully decoded
+on the basis of passing header/refusal or geometry tests.
+
+Validation: 46 AV1 release unit tests and seven selected offline integration
+tests passed, including the twelve-case chroma refusal, intrabc, film grain,
+odd restoration and temporal-motion super-resolution suites.

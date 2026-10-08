@@ -1029,3 +1029,17 @@ OBU, WebM and YUV SHA-256 values. The offline regression requires decoded mixed
 groups for every stream, both rectangular forms in each rectangular stream and
 positive all-inter sub-8 groups, then compares all pixels/reset/rewind/seek and
 presentation intervals using the native implementation only.
+
+### AV1 4:2:2/4:4:4 reconstruction reproducers
+
+`generate_av1_chroma_samples.py` authors twelve two-frame 64x48 patterns at
+8/10/12 bits with both lossless/lossy encoding, full-height chroma and half/full
+chroma width. No private images or parameter sets are used. Unmodified Homebrew
+aomenc encodes them; unmodified aomdec and dav1d independently produce identical
+packed YUV goldens. Every lossless golden equals the original packed input.
+
+The manifest records source/OBU/WebM/YUV hashes and actual intended plane shifts.
+The offline reproduction additionally verifies actual sequence subsampling/depth
+and frame-header size/losslessness before requiring the specific native format
+refusal. It is not acceptance of 4:2:2/4:4:4 playback. Generation is separate
+from ordinary tests, which require no external codec, FFmpeg or network.
