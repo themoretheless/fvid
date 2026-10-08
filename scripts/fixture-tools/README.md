@@ -267,3 +267,8 @@ Use `scripts/generate_aac_sbr_synthesis_oracles.py --bands 32` with local ISO
 draft text for downsampled synthesis references. Published 6.18.4.3 specifies
 the half-sample phase; references also enforce the exact full-rate decimation
 identity. Default `--bands 64` retains the existing byte-identical output.
+
+SBR inverse-filter bandwidth references: explicitly run
+`python3 scripts/generate_aac_sbr_chirp_oracles.py`. The offline 80-digit Decimal
+generator writes every five-frame mode sequence plus an eight-frame decay tail.
+Ordinary tests consume saved numeric traces without running the generator.

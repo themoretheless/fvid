@@ -5650,3 +5650,19 @@ chunking, checkpoint replay, reset and invalid-input rollback are also tested.
 Both output-rate synthesis variants are now present as standalone DSP; neither
 is wired into production HE-AAC playback yet. Rate bounds, frame integration,
 HF generation/adjustment and encoded acceptance remain. No performance claim.
+
+### Owned SBR inverse-filter chirp history
+
+`aac_sbr_chirp::Chirp` retains inverse-filter modes and bandwidth factors for
+1–5 noise frequency bands. It implements all 16 previous/current mode targets,
+asymmetric smoothing, and the strict 1/64 zero threshold in published
+GOST R53556.4-2013 section 6.18.6.2/table 175. Geometry mismatches fail before
+changing history; clone/replay and reset retain deterministic frame state.
+
+The independent 80-digit Decimal oracle covers every five-frame mode sequence
+(1024 sequences), followed by eight Off frames to exercise decay and zeroing.
+Tests also check exact threshold behavior, independent multi-band histories,
+checkpoint replay and invalid-call rollback. These are original numeric DSP
+vectors, not encoded HE-AAC acceptance fixtures. Predictor covariance, patch
+generation, HF adjustment and production integration still remain. No new
+encoded-media failure or full HE-AAC playback acceptance is claimed.

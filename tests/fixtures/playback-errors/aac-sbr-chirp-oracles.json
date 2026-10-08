@@ -1,0 +1,8 @@
+{
+  "source": "GOST R53556.4-2013 6.18.6.2/table 175",
+  "sequences": 1024,
+  "frames": 13,
+  "precision": 80,
+  "file": "aac-sbr-chirp-decimal.f64le",
+  "sha256": "d508936075c23fc5345955b46bfa6fbaea7485c6b28791d265e5f538159653ae"
+}
