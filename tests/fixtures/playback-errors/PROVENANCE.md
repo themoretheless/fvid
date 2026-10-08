@@ -1989,3 +1989,14 @@ the mono oracle's envelope/noise levels in each channel. PCM expectations
 therefore use the existing independent mono Decimal/direct-convolution oracle,
 not output computed by the production stereo decoder. Ordinary tests read
 checked-in assets; generation remains an explicit separate operation.
+
+
+`aac-sbr-upsampling-*.f32le/.f64le` and their manifest are produced by
+`scripts/generate_aac_sbr_upsampling_oracles.py`, explicitly and offline.
+Original dense PCM followed by silence is processed using direct time-index
+analysis and synthesis convolution with the normative QMF window. Published
+GOST R53556.4-2013 6.18.5 pure-upsampling matrix and delays supply routing.
+No private media, FFmpeg, encoder, foreign decoder or production state buffers
+are used. These are standalone DSP acceptance assets, not acceptance of
+missing SBR FIL packets in the native AAC/player path.
+Source: https://allgosts.ru/33/170/gost_r_53556.4-2013

@@ -36,6 +36,23 @@ impl LowDelay {
     pub fn reset(&mut self) {
         *self = Self::default();
     }
+    /// Pure upsampling uses all 32 low bands, including the preceding tail.
+    pub fn process_unmasked(
+        &mut self,
+        analysis: &[[Complex; 32]],
+        slots: u8,
+    ) -> Result<Vec<[Complex; 32]>> {
+        let n = frame_len(slots)?;
+        if analysis.len() != n || !finite(analysis) {
+            return Err(invalid("invalid SBR unmasked low delay inputs"));
+        }
+        let mut output = Vec::with_capacity(n + 8);
+        output.extend_from_slice(&self.tail);
+        output.extend_from_slice(analysis);
+        self.tail.copy_from_slice(&analysis[n - 8..]);
+        self.previous_kx = 32;
+        Ok(output)
+    }
     pub fn process(
         &mut self,
         analysis: &[[Complex; 32]],

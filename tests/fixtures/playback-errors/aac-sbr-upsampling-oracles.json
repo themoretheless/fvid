@@ -1,0 +1,30 @@
+[
+  {
+    "prefix": "aac-sbr-upsampling-15-32",
+    "slots": 15,
+    "bands": 32,
+    "input_sha256": "91663f8ba0d9e933ecb18d06a89dfde02f95c99056bb6adf3e39e6c12c5e3184",
+    "output_sha256": "a56c3249470b9a1f9b2cbb78a351fc567d971a18001666292b937ddbd547f91a"
+  },
+  {
+    "prefix": "aac-sbr-upsampling-15-64",
+    "slots": 15,
+    "bands": 64,
+    "input_sha256": "91663f8ba0d9e933ecb18d06a89dfde02f95c99056bb6adf3e39e6c12c5e3184",
+    "output_sha256": "ea747fb9ceb06b374be422cb753073718ab8b222759d759ff69b85804ff1655b"
+  },
+  {
+    "prefix": "aac-sbr-upsampling-16-32",
+    "slots": 16,
+    "bands": 32,
+    "input_sha256": "0af621bb8771bb5cee5902200f29ddbe9b77ea32693dd9a6ff8dc8e5b063f9f4",
+    "output_sha256": "2eb1f3a5902558cf07323a15f50e402d642d740437ed8f937f5f858a44d87e7e"
+  },
+  {
+    "prefix": "aac-sbr-upsampling-16-64",
+    "slots": 16,
+    "bands": 64,
+    "input_sha256": "0af621bb8771bb5cee5902200f29ddbe9b77ea32693dd9a6ff8dc8e5b063f9f4",
+    "output_sha256": "7c485b82fcb14243c1d5088169471658691602dc67a896f782c1212fcfce69b2"
+  }
+]

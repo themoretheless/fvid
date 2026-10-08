@@ -50,6 +50,59 @@ impl Preparation {
     pub fn reset(&mut self) {
         *self = Self::default();
     }
+    /// Delay-only path, without a header, frequency masking or HF generation.
+    pub(crate) fn upsample_rows(
+        &mut self,
+        pcm: &[&[f32]],
+        rate: u32,
+        slots: u8,
+    ) -> Result<Vec<Vec<[Complex; 64]>>> {
+        if !matches!(slots, 15 | 16)
+            || !matches!(pcm.len(), 1 | 2)
+            || rate == 0
+            || pcm
+                .iter()
+                .any(|p| p.len() != 64 * usize::from(slots) || p.iter().any(|x| !x.is_finite()))
+        {
+            return Err(invalid("invalid SBR pure upsampling inputs"));
+        }
+        let format = (rate, slots, pcm.len());
+        if self.format.is_some_and(|old| old != format) {
+            return Err(invalid("SBR pure upsampling format changed without reset"));
+        }
+        let mut trial = self.clone();
+        if trial.channels.is_empty() {
+            for _ in pcm {
+                trial.channels.push(ChannelState {
+                    analysis: Analysis::default(),
+                    delay: LowDelay::default(),
+                    chirp: Chirp::new(1)?,
+                    mapping: History::default(),
+                });
+            }
+        }
+        let mut output = Vec::with_capacity(pcm.len());
+        for (state, samples) in trial.channels.iter_mut().zip(pcm) {
+            let mut analysis = state.analysis.process(samples)?;
+            for row in &mut analysis {
+                for value in row {
+                    value.re *= 32768.0;
+                    value.im *= 32768.0;
+                }
+            }
+            let low = state.delay.process_unmasked(&analysis, slots)?;
+            let mut rows = Vec::with_capacity(2 * usize::from(slots));
+            for row in &low[2..2 + 2 * usize::from(slots)] {
+                let mut full = [Complex::default(); 64];
+                full[..32].copy_from_slice(row);
+                rows.push(full);
+            }
+            output.push(rows);
+        }
+        trial.format = Some(format);
+        *self = trial;
+        Ok(output)
+    }
     /// PCM is normalized core AAC output, exactly 960/1024 samples per channel.
     /// Analysis columns are converted to the standard's 16-bit QMF units before
     /// prediction/energy estimation (gain epsilon=1 uses those same units).

@@ -47,6 +47,59 @@ impl Dsp {
     pub fn reset(&mut self) {
         *self = Self::default();
     }
+    /// GOST 6.18.5 pure upsampling: XLow(k,l+tHFAdj), k<32, zero high bands.
+    /// Keeps analysis, delay and synthesis histories; no invented HF payload.
+    /// Native AAC dispatch and transitions back to header-bearing SBR are
+    /// qualified separately before routing missing FIL blocks through this API.
+    pub fn process_upsampling(
+        &mut self,
+        pcm: &[&[f32]],
+        rate: u32,
+        slots: u8,
+        mode: OutputRate,
+    ) -> Result<Vec<Vec<f64>>> {
+        if self.output_rate.is_some_and(|old| old != mode) {
+            return Err(invalid("SBR output rate changed without reset"));
+        }
+        let mut trial = self.clone();
+        let rows = trial.preparation.upsample_rows(pcm, rate, slots)?;
+        if trial.channels.is_empty() {
+            for _ in &rows {
+                trial.channels.push(Channel {
+                    assembly: Assembly::default(),
+                    rows: SynthesisRows::default(),
+                    synthesis: match mode {
+                        OutputRate::Double => {
+                            Synthesis::Double(aac_sbr_synthesis_qmf::Synthesis::default())
+                        }
+                        OutputRate::Core => {
+                            Synthesis::Core(aac_sbr_downsampled_qmf::Synthesis::default())
+                        }
+                    },
+                });
+            }
+        }
+        let mut output = Vec::with_capacity(rows.len());
+        for (state, rows) in trial.channels.iter_mut().zip(rows) {
+            let mut pcm = match &mut state.synthesis {
+                Synthesis::Double(s) => s.process(&rows)?,
+                Synthesis::Core(s) => s.process(
+                    &rows
+                        .iter()
+                        .map(|r| r[..32].try_into().unwrap())
+                        .collect::<Vec<_>>(),
+                )?,
+            };
+            for sample in &mut pcm {
+                *sample /= 32768.0;
+            }
+            state.rows.reset();
+            output.push(pcm);
+        }
+        trial.output_rate = Some(mode);
+        *self = trial;
+        Ok(output)
+    }
     /// One complete frame per channel. Values remain unclipped normalized f64;
     /// the caller owns interleaving, final sample format and timestamp policy.
     /// Header geometry reset preserves synthesis/overlap, while full format
@@ -396,6 +449,67 @@ mod tests {
                     let error = dsp.process(&bad, &refs, 48000, slots, rate).unwrap_err();
                     assert!(error.to_string().contains("extended audio/PS"));
                     assert_eq!(dsp, saved);
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod upsampling_tests {
+    use super::*;
+    #[test]
+    fn pure_upsampling_matches_direct_nonzero_time_convolution_and_rolls_back() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        for slots in [15, 16] {
+            for (bands, mode) in [(32, OutputRate::Core), (64, OutputRate::Double)] {
+                let prefix = format!("aac-sbr-upsampling-{slots}-{bands}");
+                let pcm: Vec<_> = std::fs::read(root.join(format!("{prefix}.f32le")))
+                    .unwrap()
+                    .chunks_exact(4)
+                    .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+                    .collect();
+                let expected = std::fs::read(root.join(format!("{prefix}.f64le"))).unwrap();
+                for channels in [1, 2] {
+                    let mut state = Dsp::default();
+                    let mut output = Vec::new();
+                    for block in pcm.chunks_exact(64 * usize::from(slots)) {
+                        let refs = vec![block; channels];
+                        let saved = state.clone();
+                        let rendered = state.process_upsampling(&refs, 48000, slots, mode).unwrap();
+                        let committed = state.clone();
+                        state = saved;
+                        assert_eq!(
+                            rendered,
+                            state.process_upsampling(&refs, 48000, slots, mode).unwrap()
+                        );
+                        assert_eq!(state, committed);
+                        for channel in &rendered {
+                            assert_eq!(channel, &rendered[0]);
+                        }
+                        output.extend_from_slice(&rendered[0]);
+                        let saved = state.clone();
+                        assert!(state.process_upsampling(&refs, 96000, slots, mode).is_err());
+                        assert_eq!(state, saved);
+                        let mut bad = block.to_vec();
+                        bad[0] = f32::NAN;
+                        let mut refs = vec![block; channels];
+                        refs[channels - 1] = &bad;
+                        assert!(state.process_upsampling(&refs, 48000, slots, mode).is_err());
+                        assert_eq!(state, saved);
+                    }
+                    assert_eq!(expected.len(), 8 * output.len());
+                    assert!(output.iter().any(|v| v.abs() > 1e-3));
+                    for (&value, b) in output.iter().zip(expected.chunks_exact(8)) {
+                        let reference = f64::from_le_bytes(b.try_into().unwrap());
+                        assert!(
+                            (value - reference).abs() < 3e-12,
+                            "slots={slots} bands={bands} {value} vs {reference}"
+                        );
+                    }
+                    state.reset();
+                    assert_eq!(state, Dsp::default());
                 }
             }
         }

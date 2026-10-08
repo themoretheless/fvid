@@ -6117,3 +6117,21 @@ No production decoder change was necessary for this centered stereo scope.
 This closes the earlier absence of native stereo packet acceptance; it does
 not qualify asymmetric panning, nonzero spectral cores, shared LC windows,
 PS, implicit SBR, missing payload or all encoded-stream conformance.
+
+
+### Owned pure-upsampling SBR DSP
+
+The delay-only DSP path follows published GOST R53556.4-2013 6.18.5:
+all 32 unmasked analysis bands (including retained history) are selected at
+XLow(k,l+tHFAdj), with tHFGen=8 and tHFAdj=2, while bands 32..63 are zero.
+Analysis and synthesis histories remain transactional across frames. Ordinary
+and downsampled synthesis are covered by four original nonzero three-frame
+PCM oracles at 960/1024 core samples. Expectations use direct time-index
+analysis and synthesis convolution, without production state buffers. Mono
+and duplicated stereo, checkpoint/replay, format/NAN rollback and reset pass.
+
+This DSP API is not yet the missing-FIL native AAC fix. Switching from/to
+header-bearing SBR must preserve the correct QMF/history state, and requires
+a short encoded synthetic video regression before native dispatch is enabled.
+The old working draft has different delay constants and was not used for
+this delay-only path.
