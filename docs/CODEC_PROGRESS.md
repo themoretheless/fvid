@@ -5615,3 +5615,23 @@ This is analysis-bank DSP qualification only. The production HE-AAC path still
 requires rate bounds, frame history/integration, HF generation/adjustment and
 QMF synthesis, followed by encoded fixtures with complete PCM acceptance.
 The direct matrix implementation has not yet been benchmarked or optimized.
+
+
+### Owned 64-band SBR synthesis QMF
+
+`aac_sbr_synthesis_qmf::Synthesis` implements the normative complex modulation,
+1280-sample retained history, window extraction and 64 chronological output
+samples per subband slot. Modulation tables are shared; filter history is owned
+and cloneable. Retained history commits only after complete finite input and
+arithmetic validation, including failure after an earlier valid slot.
+Four independent 22-slot traces cover real/imaginary basis signals, dense
+complex input and analysis bypass. Tests compare direct convolution, exact
+whole/chunked execution, clone/replay/reset, NaN/infinity and finite overflow
+rollback, and the composed owned analysis/synthesis path against saved PCM.
+30/32-slot frames produce 1920/2048 samples.
+
+DSP components are qualified separately; HE-AAC playback still requires
+rate-dependent bounds, full frame syntax/history integration and high-frequency
+generation/adjustment with encoded PCM acceptance. The direct matrix kernels
+have no performance qualification yet. Downsampled 32-band synthesis remains
+to be implemented as part of full SBR coverage.

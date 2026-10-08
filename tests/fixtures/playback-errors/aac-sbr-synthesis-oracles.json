@@ -1,0 +1,26 @@
+[
+  {
+    "name": "low-real",
+    "slots": 22,
+    "input_sha256": "f974628440de2c3892691a5b72d354cfb1cc287baba7a91a0b0dd74b512c19c5",
+    "output_sha256": "2bd3b3510d2b5c0374666ac74e4120c1f679f70c240be3f5ced02bb0f8e5a8ab"
+  },
+  {
+    "name": "high-imag",
+    "slots": 22,
+    "input_sha256": "04788414e36d23afdaa3cc729e3ac22524f86469dfdf73d9125b4952d72ba4fe",
+    "output_sha256": "dce505d8e97d58b80285464ecfa2a4f22f445cd72cbd3ceac14d5f7f05a17be6"
+  },
+  {
+    "name": "dense",
+    "slots": 22,
+    "input_sha256": "13b7ecbc5f706446d4e433f5959e233e48e788b56d2fc0ae3a5137632af559a8",
+    "output_sha256": "f77e7faa42b2ee33dfb935cd871b95297c9f2a4e1830c2ac05d8b26f620fb6d0"
+  },
+  {
+    "name": "analysis-bypass",
+    "slots": 22,
+    "input_sha256": "cdd0a83a32f4f5387aeb643dc2c38fd006e43bd78ddb97ba6ae9e7ff6ad35707",
+    "output_sha256": "f5416d8798ce0456ff1f12139f877bb010266a2b1c9d759ca7e8f708823f2f75"
+  }
+]

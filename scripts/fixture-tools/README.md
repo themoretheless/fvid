@@ -255,3 +255,9 @@ SBR analysis QMF: explicitly run `scripts/generate_aac_sbr_qmf_oracles.py`
 with local GOST HTML and ISO draft text. It cross-checks all 640 normative
 window constants, then writes original PCM and direct-convolution complex
 traces with hashes. No FFmpeg/network; ordinary tests use saved traces.
+
+
+SBR synthesis QMF: explicitly run `scripts/generate_aac_sbr_synthesis_oracles.py`
+with local ISO draft text after generating the analysis traces. It writes four
+original complex input/reference PCM pairs and hashes using a direct prior-slot
+calculation. Ordinary tests use saved traces and require no codec processes.

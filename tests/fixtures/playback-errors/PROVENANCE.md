@@ -1662,3 +1662,21 @@ Figure 5. Explicit generation is offline; ordinary tests only read saved traces.
 Sources: https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html
 and http://www.mp3-tech.org/programmer/docs/w4611.pdf .
 These are DSP traces, not encoded HE-AAC video/playback acceptance.
+
+
+### SBR synthesis QMF numerical traces
+
+`aac-sbr-synthesis-{low-real,high-imag,dense,analysis-bypass}.complex-f64le`
+contain original synthetic 22-slot, 64-band inputs. Their `.pcm-f64le` files
+contain 1408 reference PCM samples, independently computed by direct prior-slot
+contributions in `scripts/generate_aac_sbr_synthesis_oracles.py`, without
+production shifted history/demodulation/g buffers. The analysis-bypass case
+uses the separately generated analysis tone oracle and zero upper bands.
+All hashes are in `aac-sbr-synthesis-oracles.json`. Both independent component
+traces and the composed owned analysis/synthesis path are tested.
+
+Explicit offline generation takes local ISO draft text; the window has already
+been cross-checked against published GOST A.89 and ISO 1.A.12 by the analysis
+generator. Synthesis modulation and sample ordering follow GOST R53556.4-2013
+6.18.4.2 / ISO w4611 Figure 6. No private media, FFmpeg, foreign codec or
+network in generation/testing. These are DSP traces, not encoded HE-AAC playback.
