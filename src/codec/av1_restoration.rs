@@ -1,9 +1,10 @@
 //! Native restoration-unit entropy syntax. Filtering is applied separately.
 use super::{
+    Header, SymbolDecoder,
     av1_cdfs::{self, Cdfs},
-    symbol, Header, SymbolDecoder,
+    symbol,
 };
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 #[path = "av1_restoration_filter.rs"]
 mod filter;
 #[derive(Clone, Debug)]
@@ -33,7 +34,7 @@ impl State {
                     return Err(invalid("invalid AV1 restoration unit size"));
                 }
                 let sub = usize::from(p > 0);
-                let cols = ((h.size[0] as usize).div_ceil(1 << sub) + size / 2) / size;
+                let cols = ((h.upscaled_width as usize).div_ceil(1 << sub) + size / 2) / size;
                 let rows = ((h.size[1] as usize).div_ceil(1 << sub) + size / 2) / size;
                 bytes = bytes
                     .checked_add(
@@ -46,7 +47,7 @@ impl State {
             }
         }
         if h.restoration_types != [0; 3] {
-            let width = (h.size[0] as usize).div_ceil(8) * 8;
+            let width = (h.upscaled_width as usize).div_ceil(8) * 8;
             let height = (h.size[1] as usize).div_ceil(8) * 8;
             bytes = bytes
                 .checked_add(
@@ -68,7 +69,7 @@ impl State {
                 (0, 0)
             } else {
                 (
-                    (((h.size[0] as usize).div_ceil(1 << sub) + size / 2) / size).max(1),
+                    (((h.upscaled_width as usize).div_ceil(1 << sub) + size / 2) / size).max(1),
                     (((h.size[1] as usize).div_ceil(1 << sub) + size / 2) / size).max(1),
                 )
             };
@@ -105,8 +106,9 @@ impl State {
             let unit = &self.planes[p];
             let scale = 4 >> usize::from(p > 0);
             let size = unit.size;
-            let x0 = (x * scale).div_ceil(size);
-            let x1 = ((x + sb) * scale).div_ceil(size).min(unit.cols);
+            let denom = usize::from(h.superres_denom);
+            let x0 = (x * scale * denom).div_ceil(size * 8);
+            let x1 = ((x + sb) * scale * denom).div_ceil(size * 8).min(unit.cols);
             let y0 = (y * scale).div_ceil(size);
             let y1 = ((y + sb) * scale).div_ceil(size).min(unit.rows);
             for row in y0..y1 {

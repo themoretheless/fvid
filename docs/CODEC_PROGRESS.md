@@ -4472,11 +4472,38 @@ Eighteen owned 192x128 output fixtures force super-resolution denominators
 9, 12 and 16 at 8/10/12 bits, with two deterministic noise patterns each.
 Their headers prove actual scaled coded width and exclude intrabc and
 restoration to isolate this tool. libaom and dav1d agree on all reference
-pixels; all 54 fixture hashes were verified. The default regression pins
-the current native super-resolution refusal and reset behavior.
+pixels; all 54 fixture hashes were verified. Before reconstruction was implemented, a default regression pinned
+the native super-resolution refusal and reset behavior.
 
-A distinct ignored acceptance test requires full 192x128 native pixels,
-reset, WebM replay, timestamps, rewind and seek. This is an unimplemented
-reconstruction tool, not supported playback; enable acceptance and remove
-the refusal expectation with its implementation. Generating these owned
+The initially ignored acceptance test required full 192x128 native pixels,
+reset, WebM replay, timestamps, rewind and seek. That initial refusal stage
+was a reproduction rather than supported playback; native reconstruction
+and enabled acceptance are recorded in the following section. Generating these owned
 fixtures is separate from offline tests and uses no FFmpeg.
+
+
+### Native AV1 super-resolution reconstruction
+
+Owned horizontal upscaling now uses the normative 64-phase, eight-tap
+filter, signed initial phase, 14-bit step and clipped seven-bit rounding.
+Output dimensions and planes retain the restored width. Source samples
+are read from the coded MI extent, including edge padding. Additional
+upscaled planes are included in checked memory admission. A 1 MiB decoder
+budget refuses an owned 96-to-192 example; sufficient-budget acceptance
+checks its pixels and playback.
+
+Restoration unit storage uses the upscaled width, and tile/SB unit reads
+project coded horizontal positions with the super-resolution denominator.
+Both deblocked and CDEF sources are upscaled before restoration filtering.
+Eighteen additional owned combined-tool fixtures agree between libaom and
+dav1d; all 54 new hashes were verified. The original tool refusal is removed
+and both 18-stream native/playback acceptance suites are enabled, covering
+8/10/12-bit 4:2:0 and denominators 9, 12 and 16.
+
+This verifies the owned single-frame configurations, not all inter reference,
+segmentation inheritance, multi-tile or multi-unit super-resolution cases.
+These combinations and other unsupported AV1 tools remain to be qualified.
+
+Final offline validation passed 35 core AV1 tests and 67 integration tests
+across all 39 AV1 suites, with no ignored acceptance tests. The super-resolution
+acceptance binary links only system libraries.

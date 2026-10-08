@@ -6,7 +6,7 @@ use super::{
     av1_symbol::SymbolDecoder,
     vp9_transform::{self, Kind},
 };
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 #[path = "av1_picture_inter.rs"]
 mod inter;
 #[path = "av1_palette.rs"]
@@ -15,6 +15,8 @@ mod palette;
 mod quant_matrix;
 #[path = "av1_restoration.rs"]
 mod restoration;
+#[path = "av1_superres.rs"]
+mod superres;
 
 #[derive(Clone, Debug)]
 pub struct Plane {
@@ -159,7 +161,7 @@ pub(crate) fn decode(
     }
 
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
-    if h.intrabc || h.superres_denom != 8 {
+    if h.intrabc {
         return Err(crate::unsupported(
             "AV1 segmentation/intrabc/superres reconstruction not implemented",
         ));
@@ -175,12 +177,21 @@ pub(crate) fn decode(
     let storage_cols = cols.div_ceil(16) * 16;
     let storage_rows = rows.div_ceil(16) * 16;
     let restoration_bytes = restoration::State::required_bytes(h)?;
+    let upscale_bytes = if h.superres_denom != 8 {
+        (h.upscaled_width as usize)
+            .checked_mul(h.size[1] as usize)
+            .and_then(|n| n.checked_mul(12))
+            .ok_or_else(|| invalid("AV1 upscale allocation overflow"))?
+    } else {
+        0
+    };
     let required = cols
         .checked_mul(rows)
         .and_then(|n| n.checked_mul(448))
         .and_then(|n| n.checked_add(storage_cols.checked_mul(storage_rows)?.checked_mul(100)?))
         .and_then(|n| n.checked_add(500_000))
         .and_then(|n| n.checked_add(restoration_bytes))
+        .and_then(|n| n.checked_add(upscale_bytes))
         .ok_or_else(|| invalid("AV1 image allocation overflow"))?;
     if required > budget {
         return Err(invalid("AV1 image exceeds memory budget"));
@@ -341,7 +352,17 @@ pub(crate) fn decode(
         &skip,
         s.color.monochrome,
     );
+    if h.superres_denom != 8 {
+        dec.image.planes =
+            superres::upscale(&dec.image.planes, h.size, h.upscaled_width, s.color.depth)?;
+        dec.image.size[0] = h.upscaled_width;
+    }
     if let Some(before) = before_restoration {
+        let before = if h.superres_denom != 8 {
+            superres::upscale(&before, h.size, h.upscaled_width, s.color.depth)?
+        } else {
+            before
+        };
         dec.restoration.apply(&mut dec.image, &before)?;
     }
     Ok((dec.image, saved))
@@ -634,11 +655,7 @@ impl Decoder<'_> {
         {
             if let Some((resolution, multi)) = self.h.filter.delta_resolution {
                 let count = if multi {
-                    if self.s.color.monochrome {
-                        2
-                    } else {
-                        4
-                    }
+                    if self.s.color.monochrome { 2 } else { 4 }
                 } else {
                     1
                 };
