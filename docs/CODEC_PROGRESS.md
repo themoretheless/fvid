@@ -4114,3 +4114,35 @@ Native pixel, reset/finish and WebM replay/rewind/seek acceptance passed. All
 copy caused a pixel mismatch on the owned negative-delta stream. The source
 was restored and matched canonical sources; focused restored checks for all 6 encoder and 64 directly owned streams
 passed offline. Tile reset and multi-superblock accumulation remain to be qualified. This implementation is not yet a claim of complete AV1 support.
+
+## Delta-LF multi-superblock/tile qualification in progress
+
+Six owned 256x128 8/10/12-bit streams with eight 64x64 superblocks and either
+one or four tiles match both independent pixel oracles and native FVid.
+However, removing the tile-state reset still passed: diagnostics showed
+nonzero delta-LF state but zero base filter levels throughout the original
+matrix. The frame-level filter bypass makes these insufficient to qualify
+state effects on pixels. A periodic palette/gradient pattern also accepts,
+but acceptance now explicitly requires nonzero base levels before claiming
+state qualification. The owned test/generator are unfinished; they must
+produce active filtering and detect both tile carry and per-SB reset mutants
+before the gap is declared closed.
+
+## Active delta-LF accumulation and tile reset qualification
+
+The final owned generator saves seven 256x128 8/10/12-bit streams with eight
+64x64 superblocks, one/four tiles, and active base loop-filter levels. It uses
+a periodic palette/gradient pattern with quality 48 for 8 bits and 40 for
+10/12 bits, plus a reversed-period 12-bit case whose final superblock retains
+a nonzero delta at the tile boundary. Both independent reference decoders
+agree on saved pixels; all 21 new hashes were verified.
+
+The earlier zero-filter cases were insufficient even though pixels matched.
+The test now independently requires coded delta-LF, nonzero base filter
+levels and the expected actual tile count, then checks pixels, reset/finish,
+WebM replay, rewind and pixel-exact seek. The final seven-case baseline passed.
+Resetting delta-LF at every superblock caused an owned 12-bit pixel mismatch;
+retaining delta-LF across tiles caused a pixel mismatch on the reversed-period
+case. Each controlled mutation was restored; canonical and verification
+production sources match. The focused restored run across all 77 delta-LF fixtures passed offline. This qualifies the saved accumulation/reset cases,
+not full AV1 conformance or its remaining unsupported tools.
