@@ -300,3 +300,7 @@ pub mod ffv1_decoder;
 
 
 pub mod aac_coupling;
+
+// Video codecs - VP9 parallel decoding support
+#[cfg(feature = "parallel")]
+pub mod vp9_parallel;
