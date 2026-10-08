@@ -12,11 +12,15 @@
         "dav1d"
       ],
       "frames": 1,
+      "coded_frames": 1,
+      "show_existing_slot": null,
       "subsampling": "420",
       "webm": "av1-film-grain-depth8-preset1.webm",
       "webm_sha256": "040075cebb26882356f12dcb0e2c1ed045ce56411f60c0fdcb26415d8cacb341",
       "depth": 8,
       "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
       "size": [
         64,
         64
@@ -34,11 +38,15 @@
         "dav1d"
       ],
       "frames": 1,
+      "coded_frames": 1,
+      "show_existing_slot": null,
       "subsampling": "420",
       "webm": "av1-film-grain-depth8-preset16.webm",
       "webm_sha256": "d5680c46b4b9f2b3878c67bca426c3fe84397bea5e0b539f553fddf0d688ef3c",
       "depth": 8,
       "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
       "size": [
         64,
         64
@@ -56,11 +64,15 @@
         "dav1d"
       ],
       "frames": 1,
+      "coded_frames": 1,
+      "show_existing_slot": null,
       "subsampling": "420",
       "webm": "av1-film-grain-depth10-preset1.webm",
       "webm_sha256": "e055bb585b5ea515abfc085d7318173742c74d4d9fc222ea7b7e0ec5bcaf0bfa",
       "depth": 10,
       "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
       "size": [
         64,
         64
@@ -78,11 +90,15 @@
         "dav1d"
       ],
       "frames": 1,
+      "coded_frames": 1,
+      "show_existing_slot": null,
       "subsampling": "420",
       "webm": "av1-film-grain-depth10-preset16.webm",
       "webm_sha256": "82a2ffa0ac07f6b0c5ba301e4c809b73c357a8b55793e390cccbeb35d9fadef0",
       "depth": 10,
       "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
       "size": [
         64,
         64
@@ -100,11 +116,15 @@
         "dav1d"
       ],
       "frames": 1,
+      "coded_frames": 1,
+      "show_existing_slot": null,
       "subsampling": "420",
       "webm": "av1-film-grain-depth12-preset1.webm",
       "webm_sha256": "b71a81ea161360ea56a639dca694bffd9c773197aeaa95b9b77d8d16a4d1368d",
       "depth": 12,
       "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
       "size": [
         64,
         64
@@ -122,11 +142,15 @@
         "dav1d"
       ],
       "frames": 1,
+      "coded_frames": 1,
+      "show_existing_slot": null,
       "subsampling": "420",
       "webm": "av1-film-grain-depth12-preset16.webm",
       "webm_sha256": "a804fb5fa2561998a4ed02d5a8b2f97280679f66405b1116628d7c83648388f3",
       "depth": 12,
       "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
       "size": [
         64,
         64

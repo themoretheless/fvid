@@ -1,0 +1,1060 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-film-grain-tools-depth8-preset1.obu",
+      "sha256": "9ec6fdcec43d71dd7ff280075e6ab2facb85bada0deced13af1a696185ae1518",
+      "reference": "av1-film-grain-tools-depth8-preset1.yuv",
+      "reference_sha256": "2ddffdefa91a75d7bc66b16cfebf1089ecb6891ae8564326c742fb21a0087d3f",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset1.webm",
+      "webm_sha256": "2729e2c49d037cc5444ec2cb4419e808e4fbfdc165fd0cfd30c03a7ca9e17e26",
+      "depth": 8,
+      "grain_preset": 1,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset2.obu",
+      "sha256": "03ef72461852f9419573b281976f001cf24cc0d877144622580498842a1841e0",
+      "reference": "av1-film-grain-tools-depth8-preset2.yuv",
+      "reference_sha256": "bf0972a7000d814fb18efe5bf88e355fe983a0377eba39b66717fb5148a79804",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset2.webm",
+      "webm_sha256": "e7a4a8e205f00b6c710fda3dcc40806dffd033158005af4a41f0ae41779a7af6",
+      "depth": 8,
+      "grain_preset": 2,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset3.obu",
+      "sha256": "ec5c8e5bfbcc479689bb7a18368b7b31e4ff35865f6464849e8c81600b2f3bb0",
+      "reference": "av1-film-grain-tools-depth8-preset3.yuv",
+      "reference_sha256": "4f9fd87b69000c2dd06f862e5ba971b3ca76fbcb631ebabe893c1c15058372ab",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset3.webm",
+      "webm_sha256": "150be4697c603bf59f2b1c5004c46f661dbdf4e4fedfd0fb93e72fa8ebb7ff84",
+      "depth": 8,
+      "grain_preset": 3,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset4.obu",
+      "sha256": "6b5fa65a7433046e56fcb395700d52b2aed48299d5f94530687d7871aea93d4d",
+      "reference": "av1-film-grain-tools-depth8-preset4.yuv",
+      "reference_sha256": "35a2b289f0fd5dae69f342bbf9b9c13f65d03e04bb7bfdc83e19d4ef7be6b09d",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset4.webm",
+      "webm_sha256": "c9aa31eff070727c7acdf61c557b7c2a831259d7105c174420db0a04fe9b4869",
+      "depth": 8,
+      "grain_preset": 4,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset5.obu",
+      "sha256": "e3b65e114584e166e1ef06dd44f526870cc0bcc7f113b4e4977ab2b2cbb7ee4f",
+      "reference": "av1-film-grain-tools-depth8-preset5.yuv",
+      "reference_sha256": "127297b8f7a05a5dd6f7202ecc1a8102d3a32c1e63b7f95715b8662afc1ddbea",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset5.webm",
+      "webm_sha256": "2dee3708251fbf64df5e0848556b8112127d326c2817e5ea4f6b378f47e704d6",
+      "depth": 8,
+      "grain_preset": 5,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset6.obu",
+      "sha256": "eb78c04ae3547aa375596c4c574fe3b27f7ffb01b79b49b81837a0eed1593f74",
+      "reference": "av1-film-grain-tools-depth8-preset6.yuv",
+      "reference_sha256": "f846dd144a2b8234495df180da5a245019566970deb97d399f8ac5c64fe2a416",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset6.webm",
+      "webm_sha256": "a6f52b9560fc1a1b6acebdbff9f8efbfe2586a0fb4a72fc8f6e9b7d56d545033",
+      "depth": 8,
+      "grain_preset": 6,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset7.obu",
+      "sha256": "aaf222501c8d4d57625c078ffb2bdd8b39a643432894c6428c2d12d7a80a3b8a",
+      "reference": "av1-film-grain-tools-depth8-preset7.yuv",
+      "reference_sha256": "0935f2a0c889c603706936419838b67f2e0554f56a948de194ac0e4a0f058e02",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset7.webm",
+      "webm_sha256": "74ab2385e82ef549524701c39021c9142adfc4fc8844d32b356f7cbd1f1dde88",
+      "depth": 8,
+      "grain_preset": 7,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset8.obu",
+      "sha256": "84793f9e2c28822b36f259f35571874f13e7be44afc8ac41854fd34e299c457d",
+      "reference": "av1-film-grain-tools-depth8-preset8.yuv",
+      "reference_sha256": "4aa9c6e1013924251c37f3c1cccd4386a56ba75564e9cdb992abb3eb893040e1",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset8.webm",
+      "webm_sha256": "e01e83610c60b0d8747c0d3084a1d78ba9f0aece23090f8f1430e61fe27d6db1",
+      "depth": 8,
+      "grain_preset": 8,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset9.obu",
+      "sha256": "e28aa0f4ef0539033213bf58f483226226a1d489e2eeb6d921558a6c1cab56be",
+      "reference": "av1-film-grain-tools-depth8-preset9.yuv",
+      "reference_sha256": "675c4652e68927edab487df8c7afa492065ecf0a4daffd06eecc08b0b9c6675b",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset9.webm",
+      "webm_sha256": "a9000ad61b5d43533f801e305cd9a3575dab3bd48dc4503ae43fc77e177aea82",
+      "depth": 8,
+      "grain_preset": 9,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset10.obu",
+      "sha256": "a0c12ad99686a4a8ae9c02b51877ed04e519c5106b6fff26bed09cff478b42d0",
+      "reference": "av1-film-grain-tools-depth8-preset10.yuv",
+      "reference_sha256": "c9fe30baf0acea447fe3493f50ea5b3aa8649257bdb997182f2c26661c47ae52",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset10.webm",
+      "webm_sha256": "5f0ebc34fe2aae0200e142f0906ec8199f7cba06a691100399d13d40e2aba4cc",
+      "depth": 8,
+      "grain_preset": 10,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset11.obu",
+      "sha256": "43715d7c22805dbaec292479f15c7aab18819bb6a3945ce953ef9cff492596ad",
+      "reference": "av1-film-grain-tools-depth8-preset11.yuv",
+      "reference_sha256": "81d7dd12df06b839ce26ae6e4312b6ed4186e266b118294d2ec5cf5b946af1b3",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset11.webm",
+      "webm_sha256": "d7a4c42901b3bae745eeca8a5c5c1c2695536a4c1ec5504280f6511de3e78b66",
+      "depth": 8,
+      "grain_preset": 11,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset12.obu",
+      "sha256": "a1581e5174bcc541190ddad0164de63b9ea5962aac122e19fe2826ff8ed01e44",
+      "reference": "av1-film-grain-tools-depth8-preset12.yuv",
+      "reference_sha256": "75da73efc5ae929d90da5ef680493a9a274f947f6ccb484e0323f953a49f8432",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset12.webm",
+      "webm_sha256": "31879b40081f60aa22955997a2d53d1e0076969cd20cb26afaf95f347a97173c",
+      "depth": 8,
+      "grain_preset": 12,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset13.obu",
+      "sha256": "6f49e197e0a0eed4be77dd9de5536a3105d0998326aefa981d9549a13131a77f",
+      "reference": "av1-film-grain-tools-depth8-preset13.yuv",
+      "reference_sha256": "ca3f2dd13a8cbc329b5d7f07131f7d1b29c7181d8d2df317187ac88b8378f744",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset13.webm",
+      "webm_sha256": "dce5066e4b4dbfef7f73068d815f5d12efdbe978a7d7f8d8658423829e9ccb92",
+      "depth": 8,
+      "grain_preset": 13,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset14.obu",
+      "sha256": "d684b5ded01002535fcf0bc5a829d1b1340398fc3da7e3edb25054388bc87754",
+      "reference": "av1-film-grain-tools-depth8-preset14.yuv",
+      "reference_sha256": "9d46a75bfcb9918a4ecbda69e6158a9ea4bd15355a52484df01bd91c156fa3d1",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset14.webm",
+      "webm_sha256": "4587250c3879629bfcb3c1ea5000469404ebf8c6eefbdb0874fa6b6b79f46b77",
+      "depth": 8,
+      "grain_preset": 14,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset15.obu",
+      "sha256": "bb7100a142960f3b9e39fa6fef739770d0bc6e79e023c73940cb26361fbe4df6",
+      "reference": "av1-film-grain-tools-depth8-preset15.yuv",
+      "reference_sha256": "0884f5529523cb6794c8678392dc4dd550be412f5e439583bbd4440b8691c0c4",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset15.webm",
+      "webm_sha256": "8393b0ef6edd98d607854604d7c599e014b862d7eda0690dbdc19f088b44b4ac",
+      "depth": 8,
+      "grain_preset": 15,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth8-preset16.obu",
+      "sha256": "724d8928156666f628fedd88a0c001153671b5207dc2a3480c930fb1507836f6",
+      "reference": "av1-film-grain-tools-depth8-preset16.yuv",
+      "reference_sha256": "38747ebddaf901a91a73c6eac0574abb264ae13c01786590c2b25637288d90e4",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth8-preset16.webm",
+      "webm_sha256": "ec74c7a2d0a11b6c7b4298425083662391625346238686d7bba9d0559eb9e703",
+      "depth": 8,
+      "grain_preset": 16,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset1.obu",
+      "sha256": "dcc209bb6421392bbd18baedfe4ee10680bfe6c6f3aebd4b74f6895f0564f8d6",
+      "reference": "av1-film-grain-tools-depth10-preset1.yuv",
+      "reference_sha256": "68c3464cfb1d227a0a5fce1dd3f8c20b51dab68b5c3b1d4907b336d8158fdab7",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset1.webm",
+      "webm_sha256": "e0a93d0f3dff9925edcc5085fca9252cfbae81e4fe9c1e36836d7d2f73e679e2",
+      "depth": 10,
+      "grain_preset": 1,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset2.obu",
+      "sha256": "fd4af6bef9ed78dfef802c2e4b3ad35fb00b2866fa9f33a4599f1e7a65950503",
+      "reference": "av1-film-grain-tools-depth10-preset2.yuv",
+      "reference_sha256": "8d8472fbfb4de905fe6808643e5ba6bb1c0d0a2d1a987413dad2f5fb47979200",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset2.webm",
+      "webm_sha256": "f6baef0787dd78a901118065878e4a4f9ca6ba2f7accdc85291996f713a01df0",
+      "depth": 10,
+      "grain_preset": 2,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset3.obu",
+      "sha256": "0ba0c96ae5289e201996c25aa02e069f21ebc0f210ffaddd337b1f532b5276ac",
+      "reference": "av1-film-grain-tools-depth10-preset3.yuv",
+      "reference_sha256": "30c6c6d5e0181053a1d6a2fd550cba3d55a0e30dc7944f4de816fcfb1f17e38e",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset3.webm",
+      "webm_sha256": "4ad8ce65fdb6f4b44e879e3a45b9d6fca7bce8a15b7b599eb3c4e95178b02c9f",
+      "depth": 10,
+      "grain_preset": 3,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset4.obu",
+      "sha256": "94ccac46228ecac932624623c080ac9f5bd1fc358bc9de12690994c4c9d9d1ef",
+      "reference": "av1-film-grain-tools-depth10-preset4.yuv",
+      "reference_sha256": "db18893df6c5dc7cb5ae89094aac6daa52902ecb9bf4bbd159ad0880a1a1492c",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset4.webm",
+      "webm_sha256": "4e31d0cead4040f1f42486019e2cb817455ea6d0c316cbb71053019c0453eac3",
+      "depth": 10,
+      "grain_preset": 4,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset5.obu",
+      "sha256": "a35e50ccf1c112bcb3784b6b6ad362e10fd3e9bf9da19abd7a1d0778de6da948",
+      "reference": "av1-film-grain-tools-depth10-preset5.yuv",
+      "reference_sha256": "517cf7595dabfe563eef29ee8b672f9ccaf50059a71eb7e07beb2d5a8426e047",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset5.webm",
+      "webm_sha256": "3efe3270cbdd1c67be1b67ffdd7e75e9e79bb829c6c3f9b36b747dfebda90aed",
+      "depth": 10,
+      "grain_preset": 5,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset6.obu",
+      "sha256": "edb425fc4442dfcbf9191fe627397cac270204abe8f5c4cddae2bf124ba797c1",
+      "reference": "av1-film-grain-tools-depth10-preset6.yuv",
+      "reference_sha256": "232aa5d9a10b2ae1f7a6927511721f5927f0ffaafe10ffce9ba9d4f5e5569332",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset6.webm",
+      "webm_sha256": "ef24101ee271cb8f17110d8a9c8d867802ac5b73eca01976e0cbdf8211f39844",
+      "depth": 10,
+      "grain_preset": 6,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset7.obu",
+      "sha256": "2206debbc6c120b5adb795d75a1275cd76a0e7b63794638cb68157787e4bca11",
+      "reference": "av1-film-grain-tools-depth10-preset7.yuv",
+      "reference_sha256": "cbab1b6d6f7562a393d4603d67b537a64481516fe2b23415ecbe4a7a68b48c37",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset7.webm",
+      "webm_sha256": "b171c64c95b9863d419f226cd38e0f4aa336c110a07b063e7398621bedbc22e5",
+      "depth": 10,
+      "grain_preset": 7,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset8.obu",
+      "sha256": "408e75abd15c930bb84fed2e9ea1a92e40a8e708d542f995862b509c017d8c1c",
+      "reference": "av1-film-grain-tools-depth10-preset8.yuv",
+      "reference_sha256": "2fe7252a883637574f3df7a5d7cb34f00fd7dbf6286d95bf42add2930120b465",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset8.webm",
+      "webm_sha256": "64092f533ec369d3aeeb533af01b29b345c0b5145845590c37c5111c2c0c0014",
+      "depth": 10,
+      "grain_preset": 8,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset9.obu",
+      "sha256": "78d6b91a09e81556624fb6a5f5475f18195b4cbd8cf289f4b69644e68b5c15bd",
+      "reference": "av1-film-grain-tools-depth10-preset9.yuv",
+      "reference_sha256": "e15b2d00866dc8f13ee0c58c362da4ccb586c606370bac85b05ed1590b49aa75",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset9.webm",
+      "webm_sha256": "02a759a6597549eff9170b843124ac25b8b2e257e3b01a9afabe19bdf984b6f5",
+      "depth": 10,
+      "grain_preset": 9,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset10.obu",
+      "sha256": "0765bda68aaf6ed0d1058451c0dc1fbb2cf58dc2168cb2917b4e7c3a9679fae3",
+      "reference": "av1-film-grain-tools-depth10-preset10.yuv",
+      "reference_sha256": "64225e1037a670fc9a562f8bf9e68d2eba52f68dfcfc7bc8cc8d9b9f3932df86",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset10.webm",
+      "webm_sha256": "97cb71096de6eec5de17dce60684a3937936f2dc5f17a62a3f4cbbe2eb6f3f1f",
+      "depth": 10,
+      "grain_preset": 10,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset11.obu",
+      "sha256": "377285b15b88e48e8aec23f9887b8b0715513f7a05ba197ff791340f2ca2fbfa",
+      "reference": "av1-film-grain-tools-depth10-preset11.yuv",
+      "reference_sha256": "ee3fe6c77a2e1dd2e1b9c56f98828bd3609c9b212595c224ee85d6106b6de748",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset11.webm",
+      "webm_sha256": "67eb40220bb9c3c78c49c10430c081da2e574a4a4e66c72a88e9537c2b85d78f",
+      "depth": 10,
+      "grain_preset": 11,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset12.obu",
+      "sha256": "8b423aa8e948edb95721ed24975268f7ffec0a43b5c943894732c7ec3a8984cf",
+      "reference": "av1-film-grain-tools-depth10-preset12.yuv",
+      "reference_sha256": "5dfcb2e4b3c0cc64fa706f5a070b4796839bac27a2023a8e5811ef410aeeb1f6",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset12.webm",
+      "webm_sha256": "26c3e62552e11cd3fe6f0296c68847109a06cd38d3242fbaebd8a7354b88917f",
+      "depth": 10,
+      "grain_preset": 12,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset13.obu",
+      "sha256": "b1a3b94a856ea662efbba61de059968ee345627dc496c4c3254279e1d64e9785",
+      "reference": "av1-film-grain-tools-depth10-preset13.yuv",
+      "reference_sha256": "621d3a87accda95050f29879164fa62d6f8e42371e6e34fad816be3d75809ef6",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset13.webm",
+      "webm_sha256": "f097ca558ec2bdc62c0e042bab0156cb20a17807474eac23a3fce6a8ad49f978",
+      "depth": 10,
+      "grain_preset": 13,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset14.obu",
+      "sha256": "fd58c81e6da82f41966fe931565a2fe066d876fa5d5af4a849b16fc7a1499deb",
+      "reference": "av1-film-grain-tools-depth10-preset14.yuv",
+      "reference_sha256": "ac81dc82fa21627f94234b778fe75021144fece1b3cf18a02d1ab922fd45903a",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset14.webm",
+      "webm_sha256": "87d4ca775a79fe51efc8dd98c130d77ac3c4396897d470d9053c72677bbcf3b5",
+      "depth": 10,
+      "grain_preset": 14,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset15.obu",
+      "sha256": "c6049e06079101fff74422e7ca7420221a220fbe277340d8b6015108db75f87a",
+      "reference": "av1-film-grain-tools-depth10-preset15.yuv",
+      "reference_sha256": "d3e9ea1f2c205b3591cca55ae53a85461753bddefc4cae233090cef223744802",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset15.webm",
+      "webm_sha256": "84420cdf0531c1874ba988a11b1e6334f11ec3f2040d58cd4fbb476fcf2db6ef",
+      "depth": 10,
+      "grain_preset": 15,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth10-preset16.obu",
+      "sha256": "b7c2baeab23def14105741da98fe1901ec9b9776396392b55ddf6f083af60e2e",
+      "reference": "av1-film-grain-tools-depth10-preset16.yuv",
+      "reference_sha256": "82052a7a266cdc9edeea2fa29971a3a7b945e6e909b228e5b20265d61a98ded1",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth10-preset16.webm",
+      "webm_sha256": "702d859927e1eb6b9b9ca351a504b667d28fc3d58d9fa85647958ffc56a66d18",
+      "depth": 10,
+      "grain_preset": 16,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset1.obu",
+      "sha256": "0dd9be18ca90525b486838a47b23a6d530e68f579028713e9bdd48df6e45b9ba",
+      "reference": "av1-film-grain-tools-depth12-preset1.yuv",
+      "reference_sha256": "1a807bd21731d7f4b60e36ba88254e82fd03049b5d88f37a4a32a0c006fac22e",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset1.webm",
+      "webm_sha256": "f810c3f281bc22a28e9c8c7a724ddf7cead9d0e89e27a5d2e459e2e949b3ce92",
+      "depth": 12,
+      "grain_preset": 1,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset2.obu",
+      "sha256": "ec2bdecb109ca27a741e42f2535955dbb562267b225e0a364cf35af8a6409d90",
+      "reference": "av1-film-grain-tools-depth12-preset2.yuv",
+      "reference_sha256": "d836df4c2dc34521691422926773ee62a2bbeb4fa58738cf90a1cab99d30232d",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset2.webm",
+      "webm_sha256": "beefe4804e680fc37b11f9e5b52939f6fabbbe5f2b19e43c3c99b8a94fe63640",
+      "depth": 12,
+      "grain_preset": 2,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset3.obu",
+      "sha256": "e531b23b8e07f6792627d6def70750fbbf20c29b341ef1c3be3193e2872b7b1d",
+      "reference": "av1-film-grain-tools-depth12-preset3.yuv",
+      "reference_sha256": "c381698d03d9e6c077c7bb3fa3527e5c21b4b7257de018a45884289ca6870d7f",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset3.webm",
+      "webm_sha256": "7ed4bf9b44fa91c50946ba916fbd5951237bfde962ef7cbf67431cf5ef34aa83",
+      "depth": 12,
+      "grain_preset": 3,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset4.obu",
+      "sha256": "33ef707f1505f9b3fd12a39263633979095669d2ec480247fc87e1da60aca05a",
+      "reference": "av1-film-grain-tools-depth12-preset4.yuv",
+      "reference_sha256": "d7b600d724dda9df957914a9996d1777cbfafdb292a4221042dc14b0952f80d0",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset4.webm",
+      "webm_sha256": "14f6202ea973cf6ba422f79026ab791e99c7f3c58dc01826398754522ff3386f",
+      "depth": 12,
+      "grain_preset": 4,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset5.obu",
+      "sha256": "f378c2764a735c38afa2aa7f14cc4d6b33625fa820d1d10910fc52b34f149459",
+      "reference": "av1-film-grain-tools-depth12-preset5.yuv",
+      "reference_sha256": "07f1f23608f34c6f7360700ec9cb7012c3daf758e2e8c3e409213bd9d8ba3e46",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset5.webm",
+      "webm_sha256": "00abf1d7ded1bbdcfd99894188bd35bd0fca61ee62ff423e932a978a676934fc",
+      "depth": 12,
+      "grain_preset": 5,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset6.obu",
+      "sha256": "e4126bfcc05600da6cff182d32f1c0cf1e075a3789a8d61f2ad70ba8f0072b6a",
+      "reference": "av1-film-grain-tools-depth12-preset6.yuv",
+      "reference_sha256": "20feffc8d8a4e79c0ed4bf01451b589f60e7a3ec8aec43a42785eda0617e9f63",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset6.webm",
+      "webm_sha256": "070e12a1f2c7f8bd8272b113ba1ccd85cf1c375ca05cea82b4d44f3afa0a78e1",
+      "depth": 12,
+      "grain_preset": 6,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset7.obu",
+      "sha256": "15b4330b118fba20b209ade32ba720da1fdf5cedffa6851190517091eea6e2e2",
+      "reference": "av1-film-grain-tools-depth12-preset7.yuv",
+      "reference_sha256": "c5fcbde002d96bdd502fb0028e01e7d4f356d6ce402fa1bed3b5b5ea89e5edb4",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset7.webm",
+      "webm_sha256": "7f17d97e907b07e8d6e04aaf8868af18e122f8505fae1140456f97315c0786c5",
+      "depth": 12,
+      "grain_preset": 7,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset8.obu",
+      "sha256": "058f9f9994713bba757199446627fb2461575a2c2bfa6e9709fd2c0beed1b62d",
+      "reference": "av1-film-grain-tools-depth12-preset8.yuv",
+      "reference_sha256": "44674293399ea681f65d299feaf4ab443483913526af3d743c65f56a4f9b4235",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset8.webm",
+      "webm_sha256": "9c46b50b8c8f22012cf09e45f20ca6544e692addd95ccc56f69ab6255056662c",
+      "depth": 12,
+      "grain_preset": 8,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset9.obu",
+      "sha256": "024ae193fdd131b52f29f36b52ec8e84c9c7ee99276d25e5bc8d2a25a851cc8d",
+      "reference": "av1-film-grain-tools-depth12-preset9.yuv",
+      "reference_sha256": "f3ca5589c98c2e78911a0a41777fcc6443f92e4fe846d167e33b5801ba9f8c4a",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset9.webm",
+      "webm_sha256": "00e9a8483a82f30c7476c07f89416557717487062f99fa1d8ee4a9ac29461144",
+      "depth": 12,
+      "grain_preset": 9,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset10.obu",
+      "sha256": "3a43b15df58592ed2a4b59395468e762853fc08321e80c926c28d7470f77e86f",
+      "reference": "av1-film-grain-tools-depth12-preset10.yuv",
+      "reference_sha256": "bc2257709fd205873477e7197b0e4f850a04aef5f8a1e9c45441278c7f0085f4",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset10.webm",
+      "webm_sha256": "80ea97e3cfa4dc1b96622cd2f6c3dd401db53ca43ee5654f0d14db4a1b4e3dac",
+      "depth": 12,
+      "grain_preset": 10,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset11.obu",
+      "sha256": "d7974d051e939270bd14b6c568dfd8d460966fa294952e9fd3e9cc714cc5d068",
+      "reference": "av1-film-grain-tools-depth12-preset11.yuv",
+      "reference_sha256": "dea7fe6f0fd0d32504a00534af2d41b8e4cf907899883530ad032d450c4ac904",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset11.webm",
+      "webm_sha256": "81d32a61eb3edccc6ba1e3649d0b2b438b1fe9665d8aaf1c0cd665a4eea2a46c",
+      "depth": 12,
+      "grain_preset": 11,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset12.obu",
+      "sha256": "8e44fe0774ed6141d5e8c3befbb1fca5587e1c183a82ffe3bcfdeacaa44cc49b",
+      "reference": "av1-film-grain-tools-depth12-preset12.yuv",
+      "reference_sha256": "900b41ebbab9ad370e0fd12094374512423e96f780212a006d810a2c99350046",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset12.webm",
+      "webm_sha256": "f936f2257130c318b5f633cd856aeac49f41ceef4fcf767bc1076dc2c20b9514",
+      "depth": 12,
+      "grain_preset": 12,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset13.obu",
+      "sha256": "ec9f04abae9a1a16b010acf55d2ce400d4b5c7820c42390958a4773c2326440c",
+      "reference": "av1-film-grain-tools-depth12-preset13.yuv",
+      "reference_sha256": "a1289be34ea0e374b84fcf7b7b4dca096214bda047e3380c544ebae6abc97320",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset13.webm",
+      "webm_sha256": "5a87911235bd43bf7f332a69f0fa88ab87796775e2bf71b20010afa3a2bebc8d",
+      "depth": 12,
+      "grain_preset": 13,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset14.obu",
+      "sha256": "74668640e1736324c066ca6809979c1ad02004629fa0d2e7bbead1a46be8f465",
+      "reference": "av1-film-grain-tools-depth12-preset14.yuv",
+      "reference_sha256": "cd383b799bf879fbfff362c3364685147fa9c73182308b6ae8635354d9d7d1cd",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset14.webm",
+      "webm_sha256": "7259ca00c94272f91be299a7b18720b2f6d9b7d6a3a0b2eee4fe176547499f10",
+      "depth": 12,
+      "grain_preset": 14,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset15.obu",
+      "sha256": "7ab41b88f9b5550eefbe1cfd88b42ebab2845bd5cc4de0a2fa4655de5be6d8bd",
+      "reference": "av1-film-grain-tools-depth12-preset15.yuv",
+      "reference_sha256": "e4cb4ab9076115b6ede5dd5ebd92b643e92bf3c3260d158f270e93a2583c16ba",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset15.webm",
+      "webm_sha256": "70f0f51362ee9d3e4354799290436e248daea9fa65c10ae267cba191c566689c",
+      "depth": 12,
+      "grain_preset": 15,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-tools-depth12-preset16.obu",
+      "sha256": "863e4050470af0bb744d9ab7a0292498ad64653203fe3471a7729af27bd4e8bc",
+      "reference": "av1-film-grain-tools-depth12-preset16.yuv",
+      "reference_sha256": "93619b43273fbb411d2d1f8d36d18f671a56233ac07eff52224202243c810f82",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 4,
+      "subsampling": "420",
+      "webm": "av1-film-grain-tools-depth12-preset16.webm",
+      "webm_sha256": "e04f51e60989a6afe631d7c9a1457b825fc2b544dfd243287b5f2370f235ca56",
+      "depth": 12,
+      "grain_preset": 16,
+      "size": [
+        149,
+        85
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-film-grain-show-existing-depth8-preset1.obu",
+      "sha256": "11e793af53121eecf15cf6635296e8897f936d4291de5cd486701807c782c147",
+      "reference": "av1-film-grain-show-existing-depth8-preset1.yuv",
+      "reference_sha256": "10044f2222b27b52e1541cb050da8aefcc760e74bd9913372734c95a2c7066a4",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-show-existing-depth8-preset1.webm",
+      "webm_sha256": "15ee181fa640d28befac8e74aec7e2854abdbde7ea5064a82d3227c06c6fcea6",
+      "depth": 8,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-show-existing-depth8-preset16.obu",
+      "sha256": "a43b27c2d79ab837cb1b2f241ccd98985eca9ae17d5d69139839b7620cbe5961",
+      "reference": "av1-film-grain-show-existing-depth8-preset16.yuv",
+      "reference_sha256": "a65b9229dd83d58acaabe8932cd7aa3cff1d52df29f6f27573a23da88828648c",
+      "source_sha256": "0cc528a89d1de1293885e287b6489006d32884da5919ca767cdc29e6d05a588e",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-show-existing-depth8-preset16.webm",
+      "webm_sha256": "15fd7a0c28328d680dfdb61e86d721413cd404fbe81aaf2c5421453afa87c4ef",
+      "depth": 8,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-show-existing-depth10-preset1.obu",
+      "sha256": "9077ee96b35515667b54718b40ac53215202e0c025871c17ccc03fe16d547dc7",
+      "reference": "av1-film-grain-show-existing-depth10-preset1.yuv",
+      "reference_sha256": "a89118fb9aa243cb16f16e77da4f98a3bdde6d4382766f6e8dcb303f97213e71",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-show-existing-depth10-preset1.webm",
+      "webm_sha256": "44bbf7190bfb5a5472352830adab56db3f008ac9b52feeef152c7b6209f07621",
+      "depth": 10,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-show-existing-depth10-preset16.obu",
+      "sha256": "c5e775a6d3998a7410381fc8757cc437b9ee873775e51f98d1a98a335a0ba59d",
+      "reference": "av1-film-grain-show-existing-depth10-preset16.yuv",
+      "reference_sha256": "eab9d996915c85ba2a5dc343425946d5e3d927e2b6fee0f885d17355ea7d7da0",
+      "source_sha256": "9f97facf4fb8b2bb3987d770cd72dfd3205bcf4132c6099a2813f493d7237454",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-show-existing-depth10-preset16.webm",
+      "webm_sha256": "20694fdb20e71016ed960e2be14211a14f843cc314c776707347f6d38d8120c4",
+      "depth": 10,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-show-existing-depth12-preset1.obu",
+      "sha256": "cb97d38e0d12bc11bbe5005da62eebdb73715e98d0f42937b4d11b8cc31221b6",
+      "reference": "av1-film-grain-show-existing-depth12-preset1.yuv",
+      "reference_sha256": "3a51b26411e11f1b4bb56115c74a37555c5716c5847667fdbb9f359f013a2806",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-show-existing-depth12-preset1.webm",
+      "webm_sha256": "a69338ad137b7b79bd5f60f1b5dd57e924d6f1a70f5fc1a380cd092fdceaa4c3",
+      "depth": 12,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-film-grain-show-existing-depth12-preset16.obu",
+      "sha256": "73716766b8a795499f72cf1ce28f435f1f05f357d7711628c032aecf2a2240e2",
+      "reference": "av1-film-grain-show-existing-depth12-preset16.yuv",
+      "reference_sha256": "1a29de3265f407b0c597bc74dcf9c53f12abf133ebb4709c61b6fbff27511b27",
+      "source_sha256": "525cfb98e8c4a2948c127289ceed3b9dd7f3b74d8aae062bd50b4137c350b3e5",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-show-existing-depth12-preset16.webm",
+      "webm_sha256": "b1e5053fdc7a80f037717f1d55d09c01c6a802fb863fe3440854cf875c76bc21",
+      "depth": 12,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    }
+  ]
+}

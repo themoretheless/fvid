@@ -17,6 +17,8 @@ pub struct Decoded {
     pub color: Color,
     pub show: bool,
 }
+#[path = "av1_grain.rs"]
+mod grain;
 struct PendingFrame {
     header: Header,
     groups: Vec<Vec<u8>>,
@@ -133,6 +135,55 @@ impl Decoder {
             self.failed = true;
         }
         result
+    }
+    fn displayed(
+        &self,
+        mut frame: Decoded,
+        header: &Header,
+        output: &[Decoded],
+        compressed: usize,
+    ) -> Result<Decoded> {
+        if !frame.show {
+            return Ok(frame);
+        }
+        let Some(params) = &header.grain else {
+            return Ok(frame);
+        };
+        let mut retained = self.retained_picture_bytes(output)?;
+        let present = self
+            .references
+            .iter()
+            .flatten()
+            .chain(output.iter())
+            .any(|f| Arc::ptr_eq(&f.picture, &frame.picture));
+        if !present {
+            retained = retained
+                .checked_add(
+                    frame
+                        .picture
+                        .planes
+                        .iter()
+                        .map(|p| p.samples.len() * 2)
+                        .sum::<usize>()
+                        + frame.picture.segment_ids.len()
+                        + frame.picture.saved_motion.len()
+                            * std::mem::size_of::<av1_picture::SavedMotion>()
+                        + 256_000,
+                )
+                .ok_or_else(|| invalid("AV1 film grain picture size overflow"))?;
+        }
+        let available = self
+            .budget
+            .checked_sub(retained)
+            .and_then(|n| n.checked_sub(compressed))
+            .ok_or_else(|| invalid("AV1 film grain exceeds memory budget"))?;
+        frame.picture = Arc::new(grain::render(
+            &frame.picture,
+            &frame.color,
+            params,
+            available,
+        )?);
+        Ok(frame)
     }
     fn retained_picture_bytes(&self, output: &[Decoded]) -> Result<usize> {
         let mut seen = std::collections::HashSet::new();
@@ -271,7 +322,10 @@ impl Decoder {
                                 .fill(self.headers[index].as_ref().unwrap().order_hint);
                             self.showable.fill(false);
                         }
-                        output.push(decoded);
+                        let header = self.headers[index]
+                            .as_ref()
+                            .ok_or_else(|| invalid("missing AV1 show-existing header"))?;
+                        output.push(self.displayed(decoded, header, &output, 0)?);
                     } else {
                         let headers = std::array::from_fn(|i| self.headers[i].as_deref());
                         let mut owned_groups = Vec::new();
@@ -348,11 +402,6 @@ impl Decoder {
                                 self.reference_order_hints,
                             )?
                         };
-                        if h.grain.is_some() {
-                            return Err(crate::unsupported(
-                                "AV1 film grain synthesis not implemented",
-                            ));
-                        }
                         let groups: Vec<&[u8]> = if obu.kind == 4 {
                             owned_groups.iter().map(Vec::as_slice).collect()
                         } else {
@@ -415,6 +464,7 @@ impl Decoder {
                             color: s.color.clone(),
                             show: h.show,
                         };
+                        let displayed = self.displayed(decoded.clone(), &h, &output, compressed)?;
                         self.previous_frame_id = h.frame_id;
                         if let (Some(current), Some((delta_bits, id_bits))) =
                             (h.frame_id, s.frame_id_bits)
@@ -450,7 +500,7 @@ impl Decoder {
                                 self.reference_types[i] = h.frame_type;
                             }
                         }
-                        output.push(decoded);
+                        output.push(displayed);
                     }
                     if output.len() > 8 {
                         return Err(invalid("too many AV1 frames per packet"));

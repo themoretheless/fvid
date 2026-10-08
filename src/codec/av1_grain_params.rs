@@ -6,6 +6,8 @@ use crate::{Result, invalid};
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Grain {
     pub seed: u16,
+    /// Reference slot used by update_grain=0, for syntax qualification.
+    pub reference: Option<u8>,
     pub points: [[[u8; 2]; 14]; 3],
     pub point_counts: [usize; 3],
     pub chroma_from_luma: bool,
@@ -62,6 +64,7 @@ impl Grain {
             };
             let mut grain = stored.clone();
             grain.seed = seed;
+            grain.reference = Some(index as u8);
             return Ok(Some(grain));
         }
         let mut g = Self {
@@ -176,6 +179,7 @@ mod tests {
         );
         let mut expected = grain.clone();
         expected.seed = 65534;
+        expected.reference = Some(5);
         assert_eq!(parsed, expected);
         assert_eq!(reader.position(), 21);
         assert!(Grain::parse(&mut BitReader::new(&data), &s, 1, true, [4; 7], saved).is_err());

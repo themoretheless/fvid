@@ -993,5 +993,23 @@ its public film-grain presets 1/16. No private media or parameter sets are used.
 `generate_av1_film_grain_samples.py` records source/OBU/WebM/YUV SHA-256 hashes.
 Unmodified aomdec (grain enabled) and dav1d (`--filmgrain 1`) independently
 produce exactly the same packed YUV goldens. These tools run only during fixture
-generation; the offline regression executes the owned header parser and checks
-the explicit synthesis refusal. Goldens do not yet imply playback acceptance.
+generation; the initial syntax-only regression checked the explicit synthesis refusal.
+The synthesis qualification below replaces that expectation with native playback
+acceptance.
+
+### Native AV1 film grain synthesis qualification
+
+The film-grain generator additionally supports `--tools` (all 16 public libaom
+presets, 48 streams), `--custom` (24 original authored grain parameter tables,
+AR lag 0 through 3 and both chroma scaling modes), and `--show-existing` (six
+streams with a normative show-existing OBU appended to an actual showable
+reference slot). All use original deterministic 149x85 moving pixel patterns.
+The custom text tables are authored by the generator; they contain no extracted
+private codec parameters. A temporal delimiter separates the appended display
+OBU. Generation chooses a valid slot only when aomdec and dav1d both accept it
+and emit the same additional frame as an earlier displayed frame.
+
+Every OBU/WebM/YUV file and source pattern has a recorded SHA-256. Both oracles
+run solely during generation and explicitly enable grain. The checked-in
+acceptance tests use only native FVid, including reset, EOF, rewind and seek.
+The initial grain-synthesis refusal expectation is removed.

@@ -4733,7 +4733,7 @@ Validation: all 38 AV1 fvid-codecs unit tests and 78 integration tests across
 FFmpeg and no ignored acceptance tests. The initial 12-stream acceptance and
 all 12 extended copy cases also pass in debug mode.
 
-### AV1 film grain parameter syntax (2026-10-08, synthesis pending)
+### AV1 film grain parameter syntax (2026-10-08, initial syntax milestone)
 
 The owned frame-header parser now reads the complete film-grain syntax instead
 of refusing at `apply_grain`: piecewise scaling points, luma/chroma AR
@@ -4750,10 +4750,48 @@ checks all six streams and every truncated header. Unit tests exercise maximum
 point/AR counts, inheritance/new seed, invalid references, point ordering and
 absent/reset branches.
 
-**This is parameter parsing acceptance, not playback acceptance.** The decoder
-explicitly refuses at `AV1 film grain synthesis not implemented`; it never
-publishes an ungrained picture as successful film-grain playback. Native grain
-synthesis, displayed-versus-reference picture ownership and full pixel/reset/
-WebM/seek acceptance still need implementation. The refusal test must be replaced
-with playback acceptance when synthesis lands; the included goldens are ready
-for that check.
+At this initial syntax-only milestone, commit `006991e78`, playback still
+refused at `AV1 film grain synthesis not implemented`. The synthesis milestone
+below removes that gate and replaces the refusal with native pixel/playback
+acceptance using the same goldens.
+
+### Native AV1 reference film-grain synthesis (2026-10-08)
+
+Owned safe Rust now implements the normative Gaussian/LFSR noise generation,
+luma/chroma autoregression, piecewise intensity scaling including high-depth
+interpolation, horizontal/vertical block overlap, luma-coupled chroma noise and
+restricted/full-range clipping. The Gaussian constants are the specification's
+normative table, not an external decoder implementation. Bounded two-stripe
+scratch storage is reused across stripes. Admission includes that workspace,
+the displayed picture copy and the retained-reference accounting margin.
+
+Reference pictures remain ungrained. Visible frames receive a separate copy;
+hidden frames stay in their reconstruction form and show-existing synthesizes
+from the saved reconstruction/header. Parameter inheritance retains the seed
+replacement semantics and records the actual reference slot for qualification.
+The previous playback refusal test is replaced by pixel/playback acceptance.
+
+Qualification assets comprise six original 64x64 single frames, 48 four-frame
+149x85 streams covering all public libaom grain presets, 24 four-frame streams
+with original authored parameter tables covering AR lag 0/1/2/3, and six five-
+output-frame streams ending in show-existing. Both unmodified aomdec and dav1d
+with grain enabled produce exactly identical goldens. In total these assets
+contain 324 displayed frames at 8/10/12-bit 4:2:0. Offline acceptance compares
+all samples through native decode/reset, WebM/EOF/rewind and seeks. The 48-stream
+suite proves 27 actual inherited parameter headers, overlap/range enabled and
+disabled, and chroma scaling from luma. The custom suite proves all four AR lags.
+
+Zeroing synthesized noise fails the pixel regression at byte 0. A mutation that
+stores displayed/grained pictures as references fails on byte 0 of the next
+inter frame. These
+are tests of actual synthesis and reference ownership, not only parsing flags.
+Other chroma/profile/layered/tile-list support and broader combinations with
+other AV1 tools remain separate qualification gaps; this is not full AV1
+conformance.
+
+Validation: 44 AV1 fvid-codecs unit tests and 83 integration tests across 52 AV1
+suites pass in release with locked offline dependencies, no FFmpeg and zero
+ignored tests. All 252 qualification asset hashes and all 2048 normative Gaussian
+constants were verified. The grain test binary links only libSystem/libiconv,
+not libav, libaom or dav1d. Both controlled mutations failed and production code
+was restored before the final regression run.
