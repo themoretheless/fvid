@@ -2165,3 +2165,29 @@ matrix owner and compare their results to the same independently calculated
 oracles. This is numeric-stage acceptance, not full PS PCM acceptance.
 Generation and tests remain separate; no FFmpeg/libav, network, third-party
 Python packages, private media or copied codec parameter sets are required.
+
+### Original PS temporal interpolation regressions
+
+`generate_aac_ps_interpolation_fixtures.py` saves 36 exact rational common-grid
+complex interpolation cases and two original three-packet MP4s:
+`he-aac-ps-interpolation-20-synthetic.mp4` and
+`he-aac-ps-interpolation-34-synthetic.mp4`. Their saved manifest is
+`aac-ps-interpolation-oracles.json`; raw packets are
+`he-aac-ps-interpolation-packets.bin`, with hashes in the manifest.
+
+The timing oracle independently constructs piecewise anchor points with
+Fraction arithmetic (GOST R 53556.8-2013 6.4.6.4). Video endpoints come from
+the separate 90-digit Decimal matrix oracle. The video PS payloads have first
+border 0, a final border earlier than slot 31, then zero new envelopes; all
+use authored absolute IID/ICC and disabled phase, exercising Ra/20 and Rb/34.
+The history generator now accepts explicitly chosen variable borders without
+changing default generation. Both explicit generators are offline; regeneration
+kept all previous PS fixtures byte-for-byte identical.
+
+`tests/he_aac_ps_interpolation.rs` accepts the numeric temporal stage through
+MP4/SBR CRC/history/common mapping/mixing and compares saved coefficient
+streams. It does not claim full native PS stereo PCM acceptance: hybrid
+filtering, decorrelation and stereo QMF synthesis remain pending. Videos reuse
+the original AVC seed, with new AAC packets/tables/edits; no private media,
+parameter sets, foreign codec implementation, FFmpeg/libav or network are used.
+Generation is explicit and separate from ordinary tests.

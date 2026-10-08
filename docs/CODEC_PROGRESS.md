@@ -6316,3 +6316,32 @@ real matrix stage after container/SBR/PS/history/common-grid processing.
 This completes these numeric primitives, not native PS playback. Stateful
 phase history, temporal interpolation, hybrid filters, decorrelator, final
 stereo QMF synthesis and independent full PCM acceptance remain necessary.
+
+### Owned PS temporal matrix interpolation (2026-10-08)
+
+`aac_ps_interpolation` now owns chronological 24/30/32-slot common-grid
+complex coefficient interpolation and the retained final boundary. The first
+segment follows n/n0, interior segments follow (n-ne)/(ne1-ne), border zero
+applies its endpoint immediately, and the last endpoint is held to the frame
+end. Zero-envelope frames repeat the retained matrices. Startup/reset uses
+zero matrices. The state commits only after complete input validation and
+successful output construction; clones provide replay checkpoints.
+
+Configuration transfer is explicit: the surrounding DSP must map retained
+real h_ij and rebuild the complex boundary after phase reset, then replace
+the temporal owner's common geometry. This stage never reinterprets old
+native indices or invents envelopes. Interpolation avoids an overflowing
+difference between opposite finite endpoints and accepts finite extremes.
+
+Thirty-six independent exact-Fraction cases cover both common grids, all
+three slot counts, startup boundaries, interior ramps, shortened tails and
+reuse. Two original three-packet MP4s (Ra/20 and Rb/34) have border zero,
+shortened tails, retained headers/CRC and a final zero-envelope packet. They
+verify actual MP4→SBR→PS history→common mapping→real/complex matrices→temporal
+processing against saved Decimal endpoint/Fraction timing oracles. Additional
+checks cover exact startup/next-frame anchors, checkpoint replay, reset,
+explicit reconfiguration and transactional rejection of malformed input.
+
+This is temporal matrix acceptance; native HE-AACv2 PCM remains unimplemented.
+The final stateful phase-history owner, hybrid filters, decorrelator, stereo
+QMF synthesis and full independent PCM acceptance remain required.

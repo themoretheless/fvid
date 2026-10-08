@@ -54,7 +54,7 @@ def encode_row(label,mode,target,previous,temporal):
     return field(temporal,1)+''.join(book[v] for v in delta)
 
 def encode(header_present,iid_mode,icc_mode,enable_iid,enable_icc,phase,rows,
-           previous,slots,variable=False,first_time=False,extension=True):
+           previous,slots,variable=False,first_time=False,extension=True,explicit_borders=None):
     count=len(rows)
     text=field(header_present,1)
     if header_present:
@@ -63,6 +63,11 @@ def encode(header_present,iid_mode,icc_mode,enable_iid,enable_icc,phase,rows,
     counts=[1,2,3,4] if variable else [0,1,2,4]
     text+=field(variable,1)+field(counts.index(count),2)
     borders=[(e+1)*slots//(count+1) for e in range(count)] if variable else [(e+1)*slots//count-1 for e in range(count)]
+    if explicit_borders is not None:
+        assert variable and len(explicit_borders)==count
+        assert all(0<=v<slots for v in explicit_borders)
+        assert all(a<b for a,b in zip(explicit_borders,explicit_borders[1:]))
+        borders=list(explicit_borders)
     if variable:text+=''.join(field(v,5) for v in borders)
     def time(e,label):
         # Every first row is explicitly independently coded or temporal.
