@@ -28,6 +28,8 @@ pub struct Plane {
 pub struct Picture {
     pub size: [u32; 2],
     pub depth: u8,
+    /// Coded MI grid dimensions; super-resolution changes display size, not this grid.
+    pub segment_grid: [usize; 2],
     /// Segment IDs in padded 4x4 raster order, retained with reference pictures.
     pub segment_ids: Vec<u8>,
     /// Coded palette block counts per Y/UV plane group, for palette sizes 2..=8.
@@ -208,7 +210,10 @@ pub(crate) fn decode(
     let mut previous_segments = vec![0; cols * rows];
     if h.primary_reference != 7 {
         if let Some(primary) = references[h.references[h.primary_reference]] {
-            if primary.size == h.size && primary.segment_ids.len() == previous_segments.len() {
+            if h.segmentation_enabled
+                && primary.segment_grid == [cols, rows]
+                && primary.segment_ids.len() == previous_segments.len()
+            {
                 previous_segments.copy_from_slice(&primary.segment_ids);
             }
         }
@@ -221,6 +226,7 @@ pub(crate) fn decode(
     let image = Picture {
         size: h.size,
         depth: s.color.depth,
+        segment_grid: [cols, rows],
         segment_ids,
         palette_counts: [[0; 7]; 2],
         palette_cache_hits: [0; 2],

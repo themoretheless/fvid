@@ -870,3 +870,24 @@ VP9 originally has neither DefaultDuration nor explicit block durations; the gen
 - `shared-vp9-opus-unknown-rate.mkv`: input rate zero; SHA-256 `1e822150836f56e44c112c1b464761ab1e1e41f1eb1534f5ca26e88afd26d525`.
 
 Previously the owned Matroska writer declared the informational rate as its codec clock, producing 44100 Hz or refusing zero. Acceptance now requires 48000 Hz output and exact native presentation PCM after video filtering and companion remux. `native_opus_audio_export` additionally covers full/interval WAVE export, delay/padding, missing packet durations, existing WAVE DSP parity, loudness parity, packet limits, cancellation and atomic completion. Ordinary tests read committed fixtures and require neither FFmpeg nor network.
+
+
+### AV1 super-resolution with inherited segmentation
+
+`generate_av1_superres_segmentation_samples.py` produces 18 original synthetic
+192x128 three-frame streams, at 8/10/12 bits and denominators 9/12/16. Sources
+are owned deterministic moving gradients with noise; no private media or codec
+parameters are copied. The OBU, YUV and WebM hashes are recorded in
+`av1-superres-segmentation-generated.json`.
+
+Apply `scripts/av1_superres_variance_aq_fixture.patch` to libaom v3.15.1 before
+building the generator's aomenc. The fixture-only patch enables variance AQ
+under fixed-size super-resolution and forces LAST-primary map inheritance.
+Generate with two passes using the script; validate output with unmodified
+libaom and independent dav1d. Their saved full-frame pixels agree on all 54
+frames. Ordinary tests load saved fixtures and never build or run these tools.
+
+Before native coded-grid metadata was retained, the first inter frame of the
+8-bit denominator-9 orientation-0 fixture differed at byte 36864. The acceptance
+test now requires all 36 inter headers to inherit maps, nonzero key maps,
+unchanged decoded maps, full pixel parity, reset, replay, timestamps and seek.

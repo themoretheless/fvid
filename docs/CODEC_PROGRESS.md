@@ -4528,3 +4528,30 @@ The fixture generator is separate from ordinary offline tests and needs no
 FFmpeg. These fixed-denominator inter cases qualify the tested references;
 changing denominators across frames, inherited segmentation maps, tiled
 restoration units and other AV1 tools remain separate outstanding cases.
+
+
+### Super-resolution with inherited segmentation maps
+
+Eighteen owned three-frame streams combine denominators 9/12/16, 8/10/12-bit
+4:2:0, inherited nonzero segment maps, CDEF and restoration. All 36 inter
+headers explicitly inherit the primary reference map; native map equality is
+checked separately from full pixels. All 54 frames match unmodified libaom
+and independent dav1d. Reset, WebM replay, timestamps, EOF, rewind and seek
+are checked for every stream.
+
+Before the fix, the denominator-9 8-bit stream decoded its key frame correctly
+but differed at byte 36864, the start of its first inter frame. FVid compared
+upscaled picture dimensions with coded dimensions and discarded the inherited
+map. Reference pictures now retain coded MI grid dimensions independently of
+display size. Map inheritance compares MI dimensions as required by AV1 section
+7.8, including matching grids whose exact pixel dimensions differ.
+
+The separate generator uses a documented libaom v3.15.1 fixture-only patch:
+keep variance AQ enabled under super-resolution, select LAST as primary
+reference, and preserve the map on inter frames. Both independent reference
+decoders remain unmodified. No external codec, FFmpeg or network is required
+by ordinary acceptance tests. Changing denominators, temporal map updates,
+multiple tiles and other AV1 profiles/tools remain separate qualification gaps.
+
+Validation: all 35 fvid-codecs AV1 unit tests and 69 integration tests across
+41 AV1 suites pass offline with no ignored acceptance tests or FFmpeg.

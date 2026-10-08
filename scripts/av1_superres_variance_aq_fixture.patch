@@ -1,0 +1,37 @@
+diff --git a/av1/encoder/aq_variance.c b/av1/encoder/aq_variance.c
+index e8bab9b..85a2cee 100644
+--- a/av1/encoder/aq_variance.c
++++ b/av1/encoder/aq_variance.c
+@@ -56,7 +56,7 @@ void av1_vaq_frame_setup(AV1_COMP *cpi) {
+   if (avg_energy < 0) avg_energy = 0;
+   avg_ratio = rate_ratio[avg_energy];
+ 
+-  if (resolution_change) {
++  if (resolution_change && cm->superres_scale_denominator == SCALE_NUMERATOR) {
+     memset(cpi->enc_seg.map, 0, cm->mi_params.mi_rows * cm->mi_params.mi_cols);
+     av1_clearall_segfeatures(seg);
+     av1_disable_segmentation(seg);
+@@ -89,6 +89,11 @@ void av1_vaq_frame_setup(AV1_COMP *cpi) {
+       av1_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
+     }
+   }
++  if (!frame_is_intra_only(cm) && cm->features.primary_ref_frame != PRIMARY_REF_NONE && cm->superres_scale_denominator != SCALE_NUMERATOR) {
++    seg->update_map = 0;
++    seg->update_data = 0;
++    cpi->vaq_refresh = 0;
++  }
+ }
+ 
+ int av1_log_block_avg(const AV1_COMP *cpi, const MACROBLOCK *x, BLOCK_SIZE bs,
+diff --git a/av1/encoder/encode_strategy.c b/av1/encoder/encode_strategy.c
+index 85931ea..1642306 100644
+--- a/av1/encoder/encode_strategy.c
++++ b/av1/encoder/encode_strategy.c
+@@ -192,6 +192,7 @@ static int choose_primary_ref_frame(
+   // Note(yunqing): In other cases, primary_ref_frame is chosen based on
+   // cpi->ppi->gf_group.layer_depth[cpi->gf_frame_index], which also controls
+   // frame bit allocation.
++  return (LAST_FRAME - LAST_FRAME); // Owned fixture: deterministic primary reference.
+   if (cm->tiles.large_scale) return (LAST_FRAME - LAST_FRAME);
+ 
+   if (cpi->ppi->use_svc || cpi->ppi->rtc_ref.set_ref_frame_config)
