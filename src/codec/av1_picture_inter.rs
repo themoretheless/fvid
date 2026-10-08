@@ -768,6 +768,7 @@ impl Decoder<'_> {
             uv_mode: 0,
             reference,
             reference2: refs[1],
+            interintra: interintra_mode.is_some(),
             mv2: mvs[1],
             skip_mode,
             compound_average,
@@ -976,7 +977,7 @@ impl Decoder<'_> {
             let Some(b) = self.candidate(xx, yy) else {
                 return;
             };
-            if b.reference != reference || b.reference2 != 0 {
+            if b.reference != reference || b.reference2 != 0 || b.interintra {
                 return;
             }
             let mx = ((xx as usize & !(b.w - 1)) * 4 + b.w * 2 - 1) as i64;

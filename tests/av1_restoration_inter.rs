@@ -1,19 +1,14 @@
 use fvid::codec::av1_decoder::Decoder;
-// Owned reproductions stay separate from the intended full acceptance gate.
+// Owned acceptance: inter restoration and its control match independent pixels.
 #[test]
-fn owned_inter_restoration_pixels_and_known_inter_regressions() {
-    check("av1-restoration-inter-generated.json", true);
-}
-#[test]
-fn owned_inter_without_restoration_has_same_inter_regressions() {
-    check("av1-inter-restoration-control-generated.json", true);
-}
-#[test]
-#[ignore = "Acceptance pending: seven entropy failures and one 10-bit pixel mismatch remain"]
 fn owned_inter_restoration_all_streams_acceptance() {
-    check("av1-restoration-inter-generated.json", false);
+    check("av1-restoration-inter-generated.json");
 }
-fn check(manifest_name: &str, reproduce: bool) {
+#[test]
+fn owned_inter_without_restoration_all_streams_acceptance() {
+    check("av1-inter-restoration-control-generated.json");
+}
+fn check(manifest_name: &str) {
     let root =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
     let manifest: serde_json::Value =
@@ -21,7 +16,6 @@ fn check(manifest_name: &str, reproduce: bool) {
     let records = manifest["fixtures"].as_array().unwrap();
     assert_eq!(records.len(), 18);
     let mut active_inter = 0;
-    let mut gaps = 0;
     let mut accepted = 0;
     for record in records {
         let name = record["file"].as_str().unwrap();
@@ -61,36 +55,6 @@ fn check(manifest_name: &str, reproduce: bool) {
             }
         }
         assert_eq!(kinds, [0, 1, 1], "{name}: actual inter frames");
-        let depth = record["depth"].as_u64().unwrap();
-        let quality = record["quality"].as_u64().unwrap();
-        let orientation = record["orientation"].as_u64().unwrap();
-        let known = matches!(
-            (depth, quality, orientation),
-            (8, 48, 0)
-                | (8, 56, 0)
-                | (10, 48, 0)
-                | (10, 56, 0)
-                | (10, 56, 1)
-                | (12, 32, 0)
-                | (12, 48, 0)
-        );
-        if reproduce && known {
-            let mut decoder = Decoder::new(16 << 20);
-            for _ in 0..2 {
-                let error = match decoder.decode_packet(&data) {
-                    Ok(_) => panic!("{name}: gap fixed; enable acceptance and remove refusal"),
-                    Err(e) => e,
-                };
-                assert_eq!(
-                    error.to_string(),
-                    "truncated AV1 entropy data",
-                    "{name}: specific failure"
-                );
-                decoder.reset();
-            }
-            gaps += 1;
-            continue;
-        }
         accepted += 1;
         let mut decoder = Decoder::new(16 << 20);
         for _ in 0..2 {
@@ -117,24 +81,10 @@ fn check(manifest_name: &str, reproduce: bool) {
             }
             let expected = std::fs::read(root.join(record["reference"].as_str().unwrap())).unwrap();
             let mismatch = pixels.iter().zip(&expected).position(|(a, b)| a != b);
-            if reproduce && (depth, quality, orientation) == (10, 32, 0) {
-                assert_eq!(
-                    mismatch,
-                    Some(110558),
-                    "{name}: specific pixel reproduction"
-                );
-                assert_eq!((pixels[110558], expected[110558]), (240, 241));
-            } else {
-                assert_eq!(pixels.len(), expected.len(), "{name}: pixel extent");
-                assert_eq!(mismatch, None, "{name}: first differing byte");
-            }
+            assert_eq!(pixels.len(), expected.len(), "{name}: pixel extent");
+            assert_eq!(mismatch, None, "{name}: first differing byte");
             decoder.finish().unwrap();
             decoder.reset();
-        }
-        if reproduce && (depth, quality, orientation) == (10, 32, 0) {
-            gaps += 1;
-            accepted -= 1;
-            continue;
         }
         let expected = std::fs::read(root.join(record["reference"].as_str().unwrap())).unwrap();
         let webm = std::fs::read(root.join(record["webm"].as_str().unwrap())).unwrap();
@@ -170,7 +120,7 @@ fn check(manifest_name: &str, reproduce: bool) {
         }
         assert!(reader.read_frame_raw().unwrap().is_none());
     }
-    assert_eq!((accepted, gaps), if reproduce { (10, 8) } else { (18, 0) });
+    assert_eq!(accepted, 18);
     assert!(
         active_inter > 0 || manifest_name.contains("control"),
         "fixtures must exercise active inter restoration"

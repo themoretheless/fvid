@@ -4414,27 +4414,35 @@ tests across 36 AV1 suites. The restoration regression binary links
 only system libraries; no FFmpeg/libav, libaom or dav1d linkage was present.
 
 
-### Owned inter restoration qualification and remaining inter failures
+### Owned inter restoration qualification and inter-intra warp fix
 
 An 18-stream set (three frames each, 192x128, 8/10/12-bit 4:2:0) exercises
 restoration in actual inter frame headers. A matching 18-stream control set
 disables restoration. Both were generated from owned moving gradients and
 deterministic noise, with libaom/dav1d pixel agreement and 108 verified hashes.
 
-Seven parameter combinations fail native entropy decoding, on the same
-frame with restoration enabled or disabled:
+Before the fix, seven parameter combinations failed native entropy decoding,
+on the same frame with restoration enabled or disabled:
 8-bit q48/orientation0 (frame 2), q56/orientation0 (frame 3);
 10-bit q48/orientation0 (frame 2), q56/orientation0 (frame 3),
 q56/orientation1 (frame 2); 12-bit q32/orientation0 (frame 2),
-q48/orientation0 (frame 3). Diagnostics located failure in block decoding,
-not in reading restoration unit syntax. The cause is not yet established.
+q48/orientation0 (frame 3). A separate 10-bit q32/orientation0 case differed
+at byte 110558: native 240 versus reference 241 in both configurations.
 
-A separate 10-bit q32/orientation0 case decodes but differs at byte 110558
-of the three-frame planar reference: native 240 versus reference 241, with
-or without restoration. The test pins this specific mismatch.
+An instrumented external reference build located the first entropy divergence
+in motion mode selection: native selected a three-symbol warped-motion CDF
+where the reference selected the two-symbol OBMC CDF. Native Block storage
+had conflated a missing second reference with INTRA_FRAME in inter-intra
+prediction. It now retains an explicit inter-intra flag and excludes these
+neighbors from warp sample gathering, as required by AV1 find_warp_samples.
+The external reference build is diagnostic only, never a runtime/test dependency.
 
-The default tests reproduce these eight gaps and check full native reset,
-WebM replay, timestamps, rewind and seek on the other ten streams in each
-set. The distinct full acceptance test remains ignored pending the fixes;
-passing reproduction tests do not mean these streams are supported.
-Generator options and reference data remain separate from offline tests.
+All 36 streams now check full native pixels, reset, WebM replay, timestamps,
+rewind and seek. The former refusal and mismatch expectations have been
+removed, and full acceptance is enabled in ordinary offline tests. These
+108 owned frames qualify the tested inter restoration configurations; other
+AV1 profiles/tools and overall codec completion remain separate requirements.
+
+Final validation after the warp candidate fix passed 35 core AV1 tests and
+64 integration tests across all 37 AV1 suites, with no ignored acceptance
+tests in that run. The new acceptance binary links only system libraries.

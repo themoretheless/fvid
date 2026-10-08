@@ -53,6 +53,7 @@ struct Block {
     reference: usize,
     mv: [i32; 2],
     reference2: usize,
+    interintra: bool,
     mv2: [i32; 2],
     skip_mode: bool,
     compound_average: bool,
