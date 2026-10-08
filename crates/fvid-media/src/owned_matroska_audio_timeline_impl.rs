@@ -13,9 +13,11 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     let index = matroska_audio_index(&reader, selected)?;
     let track = reader.tracks[index].clone();
     let mut decoder = MatroskaTimelineDecoder::from_matroska(&track)?;
+    let in_band_ps = negotiate_matroska_ps(&mut reader, index, || control.check())?;
+    if in_band_ps { decoder = MatroskaTimelineDecoder::with_in_band_ps(&track)?; }
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
-    if track.sample_rate != u64::from(rate) || track.channels != u64::from(channels) {
+    if track.sample_rate != u64::from(rate) || (!in_band_ps && track.channels != u64::from(channels)) {
         return Err(invalid(
             "Matroska audio geometry disagrees with configuration",
         ));
@@ -174,4 +176,22 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         return Err(invalid("Matroska audio interval contains no samples"));
     }
     Ok(stats)
+}
+
+pub(crate) fn negotiate_matroska_ps<R: std::io::Read + std::io::Seek>(
+    reader: &mut MatroskaTimelineReader<R>, index: usize, mut check: impl FnMut() -> Result<()>,
+) -> Result<bool> {
+    let track = reader.tracks[index].clone();
+    if track.codec != "A_AAC" { return Ok(false); }
+    let Ok(rate) = u32::try_from(track.sample_rate) else { return Ok(false); };
+    let Ok(mut probe) = InBandPsProbe::new(&track.codec_private, rate) else { return Ok(false); };
+    reader.scan_all()?;
+    for packet_index in 0..reader.packets.len() {
+        check()?;
+        if reader.packets[packet_index].track != track.number { continue; }
+        let packet = reader.read_packet(packet_index)?;
+        if probe.read(&packet).is_err() { probe.reset(); continue; }
+        if probe.ps_detected() { return Ok(true); }
+    }
+    Ok(false)
 }

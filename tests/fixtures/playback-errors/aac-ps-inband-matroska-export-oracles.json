@@ -1,0 +1,108 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-inband-export-lc-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "4d760ed96f6882d630a1931ca059f7d316ba0933155796c2947928a5756ab1bf"
+    },
+    {
+      "file": "he-aac-ps-inband-export-sbr-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "36812649f8c426f809d8f0333c2f23deb8de673d72c2b0056c43c1d22d237498"
+    },
+    {
+      "file": "he-aac-ps-inband-export-lc-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "73dcfe0433ec47421ca84f438476cc402254978542a81ba45a5d50b0354eb3a9"
+    },
+    {
+      "file": "he-aac-ps-inband-export-sbr-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "666c10c070e808520e9f48d6b0175f38e574b800564401722d90c81e72c77f70"
+    }
+  ]
+}

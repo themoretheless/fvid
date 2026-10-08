@@ -1,4 +1,5 @@
 //! Owned Matroska AAC/ALAC/PCM presentation timeline to caller-owned float32 PCM.
+use crate::owned_aac::aac_ps_native::InBandPsProbe;
 pub use crate::owned_aac::stream::AudioDecodeStats;
 use crate::owned_webm::WebmReader as MatroskaTimelineReader;
 use fvid_control::{CopyOptions, ProgressEvent};
@@ -52,6 +53,12 @@ pub(crate) enum MatroskaTimelineDecoder {
 }
 impl MatroskaTimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
+    pub(crate) fn with_in_band_ps(track: &crate::owned_webm::Track) -> Result<Self> {
+        Ok(Self::Ps(Box::new(crate::owned_aac::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(
+            &track.codec_private, u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
+        )?)))
+    }
+
     pub(crate) fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
         match track.codec.as_str() {
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => Ok(Self::Pcm(

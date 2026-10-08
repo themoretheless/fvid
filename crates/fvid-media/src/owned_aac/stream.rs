@@ -96,7 +96,10 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
             .checked_add(usize::from(config.core.channels) * 2 * 1024 * 1024)
             .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
     }
-    if config.ps_present == Some(true) {
+    if config.ps_present != Some(false)
+        && config.sbr_present != Some(false)
+        && config.core.channels == 1
+    {
         // Eight complete fixed PS/bridge state copies cover nested native,
         // syntax, QMF, matrix and decorrelation transactions. Four MiB cover
         // bounded 64-slot/91-band hybrid/matrix rows, pending/future QMF and

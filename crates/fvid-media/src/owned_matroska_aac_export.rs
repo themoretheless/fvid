@@ -127,11 +127,15 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     }
     crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
         .map_err(|e| e.to_string())?;
+    let in_band_ps = crate::owned_matroska_audio::negotiate_matroska_ps(&mut reader, index, || Ok(()))
+        .map_err(|e| e.to_string())?;
     let track = reader
         .tracks
         .get(index)
         .ok_or("selected audio stream is absent")?;
-    let decoder = crate::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)
+    let decoder = if in_band_ps {
+        crate::owned_matroska_audio::MatroskaTimelineDecoder::with_in_band_ps(track)
+    } else { crate::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track) }
         .map_err(|e| e.to_string())?;
     let (rate, channels, mask) = (
         decoder.sample_rate(),
@@ -141,7 +145,7 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     if track.kind != 2
         || track.codec != "A_AAC"
         || track.sample_rate != u64::from(rate)
-        || track.channels != u64::from(channels)
+        || (!in_band_ps && track.channels != u64::from(channels))
     {
         return Err("Matroska audio geometry disagrees with configuration or codec".into());
     }

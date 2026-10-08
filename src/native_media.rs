@@ -381,9 +381,17 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R:std::io::Read+std::io::See
 }
 
 use crate::container::webm::WebmReader as MatroskaTimelineReader;
+use crate::codec::aac_ps_native::InBandPsProbe;
 struct MatroskaTimelineDecoder(crate::native_audio_decoder::PacketPcmDecoder);
 impl MatroskaTimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
+    fn with_in_band_ps(track: &crate::container::webm::Track) -> Result<Self> {
+        Ok(Self(crate::native_audio_decoder::PacketPcmDecoder::Ps(Box::new(
+            crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(&track.codec_private,
+                u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?).map_err(|e| invalid(&e.0))?
+        ))))
+    }
+
     fn from_matroska(track: &crate::container::webm::Track) -> Result<Self> {
         Ok(Self(
             crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?,
@@ -799,9 +807,12 @@ pub fn audio_source_info_selected(
         use std::io::{Read,Seek,SeekFrom};
         let mut input=File::open(source)?;let mut prefix=[0;4];input.read_exact(&mut prefix)?;input.seek(SeekFrom::Start(0))?;
         if prefix==[0x1a,0x45,0xdf,0xa3] {
-            let reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
-            let index=matroska_audio_index(&reader,selected)?;let track=&reader.tracks[index];let decoder=crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?;
-            if track.sample_rate!=u64::from(decoder.sample_rate()) || track.channels!=u64::from(decoder.channels()) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
+            let mut reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
+            let index=matroska_audio_index(&reader,selected)?;
+            let in_band_ps=negotiate_matroska_ps(&mut reader,index,||Ok(()))?;
+            let track=&reader.tracks[index];
+            let decoder=if in_band_ps {MatroskaTimelineDecoder::with_in_band_ps(track)?.0} else {crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?};
+            if track.sample_rate!=u64::from(decoder.sample_rate()) || (!in_band_ps && track.channels!=u64::from(decoder.channels())) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
             return Ok(AudioSourceInfo {channel_mask:decoder.channel_mask(),stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:match track.codec.as_str() {"A_ALAC"=>"alac","A_PCM/INT/LIT"|"A_PCM/INT/BIG" if track.bit_depth==8=>"pcm_u8","A_PCM/INT/LIT"=>"pcm_sle","A_PCM/INT/BIG"=>"pcm_sbe","A_PCM/FLOAT/IEEE"=>"pcm_fle",_=>"aac"}});
         }
         let reader = crate::container::mp4::Mp4Reader::open(

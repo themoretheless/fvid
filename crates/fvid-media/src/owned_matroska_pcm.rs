@@ -32,9 +32,14 @@ mod precise {
     use crate::owned_matroska_audio::{DecodeProgress, invalid, matroska_audio_index};
     use crate::owned_webm::WebmReader as MatroskaTimelineReader;
     type Result<T> = std::result::Result<T, Error>;
+    use crate::owned_aac::aac_ps_native::InBandPsProbe;
     struct MatroskaTimelineDecoder(crate::owned_pcm_decoder::PcmDecoder);
     impl MatroskaTimelineDecoder {
         const SAMPLE_BYTES: usize = 8;
+        fn with_in_band_ps(_: &crate::owned_webm::Track) -> Result<Self> {
+            Err(invalid("PCM reader cannot select AAC PS"))
+        }
+
         fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
             Ok(Self(crate::owned_pcm_decoder::PcmDecoder::from_matroska(
                 track,

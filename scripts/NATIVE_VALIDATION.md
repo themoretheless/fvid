@@ -792,3 +792,14 @@ video verifies that normal LC without SBR fill is accepted for discovery,
 followed by late PS discovery, malformed-tail rollback, reset/replay and explicit
 disable guards. This qualifies discovery only: native PS playback still refuses
 missing SBR fill. Track-wide scanning and output clock negotiation remain gaps.
+
+Implicit-PS Matroska PCM/WAV export (2026-10-09): the shared owned/root timeline
+and WAV metadata probe negotiate actual PS payload before choosing stereo.
+Four original mono-metadata LC/SBR 960/1024 videos reproduce the former exact
+SBR/PS synthesis refusal. Acceptance compares independent PCM through full
+export, gaps, ceil-rounded intervals and max-packet EOF drain; root and owned
+PCM agree byte-for-byte and public WAV reports stereo geometry. Memory admission
+reserves possible mono in-band PS before the probe; packet preflight checks
+cancellation without consuming decoded-packet progress. Original ASC/timestamps
+are retained. MP4 implicit-PS export, clock changes and missing-fill PS playback
+remain separate gaps; this supersedes only the Matroska export limitation above.
