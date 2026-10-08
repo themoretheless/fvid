@@ -4083,4 +4083,34 @@ reference decoders agree on saved pixels. All 18 payload/container/pixel
 hashes were verified. The offline reproduction test independently parses
 each header and requires coded delta-LF before checking the specific native
 refusal. This is a passing refusal test, not a playback acceptance test.
-Native block-level delta filtering and acceptance remain required.
+This refusal was subsequently replaced by native pixel acceptance below.
+
+## Native AV1 delta-loop-filter reconstruction in progress
+
+Native reconstruction now reads signed scalar or per-direction/plane delta-LF
+symbols, extends values with the normative escape syntax, accumulates/clips
+deltas, resets tile state, and records the current deltas in each intra/inter
+block. Filter strength clamps the delta-adjusted base before segmentation and
+reference/mode adjustments. The CDF generator also emits four independent
+multi-delta probability contexts, preserving all previous table IDs.
+
+The six owned 8/10/12-bit streams now match independent saved pixels. The
+12-bit quality-48 case initially exposed a second bug: chroma-from-luma at
+the bottom frame edge used clipped MI-grid luma extents instead of the fully
+reconstructed transform extent. Reconstruction now retains complete edge
+transforms in padded internal storage while using logical MI boundaries for
+intra neighbor availability. Picture/transform grids are cropped before the
+existing filter pipeline. The memory estimate includes added storage.
+
+The old refusal assertion has been replaced by pixel acceptance; reset/finish
+and WebM replay/rewind/seek are checked. All 50 tests across 24 prior/current AV1 integration suites and 35 AV1
+core tests passed offline. Scalar nonzero deltas are observed in the six encoder fixtures. An additional
+64 directly synthesized streams cover scalar/multi contexts, all four
+resolutions, positive/negative/zero and escaped/clipped values, and adaptive
+CDFs. Both independent oracles agree; the strengthened nonzero residual
+produces six distinct golden images, unlike the initial weak residual.
+Native pixel, reset/finish and WebM replay/rewind/seek acceptance passed. All
+192 added hashes were verified. Ignoring decoded deltas when choosing filter strength in the verification
+copy caused a pixel mismatch on the owned negative-delta stream. The source
+was restored and matched canonical sources; focused restored checks for all 6 encoder and 64 directly owned streams
+passed offline. Tile reset and multi-superblock accumulation remain to be qualified. This implementation is not yet a claim of complete AV1 support.

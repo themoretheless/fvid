@@ -46,6 +46,8 @@ for match in re.finditer(r'^(Default_\w+_Cdf)\s*((?:\[[^\]]+\]\s*)+)\s*=\s*\{', 
    dims=[2]+dims; init=f'{init}.repeat(2)'
  ids.append(f'pub const {key.upper()}: usize = {len(ids)};')
  out.append(f'cdfs.insert(Table {{ shape: &{dims!r}, values: {init} }});')
+ids.append(f'pub const DELTA_LF_MULTI: usize = {len(ids)};')
+out.append('cdfs.insert(Table { shape: &[4, 5], values: DEFAULT_DELTA_LF_CDF.repeat(4) });')
 out[out.index('<<IDS>>')] = '\n'.join(ids)
 out += ['cdfs', '}', '''pub fn reset_counts(&mut self) { for table in &mut self.tables { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get<const K: usize>(&mut self, id: usize, indices: [usize; K]) -> Option<&mut [u16]> {
 let table = self.tables.get_mut(id)?;

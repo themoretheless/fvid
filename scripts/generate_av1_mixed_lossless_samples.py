@@ -11,7 +11,7 @@ def table(name,offset,length):
     raw=re.search(r'const '+name+r': &\[u16\] = &\[(.*?)\];',TABLES,re.S).group(1)
     values=list(map(int,re.findall(r'\d+',raw)));row=values[offset:offset+length];assert len(row)==length and row[-2]==32768 and row[-1]==0
     return row[:-1]
-def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15,segment_references=None,obmc_blocks=None,residual_everywhere=False,frame_size=(32,32)):
+def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1,motion=0,forced_reference=False,forced_tools=(0,0),switchable_filter=False,near_second=False,interintra_mode=None,interintra_wedge=None,compound_mask=None,masked_blocks=15,segment_references=None,obmc_blocks=None,residual_everywhere=False,frame_size=(32,32),delta_lf=None):
     vector=(0,motion) if isinstance(motion,int) else tuple(motion)
     assert len(vector)==2 and all(v in [-8,-4,-2,0,2,4,8] for v in vector)
     pre_skip=forced_reference or any(forced_tools)
@@ -41,6 +41,18 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
         diff=next(d for d in range(2) if unmap(d,pred,2)==segment)
         symbols.append(dict(model=[18,[ctx]],cdf=CDF[ctx],symbol=diff))
         if pre_skip and not skip:s(32,[skipctx],'DEFAULT_SKIP_CDF',skipctx*3,3,0)
+        if i==0 and delta_lf is not None:
+            resolution,multi,values=delta_lf
+            s(61,[],'DEFAULT_DELTA_Q_CDF',0,5,0)
+            def literal(value,bits):
+                for bit in range(bits-1,-1,-1):symbols.append(dict(cdf=[16384,32768],symbol=(value>>bit)&1))
+            for index,value in enumerate(values):
+                magnitude=abs(value)
+                s(96 if multi else 62,[index] if multi else [],'DEFAULT_DELTA_LF_CDF',0,5,min(magnitude,3))
+                if magnitude>=3:
+                    bits=next(n for n in range(1,9) if 0<=magnitude-(1<<n)-1<(1<<n))
+                    literal(bits-1,3);literal(magnitude-(1<<bits)-1,bits)
+                if magnitude:literal(int(value<0),1)
         if inter and not (forced_reference and reference==0):
             if not forced_reference and not tools&2:s(29,[0],'DEFAULT_IS_INTER_CDF',0,3,1)
             n=int(x>0)+int(y>0)
@@ -140,7 +152,7 @@ def encode(writer,base,mask,selected,adaptive,residual=0,inter=False,reference=1
     text=''.join(f"{len(r['cdf'])} {r['symbol']} "+' '.join(map(str,r['cdf']))+'\n' for r in symbols)
     return subprocess.run([str(writer)],input=text.encode(),stdout=subprocess.PIPE,check=True).stdout,[grid[y*8+x] for y in range(rows) for x in range(cols)]
 
-def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None,separate=False,redundant=False):
+def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None,separate=False,redundant=False,delta_lf=None):
     b=Bits();b.u(0);b.u(kind,2);b.u(0);b.u(1);b.u(1);b.u(int(not adaptive));b.u(int(size is not None));b.u(refresh,8)
     if size is not None:b.u(size[0]-1,5);b.u(size[1]-1,5)
     b.u(0)
@@ -150,7 +162,14 @@ def key(entropy,base,selected,adaptive,kind=0,refresh=255,size=None,separate=Fal
         for feature in range(8):
             active=seg<2 and feature==0;b.u(int(active))
             if active:b.u(-base if seg==0 else 0,9)
-    b.u(0);b.u(0,16);b.u(int(selected));b.u(0)
+    if delta_lf is None:
+        b.u(0);b.u(0,16)
+    else:
+        resolution,multi,_=delta_lf
+        b.u(1);b.u(0,2);b.u(1);b.u(resolution,2);b.u(int(multi))
+        for _ in range(4):b.u(16,6)
+        b.u(0,3);b.u(0)
+    b.u(int(selected));b.u(0)
     if separate:
         header=b.bytes(trailing=True)
         return obu(3,header)+(obu(7,header) if redundant else b'')+obu(4,entropy)
