@@ -167,3 +167,51 @@ impl PsAacDecoder {
         Ok(output)
     }
 }
+
+impl crate::audio::AudioDecode for PsAacDecoder {
+    fn decode_packet(
+        &mut self,
+        data: &[u8],
+        pts: i64,
+        duration: u64,
+    ) -> crate::Result<Option<crate::audio::DecodedAudio>> {
+        self.decode(data, pts, duration).map(|out| {
+            out.map(|f| crate::audio::DecodedAudio {
+                packet: f.packet,
+                source_pts: f.source_pts,
+                source_duration: f.source_duration,
+            })
+        })
+    }
+    fn finish_packet(&mut self) -> crate::Result<Option<crate::audio::DecodedAudio>> {
+        self.finish().map(|out| {
+            out.map(|f| crate::audio::DecodedAudio {
+                packet: f.packet,
+                source_pts: f.source_pts,
+                source_duration: f.source_duration,
+            })
+        })
+    }
+    fn decode_encoded(
+        &mut self,
+        data: &[u8],
+        pts: u64,
+        duration: u64,
+    ) -> crate::Result<Option<AudioPacket>> {
+        let pts = i64::try_from(pts).map_err(|_| crate::invalid("PS AAC timestamp overflow"))?;
+        self.decode(data, pts, duration)
+            .map(|out| out.map(|f| f.packet))
+    }
+    fn reset(&mut self) {
+        PsAacDecoder::reset(self);
+    }
+    fn checkpoint(&self) -> Option<crate::audio::AudioCheckpoint> {
+        PsAacDecoder::checkpoint(self).map(crate::audio::AudioCheckpoint::PsAac)
+    }
+    fn restore(&mut self, state: &crate::audio::AudioCheckpoint) -> crate::Result<()> {
+        let crate::audio::AudioCheckpoint::PsAac(state) = state else {
+            return Err(crate::invalid("PS AAC checkpoint codec mismatch"));
+        };
+        PsAacDecoder::restore(self, state)
+    }
+}

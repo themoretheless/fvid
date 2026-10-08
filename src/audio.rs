@@ -569,6 +569,11 @@ pub trait AudioStream: Send {
     /// order. The track being read is one of them, so a longer list is what
     /// makes the track key worth having.
     fn audio_tracks(&self) -> Vec<AudioTrack>;
+    /// Whether queued codec PCM still belongs to an active presentation range.
+    /// Completed edits/silence must not receive an out-of-range lookahead frame.
+    fn drain_decoded_at_eof(&self) -> bool { true }
+    /// Check completeness after delayed PCM has been drained and presented.
+    fn validate_eof(&self) -> crate::Result<()> { Ok(()) }
     /// Next encoded packet, or `None` at end of stream.
     fn next_packet(&mut self) -> crate::Result<Option<EncodedPacket>>;
     /// One bounded scheduling step. Reset keeps the device queue and presentation
@@ -592,8 +597,25 @@ pub trait AudioStream: Send {
 }
 
 /// Decoder half of the audio pipeline: turn encoded packets into PCM.
-pub enum AudioCheckpoint { Aac(crate::codec::aac_native::AacCheckpoint) }
+pub enum AudioCheckpoint {
+    Aac(crate::codec::aac_native::AacCheckpoint),
+    PsAac(crate::codec::aac_ps_playback::Checkpoint),
+}
+/// PCM together with the source access unit used for trim and presentation.
+pub struct DecodedAudio {
+    pub packet: AudioPacket,
+    pub source_pts: i64,
+    pub source_duration: u64,
+}
 pub trait AudioDecode: Send {
+    /// Decode with signed source timing. Immediate codecs inherit the input
+    /// window; delayed codecs must return the original window with their PCM.
+    fn decode_packet(&mut self, data: &[u8], pts: i64, duration: u64) -> crate::Result<Option<DecodedAudio>> {
+        self.decode_encoded(data, pts.max(0) as u64, duration).map(|out| out.map(|packet| DecodedAudio {packet,source_pts:pts,source_duration:duration}))
+    }
+    /// Drain delayed PCM before reporting EOF. Repeated calls must eventually
+    /// return None; source timing belongs to the original encoded packet.
+    fn finish_packet(&mut self) -> crate::Result<Option<DecodedAudio>> { Ok(None) }
     fn checkpoint(&self)->Option<AudioCheckpoint> {None}
     fn restore(&mut self,_:&AudioCheckpoint)->crate::Result<()> {Err(crate::invalid("audio checkpoint is unsupported"))}
 

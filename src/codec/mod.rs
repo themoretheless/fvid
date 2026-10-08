@@ -56,11 +56,12 @@ pub fn make_audio_decoder(
     };
     use symphonia_decoder::SymphoniaDecoder;
     let decoder: Box<dyn crate::audio::AudioDecode> = match codec {
-        "mp4a" => Box::new(aac_decoder::AacDecoder::new(
-            extra_data,
-            sample_rate,
-            channels,
-        )?),
+        "mp4a" => {
+            let asc=config::aac_specific_config(extra_data)?;
+            if config::AudioSpecificConfig::parse(asc)?.ps_present==Some(true) {
+                Box::new(aac_ps_playback::PsAacDecoder::new(extra_data,sample_rate,channels)?)
+            } else {Box::new(aac_decoder::AacDecoder::new(extra_data,sample_rate,channels)?)}
+        },
         "A_OPUS" => Box::new(opus_decoder::OpusDecoder::new(extra_data, sample_rate, channels)?),
         "A_VORBIS" => Box::new(vorbis_decoder::VorbisDecoder::new(
             extra_data,

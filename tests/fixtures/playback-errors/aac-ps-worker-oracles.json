@@ -1,0 +1,25 @@
+{
+  "kind": "own silence and repeated PS source ranges; source gap remains an explicit error",
+  "cases": [
+    {
+      "file": "he-aac-ps-worker-repeat-960-synthetic.mp4",
+      "source": "he-aac-sbr-ps-960-retain-synthetic.mp4",
+      "source_start": 720,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "gap_file": "he-aac-ps-worker-source-gap-960-synthetic.mp4",
+      "gap_error": "AAC edit extends beyond source packets"
+    },
+    {
+      "file": "he-aac-ps-worker-repeat-1024-synthetic.mp4",
+      "source": "he-aac-ps-matrix-retain-synthetic.mp4",
+      "source_start": 720,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "gap_file": "he-aac-ps-worker-source-gap-1024-synthetic.mp4",
+      "gap_error": "AAC edit extends beyond source packets"
+    }
+  ]
+}

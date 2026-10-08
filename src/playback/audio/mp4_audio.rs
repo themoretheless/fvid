@@ -356,6 +356,15 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         )
     }
 
+    fn drain_decoded_at_eof(&self)->bool {
+        self.timeline.as_ref().is_none_or(|timeline| timeline.locate(self.edit_cursor.get()).is_some_and(|(_,source)|source.is_some()))
+    }
+    fn validate_eof(&self)->Result<()> {
+        if self.timeline.as_ref().is_some_and(|timeline|timeline.locate(self.edit_cursor.get()).is_some()) {
+            return Err(invalid("AAC edit extends beyond source packets"));
+        }
+        Ok(())
+    }
     fn next_step(&mut self)->Result<Option<crate::audio::AudioStep>> {
         use crate::audio::{AudioStep,AudioPacket};
         let Some(timeline)=&self.timeline else {return self.next_packet().map(|p|p.map(AudioStep::Encoded));};
@@ -372,7 +381,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             self.edit_cursor.set(cursor+frames);
             return Ok(Some(AudioStep::Pcm(AudioPacket {data,pts:cursor,timebase_num:1,timebase_den:self.track().sample_rate})));
         }
-        self.next_packet()?.map(AudioStep::Encoded).map(Some).ok_or_else(||invalid("AAC edit extends beyond source packets"))
+        Ok(self.next_packet()?.map(AudioStep::Encoded))
     }
 
     fn rewind(&mut self) {

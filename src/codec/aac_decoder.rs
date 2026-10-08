@@ -80,7 +80,7 @@ impl crate::audio::AudioDecode for AacDecoder {
         (!self.failed).then(||crate::audio::AudioCheckpoint::Aac(self.decoder.checkpoint()))
     }
     fn restore(&mut self,state:&crate::audio::AudioCheckpoint)->crate::Result<()> {
-        let crate::audio::AudioCheckpoint::Aac(state)=state;
+        let crate::audio::AudioCheckpoint::Aac(state)=state else {return Err(crate::invalid("AAC checkpoint codec mismatch"));};
         self.decoder.restore(state)?;self.failed=false;Ok(())
     }
 

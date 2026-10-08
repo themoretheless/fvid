@@ -1665,3 +1665,14 @@ EOF, checkpoint/reset and signed preroll. The same fixtures reproduce the native
 checkpoint/adapter stack overflow before heap ownership; a dedicated 2 MiB
 thread now accepts complete timing/recovery. Production worker integration remains
 separate. Generation is offline/explicit and never run by ordinary tests.
+
+## Production PS worker edit/EOF regressions
+
+`generate_aac_ps_worker_fixtures.py` creates `aac-ps-worker-oracles.json` and
+four original PS MP4s with silence/repeated ranges or an incomplete source range.
+Only authored SCE/SBR/PS/video/container data is reused. The 960 repeat needs the
+last queued packet at EOF before the next decoder reset; completed edits must
+not present an out-of-range lookahead frame into silence. Worker tests exercise
+the production factory, source-window trim, EOF, checkpoint, seek/rewind and
+exact expected PCM slices. Source-gap files assert the exact error after drain,
+not playback acceptance. No test invokes generation, FFmpeg or network.

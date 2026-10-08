@@ -223,8 +223,18 @@ impl Worker {
         let step = match self.stream.next_step() {
             Ok(Some(p)) => p,
             Ok(None) => {
-                self.ended = true;
-                return (Some(AudioEvent::Ended(self.generation)), Duration::ZERO);
+                if !self.stream.drain_decoded_at_eof() { self.decoder.reset(); }
+                return match self.decoder.finish_packet() {
+                    Ok(Some(frame)) => self.present_frame(frame),
+                    Ok(None) => {
+                        self.ended=true;
+                        match self.stream.validate_eof() {
+                            Ok(()) => (Some(AudioEvent::Ended(self.generation)),Duration::ZERO),
+                            Err(error) => (Some(AudioEvent::Error(error.to_string())),Duration::ZERO),
+                        }
+                    },
+                    Err(error) => {self.ended=true;(Some(AudioEvent::Error(error.to_string())),Duration::ZERO)},
+                };
             }
             Err(e) => {
                 self.ended = true;
@@ -250,22 +260,20 @@ impl Worker {
                     }
                 }
 
-        let mut decoded = match self.decoder.decode_encoded(
-            &packet.data,
-            packet.pts.max(0) as u64,
-            packet.duration.max(0) as u64,
-        ) {
-            Ok(Some(d)) => d,
-            Ok(None) => return (None, Duration::ZERO),
-            Err(e) => {
-                // A packet that cannot be decoded usually means the whole track
-                // is undecodable, so stop rather than report one error per frame.
-                self.ended = true;
-                return (Some(AudioEvent::Error(e.to_string())), Duration::ZERO);
+                return match self.decoder.decode_packet(&packet.data,packet.pts,packet.duration.max(0) as u64) {
+                    Ok(Some(frame)) => self.present_frame(frame),
+                    Ok(None) => (None,Duration::ZERO),
+                    Err(error) => {self.ended=true;(Some(AudioEvent::Error(error.to_string())),Duration::ZERO)},
+                };
             }
         };
+        self.queue_pcm(decoded,source_end)
+    }
 
-        match self.stream.packet_sample_limit(packet.duration.max(0) as u64) {
+    fn present_frame(&mut self,frame:crate::audio::DecodedAudio)->(Option<AudioEvent>,Duration) {
+        let mut decoded=frame.packet;
+
+        match self.stream.packet_sample_limit(frame.source_duration) {
             Ok(Some(frames)) => {
                 let bytes = frames.checked_mul(usize::from(self.stream.channels())).and_then(|n| n.checked_mul(4));
                 match bytes {
@@ -283,7 +291,7 @@ impl Worker {
             }
         }
 
-        let decoded = match self.stream.present_decoded(decoded, packet.pts) {
+        let decoded = match self.stream.present_decoded(decoded, frame.source_pts) {
             Ok(Some(packet)) => packet,
             Ok(None) => return (None,Duration::ZERO),
             Err(error) => {
@@ -292,9 +300,11 @@ impl Worker {
             }
         };
 
-                (decoded,Some(packet.pts.max(0).saturating_add(packet.duration.max(0))))
-            }
-        };
+        let end=i64::try_from(frame.source_duration).unwrap_or(i64::MAX);
+        self.queue_pcm(decoded,Some(frame.source_pts.max(0).saturating_add(end)))
+    }
+
+    fn queue_pcm(&mut self,decoded:crate::audio::AudioPacket,source_end:Option<i64>)->(Option<AudioEvent>,Duration) {
         let frontier = if matches!(self.stream.codec(), "mp4a" | "A_OPUS") || source_end.is_none() {
             let stride = usize::from(self.stream.channels()) * 4;
             let rate = self.stream.sample_rate();
@@ -1006,5 +1016,97 @@ mod checkpoint_seek_tests {
         packets.lock().unwrap().clear();worker.handle(Command::Seek(0));finish(&mut worker);
         let actual:Vec<_>=packets.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         assert!(actual==expected,"backward checkpoint seek changed PCM");
+    }
+}
+
+#[cfg(test)]
+mod ps_eof_tests {
+    use super::*;
+    use crate::audio::AudioStream;
+    #[test]
+    fn ps_worker_uses_original_unequal_windows_and_queues_eof_before_ended() {
+        for bytes in [
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-timing-1024-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-timing-960-synthetic.mp4").as_slice(),
+        ] {
+            let stream=crate::playback_mp4_audio::Mp4AudioReader::open_at(std::io::Cursor::new(bytes),Default::default(),0).unwrap();
+            let mut baseline=crate::codec::aac_ps_playback::PsAacDecoder::new(stream.extra_data(),stream.sample_rate(),stream.channels()).unwrap();
+            let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+            let mut source=crate::playback_mp4_audio::Mp4AudioReader::open_at(std::io::Cursor::new(bytes),Default::default(),0).unwrap();
+            let mut expected=Vec::new();
+            while let Some(p)=source.next_packet().unwrap() {
+                if let Some(mut f)=baseline.decode(&p.data,p.pts,p.duration as u64).unwrap() {
+                    f.packet.data.truncate(f.source_duration as usize*8);expected.push(f.packet);
+                }
+            }
+            let mut f=baseline.finish().unwrap().unwrap();f.packet.data.truncate(f.source_duration as usize*8);expected.push(f.packet);
+            let captured=Arc::new(Mutex::new(Vec::new()));let (_,commands)=sync_channel(1);let (events,_)=sync_channel(1);
+            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
+            assert!(worker.decode_next().0.is_none());assert!(captured.lock().unwrap().is_empty());
+            for count in 1..=3 {assert!(worker.decode_next().0.is_none());assert!(!worker.ended);assert_eq!(captured.lock().unwrap().len(),count);}
+            assert!(matches!(worker.decode_next().0,Some(AudioEvent::Ended(7))));assert!(worker.ended);
+            let actual=captured.lock().unwrap();assert_eq!(actual.len(),3);
+            for (a,e) in actual.iter().zip(expected) {assert_eq!(a.pts,e.pts);assert_eq!(a.data,e.data);assert_eq!(a.timebase_den,e.timebase_den);}
+        }
+    }
+    #[test]
+    fn ps_and_lc_trait_checkpoints_reject_wrong_codec_and_restore_pending_source_metadata() {
+        let bytes=include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-timing-1024-synthetic.mp4");
+        let mut stream=crate::playback_mp4_audio::Mp4AudioReader::open_at(std::io::Cursor::new(bytes.as_slice()),Default::default(),0).unwrap();
+        let mut ps:Box<dyn AudioDecode>=Box::new(crate::codec::aac_ps_playback::PsAacDecoder::new(stream.extra_data(),48000,2).unwrap());
+        let first=stream.next_packet().unwrap().unwrap();assert!(ps.decode_packet(&first.data,-1024,333).unwrap().is_none());let checkpoint=ps.checkpoint().unwrap();
+        let esds=crate::container::adts::esds_for(&[0x12,0x10]).unwrap();let mut lc=crate::codec::aac_decoder::AacDecoder::new(&esds,44100,2).unwrap();let lc_checkpoint=lc.checkpoint().unwrap();
+        assert!(ps.restore(&lc_checkpoint).unwrap_err().to_string().contains("codec mismatch"));assert!(lc.restore(&checkpoint).unwrap_err().to_string().contains("codec mismatch"));
+        let second=stream.next_packet().unwrap().unwrap();let frame=ps.decode_packet(&second.data,8888,777).unwrap().unwrap();assert_eq!(frame.source_pts,-1024);assert_eq!(frame.source_duration,333);
+        ps.restore(&checkpoint).unwrap();let replay=ps.decode_packet(&second.data,8888,777).unwrap().unwrap();assert_eq!(frame.packet.data,replay.packet.data);assert_eq!(replay.source_pts,-1024);
+        let last=ps.finish_packet().unwrap().unwrap();assert_eq!(last.source_pts,8888);assert_eq!(last.source_duration,777);assert!(ps.finish_packet().unwrap().is_none());
+    }
+}
+
+#[cfg(test)]
+mod ps_edit_worker_tests {
+    use super::*;
+    use crate::audio::AudioStream;
+    fn run(worker:&mut Worker) {
+        for _ in 0..64 {
+            match worker.decode_next().0 {
+                Some(AudioEvent::Ended(_))=>return,
+                Some(AudioEvent::Error(e))=>panic!("PS edited worker: {e}"),
+                _=>{},
+            }
+        }
+        panic!("PS worker did not terminate");
+    }
+    #[test]
+    fn factory_ps_worker_accepts_silence_repeated_ranges_eof_seek_and_rewind() {
+        for (edited,original) in [
+            (include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-repeat-1024-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-matrix-retain-synthetic.mp4").as_slice()),
+            (include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-repeat-960-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-sbr-ps-960-retain-synthetic.mp4").as_slice()),
+        ] {
+            let mut raw=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(original),Default::default()).unwrap();
+            let mut baseline=crate::codec::make_audio_decoder(raw.codec(),raw.extra_data(),raw.sample_rate(),raw.channels(),raw.bits_per_sample()).unwrap();
+            let mut pcm=Vec::new();while let Some(p)=raw.next_packet().unwrap() {if let Some(f)=baseline.decode_packet(&p.data,p.pts,p.duration as u64).unwrap(){pcm.extend(f.packet.data);}}
+            pcm.extend(baseline.finish_packet().unwrap().unwrap().packet.data);
+            let range=&pcm[720*8..3920*8];let mut expected=vec![0;1600*8];expected.extend_from_slice(range);expected.extend_from_slice(range);expected.extend(vec![0;1600*8]);assert_eq!(expected.len(),9600*8);
+            let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(edited),Default::default()).unwrap();
+            let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+            let captured=Arc::new(Mutex::new(Vec::new()));let (_,commands)=sync_channel(1);let (events,_)=sync_channel(1);
+            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            run(&mut worker);
+            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
+            check(0);
+            for request in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.handle(Command::Seek(request));run(&mut worker);check(request as usize);}
+            captured.lock().unwrap().clear();worker.handle(Command::Rewind);run(&mut worker);check(0);
+        }
+    }
+    #[test]
+    fn source_gap_is_rejected_after_pending_ps_pcm_is_drained() {
+        for bytes in [include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-1024-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-960-synthetic.mp4").as_slice()] {
+            let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap();let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+            let captured=Arc::new(Mutex::new(Vec::new()));let (_,commands)=sync_channel(1);let (events,_)=sync_channel(1);
+            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0 {Some(AudioEvent::Error(e))=>{assert!(e.contains("AAC edit extends beyond source packets"),"{e}");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
+            assert!(saw_error);assert_eq!(captured.lock().unwrap().len(),3);
+        }
     }
 }

@@ -6643,3 +6643,45 @@ Validation: 836 tests passed offline (root lib 347, owned media lib 432,
 The dedicated 2 MiB thread regression, player build, formatting, Python syntax
 and diff checks passed. Three timing assets regenerate identically, and all
 four prior 960/1024 PS wrappers remain byte-identical.
+
+### Production player PS factory, source windows and EOF/edit scheduling (2026-10-09)
+
+The player `make_audio_decoder` factory now selects the owned PS playback
+adapter when ASC explicitly signals PS (including sync-extension signalling).
+Ordinary AAC retains its current adapter. `AudioDecode::decode_packet` carries
+PCM with the original signed source PTS/duration; immediate codecs have a
+compatible default, while PS returns queued metadata. `finish_packet` drains
+EOF. Typed PS checkpoints include queued timing and reject cross-codec restores.
+
+The audio worker now applies packet-tail trim/container presentation to that
+original source window, and drains the decoder before declaring Ended. MP4
+edit completeness is checked after delayed PCM presentation. This allows the
+last queued source packet to satisfy a range before its reset or stream end.
+Completed ranges/silence do not receive an out-of-range lookahead frame at EOF;
+actual remaining source gaps still produce `AAC edit extends beyond source
+packets`. Existing immediate-decoder, PCM-step and reset paths are preserved.
+
+Original unequal-duration MP4s accept production factory decoding with correct
+trimmed PCM/source PTS and last output before Ended. Four additional original
+edited MP4s cover silence, repeated source ranges, an offset source window,
+960/1024 cores and deliberate source gaps. The 960 range needs PCM from the
+last queued source packet before the next reset. End-to-end worker tests compare
+continuous presentation timestamps and every byte to independently qualified
+native source PCM sliced by the authored edit windows. Seek into both repeated
+ranges and trailing silence, seek to zero, rewind and checkpoint restoration
+preserve the exact expected presentation suffix. Gap cases prove the specific
+remaining-source error AFTER all three native PCM packets have drained.
+All five new worker assets regenerate identically; ordinary tests run no
+fixture generation, network or FFmpeg.
+
+This accepts the tested production MP4 PS player/factory/worker path, not full
+HE-AAC v2 conformance. Independent nonzero-core stereo PCM, general startup
+trimming, missing/late/unhinted PS, coupling/PCE, export/other-container routing
+and other codec/profile gaps still remain. The legacy immediate native AAC API
+continues to refuse PS; delayed callers use the explicit PS API/adapter.
+
+Validation: complete player-feature library suite passed 905 tests with 23
+existing ignored tests. All 13 HE-AAC integration suites passed 57 tests with
+player features; no-player core library passed 347 tests. Player build, Python
+syntax and diff checks passed; all five worker fixture assets regenerate
+byte-identically. These counts describe separate feature/configuration runs.
