@@ -1764,3 +1764,17 @@ Both frame sizes and both frequency interpolation modes are covered with
 mixed envelope resolutions and nonzero starting time. No private media or
 foreign decoder algorithm is included. This is DSP acceptance, not encoded
 HE-AAC playback acceptance.
+
+### SBR gain and limiter amplitude reference
+
+`aac-sbr-gain-decimal.json` contains 60 original numeric input/output cases
+generated offline by `scripts/generate_aac_sbr_gain_oracles.py` with 80-digit
+Decimal arithmetic. Protocol formulas: GOST R53556.4-2013 6.18.7.4/5
+(https://allgosts.ru/33/170/gost_r_53556.4-2013), with the official epsilon
+and sinusoid-indicator corrections in ISO/IEC 14496-3:2001/Amd.1:2003/
+Cor.1:2004 pp4/11:
+https://cdn.standards.iteh.ai/samples/40623/9bf8354c8dab4f86a9c8be5272c128ef/ISO-IEC-14496-3-2001-Amd-1-2003-Cor-1-2004.pdf
+The latter's p8 also corrects the patch-goal comparison; the original
+21..63 step-2 geometry at 48 kHz is covered by the patch regression test.
+No private media/parameters or foreign decoder algorithm. Numeric level
+acceptance is not an encoded HE-AAC playback acceptance fixture.

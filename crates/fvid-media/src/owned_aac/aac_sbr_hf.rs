@@ -68,7 +68,7 @@ pub fn patches(master: &[u8], kx: u8, sample_rate: u32) -> Result<Vec<Patch>> {
         } else {
             msb = i32::from(kx);
         }
-        if sb == i32::from(master[k]) {
+        if i32::from(master[k]) - sb < 3 {
             k = master.len() - 1;
         }
         if sb == end {
@@ -227,6 +227,25 @@ mod tests {
                     source: 2,
                     target: 18,
                     bands: 8
+                }
+            ]
+        );
+        // Cor.1: move to the full table when the goal border is <3 bands
+        // away, not only on exact equality. The old comparison creates an
+        // unnecessary two-band internal patch for this original geometry.
+        let master: Vec<_> = (21..=63).step_by(2).collect();
+        assert_eq!(
+            patches(&master, 21, 48000).unwrap(),
+            vec![
+                Patch {
+                    source: 1,
+                    target: 21,
+                    bands: 20
+                },
+                Patch {
+                    source: 1,
+                    target: 41,
+                    bands: 20
                 }
             ]
         );

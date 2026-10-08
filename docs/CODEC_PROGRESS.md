@@ -5747,3 +5747,33 @@ energy oracle. Additional checks cover exclusive boundaries, single-band
 normalization, sparse huge inputs, subnormal energy and malformed public
 geometry. These are numeric DSP acceptance checks; encoded HE-AAC acceptance
 and the rest of gain/noise/sinusoid adjustment remain incomplete.
+
+### Owned SBR gain, additional levels and amplitude limiting
+
+`aac_sbr_gain` calculates raw gain/noise/sine amplitudes, limits gain to the
+per-limiter-band maximum, reduces noise proportionally, and applies capped
+energy compensation. It handles all four limiter-gain modes and suppresses
+noise's gain/boost contribution at the attack/carried attack envelope (the
+caller supplies that flag). Sine energy is assigned only to `S_IndexMapped`
+QMF lines, while `S_Mapped` band presence controls the raw gain branch.
+
+Official ISO/IEC 14496-3:2001/Amd.1:2003/Cor.1:2004 pp4/11 corrects epsilon
+to 1 and the sine indicator to `S_IndexMapped`. This supersedes the older
+formula printed in the translated GOST for sine amplitude. These functions
+use the standard's QMF energy units; normalized core PCM needs the matching
+scale conversion at production integration. Common energy/amplitude scaling
+avoids finite-input sum/square overflow in limiter ratios. Input amplitudes
+must remain within the physical pre-limiter bounds.
+
+60 independent 80-digit Decimal references cover harmonic presence versus
+actual harmonic line, zero/tiny/current energy, attack suppression, all four
+gain modes and three limiter partitions. Tests additionally cover huge finite
+inputs, all-zero output and malformed public inputs. Numeric acceptance is not
+encoded HE-AAC playback acceptance. Harmonic/history mapping, final signal
+assembly and production frame integration remain incomplete.
+
+The same official corrigendum p8 replaces the patch goal equality test with
+`fMaster[k]-sb<3`. `aac_sbr_hf::patches` now follows it; an original master
+table 21..63 step 2 at 48 kHz distinguishes the corrected two-patch result
+from the old unnecessary internal two-band patch. This is a protocol geometry
+regression, not a newly reported failure of an encoded/private source video.
