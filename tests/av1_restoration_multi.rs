@@ -1,8 +1,7 @@
 use fvid::codec::{av1::Obus, av1_decoder::Decoder, av1_frame::Header, av1_sequence::Sequence};
-// Entropy acceptance through validated tile termination; filtering refusal only.
-// Replace the remaining refusal with independent pixel acceptance when filtering is implemented.
+// Owned acceptance for native restoration pixels and playback lifecycle.
 #[test]
-fn owned_multiunit_tiled_restoration_reaches_filtering_stage() {
+fn owned_multiunit_tiled_restoration_matches_independent_pixels() {
     let root =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
     let manifest: serde_json::Value = serde_json::from_slice(
@@ -37,15 +36,34 @@ fn owned_multiunit_tiled_restoration_reaches_filtering_stage() {
         assert!(header.quant.matrix.is_none(), "{name}: isolate restoration");
         if header.restoration_types == [0; 3] {
             inactive += 1;
-            let mut decoder = Decoder::new(16 << 20);
-            let frames = decoder.decode_packet(&data).unwrap();
+        } else {
+            active += 1;
+            let unit_size = if record["depth"].as_u64() == Some(8)
+                && record["quality"].as_u64() == Some(48)
+                && record["orientation"].as_u64() == Some(1)
+            {
+                128
+            } else {
+                256
+            };
+            assert_eq!(
+                header.restoration_sizes, [unit_size; 3],
+                "{name}: actual multiunit size"
+            );
+        }
+        let expected = std::fs::read(root.join(record["reference"].as_str().unwrap())).unwrap();
+        let mut decoder = Decoder::new(16 << 20);
+        for _ in 0..2 {
+            let frames = decoder
+                .decode_packet(&data)
+                .unwrap_or_else(|e| panic!("{name}: {e}"));
             assert_eq!(frames.len(), 1);
             let picture = &frames[0].picture;
             let mut pixels = Vec::new();
             for (i, plane) in picture.planes.iter().enumerate() {
-                let d = if i == 0 { 1 } else { 2 };
-                for y in 0..(picture.size[1] as usize).div_ceil(d) {
-                    for x in 0..(picture.size[0] as usize).div_ceil(d) {
+                let divisor = if i == 0 { 1 } else { 2 };
+                for y in 0..(picture.size[1] as usize).div_ceil(divisor) {
+                    for x in 0..(picture.size[0] as usize).div_ceil(divisor) {
                         let value = plane.samples[y * plane.width + x];
                         if picture.depth == 8 {
                             pixels.push(value as u8);
@@ -55,39 +73,61 @@ fn owned_multiunit_tiled_restoration_reaches_filtering_stage() {
                     }
                 }
             }
-            assert_eq!(
-                pixels,
-                std::fs::read(root.join(record["reference"].as_str().unwrap())).unwrap(),
-                "{name}: inactive control acceptance"
-            );
-            continue;
+            assert_eq!(pixels, expected, "{name}: restored independent pixels");
+            decoder.finish().unwrap();
+            decoder.reset();
         }
-        active += 1;
-        let unit_size = if record["depth"].as_u64() == Some(8)
-            && record["quality"].as_u64() == Some(48)
-            && record["orientation"].as_u64() == Some(1)
-        {
-            128
-        } else {
-            256
-        };
+        let webm = std::fs::read(root.join(record["webm"].as_str().unwrap())).unwrap();
+        if header.restoration_types != [0; 3] {
+            let mut constrained = fvid::playback_webm::WebmVideoReader::open(
+                std::io::Cursor::new(webm.clone()),
+                16 << 20,
+            )
+            .unwrap();
+            let error = match constrained.read_frame_raw() {
+                Err(e) => e,
+                Ok(_) => panic!("{name}: constrained budget must account for restoration buffers"),
+            };
+            assert!(
+                error
+                    .to_string()
+                    .contains("AV1 image exceeds memory budget"),
+                "{name}: {error}"
+            );
+        }
+        let mut reader =
+            fvid::playback_webm::WebmVideoReader::open(std::io::Cursor::new(webm), 32 << 20)
+                .unwrap();
+        for _ in 0..2 {
+            assert_eq!(
+                raw_bytes(reader.read_frame_raw().unwrap().unwrap()),
+                expected,
+                "{name}: restored WebM pixels"
+            );
+            assert_eq!(
+                reader.frame_interval(),
+                Some((0, 20_000_000, 1_000_000_000))
+            );
+            assert!(reader.read_frame_raw().unwrap().is_none());
+            reader.rewind();
+        }
+        assert_eq!(reader.seek_to_sync(0).unwrap(), 0);
         assert_eq!(
-            header.restoration_sizes, [unit_size; 3],
-            "{name}: actual multiunit size"
-        );
-        assert!(header.restoration_sizes[0] > 0);
-        let mut decoder = Decoder::new(16 << 20);
-        let error = match decoder.decode_packet(&data) {
-            Ok(_) => panic!("{name}: unexpectedly accepted before restoration fix"),
-            Err(e) => e,
-        };
-        assert!(
-            error
-                .to_string()
-                .contains("AV1 loop restoration filtering not implemented"),
-            "{name}: {error}"
+            raw_bytes(reader.read_frame_raw().unwrap().unwrap()),
+            expected,
+            "{name}: seek pixels"
         );
     }
     eprintln!("active {active}, inactive {inactive}");
     assert_eq!((active, inactive), (17, 1));
+}
+
+fn raw_bytes(frame: fvid::playback_native::RawFrame) -> Vec<u8> {
+    match frame {
+        fvid::playback_native::RawFrame::Planar8(p) => {
+            p.y.iter().chain(&p.cb).chain(&p.cr).copied().collect()
+        }
+        fvid::playback_native::RawFrame::Planar(p) => p.frame.data.clone(),
+        _ => panic!("unexpected AV1 raw representation"),
+    }
 }

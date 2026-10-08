@@ -329,7 +329,9 @@ pub(crate) fn decode(
         }
         dec.tx_sizes[p].truncate(stride * (height / 4));
     }
+    let restore = dec.restoration.active()?;
     dec.filter();
+    let before_restoration = restore.then(|| dec.image.planes.clone());
     let skip = dec.blocks.iter().map(|b| b.skip).collect::<Vec<_>>();
     super::av1_filter::cdef(
         &mut dec.image,
@@ -338,8 +340,8 @@ pub(crate) fn decode(
         &skip,
         s.color.monochrome,
     );
-    if dec.restoration.active()? {
-        return Err(crate::unsupported("AV1 loop restoration filtering not implemented"));
+    if let Some(before) = before_restoration {
+        dec.restoration.apply(&mut dec.image, &before)?;
     }
     Ok((dec.image, saved))
 }

@@ -4387,3 +4387,24 @@ Final verification passed 35 core AV1 tests and the 60-test full run across
 restoration suite passed together after the final assertion changes, giving
 61 unique integration tests across 35 suites. Final restoration filtering
 acceptance and numerical coefficient validation are still outstanding.
+
+
+### Native AV1 restoration filtering
+
+The decoder now applies owned Wiener and SGRPROJ reconstruction after
+deblocking and CDEF. Restoration stripes use the retained deblocked source
+above and below their boundaries and the CDEF source inside each stripe.
+Temporary source planes and filter scratch are included in the checked
+decoder memory budget. Multi-unit playback explicitly tests refusal at
+16 MiB and acceptance at 32 MiB.
+
+The original 18-frame suite and the 18 multi-unit/two-tile frames now check
+complete reference pixels, reset, WebM replay, rewind and seek instead of
+expecting a filtering refusal. An additional owned 18-frame suite enables
+CDEF and deblocking with restoration; libaom and dav1d agree on its reference
+pixels. Its 54 manifest hashes were verified. Generation is separate from
+ordinary offline tests and requires neither private media nor FFmpeg.
+
+This qualifies the tested intra 4:2:0 cases at 8, 10 and 12 bits; it does not
+claim complete AV1 profile/tool coverage, inter restoration qualification,
+or measured 60 fps performance.
