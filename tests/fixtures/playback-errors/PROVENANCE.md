@@ -2293,3 +2293,34 @@ complete hybrid bank through 20→34→20. This is QMF-domain acceptance; its
 input is an independently authored numeric QMF signal, not decoded PCM.
 Full native PS synthesis refusal is still distinct from that acceptance.
 No generator, FFmpeg/libav or network is required for ordinary tests.
+
+### PS decorrelator and stereo QMF references (2026-10-09)
+
+`scripts/generate_aac_ps_decorrelation_oracles.py` explicitly saves
+`aac-ps-decorrelation-oracles.json` and `aac-ps-decorrelation-reference.bin`
+(binary64 LE, descriptors byte offset/scalar count). Protocol constants,
+center frequencies, delays and reset behavior are from GOST R 53556.8-2013
+6.4.5/6.4.6.1/A.3, tables 39–43. No external DSP implementation is used.
+The independent 90-digit Decimal reference expands each allpass transfer
+function into a geometric impulse response, convolves the three links and
+original complex input, and derives peak/smoother/gain histories via full
+weighted sums. This differs from Rust's ring buffers and online recurrences.
+
+Eleven cases cover silence, 128-slot real/imaginary impulses in every hybrid
+band, complex bursts and tails, 32/30-slot grid transitions, full absent-PS
+reset and partial generated-band clearing above QMF 16. Every raw/attenuated
+sample, parameter-band power/gain and retained transient vector is saved.
+References include both channel outputs after matrix mixing and inverse
+hybrid sums for `he-aac-ps-matrix-grid-retain-synthetic.mp4`, reusing its
+original authored AAC/SBR/PS packets. Matrix coefficients and hybrid input
+originate in the earlier independent numeric oracles, never Rust output.
+
+`tests/he_aac_ps_decorrelation.rs` checks every sample and coefficient, raw
+impulse energy conservation, chunking/replay/reset and atomic late failure.
+The MP4 test validates actual container packets and middle-packet SBR CRC,
+then executes native PS parameter history, hybrid analysis, decorrelation,
+matrix mixing and both QMF channel sums against saved outputs. Its supplied
+QMF signal is original numerical data; this is not decoded PCM acceptance.
+The full native PS constructor refusal remains separately tested. No private
+media, frames, audio or codec parameter sets are copied. Ordinary tests need
+no generator, FFmpeg/libav or network; generation is explicit and offline.

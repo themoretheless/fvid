@@ -6463,3 +6463,43 @@ or PCM oracle. Full native PS refusal remains independently checked.
 Raw FIR and complete hybrid-bank numerics are now accepted. Decorrelation,
 stereo QMF synthesis wiring, one-time PCM/QMF startup compensation, native
 AAC/SBR integration and full independent stereo PCM acceptance remain open.
+
+### Owned PS decorrelation and complete stereo QMF component path (2026-10-09)
+
+`aac_ps_decorrelation` implements the full 20/34-grid decorrelation stage from
+GOST R 53556.8-2013 6.4.5, tables 39–43. Lower 30/50 hybrid bands use a
+two-slot fractional phase delay and three allpass links with delays 3/4/5,
+frequency-dependent feedback and normative center frequencies. Upper bands
+use 14-slot or 1-slot delays. Feedback retains raw, unattenuated outputs.
+Transient detection sums complex power by the normative parameter bindings,
+tracks decaying peaks and two smoothers, and applies the shared parameter-band
+ratio to every hybrid sample. Silence has gain one; a representable ratio
+never requires forming an overflowing 1.5*difference intermediate.
+
+Grid changes reset all decorrelator state while the upstream hybrid bank
+retains raw QMF history. Frame controls implement full reset after an absent
+preceding PS element and filter-history clearing above exclusive generated
+QMF limit kx+M (A.3). Partial clearing retains lower-band histories and the
+shared transient state. Empty calls have no effects. The entire frame,
+including control resets and late energy/output errors, commits atomically.
+
+Saved references independently construct closed-form geometric allpass impulse
+responses and direct convolution, with transient quantities calculated from
+full weighted histories rather than the Rust streaming recurrences. Eleven
+cases cover silence, both-grid complex impulses/bursts, 32/30-slot grid
+changes, missing-PS full reset, and partial clearing above QMF 16. Every
+sample, raw output, power, gain and retained transient vector is compared.
+Unattenuated complex-impulse energy is also checked independently. Tests
+cover arbitrary chunking, checkpoint replay, reset and failure rollback.
+
+The original three-packet grid-retain MP4 now drives native MP4/SBR CRC/PS
+parameters into hybrid analysis, actual decorrelation, stereo matrices and
+inverse hybrid synthesis. Independent references compare BOTH channels at
+EVERY hybrid/QMF sample, including starred mixing coefficients. The provided
+QMF input is original numeric data, not decoded PCM. This accepts the complete
+QMF-domain component path but leaves full native PS refusal in place.
+
+Stereo QMF-to-PCM synthesis wiring, startup/timeline compensation, a combined
+transactional PS DSP owner, native AAC/SBR packet integration and independent
+whole stereo PCM acceptance still remain. Full HE-AAC v2 playback is not yet
+claimed; this milestone does not close the broader codec goal.
