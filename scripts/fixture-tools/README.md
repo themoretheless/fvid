@@ -277,3 +277,7 @@ SBR covariance references: explicitly run
 `python3 scripts/generate_aac_sbr_predictor_oracles.py`. The offline generator
 uses original signals and independent 80-digit Decimal covariance equations.
 Tests read saved traces; they do not run generators or external codecs.
+
+SBR HF references: explicitly run `python3 scripts/generate_aac_sbr_hf_oracles.py`.
+The offline 80-digit Decimal generator creates original complex QMF input and
+independent covariance/predictor/HF output. Ordinary tests read saved traces.

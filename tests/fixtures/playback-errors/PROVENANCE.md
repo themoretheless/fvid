@@ -1721,3 +1721,16 @@ explicitly stated in ISO/IEC 14496-3:2001 Amendment 1 working draft page 38
 window supersedes the older draft's fixed 32-sample window. Numeric DSP
 vectors are not an encoded HE-AAC acceptance fixture and contain no private
 media or foreign decoder algorithms.
+
+### SBR complex HF numeric reference
+
+`aac-sbr-hf-decimal.f64le` and its manifest are original complex QMF signals
+and independently calculated 80-digit Decimal HF output. Generator:
+`scripts/generate_aac_sbr_hf_oracles.py`; normative HF equation:
+GOST R53556.4-2013 section 6.18.6.3
+(https://allgosts.ru/33/170/gost_r_53556.4-2013). Patch decision flow:
+ISO/IEC 14496-3:2001 Amendment 1 working draft Figure 9, printed page 40
+(http://www.mp3-tech.org/programmer/docs/w4611.pdf). The traces cover 15/16
+slots, two contiguous parity-aligned patches, two noise bands, a discarded
+two-band tail, and envelope offset 1. No private media/parameters or copied
+decoder algorithms. Numeric DSP acceptance is not encoded HE-AAC acceptance.

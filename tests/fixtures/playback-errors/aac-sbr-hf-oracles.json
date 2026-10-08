@@ -1,0 +1,31 @@
+{
+  "source": "GOST R53556.4-2013 6.18.6.3",
+  "precision": 80,
+  "slots": [
+    15,
+    16
+  ],
+  "patches": [
+    [
+      2,
+      10,
+      8
+    ],
+    [
+      2,
+      18,
+      8
+    ]
+  ],
+  "noise": [
+    10,
+    17,
+    28
+  ],
+  "chirp": [
+    0.6,
+    0.9
+  ],
+  "file": "aac-sbr-hf-decimal.f64le",
+  "sha256": "8f197ad740afb9c2ef1235ed254539cf981e566be23df0174128e3e6970b9954"
+}

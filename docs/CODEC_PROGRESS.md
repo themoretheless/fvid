@@ -5684,3 +5684,23 @@ power-of-two scale invariance and quarter-turn complex phase invariance.
 This remains an isolated DSP component: the enclosing frame buffer must select
 the specified window; patch construction, HF generation/adjustment and encoded
 HE-AAC production acceptance remain incomplete.
+
+### Owned SBR patch selection and complex HF generation
+
+`aac_sbr_hf::patches` implements the protocol patch decision flow (ISO SBR
+Figure 9): output-rate goal, master-boundary descent, parity alignment,
+bounded source bands, progress checks and removal of a final patch shorter
+than three bands. `generate` composes source-band covariance predictors with
+per-noise-band chirp factors, including the squared factor for the second
+coefficient. It fills the envelope time interval at the tHFAdj origin and
+leaves unused slots/bands and a discarded short tail zero. Input frame, grid,
+patch, noise and bandwidth geometry is validated before generation.
+
+Original 80-digit Decimal traces independently compute source covariances and
+HF output for both frame sizes, two patches, different noise factors and an
+offset envelope. Tests connect actual patch selection to these traces, verify
+zero-chirp exact copies, and sweep thousands of patch geometries across nine
+output rates for bounded sources, phase parity and coverage. These remain DSP
+traces, not encoded HE-AAC playback acceptance. Rate-derived frequency bounds,
+limiter tables, envelope adjustment, frame buffering and production integration
+are still required.
