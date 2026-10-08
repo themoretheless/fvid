@@ -756,6 +756,7 @@ impl Decoder<'_> {
             [(w * 4).min(64), (h * 4).min(64)]
         };
         let block = Block {
+            delta_lf: self.delta_lf,
             palette_sizes: [0; 2],
             palette_colors: [[0; 8]; 2],
             segment: self.current_segment,
@@ -767,6 +768,7 @@ impl Decoder<'_> {
             uv_mode: 0,
             reference,
             reference2: refs[1],
+            interintra: interintra_mode.is_some(),
             mv2: mvs[1],
             skip_mode,
             compound_average,
@@ -975,7 +977,7 @@ impl Decoder<'_> {
             let Some(b) = self.candidate(xx, yy) else {
                 return;
             };
-            if b.reference != reference || b.reference2 != 0 {
+            if b.reference != reference || b.reference2 != 0 || b.interintra {
                 return;
             }
             let mx = ((xx as usize & !(b.w - 1)) * 4 + b.w * 2 - 1) as i64;
