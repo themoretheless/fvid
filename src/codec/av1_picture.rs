@@ -206,6 +206,42 @@ pub(crate) fn decode(
     references: [Option<&Picture>; 8],
     distances: [i32; 8],
 ) -> Result<(Picture, Cdfs)> {
+    decode_impl(s, h, groups, budget, initial, references, distances, None)
+}
+pub(crate) fn decode_camera_tile(
+    s: &Sequence,
+    h: &Header,
+    tile: usize,
+    payload: &[u8],
+    budget: usize,
+    initial: Option<&Cdfs>,
+    references: [Option<&Picture>; 8],
+) -> Result<Picture> {
+    if tile >= h.tiles.count() {
+        return Err(invalid("AV1 camera tile coordinate out of range"));
+    }
+    Ok(decode_impl(
+        s,
+        h,
+        &[],
+        budget,
+        initial,
+        references,
+        [0; 8],
+        Some((tile, payload)),
+    )?
+    .0)
+}
+fn decode_impl(
+    s: &Sequence,
+    h: &Header,
+    groups: &[&[u8]],
+    budget: usize,
+    initial: Option<&Cdfs>,
+    references: [Option<&Picture>; 8],
+    distances: [i32; 8],
+    camera: Option<(usize, &[u8])>,
+) -> Result<(Picture, Cdfs)> {
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     let cols = 2 * (h.size[0] as usize).div_ceil(8);
     let rows = 2 * (h.size[1] as usize).div_ceil(8);
@@ -349,47 +385,66 @@ pub(crate) fn decode(
     let mut initial = initial.cloned().unwrap_or_else(|| Cdfs::new(h.quant.base));
     initial.reset_counts();
     let mut saved = initial.clone();
-    for group in groups {
-        for (tile, payload) in h.tiles.group(group)? {
-            if tile != next {
-                return Err(invalid("AV1 missing or repeated tile"));
+    let tiles = if let Some(tile) = camera {
+        vec![tile]
+    } else {
+        groups
+            .iter()
+            .map(|group| h.tiles.group(group))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .flatten()
+            .collect()
+    };
+    for (tile, payload) in tiles {
+        if camera.is_none() && tile != next {
+            return Err(invalid("AV1 missing or repeated tile"));
+        }
+        next += 1;
+        let tile_cols = h.tiles.columns.len() - 1;
+        let x = tile % tile_cols;
+        let y = tile / tile_cols;
+        dec.x0 = h.tiles.columns[x] as usize;
+        dec.x1 = h.tiles.columns[x + 1] as usize;
+        dec.y0 = h.tiles.rows[y] as usize;
+        dec.y1 = h.tiles.rows[y + 1] as usize;
+        for a in &mut dec.above {
+            a.fill((0, 0));
+        }
+        dec.restoration.reset_tile();
+        dec.current_q = i32::from(h.quant.base);
+        dec.delta_lf = [0; 4];
+        dec.segment_pred_above.fill(0);
+        let mut c = initial.clone();
+        let mut d = SymbolDecoder::new(payload, !h.disable_cdf_update)?;
+        let sb = if s.superblock128 { 32 } else { 16 };
+        for r in (dec.y0..dec.y1).step_by(sb) {
+            for l in &mut dec.left {
+                l.fill((0, 0));
             }
-            next += 1;
-            let tile_cols = h.tiles.columns.len() - 1;
-            let x = tile % tile_cols;
-            let y = tile / tile_cols;
-            dec.x0 = h.tiles.columns[x] as usize;
-            dec.x1 = h.tiles.columns[x + 1] as usize;
-            dec.y0 = h.tiles.rows[y] as usize;
-            dec.y1 = h.tiles.rows[y + 1] as usize;
-            for a in &mut dec.above {
-                a.fill((0, 0));
-            }
-            dec.restoration.reset_tile();
-            dec.current_q = i32::from(h.quant.base);
-            dec.delta_lf = [0; 4];
-            dec.segment_pred_above.fill(0);
-            let mut c = initial.clone();
-            let mut d = SymbolDecoder::new(payload, !h.disable_cdf_update)?;
-            let sb = if s.superblock128 { 32 } else { 16 };
-            for r in (dec.y0..dec.y1).step_by(sb) {
-                for l in &mut dec.left {
-                    l.fill((0, 0));
+            dec.segment_pred_left.fill(0);
+            for col in (dec.x0..dec.x1).step_by(sb) {
+                if h.restoration_types != [0; 3] {
+                    dec.restoration.read(&mut d, &mut c, h, col, r, sb)?;
                 }
-                dec.segment_pred_left.fill(0);
-                for col in (dec.x0..dec.x1).step_by(sb) {
-                    if h.restoration_types != [0; 3] {
-                        dec.restoration.read(&mut d, &mut c, h, col, r, sb)?;
-                    }
-                    dec.read_deltas = h.quant.delta_resolution.is_some();
-                    dec.partition(&mut d, &mut c, col, r, sb)?;
-                }
-            }
-            d.finish()?;
-            if tile == h.tiles.context_tile as usize && !h.disable_frame_end_update {
-                saved = c;
+                dec.read_deltas = h.quant.delta_resolution.is_some();
+                dec.partition(&mut d, &mut c, col, r, sb)?;
             }
         }
+        d.finish()?;
+        if tile == h.tiles.context_tile as usize && !h.disable_frame_end_update {
+            saved = c;
+        }
+    }
+    if camera.is_some() {
+        if dec
+            .blocks
+            .iter()
+            .any(|b| b.reference > 1 || b.reference2 != 0)
+        {
+            return Err(invalid("AV1 camera tile requires LAST-only prediction"));
+        }
+        return Ok((dec.image, saved));
     }
     if next != h.tiles.count() {
         return Err(invalid("AV1 frame has missing tiles"));

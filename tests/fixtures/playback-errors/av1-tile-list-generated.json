@@ -1,0 +1,39 @@
+{
+  "size": [
+    128,
+    128
+  ],
+  "tile_size": [
+    64,
+    64
+  ],
+  "order": [
+    3,
+    0,
+    2,
+    1
+  ],
+  "oracle": "stock libaom",
+  "artifacts": {
+    "anchor.obu": {
+      "file": "av1-tile-list-anchor.obu",
+      "sha256": "4b4c1699cc3ae91cc87fb154d397acaeb56594d10ac39172772812cdc52b3336"
+    },
+    "camera.obu": {
+      "file": "av1-tile-list-camera.obu",
+      "sha256": "beb25c9201e5f17673a2f4ea05cb232deb6dca4d92752bb2da9634ab0234d09a"
+    },
+    "header.obu": {
+      "file": "av1-tile-list-header.obu",
+      "sha256": "c7c6f147b5a8b8f2343e992677ddf9239d0691bf3e5d711b66a354d989f32b99"
+    },
+    "list.obu": {
+      "file": "av1-tile-list-list.obu",
+      "sha256": "60b6b8b3a5ab0893e9ad2586341d0319f97597dfd4e337094da4d631b25b90b0"
+    },
+    "list.yuv": {
+      "file": "av1-tile-list-list.yuv",
+      "sha256": "5f7910a59e96eaafa7cead23caf24cb27a105e8f6d08ce9f5de0cd4be4658cad"
+    }
+  }
+}

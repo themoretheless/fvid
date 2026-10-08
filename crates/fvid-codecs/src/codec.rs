@@ -228,3 +228,6 @@ pub mod avc_field_references;
 
 #[path = "../../../src/codec/avc_field_dpb.rs"]
 pub mod avc_field_dpb;
+
+#[path = "../../../src/codec/av1_tile_list.rs"]
+pub mod av1_tile_list;

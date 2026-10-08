@@ -5154,3 +5154,20 @@ remain open.
 Final validation: 18 selected offline release integration tests passed, zero
 failed/ignored. All 18 new artifact hashes plus eight unchanged prior container
 hashes verify; scoped formatting, Python syntax and commit diff checks pass.
+
+
+## Native AV1 external camera tile lists (2026-10-08)
+
+`Decoder::decode_tile_list` accepts an explicit camera header and owned external
+anchor pictures, reconstructs camera tiles using the native AV1 entropy and
+picture path, and assembles them in entry order. Sparse lists preserve the
+previous canvas. Camera constraints, anchor indices, coordinates, payload
+bounds and retained/output memory are checked before reconstruction.
+
+The owned 128x128 lossless 8-bit 4:2:0 fixture uses four 64x64 tiles and LAST-only
+inter prediction. All pixels match stock libaom and the independently authored
+permutation. Tests cover sparse updates, repeat calls, anchor index 127, malformed
+lists, camera/canvas geometry and memory refusal. Ordinary packet decoding
+refuses OBU 8 with a request for external camera context; that refusal is distinct
+from explicit API acceptance. Automatic container-side provisioning, additional
+depths/chroma, SB128 and multi-anchor/CDF combinations remain unqualified.

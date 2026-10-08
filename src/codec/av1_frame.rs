@@ -43,6 +43,7 @@ pub struct Header {
     pub refresh_flags: u8,
     /// Existing reference slots invalidated by error-resilient order hints.
     pub invalidated_references: u8,
+    pub size_override: bool,
     pub size: [u32; 2],
     pub render_size: [u32; 2],
     pub upscaled_width: u32,
@@ -695,6 +696,7 @@ impl Header {
             order_hint,
             refresh_flags,
             invalidated_references,
+            size_override: override_size,
             size,
             render_size,
             upscaled_width,
