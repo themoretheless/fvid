@@ -1618,3 +1618,13 @@ unproven. Temporal motion fields, film grain, intrabc/super-resolution, restorat
 quantization matrices and additional layering/chroma behavior remain codec gaps.
 
 Final validation: all 48 tests in 22 checked-in AV1 integration suites and 35 AV1 core tests passed offline. The 168-case palette acceptance also passed in the canonical checkout. All 504 fixture hashes were verified. The palette regression executable has no FFmpeg/libav/libaom/dav1d linkage. All canonical AV1 sources match the verification snapshot after restoration of counterfactual mutations.
+
+## PS aligned stereo PCM reference
+
+`aac-ps-dsp-oracles.json` and `aac-ps-dsp-reference.bin` are original
+numeric QMF and stereo PCM references from
+`scripts/generate_aac_ps_dsp_oracles.py`. Generation is explicit and offline.
+They reuse the original PS matrix synthetic MP4 packets and syntax sequences;
+no private media or codec parameters are used. Decimal direct convolution and
+direct per-lag QMF synthesis qualify both output rates and lookahead alignment.
+Native encoded PS refusal remains; these accept the composed component DSP.

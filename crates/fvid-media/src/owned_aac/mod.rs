@@ -4,6 +4,7 @@ pub mod aac_ps_data;
 pub mod aac_ps_hybrid_filter;
 pub mod aac_ps_hybrid;
 pub mod aac_ps_decorrelation;
+pub mod aac_ps_dsp;
 pub mod aac_ps_huffman;
 pub mod aac_ps_dequant;
 pub mod aac_ps_history;

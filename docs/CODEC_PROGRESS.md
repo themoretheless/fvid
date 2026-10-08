@@ -6503,3 +6503,23 @@ Stereo QMF-to-PCM synthesis wiring, startup/timeline compensation, a combined
 transactional PS DSP owner, native AAC/SBR packet integration and independent
 whole stereo PCM acceptance still remain. Full HE-AAC v2 playback is not yet
 claimed; this milestone does not close the broader codec goal.
+
+### Aligned transactional PS QMF-to-stereo PCM DSP (2026-10-09)
+
+`aac_ps_dsp` composes retained matrices, hybrid analysis, decorrelation,
+complex stereo mixing, inverse hybrid sums and two owned QMF synthesizers.
+Six QMF lookahead slots compensate hybrid delay. Subsequent calls verify the
+retained overlap and consume it only once. Both output rates (64 and 32 PCM
+samples per slot), synthesis histories and all upstream states commit together.
+Changing output rate requires reset. PCM inherits the supplied QMF units;
+native AAC normalization and packet/startup/timeline integration remain pending.
+
+Eight original numeric cases cover 24/30/32-slot frames, 20/34 grid changes,
+phase toggles, retained parameters and zero EOF lookahead. The explicit Python
+generator uses Decimal FIR/direct allpass convolution and weighted transient
+histories, independently saved matrix coefficients, and direct QMF synthesis
+contributions. Ordinary tests consume saved references without FFmpeg/network.
+Both PCM channels and every QMF sample pass comparison; checkpoint replay,
+reset, overlap rejection and late-error rollback pass. Existing synthetic MP4
+packets provide native parameter parsing; encoded full PS playback remains
+refused. This is component acceptance, not full HE-AAC v2 conformance.
