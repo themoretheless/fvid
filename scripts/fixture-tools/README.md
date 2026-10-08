@@ -226,3 +226,12 @@ equivalent explicit PCE controls, independent cosine PCM, ASC and Y4M companions
 No external codec is required. Rates 44100/48000, frame sizes 960/1024 and
 common/separate ICS are covered. Ordinary offline acceptance:
 `cargo test --release --locked --offline --no-default-features --test aac_top_configuration`.
+
+### SBR frequency geometry (not playback qualification)
+
+`python3 scripts/generate_aac_sbr_frequency_oracles.py` explicitly creates
+1,152 original 80-digit Decimal geometry vectors. It invokes no external codec
+or network. Ordinary tests read the checked-in JSON only:
+`cargo test --manifest-path crates/fvid-media/Cargo.toml --release --locked
+--offline --no-default-features --lib aac_sbr_bands`.
+These are exact DSP geometry checks, not encoded-stream/PCM acceptance.

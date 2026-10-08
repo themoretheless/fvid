@@ -5460,3 +5460,27 @@ artifact hashes and deterministic regeneration were checked. Adjacent fill,
 height, pulse, PCE, coupling and 960-sample acceptance also pass in a clean copy.
 The test binary links libiconv/libSystem only. No FFmpeg/libav is invoked.
 This closes the indexed 7.1 Top refusal, not HE-AAC/SBR or full codec conformance.
+
+### 2026-10-08 — owned SBR frequency-table foundation
+
+`owned_aac::aac_sbr_bands::FrequencyTables::from_qmf_bounds` implements master,
+high/low envelope and noise frequency geometry from supplied k0/k2 bounds.
+Linear scales include endpoint adjustment; logarithmic scales include one/two
+regions, the 1.3 warp and bounded width correction from the published 2003
+standard (the older working draft omitted the correction limit). Crossover,
+core QMF range and noise-band limits are checked before tables are returned.
+All allocations are bounded by the 64-subband domain; no foreign decoder is used.
+
+Explicit generation produces 1,152 original 80-digit Decimal reference vectors:
+656 accepted geometries and 496 invalid combinations. Ordinary offline unit
+tests compare exact master/high/low/noise borders, cover all five-bit crossover
+values and all QMF bounds, and pin each linear endpoint adjustment. Disabling
+the warp in a disposable clean copy makes the Decimal test fail specifically
+for [11,35,3,true,0,0]; restoring it returns the owned AAC unit suite to green.
+Deterministic generation and the oracle SHA256 were verified.
+
+This is a DSP building block, not SBR playback acceptance. Rate-dependent
+start/stop derivation, header/grid/envelope parsing, QMF analysis/synthesis,
+HF generation/adjustment, state/timeline integration and encoded nonzero PCM
+regressions remain required. No unsupported SBR refusal has been converted to
+an acceptance claim, and the full codec goal remains open.
