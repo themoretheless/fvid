@@ -4008,3 +4008,41 @@ film-grain, palette, intrabc, super-resolution, restoration/profile/chroma and
 layering gaps. Full codec conformance remains unproven.
 
 Final validation: all 47 tests across 21 checked-in AV1 integration suites and 35 AV1 core tests passed offline on the final source. The six new tests passed; all 326 fixture/container hashes were verified. The regression executable has no FFmpeg/libav/libaom linkage. Verification and canonical AV1/MP4/WebM sources match.
+
+## Native AV1 palette prediction
+
+The native intra decoder now reads Y/UV palettes (2–8 colors), merges and deduplicates
+eligible above/left palette caches, decodes palette color deltas and signed/modular
+V deltas, builds diagonal color-index maps with normative context ordering and
+extends map edges before predicting visible samples. Palette prediction replaces
+ordinary intra prediction while retaining transform/residual reconstruction.
+Filter-intra syntax is omitted when a Y palette is present. Neighbor palette state
+is stored with the block grid; image accounting includes the added state.
+`Picture::palette_counts` and `palette_cache_hits` expose actual coded use rather
+than inferring palette coverage from source images.
+
+The owned generator saves 168 streams: 8/10/12-bit 4:2:0, all palette sizes 2–8,
+constant/varied chroma, matching/opposite U/V patterns, 64x64 and odd 125x117
+sizes. Saved pixels agree byte for byte between independent libaom and dav1d
+references; normal tests require neither oracle, FFmpeg/libav nor network.
+All ordinary sources are synthesized internally, including palette parameters.
+The fixture manifest records original source hashes separately from decoded hashes:
+18 opposite-chroma cases produce reconstructed samples differing from the source
+image with these generator settings, despite lossless encoding requested. Both
+reference decoders and native FVid agree on the coded reconstruction. These cases
+are decoder acceptance, not a claim of exact source-preserving encoding.
+
+`tests/av1_palette.rs` checks visible sample cropping, all sample bits, sizes,
+actual palette sizes in both plane groups for every depth, cached-color use,
+reset/finish, WebM raw depth, timestamps, rewind and seek. The pre-fix stream
+reproduced the exact native palette refusal. Deliberately replacing palette map
+lookup by color zero or dropping the V-delta sign caused pixel mismatches; the
+restored decoder passed. The WebM fixture wrapper now recognizes implicit visibility
+in reduced headers. Saved existing wrappers remained identical for checked cases.
+
+This qualifies the saved lossless-coded palette tools and 4:2:0 profiles; lossy
+palette/residual combinations, further layouts and full AV1 conformance are still
+unproven. Temporal motion fields, film grain, intrabc/super-resolution, restoration,
+quantization matrices and additional layering/chroma behavior remain codec gaps.
+
+Final validation: all 48 tests in 22 checked-in AV1 integration suites and 35 AV1 core tests passed offline. The 168-case palette acceptance also passed in the canonical checkout. All 504 fixture hashes were verified. The palette regression executable has no FFmpeg/libav/libaom/dav1d linkage. All canonical AV1 sources match the verification snapshot after restoration of counterfactual mutations.

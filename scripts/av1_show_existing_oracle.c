@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 int main(int argc,char **argv){
  if(argc!=3&&argc!=4&&argc!=5)return 2;
  if(argc==5&&strcmp(argv[4],"whole-packet"))return 2;
@@ -19,8 +20,8 @@ int main(int argc,char **argv){
   if(aom_codec_decode(&ctx,data+packet_start,at-packet_start,NULL)){fprintf(stderr,"%s: %s %s\n",argv[1],aom_codec_error(&ctx),aom_codec_error_detail(&ctx));return 1;}
   packet_start=at;
   aom_codec_iter_t iter=NULL;aom_image_t *img;
-  while((img=aom_codec_get_frame(&ctx,&iter))){if(img->bit_depth!=8||(!output&&(img->d_w!=32||img->d_h!=32)))return 1;
-   for(int p=0;p<3;p++)for(int y=0;y<(p?(img->d_h+1)/2:img->d_h);y++)for(int x=0;x<(p?(img->d_w+1)/2:img->d_w);x++){unsigned char value=img->planes[p][y*img->stride[p]+x];if(output){if(fputc(value,output)==EOF)return 2;}else if(value!=128){fprintf(stderr,"non-flat sample\n");return 1;}}count++;
+  while((img=aom_codec_get_frame(&ctx,&iter))){if(!output&&(img->bit_depth!=8||img->d_w!=32||img->d_h!=32))return 1;
+   for(int p=0;p<3;p++)for(int y=0;y<(p?(img->d_h+1)/2:img->d_h);y++)for(int x=0;x<(p?(img->d_w+1)/2:img->d_w);x++){unsigned value=(img->fmt&AOM_IMG_FMT_HIGHBITDEPTH)?((const uint16_t *)(img->planes[p]+y*img->stride[p]))[x]:img->planes[p][y*img->stride[p]+x];if(output){if(fputc(value&255,output)==EOF)return 2;if(img->bit_depth>8&&fputc(value>>8,output)==EOF)return 2;}else if(value!=128){fprintf(stderr,"non-flat sample\n");return 1;}}count++;
   }
  }
  if(output&&fclose(output))return 2;

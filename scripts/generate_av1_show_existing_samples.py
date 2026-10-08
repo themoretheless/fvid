@@ -57,21 +57,21 @@ def show(ids,model,equal,frame_id,slot,width=5):
 
 def webm(data,dimensions=(32,32)):
     from generate_audio_resample_window_fixture import ebml
-    packets=[];at=0;seq=b'';pending=b'';separate_hidden=None
+    packets=[];at=0;seq=b'';pending=b'';separate_hidden=None;reduced=False
     while at<len(data):
         begin=at;kind=data[at]>>3;at+=1;size=0;shift=0
         while True:
             byte=data[at];at+=1;size|=(byte&127)<<shift;shift+=7
             if not byte&128:break
         payload_start=at;at+=size;piece=data[begin:at]
-        if kind==1:seq=piece;pending+=piece
-        elif kind==3 and not (data[payload_start]&128):
+        if kind==1:seq=piece;pending+=piece;reduced=bool(data[payload_start]&8)
+        elif kind==3 and (reduced or not (data[payload_start]&128)):
             if separate_hidden is not None:packets.append((pending,separate_hidden));pending=b''
-            pending+=piece;separate_hidden=not (data[payload_start]&16)
+            pending+=piece;separate_hidden=not reduced and not (data[payload_start]&16)
         elif kind in [4,7]:pending+=piece
         elif kind in [3,6]:
             if separate_hidden is not None:packets.append((pending,separate_hidden));pending=b'';separate_hidden=None
-            packets.append((pending+piece,kind==6 and not (data[payload_start]&16)));pending=b''
+            packets.append((pending+piece,kind==6 and not reduced and not (data[payload_start]&16)));pending=b''
     if separate_hidden is not None:packets.append((pending,separate_hidden))
     header=ebml('1a45dfa3',ebml('4282',b'webm'))
     track=ebml('d7',b'\x01')+ebml('83',b'\x01')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
