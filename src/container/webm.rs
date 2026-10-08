@@ -5,6 +5,7 @@ use crate::{Result, container::FileTags, invalid, unsupported};
 use std::io::{Read, Seek, SeekFrom};
 pub use fvid_media::owned_matroska::Chapter;
 use fvid_media::owned_opus_packet::{duration_ns as opus_lace_duration, header_channels as opus_lace_channels};
+use fvid_media::owned_aac::config::AudioSpecificConfig as WebmAacConfig;
 include!("../../crates/fvid-media/src/owned_webm_reader_impl.rs");
 
 #[cfg(test)]

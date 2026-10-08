@@ -1,0 +1,237 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-asc-clock-sbr-explicit-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "c00ac0f21dc6858a6767ac957a1f677cccfb3bc4842709b513cd6d65c8afa4a7",
+      "asc": "2b098a00"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-ps-explicit-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "2707ae4324934cf580e2191c835422820e74d74d5ff20d15c5e5a48575aa0a39",
+      "asc": "eb098a00"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-sbr-sync-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "882a27175610a74e9806b248022998800344c126e880f78260811f07f6919f38",
+      "asc": "130c56e598"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-ps-sync-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "4275c26a3805d64603bdedb6ad0764cbf82474deaba101330380baf946f3aebe",
+      "asc": "130c56e59d4880"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-sbr-explicit-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "94d2e9f782b3a5b43188c7e12cfcc5e3b1128ce423c66a9cab831e8488275bd2",
+      "asc": "2b098800"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-ps-explicit-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "7121a41e1382aa0e91db6cd0aae81119d087e8ce09351b24db581f955487bced",
+      "asc": "eb098800"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-sbr-sync-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "f37f6f95df1f21191e8567e491000af7c245de8f0138b0dc1b478638f7dad0c2",
+      "asc": "130856e598"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-ps-sync-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "e8a3b35dd7f9aa4a0baf14100c55c03bc7e53dab0cafbf756b1aa1d7d4f9c3f7",
+      "asc": "130856e59d4880"
+    }
+  ],
+  "controls": [
+    {
+      "file": "he-aac-ps-asc-clock-control-unspecified-synthetic.mkv",
+      "sample_rate": 24000,
+      "sha256": "b51a8a6a66644bb1ed27db423b5425a174a07c32b753e7cb1ddfcf6c2179b700"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-control-explicit-core-synthetic.mkv",
+      "sample_rate": 24000,
+      "sha256": "b97ff37828626327d55a5f65ac77dfc6da191642df623c1f0359df8661076a4e"
+    },
+    {
+      "file": "he-aac-ps-asc-clock-control-conflicting-core-synthetic.mkv",
+      "sample_rate": 32000,
+      "sha256": "98e4fdaa9c66c3f96539cfb6fdcb06f0f0efcd6977122fbd220983b23545ab0c"
+    }
+  ]
+}

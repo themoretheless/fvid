@@ -873,3 +873,19 @@ Fifteen assets regenerate deterministically using only Python stdlib and owned
 synthetic inputs; ordinary tests do not invoke generators or FFmpeg. This does
 not qualify coupling, multiple elements, height layouts, general SBR/PCE or
 missing-SBR-fill PS playback.
+
+Matroska AAC ASC geometry (2026-10-09): when OutputSamplingFrequency is absent,
+explicit or sync-extension SBR ASC supplies its declared decoded clock if Audio
+states the core rate or no rate. Explicit PS ASC expands core channel metadata
+to decoded stereo. Explicit container output clocks and conflicting core rates
+are retained, and bare LC does not acquire a guessed doubled clock. Eight
+original SBR/PS 960/1024 Matroska videos reproduce the old reader's 24/48 kHz
+mismatch; real worker acceptance additionally exposed mono metadata retained
+for explicit PS. Acceptance compares independent stereo PCM through root/owned
+export, intervals, packet limits, WAV and memory admission; native AVC plus
+worker preroll, EOF, seek and rewind are exercised on all eight videos. Three
+control videos verify metadata precedence and no guessed LC clock. Twelve
+assets regenerate offline and deterministically. AAC CodecPrivate carries ASC:
+https://www.matroska.org/technical/codec_specs.html#a_aac . This closes ASC-declared
+geometry, not implicit output-clock discovery from bare LC payloads or PS
+playback without SBR fills.

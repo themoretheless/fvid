@@ -571,7 +571,33 @@ impl<R: Read + Seek> WebmReader<R> {
                         if let Some(uid) = uid {track_uids.insert(track.number,uid);}
                         // OutputSamplingFrequency overrides the core frequency
                         // regardless of element order; timestamps stay in ns.
-                        if let Some(rate) = output_sample_rate { track.sample_rate = rate; }
+                        if let Some(rate) = output_sample_rate {
+                            track.sample_rate = rate;
+                        } else if track.codec == "A_AAC" {
+                            // ASC may declare the decoded SBR clock while Audio
+                            // gives only its core clock. Never guess a multiplier
+                            // or replace an explicitly stated output clock.
+                            if let Ok(config) = WebmAacConfig::parse(&track.codec_private) {
+                                if config.sbr_present == Some(true)
+                                    && (track.sample_rate == 0
+                                        || track.sample_rate == u64::from(config.core.sample_rate))
+                                {
+                                    track.sample_rate = u64::from(config.output_sample_rate());
+                                }
+                            }
+                        }
+                        if track.codec == "A_AAC" {
+                            if let Ok(config) = WebmAacConfig::parse(&track.codec_private) {
+                                // PS expands a mono core even when container
+                                // channel metadata describes that core.
+                                if config.ps_present == Some(true)
+                                    && (track.channels == 0
+                                        || track.channels == u64::from(config.core.channels))
+                                {
+                                    track.channels = u64::from(config.output_channels());
+                                }
+                            }
+                        }
                         tracks.push(track);
                     }
                 }

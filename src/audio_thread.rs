@@ -1177,6 +1177,8 @@ mod ps_matroska_preroll_tests {
         .unwrap();
         let output_clock: serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/playback-errors/aac-ps-output-clock-matroska-oracles.json")).unwrap();
         manifest["cases"].as_array_mut().unwrap().extend(output_clock["cases"].as_array().unwrap().iter().cloned());
+        let asc_clock: serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/playback-errors/aac-ps-asc-clock-matroska-oracles.json")).unwrap();
+        manifest["cases"].as_array_mut().unwrap().extend(asc_clock["cases"].as_array().unwrap().iter().cloned());
         let oracle = include_bytes!("../tests/fixtures/playback-errors/aac-ps-absence-pcm.bin");
         for case in manifest["cases"].as_array().unwrap() {
             let file = std::fs::read(

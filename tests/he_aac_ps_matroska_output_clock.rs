@@ -4,10 +4,18 @@ use fvid_media::owned_matroska_aac::decode_matroska_aac_pcm;
 use std::{io::Cursor, time::Duration};
 #[test]
 fn matroska_output_sampling_frequency_selects_independent_ps_pcm_and_wav_clock() {
-    let manifest: serde_json::Value = serde_json::from_str(include_str!(
+    let mut manifest: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/playback-errors/aac-ps-output-clock-matroska-oracles.json"
     ))
     .unwrap();
+    let asc_clock: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-asc-clock-matroska-oracles.json"
+    ))
+    .unwrap();
+    manifest["cases"]
+        .as_array_mut()
+        .unwrap()
+        .extend(asc_clock["cases"].as_array().unwrap().iter().cloned());
     let oracle = include_bytes!("fixtures/playback-errors/aac-ps-absence-pcm.bin");
     for c in manifest["cases"].as_array().unwrap() {
         let file = std::fs::read(
@@ -163,5 +171,41 @@ fn invalid_matroska_output_sampling_frequency_is_refused_before_decode() {
             };
         assert!(owned.contains(row["error"].as_str().unwrap()));
         assert!(root.contains(row["error"].as_str().unwrap()));
+    }
+}
+
+#[test]
+fn asc_clock_inference_preserves_explicit_output_conflicts_and_unspecified_lc() {
+    let manifest: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-asc-clock-matroska-oracles.json"
+    ))
+    .unwrap();
+    for c in manifest["controls"].as_array().unwrap() {
+        let file = std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/playback-errors")
+                .join(c["file"].as_str().unwrap()),
+        )
+        .unwrap();
+        let owned =
+            fvid_media::owned_webm::WebmReader::open(Cursor::new(&file), Default::default())
+                .unwrap();
+        let root = fvid::container::webm::WebmReader::open(Cursor::new(&file), Default::default())
+            .unwrap();
+        for rate in [
+            owned
+                .tracks
+                .iter()
+                .find(|t| t.codec == "A_AAC")
+                .unwrap()
+                .sample_rate,
+            root.tracks
+                .iter()
+                .find(|t| t.codec == "A_AAC")
+                .unwrap()
+                .sample_rate,
+        ] {
+            assert_eq!(rate, c["sample_rate"].as_u64().unwrap(), "{}", c["file"]);
+        }
     }
 }

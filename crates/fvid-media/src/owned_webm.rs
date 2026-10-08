@@ -55,6 +55,7 @@ fn unsupported(message: &str) -> Error {
     }
 }
 use crate::owned_opus_packet::{duration_ns as opus_lace_duration, header_channels as opus_lace_channels};
+use crate::owned_aac::config::AudioSpecificConfig as WebmAacConfig;
 include!("owned_webm_reader_impl.rs");
 #[cfg(test)]
 mod tests {
