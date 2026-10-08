@@ -5511,3 +5511,19 @@ every truncated bit and every byte offset. The layer parses bounded raw syntax;
 it does not yet validate envelope counts, pointer legality, time geometry or
 frame-to-frame continuity, and is not HE-AAC playback acceptance.
 Reference: GOST R 53556.4-2013 table 69 (legacy MPEG-4 SBR).
+
+
+### Owned SBR time grid foundation
+
+`GridSyntax::time_grid` reconstructs envelope and noise-floor borders for
+15/16-slot (960/1024 core sample) frames. It applies NINT fixed-grid spacing,
+leading/trailing relative borders and the class-specific middle-border rule.
+It validates class shape, legal relative steps, offsets, envelope counts,
+pointer bounds and strictly increasing borders. `read_validated` commits bit
+position only after syntax and geometry succeed. Independent hand-written
+expected borders exercise all four classes and both core lengths. Malformed
+examples first pass the raw parser before failing count/overlap validation,
+so rejection cannot pass accidentally through unrelated truncation. Public-field
+extremes are checked as well. This is still syntax/geometry coverage, not coded
+HE-AAC playback acceptance; cross-frame continuity and QMF/HF decoding remain.
+Reference: GOST R 53556.4-2013 sections 6.18.3.3, 6.18.3.6 and table 174.
