@@ -5170,7 +5170,7 @@ permutation. Tests cover sparse updates, repeat calls, anchor index 127, malform
 lists, camera/canvas geometry and memory refusal. Ordinary packet decoding
 refuses OBU 8 with a request for external camera context; that refusal is distinct
 from explicit API acceptance. Automatic container-side provisioning, additional
-depths/chroma, SB128 and additional CDF combinations remain unqualified.
+depths/chroma and SB128 are qualified in the subsequent matrix below; additional CDF combinations remain unqualified.
 
 
 ## AV1 distinct tile-list anchors (2026-10-08)
@@ -5183,3 +5183,21 @@ actually exercises anchor selection rather than repeated pointers. Generation
 uses a clipping-safe original pattern; previous one-anchor, sparse-canvas,
 bounds and memory regressions remain enabled. This does not establish all
 external camera profiles or automatic container-side camera context.
+
+
+## AV1 camera tile-list depth/chroma/SB matrix (2026-10-08)
+
+The same native external-context API now has exact pixel acceptance for all
+18 combinations of SB64/SB128, 8/10/12-bit depth and 4:2:0/4:2:2/4:4:4.
+Each original lossless camera uses a 2x2 tile grid (128x128 or 256x256 frame),
+LAST-only prediction and two distinct selectable anchors. Stock libaom and
+independent Python calculations agree for one/two-anchor permutations. Offline
+Rust tests also recompute every sample, including non-square 4:2:2 chroma
+tiles and actual values above 255. All cases retain sparse canvas preservation,
+anchor mutation sensitivity, malformed/budget refusals and state isolation.
+
+Four test functions cover the 18 acceptance cases and the separate ordinary
+packet refusal without external camera context. This closes the unqualified
+depth/chroma/SB matrix for these camera lists, not remaining codec tools: other
+CDF contexts, lossy camera combinations, motion/border cases and automatic
+container external-context provisioning still need qualification.

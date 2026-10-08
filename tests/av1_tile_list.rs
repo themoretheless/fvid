@@ -10,6 +10,27 @@ fn bytes(name: &str) -> Vec<u8> {
 }
 #[test]
 fn owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output() {
+    camera_tile_list_case("", 64, 8, 420);
+}
+#[test]
+fn sb128_camera_tile_list_pixels_distinct_anchors_and_sparse_canvas() {
+    camera_tile_list_case("sb128-", 128, 8, 420);
+}
+#[test]
+fn camera_tile_list_high_depth_and_full_chroma_matrix() {
+    for sb in [64, 128] {
+        for depth in [8, 10, 12] {
+            for chroma in [420, 422, 444] {
+                if depth == 8 && chroma == 420 {
+                    continue;
+                }
+                camera_tile_list_case(&format!("d{depth}-c{chroma}-sb{sb}-"), sb, depth, chroma);
+            }
+        }
+    }
+}
+fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize) {
+    let bytes = |name: &str| bytes(&format!("{prefix}{name}"));
     let anchor = bytes("anchor.obu");
     let header = bytes("header.obu");
     let list = bytes("list.obu");
@@ -51,20 +72,33 @@ fn owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output() 
     let output = decoder
         .decode_tile_list(&camera, &anchors, obu.payload, None)
         .unwrap();
-    assert_eq!(output.size, [128, 128]);
-    assert_eq!(
+    assert_eq!(output.size, [sb * 2, sb * 2]);
+    assert_eq!(sequence.superblock128, sb == 128);
+    let pixels = |output: &fvid::codec::av1_tile_list::Output| {
         output
             .planes
             .iter()
-            .flat_map(|p| p.samples.iter().map(|v| *v as u8))
-            .collect::<Vec<_>>(),
-        golden
-    );
+            .flat_map(|p| p.samples.iter())
+            .flat_map(|v| {
+                if depth == 8 {
+                    vec![*v as u8]
+                } else {
+                    v.to_le_bytes().to_vec()
+                }
+            })
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(output.depth, depth);
+    assert_eq!(output.subsampling, [chroma != 444, chroma == 420]);
+    assert_eq!(pixels(&output), golden, "{prefix}");
+    if depth > 8 {
+        assert!(output.planes[0].samples.iter().any(|v| *v > 255));
+    }
     // Distinct anchors make selecting the wrong entry's anchor observable.
     let mut alternate = (*anchors[0]).clone();
     for plane in &mut alternate.planes {
         for sample in &mut plane.samples {
-            *sample += 9;
+            *sample += 9 << (depth - 8);
         }
     }
     let distinct = vec![anchors[0].clone(), std::sync::Arc::new(alternate)];
@@ -84,19 +118,26 @@ fn owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output() 
         .unwrap();
     assert_eq!(multi.decoded_tiles, 4);
     assert!(multi.inter_blocks > 0);
-    let multi_pixels = multi
-        .planes
-        .iter()
-        .flat_map(|p| p.samples.iter().map(|v| *v as u8))
-        .collect::<Vec<_>>();
+    let multi_pixels = pixels(&multi);
     assert_eq!(multi_pixels, bytes("multi-list.yuv"));
     assert_ne!(multi_pixels, golden);
     for p in 0..3 {
-        let tile = if p == 0 { 64 } else { 32 };
-        for y in 0..tile * 2 {
-            for x in 0..tile * 2 {
-                let offset = 9 * ((y / tile * 2 + x / tile) % 2) as u16;
-                let i = y * tile * 2 + x;
+        let width = sb >> usize::from(p != 0 && chroma != 444);
+        let height = sb >> usize::from(p != 0 && chroma == 420);
+        for y in 0..height * 2 {
+            for x in 0..width * 2 {
+                let index = y / height * 2 + x / width;
+                let source = [3, 0, 2, 1][index];
+                let source_x = source % 2 * width + x % width;
+                let source_y = source / 2 * height + y % height;
+                let authored =
+                    ((71 + (3 * source_x + 5 * source_y + 23 * p) % 96) << (depth - 8)) as u16;
+                let offset = (9 << (depth - 8)) * (index % 2) as u16;
+                let i = y * width * 2 + x;
+                assert_eq!(
+                    output.planes[p].samples[i], authored,
+                    "{prefix}, plane {p}, {x},{y}"
+                );
                 assert_eq!(
                     multi.planes[p].samples[i],
                     output.planes[p].samples[i] + offset
@@ -123,12 +164,13 @@ fn owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output() 
         .decode_tile_list(&camera, &anchors, &partial, Some(&output))
         .unwrap();
     for p in 0..3 {
-        let tile = if p == 0 { 64 } else { 32 };
-        let stride = tile * 2;
-        for y in 0..stride {
+        let width = sb >> usize::from(p != 0 && chroma != 444);
+        let height = sb >> usize::from(p != 0 && chroma == 420);
+        let stride = width * 2;
+        for y in 0..height * 2 {
             for x in 0..stride {
-                let expected = if x < tile && y < tile {
-                    output.planes[p].samples[y * stride + x + tile]
+                let expected = if x < width && y < height {
+                    output.planes[p].samples[y * stride + x + width]
                 } else {
                     output.planes[p].samples[y * stride + x]
                 };

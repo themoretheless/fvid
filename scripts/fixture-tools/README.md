@@ -144,3 +144,9 @@ The tile-list generator also writes a distinct two-anchor list and oracle.
 The second external image adds 9 to the clipping-safe owned anchor pattern;
 entries alternate anchors 0/1. Python independently verifies both outputs
 before replacing the checked-in artifacts and their SHA-256 manifest.
+
+The same command generates all 18 tile-list cases: SB64/SB128, depth 8/10/12,
+and chroma 420/422/444. The original 8-bit 420 filenames remain stable; other
+cases use `d<depth>-c<chroma>-sb<sb>` suffixes. Each has a SHA-256 manifest,
+explicit camera header and one/two-anchor goldens independently validated
+before admission. High-depth goldens contain little-endian 16-bit samples.

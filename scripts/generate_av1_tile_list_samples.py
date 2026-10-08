@@ -1,34 +1,65 @@
 #!/usr/bin/env python3
-"""Original lossless camera tile list and unmodified stock libaom golden."""
-import argparse,hashlib,json,subprocess,tempfile
+"""Original lossless camera tile lists and stock libaom generation-time oracle."""
+import argparse
+import hashlib
+import json
+import subprocess
+import tempfile
 from pathlib import Path
 
+ORDER = [3, 0, 2, 1]
+SUFFIXES = ["anchor.obu", "camera.obu", "header.obu", "list.obu", "list.yuv",
+            "multi-list.obu", "multi-list.yuv"]
+
+
+def authored(sb, depth, chroma, multi):
+    output = bytearray()
+    sx, sy = int(chroma != 444), int(chroma == 420)
+    for plane in range(3):
+        width = sb >> (sx if plane else 0)
+        height = sb >> (sy if plane else 0)
+        for y in range(height * 2):
+            for x in range(width * 2):
+                index = (y // height) * 2 + x // width
+                source = ORDER[index]
+                px = (source % 2) * width + x % width
+                py = (source // 2) * height + y % height
+                value = (71 + (3 * px + 5 * py + 23 * plane) % 96
+                         + (9 * (index % 2) if multi else 0)) << (depth - 8)
+                output.extend(value.to_bytes(1 if depth == 8 else 2, "little"))
+    return output
+
+
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--generator',type=Path,required=True);a=p.parse_args()
-    root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
-    with tempfile.TemporaryDirectory(prefix='fvid-tile-list-') as tmp:
-        prefix=Path(tmp)/'fixture';subprocess.run([str(a.generator),str(prefix)],check=True)
-        reference=Path(str(prefix)+'-list.yuv').read_bytes();expected=bytearray()
-        for plane in range(3):
-            tile=64 if plane==0 else 32;dimension=tile*2
-            for y in range(dimension):
-                for x in range(dimension):
-                    source=[3,0,2,1][(y//tile)*2+x//tile]
-                    sx=(source%2)*tile+x%tile;sy=(source//2)*tile+y%tile
-                    expected.append(71+(3*sx+5*sy+23*plane)%96)
-        assert reference==expected,'stock oracle must reproduce lossless authored tile permutation'
-        multi_expected=bytearray()
-        for plane in range(3):
-            tile=64 if plane==0 else 32;dimension=tile*2
-            for y in range(dimension):
-                for x in range(dimension):
-                    index=(y//tile)*2+x//tile;source=[3,0,2,1][index]
-                    sx=(source%2)*tile+x%tile;sy=(source//2)*tile+y%tile
-                    multi_expected.append(71+(3*sx+5*sy+23*plane)%96+9*(index%2))
-        assert Path(str(prefix)+'-multi-list.yuv').read_bytes()==multi_expected,'distinct anchors must change the selected tiles exactly'
-        records={}
-        for suffix in ['anchor.obu','camera.obu','header.obu','list.obu','list.yuv','multi-list.obu','multi-list.yuv']:
-            data=Path(str(prefix)+'-'+suffix).read_bytes();name='av1-tile-list-'+suffix;(root/name).write_bytes(data)
-            records[suffix]={'file':name,'sha256':hashlib.sha256(data).hexdigest()}
-        (root/'av1-tile-list-generated.json').write_text(json.dumps({'size':[128,128],'tile_size':[64,64],'order':[3,0,2,1],'oracle':'stock libaom','multi_anchor_offsets':[0,9],'multi_anchor_indices':[0,1,0,1],'artifacts':records},indent=2)+'\n')
-if __name__=='__main__':main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--generator", type=Path, required=True)
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parents[1] / "tests/fixtures/playback-errors"
+    for sb in [64, 128]:
+        for depth in [8, 10, 12]:
+            for chroma in [420, 422, 444]:
+                tag = ("" if sb == 64 else "sb128-") if depth == 8 and chroma == 420 else f"d{depth}-c{chroma}-sb{sb}-"
+                name_prefix = "av1-tile-list-" + tag
+                with tempfile.TemporaryDirectory(prefix="fvid-tile-list-") as tmp:
+                    prefix = Path(tmp) / "fixture"
+                    subprocess.run([str(args.generator), str(prefix), str(sb), str(depth), str(chroma)], check=True)
+                    for multi in [False, True]:
+                        suffix = "multi-list.yuv" if multi else "list.yuv"
+                        reference = Path(str(prefix) + "-" + suffix).read_bytes()
+                        assert reference == authored(sb, depth, chroma, multi), (sb, depth, chroma, multi)
+                    records = {}
+                    for suffix in SUFFIXES:
+                        data = Path(str(prefix) + "-" + suffix).read_bytes()
+                        name = name_prefix + suffix
+                        (root / name).write_bytes(data)
+                        records[suffix] = {"file": name, "sha256": hashlib.sha256(data).hexdigest()}
+                    manifest = {"size": [sb * 2, sb * 2], "tile_size": [sb, sb],
+                                "superblock": sb, "depth": depth, "chroma": chroma,
+                                "order": ORDER, "oracle": "stock libaom",
+                                "multi_anchor_offsets": [0, 9 << (depth - 8)],
+                                "multi_anchor_indices": [0, 1, 0, 1], "artifacts": records}
+                    (root / (name_prefix + "generated.json")).write_text(json.dumps(manifest, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()
