@@ -41,7 +41,7 @@ fn geometric_widths(start: u8, stop: u8, count: usize) -> Result<Vec<u8>> {
 impl FrequencyTables {
     /// Build all three derived tables from a complete master table. Bounds must
     /// already satisfy the output-rate-specific bandwidth constraints. Header
-    /// frequency_scale is 0..=3, crossover is five bits, noise_bands is 0..=3.
+    /// frequency_scale is 0..=3, crossover is three bits, noise_bands is 0..=3.
     pub fn from_qmf_bounds(
         k0: u8,
         k2: u8,
@@ -54,7 +54,7 @@ impl FrequencyTables {
             || k0 >= k2
             || k2 > 64
             || frequency_scale > 3
-            || crossover > 31
+            || crossover > 7
             || noise_bands > 3
         {
             return Err(invalid("invalid SBR frequency table parameters"));
@@ -227,7 +227,7 @@ mod tests {
                                             && k0 < k2
                                             && k2 <= 64
                                             && scale <= 3
-                                            && crossover <= 31
+                                            && crossover <= 7
                                             && count <= 3
                                     );
                                     assert_eq!(t.master.first(), Some(&k0));

@@ -4,6 +4,7 @@ pub mod aac_coupling;
 pub mod aac_imdct;
 pub mod aac_synthesis;
 pub mod aac_sbr_bands;
+pub mod aac_sbr_header;
 pub mod aac_tns;
 pub use fvid_control::error::BitstreamError as Error;
 pub type Result<T> = std::result::Result<T, Error>;

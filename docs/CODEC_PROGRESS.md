@@ -5473,7 +5473,7 @@ All allocations are bounded by the 64-subband domain; no foreign decoder is used
 
 Explicit generation produces 1,152 original 80-digit Decimal reference vectors:
 656 accepted geometries and 496 invalid combinations. Ordinary offline unit
-tests compare exact master/high/low/noise borders, cover all five-bit crossover
+tests compare exact master/high/low/noise borders, cover all three-bit crossover
 values and all QMF bounds, and pin each linear endpoint adjustment. Disabling
 the warp in a disposable clean copy makes the Decimal test fail specifically
 for [11,35,3,true,0,0]; restoring it returns the owned AAC unit suite to green.
@@ -5484,3 +5484,17 @@ start/stop derivation, header/grid/envelope parsing, QMF analysis/synthesis,
 HF generation/adjustment, state/timeline integration and encoded nonzero PCM
 regressions remain required. No unsupported SBR refusal has been converted to
 an acceptance claim, and the full codec goal remains open.
+
+
+### Owned SBR header syntax foundation
+
+`owned_aac::aac_sbr_header::Header` reads the published legacy SBR header
+inside an explicit absolute payload bit boundary. Reads commit only on success;
+absent extra sections select the normative defaults independently of past headers.
+The three-bit crossover range is now also enforced by frequency geometry.
+Hand-authored bit strings cover all four extra-section combinations at every
+byte offset, every exact bit truncation, impossible payload limits, and a trailing
+sentinel proving the parser stops before the following payload. These are syntax
+acceptance tests, not encoded HE-AAC playback acceptance. Rate-dependent bounds,
+grid/envelope/noise parsing, QMF and high-frequency reconstruction remain pending.
+Reference: GOST R 53556.4-2013 tables 63 and 105–111 (MPEG-4 Audio syntax).
