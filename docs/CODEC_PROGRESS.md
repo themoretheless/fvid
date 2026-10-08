@@ -5801,3 +5801,29 @@ range changes, late-row invalid input rollback, and all short harmonic bit
 patterns at every bit offset/truncation. Mapping connects to the owned gain
 calculator. These are protocol/DSP tests, not encoded HE-AAC playback
 acceptance; final signal assembly and production extension integration remain.
+
+### Owned complex SBR HF signal assembly
+
+`aac_sbr_assembly::Assembly` applies smoothed gains, the normative complex
+noise sequence and parity-aligned four-phase sinusoids to the generated HF
+QMF matrix. It retains four raw gain/noise history slots and noise/sine phases
+across frames. Attack/carried-attack envelopes bypass gain smoothing and mute
+noise; sinusoidal channels also mute noise. Header reset primes smoothing
+history and resets noise index while preserving sine phase; decoder/seek
+reset clears all state. Geometry changes require header reset. Entire calls
+are transactional, including late arithmetic overflow.
+
+All 512 complex A.91 noise constants were independently extracted from the
+published GOST and cross-checked against every value in ISO draft table 1.A.13.
+The extraction generator requires local standard HTML/text; ordinary tests
+consume saved numeric constants/traces. Four independent 80-digit Decimal
+assembly traces cover five frames each, both frame sizes, smoothing enabled
+and disabled, envelope offsets, transients, harmonic noise suppression, noise
+index wrap and header-reset sine continuity. Other tests check exact sine
+phase/parity, initial noise index, checkpoint replay, seek reset and failed
+call rollback.
+
+This is standalone complex DSP assembly. The production frame engine must
+still manage low/high QMF delays, overlap/tail routing, extension syntax,
+rate-derived frequency bounds and AAC PCM scaling, with original encoded
+HE-AAC PCM acceptance fixtures. No full HE-AAC playback acceptance is claimed.

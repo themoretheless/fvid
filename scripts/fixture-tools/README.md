@@ -301,3 +301,10 @@ SBR mapping references: explicitly run
 `python3 scripts/generate_aac_sbr_mapping_oracles.py`. It saves 256 original
 exact integer/boolean mapping cases from explicit time-grid/attack tables.
 Tests consume the saved JSON without generators or external codec processes.
+
+SBR noise protocol constants: explicitly run
+`python3 scripts/generate_aac_sbr_noise_table.py LOCAL_GOST_HTML LOCAL_ISO_TEXT`.
+It cross-checks all 512 complex entries before writing the Rust table/reference.
+Then run `python3 scripts/generate_aac_sbr_assembly_oracles.py` for original
+five-frame Decimal assembly traces. Tests use saved files without generators
+or codec processes.

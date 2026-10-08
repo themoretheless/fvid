@@ -1790,3 +1790,25 @@ GOST R53556.4-2013 6.18.7.2/table176
 (https://cdn.standards.iteh.ai/samples/40623/9bf8354c8dab4f86a9c8be5272c128ef/ISO-IEC-14496-3-2001-Amd-1-2003-Cor-1-2004.pdf).
 No private media/codec parameter sets or copied decoder algorithm. These
 verify protocol/DSP mapping, not encoded HE-AAC playback acceptance.
+
+### SBR noise constants and complex assembly references
+
+`aac-sbr-noise-protocol.f64le`/JSON are protocol constants from published
+GOST R53556.4-2013 A.91, cross-checked numerically against all 512 complex
+entries of ISO draft table 1.A.13 by `generate_aac_sbr_noise_table.py`, using
+explicit local documents. The Rust table is generated from those constants;
+no decoder algorithm was copied.
+
+`aac-sbr-assembly-decimal.f64le`/JSON contain original QMF inputs and
+independent 80-digit Decimal output from `generate_aac_sbr_assembly_oracles.py`.
+Direct extended-frame sums implement smoothing independently of the Rust
+history shift, while linear phase/index formulas test state continuity.
+Four traces each contain five frames: both core sizes and smoothing modes,
+noise index wrap, attack/sinusoid noise suppression and header reset.
+The manifest records the noise dependency and trace hashes.
+
+Source: GOST R53556.4-2013 6.18.7.6/A.91
+(https://allgosts.ru/33/170/gost_r_53556.4-2013); ISO draft
+(http://www.mp3-tech.org/programmer/docs/w4611.pdf). No private media or
+codec parameter sets. These are DSP references, not encoded HE-AAC playback
+acceptance fixtures.
