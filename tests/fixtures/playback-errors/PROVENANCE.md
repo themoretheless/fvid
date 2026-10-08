@@ -1416,3 +1416,29 @@ pixel. An inverse mutation loading LAST must fail or change pixels; its refusal
 is not an acceptance test. Existing pixel/dequantization/anchor mutations,
 sparse canvas and malformed/memory tests also run for every new case.
 No private media, runtime generators, network or FFmpeg are involved.
+
+
+### Proven moving AV1 camera tiles
+
+The optional final motion argument (0/1) shifts the original synthetic anchor
+pattern by 4x2 luma pixels. Plane shifts use independent subsampling axes;
+coordinates clamp at the authored frame edge. Moving camera samples use anchor
+base 64 rather than the previous bias 71, with the same optional Q32 spatial
+detail. Stock cpu-used 0 makes actual motion search observable across depths.
+The second external anchor's padding is filled with its own edge samples,
+matching the required reference border rather than leaving unrelated zeros.
+
+108 `av1-tile-list-mv-*` cases span all prior depth/chroma/SB/Q/CDF combinations.
+Stock tile-list pixels must match independent assembly of individual stock
+camera tiles; lossless pixels must also match the authored shifted formula.
+Native tests additionally require actual nonzero coded motion in every case,
+compare every one/two-anchor sample, verify sparse updates, CDF/quantization
+controls and memory/malformed refusals. Statistics increment only after
+successful inter-block reconstruction, and sparse counters are per call.
+
+The prior cpu-used 6 10-bit lossless candidate decoded correct pixels but had
+zero nonzero-motion blocks; it was excluded from this coverage and replaced.
+An initial generation-only aggregate buffer was too small for four valid
+entries; it now allows four 65536-byte payloads while checking each entry's
+16-bit length. All 216 cases have seven-artifact SHA-256 manifests. No private
+media, external runtime decoders, FFmpeg or network are needed for tests.

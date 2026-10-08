@@ -33,6 +33,10 @@ pub struct SavedMotion {
 #[derive(Clone, Debug, Default)]
 pub struct InterPredictionStats {
     pub single_reference_blocks: u32,
+    /// Reconstructed inter blocks with a nonzero coded displacement.
+    pub nonzero_motion_blocks: u32,
+    /// Reconstructed inter blocks with a fractional luma displacement (1/8 pixel).
+    pub fractional_motion_blocks: u32,
     pub average_compound_blocks: u32,
     pub distance_compound_blocks: u32,
     pub wedge_compound_blocks: u32,

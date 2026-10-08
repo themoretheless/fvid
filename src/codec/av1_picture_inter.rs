@@ -886,6 +886,10 @@ impl Decoder<'_> {
         } else {
             stats.single_reference_blocks += 1;
         }
+        let coded_motion = mvs.iter().take(if compound { 2 } else { 1 });
+        stats.nonzero_motion_blocks += u32::from(coded_motion.clone().any(|v| *v != [0, 0]));
+        stats.fractional_motion_blocks +=
+            u32::from(coded_motion.clone().any(|v| v.iter().any(|c| c % 8 != 0)));
         stats.obmc_blocks += u32::from(obmc);
         stats.interintra_blocks += u32::from(interintra_mode.is_some());
         stats.local_warp_blocks +=

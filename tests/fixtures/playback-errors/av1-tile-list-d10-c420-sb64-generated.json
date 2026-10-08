@@ -20,6 +20,11 @@
     1
   ],
   "oracle": "stock libaom",
+  "motion_shift": [
+    0,
+    0
+  ],
+  "cpu_used": 6,
   "multi_anchor_offsets": [
     0,
     36

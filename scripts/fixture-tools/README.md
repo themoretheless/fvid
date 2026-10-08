@@ -169,3 +169,11 @@ The camera generator's final mode now accepts 0 (default anchor context),
 but camera encodes PRIMARY_REF_NONE). The Python driver covers all three:
 108 cases total, with `none-` tags for genuine fresh-CDF camera syntax.
 Seven offline test functions cover these cases and missing external context.
+
+The driver now enumerates moving camera variants too (216 total cases).
+Use `--motion 0` or `--motion 1` to regenerate one family independently.
+The C generator's final optional motion flag shifts by 4x2 luma pixels and
+uses cpu-used 0, with properly extended external-reference image borders.
+Native moving acceptance requires actual nonzero coded motion; matching
+pixels alone is insufficient. Motion/depth/chroma/SB/context details and
+artifact hashes are recorded in each `mv-` manifest.

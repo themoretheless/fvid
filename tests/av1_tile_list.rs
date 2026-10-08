@@ -75,9 +75,17 @@ fn camera_context_matrix(context: &str) {
         }
     }
 }
+#[test]
+fn moving_camera_tile_list_reconstruction_across_context_depth_chroma_and_superblocks() {
+    for context in ["mv", "mv-cdf", "mv-none"] {
+        camera_context_matrix(context);
+    }
+}
 fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u8) {
-    let reset = prefix.starts_with("none-");
-    let adapted = reset || prefix.starts_with("cdf-");
+    let motion = prefix.starts_with("mv-");
+    let context = prefix.strip_prefix("mv-").unwrap_or(prefix);
+    let reset = context.starts_with("none-");
+    let adapted = reset || context.starts_with("cdf-");
     let bytes = |name: &str| bytes(&format!("{prefix}{name}"));
     let anchor = bytes("anchor.obu");
     let header = bytes("header.obu");
@@ -139,6 +147,14 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
         .decode_tile_list(&camera, &anchors, obu.payload, None)
         .unwrap();
     assert_eq!(output.size, [sb * 2, sb * 2]);
+    assert!(output.nonzero_motion_blocks <= output.inter_blocks);
+    assert!(output.fractional_motion_blocks <= output.nonzero_motion_blocks);
+    if motion {
+        assert!(
+            output.nonzero_motion_blocks > 0,
+            "{prefix}: fixture must exercise actual nonzero motion"
+        );
+    }
     assert_eq!(sequence.superblock128, sb == 128);
     let pixels = |output: &fvid::codec::av1_tile_list::Output| {
         output
@@ -205,10 +221,17 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
             for x in 0..width * 2 {
                 let index = y / height * 2 + x / width;
                 let source = [3, 0, 2, 1][index];
-                let source_x = source % 2 * width + x % width;
-                let source_y = source / 2 * height + y % height;
-                let authored =
-                    ((71 + (3 * source_x + 5 * source_y + 23 * p) % 96) << (depth - 8)) as u16;
+                let mut source_x = source % 2 * width + x % width;
+                let mut source_y = source / 2 * height + y % height;
+                if motion {
+                    source_x =
+                        (source_x + (4 >> usize::from(p != 0 && chroma != 444))).min(width * 2 - 1);
+                    source_y = (source_y + (2 >> usize::from(p != 0 && chroma == 420)))
+                        .min(height * 2 - 1);
+                }
+                let authored = (((if motion { 64 } else { 71 })
+                    + (3 * source_x + 5 * source_y + 23 * p) % 96)
+                    << (depth - 8)) as u16;
                 let offset = (9 << (depth - 8)) * (index % 2) as u16;
                 let i = y * width * 2 + x;
                 if q == 0 {
@@ -216,10 +239,12 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
                         output.planes[p].samples[i], authored,
                         "{prefix}, plane {p}, {x},{y}"
                     );
-                    assert_eq!(
-                        multi.planes[p].samples[i],
-                        output.planes[p].samples[i] + offset
-                    );
+                    if !motion {
+                        assert_eq!(
+                            multi.planes[p].samples[i],
+                            output.planes[p].samples[i] + offset
+                        );
+                    }
                 } else {
                     let detail = ((source_x / 8 + source_y / 8 + p) % 7) as i32 - 3;
                     let source_sample = (i32::from(authored) + (detail << (depth - 8))) as u16;
@@ -306,6 +331,8 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     assert_eq!(output.decoded_tiles, 4);
     assert!(output.inter_blocks > 0);
     assert_eq!(sparse.decoded_tiles, 1);
+    assert!(sparse.nonzero_motion_blocks <= sparse.inter_blocks);
+    assert!(sparse.fractional_motion_blocks <= sparse.nonzero_motion_blocks);
     let mut indexed = obu.payload.to_vec();
     indexed[4] = 127;
     let many = vec![anchors[0].clone(); 128];

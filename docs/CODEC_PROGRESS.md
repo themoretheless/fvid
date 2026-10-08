@@ -5264,3 +5264,28 @@ packet missing-context refusal, with no external codec calls/linkage.
 Additional reference-slot mappings, context-update-tile choices, motion/border
 interactions and automatic container external context remain unqualified, as
 do other codec/profile gaps. This stage does not establish complete conformance.
+
+
+## AV1 camera tile lists with proven nonzero motion (2026-10-08)
+
+The native inter-block path now exposes counters for successfully reconstructed
+blocks with nonzero coded motion and fractional luma motion. Tile-list outputs
+sum the counters for only the current call, including sparse canvas updates.
+The new 108 camera cases shift the owned image by 4x2 luma pixels, respecting
+each chroma axis and clamping the authored source at its visible edges.
+Every case requires nonzero_motion_blocks>0, in addition to exact stock pixels.
+
+A fast stock encoder candidate yielded no nonzero motion in a 10-bit lossless
+case; it was replaced, not accepted as motion coverage. Generation uses cpu-used
+0 for moving cases, preserves stock coding/oracles, and extends the second
+external anchor border with edge samples. Individual entry lengths remain
+bounded by their 16-bit syntax; the generation tool's aggregate scratch buffer
+now accommodates four entries rather than incorrectly imposing 64 KiB overall.
+
+All three CDF contexts, lossless/Q32, SB64/SB128, 8/10/12 and 420/422/444 moving
+cases pass pixel, CDF/dequantization/anchor mutation, sparse-canvas and bounds
+checks. Eight offline functions cover 216 accepted cases plus ordinary missing
+context refusal. Forty-six AV1 units and full-chroma/spatial/spatiotemporal
+integration regressions pass. Fractional motion is counted but not yet a required
+fixture property; coded off-frame vectors, additional motion tools/interactions
+and automatic container external context remain separate qualifications.
