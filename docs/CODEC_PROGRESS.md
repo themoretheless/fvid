@@ -6604,3 +6604,42 @@ Validation: 832 tests passed offline (root lib 347, owned media lib 432,
 The player build, formatting, Python syntax and diff checks passed. The native
 PS regression binary links only libiconv/libSystem, with no FFmpeg/libav codec
 library. All eight new native packet fixture assets regenerate identically.
+
+### Delayed PS playback timing adapter and bounded thread stack (2026-10-09)
+
+`fvid::codec::aac_ps_playback::PsAacDecoder` associates each input packet's
+signed source timestamp and own presentation duration with its native frame
+identity. Returned `DecodedFrame` carries complete interleaved PCM together
+with original `source_pts`/`source_duration`, rather than metadata of the later
+lookahead packet. Negative preroll timestamps remain signed for container edits;
+the PCM packet timestamp follows existing nonnegative playback conventions.
+EOF, opaque checkpoints and reset retain/clear the pending timing consistently.
+Container sample rate/channels must agree. Codec failures poison the adapter
+until reset or a valid checkpoint restore; incompatible restores preserve state.
+The adapter does not trim PCM itself: presentation uses the returned source window.
+
+Two short original MP4s provide unequal packet durations for 960/1024 cores.
+Tests verify actual MP4 PTS/duration, every stereo PCM sample, delayed identity,
+EOF replay, reset/preroll, signed source metadata and recovery after late packet
+failure. Generator support for unequal `stts` entries preserves prior uniform
+wrappers byte-identically. The worker still needs to consume these source windows,
+drain EOF before range resets/termination, and carry timing in cached checkpoints
+before the production factory can route PS through this adapter.
+
+The adapter tests exposed stack overflow on the normal 2 MiB test/playback stack.
+The same original video/PCM cases passed on 8 MiB, confirming stack pressure
+rather than an unrelated media refusal. Native PS now keeps its large fixed
+SBR/QMF/PS histories in a Box, reducing checkpoint/transaction temporaries on
+stack without sharing mutable histories. Native packet and timing tests pass on
+2 MiB; a dedicated explicitly sized 2 MiB thread runs complete timing/recovery
+regressions even when an ambient test runner uses a larger default stack.
+
+This accepts the timing adapter and stack regression. Production worker/factory,
+startup trimming, full player seek/edit scheduling, nonzero-core independent PS
+PCM and other codec/profile gaps remain open.
+
+Validation: 836 tests passed offline (root lib 347, owned media lib 432,
+13 HE-AAC integration suites 57); one existing owned test remains ignored.
+The dedicated 2 MiB thread regression, player build, formatting, Python syntax
+and diff checks passed. Three timing assets regenerate identically, and all
+four prior 960/1024 PS wrappers remain byte-identical.

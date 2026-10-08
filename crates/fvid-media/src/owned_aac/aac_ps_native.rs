@@ -21,7 +21,9 @@ pub struct NativePsAacDecoder {
     mode: OutputRate,
     synthesis: LongSineSynthesis,
     noise: NoiseState,
-    extension: aac_sbr_ps::Decoder,
+    // Large fixed QMF/PS histories live on heap so packet transactions and
+    // checkpoints do not multiply them on a normal playback thread stack.
+    extension: Box<aac_sbr_ps::Decoder>,
 }
 /// Complete opaque packet boundary, including queued frame and EOF status.
 #[derive(Clone)]

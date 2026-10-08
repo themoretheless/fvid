@@ -1653,3 +1653,15 @@ PCM expectations. Malformed MP4 cases separately require exact END/FIL/element
 errors and unchanged subsequent audio. Full packet acceptance is distinct from
 production factory/timestamp/seek support and nonzero-core PS conformance.
 Generation is explicit, offline and absent from ordinary test execution.
+
+## Delayed PS playback timing and stack regression
+
+`generate_aac_ps_playback_fixtures.py` explicitly creates
+`he-aac-ps-timing-960-synthetic.mp4`, `he-aac-ps-timing-1024-synthetic.mp4`
+and `aac-ps-playback-oracles.json`. Original authored SCE/SBR/PS packets are
+unchanged; `stts` windows differ so using lookahead packet metadata is detectable.
+The adapter tests match independent stereo PCM and original PTS/durations through
+EOF, checkpoint/reset and signed preroll. The same fixtures reproduce the native
+checkpoint/adapter stack overflow before heap ownership; a dedicated 2 MiB
+thread now accepts complete timing/recovery. Production worker integration remains
+separate. Generation is offline/explicit and never run by ordinary tests.

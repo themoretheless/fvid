@@ -289,6 +289,7 @@ pub mod aac_noise;
 
 pub mod aac_native;
 pub mod aac_ps_native;
+pub mod aac_ps_playback;
 pub mod aac_pce;
 
 pub mod aac_tns;

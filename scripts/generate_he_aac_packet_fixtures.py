@@ -43,7 +43,9 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
     template=(DEST.parent/'audio/aac-native-edit.m4a').read_bytes()
     case=next((c for c in cases if c['slots']==16 and c['bands']==64), cases[0])
     frame_samples=2*64*case['slots']
-    duration=len(case['frames'])*frame_samples
+    durations=case.get('durations',[frame_samples]*len(case['frames']))
+    assert len(durations)==len(case['frames']) and all(0<d<=frame_samples for d in durations)
+    duration=sum(durations)
     packets=[blob[f['offset']:f['offset']+f['bytes']] for f in case['frames']]
     config=bytes.fromhex(case['asc'])
     def descriptor(tag,data):
@@ -66,7 +68,9 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
             entries=list(boxes(body[8:]));assert len(entries)==1 and entries[0][0]==b'mp4a'
             entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,channels);struct.pack_into('>I',entry,24,48000<<16)
             body=bytes(4)+struct.pack('>I',1)+box(b'mp4a',bytes(entry)+box(b'esds',esds))
-        elif tag==b'stts':body=bytes(4)+struct.pack('>III',1,len(packets),frame_samples)
+        elif tag==b'stts':
+            body=(bytes(4)+struct.pack('>III',1,len(packets),frame_samples) if all(d==frame_samples for d in durations) else
+                  bytes(4)+struct.pack('>I',len(durations))+b''.join(struct.pack('>II',1,d) for d in durations))
         elif tag==b'stsc':body=bytes(4)+struct.pack('>IIII',1,1,len(packets),1)
         elif tag==b'stsz':body=bytes(4)+struct.pack('>II',0,len(packets))+b''.join(struct.pack('>I',len(p)) for p in packets)
         elif tag==b'stco':body=bytes(4)+struct.pack('>II',1,offset)

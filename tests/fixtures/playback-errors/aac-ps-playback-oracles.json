@@ -1,0 +1,75 @@
+{
+  "kind": "original unequal presentation windows for delayed native PS frames",
+  "cases": [
+    {
+      "video": {
+        "file": "he-aac-ps-timing-1024-synthetic.mp4",
+        "sha256": "a4f8db7fdc06f0ff771263022030ee1ccca71300dbf3976921c77f72f35cc396",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "source_reference": "he-aac-ps-matrix-retain-synthetic.mp4",
+      "packet_file": "he-aac-ps-matrix-controller-packets.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 136
+        },
+        {
+          "offset": 136,
+          "bytes": 17
+        },
+        {
+          "offset": 153,
+          "bytes": 16
+        }
+      ],
+      "slots": 16,
+      "durations": [
+        1536,
+        1024,
+        2048
+      ],
+      "pts": [
+        0,
+        1536,
+        2560
+      ]
+    },
+    {
+      "video": {
+        "file": "he-aac-ps-timing-960-synthetic.mp4",
+        "sha256": "7b2b4f7e57cec57061594705b9001b078eb6451c7dd5ab36d37a70c7f2e80a51",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "source_reference": "he-aac-sbr-ps-960-retain-synthetic.mp4",
+      "packet_file": "he-aac-sbr-ps-960-packets.bin",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 136
+        },
+        {
+          "offset": 136,
+          "bytes": 17
+        },
+        {
+          "offset": 153,
+          "bytes": 16
+        }
+      ],
+      "slots": 15,
+      "durations": [
+        1440,
+        960,
+        1920
+      ],
+      "pts": [
+        0,
+        1440,
+        2400
+      ]
+    }
+  ]
+}
