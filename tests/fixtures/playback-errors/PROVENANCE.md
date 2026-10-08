@@ -1812,3 +1812,26 @@ Source: GOST R53556.4-2013 6.18.7.6/A.91
 (http://www.mp3-tech.org/programmer/docs/w4611.pdf). No private media or
 codec parameter sets. These are DSP references, not encoded HE-AAC playback
 acceptance fixtures.
+
+### SBR rate-dependent header geometry references
+
+`aac-sbr-rate-oracles.json` contains original numerical protocol cases generated
+offline by `scripts/generate_aac_sbr_rate_oracles.py` with 80-digit Decimal
+arithmetic. All 3072 start/stop pairs at the twelve mapped internal SBR rates
+are covered: 2376 legal bounds and 5536 composed frequency-table acceptances.
+The saved file SHA-256 is
+`d8df52305485aea9563375a0e891039269dd4d472968a2d271f7b32ff7d5465d`.
+
+Source: ISO/IEC 14496-3:2001/Amd.1:2003, 4.6.18.2.6, 4.6.18.3.2.1 and
+4.6.18.3.6 (original published p47 equations), cross-checked with
+GOST R53556.4-2013 6.18.3.2.1/6.18.3.6:
+https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html
+The original ISO formulas resolve translation errors in the GOST images:
+strict lower thresholds for startMin/stopMin; stopDk exponent `(p+1)/13`;
+and stop index 14 uses `min(64,2*k0)`.
+
+Internal SBR rate is twice the mapped AAC core rate even in downsampled mode.
+The header-reset protocol test exhaustively covers all 2048 combinations of
+changed fields and checks that exactly the six geometry fields trigger reset.
+No private media, frames, audio, codec parameter sets or foreign decoder
+algorithm. These validate protocol geometry, not encoded HE-AAC playback.

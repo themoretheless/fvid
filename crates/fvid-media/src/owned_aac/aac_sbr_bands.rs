@@ -1,8 +1,86 @@
 //! Owned SBR master/envelope/noise frequency geometry.
 //!
-//! ISO/IEC 14496-3:2001/Amd.1:2003, 4.6.18.3.2. The caller supplies the
-//! rate-dependent k0/k2 bounds; this module does not claim SBR PCM decoding.
-use super::{Result, invalid};
+//! ISO/IEC 14496-3:2001/Amd.1:2003, 4.6.18.3.2. Frequency geometry alone
+//! does not claim SBR PCM decoding.
+use super::{Result, aac_sbr_header::Header, invalid};
+
+// Numeric protocol table from 4.6.18.3.2.1, not decoder implementation code.
+const START_OFFSETS: [[i8; 16]; 6] = [
+    [-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7],
+    [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13],
+    [-5, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16],
+    [-6, -4, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16],
+    [-4, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16, 20],
+    [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16, 20, 24],
+];
+
+/// Derive k0/k2 from the four-bit header fields and the internal SBR rate.
+/// This rate is twice the *mapped* AAC core rate (4.6.18.2.6), including
+/// downsampled SBR; it is not necessarily the requested output PCM rate.
+/// Enforces the master-bandwidth limits of 4.6.18.3.6 before table construction.
+pub fn qmf_bounds(start_frequency: u8, stop_frequency: u8, sbr_rate: u32) -> Result<(u8, u8)> {
+    if start_frequency > 15 || stop_frequency > 15 {
+        return Err(invalid("invalid SBR start/stop frequency field"));
+    }
+    let offset_row = match sbr_rate {
+        16_000 => 0,
+        22_050 => 1,
+        24_000 => 2,
+        32_000 => 3,
+        44_100 | 48_000 | 64_000 => 4,
+        88_200 | 96_000 | 128_000 | 176_400 | 192_000 => 5,
+        _ => return Err(invalid("invalid mapped internal SBR sampling frequency")),
+    };
+    let base = if sbr_rate < 32_000 {
+        3_000u32
+    } else if sbr_rate < 64_000 {
+        4_000
+    } else {
+        5_000
+    };
+    // Exact positive NINT for the rational startMin and stopMin expressions.
+    let start_min = (128 * base + sbr_rate / 2) / sbr_rate;
+    let stop_min = (256 * base + sbr_rate / 2) / sbr_rate;
+    let k0 = (start_min as i16 + i16::from(START_OFFSETS[offset_row][usize::from(start_frequency)]))
+        as u8;
+    let k2 = match stop_frequency {
+        14 => (2 * k0).min(64),
+        15 => (3 * k0).min(64),
+        _ => {
+            // The stop table sums 13 sorted rounded-endpoint differences;
+            // it does not use the master's positive-width grouping rule.
+            let ratio = 64.0 / f64::from(stop_min);
+            let mut previous = stop_min as u8;
+            let mut widths = [0u8; 13];
+            for (i, width) in widths.iter_mut().enumerate() {
+                let border = if i == 12 {
+                    64
+                } else {
+                    (f64::from(stop_min) * ratio.powf((i + 1) as f64 / 13.0)).round() as u8
+                };
+                *width = border
+                    .checked_sub(previous)
+                    .ok_or_else(|| invalid("descending SBR stop border"))?;
+                previous = border;
+            }
+            widths.sort_unstable();
+            (stop_min as u8 + widths[..usize::from(stop_frequency)].iter().sum::<u8>()).min(64)
+        }
+    };
+    let max_width = if sbr_rate <= 32_000 {
+        48
+    } else if sbr_rate == 44_100 {
+        35
+    } else {
+        32
+    };
+    if k0 == 0 || k0 > 32 || k2 <= k0 || k2 - k0 > max_width {
+        return Err(invalid(
+            "SBR master frequency range exceeds rate-specific limits",
+        ));
+    }
+    Ok((k0, k2))
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FrequencyTables {
@@ -39,6 +117,20 @@ fn geometric_widths(start: u8, stop: u8, count: usize) -> Result<Vec<u8>> {
 }
 
 impl FrequencyTables {
+    /// Construct the frequency geometry directly from a parsed header. See
+    /// `qmf_bounds` for the distinction between internal and output rates.
+    pub fn from_header(header: &Header, sbr_rate: u32) -> Result<Self> {
+        let (k0, k2) = qmf_bounds(header.start_frequency, header.stop_frequency, sbr_rate)?;
+        Self::from_qmf_bounds(
+            k0,
+            k2,
+            header.frequency_scale,
+            header.alter_scale,
+            header.crossover,
+            header.noise_bands,
+        )
+    }
+
     /// Build all three derived tables from a complete master table. Bounds must
     /// already satisfy the output-rate-specific bandwidth constraints. Header
     /// frequency_scale is 0..=3, crossover is three bits, noise_bands is 0..=3.
@@ -50,12 +142,7 @@ impl FrequencyTables {
         crossover: u8,
         noise_bands: u8,
     ) -> Result<Self> {
-        if k0 == 0
-            || k0 >= k2
-            || k2 > 64
-            || frequency_scale > 3
-            || crossover > 7
-            || noise_bands > 3
+        if k0 == 0 || k0 >= k2 || k2 > 64 || frequency_scale > 3 || crossover > 7 || noise_bands > 3
         {
             return Err(invalid("invalid SBR frequency table parameters"));
         }
@@ -159,6 +246,97 @@ impl FrequencyTables {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn every_rate_start_stop_pair_and_composed_tables_match_decimal_oracles() {
+        let manifest: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../../../../tests/fixtures/playback-errors/aac-sbr-rate-oracles.json"
+        ))
+        .unwrap();
+        let mut accepted_bounds = 0;
+        let mut accepted_tables = 0;
+        for case in manifest["vectors"].as_array().unwrap() {
+            let rate = case["rate"].as_u64().unwrap() as u32;
+            let start = case["start"].as_u64().unwrap() as u8;
+            let stop = case["stop"].as_u64().unwrap() as u8;
+            let bounds = qmf_bounds(start, stop, rate);
+            if case["bounds"].is_null() {
+                assert!(bounds.is_err(), "{case}");
+            } else {
+                assert_eq!(serde_json::json!(bounds.unwrap()), case["bounds"], "{case}");
+                accepted_bounds += 1;
+            }
+            for (controls, expected) in case["controls"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .zip(case["tables"].as_array().unwrap())
+            {
+                let header = Header {
+                    amplitude_resolution: true,
+                    start_frequency: start,
+                    stop_frequency: stop,
+                    frequency_scale: controls[0].as_u64().unwrap() as u8,
+                    alter_scale: controls[1].as_bool().unwrap(),
+                    crossover: controls[2].as_u64().unwrap() as u8,
+                    noise_bands: controls[3].as_u64().unwrap() as u8,
+                    limiter_bands: 2,
+                    limiter_gains: 2,
+                    interpolate_frequency: true,
+                    smoothing_mode: true,
+                };
+                let result = FrequencyTables::from_header(&header, rate);
+                if expected.is_null() {
+                    assert!(
+                        result.is_err(),
+                        "rate {rate}, start {start}, stop {stop}, {controls}"
+                    );
+                } else {
+                    let t = result.unwrap_or_else(|e| {
+                        panic!("rate {rate}, start {start}, stop {stop}, {controls}: {e}")
+                    });
+                    assert_eq!(
+                        serde_json::json!([t.master, t.high, t.low, t.noise]),
+                        *expected,
+                        "rate {rate}, start {start}, stop {stop}, {controls}"
+                    );
+                    accepted_tables += 1;
+                }
+            }
+        }
+        assert_eq!(manifest["vectors"].as_array().unwrap().len(), 12 * 16 * 16);
+        assert!(accepted_bounds > 2_000 && accepted_tables > 4_000);
+    }
+
+    #[test]
+    fn rate_thresholds_shortcuts_and_invalid_fields() {
+        // These exact borders distinguish < from <= at both thresholds.
+        assert_eq!(qmf_bounds(0, 0, 32_000).unwrap(), (10, 32));
+        assert_eq!(qmf_bounds(0, 0, 64_000).unwrap(), (6, 20));
+        assert_eq!(qmf_bounds(0, 14, 48_000).unwrap(), (7, 14));
+        assert_eq!(qmf_bounds(0, 15, 48_000).unwrap(), (7, 21));
+        assert_eq!(qmf_bounds(15, 15, 16_000).unwrap(), (31, 64));
+        // Wide spans are invalid even with a legal crossover offset later.
+        assert!(qmf_bounds(0, 13, 44_100).is_err());
+        assert!(qmf_bounds(0, 13, 48_000).is_err());
+        for rate in [
+            0,
+            1,
+            8_000,
+            14_700,
+            31_999,
+            32_001,
+            44_099,
+            64_001,
+            u32::MAX,
+        ] {
+            assert!(qmf_bounds(0, 0, rate).is_err(), "rate {rate}");
+        }
+        for field in 16..=255 {
+            assert!(qmf_bounds(field, 0, 48_000).is_err());
+            assert!(qmf_bounds(0, field, 48_000).is_err());
+        }
+    }
+
     #[test]
     fn logarithmic_and_derived_tables_match_high_precision_decimal_oracles() {
         let manifest: serde_json::Value = serde_json::from_slice(include_bytes!(

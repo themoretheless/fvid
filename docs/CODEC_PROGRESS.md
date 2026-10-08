@@ -5827,3 +5827,30 @@ This is standalone complex DSP assembly. The production frame engine must
 still manage low/high QMF delays, overlap/tail routing, extension syntax,
 rate-derived frequency bounds and AAC PCM scaling, with original encoded
 HE-AAC PCM acceptance fixtures. No full HE-AAC playback acceptance is claimed.
+
+### Owned rate-dependent SBR header geometry
+
+`aac_sbr_bands::qmf_bounds` now derives the master start/stop bounds from the
+four-bit header fields and the mapped internal SBR rate. It covers all twelve
+legacy internal rates (16 through 192 kHz), the six normative offset rows,
+13 sorted geometric stop widths, 2*k0/3*k0 stop shortcuts and the 48/35/32
+rate-specific bandwidth constraints. `FrequencyTables::from_header` composes
+those bounds with existing master/high/low/noise construction. The internal
+rate remains twice the mapped AAC core rate in downsampled output mode.
+
+The original published ISO equations resolve translation errors at the 32/64
+kHz thresholds, the stop-width exponent and stop index 14. Independently
+generated 80-digit Decimal references cover all 3072 rate/start/stop pairs,
+including 2376 legal bounds and 5536 complete frequency-table acceptances.
+Ordinary tests read the saved JSON offline; neither FFmpeg nor a generator is
+invoked. Exact threshold/shortcut and malformed-field tests are included.
+
+`Header::requires_reset` follows the six geometry fields in 4.6.18.3.1;
+initialization resets, while amplitude/limiter/interpolation/smoothing changes
+alone do not. All 2048 change combinations are covered. Stream owners still
+need to reset when their internal sampling frequency changes.
+
+These are protocol/numerical acceptance checks. Full FIL/SCE/CPE payload
+assembly, retained coefficient and time-grid history, QMF delays and PCM
+scaling, production AAC integration and original encoded HE-AAC playback
+acceptance remain incomplete.

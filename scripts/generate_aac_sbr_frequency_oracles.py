@@ -55,19 +55,23 @@ def tables(a, b, scale, altered, cross, density):
     for i in range(count): indices.append(indices[-1]+(len(low)-1-indices[-1])//(count-i))
     return [master,high,low,[low[i] for i in indices]]
 
-with localcontext() as ctx:
-    ctx.prec = 80
-    cases = []
-    for a in [8,11,17,24]:
-        for b in [24,35,47,64]:
-            for scale in range(4):
-                for altered in [False,True]:
-                    for cross in [0,1,5]:
-                        for density in [0,1,3]:
-                            args = [a,b,scale,altered,cross,density]
-                            try: expected = tables(*args)
-                            except ValueError: expected = None
-                            cases.append({'parameters':args,'expected':expected})
-path = Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/aac-sbr-frequency-oracles.json'
-path.write_text(json.dumps({'precision':80,'vectors':cases},separators=(',',':'))+'\n')
-print(f'{len(cases)} original Decimal vectors, {sum(c["expected"] is not None for c in cases)} accepted geometries')
+def main():
+    with localcontext() as ctx:
+        ctx.prec = 80
+        cases = []
+        for a in [8,11,17,24]:
+            for b in [24,35,47,64]:
+                for scale in range(4):
+                    for altered in [False,True]:
+                        for cross in [0,1,5]:
+                            for density in [0,1,3]:
+                                args = [a,b,scale,altered,cross,density]
+                                try: expected = tables(*args)
+                                except ValueError: expected = None
+                                cases.append({'parameters':args,'expected':expected})
+    path = Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/aac-sbr-frequency-oracles.json'
+    path.write_text(json.dumps({'precision':80,'vectors':cases},separators=(',',':'))+'\n')
+    print(f'{len(cases)} original Decimal vectors, {sum(c["expected"] is not None for c in cases)} accepted geometries')
+
+if __name__ == '__main__':
+    main()
