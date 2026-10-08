@@ -4446,3 +4446,21 @@ AV1 profiles/tools and overall codec completion remain separate requirements.
 Final validation after the warp candidate fix passed 35 core AV1 tests and
 64 integration tests across all 37 AV1 suites, with no ignored acceptance
 tests in that run. The new acceptance binary links only system libraries.
+
+
+### AV1 odd-dimension restoration qualification
+
+Eighteen owned 191x127 intra fixtures cover 8/10/12-bit 4:2:0 with
+restoration, CDEF and deblocking. Their coded headers contain 13 active
+restoration frames and five inactive controls; at least one active frame
+combines nonzero CDEF strengths and loop filter levels. Native cropped
+pixels match independent libaom/dav1d references, including the final odd
+luma row/column and ceil-divided chroma planes.
+
+The acceptance suite checks two native decode/reset cycles and WebM replay,
+EOF, rewind, timestamps and seek. All 54 saved fixture hashes were verified.
+A controlled mutation that clamps restoration samples to padded storage
+instead of the actual coded extent fails on the first fixture's restored
+pixels. The source was restored before final acceptance validation. These
+fixtures are generated separately and ordinary tests require no FFmpeg or
+reference decoder. Other dimensions and AV1 tools remain unqualified.
