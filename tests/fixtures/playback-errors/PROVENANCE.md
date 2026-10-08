@@ -2221,3 +2221,35 @@ PCM is still refused for these valid videos until the missing DSP is wired.
 All synthetic videos reuse the original AVC seed with newly authored AAC
 packets/tables/edits; no private media, parameter sets, foreign implementation,
 FFmpeg/libav, network or ordinary test-time fixture generation is involved.
+
+### Original PS retained-matrix/controller regressions
+
+`generate_aac_ps_matrix_controller_fixtures.py` explicitly generates two
+original three-packet videos: `he-aac-ps-matrix-retain-synthetic.mp4` and
+`he-aac-ps-matrix-grid-retain-synthetic.mp4`, with packets in
+`he-aac-ps-matrix-controller-packets.bin`. The first turns phase off and on
+without new envelopes. The second transfers retained real coefficients
+20→34→20 without new envelopes, changing native quantizer/mixing modes.
+The original AVC seed is reused, with new authored AAC/SBR/PS packets and
+container tables/edits; no private media or parameter sets are used.
+
+`aac-ps-matrix-controller-oracles.json` describes the saved references in
+`aac-ps-matrix-controller-coefficients.bin`: deduplicated binary64 LE rows with
+byte-offset/scalar-count descriptors. Real rows are h11/h12/h21/h22; complex
+rows are their real/imaginary pairs. The generator computes 90-digit Decimal
+real/phase endpoints, normative floating band transfers (GOST R 53556.8-2013
+6.4.6.1/6.4.6.5), and independent Fraction-based piecewise timing; no Rust or
+foreign decoder output is used as a golden reference. It covers every common
+band and QMF slot of all 20 native sequences, plus retained real, complex and
+phase snapshots. Thirteen MP4s (eleven existing plus two new) also save every
+left/right hybrid output for independently authored rational mono/decorrelated
+complex signals, including all starred coefficient conjugations.
+
+`tests/he_aac_ps_matrix_controller.rs` verifies actual container/SBR CRC/PS
+native history through the coupled matrix controller. It checks full grids,
+hybrid outputs, checkpoint replay, reset, fixed slot epochs and transaction
+rollback after late nonfinite signals. The hybrid inputs are original numeric
+test signals, not decoded PCM: hybrid analysis, decorrelation and stereo QMF
+synthesis remain pending. Full native PS playback refusal is checked separately.
+Generation is explicit and offline; ordinary tests need no FFmpeg/libav,
+network, Python generator, or copied foreign codec implementation.

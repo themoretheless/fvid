@@ -6373,7 +6373,41 @@ startup. Tests traverse MP4/SBR CRC/PS native history/common mapping/phase
 history and all starred hybrid bindings. They retain the explicit full-native
 PS synthesis refusal; only endpoint/state acceptance is established here.
 
-The surrounding matrix controller still must transfer retained real h_ij and
-apply the no-envelope retained-complex versus unrotated-real policy from
-6.4.6.5 before the temporal owner. Hybrid filtering, decorrelation, stereo QMF
-synthesis and full independent PCM acceptance remain unfinished.
+The matrix controller below now transfers retained real h_ij and applies the
+no-envelope retained-complex versus unrotated-real policy from 6.4.6.5 before
+the temporal owner. Hybrid filtering, decorrelation, stereo QMF synthesis and
+full independent PCM acceptance remain unfinished.
+
+### Owned PS matrix controller and hybrid-signal mixing (2026-10-08)
+
+`aac_ps_matrix_controller` composes native-parameter common mapping, ordered
+phase history, retained real h_ij, complex boundaries and temporal processing.
+A 20/34 change remaps the retained real coefficient vectors with floating
+weights, resets phase and rebuilds the unrotated complex boundary; it never
+remaps complex H or re-dequantizes old indices through the new native mode.
+Without new envelopes, enabled phase retains the actual previous-frame H,
+while disabled phase selects unrotated retained real h_ij (6.4.6.5). Reenabling
+phase without new parameters retains that actual boundary rather than
+resurrecting a stale earlier rotated endpoint.
+
+The controller outputs full chronological common-grid matrices and routes
+71/91 hybrid bindings with starred coefficient conjugation. Given original
+mono/decorrelated hybrid inputs, it computes separate left/right complex
+hybrid signals. Parameter processing is transactional across every contained
+state; process_and_mix also rolls back all state on a late signal error.
+The first accepted frame fixes the 24/30/32 slot epoch until explicit reset.
+Unready and fresh-owner repeated frames retain their precise refusal gates.
+
+All 20 saved native sequences now compare EVERY common-band coefficient at
+EVERY QMF slot and retained real/complex/phase snapshots to independent
+Decimal endpoints, normative floating grid weights and Fraction timing. Eleven
+existing videos and two new three-packet MP4s additionally compare EVERY
+left/right hybrid sample to independent outputs for original rational signals.
+The new videos cover phase off/on without new envelopes and 20→34→20 retained
+real-coefficient transfers across different quantizer/mixing modes. Binary64
+reference rows are deduplicated offline; tests consume saved assets only.
+
+This completes the numeric matrix controller and supplied-hybrid mixing stage.
+Hybrid analysis, decorrelation and stereo QMF synthesis are still missing
+from native PS playback; valid videos keep the full synthesis refusal until
+those stages and full independent PCM acceptance are implemented.
