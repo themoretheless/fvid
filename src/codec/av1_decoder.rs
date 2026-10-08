@@ -208,6 +208,87 @@ impl Decoder {
         }
         result
     }
+    /// Large-scale tile decoding uses explicit camera context and external
+    /// anchors, independently of ordinary packet presentation/DPB updates.
+    /// Uncovered output tiles retain `previous` samples when supplied.
+    pub fn decode_tile_list(
+        &self,
+        header: &Header,
+        anchors: &[Arc<Picture>],
+        payload: &[u8],
+        previous: Option<&super::av1_tile_list::Output>,
+    ) -> Result<super::av1_tile_list::Output> {
+        if self.failed {
+            return Err(invalid("AV1 decoder requires reset after error"));
+        }
+        let sequence = self
+            .sequence
+            .as_ref()
+            .ok_or_else(|| invalid("AV1 tile list requires sequence context"))?;
+        if anchors.len() > 128 {
+            return Err(invalid("too many AV1 tile list anchors"));
+        }
+        let list = super::av1_tile_list::TileList::parse(payload)?;
+        if header.primary_reference > 7 || header.references.iter().any(|i| *i >= 8) {
+            return Err(invalid("invalid AV1 tile list reference context"));
+        }
+        let initial = if header.primary_reference == 7 {
+            None
+        } else {
+            Some(
+                self.cdfs[header.references[header.primary_reference]]
+                    .as_deref()
+                    .ok_or_else(|| invalid("missing AV1 camera CDF context"))?,
+            )
+        };
+        let mut retained = self.retained_picture_bytes(&[])?;
+        let mut unique = Vec::<&Arc<Picture>>::new();
+        for anchor in anchors {
+            if unique.iter().any(|a| Arc::ptr_eq(a, anchor))
+                || self
+                    .references
+                    .iter()
+                    .flatten()
+                    .any(|r| Arc::ptr_eq(&r.picture, anchor))
+            {
+                continue;
+            }
+            unique.push(anchor);
+            let bytes = anchor.planes.iter().try_fold(0usize, |n, p| {
+                p.samples
+                    .len()
+                    .checked_mul(2)
+                    .and_then(|v| n.checked_add(v))
+                    .ok_or_else(|| invalid("AV1 anchor allocation overflow"))
+            })?;
+            retained = retained
+                .checked_add(bytes)
+                .and_then(|v| v.checked_add(anchor.segment_ids.len()))
+                .and_then(|v| {
+                    anchor
+                        .saved_motion
+                        .len()
+                        .checked_mul(std::mem::size_of::<av1_picture::SavedMotion>())
+                        .and_then(|n| v.checked_add(n))
+                })
+                .ok_or_else(|| invalid("AV1 anchor allocation overflow"))?;
+        }
+        if let Some(previous) = previous {
+            retained = retained
+                .checked_add(previous.bytes()?)
+                .ok_or_else(|| invalid("AV1 tile output allocation overflow"))?;
+        }
+        let budget = self
+            .budget
+            .checked_sub(retained)
+            .ok_or_else(|| invalid("AV1 tile list exceeds memory budget"))?;
+        let anchors = anchors.iter().map(Arc::as_ref).collect::<Vec<_>>();
+        let references =
+            std::array::from_fn(|i| self.references[i].as_ref().map(|r| r.picture.as_ref()));
+        super::av1_tile_list::decode(
+            sequence, header, &list, &anchors, initial, previous, budget, references,
+        )
+    }
     fn displayed(
         &self,
         mut frame: Decoded,
@@ -607,7 +688,11 @@ impl Decoder {
                         return Err(invalid("too many AV1 frames per packet"));
                     }
                 }
-                8 => return Err(crate::unsupported("AV1 tile lists not implemented")),
+                8 => {
+                    return Err(invalid(
+                        "AV1 tile list requires external camera context; use decode_tile_list",
+                    ));
+                }
                 _ => return Err(invalid("unsupported AV1 OBU ordering or tile list")),
             }
         }

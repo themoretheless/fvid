@@ -892,7 +892,7 @@ Release-сборка обязательна для практического и
   слоя: все девять operating points, 24 raw-кадра, фактические scaled blocks
   во всех шести верхних сочетаниях, MP4/WebM timestamps и rewind/seek. Это
   собственные 8-bit 4:2:0 cases; остальные профили остаются открытыми.
-  Tile-list OBU пока отклоняется.
+  Tile-list поддерживается через native `Decoder::decode_tile_list` с явными camera header и external anchors; обычный packet API требует этот внешний контекст. Автоматическая передача такого контекста из контейнера пока не реализована.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption

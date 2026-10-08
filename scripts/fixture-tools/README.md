@@ -123,3 +123,19 @@ python3 scripts/generate_av1_spatiotemporal_container_samples.py
 The raw generator requires agreement at all nine operating points. Containers
 are authored offline; generalized size arguments preserve previous two-layer
 fixture bytes. Actual interlayer/temporal prediction is checked in acceptance.
+
+
+### AV1 external camera tile lists
+
+Generation/reference tooling only (stock libaom required):
+
+```sh
+cc scripts/av1_tile_list_fixture.c $(pkg-config --cflags --libs aom) -o /tmp/fvid-av1-tile-list-fixture
+python3 scripts/generate_av1_tile_list_samples.py --generator /tmp/fvid-av1-tile-list-fixture
+```
+
+Ordinary offline acceptance uses checked-in artifacts:
+
+```sh
+cargo test --release --locked --offline --no-default-features --test av1_tile_list
+```
