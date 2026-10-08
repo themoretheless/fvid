@@ -4182,3 +4182,27 @@ confirmed actual weighted nonzero AC coefficients at square sizes 4, 8, 16,
 The diagnostics were removed and sources matched canonical code. All 96
 matrix streams passed restored pixel/reset/WebM replay/rewind/seek checks;
 the extra block-suite test passed separately alongside the full 53-test run.
+
+### AV1 inter-frame quantization matrix qualification
+
+Nine additional owned 64x64 three-frame streams cover depths 8/10/12 and
+matrix levels 0/7/15. The test parses every frame header with refreshed
+references and asserts the actual frame types [KEY, INTER, INTER] and all
+three coded plane levels. Independent libaom and dav1d references agree
+on all 27 frames; all 27 fixture/container/reference hashes were verified.
+Offline FVid tests match every pixel, reset/finish, WebM timestamps, rewind
+and seek back to the sync frame from the third-frame timestamp.
+
+A verification-only mutant disabled weighting exclusively for INTER frames.
+It failed pixel acceptance on the owned 8-bit level-0 stream, proving the
+test exercises matrix-dependent inter reconstruction rather than only the
+key frame. The original source was restored and matched canonical code.
+All three matrix suites passed together after restoration (105 streams,
+123 decoded frames per replay). The executable links neither FFmpeg/libav
+nor either reference decoder; generator execution remains separate. The
+optional dav1d helper now accepts a frame count, and its existing default
+single-frame invocation still matches the original saved reference.
+
+Separate plane levels, lossless/identity bypass and rectangular transform
+combinations still require owned qualification. AV1 restoration and other
+remaining codec tools are not claimed complete.
