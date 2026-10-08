@@ -131,6 +131,23 @@ impl Analysis {
     pub fn reset(&mut self) {
         self.history.fill(Complex::default());
     }
+    // Shared FIR evaluation for the complete bank's raw QMF history. Keeping
+    // this separate lets both configurations use the same physical history.
+    pub(crate) fn filter_history(&self, history: &[Complex; 13]) -> Result<Vec<Complex>> {
+        let mut slot = Vec::with_capacity(self.coefficients.len());
+        for taps in &self.coefficients {
+            let mut value = Complex::default();
+            for (&x, &g) in history.iter().zip(taps) {
+                value.re += x.re * g.re - x.im * g.im;
+                value.im += x.re * g.im + x.im * g.re;
+            }
+            if !finite(value) {
+                return Err(invalid("PS hybrid output is not representable"));
+            }
+            slot.push(value);
+        }
+        Ok(slot)
+    }
     /// Chronological QMF samples -> chronological raw subband slots.
     /// Invalid or unrepresentable input/output leaves all stream history intact.
     pub fn process(&mut self, input: &[Complex]) -> Result<Vec<Vec<Complex>>> {
@@ -142,18 +159,7 @@ impl Analysis {
         for &sample in input {
             history.copy_within(0..12, 1);
             history[0] = sample;
-            let mut slot = Vec::with_capacity(self.coefficients.len());
-            for taps in &self.coefficients {
-                let mut value = Complex::default();
-                for (&x, &g) in history.iter().zip(taps) {
-                    value.re += x.re * g.re - x.im * g.im;
-                    value.im += x.re * g.im + x.im * g.re;
-                }
-                if !finite(value) {
-                    return Err(invalid("PS hybrid output is not representable"));
-                }
-                slot.push(value);
-            }
+            let slot = self.filter_history(&history)?;
             output.push(slot);
         }
         self.history = history;

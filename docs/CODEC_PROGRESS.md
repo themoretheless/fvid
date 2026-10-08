@@ -6433,3 +6433,33 @@ This is the raw modulation-index layer, not the complete routed hybrid bank.
 decorrelation, stereo QMF synthesis and whole-PCM startup/timeline integration
 remain to be implemented and independently qualified. No full PS playback
 acceptance or PCM output is claimed; existing native synthesis refusals remain.
+
+### Complete owned PS QMF-domain hybrid bank (2026-10-09)
+
+`aac_ps_hybrid` composes the FIR primitives into the full 71/91-band analysis
+and inverse synthesis topology. Twenty-band QMF 0 routes raw modulation bins
+6,7,0,1,(2+5),(3+4); the QMF 1 two-way real split routes 1,0 and QMF 2 routes
+0,1 (SP-040428 figure 8.3). Thirty-four-band splits retain their per-channel
+raw index order (figure 8.5). QMF 3..63 or 5..63 are delayed by six slots.
+Inverse synthesis adds every routed subband back into its QMF channel,
+without normalization, extra filtering or signal conjugation (6.4.7).
+
+The stream owns shared raw 13-slot history for all 64 QMF channels. A 20/34
+change evaluates the new configuration on actual previous input, including
+previously unsplit channels 3/4; it does not zero histories or reinterpret
+retained filtered outputs. Empty calls change neither history nor grid.
+Clone/replay and explicit reset are supported. Processing commits the grid
+and history only after the entire block, including folding, is representable.
+
+Six independent saved Decimal full-convolution cases compare all routed
+subbands and all 64 synthesized QMF channels. They cover both configurations,
+complex impulses/rational inputs, 32-slot 20→34→20 and 30-slot 34→20→34
+transitions. A previously authored three-packet MP4 with CRC on its middle
+SBR packet now drives actual MP4/SBR/PS native state and the matrix controller
+into the bank. Its mono/decorrelated matrix path can consume actual analyzed
+hybrid input; zero diffuse input in this component test is not a decorrelation
+or PCM oracle. Full native PS refusal remains independently checked.
+
+Raw FIR and complete hybrid-bank numerics are now accepted. Decorrelation,
+stereo QMF synthesis wiring, one-time PCM/QMF startup compensation, native
+AAC/SBR integration and full independent stereo PCM acceptance remain open.

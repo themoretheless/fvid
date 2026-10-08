@@ -2270,3 +2270,26 @@ PS synthetic videos still retain their distinct full-synthesis refusal tests.
 No newly discovered media parsing/playback failure is represented by this
 numeric component fixture. Tests only read the saved JSON; no generator,
 FFmpeg/libav or network is needed.
+
+### Complete PS hybrid-bank numerical and container acceptance (2026-10-09)
+
+`scripts/generate_aac_ps_hybrid_oracles.py` explicitly produces
+`aac-ps-hybrid-oracles.json` and `aac-ps-hybrid-reference.bin` (binary64 LE).
+The topology is protocol data from SP-040428 figures 8.3/8.5; coefficients
+and delay are GOST R 53556.8-2013 tables 36–38/6.4.3. The generator uses
+independent 90-digit Decimal full linear convolution over original complex
+impulses and rational sequences. It saves every routed hybrid sample and
+inverse QMF sum for six cases, including both 20/34 grids and changes in
+32/30-slot streams. No Rust/foreign decoder output, media or parameter sets
+are copied. Numeric descriptor pairs are byte offset/scalar count.
+
+`tests/he_aac_ps_hybrid.rs` reads those saved references, verifies every
+sample, delayed reconstruction, chunking/checkpoints/reset, empty calls and
+atomic rejection of failed grid changes/late overflow. It also reuses the
+original `he-aac-ps-matrix-grid-retain-synthetic.mp4` rather than generating
+a duplicate. Real container packets are matched to their saved authored
+AAC/SBR payloads, including CRC, then PS parameters drive the controller and
+complete hybrid bank through 20→34→20. This is QMF-domain acceptance; its
+input is an independently authored numeric QMF signal, not decoded PCM.
+Full native PS synthesis refusal is still distinct from that acceptance.
+No generator, FFmpeg/libav or network is required for ordinary tests.
