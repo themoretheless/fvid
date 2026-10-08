@@ -2010,3 +2010,14 @@ Decimal; direct synthesis convolution supplies PCM including filter history
 across zero-HF intervals. The video uses the original AVC seed with rewritten
 audio packets/tables. No private parameters, media, FFmpeg or foreign decoder
 is used. Generation is explicit; ordinary tests only read saved assets.
+
+
+`he-aac-implicit-sbr.mp4/.json` are authored by
+`scripts/generate_he_aac_implicit_fixtures.py`. Original SBR packets and
+independent PCM expectations are shared with `he-aac-sbr-packets` and the
+original DSP oracle; only initialization changes to core-only ASC (unspecified
+SBR) with a declared 48 kHz container output. The original AVC seed supplies
+video; audio metadata and tables are rewritten. No private media or codec
+parameter sets are used. Generation is explicit, offline and FFmpeg-free.
+The default unhinted raw decoder still reproduces the old signalling refusal;
+the container-output constructor supplies acceptance for the intended case.

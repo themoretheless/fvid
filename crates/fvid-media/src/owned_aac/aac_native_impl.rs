@@ -125,6 +125,22 @@ impl NativeAacDecoder {
             sbr_dsp: sbr_rate.map(|_| sbr_dsp::Dsp::default()),
         })
     }
+    /// Container-declared output clock can identify implicit dual-rate SBR.
+    /// No silent rate guessing: unhinted ADTS and explicit SBR=false stay strict.
+    pub fn new_with_output_rate(asc:&[u8], output_rate:u32) -> Result<Self> {
+        let parsed=AudioSpecificConfig::parse(asc)?;
+        parsed.resolve_output_rate(output_rate)?;
+        let mut decoder=Self::new(asc)?;
+        if decoder.sample_rate()!=output_rate {
+            if parsed.program.is_some() || !matches!(parsed.core.channel_configuration,1|2) {
+                return Err(unsupported("implicit SBR multielement/PCE synthesis is not yet implemented"));
+            }
+            decoder.sbr_rate=Some(output_rate);
+            decoder.sbr_stream=Some(sbr_history::Stream::default());
+            decoder.sbr_dsp=Some(sbr_dsp::Dsp::default());
+        }
+        Ok(decoder)
+    }
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
     }

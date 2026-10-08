@@ -112,6 +112,17 @@ impl AudioSpecificConfig {
     pub fn output_sample_rate(&self) -> u32 {
         self.extension_sample_rate.unwrap_or(self.core.sample_rate)
     }
+    /// Resolve a container output clock without turning an explicit SBR=false
+    /// into implicit signalling. Unspecified SBR may use double core rate.
+    pub fn resolve_output_rate(&self, declared: u32) -> Result<u32> {
+        if declared == self.output_sample_rate() {
+            return Ok(declared);
+        }
+        if self.sbr_present.is_none() && self.core.sample_rate.checked_mul(2) == Some(declared) {
+            return Ok(declared);
+        }
+        Err(invalid("AAC output clock disagrees with configuration"))
+    }
     pub fn output_channels(&self) -> u8 {
         if self.ps_present == Some(true) {
             2

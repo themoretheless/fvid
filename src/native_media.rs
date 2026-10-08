@@ -490,7 +490,7 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
         let header = reader.configuration();
         (0, reader.audio_specific_config().to_vec(), (u64::from(header.sample_rate), u64::from(header.channels)))
     };
-    let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
+    let decoder = crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(&asc,u32::try_from(declared.0).map_err(|_|invalid("AAC output clock overflow"))?)?;
     let sample_rate = decoder.sample_rate();
     let channels = u16::from(decoder.channels());
     if declared != (u64::from(sample_rate), u64::from(channels)) {

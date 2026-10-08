@@ -43,8 +43,8 @@ impl Mp4TimelineDecoder {
 
     pub(crate) fn new(track: &crate::owned_mp4::Track) -> Result<Self> {
         match &track.codec {
-            b"mp4a" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new(
-                crate::owned_codec_config::aac_specific_config(&track.configuration)?,
+            b"mp4a" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new_with_output_rate(
+                crate::owned_codec_config::aac_specific_config(&track.configuration)?, track.sample_rate,
             )?)),
             b"alac" => {
                 if track.configuration.len() < 24
@@ -171,7 +171,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         b"mp4a" => {
             // Decoder, checkpoint and restore scratch; includes SBR state and DSP.
             crate::owned_aac::stream::decode_config_admission_bytes(
-                crate::owned_codec_config::aac_specific_config(&track.configuration)?,
+                crate::owned_codec_config::aac_specific_config(&track.configuration)?, track.sample_rate,
             )?
                 .checked_mul(3)
                 .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?

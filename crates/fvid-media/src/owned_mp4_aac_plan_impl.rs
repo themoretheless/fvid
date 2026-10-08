@@ -49,7 +49,7 @@ pub(crate) fn aac_packet_plan_window(
     }
     let asc = aac_specific_config(&track.configuration)?;
     let config = AudioSpecificConfig::parse(asc)?;
-    let output_rate = config.output_sample_rate();
+    let output_rate = config.resolve_output_rate(track.sample_rate)?;
     if track.timescale == 0
         || track.sample_rate != output_rate
         || track.channels != u16::from(config.output_channels())

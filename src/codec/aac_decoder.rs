@@ -14,13 +14,13 @@ impl AacDecoder {
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> crate::Result<Self> {
         let asc = crate::codec::config::aac_specific_config(configuration)?;
         let parsed = crate::codec::config::AudioSpecificConfig::parse(asc)?;
-        if parsed.output_sample_rate() != sample_rate || u16::from(parsed.output_channels()) != channels {
+        if parsed.resolve_output_rate(sample_rate).is_err() || u16::from(parsed.output_channels()) != channels {
             return Err(crate::invalid(
                 "AAC configuration disagrees with container sample rate or channels",
             ));
         }
 
-        let decoder = super::aac_native::NativeAacDecoder::new(asc)?;
+        let decoder = super::aac_native::NativeAacDecoder::new_with_output_rate(asc, sample_rate)?;
 
         Ok(Self {
             decoder,

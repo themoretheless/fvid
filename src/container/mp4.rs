@@ -1206,7 +1206,7 @@ fn parse_track(
         if result.codec == *b"mp4a"
             && let Ok(asc) = crate::codec::config::aac_specific_config(&result.configuration)
                 && let Ok(config) = crate::codec::config::AudioSpecificConfig::parse(asc) {
-                    result.sample_rate = config.output_sample_rate();
+                    result.sample_rate = config.resolve_output_rate(result.sample_rate).unwrap_or_else(|_| config.output_sample_rate());
                     result.channels = u16::from(config.output_channels());
                 }
     }

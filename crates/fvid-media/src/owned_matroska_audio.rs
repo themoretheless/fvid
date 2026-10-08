@@ -70,8 +70,8 @@ impl MatroskaTimelineDecoder {
             "A_ALAC" => Ok(Self::Alac(crate::owned_alac::AlacDecoder::from_matroska(
                 track,
             )?)),
-            "A_AAC" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new(
-                &track.codec_private,
+            "A_AAC" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new_with_output_rate(
+                &track.codec_private, u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
             )?)),
             _ => Err(invalid(
                 "selected Matroska audio codec is not owned by the export path",
@@ -212,7 +212,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
     let decoder = match track.codec.as_str() {
         "A_AAC" => {
-            crate::owned_aac::stream::decode_config_admission_bytes(&track.codec_private)?
+            crate::owned_aac::stream::decode_config_admission_bytes(&track.codec_private,u32::try_from(track.sample_rate).map_err(|_|invalid("AAC output clock overflow"))?)?
         }
         "A_ALAC" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
             &track.codec_private,

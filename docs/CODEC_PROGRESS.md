@@ -6158,3 +6158,27 @@ DSP before the first SBR header and verifies that retained QMF contributions
 are not replaced by a fresh decoder. Reinstating the former native missing-FIL
 refusal makes the new encoded fixture test fail with that exact diagnostic;
 restoring the fix passes the complete owned media suite.
+
+
+### Implicit SBR with declared container output rate
+
+An extension-aware output-clock resolver preserves the distinction between
+unspecified SBR and explicit SBR=false. The new native constructor accepts a
+container-declared double-core output clock for unspecified SBR, initializes
+SBR/upsampling state and keeps that clock across packet/checkpoint/reset paths.
+MP4 metadata preserves a valid declared dual-rate clock instead of replacing it
+with the core-only ASC clock. Player metadata, packet codecs, owned MP4/Matroska
+decode, controlled admission and shared remux writers use the same resolution.
+Explicit false or an incompatible output hint is rejected; the unhinted raw LC
+API remains strict.
+
+Sixteen original mono three-packet sequences, both frame sizes and all limiter/
+smoothing choices, match the independent dual-rate PCM oracle exactly. A short
+authored AVC MP4 uses core-only ASC (24 kHz) and declared 48 kHz output. It
+checks player metadata/decode, controlled export, equivalent explicit SBR PCM,
+Matroska remux/decode and seek.
+
+This closes declared-dual-rate implicit container acceptance, not automatic
+ADTS detection or implicit core-rate/downsampled discovery. Unhinted streaming
+clock negotiation, late detection, implicit stereo/PCE qualification and PS
+remain open.

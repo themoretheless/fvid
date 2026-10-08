@@ -41,7 +41,7 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
     # structure only: original esds/sample tables/edits are all replaced.
     video=(DEST/'avc-slice-lists-temporal.mp4').read_bytes()
     template=(DEST.parent/'audio/aac-native-edit.m4a').read_bytes()
-    case=next(c for c in cases if c['slots']==16 and c['bands']==64 and c['signalling']=='explicit')
+    case=next(c for c in cases if c['slots']==16 and c['bands']==64)
     packets=[blob[f['offset']:f['offset']+f['bytes']] for f in case['frames']]
     config=bytes.fromhex(case['asc'])
     def descriptor(tag,data):

@@ -96,7 +96,7 @@ fn track_entry(
             let config = AudioSpecificConfig::parse(configuration)?;
             if sample_rate == 0
                 || channels == 0
-                || config.output_sample_rate() != sample_rate
+                || config.resolve_output_rate(sample_rate)? != sample_rate
                 || u16::from(config.output_channels()) != channels
             {
                 return Err(invalid("AAC Matroska geometry differs from configuration"));

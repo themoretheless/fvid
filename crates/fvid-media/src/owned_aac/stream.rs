@@ -87,10 +87,11 @@ pub(crate) fn decode_admission_bytes(channels: u16) -> Result<usize> {
 /// nested transactional DSP clones and output interleaving; not process RSS.
 /// Callers retaining additional whole-decoder checkpoints charge this estimate
 /// separately. Revisit the bound when enlarging SBR syntax or DSP geometry.
-pub(crate) fn decode_config_admission_bytes(asc: &[u8]) -> Result<usize> {
+pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Result<usize> {
     let config = super::config::AudioSpecificConfig::parse(asc)?;
+    config.resolve_output_rate(output_rate)?;
     let mut bytes = decode_admission_bytes(u16::from(config.core.channels))?;
-    if config.sbr_present == Some(true) {
+    if config.sbr_present == Some(true) || output_rate != config.core.sample_rate {
         bytes = bytes
             .checked_add(usize::from(config.core.channels) * 2 * 1024 * 1024)
             .ok_or_else(|| invalid("AAC memory estimate overflow"))?;

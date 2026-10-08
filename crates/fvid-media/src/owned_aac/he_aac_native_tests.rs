@@ -240,3 +240,68 @@ fn missing_sbr_fill_keeps_pcm_clock_noise_history_and_checkpoint_replay() {
         }
     }
 }
+
+#[test]
+fn implicit_sbr_with_container_output_clock_matches_independent_pcm() {
+    let manifest: Value = serde_json::from_slice(include_bytes!(
+        "../../../../tests/fixtures/playback-errors/he-aac-implicit-sbr.json"
+    ))
+    .unwrap();
+    for case in manifest["cases"].as_array().unwrap() {
+        let config = asc(case);
+        assert_eq!(
+            AudioSpecificConfig::parse(&config).unwrap().sbr_present,
+            None
+        );
+        let mut decoder = NativeAacDecoder::new_with_output_rate(&config, 48000).unwrap();
+        assert_eq!(decoder.sample_rate(), 48000);
+        let mut output = Vec::new();
+        for frame in case["frames"].as_array().unwrap() {
+            let saved = decoder.checkpoint();
+            let data = decoder.decode(packet(frame)).unwrap();
+            decoder.reset();
+            decoder.restore(&saved).unwrap();
+            assert_eq!(data, decoder.decode(packet(frame)).unwrap());
+            output.extend(data);
+        }
+        assert_eq!(output.len(), case["samples"].as_u64().unwrap() as usize);
+        let at = case["pcm_offset"].as_u64().unwrap() as usize;
+        for (&value, b) in output.iter().zip(PCM[at..].chunks_exact(8)) {
+            assert_eq!(
+                value.to_bits(),
+                (f64::from_le_bytes(b.try_into().unwrap()) as f32).to_bits()
+            );
+        }
+        // A fixed LC API has no output hint and must retain its old refusal.
+        let mut strict = NativeAacDecoder::new(&config).unwrap();
+        assert!(
+            strict
+                .decode(packet(&case["frames"][0]))
+                .unwrap_err()
+                .to_string()
+                .contains("extension-aware stream signalling")
+        );
+        let mut off = config.clone();
+        let mut bits = Vec::new();
+        let push = |bits: &mut Vec<bool>, value: u32, n: u32| {
+            for shift in (0..n).rev() {
+                bits.push(value & (1 << shift) != 0);
+            }
+        };
+        push(&mut bits, 0x2b7, 11);
+        push(&mut bits, 5, 5);
+        push(&mut bits, 0, 1);
+        while bits.len() % 8 != 0 {
+            bits.push(false);
+        }
+        for byte in bits.chunks_exact(8) {
+            off.push(byte.iter().fold(0, |v, b| (v << 1) | u8::from(*b)));
+        }
+        assert_eq!(
+            AudioSpecificConfig::parse(&off).unwrap().sbr_present,
+            Some(false)
+        );
+        assert!(NativeAacDecoder::new_with_output_rate(&off, 48000).is_err());
+        assert!(NativeAacDecoder::new_with_output_rate(&config, 44100).is_err());
+    }
+}

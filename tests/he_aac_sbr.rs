@@ -325,3 +325,75 @@ fn synthetic_video_with_missing_sbr_fill_decodes_and_seeks_without_clock_changes
         assert_eq!(player, &pcm[from as usize * 48 * 4..to as usize * 48 * 4]);
     }
 }
+
+#[test]
+fn implicit_sbr_video_uses_declared_clock_in_player_export_and_remux() {
+    use std::{io::Cursor, time::Duration};
+    let bytes = include_bytes!("fixtures/playback-errors/he-aac-implicit-sbr.mp4");
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/he-aac-implicit-sbr.mp4");
+    let info = fvid::native_media::aac_source_info(&path).unwrap();
+    assert_eq!((info.sample_rate, info.channels), (48000, 1));
+    let reader = Mp4Reader::open(Cursor::new(bytes.as_slice()), Limits::default()).unwrap();
+    let track = reader
+        .tracks()
+        .iter()
+        .find(|t| t.handler == *b"soun")
+        .unwrap();
+    assert_eq!(track.sample_rate, 48000);
+    let asc = config::aac_specific_config(&track.configuration).unwrap();
+    assert_eq!(
+        config::AudioSpecificConfig::parse(asc).unwrap().sbr_present,
+        None
+    );
+    let mut player = Vec::new();
+    fvid::native_media::decode_mp4_aac_reader(reader, &mut player, None).unwrap();
+    let mut exported = Vec::new();
+    let options = fvid_media::CopyOptions {
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        ..Default::default()
+    };
+    let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(bytes.as_slice()),
+        &mut exported,
+        None,
+        &options,
+    )
+    .unwrap();
+    assert_eq!((stats.sample_rate, stats.sample_frames), (48000, 6144));
+    assert_eq!(player, exported);
+    let mut explicit = Vec::new();
+    fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(include_bytes!("fixtures/playback-errors/he-aac-sbr-synthetic.mp4").as_slice()),
+        &mut explicit,
+        None,
+        &options,
+    )
+    .unwrap();
+    assert_eq!(player, explicit);
+    let mut source =
+        fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(bytes.as_slice()), Default::default())
+            .unwrap();
+    let mut mkv = Cursor::new(Vec::new());
+    fvid_media::owned_mp4_matroska::write(&mut source, &mut mkv, None, None).unwrap();
+    let mut decoded = Vec::new();
+    fvid_media::owned_matroska_aac::decode_matroska_aac_pcm(
+        Cursor::new(mkv.get_ref()),
+        &mut decoded,
+        None,
+        &options,
+    )
+    .unwrap();
+    assert_eq!(player, decoded);
+    let reader =
+        fvid::container::webm::WebmReader::open(Cursor::new(mkv.get_ref()), Default::default())
+            .unwrap();
+    let mut seek = Vec::new();
+    fvid::native_media::decode_matroska_aac_reader(
+        reader,
+        &mut seek,
+        Some((Duration::from_millis(32), Duration::from_millis(96))),
+    )
+    .unwrap();
+    assert_eq!(seek, &player[32 * 48 * 4..96 * 48 * 4]);
+}

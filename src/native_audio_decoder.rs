@@ -32,8 +32,8 @@ impl PacketPcmDecoder {
     pub(crate) const SAMPLE_BYTES: usize = 4;
     pub(crate) fn new(track: &Track) -> Result<Self> {
         match &track.codec {
-            b"mp4a" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new(
-                crate::codec::config::aac_specific_config(&track.configuration)?,
+            b"mp4a" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
+                crate::codec::config::aac_specific_config(&track.configuration)?, track.sample_rate,
             )?)),
             b"raw " => {
                 if track.bit_depth != 8 || !(1..=64).contains(&track.channels) {
@@ -92,8 +92,8 @@ impl PacketPcmDecoder {
         let channels = u16::try_from(track.channels)
             .map_err(|_| invalid("Matroska audio channel count overflow"))?;
         match track.codec.as_str() {
-            "A_AAC" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new(
-                &track.codec_private,
+            "A_AAC" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
+                &track.codec_private, u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
             )?)),
             "A_ALAC" => Self::alac(&track.codec_private, rate, channels),
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
