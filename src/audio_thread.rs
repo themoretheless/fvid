@@ -1110,3 +1110,106 @@ mod ps_edit_worker_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod ps_matroska_preroll_tests {
+    use super::*;
+    use crate::audio::AudioStream;
+    #[test]
+    fn original_ps_matroska_preroll_is_trimmed_and_eof_seek_rewind_keep_stereo_history() {
+        let manifest: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/playback-errors/aac-ps-matroska-oracles.json"
+        ))
+        .unwrap();
+        let oracle = include_bytes!("../tests/fixtures/playback-errors/aac-ps-absence-pcm.bin");
+        for case in manifest["cases"].as_array().unwrap() {
+            let file = std::fs::read(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("tests/fixtures/playback-errors")
+                    .join(case["file"].as_str().unwrap()),
+            )
+            .unwrap();
+            let mut video = crate::playback_webm::WebmVideoReader::open_software(
+                std::io::Cursor::new(file.clone()), 1024 * 1024,
+            ).unwrap();
+            assert!(video.read_frame().unwrap());
+            let stream = crate::playback_webm_audio::WebmAudioReader::open(
+                std::io::Cursor::new(file),
+                Default::default(),
+            )
+            .unwrap();
+            let decoder = crate::codec::make_audio_decoder(
+                stream.codec(),
+                stream.extra_data(),
+                stream.sample_rate(),
+                stream.channels(),
+                stream.bits_per_sample(),
+            )
+            .unwrap();
+            let captured = Arc::new(Mutex::new(Vec::new()));
+            let (_, commands) = sync_channel(1);
+            let (events, _) = sync_channel(1);
+            let mut worker = Worker {
+                checkpoints: Vec::new(),
+                stream: Box::new(stream),
+                decoder,
+                backend: Box::new(super::presentation_window_tests::Capture(captured.clone())),
+                commands,
+                events,
+                playing: true,
+                ended: false,
+                generation: 0,
+                position: Arc::new(Mutex::new(Duration::ZERO)),
+            };
+            for _ in 0..4 {
+                assert!(worker.decode_next().0.is_none());
+            }
+            assert!(matches!(worker.decode_next().0, Some(AudioEvent::Ended(_))));
+            let baseline = std::mem::take(&mut *captured.lock().unwrap());
+            assert_eq!(baseline.len(), 3);
+            let frame_samples = case["slots"].as_u64().unwrap() as usize * 128;
+            for (i, packet) in baseline.iter().enumerate() {
+                let skip = if i == 0 {
+                    case["first_skip_samples"].as_u64().unwrap() as usize
+                } else {
+                    0
+                };
+                assert_eq!(
+                    packet.data.len(),
+                    (frame_samples - skip) * 8,
+                    "negative AAC preroll must be removed"
+                );
+                assert_eq!(
+                    packet.pts,
+                    case["source_pts_ns"][i].as_i64().unwrap().max(0) as u64
+                );
+                assert_eq!(packet.timebase_den, 1_000_000_000);
+                for (n, bytes) in packet.data.chunks_exact(4).enumerate() {
+                    let channel = n % 2;
+                    let sample = i * frame_samples + skip + n / 2;
+                    let offset = case["pcm"][channel][0].as_u64().unwrap() as usize + sample * 8;
+                    let expected =
+                        f64::from_le_bytes(oracle[offset..offset + 8].try_into().unwrap()) as f32;
+                    let actual = f32::from_le_bytes(bytes.try_into().unwrap());
+                    assert!(
+                        (actual - expected).abs() <= 2. * f32::EPSILON * expected.abs() + 2e-16
+                    );
+                }
+            }
+            for (target, start) in [(40_000_000, 1usize), (0, 0)] {
+                captured.lock().unwrap().clear();
+                worker.handle(Command::Seek(target));
+                for _ in 0..5 {
+                    let _ = worker.decode_next();
+                }
+                let actual = captured.lock().unwrap();
+                assert_eq!(actual.len(), baseline.len() - start);
+                for (a, e) in actual.iter().zip(&baseline[start..]) {
+                    assert_eq!(a.data, e.data);
+                    assert_eq!(a.pts, e.pts);
+                    assert_eq!(a.timebase_den, e.timebase_den);
+                }
+            }
+        }
+    }
+}

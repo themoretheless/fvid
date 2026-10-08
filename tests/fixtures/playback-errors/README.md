@@ -1697,3 +1697,16 @@ before a usable independent header, including zero envelopes or same-mode time
 deltas. The first frame must emit nonzero dual mono; subsequent independent
 headers must yield distinct stereo. The shared independent PCM oracle includes
 all 14 videos, both output rates, continuous synthesis and replay.
+
+
+## Matroska PS negative presentation preroll
+
+`generate_aac_ps_matroska_fixtures.py` writes two short original AVC+PS MKVs,
+`he-aac-ps-negative-preroll-{960,1024}-synthetic.mkv`, and
+`aac-ps-matroska-oracles.json`. Original authored AVC and SCE/SBR/PS packets
+are muxed with a -10 ms first audio timestamp; no private data or external
+codec is used. References point to the independent absence/late-PS PCM oracle.
+The worker regression first failed on the exact untrimmed preroll length and
+now checks every surviving PCM sample, nanosecond PTS, EOF and bit-exact
+seek/rewind recovery. Video decoding validates the authored AVC component.
+Generation stays offline and separate from ordinary tests.

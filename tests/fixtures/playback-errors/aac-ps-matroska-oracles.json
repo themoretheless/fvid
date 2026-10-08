@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-negative-preroll-960-synthetic.mkv",
+      "slots": 15,
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        80000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "ad84a752e16ff1d7f28ecbffa8934b9c5c8819685793573b3a439c2840d4cf4e"
+    },
+    {
+      "file": "he-aac-ps-negative-preroll-1024-synthetic.mkv",
+      "slots": 16,
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        80000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "ed40d5862fe2b133105f1e308b1b9b801afb177bb57f0f4aa10105c857cdd384"
+    }
+  ]
+}

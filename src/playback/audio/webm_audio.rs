@@ -1016,14 +1016,35 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
             packet.timebase_den = TIMESCALE_NS;
         }
         if self.codec_tag == "mp4a" {
-            if self
-                .presentation_floor
-                .is_some_and(|floor| source_pts < floor)
-            {
+            // Positive seeks land on a container block and replay complete
+            // blocks from that boundary. Quantized PTS can overlap the prior
+            // decoded PCM tail; presenting that tail would duplicate samples.
+            if self.presentation_floor.is_some_and(|floor| floor > 0 && source_pts < floor) {
                 return Ok(None);
             }
+            let stride = usize::from(self.channels()) * 4;
+            let rate = self.sample_rate();
+            if stride == 0 || rate == 0 || !packet.data.len().is_multiple_of(stride) {
+                return Err(invalid("invalid AAC PCM geometry"));
+            }
+            let frames = packet.data.len() / stride;
+            let floor = 0;
+            // Decode negative/source preroll to retain codec history, but only
+            // present samples at or after the floor. Delayed PS output uses
+            // its original source PTS, never the lookahead packet's timestamp.
+            let delta = (i128::from(floor) - i128::from(source_pts)).max(0) as u128;
+            let skip = (delta * u128::from(rate))
+                .div_ceil(1_000_000_000)
+                .min(frames as u128) as usize;
+            if skip == frames {
+                return Ok(None);
+            }
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            let at = i128::from(source_pts) + skip as i128 * 1_000_000_000 / i128::from(rate);
+            packet.pts = u64::try_from(at)
+                .map_err(|_| invalid("negative AAC presentation time"))?;
             // AAC decoder timestamps use a sample clock; Matroska supplies ns.
-            packet.pts = source_pts.max(0) as u64;
             packet.timebase_num = 1;
             packet.timebase_den = TIMESCALE_NS;
         }

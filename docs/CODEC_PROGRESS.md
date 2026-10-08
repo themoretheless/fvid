@@ -6721,3 +6721,23 @@ covered, with exact packet count, nonzero mono, distinct stereo, checkpoints,
 reset and EOF. The extended absence suite covers 14 videos / 28 rate cases.
 A temporal envelope changing modes is not used as a startup reproducer because
 it triggers the separate frequency-coded mode-transition requirement.
+
+
+## PS Matroska worker and negative AAC presentation preroll
+
+The Matroska player factory already routes declared PS through the delayed
+owned decoder. Two original AVC+PS MKVs now qualify that route at 960/1024,
+including late PS, original nanosecond timestamps, EOF drain and seek/rewind.
+Their first AAC block starts at -10 ms. Before the fix, the player clamped its
+PTS to zero while presenting all PCM (1920 instead of 1440 samples for 960).
+AAC presentation now removes only negative preroll samples at time zero,
+using ceil sample conversion and the delayed frame's original source PTS.
+Positive seeks keep the existing block-aligned floor: earlier blocks are
+discarded, including their tails from quantized timestamps. Codec histories still consume every preroll packet. Surviving samples
+match independent stereo PCM and preserve both channels and synthesis tails.
+This changes player presentation only; owned MP4/Matroska export and generic
+immediate packet-to-PCM paths still need delayed PS integration.
+
+Validation: full offline player library 906 passed, 23 existing ignored.
+The three Matroska assets regenerate byte-identically; Python syntax and
+diff checks pass. The targeted regression also validates native AVC playback.
