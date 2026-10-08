@@ -4507,3 +4507,24 @@ These combinations and other unsupported AV1 tools remain to be qualified.
 Final offline validation passed 35 core AV1 tests and 67 integration tests
 across all 39 AV1 suites, with no ignored acceptance tests. The super-resolution
 acceptance binary links only system libraries.
+
+
+### Inter-frame super-resolution with restoration qualification
+
+Eighteen owned three-frame streams combine super-resolution denominators
+9/12/16, 8/10/12-bit 4:2:0, CDEF and restoration. Header assertions prove
+actual super-resolution in each coded frame, a key/inter/inter sequence
+and active restoration on 35 of the 36 inter frames. All 54 decoded frames
+match saved independent libaom/dav1d pixels. Native reset and WebM replay,
+EOF, timestamps, rewind and seek are checked for every stream.
+
+All 54 saved fixture hashes were verified. A controlled mutation that
+disables reference scaling leaves the first frame intact but fails on byte
+36867 (the second frame) of the first 8-bit denominator-9 stream. This
+proves sensitivity to restored-reference prediction rather than just the
+intra upscaler. The source was restored before final acceptance validation.
+
+The fixture generator is separate from ordinary offline tests and needs no
+FFmpeg. These fixed-denominator inter cases qualify the tested references;
+changing denominators across frames, inherited segmentation maps, tiled
+restoration units and other AV1 tools remain separate outstanding cases.
