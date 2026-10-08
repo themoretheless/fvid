@@ -1076,3 +1076,25 @@ counters must cover every Y/U/V plane for each layout/depth group. Across the
 eighteen streams the first decode observes 15,890 CDEF blocks, 28,300 deblocking
 edges, 19 Wiener units and 26 SGR units. Generation is separate from tests;
 ordinary tests require no external encoder/decoder, FFmpeg or network.
+
+### Odd AV1 4:2:2/4:4:4 super-resolution and changing coded grids
+
+`generate_av1_chroma_superres_samples.py` authors 36 three-frame 191x127 original
+smooth/noisy patterns: 4:2:2/4:4:4, 8/10/12 bits, constant denominators 9/12 and
+key/inter denominators 16/9, two deterministic noise strengths. No private media
+or codec parameter sets are copied. Generation uses the same pinned generator-only
+libaom build and patch described above, with legal nonzero directional/UV
+loopfilter levels and sharpness. Unmodified aomdec and dav1d independently produce
+identical full packed plane goldens. The manifest records source/OBU/WebM/YUV
+hashes, generator source/patch, layouts/depth, both denominators and pattern IDs.
+
+The first 18-stream trial already matched pixels but omitted restoration in the
+4:2:2/12-bit U plane. That omission was rejected as incomplete tool coverage and
+a second original noise pattern added. Final offline acceptance requires actual
+super-resolution coefficients, coded MI grid changes, fixed display dimensions,
+all pixels/reset and raw WebM geometry/depth/intervals/EOF rewind/seek. Each
+layout/depth group must execute deblocking and CDEF in all Y/U/V planes and
+contain non-None restoration units for each plane. Across the 108 first-decode
+frames it observes 61,548 CDEF blocks, 73,826 deblocking edges, 73 Wiener and
+67 SGR units. Generation is separate; tests use native FVid and checked-in
+synthetic assets only, without external codecs, FFmpeg or network.

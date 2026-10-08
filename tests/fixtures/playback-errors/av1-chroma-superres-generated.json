@@ -1,0 +1,1192 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-chroma-superres-layout422-depth8-den9-kf9-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth8-den9-kf9-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth8-den9-kf9-pattern0.webm",
+      "sha256": "409428073e5134a96a45bf8f702bf1d65f73cabcf2b4ad499388ffa21eb78624",
+      "reference_sha256": "a636c590b70f6d2a51a6f559cc46f8d8c59c17ff2bcf7ddcbc833798b007bfb2",
+      "webm_sha256": "1f1d02243418c3f38af53bdda2704ad26488354473c1378caa0f138281423ceb",
+      "source_sha256": "39cb093c675ff93ee135ce45406b0fd68f5d46a190f47bff7a2a8f6fa0420241",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth8-den9-kf9-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth8-den9-kf9-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth8-den9-kf9-pattern1.webm",
+      "sha256": "2af854df8013706fcd66420c516c1ca27983439222fd29223567aa8f4d98221e",
+      "reference_sha256": "53f89f91fb798e6199ac60c5f23917ad70ab1f7575fa9be5027e2e79db1efda0",
+      "webm_sha256": "ac0fadca18b4aaf802d892fef7d4a48fa866b4b1834648dadabebcc2a10c9f2d",
+      "source_sha256": "1190422bf863e1ec19d991e66fc9d410977591afb1b6c5fac9fc55fc9e43e004",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth8-den12-kf12-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth8-den12-kf12-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth8-den12-kf12-pattern0.webm",
+      "sha256": "0f1c266fe617091f9127a314ad048fb4e8b4483e3ca7fb32f5c8ef27225ad120",
+      "reference_sha256": "3495c290ba649352b0b98b005dc4599089bbd6656eec966335e1114b0193945b",
+      "webm_sha256": "f1b6e90b4798a7da8c1b59a9685976254d8803d921f72b90689824923cb11dc2",
+      "source_sha256": "39cb093c675ff93ee135ce45406b0fd68f5d46a190f47bff7a2a8f6fa0420241",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth8-den12-kf12-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth8-den12-kf12-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth8-den12-kf12-pattern1.webm",
+      "sha256": "caf15d144e60589f36628a750f8900fc7474e61b0777d3a0bf0f35f3d781d6a5",
+      "reference_sha256": "49aea6e3ea94380a0c4bbad01d9e797f9aca77f2a0c71a8e382395302ad94c27",
+      "webm_sha256": "15818a7d38cf28ba72185519385a65939b7cb8314ca7d73f4428f91174266b74",
+      "source_sha256": "1190422bf863e1ec19d991e66fc9d410977591afb1b6c5fac9fc55fc9e43e004",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth8-den9-kf16-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth8-den9-kf16-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth8-den9-kf16-pattern0.webm",
+      "sha256": "2d664efc807d9595770c69d00696e6def865c3b062220fd13484fd2e1913fcfe",
+      "reference_sha256": "ea21b3e2cef285c541302fa7b93608ea965a5cbae55b548c0e4da32bd6713770",
+      "webm_sha256": "40fe0d38bdaa773a404b0fb27d8da23cf6728b56f927778ffb2e8983750cb258",
+      "source_sha256": "39cb093c675ff93ee135ce45406b0fd68f5d46a190f47bff7a2a8f6fa0420241",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth8-den9-kf16-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth8-den9-kf16-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth8-den9-kf16-pattern1.webm",
+      "sha256": "6ddda51ad87ad19d91448a2dc7952177635ac75df192c18834b8bc320f0bceea",
+      "reference_sha256": "d87eff2ca73df883044a014877d148fd4f2b6660a6f289444a42090abacbe9d0",
+      "webm_sha256": "571222134c4df1e17b5f732ed37fa88bcbc9ccbb4c890722a6bb548eec016f6c",
+      "source_sha256": "1190422bf863e1ec19d991e66fc9d410977591afb1b6c5fac9fc55fc9e43e004",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth8-den9-kf9-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth8-den9-kf9-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth8-den9-kf9-pattern0.webm",
+      "sha256": "dbc559653507083306c61fdc23bde4ec46c274aa9c89ade99fee7ca33fe20faa",
+      "reference_sha256": "df0e2b7406755d73e38e6d42f0e14d703daf3cea6d8f0e575060eff77a57b5a0",
+      "webm_sha256": "eff349d0e6cfc14f8906d742e93de503278589044ab1c7133c4cd016638e9133",
+      "source_sha256": "943937d36a446ccbbd9c53d4c6b4ecf9387dc7a46653ad106af386a8905f05e4",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth8-den9-kf9-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth8-den9-kf9-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth8-den9-kf9-pattern1.webm",
+      "sha256": "203038162f013edfc5a11fc3798b4bbd8077f80959c0ca6480afbbe821a01592",
+      "reference_sha256": "bf3fa20390b2346c4ea78ff668dec5b422fd62dab96d7a2f06c8b3a32d2a22b5",
+      "webm_sha256": "3bed18cbc22fe8d864160bd3dfbaeb8a127b52cf87551f0dfba5e6d82c01918c",
+      "source_sha256": "424b7f8ce5662e304cac0d19465e38e0ab03a3726b069467ab7d78bef1e1390b",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth8-den12-kf12-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth8-den12-kf12-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth8-den12-kf12-pattern0.webm",
+      "sha256": "c84be769f3a219e18fc689c9bbb161c66441cacb19bd94054b83b54498a2d200",
+      "reference_sha256": "c5e870677a09bdbdb9890c19f89582e7a6b50ebd737f84320b1a579d04bf1a4d",
+      "webm_sha256": "0d8c889778c3dcfb764a596d556e5e796483b7b653bcf2bbac73f6f0da3bb340",
+      "source_sha256": "943937d36a446ccbbd9c53d4c6b4ecf9387dc7a46653ad106af386a8905f05e4",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth8-den12-kf12-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth8-den12-kf12-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth8-den12-kf12-pattern1.webm",
+      "sha256": "306c1a2c24a98d287ca92a63bf3344ce0d467525760b60da3b0ad7b1a440305c",
+      "reference_sha256": "8197ddcbc541382f60e183c96e8728386bfe41a6d77b47704523533b98010417",
+      "webm_sha256": "12d4a8599327a4b8adb32ae985be5c6fd734dcfdeb7cd04b2cd57423e1932bb0",
+      "source_sha256": "424b7f8ce5662e304cac0d19465e38e0ab03a3726b069467ab7d78bef1e1390b",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth8-den9-kf16-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth8-den9-kf16-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth8-den9-kf16-pattern0.webm",
+      "sha256": "658b9e0141163985e10e267e49cd4d1821753ffdd1fc3975b702146a831bb670",
+      "reference_sha256": "579b96e43400b713253f3c2fc198705c52fe5c6df1e0a10a88aa73202d400440",
+      "webm_sha256": "f7d66b1bd70752412ccdc247917254f1f42597fb8428429376aaa2c429d01d32",
+      "source_sha256": "943937d36a446ccbbd9c53d4c6b4ecf9387dc7a46653ad106af386a8905f05e4",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth8-den9-kf16-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth8-den9-kf16-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth8-den9-kf16-pattern1.webm",
+      "sha256": "4fed9f9f9f37e6e77919d6f4f7fb1cbd16bdb9ac7ff76fb0b36f1a0ba3236203",
+      "reference_sha256": "9749737b9139efa328732ec577cdfd89c096a50710628744d99d89c100579e7c",
+      "webm_sha256": "79eb6702c37e259dc126dab6842d84af49fbb294166979826c249bc14bbc22fc",
+      "source_sha256": "424b7f8ce5662e304cac0d19465e38e0ab03a3726b069467ab7d78bef1e1390b",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth10-den9-kf9-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth10-den9-kf9-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth10-den9-kf9-pattern0.webm",
+      "sha256": "fb078f103dfcbf29f43a53895c000a9a7edab475a04a8632e4ac9136d5b41e77",
+      "reference_sha256": "39cb263cf0acd726aece319f3375d4e9dffadf258e0cab290c31baa6345e3ac8",
+      "webm_sha256": "08167ef54c977172d65db40509022fdb224f0601f71c47aed91f6867d001085f",
+      "source_sha256": "91c652f5e8c86885c34f069433b8c923dae9ed82522825ea22972d5dea66da97",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth10-den9-kf9-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth10-den9-kf9-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth10-den9-kf9-pattern1.webm",
+      "sha256": "5b9dcd49561e1dd50db91494280db494af3771a6667724cd11f75cec64cf1fdb",
+      "reference_sha256": "8fbd196fde1cd61e73cd7690cf74c388e298d7727fff8bfa70ab1d08f8dd048b",
+      "webm_sha256": "88f50c0e4a8cf39590ccbb4dbb5b8f34e6a7ba72761984cb10ff8b77e9e72552",
+      "source_sha256": "41753ab55c931a81fde434498184a17528098d23ba3f84a764be491a5a043b53",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth10-den12-kf12-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth10-den12-kf12-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth10-den12-kf12-pattern0.webm",
+      "sha256": "19a4d1e9b151a840561b57458277aed9731ed87bfd99014a5b289ad2caf94833",
+      "reference_sha256": "e9dcab9a04240f7fc1952f8ccc9afed0ea172b8b4391a5240e428779a2dade0b",
+      "webm_sha256": "8ce2dd2da62028ffba86324392016392072b82eb818da5f537ea2b8ec24a2363",
+      "source_sha256": "91c652f5e8c86885c34f069433b8c923dae9ed82522825ea22972d5dea66da97",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth10-den12-kf12-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth10-den12-kf12-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth10-den12-kf12-pattern1.webm",
+      "sha256": "aeba7460dbc68007ee249c46f2097b2d5dc5b6979dab68434e0d7984528ebb64",
+      "reference_sha256": "98edcce957e4579c000bccd6d04ae29283ae4b7fa2036b2bd8752389745f877a",
+      "webm_sha256": "811391f9575ef6f1f4462779084e1ad29406a8aba467562aecdadb86434b39e0",
+      "source_sha256": "41753ab55c931a81fde434498184a17528098d23ba3f84a764be491a5a043b53",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth10-den9-kf16-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth10-den9-kf16-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth10-den9-kf16-pattern0.webm",
+      "sha256": "99faf923185d8e593c9166c83e5066a8381b8f33c7aec7b0ed26cfac8c24770b",
+      "reference_sha256": "4759ee8d95a2afbacc1e9d0a32ea68566abe630106ae11f259471abf4fab7d25",
+      "webm_sha256": "92ee34b892de6f98d52c867c492651c6eeff988f19af7aa55d34d4ec8355a238",
+      "source_sha256": "91c652f5e8c86885c34f069433b8c923dae9ed82522825ea22972d5dea66da97",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth10-den9-kf16-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth10-den9-kf16-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth10-den9-kf16-pattern1.webm",
+      "sha256": "7392d9e7c7a1bfee0d7e6b61edd41a768de5f67d059668d25c38b653719c19fa",
+      "reference_sha256": "3842a9726643789670bde56ab633e27800f44a3f04731e91254c070ed5a7b515",
+      "webm_sha256": "6af929c1633a45ebc1de3cdb601f18095b84ca482caad0cc8c8cb3f1384303ad",
+      "source_sha256": "41753ab55c931a81fde434498184a17528098d23ba3f84a764be491a5a043b53",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth10-den9-kf9-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth10-den9-kf9-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth10-den9-kf9-pattern0.webm",
+      "sha256": "cdf12b0234f75b77eda6ded0f14617d56d3c0114edc7b38b137aacb544cff025",
+      "reference_sha256": "987acd4fb40d9a91bf823210145072aeeb55a47cccc4236835678bb35d0278ca",
+      "webm_sha256": "dec30b07fa5db68e1c849e91150c068ae3c28a5e0c13e352ff330878f8bb8d15",
+      "source_sha256": "ef921d36de2fe6fc76048d540168d59e4d6c3d507b0a49baf124fc499e86ca05",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth10-den9-kf9-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth10-den9-kf9-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth10-den9-kf9-pattern1.webm",
+      "sha256": "f6a9d2fa442d9f262df905141194e3748226415a8f8cc3dc27d4c6606c3066e8",
+      "reference_sha256": "d336815ead699f278d7fd7dd34d56c88ab140bcf686285e20e09fb7123e3c1e2",
+      "webm_sha256": "d8b5d5ae8c3f4595b6a6a94e2d87f742b519d7f1ea77b2d98ff8dc887a9e927d",
+      "source_sha256": "e4aa0f49d1485ec00a657fb3230479c9d3d4d2c4e8a850a710173552d2e67669",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth10-den12-kf12-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth10-den12-kf12-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth10-den12-kf12-pattern0.webm",
+      "sha256": "8e405ccefd72f2a7de21a47aba6aa328136761ab515740e538102e65c82ee225",
+      "reference_sha256": "44b3ba9e2d603a28ab55b6477f54a59332775ab9d5a3d550ac928fa5126d321f",
+      "webm_sha256": "dbfe74aed71a8e7eb1fe6d5efd940f20663f3411b4b8b2d7228d7d8283b573bd",
+      "source_sha256": "ef921d36de2fe6fc76048d540168d59e4d6c3d507b0a49baf124fc499e86ca05",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth10-den12-kf12-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth10-den12-kf12-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth10-den12-kf12-pattern1.webm",
+      "sha256": "7dfd922b02b89db9537c7ed486c0dcf3b65384865ba80d02b37f0e7b061278af",
+      "reference_sha256": "9291732016a37bce47813d56191242d50439119bde8078072c17ef336635fd30",
+      "webm_sha256": "07ec3d68e40ee8514df449f505e8b6e05232884b5c9676941defa37ea30d77e2",
+      "source_sha256": "e4aa0f49d1485ec00a657fb3230479c9d3d4d2c4e8a850a710173552d2e67669",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth10-den9-kf16-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth10-den9-kf16-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth10-den9-kf16-pattern0.webm",
+      "sha256": "1b62d57a3e55aa5417b8e9b1851ee8c26ae13acf0b2eb735ab62872228391736",
+      "reference_sha256": "4c8c1386eeb71d1f54793c858b3e13d94e703a80eeaf4599b6944a1251148b81",
+      "webm_sha256": "ebaaea6b551a8afc7b87b0e73194e392b3a5b6dbe73437c2ea2c3deb0d77114e",
+      "source_sha256": "ef921d36de2fe6fc76048d540168d59e4d6c3d507b0a49baf124fc499e86ca05",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth10-den9-kf16-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth10-den9-kf16-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth10-den9-kf16-pattern1.webm",
+      "sha256": "6dcf0f181b111455212b3aedf7d7ec9cc9d7af88b326df16ed04ba674786f660",
+      "reference_sha256": "801dab68d83ff5b1d6580b14dcaa72e87ae81113f1c420d1dc474eac2a598c8b",
+      "webm_sha256": "17ef76170d6dc698168a08fd716667424954fec4740273f956d39b7c84b0fd71",
+      "source_sha256": "e4aa0f49d1485ec00a657fb3230479c9d3d4d2c4e8a850a710173552d2e67669",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth12-den9-kf9-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth12-den9-kf9-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth12-den9-kf9-pattern0.webm",
+      "sha256": "675e794f3aa1683907cf8fa23a27221af2970a550362d9736d96424e518c4893",
+      "reference_sha256": "2ed86dcc385ceb591cbef59c5e6b1a492d17a2351ae45331ece539348ebb6413",
+      "webm_sha256": "415da1720954d42b3a2482f629d408498a8737371e56b695cb4c5ad9ca490215",
+      "source_sha256": "328ca528c4955a30cbc651cf78a4373487a17f0ed147517e063b1058f29e033d",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth12-den9-kf9-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth12-den9-kf9-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth12-den9-kf9-pattern1.webm",
+      "sha256": "5340cf967cbd57da6aac147c1a7f706be467ec82ded2710bef67e96331f3da82",
+      "reference_sha256": "a69a7596ba9715dc9f16a8758c1cd016a6506eb2f41ffa0354e1a7737196324a",
+      "webm_sha256": "6a9111dc5bc32f63e8d0f237b1a7f15b52bdb25083dac7dc2640c01932f6630f",
+      "source_sha256": "09d7aa28e99adc047219607396a667a549a02491301264a249611e34e9f1b533",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth12-den12-kf12-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth12-den12-kf12-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth12-den12-kf12-pattern0.webm",
+      "sha256": "355988a006acddcda70c50f668a1ecf7455a1b9280cdf2f3271c26589d828a3c",
+      "reference_sha256": "07ded39945f3a31d00ce25bb603c934f9f86d7ecafdf2a3edf902bf2c0720797",
+      "webm_sha256": "4d42eb6a5c66fb15c35b70a43011f29e213bb7d8ac3e36db32743b5c410988aa",
+      "source_sha256": "328ca528c4955a30cbc651cf78a4373487a17f0ed147517e063b1058f29e033d",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth12-den12-kf12-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth12-den12-kf12-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth12-den12-kf12-pattern1.webm",
+      "sha256": "60440927e10e45a7321b504df0e2a905153c66bb18345ab62107a5830ad803f8",
+      "reference_sha256": "8cca76e8feb38ef0d3d8d9ccc8fb4324802f148924fbef71c3d6d9dff67c2118",
+      "webm_sha256": "f765e6f9ff647488cb117f3af7f5d9f9f6f75517fa15ac89a29a58decc676acc",
+      "source_sha256": "09d7aa28e99adc047219607396a667a549a02491301264a249611e34e9f1b533",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth12-den9-kf16-pattern0.obu",
+      "reference": "av1-chroma-superres-layout422-depth12-den9-kf16-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout422-depth12-den9-kf16-pattern0.webm",
+      "sha256": "c9b0b44bd64dcf42851fd044bb97ffe1e0edbfaf8e6f5963257e2cab7fadfa30",
+      "reference_sha256": "ac966f25348bd3e29a6a795b442169abe87cc1c662f8d97888b9a4430554530f",
+      "webm_sha256": "3801c29294f1375b240355d10e0a7585c6eeb32eeace34ea3a60cc2320a98a6f",
+      "source_sha256": "328ca528c4955a30cbc651cf78a4373487a17f0ed147517e063b1058f29e033d",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout422-depth12-den9-kf16-pattern1.obu",
+      "reference": "av1-chroma-superres-layout422-depth12-den9-kf16-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout422-depth12-den9-kf16-pattern1.webm",
+      "sha256": "b5882913b164d6559a081509029d7970ba53f9e658c82480caf478f57dc5945b",
+      "reference_sha256": "a9a3f3b463c6f3b76aae820776484a4dbb001ba3986b9dd8cdf71d1c73ab1357",
+      "webm_sha256": "8438cf647ee2f99a6cce5dc600acb3c175c1844217425bc2d16511fa0a3c37df",
+      "source_sha256": "09d7aa28e99adc047219607396a667a549a02491301264a249611e34e9f1b533",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth12-den9-kf9-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth12-den9-kf9-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth12-den9-kf9-pattern0.webm",
+      "sha256": "59a5dd98435c89a4b23519b07f2bacf01905c7947853593463d5099eea0d39da",
+      "reference_sha256": "001b3343997256b616dc30bc887fa38941ccc55f47c33022ea42c7715c702d99",
+      "webm_sha256": "3f2aac6b5a18099d8d9c8a47c29a197332e500c1b38d22aac9163f5c6375d1d3",
+      "source_sha256": "da5292fdaace75efabd3584a3dc76de7c753fe66a5547c62e6fdb04b9bdf856b",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth12-den9-kf9-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth12-den9-kf9-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth12-den9-kf9-pattern1.webm",
+      "sha256": "71cdf58494f7271eddd26b56b007c7db2ee4b66cebea57d09d03eba137b633b4",
+      "reference_sha256": "f03ec6f0eda6451818146bc1547e40d6318db6095a84e6fb81d2dcd0225d7e90",
+      "webm_sha256": "1e4db71d1c3e3390189c10e263b695d2c7d0e81c8c886a2d1f9901f0dc136496",
+      "source_sha256": "0164fbd283167afbdef74753a33fd4b9fa687e037ae764a8476e7fea9d4456fc",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 9,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth12-den12-kf12-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth12-den12-kf12-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth12-den12-kf12-pattern0.webm",
+      "sha256": "acf857fbe82c9040b92e6476c393d2ec6e99d7853a5f130837a052ca91770a61",
+      "reference_sha256": "75b5f64b63d46929814286c8753f69c86f9415099d48dcab0cb487787df704d2",
+      "webm_sha256": "0f34e30116684d100813670b47c96a2cc291ab1ec99e41204e44828203e4335b",
+      "source_sha256": "da5292fdaace75efabd3584a3dc76de7c753fe66a5547c62e6fdb04b9bdf856b",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth12-den12-kf12-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth12-den12-kf12-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth12-den12-kf12-pattern1.webm",
+      "sha256": "f3e14e741bf65af94018bd453f9dfbdd133ae9ef1d646dbe2e02651052a9eef7",
+      "reference_sha256": "2d1242533673bc1907d908c1bf74ce2a777abc24306b8628ecb6e73e516ef214",
+      "webm_sha256": "75efb97e527c828e78a17276a5cc7bd89b53da48980c6fda33837ff51525aa4c",
+      "source_sha256": "0164fbd283167afbdef74753a33fd4b9fa687e037ae764a8476e7fea9d4456fc",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 12,
+      "key_denominator": 12,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth12-den9-kf16-pattern0.obu",
+      "reference": "av1-chroma-superres-layout444-depth12-den9-kf16-pattern0.yuv",
+      "webm": "av1-chroma-superres-layout444-depth12-den9-kf16-pattern0.webm",
+      "sha256": "2b8bb64f66ef7e5cf2fe9d4d1725fac2001fb0833751a6b0551a0c389270d556",
+      "reference_sha256": "b2d1a81e9b9b60dd8108b7608e19964f370614f52fc51287d0be9f90a982e760",
+      "webm_sha256": "d80ae6085e2af5a9bc50579048719b37d3b45e39abbd6b7ad3b847d86d6b6ad8",
+      "source_sha256": "da5292fdaace75efabd3584a3dc76de7c753fe66a5547c62e6fdb04b9bdf856b",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 0,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-superres-layout444-depth12-den9-kf16-pattern1.obu",
+      "reference": "av1-chroma-superres-layout444-depth12-den9-kf16-pattern1.yuv",
+      "webm": "av1-chroma-superres-layout444-depth12-den9-kf16-pattern1.webm",
+      "sha256": "c904b01389f9cccc11f0b24bbbdd6536c57902ecb783e02bf4677fa4abc673ca",
+      "reference_sha256": "d9912057977ea89d02f6c32f72549178a472666c64117853055cbf6d7505a9a8",
+      "webm_sha256": "b0358ea87ea5f79c45e5f30f400ac16171fe2ba06e0fd3b7e985486bb263b560",
+      "source_sha256": "0164fbd283167afbdef74753a33fd4b9fa687e037ae764a8476e7fea9d4456fc",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "pattern": 1,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 3,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "denominator": 9,
+      "key_denominator": 16,
+      "cpu_used": 0,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    }
+  ]
+}

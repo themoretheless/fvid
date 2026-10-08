@@ -21,3 +21,15 @@ python3 /path/to/fvid/scripts/generate_av1_chroma_filter_samples.py --encoder /o
 Replace `/path/to/fvid` and the stock CLI paths for the generation host. Generation
 requires the source checkout and reference tools; test execution only reads the
 checked-in synthetic OBU/WebM/YUV assets and uses native FVid APIs.
+
+The same generator-only encoder also produces the odd chroma super-resolution
+qualification streams (coefficients 9/12 and changing 16-to-9 coded widths):
+
+```sh
+python3 /path/to/fvid/scripts/generate_av1_chroma_superres_samples.py --encoder /tmp/fvid-aom-fixture-build/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+```
+
+Two original noise patterns are used so restoration is actually selected in all
+Y/U/V planes of each layout/depth group. The offline acceptance validates actual
+header coefficients/loopfilter levels, coded grids, all pixels, filter-unit
+statistics and WebM reset/rewind/seek behavior.

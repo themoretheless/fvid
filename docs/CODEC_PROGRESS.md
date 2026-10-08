@@ -4960,3 +4960,23 @@ tests passed, zero failures/ignored tests. The new acceptance covers all eightee
 streams; base chroma, mixed-sub8, intrabc tools, film-grain tools, odd restoration
 and temporal-motion/super-resolution regressions remain passing. All 54 artifact
 hashes, generator Python syntax, Rust formatting and scoped diff checks passed.
+
+### AV1 4:2:2/4:4:4 super-resolution qualification (2026-10-08)
+
+Thirty-six owned three-frame 191x127 streams qualify constant denominators 9/12
+and changing key/inter denominators 16/9 at 4:2:2/4:4:4 and 8/10/12 bits. Actual
+headers and decoded coded MI grids are checked independently of display size;
+all output pixels match stock aomdec/dav1d goldens. Decoder reset, raw WebM
+plane dimensions/depth/pixels, 20ms intervals, EOF rewind and sync seek replay
+pass. Deblocking/CDEF/restoration remain enabled and are proved by real per-plane
+statistics, not flags alone: 61,548 CDEF blocks, 73,826 deblocking edges,
+73 Wiener and 67 SGR units in the 108 first-decode frames. The initial single
+noise pattern omitted U restoration at 4:2:2/12-bit; the accepted set uses two
+original patterns and requires non-None restoration in every plane/layout/depth.
+
+Generation uses the previously pinned forced-deblocking encoder only as a fixture
+tool; both reference decoders remain unchanged. All 108 OBU/WebM/YUV artifact
+hashes, generator syntax, formatting and scoped diff checks pass. Final 48 AV1
+release unit tests and ten selected offline integration tests pass, zero
+failures/ignored tests. These streams do not establish intrabc, film grain,
+layered operating points or whole AV1 conformance.
