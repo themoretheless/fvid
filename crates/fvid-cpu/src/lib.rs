@@ -879,6 +879,461 @@ unsafe fn av1_cdef_block_neon(
     }
 }
 
+pub const HEVC_DCT: [[i16; 32]; 32] = [
+    [
+        64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+        64, 64, 64, 64, 64, 64, 64, 64, 64,
+    ],
+    [
+        90, 90, 88, 85, 82, 78, 73, 67, 61, 54, 46, 38, 31, 22, 13, 4, -4, -13, -22, -31, -38, -46,
+        -54, -61, -67, -73, -78, -82, -85, -88, -90, -90,
+    ],
+    [
+        90, 87, 80, 70, 57, 43, 25, 9, -9, -25, -43, -57, -70, -80, -87, -90, -90, -87, -80, -70,
+        -57, -43, -25, -9, 9, 25, 43, 57, 70, 80, 87, 90,
+    ],
+    [
+        90, 82, 67, 46, 22, -4, -31, -54, -73, -85, -90, -88, -78, -61, -38, -13, 13, 38, 61, 78,
+        88, 90, 85, 73, 54, 31, 4, -22, -46, -67, -82, -90,
+    ],
+    [
+        89, 75, 50, 18, -18, -50, -75, -89, -89, -75, -50, -18, 18, 50, 75, 89, 89, 75, 50, 18,
+        -18, -50, -75, -89, -89, -75, -50, -18, 18, 50, 75, 89,
+    ],
+    [
+        88, 67, 31, -13, -54, -82, -90, -78, -46, -4, 38, 73, 90, 85, 61, 22, -22, -61, -85, -90,
+        -73, -38, 4, 46, 78, 90, 82, 54, 13, -31, -67, -88,
+    ],
+    [
+        87, 57, 9, -43, -80, -90, -70, -25, 25, 70, 90, 80, 43, -9, -57, -87, -87, -57, -9, 43, 80,
+        90, 70, 25, -25, -70, -90, -80, -43, 9, 57, 87,
+    ],
+    [
+        85, 46, -13, -67, -90, -73, -22, 38, 82, 88, 54, -4, -61, -90, -78, -31, 31, 78, 90, 61, 4,
+        -54, -88, -82, -38, 22, 73, 90, 67, 13, -46, -85,
+    ],
+    [
+        83, 36, -36, -83, -83, -36, 36, 83, 83, 36, -36, -83, -83, -36, 36, 83, 83, 36, -36, -83,
+        -83, -36, 36, 83, 83, 36, -36, -83, -83, -36, 36, 83,
+    ],
+    [
+        82, 22, -54, -90, -61, 13, 78, 85, 31, -46, -90, -67, 4, 73, 88, 38, -38, -88, -73, -4, 67,
+        90, 46, -31, -85, -78, -13, 61, 90, 54, -22, -82,
+    ],
+    [
+        80, 9, -70, -87, -25, 57, 90, 43, -43, -90, -57, 25, 87, 70, -9, -80, -80, -9, 70, 87, 25,
+        -57, -90, -43, 43, 90, 57, -25, -87, -70, 9, 80,
+    ],
+    [
+        78, -4, -82, -73, 13, 85, 67, -22, -88, -61, 31, 90, 54, -38, -90, -46, 46, 90, 38, -54,
+        -90, -31, 61, 88, 22, -67, -85, -13, 73, 82, 4, -78,
+    ],
+    [
+        75, -18, -89, -50, 50, 89, 18, -75, -75, 18, 89, 50, -50, -89, -18, 75, 75, -18, -89, -50,
+        50, 89, 18, -75, -75, 18, 89, 50, -50, -89, -18, 75,
+    ],
+    [
+        73, -31, -90, -22, 78, 67, -38, -90, -13, 82, 61, -46, -88, -4, 85, 54, -54, -85, 4, 88,
+        46, -61, -82, 13, 90, 38, -67, -78, 22, 90, 31, -73,
+    ],
+    [
+        70, -43, -87, 9, 90, 25, -80, -57, 57, 80, -25, -90, -9, 87, 43, -70, -70, 43, 87, -9, -90,
+        -25, 80, 57, -57, -80, 25, 90, 9, -87, -43, 70,
+    ],
+    [
+        67, -54, -78, 38, 85, -22, -90, 4, 90, 13, -88, -31, 82, 46, -73, -61, 61, 73, -46, -82,
+        31, 88, -13, -90, -4, 90, 22, -85, -38, 78, 54, -67,
+    ],
+    [
+        64, -64, -64, 64, 64, -64, -64, 64, 64, -64, -64, 64, 64, -64, -64, 64, 64, -64, -64, 64,
+        64, -64, -64, 64, 64, -64, -64, 64, 64, -64, -64, 64,
+    ],
+    [
+        61, -73, -46, 82, 31, -88, -13, 90, -4, -90, 22, 85, -38, -78, 54, 67, -67, -54, 78, 38,
+        -85, -22, 90, 4, -90, 13, 88, -31, -82, 46, 73, -61,
+    ],
+    [
+        57, -80, -25, 90, -9, -87, 43, 70, -70, -43, 87, 9, -90, 25, 80, -57, -57, 80, 25, -90, 9,
+        87, -43, -70, 70, 43, -87, -9, 90, -25, -80, 57,
+    ],
+    [
+        54, -85, -4, 88, -46, -61, 82, 13, -90, 38, 67, -78, -22, 90, -31, -73, 73, 31, -90, 22,
+        78, -67, -38, 90, -13, -82, 61, 46, -88, 4, 85, -54,
+    ],
+    [
+        50, -89, 18, 75, -75, -18, 89, -50, -50, 89, -18, -75, 75, 18, -89, 50, 50, -89, 18, 75,
+        -75, -18, 89, -50, -50, 89, -18, -75, 75, 18, -89, 50,
+    ],
+    [
+        46, -90, 38, 54, -90, 31, 61, -88, 22, 67, -85, 13, 73, -82, 4, 78, -78, -4, 82, -73, -13,
+        85, -67, -22, 88, -61, -31, 90, -54, -38, 90, -46,
+    ],
+    [
+        43, -90, 57, 25, -87, 70, 9, -80, 80, -9, -70, 87, -25, -57, 90, -43, -43, 90, -57, -25,
+        87, -70, -9, 80, -80, 9, 70, -87, 25, 57, -90, 43,
+    ],
+    [
+        38, -88, 73, -4, -67, 90, -46, -31, 85, -78, 13, 61, -90, 54, 22, -82, 82, -22, -54, 90,
+        -61, -13, 78, -85, 31, 46, -90, 67, 4, -73, 88, -38,
+    ],
+    [
+        36, -83, 83, -36, -36, 83, -83, 36, 36, -83, 83, -36, -36, 83, -83, 36, 36, -83, 83, -36,
+        -36, 83, -83, 36, 36, -83, 83, -36, -36, 83, -83, 36,
+    ],
+    [
+        31, -78, 90, -61, 4, 54, -88, 82, -38, -22, 73, -90, 67, -13, -46, 85, -85, 46, 13, -67,
+        90, -73, 22, 38, -82, 88, -54, -4, 61, -90, 78, -31,
+    ],
+    [
+        25, -70, 90, -80, 43, 9, -57, 87, -87, 57, -9, -43, 80, -90, 70, -25, -25, 70, -90, 80,
+        -43, -9, 57, -87, 87, -57, 9, 43, -80, 90, -70, 25,
+    ],
+    [
+        22, -61, 85, -90, 73, -38, -4, 46, -78, 90, -82, 54, -13, -31, 67, -88, 88, -67, 31, 13,
+        -54, 82, -90, 78, -46, 4, 38, -73, 90, -85, 61, -22,
+    ],
+    [
+        18, -50, 75, -89, 89, -75, 50, -18, -18, 50, -75, 89, -89, 75, -50, 18, 18, -50, 75, -89,
+        89, -75, 50, -18, -18, 50, -75, 89, -89, 75, -50, 18,
+    ],
+    [
+        13, -38, 61, -78, 88, -90, 85, -73, 54, -31, 4, 22, -46, 67, -82, 90, -90, 82, -67, 46,
+        -22, -4, 31, -54, 73, -85, 90, -88, 78, -61, 38, -13,
+    ],
+    [
+        9, -25, 43, -57, 70, -80, 87, -90, 90, -87, 80, -70, 57, -43, 25, -9, -9, 25, -43, 57, -70,
+        80, -87, 90, -90, 87, -80, 70, -57, 43, -25, 9,
+    ],
+    [
+        4, -13, 22, -31, 38, -46, 54, -61, 67, -73, 78, -82, 85, -88, 90, -90, 90, -90, 88, -85,
+        82, -78, 73, -67, 61, -54, 46, -38, 31, -22, 13, -4,
+    ],
+];
+
+fn hevc_inverse2_scalar(input: &[i32; 2], output: &mut [i32; 2]) {
+    output[0] = 64 * (input[0] + input[1]);
+    output[1] = 64 * (input[0] - input[1]);
+}
+
+macro_rules! hevc_inverse_size_scalar {
+    ($name:ident, $smaller:ident, $n:expr) => {
+        fn $name(input: &[i32; $n], output: &mut [i32; $n]) {
+            let even = std::array::from_fn::<_, { $n / 2 }, _>(|k| input[2 * k]);
+            let mut values = [0; $n / 2];
+            $smaller(&even, &mut values);
+            let mut odd = [0; $n / 2];
+            for k in (1..$n).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                for x in 0..$n / 2 {
+                    odd[x] += input[k] * i32::from(HEVC_DCT[k * (32 / $n)][x]);
+                }
+            }
+            for x in 0..$n / 2 {
+                output[x] = values[x] + odd[x];
+                output[$n - 1 - x] = values[x] - odd[x];
+            }
+        }
+    };
+}
+
+hevc_inverse_size_scalar!(hevc_inverse4_scalar_arr, hevc_inverse2_scalar, 4);
+hevc_inverse_size_scalar!(hevc_inverse8_scalar_arr, hevc_inverse4_scalar_arr, 8);
+hevc_inverse_size_scalar!(hevc_inverse16_scalar_arr, hevc_inverse8_scalar_arr, 16);
+hevc_inverse_size_scalar!(hevc_inverse32_scalar_arr, hevc_inverse16_scalar_arr, 32);
+
+pub fn hevc_inverse_scalar(input: &[i32], output: &mut [i32]) {
+    let len = input.len();
+    if input[1..].iter().all(|&v| v == 0) {
+        output[..len].fill(input[0] * 64);
+        return;
+    }
+    match len {
+        4 => hevc_inverse4_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        8 => hevc_inverse8_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        16 => hevc_inverse16_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        32 => hevc_inverse32_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        _ => panic!("unsupported HEVC transform size {len}"),
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+mod hevc_neon {
+    use super::*;
+    use std::arch::aarch64::*;
+
+    #[inline]
+    pub unsafe fn vrev_s32(v: int32x4_t) -> int32x4_t {
+        unsafe {
+            let rev64 = vrev64q_s32(v);
+            vcombine_s32(vget_high_s32(rev64), vget_low_s32(rev64))
+        }
+    }
+
+    pub unsafe fn hevc_inverse8_neon(input: &[i32; 8], output: &mut [i32; 8]) {
+        let even: [i32; 4] = [input[0], input[2], input[4], input[6]];
+        let mut values = [0i32; 4];
+        hevc_inverse4_scalar_arr(&even, &mut values);
+
+        unsafe {
+            let val = vld1q_s32(values.as_ptr());
+            let mut odd = vdupq_n_s32(0);
+            for k in (1..8).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                let d_16 = vld1_s16(HEVC_DCT[k * 4].as_ptr());
+                let d_32 = vmovl_s16(d_16);
+                odd = vmlaq_n_s32(odd, d_32, input[k]);
+            }
+            let sum = vaddq_s32(val, odd);
+            let diff = vsubq_s32(val, odd);
+            vst1q_s32(output.as_mut_ptr(), sum);
+            vst1q_s32(output.as_mut_ptr().add(4), vrev_s32(diff));
+        }
+    }
+
+    pub unsafe fn hevc_inverse16_neon(input: &[i32; 16], output: &mut [i32; 16]) {
+        let even: [i32; 8] = std::array::from_fn(|k| input[2 * k]);
+        let mut values = [0i32; 8];
+        unsafe { hevc_inverse8_neon(&even, &mut values) };
+
+        unsafe {
+            let val0 = vld1q_s32(values.as_ptr());
+            let val1 = vld1q_s32(values.as_ptr().add(4));
+            let mut odd0 = vdupq_n_s32(0);
+            let mut odd1 = vdupq_n_s32(0);
+            for k in (1..16).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                let ptr = HEVC_DCT[k * 2].as_ptr();
+                let d0 = vmovl_s16(vld1_s16(ptr));
+                let d1 = vmovl_s16(vld1_s16(ptr.add(4)));
+                odd0 = vmlaq_n_s32(odd0, d0, input[k]);
+                odd1 = vmlaq_n_s32(odd1, d1, input[k]);
+            }
+            let sum0 = vaddq_s32(val0, odd0);
+            let sum1 = vaddq_s32(val1, odd1);
+            let diff0 = vsubq_s32(val0, odd0);
+            let diff1 = vsubq_s32(val1, odd1);
+            vst1q_s32(output.as_mut_ptr(), sum0);
+            vst1q_s32(output.as_mut_ptr().add(4), sum1);
+            vst1q_s32(output.as_mut_ptr().add(8), vrev_s32(diff1));
+            vst1q_s32(output.as_mut_ptr().add(12), vrev_s32(diff0));
+        }
+    }
+
+    pub unsafe fn hevc_inverse32_neon(input: &[i32; 32], output: &mut [i32; 32]) {
+        let even: [i32; 16] = std::array::from_fn(|k| input[2 * k]);
+        let mut values = [0i32; 16];
+        unsafe { hevc_inverse16_neon(&even, &mut values) };
+
+        unsafe {
+            let val0 = vld1q_s32(values.as_ptr());
+            let val1 = vld1q_s32(values.as_ptr().add(4));
+            let val2 = vld1q_s32(values.as_ptr().add(8));
+            let val3 = vld1q_s32(values.as_ptr().add(12));
+            let mut odd0 = vdupq_n_s32(0);
+            let mut odd1 = vdupq_n_s32(0);
+            let mut odd2 = vdupq_n_s32(0);
+            let mut odd3 = vdupq_n_s32(0);
+            for k in (1..32).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                let ptr = HEVC_DCT[k].as_ptr();
+                let d0 = vmovl_s16(vld1_s16(ptr));
+                let d1 = vmovl_s16(vld1_s16(ptr.add(4)));
+                let d2 = vmovl_s16(vld1_s16(ptr.add(8)));
+                let d3 = vmovl_s16(vld1_s16(ptr.add(12)));
+                odd0 = vmlaq_n_s32(odd0, d0, input[k]);
+                odd1 = vmlaq_n_s32(odd1, d1, input[k]);
+                odd2 = vmlaq_n_s32(odd2, d2, input[k]);
+                odd3 = vmlaq_n_s32(odd3, d3, input[k]);
+            }
+            let sum0 = vaddq_s32(val0, odd0);
+            let sum1 = vaddq_s32(val1, odd1);
+            let sum2 = vaddq_s32(val2, odd2);
+            let sum3 = vaddq_s32(val3, odd3);
+            let diff0 = vsubq_s32(val0, odd0);
+            let diff1 = vsubq_s32(val1, odd1);
+            let diff2 = vsubq_s32(val2, odd2);
+            let diff3 = vsubq_s32(val3, odd3);
+            vst1q_s32(output.as_mut_ptr(), sum0);
+            vst1q_s32(output.as_mut_ptr().add(4), sum1);
+            vst1q_s32(output.as_mut_ptr().add(8), sum2);
+            vst1q_s32(output.as_mut_ptr().add(12), sum3);
+            vst1q_s32(output.as_mut_ptr().add(16), vrev_s32(diff3));
+            vst1q_s32(output.as_mut_ptr().add(20), vrev_s32(diff2));
+            vst1q_s32(output.as_mut_ptr().add(24), vrev_s32(diff1));
+            vst1q_s32(output.as_mut_ptr().add(28), vrev_s32(diff0));
+        }
+    }
+}
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+mod hevc_avx2 {
+    use super::*;
+    #[cfg(target_arch = "x86")]
+    use std::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use std::arch::x86_64::*;
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn hevc_inverse8_avx2(input: &[i32; 8], output: &mut [i32; 8]) {
+        let even: [i32; 4] = [input[0], input[2], input[4], input[6]];
+        let mut values = [0i32; 4];
+        hevc_inverse4_scalar_arr(&even, &mut values);
+
+        unsafe {
+            let val = _mm_loadu_si128(values.as_ptr().cast());
+            let mut odd = _mm_setzero_si128();
+            for k in (1..8).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                let d_16 = _mm_loadl_epi64(HEVC_DCT[k * 4].as_ptr().cast());
+                let d_32 = _mm_cvtepi16_epi32(d_16);
+                let prod = _mm_mullo_epi32(d_32, _mm_set1_epi32(input[k]));
+                odd = _mm_add_epi32(odd, prod);
+            }
+            let sum = _mm_add_epi32(val, odd);
+            let diff = _mm_sub_epi32(val, odd);
+            _mm_storeu_si128(output.as_mut_ptr().cast(), sum);
+            let rev_diff = _mm_shuffle_epi32(diff, 0b00_01_10_11);
+            _mm_storeu_si128(output.as_mut_ptr().add(4).cast(), rev_diff);
+        }
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn hevc_inverse16_avx2(input: &[i32; 16], output: &mut [i32; 16]) {
+        let even: [i32; 8] = std::array::from_fn(|k| input[2 * k]);
+        let mut values = [0i32; 8];
+        unsafe { hevc_inverse8_avx2(&even, &mut values) };
+
+        unsafe {
+            let val = _mm256_loadu_si256(values.as_ptr().cast());
+            let mut odd = _mm256_setzero_si256();
+            for k in (1..16).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                let d_16 = _mm_loadu_si128(HEVC_DCT[k * 2].as_ptr().cast());
+                let d_32 = _mm256_cvtepi16_epi32(d_16);
+                let prod = _mm256_mullo_epi32(d_32, _mm256_set1_epi32(input[k]));
+                odd = _mm256_add_epi32(odd, prod);
+            }
+            let sum = _mm256_add_epi32(val, odd);
+            let diff = _mm256_sub_epi32(val, odd);
+            _mm256_storeu_si256(output.as_mut_ptr().cast(), sum);
+            let rev_mask = _mm256_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0);
+            let rev_diff = _mm256_permutevar8x32_epi32(diff, rev_mask);
+            _mm256_storeu_si256(output.as_mut_ptr().add(8).cast(), rev_diff);
+        }
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub unsafe fn hevc_inverse32_avx2(input: &[i32; 32], output: &mut [i32; 32]) {
+        let even: [i32; 16] = std::array::from_fn(|k| input[2 * k]);
+        let mut values = [0i32; 16];
+        unsafe { hevc_inverse16_avx2(&even, &mut values) };
+
+        unsafe {
+            let val0 = _mm256_loadu_si256(values.as_ptr().cast());
+            let val1 = _mm256_loadu_si256(values.as_ptr().add(8).cast());
+            let mut odd0 = _mm256_setzero_si256();
+            let mut odd1 = _mm256_setzero_si256();
+            for k in (1..32).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                let ptr = HEVC_DCT[k].as_ptr();
+                let d0_16 = _mm_loadu_si128(ptr.cast());
+                let d0_32 = _mm256_cvtepi16_epi32(d0_16);
+                let d1_16 = _mm_loadu_si128(ptr.add(8).cast());
+                let d1_32 = _mm256_cvtepi16_epi32(d1_16);
+                let scale = _mm256_set1_epi32(input[k]);
+                odd0 = _mm256_add_epi32(odd0, _mm256_mullo_epi32(d0_32, scale));
+                odd1 = _mm256_add_epi32(odd1, _mm256_mullo_epi32(d1_32, scale));
+            }
+            let sum0 = _mm256_add_epi32(val0, odd0);
+            let sum1 = _mm256_add_epi32(val1, odd1);
+            let diff0 = _mm256_sub_epi32(val0, odd0);
+            let diff1 = _mm256_sub_epi32(val1, odd1);
+            _mm256_storeu_si256(output.as_mut_ptr().cast(), sum0);
+            _mm256_storeu_si256(output.as_mut_ptr().add(8).cast(), sum1);
+            let rev_mask = _mm256_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0);
+            let rev_diff1 = _mm256_permutevar8x32_epi32(diff1, rev_mask);
+            let rev_diff0 = _mm256_permutevar8x32_epi32(diff0, rev_mask);
+            _mm256_storeu_si256(output.as_mut_ptr().add(16).cast(), rev_diff1);
+            _mm256_storeu_si256(output.as_mut_ptr().add(24).cast(), rev_diff0);
+        }
+    }
+}
+
+/// SIMD-accelerated HEVC inverse DCT for sizes 4, 8, 16, and 32.
+///
+/// Dispatches to NEON on aarch64, AVX2 on x86_64 when detected, or scalar factorization.
+pub fn hevc_inverse_dct(input: &[i32], output: &mut [i32]) {
+    let len = input.len();
+    if len == 0 {
+        return;
+    }
+    if input[1..].iter().all(|&v| v == 0) {
+        output[..len].fill(input[0] * 64);
+        return;
+    }
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64.
+        match len {
+            4 => hevc_inverse4_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+            8 => unsafe { hevc_neon::hevc_inverse8_neon(input.try_into().unwrap(), output.try_into().unwrap()) },
+            16 => unsafe { hevc_neon::hevc_inverse16_neon(input.try_into().unwrap(), output.try_into().unwrap()) },
+            32 => unsafe { hevc_neon::hevc_inverse32_neon(input.try_into().unwrap(), output.try_into().unwrap()) },
+            _ => panic!("unsupported HEVC transform size {len}"),
+        }
+        return;
+    }
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if has_avx2() {
+            // SAFETY: AVX2 detected.
+            unsafe {
+                match len {
+                    4 => {
+                        hevc_inverse4_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap());
+                        return;
+                    }
+                    8 => {
+                        hevc_avx2::hevc_inverse8_avx2(input.try_into().unwrap(), output.try_into().unwrap());
+                        return;
+                    }
+                    16 => {
+                        hevc_avx2::hevc_inverse16_avx2(input.try_into().unwrap(), output.try_into().unwrap());
+                        return;
+                    }
+                    32 => {
+                        hevc_avx2::hevc_inverse32_avx2(input.try_into().unwrap(), output.try_into().unwrap());
+                        return;
+                    }
+                    _ => panic!("unsupported HEVC transform size {len}"),
+                }
+            }
+        }
+    }
+    #[allow(unreachable_code)]
+    match len {
+        4 => hevc_inverse4_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        8 => hevc_inverse8_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        16 => hevc_inverse16_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        32 => hevc_inverse32_scalar_arr(input.try_into().unwrap(), output.try_into().unwrap()),
+        _ => panic!("unsupported HEVC transform size {len}"),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1167,4 +1622,81 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn hevc_inverse_dct_matches_dense_matrix_and_scalar() {
+        let mut state = 17u32;
+        for n in [4usize, 8, 16, 32] {
+            for case in 0..128 {
+                let mut input = vec![0i32; n];
+                for (k, v) in input.iter_mut().enumerate() {
+                    state = state.wrapping_mul(1664525).wrapping_add(1013904223);
+                    *v = if case < n && k != case {
+                        0
+                    } else {
+                        (state >> 16) as i16 as i32
+                    };
+                }
+                let mut actual = vec![0i32; n];
+                let mut expected_scalar = vec![0i32; n];
+                hevc_inverse_dct(&input, &mut actual);
+                hevc_inverse_scalar(&input, &mut expected_scalar);
+                assert_eq!(actual, expected_scalar, "n={n} case={case} actual vs scalar");
+
+                for x in 0..n {
+                    let expected_dense: i64 = (0..n)
+                        .map(|k| i64::from(input[k]) * i64::from(HEVC_DCT[k * (32 / n)][x]))
+                        .sum();
+                    assert_eq!(
+                        i64::from(actual[x]),
+                        expected_dense,
+                        "n={n} case={case} x={x} actual vs dense"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn hevc_inverse_dct_dc_only() {
+        for n in [4usize, 8, 16, 32] {
+            let mut input = vec![0i32; n];
+            input[0] = 42;
+            let mut actual = vec![0i32; n];
+            hevc_inverse_dct(&input, &mut actual);
+            assert_eq!(actual, vec![42 * 64; n]);
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn hevc_inverse_neon_matches_scalar() {
+        let mut state = 0x1234_5678_9ABC_DEF0u64;
+        for trial in 0..200 {
+            // Test 8
+            let input8: [i32; 8] = std::array::from_fn(|_| (xorshift(&mut state) as i16) as i32);
+            let mut out8_neon = [0i32; 8];
+            let mut out8_scalar = [0i32; 8];
+            unsafe { hevc_neon::hevc_inverse8_neon(&input8, &mut out8_neon) };
+            hevc_inverse8_scalar_arr(&input8, &mut out8_scalar);
+            assert_eq!(out8_neon, out8_scalar, "trial {trial} size 8");
+
+            // Test 16
+            let input16: [i32; 16] = std::array::from_fn(|_| (xorshift(&mut state) as i16) as i32);
+            let mut out16_neon = [0i32; 16];
+            let mut out16_scalar = [0i32; 16];
+            unsafe { hevc_neon::hevc_inverse16_neon(&input16, &mut out16_neon) };
+            hevc_inverse16_scalar_arr(&input16, &mut out16_scalar);
+            assert_eq!(out16_neon, out16_scalar, "trial {trial} size 16");
+
+            // Test 32
+            let input32: [i32; 32] = std::array::from_fn(|_| (xorshift(&mut state) as i16) as i32);
+            let mut out32_neon = [0i32; 32];
+            let mut out32_scalar = [0i32; 32];
+            unsafe { hevc_neon::hevc_inverse32_neon(&input32, &mut out32_neon) };
+            hevc_inverse32_scalar_arr(&input32, &mut out32_scalar);
+            assert_eq!(out32_neon, out32_scalar, "trial {trial} size 32");
+        }
+    }
 }
+

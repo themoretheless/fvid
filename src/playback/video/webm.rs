@@ -17,11 +17,18 @@ use std::{
     time::Duration,
 };
 
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+use crate::playback_mp4::{Hardware, hardware_frame, open_hardware};
+
 enum Picture {
     Coded(Arc<IntraPicture>, AvcColour),
     Ffv1(Arc<PackedPlanar>),
     Vp9(Box<Decoded>),
     Av1(crate::codec::av1_decoder::Decoded),
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    Surface(fvid_vt::Surface, AvcColour),
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    Planar8(Arc<Planar8>),
 }
 enum VideoDecoder {
     Avc(Box<AvcDecoder>),
@@ -84,9 +91,26 @@ pub struct WebmVideoReader<R> {
     rgb_budget: usize,
     failed: bool,
     frames: u64,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    hardware: Option<Hardware>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    coded_dimensions: [u32; 2],
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    codec_private: Vec<u8>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    raw_codec: &'static str,
 }
 impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn open(reader: R, budget: usize) -> Result<Self> {
+        Self::open_with_hardware(reader, budget, true)
+    }
+
+    pub fn open_software(reader: R, budget: usize) -> Result<Self> {
+        Self::open_with_hardware(reader, budget, false)
+    }
+
+    fn open_with_hardware(reader: R, budget: usize, allow_hardware: bool) -> Result<Self> {
+        let _ = allow_hardware;
         let mut demux = WebmReader::open(reader, Limits::default())?;
         let track = demux
             .tracks
@@ -139,6 +163,18 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // sequence header, and a track with no `Colour` element is graded by
         // that instead, so the two are read apart.
         let (colour, hdr) = (track.colour, track.hdr);
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let track_width = track.width;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let track_height = track.height;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let track_codec = match track.codec.as_str() {
+            "V_MPEG4/ISO/AVC" => "V_MPEG4/ISO/AVC",
+            "V_MPEGH/ISO/HEVC" => "V_MPEGH/ISO/HEVC",
+            "V_VP9" => "V_VP9",
+            "V_AV1" => "V_AV1",
+            _ => "",
+        };
         let (track, private) = (track.number, track.codec_private.clone());
         let rgb_budget = budget / 4;
         // An AV1 track's own statement, read before a single picture is
@@ -159,6 +195,19 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             seed
         });
         let queue_budget = (budget - rgb_budget) / 2;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let hardware = if !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
+            None
+        } else {
+            open_hardware(
+                track_codec.as_bytes(),
+                &private,
+                track_width,
+                track_height,
+                queue_budget,
+                false,
+            )
+        };
         let future_pts = if avc || hevc {
             // Reordered codecs need a suffix minimum of packet PTS to know when
             // a decoded picture can be emitted. Packet payloads remain lazy.
@@ -198,25 +247,32 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         } else {
             None
         };
+        let decoder = if let Some((w, h)) = ffv1_size {
+            VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::new(
+                w,
+                h,
+                queue_budget,
+            )?))
+        } else if avc {
+            VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
+        } else if hevc {
+            let mut d = HevcDecoder::from_configuration(&private, queue_budget)?;
+            if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
+                if let Ok(packet) = demux.read_packet(index) {
+                    d.observe_packet(&packet);
+                }
+            }
+            VideoDecoder::Hevc(Box::new(d))
+        } else if av1 {
+            VideoDecoder::Av1(Box::new(crate::codec::av1_decoder::Decoder::from_configuration(
+                &private, (budget - rgb_budget) / 12 * 10,
+            )?))
+        } else {
+            VideoDecoder::Vp9(Box::new(Decoder::new((budget - rgb_budget) / 12 * 10)))
+        };
         Ok(Self {
             demux,
-            decoder: if let Some((w, h)) = ffv1_size {
-                VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::new(
-                    w,
-                    h,
-                    queue_budget,
-                )?))
-            } else if avc {
-                VideoDecoder::Avc(Box::new(AvcDecoder::new(&private, queue_budget)?))
-            } else if hevc {
-                VideoDecoder::Hevc(Box::new(HevcDecoder::from_configuration(&private, queue_budget)?))
-            } else if av1 {
-                VideoDecoder::Av1(Box::new(crate::codec::av1_decoder::Decoder::from_configuration(
-                    &private, (budget - rgb_budget) / 12 * 10,
-                )?))
-            } else {
-                VideoDecoder::Vp9(Box::new(Decoder::new((budget - rgb_budget) / 12 * 10)))
-            },
+            decoder,
             track,
             index: 0,
             pending: None,
@@ -250,7 +306,51 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             rgb_budget,
             failed: false,
             frames: 0,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            hardware,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            coded_dimensions: [
+                u32::try_from(track_width).unwrap_or(0),
+                u32::try_from(track_height).unwrap_or(0),
+            ],
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            codec_private: private,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            raw_codec: track_codec,
         })
+    }
+    /// Whether frames come from the platform's hardware decoder.
+    pub fn hardware_accelerated(&self) -> bool {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        {
+            self.hardware.is_some()
+        }
+        #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+        false
+    }
+    /// Enable shared decoder surfaces before reading the first frame.
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    pub fn enable_shared_surfaces(&mut self) -> Result<bool> {
+        if self.index != 0 || self.pending.is_some() || !self.queued.is_empty() {
+            return Err(invalid(
+                "shared surfaces must be configured before decoding",
+            ));
+        }
+        if self.hardware.is_none() {
+            return Ok(false);
+        }
+        let Some(hardware) = open_hardware(
+            self.raw_codec.as_bytes(),
+            &self.codec_private,
+            u64::from(self.coded_dimensions[0]),
+            u64::from(self.coded_dimensions[1]),
+            self.queue_budget,
+            true,
+        ) else {
+            return Ok(false);
+        };
+        self.hardware = Some(hardware);
+        Ok(true)
     }
     pub fn dimensions(&self) -> [usize; 2] {
         self.dimensions
@@ -574,14 +674,29 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             };
             let mut bytes = 0usize;
             for frame in self.queued.iter().chain(std::iter::once(&frame)) {
-                if let Picture::Coded(p, _) = &frame.decoded {
-                    for plane in [&p.y, &p.cb, &p.cr] {
-                        bytes = plane
-                            .len()
-                            .checked_mul(2)
-                            .and_then(|n| bytes.checked_add(n))
+                match &frame.decoded {
+                    Picture::Coded(p, _) => {
+                        for plane in [&p.y, &p.cb, &p.cr] {
+                            bytes = plane
+                                .len()
+                                .checked_mul(2)
+                                .and_then(|n| bytes.checked_add(n))
+                                .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
+                        }
+                    }
+                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                    Picture::Surface(s, _) => {
+                        bytes = bytes
+                            .checked_add(s.storage_bytes())
                             .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
                     }
+                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                    Picture::Planar8(p) => {
+                        bytes = bytes
+                            .checked_add(p.y.len() + p.cb.len() + p.cr.len())
+                            .ok_or_else(|| invalid("Matroska reorder storage overflow"))?;
+                    }
+                    _ => {}
                 }
             }
             if bytes > self.queue_budget {
@@ -607,18 +722,56 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             let duration = self.demux.packets[index].duration_ns;
             let packet = self.demux.read_packet(index)?;
             let mut visible = None;
-            match &mut self.decoder {
-                VideoDecoder::Avc(d) => {
-                    if let Some(picture) = d.decode_order(&packet)? {
-                        let colour =
-                            AvcColour::from_vui(d.active_vui().or_else(|| d.recorded_vui()))?;
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            if let Some(hardware) = &mut self.hardware {
+                if let VideoDecoder::Hevc(d) = &mut self.decoder {
+                    d.observe_packet(&packet);
+                }
+                if hardware.shared {
+                    let surface = hardware
+                        .session
+                        .decode_surface(&packet)
+                        .map_err(|error| invalid(&error.to_string()))?;
+                    if let Some(surface) = surface {
                         visible = Some(Frame {
-                            decoded: Picture::Coded(picture, colour),
+                            decoded: Picture::Surface(surface, hardware.colour),
+                            pts,
+                            duration,
+                        });
+                    }
+                } else {
+                    let planes = hardware
+                        .session
+                        .decode(&packet)
+                        .map_err(|error| invalid(&error.to_string()))?;
+                    if let Some(planes) = planes {
+                        let (picture, planes8) = hardware_frame(planes, hardware.colour);
+                        let decoded = if let Some(p) = planes8 {
+                            Picture::Planar8(Arc::new(p))
+                        } else {
+                            Picture::Coded(Arc::new(picture), hardware.colour)
+                        };
+                        visible = Some(Frame {
+                            decoded,
                             pts,
                             duration,
                         });
                     }
                 }
+            }
+            if visible.is_none() {
+                match &mut self.decoder {
+                    VideoDecoder::Avc(d) => {
+                        if let Some(picture) = d.decode_order(&packet)? {
+                            let colour =
+                                AvcColour::from_vui(d.active_vui().or_else(|| d.recorded_vui()))?;
+                            visible = Some(Frame {
+                                decoded: Picture::Coded(picture, colour),
+                                pts,
+                                duration,
+                            });
+                        }
+                    }
                 VideoDecoder::Hevc(d) => {
                     if let Some(frame) = d.decode_packet(&packet)?.filter(|f| f.output) {
                         let p = &frame.picture;
@@ -686,6 +839,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         });
                     }
                 }
+            }
             }
             // Invisible blocks are still fully decoded: later frames may
             // reference them. Only their presentation is suppressed.
@@ -758,6 +912,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let start = u128::try_from(i128::from(current.pts) - i128::from(base))
             .map_err(|_| invalid("WebM presentation timestamp precedes origin"))?;
         let (size, depth, full_range, color_space, monochrome) = match &current.decoded {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Picture::Surface(s, colour) => {
+                ([s.width() as u32, s.height() as u32], s.depth(), colour.full, 0, false)
+            }
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Picture::Planar8(p) => {
+                ([p.width as u32, p.height as u32], 8, p.colour.full, 0, false)
+            }
             Picture::Coded(p, colour) => {
                 let (w, h) = p.dimensions();
                 ([w as u32, h as u32], p.bit_depth, colour.full, 0, false)
@@ -823,6 +985,22 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             crate::playback_native::avc_to_rgb(p, *colour, &mut self.rgb, self.rgb_budget)?;
             return Ok(true);
         }
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Picture::Planar8(p) = &current.decoded {
+            crate::playback_native::planar8_to_rgb(p, &mut self.rgb, self.rgb_budget)?;
+            return Ok(true);
+        }
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Picture::Surface(s, colour) = &current.decoded {
+            let planes = s.download().map_err(|e| invalid(&e.to_string()))?;
+            let (picture, planes8) = hardware_frame(planes, *colour);
+            if let Some(planes8) = planes8 {
+                crate::playback_native::planar8_to_rgb(&planes8, &mut self.rgb, self.rgb_budget)?;
+            } else {
+                crate::playback_native::avc_to_rgb(&picture, *colour, &mut self.rgb, self.rgb_budget)?;
+            }
+            return Ok(true);
+        }
         let (kr, kb) = match current.color_space {
             0 | 1 | 3 => (0.299, 0.114),
             2 => (0.2126, 0.0722),
@@ -852,6 +1030,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         let planes = match &current.decoded {
             Picture::Coded(_, _) | Picture::Ffv1(_) => unreachable!("coded planes handled above"),
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Picture::Surface(_, _) | Picture::Planar8(_) => unreachable!("hardware planes handled above"),
             Picture::Vp9(d) => d
                 .picture
                 .planes
@@ -915,6 +1095,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 return Ok(None);
             };
             let raw = match &current.decoded {
+                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                Picture::Surface(surface, colour) => crate::playback_native::RawFrame::Surface {
+                    surface: surface.clone(),
+                    colour: *colour,
+                },
+                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                Picture::Planar8(p) => crate::playback_native::RawFrame::Planar8(p.clone()),
                 Picture::Ffv1(p) => crate::playback_native::RawFrame::Planar(p.clone()),
                 Picture::Coded(picture, colour) => crate::playback_native::RawFrame::Avc {
                     picture: picture.clone(),
@@ -982,6 +1169,19 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             }
             return Ok(crate::playback_native::avc_to_planar8(p, *colour));
         }
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Picture::Planar8(p) = &current.decoded {
+            return Ok((**p).clone());
+        }
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Picture::Surface(s, colour) = &current.decoded {
+            let planes = s.download().map_err(|e| invalid(&e.to_string()))?;
+            let (picture, planes8) = hardware_frame(planes, *colour);
+            if let Some(planes8) = planes8 {
+                return Ok(planes8);
+            }
+            return Ok(crate::playback_native::avc_to_planar8(&picture, *colour));
+        }
         let (kr, kb) = match current.color_space {
             0 | 1 | 3 => (0.299, 0.114),
             2 => (0.2126, 0.0722),
@@ -1022,6 +1222,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         let planes = match &current.decoded {
             Picture::Coded(_, _) | Picture::Ffv1(_) => unreachable!("coded planes handled above"),
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Picture::Surface(_, _) | Picture::Planar8(_) => unreachable!("hardware planes handled above"),
             Picture::Vp9(d) => d
                 .picture
                 .planes

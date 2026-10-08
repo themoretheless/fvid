@@ -701,6 +701,37 @@ impl Session {
     /// Create a VP9 session. `config` is the vpcC configuration box contents;
     /// `width` and `height` are the coded dimensions.
     pub fn new_vp9(config: &[u8], width: u32, height: u32) -> Result<Self, Error> {
+        Self::new_vp9_format(config, width, height, PLANAR_420)
+    }
+
+    /// VP9 session producing shared NV12 or P010 surfaces for Metal.
+    pub fn new_vp9_surface(
+        config: &[u8],
+        width: u32,
+        height: u32,
+        depth: u8,
+        full_range: bool,
+    ) -> Result<Self, Error> {
+        let pixel_format = match (depth, full_range) {
+            (8, false) => NV12_VIDEO,
+            (8, true) => NV12_FULL,
+            (10, false) => P010_VIDEO,
+            (10, true) => P010_FULL,
+            _ => {
+                return Err(Error(
+                    "VideoToolbox: shared VP9 output supports 8 or 10 bits".into(),
+                ));
+            }
+        };
+        Self::new_vp9_format(config, width, height, pixel_format)
+    }
+
+    fn new_vp9_format(
+        config: &[u8],
+        width: u32,
+        height: u32,
+        pixel_format: u32,
+    ) -> Result<Self, Error> {
         if config.is_empty() {
             return Err(Error("VideoToolbox: empty VP9 configuration".into()));
         }
@@ -737,13 +768,44 @@ impl Session {
             if code != 0 || format.is_null() {
                 return Err(status("VP9 format description", code));
             }
-            Self::from_format(format)
+            Self::from_format_with_pixel_format(format, pixel_format)
         }
     }
 
     /// Create an AV1 session. `config` is the av1C configuration box contents;
     /// `width` and `height` are the coded dimensions.
     pub fn new_av1(config: &[u8], width: u32, height: u32) -> Result<Self, Error> {
+        Self::new_av1_format(config, width, height, PLANAR_420)
+    }
+
+    /// AV1 session producing shared NV12 or P010 surfaces for Metal.
+    pub fn new_av1_surface(
+        config: &[u8],
+        width: u32,
+        height: u32,
+        depth: u8,
+        full_range: bool,
+    ) -> Result<Self, Error> {
+        let pixel_format = match (depth, full_range) {
+            (8, false) => NV12_VIDEO,
+            (8, true) => NV12_FULL,
+            (10, false) => P010_VIDEO,
+            (10, true) => P010_FULL,
+            _ => {
+                return Err(Error(
+                    "VideoToolbox: shared AV1 output supports 8 or 10 bits".into(),
+                ));
+            }
+        };
+        Self::new_av1_format(config, width, height, pixel_format)
+    }
+
+    fn new_av1_format(
+        config: &[u8],
+        width: u32,
+        height: u32,
+        pixel_format: u32,
+    ) -> Result<Self, Error> {
         if config.is_empty() {
             return Err(Error("VideoToolbox: empty AV1 configuration".into()));
         }
@@ -780,10 +842,11 @@ impl Session {
             if code != 0 || format.is_null() {
                 return Err(status("AV1 format description", code));
             }
-            Self::from_format(format)
+            Self::from_format_with_pixel_format(format, pixel_format)
         }
     }
 
+    #[allow(dead_code)]
     unsafe fn from_format(format: CFRef) -> Result<Self, Error> {
         // SAFETY: the owned description is passed to the shared session constructor.
         unsafe { Self::from_format_with_pixel_format(format, PLANAR_420) }

@@ -135,6 +135,20 @@ impl HevcDecoder {
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
     }
+    /// Inspect in-band SEI NAL units in a packet to update HDR metadata without full picture decoding.
+    pub fn observe_packet(&mut self, packet: &[u8]) {
+        if let Ok(units) = NalUnits::new(packet, self.length) {
+            for nal in units {
+                let Ok(nal) = nal else { break };
+                let Ok(header) = NalHeader::parse(nal) else { continue };
+                if hevc_sei::is_sei_unit(header.unit_type) {
+                    if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, self.budget) {
+                        self.hdr.merge(hdr);
+                    }
+                }
+            }
+        }
+    }
     // Validate parameter updates before committing them to decoder state.
     fn updated_pairs(&self, packet: &[u8]) -> Result<Option<ParameterSets>> {
         if packet.len() > self.budget {

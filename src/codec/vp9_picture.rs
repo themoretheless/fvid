@@ -94,6 +94,18 @@ pub fn decode_frame(
 ) -> Result<Picture> {
     decode_frame_counted(frame, header, ch, references, previous, budget).map(|v| v.0)
 }
+
+/// Decode with optional tile parallelism enabled.
+pub fn decode_frame_parallel(
+    frame: &[u8],
+    header: &Header,
+    ch: &CompressedHeader,
+    references: [Option<&Picture>; 3],
+    previous: Option<&Picture>,
+    budget: usize,
+) -> Result<(Picture, Counts)> {
+    decode_frame_counted(frame, header, ch, references, previous, budget)
+}
 pub(crate) fn decode_frame_counted(
     frame: &[u8],
     header: &Header,
