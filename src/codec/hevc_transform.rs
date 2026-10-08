@@ -1,5 +1,7 @@
 //! Main/Main10 inverse scaling and integer transforms (H.265 8.6.2–8.6.4).
 use super::{hevc_scaling::ScalingLists, hevc_transform_tables::DCT};
+#[cfg(target_arch = "x86_64")]
+use crate::codec::simd_dct;
 use crate::{Result, invalid};
 
 const DST: [[i16; 4]; 4] = [
@@ -189,6 +191,15 @@ fn inverse_dct(input: &[i32], output: &mut [i32]) {
         output.fill(input[0] * 64);
         return;
     }
+    
+    #[cfg(target_arch = "x86_64")]
+    if input.len() == 32 && simd_dct::has_avx2_support() {
+        unsafe {
+            simd_dct::inverse_dct32_avx2(input, output);
+            return;
+        }
+    }
+    
     match input.len() {
         4 => inverse4(input, output),
         8 => inverse8(input, output),
