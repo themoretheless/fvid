@@ -2078,3 +2078,48 @@ the exact still-pending synthesis errors for both explicit and implicit PS.
 The PCM acceptance expectations must replace those refusal assertions when
 real hybrid/decorrelation/mixing stereo DSP is connected. No duplicated mono
 output or unrelated parsing failure counts as HE-AACv2 playback acceptance.
+
+### PS native parameter history, grids and numeric failure videos
+
+`scripts/generate_aac_ps_history_fixtures.py` authors absolute IID/ICC/IPD/OPD
+targets before converting them to encoded frequency/time deltas. The saved
+`aac-ps-history-syntax.bin` and `aac-ps-history-oracles.json` contain 20 original
+sequences for all native resolutions/quantizers/mixing modes and 24/30/32 QMF
+slots. Different directions alternate per tool/envelope. Cases include phase
+wrap, no-envelope reuse, quantizer/resolution changes with no new parameters,
+disable/re-enable defaults, and startup requiring an independent PS header.
+Expected indices are these original targets, never decoder output. Header and
+numeric history rollback are tested on truncated or invalid complete packets.
+
+`aac-ps-dequant-oracles.json` records the normative IID/ICC grids (GOST R
+53556.8-2013 tables 25/26/28), and all phase indices from table 31. A separate
+90-digit Decimal Machin series computes the saved phase-radian references.
+No third-party codec implementation or Rust decoder is run by the generator.
+
+`he-aac-ps-varying-synthetic.mp4` and `he-aac-ps-varying-packets.bin` carry
+three original AAC/SBR/PS packets with varying IID/ICC targets and IPD/OPD phase
+wraps. They use the same authored AVC seed and fully replaced synthetic audio
+template structure as the earlier PS videos. This is native numeric acceptance
+and pending stereo PCM synthesis reproduction, not HE-AACv2 playback proof.
+
+`he-aac-ps-invalid-iid-coarse-synthetic.mp4`,
+`he-aac-ps-invalid-iid-fine-synthetic.mp4` and
+`he-aac-ps-invalid-icc-synthetic.mp4` reproduce *numeric grid* violations. Their
+three-packet audio is saved in `he-aac-ps-invalid-packets.bin`; all deltas use
+legal normative Huffman symbols. The indices reconstruct to 8 for coarse IID,
+16 for fine IID, or 14 for ICC. `tests/he_aac_ps.rs` first verifies MP4 demux,
+original packet bytes, SBR syntax/CRC, and successful PS syntax, then requires
+the exact numeric error with unchanged composed PS state. These malformed-media
+refusal tests are intentional and do not stand in for valid PS PCM acceptance.
+
+`he-aac-ps-mode-transition-synthetic.mp4` and
+`he-aac-ps-mode-transition-packets.bin` contain a valid 10-band PS packet, a
+header changing to 34-band modes without new envelopes, then a header disabling
+both tools with no new envelopes. The numeric state exposes current 34-band
+mode fields separately from the old 10-band retained grids; disabling tools
+zeros their parameters without erasing those current mode fields. This is
+numeric/header-state acceptance for later common-band selection, not PCM.
+
+All hashes are recorded in `aac-ps-history-oracles.json`. Generation is explicit,
+offline and separate from tests; no FFmpeg/libav, network, private video, frames,
+audio or codec parameter sets are used.

@@ -3,7 +3,7 @@
 //! and stereo PCM synthesis are separate; syntax acceptance is not playback.
 use super::{Result, aac_ps_huffman::Book, bits::BitReader, invalid};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct IidMode(u8);
 impl IidMode {
     pub fn new(value: u8) -> Result<Self> {
@@ -27,7 +27,7 @@ impl IidMode {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct IccMode(u8);
 impl IccMode {
     pub fn new(value: u8) -> Result<Self> {

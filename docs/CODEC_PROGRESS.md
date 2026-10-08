@@ -6228,8 +6228,49 @@ verified second-packet CRC. `tests/he_aac_ps.rs` accepts their PS syntax and
 reproduces the exact pending synthesis refusals. Generation is offline and
 separate from ordinary tests; it uses no foreign codec or FFmpeg.
 
-This closes PS syntax, not HE-AACv2 playback. Delta reconstruction, parameter
-mapping/dequantization, hybrid filters, decorrelation, interpolated complex
-stereo mixing, PCM synthesis and stereo geometry/implicit PS negotiation still
-need implementation and stereo PCM acceptance references. The native player
-continues to refuse PS explicitly until those stages are implemented.
+This closes PS syntax, not HE-AACv2 playback. Native-band reconstruction and
+dequantization are implemented below. Global parameter-band mapping, hybrid
+filters, decorrelation, interpolated complex stereo mixing, PCM synthesis and
+stereo geometry/implicit PS negotiation still need implementation and stereo
+PCM acceptance references. The native player continues to refuse PS explicitly
+until those stages are implemented.
+
+### Owned PS native parameter history and dequantization (2026-10-08)
+
+`owned_aac::aac_ps_history` reconstructs IID/ICC signed indices and IPD/OPD
+modulo-8 indices within and across envelopes/packets. It preserves the original
+native grids for zero-envelope reuse, even when a new header changes modes;
+disabled tools use zero-index defaults. Later time rows address available raw
+previous-band indices (otherwise index zero), independently of later global
+parameter-band mapping. Frequency-coded first rows are required after a mode
+change. Header/dimensions/codebook ranges/reconstructed grids are checked even
+for manually constructed public frames. Slot-count changes require reset.
+Current retained mode fields are exposed separately from the old physical
+grids, including a no-envelope mode change followed by tool disable. The later
+common-band stage must select the current configuration, not infer it from an
+old retained grid or lose it when the enabled header field becomes absent.
+
+Startup becomes ready only after a header with nonzero envelope count and
+independent first rows for every enabled tool. Clone checkpoints replay the
+same parameters; reset clears both syntax and numeric history. The composed
+PS `Stream` commits input position, header and numeric history together, with
+rollback on a numeric failure in a later block of the same SBR extension.
+Repeated phase extension assignments use the final transmitted parameter rows.
+`aac_ps_dequant` exposes normative IID dB, ICC coherence and phase radians,
+with independent saved Decimal/Machin phase references for all grid values.
+
+Twenty original varying-target sequences cover all six modes and 24/30/32 QMF
+slots, alternating time/frequency rows, phase wraps, startup, disabled/re-enabled
+tools, no-envelope reuse and resolution changes. Expected indices are authored
+absolute targets before encoding, not decoder-generated references. Five new
+short MP4 videos cover varying valid PS and invalid coarse/fine IID or ICC
+indices made from otherwise legal Huffman words, plus mode-change/disable with
+no new envelopes. SBR syntax/CRC and PS syntax
+are checked before asserting the exact numeric refusal. All generation is
+explicit and offline, with no FFmpeg, foreign codec or private source media.
+
+These tests establish native parameter recovery, not PS stereo PCM. The old
+and varying valid videos retain explicit pending-synthesis refusal checks until
+real hybrid/decorrelation/mixing/synthesis and container stereo negotiation are
+implemented. Mapping/dequantization at the *common* stereo-band grid remains a
+separate necessary step before mixing; native values alone cannot replace it.

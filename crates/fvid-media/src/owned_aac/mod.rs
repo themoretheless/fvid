@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 pub mod aac_ps_data;
 pub mod aac_ps_huffman;
+pub mod aac_ps_dequant;
+pub mod aac_ps_history;
 mod aac_ps_huffman_tables;
 pub mod aac_coupling;
 pub mod aac_imdct;
