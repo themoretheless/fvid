@@ -42,6 +42,28 @@ impl PsAacDecoder {
             failed: false,
         })
     }
+    /// Construct a candidate for a reader that has verified actual in-band PS.
+    /// The native decoder still rejects explicit disable flags and requires PS
+    /// payload presence before a successful EOF drain.
+    pub fn new_with_in_band_ps(
+        configuration: &[u8],
+        sample_rate: u32,
+        channels: u16,
+    ) -> crate::Result<Self> {
+        let asc = crate::codec::config::aac_specific_config(configuration)?;
+        let decoder = NativePsAacDecoder::new_with_in_band_ps(asc, sample_rate)
+            .map_err(|e| crate::invalid(&e.0))?;
+        if channels != 2 {
+            return Err(crate::invalid(
+                "in-band PS requires negotiated stereo layout",
+            ));
+        }
+        Ok(Self {
+            decoder,
+            pending: None,
+            failed: false,
+        })
+    }
     pub fn spec(&self) -> AudioSpec {
         AudioSpec {
             sample_rate: self.decoder.sample_rate(),

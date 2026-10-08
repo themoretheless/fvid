@@ -88,13 +88,7 @@ impl AudioPlayback {
                     return;
                 }
 
-                let decoder = match crate::codec::make_audio_decoder(
-                    stream.codec(),
-                    stream.extra_data(),
-                    sample_rate,
-                    channels,
-                    stream.bits_per_sample(),
-                ) {
+                let decoder = match stream.make_decoder() {
                     Ok(d) => d,
                     Err(e) => {
                         let _ =

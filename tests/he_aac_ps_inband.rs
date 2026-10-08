@@ -156,3 +156,69 @@ fn in_band_candidate_honors_disabled_tools_and_does_not_classify_plain_mono_as_p
     candidate.restore(&saved).unwrap();
     assert_eq!(candidate.pending_frame_index(), pending);
 }
+
+#[cfg(feature = "player")]
+#[test]
+fn unhinted_ps_playback_bridge_retains_delayed_signed_source_windows() {
+    use fvid::codec::aac_ps_playback::PsAacDecoder;
+    let manifest: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-inband-oracles.json"
+    ))
+    .unwrap();
+    let reference = include_bytes!("fixtures/playback-errors/aac-ps-absence-pcm.bin");
+    for case in manifest["cases"].as_array().unwrap() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(case["video"]["file"].as_str().unwrap());
+        let mut reader =
+            Mp4Reader::open(std::fs::File::open(path).unwrap(), Limits::default()).unwrap();
+        let track = reader
+            .tracks()
+            .iter()
+            .position(|t| t.handler == *b"soun")
+            .unwrap();
+        let config = reader.tracks()[track].configuration.clone();
+        assert!(PsAacDecoder::new(&config, 48000, 2).is_err());
+        assert!(PsAacDecoder::new_with_in_band_ps(&config, 48000, 1).is_err());
+        let mut decoder = PsAacDecoder::new_with_in_band_ps(&config, 48000, 2).unwrap();
+        let pts = [-480, 1440, 3360];
+        let duration = [960, 720, 480];
+        let mut frames = vec![];
+        for i in 0..3 {
+            let mut packet = vec![];
+            reader.read_packet(track, i, &mut packet).unwrap();
+            let saved = decoder.checkpoint().unwrap();
+            let output = decoder.decode(&packet, pts[i], duration[i]).unwrap();
+            decoder.restore(&saved).unwrap();
+            let replay = decoder.decode(&packet, pts[i], duration[i]).unwrap();
+            assert_eq!(
+                output.as_ref().map(|f| &f.packet.data),
+                replay.as_ref().map(|f| &f.packet.data)
+            );
+            if let Some(frame) = output {
+                frames.push(frame);
+            }
+        }
+        frames.push(decoder.finish().unwrap().unwrap());
+        assert!(decoder.finish().unwrap().is_none());
+        let mut offset = 0;
+        for (i, frame) in frames.iter().enumerate() {
+            assert_eq!(frame.source_pts, pts[i]);
+            assert_eq!(frame.source_duration, duration[i]);
+            assert_eq!(frame.frame_index, i as u64);
+            for bytes in frame.packet.data.chunks_exact(4) {
+                let actual = f32::from_le_bytes(bytes.try_into().unwrap());
+                let descriptor = &case["pcm"]["Double"][offset % 2];
+                let start = descriptor[0].as_u64().unwrap() as usize + (offset / 2) * 8;
+                let expected =
+                    f64::from_le_bytes(reference[start..start + 8].try_into().unwrap()) as f32;
+                assert!((actual - expected).abs() <= 2. * f32::EPSILON * expected.abs() + 2e-16);
+                offset += 1;
+            }
+        }
+        assert_eq!(
+            offset,
+            case["pcm"]["Double"][0][1].as_u64().unwrap() as usize * 2
+        );
+    }
+}
