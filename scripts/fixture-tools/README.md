@@ -249,3 +249,9 @@ SBR dequantization oracles: explicitly run
 `python3 scripts/generate_aac_sbr_dequant_oracles.py` to generate 530 Decimal
 numerical cases. It uses only the Python standard library, no encoder or network.
 Ordinary tests read the checked-in JSON; see fixture PROVENANCE.md.
+
+
+SBR analysis QMF: explicitly run `scripts/generate_aac_sbr_qmf_oracles.py`
+with local GOST HTML and ISO draft text. It cross-checks all 640 normative
+window constants, then writes original PCM and direct-convolution complex
+traces with hashes. No FFmpeg/network; ordinary tests use saved traces.

@@ -5596,3 +5596,22 @@ This remains coefficient/DSP qualification. HE-AAC encoded playback acceptance
 requires production frame state, output-rate frequency bounds, integration of
 SBR syntax, QMF and high-frequency generation/adjustment. No HE-AAC support claim
 is made from these standalone numerical tests.
+
+
+### Owned SBR analysis QMF foundation
+
+`aac_sbr_qmf::Analysis` implements the normative 32-band complex analysis
+bank: 320-sample retained history, newest-first input orientation, every-other
+QMF window coefficient, five polyphase contributions and complex modulation.
+Immutable modulation tables are shared; cloned histories remain independent.
+Full-call PCM validation precedes mutation; reset discards prior filter state.
+960/1024 core frames produce 30/32 subband slots. Four independently generated
+22-block direct-convolution traces cover impulses, boundary samples, dense
+nonzero signals and tones. Tests also verify bit-identical chunked/whole
+operation, checkpoint replay, reset and invalid-call rollback. All 640 window
+constants were cross-checked against two standard layouts.
+
+This is analysis-bank DSP qualification only. The production HE-AAC path still
+requires rate bounds, frame history/integration, HF generation/adjustment and
+QMF synthesis, followed by encoded fixtures with complete PCM acceptance.
+The direct matrix implementation has not yet been benchmarked or optimized.

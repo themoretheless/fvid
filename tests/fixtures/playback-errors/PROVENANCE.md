@@ -1641,3 +1641,24 @@ and noise quantized-value/parity requirements in 6.18.3.6.
 Source: https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html .
 SHA-256: `d82e592fbfac664eae31fe14b715dfca01aab3381bb7ad19742d2621389a5850`. Generation was repeated with byte-identical output.
 These are numerical protocol oracles, not encoded HE-AAC playback acceptance.
+
+
+### SBR QMF analysis numerical traces
+
+`aac-sbr-qmf-{impulse-first,impulse-boundary,dense,tones}.f32le` contain
+original synthetic PCM, 704 samples each, created by
+`scripts/generate_aac_sbr_qmf_oracles.py`. Their `.complex-f64le` companions
+are independently calculated direct time-index convolutions (22 blocks, 32
+complex bands per block), with no mutable history or intermediate polyphase
+vector. Impulses cover first-sample and block-boundary orientation; dense
+rational signals and two tones cover sustained nonzero state. The JSON manifest
+contains exact input/output hashes. No private media or foreign decoder is used.
+
+The generator requires local UTF-8 GOST HTML and ISO draft text. All 640
+window coefficients must match numerically between GOST R53556.4-2013 A.89
+and ISO w4611 1.A.12 before output is written. Matrix, reversed newest-first
+history and every-other window coefficient follow section 6.18.4.1 and ISO
+Figure 5. Explicit generation is offline; ordinary tests only read saved traces.
+Sources: https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html
+and http://www.mp3-tech.org/programmer/docs/w4611.pdf .
+These are DSP traces, not encoded HE-AAC video/playback acceptance.
