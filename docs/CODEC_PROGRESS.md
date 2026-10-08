@@ -4046,3 +4046,29 @@ unproven. Temporal motion fields, film grain, intrabc/super-resolution, restorat
 quantization matrices and additional layering/chroma behavior remain codec gaps.
 
 Final validation: all 48 tests in 22 checked-in AV1 integration suites and 35 AV1 core tests passed offline. The 168-case palette acceptance also passed in the canonical checkout. All 504 fixture hashes were verified. The palette regression executable has no FFmpeg/libav/libaom/dav1d linkage. All canonical AV1 sources match the verification snapshot after restoration of counterfactual mutations.
+
+## Lossy AV1 palette qualification in progress
+
+The owned lossy generator saves 339 single-frame 4:2:0 streams and matching
+WebM wrappers and pixel goldens. The matrix spans 8/10/12 bits, source color
+counts 2–8, constant/varied chroma, both U/V directions, and even/odd sizes.
+336 cases use small source perturbations at quality 8/32; three additional
+gradient cases at quality 48 exercise palette residuals and active loop filtering.
+The gradient noise is selected per depth; enabling the encoder filter alone did
+not guarantee nonzero coded filter levels. Saved libaom and dav1d pixels agree.
+
+`tests/av1_lossy_palette.rs` checks decoded pixels, reset/finish, WebM timestamps,
+rewind/seek, actual palette sizes 2–8 in both plane groups at every depth,
+nonzero palette residuals, and active loop-filter levels. Each gradient case
+individually requires nonzero filtering and luma palette residuals.
+`Picture::palette_residual_blocks` counts transform blocks with actual nonzero
+dequantized residuals in a palette plane group. Ordinary tests use only owned
+saved fixtures, with no encoder, oracle, FFmpeg, or network invocation.
+
+The 339-case baseline acceptance passed, including coded coverage assertions.
+Omitting loop filtering in the verification copy caused a pixel comparison
+failure on the owned filtered stream; the source was restored and matched
+the canonical source. All 1017 saved file hashes were verified. The test
+executable has no FFmpeg/libav/libaom/dav1d linkage. The final strengthened 339-case acceptance and the existing 168-case lossless
+palette acceptance both passed offline after restoration. This does not claim full AV1 conformance or coverage of the
+remaining codec tools listed above.
