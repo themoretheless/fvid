@@ -4314,3 +4314,31 @@ and matched canonical code, showing independent sensitivity to both bypasses.
 Final restored-source run passed all seven matrix suites together:
 258 owned streams and 276 decoded frames per replay. The identity test
 executable links neither FFmpeg/libav nor either external reference decoder.
+
+### AV1 loop restoration: owned reproduction and header remapping fix
+
+Eighteen owned 192x128 synthetic ramp/noise one-frame streams cover depths
+8/10/12, qualities 32/48/56 and two noise amplitudes. Generation-only
+libaom and dav1d references agree on every frame; all 54 hashes were checked.
+Four frames have restoration disabled in their frame headers and pass
+independent pixel acceptance. Fourteen have active SGRPROJ and/or Wiener
+planes and reproduce precisely `AV1 loop restoration not implemented`.
+The passing active test is refusal/reproduction, not playback acceptance.
+
+The fixture investigation exposed a native header parsing bug: `lr_type`
+was stored without normative Remap_Lr_Type conversion. The parser now maps
+bitstream [NONE, SWITCHABLE, WIENER, SGRPROJ] to semantic values [0,3,1,2].
+The owned test asserts all 18 expected semantic plane triples, including
+both SGRPROJ and Wiener. Its pre-fix run failed on the first coded SGRPROJ
+plane with the specific semantic-value mismatch. No refusal is removed:
+restoration entropy parsing and filtering still need implementation, after
+which this active refusal expectation must become pixel acceptance.
+
+Normative syntax: https://raw.githubusercontent.com/AOMediaCodec/av1-spec/master/06.bitstream.syntax.md
+(`lr_params`, Remap_Lr_Type). No private media or parameter sets enter the
+fixtures; ordinary tests use only saved streams/reference bytes.
+
+Final verification passed all 35 core AV1 tests and 60 integration tests
+across 34 AV1 suites. The restoration regression executable links neither
+FFmpeg/libav nor either generation-only reference decoder. The active
+restoration reproduction remains a known codec gap, not completed playback.
