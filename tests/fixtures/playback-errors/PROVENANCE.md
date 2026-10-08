@@ -1750,3 +1750,17 @@ are numeric geometry acceptance vectors, not encoded HE-AAC acceptance.
 The arbitrary-geometry oracle includes 68 incompatible cases (source range
 exceeds the low-band boundary or merging leaves no limiter band); these are
 refusal checks. The remaining 1612 cases accept frequency geometry.
+
+### SBR current-envelope energy numeric reference
+
+`aac-sbr-energy-decimal.f64le` and its manifest are original complex QMF signals
+and 80-digit Decimal mean-energy references, generated explicitly by
+`scripts/generate_aac_sbr_energy_oracles.py`. Protocol source: published
+GOST R53556.4-2013 6.18.7.3
+(https://allgosts.ru/33/170/gost_r_53556.4-2013), including RATE=2 and inclusive
+frequency width. One input case uses the saved independently generated
+`aac-sbr-hf-decimal.f64le`; the dependency hash is recorded in the manifest.
+Both frame sizes and both frequency interpolation modes are covered with
+mixed envelope resolutions and nonzero starting time. No private media or
+foreign decoder algorithm is included. This is DSP acceptance, not encoded
+HE-AAC playback acceptance.

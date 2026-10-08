@@ -5727,3 +5727,23 @@ production frame integration remain necessary.
 The arbitrary-geometry oracle includes 68 incompatible cases (source range
 exceeds the low-band boundary or merging leaves no limiter band); these are
 refusal checks. The remaining 1612 cases accept frequency geometry.
+
+### Owned SBR current-envelope energy estimation
+
+`aac_sbr_energy::estimate` implements both `bs_interpol_freq` modes in published
+6.18.7.3: per-QMF-band time means or joint time/frequency means replicated over
+the current envelope's low/high resolution bands. Input and output use the
+HF generator's tHFAdj-relative origin; SBR time borders are multiplied by RATE=2.
+Published inclusive frequency width (`kh-kl+1`) is used, including one-band
+regions. A normalized RMS calculation avoids intermediate square overflow
+when the final mean is representable; genuinely unrepresentable energies fail
+explicitly. Geometry and non-finite inputs are validated before calculation.
+
+Independent 80-digit Decimal references cover both frame sizes, both modes,
+mixed frequency resolutions, offset/multiple envelopes, silence, dense complex
+signals, a boundary impulse, constant bands and independently generated HF.
+The last case connects actual owned patch/predictor/HF generation to the saved
+energy oracle. Additional checks cover exclusive boundaries, single-band
+normalization, sparse huge inputs, subnormal energy and malformed public
+geometry. These are numeric DSP acceptance checks; encoded HE-AAC acceptance
+and the rest of gain/noise/sinusoid adjustment remain incomplete.

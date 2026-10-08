@@ -1,0 +1,37 @@
+{
+  "source": "GOST R53556.4-2013 6.18.7.3",
+  "precision": 80,
+  "slots": [
+    15,
+    16
+  ],
+  "cases": [
+    "silence",
+    "dense rational",
+    "boundary impulse",
+    "constant bands",
+    "independent HF output"
+  ],
+  "high": [
+    10,
+    11,
+    14,
+    18,
+    21,
+    28
+  ],
+  "low": [
+    10,
+    11,
+    18,
+    28
+  ],
+  "resolution": [
+    false,
+    true,
+    false
+  ],
+  "hf_dependency_sha256": "8f197ad740afb9c2ef1235ed254539cf981e566be23df0174128e3e6970b9954",
+  "file": "aac-sbr-energy-decimal.f64le",
+  "sha256": "2408b1e2fbe3d1a87131a541d289f4900355fcec8ed5695e4f1a9ecb63d6a448"
+}

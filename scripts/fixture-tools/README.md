@@ -286,3 +286,8 @@ SBR limiter border references: explicitly run
 `python3 scripts/generate_aac_sbr_limiter_oracles.py`. The offline generator
 compares Decimal ratios with an 80-digit exponential threshold, producing
 1680 original geometries covering all modes. Tests consume the saved JSON.
+
+SBR energy references: explicitly run
+`python3 scripts/generate_aac_sbr_energy_oracles.py` after HF reference generation.
+It uses original signals and the saved independent HF output, then computes
+80-digit Decimal time/frequency means. Ordinary tests use saved traces offline.
