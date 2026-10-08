@@ -5854,3 +5854,28 @@ These are protocol/numerical acceptance checks. Full FIL/SCE/CPE payload
 assembly, retained coefficient and time-grid history, QMF delays and PCM
 scaling, production AAC integration and original encoded HE-AAC playback
 acceptance remain incomplete.
+
+### Owned non-scalable SBR SCE/CPE data syntax
+
+`aac_sbr_data::Data::read` composes the owned header-derived frequency geometry,
+validated grids, delta flags, inverse-filter modes, envelope/noise Huffman rows
+and harmonic masks for non-scalable mono and stereo elements. Coupled CPE
+shares its grid/inverse-filter modes and reads level envelope/noise followed
+by balance envelope/noise; uncoupled CPE reads both envelopes before both noise
+sets. Reserved fields and length-escaped extended-data areas are bounded.
+The complete call restores the input reader on any failure. Extended bytes
+are retained explicitly, not interpreted as PS or silently decoded.
+
+81 original bit syntax vectors (4587 bytes) exercise all four frame classes,
+FIXFIX one/two envelopes, both amplitude modes, both delta directions,
+level/balance books, independent/shared channel controls, harmonics and
+extension lengths absent/0/1/14/15/16/270. Every bit truncation at each of eight
+start offsets is checked; successful reads must leave following bits intact.
+An isolated mutation which groups the coupled envelopes ahead of noise fails
+on exact coefficient values in case 8, demonstrating order-sensitive coverage.
+No foreign encoder/decoder or private media is used, and ordinary tests do
+not generate fixtures or invoke FFmpeg/network access.
+
+These are payload syntax acceptance checks, not HE-AAC PCM acceptance. Outer
+FIL/header/CRC handling, coefficient history, QMF overlap/scaling and production
+AAC integration remain; PS needs its own extension decoder.

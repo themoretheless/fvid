@@ -1835,3 +1835,27 @@ The header-reset protocol test exhaustively covers all 2048 combinations of
 changed fields and checks that exactly the six geometry fields trigger reset.
 No private media, frames, audio, codec parameter sets or foreign decoder
 algorithm. These validate protocol geometry, not encoded HE-AAC playback.
+
+### SBR SCE/CPE data syntax vectors
+
+`aac-sbr-data-syntax.bin` and `aac-sbr-data-syntax.json` are 81 original bit
+syntax vectors generated offline by `scripts/generate_aac_sbr_data_fixtures.py`.
+The binary is 4587 bytes, SHA-256
+`6f262dae7a70142da480ee249c1a0295edd3bb711097b29888316fdb26b22398`.
+The generator uses the saved normative Huffman codewords, independently
+authored syntax/expected fields and original deterministic extension bytes.
+Source: ISO/IEC 14496-3 SBR single-channel/pair syntax, cross-checked with
+GOST R53556.4-2013 tables 65/66/69/72/73:
+https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html
+
+Vectors cover mono, coupled and uncoupled stereo; all legacy grid classes;
+amplitude and delta modes; independent/shared inverse filtering; harmonic
+flags; extension lengths including escape/max length. Ordinary Rust tests
+consume the saved vectors and check every truncation at all eight bit offsets.
+The coupled-order mutation preserves book selection but groups envelopes
+before noise; exact coefficient expectations fail in case 8.
+
+No private video, frames, audio or codec parameter sets; no copied decoder
+algorithm, external encoder, FFmpeg or network. These are syntax acceptance
+vectors, not encoded HE-AAC playback fixtures. Retained extension bytes do
+not establish PS decoding acceptance.
