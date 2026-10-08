@@ -891,3 +891,25 @@ Before native coded-grid metadata was retained, the first inter frame of the
 8-bit denominator-9 orientation-0 fixture differed at byte 36864. The acceptance
 test now requires all 36 inter headers to inherit maps, nonzero key maps,
 unchanged decoded maps, full pixel parity, reset, replay, timestamps and seek.
+
+
+### AV1 tiled and changing-denominator super-resolution
+
+`generate_av1_superres_multi_samples.py` and
+`generate_av1_superres_changing_samples.py` generate 18 owned three-frame
+streams each from deterministic moving gradients and noise. The first uses
+385x385 odd output, two entropy tiles, 128x128 superblocks, denominators 9/12/16
+and active multiunit restoration. The second keeps 192x128 output and changes
+key/inter denominators through 9->16, 16->9 and 8->12.
+
+Unmodified libaom v3.15.1 aomenc generates OBUs; unmodified libaom and independent
+dav1d agree on full pixels for all 108 frames. The scripts record original
+source and OBU/YUV/WebM hashes in their `*-generated.json` manifests. No private
+media, frames, audio or parameter sets are copied. Ordinary tests only read
+saved assets and require neither external codecs, FFmpeg nor network.
+
+Both suites assert actual stream tools, full pixels, reset and WebM playback
+lifecycle. The tiled suite also detects a controlled broken restoration-unit
+projection: forcing denominator 8 yields a specific entropy failure on its
+first denominator-9 fixture. The production source is restored before final
+acceptance. No production codec change was needed for these qualified cases.

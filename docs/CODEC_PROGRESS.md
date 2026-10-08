@@ -4555,3 +4555,32 @@ multiple tiles and other AV1 profiles/tools remain separate qualification gaps.
 
 Validation: all 35 fvid-codecs AV1 unit tests and 69 integration tests across
 41 AV1 suites pass offline with no ignored acceptance tests or FFmpeg.
+
+
+### Tiled and changing-denominator AV1 super-resolution
+
+Two further owned suites each contain 18 three-frame streams across 8/10/12-bit
+4:2:0 and two deterministic source patterns. The tiled suite uses odd 385x385
+output, 128x128 superblocks, exactly two entropy tiles, denominators 9/12/16,
+CDEF and restoration. Headers require active restoration on 34 inter frames
+and multiple luma restoration units on 40 of the 54 frames. Full native pixels,
+reset, WebM replay, timestamps, EOF, rewind and seek match saved independent
+libaom/dav1d pixels for every stream.
+
+A controlled mutation that projects restoration-unit boundaries with denominator
+8 instead of the signaled denominator fails the first 8-bit denominator-9
+fixture with truncated AV1 entropy data. The exact original source was restored
+before the final acceptance run. This demonstrates sensitivity to the coded-to-
+upscaled unit projection across tiles rather than only the final image filter.
+
+The changing-denominator suite forces key/inter transitions 9->16, 16->9 and
+8->12 at 192x128 output. Every header proves the requested denominator and
+changed coded width; decoded coded-grid dimensions change while the display
+extent remains constant. All 54 frames match both references, including reset,
+WebM replay, timestamps, EOF, rewind and seek.
+
+Fixture generation uses independent tools separately from offline tests and
+requires no FFmpeg. These suites qualify the recorded fixed-size transitions
+and two-tile layouts. Temporal reference motion fields, temporal segmentation
+map updates, film grain, intrabc and additional profiles/chroma remain gaps;
+these acceptance suites do not establish complete AV1 support.
