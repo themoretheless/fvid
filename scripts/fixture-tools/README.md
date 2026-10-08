@@ -272,3 +272,8 @@ SBR inverse-filter bandwidth references: explicitly run
 `python3 scripts/generate_aac_sbr_chirp_oracles.py`. The offline 80-digit Decimal
 generator writes every five-frame mode sequence plus an eight-frame decay tail.
 Ordinary tests consume saved numeric traces without running the generator.
+
+SBR covariance references: explicitly run
+`python3 scripts/generate_aac_sbr_predictor_oracles.py`. The offline generator
+uses original signals and independent 80-digit Decimal covariance equations.
+Tests read saved traces; they do not run generators or external codecs.

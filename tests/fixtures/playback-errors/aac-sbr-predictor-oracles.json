@@ -1,0 +1,18 @@
+{
+  "source": "GOST R53556.4-2013 6.18.6.2; ISO working draft epsilon=1e-6",
+  "precision": 80,
+  "slots": [
+    15,
+    16
+  ],
+  "cases": [
+    "zero",
+    "real constant",
+    "complex constant",
+    "dense rational",
+    "complex ramp",
+    "unstable growth"
+  ],
+  "file": "aac-sbr-predictor-decimal.f64le",
+  "sha256": "2752ac931310b33ea3ea2436cf96ce30de0a07b19997eeef034646cb43f17236"
+}

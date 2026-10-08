@@ -1708,3 +1708,16 @@ GOST R53556.4-2013 section 6.18.6.2 and table 175
 sequences include eight trailing Off frames. No private audio/video/parameters
 or foreign decoder implementation is included. These numeric references prove
 chirp state behavior, not encoded HE-AAC playback acceptance.
+
+### SBR complex covariance numeric reference
+
+`aac-sbr-predictor-decimal.f64le` and its JSON manifest contain original complex
+source signals and independent 80-digit Decimal predictor results from
+`scripts/generate_aac_sbr_predictor_oracles.py`. Protocol equations: published
+GOST R53556.4-2013 6.18.6.2
+(https://allgosts.ru/33/170/gost_r_53556.4-2013); relaxation epsilon 1e-6 is
+explicitly stated in ISO/IEC 14496-3:2001 Amendment 1 working draft page 38
+(http://www.mp3-tech.org/programmer/docs/w4611.pdf). The published summation
+window supersedes the older draft's fixed 32-sample window. Numeric DSP
+vectors are not an encoded HE-AAC acceptance fixture and contain no private
+media or foreign decoder algorithms.

@@ -5666,3 +5666,21 @@ checkpoint replay and invalid-call rollback. These are original numeric DSP
 vectors, not encoded HE-AAC acceptance fixtures. Predictor covariance, patch
 generation, HF adjustment and production integration still remain. No new
 encoded-media failure or full HE-AAC playback acceptance is claimed.
+
+### Owned complex SBR covariance predictor
+
+`aac_sbr_predictor::predict` computes complex covariance and both prediction
+coefficients for legacy SBR windows of `2*numTimeSlots+6` samples plus two
+preceding samples (15/16 slots). It applies the published zero-denominator and
+magnitude >=4 reset rules, with relaxation epsilon 1e-6 verified in the ISO
+working draft. Common input normalization preserves coefficient ratios while
+preventing finite-input covariance overflow. Invalid windows/non-finite inputs
+are rejected before calculation.
+
+Independent 80-digit Decimal vectors cover silence, real/complex constants,
+dense rational signals, a complex ramp and unstable exponential growth for
+both frame sizes. Additional checks cover zero past energy, huge finite input,
+power-of-two scale invariance and quarter-turn complex phase invariance.
+This remains an isolated DSP component: the enclosing frame buffer must select
+the specified window; patch construction, HF generation/adjustment and encoded
+HE-AAC production acceptance remain incomplete.
