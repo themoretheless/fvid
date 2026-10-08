@@ -933,3 +933,21 @@ the first stream. Source is restored before final acceptance. Earlier trials
 with only false prediction symbols were replaced; passing those trials was
 not counted as acceptance for using the previous map. No private source
 media or parameters are copied; ordinary tests invoke no codec tools or network.
+
+
+### AV1 temporal reference motion fields
+
+`generate_av1_temporal_motion_samples.py` creates six original synthetic
+six-frame 192x128 streams at 8/10/12 bits from deterministically translated
+gradients and noise. Unmodified libaom v3.15.1 aomenc enables reference-frame
+MVs; unmodified libaom and independent dav1d agree on all 36 full frames.
+`av1-temporal-motion-generated.json` records OBU/YUV/WebM and source hashes.
+No private media or codec parameters are copied.
+
+The previous native gate returned the specific temporal-motion-field refusal.
+Acceptance now checks actual reference-MV headers on all 30 inter frames,
+nonzero retained motion, full pixels, reset, timestamps, EOF, rewind and seek.
+A controlled projected-field-zeroing mutation is detected at byte 110592 of
+the first fixture, after three correct frames. The source is restored before
+final acceptance. Tests only read saved assets and require no codec tools,
+FFmpeg or network.

@@ -4616,3 +4616,38 @@ establish temporal map behavior across changing coded grids or multiple tiles.
 
 Final focused validation: six tests across temporal maps, inherited super-resolution
 maps and temporal super-resolution maps pass offline without ignored tests.
+
+
+### Native AV1 temporal reference motion fields
+
+The native decoder now retains filtered forward-reference MVs on the coded
+8x8 grid, projects them using saved frame distances, and inserts temporal
+samples between nearest and farther spatial MV candidates. The implementation
+covers source-frame priority, order-hint wrapping through signed distances,
+reference-grid matching, projection rounding/clipping, bounded projected
+positions, compound candidates and the temporal ZERO_MV context. Storage and
+working allocations are included in decoder admission/retained memory.
+
+Six owned six-frame 192x128 sequences at 8/10/12 bits use deterministic
+translated gradients and noise. Before the fix, they specifically refused
+with `AV1 temporal motion field not implemented`. Acceptance requires all
+30 inter headers to enable reference MVs, retained nonzero motion samples,
+full independent libaom/dav1d pixel parity for all 36 frames, reset, WebM replay,
+timestamps, EOF, rewind and seek.
+
+A controlled mutation that discards all projected field samples keeps the first
+three frames intact but differs at byte 110592, the first pixel of the fourth
+frame in the first 8-bit fixture. This proves use of projected temporal
+candidates rather than only enabling the header flag. Source is restored
+before final validation. Two internal tests cover signed projection, rounding,
+clipping and bounded negative position offsets. Generation is separate from
+ordinary offline tests, with no FFmpeg or network dependency.
+
+These first sequences establish forward-reference temporal prediction at one
+tile and fixed coded dimensions. Bidirectional references, wrapped order hints,
+changing coded grids, tiled temporal sampling and super-resolution combinations
+still require dedicated full-pixel qualification. Film grain, intrabc, mixed
+sub-8x8 intra/inter chroma and additional profiles/chroma remain separate gaps.
+
+Validation: all 37 AV1 fvid-codecs unit tests and 73 integration tests across
+45 AV1 suites pass offline, with no ignored acceptance tests or FFmpeg.

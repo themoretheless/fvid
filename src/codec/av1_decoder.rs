@@ -9,7 +9,7 @@ use super::{
     bits::BitReader,
 };
 use crate::color::hdr::HdrMetadata;
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 use std::sync::Arc;
 #[derive(Clone)]
 pub struct Decoded {
@@ -146,7 +146,13 @@ impl Decoder {
                     .map(|p| p.samples.len() * 2)
                     .sum::<usize>();
                 retained = retained
-                    .checked_add(bytes + frame.picture.segment_ids.len() + 256_000)
+                    .checked_add(
+                        bytes
+                            + frame.picture.segment_ids.len()
+                            + frame.picture.saved_motion.len()
+                                * std::mem::size_of::<av1_picture::SavedMotion>()
+                            + 256_000,
+                    )
                     .ok_or_else(|| invalid("AV1 memory accounting overflow"))?;
             }
         }
@@ -572,12 +578,14 @@ mod tests {
                         .contains("AV1 inter reference frame ID mismatch"),
                     "{name}: {error}"
                 );
-                assert!(decoder
-                    .decode_packet(&data[offset..])
-                    .err()
-                    .unwrap()
-                    .to_string()
-                    .contains("requires reset"));
+                assert!(
+                    decoder
+                        .decode_packet(&data[offset..])
+                        .err()
+                        .unwrap()
+                        .to_string()
+                        .contains("requires reset")
+                );
                 decoder.reset();
             }
         }

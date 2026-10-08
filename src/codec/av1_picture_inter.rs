@@ -40,6 +40,7 @@ struct Stack {
     mv: Vec<([[i32; 2]; 2], usize)>,
     new: usize,
     reference: usize,
+    zero: usize,
 }
 struct Search<'a, 'b> {
     decoder: &'a Decoder<'b>,
@@ -166,6 +167,74 @@ impl Search<'_, '_> {
         found
     }
 }
+impl Search<'_, '_> {
+    fn temporal(&mut self, zero: &mut usize) {
+        let [x, y] = self.origin;
+        let [w, h] = self.size;
+        let globals = [
+            self.decoder.global_vector(x, y, w, h, self.refs[0]),
+            if self.refs[1] > 0 {
+                self.decoder.global_vector(x, y, w, h, self.refs[1])
+            } else {
+                [0; 2]
+            },
+        ];
+        let mut sample = |dx: isize, dy: isize| {
+            let col = (x as isize + dx) | 1;
+            let row = (y as isize + dy) | 1;
+            if col < self.decoder.x0 as isize
+                || col >= self.decoder.x1 as isize
+                || row < self.decoder.y0 as isize
+                || row >= self.decoder.y1 as isize
+            {
+                return;
+            }
+            if dx == 0 && dy == 0 {
+                *zero = 1;
+            }
+            let field = self.decoder.motion_field
+                [(row as usize / 2) * (self.decoder.cols / 2) + col as usize / 2];
+            let mut candidates = [[0; 2]; 2];
+            for list in 0..if self.refs[1] > 0 { 2 } else { 1 } {
+                let mv = field[self.refs[list]];
+                if mv == motion_field::INVALID {
+                    return;
+                }
+                candidates[list] = lower(
+                    mv,
+                    self.decoder.h.integer_mv,
+                    self.decoder.h.high_precision_mv,
+                );
+            }
+            if dx == 0 && dy == 0 {
+                *zero = usize::from((0..if self.refs[1] > 0 { 2 } else { 1 }).any(|list| {
+                    (0..2).any(|component| {
+                        (candidates[list][component] - globals[list][component]).abs() >= 16
+                    })
+                }));
+            }
+            self.add(candidates, 2);
+        };
+        for dy in (0..h.min(16)).step_by(if h >= 16 { 4 } else { 2 }) {
+            for dx in (0..w.min(16)).step_by(if w >= 16 { 4 } else { 2 }) {
+                sample(dx as isize, dy as isize);
+            }
+        }
+        if h >= 2 && h < 16 && w >= 2 && w < 16 {
+            for (dy, dx) in [
+                (h as isize, -2),
+                (h as isize, w as isize),
+                (h as isize - 2, w as isize),
+            ] {
+                let row = (y & 15) as isize + dy;
+                let col = (x & 15) as isize + dx;
+                if (0..16).contains(&row) && (0..16).contains(&col) {
+                    sample(dx, dy);
+                }
+            }
+        }
+    }
+}
 impl Decoder<'_> {
     fn candidate(&self, x: isize, y: isize) -> Option<Block> {
         if x < self.x0 as isize
@@ -223,6 +292,10 @@ impl Decoder<'_> {
         let num_new = search.new;
         for v in &mut search.stack {
             v.1 += 640;
+        }
+        let mut zero = 0;
+        if self.h.reference_mvs {
+            search.temporal(&mut zero);
         }
         above |= search.scan(-1, -1, None);
         above |= search.scan(0, -3, Some(false));
@@ -319,6 +392,7 @@ impl Decoder<'_> {
             mv: stack,
             new,
             reference,
+            zero,
         }
     }
     pub(super) fn inter_block(
@@ -491,11 +565,7 @@ impl Decoder<'_> {
                     5
                 }
             } else if bit(2, &[1, 2], &[3, 4])? {
-                if bit(4, &[3], &[4])? {
-                    4
-                } else {
-                    3
-                }
+                if bit(4, &[3], &[4])? { 4 } else { 3 }
             } else if bit(3, &[1], &[2])? {
                 2
             } else {
@@ -515,7 +585,7 @@ impl Decoder<'_> {
             17 + symbol(d, c, av1_cdfs::COMPOUND_MODE, [ctx])?
         } else if symbol(d, c, av1_cdfs::NEW_MV, [stack.new])? == 0 {
             16
-        } else if symbol(d, c, av1_cdfs::ZERO_MV, [0])? == 0 {
+        } else if symbol(d, c, av1_cdfs::ZERO_MV, [stack.zero])? == 0 {
             15
         } else if symbol(d, c, av1_cdfs::REF_MV, [stack.reference])? == 0 {
             13

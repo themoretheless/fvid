@@ -852,13 +852,15 @@ Release-сборка обязательна для практического и
 
 - VP9: пока отсутствуют compound prediction, segmentation, reference scaling,
   и 4:2:2/4:4:4.
-- AV1: пока отсутствуют temporal motion fields, nonidentity global motion,
-  OBMC, masked compound/inter-intra blending, palette/intrabc, segmentation,
-  quantization matrices, super-resolution/reference scaling, loop restoration,
-  film grain и 4:2:2/4:4:4. Не поддержаны short reference signaling, inter frame IDs,
-  отдельные FrameHeader/TileGroup OBU и многослойные operating points.
-  Несовпадение order hints опорных кадров в error-resilient потоке требует reset.
-  AV1 в MP4 ещё не подключён. Эти ограничения проверяются без внешнего fallback.
+- AV1: собственные fixture проверяют global motion, OBMC, compound/inter-intra,
+  palette, segmentation, quantization matrices, super-resolution и restoration
+  в 8/10/12-битном 4:2:0. Temporal reference motion fields теперь проходят первые
+  шесть последовательностей с forward references; bidirectional, tiled и
+  super-resolution сочетания ещё требуют отдельной квалификации.
+  Явные оставшиеся отказы: film grain, intrabc, sub-8x8 mixed intra/inter chroma,
+  4:2:2/4:4:4, layered operating points, spatial layering и tile-list OBU.
+  Полный перечень проверенных комбинаций и оставшихся пробелов см. в
+  `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption
   и полноценная обработка всех Matroska timing/display extensions. Требуется
   не более одного отображаемого кадра в пакете и возрастающие PTS.

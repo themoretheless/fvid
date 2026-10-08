@@ -9,6 +9,8 @@ use super::{
 use crate::{Result, invalid};
 #[path = "av1_picture_inter.rs"]
 mod inter;
+#[path = "av1_motion_field.rs"]
+mod motion_field;
 #[path = "av1_palette.rs"]
 mod palette;
 #[path = "av1_quant_matrix.rs"]
@@ -17,6 +19,12 @@ mod quant_matrix;
 mod restoration;
 #[path = "av1_superres.rs"]
 mod superres;
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct SavedMotion {
+    pub reference: u8,
+    pub mv: [i32; 2],
+}
 
 #[derive(Clone, Debug)]
 pub struct Plane {
@@ -32,6 +40,11 @@ pub struct Picture {
     pub segment_grid: [usize; 2],
     /// Segment IDs in padded 4x4 raster order, retained with reference pictures.
     pub segment_ids: Vec<u8>,
+    /// Filtered motion samples on the coded 8x8 grid, retained for temporal prediction.
+    pub saved_motion: Vec<SavedMotion>,
+    motion_frame_type: u8,
+    motion_hints: [u32; 8],
+    motion_distances: [i32; 8],
     /// Coded palette block counts per Y/UV plane group, for palette sizes 2..=8.
     pub palette_counts: [[u32; 7]; 2],
     /// Palette colors selected from the above/left neighbor cache, per Y/UV group.
@@ -78,6 +91,7 @@ struct Decoder<'a> {
     cols: usize,
     rows: usize,
     blocks: Vec<Block>,
+    motion_field: Vec<[[i32; 2]; 8]>,
     x0: usize,
     y0: usize,
     x1: usize,
@@ -156,12 +170,6 @@ pub(crate) fn decode(
     references: [Option<&Picture>; 8],
     distances: [i32; 8],
 ) -> Result<(Picture, Cdfs)> {
-    if h.reference_mvs {
-        return Err(crate::unsupported(
-            "AV1 temporal motion field not implemented",
-        ));
-    }
-
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     if h.intrabc {
         return Err(crate::unsupported(
@@ -194,6 +202,13 @@ pub(crate) fn decode(
         .and_then(|n| n.checked_add(500_000))
         .and_then(|n| n.checked_add(restoration_bytes))
         .and_then(|n| n.checked_add(upscale_bytes))
+        .and_then(|n| {
+            if s.reference_mvs {
+                n.checked_add(cols.checked_mul(rows)?.checked_mul(20)?)
+            } else {
+                Some(n)
+            }
+        })
         .ok_or_else(|| invalid("AV1 image allocation overflow"))?;
     if required > budget {
         return Err(invalid("AV1 image exceeds memory budget"));
@@ -228,6 +243,14 @@ pub(crate) fn decode(
         depth: s.color.depth,
         segment_grid: [cols, rows],
         segment_ids,
+        saved_motion: if s.reference_mvs {
+            vec![SavedMotion::default(); cols * rows / 4]
+        } else {
+            Vec::new()
+        },
+        motion_frame_type: h.frame_type,
+        motion_hints: motion_field::hints(h, distances, s.order_hint_bits),
+        motion_distances: distances,
         palette_counts: [[0; 7]; 2],
         palette_cache_hits: [0; 2],
         palette_residual_blocks: [0; 2],
@@ -243,6 +266,13 @@ pub(crate) fn decode(
         cols,
         rows,
         blocks: vec![Block::default(); cols * rows],
+        motion_field: motion_field::build(
+            h,
+            references,
+            distances,
+            [cols, rows],
+            s.order_hint_bits,
+        ),
         x0: 0,
         y0: 0,
         x1: 0,
@@ -325,6 +355,7 @@ pub(crate) fn decode(
     if next != h.tiles.count() {
         return Err(invalid("AV1 frame has missing tiles"));
     }
+    motion_field::save(&mut dec);
     // Keep public picture storage and filtering grids at their original MI extent.
     for p in 0..3 {
         let sub = usize::from(p > 0);

@@ -1,0 +1,160 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-temporal-motion-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.obu",
+      "sha256": "70952c27273e31667f5b5601348681edd4df8f9c874168b37668ed3038898dbf",
+      "reference": "av1-temporal-motion-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.yuv",
+      "reference_sha256": "da6f66809e7483523082b986385de6ab4de364047350119e1526de395c72c10f",
+      "source_sha256": "15ba5a7d08b5c167ef4f3d6814147f5687574f4de2a4e2dd0eb11743867e379c",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 0,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-motion-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.webm",
+      "webm_sha256": "99f08b958cbf4893308c7b65b92dce16fd09c149b31ebea65ac33a301587f5f8",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-motion-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.obu",
+      "sha256": "a7395529692f2b51aa78e60af802e9e93aea69fc3e22578e71aaa28c73e8456f",
+      "reference": "av1-temporal-motion-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.yuv",
+      "reference_sha256": "b9403e6f26d889349708437630fd5ca2c6c993289c5037d02faa4e0082b4682f",
+      "source_sha256": "6a919b529e9b20c26ec0c30b122ce8cdc29c02f22f260ae2ebbc436faa45c5bd",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 1,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-motion-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.webm",
+      "webm_sha256": "f4e266002655df9e0f197193028f97775a62714db5fd806347c819465b25e908",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-motion-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.obu",
+      "sha256": "bfb8685a9758795428f451da7c5610c184b92ad688efbcfa6f565880f406bcee",
+      "reference": "av1-temporal-motion-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.yuv",
+      "reference_sha256": "2a628c5c6914d518ab04baef745c44ad5f15edb03d5a58f0840c1278ff015be2",
+      "source_sha256": "de19dcb6c69b1664ffa2ef0a8ca333cbd786dd7e024c7a5032c98ef811fe9fa4",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 0,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-motion-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.webm",
+      "webm_sha256": "88b4712271784377b680753130a7236e131d557d48e1e4b1bcd160afd9f76d85",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-motion-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.obu",
+      "sha256": "984de5cdc3cf486a0714eda80f7bfdb098e7efc97891fc6988b6540bd8b357c2",
+      "reference": "av1-temporal-motion-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.yuv",
+      "reference_sha256": "77f74c0374718a3d8d8daed64d9a2c93190a0f8dff1d48d88e084fdba8d3502b",
+      "source_sha256": "f43fd5a03da00a7199328d418359652cc0c8507b396b500e8a80df9800a8247f",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 1,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-motion-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.webm",
+      "webm_sha256": "404e925bd4a5b6531999e7949ca911c16ff4435fef4981e7b61e65f52583d8ea",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-motion-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.obu",
+      "sha256": "f63c0c4f8c8b0cef689a50e38e5bd228e1fbfc1423583ac58aad7cc4044051f1",
+      "reference": "av1-temporal-motion-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.yuv",
+      "reference_sha256": "21f4819cbd650e4a95d69a8c656691762b5e3055b97bcc8c99d7d67626807ece",
+      "source_sha256": "6666725c823902b4b218abcbe28da4ec2df84f903e217b2e02521bc1b85fbcb8",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 0,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-motion-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.webm",
+      "webm_sha256": "9157f7de9e96545b29c421396f330fd80b52e4bd15f62605c2441a31d4ec7dcb",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-motion-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.obu",
+      "sha256": "99ad5a0f4ebfbed9c255e6dc5757becaf5e1a009c0f8277a3f79e81031390732",
+      "reference": "av1-temporal-motion-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.yuv",
+      "reference_sha256": "52b2d4f5cc6d3fa08977d15b9b095797d5f9a3d2b9c34c672f766dcf87f3faa5",
+      "source_sha256": "0d62752b76732b9995c40841dde15b92f7ce89450da196e6d37af686a78f18c6",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 1,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-motion-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.webm",
+      "webm_sha256": "95852d162282d5dd8d29ceb90a429dd5094fe8989b40d760099b199da72be5f4",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    }
+  ]
+}
