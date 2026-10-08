@@ -1904,3 +1904,16 @@ not playback acceptance. Tests also consume the valid saved sequences through
 extension/CRC, reconstruction and dequantization; ordinary execution needs no
 fixture generator, FFmpeg, network or foreign codec. These are bit syntax and
 coefficient/DSP references, not encoded HE-AAC PCM playback fixtures.
+
+#### SBR cross-frame buffering numeric regressions
+
+`owned_aac::aac_sbr_buffers::tests` constructs original tagged complex analysis
+and adjusted-HF columns directly. Tags encode frame/column/band, allowing
+independent exact expectations for the previous eight analysis columns,
+previous-frame 0/2/4/6-column HF tail, changed crossover/end, two-column
+adjustment offset and composed six-column latency. Both 15/16 time-slot
+formats, reset/checkpoint replay and transactional late input errors are
+covered. There is no private media or codec parameter set. These are protocol
+and DSP routing tests, not encoded HE-AAC playback acceptance, and discover
+no new real-media failure requiring a video reproducer. Standard reference:
+GOST R 53556.4-2013 section 6.18.5, XLow/X and lTemp equations.

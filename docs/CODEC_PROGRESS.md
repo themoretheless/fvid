@@ -5938,3 +5938,30 @@ This is composed bit-syntax/coefficient/DSP coverage, not HE-AAC PCM playback
 acceptance. Production FIL dispatch and AAC object-type wiring, complete
 cross-frame QMF/time-grid overlap, PCM scaling/synthesis and encoded playback
 acceptance remain unfinished.
+
+### SBR cross-frame QMF delay and synthesis row routing
+
+Owned `aac_sbr_buffers` now constructs XLow using tHFGen=8: retained raw
+analysis columns use the previous crossover, current columns use the current
+crossover, and the rest of the 32-band range is zero. Geometry changes retain
+the old analysis tail; full decoder/seek reset clears it.
+
+The non-scalable synthesis-row merger uses tHFAdj=2 and previous-frame
+lTemp=2*tE_previous(last)-2*numTimeSlots_previous. It retains six adjusted HF
+columns and selects previous kx/end for that overhang, then current geometry
+for the remainder. Out-of-range synthesis bands are zero. Startup has zero
+overhang/history; calls validate all dimensions and finite values before
+committing history. Clone/replay and explicit reset are deterministic.
+
+Four original numeric regressions cover both 960/1024 core frame sizes,
+all four overhang lengths, crossover increases/decreases including 1/32,
+previous/current HF endpoints, the eight-column analysis history, composed
+six-column output latency, and late nonfinite-input rollback. They use tagged
+complex columns, independent direct timeline/index expectations, and do not
+need FFmpeg, networking or fixture generation. Normative equations were
+checked against GOST R 53556.4-2013 section 6.18.5 (published MPEG-4 SBR
+translation); this implements non-scalable routing, not scalable bsco.
+
+This closes the standalone frame-buffer/routing gap. Complete SBR frame DSP
+composition, production AAC FIL/object-type wiring, PCM scaling, EOF/delay
+handling and original encoded HE-AAC playback acceptance remain unfinished.
