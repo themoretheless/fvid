@@ -1917,3 +1917,17 @@ covered. There is no private media or codec parameter set. These are protocol
 and DSP routing tests, not encoded HE-AAC playback acceptance, and discover
 no new real-media failure requiring a video reproducer. Standard reference:
 GOST R 53556.4-2013 section 6.18.5, XLow/X and lTemp equations.
+
+#### Composed SBR preparation regressions
+
+`aac_sbr_prepare` reuses the original `aac-sbr-history-syntax.bin` /
+`aac-sbr-history-decimal.json` sequences through the actual extension and
+coefficient parsers. The accompanying silence and bounded integer-pattern
+PCM is created in the test itself, without private audio. Every sequence
+runs analysis, retained QMF delay, chirp update, patches, HF, energy and
+parameter/harmonic mapping. Checkpoint replay and a deliberately late invalid
+second-channel dequantized envelope value prove whole-call state rollback. The original four
+`aac-sbr-qmf-*.f32le` direct-convolution oracle pairs independently check
+standard-unit scaling in the composed path. These are composed DSP/protocol
+regressions, not encoded HE-AAC PCM playback acceptance or new private-media
+failure reproducers.

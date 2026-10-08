@@ -16,6 +16,7 @@ pub mod aac_sbr_gain;
 pub mod aac_sbr_mapping;
 pub mod aac_sbr_assembly;
 pub mod aac_sbr_buffers;
+pub mod aac_sbr_prepare;
 mod aac_sbr_noise_table;
 pub mod aac_sbr_huffman;
 pub mod aac_sbr_coefficients;

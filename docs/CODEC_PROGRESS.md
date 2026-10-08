@@ -5965,3 +5965,31 @@ translation); this implements non-scalable routing, not scalable bsco.
 This closes the standalone frame-buffer/routing gap. Complete SBR frame DSP
 composition, production AAC FIL/object-type wiring, PCM scaling, EOF/delay
 handling and original encoded HE-AAC playback acceptance remain unfinished.
+
+### Composed SBR analysis / HF / energy / parameter mapping
+
+`aac_sbr_prepare::Preparation` now joins normalized core PCM analysis,
+eight-column low delay, inverse-filter/chirp history, owned patch generation,
+complex HF generation, envelope energy estimation and dequantized parameter /
+harmonic mapping. Analysis columns are scaled by exactly 32768 into standard
+16-bit QMF units before prediction and energy estimation. Header geometry
+reset rebuilds chirp history while retaining delayed low columns and absolute
+harmonic/attack history; format/seek resets the whole preparation state.
+Both channels commit together only after every stage succeeds.
+
+The existing 12 original four-frame syntax/coefficient sequences now drive
+this complete preparation path with silence and original deterministic PCM,
+covering mono, uncoupled/coupled stereo, 960/1024 core frames, changed amplitude
+resolution, all time-grid classes, saved-state replay and late second-channel
+mapping failure rollback. Four saved direct-time-convolution analysis oracles
+independently verify the composed PCM-to-QMF scale, zero startup delay and
+crossover masking. No ordinary test runs generators, FFmpeg or networking.
+
+This is preparation for envelope adjustment, not full synthesized HE-AAC
+acceptance. A remaining interface discrepancy needs normative resolution:
+nonzero limiter modes can remove the upper boundary of a discarded 1/2-band
+HF patch tail, while gain limiting requires borders covering the entire M
+range. No silent mode substitution or limiter bypass was added. Remaining
+work includes resolving that boundary, gain/assembly/synthesis composition,
+production FIL/ASC wiring, PCM output/delay/EOF handling and original encoded
+HE-AAC playback acceptance.
