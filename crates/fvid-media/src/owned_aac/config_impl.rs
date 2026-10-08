@@ -25,22 +25,22 @@ impl AacConfig {
     pub fn parse_with_program(
         data: &[u8],
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
-        let mut b = BitReader::new(data);
-        let object_type = audio_object_type(&mut b)?;
-        let index = b.read(4)? as usize;
-        let sample_rate = if index == 15 {
-            b.read(24)?
-        } else {
-            *AAC_RATES
-                .get(index)
-                .ok_or_else(|| invalid("reserved AAC frequency index"))?
-        };
-        if sample_rate == 0 {
-            return Err(invalid("zero AAC frequency"));
+        let parsed = AudioSpecificConfig::parse(data)?;
+        if parsed.sbr_present == Some(true) || parsed.ps_present == Some(true) {
+            return Err(invalid(
+                "AAC SBR configuration requires the extension-aware decoder",
+            ));
         }
-        let config = b.read(4)?;
+        Ok((parsed.core, parsed.program))
+    }
+    fn read_core(
+        b: &mut BitReader<'_>,
+        object_type: u32,
+        sample_rate: u32,
+        config: u32,
+    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
         if object_type != 2 {
-            return Err(invalid("only AAC-LC configuration is implemented"));
+            return Err(invalid("only AAC-LC core configuration is implemented"));
         }
         let mut channels = match config {
             0 => 0,
@@ -59,7 +59,7 @@ impl AacConfig {
             return Err(invalid("AAC extension flag is not yet supported"));
         }
         let program = if config == 0 {
-            let program = super::aac_pce::ProgramConfig::read(&mut b, 0)?;
+            let program = super::aac_pce::ProgramConfig::read(b, 0)?;
             if u32::from(program.object_type) != object_type || program.sample_rate != sample_rate {
                 return Err(invalid("AAC PCE disagrees with AudioSpecificConfig"));
             }
@@ -68,20 +68,6 @@ impl AacConfig {
         } else {
             None
         };
-        // Explicitly consume the common backward-compatible SBR sync extension.
-        if b.remaining() >= 16 {
-            if b.read(11)? != 0x2b7 {
-                return Err(invalid("unsupported AAC trailing extension"));
-            }
-            if audio_object_type(&mut b)? != 5 || b.bit()? {
-                return Err(invalid("AAC SBR decoding is not yet implemented"));
-            }
-        }
-        while b.remaining() > 0 {
-            if b.bit()? {
-                return Err(invalid("nonzero AAC trailing bits"));
-            }
-        }
         Ok((
             Self {
                 channel_configuration: config as u8,
@@ -93,5 +79,99 @@ impl AacConfig {
             },
             program,
         ))
+    }
+}
+
+/// Complete ASC metadata. `core` retains AAC clock/geometry; the extension
+/// clock is separate so SBR does not change the core scale-factor band tables.
+/// None preserves the standard's unspecified (-1) SBR/PS signalling state.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AudioSpecificConfig {
+    pub signaled_object_type: u32,
+    pub core: AacConfig,
+    pub program: Option<super::aac_pce::ProgramConfig>,
+    pub sbr_present: Option<bool>,
+    pub ps_present: Option<bool>,
+    pub extension_sample_rate: Option<u32>,
+}
+fn sampling_frequency(b: &mut BitReader<'_>) -> Result<u32> {
+    let index = b.read(4)? as usize;
+    let rate = if index == 15 {
+        b.read(24)?
+    } else {
+        *AAC_RATES
+            .get(index)
+            .ok_or_else(|| invalid("reserved AAC frequency index"))?
+    };
+    if rate == 0 {
+        return Err(invalid("zero AAC frequency"));
+    }
+    Ok(rate)
+}
+impl AudioSpecificConfig {
+    pub fn output_sample_rate(&self) -> u32 {
+        self.extension_sample_rate.unwrap_or(self.core.sample_rate)
+    }
+    pub fn output_channels(&self) -> u8 {
+        if self.ps_present == Some(true) {
+            2
+        } else {
+            self.core.channels
+        }
+    }
+    /// Parse LC core plus explicit AOT5/AOT29 or backward-compatible SBR/PS
+    /// metadata. Recognizing PS metadata does not imply PS audio synthesis.
+    pub fn parse(data: &[u8]) -> Result<Self> {
+        let mut b = BitReader::new(data);
+        let signaled_object_type = audio_object_type(&mut b)?;
+        let sample_rate = sampling_frequency(&mut b)?;
+        let configuration = b.read(4)?;
+        let explicit = matches!(signaled_object_type, 5 | 29);
+        let mut sbr_present = explicit.then_some(true);
+        let mut ps_present = (signaled_object_type == 29).then_some(true);
+        let mut extension_sample_rate = None;
+        let core_object_type = if explicit {
+            extension_sample_rate = Some(sampling_frequency(&mut b)?);
+            audio_object_type(&mut b)?
+        } else {
+            signaled_object_type
+        };
+        let (core, program) =
+            AacConfig::read_core(&mut b, core_object_type, sample_rate, configuration)?;
+        if !explicit && b.remaining() >= 16 {
+            if b.read(11)? != 0x2b7 {
+                return Err(invalid("unsupported AAC trailing extension"));
+            }
+            if audio_object_type(&mut b)? != 5 {
+                return Err(invalid("unsupported AAC trailing extension object type"));
+            }
+            let present = b.bit()?;
+            sbr_present = Some(present);
+            if present {
+                extension_sample_rate = Some(sampling_frequency(&mut b)?);
+                if b.remaining() >= 12 {
+                    if b.read(11)? != 0x548 {
+                        return Err(invalid("unsupported AAC trailing PS extension"));
+                    }
+                    ps_present = Some(b.bit()?);
+                }
+            }
+        }
+        if ps_present == Some(true) && core.channels != 1 {
+            return Err(invalid("AAC parametric stereo requires a mono core"));
+        }
+        while b.remaining() > 0 {
+            if b.bit()? {
+                return Err(invalid("nonzero AAC trailing bits"));
+            }
+        }
+        Ok(Self {
+            signaled_object_type,
+            core,
+            program,
+            sbr_present,
+            ps_present,
+            extension_sample_rate,
+        })
     }
 }

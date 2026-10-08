@@ -1956,3 +1956,13 @@ Figure 4.40's endpoint-removal ambiguity. It still needs encoded/reference
 PCM conformance qualification; the Decimal geometry generator now enforces
 that coverage invariant. This is SBR payload + supplied core PCM acceptance,
 not full HE-AAC file playback, and no new private-media failure was discovered.
+
+
+HE-AAC packet fixtures (`he-aac-sbr-packets.bin/.json` and
+`he-aac-sbr-synthetic.mp4`) are authored by
+`scripts/generate_he_aac_packet_fixtures.py`, without FFmpeg, libav or network.
+Their silent LC SCE core and SBR payloads contain no private media or parameter
+sets. The MP4 reuses the existing authored AVC video and audio container structure,
+replacing all audio packets, ASC, sample tables and edits. PCM expectations reuse
+the independently computed original SBR DSP oracle. ASC syntax follows
+ISO/IEC 14496-3:2005/Amd.2:2006 Table 1.13.

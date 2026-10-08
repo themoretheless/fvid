@@ -1205,9 +1205,9 @@ fn parse_track(
         // sample entries may retain a generic stereo declaration for mono AAC.
         if result.codec == *b"mp4a"
             && let Ok(asc) = crate::codec::config::aac_specific_config(&result.configuration)
-                && let Ok(config) = crate::codec::config::AacConfig::parse(asc) {
-                    result.sample_rate = config.sample_rate;
-                    result.channels = u16::from(config.channels);
+                && let Ok(config) = crate::codec::config::AudioSpecificConfig::parse(asc) {
+                    result.sample_rate = config.output_sample_rate();
+                    result.channels = u16::from(config.output_channels());
                 }
     }
     // A fragmented track describes its coding here and its samples nowhere: the

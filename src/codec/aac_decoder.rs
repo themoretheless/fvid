@@ -13,8 +13,8 @@ impl AacDecoder {
     /// Create a new AAC decoder from an MP4 `esds` sample-entry configuration.
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> crate::Result<Self> {
         let asc = crate::codec::config::aac_specific_config(configuration)?;
-        let parsed = crate::codec::config::AacConfig::parse(asc)?;
-        if parsed.sample_rate != sample_rate || u16::from(parsed.channels) != channels {
+        let parsed = crate::codec::config::AudioSpecificConfig::parse(asc)?;
+        if parsed.output_sample_rate() != sample_rate || u16::from(parsed.output_channels()) != channels {
             return Err(crate::invalid(
                 "AAC configuration disagrees with container sample rate or channels",
             ));

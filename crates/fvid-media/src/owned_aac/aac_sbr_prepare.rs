@@ -31,6 +31,22 @@ pub struct Channel {
     pub mapped: Mapped,
 }
 impl Preparation {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        footprint.vector(&self.channels)?;
+        for state in &self.channels {
+            state.chirp.visit_retained(footprint)?;
+        }
+        if let Some(tables) = &self.frequency {
+            for table in [&tables.master, &tables.high, &tables.low, &tables.noise] {
+                footprint.vector(table)?;
+            }
+        }
+        Ok(())
+    }
+
     pub fn reset(&mut self) {
         *self = Self::default();
     }

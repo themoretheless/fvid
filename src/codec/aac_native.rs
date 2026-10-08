@@ -5,6 +5,7 @@ use super::aac_bands::BandTables;
 use super::aac_coupling::Coupling;
 use crate::native_export::default_pcm_mask;
 use crate::Error;
+use fvid_media::owned_aac::{aac_sbr_history as sbr_history, aac_sbr_dsp as sbr_dsp, bits::BitReader as SbrBitReader};
 include!("../../crates/fvid-media/src/owned_aac/aac_native_impl.rs");
 
 #[cfg(test)]
@@ -263,3 +264,6 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod he_aac_native_tests { include!("../../crates/fvid-media/src/owned_aac/he_aac_native_tests.rs"); }

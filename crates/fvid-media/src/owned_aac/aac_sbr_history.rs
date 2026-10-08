@@ -206,6 +206,23 @@ pub struct Frame {
     pub parameters: Parameters,
 }
 impl Stream {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        footprint.vector(&self.coefficients.channels)?;
+        for previous in &self.coefficients.channels {
+            if let Some((borders, values)) = &previous.envelope {
+                footprint.vector(borders)?;
+                footprint.vector(values)?;
+            }
+            if let Some(values) = &previous.noise {
+                footprint.vector(values)?;
+            }
+        }
+        Ok(())
+    }
+
     pub fn reset(&mut self) {
         *self = Self::default();
     }

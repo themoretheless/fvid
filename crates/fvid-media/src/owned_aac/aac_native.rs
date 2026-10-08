@@ -7,6 +7,7 @@ fn default_pcm_mask(channels: u16) -> Result<u32> {
     crate::owned_wav::default_pcm_mask(channels).map_err(|e| invalid(&e))
 }
 use super::Error;
+use super::{aac_sbr_history as sbr_history, aac_sbr_dsp as sbr_dsp, bits::BitReader as SbrBitReader};
 include!("aac_native_impl.rs");
 
 #[cfg(test)]
@@ -86,6 +87,12 @@ impl NativeAacDecoder {
             )
             .map_err(|e| invalid(&e))?;
         }
+        for stream in [self.sbr_stream.as_ref(), checkpoint.and_then(|state| state.sbr_stream.as_ref())].into_iter().flatten() {
+            stream.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
+        }
+        for dsp in [self.sbr_dsp.as_ref(), checkpoint.and_then(|state| state.sbr_dsp.as_ref())].into_iter().flatten() {
+            dsp.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
+        }
         Ok(footprint.total())
     }
 }
@@ -148,5 +155,30 @@ mod element_tag_tests {
         assert!(!tags.insert(4, 0));
         assert!(!tags.insert(0, 16));
         assert_eq!(std::mem::size_of::<ElementTags>(), 8);
+    }
+}
+
+#[cfg(test)]
+mod he_aac_native_tests { include!("he_aac_native_tests.rs"); }
+
+#[cfg(test)]
+mod sbr_memory_tests {
+    use super::*;
+    #[test]
+    fn retained_payload_counts_sbr_and_checkpoint_allocations_without_shared_window_duplication() {
+        let cases: serde_json::Value=serde_json::from_slice(include_bytes!("../../../../tests/fixtures/playback-errors/he-aac-sbr-packets.json")).unwrap();
+        let case=&cases["cases"][0];
+        let asc:Vec<u8>=case["asc"].as_str().unwrap().as_bytes().chunks_exact(2).map(|b|u8::from_str_radix(std::str::from_utf8(b).unwrap(),16).unwrap()).collect();
+        let mut decoder=NativeAacDecoder::new(&asc).unwrap();
+        let before=decoder.retained_payload_bytes().unwrap();
+        let binary=include_bytes!("../../../../tests/fixtures/playback-errors/he-aac-sbr-packets.bin");
+        let frame=&case["frames"][0];let off=frame["offset"].as_u64().unwrap() as usize;
+        decoder.decode(&binary[off..off+frame["bytes"].as_u64().unwrap() as usize]).unwrap();
+        let after=decoder.retained_payload_bytes().unwrap();assert!(after>before+16_000);
+        let checkpoint=decoder.checkpoint();
+        let combined=decoder.retained_payload_bytes_with_checkpoint(Some(&checkpoint)).unwrap();
+        assert!(combined>after+16_000);assert!(combined<after*2);
+        decoder.reset();assert_eq!(decoder.retained_payload_bytes().unwrap(),before);
+        decoder.restore(&checkpoint).unwrap();assert!(decoder.retained_payload_bytes().unwrap()>before+16_000);
     }
 }

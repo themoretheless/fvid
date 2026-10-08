@@ -6042,3 +6042,21 @@ failure rollback, output-mode refusal and explicit PS refusal are checked.
 
 Production AAC FIL/ASC integration, original encoded HE-AAC playback/PCM
 acceptance, EOF/delay handling and PS/other codec gaps remain unfinished.
+
+
+### Native AAC SBR packet integration
+
+The extension-aware AudioSpecificConfig parser and native AAC FIL decoder now
+compose core LC decoding with owned SBR DSP. Core and output sample rates are
+separate, and checkpoints, reset, failure rollback and retained-memory accounting
+include SBR state. Original fixtures cover 64 three-packet mono sequences, both
+frame sizes and output modes, explicit and sync-extension signalling, CRC failure
+rollback and exact PCM comparison against the independent DSP oracle. A short
+authored AVC/HE-AAC MP4 also verifies demux and the AAC codec adapter. Ordinary
+tests consume checked-in fixtures without FFmpeg or network access.
+
+This is not full player/export HE-AAC qualification: the owned MP4 audio planner
+and playback clock integration remain to be completed. Native stereo packet
+acceptance, nonzero spectral core reference PCM, EOF/delay, implicit ADTS SBR,
+missing-payload upsampling, multi-element/PCE SBR and PS remain unqualified or
+unsupported.

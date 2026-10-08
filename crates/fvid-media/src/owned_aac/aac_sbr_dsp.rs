@@ -36,6 +36,14 @@ pub struct Dsp {
     output_rate: Option<OutputRate>,
 }
 impl Dsp {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        self.preparation.visit_retained(footprint)?;
+        footprint.vector(&self.channels)
+    }
+
     pub fn reset(&mut self) {
         *self = Self::default();
     }

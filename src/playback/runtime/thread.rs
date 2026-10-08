@@ -672,15 +672,17 @@ mod precision_tests {
                 panic!("precision was converted on CPU");
             };
             assert!(Arc::ptr_eq(&frame, &preserved));
-            let output = into_pixels(RawFrame::Planar(frame.clone()), 90, 1024, None).unwrap();
-            let Pixels::Packed(rotated, None) = output else {
-                panic!("rotation narrowed samples");
-            };
-            assert_eq!(rotated.depth, depth);
-            let expected =
-                crate::playback_native::rotate_plane(&frame.frame.data[..8], 2, 2, 90, 2);
-            assert_eq!(&rotated.frame.data[..8], expected);
-            assert_eq!(&rotated.frame.data[8..], &frame.frame.data[8..]);
+            // GPU rotation is carried by Frame::rotation. Conversion must keep
+            // the original allocation and precision for every quarter turn.
+            for rotation in [90, 180, 270] {
+                let output = into_pixels(RawFrame::Planar(frame.clone()), rotation, 1024, None).unwrap();
+                let Pixels::Packed(preserved, None) = output else {
+                    panic!("rotation narrowed samples");
+                };
+                assert!(Arc::ptr_eq(&frame, &preserved));
+                assert_eq!(preserved.depth, depth);
+                assert_eq!(preserved.frame.data, frame.frame.data);
+            }
         }
     }
     #[test]

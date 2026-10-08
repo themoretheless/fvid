@@ -7,6 +7,14 @@ pub struct Chirp {
     bandwidth: Vec<f64>,
 }
 impl Chirp {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        footprint.vector(&self.previous)?;
+        footprint.vector(&self.bandwidth)
+    }
+
     pub fn new(noise_bands: usize) -> Result<Self> {
         if !(1..=5).contains(&noise_bands) {
             return Err(invalid("invalid SBR chirp band count"));

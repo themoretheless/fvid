@@ -415,6 +415,14 @@ pub(crate) fn skip_data_stream(bits: &mut super::bits::BitReader<'_>) -> Result<
 /// Skip supported fill/fill-data extensions after ID_FIL without committing a
 /// partial read. Other extensions carry codec tools and cannot be discarded.
 pub(crate) fn skip_fill(bits: &mut super::bits::BitReader<'_>) -> Result<()> {
+    read_fill(bits, |_, _, _| Err(unsupported("AAC fill extension tool is not implemented")))
+}
+/// The SBR owner supplies transactional parsing for extension types 13/14;
+/// all other fill/ancillary syntax uses the same bounded parser as AAC-LC.
+pub(crate) fn read_fill(
+    bits: &mut super::bits::BitReader<'_>,
+    mut sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
+) -> Result<()> {
     let mut input = bits.clone();
     let mut count = input.read(4)? as usize;
     if count == 15 {
@@ -460,6 +468,13 @@ pub(crate) fn skip_fill(bits: &mut super::bits::BitReader<'_>) -> Result<()> {
                     return Err(invalid("AAC ancillary data exceeds fill payload"));
                 }
                 input.skip(length * 8)?;
+            }
+            kind @ (13 | 14) => {
+                let start = input.position();
+                sbr(&mut input, end, kind == 14)?;
+                if input.position() <= start || input.position() > end {
+                    return Err(invalid("invalid SBR fill extension consumption"));
+                }
             }
             _ => return Err(unsupported("AAC fill extension tool is not implemented")),
         }
