@@ -17,6 +17,22 @@ pub struct Header {
 }
 
 impl Header {
+    /// Whether frequency-dependent decoder history must be reset (6.18.3.1).
+    /// A first header initializes the geometry. Amplitude, limiter and smoothing
+    /// changes alone preserve history; an output-rate change is handled by the
+    /// stream owner separately.
+    pub fn requires_reset(&self, previous: Option<&Self>) -> bool {
+        let Some(previous) = previous else {
+            return true;
+        };
+        self.start_frequency != previous.start_frequency
+            || self.stop_frequency != previous.stop_frequency
+            || self.frequency_scale != previous.frequency_scale
+            || self.alter_scale != previous.alter_scale
+            || self.crossover != previous.crossover
+            || self.noise_bands != previous.noise_bands
+    }
+
     /// Read inside an absolute payload bit boundary, committing the reader only
     /// on success. Absent extra fields always select defaults, not old values.
     pub fn read(bits: &mut BitReader<'_>, payload_end: usize) -> Result<Self> {
@@ -69,6 +85,59 @@ impl Header {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reset_tracks_exactly_the_six_geometry_fields() {
+        let (bytes, end) = sample(0, false, false);
+        let original = Header::read(&mut BitReader::new(&bytes), end).unwrap();
+        assert!(original.requires_reset(None));
+        assert!(!original.requires_reset(Some(&original)));
+        // Enumerate every subset of changed fields, including combinations of
+        // geometry and non-geometry fields. This is header protocol coverage,
+        // not an encoded HE-AAC playback acceptance test.
+        for mask in 0..1u16 << 11 {
+            let mut next = original.clone();
+            if mask & 1 != 0 {
+                next.start_frequency ^= 1;
+            }
+            if mask & 2 != 0 {
+                next.stop_frequency ^= 1;
+            }
+            if mask & 4 != 0 {
+                next.frequency_scale ^= 1;
+            }
+            if mask & 8 != 0 {
+                next.alter_scale = !next.alter_scale;
+            }
+            if mask & 16 != 0 {
+                next.crossover ^= 1;
+            }
+            if mask & 32 != 0 {
+                next.noise_bands ^= 1;
+            }
+            if mask & 64 != 0 {
+                next.amplitude_resolution = !next.amplitude_resolution;
+            }
+            if mask & 128 != 0 {
+                next.limiter_bands ^= 1;
+            }
+            if mask & 256 != 0 {
+                next.limiter_gains ^= 1;
+            }
+            if mask & 512 != 0 {
+                next.interpolate_frequency = !next.interpolate_frequency;
+            }
+            if mask & 1024 != 0 {
+                next.smoothing_mode = !next.smoothing_mode;
+            }
+            assert_eq!(
+                next.requires_reset(Some(&original)),
+                mask & 63 != 0,
+                "mask {mask}"
+            );
+            assert_eq!(original.requires_reset(Some(&next)), mask & 63 != 0);
+        }
+    }
 
     // Hand-authored fields exercise the published syntax, independently of the
     // parser. Padding remains available so only the payload boundary cuts reads.
