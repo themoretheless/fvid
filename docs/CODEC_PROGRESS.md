@@ -5413,3 +5413,30 @@ tests pass in a clean copy without active drafts. Fifty-two AAC unit tests pass
 locally. The clean binary links only libiconv/libSystem, without FFmpeg/libav.
 This closes explicit PCE height/group decoding; HE-AAC/SBR, gain control and
 other unresolved codec tools remain independent work.
+
+## AAC-LC pulse selection for spectral and non-spectral bands (2026-10-08)
+
+The owned channel path now applies pulse amplitudes only within coded spectral
+bands (codebooks 1..11 with a spectral scalefactor). Valid positions beyond
+max_sfb or in ZERO_HCB/PNS/intensity bands no longer spuriously reject playback
+or contaminate those tools. Coded pulses still accumulate before inverse
+quantization, including repeated positions and the negative zero branch.
+Selection evaluates at most four positions and introduces no scratch allocation.
+
+Twelve originally authored six-frame cases, twelve pulse-free controls and a
+matching synthetic video cover near/far uncoded starts, repeated/crossing/zero
+spectral pulses, zero bands, PNS and both intensity codebooks. Seven spectral
+pairs have independently evaluated direct-cosine PCM; PNS/intensity cases match
+their valid pulse-free controls exactly across all frames. Thirty-nine artifact
+hashes were verified. Before implementation, ordinary acceptance reached the
+specific above-coded-band refusal; an independent pre-fix probe proved each
+zero/PNS/intensity case reached its precise zero-codebook failure after its
+pulse-free baseline successfully decoded.
+
+Five pulse tests verify nonzero PCM, exact tool/random-state preservation,
+invalid band/offset rollback, all packet truncations, reset/checkpoint behavior,
+owned WAV export and video intervals. These pass in a clean copy alongside
+four fill, five height, thirteen PCE and five coupling tests. Fifty-two AAC units
+pass locally. The clean binary links only libiconv/libSystem; ordinary tests
+need neither FFmpeg/libav nor network. This closes the discovered pulse/band
+interaction failures, not HE-AAC/SBR, SSR gain control or full codec conformance.

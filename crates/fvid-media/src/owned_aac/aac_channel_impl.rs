@@ -76,15 +76,12 @@ impl ChannelData {
             if self.info.sequence == WindowSequence::EightShort {
                 return Err(invalid("pulse on short AAC window"));
             }
-            pulse.apply(&mut quantized)?;
-            if quantized[offsets[self.info.max_sfb as usize]..]
-                .iter()
-                .any(|&v| v != 0)
-            {
-                return Err(unsupported(
-                    "AAC pulse above coded bands requires reconstruction",
-                ));
-            }
+            pulse.apply_where(&mut quantized, |position| {
+                let band = offsets.partition_point(|&start| start <= position) - 1;
+                band < self.info.max_sfb as usize
+                    && matches!(self.codebooks[0][band], 1..=11)
+                    && matches!(self.scales[0][band], BandScale::Spectral(_))
+            })?;
         }
         let mut ordered = vec![0.0; n];
         let size = *offsets.last().unwrap();

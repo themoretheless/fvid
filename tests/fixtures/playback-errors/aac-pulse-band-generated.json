@@ -1,0 +1,428 @@
+{
+  "cases": {
+    "outside": {
+      "kind": "spectral",
+      "pulse_start": 1,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-outside.aac",
+          "sha256": "def87997b28f1228f579e9849c110e139b4fb7db76a2ec970de13bde93619e42"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-outside.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "outside-baseline": {
+      "kind": "spectral",
+      "pulse_start": 1,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-outside-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-outside-baseline.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "outside-four": {
+      "kind": "spectral",
+      "pulse_start": 1,
+      "pulses": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-outside-four.aac",
+          "sha256": "909d727d05f22a648164c7c43edb2b1ca3ec1d77cd335a3b9b0fa0aaaae67292"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-outside-four.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "outside-four-baseline": {
+      "kind": "spectral",
+      "pulse_start": 1,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-outside-four-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-outside-four-baseline.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "outside-far": {
+      "kind": "spectral",
+      "pulse_start": 48,
+      "pulses": [
+        [
+          31,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-outside-far.aac",
+          "sha256": "b2d48e07c65aeae92be1357f50d4f18eb481639e7c28560cbcba902977fcb678"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-outside-far.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "outside-far-baseline": {
+      "kind": "spectral",
+      "pulse_start": 48,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-outside-far-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-outside-far-baseline.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "cross-boundary": {
+      "kind": "spectral",
+      "pulse_start": 0,
+      "pulses": [
+        [
+          3,
+          2
+        ],
+        [
+          1,
+          4
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-cross-boundary.aac",
+          "sha256": "db893603162d223eaf1507601e506c1110bd58ea8ea1d19995fa00d60582da2f"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-cross-boundary.f32le",
+          "sha256": "52e9f5e56fe6f778b86fb1e925d2369d5f46ee5e8051f0c1c1c28a398915c7ad"
+        }
+      }
+    },
+    "cross-boundary-baseline": {
+      "kind": "spectral",
+      "pulse_start": 0,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-cross-boundary-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-cross-boundary-baseline.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "repeated-spectral": {
+      "kind": "spectral",
+      "pulse_start": 0,
+      "pulses": [
+        [
+          0,
+          15
+        ],
+        [
+          0,
+          15
+        ],
+        [
+          0,
+          15
+        ],
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-repeated-spectral.aac",
+          "sha256": "e71d3520e05486c2ee07358b54c4cedce07e15e0ff5ea8aaf8ce5233441d9773"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-repeated-spectral.f32le",
+          "sha256": "d9630f4eab558698e5e1cb0ad8e131e3208a23cb1b421a1b5834da4b8bd9eafe"
+        }
+      }
+    },
+    "repeated-spectral-baseline": {
+      "kind": "spectral",
+      "pulse_start": 0,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-repeated-spectral-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-repeated-spectral-baseline.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "zero-spectral": {
+      "kind": "zero-spectral",
+      "pulse_start": 0,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-zero-spectral.aac",
+          "sha256": "6483dae319c603739368d3d1c2a717258d42d0dfc812a424c94ce0558a447027"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-zero-spectral.f32le",
+          "sha256": "c446a7dd0cb9aee65b38810197e6cfb2c3b7666810c0eee68d8b72bc892ba36d"
+        }
+      }
+    },
+    "zero-spectral-baseline": {
+      "kind": "zero-spectral",
+      "pulse_start": 0,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-zero-spectral-baseline.aac",
+          "sha256": "b9fcb081016eb53327045d2269a3d7accdb268c7c4c484e68b81c66030f93ae2"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-zero-spectral-baseline.f32le",
+          "sha256": "de676bae28a480011d3d012db14bef539324e62a841a9627863c689bea168af3"
+        }
+      }
+    },
+    "zero-band": {
+      "kind": "zero",
+      "pulse_start": 1,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-zero-band.aac",
+          "sha256": "899b14dd2e1b8be3e5a5919a0a9701e57ee454f9a28b09dfb20efac9902dd340"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-zero-band.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "zero-band-baseline": {
+      "kind": "zero",
+      "pulse_start": 1,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-zero-band-baseline.aac",
+          "sha256": "85ab167caf63b551eca4071c8f9b2c1e749bc68b60c8ffabad6d8e86b9e36cf5"
+        },
+        ".f32le": {
+          "file": "aac-pulse-band-zero-band-baseline.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "noise-band": {
+      "kind": "noise",
+      "pulse_start": 1,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-noise-band.aac",
+          "sha256": "af3040aa339c6a2c341e3029e3aa22dac60b7baabf63aeb6e0683bc3d9e37836"
+        }
+      }
+    },
+    "noise-band-baseline": {
+      "kind": "noise",
+      "pulse_start": 1,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-noise-band-baseline.aac",
+          "sha256": "53870e4bcb84a5f0aa78f2b3a6d3829b5aa0b9522c16cdd745db432eae14f84f"
+        }
+      }
+    },
+    "intensity14": {
+      "kind": "intensity14",
+      "pulse_start": 1,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-intensity14.aac",
+          "sha256": "20e9e8f701dabb8d0fec2dea80ba4d79881698fd0e73ae2f60582b4ee19d69ad"
+        }
+      }
+    },
+    "intensity14-baseline": {
+      "kind": "intensity14",
+      "pulse_start": 1,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-intensity14-baseline.aac",
+          "sha256": "53a62c6844760a412093ce41c0bd456f3a1a4f68ac40d4209454c90aeeac8ec7"
+        }
+      }
+    },
+    "intensity15": {
+      "kind": "intensity15",
+      "pulse_start": 1,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-intensity15.aac",
+          "sha256": "c6a257d23d10faa2d12017a121410b0cc1f457537977046cadcd4b5bfb02acab"
+        }
+      }
+    },
+    "intensity15-baseline": {
+      "kind": "intensity15",
+      "pulse_start": 1,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-intensity15-baseline.aac",
+          "sha256": "7ca008b0bb637f8589175ad8d8ec10e8449cb17e66c8ddf9aa5da6d0a813f5e4"
+        }
+      }
+    },
+    "invalid-start": {
+      "kind": "spectral",
+      "pulse_start": 49,
+      "pulses": [
+        [
+          0,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-invalid-start.aac",
+          "sha256": "843f9982829201e21b6699ff4533d8aeef937c4b6ee8a43904f115fcb296f1f8"
+        }
+      }
+    },
+    "invalid-start-baseline": {
+      "kind": "spectral",
+      "pulse_start": 49,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-invalid-start-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        }
+      }
+    },
+    "invalid-offset": {
+      "kind": "spectral",
+      "pulse_start": 48,
+      "pulses": [
+        [
+          31,
+          15
+        ],
+        [
+          31,
+          15
+        ],
+        [
+          31,
+          15
+        ],
+        [
+          31,
+          15
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-invalid-offset.aac",
+          "sha256": "ef261b172382b900d2fc009e0b8e244bf748ff51623bb7e5adf1584d74544e75"
+        }
+      }
+    },
+    "invalid-offset-baseline": {
+      "kind": "spectral",
+      "pulse_start": 48,
+      "pulses": [],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-pulse-band-invalid-offset-baseline.aac",
+          "sha256": "8d77e288f68938fbb5bd85ecb9bca330a7c2574ecf19dfa20c93751da915599e"
+        }
+      }
+    }
+  },
+  "video": {
+    "file": "aac-pulse-band-companion.y4m",
+    "sha256": "7e151c25df0b3a6332f6debf184b0109ce6dbf016469030786e245f34247e4a5"
+  }
+}

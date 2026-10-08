@@ -1532,3 +1532,35 @@ Ordinary tests consume committed bytes and need no FFmpeg or network.
 Syntax references (no source code or runtime imported):
 https://github.com/mstorsjo/fdk-aac/blob/master/libMpegTPEnc/src/tpenc_asc.cpp
 https://learn.microsoft.com/en-us/windows/win32/medfound/mf-mt-audio-channel-mask-attribute
+
+### AAC-LC pulse selection across band tools (2026-10-08)
+
+`generate_aac_pulse_band_samples.py` originally authors twelve six-frame
+AAC-LC cases and a pulse-free baseline for each. Ten exercise accepted tools;
+two contain invalid start band or cumulative offset. Seven spectral/zero-band
+pairs have independent PCM references from direct cosine evaluation, signed
+4/3-power quantization and sine-window overlap. Noise/intensity comparisons
+use pulse-free versions of the same explicitly authored syntax and compare
+PCM exactly across all six frames, including PNS state. Both intensity variants
+use shared ICS and a zero MS mask. No source audio/frames/codec parameters
+were copied. Only already owned protocol codeword tables are consulted.
+
+Fixtures span pulse starts outside max_sfb (near and far), four outside pulses,
+a coded/uncoded boundary crossing, four repeated coded pulses, a zero-valued
+spectral coefficient, ZERO_HCB, PNS, and both intensity codebooks. Acceptance
+requires nonzero PCM; the crossing/repeated/zero-spectral cases independently
+prove that coded spectral pulses still alter reconstruction. The six-frame
+16x16 Y4M companion matches 48000/1024 fps. Hashes cover 39 audio/PCM/video
+artifacts; generation is explicit, offline and independent of test execution.
+
+Pre-fix acceptance failed precisely on the above-coded-band refusal. A separate
+pre-fix probe verified that all pulse-free baselines decoded and ZERO_HCB/PNS/
+intensity variants each reached `nonzero AAC zero-codebook band`. Passing
+refusal evidence is distinct from now-enabled playback acceptance. Ordinary
+tests additionally check malformed-pulse state rollback, every packet
+truncation, checkpoints, reset and WAV payload order through owned export.
+No FFmpeg/libav is invoked or linked by ordinary tests.
+
+Pulse selection behavior was checked against the published decoder algorithm;
+no source code or runtime was imported:
+https://ffmpeg.org/doxygen/7.0/aacdec__template_8c_source.html

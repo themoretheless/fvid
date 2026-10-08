@@ -49,12 +49,24 @@ impl PulseData {
     /// Repeated positions accumulate; a zero coefficient takes the negative
     /// branch. Up to four amplitude-15 pulses can extend magnitude to 8251.
     pub fn apply(&self, coefficients: &mut [i16]) -> Result<()> {
+        self.apply_where(coefficients, |_| true)
+    }
+    /// Channel reconstruction applies pulses only to coded spectral bands.
+    /// Other bands have no spectral scalefactor and retain their own tools.
+    pub(crate) fn apply_where(
+        &self,
+        coefficients: &mut [i16],
+        enabled: impl Fn(usize) -> bool,
+    ) -> Result<()> {
         if coefficients.len() != self.frame_samples
             || coefficients.iter().any(|&v| i32::from(v).abs() > 8191)
         {
             return Err(invalid("invalid AAC pre-pulse spectrum"));
         }
         for i in 0..self.count {
+            if !enabled(self.positions[i]) {
+                continue;
+            }
             let value = &mut coefficients[self.positions[i]];
             if *value > 0 {
                 *value += self.amplitudes[i];

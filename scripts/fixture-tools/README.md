@@ -208,3 +208,12 @@ a Y4M companion and hashes. No external encoder is required. Run ordinary
 acceptance with `cargo test --release --locked --offline --no-default-features
 --test aac_height_layouts`. Invalid CRC/layer and changed-layout tests are
 separate from accepted nonzero per-channel playback.
+
+### AAC pulse/band interactions
+
+`python3 scripts/generate_aac_pulse_band_samples.py` explicitly generates
+original spectral/uncoded/zero/noise/intensity pulse cases, pulse-free controls,
+independent spectral PCM and a video companion. No external codec is needed.
+Run ordinary acceptance with `cargo test --release --locked --offline
+--no-default-features --test aac_pulse_bands`. Invalid bands/offsets remain
+refusal tests, separate from nonzero playback acceptance.
