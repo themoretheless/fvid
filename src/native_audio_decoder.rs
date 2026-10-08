@@ -37,6 +37,12 @@ impl PacketPcmDecoder {
     }
 
     pub(crate) const SAMPLE_BYTES: usize = 4;
+    pub(crate) fn with_in_band_ps(track: &Track) -> Result<Self> {
+        Ok(Self::Ps(Box::new(crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(
+            crate::codec::config::aac_specific_config(&track.configuration)?, track.sample_rate,
+        ).map_err(|e| invalid(&e.0))?)))
+    }
+
     pub(crate) fn new(track: &Track) -> Result<Self> {
         match &track.codec {
             b"mp4a" => {

@@ -1,4 +1,6 @@
 //! Owned MP4 AAC/ALAC/PCM/IMA4 presentation decoding, including silence and repeated edits.
+use crate::owned_aac::aac_ps_native::InBandPsProbe;
+use crate::owned_codec_config::aac_specific_config as mp4_probe_config;
 pub(crate) enum Mp4AacCheckpoint {
     Aac(crate::owned_aac::AacCheckpoint),
     Ps(crate::owned_aac::aac_ps_native::Checkpoint),
@@ -29,6 +31,12 @@ pub(crate) enum Mp4TimelineDecoder {
 }
 impl Mp4TimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
+    pub(crate) fn with_in_band_ps(track: &crate::owned_mp4::Track) -> Result<Self> {
+        Ok(Self::Ps(Box::new(crate::owned_aac::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(
+            mp4_probe_config(&track.configuration)?, track.sample_rate,
+        )?)))
+    }
+
     pub(crate) fn checkpoint(&self) -> Option<Mp4AacCheckpoint> {
         match self {
             Self::Aac(d) => Some(Mp4AacCheckpoint::Aac(d.checkpoint())),
@@ -435,6 +443,8 @@ mod precise {
     struct Mp4TimelineDecoder(crate::owned_pcm_decoder::PcmDecoder);
     impl Mp4TimelineDecoder {
         const SAMPLE_BYTES: usize = 8;
+        fn with_in_band_ps(_: &crate::owned_mp4::Track) -> Result<Self> { Err(invalid("PCM reader cannot select AAC PS")) }
+
         fn new(track: &crate::owned_mp4::Track) -> Result<Self> {
             Ok(Self(
                 crate::owned_pcm_decoder::PcmDecoder::from_mp4(track)

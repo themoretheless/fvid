@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-inband-export-lc-960-synthetic.mp4",
+      "reference": 13,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "8cde696c95a0230b064215f9d32d660b77697df6d10811717d04d7cf0a297c5a",
+      "kind": "LC",
+      "asc": "130c"
+    },
+    {
+      "file": "he-aac-ps-inband-export-sbr-960-synthetic.mp4",
+      "reference": 13,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "a7e9953b433067899f64dde1b2dbe79b477993a8ed4347957c7d2ff7be819320",
+      "kind": "SBR",
+      "asc": "2b098a00"
+    },
+    {
+      "file": "he-aac-ps-inband-export-lc-1024-synthetic.mp4",
+      "reference": 5,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "e9e7f46207a0f667ef778ec42722c94ac9310eb25b8ee62e9393fe2101f16728",
+      "kind": "LC",
+      "asc": "1308"
+    },
+    {
+      "file": "he-aac-ps-inband-export-sbr-1024-synthetic.mp4",
+      "reference": 5,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "4534c35074527bdb5415a1fc6e1d4665412e05131053b3aac3d9b7bb708ab6df",
+      "kind": "SBR",
+      "asc": "2b098800"
+    }
+  ]
+}

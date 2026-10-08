@@ -11,10 +11,11 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     }
     let index = mp4_audio_index(&reader, selected)?;
     let track = reader.tracks()[index].clone();
-    let mut decoder = Mp4TimelineDecoder::new(&track)?;
+    let in_band_ps = negotiate_mp4_ps(&mut reader, index, || control.check())?;
+    let mut decoder = if in_band_ps { Mp4TimelineDecoder::with_in_band_ps(&track)? } else { Mp4TimelineDecoder::new(&track)? };
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
-    if track.timescale == 0 || track.sample_rate != rate || track.channels != channels {
+    if track.timescale == 0 || track.sample_rate != rate || (!in_band_ps && track.channels != channels) {
         return Err(invalid(
             "MP4 audio export requires valid clock and matching audio geometry",
         ));
@@ -214,4 +215,21 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         return Err(invalid("MP4 audio edit contains no samples"));
     }
     Ok(stats)
+}
+
+pub(crate) fn negotiate_mp4_ps<R: std::io::Read + std::io::Seek>(
+    reader: &mut Mp4TimelineReader<R>, index: usize, mut check: impl FnMut() -> Result<()>,
+) -> Result<bool> {
+    let track = reader.tracks()[index].clone();
+    if track.codec != *b"mp4a" { return Ok(false); }
+    let asc = mp4_probe_config(&track.configuration)?;
+    let Ok(mut probe) = InBandPsProbe::new(asc, track.sample_rate) else { return Ok(false); };
+    let mut packet = Vec::new();
+    for sample in 0..track.samples.len() {
+        check()?;
+        reader.read_packet(index, sample, &mut packet)?;
+        if probe.read(&packet).is_err() { probe.reset(); continue; }
+        if probe.ps_detected() { return Ok(true); }
+    }
+    Ok(false)
 }

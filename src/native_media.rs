@@ -340,6 +340,7 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
     decode_mp4_audio_reader_controlled(reader,output,interval,selected,control)
 }
 
+use crate::codec::config::aac_specific_config as mp4_probe_config;
 use crate::container::mp4::Mp4Reader as Mp4TimelineReader;
 use crate::native_audio_decoder::PacketPcmDecoder as Mp4TimelineDecoder;
 use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
@@ -815,14 +816,15 @@ pub fn audio_source_info_selected(
             if track.sample_rate!=u64::from(decoder.sample_rate()) || (!in_band_ps && track.channels!=u64::from(decoder.channels())) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
             return Ok(AudioSourceInfo {channel_mask:decoder.channel_mask(),stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:match track.codec.as_str() {"A_ALAC"=>"alac","A_PCM/INT/LIT"|"A_PCM/INT/BIG" if track.bit_depth==8=>"pcm_u8","A_PCM/INT/LIT"=>"pcm_sle","A_PCM/INT/BIG"=>"pcm_sbe","A_PCM/FLOAT/IEEE"=>"pcm_fle",_=>"aac"}});
         }
-        let reader = crate::container::mp4::Mp4Reader::open(
+        let mut reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
             Default::default(),
         )?;
         let index = mp4_audio_index(&reader, selected)?;
+        let in_band_ps = negotiate_mp4_ps(&mut reader,index,||Ok(()))?;
         let track = &reader.tracks()[index];
-        let decoder = crate::native_audio_decoder::PacketPcmDecoder::new(track)?;
-        if track.sample_rate != decoder.sample_rate() || track.channels != decoder.channels() {
+        let decoder = if in_band_ps {crate::native_audio_decoder::PacketPcmDecoder::with_in_band_ps(track)?} else {crate::native_audio_decoder::PacketPcmDecoder::new(track)?};
+        if track.sample_rate != decoder.sample_rate() || (!in_band_ps && track.channels != decoder.channels()) {
             return Err(invalid("MP4 container and decoder geometry disagree"));
         }
         Ok(AudioSourceInfo {

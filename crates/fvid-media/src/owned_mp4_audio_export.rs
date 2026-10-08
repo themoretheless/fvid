@@ -51,7 +51,7 @@ pub(crate) fn descriptor(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<(usize, u32, u16, u32, String)> {
-    let reader = open(source, options)?;
+    let mut reader = open(source, options)?;
     if !reader.refused().is_empty() {
         return Err("MP4 stream selection requires every track to be represented".into());
     }
@@ -64,12 +64,12 @@ pub(crate) fn descriptor(
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
     crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
         .map_err(|e| e.to_string())?;
+    let in_band_ps = crate::owned_mp4_audio::negotiate_mp4_ps(&mut reader,index,||Ok(())).map_err(|e|e.to_string())?;
     let track = &reader.tracks()[index];
-    let decoder =
-        crate::owned_mp4_audio::Mp4TimelineDecoder::new(track).map_err(|e| e.to_string())?;
+    let decoder = if in_band_ps {crate::owned_mp4_audio::Mp4TimelineDecoder::with_in_band_ps(track)} else {crate::owned_mp4_audio::Mp4TimelineDecoder::new(track)}.map_err(|e|e.to_string())?;
     if track.timescale == 0
         || track.sample_rate != decoder.sample_rate()
-        || track.channels != decoder.channels()
+        || (!in_band_ps && track.channels != decoder.channels())
     {
         return Err("MP4 audio export requires valid clock and matching audio geometry".into());
     }

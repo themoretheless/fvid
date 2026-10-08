@@ -803,3 +803,15 @@ reserves possible mono in-band PS before the probe; packet preflight checks
 cancellation without consuming decoded-packet progress. Original ASC/timestamps
 are retained. MP4 implicit-PS export, clock changes and missing-fill PS playback
 remain separate gaps; this supersedes only the Matroska export limitation above.
+
+Implicit-PS MP4 PCM/WAV export (2026-10-09): the shared root/owned timeline and
+public WAV metadata selection probe original payload before choosing delayed
+stereo PS. Four additional original LC/SBR 960/1024 MP4 fixtures declare mono
+sample entries and omit PS signalling while retaining the authored packets and
+repeated edit ranges. The regression reproduces the exact former ASC-only
+SBR/PS synthesis refusal, accepts independent PCM for silence, repeated ranges,
+intervals and max-packet EOF, compares root/owned bytes, inspects WAV geometry
+and source speaker mask, and rejects low controlled budgets before PCM output.
+No raw ASC or timestamps are rewritten at runtime. Output clock changes and
+PS playback without SBR fills remain unqualified; the prior implicit-PS export
+limitations are superseded only for the tested MP4 and Matroska geometries.
