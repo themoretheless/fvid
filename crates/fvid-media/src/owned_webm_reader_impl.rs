@@ -416,6 +416,7 @@ impl<R: Read + Seek> WebmReader<R> {
                         // the same place. Whichever the newer spelling is wins, in
                         // either writing order, so a track that carries both does
                         // not read as two different languages.
+                        let mut output_sample_rate = None;
                         let mut uid = None;
                         let mut ietf = None;
                         let mut disposition = 1i32;
@@ -519,14 +520,18 @@ impl<R: Read + Seek> WebmReader<R> {
                                 0xe1 => {
                                     for v in fields(&mut *reader, f, &mut *elements, limits.elements)? {
                                         match v.id {
-                                            0xb5 => {
+                                            0xb5 | 0x78b5 => {
                                                 let value = float(&mut *reader, v)?;
                                                 if !value.is_finite() || value <= 0.0 {
                                                     return Err(invalid(
                                                         "invalid WebM sampling frequency",
                                                     ));
                                                 }
-                                                track.sample_rate = value.round() as u64;
+                                                if v.id == 0x78b5 {
+                                                    output_sample_rate = Some(value.round() as u64);
+                                                } else {
+                                                    track.sample_rate = value.round() as u64;
+                                                }
                                             }
                                             0x9f => track.channels = uint(&mut *reader, v)?,
                                             // `BitDepth` under `Audio`, in the two-byte
@@ -564,6 +569,9 @@ impl<R: Read + Seek> WebmReader<R> {
                             return Err(invalid("invalid WebM track"));
                         }
                         if let Some(uid) = uid {track_uids.insert(track.number,uid);}
+                        // OutputSamplingFrequency overrides the core frequency
+                        // regardless of element order; timestamps stay in ns.
+                        if let Some(rate) = output_sample_rate { track.sample_rate = rate; }
                         tracks.push(track);
                     }
                 }

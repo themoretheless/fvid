@@ -1171,10 +1171,12 @@ mod ps_matroska_preroll_tests {
     use crate::audio::AudioStream;
     #[test]
     fn original_ps_matroska_preroll_is_trimmed_and_eof_seek_rewind_keep_stereo_history() {
-        let manifest: serde_json::Value = serde_json::from_str(include_str!(
+        let mut manifest: serde_json::Value = serde_json::from_str(include_str!(
             "../tests/fixtures/playback-errors/aac-ps-matroska-oracles.json"
         ))
         .unwrap();
+        let output_clock: serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/playback-errors/aac-ps-output-clock-matroska-oracles.json")).unwrap();
+        manifest["cases"].as_array_mut().unwrap().extend(output_clock["cases"].as_array().unwrap().iter().cloned());
         let oracle = include_bytes!("../tests/fixtures/playback-errors/aac-ps-absence-pcm.bin");
         for case in manifest["cases"].as_array().unwrap() {
             let file = std::fs::read(
@@ -1192,14 +1194,8 @@ mod ps_matroska_preroll_tests {
                 Default::default(),
             )
             .unwrap();
-            let decoder = crate::codec::make_audio_decoder(
-                stream.codec(),
-                stream.extra_data(),
-                stream.sample_rate(),
-                stream.channels(),
-                stream.bits_per_sample(),
-            )
-            .unwrap();
+            assert_eq!((stream.sample_rate(),stream.channels()),(48000,2));
+            let decoder = stream.make_decoder().unwrap();
             let captured = Arc::new(Mutex::new(Vec::new()));
             let (_, commands) = sync_channel(1);
             let (events, _) = sync_channel(1);

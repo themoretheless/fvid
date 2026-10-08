@@ -843,3 +843,19 @@ worker tests cover source-to-output clock conversion, seek and rewind. Five
 assets regenerate deterministically without codec executables. This qualifies
 MP4 explicit SBR output clocks; Matroska core-clock metadata, bare LC implicit
 SBR clock discovery and missing-fill PS playback remain separate gaps.
+
+Matroska OutputSamplingFrequency (2026-10-09): the shared root/owned reader
+honors Audio/OutputSamplingFrequency (0x78B5), independently of element order,
+with the same positive finite validation as SamplingFrequency. The default
+remains SamplingFrequency when no output element is present. Source timestamps
+remain nanoseconds. Four original LC/SBR in-band PS 960/1024 videos declare
+SamplingFrequency=24000 and OutputSamplingFrequency=48000, with both orders.
+Before the fix the exact reader regression reports 24000 instead of 48000.
+Acceptance covers independent PCM/WAV, gaps, intervals, packet-limit EOF,
+controlled memory admission, native AVC frame, negative preroll, seek and
+rewind. Four malformed variants refuse zero/negative/NaN/infinity explicitly;
+these are refusal tests, not playback acceptance. Nine assets regenerate offline
+and deterministically. Element semantics follow
+https://www.matroska.org/technical/elements.html#OutputSamplingFrequency .
+ASC-only inference when OutputSamplingFrequency is omitted, implicit output
+clock discovery and PS playback without SBR fills remain separate gaps.

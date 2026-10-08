@@ -1,0 +1,130 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-output-clock-lc-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "8d787a5fe1c2a5e8bc2b87a1d5ef165ade62c9148f30351bdf7c76cd674f7ec9"
+    },
+    {
+      "file": "he-aac-ps-output-clock-sbr-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "e1e58930209437b026a45df9ae87741a0e38e33e4ffb49fcfbfe465577f25d36"
+    },
+    {
+      "file": "he-aac-ps-output-clock-lc-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "7963fd886a98626522ea2dccfb92c70e0863d7e43ad5510a05fd55ebc893a5ff"
+    },
+    {
+      "file": "he-aac-ps-output-clock-sbr-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "source_pts_ns": [
+        -10000000,
+        40000000,
+        90000000
+      ],
+      "first_skip_samples": 480,
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "811355d60189df04bbf8f5fb180eb145e8516ffc6f052b0cb7a9e212b64c3b87"
+    }
+  ],
+  "invalid": [
+    {
+      "file": "he-aac-ps-output-clock-invalid-zero-synthetic.mkv",
+      "error": "invalid WebM sampling frequency",
+      "sha256": "7be7927152c50eac2541387dd2f5490c5e151aebc15b70786ff3996073578659"
+    },
+    {
+      "file": "he-aac-ps-output-clock-invalid-negative-synthetic.mkv",
+      "error": "invalid WebM sampling frequency",
+      "sha256": "de37ed6503de30c39e22baa56a0aa5076de2a7ea0ab288ae8c1056828f3c85c9"
+    },
+    {
+      "file": "he-aac-ps-output-clock-invalid-nan-synthetic.mkv",
+      "error": "invalid WebM sampling frequency",
+      "sha256": "10ebdf6e881ccb872a4bfc5999fcde1dcab0d6d640825e101b7ddbb2b104ecce"
+    },
+    {
+      "file": "he-aac-ps-output-clock-invalid-infinity-synthetic.mkv",
+      "error": "invalid WebM sampling frequency",
+      "sha256": "96e0fc2fd291bca328e4cc39073f7d18dc21863a2425ac20d1a01c93afed9e20"
+    }
+  ]
+}
