@@ -15,8 +15,8 @@ static unsigned sample(const aom_image_t *img,int p,int x,int y){return img->fmt
 static void put(aom_image_t *img,int p,int x,int y,unsigned value){if(img->fmt&AOM_IMG_FMT_HIGHBITDEPTH)((unsigned short*)(img->planes[p]+y*img->stride[p]))[x]=value;else img->planes[p][y*img->stride[p]+x]=value;}
 static void save_image(const char *prefix,const char *suffix,const aom_image_t *img,int depth){size_t capacity=(size_t)img->d_w*img->d_h*6;unsigned char *raw=malloc(capacity);if(!raw)exit(2);size_t at=0;for(int p=0;p<3;p++)for(unsigned y=0;y<(img->d_h>>(p?img->y_chroma_shift:0));y++)for(unsigned x=0;x<(img->d_w>>(p?img->x_chroma_shift:0));x++){unsigned v=sample(img,p,x,y);raw[at++]=v&255;if(depth>8)raw[at++]=v>>8;}save(prefix,suffix,raw,at);free(raw);}
 int main(int argc,char **argv){
- if(argc!=2&&argc!=3&&argc!=5&&argc!=6)return 2;const char *prefix=argv[1];int sb=argc>=3?atoi(argv[2]):64;int depth=argc>=5?atoi(argv[3]):8;int chroma=argc>=5?atoi(argv[4]):420;int q=argc==6?atoi(argv[5]):0;
- if(q<0||q>63)return 2;
+ if(argc!=2&&argc!=3&&argc!=5&&argc!=6&&argc!=7)return 2;const char *prefix=argv[1];int sb=argc>=3?atoi(argv[2]):64;int depth=argc>=5?atoi(argv[3]):8;int chroma=argc>=5?atoi(argv[4]):420;int q=argc>=6?atoi(argv[5]):0;int adapted=argc==7?atoi(argv[6]):0;
+ if(q<0||q>63||(adapted!=0&&adapted!=1))return 2;
  if((sb!=64&&sb!=128)||(depth!=8&&depth!=10&&depth!=12)||(chroma!=420&&chroma!=422&&chroma!=444))return 2;int dimension=2*sb;int sx=chroma==444?0:1;int sy=chroma==420?1:0;int shift=depth-8;
  aom_img_fmt_t input_format=chroma==420?AOM_IMG_FMT_I420:chroma==422?AOM_IMG_FMT_I422:AOM_IMG_FMT_I444;if(depth>8)input_format|=AOM_IMG_FMT_HIGHBITDEPTH;
  aom_codec_enc_cfg_t cfg;check(aom_codec_enc_config_default(aom_codec_av1_cx(),&cfg,AOM_USAGE_REALTIME));
@@ -27,11 +27,13 @@ int main(int argc,char **argv){
  check(aom_codec_control(&enc,AV1E_SET_ENABLE_ORDER_HINT,0));check(aom_codec_control(&enc,AV1E_SET_ENABLE_REF_FRAME_MVS,0));check(aom_codec_control(&enc,AV1E_SET_ENABLE_CDEF,0u));check(aom_codec_control(&enc,AV1E_SET_ENABLE_RESTORATION,0u));check(aom_codec_control(&enc,AV1E_SET_LOOPFILTER_CONTROL,0));check(aom_codec_control(&enc,AV1E_SET_ENABLE_PALETTE,0));check(aom_codec_control(&enc,AV1E_SET_ENABLE_INTRABC,0));check(aom_codec_control(&enc,AV1E_SET_CDF_UPDATE_MODE,0u));
  aom_svc_params_t svc={0};svc.number_spatial_layers=1;svc.number_temporal_layers=1;svc.scaling_factor_num[0]=1;svc.scaling_factor_den[0]=1;svc.framerate_factor[0]=1;svc.layer_target_bitrate[0]=256;
  check(aom_codec_control(&enc,AV1E_SET_SVC_PARAMS,&svc));
+ if(adapted){check(aom_codec_control(&enc,AV1E_SET_CDF_UPDATE_MODE,1u));check(aom_codec_control(&enc,AV1E_SET_TILE_COLUMNS,1u));check(aom_codec_control(&enc,AV1E_SET_TILE_ROWS,1u));}
  aom_image_t *img=aom_img_alloc(NULL,input_format,dimension,dimension,1);if(!img)return 2;
  for(int p=0;p<3;p++)for(int y=0;y<(dimension>>(p?sy:0));y++)for(int x=0;x<(dimension>>(p?sx:0));x++)put(img,p,x,y,(64+(3*x+5*y+23*p)%96)<<shift);
  check(aom_codec_encode(&enc,img,0,1,AOM_EFLAG_FORCE_KF));size_t an;unsigned char *ab=packet(&enc,&an);save(prefix,"-anchor.obu",ab,an);
  cfg.large_scale_tile=1;check(aom_codec_enc_config_set(&enc,&cfg));check(aom_codec_control(&enc,AV1E_SET_TILE_COLUMNS,1u));check(aom_codec_control(&enc,AV1E_SET_TILE_ROWS,1u));check(aom_codec_control(&enc,AV1E_SET_SINGLE_TILE_DECODING,1u));
- check(aom_codec_encode(&enc,img,1,1,AOM_EFLAG_FORCE_KF));size_t prime_size;unsigned char *prime=packet(&enc,&prime_size);free(prime);
+ if(adapted)check(aom_codec_control(&enc,AV1E_SET_CDF_UPDATE_MODE,0u));
+ if(!adapted){check(aom_codec_encode(&enc,img,1,1,AOM_EFLAG_FORCE_KF));size_t prime_size;unsigned char *prime=packet(&enc,&prime_size);free(prime);}
  av1_ref_frame_t forced={0};forced.idx=0;forced.img=*img;check(aom_codec_control(&enc,AV1_SET_REFERENCE,&forced));check(aom_codec_control(&enc,AV1E_SET_FRAME_PARALLEL_DECODING,1u));
  if(q){check(aom_codec_control(&enc,AV1E_SET_LOSSLESS,0u));check(aom_codec_control(&enc,AV1E_SET_QUANTIZER_ONE_PASS,q));}
  for(int p=0;p<3;p++)for(int y=0;y<(dimension>>(p?sy:0));y++)for(int x=0;x<(dimension>>(p?sx:0));x++)put(img,p,x,y,(71+(3*x+5*y+23*p)%96+(q?((x/8+y/8+p)%7-3):0))<<shift);

@@ -55,14 +55,16 @@ def main():
     parser.add_argument("--generator", type=Path, required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1] / "tests/fixtures/playback-errors"
-    for q, sb, depth, chroma in itertools.product([0, 32], [64, 128], [8, 10, 12], [420, 422, 444]):
+    for adapted, q, sb, depth, chroma in itertools.product([0, 1], [0, 32], [64, 128], [8, 10, 12], [420, 422, 444]):
         tag = ("" if sb == 64 else "sb128-") if depth == 8 and chroma == 420 else f"d{depth}-c{chroma}-sb{sb}-"
         if q:
             tag = f"q{q}-d{depth}-c{chroma}-sb{sb}-"
+        if adapted:
+            tag = "cdf-" + tag
         name_prefix = "av1-tile-list-" + tag
         with tempfile.TemporaryDirectory(prefix="fvid-tile-list-") as tmp:
             prefix = Path(tmp) / "fixture"
-            subprocess.run([str(args.generator), str(prefix), str(sb), str(depth), str(chroma), str(q)], check=True)
+            subprocess.run([str(args.generator), str(prefix), str(sb), str(depth), str(chroma), str(q), str(adapted)], check=True)
             single = Path(str(prefix) + "-list.yuv").read_bytes()
             multiple = Path(str(prefix) + "-multi-list.yuv").read_bytes()
             assert single == assemble_tiles(prefix, sb, depth, chroma), "tile-list must match separate camera-tile reconstruction"
@@ -79,7 +81,7 @@ def main():
                 (root / name).write_bytes(data)
                 records[suffix] = {"file": name, "sha256": hashlib.sha256(data).hexdigest()}
             manifest = {"size": [sb * 2, sb * 2], "tile_size": [sb, sb],
-                        "superblock": sb, "depth": depth, "chroma": chroma, "quantizer": q,
+                        "superblock": sb, "depth": depth, "chroma": chroma, "quantizer": q, "adapted_anchor_cdf": bool(adapted),
                         "order": ORDER, "oracle": "stock libaom",
                         "multi_anchor_offsets": [0, 9 << (depth - 8)],
                         "multi_anchor_indices": [0, 1, 0, 1], "artifacts": records}

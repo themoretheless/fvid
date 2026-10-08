@@ -1,0 +1,62 @@
+{
+  "size": [
+    256,
+    256
+  ],
+  "tile_size": [
+    128,
+    128
+  ],
+  "superblock": 128,
+  "depth": 12,
+  "chroma": 444,
+  "quantizer": 32,
+  "adapted_anchor_cdf": true,
+  "order": [
+    3,
+    0,
+    2,
+    1
+  ],
+  "oracle": "stock libaom",
+  "multi_anchor_offsets": [
+    0,
+    144
+  ],
+  "multi_anchor_indices": [
+    0,
+    1,
+    0,
+    1
+  ],
+  "artifacts": {
+    "anchor.obu": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-anchor.obu",
+      "sha256": "f475e4378855b77fad5e6a85681517b8ec8d4d8abcf6c15480e259cda1ae9464"
+    },
+    "camera.obu": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-camera.obu",
+      "sha256": "821ed31c05edb9e5faf0a6c536e388328573872e80f5b988eaf144afe8007189"
+    },
+    "header.obu": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-header.obu",
+      "sha256": "9d2bfdee65d5016eb0804f729feb2cd532f708ac70f58c217c74c51ee9c364dc"
+    },
+    "list.obu": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-list.obu",
+      "sha256": "668d37bfc8e5b013f1aa2e8d7bdcc09d70bd2952cc12e7c23935591d9aa05357"
+    },
+    "list.yuv": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-list.yuv",
+      "sha256": "5e5236f35d5d7aaec758df1830489480f14d787f500ab88542114cd9c8ba831b"
+    },
+    "multi-list.obu": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-multi-list.obu",
+      "sha256": "378cb854965f9eb4872cc8662a2e0116140108313afede1593bbe748f084ea2e"
+    },
+    "multi-list.yuv": {
+      "file": "av1-tile-list-cdf-q32-d12-c444-sb128-multi-list.yuv",
+      "sha256": "b1f7605453e02c343b72ec51b5c9cbf8d3b034d9c222b741f9f0ec698c909561"
+    }
+  }
+}

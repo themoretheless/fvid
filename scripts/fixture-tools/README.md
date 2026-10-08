@@ -156,3 +156,10 @@ Anchors stay lossless; lossy source images add an owned spatial residual.
 Temporary individual camera-tile reconstructions must assemble to the exact
 stock tile-list oracle before artifacts are admitted. Lossy output must differ
 from authored source. Ordinary tests read only admitted fixtures.
+
+Generation also covers inherited adapted anchor CDF: 72 total camera cases.
+The `cdf-` variants enable CDF adaptation/save for the normal anchor and omit
+large-scale priming, preserving its frame context for camera LAST. Six offline
+test functions exercise the 72 cases and missing-side-information refusal.
+The C generator's final optional integer selects adapted-anchor mode (0/1);
+the Python driver enumerates both modes and writes explicit manifest metadata.

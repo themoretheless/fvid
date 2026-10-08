@@ -45,7 +45,31 @@ fn lossy_camera_tile_list_transform_reconstruction_matrix() {
         }
     }
 }
+#[test]
+fn adapted_anchor_cdf_camera_tile_list_matrix() {
+    for q in [0, 32] {
+        for sb in [64, 128] {
+            for depth in [8, 10, 12] {
+                for chroma in [420, 422, 444] {
+                    let tag = if q > 0 {
+                        format!("q{q}-d{depth}-c{chroma}-sb{sb}-")
+                    } else if depth == 8 && chroma == 420 {
+                        if sb == 64 {
+                            String::new()
+                        } else {
+                            "sb128-".to_owned()
+                        }
+                    } else {
+                        format!("d{depth}-c{chroma}-sb{sb}-")
+                    };
+                    camera_tile_list_case(&format!("cdf-{tag}"), sb, depth, chroma, q);
+                }
+            }
+        }
+    }
+}
 fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u8) {
+    let adapted = prefix.starts_with("cdf-");
     let bytes = |name: &str| bytes(&format!("{prefix}{name}"));
     let anchor = bytes("anchor.obu");
     let header = bytes("header.obu");
@@ -65,12 +89,25 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
         .find(|o| o.kind == 6)
         .unwrap();
     let ah = Header::parse_intra(&sequence, original.payload, 0, 0).unwrap();
+    assert_eq!(
+        !ah.disable_cdf_update, adapted,
+        "{prefix}: anchor CDF adaptation"
+    );
+    if adapted {
+        assert!(
+            !ah.disable_frame_end_update,
+            "{prefix}: anchor must save adapted CDF"
+        );
+    }
     let frame = Obus::new(&header)
         .map(Result::unwrap)
         .find(|o| o.kind == 6)
         .unwrap();
     let camera = Header::parse(&sequence, frame.payload, 0, 0, &[Some(&ah); 8]).unwrap();
     assert_eq!(camera.frame_type, 1);
+    if adapted {
+        assert_eq!(camera.primary_reference, 0, "{prefix}: inherit LAST CDF");
+    }
     assert_eq!(camera.refresh_flags, 0);
     assert_eq!(camera.quant.base > 0, q > 0);
     assert!(camera.disable_cdf_update && camera.disable_frame_end_update);
@@ -110,6 +147,16 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     assert_eq!(pixels(&output), golden, "{prefix}");
     if depth > 8 {
         assert!(output.planes[0].samples.iter().any(|v| *v > 255));
+    }
+    if adapted {
+        let mut default_cdf = camera.clone();
+        default_cdf.primary_reference = 7;
+        match decoder.decode_tile_list(&default_cdf, &anchors, obu.payload, None) {
+            Ok(changed) => assert_ne!(pixels(&changed), golden, "{prefix}: inherited CDF mutation"),
+            Err(_) => decoder
+                .finish()
+                .expect("advanced context refusal must not poison ordinary decoder"),
+        }
     }
     // Distinct anchors make selecting the wrong entry's anchor observable.
     let mut alternate = (*anchors[0]).clone();

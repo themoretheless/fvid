@@ -5220,3 +5220,26 @@ lossless/lossy camera cases plus ordinary missing-context refusal. No external
 codec is called or linked in ordinary tests. Further motion/border, CDF-state,
 quantizer/tool combinations and container-side external context remain open;
 this stage does not claim complete codec conformance.
+
+
+## AV1 camera tile lists with inherited adapted CDF (2026-10-08)
+
+The explicit native camera-context path now has 36 additional cases whose
+normal lossless anchor enables symbol CDF adaptation and frame-end CDF saving.
+The anchor uses a 2x2 tile layout. The generator switches to large-scale camera
+mode without an intervening keyframe, so primary reference LAST inherits the
+actual anchor CDF rather than a fresh default context. Camera CDF updates remain
+disabled as required for this large-scale mode.
+
+All lossless/Q32, SB64/SB128, 8/10/12 and 420/422/444 cases match stock libaom
+one/two-anchor pixels and separately reconstructed camera tiles. Native tests
+assert the parsed anchor adaptation/save flags and camera primary reference 0.
+A mutation that selects PRIMARY_REF_NONE must fail entropy reconstruction or
+produce different pixels; that mutation refusal is distinct from the passing
+normal acceptance. Six test functions cover 72 accepted camera cases plus the
+ordinary missing-external-context refusal.
+
+Primary-ref-none encoded camera streams, more reference/CDF slot mappings,
+context-update-tile choices, motion/border interactions and automatic container
+side information remain separate qualifications. This evidence does not imply
+whole-codec conformance.

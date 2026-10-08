@@ -1377,3 +1377,23 @@ outside the repository. Offline acceptance checks all pixels, actual lossy
 source differences, successfully reconstructed dequantization mutations,
 anchor-selection mutations and the existing sparse/malformed/memory coverage.
 No private inputs, FFmpeg, network or runtime generation are used.
+
+
+### AV1 adapted anchor CDF camera contexts
+
+The generator's final optional argument enables anchor CDF adaptation and
+a normal 2x2 anchor tile layout. This variant omits the previously discarded
+priming keyframe after switching to large-scale mode, preserving the normal
+anchor's adapted frame context. The normal decoder saves the anchor CDF;
+camera primary_ref_frame=LAST loads it with camera/frame-end updates disabled.
+
+The 36 new `av1-tile-list-cdf-*` cases span both quantizers, superblocks, all
+depths and chroma layouts. Stock libaom must decode them and match separately
+assembled camera-tile output. Lossless results still match the independently
+authored formula; lossy results must differ from source. Seven admitted
+artifacts per case have SHA-256 manifests; no private input is used. Native
+acceptance checks parsed adaptation/save flags, LAST primary reference and all
+pixels. Switching the camera to default CDF is a mutation control: wrong pixels
+or entropy refusal pass that control, not playback acceptance. All original
+lossless/lossy acceptance, dequantization/anchor mutations, sparse-canvas and
+malformed/memory checks remain enabled. Ordinary tests run no generators.
