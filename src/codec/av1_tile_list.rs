@@ -63,6 +63,8 @@ pub struct Output {
     pub nonzero_motion_blocks: u64,
     pub fractional_motion_blocks: u64,
     pub border_motion_blocks: u64,
+    /// Current-call border counts: left, top, right, bottom.
+    pub border_motion_edges: [u64; 4],
     pub size: [usize; 2],
     pub depth: u8,
     pub subsampling: [bool; 2],
@@ -242,6 +244,7 @@ pub(crate) fn decode(
             nonzero_motion_blocks: 0,
             fractional_motion_blocks: 0,
             border_motion_blocks: 0,
+            border_motion_edges: [0; 4],
             size,
             depth: s.color.depth,
             subsampling: s.color.subsampling,
@@ -257,6 +260,7 @@ pub(crate) fn decode(
     output.nonzero_motion_blocks = 0;
     output.fractional_motion_blocks = 0;
     output.border_motion_blocks = 0;
+    output.border_motion_edges = [0; 4];
     for (index, entry) in list.entries.iter().enumerate() {
         let mut references = references;
         references[h.references[0]] = Some(anchors[entry.anchor]);
@@ -269,6 +273,10 @@ pub(crate) fn decode(
         output.fractional_motion_blocks +=
             u64::from(picture.inter_prediction.fractional_motion_blocks);
         output.border_motion_blocks += u64::from(picture.inter_prediction.border_motion_blocks);
+        for edge in 0..4 {
+            output.border_motion_edges[edge] +=
+                u64::from(picture.inter_prediction.border_motion_edges[edge]);
+        }
         for p in 0..3 {
             let sx = if p == 0 {
                 0

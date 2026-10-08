@@ -1463,3 +1463,17 @@ Rust tests assert these requirements, real decoded counters, exact pixels,
 sparse counter bounds and all prior controls. Regeneration changed metadata
 only; no original OBU/YUV binaries or private source material were substituted.
 Ordinary tests use checked-in artifacts without external codecs or network.
+
+### Reverse camera tile-list motion and directional edge gates
+
+108 original `mvneg-` cases use the existing authored pattern shifted by
+-4/-2 luma pixels and clamped at each plane boundary. Each case records seven
+owned OBU/YUV artifacts and their hashes; no private media or parameters enter
+generation. Stock reconstruction and independent lossless formula controls
+remain separate from ordinary offline test execution.
+
+324 cases now pass nine ordinary tile-list test functions. Directional decoded
+counts are ordered left/top/right/bottom. `require_motion_edges` expresses
+positive requirements, with false meaning not required. The matched positive
+and reverse families require all four edges jointly for every parameter set;
+authored shift sign alone is not proof of coded vector direction.

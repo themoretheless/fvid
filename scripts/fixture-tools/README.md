@@ -184,3 +184,10 @@ pinned 42 fractional cases must also decode fractional luma displacement.
 Regenerating with different stock encoder settings must retain these properties
 or update fixtures and qualification deliberately; matching pixels alone does
 not satisfy the required motion coverage.
+
+The driver now enumerates motion -1/0/1 (324 total cases). `--motion -1`
+regenerates the 108 `mvneg-` cases with clamped -4/-2 luma shifts.
+Directional counters and `require_motion_edges` use left/top/right/bottom order.
+Each positive/reverse pair requires all four coded edges jointly; source shift
+alone cannot prove coded vector direction. False requirement flags mean not
+required, not absent. Nine offline tile-list test functions cover the matrix.

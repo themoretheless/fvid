@@ -5311,3 +5311,20 @@ regressions pass without external decoders. Existing fixture binaries were
 unchanged on regeneration. This qualifies the observed coded border/fractional
 paths, not every direction/phase/filter combination, scaled/warped boundary
 interaction or all remaining codec gaps.
+
+## AV1 tile-list reverse motion and directional border proof (2026-10-08)
+
+108 additional owned reverse-motion cases bring acceptance to 324 cases.
+The authored shift is -4/-2 luma pixels with clamped source coordinates.
+Decoded border counters distinguish left, top, right and bottom; manifest
+requirements assert actual coded coverage, not inferred source motion.
+Periodic source patterns can cause the encoder to select opposite-sign vectors
+and compensate with residuals. Each of the 108 positive/reverse pairs requires
+all four edges jointly across depth, chroma, SB, quantizer and CDF contexts.
+Observed positive coverage counts are 108/0/72/108, reverse 72/108/98/0
+in left/top/right/bottom order. False requirement flags do not assert absence.
+
+Nine tile-list test functions, 46 AV1 units and three adjacent integration
+suites pass offline. All 2268 artifact hashes were checked. Every fractional
+phase/filter, scaled/warped boundary interaction, external container context
+and wider codec gaps remain separate qualification work.

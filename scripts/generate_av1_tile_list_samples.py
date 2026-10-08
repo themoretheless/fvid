@@ -26,8 +26,8 @@ def authored(sb, depth, chroma, multi, q=0, motion=0):
                 px = (source % 2) * width + x % width
                 py = (source // 2) * height + y % height
                 if motion:
-                    px = min(width * 2 - 1, px + (4 >> (sx if plane else 0)))
-                    py = min(height * 2 - 1, py + (2 >> (sy if plane else 0)))
+                    px = max(0, min(width * 2 - 1, px + motion * (4 >> (sx if plane else 0))))
+                    py = max(0, min(height * 2 - 1, py + motion * (2 >> (sy if plane else 0))))
                 value = ((64 if motion else 71) + (3 * px + 5 * py + 23 * plane) % 96
                          + ((px // 8 + py // 8 + plane) % 7 - 3 if q else 0)
                          + (9 * (index % 2) if multi else 0)) << (depth - 8)
@@ -56,17 +56,17 @@ def assemble_tiles(prefix, sb, depth, chroma):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--generator", type=Path, required=True)
-    parser.add_argument("--motion", type=int, choices=[0, 1], help="generate only this motion family")
+    parser.add_argument("--motion", type=int, choices=[-1, 0, 1], help="generate only this motion family")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1] / "tests/fixtures/playback-errors"
-    for motion, adapted, q, sb, depth, chroma in itertools.product([0, 1] if args.motion is None else [args.motion], [0, 1, 2], [0, 32], [64, 128], [8, 10, 12], [420, 422, 444]):
+    for motion, adapted, q, sb, depth, chroma in itertools.product([-1, 0, 1] if args.motion is None else [args.motion], [0, 1, 2], [0, 32], [64, 128], [8, 10, 12], [420, 422, 444]):
         tag = ("" if sb == 64 else "sb128-") if depth == 8 and chroma == 420 else f"d{depth}-c{chroma}-sb{sb}-"
         if q:
             tag = f"q{q}-d{depth}-c{chroma}-sb{sb}-"
         if adapted:
             tag = ("none-" if adapted == 2 else "cdf-") + tag
         if motion:
-            tag = "mv-" + tag
+            tag = ("mvneg-" if motion < 0 else "mv-") + tag
         name_prefix = "av1-tile-list-" + tag
         with tempfile.TemporaryDirectory(prefix="fvid-tile-list-") as tmp:
             prefix = Path(tmp) / "fixture"
@@ -91,14 +91,18 @@ def main():
                 records[suffix] = {"file": name, "sha256": hashlib.sha256(data).hexdigest()}
             manifest = {"size": [sb * 2, sb * 2], "tile_size": [sb, sb],
                         "superblock": sb, "depth": depth, "chroma": chroma, "quantizer": q, "adapted_anchor_cdf": bool(adapted), "primary_ref_none": adapted == 2,
-                        "order": ORDER, "oracle": "stock libaom", "motion_shift": [4, 2] if motion else [0, 0], "cpu_used": 0 if motion else 6,
+                        "order": ORDER, "oracle": "stock libaom", "motion_shift": [motion*4, motion*2], "cpu_used": 0 if motion else 6,
                         "multi_anchor_offsets": [0, 9 << (depth - 8)],
                         "multi_anchor_indices": [0, 1, 0, 1], "artifacts": records}
             manifest["require_nonzero_motion"] = bool(motion)
             manifest["require_border_motion"] = bool(motion)
-            manifest["require_fractional_motion"] = bool(motion and (
+            manifest["require_fractional_motion"] = bool(motion > 0 and (
                 (q == 0 and depth == 8 and chroma == 422) or
                 (q > 0 and (sb == 128 or chroma == 422))))
+            manifest["require_motion_edges"] = (
+                [True, False, q > 0 or depth == 8, True] if motion > 0 else
+                [q > 0 or depth == 8, True, q == 0 and depth > 8, False] if motion < 0 else
+                [False, False, False, False])
             (root / (name_prefix + "generated.json")).write_text(json.dumps(manifest, indent=2) + "\n")
 
 

@@ -17,7 +17,7 @@ static void extend_image(aom_image_t *img){for(int p=0;p<3;p++){int sx=p?img->x_
 static void save_image(const char *prefix,const char *suffix,const aom_image_t *img,int depth){size_t capacity=(size_t)img->d_w*img->d_h*6;unsigned char *raw=malloc(capacity);if(!raw)exit(2);size_t at=0;for(int p=0;p<3;p++)for(unsigned y=0;y<(img->d_h>>(p?img->y_chroma_shift:0));y++)for(unsigned x=0;x<(img->d_w>>(p?img->x_chroma_shift:0));x++){unsigned v=sample(img,p,x,y);raw[at++]=v&255;if(depth>8)raw[at++]=v>>8;}save(prefix,suffix,raw,at);free(raw);}
 int main(int argc,char **argv){
  if(argc!=2&&argc!=3&&argc!=5&&argc!=6&&argc!=7&&argc!=8)return 2;const char *prefix=argv[1];int sb=argc>=3?atoi(argv[2]):64;int depth=argc>=5?atoi(argv[3]):8;int chroma=argc>=5?atoi(argv[4]):420;int q=argc>=6?atoi(argv[5]):0;int adapted=argc>=7?atoi(argv[6]):0;int motion=argc==8?atoi(argv[7]):0;
- if(motion<0||motion>1)return 2;
+ if(motion< -1||motion>1)return 2;
  if(q<0||q>63||(adapted<0||adapted>2))return 2;
  if((sb!=64&&sb!=128)||(depth!=8&&depth!=10&&depth!=12)||(chroma!=420&&chroma!=422&&chroma!=444))return 2;int dimension=2*sb;int sx=chroma==444?0:1;int sy=chroma==420?1:0;int shift=depth-8;
  aom_img_fmt_t input_format=chroma==420?AOM_IMG_FMT_I420:chroma==422?AOM_IMG_FMT_I422:AOM_IMG_FMT_I444;if(depth>8)input_format|=AOM_IMG_FMT_HIGHBITDEPTH;
@@ -38,7 +38,7 @@ int main(int argc,char **argv){
  if(!adapted){check(aom_codec_encode(&enc,img,1,1,AOM_EFLAG_FORCE_KF));size_t prime_size;unsigned char *prime=packet(&enc,&prime_size);free(prime);}
  av1_ref_frame_t forced={0};forced.idx=0;forced.img=*img;check(aom_codec_control(&enc,AV1_SET_REFERENCE,&forced));check(aom_codec_control(&enc,AV1E_SET_FRAME_PARALLEL_DECODING,1u));
  if(q){check(aom_codec_control(&enc,AV1E_SET_LOSSLESS,0u));check(aom_codec_control(&enc,AV1E_SET_QUANTIZER_ONE_PASS,q));}
- for(int p=0;p<3;p++)for(int y=0;y<(dimension>>(p?sy:0));y++)for(int x=0;x<(dimension>>(p?sx:0));x++){int xx=x,yy=y;if(motion){int w=dimension>>(p?sx:0),h=dimension>>(p?sy:0);xx=x+(4>>(p?sx:0));yy=y+(2>>(p?sy:0));if(xx>=w)xx=w-1;if(yy>=h)yy=h-1;}put(img,p,x,y,((motion?64:71)+(3*xx+5*yy+23*p)%96+(q?((xx/8+yy/8+p)%7-3):0))<<shift);}
+ for(int p=0;p<3;p++)for(int y=0;y<(dimension>>(p?sy:0));y++)for(int x=0;x<(dimension>>(p?sx:0));x++){int xx=x,yy=y;if(motion){int w=dimension>>(p?sx:0),h=dimension>>(p?sy:0);xx=x+motion*(4>>(p?sx:0));yy=y+motion*(2>>(p?sy:0));if(xx<0)xx=0;if(yy<0)yy=0;if(xx>=w)xx=w-1;if(yy>=h)yy=h-1;}put(img,p,x,y,((motion?64:71)+(3*xx+5*yy+23*p)%96+(q?((xx/8+yy/8+p)%7-3):0))<<shift);}
  int flags=AOM_EFLAG_NO_REF_LAST2|AOM_EFLAG_NO_REF_LAST3|AOM_EFLAG_NO_REF_GF|AOM_EFLAG_NO_REF_ARF|AOM_EFLAG_NO_REF_BWD|AOM_EFLAG_NO_REF_ARF2|AOM_EFLAG_NO_UPD_LAST|AOM_EFLAG_NO_UPD_GF|AOM_EFLAG_NO_UPD_ARF|AOM_EFLAG_NO_UPD_ENTROPY;
  if(adapted==2)flags|=AOM_EFLAG_SET_PRIMARY_REF_NONE;
  aom_svc_ref_frame_config_t refs={0};refs.reference[0]=1;

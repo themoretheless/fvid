@@ -67,5 +67,11 @@
   },
   "require_nonzero_motion": true,
   "require_border_motion": true,
-  "require_fractional_motion": true
+  "require_fractional_motion": true,
+  "require_motion_edges": [
+    true,
+    false,
+    true,
+    true
+  ]
 }

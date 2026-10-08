@@ -81,9 +81,19 @@ fn moving_camera_tile_list_reconstruction_across_context_depth_chroma_and_superb
         camera_context_matrix(context);
     }
 }
+#[test]
+fn reverse_moving_camera_tile_lists_across_context_depth_chroma_and_superblocks() {
+    for context in ["mvneg", "mvneg-cdf", "mvneg-none"] {
+        camera_context_matrix(context);
+    }
+}
 fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u8) {
-    let motion = prefix.starts_with("mv-");
-    let context = prefix.strip_prefix("mv-").unwrap_or(prefix);
+    let negative = prefix.starts_with("mvneg-");
+    let motion = negative || prefix.starts_with("mv-");
+    let context = prefix
+        .strip_prefix("mv-")
+        .or_else(|| prefix.strip_prefix("mvneg-"))
+        .unwrap_or(prefix);
     let reset = context.starts_with("none-");
     let adapted = reset || context.starts_with("cdf-");
     let bytes = |name: &str| bytes(&format!("{prefix}{name}"));
@@ -150,10 +160,18 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     assert!(output.nonzero_motion_blocks <= output.inter_blocks);
     assert!(output.fractional_motion_blocks <= output.nonzero_motion_blocks);
     assert!(output.border_motion_blocks <= output.nonzero_motion_blocks);
+    assert!(
+        output
+            .border_motion_edges
+            .iter()
+            .all(|n| *n <= output.border_motion_blocks)
+    );
+    assert!(output.border_motion_edges.iter().sum::<u64>() >= output.border_motion_blocks);
     let manifest: serde_json::Value = serde_json::from_slice(&bytes("generated.json")).unwrap();
     assert_eq!(manifest["require_nonzero_motion"].as_bool(), Some(motion));
     assert_eq!(manifest["require_border_motion"].as_bool(), Some(motion));
     let fractional = motion
+        && !negative
         && ((q == 0 && depth == 8 && chroma == 422) || (q > 0 && (sb == 128 || chroma == 422)));
     assert_eq!(
         manifest["require_fractional_motion"].as_bool(),
@@ -168,6 +186,25 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
             output.border_motion_blocks > 0,
             "{prefix}: coded reference rectangle must cross the frame edge"
         );
+    }
+    let required_edges = if negative {
+        [q > 0 || depth == 8, true, q == 0 && depth > 8, false]
+    } else if motion {
+        [true, false, q > 0 || depth == 8, true]
+    } else {
+        [false; 4]
+    };
+    for (edge, required) in required_edges.into_iter().enumerate() {
+        assert_eq!(
+            manifest["require_motion_edges"][edge].as_bool(),
+            Some(required)
+        );
+        if required {
+            assert!(
+                output.border_motion_edges[edge] > 0,
+                "{prefix}: coded edge {edge} required"
+            );
+        }
     }
     if fractional {
         assert!(
@@ -244,10 +281,15 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
                 let mut source_x = source % 2 * width + x % width;
                 let mut source_y = source / 2 * height + y % height;
                 if motion {
-                    source_x =
-                        (source_x + (4 >> usize::from(p != 0 && chroma != 444))).min(width * 2 - 1);
-                    source_y = (source_y + (2 >> usize::from(p != 0 && chroma == 420)))
-                        .min(height * 2 - 1);
+                    let dx = 4 >> usize::from(p != 0 && chroma != 444);
+                    let dy = 2 >> usize::from(p != 0 && chroma == 420);
+                    if negative {
+                        source_x = source_x.saturating_sub(dx);
+                        source_y = source_y.saturating_sub(dy);
+                    } else {
+                        source_x = (source_x + dx).min(width * 2 - 1);
+                        source_y = (source_y + dy).min(height * 2 - 1);
+                    }
                 }
                 let authored = (((if motion { 64 } else { 71 })
                     + (3 * source_x + 5 * source_y + 23 * p) % 96)
@@ -354,6 +396,13 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     assert!(sparse.nonzero_motion_blocks <= sparse.inter_blocks);
     assert!(sparse.fractional_motion_blocks <= sparse.nonzero_motion_blocks);
     assert!(sparse.border_motion_blocks <= sparse.nonzero_motion_blocks);
+    assert!(
+        sparse
+            .border_motion_edges
+            .iter()
+            .all(|n| *n <= sparse.border_motion_blocks)
+    );
+    assert!(sparse.border_motion_edges.iter().sum::<u64>() >= sparse.border_motion_blocks);
     let mut indexed = obu.payload.to_vec();
     indexed[4] = 127;
     let many = vec![anchors[0].clone(); 128];

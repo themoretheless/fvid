@@ -39,6 +39,8 @@ pub struct InterPredictionStats {
     pub fractional_motion_blocks: u32,
     /// Unscaled translation blocks whose visible coded rectangle crosses the reference edge.
     pub border_motion_blocks: u32,
+    /// Border-crossing block counts in left, top, right, bottom order.
+    pub border_motion_edges: [u32; 4],
     pub average_compound_blocks: u32,
     pub distance_compound_blocks: u32,
     pub wedge_compound_blocks: u32,
