@@ -164,6 +164,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn enable_shared_surfaces(&mut self) -> Result<bool> {
         match self {
             Self::Avc { source, .. } => source.enable_shared_surfaces(),
+            Self::Webm(source) => source.enable_shared_surfaces(),
             _ => Ok(false),
         }
     }
@@ -190,9 +191,11 @@ impl<R: BufRead + Seek> NativeReader<R> {
             return Ok(Self::Y4m(Y4mReader::new(reader, budget)?));
         }
         if length >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
-            return Ok(Self::Webm(crate::playback_webm::WebmVideoReader::open(
-                reader, budget,
-            )?));
+            return Ok(Self::Webm(if allow_hardware {
+                crate::playback_webm::WebmVideoReader::open(reader, budget)?
+            } else {
+                crate::playback_webm::WebmVideoReader::open_software(reader, budget)?
+            }));
         }
         let signature = &prefix[..length];
         if signature.starts_with(&[0xff, 0xd8, 0xff]) {
@@ -560,6 +563,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn hardware_accelerated(&self) -> bool {
         match self {
             Self::Avc { source, .. } => source.hardware_accelerated(),
+            Self::Webm(source) => source.hardware_accelerated(),
             _ => false,
         }
     }
@@ -904,6 +908,7 @@ impl AvcColour {
     }
 }
 /// The visible picture as packed 8-bit 4:2:0 planes, ready for GPU upload.
+#[derive(Clone)]
 pub struct Planar8 {
     pub width: usize,
     pub height: usize,

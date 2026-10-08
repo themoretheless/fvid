@@ -1,0 +1,28 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.obu",
+      "sha256": "ae4fbe207d8b7e3b069680341769321c41f268735501e33267f1a992e0a9c2a0",
+      "reference": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.yuv",
+      "reference_sha256": "6b43f9e80eb218fca218674644e073caf36df29ab1ce1ec7149b4b9805ea7f58",
+      "source_sha256": "2b4091b309778559d4d33b6be3c324a890d449986545bfb0ad445254cafd1c99",
+      "source_exact": false,
+      "quality": 48,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.webm",
+      "webm_sha256": "4dab66ed172e2e7027b8738551479b234a59d2be36d94685845014c09c003cb5",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        125,
+        117
+      ]
+    }
+  ]
+}
