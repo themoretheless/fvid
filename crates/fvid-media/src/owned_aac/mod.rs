@@ -9,6 +9,7 @@ pub mod aac_sbr_grid;
 pub mod aac_sbr_controls;
 pub mod aac_sbr_huffman;
 pub mod aac_sbr_coefficients;
+pub mod aac_sbr_dequant;
 mod aac_sbr_huffman_tables;
 pub mod aac_tns;
 pub use fvid_control::error::BitstreamError as Error;

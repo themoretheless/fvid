@@ -5578,3 +5578,21 @@ quantized conformance bounds, dequantization/stereo uncoupling, rate-dependent
 frequency bounds and the QMF/high-frequency pipeline remain to be integrated.
 Reference: GOST R53556.4-2013 tables 72/73 and section 6.18.3.4; ISO SBR
 normative codewords are separately qualified by the Huffman generator.
+
+
+### Owned SBR dequantization and coupled stereo
+
+`aac_sbr_dequant` converts reconstructed quantized envelope/noise scalefactors
+into energy/noise ratios and recovers coupled left/right values. Both amplitude
+resolutions, their distinct pan offsets, even reconstructed balance values,
+legal noise-level ranges and the opposite envelope/noise panning orientations
+are implemented. Independent channel fractions avoid subtractive loss for the
+quieter channel. Nonfinite/unrepresentable output is rejected explicitly.
+Tests compare 530 independent 80-digit Decimal cases, neutral panning, mirrored
+channels, envelope energy conservation, explicit asymmetric left/right examples,
+parity/noise bounds and numerical extremes.
+
+This remains coefficient/DSP qualification. HE-AAC encoded playback acceptance
+requires production frame state, output-rate frequency bounds, integration of
+SBR syntax, QMF and high-frequency generation/adjustment. No HE-AAC support claim
+is made from these standalone numerical tests.

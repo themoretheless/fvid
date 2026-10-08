@@ -243,3 +243,9 @@ network/process codec calls, validates ten complete prefix-free tables, applies
 explicit documented translation errata and cross-checks all 604 symbols against
 the separate ISO text layout before writing Rust constants and JSON vectors.
 Do not run generation during ordinary tests. See fixture PROVENANCE.md.
+
+
+SBR dequantization oracles: explicitly run
+`python3 scripts/generate_aac_sbr_dequant_oracles.py` to generate 530 Decimal
+numerical cases. It uses only the Python standard library, no encoder or network.
+Ordinary tests read the checked-in JSON; see fixture PROVENANCE.md.

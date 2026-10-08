@@ -1624,3 +1624,20 @@ Explicit offline regeneration:
 Both reference files must already be local; ordinary tests read checked-in data
 and require neither FFmpeg nor network. SHA-256: `8b4858fe7e039af6760d6c6550e45736d9cfa8e60e7147a2fb8a6c680dd23643`.
 These are syntax vectors, not HE-AAC encoded PCM/playback acceptance.
+
+
+### SBR dequantization numerical vectors
+
+`aac-sbr-dequant-oracles.json` contains 530 standalone numeric cases computed
+with 80-digit Python Decimal arithmetic by the explicit offline generator
+`scripts/generate_aac_sbr_dequant_oracles.py`. Direct normative fractions cover
+mono/uncoupled envelope energy at both amplitude resolutions, all legal noise
+levels, coupled envelope panning and all even legal noise balance values.
+The production implementation uses f64 and calculates both channel fractions
+independently to preserve the quiet channel. Expected cases contain no private
+media and require no FFmpeg, foreign codec or network.
+Reference: GOST R53556.4-2013 section 6.18.3.5, panOffset=[24,12] in 6.18.2.6,
+and noise quantized-value/parity requirements in 6.18.3.6.
+Source: https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html .
+SHA-256: `d82e592fbfac664eae31fe14b715dfca01aab3381bb7ad19742d2621389a5850`. Generation was repeated with byte-identical output.
+These are numerical protocol oracles, not encoded HE-AAC playback acceptance.
