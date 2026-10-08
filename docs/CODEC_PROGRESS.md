@@ -4651,3 +4651,18 @@ sub-8x8 intra/inter chroma and additional profiles/chroma remain separate gaps.
 
 Validation: all 37 AV1 fvid-codecs unit tests and 73 integration tests across
 45 AV1 suites pass offline, with no ignored acceptance tests or FFmpeg.
+
+
+### Temporal reference motion with super-resolution and restoration
+
+Eighteen owned six-frame 192x128 sequences combine temporal reference motion
+with super-resolution denominators 9/12/16, loop filtering, CDEF and restoration
+at 8/10/12 bits and two translated source patterns. All 90 inter headers
+enable reference MVs, while the coded grid is narrower than the display grid.
+The native acceptance checks full independent libaom/dav1d pixel parity for
+108 frames, retained nonzero motion, coded-grid storage, reset, WebM replay,
+20 ms timestamps, EOF, rewind and seek. All 54 checked-in asset hashes match
+the generation manifest. Ordinary execution is offline and requires no FFmpeg
+or external decoder. This qualifies fixed-denominator forward-reference
+combinations; bidirectional references, order-hint wrap, changing coded grids
+and tiled temporal sampling still need dedicated qualification.
