@@ -191,3 +191,11 @@ Directional counters and `require_motion_edges` use left/top/right/bottom order.
 Each positive/reverse pair requires all four coded edges jointly; source shift
 alone cannot prove coded vector direction. False requirement flags mean not
 required, not absent. Nine offline tile-list test functions cover the matrix.
+
+### AAC ancillary fill elements
+
+Run `python3 scripts/generate_aac_fill_samples.py` explicitly to regenerate nine
+owned AAC derivatives, their six-frame Y4M companion and hash manifest. No
+external codec is needed. Ordinary acceptance uses committed files:
+`cargo test --release --locked --offline --no-default-features --test aac_fill_extensions`.
+Audio-tool refusals are kept separate from ancillary-data playback acceptance.

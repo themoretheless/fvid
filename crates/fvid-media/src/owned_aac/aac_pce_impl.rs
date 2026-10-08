@@ -314,15 +314,94 @@ pub(crate) fn skip_fill(bits: &mut super::bits::BitReader<'_>) -> Result<()> {
         count += input.read(8)? as usize;
         count -= 1;
     }
-    if count != 0 {
-        let extension = input.read(4)?;
-        if !matches!(extension, 0 | 1) {
-            return Err(unsupported(
-                "AAC fill extension tool is not implemented",
-            ));
+    let end = input.position() + count * 8;
+    if count * 8 > input.remaining() {
+        return Err(invalid("truncated AAC fill payload"));
+    }
+    while input.position() < end {
+        let read = |input: &mut super::bits::BitReader<'_>, width: u8| -> Result<u32> {
+            if usize::from(width) > end - input.position() {
+                return Err(invalid("AAC extension exceeds fill payload"));
+            }
+            input.read(width)
+        };
+        match read(&mut input, 4)? {
+            0 => input.skip(end - input.position())?,
+            1 => {
+                if read(&mut input, 4)? != 0 {
+                    return Err(invalid("invalid AAC fill-data nibble"));
+                }
+                while input.position() < end {
+                    if read(&mut input, 8)? != 0xa5 {
+                        return Err(invalid("invalid AAC fill-data byte"));
+                    }
+                }
+            }
+            2 => {
+                if read(&mut input, 4)? != 0 {
+                    return Err(unsupported("AAC ancillary data version is not implemented"));
+                }
+                let mut length = 0usize;
+                loop {
+                    let part = read(&mut input, 8)? as usize;
+                    length += part;
+                    if part != 255 {
+                        break;
+                    }
+                }
+                if length > (end - input.position()) / 8 {
+                    return Err(invalid("AAC ancillary data exceeds fill payload"));
+                }
+                input.skip(length * 8)?;
+            }
+            _ => return Err(unsupported("AAC fill extension tool is not implemented")),
         }
-        input.skip(count * 8 - 4)?;
     }
     *bits = input;
     Ok(())
+}
+
+#[cfg(test)]
+mod fill_tests {
+    use super::*;
+    #[test]
+    fn ancillary_fill_is_bounded_and_transactional_at_every_bit_offset() {
+        for offset in 0..8 {
+            for (payload, accepted) in [
+                (&[0x20, 1, 0x55, 0x00][..], true),
+                (&[0x20, 7, 0x55][..], false),
+                (&[0x20, 255][..], false),
+                (&[0x20, 0, 0xd0][..], false),
+                (&[0x10, 0xa4][..], false),
+            ] {
+                let mut fields = vec![false; offset];
+                for shift in (0..4).rev() {
+                    fields.push(payload.len() & (1 << shift) != 0);
+                }
+                for byte in payload {
+                    for shift in (0..8).rev() {
+                        fields.push(byte & (1 << shift) != 0);
+                    }
+                }
+                // Bytes after the declared FIL must never rescue its length.
+                fields.extend([true; 32]);
+                fields.resize(fields.len().next_multiple_of(8), false);
+                let bytes: Vec<_> = fields
+                    .chunks_exact(8)
+                    .map(|c| c.iter().fold(0u8, |n, b| n * 2 + u8::from(*b)))
+                    .collect();
+                let mut bits = BitReader::new(&bytes);
+                bits.skip(offset).unwrap();
+                assert_eq!(skip_fill(&mut bits).is_ok(), accepted);
+                assert_eq!(
+                    bits.position(),
+                    if accepted {
+                        offset + 4 + payload.len() * 8
+                    } else {
+                        offset
+                    }
+                );
+            }
+        }
+    }
 }

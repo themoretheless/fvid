@@ -488,7 +488,12 @@ fn adts_program_after_fill_elements_retains_audio_and_rejects_tools() {
                 field(count - 14, 8);
             }
             for index in 0..count {
-                field(if count == 14 && index == 0 { 0x10 } else { 0 }, 8);
+                field(
+                    if count == 14 {
+                        if index == 0 { 0x10 } else { 0xa5 }
+                    } else { 0 },
+                    8,
+                );
             }
         }
         let prefix: Vec<u8> = bits

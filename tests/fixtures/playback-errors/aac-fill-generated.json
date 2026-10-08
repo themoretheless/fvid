@@ -1,0 +1,45 @@
+{
+  "source_sha256": "b3ce8fe3c284cde88b3d671399ba9028c9f22ac47f8419b7b1b5b4e18db56e2e",
+  "cases": {
+    "empty": {
+      "file": "aac-fill-empty.aac",
+      "sha256": "a1ea3c70cf40d5bc1d6b5bfc3a3f9e4528441d00aa0b774e0102599adf5c9037"
+    },
+    "short": {
+      "file": "aac-fill-short.aac",
+      "sha256": "aef6bf94293dcd621a57f93a10ab6cc74fc4cd3b21db45e2e137beda07f8a6d4"
+    },
+    "escaped": {
+      "file": "aac-fill-escaped.aac",
+      "sha256": "97c47053299c3a687568af1368132b0a752ca5b74aa43a1411c5482d3a65689b"
+    },
+    "multiple": {
+      "file": "aac-fill-multiple.aac",
+      "sha256": "82b1718af2466c52e4b2a6f0be9844c00e4d5e060fca6d78f38af811d7d626b0"
+    },
+    "overrun": {
+      "file": "aac-fill-overrun.aac",
+      "sha256": "a3d8b578fe46cbedb0a4a008cfa7dcd811802df8b24a40d7a5bfcc4dd68ade3b"
+    },
+    "unterminated": {
+      "file": "aac-fill-unterminated.aac",
+      "sha256": "bf4b263c11f60c1633cb35c57316b68deca8aa7828adfd313488de5cfbd92917"
+    },
+    "version": {
+      "file": "aac-fill-version.aac",
+      "sha256": "40d15fc9e5365cea5d6844507b9e92b6bb9adc5570eca5fd8c56a96449683fa9"
+    },
+    "hidden-sbr": {
+      "file": "aac-fill-hidden-sbr.aac",
+      "sha256": "3ac05855f444c8140dbcec1a49cab9623eec0e07b2f671215eb0de1523a36b70"
+    },
+    "bad-fill": {
+      "file": "aac-fill-bad-fill.aac",
+      "sha256": "e891b991cb88ae3e0a32ab110a6356461012f851ec2a5ed5843f1fb7b8ef8d6b"
+    }
+  },
+  "video": {
+    "file": "aac-fill-companion.y4m",
+    "sha256": "5b27914c06d4625d482d7a68c0a41990a9434989d5e1e7ff80f8b063192898b6"
+  }
+}

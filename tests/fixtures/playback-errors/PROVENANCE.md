@@ -1477,3 +1477,26 @@ counts are ordered left/top/right/bottom. `require_motion_edges` expresses
 positive requirements, with false meaning not required. The matched positive
 and reverse families require all four edges jointly for every parameter set;
 authored shift sign alone is not proof of coded vector direction.
+
+### AAC-LC ancillary fill extensions (2026-10-08)
+
+`generate_aac_fill_samples.py` uses only the committed, originally authored
+`aac-independent-coupling.aac` as audio source. It prefixes eight FIL elements
+to preserve the original PCE byte alignment, updates ADTS sizes and writes nine
+six-frame variants. `aac-fill-generated.json` pins every output and source hash.
+Empty/short/escaped (255+0 length) and multiple ancillary extensions preserve
+the independently qualified nonzero coupling PCM. The pre-fix acceptance test
+failed specifically with `AAC fill extension tool is not implemented`; enabled
+acceptance now compares decoded PCM and explicit PCE setup exactly.
+
+Overrun, unterminated length, unknown version, invalid fill-data byte and SBR
+after ancillary data are rejection tests, not playback acceptance for SBR.
+Every truncated escaped packet must leave audio state unchanged. Parser tests
+check all eight starting bit offsets and prohibit using bytes beyond FIL as
+length or payload. A six-frame 16x16 authored Y4M companion at 48000/1024 fps
+matches the AAC frame intervals. No private media/parameters, external encoder,
+FFmpeg or network is used by generation or ordinary tests.
+
+Extension syntax was checked against FDK AAC's `EXT_DATA_ELEMENT` parser:
+https://github.com/mstorsjo/fdk-aac/blob/master/libAACdec/src/aacdecoder.cpp
+The Rust implementation is independently written; FDK is not linked or invoked.

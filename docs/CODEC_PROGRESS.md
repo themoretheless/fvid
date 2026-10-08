@@ -5355,3 +5355,28 @@ subsampling shift with the horizontal one makes the new test fail precisely on
 8-bit 422 Cb at the top-left edge; the mutation was removed afterward. This
 checks that the oracle detects the axis regression rather than merely matching
 two shared implementations.
+
+## AAC-LC ancillary EXT_DATA_ELEMENT playback (2026-10-08)
+
+The owned fill parser now accepts version-zero ancillary data, including empty
+payloads, chained 255-byte length fields and multiple extension payloads per FIL.
+It bounds every read by the declared fill length and commits the bit cursor only
+after complete success. Ancillary bytes never change audio synthesis. EXT_FIL
+and conforming EXT_FILL_DATA remain supported; malformed fill-data bytes are
+now rejected. SBR/audio tools and unknown ancillary versions remain explicit
+unsupported behavior, including an SBR extension after accepted ancillary data.
+
+Nine six-frame synthetic ADTS variants plus a matching authored Y4M companion
+reproduce acceptance/refusals. Pre-fix ordinary acceptance failed on the precise
+fill-tool refusal. Four enabled integration tests verify exact nonzero PCM,
+explicit PCE setup, malformed/unsupported extensions, all escaped-packet
+truncations, unchanged decoder state and the six matching video intervals.
+A parser unit checks transactional bounds at every initial bit offset.
+
+The four integrations pass in a clean copy; 13 existing PCE and five coupling
+tests also pass there. The parser unit passes locally. The clean test binary
+links only libiconv/libSystem, without FFmpeg/libav. Existing EXT_FILL_DATA test
+construction was corrected from invalid zero padding to the required 0xa5 bytes.
+This closes ancillary fill playback, not SBR/HE-AAC, gain control, height layouts
+or the broader unresolved codec tools. Generation is explicit, uses committed
+owned media only, and requires no external encoder or network.
