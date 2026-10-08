@@ -1,4 +1,6 @@
 //! VP9 intra and single-reference inter reconstruction. Unsupported tools are rejected before output.
+#[cfg(feature = "parallel")]
+use super::vp9_parallel;
 use super::{
     vp9::{self, Header},
     vp9_bool::BoolDecoder,
@@ -93,6 +95,36 @@ pub fn decode_frame(
     budget: usize,
 ) -> Result<Picture> {
     decode_frame_counted(frame, header, ch, references, previous, budget).map(|v| v.0)
+}
+
+/// Decode with optional tile parallelism enabled.
+#[cfg(feature = "parallel")]
+pub fn decode_frame_parallel(
+    frame: &[u8],
+    header: &Header,
+    ch: &CompressedHeader,
+    references: [Option<&Picture>; 3],
+    previous: Option<&Picture>,
+    budget: usize,
+) -> Result<(Picture, Counts)> {
+    // Try parallel decode if multiple tiles
+    if let Some(result) = super::vp9_parallel::try_decode_parallel(frame, header)? {
+        return Ok(result);
+    }
+    // Fallback to sequential
+    decode_frame_counted(frame, header, ch, references, previous, budget)
+}
+
+#[cfg(not(feature = "parallel"))]
+pub fn decode_frame_parallel(
+    frame: &[u8],
+    header: &Header,
+    ch: &CompressedHeader,
+    references: [Option<&Picture>; 3],
+    previous: Option<&Picture>,
+    budget: usize,
+) -> Result<(Picture, Counts)> {
+    decode_frame_counted(frame, header, ch, references, previous, budget)
 }
 pub(crate) fn decode_frame_counted(
     frame: &[u8],
