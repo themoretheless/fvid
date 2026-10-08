@@ -217,6 +217,43 @@ impl Header {
         refs: &[Option<&Header>; 8],
         reference_order_hints: [u32; 8],
     ) -> Result<Self> {
+        Self::parse_framing(
+            s,
+            data,
+            temporal_id,
+            spatial_id,
+            refs,
+            reference_order_hints,
+            false,
+        )
+    }
+    pub(crate) fn parse_separate(
+        s: &Sequence,
+        data: &[u8],
+        temporal_id: u8,
+        spatial_id: u8,
+        refs: &[Option<&Header>; 8],
+        reference_order_hints: [u32; 8],
+    ) -> Result<Self> {
+        Self::parse_framing(
+            s,
+            data,
+            temporal_id,
+            spatial_id,
+            refs,
+            reference_order_hints,
+            true,
+        )
+    }
+    fn parse_framing(
+        s: &Sequence,
+        data: &[u8],
+        temporal_id: u8,
+        spatial_id: u8,
+        refs: &[Option<&Header>; 8],
+        reference_order_hints: [u32; 8],
+        separate: bool,
+    ) -> Result<Self> {
         let b = &mut BitReader::new(data);
         let (frame_type, show, showable, error_resilient) = if s.reduced_header {
             (0, true, false, true)
@@ -621,7 +658,18 @@ impl Header {
                 "AV1 film grain parameters not implemented",
             ));
         }
-        align(b)?;
+        if separate {
+            if !b.bit()? {
+                return Err(invalid("missing AV1 frame header trailing one bit"));
+            }
+            while b.position() < data.len() * 8 {
+                if b.bit()? {
+                    return Err(invalid("nonzero AV1 frame header trailing padding"));
+                }
+            }
+        } else {
+            align(b)?;
+        }
         Ok(Self {
             frame_type,
             frame_id,

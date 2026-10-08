@@ -756,6 +756,8 @@ impl Decoder<'_> {
             [(w * 4).min(64), (h * 4).min(64)]
         };
         let block = Block {
+            palette_sizes: [0; 2],
+            palette_colors: [[0; 8]; 2],
             segment: self.current_segment,
             w,
             h,

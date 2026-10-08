@@ -9,6 +9,8 @@ use super::{
 use crate::{invalid, Result};
 #[path = "av1_picture_inter.rs"]
 mod inter;
+#[path = "av1_palette.rs"]
+mod palette;
 
 #[derive(Clone, Debug)]
 pub struct Plane {
@@ -22,6 +24,12 @@ pub struct Picture {
     pub depth: u8,
     /// Segment IDs in padded 4x4 raster order, retained with reference pictures.
     pub segment_ids: Vec<u8>,
+    /// Coded palette block counts per Y/UV plane group, for palette sizes 2..=8.
+    pub palette_counts: [[u32; 7]; 2],
+    /// Palette colors selected from the above/left neighbor cache, per Y/UV group.
+    pub palette_cache_hits: [u32; 2],
+    /// Palette transform blocks with nonzero dequantized residuals, per Y/UV group.
+    pub palette_residual_blocks: [u32; 2],
     pub planes: [Plane; 3],
 }
 #[derive(Clone, Copy)]
@@ -47,6 +55,8 @@ struct Block {
     compound_mask: Option<CompoundMask>,
     warp: Option<[i64; 6]>,
     filters: [usize; 2],
+    palette_sizes: [u8; 2],
+    palette_colors: [[u16; 8]; 2],
 }
 struct Decoder<'a> {
     s: &'a Sequence,
@@ -163,7 +173,7 @@ pub(crate) fn decode(
     let rows = 2 * (h.size[1] as usize).div_ceil(8);
     let required = cols
         .checked_mul(rows)
-        .and_then(|n| n.checked_mul(384))
+        .and_then(|n| n.checked_mul(448))
         .and_then(|n| n.checked_add(500_000))
         .ok_or_else(|| invalid("AV1 image allocation overflow"))?;
     if required > budget {
@@ -195,6 +205,9 @@ pub(crate) fn decode(
         size: h.size,
         depth: s.color.depth,
         segment_ids,
+        palette_counts: [[0; 7]; 2],
+        palette_cache_hits: [0; 2],
+        palette_residual_blocks: [0; 2],
         planes,
     };
     let mut dec = Decoder {
@@ -649,21 +662,69 @@ impl Decoder<'_> {
                 uv_angle = symbol(d, c, av1_cdfs::ANGLE_DELTA, [uv - 1])? as i32 - 3;
             }
         }
+        let mut palette_sizes = [0u8; 2];
+        let mut palette_colors = [[0u16; 8]; 3];
         if self.h.screen_content && w >= 2 && h >= 2 && w <= 16 && h <= 16 {
             let size_ctx = (w * h).ilog2() as usize - 2;
-            let palette_y =
-                mode == 0 && symbol(d, c, av1_cdfs::PALETTE_Y_MODE, [size_ctx, 0])? != 0;
-            if palette_y {
-                return Err(crate::unsupported(
-                    "AV1 palette reconstruction not implemented",
-                ));
-            }
-            if has_chroma && uv == 0 && symbol(d, c, av1_cdfs::PALETTE_UV_MODE, [0])? != 0 {
-                return Err(crate::unsupported("AV1 chroma palette not implemented"));
+            let ctx = usize::from(above.is_some_and(|b| b.palette_sizes[0] > 0))
+                + usize::from(left.is_some_and(|b| b.palette_sizes[0] > 0));
+            for plane in 0..2 {
+                let eligible = if plane == 0 {
+                    mode == 0
+                } else {
+                    has_chroma && uv == 0
+                };
+                let present = eligible
+                    && if plane == 0 {
+                        symbol(d, c, av1_cdfs::PALETTE_Y_MODE, [size_ctx, ctx])? != 0
+                    } else {
+                        symbol(
+                            d,
+                            c,
+                            av1_cdfs::PALETTE_UV_MODE,
+                            [usize::from(palette_sizes[0] > 0)],
+                        )? != 0
+                    };
+                if !present {
+                    continue;
+                }
+                let n = 2 + symbol(
+                    d,
+                    c,
+                    if plane == 0 {
+                        av1_cdfs::PALETTE_Y_SIZE
+                    } else {
+                        av1_cdfs::PALETTE_UV_SIZE
+                    },
+                    [size_ctx],
+                )?;
+                palette_sizes[plane] = n as u8;
+                self.image.palette_counts[plane][n - 2] += 1;
+                let mut cache = Vec::new();
+                if y * 4 % 64 != 0 {
+                    if let Some(b) = above {
+                        cache.extend_from_slice(
+                            &b.palette_colors[plane][..b.palette_sizes[plane] as usize],
+                        );
+                    }
+                }
+                if let Some(b) = left {
+                    cache.extend_from_slice(
+                        &b.palette_colors[plane][..b.palette_sizes[plane] as usize],
+                    );
+                }
+                cache.sort_unstable();
+                cache.dedup();
+                let (colors, hits) = palette::colors(d, &cache, n, self.s.color.depth, plane > 0)?;
+                palette_colors[plane] = colors;
+                self.image.palette_cache_hits[plane] += hits;
+                if plane == 1 {
+                    palette_colors[2] = palette::v_colors(d, n, self.s.color.depth)?;
+                }
             }
         }
         let mut filter_mode = None;
-        if self.s.filter_intra && mode == 0 && w <= 8 && h <= 8 {
+        if self.s.filter_intra && mode == 0 && palette_sizes[0] == 0 && w <= 8 && h <= 8 {
             let sizes = [
                 (1, 1),
                 (1, 2),
@@ -694,6 +755,30 @@ impl Decoder<'_> {
                 .ok_or_else(|| invalid("invalid AV1 block size"))?;
             if symbol(d, c, av1_cdfs::FILTER_INTRA, [size_id])? != 0 {
                 filter_mode = Some(symbol(d, c, av1_cdfs::FILTER_INTRA_MODE, [])?);
+            }
+        }
+        for group in 0..2 {
+            let n = palette_sizes[group] as usize;
+            if n == 0 {
+                continue;
+            }
+            let bw = (w * 4) >> group;
+            let bh = (h * 4) >> group;
+            let visible = [
+                ((self.cols - x) * 4).min(w * 4) >> group,
+                ((self.rows - y) * 4).min(h * 4) >> group,
+            ];
+            let map = palette::map(d, c, n, group > 0, [bw, bh], visible)?;
+            for p in if group == 0 { 0..1 } else { 1..3 } {
+                let plane = &mut self.image.planes[p];
+                let px = x * 4 >> group;
+                let py = y * 4 >> group;
+                for row in 0..bh.min(plane.height - py) {
+                    for col in 0..bw.min(plane.width - px) {
+                        plane.samples[(py + row) * plane.width + px + col] =
+                            palette_colors[p][map[row * bw + col] as usize];
+                    }
+                }
             }
         }
         let mut tx = if self.h.lossless[self.current_segment] {
@@ -738,6 +823,8 @@ impl Decoder<'_> {
                     skip,
                     tx,
                     uv_mode: uv,
+                    palette_sizes,
+                    palette_colors: [palette_colors[0], palette_colors[1]],
                     ..Block::default()
                 };
             }
@@ -771,16 +858,18 @@ impl Decoder<'_> {
                             }
                             let m = if p == 0 { mode } else { uv };
                             let angle = if p == 0 { angle } else { uv_angle };
-                            self.predict(
-                                p,
-                                xx * 4,
-                                yy * 4,
-                                size,
-                                if m == 13 { 0 } else { m },
-                                angle,
-                                if p == 0 { filter_mode } else { None },
-                                smooth_neighbor,
-                            )?;
+                            if palette_sizes[usize::from(p > 0)] == 0 {
+                                self.predict(
+                                    p,
+                                    xx * 4,
+                                    yy * 4,
+                                    size,
+                                    if m == 13 { 0 } else { m },
+                                    angle,
+                                    if p == 0 { filter_mode } else { None },
+                                    smooth_neighbor,
+                                )?;
+                            }
                             if m == 13 {
                                 self.cfl(
                                     p,
@@ -816,6 +905,11 @@ impl Decoder<'_> {
                                     },
                                 )?
                             };
+                            if palette_sizes[usize::from(p > 0)] > 0
+                                && dequant.iter().any(|v| *v != 0)
+                            {
+                                self.image.palette_residual_blocks[usize::from(p > 0)] += 1;
+                            }
                             let residual: &[i32] = if self.h.lossless[self.current_segment] {
                                 vp9_transform::inverse(
                                     &dequant,
