@@ -5072,3 +5072,14 @@ payload robustness, and HDR exclusion with a valid global control.
 
 This stage does not complete spatial layering, tile-list assembly or all layered
 profiles/decoder-model combinations. Whole-codec conformance remains unproven.
+
+### Delivery verification: temporal operating points (2026-10-08)
+
+A clean detached checkout of `211ac29d1`, using a separate Cargo target directory,
+passed 49 AV1 unit tests and 19 integration tests across operating points, separate
+frame groups, full-chroma inter/intrabc/grain, film-grain tools and scaled references.
+Commands used `--release --locked --offline`; root integrations additionally used
+`--no-default-features`. Scoped rustfmt, Python syntax, commit diff checks and all
+five new fixture hashes passed. The operating-points test executable links only
+libSystem and libiconv, with no libav or external codec library. This verification
+does not qualify spatial layers, tile lists, every codec tool or live 60 fps.
