@@ -5527,3 +5527,18 @@ so rejection cannot pass accidentally through unrelated truncation. Public-field
 extremes are checked as well. This is still syntax/geometry coverage, not coded
 HE-AAC playback acceptance; cross-frame continuity and QMF/HF decoding remain.
 Reference: GOST R 53556.4-2013 sections 6.18.3.3, 6.18.3.6 and table 174.
+
+
+### Owned SBR delta/inverse-filter control syntax
+
+`owned_aac::aac_sbr_controls` reads envelope/noise delta directions and
+noise-band inverse-filter modes transactionally within an extension boundary.
+Delta counts come from a validated time grid; inverse-filter counts are
+independent frequency-table noise bands (1–5), including the shared list in
+coupled stereo. Exhaustive tests cover every direction pattern for 1–5
+envelopes and every filter sequence for 1–5 bands, all eight starting bit
+offsets, every truncation, trailing sentinels and invalid external geometry.
+No coefficient Huffman decoding or PCM rendering is claimed by these syntax
+tests. Huffman/delta reconstruction, frame state, rate-dependent frequency
+bounds, QMF and high-frequency adjustment still remain before HE-AAC acceptance.
+Reference: GOST R 53556.4-2013 tables 70, 71, 116 and 117.
