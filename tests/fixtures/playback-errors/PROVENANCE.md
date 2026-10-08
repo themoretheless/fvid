@@ -2123,3 +2123,24 @@ numeric/header-state acceptance for later common-band selection, not PCM.
 All hashes are recorded in `aac-ps-history-oracles.json`. Generation is explicit,
 offline and separate from tests; no FFmpeg/libav, network, private video, frames,
 audio or codec parameter sets are used.
+
+### Original PS common-band mapping regressions
+
+`aac-ps-mapping-protocol.json` records numeric protocol weights and hybrid
+routing from GOST R 53556.8-2013 section 6.4.6.1, tables 44–49. The HTML OCR
+`idxg` in the 34→20 row 5 is `idx9`, confirmed against primary 3GPP SP-040428
+table 8.20. No foreign codec implementation algorithms were used.
+
+`generate_aac_ps_mapping_tables.py` emits numeric Rust tables offline.
+`generate_aac_ps_mapping_fixtures.py` uses independent exact Fraction arithmetic
+(integer conversion truncates toward zero) and Decimal reference levels. It
+produces `aac-ps-mapping-oracles.json`, `he-aac-ps-mapping-packets.bin`, six
+`he-aac-ps-mixed-*-synthetic.mp4` videos and the disabled-selection video.
+The original AVC seed is reused; AAC/PS payloads, sample tables and edits are
+authored by the generator. The oracles exercise negative odd IID averages,
+phase padding, every native mode combination, and selection transitions.
+
+`tests/he_aac_ps_mapping.rs` verifies saved oracles and the actual container→
+SBR/CRC→PS history→common-grid path. This accepts parameter mapping, not full
+HE-AACv2 stereo PCM. Fixture generation is explicit and separate from ordinary
+tests, which use no FFmpeg/libav, network, or private source media.

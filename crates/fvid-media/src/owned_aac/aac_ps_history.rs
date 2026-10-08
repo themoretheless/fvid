@@ -52,7 +52,7 @@ pub struct Levels {
 impl Indices {
     /// Validate native-band dimensions and grids before allocating levels.
     /// Disabled tools have explicit index zero defaults, not stale parameters.
-    pub fn dequantize(&self) -> Result<Levels> {
+    pub fn validate(&self) -> Result<()> {
         if self.iid.len() != self.iid_mode.bands()
             || self.icc.len() != self.icc_mode.bands()
             || self.ipd.len() != self.phase_mode.phase_bands()
@@ -66,6 +66,19 @@ impl Indices {
                 "invalid PS native parameter dimensions or disabled defaults",
             ));
         }
+        for &v in &self.iid {
+            aac_ps_dequant::iid_db(self.iid_mode, v)?;
+        }
+        for &v in &self.icc {
+            aac_ps_dequant::coherence(v)?;
+        }
+        for &v in self.ipd.iter().chain(&self.opd) {
+            aac_ps_dequant::phase_radians(v)?;
+        }
+        Ok(())
+    }
+    pub fn dequantize(&self) -> Result<Levels> {
+        self.validate()?;
         let iid_db = self
             .iid
             .iter()

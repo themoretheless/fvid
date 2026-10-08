@@ -6272,5 +6272,23 @@ explicit and offline, with no FFmpeg, foreign codec or private source media.
 These tests establish native parameter recovery, not PS stereo PCM. The old
 and varying valid videos retain explicit pending-synthesis refusal checks until
 real hybrid/decorrelation/mixing/synthesis and container stereo negotiation are
-implemented. Mapping/dequantization at the *common* stereo-band grid remains a
-separate necessary step before mixing; native values alone cannot replace it.
+implemented. The common-band mapping stage below now supplies the separate
+parameter geometry required before mixing; native values alone cannot replace it.
+
+### Owned PS common-band mapping (2026-10-08)
+
+The owned mapper selects common 20/34 bands, treating a disabled tool as
+20 bands and preserving the previous configuration when both are disabled.
+It maps IID/ICC integer indices before dequantization with truncation toward
+zero, pads lower IPD/OPD phase grids, and maps real mixing coefficients with
+floating weights. Numeric protocol tables also describe 71/91 hybrid subband
+bindings and the starred complex-coefficient conjugations. Zero-envelope
+configuration changes do not manufacture parameter envelopes: retained real
+mixing coefficients must be transferred separately when DSP is connected.
+
+Offline regression oracles cover 286 integer, 120 real coefficient, 24 phase,
+and 144 native parameter cases, all 20 saved history sequences, transactional
+mapping/reset, and seven original three-packet MP4s with mixed resolutions
+and disabled-tool selection. These are mapping acceptance tests. Full hybrid
+filtering, decorrelation, phase smoothing, stereo mixing/synthesis and PCM
+acceptance remain unfinished; native PS playback still refuses explicitly.
