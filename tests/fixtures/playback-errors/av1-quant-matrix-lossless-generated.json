@@ -1,0 +1,229 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-quant-matrix-lossless-depth8-qm0-7-14.obu",
+      "reference": "av1-quant-matrix-lossless-depth8-qm0-7-14.yuv",
+      "webm": "av1-quant-matrix-lossless-depth8-qm0-7-14.webm",
+      "depth": 8,
+      "source_exact": true,
+      "source_sha256": "c3483a6ff189b352a688b9ce8e9f85dd65172fff66fb9dd4c82dd0e9f9adb511",
+      "matrix": [
+        0,
+        7,
+        14
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "37b61f007491177f5ea5ffefab2d8d5dcc076e31a326ce3f1a9f8a11dca707ee",
+      "reference_sha256": "c3483a6ff189b352a688b9ce8e9f85dd65172fff66fb9dd4c82dd0e9f9adb511",
+      "webm_sha256": "ced5787c53d122244fc86b4816f42b3f11f107ba9c2984d9207a612f80e8033e"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth8-qm14-0-7.obu",
+      "reference": "av1-quant-matrix-lossless-depth8-qm14-0-7.yuv",
+      "webm": "av1-quant-matrix-lossless-depth8-qm14-0-7.webm",
+      "depth": 8,
+      "source_exact": true,
+      "source_sha256": "c3483a6ff189b352a688b9ce8e9f85dd65172fff66fb9dd4c82dd0e9f9adb511",
+      "matrix": [
+        14,
+        0,
+        7
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "0e5a48ecdbb0abb39945ec7ea64ab47491f34c1c50d34573df5312a401ff61bf",
+      "reference_sha256": "c3483a6ff189b352a688b9ce8e9f85dd65172fff66fb9dd4c82dd0e9f9adb511",
+      "webm_sha256": "59cd3b76ac02e84d260ef19ef4c242be12e721d0f1248a5b89b7420e3962bcf4"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth8-qm7-14-0.obu",
+      "reference": "av1-quant-matrix-lossless-depth8-qm7-14-0.yuv",
+      "webm": "av1-quant-matrix-lossless-depth8-qm7-14-0.webm",
+      "depth": 8,
+      "source_exact": true,
+      "source_sha256": "c3483a6ff189b352a688b9ce8e9f85dd65172fff66fb9dd4c82dd0e9f9adb511",
+      "matrix": [
+        7,
+        14,
+        0
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "0729976deef216246079644b5d085ceb4d44107a9c99ad3d02aa401c8a9cd23a",
+      "reference_sha256": "c3483a6ff189b352a688b9ce8e9f85dd65172fff66fb9dd4c82dd0e9f9adb511",
+      "webm_sha256": "277f1f1ed8590ddbf205e8472054f7581883b3687473633e48b006f78289d5fb"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth10-qm0-7-14.obu",
+      "reference": "av1-quant-matrix-lossless-depth10-qm0-7-14.yuv",
+      "webm": "av1-quant-matrix-lossless-depth10-qm0-7-14.webm",
+      "depth": 10,
+      "source_exact": true,
+      "source_sha256": "45dca6c47e68b7eb6fcc90ad72df4c6036e3cda1e5c68f011063e7eb8f6db630",
+      "matrix": [
+        0,
+        7,
+        14
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "d0d4bbaaf312c5c9d1433893662f61d47841fe460f10a7a5eef0f66aedeb4038",
+      "reference_sha256": "45dca6c47e68b7eb6fcc90ad72df4c6036e3cda1e5c68f011063e7eb8f6db630",
+      "webm_sha256": "39766adfbde520e193c7835f2d17d98f8f1414ff9da483cc6bc4a0703e3d6444"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth10-qm14-0-7.obu",
+      "reference": "av1-quant-matrix-lossless-depth10-qm14-0-7.yuv",
+      "webm": "av1-quant-matrix-lossless-depth10-qm14-0-7.webm",
+      "depth": 10,
+      "source_exact": true,
+      "source_sha256": "45dca6c47e68b7eb6fcc90ad72df4c6036e3cda1e5c68f011063e7eb8f6db630",
+      "matrix": [
+        14,
+        0,
+        7
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "db8408413cce368409e21039e02cdf3c81fa8abae0f889a041f7e5c469a7da50",
+      "reference_sha256": "45dca6c47e68b7eb6fcc90ad72df4c6036e3cda1e5c68f011063e7eb8f6db630",
+      "webm_sha256": "85e72ed268e8c2b8cc184d035848437cf3db82c7b0f1e5c1e4ec48cce51c1f7c"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth10-qm7-14-0.obu",
+      "reference": "av1-quant-matrix-lossless-depth10-qm7-14-0.yuv",
+      "webm": "av1-quant-matrix-lossless-depth10-qm7-14-0.webm",
+      "depth": 10,
+      "source_exact": true,
+      "source_sha256": "45dca6c47e68b7eb6fcc90ad72df4c6036e3cda1e5c68f011063e7eb8f6db630",
+      "matrix": [
+        7,
+        14,
+        0
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "26eb02d14ee690b21c8a5da98ea8285090a0a1ecf8cd61c166fda7c93692d47f",
+      "reference_sha256": "45dca6c47e68b7eb6fcc90ad72df4c6036e3cda1e5c68f011063e7eb8f6db630",
+      "webm_sha256": "75c3a4637f497624301ef2d15406d1a29b3fd24a7823709ae8681aced61d3737"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth12-qm0-7-14.obu",
+      "reference": "av1-quant-matrix-lossless-depth12-qm0-7-14.yuv",
+      "webm": "av1-quant-matrix-lossless-depth12-qm0-7-14.webm",
+      "depth": 12,
+      "source_exact": true,
+      "source_sha256": "d9aa0e1b9ce1889fba13f86b6bacc7e3ef77cc6153f14e4819d8e745c626210a",
+      "matrix": [
+        0,
+        7,
+        14
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "aa4a5605a33e2ba3df35fcd802e9533660fa9336fb0f80a518e00ecf14811901",
+      "reference_sha256": "d9aa0e1b9ce1889fba13f86b6bacc7e3ef77cc6153f14e4819d8e745c626210a",
+      "webm_sha256": "2aa3cc5f14d5daecb50bce9830ee53510df819c0b0aba1d98a7b0e1c3c4b92ed"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth12-qm14-0-7.obu",
+      "reference": "av1-quant-matrix-lossless-depth12-qm14-0-7.yuv",
+      "webm": "av1-quant-matrix-lossless-depth12-qm14-0-7.webm",
+      "depth": 12,
+      "source_exact": true,
+      "source_sha256": "d9aa0e1b9ce1889fba13f86b6bacc7e3ef77cc6153f14e4819d8e745c626210a",
+      "matrix": [
+        14,
+        0,
+        7
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "f4434e5180f1d155ce225f45f85c641a66bab6290d2b6de7ab5d1567d9440499",
+      "reference_sha256": "d9aa0e1b9ce1889fba13f86b6bacc7e3ef77cc6153f14e4819d8e745c626210a",
+      "webm_sha256": "fd4f6b58601036dc47e79027a5a428049adda9426042fb6cc4af0cb988442c02"
+    },
+    {
+      "file": "av1-quant-matrix-lossless-depth12-qm7-14-0.obu",
+      "reference": "av1-quant-matrix-lossless-depth12-qm7-14-0.yuv",
+      "webm": "av1-quant-matrix-lossless-depth12-qm7-14-0.webm",
+      "depth": 12,
+      "source_exact": true,
+      "source_sha256": "d9aa0e1b9ce1889fba13f86b6bacc7e3ef77cc6153f14e4819d8e745c626210a",
+      "matrix": [
+        7,
+        14,
+        0
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "69a44d14beb9b9bf819ffd1b55286a5c641100b8779d0cd29686e666657f69e9",
+      "reference_sha256": "d9aa0e1b9ce1889fba13f86b6bacc7e3ef77cc6153f14e4819d8e745c626210a",
+      "webm_sha256": "2b83a1e3eaa8c8b4508d97fbbc11e32ae11dd4495256b6d6def31afae7169ba3"
+    }
+  ]
+}
