@@ -13,6 +13,8 @@ mod inter;
 mod palette;
 #[path = "av1_quant_matrix.rs"]
 mod quant_matrix;
+#[path = "av1_restoration.rs"]
+mod restoration;
 
 #[derive(Clone, Debug)]
 pub struct Plane {
@@ -81,6 +83,7 @@ struct Decoder<'a> {
     tx_sizes: [Vec<[usize; 2]>; 3],
     tx_types: Vec<u8>,
     cdef_indexes: Vec<i8>,
+    restoration: restoration::State,
     read_deltas: bool,
     current_q: i32,
     delta_lf: [i32; 4],
@@ -154,9 +157,6 @@ pub(crate) fn decode(
         ));
     }
 
-    if h.restoration_types != [0; 3] {
-        return Err(crate::unsupported("AV1 loop restoration not implemented"));
-    }
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     if h.intrabc || h.superres_denom != 8 {
         return Err(crate::unsupported(
@@ -173,11 +173,13 @@ pub(crate) fn decode(
     // Complete edge transforms are needed by chroma-from-luma before cropping.
     let storage_cols = cols.div_ceil(16) * 16;
     let storage_rows = rows.div_ceil(16) * 16;
+    let restoration_bytes = restoration::State::required_bytes(h)?;
     let required = cols
         .checked_mul(rows)
         .and_then(|n| n.checked_mul(448))
         .and_then(|n| n.checked_add(storage_cols.checked_mul(storage_rows)?.checked_mul(100)?))
         .and_then(|n| n.checked_add(500_000))
+        .and_then(|n| n.checked_add(restoration_bytes))
         .ok_or_else(|| invalid("AV1 image allocation overflow"))?;
     if required > budget {
         return Err(invalid("AV1 image exceeds memory budget"));
@@ -233,6 +235,7 @@ pub(crate) fn decode(
         tx_types: vec![0; cols * rows],
         tx_sizes: std::array::from_fn(|_| vec![[4, 4]; storage_cols * storage_rows]),
         cdef_indexes: vec![-1; cols.div_ceil(16) * rows.div_ceil(16)],
+        restoration: restoration::State::new(h),
         read_deltas: false,
         current_q: i32::from(h.quant.base),
         delta_lf: [0; 4],
@@ -275,6 +278,7 @@ pub(crate) fn decode(
             for a in &mut dec.above {
                 a.fill((0, 0));
             }
+            dec.restoration.reset_tile();
             dec.current_q = i32::from(h.quant.base);
             dec.delta_lf = [0; 4];
             dec.segment_pred_above.fill(0);
@@ -287,6 +291,9 @@ pub(crate) fn decode(
                 }
                 dec.segment_pred_left.fill(0);
                 for col in (dec.x0..dec.x1).step_by(sb) {
+                    if h.restoration_types != [0; 3] {
+                        dec.restoration.read(&mut d, &mut c, h, col, r, sb)?;
+                    }
                     dec.read_deltas = h.quant.delta_resolution.is_some();
                     dec.partition(&mut d, &mut c, col, r, sb)?;
                 }
@@ -331,6 +338,9 @@ pub(crate) fn decode(
         &skip,
         s.color.monochrome,
     );
+    if dec.restoration.active()? {
+        return Err(crate::unsupported("AV1 loop restoration filtering not implemented"));
+    }
     Ok((dec.image, saved))
 }
 impl Decoder<'_> {

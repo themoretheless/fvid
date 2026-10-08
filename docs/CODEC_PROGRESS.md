@@ -4342,3 +4342,48 @@ Final verification passed all 35 core AV1 tests and 60 integration tests
 across 34 AV1 suites. The restoration regression executable links neither
 FFmpeg/libav nor either generation-only reference decoder. The active
 restoration reproduction remains a known codec gap, not completed playback.
+
+### AV1 restoration unit entropy parsing
+
+Native decoding now reads restoration units before each superblock's
+partition syntax. It uses adaptive Wiener/SGRPROJ/switchable CDFs, signed
+reference-centered subexponential coefficients, chroma tap rules and SGR
+radius-dependent projection parameters. Unit storage uses checked frame
+dimensions, validated unit sizes and explicit accounting in the existing
+image allocation budget. Reference coefficients reset for each tile;
+duplicate/missing units are rejected. No decoder dependency was introduced.
+
+All 14 active owned frames now reach validated tile entropy termination and
+block reconstruction before the precise remaining refusal,
+`AV1 loop restoration filtering not implemented`. The four inactive controls
+still match independent reference pixels. This is entropy-stage acceptance
+and filtering-stage refusal; it does not yet prove restoration pixels or
+the numerical correctness of every retained coefficient. The final filter
+pixel comparison is still required.
+
+A verification-only mutant omitted unit reads. The owned first stream failed
+with `invalid AV1 entropy trailing bits`, showing that reading these fields
+is necessary to align the subsequent block stream. The source was restored.
+The test's refusal expectation was updated to the filtering-stage message
+to distinguish this progress from the previous early header refusal.
+Initial single-unit fixture qualification includes Wiener and SGRPROJ.
+The multi-unit extension below expands syntax coverage; coefficient
+numerics and final filtering still require pixel acceptance.
+Normative syntax: https://raw.githubusercontent.com/AOMediaCodec/av1-spec/master/06.bitstream.syntax.md
+(`read_lr`, `read_lr_unit`, signed subexponential restoration syntax).
+
+An additional 18 owned 384x640 frames use two entropy tiles and 128x128
+superblocks. Seventeen active frames reach the filtering stage with valid
+entropy termination; one inactive frame matches independent pixels.
+Sixteen frames have active luma with a 2x3 unit grid at size 256. The
+chroma-only active case uses size 128 and multiple chroma units. Two frames
+select SWITCHABLE, so syntax acceptance now exercises all three frame
+restoration modes. Both reference decoders agree and all 54 new hashes
+were verified. Tests assert dimensions, tile count, superblock mode and
+actual unit sizes; no reference process runs during ordinary tests.
+
+Final verification passed 35 core AV1 tests and the 60-test full run across
+34 integration suites. The additional multi-unit suite and original
+restoration suite passed together after the final assertion changes, giving
+61 unique integration tests across 35 suites. Final restoration filtering
+acceptance and numerical coefficient validation are still outstanding.

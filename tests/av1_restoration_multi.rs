@@ -2,38 +2,18 @@ use fvid::codec::{av1::Obus, av1_decoder::Decoder, av1_frame::Header, av1_sequen
 // Entropy acceptance through validated tile termination; filtering refusal only.
 // Replace the remaining refusal with independent pixel acceptance when filtering is implemented.
 #[test]
-fn owned_active_loop_restoration_reproduces_specific_refusal() {
+fn owned_multiunit_tiled_restoration_reaches_filtering_stage() {
     let root =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
     let manifest: serde_json::Value = serde_json::from_slice(
-        &std::fs::read(root.join("av1-restoration-generated.json")).unwrap(),
+        &std::fs::read(root.join("av1-restoration-multi-generated.json")).unwrap(),
     )
     .unwrap();
     let records = manifest["fixtures"].as_array().unwrap();
     assert_eq!(records.len(), 18);
     let mut active = 0;
     let mut inactive = 0;
-    let expected_types = [
-        [0, 2, 2],
-        [2, 0, 0],
-        [2, 2, 2],
-        [0, 0, 0],
-        [2, 2, 0],
-        [0, 0, 0],
-        [2, 2, 1],
-        [2, 0, 0],
-        [2, 2, 2],
-        [2, 0, 0],
-        [2, 0, 0],
-        [0, 0, 0],
-        [2, 2, 2],
-        [2, 0, 0],
-        [2, 0, 0],
-        [2, 2, 0],
-        [0, 0, 0],
-        [0, 0, 2],
-    ];
-    for (case, record) in records.iter().enumerate() {
+    for record in records {
         let name = record["file"].as_str().unwrap();
         let data = std::fs::read(root.join(name)).unwrap();
         let obus: Vec<_> = Obus::new(&data).map(Result::unwrap).collect();
@@ -51,10 +31,9 @@ fn owned_active_loop_restoration_reproduces_specific_refusal() {
             "{name}: restoration {:?} units {:?}",
             header.restoration_types, header.restoration_sizes
         );
-        assert_eq!(
-            header.restoration_types, expected_types[case],
-            "{name}: normative restoration remapping"
-        );
+        assert!(sequence.superblock128, "{name}: 128x128 superblocks");
+        assert_eq!(header.tiles.count(), 2, "{name}: two entropy tiles");
+        assert_eq!(header.size, [384, 640], "{name}: multiunit frame extent");
         assert!(header.quant.matrix.is_none(), "{name}: isolate restoration");
         if header.restoration_types == [0; 3] {
             inactive += 1;
@@ -84,6 +63,18 @@ fn owned_active_loop_restoration_reproduces_specific_refusal() {
             continue;
         }
         active += 1;
+        let unit_size = if record["depth"].as_u64() == Some(8)
+            && record["quality"].as_u64() == Some(48)
+            && record["orientation"].as_u64() == Some(1)
+        {
+            128
+        } else {
+            256
+        };
+        assert_eq!(
+            header.restoration_sizes, [unit_size; 3],
+            "{name}: actual multiunit size"
+        );
         assert!(header.restoration_sizes[0] > 0);
         let mut decoder = Decoder::new(16 << 20);
         let error = match decoder.decode_packet(&data) {
@@ -98,5 +89,5 @@ fn owned_active_loop_restoration_reproduces_specific_refusal() {
         );
     }
     eprintln!("active {active}, inactive {inactive}");
-    assert_eq!((active, inactive), (14, 4));
+    assert_eq!((active, inactive), (17, 1));
 }
