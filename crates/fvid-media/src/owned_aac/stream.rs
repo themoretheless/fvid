@@ -96,6 +96,20 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
             .checked_add(usize::from(config.core.channels) * 2 * 1024 * 1024)
             .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
     }
+    if config.ps_present == Some(true) {
+        // Eight complete fixed PS/bridge state copies cover nested native,
+        // syntax, QMF, matrix and decorrelation transactions. Four MiB cover
+        // bounded 64-slot/91-band hybrid/matrix rows, pending/future QMF and
+        // stereo PCM vectors with Vec growth. Checkpoints are charged separately.
+        let fixed = std::mem::size_of::<super::aac_ps_native::NativePsAacDecoder>()
+            .checked_add(std::mem::size_of::<super::aac_sbr_ps::Decoder>())
+            .and_then(|n| n.checked_mul(8))
+            .ok_or_else(|| invalid("PS memory estimate overflow"))?;
+        bytes = bytes
+            .checked_add(fixed)
+            .and_then(|n| n.checked_add(4 * 1024 * 1024))
+            .ok_or_else(|| invalid("PS memory estimate overflow"))?;
+    }
     Ok(bytes)
 }
 /// ADTS discovery reserves the SBR DSP even before the first FIL. Disk records

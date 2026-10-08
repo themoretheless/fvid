@@ -381,7 +381,30 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R:std::io::Read+std::io::See
 }
 
 use crate::container::webm::WebmReader as MatroskaTimelineReader;
-use crate::native_audio_decoder::PacketPcmDecoder as MatroskaTimelineDecoder;
+struct MatroskaTimelineDecoder(crate::native_audio_decoder::PacketPcmDecoder);
+impl MatroskaTimelineDecoder {
+    const SAMPLE_BYTES: usize = 4;
+    fn from_matroska(track: &crate::container::webm::Track) -> Result<Self> {
+        Ok(Self(
+            crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?,
+        ))
+    }
+    fn sample_rate(&self) -> u32 {
+        self.0.sample_rate()
+    }
+    fn channels(&self) -> u16 {
+        self.0.channels()
+    }
+    fn delayed(&self) -> bool {
+        self.0.delayed()
+    }
+    fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
+        self.0.decode_delayed(data)
+    }
+    fn finish(&mut self) -> Result<Option<Vec<f32>>> {
+        self.0.finish_delayed()
+    }
+}
 include!("../crates/fvid-media/src/owned_matroska_audio_timeline_impl.rs");
 
 /// Identify AAC in supported containers by their headers and track configuration.

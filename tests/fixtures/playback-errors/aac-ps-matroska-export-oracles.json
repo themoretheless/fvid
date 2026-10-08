@@ -1,0 +1,44 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-export-gaps-960-synthetic.mkv",
+      "slots": 15,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "pcm": [
+        [
+          138240,
+          5760
+        ],
+        [
+          184320,
+          5760
+        ]
+      ],
+      "sha256": "8977cb6a2b0342b6e49b7018fbbd01d93211f8dc3b0178af90263e2c7a841be7"
+    },
+    {
+      "file": "he-aac-ps-export-gaps-1024-synthetic.mkv",
+      "slots": 16,
+      "frame_starts": [
+        0,
+        2400,
+        4800
+      ],
+      "pcm": [
+        [
+          1115136,
+          6144
+        ],
+        [
+          1164288,
+          6144
+        ]
+      ],
+      "sha256": "d5e2ed3a3d5509cef033d5a449960a9e2a589989e5930aca02ff5a2747ec1d64"
+    }
+  ]
+}

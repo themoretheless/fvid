@@ -29,7 +29,7 @@ pub fn decode_matroska_pcm_f64<R: Read + Seek>(
 }
 mod precise {
     use super::*;
-    use crate::owned_matroska_audio::{invalid, matroska_audio_index, DecodeProgress};
+    use crate::owned_matroska_audio::{DecodeProgress, invalid, matroska_audio_index};
     use crate::owned_webm::WebmReader as MatroskaTimelineReader;
     type Result<T> = std::result::Result<T, Error>;
     struct MatroskaTimelineDecoder(crate::owned_pcm_decoder::PcmDecoder);
@@ -46,8 +46,14 @@ mod precise {
         fn channels(&self) -> u16 {
             self.0.channels()
         }
-        fn decode(&mut self, data: &[u8]) -> Result<Vec<f64>> {
-            Ok(self.0.decode_pcm_f64(data)?)
+        fn delayed(&self) -> bool {
+            false
+        }
+        fn finish(&mut self) -> Result<Option<Vec<f64>>> {
+            Ok(None)
+        }
+        fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f64>>> {
+            Ok(Some(self.0.decode_pcm_f64(data)?))
         }
     }
     pub(super) fn decode<R: Read + Seek>(
@@ -81,8 +87,11 @@ mod precise {
             hook.emit(control.event);
         }
         control.check()?;
-        let mut reader =
-            crate::owned_matroska_audio::open_audio_reader(source, options, options.max_packet_bytes)?;
+        let mut reader = crate::owned_matroska_audio::open_audio_reader(
+            source,
+            options,
+            options.max_packet_bytes,
+        )?;
         let index = matroska_audio_index(&reader, selected)?;
         crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)?;
         decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)

@@ -43,15 +43,16 @@ type Result<T> = std::result::Result<T, Error>;
 pub(crate) fn invalid(message: &str) -> Error {
     Error(message.into())
 }
-enum MatroskaTimelineDecoder {
+pub(crate) enum MatroskaTimelineDecoder {
     Pcm(crate::owned_pcm_decoder::PcmDecoder),
     Alac(crate::owned_alac::AlacDecoder),
     Aac(crate::owned_aac::NativeAacDecoder),
+    Ps(Box<crate::owned_aac::aac_ps_native::NativePsAacDecoder>),
     Opus(crate::owned_opus::OpusDecoder),
 }
 impl MatroskaTimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
-    fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
+    pub(crate) fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
         match track.codec.as_str() {
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => Ok(Self::Pcm(
                 crate::owned_pcm_decoder::PcmDecoder::from_matroska(track)?,
@@ -70,36 +71,72 @@ impl MatroskaTimelineDecoder {
             "A_ALAC" => Ok(Self::Alac(crate::owned_alac::AlacDecoder::from_matroska(
                 track,
             )?)),
-            "A_AAC" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new_with_output_rate(
-                &track.codec_private, u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
-            )?)),
+            "A_AAC" => {
+                let config =
+                    crate::owned_aac::config::AudioSpecificConfig::parse(&track.codec_private)?;
+                if config.ps_present == Some(true) {
+                    Ok(Self::Ps(Box::new(
+                        crate::owned_aac::aac_ps_native::NativePsAacDecoder::new(
+                            &track.codec_private,
+                        )?,
+                    )))
+                } else {
+                    Ok(Self::Aac(
+                        crate::owned_aac::NativeAacDecoder::new_with_output_rate(
+                            &track.codec_private,
+                            u32::try_from(track.sample_rate)
+                                .map_err(|_| invalid("AAC output clock overflow"))?,
+                        )?,
+                    ))
+                }
+            }
             _ => Err(invalid(
                 "selected Matroska audio codec is not owned by the export path",
             )),
         }
     }
-    fn sample_rate(&self) -> u32 {
+    pub(crate) fn sample_rate(&self) -> u32 {
         match self {
             Self::Pcm(d) => d.sample_rate(),
             Self::Alac(d) => d.sample_rate(),
             Self::Aac(d) => d.sample_rate(),
+            Self::Ps(d) => d.sample_rate(),
             Self::Opus(d) => d.sample_rate(),
         }
     }
-    fn channels(&self) -> u16 {
+    pub(crate) fn channels(&self) -> u16 {
         match self {
             Self::Pcm(d) => d.channels(),
             Self::Alac(d) => d.channels(),
             Self::Aac(d) => u16::from(d.channels()),
+            Self::Ps(d) => u16::from(d.channels()),
             Self::Opus(d) => d.channels(),
         }
     }
-    fn decode(&mut self, data: &[u8]) -> Result<Vec<f32>> {
+    pub(crate) fn aac_channel_mask(&self) -> Result<u32> {
         match self {
-            Self::Pcm(d) => Ok(d.decode_pcm(data)?),
-            Self::Alac(d) => Ok(d.decode_pcm(data)?),
-            Self::Aac(d) => Ok(d.decode(data)?),
-            Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e)),
+            Self::Aac(d) => Ok(d.channel_mask()),
+            Self::Ps(d) => Ok(d.channel_mask()),
+            _ => Err(invalid("channel mask requires AAC decoder")),
+        }
+    }
+    fn delayed(&self) -> bool {
+        matches!(self, Self::Ps(_))
+    }
+    fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
+        let samples = match self {
+            Self::Ps(d) => return Ok(d.decode(data)?.map(|f| f.pcm)),
+            Self::Pcm(d) => d.decode_pcm(data)?,
+            Self::Alac(d) => d.decode_pcm(data)?,
+            Self::Aac(d) => d.decode(data)?,
+            Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e))?,
+        };
+        Ok(Some(samples))
+    }
+    fn finish(&mut self) -> Result<Option<Vec<f32>>> {
+        match self {
+            Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+            _ => Ok(None),
         }
     }
 }
@@ -211,9 +248,10 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
     let decoder = match track.codec.as_str() {
-        "A_AAC" => {
-            crate::owned_aac::stream::decode_config_admission_bytes(&track.codec_private,u32::try_from(track.sample_rate).map_err(|_|invalid("AAC output clock overflow"))?)?
-        }
+        "A_AAC" => crate::owned_aac::stream::decode_config_admission_bytes(
+            &track.codec_private,
+            u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
+        )?,
         "A_ALAC" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
             &track.codec_private,
             u32::try_from(track.sample_rate)
@@ -226,7 +264,8 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             &track.codec_private,
             u32::try_from(track.sample_rate).map_err(|_| invalid("Opus sample rate overflow"))?,
             u16::try_from(track.channels).map_err(|_| invalid("Opus channel count overflow"))?,
-        ).map_err(|e| invalid(&e))?,
+        )
+        .map_err(|e| invalid(&e))?,
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
             // Geometry validation allocates no heap. Widened samples are charged
             // against each packet below, using f64 even for the f32 API.
@@ -266,7 +305,13 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             // Opus multistream also retains a rebuilt elementary packet, with
             // up to twice its length reserved by Vec growth.
             let packet = largest_packet
-                .checked_mul(if pcm { 9 } else if opus { 3 } else { 1 })
+                .checked_mul(if pcm {
+                    9
+                } else if opus {
+                    3
+                } else {
+                    1
+                })
                 .ok_or_else(|| {
                     crate::owned_ebml::Error("Matroska memory estimate overflow".into())
                 })?;
@@ -293,7 +338,8 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             {
                 return Err(crate::owned_ebml::Error(format!(
                     "controlled memory budget exceeded: need {estimated} bytes"
-                )).into());
+                ))
+                .into());
             }
             Ok(())
         })
@@ -382,5 +428,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
 include!("owned_matroska_audio_timeline_impl.rs");
 
 impl From<crate::owned_webm::Error> for Error {
-    fn from(error: crate::owned_webm::Error) -> Self { Self(error.to_string()) }
+    fn from(error: crate::owned_webm::Error) -> Self {
+        Self(error.to_string())
+    }
 }

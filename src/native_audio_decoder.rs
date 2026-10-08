@@ -3,6 +3,7 @@ use crate::{Result, container::mp4::Track, invalid};
 pub(crate) enum PacketPcmDecoder {
     Pcm(crate::codec::pcm_decoder::PcmDecoder),
     Aac(crate::codec::aac_native::NativeAacDecoder),
+    Ps(Box<crate::codec::aac_ps_native::NativePsAacDecoder>),
     Alac {
         decoder: crate::codec::alac_decoder::AlacDecoder,
         rate: u32,
@@ -32,9 +33,12 @@ impl PacketPcmDecoder {
     pub(crate) const SAMPLE_BYTES: usize = 4;
     pub(crate) fn new(track: &Track) -> Result<Self> {
         match &track.codec {
-            b"mp4a" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
-                crate::codec::config::aac_specific_config(&track.configuration)?, track.sample_rate,
-            )?)),
+            b"mp4a" => Ok(Self::Aac(
+                crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
+                    crate::codec::config::aac_specific_config(&track.configuration)?,
+                    track.sample_rate,
+                )?,
+            )),
             b"raw " => {
                 if track.bit_depth != 8 || !(1..=64).contains(&track.channels) {
                     return Err(invalid(
@@ -92,9 +96,22 @@ impl PacketPcmDecoder {
         let channels = u16::try_from(track.channels)
             .map_err(|_| invalid("Matroska audio channel count overflow"))?;
         match track.codec.as_str() {
-            "A_AAC" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
-                &track.codec_private, u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
-            )?)),
+            "A_AAC" => {
+                let config =
+                    crate::codec::config::AudioSpecificConfig::parse(&track.codec_private)?;
+                if config.ps_present == Some(true) {
+                    Ok(Self::Ps(Box::new(
+                        crate::codec::aac_ps_native::NativePsAacDecoder::new(&track.codec_private)?,
+                    )))
+                } else {
+                    Ok(Self::Aac(
+                        crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
+                            &track.codec_private,
+                            rate,
+                        )?,
+                    ))
+                }
+            }
             "A_ALAC" => Self::alac(&track.codec_private, rate, channels),
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
                 if channels == 0 || channels > 64 {
@@ -125,6 +142,7 @@ impl PacketPcmDecoder {
         match self {
             Self::Pcm(d) => d.spec().sample_rate,
             Self::Aac(d) => d.sample_rate(),
+            Self::Ps(d) => d.sample_rate(),
             Self::Alac { rate, .. } => *rate,
         }
     }
@@ -132,21 +150,44 @@ impl PacketPcmDecoder {
         match self {
             Self::Pcm(d) => d.spec().channels,
             Self::Aac(d) => u16::from(d.channels()),
+            Self::Ps(d) => u16::from(d.channels()),
             Self::Alac { channels, .. } => *channels,
         }
     }
     pub(crate) fn channel_mask(&self) -> Option<u32> {
-        match self {Self::Aac(decoder)=>Some(decoder.channel_mask()),_=>None}
+        match self {
+            Self::Aac(decoder) => Some(decoder.channel_mask()),
+            Self::Ps(decoder) => Some(decoder.channel_mask()),
+            _ => None,
+        }
     }
     pub(crate) fn reset(&mut self) {
-        if let Self::Aac(d) = self {
-            d.reset();
+        match self {
+            Self::Aac(d) => d.reset(),
+            Self::Ps(d) => d.reset(),
+            _ => {}
+        }
+    }
+    pub(crate) fn delayed(&self) -> bool {
+        matches!(self, Self::Ps(_))
+    }
+    pub(crate) fn decode_delayed(&mut self, packet: &[u8]) -> Result<Option<Vec<f32>>> {
+        match self {
+            Self::Ps(d) => Ok(d.decode(packet)?.map(|f| f.pcm)),
+            _ => Ok(Some(self.decode(packet)?)),
+        }
+    }
+    pub(crate) fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
+        match self {
+            Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+            _ => Ok(None),
         }
     }
     pub(crate) fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
         match self {
             Self::Pcm(d) => d.decode_pcm(packet),
             Self::Aac(d) => d.decode(packet),
+            Self::Ps(_) => Err(invalid("PS PCM requires delayed decode and EOF drain")),
             Self::Alac { decoder, .. } => decoder.decode_pcm(packet),
         }
     }

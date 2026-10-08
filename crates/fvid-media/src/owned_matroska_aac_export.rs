@@ -131,12 +131,12 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
         .tracks
         .get(index)
         .ok_or("selected audio stream is absent")?;
-    let decoder =
-        crate::owned_aac::NativeAacDecoder::new(&track.codec_private).map_err(|e| e.to_string())?;
+    let decoder = crate::owned_matroska_audio::MatroskaTimelineDecoder::from_matroska(track)
+        .map_err(|e| e.to_string())?;
     let (rate, channels, mask) = (
         decoder.sample_rate(),
-        u16::from(decoder.channels()),
-        decoder.channel_mask(),
+        decoder.channels(),
+        decoder.aac_channel_mask().map_err(|e| e.to_string())?,
     );
     if track.kind != 2
         || track.codec != "A_AAC"

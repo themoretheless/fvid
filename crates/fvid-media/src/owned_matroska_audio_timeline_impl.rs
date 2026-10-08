@@ -48,23 +48,54 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         sample_rate: rate,
         channels,
     };
-    for index in 0..reader.packets.len() {
+    let mut pending_packet = None;
+    for index in 0..=reader.packets.len() {
         control.check()?;
-        if control.packet_limit_reached() { break; }
-        let packet = reader.packets[index].clone();
-        if packet.track != track.number {
-            continue;
-        }
         if position >= to {
             break;
         }
+        let terminal = index == reader.packets.len() || control.packet_limit_reached();
+        let (packet, samples) = if terminal {
+            let Some(samples) = decoder.finish()? else {
+                break;
+            };
+            let packet = pending_packet
+                .take()
+                .ok_or_else(|| invalid("delayed Matroska audio has no source packet"))?;
+            (packet, samples)
+        } else {
+            let packet = reader.packets[index].clone();
+            if packet.track != track.number {
+                continue;
+            }
+            let encoded = reader.read_packet(index)?;
+            let samples = decoder.decode(&encoded)?;
+            control.packet(encoded.len())?;
+            if decoder.delayed() {
+                let previous = pending_packet.replace(packet);
+                let Some(samples) = samples else {
+                    continue;
+                };
+                let packet = previous
+                    .ok_or_else(|| invalid("delayed Matroska audio source identity mismatch"))?;
+                (packet, samples)
+            } else {
+                (
+                    packet,
+                    samples.ok_or_else(|| invalid("immediate Matroska audio returned no PCM"))?,
+                )
+            }
+        };
         let base = *origin.get_or_insert(packet.pts_ns);
         let timestamp = ((i128::from(packet.pts_ns) - i128::from(base)) * i128::from(rate)
-            + 500_000_000).div_euclid(1_000_000_000) - i128::from(total_delay);
-        let precision = (u128::from(reader.timestamp_scale_ns()) * u128::from(rate)
-            / 1_000_000_000) as u64;
-        let encoded = reader.read_packet(index)?;
-        let samples = decoder.decode(&encoded)?;
+            + 500_000_000)
+            .div_euclid(1_000_000_000)
+            - i128::from(total_delay);
+        let precision =
+            (u128::from(reader.timestamp_scale_ns()) * u128::from(rate) / 1_000_000_000) as u64;
+        if !samples.len().is_multiple_of(usize::from(channels)) {
+            return Err(invalid("invalid Matroska decoded PCM stride"));
+        }
         let frames = (samples.len() / usize::from(channels)) as u64;
         let padding = trim_samples(packet.discard_padding_ns.unsigned_abs())?;
         if padding > frames {
@@ -94,14 +125,17 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         }
         let available = end - first;
         stats.decoded_frames += 1;
-        control.packet(encoded.len())?;
-        if available == 0 { continue; }
+        if available == 0 {
+            continue;
+        }
         let audible_start = timestamp + i128::from(first) - i128::from(leading_padding);
-        let audible_start = if audible_start < 0 && audible_start.unsigned_abs() <= u128::from(precision) {
-            0
-        } else {
-            u64::try_from(audible_start).map_err(|_| invalid("negative presented Matroska audio timestamp"))?
-        };
+        let audible_start =
+            if audible_start < 0 && audible_start.unsigned_abs() <= u128::from(precision) {
+                0
+            } else {
+                u64::try_from(audible_start)
+                    .map_err(|_| invalid("negative presented Matroska audio timestamp"))?
+            };
         if audible_start < position && position - audible_start > precision {
             return Err(invalid("overlapping presented Matroska audio intervals"));
         }
@@ -132,7 +166,9 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
             output.write_all(&sample.to_le_bytes())?;
         }
         stats.sample_frames += end - begin;
-        position = position.checked_add(available).ok_or_else(||invalid("audio timeline overflow"))?;
+        position = position
+            .checked_add(available)
+            .ok_or_else(|| invalid("audio timeline overflow"))?;
     }
     if stats.sample_frames == 0 {
         return Err(invalid("Matroska audio interval contains no samples"));

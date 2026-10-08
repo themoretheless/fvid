@@ -1710,3 +1710,18 @@ The worker regression first failed on the exact untrimmed preroll length and
 now checks every surviving PCM sample, nanosecond PTS, EOF and bit-exact
 seek/rewind recovery. Video decoding validates the authored AVC component.
 Generation stays offline and separate from ordinary tests.
+
+
+## Matroska PS export gaps and delayed EOF
+
+`generate_aac_ps_matroska_export_fixtures.py` creates
+`he-aac-ps-export-gaps-{960,1024}-synthetic.mkv` and
+`aac-ps-matroska-export-oracles.json`, using only the original authored AVC
+and SCE/SBR/PS data from the player regression. The last audio timestamp
+is changed to 90 ms so both frame sizes have non-overlapping source intervals.
+The independent PCM reference comes from the saved absence/late-PS oracle;
+gap positions derive directly from original timestamps and first-source origin.
+`he_aac_ps_matroska_export` reproduces the specific pre-fix PS synthesis refusal
+and accepts every PCM sample, gap, interval and accepted-packet tail. It also
+checks root reader byte equality, public WAVE export and admission before output.
+Ordinary tests invoke neither generation, codec executables nor network.

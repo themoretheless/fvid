@@ -6735,9 +6735,41 @@ using ceil sample conversion and the delayed frame's original source PTS.
 Positive seeks keep the existing block-aligned floor: earlier blocks are
 discarded, including their tails from quantized timestamps. Codec histories still consume every preroll packet. Surviving samples
 match independent stereo PCM and preserve both channels and synthesis tails.
-This changes player presentation only; owned MP4/Matroska export and generic
-immediate packet-to-PCM paths still need delayed PS integration.
+This changes player presentation only. Matroska delayed export is qualified
+below; owned MP4 export still needs delayed PS integration.
 
 Validation: full offline player library 906 passed, 23 existing ignored.
 The three Matroska assets regenerate byte-identically; Python syntax and
 diff checks pass. The targeted regression also validates native AVC playback.
+
+
+## Owned declared-PS Matroska PCM and WAV export
+
+Matroska timeline decoders dispatch explicitly declared PS to the owned delayed
+PS decoder. Pending source packet metadata supplies PTS and DiscardPadding for
+the returned PCM. EOF and an accepted-input packet limit drain the pending
+frame once, without reading/counting an extra source packet. Immediate PCM,
+ALAC, LC/SBR AAC and Opus retain immediate behavior; the f64 PCM instantiation
+uses the same timeline. Root native reader/export geometry also recognizes PS
+and uses the delayed interface, while legacy immediate PS PCM calls refuse it.
+
+Two original AVC+PS MKVs at 960/1024 core frames use non-overlapping timestamp
+gaps. They reproduce the old exact PS synthesis refusal. Acceptance compares
+every PCM sample to independent normalized stereo references, including gap
+silence, ceil intervals, accepted two-packet EOF tail and full three-frame EOF.
+The existing export policy normalizes the first source timestamp to presentation
+origin, separately from player preroll at absolute zero. Root native reader PCM
+matches owned output byte-for-byte. Public `decode_audio` produces WAVE with
+matching rate, stereo layout and presentation sample count.
+
+Optional controlled admission adds eight fixed PS state-copy reserves plus
+four MiB for bounded hybrid/matrix/QMF/stereo vectors and their capacity growth.
+The existing SBR/core/index/packet/track estimates are retained. Acceptance
+checks a 64 MiB admitted export and a 10 MiB rejection before PCM output.
+These are caller-selected test limits, not an unconditional player cap.
+
+Validation: target export acceptance passed; full owned media library 432 passed
+and 1 existing ignored, full offline player library 906 passed and 23 existing
+ignored. Three new assets regenerate byte-identically; generation is offline
+and separate from tests. MP4 PS exports, unhinted PS, nonzero-core startup PCM
+and other codec/profile gaps remain unqualified.
