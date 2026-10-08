@@ -4233,3 +4233,29 @@ still require owned qualification; remaining codec gaps stay open.
 Final restored-source run passed all four matrix suites together: 114 owned
 streams and 132 decoded frames per replay. The distinct-plane test binary
 links neither FFmpeg/libav nor either reference decoder.
+
+### AV1 rectangular quantization matrix qualification
+
+Fifty-four owned one-frame 64x64 streams cover depths 8/10/12, matrix
+levels 0/7/15 and six oriented stripe/ramp patterns. Independent libaom
+and dav1d pixels agree, and all 162 hashes were verified. Offline tests
+assert coded levels and compare native pixels/reset/finish plus WebM
+replay/rewind/seek. Generation remains separate from ordinary tests.
+
+The first noisy patterns encoded only square transforms despite enabling
+rectangular search, so they were replaced before qualification. Temporary
+reconstruction diagnostics on the final fixtures confirmed weighted nonzero
+AC coefficients at 4x8, 8x4, 8x16, 16x8, 16x32 and 32x16 for every depth,
+and additionally 32x64 at 8 bits. This is coded use rather than inference
+from encoder settings. Diagnostics were removed and sources matched
+canonical code. A verification-only mutant ignored weights exclusively
+when width differed from height; pixel acceptance failed on the owned
+8-bit level-0 orientation-2 stream, then the source was restored.
+
+This qualifies those exercised shapes, not every AV1 rectangle. Remaining
+32x64 high-depth, 64x32 and 4:1 aspect-ratio shapes still need owned
+qualification, as do lossless/identity bypass and other codec tools.
+
+Final restored-source run passed all five matrix suites together: 168 owned
+streams and 186 decoded frames per replay. The rectangle test executable
+links neither FFmpeg/libav nor either external reference decoder.
