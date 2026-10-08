@@ -169,12 +169,10 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
     let decoder = match &track.codec {
         b"mp4a" => {
-            let config = crate::owned_aac::config::AacConfig::parse(
+            // Decoder, checkpoint and restore scratch; includes SBR state and DSP.
+            crate::owned_aac::stream::decode_config_admission_bytes(
                 crate::owned_codec_config::aac_specific_config(&track.configuration)?,
-            )?;
-            // Decoder plus checkpoint and replacement/restore scratch. Immutable
-            // tables are shared, but charging full estimates is conservative.
-            crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?
+            )?
                 .checked_mul(3)
                 .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?
         }

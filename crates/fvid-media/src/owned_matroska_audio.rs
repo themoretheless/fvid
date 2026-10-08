@@ -212,8 +212,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
     let decoder = match track.codec.as_str() {
         "A_AAC" => {
-            let config = crate::owned_aac::config::AacConfig::parse(&track.codec_private)?;
-            crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?
+            crate::owned_aac::stream::decode_config_admission_bytes(&track.codec_private)?
         }
         "A_ALAC" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
             &track.codec_private,

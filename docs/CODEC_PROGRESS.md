@@ -6076,3 +6076,25 @@ This supersedes the earlier outstanding unbounded MP4 decode/seek integration
 note; it does not qualify live audio-device playback, bounded SBR export
 admission, all edit schedules, Matroska HE-AAC decode, priming/EOF conformance
 or encoded nonzero-core reference PCM. These and PS/profile gaps remain open.
+
+
+### HE-AAC controlled decode and Matroska acceptance
+
+ASC-aware container AAC memory admission now includes a conservative SBR DSP
+and transaction reserve instead of rejecting SBR via the LC-only parser. MP4
+charges decoder/checkpoint/restore state separately; Matroska charges its own
+index and decode state. This estimate covers controlled allocation payload,
+not process RSS or allocator overhead. Its buffer geometry is documented in
+`owned_aac/stream.rs` and must evolve with supported tools.
+
+The authored synthetic video is remuxed without decoding during the test, then
+its Matroska HE-AAC audio is decoded through both player and owned export paths.
+Whole PCM, seek and rewind intervals exactly match the original MP4 PCM. A
+64 MiB controlled limit accepts both container exports; a 1 KiB limit rejects
+before writing. This closes the earlier ASC refusal in controlled MP4/Matroska
+decode and supplies Matroska HE-AAC decode acceptance for this mono fixture.
+
+Implicit ADTS SBR, missing-payload upsampling, native stereo packet/reference
+qualification, PS, spectral-core conformance, priming/EOF and broader codec
+profile coverage remain unfinished. Filtered multitrack export still has an
+LC-only AAC duration parser and needs its own targeted regression.

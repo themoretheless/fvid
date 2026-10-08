@@ -159,3 +159,85 @@ fn he_aac_remux_uses_output_sample_clock_and_preserves_packets() {
         assert_eq!(reader.read_packet(i).unwrap(), original);
     }
 }
+
+#[test]
+fn he_aac_matroska_seek_and_controlled_export_preserve_pcm() {
+    use std::{io::Cursor, time::Duration};
+    let fixture = include_bytes!("fixtures/playback-errors/he-aac-sbr-synthetic.mp4");
+    let generous = fvid_media::CopyOptions {
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        ..Default::default()
+    };
+    let tight = fvid_media::CopyOptions {
+        max_controlled_bytes: Some(1024),
+        ..Default::default()
+    };
+    let mut full = Vec::new();
+    fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(fixture.as_slice()),
+        &mut full,
+        None,
+        &generous,
+    )
+    .unwrap();
+    let mut refused = Vec::new();
+    let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(fixture.as_slice()),
+        &mut refused,
+        None,
+        &tight,
+    )
+    .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("controlled memory budget exceeded")
+    );
+    assert!(refused.is_empty());
+    let mut source =
+        fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(fixture.as_slice()), Default::default())
+            .unwrap();
+    let mut output = Cursor::new(Vec::new());
+    fvid_media::owned_mp4_matroska::write(&mut source, &mut output, None, None).unwrap();
+    let bytes = output.into_inner();
+    for interval in [
+        None,
+        Some((Duration::from_millis(32), Duration::from_millis(96))),
+        Some((Duration::ZERO, Duration::from_millis(128))),
+    ] {
+        let mut pcm = Vec::new();
+        fvid_media::owned_matroska_aac::decode_matroska_aac_pcm(
+            Cursor::new(&bytes),
+            &mut pcm,
+            interval,
+            &generous,
+        )
+        .unwrap();
+        let expected = if interval.is_some_and(|(from, _)| !from.is_zero()) {
+            &full[32 * 48 * 4..96 * 48 * 4]
+        } else {
+            full.as_slice()
+        };
+        assert_eq!(pcm, expected);
+        let reader =
+            fvid::container::webm::WebmReader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        let mut player = Vec::new();
+        fvid::native_media::decode_matroska_aac_reader(reader, &mut player, interval).unwrap();
+        assert_eq!(player, expected);
+    }
+    let mut refused = Vec::new();
+    let error = fvid_media::owned_matroska_aac::decode_matroska_aac_pcm(
+        Cursor::new(&bytes),
+        &mut refused,
+        None,
+        &tight,
+    )
+    .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("controlled memory budget exceeded")
+    );
+    assert!(refused.is_empty());
+}

@@ -78,6 +78,25 @@ pub(crate) fn decode_admission_bytes(channels: u16) -> Result<usize> {
         .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
     Ok(estimated)
 }
+/// ASC-aware admission for container AAC. In addition to the LC reserve,
+/// SBR charges 2 MiB/channel: 12 complex row buffers at 64x64x16 bytes,
+/// eight 64 KiB history/transaction reserves, twelve 5x64x64-byte
+/// parameter/level buffers, and four 16 KiB PCM buffers. This rounds their
+/// 1.55 MiB sum upward for vector growth/headers and small frequency tables.
+/// Bounds cover 960/1024 core frames, at most five envelopes, 64 QMF bands,
+/// nested transactional DSP clones and output interleaving; not process RSS.
+/// Callers retaining additional whole-decoder checkpoints charge this estimate
+/// separately. Revisit the bound when enlarging SBR syntax or DSP geometry.
+pub(crate) fn decode_config_admission_bytes(asc: &[u8]) -> Result<usize> {
+    let config = super::config::AudioSpecificConfig::parse(asc)?;
+    let mut bytes = decode_admission_bytes(u16::from(config.core.channels))?;
+    if config.sbr_present == Some(true) {
+        bytes = bytes
+            .checked_add(usize::from(config.core.channels) * 2 * 1024 * 1024)
+            .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
+    }
+    Ok(bytes)
+}
 pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Result<()> {
     let Some(limit) = options.max_controlled_bytes else {
         return Ok(());
