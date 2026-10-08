@@ -11,6 +11,8 @@ pub mod lut;
 pub use fvid_codecs::color::primaries;
 pub use fvid_codecs::color::tonemap;
 pub use fvid_codecs::color::transfer;
+#[cfg(target_arch = "x86_64")]
+pub mod simd_rgb_convert;
 
 pub use grade::{Grade, Settings, ShaderLook, ShaderStages};
 pub use hdr::{
