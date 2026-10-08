@@ -82,3 +82,80 @@ fn original_video_with_he_aac_audio_demuxes_and_decodes_the_intended_sbr_failure
         );
     }
 }
+
+#[test]
+fn he_aac_player_and_export_clocks_preserve_full_pcm_and_seek() {
+    use std::{io::Cursor, time::Duration};
+    let fixture = include_bytes!("fixtures/playback-errors/he-aac-sbr-synthetic.mp4");
+    let mut full = Vec::new();
+    let reader = Mp4Reader::open(Cursor::new(fixture.as_slice()), Limits::default()).unwrap();
+    let stats = fvid::native_media::decode_mp4_aac_reader(reader, &mut full, None).unwrap();
+    assert_eq!(
+        (stats.sample_rate, stats.channels, stats.sample_frames),
+        (48000, 1, 6144)
+    );
+    let mut exported = Vec::new();
+    let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(fixture.as_slice()),
+        &mut exported,
+        None,
+        &Default::default(),
+    )
+    .unwrap();
+    assert_eq!(stats.sample_frames, 6144);
+    assert_eq!(full, exported);
+    for (from, to) in [(0, 32), (32, 96), (64, 128), (0, 128)] {
+        let interval = Some((Duration::from_millis(from), Duration::from_millis(to)));
+        let mut seek = Vec::new();
+        let reader = Mp4Reader::open(Cursor::new(fixture.as_slice()), Limits::default()).unwrap();
+        fvid::native_media::decode_mp4_aac_reader(reader, &mut seek, interval).unwrap();
+        assert_eq!(seek, &full[from as usize * 48 * 4..to as usize * 48 * 4]);
+        let mut export = Vec::new();
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(fixture.as_slice()),
+            &mut export,
+            interval,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(seek, export);
+    }
+}
+
+#[test]
+fn he_aac_remux_uses_output_sample_clock_and_preserves_packets() {
+    use std::io::Cursor;
+    let fixture = include_bytes!("fixtures/playback-errors/he-aac-sbr-synthetic.mp4");
+    let mut source =
+        fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(fixture.as_slice()), Default::default())
+            .unwrap();
+    let mut output = Cursor::new(Vec::new());
+    fvid_media::owned_mp4_matroska::write(&mut source, &mut output, None, None).unwrap();
+    output.set_position(0);
+    let mut reader = fvid_media::owned_webm::WebmReader::open(output, Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    let audio = reader
+        .tracks
+        .iter()
+        .find(|t| t.sample_rate == 48000)
+        .unwrap();
+    let packets: Vec<_> = reader
+        .packets
+        .iter()
+        .enumerate()
+        .filter(|(_, p)| p.track == audio.number)
+        .map(|(i, p)| (i, p.pts_ns))
+        .collect();
+    assert_eq!(packets.len(), 3);
+    for (n, (i, pts)) in packets.into_iter().enumerate() {
+        assert!((pts as i64 - (n as i64 * 2048 * 1_000_000_000 / 48000)).abs() < 1000);
+        let audio_index = source
+            .tracks()
+            .iter()
+            .position(|t| t.handler == *b"soun")
+            .unwrap();
+        let mut original = Vec::new();
+        source.read_packet(audio_index, n, &mut original).unwrap();
+        assert_eq!(reader.read_packet(i).unwrap(), original);
+    }
+}

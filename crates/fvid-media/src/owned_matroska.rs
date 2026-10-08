@@ -646,6 +646,7 @@ impl From<crate::owned_mp4::Error> for Error {
 }
 use crate::owned_mp4::Track as Mp4AacTrack;
 use crate::owned_codec_config::aac_specific_config;
+use crate::owned_aac::config::AudioSpecificConfig;
 include!("owned_mp4_aac_plan_impl.rs");
 impl FileMetadata {
     pub fn from_mp4<R: Read + Seek>(input: &crate::owned_mp4::Mp4Reader<R>) -> Self {

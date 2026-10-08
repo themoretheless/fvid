@@ -1966,3 +1966,8 @@ sets. The MP4 reuses the existing authored AVC video and audio container structu
 replacing all audio packets, ASC, sample tables and edits. PCM expectations reuse
 the independently computed original SBR DSP oracle. ASC syntax follows
 ISO/IEC 14496-3:2005/Amd.2:2006 Table 1.13.
+
+The same HE-AAC synthetic MP4 additionally reproduces the former LC-only
+MP4-to-Matroska remux refusal and validates output-rate packet timestamps,
+packet preservation, whole-file PCM and four sample-exact seek ranges in the
+player timeline and owned export. No new private media was introduced.

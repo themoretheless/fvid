@@ -211,4 +211,5 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
 
 use super::mp4::Track as Mp4AacTrack;
 use crate::codec::config::aac_specific_config;
+use crate::codec::config::AudioSpecificConfig;
 include!("../../crates/fvid-media/src/owned_mp4_aac_plan_impl.rs");

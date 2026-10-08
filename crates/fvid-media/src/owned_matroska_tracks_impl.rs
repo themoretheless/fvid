@@ -93,11 +93,11 @@ fn track_entry(
             if metadata.is_some() || rotation != 0 {
                 return Err(invalid("video metadata supplied for AAC track"));
             }
-            let config = AacConfig::parse(configuration)?;
+            let config = AudioSpecificConfig::parse(configuration)?;
             if sample_rate == 0
                 || channels == 0
-                || config.sample_rate != sample_rate
-                || u16::from(config.channels) != channels
+                || config.output_sample_rate() != sample_rate
+                || u16::from(config.output_channels()) != channels
             {
                 return Err(invalid("AAC Matroska geometry differs from configuration"));
             }

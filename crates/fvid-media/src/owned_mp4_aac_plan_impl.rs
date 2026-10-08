@@ -48,14 +48,15 @@ pub(crate) fn aac_packet_plan_window(
         return Err(invalid("MP4 track is not AAC"));
     }
     let asc = aac_specific_config(&track.configuration)?;
-    let config = AacConfig::parse(asc)?;
+    let config = AudioSpecificConfig::parse(asc)?;
+    let output_rate = config.output_sample_rate();
     if track.timescale == 0
-        || track.sample_rate != config.sample_rate
-        || track.channels != u16::from(config.channels)
+        || track.sample_rate != output_rate
+        || track.channels != u16::from(config.output_channels())
     {
         return Err(invalid("MP4 AAC clock or geometry mismatch"));
     }
-    let rate = u128::from(config.sample_rate);
+    let rate = u128::from(output_rate);
     let position = |ticks: u64| -> Result<u64> {
         let n = u128::from(ticks) * rate;
         let d = u128::from(track.timescale);
@@ -97,15 +98,24 @@ pub(crate) fn aac_packet_plan_window(
                 .map_err(|_| invalid("AAC interval sample overflow"))
         };
         let origin = start;
-        start = origin.checked_add(samples(from)?)
+        start = origin
+            .checked_add(samples(from)?)
             .ok_or_else(|| invalid("AAC interval endpoint overflow"))?;
-        end = end.min(origin.checked_add(samples(to)?)
-            .ok_or_else(|| invalid("AAC interval endpoint overflow"))?);
+        end = end.min(
+            origin
+                .checked_add(samples(to)?)
+                .ok_or_else(|| invalid("AAC interval endpoint overflow"))?,
+        );
         if start >= end {
             return Err(invalid("audio interval contains no samples"));
         }
     }
-    let frame = u64::from(config.frame_samples);
+    let scaled = u64::from(config.core.frame_samples) * u64::from(output_rate);
+    let core_rate = u64::from(config.core.sample_rate);
+    if scaled % core_rate != 0 {
+        return Err(invalid("AAC output frame clock is not sample aligned"));
+    }
+    let frame = scaled / core_rate;
     let count =
         usize::try_from(end.div_ceil(frame)).map_err(|_| invalid("AAC packet count overflow"))?;
     if count > track.samples.len() {
@@ -138,17 +148,17 @@ pub(crate) fn aac_packet_plan_window(
             return Err(invalid("AAC media duration disagrees with packet timeline"));
         }
     }
-    let delay = sample_ns(start, config.sample_rate)?;
+    let delay = sample_ns(start, output_rate)?;
     let coded_end = (count as u64)
         .checked_mul(frame)
         .ok_or_else(|| invalid("AAC timeline overflow"))?;
-    let padding = i64::try_from(sample_ns(coded_end - end, config.sample_rate)?)
+    let padding = i64::try_from(sample_ns(coded_end - end, output_rate)?)
         .map_err(|_| invalid("AAC padding overflow"))?;
     Ok(AacPacketPlan {
         count,
         delay,
         padding,
         frame,
-        rate: config.sample_rate,
+        rate: output_rate,
     })
 }

@@ -6060,3 +6060,19 @@ and playback clock integration remain to be completed. Native stereo packet
 acceptance, nonzero spectral core reference PCM, EOF/delay, implicit ADTS SBR,
 missing-payload upsampling, multi-element/PCE SBR and PS remain unqualified or
 unsupported.
+
+
+### HE-AAC MP4 timelines and Matroska remux
+
+The authored mono 24-to-48 kHz HE-AAC MP4 now reaches the player's native audio
+timeline and the owned float32 export path: both preserve 6144 PCM samples and
+four seek intervals exactly. The shared MP4-to-Matroska packet planner uses the
+output rate and scales the core frame duration (1024 to 2048 output samples),
+including delay/padding arithmetic. The Matroska AAC track writer reads the
+extension-aware ASC and preserves complete encoded packets. A regression on the
+same short authored video reproduces the previous LC-only remux refusal.
+
+This supersedes the earlier outstanding unbounded MP4 decode/seek integration
+note; it does not qualify live audio-device playback, bounded SBR export
+admission, all edit schedules, Matroska HE-AAC decode, priming/EOF conformance
+or encoded nonzero-core reference PCM. These and PS/profile gaps remain open.
