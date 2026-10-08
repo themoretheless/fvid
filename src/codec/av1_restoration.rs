@@ -4,6 +4,8 @@ use super::{
     symbol, Header, SymbolDecoder,
 };
 use crate::{invalid, Result};
+#[path = "av1_restoration_filter.rs"]
+mod filter;
 #[derive(Clone, Debug)]
 pub(super) enum Unit {
     None,
@@ -42,6 +44,19 @@ impl State {
                     )
                     .ok_or_else(|| invalid("AV1 restoration allocation overflow"))?;
             }
+        }
+        if h.restoration_types != [0; 3] {
+            let width = (h.size[0] as usize).div_ceil(8) * 8;
+            let height = (h.size[1] as usize).div_ceil(8) * 8;
+            bytes = bytes
+                .checked_add(
+                    width
+                        .checked_mul(height)
+                        .and_then(|n| n.checked_mul(6))
+                        .ok_or_else(|| invalid("AV1 restoration source allocation overflow"))?,
+                )
+                .and_then(|n| n.checked_add(200_000))
+                .ok_or_else(|| invalid("AV1 restoration scratch allocation overflow"))?;
         }
         Ok(bytes)
     }
@@ -164,6 +179,59 @@ impl State {
                     }
                     self.planes[p].units[index] = Some(value);
                 }
+            }
+        }
+        Ok(())
+    }
+    pub(super) fn apply(
+        &self,
+        image: &mut super::Picture,
+        before: &[super::Plane; 3],
+    ) -> Result<()> {
+        self.active()?;
+        let depth = image.depth;
+        for p in 0..3 {
+            let layout = &self.planes[p];
+            if layout.units.is_empty() {
+                continue;
+            }
+            let sub = usize::from(p > 0);
+            let width = (image.size[0] as usize).div_ceil(1 << sub);
+            let height = (image.size[1] as usize).div_ceil(1 << sub);
+            let cdef = image.planes[p].clone();
+            let output = &mut image.planes[p];
+            let mut y = 0;
+            while y < height {
+                let stripe = ((y << sub) + 8) / 64;
+                let start = (-8 + stripe as i64 * 64) >> sub;
+                let end = start + (64 >> sub) - 1;
+                let unit_row = ((y + (8 >> sub)) / layout.size).min(layout.rows - 1);
+                let h = (end as usize + 1 - y).min(height - y).min(64 >> sub);
+                let source = filter::Source {
+                    before: &before[p],
+                    cdef: &cdef,
+                    width,
+                    height,
+                    start,
+                    end,
+                    depth,
+                };
+                let mut x = 0;
+                while x < width {
+                    let unit_col = (x / layout.size).min(layout.cols - 1);
+                    let limit = if unit_col + 1 == layout.cols {
+                        width
+                    } else {
+                        (unit_col + 1) * layout.size
+                    };
+                    let w = (limit - x).min(64).min(width - x);
+                    let unit = layout.units[unit_row * layout.cols + unit_col]
+                        .as_ref()
+                        .ok_or_else(|| invalid("missing AV1 restoration unit"))?;
+                    filter::block(&source, output, unit, x, y, w, h);
+                    x += w;
+                }
+                y += h;
             }
         }
         Ok(())

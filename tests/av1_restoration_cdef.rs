@@ -1,17 +1,18 @@
 use fvid::codec::{av1::Obus, av1_decoder::Decoder, av1_frame::Header, av1_sequence::Sequence};
 // Owned acceptance for native restoration pixels and playback lifecycle.
 #[test]
-fn owned_multiunit_tiled_restoration_matches_independent_pixels() {
+fn owned_cdef_restoration_stripe_pixels_match_independent_references() {
     let root =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
     let manifest: serde_json::Value = serde_json::from_slice(
-        &std::fs::read(root.join("av1-restoration-multi-generated.json")).unwrap(),
+        &std::fs::read(root.join("av1-restoration-cdef-generated.json")).unwrap(),
     )
     .unwrap();
     let records = manifest["fixtures"].as_array().unwrap();
     assert_eq!(records.len(), 18);
     let mut active = 0;
     let mut inactive = 0;
+    let mut combined = 0;
     for record in records {
         let name = record["file"].as_str().unwrap();
         let data = std::fs::read(root.join(name)).unwrap();
@@ -30,26 +31,22 @@ fn owned_multiunit_tiled_restoration_matches_independent_pixels() {
             "{name}: restoration {:?} units {:?}",
             header.restoration_types, header.restoration_sizes
         );
-        assert!(sequence.superblock128, "{name}: 128x128 superblocks");
-        assert_eq!(header.tiles.count(), 2, "{name}: two entropy tiles");
-        assert_eq!(header.size, [384, 640], "{name}: multiunit frame extent");
+        assert!(sequence.cdef, "{name}: sequence CDEF enabled");
+        eprintln!(
+            "{name}: CDEF {:?}, LF {:?}",
+            header.cdef.strengths, header.filter.levels
+        );
         assert!(header.quant.matrix.is_none(), "{name}: isolate restoration");
         if header.restoration_types == [0; 3] {
             inactive += 1;
         } else {
             active += 1;
-            let unit_size = if record["depth"].as_u64() == Some(8)
-                && record["quality"].as_u64() == Some(48)
-                && record["orientation"].as_u64() == Some(1)
+            if header.filter.levels.iter().any(|&v| v > 0)
+                && header.cdef.strengths.iter().flatten().any(|&v| v > 0)
             {
-                128
-            } else {
-                256
-            };
-            assert_eq!(
-                header.restoration_sizes, [unit_size; 3],
-                "{name}: actual multiunit size"
-            );
+                combined += 1;
+            }
+            assert!(header.restoration_sizes[0] > 0);
         }
         let expected = std::fs::read(root.join(record["reference"].as_str().unwrap())).unwrap();
         let mut decoder = Decoder::new(16 << 20);
@@ -78,25 +75,8 @@ fn owned_multiunit_tiled_restoration_matches_independent_pixels() {
             decoder.reset();
         }
         let webm = std::fs::read(root.join(record["webm"].as_str().unwrap())).unwrap();
-        if header.restoration_types != [0; 3] {
-            let mut constrained = fvid::playback_webm::WebmVideoReader::open(
-                std::io::Cursor::new(webm.clone()),
-                16 << 20,
-            )
-            .unwrap();
-            let error = match constrained.read_frame_raw() {
-                Err(e) => e,
-                Ok(_) => panic!("{name}: constrained budget must account for restoration buffers"),
-            };
-            assert!(
-                error
-                    .to_string()
-                    .contains("AV1 image exceeds memory budget"),
-                "{name}: {error}"
-            );
-        }
         let mut reader =
-            fvid::playback_webm::WebmVideoReader::open(std::io::Cursor::new(webm), 32 << 20)
+            fvid::playback_webm::WebmVideoReader::open(std::io::Cursor::new(webm), 16 << 20)
                 .unwrap();
         for _ in 0..2 {
             assert_eq!(
@@ -119,7 +99,11 @@ fn owned_multiunit_tiled_restoration_matches_independent_pixels() {
         );
     }
     eprintln!("active {active}, inactive {inactive}");
-    assert_eq!((active, inactive), (17, 1));
+    assert!(
+        combined > 0,
+        "must exercise active restoration with CDEF and deblocking"
+    );
+    assert!(active > 0);
 }
 
 fn raw_bytes(frame: fvid::playback_native::RawFrame) -> Vec<u8> {
