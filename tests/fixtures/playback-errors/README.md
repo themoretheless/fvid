@@ -1676,3 +1676,17 @@ not present an out-of-range lookahead frame into silence. Worker tests exercise
 the production factory, source-window trim, EOF, checkpoint, seek/rewind and
 exact expected PCM slices. Source-gap files assert the exact error after drain,
 not playback acceptance. No test invokes generation, FFmpeg or network.
+
+
+## Absent and late PS regressions
+
+`generate_aac_ps_absence_fixtures.py` creates eight original three-packet
+`he-aac-ps-{all-mono,late-ps,missing-middle,trailing-mono}-{960,1024}-synthetic.mp4`
+fixtures, `he-aac-ps-absence-packets.bin`, `aac-ps-absence-pcm.bin` and
+`aac-ps-absence-oracles.json`. Original silent SCE and authored SBR noise/PS
+parameters contain no private media or parameter sets. Independent Decimal
+noise/decorrelation/matrix and direct synthesis references cover both output
+rates. The normative mono mapping follows GOST R 53556.8-2013 6.5.1 and A.1;
+decorrelation reset on returning PS follows A.3. Tests accept absent/late PS,
+compare all PCM, retain synthesis tails, and replay checkpoint/reset/EOF.
+Generation is separate, offline and never invoked by ordinary tests.

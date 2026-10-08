@@ -6676,7 +6676,7 @@ fixture generation, network or FFmpeg.
 
 This accepts the tested production MP4 PS player/factory/worker path, not full
 HE-AAC v2 conformance. Independent nonzero-core stereo PCM, general startup
-trimming, missing/late/unhinted PS, coupling/PCE, export/other-container routing
+trimming, unhinted PS, coupling/PCE, export/other-container routing
 and other codec/profile gaps still remain. The legacy immediate native AAC API
 continues to refuse PS; delayed callers use the explicit PS API/adapter.
 
@@ -6685,3 +6685,21 @@ existing ignored tests. All 13 HE-AAC integration suites passed 57 tests with
 player features; no-player core library passed 347 tests. Player build, Python
 syntax and diff checks passed; all five worker fixture assets regenerate
 byte-identically. These counts describe separate feature/configuration runs.
+
+
+## Declared PS with absent and late elements
+
+The owned SBR/PS bridge accepts a mono SBR frame without a PS element and
+maps its QMF rows to both synthesis channels. Hybrid input history advances
+through these frames; matrix and phase history retain the last PS element.
+Returning PS resets decorrelation when the previous frame lacked PS. Separate
+left/right synthesis tails remain continuous and settle to dual mono.
+
+Eight original three-packet MP4 fixtures cover all-mono, late PS, missing-middle
+and trailing-mono at 960/1024 core samples. `he_aac_ps_absence` compares every
+PCM sample against independent synthesis/decorrelation references at both core
+and double output rates, plus packet identity, EOF, checkpoint and reset.
+Generation is explicit and offline; tests do not invoke FFmpeg or network.
+Uninitialized PS is routed to mono in the bridge but dedicated startup acceptance
+remains unqualified. Missing whole SBR FIL, unhinted discovery, nonzero-core
+startup trimming and export/other-container routing remain separate gaps.

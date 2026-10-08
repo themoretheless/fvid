@@ -9,7 +9,7 @@ use super::{
 };
 #[derive(Clone, Debug, PartialEq)]
 struct Pending {
-    parameters: aac_ps_history::Parameters,
+    parameters: Option<aac_ps_history::Parameters>,
     rows: Vec<[Complex; 64]>,
     controls: FrameControls,
     frame_index: u64,
@@ -23,6 +23,7 @@ pub struct Decoder {
     pending: Option<Pending>,
     format: Option<(u32, u8, OutputRate)>,
     next_index: u64,
+    previous_ps_present: bool,
     finished: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -52,13 +53,12 @@ impl Decoder {
             .ok_or_else(|| invalid("missing SBR PS format"))?;
         let mut input = pending.rows;
         input.extend_from_slice(future);
-        let mut output = self.ps.process(
-            &pending.parameters,
-            slots * 2,
-            &input,
-            pending.controls,
-            output_rate,
-        )?;
+        let mut output = if let Some(parameters) = &pending.parameters {
+            self.ps
+                .process(parameters, slots * 2, &input, pending.controls, output_rate)?
+        } else {
+            self.ps.process_dual_mono(slots * 2, &input, output_rate)?
+        };
         for value in output.pcm.iter_mut().flatten() {
             *value /= 32768.0;
         }
@@ -69,10 +69,10 @@ impl Decoder {
             pcm: output.pcm,
         }))
     }
-    /// Read one mono SBR payload with exactly one PS element. The first call
+    /// Read one mono SBR payload with at most one PS element. The first call
     /// queues output and returns None; later calls return the preceding frame.
     /// Reader, SBR, native parameters, QMF, PS and queue commit atomically.
-    /// Missing-PS frame semantics are still explicit unsupported behavior.
+    /// Absent or independently uninitialized PS maps normal SBR mono to stereo.
     pub fn read(
         &mut self,
         bits: &mut BitReader<'_>,
@@ -97,9 +97,9 @@ impl Decoder {
         let mut reader = bits.clone();
         let frame = trial.sbr.read(&mut reader, end, crc, rate, slots, 1)?;
         let data = frame.syntax.data.extended_data.as_deref().unwrap_or(&[]);
-        let mut parsed = trial.parameters.read_sbr_extensions(data, slots * 2)?;
-        if parsed.len() != 1 {
-            return Err(unsupported("SBR PS frame requires exactly one PS element"));
+        let parsed = trial.parameters.read_sbr_extensions(data, slots * 2)?;
+        if parsed.len() > 1 {
+            return Err(unsupported("SBR PS frame permits at most one PS element"));
         }
         let rows = trial.qmf.process(&frame, &[pcm], rate, slots)?;
         if rows.format_reset && trial.pending.is_some() {
@@ -115,14 +115,18 @@ impl Decoder {
             .ok_or_else(|| invalid("missing mono SBR QMF rows"))?;
         let output = trial.render(&rows[..aac_ps_dsp::LOOKAHEAD])?;
         trial.pending = Some(Pending {
-            parameters: parsed.remove(0).parameters,
+            parameters: parsed
+                .first()
+                .filter(|p| p.parameters.initialized)
+                .map(|p| p.parameters.clone()),
             rows,
             controls: FrameControls {
-                previous_ps_present: trial.next_index != 0,
+                previous_ps_present: trial.previous_ps_present,
                 qmf_limit: rows_limit(&frame),
             },
             frame_index: trial.next_index,
         });
+        trial.previous_ps_present = !parsed.is_empty();
         trial.next_index = trial
             .next_index
             .checked_add(1)

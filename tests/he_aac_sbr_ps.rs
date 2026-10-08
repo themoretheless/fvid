@@ -250,7 +250,7 @@ fn original_video_packets_reach_both_stereo_pcm_oracles_with_real_lookahead_and_
     assert_eq!(count, 4);
 }
 #[test]
-fn reader_queue_and_all_histories_roll_back_on_crc_pcm_ps_and_epoch_failures() {
+fn reader_queue_and_all_histories_roll_back_on_crc_pcm_and_epoch_failures() {
     let m = matrices();
     let video = &m["videos"][0];
     let (payloads, pcm) = packets(video);
@@ -342,31 +342,6 @@ fn reader_queue_and_all_histories_roll_back_on_crc_pcm_ps_and_epoch_failures() {
         16,
         OutputRate::Core,
         "SBR PS format changed without reset",
-    );
-    // Existing original no-PS SBR syntax is syntactically valid, but this owner
-    // explicitly refuses missing PS; it must retain the queued prior output.
-    let raw = include_bytes!("fixtures/playback-errors/aac-sbr-dsp-syntax.bin");
-    let manifest: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/aac-sbr-dsp-oracles.json"
-    ))
-    .unwrap();
-    let c = manifest["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|v| v["slots"] == 16 && v["smoothing"] == true && v["limiter"] == 2)
-        .unwrap();
-    let f = &c["frames"][1];
-    let off = f["offset"].as_u64().unwrap() as usize;
-    let len = f["byte_length"].as_u64().unwrap() as usize;
-    check(
-        &mut state,
-        &raw[off..off + len],
-        &pcm[1],
-        48000,
-        16,
-        OutputRate::Double,
-        "requires exactly one PS element",
     );
     let (mut bits, crc) = open(&payloads[1]);
     assert_eq!(
