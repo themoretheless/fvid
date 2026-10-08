@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Owned synthetic AV1 identity-transform quantization matrix fixtures, generated separately from offline tests."""
+import argparse,hashlib,json,subprocess,tempfile,itertools
+from pathlib import Path
+from generate_av1_show_existing_samples import webm
+
+def main():
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--encoder',type=Path,required=True);p.add_argument('--oracle',type=Path,required=True);p.add_argument('--second-oracle',type=Path,required=True);a=p.parse_args()
+ root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors';records=[]
+ cases=list(itertools.product([8,10,12],[3],[True],[0],[True],[4,12,32],[0,7,15],range(3)))
+ for depth,colors,chroma,layout,mirror,quality,matrix,orientation in cases:
+   width,height=(64,64) if layout==0 else (125,117)
+   def plane(w,h,p):
+    def value(x,y):
+     if orientation==0:return 128+((x*73+y*127+p*31)%127)-63
+     if orientation==1:return 32+((x+y+p)%2)*192
+     return 32 if x%16==0 or y%16==0 else 224
+    values=[value(x,y) for y in range(h) for x in range(w)]
+    if depth==8:return bytes(values)
+    return b''.join((v<<(depth-8)).to_bytes(2,'little') for v in values)
+   pixels=plane(width,height,0)+plane((width+1)//2,(height+1)//2,1)+plane((width+1)//2,(height+1)//2,2)
+   name=f'av1-quant-matrix-identity-depth{depth}-colors{colors}-chroma{int(chroma)}-layout{layout}-vflip{int(mirror)}-q{quality}-qm{matrix}-orientation{orientation}';file=name+'.obu';expected=name+'.yuv';wrapped=name+'.webm'
+   with tempfile.TemporaryDirectory(prefix='fvid-owned-palette-') as tmp:
+    input=Path(tmp)/'owned.y4m';input.write_bytes(f'YUV4MPEG2 W{width} H{height} F50:1 Ip A1:1 C{"420jpeg" if depth==8 else "420p"+str(depth)}\nFRAME\n'.encode()+pixels)
+    subprocess.run([str(a.encoder),'--obu','--cpu-used=0','--passes=1','--sb-size=64','--limit=1','--lossless=0','--end-usage=q',f'--cq-level={quality}','--deltaq-mode=0','--loopfilter-control=0','--enable-qm=1',f'--qm-min={matrix}',f'--qm-max={matrix}',f'--bit-depth={depth}',f'--input-bit-depth={depth}','--min-partition-size=4','--max-partition-size=64','--enable-rect-partitions=1','--enable-ab-partitions=0','--enable-1to4-partitions=0','--tune-content='+('default' if quality==48 else 'screen'),'--enable-flip-idtx=1','--reduced-tx-type-set=0','--enable-tx-size-search=1','--enable-tx64=1','--enable-rect-tx=1','--enable-palette=0','--enable-intrabc=0','--enable-cdef=0','--enable-restoration=0','--enable-ref-frame-mvs=0',f'--output={root/file}',str(input)],check=True)
+   data=(root/file).read_bytes();subprocess.run([str(a.oracle),str(root/file),'1',str(root/expected),'whole-packet'],check=True)
+   golden=(root/expected).read_bytes()
+   with tempfile.TemporaryDirectory(prefix='fvid-second-palette-oracle-') as tmp:
+    cross=Path(tmp)/'cross.yuv';subprocess.run([str(a.second_oracle),str(root/file),str(cross)],check=True)
+    assert cross.read_bytes()==golden, name+': independent oracle mismatch'
+   source_exact=golden==pixels
+
+
+   container=webm(data,(width,height));(root/wrapped).write_bytes(container)
+   records.append(dict(file=file,sha256=hashlib.sha256(data).hexdigest(),reference=expected,reference_sha256=hashlib.sha256(golden).hexdigest(),source_sha256=hashlib.sha256(pixels).hexdigest(),source_exact=source_exact,quality=quality,matrix=matrix,orientation=orientation,oracles=['libaom','dav1d'],mirror=mirror,webm=wrapped,webm_sha256=hashlib.sha256(container).hexdigest(),depth=depth,colors=colors,chroma=chroma,layout=layout,size=[width,height]))
+ (root/'av1-quant-matrix-identity-generated.json').write_text(json.dumps(dict(fixtures=records),indent=2)+'\n')
+if __name__=='__main__':main()

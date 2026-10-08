@@ -4288,3 +4288,29 @@ owned qualification, along with remaining rectangular shapes and codec tools.
 The final restored-source run passed all six matrix suites together:
 177 owned streams and 195 decoded frames per replay. The new executable
 links neither FFmpeg/libav nor either external reference decoder.
+
+### AV1 identity-transform quantization matrix bypass qualification
+
+Eighty-one owned one-frame streams cover depths 8/10/12, qualities 4/12/32,
+matrix levels 0/7/15 and three synthetic noise/checker/grid patterns. Both
+independent libaom and dav1d references agree, and all 243 hashes were
+verified. Offline acceptance asserts actual coded levels and native pixels
+with reset/finish plus WebM replay/rewind/seek. Ordinary tests consume saved
+fixtures without executing reference decoders or generation.
+
+Temporary reconstruction diagnostics confirmed nonzero coefficients with
+IDTX (type 9), V_DCT (10) and H_DCT (11) at every depth. The initial two
+qualities did not exercise 12-bit IDTX, so quality 4 was added before that
+coverage was claimed. Diagnostics were removed and canonical code restored.
+This qualifies the actual identity and one-axis DCT cases observed; it does
+not prove all one-axis ADST/FLIPADST types, mixed lossless/lossy segments,
+remaining rectangular shapes, or the remaining codec tools.
+
+Two verification-only mutants applied matrices to IDTX, and to V_DCT/H_DCT
+respectively. Each failed pixel acceptance on owned 8-bit quality-4 level-0
+streams (checker and noise patterns respectively). Both sources were restored
+and matched canonical code, showing independent sensitivity to both bypasses.
+
+Final restored-source run passed all seven matrix suites together:
+258 owned streams and 276 decoded frames per replay. The identity test
+executable links neither FFmpeg/libav nor either external reference decoder.
