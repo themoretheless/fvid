@@ -934,7 +934,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         _=>unreachable!(),
                     };
                     let [w,h]=current.size.map(|n|n as usize);
-                    let cw=w.div_ceil(2);let ch=h.div_ceil(2);
+                    let factors = match &current.decoded {
+                        Picture::Av1(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
+                        _ => [2, 2],
+                    };
+                    let cw=w.div_ceil(factors[0]);let ch=h.div_ceil(factors[1]);
                     let bytes=w.checked_mul(h).and_then(|n|cw.checked_mul(ch).and_then(|c|c.checked_mul(2)).and_then(|c|n.checked_add(c))).and_then(|n|n.checked_mul(2))
                         .filter(|&n|n<=self.rgb_budget).ok_or_else(||invalid("packed WebM planes exceed budget"))?;
                     let mut data=Vec::with_capacity(bytes);
@@ -949,7 +953,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     }
                     let (kr,kb)=match current.color_space {0|1|3=>(0.299,0.114),2=>(0.2126,0.0722),4=>(0.212,0.087),5=>(0.2627,0.0593),_=>return Err(invalid("unsupported native RGB colour configuration"))};
                     crate::playback_native::RawFrame::Planar(Arc::new(PackedPlanar::new(
-                        crate::native_geometry::GeometryFrame{width:w,height:h,subsampling:Some([2,2]),data},current.depth,
+                        crate::native_geometry::GeometryFrame{width:w,height:h,subsampling:Some(factors),data},current.depth,
                         AvcColour{kr,kb,full:current.full_range})?))
                 },
                 _ => crate::playback_native::RawFrame::Planar8(Arc::new(
@@ -995,8 +999,12 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let w = current.size[0] as usize;
         let h = current.size[1] as usize;
         let shift = current.depth.saturating_sub(8);
-        let chroma_width = w.div_ceil(2);
-        let chroma_height = h.div_ceil(2);
+        let factors = match &current.decoded {
+            Picture::Av1(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
+            _ => [2, 2],
+        };
+        let chroma_width = w.div_ceil(factors[0]);
+        let chroma_height = h.div_ceil(factors[1]);
         let chroma_bytes = chroma_width
             .checked_mul(chroma_height)
             .ok_or_else(|| invalid("WebM chroma size overflow"))?;

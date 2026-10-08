@@ -4908,3 +4908,28 @@ restoration and temporal-motion/super-resolution retain their existing full
 pixel/reference/reset/seek comparisons. Chroma-stream refusal remains passing
 and is explicitly not an acceptance result. Formatting and scoped diff checks
 passed.
+
+### AV1 4:2:2/4:4:4 basic reconstruction acceptance (2026-10-08)
+
+The native format gate is removed. All twelve owned two-frame 64x48 streams at
+4:2:2/4:4:4 and 8/10/12 bits, lossless/lossy, match both independent oracle
+pixel goldens. Decoder finish/reset, WebM raw output plane geometry/depth/pixels,
+20ms presentation intervals, EOF rewind and sync seek replay pass. The former
+refusal expectation is replaced with enabled acceptance. The initial lossless
+4:2:2 entropy trailing-bit failure was reproduced by the existing owned fixture
+and fixed by making lossless CFL eligibility depend on the actual UV 4x4 block.
+
+Intrabc phases, CDEF block dimensions/direction remapping, horizontal upscaling
+and restoration-unit/stripe geometry now honor separate subsampling axes.
+WebM planar8 and high-depth packed output preserve full-height/full-width chroma
+when required. Forty-eight final AV1 release unit tests pass. The base chroma
+fixtures disable CDEF/restoration/intrabc/super-resolution; dedicated non-4:2:0
+qualification for those tools, film grain, odd dimensions and broader inter
+profiles remains pending and must not be inferred from base acceptance.
+
+Final validation: 48 AV1 release unit tests and eight selected offline
+integration tests passed with zero failures/ignored tests. The enabled chroma
+acceptance covers all twelve streams, including container/reset/rewind/seek;
+existing mixed-sub8, intrabc, film-grain, odd restoration and temporal-motion
+super-resolution full-pixel regressions also pass. Scoped diff and formatting
+checks pass. No external codec, FFmpeg or network is used by ordinary tests.

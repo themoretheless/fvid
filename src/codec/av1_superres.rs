@@ -72,6 +72,7 @@ pub(super) fn upscale(
     size: [u32; 2],
     width: u32,
     depth: u8,
+    subsampling: [bool; 2],
 ) -> Result<[Plane; 3]> {
     if width <= size[0] {
         return Err(invalid("invalid AV1 super-resolution extent"));
@@ -82,10 +83,14 @@ pub(super) fn upscale(
         samples: Vec::new(),
     });
     for p in 0..3 {
-        let sub = usize::from(p > 0);
-        let down = (size[0] as usize).div_ceil(1 << sub);
-        let up = (width as usize).div_ceil(1 << sub);
-        let height = (size[1] as usize).div_ceil(1 << sub);
+        let [sub_x, sub_y] = if p == 0 {
+            [0; 2]
+        } else {
+            subsampling.map(usize::from)
+        };
+        let down = (size[0] as usize).div_ceil(1 << sub_x);
+        let up = (width as usize).div_ceil(1 << sub_x);
+        let height = (size[1] as usize).div_ceil(1 << sub_y);
         let step = (((down as i64) << 14) + up as i64 / 2) / up as i64;
         let error = up as i64 * step - ((down as i64) << 14);
         let initial = ((-(up as i64 - down as i64) * (1 << 13) + up as i64 / 2) / up as i64 + 128

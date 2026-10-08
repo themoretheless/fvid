@@ -20,12 +20,13 @@ struct Plane {
     units: Vec<Option<Unit>>,
 }
 pub(super) struct State {
+    subsampling: [bool; 2],
     planes: [Plane; 3],
     wiener: [[[i32; 3]; 2]; 3],
     sgr: [[i32; 2]; 3],
 }
 impl State {
-    pub(super) fn required_bytes(h: &Header) -> Result<usize> {
+    pub(super) fn required_bytes(h: &Header, subsampling: [bool; 2]) -> Result<usize> {
         let mut bytes = 0usize;
         for p in 0..3 {
             if h.restoration_types[p] != 0 {
@@ -33,9 +34,13 @@ impl State {
                 if !matches!(size, 32 | 64 | 128 | 256) {
                     return Err(invalid("invalid AV1 restoration unit size"));
                 }
-                let sub = usize::from(p > 0);
-                let cols = ((h.upscaled_width as usize).div_ceil(1 << sub) + size / 2) / size;
-                let rows = ((h.size[1] as usize).div_ceil(1 << sub) + size / 2) / size;
+                let [sub_x, sub_y] = if p == 0 {
+                    [0; 2]
+                } else {
+                    subsampling.map(usize::from)
+                };
+                let cols = ((h.upscaled_width as usize).div_ceil(1 << sub_x) + size / 2) / size;
+                let rows = ((h.size[1] as usize).div_ceil(1 << sub_y) + size / 2) / size;
                 bytes = bytes
                     .checked_add(
                         cols.max(1)
@@ -61,16 +66,20 @@ impl State {
         }
         Ok(bytes)
     }
-    pub(super) fn new(h: &Header) -> Self {
+    pub(super) fn new(h: &Header, subsampling: [bool; 2]) -> Self {
         let planes = std::array::from_fn(|p| {
             let size = h.restoration_sizes[p] as usize;
-            let sub = usize::from(p > 0);
+            let [sub_x, sub_y] = if p == 0 {
+                [0; 2]
+            } else {
+                subsampling.map(usize::from)
+            };
             let (cols, rows) = if h.restoration_types[p] == 0 {
                 (0, 0)
             } else {
                 (
-                    (((h.upscaled_width as usize).div_ceil(1 << sub) + size / 2) / size).max(1),
-                    (((h.size[1] as usize).div_ceil(1 << sub) + size / 2) / size).max(1),
+                    (((h.upscaled_width as usize).div_ceil(1 << sub_x) + size / 2) / size).max(1),
+                    (((h.size[1] as usize).div_ceil(1 << sub_y) + size / 2) / size).max(1),
                 )
             };
             Plane {
@@ -81,6 +90,7 @@ impl State {
             }
         });
         Self {
+            subsampling,
             planes,
             wiener: [[[3, -7, 15]; 2]; 3],
             sgr: [[-32, 31]; 3],
@@ -104,13 +114,21 @@ impl State {
                 continue;
             }
             let unit = &self.planes[p];
-            let scale = 4 >> usize::from(p > 0);
+            let [sub_x, sub_y] = if p == 0 {
+                [0; 2]
+            } else {
+                self.subsampling.map(usize::from)
+            };
+            let scale_x = 4 >> sub_x;
+            let scale_y = 4 >> sub_y;
             let size = unit.size;
             let denom = usize::from(h.superres_denom);
-            let x0 = (x * scale * denom).div_ceil(size * 8);
-            let x1 = ((x + sb) * scale * denom).div_ceil(size * 8).min(unit.cols);
-            let y0 = (y * scale).div_ceil(size);
-            let y1 = ((y + sb) * scale).div_ceil(size).min(unit.rows);
+            let x0 = (x * scale_x * denom).div_ceil(size * 8);
+            let x1 = ((x + sb) * scale_x * denom)
+                .div_ceil(size * 8)
+                .min(unit.cols);
+            let y0 = (y * scale_y).div_ceil(size);
+            let y1 = ((y + sb) * scale_y).div_ceil(size).min(unit.rows);
             for row in y0..y1 {
                 for col in x0..x1 {
                     let kind = match h.restoration_types[p] {
@@ -197,18 +215,22 @@ impl State {
             if layout.units.is_empty() {
                 continue;
             }
-            let sub = usize::from(p > 0);
-            let width = (image.size[0] as usize).div_ceil(1 << sub);
-            let height = (image.size[1] as usize).div_ceil(1 << sub);
+            let [sub_x, sub_y] = if p == 0 {
+                [0; 2]
+            } else {
+                self.subsampling.map(usize::from)
+            };
+            let width = (image.size[0] as usize).div_ceil(1 << sub_x);
+            let height = (image.size[1] as usize).div_ceil(1 << sub_y);
             let cdef = image.planes[p].clone();
             let output = &mut image.planes[p];
             let mut y = 0;
             while y < height {
-                let stripe = ((y << sub) + 8) / 64;
-                let start = (-8 + stripe as i64 * 64) >> sub;
-                let end = start + (64 >> sub) - 1;
-                let unit_row = ((y + (8 >> sub)) / layout.size).min(layout.rows - 1);
-                let h = (end as usize + 1 - y).min(height - y).min(64 >> sub);
+                let stripe = ((y << sub_y) + 8) / 64;
+                let start = (-8 + stripe as i64 * 64) >> sub_y;
+                let end = start + (64 >> sub_y) - 1;
+                let unit_row = ((y + (8 >> sub_y)) / layout.size).min(layout.rows - 1);
+                let h = (end as usize + 1 - y).min(height - y).min(64 >> sub_y);
                 let source = filter::Source {
                     before: &before[p],
                     cdef: &cdef,

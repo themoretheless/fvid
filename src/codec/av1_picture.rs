@@ -185,17 +185,12 @@ pub(crate) fn decode(
     distances: [i32; 8],
 ) -> Result<(Picture, Cdfs)> {
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
-    if s.color.subsampling != [true, true] {
-        return Err(crate::unsupported(
-            "AV1 native reconstruction requires 4:2:0",
-        ));
-    }
     let cols = 2 * (h.size[0] as usize).div_ceil(8);
     let rows = 2 * (h.size[1] as usize).div_ceil(8);
     // Complete edge transforms are needed by chroma-from-luma before cropping.
     let storage_cols = cols.div_ceil(16) * 16;
     let storage_rows = rows.div_ceil(16) * 16;
-    let restoration_bytes = restoration::State::required_bytes(h)?;
+    let restoration_bytes = restoration::State::required_bytes(h, s.color.subsampling)?;
     let upscale_bytes = if h.superres_denom != 8 {
         (h.upscaled_width as usize)
             .checked_mul(h.size[1] as usize)
@@ -300,7 +295,7 @@ pub(crate) fn decode(
         tx_types: vec![0; cols * rows],
         tx_sizes: std::array::from_fn(|_| vec![[4, 4]; storage_cols * storage_rows]),
         cdef_indexes: vec![-1; cols.div_ceil(16) * rows.div_ceil(16)],
-        restoration: restoration::State::new(h),
+        restoration: restoration::State::new(h, s.color.subsampling),
         read_deltas: false,
         current_q: i32::from(h.quant.base),
         delta_lf: [0; 4],
@@ -405,13 +400,24 @@ pub(crate) fn decode(
         s.color.monochrome,
     );
     if h.superres_denom != 8 {
-        dec.image.planes =
-            superres::upscale(&dec.image.planes, h.size, h.upscaled_width, s.color.depth)?;
+        dec.image.planes = superres::upscale(
+            &dec.image.planes,
+            h.size,
+            h.upscaled_width,
+            s.color.depth,
+            s.color.subsampling,
+        )?;
         dec.image.size[0] = h.upscaled_width;
     }
     if let Some(before) = before_restoration {
         let before = if h.superres_denom != 8 {
-            superres::upscale(&before, h.size, h.upscaled_width, s.color.depth)?
+            superres::upscale(
+                &before,
+                h.size,
+                h.upscaled_width,
+                s.color.depth,
+                s.color.subsampling,
+            )?
         } else {
             before
         };
@@ -777,7 +783,7 @@ impl Decoder<'_> {
         let mut cfl = [0i32; 2];
         if has_chroma {
             let cfl_allowed = if self.h.lossless[self.current_segment] {
-                w <= 2 && h <= 2
+                w <= (1 << usize::from(sx)) && h <= (1 << usize::from(sy))
             } else {
                 w.max(h) <= 8
             };

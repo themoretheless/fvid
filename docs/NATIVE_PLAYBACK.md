@@ -864,8 +864,11 @@ Release-сборка обязательна для практического и
   в отдельную display-копию; reference storage остаётся без зерна.
   Sub-8x8 chroma со смешанными intra/inter соседями проверен для 4×4,
   4×N и N×4, включая выбор отдельного вектора для all-inter групп.
-  Явные оставшиеся отказы: 4:2:2/4:4:4, layered operating points,
-  spatial layering и tile-list OBU.
+  Базовые lossless/lossy 4:2:2/4:4:4 в 8/10/12 битах проверены по всем
+  пикселям, decoder reset и WebM raw output/rewind/seek. Отдельная квалификация
+  intrabc, CDEF/restoration/super-resolution, film grain, нечётных размеров и
+  сложных inter-комбинаций в этих форматах пока не завершена.
+  Явные оставшиеся отказы: layered operating points, spatial layering и tile-list OBU.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption

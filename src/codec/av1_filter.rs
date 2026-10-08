@@ -154,13 +154,13 @@ fn block_edge(
     target: &mut [u16],
     x0: usize,
     y0: usize,
-    size: usize,
+    size: [usize; 2],
     taps: &[fvid_cpu::CdefTap],
 ) {
     let (width, height) = (source.width, source.height);
     let src = &source.samples;
-    for y in y0..y0 + size {
-        for x in x0..x0 + size {
+    for y in y0..y0 + size[1] {
+        for x in x0..x0 + size[0] {
             let base = y * width + x;
             let current = i32::from(src[base]);
             let (mut lo, mut hi, mut sum) = (current, current, 0);
@@ -219,10 +219,24 @@ pub(crate) fn cdef(
                 0
             };
             for p in 0..if monochrome { 1 } else { 3 } {
-                let sub = usize::from(p > 0);
+                let [sub_x, sub_y] = if p == 0 {
+                    [0; 2]
+                } else {
+                    image.subsampling.map(usize::from)
+                };
                 let mut pri = i32::from(strength[if p == 0 { 0 } else { 2 }]) << shift;
                 let sec = i32::from(strength[if p == 0 { 1 } else { 3 }]) << shift;
-                let direction = if pri == 0 { 0 } else { dir };
+                let direction = if pri == 0 {
+                    0
+                } else if p > 0 && sub_x != sub_y {
+                    if sub_x == 1 {
+                        [7, 0, 2, 4, 5, 6, 6, 6][dir]
+                    } else {
+                        [1, 2, 2, 2, 3, 4, 6, 0][dir]
+                    }
+                } else {
+                    dir
+                };
                 if p == 0 {
                     pri = if variance == 0 {
                         0
@@ -233,7 +247,7 @@ pub(crate) fn cdef(
                 let damping = i32::from(params.damping) + i32::from(shift) - i32::from(p > 0);
                 let source = &input.planes[p];
                 let target = &mut image.planes[p];
-                let size = 8 >> sub;
+                let size = [8 >> sub_x, 8 >> sub_y];
                 let pri_taps = if (pri >> shift) & 1 == 0 {
                     [4, 2]
                 } else {
@@ -270,11 +284,11 @@ pub(crate) fn cdef(
                     continue;
                 }
                 let taps = &taps[..count];
-                let (x0, y0) = ((col * 4) >> sub, (r * 4) >> sub);
+                let (x0, y0) = ((col * 4) >> sub_x, (r * 4) >> sub_y);
                 if x0 >= 2
                     && y0 >= 2
-                    && x0 + size + 1 < source.width
-                    && y0 + size + 1 < source.height
+                    && x0 + size[0] + 1 < source.width
+                    && y0 + size[1] + 1 < source.height
                 {
                     fvid_cpu::av1_cdef_block(
                         &source.samples,
@@ -282,8 +296,8 @@ pub(crate) fn cdef(
                         source.width,
                         x0,
                         y0,
-                        size,
-                        size,
+                        size[0],
+                        size[1],
                         taps,
                     );
                 } else {

@@ -1040,6 +1040,12 @@ packed YUV goldens. Every lossless golden equals the original packed input.
 
 The manifest records source/OBU/WebM/YUV hashes and actual intended plane shifts.
 The offline reproduction additionally verifies actual sequence subsampling/depth
-and frame-header size/losslessness before requiring the specific native format
-refusal. It is not acceptance of 4:2:2/4:4:4 playback. Generation is separate
-from ordinary tests, which require no external codec, FFmpeg or network.
+and frame-header size/losslessness. The former native format refusal expectation
+is replaced by full native pixel acceptance for all twelve streams, decoder
+reset, WebM raw plane dimensions/depth/pixels, presentation intervals, EOF rewind
+and seek replay. Lossless 4:2:2 initially reproduced an entropy trailing-bit
+failure after removing the format gate; selecting CFL eligibility from the
+actual chroma block shape fixes that failure. Generation is separate from
+ordinary tests, which require no external codec, FFmpeg or network.
+These short streams disable CDEF/restoration/intrabc and super-resolution;
+acceptance of those tools at 4:2:2/4:4:4 still needs dedicated fixtures.

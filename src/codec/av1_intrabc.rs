@@ -125,15 +125,15 @@ impl Decoder<'_> {
         size: [usize; 2],
         mv: [i32; 2],
     ) -> Result<()> {
-        let sub = usize::from(p > 0);
+        let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
         // Luma displacement is integral; subsampled chroma can have a half
         // sample phase. Bilinear filtering therefore uses weights 0, 1 or 2.
         let dx = mv[1] / 8;
         let dy = mv[0] / 8;
-        let fx = if sub == 0 { 0 } else { dx & 1 };
-        let fy = if sub == 0 { 0 } else { dy & 1 };
-        let sx = x as i32 + (dx >> sub);
-        let sy = y as i32 + (dy >> sub);
+        let fx = if sub_x == 0 { 0 } else { dx & 1 };
+        let fy = if sub_y == 0 { 0 } else { dy & 1 };
+        let sx = x as i32 + (dx >> sub_x);
+        let sy = y as i32 + (dy >> sub_y);
         let plane = &mut self.image.planes[p];
         let [w, h] = size;
         self.pred_scratch.resize(w * h, 0);
