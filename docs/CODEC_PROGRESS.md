@@ -5556,3 +5556,25 @@ translation duplicates and malformed lengths from entering production.
 The decoder is owned Rust. It does not yet reconstruct envelope values or
 render HE-AAC; book selection, stereo/temporal delta reconstruction, rate bounds,
 QMF and high-frequency processing still require integration and PCM acceptance.
+
+
+### Owned SBR coefficient syntax and delta reconstruction
+
+`aac_sbr_coefficients` reads level/balance envelope and noise rows inside an
+extension boundary. Selection covers time/frequency books, 1.5/3 dB envelope
+resolution, 5/6/7-bit absolute envelope values, 5-bit noise starts, and the
+one-envelope FIXFIX resolution override. Whole blocks restore bit position on
+truncation. Noise frequency books reuse the normative envelope 3 dB books.
+`reconstruct` performs checked frequency accumulation or temporal addition with
+physical interval mapping across nested high/low band tables; it doubles newly
+transmitted stereo-balance values without doubling previous stored values.
+Mixed-resolution/direction tests assert independently written quantized values
+and exact encoded consumption, and exercise all-bit rollback for complete blocks.
+Invalid dimensions, incompatible histories and arithmetic overflow are rejected.
+
+This is coefficient-level coverage, not HE-AAC playback acceptance. Previous
+frame coefficients are still supplied explicitly; production frame state,
+quantized conformance bounds, dequantization/stereo uncoupling, rate-dependent
+frequency bounds and the QMF/high-frequency pipeline remain to be integrated.
+Reference: GOST R53556.4-2013 tables 72/73 and section 6.18.3.4; ISO SBR
+normative codewords are separately qualified by the Huffman generator.
