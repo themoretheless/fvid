@@ -913,3 +913,23 @@ lifecycle. The tiled suite also detects a controlled broken restoration-unit
 projection: forcing denominator 8 yields a specific entropy failure on its
 first denominator-9 fixture. The production source is restored before final
 acceptance. No production codec change was needed for these qualified cases.
+
+
+### AV1 temporal segment prediction with super-resolution
+
+`generate_av1_superres_temporal_segmentation_samples.py` produces 18 original
+synthetic 192x128 three-frame streams at 8/10/12 bits and denominators 9/12/16.
+Apply `scripts/av1_superres_temporal_aq_fixture.patch` to libaom v3.15.1 before
+building the generator. This fixture-only patch enables variance AQ under
+super-resolution, selects LAST primary, refreshes inter maps using segment 1,
+and emits predicted-ID symbols when the previous map matches. The manifest
+records its SHA-256 together with source, OBU, YUV and WebM hashes.
+
+Unmodified libaom and independent dav1d agree on all 54 full frames. Tests
+require all 36 inter headers to signal temporal updates, nonzero key maps,
+full native pixel parity, reset and complete WebM replay/seek lifecycle. A
+controlled mutation that discards previous maps is detected at byte 36864 of
+the first stream. Source is restored before final acceptance. Earlier trials
+with only false prediction symbols were replaced; passing those trials was
+not counted as acceptance for using the previous map. No private source
+media or parameters are copied; ordinary tests invoke no codec tools or network.

@@ -4584,3 +4584,35 @@ requires no FFmpeg. These suites qualify the recorded fixed-size transitions
 and two-tile layouts. Temporal reference motion fields, temporal segmentation
 map updates, film grain, intrabc and additional profiles/chroma remain gaps;
 these acceptance suites do not establish complete AV1 support.
+
+
+### AV1 temporal segmentation with super-resolution
+
+Temporal segmentation already has explicit owned map/pixel coverage in
+`av1_segmentation_maps`. A further 18 three-frame streams now combine temporal
+map prediction with super-resolution denominators 9/12/16, 8/10/12-bit 4:2:0,
+CDEF and restoration. All 36 inter headers require enabled segmentation,
+update_map and temporal_update, with LAST as primary reference. Key maps are
+required to contain nonzero IDs. Full pixels for all 54 frames match unmodified
+libaom and independent dav1d; reset, WebM replay, timestamps, EOF, rewind and
+seek are checked for every stream.
+
+The first generation attempt exposed an insufficient fixture: temporal_update
+was signaled but all traced prediction symbols were false, so zeroing the
+previous map did not affect pixels. The final fixture-only encoder patch uses
+segment 1 and emits predicted-ID symbols when the previous map matches. Its
+hash is pinned in the manifest. Both independent decoders remain unmodified.
+A controlled native mutation that discards the previous coded-grid map now
+leaves the key frame intact but differs at byte 36864 of the first 8-bit
+Denominator-9 stream, the start of the first inter frame. The source is restored
+before final acceptance validation. The initial insufficient assets were
+replaced rather than presented as tool coverage.
+
+No production codec change is required for these tested combinations; fixture
+generation is separate from ordinary offline tests, with no FFmpeg or network.
+Temporal reference motion fields, film grain, intrabc and additional chroma/
+profiles remain separate outstanding AV1 work. These fixed-grid cases do not
+establish temporal map behavior across changing coded grids or multiple tiles.
+
+Final focused validation: six tests across temporal maps, inherited super-resolution
+maps and temporal super-resolution maps pass offline without ignored tests.

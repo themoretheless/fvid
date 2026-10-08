@@ -1,0 +1,61 @@
+diff --git a/av1/encoder/aq_variance.c b/av1/encoder/aq_variance.c
+index e8bab9b..9dbf362 100644
+--- a/av1/encoder/aq_variance.c
++++ b/av1/encoder/aq_variance.c
+@@ -36,7 +36,7 @@ static const double deltaq_rate_ratio[MAX_SEGMENTS] = { 2.5,  2.0, 1.5, 1.0,
+ #define ENERGY_IN_BOUNDS(energy) \
+   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
+ 
+-static const int segment_id[ENERGY_SPAN] = { 0, 1, 1, 2, 3, 4 };
++static const int segment_id[ENERGY_SPAN] = { 1, 1, 1, 1, 1, 1 };
+ 
+ #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
+ 
+@@ -56,7 +56,7 @@ void av1_vaq_frame_setup(AV1_COMP *cpi) {
+   if (avg_energy < 0) avg_energy = 0;
+   avg_ratio = rate_ratio[avg_energy];
+ 
+-  if (resolution_change) {
++  if (resolution_change && cm->superres_scale_denominator == SCALE_NUMERATOR) {
+     memset(cpi->enc_seg.map, 0, cm->mi_params.mi_rows * cm->mi_params.mi_cols);
+     av1_clearall_segfeatures(seg);
+     av1_disable_segmentation(seg);
+@@ -89,6 +89,10 @@ void av1_vaq_frame_setup(AV1_COMP *cpi) {
+       av1_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
+     }
+   }
++  if (!frame_is_intra_only(cm) && cm->features.primary_ref_frame != PRIMARY_REF_NONE && cm->superres_scale_denominator != SCALE_NUMERATOR) {
++    seg->update_map = 1;
++    cpi->vaq_refresh = 1;
++  }
+ }
+ 
+ int av1_log_block_avg(const AV1_COMP *cpi, const MACROBLOCK *x, BLOCK_SIZE bs,
+diff --git a/av1/encoder/bitstream.c b/av1/encoder/bitstream.c
+index 53ca4ad..f64df10 100644
+--- a/av1/encoder/bitstream.c
++++ b/av1/encoder/bitstream.c
+@@ -939,7 +939,10 @@ static inline void write_inter_segment_id(AV1_COMP *cpi, MACROBLOCKD *const xd,
+       }
+     }
+     if (seg->temporal_update) {
+-      const int pred_flag = mbmi->seg_id_predicted;
++      const int pred_flag = cm->last_frame_seg_map &&
++          mbmi->segment_id == get_segment_id(&cm->mi_params, cm->last_frame_seg_map,
++                                             mbmi->bsize, mi_row, mi_col);
++      mbmi->seg_id_predicted = pred_flag;
+       aom_cdf_prob *pred_cdf = av1_get_pred_cdf_seg_id(segp, xd);
+       aom_write_symbol(w, pred_flag, pred_cdf, 2);
+       if (!pred_flag) {
+diff --git a/av1/encoder/encode_strategy.c b/av1/encoder/encode_strategy.c
+index 85931ea..1642306 100644
+--- a/av1/encoder/encode_strategy.c
++++ b/av1/encoder/encode_strategy.c
+@@ -192,6 +192,7 @@ static int choose_primary_ref_frame(
+   // Note(yunqing): In other cases, primary_ref_frame is chosen based on
+   // cpi->ppi->gf_group.layer_depth[cpi->gf_frame_index], which also controls
+   // frame bit allocation.
++  return (LAST_FRAME - LAST_FRAME); // Owned fixture: deterministic primary reference.
+   if (cm->tiles.large_scale) return (LAST_FRAME - LAST_FRAME);
+ 
+   if (cpi->ppi->use_svc || cpi->ppi->rtc_ref.set_ref_frame_config)
