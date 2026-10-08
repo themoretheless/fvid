@@ -41,6 +41,8 @@ pub struct Header {
     pub intrabc: bool,
     pub order_hint: u32,
     pub refresh_flags: u8,
+    /// Existing reference slots invalidated by error-resilient order hints.
+    pub invalidated_references: u8,
     pub size: [u32; 2],
     pub render_size: [u32; 2],
     pub upscaled_width: u32,
@@ -256,6 +258,8 @@ impl Header {
         reference_order_hints: [u32; 8],
         separate: bool,
     ) -> Result<Self> {
+        let mut adjusted_refs = *refs;
+        let mut invalidated_references = 0u8;
         let b = &mut BitReader::new(data);
         let (frame_type, show, showable, error_resilient) = if s.reduced_header {
             (0, true, false, true)
@@ -325,15 +329,15 @@ impl Header {
             b.read(8)? as u8
         };
         if (!intra || refresh_flags != 255) && error_resilient && s.order_hint_bits > 0 {
-            for reference in refs {
+            for (i, reference) in adjusted_refs.iter_mut().enumerate() {
                 let hint = b.read(s.order_hint_bits)?;
-                if reference.is_some_and(|r| r.order_hint != hint) {
-                    return Err(invalid(
-                        "AV1 error-resilient reference invalidation requires reset",
-                    ));
+                if reference_order_hints[i] != hint {
+                    *reference = None;
+                    invalidated_references |= 1 << i;
                 }
             }
         }
+        let refs = &adjusted_refs;
         let mut references = [0usize; 7];
         let mut found_ref = None;
         if !intra {
@@ -690,6 +694,7 @@ impl Header {
             intrabc,
             order_hint,
             refresh_flags,
+            invalidated_references,
             size,
             render_size,
             upscaled_width,

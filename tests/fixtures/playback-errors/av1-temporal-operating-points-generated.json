@@ -1,0 +1,64 @@
+{
+  "file": "av1-temporal-operating-points.obu",
+  "sha256": "0b811f441493423710aacbb0758b35f94e692094afca53a42e839c6f4aad81c1",
+  "webm": "av1-temporal-operating-points.webm",
+  "webm_sha256": "28ad44b2cc04c20e9f81ff2d518f81e2ac53e223dd4ccd6422e719872aa1198d",
+  "temporal_ids": [
+    0,
+    2,
+    1,
+    2,
+    0,
+    2,
+    1,
+    2
+  ],
+  "size": [
+    64,
+    48
+  ],
+  "oracles": [
+    "libaom",
+    "dav1d"
+  ],
+  "points": [
+    {
+      "point": 0,
+      "idc": 263,
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "reference": "av1-temporal-operating-points-op0.yuv",
+      "reference_sha256": "b66e1cb94a081fea297380db3dbb37fe7eaca9edd4e5d1bf473b9de52c8df127"
+    },
+    {
+      "point": 1,
+      "idc": 259,
+      "indices": [
+        0,
+        2,
+        4,
+        6
+      ],
+      "reference": "av1-temporal-operating-points-op1.yuv",
+      "reference_sha256": "65a8fa4173c9512019cb71cf665c8bff517c89a2852b192a3d1aafabbfa97385"
+    },
+    {
+      "point": 2,
+      "idc": 257,
+      "indices": [
+        0,
+        4
+      ],
+      "reference": "av1-temporal-operating-points-op2.yuv",
+      "reference_sha256": "7fa39653818250f02862a21ed79b59d1c9c8a2e7d10e3d0d2655de5e1fb26b8a"
+    }
+  ]
+}

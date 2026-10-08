@@ -1184,3 +1184,40 @@ compound, 515 wedge, 141 difference, 9,599 OBMC, 883 inter-intra, 2,562 local wa
 168 global warp and 8,294 blocks using scaled references. These counts can overlap
 across categories (for example, single-reference OBMC), and are not frame counts.
 This set does not establish every inter-tool/profile/tile/layer combination.
+
+### AV1 temporal operating points and inactive-reference invalidation
+
+`av1_temporal_operating_points_fixture.c` is an original generation-only stock
+libaom 3.15.1 SVC encoder, one spatial/three temporal layers. Eight original
+64x48 8-bit 4:2:0 patterns use temporal IDs [0,2,1,2,0,2,1,2]. Each layer
+references the base buffer; only its own buffer is refreshed. Inactive logical
+references alias the base buffer, except the mapped refresh destination. No
+private samples or parameter sets are used. The Python generator requires
+unmodified aomdec/dav1d agreement for all three operating points: idc 0x107,
+0x103 and 0x101, with eight/four/two output frames. All five OBU/WebM/YUV artifact
+hashes are recorded. Ordinary tests do not compile or invoke these tools.
+
+The fixture initially reproduced exactly `AV1 layered operating points not
+implemented`. Once that gate was removed, lower points exposed the separate
+`AV1 error-resilient reference invalidation requires reset` gate. Selected-frame
+order hints legitimately invalidate dormant slots belonging to excluded temporal
+layers. The fix records invalidated slots in the header and clears native
+references/headers/CDF/showable state; invalidated slots used by the current
+header still cause a missing-picture error. The test requires actual inactive
+invalidation at both lower points and independently poisons an active reference
+hint to verify the latter refusal.
+
+`tests/av1_operating_points.rs` enables full native acceptance for all three
+points, exact pixels with full-stream and per-access-unit input, configuration
+seeding/reset, default selection, invalid-index errors, and default-point WebM
+pixels/20ms intervals/EOF rewind/sync seek. Adversarial excluded OBU payloads
+(frame/header/tile/redundant/tile-list) test temporal-only, spatial-only and
+combined exclusion before parsing. Excluded valid HDR CLL must not mutate
+metadata; the identical unextended payload is a positive parsing control.
+These are filtering robustness checks, not claims that malformed included OBUs
+are legal. A separate refusal check for an included spatial layer remains.
+
+Scope: genuine temporal SVC at 8-bit 4:2:0, not reconstruction of spatial layers,
+tile-list assembly, all decoder-model timings, or every layered profile/tool
+combination. Normative operating-point filtering: AV1 section 5.3,
+<https://aomediacodec.github.io/av1-spec/>.

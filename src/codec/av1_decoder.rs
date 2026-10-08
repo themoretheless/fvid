@@ -30,6 +30,7 @@ struct PendingFrame {
 }
 pub struct Decoder {
     sequence: Option<Sequence>,
+    operating_point: usize,
     initial_sequence: Option<Sequence>,
     initial_hdr: HdrMetadata,
     references: [Option<Decoded>; 8],
@@ -55,6 +56,7 @@ impl Decoder {
     pub fn new(budget: usize) -> Self {
         Self {
             sequence: None,
+            operating_point: 0,
             initial_sequence: None,
             initial_hdr: HdrMetadata::default(),
             references: std::array::from_fn(|_| None),
@@ -70,10 +72,27 @@ impl Decoder {
             previous_frame_id: None,
         }
     }
+    /// Select a sequence operating point. The sequence header validates its index;
+    /// reset retains this selection. Point zero is the default.
+    pub fn with_operating_point(budget: usize, operating_point: usize) -> Result<Self> {
+        if operating_point >= 32 {
+            return Err(invalid("AV1 operating point index exceeds 31"));
+        }
+        let mut decoder = Self::new(budget);
+        decoder.operating_point = operating_point;
+        Ok(decoder)
+    }
     /// Seed configuration OBUs before decoding access units. Reset retains the
     /// configuration sequence and HDR metadata, but clears all frame references.
     pub fn from_configuration(record: &[u8], budget: usize) -> Result<Self> {
-        let mut decoder = Self::new(budget);
+        Self::from_configuration_with_operating_point(record, budget, 0)
+    }
+    pub fn from_configuration_with_operating_point(
+        record: &[u8],
+        budget: usize,
+        operating_point: usize,
+    ) -> Result<Self> {
+        let mut decoder = Self::with_operating_point(budget, operating_point)?;
         if !record.is_empty() {
             if record.len() < 4 {
                 return Err(invalid("truncated AV1 codec configuration record"));
@@ -94,7 +113,9 @@ impl Decoder {
     pub fn reset(&mut self) {
         let sequence = self.initial_sequence.clone();
         let hdr = self.initial_hdr;
+        let operating_point = self.operating_point;
         *self = Self::new(self.budget);
+        self.operating_point = operating_point;
         self.sequence = sequence.clone();
         self.initial_sequence = sequence;
         self.hdr = hdr;
@@ -213,16 +234,28 @@ impl Decoder {
         let mut output = Vec::new();
         for obu in Obus::new(data) {
             let obu = obu?;
+            // AV1 5.3: drop excluded extended OBUs before inspecting payload or
+            // changing pending frames, references, CDFs or metadata. Sequence
+            // headers and temporal delimiters always participate.
+            if obu.has_extension && !matches!(obu.kind, 1 | 2) {
+                if let Some(sequence) = &self.sequence {
+                    let idc = sequence.operating_points[self.operating_point].idc;
+                    if idc != 0
+                        && (idc & (1 << obu.temporal_id) == 0
+                            || idc & (1 << (obu.spatial_id + 8)) == 0)
+                    {
+                        continue;
+                    }
+                }
+            }
             if self.pending.is_some() && matches!(obu.kind, 1 | 2 | 3 | 6) {
                 return Err(invalid("AV1 new frame or delimiter before tile completion"));
             }
             match obu.kind {
                 1 => {
                     let sequence = Sequence::parse(obu.payload)?;
-                    if sequence.operating_points[0].idc != 0 {
-                        return Err(crate::unsupported(
-                            "AV1 layered operating points not implemented",
-                        ));
+                    if self.operating_point >= sequence.operating_points.len() {
+                        return Err(invalid("AV1 operating point index not present in sequence"));
                     }
                     if self.sequence.as_ref().is_some_and(|s| s != &sequence) {
                         self.previous_frame_id = None;
@@ -373,6 +406,15 @@ impl Decoder {
                                 &headers,
                                 self.reference_order_hints,
                             )?;
+                            for i in 0..8 {
+                                if header.invalidated_references & (1 << i) != 0 {
+                                    self.references[i] = None;
+                                    self.headers[i] = None;
+                                    self.cdfs[i] = None;
+                                    self.showable[i] = false;
+                                    self.reference_types[i] = 0;
+                                }
+                            }
                             let available = self
                                 .budget
                                 .checked_sub(self.retained_picture_bytes(&output)?)
@@ -418,11 +460,6 @@ impl Decoder {
                                 return Err(invalid("AV1 invalid current frame ID progression"));
                             }
                         }
-                        let initial = if h.primary_reference == 7 {
-                            None
-                        } else {
-                            self.cdfs[h.references[h.primary_reference]].as_deref()
-                        };
                         let distances = std::array::from_fn(|i| {
                             if i == 0 || s.order_hint_bits == 0 {
                                 0
@@ -433,6 +470,20 @@ impl Decoder {
                                 (diff << shift) >> shift
                             }
                         });
+                        for i in 0..8 {
+                            if h.invalidated_references & (1 << i) != 0 {
+                                self.references[i] = None;
+                                self.headers[i] = None;
+                                self.cdfs[i] = None;
+                                self.showable[i] = false;
+                                self.reference_types[i] = 0;
+                            }
+                        }
+                        let initial = if h.primary_reference == 7 {
+                            None
+                        } else {
+                            self.cdfs[h.references[h.primary_reference]].as_deref()
+                        };
                         let retained = self.retained_picture_bytes(&output)?;
                         let compressed = owned_groups.iter().try_fold(0usize, |n, group| {
                             n.checked_add(group.len())

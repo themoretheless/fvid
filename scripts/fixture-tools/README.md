@@ -73,3 +73,17 @@ oracles must agree on every raw pixel, including the 96x64 keyframe to 191x127
 inter transition. Offline tests require actual compound variants, OBMC,
 inter-intra, local/global warp and scaled-reference execution in each
 4:2:2/4:4:4 and 8/10/12-bit group, plus reset/WebM timing/rewind/seek.
+
+## Temporal SVC operating-point fixtures
+
+Build the original generation-only C program against stock libaom (qualified
+with 3.15.1), then compare all points with unchanged reference decoders:
+
+```sh
+cc /path/to/fvid/scripts/av1_temporal_operating_points_fixture.c $(pkg-config --cflags --libs aom) -o /tmp/fvid-av1-temporal-operating-points-fixture
+python3 /path/to/fvid/scripts/generate_av1_temporal_operating_points_samples.py --encoder /tmp/fvid-av1-temporal-operating-points-fixture --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+```
+
+Only generation uses libaom/dav1d. Ordinary acceptance reads the owned OBU/WebM
+and three raw goldens, checking selection, inactive-reference invalidation,
+configuration/reset, exact pixels, packetized input and WebM rewind/seek.

@@ -879,7 +879,10 @@ Release-сборка обязательна для практического и
   Film grain в 4:2:2/4:4:4 отдельно проверен на 156 потоках 149×85:
   все 16 preset, собственные AR-параметры lag 0–3, chroma scaling,
   наследование и show-existing; все пиксели, reset и WebM rewind/seek.
-  Явные оставшиеся отказы: layered operating points, spatial layering и tile-list OBU.
+  Temporal operating points поддержаны: выбор point, фильтрация extended OBU
+  до изменения состояния, reset/configuration и error-resilient invalidation
+  проверены на собственном 8-битном 4:2:0 SVC-потоке с тремя temporal layers.
+  Явные оставшиеся отказы: включённые spatial layers и tile-list OBU.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption

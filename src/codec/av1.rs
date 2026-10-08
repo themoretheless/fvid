@@ -5,6 +5,7 @@ use crate::{Result, invalid};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Obu<'a> {
     pub kind: u8,
+    pub has_extension: bool,
     pub temporal_id: u8,
     pub spatial_id: u8,
     pub payload: &'a [u8],
@@ -78,6 +79,7 @@ fn read_obu(packet: &[u8]) -> Result<(Obu<'_>, &[u8])> {
     Ok((
         Obu {
             kind,
+            has_extension: h & 4 != 0,
             temporal_id,
             spatial_id,
             payload,
@@ -116,6 +118,7 @@ mod tests {
             obus[1],
             Obu {
                 kind: 15,
+                has_extension: true,
                 temporal_id: 3,
                 spatial_id: 1,
                 payload: &[1, 2]

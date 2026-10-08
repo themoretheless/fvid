@@ -5050,3 +5050,25 @@ tests passed, zero failures/ignored tests, including existing OBMC, masked
 compound, inter-intra and scaled-reference suites. Generator syntax, Rust
 formatting, all 72 artifact hashes and scoped diff checks pass. The new test
 binary links only system libSystem/libiconv, with no FFmpeg/libav/codec linkage.
+
+### AV1 temporal operating-point selection and filtering (2026-10-08)
+
+The native layered-operating-point blanket refusal is removed. Decoder callers
+can select point 0–31 at creation or configuration seeding; the sequence validates
+availability and reset preserves the selection. Extended OBUs outside either
+selected temporal/spatial mask are dropped before payload parsing or changes to
+pending frames, references, CDFs or HDR. Sequence headers and delimiters remain
+unconditional. Included spatial-layer reconstruction still refuses explicitly.
+
+An original stock-libaom SVC generator supplies three actual temporal layers,
+64x48, 8-bit 4:2:0. Both unmodified reference decoders agree at operating points
+0/1/2 (eight/four/two frames). The synthetic first sequence reproduces the former
+blanket refusal. Lower-point acceptance also fixes the error-resilient dormant
+reference invalidation gate: headers record invalidated physical slots; decoded
+state clears them, while active invalid references remain errors. Acceptance
+requires real invalidation at lower points, exact pixel replay, packetized/full
+input, seeded/unseeded reset, default WebM timing/rewind/seek, filtered malformed
+payload robustness, and HDR exclusion with a valid global control.
+
+This stage does not complete spatial layering, tile-list assembly or all layered
+profiles/decoder-model combinations. Whole-codec conformance remains unproven.

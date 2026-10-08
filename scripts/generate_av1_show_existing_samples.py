@@ -59,7 +59,8 @@ def webm(data,dimensions=(32,32)):
     from generate_audio_resample_window_fixture import ebml
     packets=[];at=0;seq=b'';pending=b'';separate_hidden=None;reduced=False
     while at<len(data):
-        begin=at;kind=data[at]>>3;at+=1;size=0;shift=0
+        begin=at;header=data[at];kind=(header>>3)&15;at+=1;size=0;shift=0
+        if header&4:at+=1
         while True:
             byte=data[at];at+=1;size|=(byte&127)<<shift;shift+=7
             if not byte&128:break
