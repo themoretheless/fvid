@@ -984,3 +984,14 @@ decoded goldens define acceptance there. OBU/WebM/YUV hashes are stored in
 `av1-intrabc-generated.json`, `av1-intrabc-tools-generated.json` and
 `av1-intrabc-tools-control-generated.json` (108 assets total). External
 codecs run only during generation. Ordinary tests are offline and native.
+
+### AV1 film grain parameter fixtures
+
+`av1-film-grain-generated.json` describes six original deterministic 64x64
+synthetic patterns at 8/10/12 bits, encoded with unmodified Homebrew aomenc and
+its public film-grain presets 1/16. No private media or parameter sets are used.
+`generate_av1_film_grain_samples.py` records source/OBU/WebM/YUV SHA-256 hashes.
+Unmodified aomdec (grain enabled) and dav1d (`--filmgrain 1`) independently
+produce exactly the same packed YUV goldens. These tools run only during fixture
+generation; the offline regression executes the owned header parser and checks
+the explicit synthesis refusal. Goldens do not yet imply playback acceptance.

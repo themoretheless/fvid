@@ -1,0 +1,136 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-film-grain-depth8-preset1.obu",
+      "sha256": "b104d5cbb4ceceadb07960d56abb37a66c635727f663e6dcbf3e9348f6403760",
+      "reference": "av1-film-grain-depth8-preset1.yuv",
+      "reference_sha256": "e20d88a083ec0400877492a11416581f5083ab9f0e4c53ce8d50ae5e9b4b8a33",
+      "source_sha256": "0073157ac8affff0319dd88539e223aeabf8bcbb57b4fed58b2a278bb01f4cfe",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-depth8-preset1.webm",
+      "webm_sha256": "040075cebb26882356f12dcb0e2c1ed045ce56411f60c0fdcb26415d8cacb341",
+      "depth": 8,
+      "grain_preset": 1,
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "av1-film-grain-depth8-preset16.obu",
+      "sha256": "3ba7721c4cdd0fc6905078ef44bb4ff1e008252875f743d89bf448faac940d14",
+      "reference": "av1-film-grain-depth8-preset16.yuv",
+      "reference_sha256": "faf42402cdd0f5f1f8132a4e8c4386d1781ce45306a67acf2b06586aa06e57fb",
+      "source_sha256": "0073157ac8affff0319dd88539e223aeabf8bcbb57b4fed58b2a278bb01f4cfe",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-depth8-preset16.webm",
+      "webm_sha256": "d5680c46b4b9f2b3878c67bca426c3fe84397bea5e0b539f553fddf0d688ef3c",
+      "depth": 8,
+      "grain_preset": 16,
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "av1-film-grain-depth10-preset1.obu",
+      "sha256": "38de238cacb0ee81b9fd3f67b8e31e6973c702335e155e48c0d32520e495d8bd",
+      "reference": "av1-film-grain-depth10-preset1.yuv",
+      "reference_sha256": "7b7ecf4a1f551d7455af05d37e39c2115385ac68c984de8f757da8db1f103a29",
+      "source_sha256": "3a7c9715852bd16c09b761b7c283d6ec3540745167f95d304643dbb720dd70bd",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-depth10-preset1.webm",
+      "webm_sha256": "e055bb585b5ea515abfc085d7318173742c74d4d9fc222ea7b7e0ec5bcaf0bfa",
+      "depth": 10,
+      "grain_preset": 1,
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "av1-film-grain-depth10-preset16.obu",
+      "sha256": "e37d5b44f9e1c4d771ae5b2320d601c4dbbde31a574e6c3ff8d68133f07a0ab1",
+      "reference": "av1-film-grain-depth10-preset16.yuv",
+      "reference_sha256": "1204ab0c29690338804c77ba30724076737c3c9a07ee2e7c1084d3c71267c819",
+      "source_sha256": "3a7c9715852bd16c09b761b7c283d6ec3540745167f95d304643dbb720dd70bd",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-depth10-preset16.webm",
+      "webm_sha256": "82a2ffa0ac07f6b0c5ba301e4c809b73c357a8b55793e390cccbeb35d9fadef0",
+      "depth": 10,
+      "grain_preset": 16,
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "av1-film-grain-depth12-preset1.obu",
+      "sha256": "4ff5ea2d7a24cb03f0fba9328e0e9997420f3b35e83bc73d2861d175005c5d63",
+      "reference": "av1-film-grain-depth12-preset1.yuv",
+      "reference_sha256": "7b01446dafa9fd18d5bc363d4ce00286ba9adbe7f1045a04a48108eab0f2821c",
+      "source_sha256": "656fe427a65090b0fdec49ada61bb07dbb09bbc1fecda1d2e88e558b379209d4",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-depth12-preset1.webm",
+      "webm_sha256": "b71a81ea161360ea56a639dca694bffd9c773197aeaa95b9b77d8d16a4d1368d",
+      "depth": 12,
+      "grain_preset": 1,
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "av1-film-grain-depth12-preset16.obu",
+      "sha256": "73f187de49c8039db7e350eadbab0a58d7932665c7922410ee4b555c9f3c238e",
+      "reference": "av1-film-grain-depth12-preset16.yuv",
+      "reference_sha256": "522141b5e17764483253dc923b7482696a7e8778e63b09fb2b8108b5d8be7246",
+      "source_sha256": "656fe427a65090b0fdec49ada61bb07dbb09bbc1fecda1d2e88e558b379209d4",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 1,
+      "subsampling": "420",
+      "webm": "av1-film-grain-depth12-preset16.webm",
+      "webm_sha256": "a804fb5fa2561998a4ed02d5a8b2f97280679f66405b1116628d7c83648388f3",
+      "depth": 12,
+      "grain_preset": 16,
+      "size": [
+        64,
+        64
+      ]
+    }
+  ]
+}

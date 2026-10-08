@@ -1,10 +1,10 @@
 //! AV1 frame header syntax with explicit reference metadata.
 use super::{
     av1_sequence::Sequence,
-    av1_tiles::{align, signed, Layout},
+    av1_tiles::{Layout, align, signed},
     bits::BitReader,
 };
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 #[derive(Clone, Debug)]
 pub struct Quantization {
     pub base: u8,
@@ -29,6 +29,7 @@ pub struct Cdef {
 }
 #[derive(Clone, Debug)]
 pub struct Header {
+    pub grain: Option<Grain>,
     pub frame_type: u8,
     pub frame_id: Option<u32>,
     pub show: bool,
@@ -74,6 +75,10 @@ pub struct Header {
     pub global_types: [u8; 7],
     pub global_params: [[i64; 6]; 7],
 }
+#[path = "av1_grain_params.rs"]
+mod grain_params;
+pub use grain_params::Grain;
+
 const IDENTITY_GLOBAL: [i64; 6] = [0, 0, 65536, 0, 0, 65536];
 fn global_unsigned(b: &mut BitReader<'_>, n: u32) -> Result<u32> {
     if n == 1 {
@@ -179,11 +184,7 @@ fn short_references(
     Ok(references)
 }
 fn delta_q(b: &mut BitReader<'_>) -> Result<i32> {
-    if b.bit()? {
-        signed(b, 7)
-    } else {
-        Ok(0)
-    }
+    if b.bit()? { signed(b, 7) } else { Ok(0) }
 }
 impl Header {
     /// Parse an intra frame in an OBU_FRAME payload (zero byte alignment).
@@ -656,11 +657,14 @@ impl Header {
                 }
             }
         }
-        if s.film_grain && (show || showable) && b.bit()? {
-            return Err(crate::unsupported(
-                "AV1 film grain parameters not implemented",
-            ));
-        }
+        let grain = Grain::parse(
+            b,
+            s,
+            frame_type,
+            show || showable,
+            references,
+            refs.map(|h| h.map(|h| h.grain.as_ref())),
+        )?;
         if separate {
             if !b.bit()? {
                 return Err(invalid("missing AV1 frame header trailing one bit"));
@@ -674,6 +678,7 @@ impl Header {
             align(b)?;
         }
         Ok(Self {
+            grain,
             frame_type,
             frame_id,
             show,
@@ -736,9 +741,11 @@ mod tests {
         assert_eq!(h.tiles.count(), 1);
         assert_eq!(h.refresh_flags, 255);
         assert_eq!(h.quant.base, 86);
-        assert!(!h.tiles.group(&o.payload[h.header_bytes..]).unwrap()[0]
-            .1
-            .is_empty());
+        assert!(
+            !h.tiles.group(&o.payload[h.header_bytes..]).unwrap()[0]
+                .1
+                .is_empty()
+        );
         for end in 0..h.header_bytes {
             assert!(Header::parse_intra(&s, &o.payload[..end], 0, 0).is_err());
         }

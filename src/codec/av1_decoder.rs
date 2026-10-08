@@ -348,6 +348,11 @@ impl Decoder {
                                 self.reference_order_hints,
                             )?
                         };
+                        if h.grain.is_some() {
+                            return Err(crate::unsupported(
+                                "AV1 film grain synthesis not implemented",
+                            ));
+                        }
                         let groups: Vec<&[u8]> = if obu.kind == 4 {
                             owned_groups.iter().map(Vec::as_slice).collect()
                         } else {

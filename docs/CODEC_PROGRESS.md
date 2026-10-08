@@ -4732,3 +4732,28 @@ Validation: all 38 AV1 fvid-codecs unit tests and 78 integration tests across
 50 AV1 suites pass in release mode with locked offline dependencies, no
 FFmpeg and no ignored acceptance tests. The initial 12-stream acceptance and
 all 12 extended copy cases also pass in debug mode.
+
+### AV1 film grain parameter syntax (2026-10-08, synthesis pending)
+
+The owned frame-header parser now reads the complete film-grain syntax instead
+of refusing at `apply_grain`: piecewise scaling points, luma/chroma AR
+coefficients through lag 3, chroma multipliers/offsets, overlap/range flags,
+seed, and inter-frame parameter inheritance. Fixed arrays bound every signaled
+count. Point counts/order and reference membership are validated. Inherited
+parameters replace only the seed; reset parameters are inherited as reset.
+
+Six owned 64x64 8/10/12-bit input patterns encoded with public libaom grain
+presets 1/16 have identical grain-applied goldens from aomdec and dav1d. Generation
+is separate (`scripts/generate_av1_film_grain_samples.py`); ordinary tests read
+checked-in assets and do not launch external codecs. Header syntax acceptance
+checks all six streams and every truncated header. Unit tests exercise maximum
+point/AR counts, inheritance/new seed, invalid references, point ordering and
+absent/reset branches.
+
+**This is parameter parsing acceptance, not playback acceptance.** The decoder
+explicitly refuses at `AV1 film grain synthesis not implemented`; it never
+publishes an ungrained picture as successful film-grain playback. Native grain
+synthesis, displayed-versus-reference picture ownership and full pixel/reset/
+WebM/seek acceptance still need implementation. The refusal test must be replaced
+with playback acceptance when synthesis lands; the included goldens are ready
+for that check.
