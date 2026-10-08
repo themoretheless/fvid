@@ -397,3 +397,36 @@ fn implicit_sbr_video_uses_declared_clock_in_player_export_and_remux() {
     .unwrap();
     assert_eq!(seek, &player[32 * 48 * 4..96 * 48 * 4]);
 }
+
+#[test]
+fn original_adts_packets_discover_sbr_and_match_the_paired_video_pcm() {
+    use std::io::Cursor;
+    let bytes = include_bytes!("fixtures/playback-errors/he-aac-implicit-sbr.aac");
+    let mut reader = fvid::container::adts::StreamReader::open(bytes.as_slice()).unwrap();
+    assert_eq!(reader.configuration().sample_rate, 24000);
+    let mut decoder =
+        NativeAacDecoder::new_with_sbr_detection(reader.audio_specific_config()).unwrap();
+    let mut pcm = Vec::new();
+    while let Some(packet) = reader.next_packet().unwrap() {
+        pcm.extend(decoder.decode(&packet).unwrap());
+        assert_eq!(decoder.sample_rate(), 48000);
+    }
+    assert_eq!(pcm.len(), 6144);
+    let mut video = Vec::new();
+    fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(include_bytes!("fixtures/playback-errors/he-aac-implicit-sbr.mp4").as_slice()),
+        &mut video,
+        None,
+        &Default::default(),
+    )
+    .unwrap();
+    assert_eq!(
+        pcm.iter().flat_map(|v| v.to_le_bytes()).collect::<Vec<_>>(),
+        video
+    );
+    let initial = NativeAacDecoder::new_with_sbr_detection(&[0x13, 0x08])
+        .unwrap()
+        .checkpoint();
+    decoder.restore(&initial).unwrap();
+    assert_eq!(decoder.sample_rate(), 24000);
+}

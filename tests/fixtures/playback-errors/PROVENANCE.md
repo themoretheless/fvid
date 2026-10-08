@@ -2021,3 +2021,10 @@ video; audio metadata and tables are rewritten. No private media or codec
 parameter sets are used. Generation is explicit, offline and FFmpeg-free.
 The default unhinted raw decoder still reproduces the old signalling refusal;
 the container-output constructor supplies acceptance for the intended case.
+
+`he-aac-implicit-sbr.aac` is emitted by the same explicit offline generator
+as `he-aac-implicit-sbr.mp4`: original AAC-LC ADTS headers (24 kHz core) wrap
+the paired video's three original SBR-bearing packets. The new native
+discovery API must produce the same 48 kHz PCM as the video. No private
+parameters, FFmpeg or foreign codec implementation is involved. This checks
+packet discovery, not high-level ADTS output-clock negotiation.

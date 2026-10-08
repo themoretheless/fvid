@@ -305,3 +305,84 @@ fn implicit_sbr_with_container_output_clock_matches_independent_pcm() {
         assert!(NativeAacDecoder::new_with_output_rate(&config, 44100).is_err());
     }
 }
+
+#[test]
+fn sbr_discovery_changes_clock_atomically_and_restores_undetected_checkpoints() {
+    let manifest: Value = serde_json::from_slice(include_bytes!(
+        "../../../../tests/fixtures/playback-errors/he-aac-implicit-sbr.json"
+    ))
+    .unwrap();
+    for case in manifest["cases"].as_array().unwrap() {
+        let config = asc(case);
+        let mut detected = NativeAacDecoder::new_with_sbr_detection(&config).unwrap();
+        let mut fixed = NativeAacDecoder::new_with_output_rate(&config, 48000).unwrap();
+        assert_eq!(detected.sample_rate(), 24000);
+        let initial = detected.checkpoint();
+        let first = packet(&case["frames"][0]);
+        for cut in 0..first.len() {
+            assert!(detected.decode(&first[..cut]).is_err());
+            assert_eq!(detected.sample_rate(), 24000);
+        }
+        for (n, frame) in case["frames"].as_array().unwrap().iter().enumerate() {
+            assert_eq!(
+                detected.decode(packet(frame)).unwrap(),
+                fixed.decode(packet(frame)).unwrap()
+            );
+            assert_eq!(detected.sample_rate(), 48000);
+            if n == 0 {
+                detected.restore(&initial).unwrap();
+                assert_eq!(detected.sample_rate(), 24000);
+                let actual = detected.decode(first).unwrap();
+                let mut replay = NativeAacDecoder::new_with_output_rate(&config, 48000).unwrap();
+                assert_eq!(actual, replay.decode(first).unwrap());
+            }
+        }
+        let mut off = config.clone();
+        off.extend_from_slice(&[0x56, 0xe5, 0]);
+        assert_eq!(
+            AudioSpecificConfig::parse(&off).unwrap().sbr_present,
+            Some(false)
+        );
+        let mut forbidden = NativeAacDecoder::new_with_sbr_detection(&off).unwrap();
+        assert!(forbidden.decode(first).is_err());
+        assert_eq!(forbidden.sample_rate(), 24000);
+        detected.reset();
+        assert_eq!(detected.sample_rate(), 24000);
+        let mut strict = NativeAacDecoder::new(&config).unwrap();
+        assert!(strict.restore(&initial).is_err());
+    }
+    // After a valid LC prefix, discovery must retain the earlier delay-only QMF
+    // state, and restoring a pre-discovery checkpoint must recover the core clock.
+    let missing: Value = serde_json::from_slice(include_bytes!(
+        "../../../../tests/fixtures/playback-errors/he-aac-missing-sbr.json"
+    ))
+    .unwrap();
+    let raw = include_bytes!("../../../../tests/fixtures/playback-errors/he-aac-missing-sbr.bin");
+    for case in missing["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["bands"] == 64 && c["pattern"][0] == false && c["pattern"][1] == true)
+    {
+        let config = if case["slots"] == 16 {
+            vec![0x13, 0x08]
+        } else {
+            vec![0x13, 0x0c]
+        };
+        let mut detected = NativeAacDecoder::new_with_sbr_detection(&config).unwrap();
+        let mut fixed = NativeAacDecoder::new_with_output_rate(&config, 48000).unwrap();
+        for (n, frame) in case["frames"].as_array().unwrap().iter().enumerate() {
+            let at = frame["offset"].as_u64().unwrap() as usize;
+            let packet = &raw[at..at + frame["bytes"].as_u64().unwrap() as usize];
+            let actual = detected.decode(packet).unwrap();
+            let reference = fixed.decode(packet).unwrap();
+            if n == 0 {
+                assert_eq!(actual.len() * 2, reference.len());
+                assert_eq!(detected.sample_rate(), 24000);
+            } else {
+                assert_eq!(actual, reference);
+                assert_eq!(detected.sample_rate(), 48000);
+            }
+        }
+    }
+}

@@ -6182,3 +6182,27 @@ This closes declared-dual-rate implicit container acceptance, not automatic
 ADTS detection or implicit core-rate/downsampled discovery. Unhinted streaming
 clock negotiation, late detection, implicit stereo/PCE qualification and PS
 remain open.
+
+
+### Transactional unhinted SBR discovery in the native decoder
+
+`NativeAacDecoder::new_with_sbr_detection` accepts unspecified mono/stereo ASC
+without a container output hint. A fully valid SBR FIL atomically enables
+dual-rate output; failed parsing/DSP leaves the previous clock and state
+unchanged. Pre-discovery LC blocks retain QMF analysis/delay/synthesis history
+while returning core PCM. Once detected, missing-FIL blocks use upsampling.
+Checkpoints preserve discovery policy and output clock; reset returns an
+automatic decoder to the undetected state. Explicit SBR=false remains strict.
+
+Sixteen original mono packet sequences match the fixed-clock reference, every
+byte truncation of the first SBR block refuses without changing the clock,
+and restoring pre-discovery checkpoints recovers the core rate. Delayed
+discovery after a valid silent LC block retains the same QMF contributions
+as the fixed-clock decoder. Original ADTS framing of the paired synthetic
+video's packets is decoded through the new discovery API and matches its PCM.
+
+The high-level ADTS streaming exporter/player has not yet switched to this API.
+It must negotiate one output clock before publishing PCM and replay any LC
+prefix after late discovery, with bounded retained storage and correct packet
+limits/interval semantics. Automatic stereo/implicit downsampled signalling,
+PS and broader codec gaps remain open.

@@ -29,6 +29,7 @@ pub struct NativeAacDecoder {
     mapping: Vec<usize>,
     channel_mask: u32,
     sbr_rate: Option<u32>,
+    detect_sbr: bool,
     sbr_stream: Option<sbr_history::Stream>,
     sbr_dsp: Option<sbr_dsp::Dsp>,
 }
@@ -45,6 +46,7 @@ pub struct AacCheckpoint {
     mapping: Vec<usize>,
     channel_mask: u32,
     sbr_rate: Option<u32>,
+    detect_sbr: bool,
     sbr_stream: Option<sbr_history::Stream>,
     sbr_dsp: Option<sbr_dsp::Dsp>,
 }
@@ -120,7 +122,7 @@ impl NativeAacDecoder {
             program,
             mapping,
             channel_mask,
-            sbr_rate,
+            sbr_rate, detect_sbr:false,
             sbr_stream: sbr_rate.map(|_| sbr_history::Stream::default()),
             sbr_dsp: sbr_rate.map(|_| sbr_dsp::Dsp::default()),
         })
@@ -141,6 +143,16 @@ impl NativeAacDecoder {
         }
         Ok(decoder)
     }
+    /// Discover dual-rate SBR from a valid FIL when ASC leaves SBR unspecified.
+    /// The output clock may change at that packet; callers must negotiate it
+    /// before publishing PCM. Fixed-clock container callers use output hints.
+    pub fn new_with_sbr_detection(asc:&[u8]) -> Result<Self> {
+        let parsed=AudioSpecificConfig::parse(asc)?;
+        let mut decoder=Self::new(asc)?;
+        decoder.detect_sbr=parsed.sbr_present.is_none() && parsed.program.is_none() && matches!(parsed.core.channel_configuration,1|2);
+        if decoder.detect_sbr {decoder.sbr_dsp=Some(sbr_dsp::Dsp::default());}
+        Ok(decoder)
+    }
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
     }
@@ -159,14 +171,14 @@ impl NativeAacDecoder {
         AacCheckpoint {config:self.config.clone(),program:self.program.clone(),
             synthesis:self.synthesis.clone(),coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
-            sbr_rate:self.sbr_rate,sbr_stream:self.sbr_stream.clone(),sbr_dsp:self.sbr_dsp.clone()}
+            sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_stream:self.sbr_stream.clone(),sbr_dsp:self.sbr_dsp.clone()}
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
-        if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.sbr_rate!=state.sbr_rate {
+        if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
-        self.synthesis=state.synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_stream=state.sbr_stream.clone();self.sbr_dsp=state.sbr_dsp.clone();
+        self.synthesis=state.synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_stream=state.sbr_stream.clone();self.sbr_dsp=state.sbr_dsp.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
@@ -175,6 +187,7 @@ impl NativeAacDecoder {
         }
         for synthesis in self.coupling_synthesis.iter_mut().flatten() {synthesis.reset();}
         self.noise.reset();
+        if self.detect_sbr {self.sbr_rate=None;self.sbr_stream=None;self.sbr_dsp=Some(sbr_dsp::Dsp::default());}
         if let Some(stream) = &mut self.sbr_stream { stream.reset(); }
         if let Some(dsp) = &mut self.sbr_dsp { dsp.reset(); }
     }
@@ -183,6 +196,7 @@ impl NativeAacDecoder {
     pub fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
         let mut bits = BitReader::new(packet);
         let mut noise = self.noise.clone();
+        let mut sbr_rate = self.sbr_rate;
         let mut sbr_stream = self.sbr_stream.clone();
         let mut sbr_dsp = self.sbr_dsp.clone();
         let mut sbr_frame = None;
@@ -284,6 +298,11 @@ impl NativeAacDecoder {
                     }
                 }
                 6 => super::aac_pce::read_fill(&mut bits, |input, end, crc| {
+                    if sbr_stream.is_none() && self.detect_sbr {
+                        sbr_rate=Some(self.config.sample_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?);
+                        sbr_stream=Some(sbr_history::Stream::default());
+                        if sbr_dsp.is_none() {sbr_dsp=Some(sbr_dsp::Dsp::default());}
+                    }
                     let stream = sbr_stream.as_mut().ok_or_else(|| unsupported("AAC fill extension tool SBR requires extension-aware stream signalling"))?;
                     if !matches!(previous_element, Some(0 | 1)) || sbr_frame.is_some() {
                         return Err(invalid("SBR fill must follow its sole audio element"));
@@ -388,17 +407,18 @@ impl NativeAacDecoder {
                     }
                 }
             }
-            if self.sbr_rate.is_some() {
+            if sbr_rate.is_some() || self.detect_sbr {
                 let planar: Vec<Vec<f32>> = (0..channels.len()).map(|c| output.chunks_exact(channels.len()).map(|row| row[c]).collect()).collect();
                 let refs: Vec<_> = planar.iter().map(Vec::as_slice).collect();
                 let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
-                let mode = if self.sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
+                let mode = if sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
                 let dsp = sbr_dsp.as_mut().ok_or_else(|| invalid("missing SBR DSP state"))?;
                 let rendered = if let Some(frame) = &sbr_frame {
                     dsp.process(frame, &refs, rate, (self.config.frame_samples/64) as u8, mode)
                 } else {
                     dsp.process_upsampling(&refs, rate, (self.config.frame_samples/64) as u8, mode)
                 }.map_err(|e| invalid(&e.0))?;
+                if sbr_rate.is_some() {
                 let samples = rendered[0].len();
                 output = vec![0.0; samples*channels.len()];
                 for (channel, data) in rendered.iter().enumerate() {
@@ -408,12 +428,14 @@ impl NativeAacDecoder {
                         output[i*channels.len()+channel] = sample;
                     }
                 }
+                }
             }
             Ok(output)
         })();
         match result {
             Ok(output) => {
                 self.noise = noise;
+                self.sbr_rate = sbr_rate;
                 self.sbr_stream = sbr_stream;
                 self.sbr_dsp = sbr_dsp;
                 Ok(output)
