@@ -217,3 +217,12 @@ independent spectral PCM and a video companion. No external codec is needed.
 Run ordinary acceptance with `cargo test --release --locked --offline
 --no-default-features --test aac_pulse_bands`. Invalid bands/offsets remain
 refusal tests, separate from nonzero playback acceptance.
+
+### Indexed AAC 7.1 Top
+
+`python3 scripts/generate_aac_top_config_samples.py` explicitly generates eight
+original six-frame AAC-LC Matroska streams with channelConfiguration 14,
+equivalent explicit PCE controls, independent cosine PCM, ASC and Y4M companions.
+No external codec is required. Rates 44100/48000, frame sizes 960/1024 and
+common/separate ICS are covered. Ordinary offline acceptance:
+`cargo test --release --locked --offline --no-default-features --test aac_top_configuration`.

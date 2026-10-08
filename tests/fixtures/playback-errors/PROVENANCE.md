@@ -1564,3 +1564,26 @@ No FFmpeg/libav is invoked or linked by ordinary tests.
 Pulse selection behavior was checked against the published decoder algorithm;
 no source code or runtime was imported:
 https://ffmpeg.org/doxygen/7.0/aacdec__template_8c_source.html
+### Indexed AAC-LC 7.1 Top configuration (2026-10-08)
+
+`aac-top-config-*` is original synthetic media generated explicitly by
+`scripts/generate_aac_top_config_samples.py`. Eight six-frame streams cover
+44.1/48 kHz, 960/1024 samples and common/separate CPE windows. Every channel has
+distinct signed spectral energy; float32 reference PCM is computed by direct
+cosine IMDCT, inverse scaling, sine windows and independent overlap buffers.
+No private media, parameters, external encoder, decoder or process is used.
+The normative Huffman numbers come from the existing owned table file.
+
+The declared configuration 14 is 7.1 Top: normal front SCE/CPE, normal back CPE,
+LFE and top front CPE. Protocol layout evidence: [FDK encoder documentation](https://android.googlesource.com/platform/external/aac/+/master/libAACenc/include/aacenc_lib.h)
+and [Fraunhofer configuration table](https://www2.iis.fraunhofer.de/AAC/multichannel.html).
+These are syntax/layout references, not imported decoder implementations.
+Expected PCM order is independently authored FL/FR/FC/LFE/BL/BR/TFL/TFR.
+
+Equivalent explicit-PCE controls contain the identical raw packets. Before the
+fix those controls decoded to the independent PCM while indexed acceptance
+failed specifically with `unsupported AAC channel configuration`. The fix
+enables acceptance; wrong horizontal element order still fails. SHA256 hashes
+and reproducible generation cover all forty artifacts. Ordinary tests require
+neither fixture generation nor FFmpeg/network. Y4M companions have six video
+frames with the same rate/sample-size timing as the audio packets.

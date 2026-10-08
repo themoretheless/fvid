@@ -1,0 +1,241 @@
+{
+  "cases": {
+    "48000-1024-separate": {
+      "rate": 48000,
+      "samples": 1024,
+      "common_window": false,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-48000-1024-separate.mka",
+          "sha256": "40bda6a84f345fb4b62edf13fc9c620a0a3aedcc1ed67d2e4a41dfad0596871b"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-48000-1024-separate.baseline.mka",
+          "sha256": "398c322fbfb08c5ce53a1eaa0aaa03de1e8c24cc6c90a70cc19db00bdc56cb19"
+        },
+        ".f32le": {
+          "file": "aac-top-config-48000-1024-separate.f32le",
+          "sha256": "3c10241a31a1b9384193068b67f1a3bf15fc33ccfd31bb4832c8d7eebb849b74"
+        },
+        ".y4m": {
+          "file": "aac-top-config-48000-1024-separate.y4m",
+          "sha256": "00824b4afd8f5527bf7d279bb5892ab13b5edc82f7a506df55964cc704675439"
+        },
+        ".asc": {
+          "file": "aac-top-config-48000-1024-separate.asc",
+          "sha256": "def8867cf826d68d2712b81978d2e56c15d36937f91bc8b837bcca37d70d0cf6"
+        }
+      }
+    },
+    "48000-1024-common": {
+      "rate": 48000,
+      "samples": 1024,
+      "common_window": true,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-48000-1024-common.mka",
+          "sha256": "9c6570aa9af83a9ae086706cb6aeb9b175dbe2dda85a6d643f1420e81383f361"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-48000-1024-common.baseline.mka",
+          "sha256": "4ac353c16c871c0fa373f94418c5f66441b9fd1b0ea8ca8c8b2975f52a1d6aa6"
+        },
+        ".f32le": {
+          "file": "aac-top-config-48000-1024-common.f32le",
+          "sha256": "3c10241a31a1b9384193068b67f1a3bf15fc33ccfd31bb4832c8d7eebb849b74"
+        },
+        ".y4m": {
+          "file": "aac-top-config-48000-1024-common.y4m",
+          "sha256": "00824b4afd8f5527bf7d279bb5892ab13b5edc82f7a506df55964cc704675439"
+        },
+        ".asc": {
+          "file": "aac-top-config-48000-1024-common.asc",
+          "sha256": "def8867cf826d68d2712b81978d2e56c15d36937f91bc8b837bcca37d70d0cf6"
+        }
+      }
+    },
+    "48000-960-separate": {
+      "rate": 48000,
+      "samples": 960,
+      "common_window": false,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-48000-960-separate.mka",
+          "sha256": "199dad4dc0e3ff0982ea122c8faf49fcf5b2d50502b4c26481cc785c45d10ad0"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-48000-960-separate.baseline.mka",
+          "sha256": "30cfef9eb66cc61cfa8d32bddf417f21d6d257b3ef23fa367837ff4a5fbe1819"
+        },
+        ".f32le": {
+          "file": "aac-top-config-48000-960-separate.f32le",
+          "sha256": "3a97203dddcbcad6bb6c3ce671b9cd33a9eba715c306480ad5561fe859c6b518"
+        },
+        ".y4m": {
+          "file": "aac-top-config-48000-960-separate.y4m",
+          "sha256": "7642fac2feb225fd9393813bd6df717e0642f150b05ed57561b4a8c642ae9c11"
+        },
+        ".asc": {
+          "file": "aac-top-config-48000-960-separate.asc",
+          "sha256": "acc73c653b22803024bb21215e48474896e4f06f2ddc732eed04cf78682b61cc"
+        }
+      }
+    },
+    "48000-960-common": {
+      "rate": 48000,
+      "samples": 960,
+      "common_window": true,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-48000-960-common.mka",
+          "sha256": "ad4963660f135dcf6e0cf8543c7cf0a2e38c21248c7eb7faba90b3350356eb1c"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-48000-960-common.baseline.mka",
+          "sha256": "0b742f727dce15b453a476218ab45aba62bada41e896dce8d193c46ee12f3b42"
+        },
+        ".f32le": {
+          "file": "aac-top-config-48000-960-common.f32le",
+          "sha256": "3a97203dddcbcad6bb6c3ce671b9cd33a9eba715c306480ad5561fe859c6b518"
+        },
+        ".y4m": {
+          "file": "aac-top-config-48000-960-common.y4m",
+          "sha256": "7642fac2feb225fd9393813bd6df717e0642f150b05ed57561b4a8c642ae9c11"
+        },
+        ".asc": {
+          "file": "aac-top-config-48000-960-common.asc",
+          "sha256": "acc73c653b22803024bb21215e48474896e4f06f2ddc732eed04cf78682b61cc"
+        }
+      }
+    },
+    "44100-1024-separate": {
+      "rate": 44100,
+      "samples": 1024,
+      "common_window": false,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-44100-1024-separate.mka",
+          "sha256": "facc73fb34a7b0f077e2c91e3d8e573c2478b8f9c6ef2c97180e388ffc11c3a6"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-44100-1024-separate.baseline.mka",
+          "sha256": "a6ab49a30e28a960c3f83e5f7913fff99b6b3e52016f1294ed09b57a9dce8872"
+        },
+        ".f32le": {
+          "file": "aac-top-config-44100-1024-separate.f32le",
+          "sha256": "3c10241a31a1b9384193068b67f1a3bf15fc33ccfd31bb4832c8d7eebb849b74"
+        },
+        ".y4m": {
+          "file": "aac-top-config-44100-1024-separate.y4m",
+          "sha256": "1c716238062a2dbdc2c3e240f60269f0285df324c59521447ac0c605ba4a7656"
+        },
+        ".asc": {
+          "file": "aac-top-config-44100-1024-separate.asc",
+          "sha256": "763d08a4e1e5f89b99c4d3a89bf9f288ae6389020ab90713b7c3472edbd1899b"
+        }
+      }
+    },
+    "44100-1024-common": {
+      "rate": 44100,
+      "samples": 1024,
+      "common_window": true,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-44100-1024-common.mka",
+          "sha256": "eadae1730ab385a203df406e929c2d56f87126e51195c7896d02fcecd3a83f59"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-44100-1024-common.baseline.mka",
+          "sha256": "b2d8d20818b0954edb43ba7847680503519debda6c667047af8f803a5bb26e2a"
+        },
+        ".f32le": {
+          "file": "aac-top-config-44100-1024-common.f32le",
+          "sha256": "3c10241a31a1b9384193068b67f1a3bf15fc33ccfd31bb4832c8d7eebb849b74"
+        },
+        ".y4m": {
+          "file": "aac-top-config-44100-1024-common.y4m",
+          "sha256": "1c716238062a2dbdc2c3e240f60269f0285df324c59521447ac0c605ba4a7656"
+        },
+        ".asc": {
+          "file": "aac-top-config-44100-1024-common.asc",
+          "sha256": "763d08a4e1e5f89b99c4d3a89bf9f288ae6389020ab90713b7c3472edbd1899b"
+        }
+      }
+    },
+    "44100-960-separate": {
+      "rate": 44100,
+      "samples": 960,
+      "common_window": false,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-44100-960-separate.mka",
+          "sha256": "2ff1957a589b23524d450e5835a32214913c8a05618903123d7d8dc3c211352e"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-44100-960-separate.baseline.mka",
+          "sha256": "0e35037a03db575b82a1e1ff787c532a433a676e5d7c096f60553ef8ea97bb9e"
+        },
+        ".f32le": {
+          "file": "aac-top-config-44100-960-separate.f32le",
+          "sha256": "3a97203dddcbcad6bb6c3ce671b9cd33a9eba715c306480ad5561fe859c6b518"
+        },
+        ".y4m": {
+          "file": "aac-top-config-44100-960-separate.y4m",
+          "sha256": "66a2950cda199d6e461284871b3610547d1016084f9754e13c62030c7baff196"
+        },
+        ".asc": {
+          "file": "aac-top-config-44100-960-separate.asc",
+          "sha256": "26c2e9847ea2627c4fd4c2bb2e7ff2fda6fb0d74b51cac199692457886299665"
+        }
+      }
+    },
+    "44100-960-common": {
+      "rate": 44100,
+      "samples": 960,
+      "common_window": true,
+      "artifacts": {
+        ".mka": {
+          "file": "aac-top-config-44100-960-common.mka",
+          "sha256": "a26918b9fba4dc29979d2eb25635f0f5c79c80879469084e48df40001aaabbfa"
+        },
+        ".baseline.mka": {
+          "file": "aac-top-config-44100-960-common.baseline.mka",
+          "sha256": "98f2506dcb21903243ea6933573d761a5c17197af2bc64aa4288b059adb1eb5e"
+        },
+        ".f32le": {
+          "file": "aac-top-config-44100-960-common.f32le",
+          "sha256": "3a97203dddcbcad6bb6c3ce671b9cd33a9eba715c306480ad5561fe859c6b518"
+        },
+        ".y4m": {
+          "file": "aac-top-config-44100-960-common.y4m",
+          "sha256": "66a2950cda199d6e461284871b3610547d1016084f9754e13c62030c7baff196"
+        },
+        ".asc": {
+          "file": "aac-top-config-44100-960-common.asc",
+          "sha256": "26c2e9847ea2627c4fd4c2bb2e7ff2fda6fb0d74b51cac199692457886299665"
+        }
+      }
+    }
+  },
+  "element_order": [
+    "FC",
+    "FL",
+    "FR",
+    "BL",
+    "BR",
+    "LFE",
+    "TFL",
+    "TFR"
+  ],
+  "pcm_order": [
+    "FL",
+    "FR",
+    "FC",
+    "LFE",
+    "BL",
+    "BR",
+    "TFL",
+    "TFR"
+  ],
+  "mask": 20543
+}

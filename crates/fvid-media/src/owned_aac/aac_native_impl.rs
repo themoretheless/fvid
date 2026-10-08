@@ -64,6 +64,9 @@ impl NativeAacDecoder {
                 7 => &[2, 6, 7, 0, 1, 4, 5, 3],
                 11 => &[2, 0, 1, 4, 5, 6, 3],
                 12 => &[2, 0, 1, 6, 7, 4, 5, 3],
+                // Configuration 14: normal FC, FL/FR, BL/BR, LFE,
+                // followed by top-front left/right.
+                14 => &[2, 0, 1, 4, 5, 3, 6, 7],
                 _ => unreachable!(),
             };
             (
@@ -73,6 +76,8 @@ impl NativeAacDecoder {
                     0x13f
                 } else if config.channel_configuration == 12 {
                     0x63f
+                } else if config.channel_configuration == 14 {
+                    0x503f
                 } else {
                     default_pcm_mask(u16::from(config.channels))?
                 },
@@ -146,6 +151,7 @@ impl NativeAacDecoder {
             6 => &[0, 1, 1, 3],
             7 | 12 => &[0, 1, 1, 1, 3],
             11 => &[0, 1, 1, 0, 3],
+            14 => &[0, 1, 1, 3, 1],
             _ => &[],
         };
         let mut element_index = 0;

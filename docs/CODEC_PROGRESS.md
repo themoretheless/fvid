@@ -5440,3 +5440,23 @@ four fill, five height, thirteen PCE and five coupling tests. Fifty-two AAC unit
 pass locally. The clean binary links only libiconv/libSystem; ordinary tests
 need neither FFmpeg/libav nor network. This closes the discovered pulse/band
 interaction failures, not HE-AAC/SBR, SSR gain control or full codec conformance.
+### 2026-10-08 — indexed AAC-LC 7.1 Top
+
+The owned ASC parser and native AAC decoder now accept channelConfiguration 14,
+with normal FC/FL/FR/BL/BR/LFE followed by top-front left/right. PCM uses ascending
+WAVE speaker bits and mask 0x503f; existing configurations retain their maps.
+
+Eight original six-frame Matroska streams cover 44.1/48 kHz, 960/1024 sample
+frames, common and separate CPE windows. Independently authored PCE controls
+prove the identical packets were valid before the fix; direct-cosine PCM covers
+every speaker with distinct signed energy. Pre-fix acceptance in a clean HEAD
+failed exactly at `unsupported AAC channel configuration`.
+
+Five ordinary offline tests pass for nonzero PCM, complete channel geometry,
+fractional interval/preroll boundaries, reset/checkpoint, every second-packet
+truncation after a valid frame, wrong horizontal element order, incompatible
+checkpoint refusal, WAV export/mask and synthetic video intervals. Forty
+artifact hashes and deterministic regeneration were checked. Adjacent fill,
+height, pulse, PCE, coupling and 960-sample acceptance also pass in a clean copy.
+The test binary links libiconv/libSystem only. No FFmpeg/libav is invoked.
+This closes the indexed 7.1 Top refusal, not HE-AAC/SBR or full codec conformance.

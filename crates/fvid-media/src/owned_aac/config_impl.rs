@@ -45,7 +45,7 @@ impl AacConfig {
         let mut channels = match config {
             0 => 0,
             1..=6 => config as u8,
-            7 | 12 => 8,
+            7 | 12 | 14 => 8,
             11 => 7,
             _ => return Err(invalid("unsupported AAC channel configuration")),
         };
