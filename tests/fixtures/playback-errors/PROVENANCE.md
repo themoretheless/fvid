@@ -951,3 +951,16 @@ A controlled projected-field-zeroing mutation is detected at byte 110592 of
 the first fixture, after three correct frames. The source is restored before
 final acceptance. Tests only read saved assets and require no codec tools,
 FFmpeg or network.
+
+
+## Owned bidirectional temporal motion streams
+
+`generate_av1_temporal_bidirectional_samples.py` creates twelve deterministic
+192x128 gradient/noise frames with translated coordinates, at 8/10/12 bits and
+two movement patterns. Unmodified libaom encoding uses twelve-frame lag and
+alternate references; libaom and independent dav1d decode matching display
+goldens. All 18 OBU/WebM/YUV assets have hashes in
+`av1-temporal-bidirectional-generated.json`. No private source media, samples
+or codec parameters are included. External codecs run only during generation,
+not ordinary regression execution. WebM packet-index PTS intentionally include
+hidden coded frames; displayed intervals end at the next shown frame.

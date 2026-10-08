@@ -4666,3 +4666,23 @@ the generation manifest. Ordinary execution is offline and requires no FFmpeg
 or external decoder. This qualifies fixed-denominator forward-reference
 combinations; bidirectional references, order-hint wrap, changing coded grids
 and tiled temporal sampling still need dedicated qualification.
+
+
+### Bidirectional temporal motion-field qualification
+
+Six owned twelve-frame 192x128 sequences at 8/10/12 bits and two translated
+source patterns use lagged encoding and alternate references. The test confirms
+69 actual reference-MV inter headers and 78 future-reference slots using signed
+order-hint distances. It decodes one OBU at a time, retains hidden references,
+and compares all 72 displayed frames with matching independent libaom/dav1d
+goldens. Reset, full WebM replay, displayed PTS intervals across hidden frames,
+EOF, rewind and sync-seek replay are checked. The test never invokes external
+codecs, FFmpeg or the network. Generation remains separate.
+
+A controlled mutation removing only BWDREF/ALTREF2/ALTREF projection makes the
+first 8-bit fixture fail native entropy trailing-bit validation. This proves
+the streams require future-source temporal projection, not merely positive
+reference distances. The production source was restored byte-for-byte before
+final acceptance. This qualifies the owned single-tile, fixed-grid streams;
+wrapped order hints, changing coded grids and tiled temporal sampling remain
+unproven, along with film grain, intrabc and additional chroma/profiles.

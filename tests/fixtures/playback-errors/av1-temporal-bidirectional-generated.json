@@ -1,0 +1,160 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-temporal-bidirectional-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.obu",
+      "sha256": "30e115f8de691b658cdb40e88d275d383ba250d347a33c236dbdd16282b56f29",
+      "reference": "av1-temporal-bidirectional-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.yuv",
+      "reference_sha256": "71d594d67f4aeb8e523b87f0ba15950c00db9431654ce9395dd00632ff4721af",
+      "source_sha256": "d4545bc1c44384e641e80549a83310a002d757822a0b0f6e67b85280a32a5730",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 0,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-bidirectional-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.webm",
+      "webm_sha256": "334e801b5bf89c90c3cd4e902e768b4835921ed10a68c3c60dcb81d6e729dde3",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-bidirectional-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.obu",
+      "sha256": "96777be664cb2a7f2091a098d747d43a40e2b3b236e9cf0cafbb49f8c8bd0445",
+      "reference": "av1-temporal-bidirectional-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.yuv",
+      "reference_sha256": "b2bccd04edd1b11c4b584fcf0b1c3c13485c217790ff5e48487b606231d67a73",
+      "source_sha256": "1e7b0ec75813795023364840ec967bf93fae02b3b0d3cde2b9561cfa3c0200cb",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 1,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-bidirectional-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.webm",
+      "webm_sha256": "5f64792a4704a49ce17899df844a87a86282e57c1e165ea29f5d6b141ef819e1",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-bidirectional-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.obu",
+      "sha256": "f606cb68c48162a7fa1deb1cfe82ff0ee200662ec179df4a5a298f22bcf16e93",
+      "reference": "av1-temporal-bidirectional-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.yuv",
+      "reference_sha256": "50a667f20140fa5c40d8cbfa0f2f46153417ad246142b9fb7c847f0871a28987",
+      "source_sha256": "e830478b1026b6387441e55220efb94147144fc894659b48a521df8e1bdb9aff",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 0,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-bidirectional-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.webm",
+      "webm_sha256": "c0db07fe9d88dd7588a03657d909db68569c68d9925f6c6ba62a52b3d97073a5",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-bidirectional-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.obu",
+      "sha256": "59dc574103f5451fd4d03d61d1abbec5a010e177adc510565ef9686dc8818949",
+      "reference": "av1-temporal-bidirectional-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.yuv",
+      "reference_sha256": "a26672174019b0c85dc64ed1afce8f8e0c0a9313f9809f45aac0e4e9c4f5abdf",
+      "source_sha256": "473cbe313e9c16c010d930cecdf12d5bfb6356c8dced911afdd5b86fd5e5d374",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 1,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-bidirectional-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.webm",
+      "webm_sha256": "4bee91751c729b3654cc74e5aa08acbf32987a2846a4c8386b049a3982c43db0",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-bidirectional-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.obu",
+      "sha256": "f5db085cd3b6afb53dc0359b65ad34ff9af3f360665cb864b733d44ee398fce3",
+      "reference": "av1-temporal-bidirectional-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.yuv",
+      "reference_sha256": "bea8e42169ae499ce303cc2e34a23a8b0c502e979fa595f4a2f52e03aa21ad29",
+      "source_sha256": "a72af0abfcedff205faab4c045eb3a27372e27ff027f9a56d198fb51499b41f8",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 0,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-bidirectional-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom8.webm",
+      "webm_sha256": "5a04ac9557cb34f1c7caea7ac2be9b5301f9d4cb1ac54afe22480bb1894ab1db",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-temporal-bidirectional-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.obu",
+      "sha256": "37fe585fab969c3a39fa3aca145e784a5bd9c6d2a6a36d99c05d52066fd4e897",
+      "reference": "av1-temporal-bidirectional-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.yuv",
+      "reference_sha256": "ef1320cd3c50c29d9d600d1b79ea4f1aaaa2af0a80255b7f3f4a67435036b799",
+      "source_sha256": "6c7e508559ccde41b7e13a551f4a6f734705e6991b12e5bffe1f5bdd9064bd81",
+      "source_exact": false,
+      "quality": 32,
+      "orientation": 1,
+      "denominator": 8,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-temporal-bidirectional-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom8.webm",
+      "webm_sha256": "671d7ac43fc53ffe758625dc3931f80edd634c7b615bf62ee9240a03d8eb8e39",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "size": [
+        192,
+        128
+      ]
+    }
+  ]
+}
