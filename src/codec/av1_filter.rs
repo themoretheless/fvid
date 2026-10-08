@@ -283,6 +283,7 @@ pub(crate) fn cdef(
                 if count == 0 {
                     continue;
                 }
+                image.cdef_filtered_blocks[p] += 1;
                 let taps = &taps[..count];
                 let (x0, y0) = ((col * 4) >> sub_x, (r * 4) >> sub_y);
                 if x0 >= 2

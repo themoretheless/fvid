@@ -4933,3 +4933,30 @@ acceptance covers all twelve streams, including container/reset/rewind/seek;
 existing mixed-sub8, intrabc, film-grain, odd restoration and temporal-motion
 super-resolution full-pixel regressions also pass. Scoped diff and formatting
 checks pass. No external codec, FFmpeg or network is used by ordinary tests.
+
+### Odd AV1 4:2:2/4:4:4 post-filter qualification (2026-10-08)
+
+Eighteen owned two-frame 191x127 streams qualify deblocking, rectangular CDEF
+(including 4:2:2 direction remapping) and Wiener/SGR restoration with independently
+rounded chroma extents at 8/10/12 bits. All native pixels match unmodified
+aomdec/dav1d goldens; decoder reset and WebM raw geometry/depth/pixels, intervals,
+EOF rewind and seek pass. Enabled flags were insufficient: stock encoder trials
+chose zero deblocking. Six generator-only patched-lib-aom cases therefore force
+legal directional/UV levels [16,24,20,28], sharpness 2; the twelve remaining
+cases use stock aomenc. The pinned source/patch and hashes are documented in
+fixture provenance. No generator library is linked to FVid or used by tests.
+
+Actual per-plane decode statistics cover CDEF, deblocking and non-None restoration
+units in each layout/depth group, including all Y/U/V planes. First-decode totals
+are 15,890 CDEF blocks, 28,300 deblocking edges, 19 Wiener and 26 SGR units.
+Restoration allocation admission now reserves eight bytes per padded luma sample
+for 4:4:4 (all pre-restoration planes plus the current plane clone), preserving
+the prior six-byte margin for 4:2:0/4:2:2. Super-resolution, intrabc and film-grain
+combinations in these layouts still need separate qualification; this stage does
+not establish whole-codec conformance.
+
+Validation: 48 AV1 release unit tests and nine selected offline integration
+tests passed, zero failures/ignored tests. The new acceptance covers all eighteen
+streams; base chroma, mixed-sub8, intrabc tools, film-grain tools, odd restoration
+and temporal-motion/super-resolution regressions remain passing. All 54 artifact
+hashes, generator Python syntax, Rust formatting and scoped diff checks passed.

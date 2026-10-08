@@ -58,7 +58,9 @@ impl State {
                 .checked_add(
                     width
                         .checked_mul(height)
-                        .and_then(|n| n.checked_mul(6))
+                        .and_then(|n| {
+                            n.checked_mul(if subsampling == [false, false] { 8 } else { 6 })
+                        })
                         .ok_or_else(|| invalid("AV1 restoration source allocation overflow"))?,
                 )
                 .and_then(|n| n.checked_add(200_000))
@@ -259,6 +261,19 @@ impl State {
             }
         }
         Ok(())
+    }
+    pub(super) fn counts(&self) -> [[u32; 3]; 3] {
+        std::array::from_fn(|p| {
+            let mut counts = [0; 3];
+            for unit in self.planes[p].units.iter().flatten() {
+                counts[match unit {
+                    Unit::None => 0,
+                    Unit::Wiener(_) => 1,
+                    Unit::Sgr { .. } => 2,
+                }] += 1;
+            }
+            counts
+        })
     }
     pub(super) fn active(&self) -> Result<bool> {
         let mut active = false;

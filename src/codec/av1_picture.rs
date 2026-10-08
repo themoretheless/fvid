@@ -64,6 +64,11 @@ pub struct Picture {
     /// Sub-8 chroma groups with decoded intra neighbors: 4x4, 4xN, Nx4 luma.
     pub mixed_intra_chroma_groups: [u32; 3],
     pub sub8_inter_chroma_groups: u32,
+    /// Actually filtered CDEF blocks per Y/U/V plane.
+    pub cdef_filtered_blocks: [u32; 3],
+    pub deblocking_edges: [u32; 3],
+    /// Decoded restoration units per plane: None/Wiener/SGR.
+    pub restoration_unit_counts: [[u32; 3]; 3],
     pub planes: [Plane; 3],
 }
 #[derive(Clone, Copy)]
@@ -266,6 +271,9 @@ pub(crate) fn decode(
         intrabc_residual_blocks: [0; 3],
         mixed_intra_chroma_groups: [0; 3],
         sub8_inter_chroma_groups: 0,
+        cdef_filtered_blocks: [0; 3],
+        deblocking_edges: [0; 3],
+        restoration_unit_counts: [[0; 3]; 3],
         planes,
     };
     let mut dec = Decoder {
@@ -389,6 +397,7 @@ pub(crate) fn decode(
         dec.tx_sizes[p].truncate(stride * (height / 4));
     }
     let restore = dec.restoration.active()?;
+    dec.image.restoration_unit_counts = dec.restoration.counts();
     dec.filter();
     let before_restoration = restore.then(|| dec.image.planes.clone());
     let skip = dec.blocks.iter().map(|b| b.skip).collect::<Vec<_>>();
@@ -1343,6 +1352,7 @@ impl Decoder<'_> {
                         if (if pass == 0 { x } else { y }) % current != 0 {
                             continue;
                         }
+                        self.image.deblocking_edges[p] += 1;
                         let width = current.min(self.tx_sizes[p][prev][pass]).min(if p == 0 {
                             16
                         } else {

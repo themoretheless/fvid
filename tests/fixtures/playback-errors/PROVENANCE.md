@@ -1049,3 +1049,30 @@ actual chroma block shape fixes that failure. Generation is separate from
 ordinary tests, which require no external codec, FFmpeg or network.
 These short streams disable CDEF/restoration/intrabc and super-resolution;
 acceptance of those tools at 4:2:2/4:4:4 still needs dedicated fixtures.
+
+### Odd AV1 4:2:2/4:4:4 CDEF/restoration/deblocking qualification
+
+`generate_av1_chroma_filter_samples.py` authors eighteen two-frame 191x127
+original smooth/noisy and moving textured streams: 4:2:2/4:4:4, 8/10/12 bits,
+CQ 32/48/56. Chroma extents round up independently on both axes. No private
+images, audio or codec parameter sets are copied. Stock Homebrew aomenc encodes
+the twelve CQ 32/48 cases with CDEF/restoration enabled. Stock encoder trials
+selected zero deblocking even at CQ 56, so encoder settings alone were rejected
+as proof of deblocking coverage.
+
+The six CQ 56 streams use a separate generator-only libaom build at commit
+`44d0a57786f432d933ff64b653347c66f4d0fa1d` (v3.15.1), with the checked-in patch
+`scripts/fixture-tools/av1-chroma-forced-deblock.patch`. It assigns legal
+directional/Y/UV loopfilter levels [16,24,20,28] and sharpness 2 before encoding.
+This build is never used by FVid or ordinary tests. Unmodified aomdec and dav1d
+independently decode every generated OBU and must produce identical full packed
+plane goldens. The manifest pins the generator commit/patch hash for forced
+cases and records source/OBU/WebM/YUV hashes and actual layout/depth/size.
+
+The offline acceptance checks all pixels and actual forced header levels,
+decoder reset, raw WebM geometry/depth, intervals, EOF rewind and seek. Real
+CDEF block/deblocking edge counters and decoded Wiener/SGR restoration-unit
+counters must cover every Y/U/V plane for each layout/depth group. Across the
+eighteen streams the first decode observes 15,890 CDEF blocks, 28,300 deblocking
+edges, 19 Wiener units and 26 SGR units. Generation is separate from tests;
+ordinary tests require no external encoder/decoder, FFmpeg or network.

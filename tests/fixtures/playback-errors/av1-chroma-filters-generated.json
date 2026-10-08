@@ -1,0 +1,544 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-chroma-filters-layout422-depth8-q32.obu",
+      "reference": "av1-chroma-filters-layout422-depth8-q32.yuv",
+      "webm": "av1-chroma-filters-layout422-depth8-q32.webm",
+      "sha256": "8c0d8b1c93588ba7414b4fc3b21179c3c9e0bcbe1615264ceb64063a3e0c8165",
+      "reference_sha256": "96d302aebfa3923c1cff76a67611ba8e5c49aeebfef1448e4159fe73da1c15c5",
+      "webm_sha256": "eacafe68b9ddf9e87d8e7de05ce1440090f3494e4df7e06684ec1350f92e2fec",
+      "source_sha256": "2f2a6d736905075f26accec7c5805c8174eec5609611ada45cb3ec00470595ec",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth8-q48.obu",
+      "reference": "av1-chroma-filters-layout422-depth8-q48.yuv",
+      "webm": "av1-chroma-filters-layout422-depth8-q48.webm",
+      "sha256": "1251dda619f0412052b57dedfd7193f7f99ed852791e1d706212ea7d47e615a0",
+      "reference_sha256": "f0d2689f0186ea8df168a85acf326d6edc6e87408e3c5caa92e4ee68a19e3f70",
+      "webm_sha256": "5dfc1c281c30ce429e95ce3e683de3c510ee67cf9b29fa26c194866438f14963",
+      "source_sha256": "c773de5030d18ff8b26308a2a991268c54ddc362a21f78d82315895e476ead70",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 48,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth8-q56.obu",
+      "reference": "av1-chroma-filters-layout422-depth8-q56.yuv",
+      "webm": "av1-chroma-filters-layout422-depth8-q56.webm",
+      "sha256": "904d691c2a67e732a74b0b71adf28dde56979e830afd4c461f1e34f7510d4b54",
+      "reference_sha256": "dd3c0d848c277577330d91b7051aa403de10bddc18876770cd3f5844670bb2fc",
+      "webm_sha256": "c4fc9be37e824bb76ebb7d5eec1b5ab5a2c64026dd37e8651232920f757cbe35",
+      "source_sha256": "c773de5030d18ff8b26308a2a991268c54ddc362a21f78d82315895e476ead70",
+      "depth": 8,
+      "layout": "422",
+      "lossless": false,
+      "quality": 56,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 6,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth8-q32.obu",
+      "reference": "av1-chroma-filters-layout444-depth8-q32.yuv",
+      "webm": "av1-chroma-filters-layout444-depth8-q32.webm",
+      "sha256": "a233961d56af1c343e11b1a094db3314efed61cb64d97fe31bd0363217c02141",
+      "reference_sha256": "a599aa0cfe9858d7c3dd9b25ed384364e70a7ac7b60f49108af88aba8b1951dd",
+      "webm_sha256": "19104542fe448b35d53ad495cea6ddacd0d1f372610a224aa01400ed3dd1054d",
+      "source_sha256": "f4dc324b2da85a79ba60884547e3baa6e1d671c6a98f466c9dcfcdec39a70671",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth8-q48.obu",
+      "reference": "av1-chroma-filters-layout444-depth8-q48.yuv",
+      "webm": "av1-chroma-filters-layout444-depth8-q48.webm",
+      "sha256": "a17e53d77098b30eba05ad3f7042026f59e82beabcf5f409ee7cb2d119bbf073",
+      "reference_sha256": "8b2e77bf687b8c68ff4e0b018b6becf15b4f3784d0d5ea1178915047fb036c83",
+      "webm_sha256": "76370c673a5dd2134a10db291620e79c4a4d68d7bd9cff6da5da6595ac56d0b6",
+      "source_sha256": "2eaf5b00c261d4a6206789a8d3d26dcb0a7aa0d8d39f71ce26249860cc946692",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 48,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth8-q56.obu",
+      "reference": "av1-chroma-filters-layout444-depth8-q56.yuv",
+      "webm": "av1-chroma-filters-layout444-depth8-q56.webm",
+      "sha256": "116c7593547a27c9e71cc4cf329d4b81def2ff528fd0243a2bc94444ca93a7a1",
+      "reference_sha256": "012500bedc4f2b08011829fd77474d8a23776cc3e98ea09e821852f911c84e7d",
+      "webm_sha256": "ac11e4dec8383c6412ec168d80711f3fb0ffdb2071b4e30dc31d18b25955139e",
+      "source_sha256": "2eaf5b00c261d4a6206789a8d3d26dcb0a7aa0d8d39f71ce26249860cc946692",
+      "depth": 8,
+      "layout": "444",
+      "lossless": false,
+      "quality": 56,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 6,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth10-q32.obu",
+      "reference": "av1-chroma-filters-layout422-depth10-q32.yuv",
+      "webm": "av1-chroma-filters-layout422-depth10-q32.webm",
+      "sha256": "db3cd08329be4ce54075f9445b726ab9f61b38473592665291ece70789d76735",
+      "reference_sha256": "89389d993371160ed23789e40452aac5516be082fb5a21dee8cf03eff2b5195a",
+      "webm_sha256": "5c5bda087b9eeda60cfca6ea5793c254e39e8a5e59e465bb04f0e7cfae79bc84",
+      "source_sha256": "edbf8a20d46150ed3907f2b941184770aec3d142454a3986868fdf8d5ad66b27",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth10-q48.obu",
+      "reference": "av1-chroma-filters-layout422-depth10-q48.yuv",
+      "webm": "av1-chroma-filters-layout422-depth10-q48.webm",
+      "sha256": "643cb3dc29103b5ba22250037036e83888578e21cc431b62449c40bed358c4bf",
+      "reference_sha256": "14f6340e00d3609f3cc837906a7e8229150bd1e6092693cc31720b40e21c230c",
+      "webm_sha256": "7e8907930deba6336e03b0e80b22f3ffeec3c2ea5e51d800465a4b69353c0ecd",
+      "source_sha256": "d6814e196247b57622155b124467e0d12701b256853b2f8e4e300be6dbff2c1e",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 48,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth10-q56.obu",
+      "reference": "av1-chroma-filters-layout422-depth10-q56.yuv",
+      "webm": "av1-chroma-filters-layout422-depth10-q56.webm",
+      "sha256": "ac975482f98a8b9b5472de7c029d34f2e3ac26650ad449e495bfe0411c0a6fde",
+      "reference_sha256": "f8ba1d5027c1391a1432ec00b9180cfb3f1e0db0ebcd2ffdc14c3437b232649b",
+      "webm_sha256": "d7b2c0e34b87408165af686a922275db0c7239ab140cd6d3c32dbc498cad1c86",
+      "source_sha256": "d6814e196247b57622155b124467e0d12701b256853b2f8e4e300be6dbff2c1e",
+      "depth": 10,
+      "layout": "422",
+      "lossless": false,
+      "quality": 56,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 6,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth10-q32.obu",
+      "reference": "av1-chroma-filters-layout444-depth10-q32.yuv",
+      "webm": "av1-chroma-filters-layout444-depth10-q32.webm",
+      "sha256": "ab421a644ed1dc9eadc063da3ffe1c1c076fdbd55053060a8feea9514b340e16",
+      "reference_sha256": "d4ef5d3fe4bae4dad6e4c33eb8638e55efd25a3d0574041eba7a80cb5b03e806",
+      "webm_sha256": "8f9f3f4cdb8f4158d7f5a5fecc2aa19b5c761236d13f20f1ab2fadeb4e6ea65e",
+      "source_sha256": "234e74a4b7655da38fee5ac093d8323a2428ae82a6ff950551e292d7d98bac30",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth10-q48.obu",
+      "reference": "av1-chroma-filters-layout444-depth10-q48.yuv",
+      "webm": "av1-chroma-filters-layout444-depth10-q48.webm",
+      "sha256": "871d8a759e0dfa37668bb2175dca7ef45190e25e90de8f9bf37bdca55984caec",
+      "reference_sha256": "5c8a168a27ffd3be4ffdde401e3df7c842ade4c7dc8cc760d898451fcc704b2c",
+      "webm_sha256": "50142167a4ffdbe7d84b91d2304c6449be0b52e1b0277b2c03bfcbbcceee09ae",
+      "source_sha256": "04c2ae6a2f1ba74682b258f6c20bad96bb98515b47df148ed7e07e8f3f57984b",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 48,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth10-q56.obu",
+      "reference": "av1-chroma-filters-layout444-depth10-q56.yuv",
+      "webm": "av1-chroma-filters-layout444-depth10-q56.webm",
+      "sha256": "389b78f099f6b46ebc53def2310fd4522edd94746a78af53ec8b804b5a790e9f",
+      "reference_sha256": "fa6b5ff88469c4a8e49dbc2f61aef366f365fc06600c4b41583616396a54b96b",
+      "webm_sha256": "eb8e19f26b6361e90a5cae9de9465a2d7941d8d42549058c2559dd21913017a8",
+      "source_sha256": "04c2ae6a2f1ba74682b258f6c20bad96bb98515b47df148ed7e07e8f3f57984b",
+      "depth": 10,
+      "layout": "444",
+      "lossless": false,
+      "quality": 56,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 6,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth12-q32.obu",
+      "reference": "av1-chroma-filters-layout422-depth12-q32.yuv",
+      "webm": "av1-chroma-filters-layout422-depth12-q32.webm",
+      "sha256": "45d9cd58d9acddaba8d9f11a16138449b23ed87843708e9f16e19d66aeb5fa22",
+      "reference_sha256": "406f26b01dc4cf2097a6523712c81a47f03feef6cec4a86b4b2b1ed0b30b0028",
+      "webm_sha256": "fe4b107f38f9778003a15c9728c30965fffbec690e2477ab12a113a351d86559",
+      "source_sha256": "25b70c78c219afe8146b7cf960fdf6f33ef0b458be2c6739701ff0695e021591",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 32,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth12-q48.obu",
+      "reference": "av1-chroma-filters-layout422-depth12-q48.yuv",
+      "webm": "av1-chroma-filters-layout422-depth12-q48.webm",
+      "sha256": "c0e335de06d03973c272ae74267b7547cd2dd4b8fd44a90c141200b911f94dc7",
+      "reference_sha256": "cb97bc947af5951b90ca4245fbd36185448906a87af3c434d9d810b10585ed59",
+      "webm_sha256": "e2323679eb150cdde124d72a6e89c802ac58e862e8611b000ee27f54576e8f45",
+      "source_sha256": "d9d561fd36bd4192922d41593f83eee49b40ae3c806f41e72d38525d2ae7c220",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 48,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout422-depth12-q56.obu",
+      "reference": "av1-chroma-filters-layout422-depth12-q56.yuv",
+      "webm": "av1-chroma-filters-layout422-depth12-q56.webm",
+      "sha256": "d4afffa2847f4053aadf0a82e9e24a1f4df8510bbd95927db32db83212b2cc59",
+      "reference_sha256": "219910c97882fdc774f319edae5613c5cf056abdd97e4021e2994c36d94641ca",
+      "webm_sha256": "6eca2b1cc9f9b73234e8a1b0f1c014c076b6e696df583ed2598a42b37b7e9c20",
+      "source_sha256": "d9d561fd36bd4192922d41593f83eee49b40ae3c806f41e72d38525d2ae7c220",
+      "depth": 12,
+      "layout": "422",
+      "lossless": false,
+      "quality": 56,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 6,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth12-q32.obu",
+      "reference": "av1-chroma-filters-layout444-depth12-q32.yuv",
+      "webm": "av1-chroma-filters-layout444-depth12-q32.webm",
+      "sha256": "9427ecb75cd12870c0978c83871c5212da67bf1abfc6b302118d62342c285208",
+      "reference_sha256": "c8abdcfba9274b3176ea2f148a6654fc2c0b9572e4c76675d2cdfbb774baf27a",
+      "webm_sha256": "c143fbea0a41434c1d479244d17774f089046e18b5c7742cbc5748267e9a324b",
+      "source_sha256": "dbb097e0aa43da4f495173215a121cdb205861c23122a71b955e6682311e6e09",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 32,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth12-q48.obu",
+      "reference": "av1-chroma-filters-layout444-depth12-q48.yuv",
+      "webm": "av1-chroma-filters-layout444-depth12-q48.webm",
+      "sha256": "7f02c42b3134907ec2e3418d179b8569310dcdd77b953792a004747270212190",
+      "reference_sha256": "ff63fe8f46a0b9deb7bb026544689bc036ab82d6dc4ec06fedcb364a9c856bd6",
+      "webm_sha256": "af624868450c604fdb84eef12360920e8f1f38d9b4bc4a08d314164518dc3105",
+      "source_sha256": "f8328f16798e694c9ffebd5f545f745a6bd8663d75459b77baf77a19a04f3a23",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 48,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 0,
+      "forced_deblocking": false,
+      "encoder_source_commit": null,
+      "encoder_patch_sha256": null
+    },
+    {
+      "file": "av1-chroma-filters-layout444-depth12-q56.obu",
+      "reference": "av1-chroma-filters-layout444-depth12-q56.yuv",
+      "webm": "av1-chroma-filters-layout444-depth12-q56.webm",
+      "sha256": "8c8f92aede59dceedf9a0ed24cf3b595763bb3da3e0f61ee46683b9de15fec71",
+      "reference_sha256": "0625ffdcdbcc9e502eba30ed0920663c61c27559c7cb20428b680d86b37c16b7",
+      "webm_sha256": "04a7700284f341c91c34f472c68bb27810a87bfc8261aafe6a8f055ecc54f214",
+      "source_sha256": "f8328f16798e694c9ffebd5f545f745a6bd8663d75459b77baf77a19a04f3a23",
+      "depth": 12,
+      "layout": "444",
+      "lossless": false,
+      "quality": 56,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 2,
+      "size": [
+        191,
+        127
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "cpu_used": 6,
+      "forced_deblocking": true,
+      "encoder_source_commit": "44d0a57786f432d933ff64b653347c66f4d0fa1d",
+      "encoder_patch_sha256": "76914216579c65962b5e5e967b1d0af230b6e5206fe0ce88d594fc25a1dada96"
+    }
+  ]
+}

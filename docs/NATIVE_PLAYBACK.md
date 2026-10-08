@@ -866,8 +866,10 @@ Release-сборка обязательна для практического и
   4×N и N×4, включая выбор отдельного вектора для all-inter групп.
   Базовые lossless/lossy 4:2:2/4:4:4 в 8/10/12 битах проверены по всем
   пикселям, decoder reset и WebM raw output/rewind/seek. Отдельная квалификация
-  intrabc, CDEF/restoration/super-resolution, film grain, нечётных размеров и
-  сложных inter-комбинаций в этих форматах пока не завершена.
+  intrabc, super-resolution, film grain и сложных inter-комбинаций в этих
+  форматах пока не завершена. CDEF, deblocking и Wiener/SGR restoration уже
+  проверены на 18 двухкадровых потоках 191×127 во всех Y/U/V-плоскостях,
+  включая raw WebM, reset/rewind/seek и фактическое выполнение фильтров.
   Явные оставшиеся отказы: layered operating points, spatial layering и tile-list OBU.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
