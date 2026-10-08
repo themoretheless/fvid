@@ -1,0 +1,375 @@
+{
+  "kind": "original silent native core, SBR noise and independent mono/PS stereo transitions",
+  "cases": [
+    {
+      "name": "all-mono",
+      "video": {
+        "file": "he-aac-ps-all-mono-960-synthetic.mp4",
+        "sha256": "e6f23624c0fd7f8e30f6f70169329c4223c927f34eb15f5ab65956008706101e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 16
+        },
+        {
+          "offset": 16,
+          "bytes": 13
+        },
+        {
+          "offset": 29,
+          "bytes": 12
+        }
+      ],
+      "ps_present": [
+        false,
+        false,
+        false
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            0,
+            5760
+          ],
+          [
+            46080,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            92160,
+            2880
+          ],
+          [
+            115200,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "late-ps",
+      "video": {
+        "file": "he-aac-ps-late-ps-960-synthetic.mp4",
+        "sha256": "a03fd435ca29c8be863dcd849e7993d40bfd8969c8d6b8a0683c64fcb60759c4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 41,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "missing-middle",
+      "video": {
+        "file": "he-aac-ps-missing-middle-960-synthetic.mp4",
+        "sha256": "0b6ccc9aef984174d3cdac743f3ad274c4a6b37428648ef877efdc0f5246dea4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 57,
+          "bytes": 13
+        }
+      ],
+      "ps_present": [
+        true,
+        false,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            276480,
+            5760
+          ],
+          [
+            322560,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            368640,
+            2880
+          ],
+          [
+            391680,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "trailing-mono",
+      "video": {
+        "file": "he-aac-ps-trailing-mono-960-synthetic.mp4",
+        "sha256": "5bc3fa9ee7ab6b9237beeca493da8cf21c7f11c565cf39534c1767a842a37c8f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 70,
+          "bytes": 12
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        false
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            414720,
+            5760
+          ],
+          [
+            460800,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            506880,
+            2880
+          ],
+          [
+            529920,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "all-mono",
+      "video": {
+        "file": "he-aac-ps-all-mono-1024-synthetic.mp4",
+        "sha256": "bf449a9783938036ef17542965ebc7a680b91b04e3df10f2c8d86536b06e8291",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 82,
+          "bytes": 16
+        },
+        {
+          "offset": 98,
+          "bytes": 13
+        },
+        {
+          "offset": 111,
+          "bytes": 12
+        }
+      ],
+      "ps_present": [
+        false,
+        false,
+        false
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            552960,
+            6144
+          ],
+          [
+            602112,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            651264,
+            3072
+          ],
+          [
+            675840,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "late-ps",
+      "video": {
+        "file": "he-aac-ps-late-ps-1024-synthetic.mp4",
+        "sha256": "c25f2179f13abb88c8c3d3798358bdd9d1e84fe012771ff9a91fa2aef96214fc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 123,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            700416,
+            6144
+          ],
+          [
+            749568,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            798720,
+            3072
+          ],
+          [
+            823296,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "missing-middle",
+      "video": {
+        "file": "he-aac-ps-missing-middle-1024-synthetic.mp4",
+        "sha256": "d8d514d893fd695cc4f3549355874b9bc23c31d257f5cf288f74a0634461d912",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 139,
+          "bytes": 13
+        }
+      ],
+      "ps_present": [
+        true,
+        false,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            847872,
+            6144
+          ],
+          [
+            897024,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            946176,
+            3072
+          ],
+          [
+            970752,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "trailing-mono",
+      "video": {
+        "file": "he-aac-ps-trailing-mono-1024-synthetic.mp4",
+        "sha256": "e5f14b8491ae0520871b6f5e25a4b7631ab6fde77cfdef813f5deda43f0b0bab",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 152,
+          "bytes": 12
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        false
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            995328,
+            6144
+          ],
+          [
+            1044480,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1093632,
+            3072
+          ],
+          [
+            1118208,
+            3072
+          ]
+        ]
+      }
+    }
+  ],
+  "packet_sha256": "bd3efa04280a431c37c9dc2903acc6cd0f0ca5571365fd7934da5abea559616a",
+  "pcm_sha256": "47387458cfbb066743c695f4a0f9605281f269748d0f9d26520414635c05b4b8"
+}

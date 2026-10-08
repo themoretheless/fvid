@@ -74,22 +74,7 @@ impl Dsp {
     pub fn output_rate(&self) -> Option<OutputRate> {
         self.synthesis.as_ref().map(Synthesis::rate)
     }
-    /// One PS frame of 24/30/32 aligned output slots. QMF input contains the
-    /// frame's chronological slots followed by exactly six future slots.
-    /// On subsequent calls its first six slots must equal the preceding
-    /// lookahead. They are already in raw hybrid history and are not advanced
-    /// twice. At EOF the caller may provide six zero future slots.
-    ///
-    /// All matrix, hybrid, decorrelation, overlap and BOTH synthesis histories
-    /// commit together, only after PCM generation for both channels succeeds.
-    pub fn process(
-        &mut self,
-        parameters: &Parameters,
-        slots: u8,
-        qmf: &[[Complex; 64]],
-        controls: FrameControls,
-        rate: OutputRate,
-    ) -> Result<Frame> {
+    fn validate_input(&self, slots: u8, qmf: &[[Complex; 64]], rate: OutputRate) -> Result<()> {
         if !matches!(slots, 24 | 30 | 32) {
             return Err(invalid("PS DSP slot count must be 24, 30 or 32"));
         }
@@ -117,6 +102,58 @@ impl Dsp {
                 "PS DSP QMF lookahead overlap does not match retained input",
             ));
         }
+        Ok(())
+    }
+    /// Normal SBR mono mapped to both output channels while PS is absent or
+    /// not independently initialized. Retain raw hybrid history/lookahead for
+    /// reentry and BOTH existing synthesis histories for continuous PCM.
+    pub fn process_dual_mono(
+        &mut self,
+        slots: u8,
+        qmf: &[[Complex; 64]],
+        rate: OutputRate,
+    ) -> Result<Frame> {
+        self.validate_input(slots, qmf, rate)?;
+        let mut trial = self.clone();
+        let initial = trial.lookahead.is_none();
+        let input = if initial { qmf } else { &qmf[LOOKAHEAD..] };
+        let bands = trial.matrix.bands();
+        trial.hybrid.process(bands, input)?;
+        let rows = qmf[..usize::from(slots)].to_vec();
+        let qmf = [rows.clone(), rows];
+        let pcm = trial
+            .synthesis
+            .get_or_insert_with(|| Synthesis::new(rate))
+            .process(&qmf)?;
+        trial.lookahead = Some(std::array::from_fn(|n| input[input.len() - LOOKAHEAD + n]));
+        let frame = Frame {
+            bands,
+            bands_changed: false,
+            slots,
+            output_rate: rate,
+            qmf,
+            pcm,
+        };
+        *self = trial;
+        Ok(frame)
+    }
+    /// One PS frame of 24/30/32 aligned output slots. QMF input contains the
+    /// frame's chronological slots followed by exactly six future slots.
+    /// On subsequent calls its first six slots must equal the preceding
+    /// lookahead. They are already in raw hybrid history and are not advanced
+    /// twice. At EOF the caller may provide six zero future slots.
+    ///
+    /// All matrix, hybrid, decorrelation, overlap and BOTH synthesis histories
+    /// commit together, only after PCM generation for both channels succeeds.
+    pub fn process(
+        &mut self,
+        parameters: &Parameters,
+        slots: u8,
+        qmf: &[[Complex; 64]],
+        controls: FrameControls,
+        rate: OutputRate,
+    ) -> Result<Frame> {
+        self.validate_input(slots, qmf, rate)?;
         let mut trial = self.clone();
         let matrices = trial.matrix.process(parameters, slots)?;
         let bands = matrices.temporal.bands;
