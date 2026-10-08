@@ -33,3 +33,17 @@ Two original noise patterns are used so restoration is actually selected in all
 Y/U/V planes of each layout/depth group. The offline acceptance validates actual
 header coefficients/loopfilter levels, coded grids, all pixels, filter-unit
 statistics and WebM reset/rewind/seek behavior.
+
+## Full-chroma film grain fixtures
+
+These fixtures use the stock encoder, not the forced-deblocking build above:
+
+```sh
+python3 /path/to/fvid/scripts/generate_av1_chroma_grain_samples.py --tools --encoder /opt/homebrew/bin/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+python3 /path/to/fvid/scripts/generate_av1_chroma_grain_samples.py --custom --encoder /opt/homebrew/bin/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+python3 /path/to/fvid/scripts/generate_av1_chroma_grain_samples.py --show-existing --encoder /opt/homebrew/bin/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+```
+
+The 156 owned streams cover 4:2:2/4:4:4 at 8/10/12 bits. Both grain-enabled
+oracles must agree. Offline tests check all pixels, per-layout/depth header
+coverage, reset and WebM timing/rewind/seek; generation remains separate.

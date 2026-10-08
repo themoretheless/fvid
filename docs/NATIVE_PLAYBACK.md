@@ -859,19 +859,22 @@ Release-сборка обязательна для практического и
   order hints, changing coded grids и tiled sampling ещё не квалифицированы.
   Собственный intra block copy проходит lossless/lossy-потоки, superblock
   64/128, два tile, нечётные размеры, sub-8x8 блоки и chroma half-sample phases.
-  Собственный film grain проверен в 8/10/12-битном 4:2:0: AR lag 0–3,
+  Собственный film grain проверен в 8/10/12-битных 4:2:0/4:2:2/4:4:4: AR lag 0–3,
   overlap/range, chroma scaling, наследование и show-existing. Зерно добавляется
   в отдельную display-копию; reference storage остаётся без зерна.
   Sub-8x8 chroma со смешанными intra/inter соседями проверен для 4×4,
   4×N и N×4, включая выбор отдельного вектора для all-inter групп.
   Базовые lossless/lossy 4:2:2/4:4:4 в 8/10/12 битах проверены по всем
   пикселям, decoder reset и WebM raw output/rewind/seek. Отдельная квалификация
-  intrabc, film grain и сложных inter-комбинаций в этих
+  intrabc и сложных inter-комбинаций в этих
   форматах пока не завершена. CDEF, deblocking и Wiener/SGR restoration уже
   проверены на 18 двухкадровых потоках 191×127 во всех Y/U/V-плоскостях,
   включая raw WebM, reset/rewind/seek и фактическое выполнение фильтров.
   Super-resolution проверен ещё на 36 трёхкадровых потоках 191×127: коэффициенты
   9/12, смена 16→9 между key/inter, фильтры во всех плоскостях и coded MI grids.
+  Film grain в 4:2:2/4:4:4 отдельно проверен на 156 потоках 149×85:
+  все 16 preset, собственные AR-параметры lag 0–3, chroma scaling,
+  наследование и show-existing; все пиксели, reset и WebM rewind/seek.
   Явные оставшиеся отказы: layered operating points, spatial layering и tile-list OBU.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.

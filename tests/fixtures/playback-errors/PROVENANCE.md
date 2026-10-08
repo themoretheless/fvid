@@ -1098,3 +1098,30 @@ contain non-None restoration units for each plane. Across the 108 first-decode
 frames it observes 61,548 CDEF blocks, 73,826 deblocking edges, 73 Wiener and
 67 SGR units. Generation is separate; tests use native FVid and checked-in
 synthetic assets only, without external codecs, FFmpeg or network.
+
+### Odd AV1 4:2:2/4:4:4 film grain qualification
+
+`generate_av1_chroma_grain_samples.py` creates original deterministic moving
+149x85 Y/U/V patterns at 8/10/12 bits for 4:2:2 and 4:4:4. The three manifests
+record 96 public-preset streams (`--tools`, all 16 presets), 48 authored grain
+parameter streams (`--custom`, AR lag 0–3, chroma scaling from luma or separate
+UV points), and twelve streams (`--show-existing`, presets 1/16) with an extra
+display of an actual showable reference. Each has four coded frames; the final
+set has five displayed frames. This is 636 displayed frames in total.
+
+Only generation invokes stock aomenc, aomdec and dav1d. Both unmodified decoders
+must produce identical grain-enabled full-precision YUV before a fixture is
+accepted. Show-existing generation also requires that the appended output match
+an earlier displayed frame. The authored AR coefficients/points/seeds and source
+pattern are defined by the generator, with no private media or parameter sets.
+Source and OBU/WebM/YUV SHA-256 hashes are recorded; all 468 artifact hashes were
+verified. Fixtures deliberately disable CDEF/restoration/intrabc/reference-MVs;
+this set does not qualify grain combined with every other tool.
+
+`tests/av1_chroma_grain.rs` checks actual color layout/depth and exact plane byte
+counts, parsed AR lag/scaling flags, and every native decoded pixel, twice across
+finish/reset. Raw WebM output, 20ms intervals, EOF rewind and sync seek replay are
+also verified. Every layout/depth group must contain overlap on/off, full/limited
+range (preset sets), both chroma scaling modes (tools/custom), every AR lag
+(custom), and actual inherited parameters (tools). Ordinary tests run only FVid,
+reading checked-in artifacts, with no external codec or network invocation.

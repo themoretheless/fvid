@@ -4980,3 +4980,20 @@ hashes, generator syntax, formatting and scoped diff checks pass. Final 48 AV1
 release unit tests and ten selected offline integration tests pass, zero
 failures/ignored tests. These streams do not establish intrabc, film grain,
 layered operating points or whole AV1 conformance.
+
+### AV1 full-chroma film grain acceptance (2026-10-08)
+
+156 owned 149x85 streams qualify native grain for 4:2:2/4:4:4 at 8/10/12 bits:
+96 public-preset cases, 48 authored AR lag 0–3/scaling cases and twelve
+show-existing cases. All 636 displayed frames match both stock independent
+reference decoders, including four-frame inter ownership and a repeated display
+of a stored showable reference. All pixel/depth/geometry, finish/reset, raw WebM,
+20ms intervals, EOF rewind and sync-seek replays pass. Header coverage is required
+separately in every layout/depth group, including actual inheritance in presets.
+No production change was needed for this qualification. Intrabc/full-chroma,
+more inter-tool combinations, layering and whole-codec conformance remain open.
+
+Validation: 48 AV1 release unit tests and nine offline integration tests pass,
+zero failures/ignored tests. Generator syntax, Rust formatting, all 468 artifact
+hashes and scoped diff checks pass. The new test binary links only system
+libSystem/libiconv, with no FFmpeg/libav or external codec linkage.

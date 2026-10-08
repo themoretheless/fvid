@@ -1,0 +1,364 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-chroma-grain-show-existing-layout422-depth8-preset1.obu",
+      "sha256": "9557f9a06e7946370eabc98abbbd6c20fc08a5d42fdf831496525721b6184999",
+      "reference": "av1-chroma-grain-show-existing-layout422-depth8-preset1.yuv",
+      "reference_sha256": "12eb16334e7e5f6892afb8148a7f7bd2b16b75b59b0630e130c7151ef47dae2c",
+      "source_sha256": "809079de2250766d579f34e5ff75174cf30c93f2c7210d0624db160f6747fd12",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "422",
+      "subsampling": [
+        1,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout422-depth8-preset1.webm",
+      "webm_sha256": "7fdf5fc12c03a258288110fbce498c2cef07c7cfbdc85476445eb17d009ccdc3",
+      "depth": 8,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout422-depth8-preset16.obu",
+      "sha256": "c823bf4d84573bfe6fa7094d53a81ae1145e90a462bd5c59f5beff13b8bc840e",
+      "reference": "av1-chroma-grain-show-existing-layout422-depth8-preset16.yuv",
+      "reference_sha256": "392bcd1efac271019dca2f6b2b9d929ffc456e63047d20d6293fc22d3e34f2c8",
+      "source_sha256": "809079de2250766d579f34e5ff75174cf30c93f2c7210d0624db160f6747fd12",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "422",
+      "subsampling": [
+        1,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout422-depth8-preset16.webm",
+      "webm_sha256": "6e6552a3a80cd2faaf33e8f0d1ba4f34735d1c745caf6c59769bd9e5ecee1b19",
+      "depth": 8,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout444-depth8-preset1.obu",
+      "sha256": "f34124e922ee2b94bf8351486cfb4806ef091e08f95c860d53e895c3467d2d5b",
+      "reference": "av1-chroma-grain-show-existing-layout444-depth8-preset1.yuv",
+      "reference_sha256": "51acb60eef9d6bf2e67014fc95ec30e682f3e6688ad830c97a7bd0580dcb8869",
+      "source_sha256": "fcfde601ce41b35d4c68609e4e1ad7a12689e63dfd4a12602e50145185866f13",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "444",
+      "subsampling": [
+        0,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout444-depth8-preset1.webm",
+      "webm_sha256": "28e90800a253485ca4ad765c68fb483714ba5f0eeeb5d0e6f0a9c9edb3519130",
+      "depth": 8,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout444-depth8-preset16.obu",
+      "sha256": "562a667f611a066cd6ed4d4c658afa37319f3802f19b1f5dfa5bc11c6762fa22",
+      "reference": "av1-chroma-grain-show-existing-layout444-depth8-preset16.yuv",
+      "reference_sha256": "f3ea603b0f951254bce5d168115b51df693388070d9ef56ee5b0af159b27a4fe",
+      "source_sha256": "fcfde601ce41b35d4c68609e4e1ad7a12689e63dfd4a12602e50145185866f13",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "444",
+      "subsampling": [
+        0,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout444-depth8-preset16.webm",
+      "webm_sha256": "4c34e19ce860107d1ede54fff81205484192eb5ccb470203a0328868c44d073b",
+      "depth": 8,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout422-depth10-preset1.obu",
+      "sha256": "91d82729696cb978ea458da92ad93153471969c060f6245c1259fb33206005d7",
+      "reference": "av1-chroma-grain-show-existing-layout422-depth10-preset1.yuv",
+      "reference_sha256": "08483be1efb7ed28fb1a21db326aa6080dd6e9a775c9d5a158cefcc4779d5920",
+      "source_sha256": "2e5982e66426ace8fa335e53d1e6d60f482ff7e3063144968fce484fbc8fb05a",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "422",
+      "subsampling": [
+        1,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout422-depth10-preset1.webm",
+      "webm_sha256": "6420dc44408e364e08d2eec835e9b46c023c8c03a0609a3d3d04a87035000832",
+      "depth": 10,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout422-depth10-preset16.obu",
+      "sha256": "58d2848d46536442760603b26f73557e5b2e84d200ab57dd11282b5f5b87ca86",
+      "reference": "av1-chroma-grain-show-existing-layout422-depth10-preset16.yuv",
+      "reference_sha256": "e4f2e4e7ad992ae50703d9179ffa11a4b5a95f2d86baa693e10fcde75848d71c",
+      "source_sha256": "2e5982e66426ace8fa335e53d1e6d60f482ff7e3063144968fce484fbc8fb05a",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "422",
+      "subsampling": [
+        1,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout422-depth10-preset16.webm",
+      "webm_sha256": "a3d844e697280764d2cce944ac155cf2c122938b8de237d4b31ae540ef7b35a5",
+      "depth": 10,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout444-depth10-preset1.obu",
+      "sha256": "834e92ebfe9bc4dbc5ccf08c667d24aa71bdead5aeb64a25e5b08abac7a68ab7",
+      "reference": "av1-chroma-grain-show-existing-layout444-depth10-preset1.yuv",
+      "reference_sha256": "e927a502f97d451b0b25f000b6a3e47a93f50df36d2956ee3bc223890180fa8c",
+      "source_sha256": "ffbf614f367ba7baeea5e87c11993f2112d25dea1d3a0c016015225836ae9343",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "444",
+      "subsampling": [
+        0,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout444-depth10-preset1.webm",
+      "webm_sha256": "aac5ab3d721d26d8e83e6d590f28e44acfbbc90f9d583f42c5dc0aa5a6ea68bf",
+      "depth": 10,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout444-depth10-preset16.obu",
+      "sha256": "52ff48b1c71e865ee462cdd5c6e7aff867e0f860746ecc62ac5f8d1aac26ef4d",
+      "reference": "av1-chroma-grain-show-existing-layout444-depth10-preset16.yuv",
+      "reference_sha256": "20eab466d590cb2bbdfcccecb20a13e77bc04a36e672c244221774b79c2fa31b",
+      "source_sha256": "ffbf614f367ba7baeea5e87c11993f2112d25dea1d3a0c016015225836ae9343",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "444",
+      "subsampling": [
+        0,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout444-depth10-preset16.webm",
+      "webm_sha256": "9da506d7bebeb5541a0175182502667fc382a11d26eccb06701c1e913369d3ca",
+      "depth": 10,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout422-depth12-preset1.obu",
+      "sha256": "78dd29a8a7ad6ea906e247ec93a82f2183a823198a2243df51a0fd5007e04a04",
+      "reference": "av1-chroma-grain-show-existing-layout422-depth12-preset1.yuv",
+      "reference_sha256": "bd9886e8793dbcf4ca4260fba34df7fcfa3d560177515002863a7cbcddf4c7d2",
+      "source_sha256": "4ff839a9d4d80e62880c852d89b8c0d28154569fffcf348c129498524b196876",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "422",
+      "subsampling": [
+        1,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout422-depth12-preset1.webm",
+      "webm_sha256": "513246d9b92ce278944ca5404a10a4792055289c4da207a4c52008964ec2f2b2",
+      "depth": 12,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout422-depth12-preset16.obu",
+      "sha256": "b7c080cc8e746c6ab28eeef68226dae67ec2fbd1a67275c3dcc81b37eb562906",
+      "reference": "av1-chroma-grain-show-existing-layout422-depth12-preset16.yuv",
+      "reference_sha256": "b4f0f28233dd6ab79e8ba88b9300cfce09e4dcc42b30cff0cce748debbaf2f7c",
+      "source_sha256": "4ff839a9d4d80e62880c852d89b8c0d28154569fffcf348c129498524b196876",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "422",
+      "subsampling": [
+        1,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout422-depth12-preset16.webm",
+      "webm_sha256": "0f721cc8edf6b8fd5be889fbfd7afe60c990e46591797710324ec8d7237c3bcb",
+      "depth": 12,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout444-depth12-preset1.obu",
+      "sha256": "bad1346b7538ea555cf7b5760a93f56ea5d874b971c5c152adf6b28c7dc83ca4",
+      "reference": "av1-chroma-grain-show-existing-layout444-depth12-preset1.yuv",
+      "reference_sha256": "c19361913096ee183331a17d5c9dcb561c235c4578e577d729ee8ca9733af4e5",
+      "source_sha256": "2e14ab8aa40649f468f75ca3b602a009512cba72137fb9bc4bb648346bfc0858",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "444",
+      "subsampling": [
+        0,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout444-depth12-preset1.webm",
+      "webm_sha256": "28bbc6876451be91750552408b98b294eaa6b8942de56b0363827e2f2760d3c2",
+      "depth": 12,
+      "grain_preset": 1,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    },
+    {
+      "file": "av1-chroma-grain-show-existing-layout444-depth12-preset16.obu",
+      "sha256": "c5d67e09be3b31110a60ff83181449a107da2ba163683702f8f883a8ce3327c1",
+      "reference": "av1-chroma-grain-show-existing-layout444-depth12-preset16.yuv",
+      "reference_sha256": "8d7ab4dadb25b96ac6100bb924328f972c59bc30dac5bb78c8ebe0bd1fc326a4",
+      "source_sha256": "2e14ab8aa40649f468f75ca3b602a009512cba72137fb9bc4bb648346bfc0858",
+      "source_exact": false,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "frames": 5,
+      "coded_frames": 4,
+      "show_existing_slot": 1,
+      "layout": "444",
+      "subsampling": [
+        0,
+        0
+      ],
+      "webm": "av1-chroma-grain-show-existing-layout444-depth12-preset16.webm",
+      "webm_sha256": "d4e35a7931e14b1f8f92ce5d825c717598ab5e2d6c7d0b2ff61e09b275021412",
+      "depth": 12,
+      "grain_preset": 16,
+      "ar_lag": null,
+      "chroma_from_luma": null,
+      "size": [
+        149,
+        85
+      ]
+    }
+  ]
+}
