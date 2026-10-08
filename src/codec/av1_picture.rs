@@ -11,6 +11,10 @@ use crate::{invalid, Result};
 mod inter;
 #[path = "av1_palette.rs"]
 mod palette;
+#[path = "av1_quant_matrix.rs"]
+mod quant_matrix;
+#[path = "av1_restoration.rs"]
+mod restoration;
 
 #[derive(Clone, Debug)]
 pub struct Plane {
@@ -57,6 +61,7 @@ struct Block {
     filters: [usize; 2],
     palette_sizes: [u8; 2],
     palette_colors: [[u16; 8]; 2],
+    delta_lf: [i32; 4],
 }
 struct Decoder<'a> {
     s: &'a Sequence,
@@ -78,8 +83,10 @@ struct Decoder<'a> {
     tx_sizes: [Vec<[usize; 2]>; 3],
     tx_types: Vec<u8>,
     cdef_indexes: Vec<i8>,
+    restoration: restoration::State,
     read_deltas: bool,
     current_q: i32,
+    delta_lf: [i32; 4],
     current_segment: usize,
     segment_pre_skip: bool,
     previous_segments: Vec<u8>,
@@ -150,14 +157,6 @@ pub(crate) fn decode(
         ));
     }
 
-    if h.quant.matrix.is_some()
-        || h.filter.delta_resolution.is_some()
-        || h.restoration_types != [0; 3]
-    {
-        return Err(crate::unsupported(
-            "AV1 quantization matrices or in-loop filtering not implemented",
-        ));
-    }
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     if h.intrabc || h.superres_denom != 8 {
         return Err(crate::unsupported(
@@ -171,17 +170,23 @@ pub(crate) fn decode(
     }
     let cols = 2 * (h.size[0] as usize).div_ceil(8);
     let rows = 2 * (h.size[1] as usize).div_ceil(8);
+    // Complete edge transforms are needed by chroma-from-luma before cropping.
+    let storage_cols = cols.div_ceil(16) * 16;
+    let storage_rows = rows.div_ceil(16) * 16;
+    let restoration_bytes = restoration::State::required_bytes(h)?;
     let required = cols
         .checked_mul(rows)
         .and_then(|n| n.checked_mul(448))
+        .and_then(|n| n.checked_add(storage_cols.checked_mul(storage_rows)?.checked_mul(100)?))
         .and_then(|n| n.checked_add(500_000))
+        .and_then(|n| n.checked_add(restoration_bytes))
         .ok_or_else(|| invalid("AV1 image allocation overflow"))?;
     if required > budget {
         return Err(invalid("AV1 image exceeds memory budget"));
     }
     let planes = std::array::from_fn(|p| {
-        let width = cols * 4 >> usize::from(p > 0);
-        let height = rows * 4 >> usize::from(p > 0);
+        let width = storage_cols * 4 >> usize::from(p > 0);
+        let height = storage_rows * 4 >> usize::from(p > 0);
         Plane {
             width,
             height,
@@ -226,12 +231,14 @@ pub(crate) fn decode(
         y1: 0,
         above: std::array::from_fn(|_| vec![(0, 0); cols + 32]),
         left: std::array::from_fn(|_| vec![(0, 0); rows + 32]),
-        decoded: std::array::from_fn(|_| vec![false; cols * rows]),
+        decoded: std::array::from_fn(|_| vec![false; storage_cols * storage_rows]),
         tx_types: vec![0; cols * rows],
-        tx_sizes: std::array::from_fn(|_| vec![[4, 4]; cols * rows]),
+        tx_sizes: std::array::from_fn(|_| vec![[4, 4]; storage_cols * storage_rows]),
         cdef_indexes: vec![-1; cols.div_ceil(16) * rows.div_ceil(16)],
+        restoration: restoration::State::new(h),
         read_deltas: false,
         current_q: i32::from(h.quant.base),
+        delta_lf: [0; 4],
         current_segment: 0,
         segment_pre_skip: h
             .segments
@@ -271,7 +278,9 @@ pub(crate) fn decode(
             for a in &mut dec.above {
                 a.fill((0, 0));
             }
+            dec.restoration.reset_tile();
             dec.current_q = i32::from(h.quant.base);
+            dec.delta_lf = [0; 4];
             dec.segment_pred_above.fill(0);
             let mut c = initial.clone();
             let mut d = SymbolDecoder::new(payload, !h.disable_cdf_update)?;
@@ -282,6 +291,9 @@ pub(crate) fn decode(
                 }
                 dec.segment_pred_left.fill(0);
                 for col in (dec.x0..dec.x1).step_by(sb) {
+                    if h.restoration_types != [0; 3] {
+                        dec.restoration.read(&mut d, &mut c, h, col, r, sb)?;
+                    }
                     dec.read_deltas = h.quant.delta_resolution.is_some();
                     dec.partition(&mut d, &mut c, col, r, sb)?;
                 }
@@ -295,7 +307,31 @@ pub(crate) fn decode(
     if next != h.tiles.count() {
         return Err(invalid("AV1 frame has missing tiles"));
     }
+    // Keep public picture storage and filtering grids at their original MI extent.
+    for p in 0..3 {
+        let sub = usize::from(p > 0);
+        let width = cols * 4 >> sub;
+        let height = rows * 4 >> sub;
+        let plane = &mut dec.image.planes[p];
+        let old_width = plane.width;
+        for y in 0..height {
+            plane
+                .samples
+                .copy_within(y * old_width..y * old_width + width, y * width);
+        }
+        plane.samples.truncate(width * height);
+        plane.width = width;
+        plane.height = height;
+        let old_stride = old_width / 4;
+        let stride = width / 4;
+        for y in 0..height / 4 {
+            dec.tx_sizes[p].copy_within(y * old_stride..y * old_stride + stride, y * stride);
+        }
+        dec.tx_sizes[p].truncate(stride * (height / 4));
+    }
+    let restore = dec.restoration.active()?;
     dec.filter();
+    let before_restoration = restore.then(|| dec.image.planes.clone());
     let skip = dec.blocks.iter().map(|b| b.skip).collect::<Vec<_>>();
     super::av1_filter::cdef(
         &mut dec.image,
@@ -304,6 +340,9 @@ pub(crate) fn decode(
         &skip,
         s.color.monochrome,
     );
+    if let Some(before) = before_restoration {
+        dec.restoration.apply(&mut dec.image, &before)?;
+    }
     Ok((dec.image, saved))
 }
 impl Decoder<'_> {
@@ -590,6 +629,38 @@ impl Decoder<'_> {
                 .clamp(1, 255);
             }
         }
+        if self.read_deltas && !(skip && w == if self.s.superblock128 { 32 } else { 16 } && w == h)
+        {
+            if let Some((resolution, multi)) = self.h.filter.delta_resolution {
+                let count = if multi {
+                    if self.s.color.monochrome {
+                        2
+                    } else {
+                        4
+                    }
+                } else {
+                    1
+                };
+                for i in 0..count {
+                    let mut value = if multi {
+                        symbol(d, c, av1_cdfs::DELTA_LF_MULTI, [i])?
+                    } else {
+                        symbol(d, c, av1_cdfs::DELTA_LF, [])?
+                    } as i32;
+                    if value == 3 {
+                        let bits = d.literal(3)? as u8 + 1;
+                        value = d.literal(bits)? as i32 + (1 << bits) + 1;
+                    }
+                    if value != 0 {
+                        if d.bit()? {
+                            value = -value;
+                        }
+                        self.delta_lf[i] =
+                            (self.delta_lf[i] + (value << resolution)).clamp(-63, 63);
+                    }
+                }
+            }
+        }
         self.read_deltas = false;
         if !matches!(self.h.frame_type, 0 | 2) {
             let ctx = match (above, left) {
@@ -823,6 +894,7 @@ impl Decoder<'_> {
                     skip,
                     tx,
                     uv_mode: uv,
+                    delta_lf: self.delta_lf,
                     palette_sizes,
                     palette_colors: [palette_colors[0], palette_colors[1]],
                     ..Block::default()
@@ -831,6 +903,7 @@ impl Decoder<'_> {
         }
         for cy in 0..h.div_ceil(16) {
             for cx in 0..w.div_ceil(16) {
+                let mut max_luma = [0; 2];
                 for p in 0..if has_chroma { 3 } else { 1 } {
                     let sub = usize::from(p > 0);
                     let bw = (w >> sub).max(1);
@@ -871,14 +944,7 @@ impl Decoder<'_> {
                                 )?;
                             }
                             if m == 13 {
-                                self.cfl(
-                                    p,
-                                    xx * 4,
-                                    yy * 4,
-                                    size,
-                                    cfl[p - 1],
-                                    [(x + w).min(self.cols) * 4, (y + h).min(self.rows) * 4],
-                                )?;
+                                self.cfl(p, xx * 4, yy * 4, size, cfl[p - 1], max_luma)?;
                             }
                             let (dequant, kind) = if skip {
                                 for i in 0..tw / 4 {
@@ -944,6 +1010,9 @@ impl Decoder<'_> {
                                         as u16;
                                 }
                             }
+                            if p == 0 {
+                                max_luma = [xx * 4 + tw, yy * 4 + th];
+                            }
                             for r in yy..(yy + th / 4).min(plane.height / 4) {
                                 for col in xx..(xx + tw / 4).min(plane.width / 4) {
                                     self.decoded[p][r * (plane.width / 4) + col] = true;
@@ -975,16 +1044,18 @@ impl Decoder<'_> {
         let mid = 1u16 << (self.s.color.depth - 1);
         let plane = &self.image.planes[p];
         let grid = plane.width / 4;
+        let logical_width = self.cols * 4 >> sub;
+        let logical_height = self.rows * 4 >> sub;
         let above_right =
-            above && x + w < plane.width && self.decoded[p][((y - 1) / 4) * grid + (x + w) / 4];
+            above && x + w < logical_width && self.decoded[p][((y - 1) / 4) * grid + (x + w) / 4];
         let below_left =
-            left && y + h < plane.height && self.decoded[p][((y + h) / 4) * grid + (x - 1) / 4];
+            left && y + h < logical_height && self.decoded[p][((y + h) / 4) * grid + (x - 1) / 4];
         let top: Vec<u16> = (0..w + h)
             .map(|i| {
                 if above {
                     plane.samples[(y - 1) * plane.width
                         + (x + i)
-                            .min(plane.width - 1)
+                            .min(logical_width - 1)
                             .min(x + if above_right { 2 * w } else { w } - 1)]
                 } else if left {
                     plane.samples[y * plane.width + x - 1]
@@ -997,7 +1068,7 @@ impl Decoder<'_> {
             .map(|i| {
                 if left {
                     plane.samples[(y + i)
-                        .min(plane.height - 1)
+                        .min(logical_height - 1)
                         .min(y + if below_left { 2 * h } else { h } - 1)
                         * plane.width
                         + x
@@ -1120,7 +1191,18 @@ impl Decoder<'_> {
                             continue;
                         }
                         let strength = |b: Block| {
-                            let segment_level = (base
+                            let lf_index = if self
+                                .h
+                                .filter
+                                .delta_resolution
+                                .is_some_and(|(_, multi)| multi)
+                            {
+                                filter_index
+                            } else {
+                                0
+                            };
+                            let adjusted_base = (base + b.delta_lf[lf_index]).clamp(0, 63);
+                            let segment_level = (adjusted_base
                                 + self.h.segments[b.segment][1 + filter_index].unwrap_or(0))
                             .clamp(0, 63);
                             if !self.h.filter.deltas_enabled {
@@ -1559,12 +1641,26 @@ impl Decoder<'_> {
                 0
             };
             let limit = 1i64 << (7 + self.s.color.depth);
+            let matrix = if kind < 9 && !self.h.lossless[self.current_segment] {
+                self.h
+                    .quant
+                    .matrix
+                    .map(|levels| levels[p])
+                    .filter(|level| *level < 15)
+                    .map(|level| quant_matrix::weights(level, p > 0, size))
+            } else {
+                None
+            };
             // Rows of the coefficient block map one to one onto rows of the
             // residual, so walking them keeps the store sequential instead of
             // dividing the linear coefficient index back out per sample.
             for (r, row) in q.chunks(tw).enumerate() {
                 for (c, value) in row.iter().enumerate() {
-                    let dq = i64::from(*value) * i64::from(if r == 0 && c == 0 { dc } else { ac });
+                    let mut step = if r == 0 && c == 0 { dc } else { ac };
+                    if let Some(matrix) = matrix {
+                        step = (step * i32::from(matrix[r * tw + c]) + 16) >> 5;
+                    }
+                    let dq = i64::from(*value) * i64::from(step);
                     // The magnitude is truncated towards zero, which for a
                     // power of two is a shift of the absolute value.
                     dequant[r * w + c] = (dq.signum() * ((dq.abs() & 0xffffff) >> shift))

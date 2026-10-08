@@ -54,6 +54,7 @@ pub struct Header {
     pub lossless: [bool; 8],
     pub filter: LoopFilter,
     pub cdef: Cdef,
+    /// Semantic restoration enum: NONE=0, WIENER=1, SGRPROJ=2, SWITCHABLE=3.
     pub restoration_types: [u8; 3],
     pub restoration_sizes: [u32; 3],
     /// 0 = 4x4 only, 1 = largest, 2 = selected per block.
@@ -555,7 +556,9 @@ impl Header {
                 .iter_mut()
                 .take(if s.color.monochrome { 1 } else { 3 })
             {
-                *t = b.read(2)? as u8;
+                // Bitstream codes map NONE/SWITCHABLE/WIENER/SGRPROJ to
+                // the semantic NONE/WIENER/SGRPROJ/SWITCHABLE enum.
+                *t = [0, 3, 1, 2][b.read(2)? as usize];
             }
             if restoration_types != [0; 3] {
                 let mut shift = b.read(1)? + u32::from(s.superblock128);

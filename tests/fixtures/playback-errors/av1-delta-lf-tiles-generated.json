@@ -1,0 +1,193 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-delta-lf-tiles-depth8-colors3-chroma1-layout0-vflip1-q48.obu",
+      "sha256": "2ae13430a2fc56c6904ebe526726e0a8306bb58e497995a5eced618e1b8a4852",
+      "reference": "av1-delta-lf-tiles-depth8-colors3-chroma1-layout0-vflip1-q48.yuv",
+      "reference_sha256": "749ddc904cd04a77705039a1865121a7200f28d535a38bc71c47b9da1f9a6528",
+      "source_sha256": "6eb39e70a49a291a668d467d7ed5f1228c27f821de5f30da445c5447bf28ab08",
+      "source_exact": false,
+      "quality": 48,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth8-colors3-chroma1-layout0-vflip1-q48.webm",
+      "webm_sha256": "db9fd1b774073b48a79d83e65ef571c699d27cccf04787a7c657e3c339a1634d",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "phase": 0,
+      "tiles": 1,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "av1-delta-lf-tiles-depth8-colors3-chroma1-layout1-vflip1-q48.obu",
+      "sha256": "a8226e22e919e555fc0c2224314bd73c401effc81cb872be17056a872e97f5e9",
+      "reference": "av1-delta-lf-tiles-depth8-colors3-chroma1-layout1-vflip1-q48.yuv",
+      "reference_sha256": "feaf708e6ebda322a8e1a3f5444400ae303ba144e81b3d91a3f6d4ca7cb4fa20",
+      "source_sha256": "6eb39e70a49a291a668d467d7ed5f1228c27f821de5f30da445c5447bf28ab08",
+      "source_exact": false,
+      "quality": 48,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth8-colors3-chroma1-layout1-vflip1-q48.webm",
+      "webm_sha256": "7a0216c3c4b5404394fcf2f582333243404b26697f1f4644b995372e90d44af7",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "phase": 0,
+      "tiles": 4,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q40.obu",
+      "sha256": "b0e4c8507d110d07e7fd3b6afef1670dd21c132e7d63968b220b7380caa14b61",
+      "reference": "av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q40.yuv",
+      "reference_sha256": "c56df5adc9edcf1360a40cb0a05cde1186e9463142773fae69b2173766e4f787",
+      "source_sha256": "ccd2ff55bd040d42ec2690b36787ea04130f27e30583638ef4c3812e0a9df861",
+      "source_exact": false,
+      "quality": 40,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q40.webm",
+      "webm_sha256": "1e9f4e12182600582c8b4c3c484d8f7e1620ade572917f90d5f56d38218d76d1",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "phase": 0,
+      "tiles": 1,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q40.obu",
+      "sha256": "54f23e6604f8daac876d739cd5c8c016c5294e7b4c3bb1341afa388efc231aa0",
+      "reference": "av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q40.yuv",
+      "reference_sha256": "a439c9ff8c91b0ba5d2662bc355613ca350b37638c6b59ada44e429cc08c6d47",
+      "source_sha256": "ccd2ff55bd040d42ec2690b36787ea04130f27e30583638ef4c3812e0a9df861",
+      "source_exact": false,
+      "quality": 40,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q40.webm",
+      "webm_sha256": "9eb926db6162ec7b02ad252f531e7535d9ea18f6aa52b924ff7239957f1f657a",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "phase": 0,
+      "tiles": 4,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q40.obu",
+      "sha256": "ee321278765a9481f809f11bae0787fab9429f82579a47cdc371f8ac6423b019",
+      "reference": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q40.yuv",
+      "reference_sha256": "c2d5d9f2a83bfaad3a01a2f4440610c0807ec7354e92aa276dae82dadfc2debd",
+      "source_sha256": "448075341d606255ad21c980ae7790c014c1160b1cb1821e091f91813e66a6f2",
+      "source_exact": false,
+      "quality": 40,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q40.webm",
+      "webm_sha256": "8559182cc569d7ed2c3270d5be1e138d6754202eeaffc133ac66479f42978e50",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "phase": 0,
+      "tiles": 1,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40.obu",
+      "sha256": "f2a076672a334f649cdcfc4ccdb21b29bc513d2f54e377eb6d6485a26b355bc6",
+      "reference": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40.yuv",
+      "reference_sha256": "87157003b72b3ecf942f695ab1f8b416266c7a4884b0ef9acdbc4490b01e2083",
+      "source_sha256": "448075341d606255ad21c980ae7790c014c1160b1cb1821e091f91813e66a6f2",
+      "source_exact": false,
+      "quality": 40,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40.webm",
+      "webm_sha256": "5406ff195518cb56cf3766fe5a51ee05b664165522b65bd900c45d580f86535f",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "phase": 0,
+      "tiles": 4,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    },
+    {
+      "file": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40-phase1.obu",
+      "sha256": "11f080ee8f1b22d854344cb9b092e4296e52ad0e54fb38032db00e570e66f064",
+      "reference": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40-phase1.yuv",
+      "reference_sha256": "5d2be5be3c2b39ff3532b5187e79b937ee5c02a454e70e9cbb7c40d235551631",
+      "source_sha256": "b1918899c9f261ed243e1aa240dd470902f23db407829d660cccdff26fb90a2d",
+      "source_exact": false,
+      "quality": 40,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40-phase1.webm",
+      "webm_sha256": "970758cc90a4e1151f50516a6191b698fdb434db432a2a1169ba8665282da0a5",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 1,
+      "phase": 1,
+      "tiles": 4,
+      "superblocks": 8,
+      "size": [
+        256,
+        128
+      ]
+    }
+  ]
+}

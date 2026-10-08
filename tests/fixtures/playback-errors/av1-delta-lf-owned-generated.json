@@ -1,0 +1,948 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt0-v0.obu",
+      "sha256": "94e56289f3f3ea57b0e462ef7638feefc4fa92914793f66211177adebfb643f7",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt0-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt0-v0.webm",
+      "webm_sha256": "0fde9a2237fc7efb0179e2aff13df003a2e652d8b387357d2de661a5498d22e0",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt0-v1.obu",
+      "sha256": "75106625e5281ef4361e2eba2feb6061e970a6d36850532a58a5c3bc7ddaba41",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt0-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt0-v1.webm",
+      "webm_sha256": "66f628f1d2ea3f12b055dc9fe42356200999fc6fdc1c0dc5e234f550bf6e2f01",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt0-v-2.obu",
+      "sha256": "da8c39cafd6371cdfb31504ab6cb50ef88a801a4feb83c81a70718543d1824e6",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt0-v-2.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt0-v-2.webm",
+      "webm_sha256": "3707780ca78a76456812af194d923bfcc4ec0eb4eb0da793c358eaee588b482f",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt0-v3.obu",
+      "sha256": "ba4059e13931efb620bfd5127289d0065f8953dccfcf07217dc430de149e2ff3",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt0-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt0-v3.webm",
+      "webm_sha256": "9c1f99aad2a5010254cc1ce3b49664f6e4d6085ff01a512b111f5ca1a7a3f2f8",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt0-v-63.obu",
+      "sha256": "ed547beb0801645386c1b096e77282cd1613f232b85a35fb92d07e1bf40b6e17",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt0-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt0-v-63.webm",
+      "webm_sha256": "2c6f9bd32fb38b9c256c3e5906f59fbc56602f660ccaf9040b1729cce8d49a5e",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt0-v255.obu",
+      "sha256": "ddcc88b248810b56726f3457d3ba317f61ac7b959fbf745f469e4e4a50d09d6d",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt0-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt0-v255.webm",
+      "webm_sha256": "3e5c8f4460de512cf9ae9d008c756d498d3f4a92c5e6e58347b56112719e88c6",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt1-v0.obu",
+      "sha256": "a39999a4818ffd213dfce83a8254d2e70c904f02b64279fb874000c1f64f071d",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt1-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt1-v0.webm",
+      "webm_sha256": "b29c8d18585cfce82d9c8b74ab453b526b97436a81b6129dbd4fa591512a81fb",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt1-v1.obu",
+      "sha256": "03b5c99ea7cdbe2a3c896f3ccca88b51f1000abb23da780083720e3cbf25e6e4",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt1-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt1-v1.webm",
+      "webm_sha256": "f82a3b130b0324468503f07b341a99c6e735d822ec416b89e0f1542027fcc8e2",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt1-v-2.obu",
+      "sha256": "19ff5cfa7cfc2d3eb651e346c65e2438572e5eec03e965464b9f6fa7869616fa",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt1-v-2.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt1-v-2.webm",
+      "webm_sha256": "42ec70f8429093a91a76183973301e7f4986fd4f4037dc897c8b4f6079a9fc6e",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt1-v3.obu",
+      "sha256": "159ecf498792a07c6138bc8aabb8b6e9af37b4a1f6042a7c995c122de6d8cced",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt1-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt1-v3.webm",
+      "webm_sha256": "efedd99b329f53354b8801486b1ddf756f8c081ff7af2e15f823c9109cbde7b8",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt1-v-63.obu",
+      "sha256": "711cc5d599e554b4a8571f8dfbf8bd9010f45bd51c8b9042d4a10e538cfe319f",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt1-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt1-v-63.webm",
+      "webm_sha256": "390059041e3ab05d27cb648c364e802c6d07d0fd87935750f2a89d5895165431",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi0-adapt1-v255.obu",
+      "sha256": "3a4e4176c0f135c95a153bbb31fd47ba58c5eac48202faf5ad66cc2f7ae89881",
+      "reference": "av1-delta-lf-owned-r0-multi0-adapt1-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r0-multi0-adapt1-v255.webm",
+      "webm_sha256": "a866d9b6be1ba1826cd8459af474e564e3e2205257c7c3deae273d61c28af6c0",
+      "resolution": 0,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi1-adapt0-v1_-2_3_-63.obu",
+      "sha256": "0168b25aae629efc703ee0a993204a1921bacba133ebbb3eee0234408f552cb4",
+      "reference": "av1-delta-lf-owned-r0-multi1-adapt0-v1_-2_3_-63.yuv",
+      "reference_sha256": "b5ccf801b3fdfe0a24b76d9db914e73ecb33bf1f391633115510c93f5b35d7bf",
+      "webm": "av1-delta-lf-owned-r0-multi1-adapt0-v1_-2_3_-63.webm",
+      "webm_sha256": "f3d1da8ccb0c91eb23521b69d54b30a2deb601d1a7c089faed31d1fa835cc309",
+      "resolution": 0,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi1-adapt0-v-255_255_-3_2.obu",
+      "sha256": "309aedd3eb25fb9a2bae94532e4c98d64984dcd48027953c7fa70cbc38d2c3b7",
+      "reference": "av1-delta-lf-owned-r0-multi1-adapt0-v-255_255_-3_2.yuv",
+      "reference_sha256": "aa4a23cd2a109dd3c37843f977a3028785ec73a2abb5b92ed4ca2698de4ff025",
+      "webm": "av1-delta-lf-owned-r0-multi1-adapt0-v-255_255_-3_2.webm",
+      "webm_sha256": "53eceace7a3dbf5a74a1b8b7aaee8fd8d32d2aa61eff77490caa4b1051a5294a",
+      "resolution": 0,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi1-adapt1-v1_-2_3_-63.obu",
+      "sha256": "dc3980479776901cd76d27d67253236103a1498e24cc83eeafd5f4498a9e237a",
+      "reference": "av1-delta-lf-owned-r0-multi1-adapt1-v1_-2_3_-63.yuv",
+      "reference_sha256": "b5ccf801b3fdfe0a24b76d9db914e73ecb33bf1f391633115510c93f5b35d7bf",
+      "webm": "av1-delta-lf-owned-r0-multi1-adapt1-v1_-2_3_-63.webm",
+      "webm_sha256": "e5d995eeff0b01c30b06ef2ccebfd5f741f8400318c7d5072f5c8e9407a67e7a",
+      "resolution": 0,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r0-multi1-adapt1-v-255_255_-3_2.obu",
+      "sha256": "0f10f8f15addcd8582cf52a892716d89e7e25089403bfbee7873aa02b1f543dc",
+      "reference": "av1-delta-lf-owned-r0-multi1-adapt1-v-255_255_-3_2.yuv",
+      "reference_sha256": "aa4a23cd2a109dd3c37843f977a3028785ec73a2abb5b92ed4ca2698de4ff025",
+      "webm": "av1-delta-lf-owned-r0-multi1-adapt1-v-255_255_-3_2.webm",
+      "webm_sha256": "259232356f44b38bd471bc2fd6156146c95c339ad9710663ac183cfd6f279998",
+      "resolution": 0,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt0-v0.obu",
+      "sha256": "f57c1a2238a2c621e2352fcd642af49eeba0933450d8053f2cd6bdaac61a3f01",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt0-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt0-v0.webm",
+      "webm_sha256": "ae4bc61407839b37183ff5bc32a6df95b6bddc7f7e963462e462ce33021104da",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt0-v1.obu",
+      "sha256": "30d5b24c9b946daa8e08b0c411319adef7bd60fd7ba9ae4af8257d6c8e01784f",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt0-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt0-v1.webm",
+      "webm_sha256": "221b6f68822962c4a2d1aaf747840547ecc0dab3fae3e4f81030c0531ea7bdf4",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt0-v-2.obu",
+      "sha256": "cf9339ce2df22c27d97bdd3f2a3a59c873e5178a412ea8d8d28f57b7f8758b64",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt0-v-2.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt0-v-2.webm",
+      "webm_sha256": "eb06300edc36a7faab946b1e6b0fe5c9ab8ed6a34100d1392cbc519ab2b0900d",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt0-v3.obu",
+      "sha256": "9ed0ca49501947b9d24f4478d6ad4b57ce823e118dc9c5194a41a38fc4aa698e",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt0-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt0-v3.webm",
+      "webm_sha256": "89a39d25cd0e960a6e6fd8086def1bc9aa5f231353bca09d494f93c0dbd2d0fb",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt0-v-63.obu",
+      "sha256": "7e0a65d3ee17e0c10450d700613f4a66460657761a511aedb1849e3437579bc8",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt0-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt0-v-63.webm",
+      "webm_sha256": "3b6e828a9326a50583d5fe9d529733ee686dc352c9cac918894bfaf3045f3804",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt0-v255.obu",
+      "sha256": "a40d7c23933bc4510ae565e49b50f5fd88e160a1de6808ec4f676a138383c2e2",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt0-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt0-v255.webm",
+      "webm_sha256": "68ca6cc3da3c3d1963a81899fc134029e50bf5455d7af14dc377091060b9bd37",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt1-v0.obu",
+      "sha256": "e5580ceeffdcddda3ebd524f430039a9e72b52267a3010837802880b96b057c4",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt1-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt1-v0.webm",
+      "webm_sha256": "3c1270b0794571ca5e421203fd970c1ba8089256a67724f005134712465e4fc2",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt1-v1.obu",
+      "sha256": "a36857171263731a2e804cf4e7b1e6d97375120c1d184d963a599fda634ab4f0",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt1-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt1-v1.webm",
+      "webm_sha256": "d405564636d5549466eb7c7309270b3bcf05b58d98550cadbff2758809350817",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt1-v-2.obu",
+      "sha256": "3bd42c49dc1bf97be30784d3c2409bd4ca236d3e879e3cf2548854745abf77b7",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt1-v-2.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt1-v-2.webm",
+      "webm_sha256": "e7b7fd76b90fddbbf080ca2132128b79b364595269e132cd411d5e877e770397",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt1-v3.obu",
+      "sha256": "9a039206bf42775b318b935b352e1dde7f6a89db67f5d360cd74754130b467a5",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt1-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt1-v3.webm",
+      "webm_sha256": "abf98c9508923bcedcc8df542f62d6a207b959bfb9a81dd08cf4bdab2708abdb",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt1-v-63.obu",
+      "sha256": "9019df350c111a7190339aadc1ef2fd53032b0f12e96fc2f80a9400a99ef0a69",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt1-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt1-v-63.webm",
+      "webm_sha256": "d6f6168bc4b279afcae7fea2afd3ea1ef75cd336a2aedfe96a141ab232152835",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi0-adapt1-v255.obu",
+      "sha256": "fc03adfe1ee8479d8ade9880cd9cde9037c2a6ab002d7e217d76565bc7af8d77",
+      "reference": "av1-delta-lf-owned-r1-multi0-adapt1-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r1-multi0-adapt1-v255.webm",
+      "webm_sha256": "39f08500a17fc051fb29dce1e6f0d01e49d83bed14ecee4021803bb96bcb2ce1",
+      "resolution": 1,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi1-adapt0-v1_-2_3_-63.obu",
+      "sha256": "29bfd535bebdcf540223494ff7aee59ac92e7d10a7877d23b4559f3ec91dc7de",
+      "reference": "av1-delta-lf-owned-r1-multi1-adapt0-v1_-2_3_-63.yuv",
+      "reference_sha256": "b5ccf801b3fdfe0a24b76d9db914e73ecb33bf1f391633115510c93f5b35d7bf",
+      "webm": "av1-delta-lf-owned-r1-multi1-adapt0-v1_-2_3_-63.webm",
+      "webm_sha256": "b0caa604f8bd84aca109e303e534a4822c37f948ab2bc4fdc9ea55dc53d66429",
+      "resolution": 1,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi1-adapt0-v-255_255_-3_2.obu",
+      "sha256": "120bf46d24a10909e6cd11350863593126fc5eb61ce7946f5244498777209bbf",
+      "reference": "av1-delta-lf-owned-r1-multi1-adapt0-v-255_255_-3_2.yuv",
+      "reference_sha256": "aa4a23cd2a109dd3c37843f977a3028785ec73a2abb5b92ed4ca2698de4ff025",
+      "webm": "av1-delta-lf-owned-r1-multi1-adapt0-v-255_255_-3_2.webm",
+      "webm_sha256": "ddd2799ba73080b9eb74c0e68a12b77675c8ccc21341b2a415fe102a1f69f303",
+      "resolution": 1,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi1-adapt1-v1_-2_3_-63.obu",
+      "sha256": "c44616515d99d0c55c7d96ada0100b1d0b15cb46a0c16423832a05df295c9d16",
+      "reference": "av1-delta-lf-owned-r1-multi1-adapt1-v1_-2_3_-63.yuv",
+      "reference_sha256": "b5ccf801b3fdfe0a24b76d9db914e73ecb33bf1f391633115510c93f5b35d7bf",
+      "webm": "av1-delta-lf-owned-r1-multi1-adapt1-v1_-2_3_-63.webm",
+      "webm_sha256": "5e1431933a4d75743b4be312a27bbddb23aa2eab83162e6d1d1eb01f878294ef",
+      "resolution": 1,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r1-multi1-adapt1-v-255_255_-3_2.obu",
+      "sha256": "2153f1587bac5bf9b27f8e9772e9c9ba6196c1bdf55cdc80296245b06e9efa63",
+      "reference": "av1-delta-lf-owned-r1-multi1-adapt1-v-255_255_-3_2.yuv",
+      "reference_sha256": "aa4a23cd2a109dd3c37843f977a3028785ec73a2abb5b92ed4ca2698de4ff025",
+      "webm": "av1-delta-lf-owned-r1-multi1-adapt1-v-255_255_-3_2.webm",
+      "webm_sha256": "9002c5a09fda5aaf0f6feab5314423ded4fb242585c5830b51e78bb235553faa",
+      "resolution": 1,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt0-v0.obu",
+      "sha256": "e2b86699b1268ce6f171c88053c5d9a59845b6edff36f9df9cb61161b2aaeb3a",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt0-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt0-v0.webm",
+      "webm_sha256": "5af56918eacb4326085cbf42d7ccf9a0fb37bb3b08a9b124cbed56451b5d1c4e",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt0-v1.obu",
+      "sha256": "14c2ace5a9c0d123e764a16e2007b8331b44c4bf2427bb936cacc4328fea7888",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt0-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt0-v1.webm",
+      "webm_sha256": "95014df5c99aa301fdc25bf3598263dd1be7aca92e6a0beafdafc00918e5992c",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt0-v-2.obu",
+      "sha256": "ae8daa2a6cfe40a7389420582bc43cbcfc845f70a0d87c5ba7743ab8db365d8d",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt0-v-2.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt0-v-2.webm",
+      "webm_sha256": "cd86eb4931ec997b8a51257554ed2f399a929bcf6955031bf524ed517e214cee",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt0-v3.obu",
+      "sha256": "3e6c04cf1bc71d2d538f4023193af9665f95aacb5de287df13f47ef778147298",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt0-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt0-v3.webm",
+      "webm_sha256": "48e74355515ce3b216464d49a7fbe27ab22067ce061ff72640c4b0f814415438",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt0-v-63.obu",
+      "sha256": "121f9adf49c618183acd09456ac5ae70188a18bf55a7c9cb414796951272c5d0",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt0-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt0-v-63.webm",
+      "webm_sha256": "0c1458443eb836a3dc8e15cbf6a28342012354adc5074df8193a9e2a3b51e63b",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt0-v255.obu",
+      "sha256": "fe294f0b72dfc8dbc5d759e7b1d4220e7dc542c8bb782f49ce72ec7c730ac822",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt0-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt0-v255.webm",
+      "webm_sha256": "2df75ab9c35ca38c0762b6ebb4810f2c8aed014f6bdc3bd36b473c8f5ae9f716",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt1-v0.obu",
+      "sha256": "664a1ae2b631abdd1da4f1283d8cfce3f9a1688f5f215fcdf5efa483ba5e9f94",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt1-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt1-v0.webm",
+      "webm_sha256": "ad09d46ac6a0ca9b631854f246a3af972c43c8b1480d42d86a8f92521968f5b2",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt1-v1.obu",
+      "sha256": "d36f5d26ceefb833e04aa811d0591f8370c0d372a94fbae2a9142158bbbae22d",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt1-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt1-v1.webm",
+      "webm_sha256": "cb19df13891a03198fdcb62777362374b206b18584bf75aa99267e1199e9e3ae",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt1-v-2.obu",
+      "sha256": "3758c184080572716c4ad542e244ceded4502942bd63401169acf73a182b01df",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt1-v-2.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt1-v-2.webm",
+      "webm_sha256": "bf9327e7d79c770648ee8bf73fec19521ee8a1742a15bafe46da5926e4b08382",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt1-v3.obu",
+      "sha256": "5e14bd6fba74903a5217b795fbf81e7ed89475b0f1ad3e7240e0ce4895361dae",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt1-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt1-v3.webm",
+      "webm_sha256": "e13a7597dee6fde3710e1ec3decca5c8ab7fec50557b1258d38119b77de17122",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt1-v-63.obu",
+      "sha256": "f30a02dc688632bdff07752903fe9ee56f680423feca904ce718a798491b2f26",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt1-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt1-v-63.webm",
+      "webm_sha256": "912285fbe0d73cbac959a4bba47a4db155b94b35533f7f98edae0ede6a96ea3c",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi0-adapt1-v255.obu",
+      "sha256": "33137a033291c0815082052e030dd90a7724f51a285e50f374c4b9a54da743e4",
+      "reference": "av1-delta-lf-owned-r2-multi0-adapt1-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r2-multi0-adapt1-v255.webm",
+      "webm_sha256": "f59d269b7dfdd62eedc7d759225fa7265f570fd4e1f566f08c3d2ed7d2211c8e",
+      "resolution": 2,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi1-adapt0-v1_-2_3_-63.obu",
+      "sha256": "f427de4dbd1e2f1778aa5d5dc885bab61f2254997beb4531235f27dd59cdc004",
+      "reference": "av1-delta-lf-owned-r2-multi1-adapt0-v1_-2_3_-63.yuv",
+      "reference_sha256": "b5ccf801b3fdfe0a24b76d9db914e73ecb33bf1f391633115510c93f5b35d7bf",
+      "webm": "av1-delta-lf-owned-r2-multi1-adapt0-v1_-2_3_-63.webm",
+      "webm_sha256": "e010519f5693af59f54abdaa762d48f09d815f95c4b7ba6a0540fe75995cd54b",
+      "resolution": 2,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi1-adapt0-v-255_255_-3_2.obu",
+      "sha256": "3ae4c04e7909afcec9c8324092d7555c006465c7ccded8c32d3c78b7bbd234e9",
+      "reference": "av1-delta-lf-owned-r2-multi1-adapt0-v-255_255_-3_2.yuv",
+      "reference_sha256": "aa4a23cd2a109dd3c37843f977a3028785ec73a2abb5b92ed4ca2698de4ff025",
+      "webm": "av1-delta-lf-owned-r2-multi1-adapt0-v-255_255_-3_2.webm",
+      "webm_sha256": "5fe8b1b098dbf1bb647b75969473b6cd0adc036e6dbb4d95f98e9f79d3812e28",
+      "resolution": 2,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi1-adapt1-v1_-2_3_-63.obu",
+      "sha256": "87d7bc58e47054e760c61ed6a222864bb222adb5427f08e79e07c91e81a5ce29",
+      "reference": "av1-delta-lf-owned-r2-multi1-adapt1-v1_-2_3_-63.yuv",
+      "reference_sha256": "b5ccf801b3fdfe0a24b76d9db914e73ecb33bf1f391633115510c93f5b35d7bf",
+      "webm": "av1-delta-lf-owned-r2-multi1-adapt1-v1_-2_3_-63.webm",
+      "webm_sha256": "7a7d7c713c8c44cec1d02cc4dfaad374c80b5c885d27c06c601af1424d19e4dc",
+      "resolution": 2,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r2-multi1-adapt1-v-255_255_-3_2.obu",
+      "sha256": "5dee8b69f0bb19b4cbb5b6497e61b26b97e83b7a00cf8ed14f3ba4821efff3a8",
+      "reference": "av1-delta-lf-owned-r2-multi1-adapt1-v-255_255_-3_2.yuv",
+      "reference_sha256": "aa4a23cd2a109dd3c37843f977a3028785ec73a2abb5b92ed4ca2698de4ff025",
+      "webm": "av1-delta-lf-owned-r2-multi1-adapt1-v-255_255_-3_2.webm",
+      "webm_sha256": "24fce7888be9acb73c725b8e91d7f7f792449dd6807454b72e6b8b4f7bf2efa6",
+      "resolution": 2,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt0-v0.obu",
+      "sha256": "4106270f18c4986eed204b3cc73d01c89194e0153c86d0562c5038b6c938dab8",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt0-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt0-v0.webm",
+      "webm_sha256": "e9980eadace187ed69e000dee0d4212fd7653ab3b2b8b763001ebc2d2e30c586",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt0-v1.obu",
+      "sha256": "1f656c5b1f787857ebca3762a68280e0cf6720a3e2722c712203662abd31df2c",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt0-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt0-v1.webm",
+      "webm_sha256": "ab0288d6f5b364e7f71e82367598fd1cd547792dce518cee2c8e9becd7186efd",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt0-v-2.obu",
+      "sha256": "431a3cb5868ced4a4658c051456f9e8b0fca1200c6da92d61f33c2cf97a351fa",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt0-v-2.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt0-v-2.webm",
+      "webm_sha256": "4b5141a694265eea1ad94f9d592c12eb3e0bc300d4297e963153e5d3af7e0cec",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt0-v3.obu",
+      "sha256": "6308d707377f2d04871a46fef18f3f2a90bbf9e9687606ba5c124e82327de13c",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt0-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt0-v3.webm",
+      "webm_sha256": "5a9f1d10045cf34a914dedef975762779f8d953bd3b7f01bcaec151c02cf155f",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt0-v-63.obu",
+      "sha256": "6b17fa8cd1e6333446666aef772c897e71c061d5ddaff809c3a16a72235519fe",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt0-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt0-v-63.webm",
+      "webm_sha256": "c99e17b8138c362072813592859d441de1de06e0b8d4dfa9bc4052b90ea3df45",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt0-v255.obu",
+      "sha256": "2b107e5471866f498ba071d0ebca57946d320eb2e53ca88ba165fe037c1e4209",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt0-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt0-v255.webm",
+      "webm_sha256": "534a916ea2201b1625673345483cdd165dfa07d0efe9a1327748503f0e447af1",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": false,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt1-v0.obu",
+      "sha256": "7319491eb5a253830a29fd5cce3c18e02a91aba90071b1cde49077456bf73a26",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt1-v0.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt1-v0.webm",
+      "webm_sha256": "c4c16fc39b2bda8c7c5101c914c2391f1f699d3b5ed50e122d0392c18d369eea",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        0
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt1-v1.obu",
+      "sha256": "a7b2b9623f8b91722b28ba9c4df20cf384bb927bb8787d08755d5f5d2d75a0df",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt1-v1.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt1-v1.webm",
+      "webm_sha256": "e5ed1972d8f5d441677fb0674c6c68d9ec09e67d9436cc2f4fb577210352fc40",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        1
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt1-v-2.obu",
+      "sha256": "f8ef36a09dc3d4198b6a4e7e3b5f80ff06c4f095b47c647ba1601b31591482fa",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt1-v-2.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt1-v-2.webm",
+      "webm_sha256": "278764199aad70ca8a550445be45281e9dce414f3005e75d667361d5056abf67",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt1-v3.obu",
+      "sha256": "32cee8e526db295177ef7cc5f6ab504fa42693c8cb334b4d27eff2cc75b726f3",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt1-v3.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt1-v3.webm",
+      "webm_sha256": "c2fbfce95fd8f4c7a1a7df9d7a927ff0c55ea59fe3b574fc0b811dcdfea5e649",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        3
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt1-v-63.obu",
+      "sha256": "5301df3b5e90f3c7d5b29356b61c024bc28cd11b945082c4100d88ce68e9a257",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt1-v-63.yuv",
+      "reference_sha256": "68b41c326587a239a059e1c69e6b446ab6d9fcfb4094a7cb9904e7261c62fdd4",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt1-v-63.webm",
+      "webm_sha256": "57f7db6fd33efdf22497974c9bef7558eb1f146fb16ccd49174b3584e19a8981",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi0-adapt1-v255.obu",
+      "sha256": "a86f20356d546f1268066ee24296c0144a1a297f2996909dd1ee7d70f3004896",
+      "reference": "av1-delta-lf-owned-r3-multi0-adapt1-v255.yuv",
+      "reference_sha256": "ef0332a6a9c191799d8bc46592b370164d176d49f10c3c5bb38284fa2d8866a1",
+      "webm": "av1-delta-lf-owned-r3-multi0-adapt1-v255.webm",
+      "webm_sha256": "fc81c806dc60659df3e2e338d5eae8dfe156c1094228c06b958d879e33f19332",
+      "resolution": 3,
+      "multi": false,
+      "adaptive": true,
+      "values": [
+        255
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi1-adapt0-v1_-2_3_-63.obu",
+      "sha256": "b39654f8f9a40dd184ca7a9a6c590b781433873876e8163e8f2fcafcdde85920",
+      "reference": "av1-delta-lf-owned-r3-multi1-adapt0-v1_-2_3_-63.yuv",
+      "reference_sha256": "80ea923026b8540fc8d4f7808b8d56e1d4ff2f22956a5985fc4a17b65a1a08e3",
+      "webm": "av1-delta-lf-owned-r3-multi1-adapt0-v1_-2_3_-63.webm",
+      "webm_sha256": "3b21aa802cd00ca22c5db8eb76f3d485988909740a849f3bcfef5142bdd7ab7b",
+      "resolution": 3,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi1-adapt0-v-255_255_-3_2.obu",
+      "sha256": "faa7920fdf20c49b4ead427348cb05a8ef0b5b8bb81c8f9f5550fb5e739409cc",
+      "reference": "av1-delta-lf-owned-r3-multi1-adapt0-v-255_255_-3_2.yuv",
+      "reference_sha256": "a3b458b433059760accf6908104b05b718e6dae2b16149fa43ef44421107803e",
+      "webm": "av1-delta-lf-owned-r3-multi1-adapt0-v-255_255_-3_2.webm",
+      "webm_sha256": "8758762644786bf545b1879684c8ac6a4a0ec2299d07b6364015e7264f8a90c1",
+      "resolution": 3,
+      "multi": true,
+      "adaptive": false,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi1-adapt1-v1_-2_3_-63.obu",
+      "sha256": "07bef1027aef9cda262b756e5547d51a89f621a482b7b48f46302803b038c126",
+      "reference": "av1-delta-lf-owned-r3-multi1-adapt1-v1_-2_3_-63.yuv",
+      "reference_sha256": "80ea923026b8540fc8d4f7808b8d56e1d4ff2f22956a5985fc4a17b65a1a08e3",
+      "webm": "av1-delta-lf-owned-r3-multi1-adapt1-v1_-2_3_-63.webm",
+      "webm_sha256": "1f2ff7ed6607e2a8ec8859ee568d3a726e6e9d649aae5f41e154a8cbf6e4e15e",
+      "resolution": 3,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        1,
+        -2,
+        3,
+        -63
+      ]
+    },
+    {
+      "file": "av1-delta-lf-owned-r3-multi1-adapt1-v-255_255_-3_2.obu",
+      "sha256": "244476245e7238bde06be816a3422dd38ceb29f1e6da91d41f0b5fec832a6711",
+      "reference": "av1-delta-lf-owned-r3-multi1-adapt1-v-255_255_-3_2.yuv",
+      "reference_sha256": "a3b458b433059760accf6908104b05b718e6dae2b16149fa43ef44421107803e",
+      "webm": "av1-delta-lf-owned-r3-multi1-adapt1-v-255_255_-3_2.webm",
+      "webm_sha256": "78b9f2c8b68a33f7b848c4b5ebea33794140f1683e1d1b68871b86da43931d02",
+      "resolution": 3,
+      "multi": true,
+      "adaptive": true,
+      "values": [
+        -255,
+        255,
+        -3,
+        2
+      ]
+    }
+  ]
+}
