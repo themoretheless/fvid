@@ -859,3 +859,17 @@ and deterministically. Element semantics follow
 https://www.matroska.org/technical/elements.html#OutputSamplingFrequency .
 ASC-only inference when OutputSamplingFrequency is omitted, implicit output
 clock discovery and PS playback without SBR fills remain separate gaps.
+
+Mono PCE PS qualification (2026-10-09): native PS decoding and the syntax probe
+accept an explicitly configured sole normal front SCE with a nonzero tag (3).
+Matching in-band PCEs are validated; wrong SCE tags, changed program layouts and
+checkpoints from another PCE configuration are refused transactionally. Before
+the fix, the original synthetic acceptance fixture reproduced the exact blanket
+`native PS decoder requires one mono AAC-LC element` refusal. Six LC/SBR/PS
+960/1024 cases cover both 24/48 kHz output modes against independent PCM,
+checkpoint replay, reset and EOF. Twelve MP4/Matroska videos cover root/owned
+PCM, negotiated reader factories and WAV export, including Matroska gaps.
+Fifteen assets regenerate deterministically using only Python stdlib and owned
+synthetic inputs; ordinary tests do not invoke generators or FFmpeg. This does
+not qualify coupling, multiple elements, height layouts, general SBR/PCE or
+missing-SBR-fill PS playback.

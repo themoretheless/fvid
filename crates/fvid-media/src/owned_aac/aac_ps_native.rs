@@ -17,6 +17,7 @@ use super::{
 #[derive(Clone)]
 pub struct NativePsAacDecoder {
     config: AacConfig,
+    program: Option<aac_pce::ProgramConfig>,
     output_rate: u32,
     mode: OutputRate,
     requires_in_band: bool,
@@ -72,14 +73,7 @@ impl NativePsAacDecoder {
         output_rate: u32,
         requires_in_band: bool,
     ) -> Result<Self> {
-        if parsed.program.is_some()
-            || parsed.core.channels != 1
-            || parsed.core.channel_configuration != 1
-        {
-            return Err(unsupported(
-                "native PS decoder requires one mono AAC-LC element",
-            ));
-        }
+        validate_mono_program(&parsed)?;
         let double = parsed
             .core
             .sample_rate
@@ -98,6 +92,7 @@ impl NativePsAacDecoder {
         let synthesis = LongSineSynthesis::new(usize::from(parsed.core.frame_samples))?;
         Ok(Self {
             config: parsed.core,
+            program: parsed.program,
             output_rate,
             mode,
             requires_in_band,
@@ -128,6 +123,7 @@ impl NativePsAacDecoder {
     }
     pub fn restore(&mut self, checkpoint: &Checkpoint) -> Result<()> {
         if self.config != checkpoint.state.config
+            || self.program != checkpoint.state.program
             || self.output_rate != checkpoint.state.output_rate
             || self.mode != checkpoint.state.mode
             || self.requires_in_band != checkpoint.state.requires_in_band
@@ -181,7 +177,8 @@ impl NativePsAacDecoder {
                     if core.is_some() {
                         return Err(invalid("duplicate PS AAC mono element"));
                     }
-                    bits.read(4)?; // SCE tag: one element, no PCE mapping.
+                    let tag = bits.read(4)? as u8;
+                    validate_sce_tag(trial.program.as_ref(), tag)?;
                     let channel = ChannelData::read(&mut bits, &trial.config)?;
                     let spectrum = channel.spectrum_with_noise(&trial.config, &mut trial.noise)?;
                     let spectrum = channel.apply_tns(&trial.config, spectrum)?;
@@ -199,6 +196,7 @@ impl NativePsAacDecoder {
                     core = Some(pcm);
                 }
                 4 => aac_pce::skip_data_stream(&mut bits)?,
+                5 => read_program(&mut bits, trial.program.as_ref())?,
                 6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
                     let pcm = core
                         .as_ref()
@@ -226,7 +224,7 @@ impl NativePsAacDecoder {
                 7 => break,
                 _ => {
                     return Err(unsupported(
-                        "PS AAC block requires a sole mono SCE without coupling or PCE",
+                        "PS AAC block requires a sole mono SCE without coupling",
                     ));
                 }
             }
@@ -263,6 +261,7 @@ impl NativePsAacDecoder {
 #[derive(Clone)]
 pub struct InBandPsProbe {
     config: AacConfig,
+    program: Option<aac_pce::ProgramConfig>,
     sbr: super::aac_sbr_history::Stream,
     ps: super::aac_ps_history::Stream,
     seen: bool,
@@ -276,17 +275,11 @@ impl InBandPsProbe {
             ));
         }
         parsed.resolve_output_rate(output_rate)?;
-        if parsed.program.is_some()
-            || parsed.core.channels != 1
-            || parsed.core.channel_configuration != 1
-        {
-            return Err(unsupported(
-                "in-band PS probe requires one mono AAC-LC element",
-            ));
-        }
+        validate_mono_program(&parsed)?;
         BandTables::for_config(&parsed.core)?;
         Ok(Self {
             config: parsed.core,
+            program: parsed.program,
             sbr: Default::default(),
             ps: Default::default(),
             seen: false,
@@ -313,11 +306,13 @@ impl InBandPsProbe {
                     if core {
                         return Err(invalid("duplicate PS AAC mono element"));
                     }
-                    bits.read(4)?;
+                    let tag = bits.read(4)? as u8;
+                    validate_sce_tag(trial.program.as_ref(), tag)?;
                     ChannelData::read(&mut bits, &trial.config)?;
                     core = true;
                 }
                 4 => aac_pce::skip_data_stream(&mut bits)?,
+                5 => read_program(&mut bits, trial.program.as_ref())?,
                 6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
                     if !core {
                         return Err(invalid("PS SBR fill precedes mono element"));
@@ -346,7 +341,7 @@ impl InBandPsProbe {
                 7 => break,
                 _ => {
                     return Err(unsupported(
-                        "PS AAC block requires a sole mono SCE without coupling or PCE",
+                        "PS AAC block requires a sole mono SCE without coupling",
                     ));
                 }
             }
@@ -361,4 +356,52 @@ impl InBandPsProbe {
         *self = trial;
         Ok(seen)
     }
+}
+
+fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
+    if parsed.core.channels != 1 {
+        return Err(unsupported(
+            "native PS decoder requires one mono AAC-LC element",
+        ));
+    }
+    if let Some(program) = &parsed.program {
+        if parsed.core.channel_configuration != 0
+            || !program.coupling.is_empty()
+            || program.elements.len() != 1
+            || program.elements[0].pair
+            || program.elements[0].position != aac_pce::Position::Front
+            || program.height_layers()? != [aac_pce::HeightLayer::Normal]
+            || program.pcm_layout()? != (4, vec![0])
+        {
+            return Err(unsupported(
+                "native PS PCE requires a sole normal front mono SCE without coupling",
+            ));
+        }
+    } else if parsed.core.channel_configuration != 1 {
+        return Err(unsupported(
+            "native PS decoder requires one mono AAC-LC element",
+        ));
+    }
+    Ok(())
+}
+fn validate_sce_tag(program: Option<&aac_pce::ProgramConfig>, tag: u8) -> Result<()> {
+    if program.is_some_and(|p| p.elements[0].tag != tag) {
+        return Err(invalid("PS AAC mono tag is not configured by PCE"));
+    }
+    Ok(())
+}
+fn read_program(bits: &mut BitReader<'_>, expected: Option<&aac_pce::ProgramConfig>) -> Result<()> {
+    let program = aac_pce::ProgramConfig::read(bits, 0)?;
+    let expected = expected
+        .ok_or_else(|| unsupported("in-band PS PCE needs an explicit configured program"))?;
+    if program.coupling != expected.coupling
+        || program.elements != expected.elements
+        || program.sample_rate != expected.sample_rate
+        || program.object_type != expected.object_type
+        || program.height_layers()? != expected.height_layers()?
+        || program.pcm_layout()? != expected.pcm_layout()?
+    {
+        return Err(invalid("PS AAC in-band PCE changed the configured layout"));
+    }
+    Ok(())
 }

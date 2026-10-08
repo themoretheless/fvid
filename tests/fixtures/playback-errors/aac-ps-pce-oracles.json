@@ -1,0 +1,326 @@
+{
+  "cases": [
+    {
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 23
+        },
+        {
+          "offset": 23,
+          "bytes": 139
+        },
+        {
+          "offset": 162,
+          "bytes": 23
+        }
+      ],
+      "kind": "LC",
+      "slots": 15,
+      "video": {
+        "file": "he-aac-ps-pce-lc-960-synthetic.mp4",
+        "sha256": "0e225e9dba162844d81af51bbc1638013d872ec6661fea1f75b46c8964f4f421",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1304058400000600"
+      },
+      "asc_core": "1304058400000600",
+      "asc_wrong_tag": "1304058400000800",
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      },
+      "matroska_file": "he-aac-ps-pce-lc-960-synthetic.mkv",
+      "matroska_sha256": "79362b27952a6596068fea8c081cc1782c3762b3c35264278c338980cdee7a7b"
+    },
+    {
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 23
+        },
+        {
+          "offset": 23,
+          "bytes": 139
+        },
+        {
+          "offset": 162,
+          "bytes": 23
+        }
+      ],
+      "kind": "SBR",
+      "slots": 15,
+      "video": {
+        "file": "he-aac-ps-pce-sbr-960-synthetic.mp4",
+        "sha256": "73e0dbda6c20c0789e024755eded17f31b9f9beb53d5421c37104ef27ebe99ef",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018a02c200000300"
+      },
+      "asc_core": "2b030a02c200000300",
+      "asc_wrong_tag": "2b018a02c200000400",
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      },
+      "matroska_file": "he-aac-ps-pce-sbr-960-synthetic.mkv",
+      "matroska_sha256": "02e53feee131b04b93a53876043123757c49e529e9f3f5ddad131f4e2b2a4f0b"
+    },
+    {
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 23
+        },
+        {
+          "offset": 23,
+          "bytes": 139
+        },
+        {
+          "offset": 162,
+          "bytes": 23
+        }
+      ],
+      "kind": "PS",
+      "slots": 15,
+      "video": {
+        "file": "he-aac-ps-pce-ps-960-synthetic.mp4",
+        "sha256": "7a599b713e1c21e7a7ce9cdb4df7910c3742d70adfb7463f456ae8c468b9d551",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018a02c200000300"
+      },
+      "asc_core": "eb030a02c200000300",
+      "asc_wrong_tag": "eb018a02c200000400",
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      },
+      "matroska_file": "he-aac-ps-pce-ps-960-synthetic.mkv",
+      "matroska_sha256": "e4aa75373b38f005ca73e0759a9eb1e2455719000f7839e9ffea2becca16bb7b"
+    },
+    {
+      "frames": [
+        {
+          "offset": 185,
+          "bytes": 23
+        },
+        {
+          "offset": 208,
+          "bytes": 139
+        },
+        {
+          "offset": 347,
+          "bytes": 23
+        }
+      ],
+      "kind": "LC",
+      "slots": 16,
+      "video": {
+        "file": "he-aac-ps-pce-lc-1024-synthetic.mp4",
+        "sha256": "49b6a29abda3a2aa6d0574acc35fba2cea76cd2e2796dd40fcfbdab39feebc0f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1300058400000600"
+      },
+      "asc_core": "1300058400000600",
+      "asc_wrong_tag": "1300058400000800",
+      "pcm": {
+        "Double": [
+          [
+            1115136,
+            6144
+          ],
+          [
+            1164288,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1213440,
+            3072
+          ],
+          [
+            1238016,
+            3072
+          ]
+        ]
+      },
+      "matroska_file": "he-aac-ps-pce-lc-1024-synthetic.mkv",
+      "matroska_sha256": "978622996dad607502e1020ba6b5be7f3a7339ff4083c0c80258080106d5a476"
+    },
+    {
+      "frames": [
+        {
+          "offset": 185,
+          "bytes": 23
+        },
+        {
+          "offset": 208,
+          "bytes": 139
+        },
+        {
+          "offset": 347,
+          "bytes": 23
+        }
+      ],
+      "kind": "SBR",
+      "slots": 16,
+      "video": {
+        "file": "he-aac-ps-pce-sbr-1024-synthetic.mp4",
+        "sha256": "14c554aa2e52caeb598a4d5f4368790a6b25eabd10a19d31d36c6cc29f0fcf76",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c200000300"
+      },
+      "asc_core": "2b030802c200000300",
+      "asc_wrong_tag": "2b018802c200000400",
+      "pcm": {
+        "Double": [
+          [
+            1115136,
+            6144
+          ],
+          [
+            1164288,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1213440,
+            3072
+          ],
+          [
+            1238016,
+            3072
+          ]
+        ]
+      },
+      "matroska_file": "he-aac-ps-pce-sbr-1024-synthetic.mkv",
+      "matroska_sha256": "60534cc61faec1b64dfae39840bf0823605c700f36232147e2f747767ffa3f80"
+    },
+    {
+      "frames": [
+        {
+          "offset": 185,
+          "bytes": 23
+        },
+        {
+          "offset": 208,
+          "bytes": 139
+        },
+        {
+          "offset": 347,
+          "bytes": 23
+        }
+      ],
+      "kind": "PS",
+      "slots": 16,
+      "video": {
+        "file": "he-aac-ps-pce-ps-1024-synthetic.mp4",
+        "sha256": "d041962a2f58daa71ae80a4b0705d528102171486943983ed5f97eab11e0d3c8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018802c200000300"
+      },
+      "asc_core": "eb030802c200000300",
+      "asc_wrong_tag": "eb018802c200000400",
+      "pcm": {
+        "Double": [
+          [
+            1115136,
+            6144
+          ],
+          [
+            1164288,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1213440,
+            3072
+          ],
+          [
+            1238016,
+            3072
+          ]
+        ]
+      },
+      "matroska_file": "he-aac-ps-pce-ps-1024-synthetic.mkv",
+      "matroska_sha256": "09099bdfcce09afba6ba7b438d2e623bd6b3e407b1d70e1aae4da62e2037e773"
+    }
+  ],
+  "invalid": [
+    {
+      "video": {
+        "file": "he-aac-ps-pce-wrong-sce-tag-synthetic.mp4",
+        "sha256": "c883588a7fe562444287d3687a45107662f9fc3462cda9984410a82e3daa7637",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018802c200000300"
+      },
+      "error": "PS AAC mono tag is not configured by PCE",
+      "failing_packet": 1
+    },
+    {
+      "video": {
+        "file": "he-aac-ps-pce-changed-program-synthetic.mp4",
+        "sha256": "d9c140f25978f730c17fb5a77ace6a7d337a75ec728128ac73e15218bb65aa86",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018802c200000300"
+      },
+      "error": "PS AAC in-band PCE changed the configured layout",
+      "failing_packet": 1
+    }
+  ]
+}

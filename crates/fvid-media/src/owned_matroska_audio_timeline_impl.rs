@@ -12,9 +12,8 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     reader.scan_all()?;
     let index = matroska_audio_index(&reader, selected)?;
     let track = reader.tracks[index].clone();
-    let mut decoder = MatroskaTimelineDecoder::from_matroska(&track)?;
     let in_band_ps = negotiate_matroska_ps(&mut reader, index, || control.check())?;
-    if in_band_ps { decoder = MatroskaTimelineDecoder::with_in_band_ps(&track)?; }
+    let mut decoder = if in_band_ps { MatroskaTimelineDecoder::with_in_band_ps(&track)? } else { MatroskaTimelineDecoder::from_matroska(&track)? };
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
     if track.sample_rate != u64::from(rate) || (!in_band_ps && track.channels != u64::from(channels)) {
