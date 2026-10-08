@@ -1746,3 +1746,19 @@ The MP4 export suite also reuses the original worker source-gap MP4s to assert
 the exact invalid-range refusal only after pending EOF PCM is written to the
 caller-owned raw output. This is a refusal test for an invalid timeline, distinct
 from the valid edited/unequal-window playback and export acceptance tests.
+
+
+## Native in-band PS with LC/SBR ASC
+
+`generate_aac_ps_inband_fixtures.py` creates four
+`he-aac-ps-inband-{lc,sbr}-{960,1024}-synthetic.mp4` videos and
+`aac-ps-inband-oracles.json`. Original authored late-PS packets and AVC seeds
+are unchanged; only original ASC signalling is generated without PS metadata.
+Saved independent PCM from the absence/late-PS oracle covers core/double output.
+`he_aac_ps_inband` accepts the native candidate API, checks actual PS presence,
+full PCM and atomic checkpoint/reset/EOF state. Known trailing-byte malformed
+syntax additionally verifies that a rejected packet cannot latch PS presence.
+Explicit disabled tools remain rejected; an ordinary no-PS mono stream rejects
+the PS candidate at EOF while the normal owned mono decoder accepts it.
+This does not assert automatic player/export container discovery. Generation
+is offline and separate from ordinary tests, without external codec programs.

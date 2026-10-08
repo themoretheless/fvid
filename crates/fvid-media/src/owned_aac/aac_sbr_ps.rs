@@ -24,6 +24,7 @@ pub struct Decoder {
     format: Option<(u32, u8, OutputRate)>,
     next_index: u64,
     previous_ps_present: bool,
+    ps_seen: bool,
     finished: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -37,6 +38,9 @@ pub struct Frame {
 impl Decoder {
     pub fn reset(&mut self) {
         *self = Self::default();
+    }
+    pub fn ps_seen(&self) -> bool {
+        self.ps_seen
     }
     pub fn pending_frame_index(&self) -> Option<u64> {
         self.pending.as_ref().map(|p| p.frame_index)
@@ -127,6 +131,7 @@ impl Decoder {
             frame_index: trial.next_index,
         });
         trial.previous_ps_present = !parsed.is_empty();
+        trial.ps_seen |= !parsed.is_empty();
         trial.next_index = trial
             .next_index
             .checked_add(1)

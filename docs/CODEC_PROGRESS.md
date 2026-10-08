@@ -6807,3 +6807,37 @@ refusal after all pending EOF PCM. Matroska export acceptance still passed.
 Full owned media library 432 passed / 1 existing ignored; full offline player
 library 906 passed / 23 existing ignored. Three new MP4 assets regenerate
 byte-identically; Python syntax, Rust formatting and diff checks pass.
+
+
+## Native in-band PS candidate API with unspecified ASC signalling
+
+`NativePsAacDecoder::new_with_in_band_ps(asc, output_rate)` accepts mono
+AAC-LC or SBR ASC whose PS flag is unspecified. It negotiates a caller-supplied
+core/double output clock and reuses the owned full packet parser and delayed
+SBR/PS pipeline. `ps_detected()` reports actual accepted PS elements, including
+startup elements before an independent stereo header; it is sticky until reset
+and is retained by checkpoints. A malformed later packet rolls back the flag
+together with core/extension/pending histories. Candidate EOF without any PS
+element rejects the candidate instead of classifying ordinary mono AAC as PS.
+The normal AAC decoder still accepts the corresponding mono SBR stream.
+
+The strict `new` API remains for explicitly signalled PS. Candidate construction
+honors explicit PS=false or SBR=false; checkpoint compatibility includes this
+EOF/presence policy. This is the native decoding/discovery API, not automatic
+container probing. Container dispatch must inspect payload and negotiate layout
+before publishing stereo metadata; automatic unhinted MP4/Matroska routing is
+still separate work, as are missing whole SBR FIL and nonzero-core PS startup.
+
+Four original short AVC+AAC MP4s omit PS signalling from LC or explicit SBR ASC
+and carry late PS in the original authored payload. Before the fix they reproduce
+the exact explicit-signalling constructor refusal. Acceptance covers eight
+960/1024 and core/double output combinations against every independent stereo
+PCM sample, actual presence transitions, delayed frame identity, checkpoint
+replay/reset/EOF, malformed trailing-byte rollback and explicit-disabled tools.
+A no-PS candidate failure is a candidate-refusal test, separate from valid
+unhinted-PS native acceptance and normal mono AAC acceptance.
+
+Validation: all 17 HE-AAC suites passed 64 tests, full owned media library
+432 passed / 1 existing ignored, full offline player library 906 passed / 23
+existing ignored. Five new assets regenerate byte-identically; Python syntax,
+Rust formatting and diff checks pass. No test runs generation or codec tools.

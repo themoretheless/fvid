@@ -19,6 +19,7 @@ pub struct NativePsAacDecoder {
     config: AacConfig,
     output_rate: u32,
     mode: OutputRate,
+    requires_in_band: bool,
     synthesis: LongSineSynthesis,
     noise: NoiseState,
     // Large fixed QMF/PS histories live on heap so packet transactions and
@@ -45,6 +46,32 @@ impl NativePsAacDecoder {
                 "native PS decoder requires explicit SBR and PS signalling",
             ));
         }
+        let output_rate = parsed
+            .extension_sample_rate
+            .ok_or_else(|| invalid("missing PS output frequency"))?;
+        Self::build(parsed, output_rate, false)
+    }
+    /// Candidate stereo PS decoder when ASC leaves PS unspecified. The caller
+    /// supplies the negotiated output clock and must verify payload presence
+    /// before publishing the stereo layout. Explicit disabled tools are honored.
+    /// EOF without any in-band PS element rejects this candidate; ordinary mono
+    /// AAC remains the job of NativeAacDecoder. First output is delayed as usual.
+    pub fn new_with_in_band_ps(asc: &[u8], output_rate: u32) -> Result<Self> {
+        let parsed = AudioSpecificConfig::parse(asc)?;
+        if parsed.ps_present == Some(false) || parsed.sbr_present == Some(false) {
+            return Err(invalid(
+                "in-band PS cannot override explicitly disabled PS or SBR",
+            ));
+        }
+        parsed.resolve_output_rate(output_rate)?;
+        let requires_in_band = parsed.ps_present != Some(true);
+        Self::build(parsed, output_rate, requires_in_band)
+    }
+    fn build(
+        parsed: AudioSpecificConfig,
+        output_rate: u32,
+        requires_in_band: bool,
+    ) -> Result<Self> {
         if parsed.program.is_some()
             || parsed.core.channels != 1
             || parsed.core.channel_configuration != 1
@@ -53,9 +80,6 @@ impl NativePsAacDecoder {
                 "native PS decoder requires one mono AAC-LC element",
             ));
         }
-        let output_rate = parsed
-            .extension_sample_rate
-            .ok_or_else(|| invalid("missing PS output frequency"))?;
         let double = parsed
             .core
             .sample_rate
@@ -76,6 +100,7 @@ impl NativePsAacDecoder {
             config: parsed.core,
             output_rate,
             mode,
+            requires_in_band,
             synthesis,
             noise: NoiseState::default(),
             extension: Default::default(),
@@ -90,6 +115,9 @@ impl NativePsAacDecoder {
     pub fn channel_mask(&self) -> u32 {
         3
     }
+    pub fn ps_detected(&self) -> bool {
+        self.extension.ps_seen()
+    }
     pub fn pending_frame_index(&self) -> Option<u64> {
         self.extension.pending_frame_index()
     }
@@ -102,6 +130,7 @@ impl NativePsAacDecoder {
         if self.config != checkpoint.state.config
             || self.output_rate != checkpoint.state.output_rate
             || self.mode != checkpoint.state.mode
+            || self.requires_in_band != checkpoint.state.requires_in_band
         {
             return Err(invalid("PS AAC checkpoint configuration mismatch"));
         }
@@ -216,6 +245,11 @@ impl NativePsAacDecoder {
         Ok(output)
     }
     pub fn finish(&mut self) -> Result<Option<Frame>> {
+        if self.requires_in_band && !self.ps_detected() {
+            return Err(invalid(
+                "in-band PS candidate reached EOF without a PS element",
+            ));
+        }
         let mut trial = self.clone();
         let output = trial.extension.finish()?;
         let output = trial.output(output)?;

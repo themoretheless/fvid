@@ -1,0 +1,224 @@
+{
+  "cases": [
+    {
+      "kind": "LC",
+      "slots": 15,
+      "video": {
+        "file": "he-aac-ps-inband-lc-960-synthetic.mp4",
+        "sha256": "4220a9ebabafe0e09a832f5de0d2a609c030613502cb5d22c6f41b773242bc80",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130c"
+      },
+      "frames": [
+        {
+          "offset": 41,
+          "bytes": 16
+        },
+        {
+          "offset": 57,
+          "bytes": 132
+        },
+        {
+          "offset": 189,
+          "bytes": 16
+        }
+      ],
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      },
+      "asc_core": "130c",
+      "detected": [
+        false,
+        true,
+        true
+      ]
+    },
+    {
+      "kind": "SBR",
+      "slots": 15,
+      "video": {
+        "file": "he-aac-ps-inband-sbr-960-synthetic.mp4",
+        "sha256": "5aa50b32587fe00949e8c37d0609ea6a7928211802d18abaaed1a888ef360980",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098a00"
+      },
+      "frames": [
+        {
+          "offset": 41,
+          "bytes": 16
+        },
+        {
+          "offset": 57,
+          "bytes": 132
+        },
+        {
+          "offset": 189,
+          "bytes": 16
+        }
+      ],
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      },
+      "asc_core": "2b0b0a00",
+      "detected": [
+        false,
+        true,
+        true
+      ]
+    },
+    {
+      "kind": "LC",
+      "slots": 16,
+      "video": {
+        "file": "he-aac-ps-inband-lc-1024-synthetic.mp4",
+        "sha256": "b1f91c758d1f0900ed489e267a7448f2c003ff2a6b090a91c7f67f83d4c5b34c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1308"
+      },
+      "frames": [
+        {
+          "offset": 1104,
+          "bytes": 16
+        },
+        {
+          "offset": 1120,
+          "bytes": 132
+        },
+        {
+          "offset": 1252,
+          "bytes": 16
+        }
+      ],
+      "pcm": {
+        "Double": [
+          [
+            1115136,
+            6144
+          ],
+          [
+            1164288,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1213440,
+            3072
+          ],
+          [
+            1238016,
+            3072
+          ]
+        ]
+      },
+      "asc_core": "1308",
+      "detected": [
+        false,
+        true,
+        true
+      ]
+    },
+    {
+      "kind": "SBR",
+      "slots": 16,
+      "video": {
+        "file": "he-aac-ps-inband-sbr-1024-synthetic.mp4",
+        "sha256": "50e089010f826b290419676f848828dc2730b277f2375a1511543b0ef4798203",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098800"
+      },
+      "frames": [
+        {
+          "offset": 1104,
+          "bytes": 16
+        },
+        {
+          "offset": 1120,
+          "bytes": 132
+        },
+        {
+          "offset": 1252,
+          "bytes": 16
+        }
+      ],
+      "pcm": {
+        "Double": [
+          [
+            1115136,
+            6144
+          ],
+          [
+            1164288,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1213440,
+            3072
+          ],
+          [
+            1238016,
+            3072
+          ]
+        ]
+      },
+      "asc_core": "2b0b0800",
+      "detected": [
+        false,
+        true,
+        true
+      ]
+    }
+  ],
+  "explicit_false": [
+    {
+      "slots": 15,
+      "sbr_false": "130c56e500",
+      "ps_false": "130c56e59d4800"
+    },
+    {
+      "slots": 16,
+      "sbr_false": "130856e500",
+      "ps_false": "130856e59d4800"
+    }
+  ]
+}
