@@ -5903,3 +5903,38 @@ fail with the specific checksum error and preserve both input and state.
 This validates outer syntax and CRC, not decoded HE-AAC PCM. Production FIL
 dispatch, retained/reconstructed coefficient history, QMF overlap/scaling
 and original encoded HE-AAC playback acceptance still remain.
+
+### Owned SBR cross-frame coefficient history and dequantized parameters
+
+`aac_sbr_history::History::decode` retains the last quantized envelope and noise
+row of each channel, reconstructs within/across frames, then dequantizes the
+whole mono/uncoupled/coupled frame. Envelope references retain physical band
+borders for high/low resolution mapping; noise references use the previous
+band index per Q(k,l), including when borders change. Coupled balance doubles
+only new deltas. Current grid amplitude resolution controls dequantization;
+the published g_E reference retains previous reconstructed quantized values.
+Typed dimensions, coupled shared controls and normative noise bounds are
+validated before any history commit.
+
+`Stream::read` composes this with the owned extension/header/CRC parser. Input,
+retained header and both channels' coefficient history commit together only
+after the complete frame dequantizes. Format change/seek resets history;
+changing only header amplitude resolution preserves temporal references.
+Unknown PS extension bytes remain retained rather than decoded as audio.
+
+12 original four-frame bit sequences (mono and both stereo modes, both core
+frame sizes, even/odd high-band counts) compose the actual extension/CRC/data
+parser with reconstruction and dequantization. An independent 64-bin expanded
+reference checks integer mappings, and 80-digit Decimal checks the final
+channel energy/noise values. They exercise header updates/reuse, all grid
+classes, fine/coarse changes, within/across-frame high/low mapping, checkpoint
+replay and reset. Dedicated typed geometry checks prove noise references
+follow indices rather than previous physical intervals. Original five-bit
+Q=31 vectors reach the intended normative noise-range refusal after accepted
+syntax; their late failure preserves header/history and the following
+headerless frame still matches its original expected result.
+
+This is composed bit-syntax/coefficient/DSP coverage, not HE-AAC PCM playback
+acceptance. Production FIL dispatch and AAC object-type wiring, complete
+cross-frame QMF/time-grid overlap, PCM scaling/synthesis and encoded playback
+acceptance remain unfinished.
