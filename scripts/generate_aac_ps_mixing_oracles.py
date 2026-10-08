@@ -36,6 +36,16 @@ def matrix(db,rho,mode):
     mu=1+(4*rho*rho-4)/(c+1/c)**2
     cg=((1+mu.sqrt())/2).sqrt();sg=((1-mu.sqrt())/2).sqrt()
     return [SQRT2*ca*cg,SQRT2*sa*cg,-SQRT2*sa*sg,SQRT2*ca*sg]
+def rotation(indices):
+    re=im=D(0)
+    for weight,index in zip([D('.25'),D('.5'),D(1)],indices):
+        sn,cs=sincos(PI*index/4);re+=weight*cs;im+=weight*sn
+    length=(re*re+im*im).sqrt()
+    return re/length,im/length
+def phase_coefficients(real,ipd,opd):
+    ir,ii=rotation(ipd);o_r,o_i=rotation(opd)
+    right=(o_r*ir+o_i*ii,o_i*ir-o_r*ii)
+    return [(h*re,h*im) for h,(re,im) in zip(real,[(o_r,o_i),right,(o_r,o_i),right])]
 def main():
     saved=json.loads((ROOT/'tests/fixtures/playback-errors/aac-ps-dequant-oracles.json').read_text())
     rows=[]
@@ -46,12 +56,6 @@ def main():
                     rows.append(dict(fine=fine,iid=iid['index'],icc=icc['index'],mode=mode,expected=[str(x) for x in matrix(iid['db'],D(icc['value']),mode)]))
     phase=[]
     base=matrix('4',D('.36764'),'a')
-    def rotation(indices):
-        re=im=D(0)
-        for weight,index in zip([D('.25'),D('.5'),D(1)],indices):
-            sn,cs=sincos(PI*index/4);re+=weight*cs;im+=weight*sn
-        length=(re*re+im*im).sqrt()
-        return re/length,im/length
     for values in product(range(8),repeat=3):
         for family in ['ipd','opd']:
             ipd=values if family=='ipd' else (7,0,1)

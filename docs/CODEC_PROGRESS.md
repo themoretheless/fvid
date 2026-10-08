@@ -6343,5 +6343,37 @@ checks cover exact startup/next-frame anchors, checkpoint replay, reset,
 explicit reconfiguration and transactional rejection of malformed input.
 
 This is temporal matrix acceptance; native HE-AACv2 PCM remains unimplemented.
-The final stateful phase-history owner, hybrid filters, decorrelator, stereo
-QMF synthesis and full independent PCM acceptance remain required.
+The surrounding matrix controller, hybrid filters, decorrelator, stereo QMF
+synthesis and full independent PCM acceptance remain required.
+
+### Owned PS two-position phase history (2026-10-08)
+
+`aac_ps_phase_history` now retains ordered oldest/previous common-grid IPD
+and OPD across envelopes and frames, derives new smoothed complex endpoints,
+and routes/conjugates endpoints for the 71/91 hybrid bindings. A new disabled
+phase envelope uses zero parameters while preserving the preceding position.
+Zero new envelopes do not advance parameter positions; a 20/34 configuration
+change resets both positions even when the frame carries no new envelopes.
+Processing is transactional across all envelopes, including late numeric
+validation failures. Clones provide replay checkpoints and reset clears state.
+
+Unready parameter frames are refused without advancing physical history. A
+ready repeated frame cannot bootstrap a fresh physical owner: it requires
+its checkpoint/preroll instead of silently manufacturing zero history.
+The first ready frame initializes at its actual current grid even if an earlier
+unready header already changed the parser's grid. Later frames enforce common
+grid continuity. An original three-packet 34-band startup video covers this
+case separately from the ordinary ready-grid transitions.
+
+Independent authored position traces and Decimal matrix/rotation references
+cover all 20 saved native sequences and seven mixed-resolution videos. Four
+new original MP4s cover two-envelope phase history around a repeated frame,
+phase disable/reenable, a grid change without envelopes, and delayed 34-band
+startup. Tests traverse MP4/SBR CRC/PS native history/common mapping/phase
+history and all starred hybrid bindings. They retain the explicit full-native
+PS synthesis refusal; only endpoint/state acceptance is established here.
+
+The surrounding matrix controller still must transfer retained real h_ij and
+apply the no-envelope retained-complex versus unrotated-real policy from
+6.4.6.5 before the temporal owner. Hybrid filtering, decorrelation, stereo QMF
+synthesis and full independent PCM acceptance remain unfinished.

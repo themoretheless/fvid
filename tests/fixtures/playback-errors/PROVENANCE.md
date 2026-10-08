@@ -2191,3 +2191,33 @@ filtering, decorrelation and stereo QMF synthesis remain pending. Videos reuse
 the original AVC seed, with new AAC packets/tables/edits; no private media,
 parameter sets, foreign codec implementation, FFmpeg/libav or network are used.
 Generation is explicit and separate from ordinary tests.
+
+### Original PS phase-history regressions
+
+`generate_aac_ps_phase_history_fixtures.py` explicitly generates
+`aac-ps-phase-history-oracles.json`, `he-aac-ps-phase-history-packets.bin` and
+four original three-packet MP4s: `he-aac-ps-phase-history-synthetic.mp4`,
+`he-aac-ps-phase-disable-synthetic.mp4`,
+`he-aac-ps-phase-grid-transition-synthetic.mp4` and
+`he-aac-ps-phase-startup-34-synthetic.mp4`. Hashes and authored common-grid
+inputs are saved in the manifest. No decoder output is used as an oracle.
+
+Absolute position traces cover all 20 native history sequences and seven
+mixed-resolution videos. Complex endpoints use the existing independent
+90-digit Decimal real-matrix and phasor series, now exposed as reusable
+generator helpers without changing the old mixing oracle bytes. The protocol
+equations/state reset are from GOST R 53556.8-2013 6.4.6.1/6.4.6.3. New packet
+controls include repeated frames, phase disable/reenable and a grid change
+with zero envelopes. The delayed-startup fixture begins with an unready
+34-band header with zero envelopes, then an independent ready parameter set:
+physical phase history must not reject that first ready grid as discontinuous.
+
+`tests/he_aac_ps_phase_history.rs` accepts the endpoint/history stages and
+checks numeric values, retained positions, reset, checkpoint replay, late
+error rollback and every conjugated hybrid routing entry. The repeated
+packet is accepted with primed phase state, but explicitly refused on a fresh
+owner needing its checkpoint/preroll. Full native PS
+PCM is still refused for these valid videos until the missing DSP is wired.
+All synthetic videos reuse the original AVC seed with newly authored AAC
+packets/tables/edits; no private media, parameter sets, foreign implementation,
+FFmpeg/libav, network or ordinary test-time fixture generation is involved.
