@@ -39,6 +39,7 @@ pub struct Plane {
 pub struct Picture {
     pub size: [u32; 2],
     pub depth: u8,
+    pub subsampling: [bool; 2],
     /// Coded MI grid dimensions; super-resolution changes display size, not this grid.
     pub segment_grid: [usize; 2],
     /// Segment IDs in padded 4x4 raster order, retained with reference pictures.
@@ -248,6 +249,7 @@ pub(crate) fn decode(
         vec![0; cols * rows]
     };
     let image = Picture {
+        subsampling: s.color.subsampling,
         size: h.size,
         depth: s.color.depth,
         segment_grid: [cols, rows],

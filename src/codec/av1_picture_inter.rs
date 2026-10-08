@@ -883,28 +883,34 @@ impl Decoder<'_> {
             }
         }
         let wedge_mask = interintra_wedge.map(|index| blend::wedge([w * 4, h * 4], index));
-        let chroma = !self.s.color.monochrome && !(w == 1 && x % 2 == 0 || h == 1 && y % 2 == 0);
+        let [sx, sy] = self.s.color.subsampling;
+        let chroma =
+            !self.s.color.monochrome && !(sx && w == 1 && x % 2 == 0 || sy && h == 1 && y % 2 == 0);
         for p in 0..if chroma { 3 } else { 1 } {
-            let sub = usize::from(p > 0);
-            let px = (x >> sub) * 4;
-            let py = (y >> sub) * 4;
-            let pw = ((w * 4) >> sub).max(4);
-            let ph = ((h * 4) >> sub).max(4);
+            let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
+            let px = (x >> sub_x) * 4;
+            let py = (y >> sub_y) * 4;
+            let pw = ((w * 4) >> sub_x).max(4);
+            let ph = ((h * 4) >> sub_y).max(4);
+            let small_chroma = p > 0 && (sub_x != 0 && w == 1 || sub_y != 0 && h == 1);
+            let group_x = x & !sub_x;
+            let group_y = y & !sub_y;
+            let group_w = (pw << sub_x) / 4;
+            let group_h = (ph << sub_y) / 4;
             // AV1 prediction syntax SomeUseIntra: an intra constituent selects
             // the current inter block for the whole chroma group. Otherwise
             // each constituent luma block supplies its own inter prediction.
             let mixed = block.intrabc
-                || p > 0
-                    && (w == 1 || h == 1)
-                    && (0..(ph / 2)).any(|yy| {
-                        (0..(pw / 2)).any(|xx| {
-                            self.blocks[((y & !1) + yy) * self.cols + (x & !1) + xx].reference == 0
+                || small_chroma
+                    && (0..group_h).any(|yy| {
+                        (0..group_w).any(|xx| {
+                            self.blocks[(group_y + yy) * self.cols + group_x + xx].reference == 0
                         })
                     });
-            if p == 1 && (w == 1 || h == 1) && !block.intrabc {
-                let actual_intra = (0..(ph / 2).min(self.rows.saturating_sub(y & !1))).any(|yy| {
-                    (0..(pw / 2).min(self.cols.saturating_sub(x & !1))).any(|xx| {
-                        let neighbor = self.blocks[((y & !1) + yy) * self.cols + (x & !1) + xx];
+            if p == 1 && small_chroma && !block.intrabc {
+                let actual_intra = (0..group_h.min(self.rows.saturating_sub(group_y))).any(|yy| {
+                    (0..group_w.min(self.cols.saturating_sub(group_x))).any(|xx| {
+                        let neighbor = self.blocks[(group_y + yy) * self.cols + group_x + xx];
                         neighbor.w != 0 && neighbor.reference == 0 && !neighbor.intrabc
                     })
                 });
@@ -921,12 +927,22 @@ impl Decoder<'_> {
                     self.image.sub8_inter_chroma_groups += 1;
                 }
             }
-            let step_x = if p > 0 && w == 1 && !mixed { 2 } else { pw };
-            let step_y = if p > 0 && h == 1 && !mixed { 2 } else { ph };
+            let step_x = if p > 0 && sub_x != 0 && w == 1 && !mixed {
+                2
+            } else {
+                pw
+            };
+            let step_y = if p > 0 && sub_y != 0 && h == 1 && !mixed {
+                2
+            } else {
+                ph
+            };
             for yy in (0..ph).step_by(step_y) {
                 for xx in (0..pw).step_by(step_x) {
-                    let b = if p > 0 && (w == 1 || h == 1) && !mixed {
-                        self.blocks[((y & !1) + yy / 2) * self.cols + (x & !1) + xx / 2]
+                    let b = if small_chroma && !mixed {
+                        self.blocks[(group_y + ((yy << sub_y) / 4)) * self.cols
+                            + group_x
+                            + ((xx << sub_x) / 4)]
                     } else {
                         block
                     };
@@ -957,16 +973,14 @@ impl Decoder<'_> {
                         for row in 0..step_y.min(plane.height.saturating_sub(py + yy)) {
                             for col in 0..step_x.min(plane.width.saturating_sub(px + xx)) {
                                 let weight = if let Some(mask) = &wedge_mask {
-                                    if p == 0 {
-                                        mask[row][col]
-                                    } else {
-                                        (mask[2 * row][2 * col]
-                                            + mask[2 * row][2 * col + 1]
-                                            + mask[2 * row + 1][2 * col]
-                                            + mask[2 * row + 1][2 * col + 1]
-                                            + 2)
-                                            >> 2
+                                    let mut sum = 0;
+                                    for dy in 0..=sub_y {
+                                        for dx in 0..=sub_x {
+                                            sum += mask[(row << sub_y) + dy][(col << sub_x) + dx];
+                                        }
                                     }
+                                    let shift = sub_x + sub_y;
+                                    (sum + ((1 << shift) >> 1)) >> shift
                                 } else {
                                     match mode {
                                         1 => INTERINTRA_WEIGHTS[row * scale],
@@ -990,13 +1004,13 @@ impl Decoder<'_> {
         for cy in 0..h.div_ceil(16) {
             for cx in 0..w.div_ceil(16) {
                 for p in 0..if chroma { 3 } else { 1 } {
-                    let sub = usize::from(p > 0);
-                    let bw = (w >> sub).max(1);
-                    let bh = (h >> sub).max(1);
-                    let cw = (w.min(16) >> sub).max(1);
-                    let ch = (h.min(16) >> sub).max(1);
-                    let bx = (x >> sub) + cx * (16 >> sub);
-                    let by = (y >> sub) + cy * (16 >> sub);
+                    let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
+                    let bw = (w >> sub_x).max(1);
+                    let bh = (h >> sub_y).max(1);
+                    let cw = (w.min(16) >> sub_x).max(1);
+                    let ch = (h.min(16) >> sub_y).max(1);
+                    let bx = (x >> sub_x) + cx * (16 >> sub_x);
+                    let by = (y >> sub_y) + cy * (16 >> sub_y);
                     let size = if self.h.lossless[self.current_segment] {
                         [4; 2]
                     } else if p == 0 {
@@ -1016,7 +1030,7 @@ impl Decoder<'_> {
                     }
                     for (xx, yy, size) in transforms {
                         let [tw, th] = size;
-                        if xx >= self.cols >> sub || yy >= self.rows >> sub {
+                        if xx >= self.cols >> sub_x || yy >= self.rows >> sub_y {
                             continue;
                         }
                         let residual: &[i32] = if skip {
@@ -1363,17 +1377,16 @@ impl Decoder<'_> {
             let post = if color_depth == 12 { 2 } else { 4 };
             for row in 0..h.min(dst.height.saturating_sub(y)) {
                 for col in 0..w.min(dst.width.saturating_sub(x)) {
-                    let weight = if p == 0 {
-                        self.compound_weights[row * stride + col]
-                    } else {
-                        let at = 2 * row * stride + 2 * col;
-                        (self.compound_weights[at]
-                            + self.compound_weights[at + 1]
-                            + self.compound_weights[at + stride]
-                            + self.compound_weights[at + stride + 1]
-                            + 2)
-                            >> 2
-                    };
+                    let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
+                    let mut sum = 0;
+                    for dy in 0..=sub_y {
+                        for dx in 0..=sub_x {
+                            sum += self.compound_weights
+                                [((row << sub_y) + dy) * stride + (col << sub_x) + dx];
+                        }
+                    }
+                    let shift = sub_x + sub_y;
+                    let weight = (sum + ((1 << shift) >> 1)) >> shift;
                     let i = row * w + col;
                     let sum = weight * self.inter_pred[i] + (64 - weight) * self.inter_pred2[i];
                     dst.samples[(y + row) * dst.width + x + col] =
@@ -1447,7 +1460,7 @@ impl Decoder<'_> {
         let [x, y] = origin;
         let [w4, h4] = luma_size;
         let [w, h] = plane_size;
-        let sub = usize::from(p > 0);
+        let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
         let above_size = SIZES.iter().position(|&size| size == (w / 4, h / 4));
         for pass in 0..2 {
             let available = if pass == 0 {
@@ -1474,14 +1487,14 @@ impl Decoder<'_> {
                 if candidate.reference > 0 {
                     count += 1;
                     let size = if pass == 0 {
-                        [w.min(step * 4 >> sub), (h / 2).min(32 >> sub)]
+                        [w.min(step * 4 >> sub_x), (h / 2).min(32 >> sub_y)]
                     } else {
-                        [(w / 2).min(32 >> sub), h.min(step * 4 >> sub)]
+                        [(w / 2).min(32 >> sub_x), h.min(step * 4 >> sub_y)]
                     };
                     let point = if pass == 0 {
-                        [cursor * 4 >> sub, y * 4 >> sub]
+                        [cursor * 4 >> sub_x, y * 4 >> sub_y]
                     } else {
-                        [x * 4 >> sub, cursor * 4 >> sub]
+                        [x * 4 >> sub_x, cursor * 4 >> sub_y]
                     };
                     Self::motion_samples(
                         self.references,
@@ -1538,11 +1551,15 @@ impl Decoder<'_> {
         out: &mut Vec<i32>,
     ) -> Result<()> {
         use super::super::av1_tables::SUBPEL_FILTERS;
-        let sub = usize::from(p > 0);
+        let [sub_x, sub_y] = if p == 0 {
+            [0; 2]
+        } else {
+            reference.subsampling.map(usize::from)
+        };
         let [w, h] = size;
         let coordinates = [0, 1].map(|axis| {
             let mv = b.mv[1 - axis] as i64;
-            let original = origin[axis] as i64 * 16 + ((2 * mv) >> sub) + 8;
+            let original = origin[axis] as i64 * 16 + ((2 * mv) >> [sub_x, sub_y][axis]) + 8;
             let base = original * scale[axis] - (8 << 14);
             let start = base.signum() * ((base.abs() + 128) >> 8) + 32;
             let step = (scale[axis] + 8) >> 4;
@@ -1558,8 +1575,8 @@ impl Decoder<'_> {
         let fx = &SUBPEL_FILTERS[filter(1, w)];
         let fy = &SUBPEL_FILTERS[filter(0, h)];
         let src = &reference.planes[p];
-        let last_x = (reference.size[0] as i64 + sub as i64) / (1 << sub) - 1;
-        let last_y = (reference.size[1] as i64 + sub as i64) / (1 << sub) - 1;
+        let last_x = (reference.size[0] as i64 + sub_x as i64) / (1 << sub_x) - 1;
+        let last_y = (reference.size[1] as i64 + sub_y as i64) / (1 << sub_y) - 1;
         let round0 = if depth == 12 { 5 } else { 3 };
         let round1 = if compound { 7 } else { 14 - round0 };
         temp.resize(rows * w, 0);
@@ -1631,13 +1648,17 @@ impl Decoder<'_> {
                 return Ok(());
             }
         }
-        let sub = usize::from(p > 0);
+        let [sub_x, sub_y] = if p == 0 {
+            [0; 2]
+        } else {
+            reference.subsampling.map(usize::from)
+        };
         let [w, h] = size;
         let src = &reference.planes[p];
-        let last_x = (reference.size[0] as usize).div_ceil(1 << sub) as i32 - 1;
-        let last_y = (reference.size[1] as usize).div_ceil(1 << sub) as i32 - 1;
-        let coord_x = (x as i32) * 16 + (b.mv[1] << (1 - sub));
-        let coord_y = (y as i32) * 16 + (b.mv[0] << (1 - sub));
+        let last_x = (reference.size[0] as usize).div_ceil(1 << sub_x) as i32 - 1;
+        let last_y = (reference.size[1] as usize).div_ceil(1 << sub_y) as i32 - 1;
+        let coord_x = (x as i32) * 16 + (b.mv[1] << (1 - sub_x));
+        let coord_y = (y as i32) * 16 + (b.mv[0] << (1 - sub_y));
         let filter = |dir: usize, n: usize| {
             let f = b.filters[dir];
             if n <= 4 {
@@ -1732,4 +1753,117 @@ fn reference_scale(reference: [u32; 2], current: [u32; 2]) -> Result<[i64; 2]> {
         out[axis] = (((r << 14) + c / 2) / c) as i64;
     }
     Ok(out)
+}
+
+#[cfg(test)]
+mod chroma_axis_tests {
+    use super::*;
+    #[test]
+    fn integer_motion_and_identity_scaling_use_each_reference_axis() {
+        let frames = super::super::super::av1_decoder::Decoder::new(16 << 20)
+            .decode_packet(include_bytes!("../../tests/fixtures/av1/ramp.obu"))
+            .unwrap();
+        let original = &frames[0].picture;
+        for subsampling in [[true, true], [true, false], [false, false]] {
+            for depth in [8, 10, 12] {
+                let mut reference = (**original).clone();
+                reference.size = [65, 49];
+                reference.depth = depth;
+                reference.subsampling = subsampling;
+                reference.planes = std::array::from_fn(|p| {
+                    let shifts = if p == 0 {
+                        [0; 2]
+                    } else {
+                        subsampling.map(usize::from)
+                    };
+                    let width = 65usize.div_ceil(1 << shifts[0]);
+                    let height = 49usize.div_ceil(1 << shifts[1]);
+                    let samples = (0..width * height)
+                        .map(|i| ((i * 37 + i / width * 13 + p * 71) % (1 << depth)) as u16)
+                        .collect();
+                    Plane {
+                        width,
+                        height,
+                        samples,
+                    }
+                });
+                let mut refs = [None; 8];
+                refs[0] = Some(&reference);
+                for p in 0..3 {
+                    let shifts = if p == 0 {
+                        [0; 2]
+                    } else {
+                        subsampling.map(usize::from)
+                    };
+                    for origin in [
+                        [3, 5],
+                        [
+                            reference.planes[p].width - 3,
+                            reference.planes[p].height - 3,
+                        ],
+                    ] {
+                        for mv in [[16, 16], [-16, -16]] {
+                            let block = Block {
+                                reference: 1,
+                                mv,
+                                ..Block::default()
+                            };
+                            let mut temp = Vec::new();
+                            let mut normal = Vec::new();
+                            Decoder::motion_samples(
+                                refs,
+                                [0; 7],
+                                reference.size,
+                                depth,
+                                p,
+                                origin[0],
+                                origin[1],
+                                [4, 4],
+                                block,
+                                false,
+                                &mut temp,
+                                &mut normal,
+                            )
+                            .unwrap();
+                            let mut scaled = Vec::new();
+                            Decoder::scaled_motion_samples(
+                                &reference,
+                                p,
+                                origin,
+                                [4, 4],
+                                block,
+                                [16384; 2],
+                                depth,
+                                false,
+                                &mut temp,
+                                &mut scaled,
+                            )
+                            .unwrap();
+                            let src = &reference.planes[p];
+                            let mut expected = Vec::new();
+                            for y in 0..4 {
+                                for x in 0..4 {
+                                    let sx = (origin[0] as i32 + x + (mv[1] / 8 >> shifts[0]))
+                                        .clamp(0, src.width as i32 - 1)
+                                        as usize;
+                                    let sy = (origin[1] as i32 + y + (mv[0] / 8 >> shifts[1]))
+                                        .clamp(0, src.height as i32 - 1)
+                                        as usize;
+                                    expected.push(i32::from(src.samples[sy * src.width + sx]));
+                                }
+                            }
+                            assert_eq!(
+                                normal, expected,
+                                "{subsampling:?}/{depth}/plane{p}/{origin:?}/{mv:?}"
+                            );
+                            assert_eq!(
+                                scaled, expected,
+                                "scaled {subsampling:?}/{depth}/plane{p}/{origin:?}/{mv:?}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -3,13 +3,9 @@ use super::{
     av1_picture::Picture,
     av1_tables::{DIV_LUT, WARPED_FILTERS},
 };
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 fn round(v: i64, n: u32) -> i64 {
-    if n == 0 {
-        v
-    } else {
-        (v + (1 << (n - 1))) >> n
-    }
+    if n == 0 { v } else { (v + (1 << (n - 1))) >> n }
 }
 fn signed(v: i64, n: u32) -> i64 {
     v.signum() * round(v.abs(), n)
@@ -100,19 +96,23 @@ pub(super) fn predict(
     let [a, b, g, d] = shear(params).ok_or_else(|| invalid("invalid AV1 warp shear"))?;
     let [x, y] = origin;
     let [w, h] = size;
-    let sub = usize::from(plane > 0);
+    let [sub_x, sub_y] = if plane == 0 {
+        [0; 2]
+    } else {
+        reference.subsampling.map(usize::from)
+    };
     let src = &reference.planes[plane];
-    let maxx = (reference.size[0] as usize).div_ceil(1 << sub) as i64 - 1;
-    let maxy = (reference.size[1] as usize).div_ceil(1 << sub) as i64 - 1;
+    let maxx = (reference.size[0] as usize).div_ceil(1 << sub_x) as i64 - 1;
+    let maxy = (reference.size[1] as usize).div_ceil(1 << sub_y) as i64 - 1;
     let r0 = if reference.depth == 12 { 5 } else { 3 };
     let r1 = if compound { 7 } else { 14 - r0 };
     let mut out = vec![0; w * h];
     for yy in (0..h).step_by(8) {
         for xx in (0..w).step_by(8) {
-            let sx = ((x + xx + 4) << sub) as i64;
-            let sy = ((y + yy + 4) << sub) as i64;
-            let dx = (params[2] * sx + params[3] * sy + params[0]) >> sub;
-            let dy = (params[4] * sx + params[5] * sy + params[1]) >> sub;
+            let sx = ((x + xx + 4) << sub_x) as i64;
+            let sy = ((y + yy + 4) << sub_y) as i64;
+            let dx = (params[2] * sx + params[3] * sy + params[0]) >> sub_x;
+            let dy = (params[4] * sx + params[5] * sy + params[1]) >> sub_y;
             let ix = dx >> 16;
             let iy = dy >> 16;
             let fx = dx & 65535;

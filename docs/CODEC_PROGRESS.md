@@ -4882,3 +4882,29 @@ chroma refusal, mixed-sub8 prediction, intrabc tools, film-grain tools, odd
 restoration and temporal-motion super-resolution. Existing 4:2:0 full-pixel,
 reference/reset and seek comparisons remain passing; these checks do not prove
 4:2:2/4:4:4 reconstruction acceptance while the production gate is present.
+
+### AV1 inter chroma axis conversion (2026-10-08, playback pending)
+
+Reference pictures now retain sequence subsampling. Normal/scaled motion
+compensation and warped prediction use separate horizontal/vertical reference
+coordinates and active image bounds. Inter residual chunks, overlap prediction
+geometry and inter-intra/compound mask averaging use the same independent axes.
+Sub-8 chroma-reference groups expand only along subsampled axes; 4:2:2 therefore
+combines horizontal neighbors without combining rows, and 4:4:4 has no implicit
+sub-8 grouping. The original 4:2:0 counters and behavior remain in regression.
+
+A deterministic motion test replaces decoded owned ramp reference planes with
+original patterned 65x49 plane samples. It checks positive/negative integer
+motion, active-edge replication and identity scaled prediction at all three
+layouts and 8/10/12-bit depths against explicitly indexed expected samples.
+This is motion-path coverage, not whole-stream 4:2:2/4:4:4 acceptance. The
+production format gate remains pending intrabc, other filters/output conversion
+and pixel/reset/WebM/seek acceptance of the twelve checked-in chroma streams.
+
+Validation: final 48 AV1 release unit tests (including all 108 normal/scaled
+motion cases) and eight selected offline integration tests passed, with zero
+failures/ignored tests. Mixed-sub8, intrabc tools, film-grain tools, odd
+restoration and temporal-motion/super-resolution retain their existing full
+pixel/reference/reset/seek comparisons. Chroma-stream refusal remains passing
+and is explicitly not an acceptance result. Formatting and scoped diff checks
+passed.
