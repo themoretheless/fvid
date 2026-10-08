@@ -5328,3 +5328,30 @@ Nine tile-list test functions, 46 AV1 units and three adjacent integration
 suites pass offline. All 2268 artifact hashes were checked. Every fractional
 phase/filter, scaled/warped boundary interaction, external container context
 and wider codec gaps remain separate qualification work.
+
+## AV1 fractional predictor phase/filter/edge matrix (2026-10-08)
+
+An offline scalar-convolution qualification now evaluates 4,423,680 prediction
+configurations against both normal translation and identity-scaled prediction.
+It spans 420/422/444, 8/10/12-bit, all three planes, 4x4/4x8/8x4/8x8 blocks,
+four frame corners plus an interior origin, all 16 filter pairs, signed row/col
+vectors -8..7, and both single and compound intermediate rounding. This covers
+all eight reachable luma/full-chroma phases and all sixteen subsampled chroma
+phases on their respective axes. Odd 33x29 reference dimensions exercise edge
+clamping independently of padded geometry.
+
+The oracle computes each pixel independently with 64-bit accumulators instead
+of sharing optimized source-row or intermediate-buffer indexing. Filter taps
+are shared normative tables, so this proves coordinate selection, axis mapping,
+border extension and rounding consistency, not independent correctness of the
+filter constants. References use the existing owned synthetic ramp picture
+metadata with original procedural plane samples; no private media, external
+codec or fixture generation runs in these tests. Whole-stream coded phase
+coverage, nonidentity scaling and warp interactions remain separate work.
+
+All 47 AV1 unit tests pass in both the active checkout and a clean committed
+copy with only this test added. Deliberately replacing the production vertical
+subsampling shift with the horizontal one makes the new test fail precisely on
+8-bit 422 Cb at the top-left edge; the mutation was removed afterward. This
+checks that the oracle detects the axis regression rather than merely matching
+two shared implementations.

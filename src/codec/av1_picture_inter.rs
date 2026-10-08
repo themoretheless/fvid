@@ -1938,4 +1938,165 @@ mod chroma_axis_tests {
             }
         }
     }
+    #[test]
+    fn fractional_filters_match_scalar_edges_and_identity_scaling() {
+        use super::super::super::av1_tables::SUBPEL_FILTERS;
+        let frames = super::super::super::av1_decoder::Decoder::new(16 << 20)
+            .decode_packet(include_bytes!("../../tests/fixtures/av1/ramp.obu"))
+            .unwrap();
+        for subsampling in [[true, true], [true, false], [false, false]] {
+            for depth in [8, 10, 12] {
+                let mut reference = (*frames[0].picture).clone();
+                reference.size = [33, 29];
+                reference.depth = depth;
+                reference.subsampling = subsampling;
+                reference.planes = std::array::from_fn(|p| {
+                    let shifts = if p == 0 {
+                        [0; 2]
+                    } else {
+                        subsampling.map(usize::from)
+                    };
+                    let width = 33usize.div_ceil(1 << shifts[0]);
+                    let height = 29usize.div_ceil(1 << shifts[1]);
+                    Plane {
+                        width,
+                        height,
+                        samples: (0..width * height)
+                            .map(|i| ((i * 137 + i / width * 71 + p * 53) % (1 << depth)) as u16)
+                            .collect(),
+                    }
+                });
+                let mut refs = [None; 8];
+                refs[0] = Some(&reference);
+                for p in 0..3 {
+                    let shifts = if p == 0 {
+                        [0; 2]
+                    } else {
+                        subsampling.map(usize::from)
+                    };
+                    let src = &reference.planes[p];
+                    for size in [[4, 4], [4, 8], [8, 4], [8, 8]] {
+                        for origin in [
+                            [0, 0],
+                            [src.width - 2, 0],
+                            [0, src.height - 2],
+                            [src.width - 2, src.height - 2],
+                            [7, 8],
+                        ] {
+                            for filters in (0..4).flat_map(|y| (0..4).map(move |x| [y, x])) {
+                                for my in -8..8 {
+                                    for mx in -8..8 {
+                                        let block = Block {
+                                            reference: 1,
+                                            mv: [my, mx],
+                                            filters,
+                                            ..Block::default()
+                                        };
+                                        for compound in [false, true] {
+                                            // Scalar oracle: independently evaluate each output pixel's
+                                            // two-dimensional separable convolution, clamping every tap.
+                                            let coord = [
+                                                origin[0] as i32 * 16 + (mx << (1 - shifts[0])),
+                                                origin[1] as i32 * 16 + (my << (1 - shifts[1])),
+                                            ];
+                                            let table = |axis: usize| {
+                                                let f = filters[1 - axis];
+                                                if size[axis] <= 4 {
+                                                    match f {
+                                                        0 | 2 => 4,
+                                                        1 => 5,
+                                                        _ => f,
+                                                    }
+                                                } else {
+                                                    f
+                                                }
+                                            };
+                                            let fx =
+                                                &SUBPEL_FILTERS[table(0)][(coord[0] & 15) as usize];
+                                            let fy =
+                                                &SUBPEL_FILTERS[table(1)][(coord[1] & 15) as usize];
+                                            let r0 = if depth == 12 { 5 } else { 3 };
+                                            let r1 = if compound { 7 } else { 14 - r0 };
+                                            let mut expected = Vec::new();
+                                            for y in 0..size[1] {
+                                                for x in 0..size[0] {
+                                                    let mut sum = 0i64;
+                                                    for (ty, &ky) in fy.iter().enumerate() {
+                                                        let sy =
+                                                            ((coord[1] >> 4) + y as i32 + ty as i32
+                                                                - 3)
+                                                            .clamp(0, src.height as i32 - 1)
+                                                                as usize;
+                                                        let mut horizontal = 0i64;
+                                                        for (tx, &kx) in fx.iter().enumerate() {
+                                                            let sx = ((coord[0] >> 4)
+                                                                + x as i32
+                                                                + tx as i32
+                                                                - 3)
+                                                            .clamp(0, src.width as i32 - 1)
+                                                                as usize;
+                                                            horizontal += i64::from(kx)
+                                                                * i64::from(
+                                                                    src.samples
+                                                                        [sy * src.width + sx],
+                                                                );
+                                                        }
+                                                        sum += i64::from(ky)
+                                                            * ((horizontal + (1 << (r0 - 1)))
+                                                                >> r0);
+                                                    }
+                                                    expected.push(
+                                                        ((sum + (1 << (r1 - 1))) >> r1) as i32,
+                                                    );
+                                                }
+                                            }
+                                            let mut temp = Vec::new();
+                                            let mut normal = Vec::new();
+                                            Decoder::motion_samples(
+                                                refs,
+                                                [0; 7],
+                                                reference.size,
+                                                depth,
+                                                p,
+                                                origin[0],
+                                                origin[1],
+                                                size,
+                                                block,
+                                                compound,
+                                                &mut temp,
+                                                &mut normal,
+                                            )
+                                            .unwrap();
+                                            let mut scaled = Vec::new();
+                                            Decoder::scaled_motion_samples(
+                                                &reference,
+                                                p,
+                                                origin,
+                                                size,
+                                                block,
+                                                [16384; 2],
+                                                depth,
+                                                compound,
+                                                &mut temp,
+                                                &mut scaled,
+                                            )
+                                            .unwrap();
+                                            assert_eq!(
+                                                normal, expected,
+                                                "normal {subsampling:?}/{depth}/p{p}/{size:?}/{origin:?}/{filters:?}/{my},{mx}/{compound}"
+                                            );
+                                            assert_eq!(
+                                                scaled, expected,
+                                                "scaled {subsampling:?}/{depth}/p{p}/{size:?}/{origin:?}/{filters:?}/{my},{mx}/{compound}"
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
