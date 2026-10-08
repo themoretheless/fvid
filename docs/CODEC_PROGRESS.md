@@ -5542,3 +5542,17 @@ No coefficient Huffman decoding or PCM rendering is claimed by these syntax
 tests. Huffman/delta reconstruction, frame state, rate-dependent frequency
 bounds, QMF and high-frequency adjustment still remain before HE-AAC acceptance.
 Reference: GOST R 53556.4-2013 tables 70, 71, 116 and 117.
+
+
+### Owned SBR Huffman decoding foundation
+
+`Book::decode` decodes all ten normative SBR prefix books to signed deltas
+inside a payload bit boundary, committing position only on a complete codeword.
+All 604 symbols are tested at eight bit offsets, with every exact truncation
+and trailing sentinels. Full prefix-free/Kraft checks are independent of the
+decoder. Generation cross-checks every protocol constant against both published
+translation and independently parsed ISO draft tables; explicit errata prevent
+translation duplicates and malformed lengths from entering production.
+The decoder is owned Rust. It does not yet reconstruct envelope values or
+render HE-AAC; book selection, stereo/temporal delta reconstruction, rate bounds,
+QMF and high-frequency processing still require integration and PCM acceptance.

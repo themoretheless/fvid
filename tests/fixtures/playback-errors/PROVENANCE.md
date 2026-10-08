@@ -1604,3 +1604,23 @@ or implementation was imported. No FFmpeg/network is used for generation or
 ordinary tests. This numerical artifact does not establish SBR playback support;
 encoded media, QMF/HF synthesis and nonzero PCM qualification remain outstanding.
 SHA256: `0719ee3544d0c2f69f6884bfa21c558698dd2e53c1cdecd9af50a7cbb383cdad`.
+
+
+### SBR normative Huffman protocol vectors
+
+`aac-sbr-huffman-codewords.json` contains the ten legacy SBR codebooks
+(604 indexed symbols), from GOST R53556.4-2013 tables A.79–A.88. Every symbol
+is cross-checked against ISO w4611 tables 1.A.2–1.A.11, independently parsed
+from its two-column PDF text layout. These are protocol constants, not copied
+decoder code and not private media. Translation errors are corrected explicitly:
+A.80 indices 31,32,101,103; A.81 index38; A.82 index1; A.87 index26. The
+three 25-symbol books have translated sparse printed indices normalized to
+consecutive indices, verified against ISO.
+
+Sources: https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html
+and http://www.mp3-tech.org/programmer/docs/w4611.pdf .
+Explicit offline regeneration:
+`python3 scripts/generate_aac_sbr_huffman_tables.py standard.html iso-draft.txt`.
+Both reference files must already be local; ordinary tests read checked-in data
+and require neither FFmpeg nor network. SHA-256: `8b4858fe7e039af6760d6c6550e45736d9cfa8e60e7147a2fb8a6c680dd23643`.
+These are syntax vectors, not HE-AAC encoded PCM/playback acceptance.

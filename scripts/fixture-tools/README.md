@@ -235,3 +235,11 @@ or network. Ordinary tests read the checked-in JSON only:
 `cargo test --manifest-path crates/fvid-media/Cargo.toml --release --locked
 --offline --no-default-features --lib aac_sbr_bands`.
 These are exact DSP geometry checks, not encoded-stream/PCM acceptance.
+
+
+SBR Huffman protocol constants: `scripts/generate_aac_sbr_huffman_tables.py`
+takes a locally saved UTF-8 GOST HTML and ISO draft PDF text. It performs no
+network/process codec calls, validates ten complete prefix-free tables, applies
+explicit documented translation errata and cross-checks all 604 symbols against
+the separate ISO text layout before writing Rust constants and JSON vectors.
+Do not run generation during ordinary tests. See fixture PROVENANCE.md.
