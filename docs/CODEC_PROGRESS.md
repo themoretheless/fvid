@@ -4206,3 +4206,30 @@ single-frame invocation still matches the original saved reference.
 Separate plane levels, lossless/identity bypass and rectangular transform
 combinations still require owned qualification. AV1 restoration and other
 remaining codec tools are not claimed complete.
+
+### AV1 independent Y/U/V quantization matrix qualification
+
+Nine owned one-frame 64x64 streams cover depths 8/10/12 with independent
+plane levels [0,7,14], [14,0,7] and [7,14,0]. Both generation-only libaom
+and dav1d references agree on every pixel, and all 27 hashes were checked.
+The ordinary offline test asserts the coded separate-UV flag and all three
+actual matrix levels, then checks native pixels/reset/finish and WebM
+replay/rewind/seek against saved independent references.
+
+The installed encoder's per-plane control calls did not change its coded
+[7,7,7] levels, so generation uses a deterministic owned baseline plus a
+native optional header rewrite utility. It changes only matrix levels and
+the required separate-UV flag, diff-UV signaling and byte alignment. Full
+parsed sequence/frame equality checks protect every other field; tile
+payload bytes are copied unchanged. No private media or parameters enter
+the fixtures, and ordinary tests do not execute the generator.
+
+Two verification-only mutants replaced chroma levels with Y, and replaced
+V's level with U respectively. Both failed pixel acceptance on the owned
+8-bit [0,7,14] stream. Sources were restored and matched canonical code.
+Lossless/identity bypass and rectangular matrix transform combinations
+still require owned qualification; remaining codec gaps stay open.
+
+Final restored-source run passed all four matrix suites together: 114 owned
+streams and 132 decoded frames per replay. The distinct-plane test binary
+links neither FFmpeg/libav nor either reference decoder.
