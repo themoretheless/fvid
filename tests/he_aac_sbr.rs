@@ -241,3 +241,43 @@ fn he_aac_matroska_seek_and_controlled_export_preserve_pcm() {
     );
     assert!(refused.is_empty());
 }
+
+#[test]
+fn original_stereo_he_aac_video_preserves_both_channels_in_player_and_export() {
+    use std::io::Cursor;
+    let stereo = include_bytes!("fixtures/playback-errors/he-aac-sbr-stereo.mp4");
+    let mono = include_bytes!("fixtures/playback-errors/he-aac-sbr-synthetic.mp4");
+    let mut reference = Vec::new();
+    fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(mono.as_slice()),
+        &mut reference,
+        None,
+        &Default::default(),
+    )
+    .unwrap();
+    let mut output = Vec::new();
+    let reader = Mp4Reader::open(Cursor::new(stereo.as_slice()), Limits::default()).unwrap();
+    let stats = fvid::native_media::decode_mp4_aac_reader(reader, &mut output, None).unwrap();
+    assert_eq!(
+        (stats.sample_rate, stats.channels, stats.sample_frames),
+        (48000, 2, 6144)
+    );
+    for (pair, sample) in output.chunks_exact(8).zip(reference.chunks_exact(4)) {
+        assert_eq!(&pair[..4], sample);
+        assert_eq!(&pair[4..], sample);
+    }
+    assert_eq!(output.len(), reference.len() * 2);
+    let mut exported = Vec::new();
+    let options = fvid_media::CopyOptions {
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        ..Default::default()
+    };
+    fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(stereo.as_slice()),
+        &mut exported,
+        None,
+        &options,
+    )
+    .unwrap();
+    assert_eq!(output, exported);
+}

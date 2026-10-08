@@ -35,7 +35,7 @@ def boxes(data):
 
 def box(tag,body): return struct.pack('>I4s',len(body)+8,tag)+body
 
-def video_fixture(cases,blob):
+def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
     # Existing authored AVC video is unchanged; original moov becomes equal-size
     # free, preserving its sample offsets. The audio template supplies container
     # structure only: original esds/sample tables/edits are all replaced.
@@ -62,7 +62,7 @@ def video_fixture(cases,blob):
             body=bytearray(body);assert body[0]==0;struct.pack_into('>II',body,12,48000,6144);body=bytes(body)
         elif tag==b'stsd':
             entries=list(boxes(body[8:]));assert len(entries)==1 and entries[0][0]==b'mp4a'
-            entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,1);struct.pack_into('>I',entry,24,48000<<16)
+            entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,channels);struct.pack_into('>I',entry,24,48000<<16)
             body=bytes(4)+struct.pack('>I',1)+box(b'mp4a',bytes(entry)+box(b'esds',esds))
         elif tag==b'stts':body=bytes(4)+struct.pack('>III',1,3,2048)
         elif tag==b'stsc':body=bytes(4)+struct.pack('>IIII',1,1,3,1)
@@ -80,8 +80,8 @@ def video_fixture(cases,blob):
     header=bytearray(next(p for t,p in original_children if t==b'mvhd'));header[-4:]=struct.pack('>I',3);struct.pack_into('>I',header,16,max(struct.unpack_from('>I',header,16)[0],audio_duration))
     movie=box(b'mvhd',header)+b''.join(box(t,p) for t,p in original_children if t==b'trak')+audio
     data=b''.join(box(b'free' if t==b'moov' else t,p) for t,p in boxes(video))+box(b'mdat',b''.join(packets))+box(b'moov',movie)
-    (DEST/'he-aac-sbr-synthetic.mp4').write_bytes(data)
-    return dict(file='he-aac-sbr-synthetic.mp4',sha256=hashlib.sha256(data).hexdigest(),
+    (DEST/filename).write_bytes(data)
+    return dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),
         video_seed_sha256=hashlib.sha256(video).hexdigest(),asc=case['asc'],pcm_offset=case['pcm_offset'],samples=case['samples'])
 
 def main():

@@ -6098,3 +6098,22 @@ Implicit ADTS SBR, missing-payload upsampling, native stereo packet/reference
 qualification, PS, spectral-core conformance, priming/EOF and broader codec
 profile coverage remain unfinished. Filtered multitrack export still has an
 LC-only AAC duration parser and needs its own targeted regression.
+
+
+### Native stereo HE-AAC packet acceptance
+
+64 original three-packet LC CPE+SBR sequences now qualify the complete native
+stereo decoder for centered coupled and uncoupled SBR. They cover 960/1024
+core frames, both output modes, four limiter densities, both smoothing flags,
+header reuse, temporal coefficients, CRC failure rollback and checkpoint/reset
+replay. The silent CPE core has independently signalled windows. Each channel
+uses the existing independent mono Decimal/direct-convolution PCM oracle: the
+centered coupled energy/noise split equals the uncoupled mono values. Every
+float32 sample must match exactly in both channels.
+
+A short original AVC/stereo HE-AAC MP4 additionally checks both native player
+audio and controlled owned export against the corresponding mono fixture.
+No production decoder change was necessary for this centered stereo scope.
+This closes the earlier absence of native stereo packet acceptance; it does
+not qualify asymmetric panning, nonzero spectral cores, shared LC windows,
+PS, implicit SBR, missing payload or all encoded-stream conformance.

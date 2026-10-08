@@ -155,3 +155,48 @@ fn extended_asc_keeps_core_rate_ps_and_unspecified_flags_distinct() {
     let reserved = packed("00101 1101 0001 0011 00010 000".replace(' ', "").as_str());
     assert!(AudioSpecificConfig::parse(&reserved).is_err());
 }
+
+#[test]
+fn complete_stereo_cpe_sbr_matches_both_independent_mono_oracles_and_crc_rollback() {
+    let manifest: Value = serde_json::from_slice(include_bytes!(
+        "../../../../tests/fixtures/playback-errors/he-aac-sbr-stereo.json"
+    ))
+    .unwrap();
+    let data = include_bytes!("../../../../tests/fixtures/playback-errors/he-aac-sbr-stereo.bin");
+    for case in manifest["cases"].as_array().unwrap() {
+        let mut decoder = NativeAacDecoder::new(&asc(case)).unwrap();
+        assert_eq!(decoder.channels(), 2);
+        let mut output = Vec::new();
+        for (n, frame) in case["frames"].as_array().unwrap().iter().enumerate() {
+            let start = frame["offset"].as_u64().unwrap() as usize;
+            let raw = &data[start..start + frame["bytes"].as_u64().unwrap() as usize];
+            let saved = decoder.checkpoint();
+            if n == 1 {
+                let bit = frame["crc_bit"].as_u64().unwrap() as usize;
+                let mut broken = raw.to_vec();
+                broken[bit / 8] ^= 1 << (7 - bit % 8);
+                assert!(
+                    decoder
+                        .decode(&broken)
+                        .unwrap_err()
+                        .to_string()
+                        .contains("CRC")
+                );
+            }
+            let decoded = decoder
+                .decode(raw)
+                .unwrap_or_else(|e| panic!("frame {n}, case {case}: {e}"));
+            decoder.reset();
+            decoder.restore(&saved).unwrap();
+            assert_eq!(decoded, decoder.decode(raw).unwrap());
+            output.extend(decoded);
+        }
+        let offset = case["pcm_offset"].as_u64().unwrap() as usize;
+        assert_eq!(output.len(), 2 * case["samples"].as_u64().unwrap() as usize);
+        for (pair, b) in output.chunks_exact(2).zip(PCM[offset..].chunks_exact(8)) {
+            let expected = (f64::from_le_bytes(b.try_into().unwrap()) as f32).to_bits();
+            assert_eq!(pair[0].to_bits(), expected, "left {case}");
+            assert_eq!(pair[1].to_bits(), expected, "right {case}");
+        }
+    }
+}
