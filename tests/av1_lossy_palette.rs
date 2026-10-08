@@ -9,10 +9,11 @@ fn lossy_palette_pixels_reset_webm_rewind_seek_match_owned_oracle() {
         &std::fs::read(root().join("av1-lossy-palette-generated.json")).unwrap(),
     )
     .unwrap();
-    let records = m["fixtures"].as_array().unwrap();
-    assert_eq!(records.len(), 336);
+    let mut records: Vec<_> = m["fixtures"].as_array().unwrap().iter().collect();
+    records.sort_by_key(|r| std::cmp::Reverse(r["quality"].as_u64().unwrap()));
+    assert_eq!(records.len(), 339);
     for depth in [8, 10, 12] {
-        assert_eq!(records.iter().filter(|r| r["depth"] == depth).count(), 112);
+        assert_eq!(records.iter().filter(|r| r["depth"] == depth).count(), 113);
     }
     let mut coverage = [[[0u32; 7]; 2]; 3];
     let mut residuals = [[0u32; 2]; 3];
@@ -53,6 +54,12 @@ fn lossy_palette_pixels_reset_webm_rewind_seek_match_owned_oracle() {
             _ => unreachable!(),
         };
         filters[index] += u32::from(header.filter.levels.iter().any(|v| *v > 0));
+        if r["quality"] == 48 {
+            assert!(
+                header.filter.levels.iter().any(|v| *v > 0),
+                "{name}: filtered fixture has zero levels"
+            );
+        }
         let mut d = Decoder::new(16 << 20);
         for _ in 0..2 {
             let frames = d
@@ -64,6 +71,12 @@ fn lossy_palette_pixels_reset_webm_rewind_seek_match_owned_oracle() {
             assert_eq!(p.size, size);
             assert_eq!(p.depth, depth);
             let stats = p.palette_counts;
+            if r["quality"] == 48 {
+                assert!(
+                    p.palette_residual_blocks[0] > 0,
+                    "{name}: no palette residuals in filtered fixture"
+                );
+            }
             for plane in 0..2 {
                 residuals[index][plane] += p.palette_residual_blocks[plane];
             }
