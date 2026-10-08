@@ -1741,16 +1741,28 @@ fn display_rgb(frame: &Frame) -> crate::Result<Vec<u8>> {
             },
             Pixels::Packed(planes, grade) => {
                 let mut rgb = Vec::new();
-                planes.to_rgb(&mut rgb, planes.frame.width * planes.frame.height * 3)?;
+                if frame.rotation != 0 {
+                    let packed = planes.rotated(frame.rotation)?;
+                    packed.to_rgb(&mut rgb, packed.frame.width * packed.frame.height * 3)?;
+                } else {
+                    planes.to_rgb(&mut rgb, planes.frame.width * planes.frame.height * 3)?;
+                }
                 if let Some(grade) = grade { grade.apply(&mut rgb); }
                 Ok(rgb)
             }
             Pixels::Planar(planes, grade) => {
+                let turned;
+                let planes_ref = if frame.rotation != 0 {
+                    turned = crate::playback_native::rotate_planar8(planes, frame.rotation);
+                    &turned
+                } else {
+                    planes.as_ref()
+                };
                 let mut rgb = Vec::new();
                 crate::playback_native::planar8_to_rgb(
-                    planes,
+                    planes_ref,
                     &mut rgb,
-                    planes.width * planes.height * 3,
+                    planes_ref.width * planes_ref.height * 3,
                 )?;
                 // The grade a plane picture kept for the shader is applied here
                 // instead, and it is the same table read the same way: both
@@ -1906,12 +1918,12 @@ struct Player {
     seek_target: Option<Duration>,
     /// Frame on screen when it is drawn by the GPU shader (planar), with the
     /// grade it still owes and that shader reads.
-    video: Option<(Arc<Planar8>, u64, Option<Arc<Grade>>)>,
+    video: Option<(Arc<Planar8>, u64, Option<Arc<Grade>>, u16)>,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     video_surface: Option<(crate::playback_thread::SurfacePixels, u64)>,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     shared_surfaces: bool,
-    video_packed: Option<(Arc<crate::playback_native::PackedPlanar>, u64, Option<Arc<Grade>>)>,
+    video_packed: Option<(Arc<crate::playback_native::PackedPlanar>, u64, Option<Arc<Grade>>, u16)>,
     /// Frame on screen when it arrived as packed RGB (Y4M, WebM).
     texture: Option<egui::TextureHandle>,
     /// The frame last shown, in whichever layout it came. The snapshot key
@@ -2774,7 +2786,7 @@ impl Player {
                         self.video_surface = Some((surface.clone(), frame.serial));
                     },
                     Pixels::Packed(planes, grade) => {
-                        self.video_packed = Some((planes.clone(), frame.serial, grade.clone()));
+                        self.video_packed = Some((planes.clone(), frame.serial, grade.clone(), frame.rotation));
                         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
                         { self.video_surface = None; }
                         self.video = None;
@@ -2782,7 +2794,7 @@ impl Player {
                         self.rgb_frame = None;
                     }
                     Pixels::Planar(planes, grade) => {
-                        self.video = Some((planes.clone(), frame.serial, grade.clone()));
+                        self.video = Some((planes.clone(), frame.serial, grade.clone(), frame.rotation));
                         self.video_packed = None;
                         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
                         { self.video_surface = None; }
@@ -5514,8 +5526,13 @@ impl eframe::App for Player {
             // size. Planar frames are converted to RGB by the GPU shader while
             // drawing, which is handed the crop as texture coordinates and the
             // grade the picture kept for it.
-            if let Some((planes, serial, grade)) = &self.video {
-                let source = Vec2::new(planes.width as f32, planes.height as f32);
+            if let Some((planes, serial, grade, rotation)) = &self.video {
+                let (w, h) = (planes.width, planes.height);
+                let source = if *rotation == 90 || *rotation == 270 {
+                    Vec2::new(h as f32, w as f32)
+                } else {
+                    Vec2::new(w as f32, h as f32)
+                };
                 let insets =
                     shown_insets(source, self.container_insets, self.pixel_aspect, self.crop);
                 let size = shown_size(
@@ -5536,17 +5553,23 @@ impl eframe::App for Player {
                         // shader reads out of the table the CPU would have read;
                         // see [`Grade::shader_look`] for what reaches here.
                         grade: grade.clone(),
+                        rotation: *rotation,
                     },
                 ));
-            } else if let Some((planes, serial, grade)) = &self.video_packed {
-                let source = Vec2::new(planes.frame.width as f32, planes.frame.height as f32);
+            } else if let Some((planes, serial, grade, rotation)) = &self.video_packed {
+                let (w, h) = (planes.frame.width, planes.frame.height);
+                let source = if *rotation == 90 || *rotation == 270 {
+                    Vec2::new(h as f32, w as f32)
+                } else {
+                    Vec2::new(w as f32, h as f32)
+                };
                 let insets = shown_insets(source, self.container_insets, self.pixel_aspect, self.crop);
                 let size = shown_size(cropped_size(source, insets), self.pixel_aspect, self.aspect, frame.size());
                 let rect = video_rect(frame, size, self.zoom_milli, self.pan);
                 ui.painter().add(egui_wgpu::Callback::new_paint_callback(rect,
                     crate::player_gpu::PackedVideoCallback {
                         frame: planes.clone(), serial: *serial, window: uv_window(source, insets),
-                        adjust: adjust_scalars(&self.adjust), grade: grade.clone(),
+                        adjust: adjust_scalars(&self.adjust), grade: grade.clone(), rotation: *rotation,
                     },
                 ));
             } else if let Some((rgb, dimensions)) = &self.rgb_frame {
@@ -6338,7 +6361,7 @@ mod tests {
     fn spherical_look_on_pause_preserves_clock_and_bounds_angles() {
         let rgb: Vec<u8> = (0..96).map(|n| (n * 2) as u8).collect();
         let frame = Frame { pixels: Pixels::Rgb(rgb), dimensions: [8,4], period: Duration::from_millis(17),
-            interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9 };
+            interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9, rotation: 0 };
         let mut player = Player { paused: true, presented_source: Some(frame.clone()), presented: Some(frame), ..Default::default() };
         player.spherical.enabled = true;
         player.redraw_view();
@@ -6359,7 +6382,7 @@ mod tests {
         let rgb: Vec<u8> = (0..96).map(|n| (n * 2) as u8).collect();
         let frame = Frame { pixels: Pixels::Rgb(rgb.clone()), dimensions: [8,4],
             period: Duration::from_millis(17), interval: Some((2,3,60)),
-            pts: Some((2,60)), generation: 7, serial: 9 };
+            pts: Some((2,60)), generation: 7, serial: 9, rotation: 0 };
         let mut player = Player { paused: true, presented_source: Some(frame.clone()), presented: Some(frame), ..Default::default() };
         player.change_spherical(false);
         let Pixels::Rgb(projected) = &player.presented.as_ref().unwrap().pixels else { panic!("expected RGB") };
@@ -6435,7 +6458,7 @@ mod tests {
             })).collect();
             let mut frame = Frame {
                 pixels: Pixels::Rgb(rgb), dimensions: [8,4], period: Duration::from_millis(17),
-                interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9,
+                interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9, rotation: 0,
             };
             super::spherical_frame(&mut frame, parsed.spherical).unwrap();
             let Pixels::Rgb(rgb) = &frame.pixels else { panic!("expected RGB") };
@@ -6456,7 +6479,7 @@ mod tests {
         let mut frame = Frame {
             pixels: Pixels::Rgb(source.iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, *p as u8]).collect()),
             dimensions: [8,4], period: Duration::from_millis(17), interval: Some((2,3,60)),
-            pts: Some((2,60)), generation: 7, serial: 9,
+            pts: Some((2,60)), generation: 7, serial: 9, rotation: 0,
         };
         super::spherical_frame(&mut frame, parsed.spherical).unwrap();
         let original: Vec<u8> = source.iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, *p as u8]).collect();
@@ -6476,7 +6499,7 @@ mod tests {
         let mut frame = Frame {
             pixels: Pixels::Rgb(vec![10,20,30,40,50,60,70,80,90,100,110,120]),
             dimensions: [4,1], period: Duration::from_millis(17),
-            interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9,
+            interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9, rotation: 0,
         };
         super::stereo_frame(&mut frame, parsed.stereo3d).unwrap();
         assert_eq!(frame.dimensions, [2,1]);
@@ -8814,6 +8837,7 @@ mod tests {
                 pts: None,
                 generation: 0,
                 serial: 1,
+                rotation: 0,
             }),
             ..Default::default()
         };
@@ -8905,6 +8929,7 @@ mod tests {
                     pts: None,
                     generation: 0,
                     serial: 1,
+                    rotation: 0,
                 }),
                 ..Default::default()
             };
@@ -11316,6 +11341,7 @@ mod gpu_option_tests {
             pixels: Pixels::Rgb(codes.clone()), dimensions: [2,2],
             period: Duration::from_millis(40), interval: None, pts: None,
             generation: player.playback.as_ref().unwrap().generation(), serial: 100,
+            rotation: 0,
         });
         player.step = 1;
         player.present(&egui::Context::default());
