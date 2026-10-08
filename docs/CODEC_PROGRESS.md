@@ -4072,3 +4072,15 @@ the canonical source. All 1017 saved file hashes were verified. The test
 executable has no FFmpeg/libav/libaom/dav1d linkage. The final strengthened 339-case acceptance and the existing 168-case lossless
 palette acceptance both passed offline after restoration. This does not claim full AV1 conformance or coverage of the
 remaining codec tools listed above.
+
+## AV1 delta-loop-filter owned reproduction
+
+Six owned 8/10/12-bit streams at quality 32/48 now reproduce the native
+`delta_lf` refusal. The generator forces 64x64 superblocks; auto superblock
+selection had omitted delta-LF syntax in one high-depth gradient stream, so
+that earlier encoding did not qualify as a reproducer. Both independent
+reference decoders agree on saved pixels. All 18 payload/container/pixel
+hashes were verified. The offline reproduction test independently parses
+each header and requires coded delta-LF before checking the specific native
+refusal. This is a passing refusal test, not a playback acceptance test.
+Native block-level delta filtering and acceptance remain required.
