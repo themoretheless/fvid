@@ -2144,3 +2144,24 @@ phase padding, every native mode combination, and selection transitions.
 SBR/CRC→PS history→common-grid path. This accepts parameter mapping, not full
 HE-AACv2 stereo PCM. Fixture generation is explicit and separate from ordinary
 tests, which use no FFmpeg/libav, network, or private source media.
+
+### Independent PS mixing and phase oracle
+
+`generate_aac_ps_mixing_oracles.py` explicitly generates
+`aac-ps-mixing-oracles.json` using Python stdlib Decimal at 90-digit precision.
+The equations are normative protocol mathematics from GOST R 53556.8-2013
+6.4.6.2–6.4.6.3; no foreign codec implementation algorithms are used. Ra
+uses authored Decimal series; Rb uses independent algebraic eigenvectors
+(no atan/modulo implementation reuse). It covers all 736 quantized real
+matrices and 1024 phase rotations (512 possible three-set histories for each
+of IPD and OPD), with the normative 1/4, 1/2, 1 phasor weights.
+
+Unit tests compare Rust matrix/rotation results to saved numbers and verify
+energy, intensity and coherence. Saved phase rows also contain independently
+calculated left/right outputs for original complex input signals. The existing
+seven original mixed-resolution
+MP4 regressions additionally pass parsed common envelopes through the real
+matrix owner and compare their results to the same independently calculated
+oracles. This is numeric-stage acceptance, not full PS PCM acceptance.
+Generation and tests remain separate; no FFmpeg/libav, network, third-party
+Python packages, private media or copied codec parameter sets are required.

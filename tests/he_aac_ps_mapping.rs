@@ -54,6 +54,31 @@ fn check(actual: &m::Indices, expected: &Value) {
     ] {
         assert_eq!(*a, integers(&expected[k]), "{k}");
     }
+    static MIXING: std::sync::OnceLock<Value> = std::sync::OnceLock::new();
+    let reference = MIXING.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "fixtures/playback-errors/aac-ps-mixing-oracles.json"
+        ))
+        .unwrap()
+    });
+    let matrices = fvid_media::owned_aac::aac_ps_mixing::envelope(actual).unwrap();
+    for (i, matrix) in matrices.iter().enumerate() {
+        let row = reference["rows"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| {
+                r["fine"].as_bool().unwrap() == actual.iid_mode.fine()
+                    && r["mode"].as_str().unwrap()
+                        == if actual.icc_mode.mixing_b() { "b" } else { "a" }
+                    && r["iid"].as_i64().unwrap() == i64::from(actual.iid[i])
+                    && r["icc"].as_i64().unwrap() == i64::from(actual.icc[i])
+            })
+            .unwrap();
+        for (a, e) in matrix.coefficients().iter().zip(real(&row["expected"])) {
+            assert!((a - e).abs() < 2e-11);
+        }
+    }
     let l = actual.dequantize().unwrap();
     for (a, k) in [
         (&l.iid_db, "iid_db"),

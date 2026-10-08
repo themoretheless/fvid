@@ -5,6 +5,7 @@ pub mod aac_ps_huffman;
 pub mod aac_ps_dequant;
 pub mod aac_ps_history;
 pub mod aac_ps_mapping;
+pub mod aac_ps_mixing;
 mod aac_ps_mapping_tables;
 mod aac_ps_huffman_tables;
 pub mod aac_coupling;

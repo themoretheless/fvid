@@ -6292,3 +6292,27 @@ mapping/reset, and seven original three-packet MP4s with mixed resolutions
 and disabled-tool selection. These are mapping acceptance tests. Full hybrid
 filtering, decorrelation, phase smoothing, stereo mixing/synthesis and PCM
 acceptance remain unfinished; native PS playback still refuses explicitly.
+
+### Owned PS real matrices and phase primitives (2026-10-08)
+
+`aac_ps_mixing` computes Ra/Rb h11/h12/h21/h22 from validated quantized
+IID/ICC, including the normative Rb coherence floor 0.05 and modulo-pi/2
+angle correction. It derives matrices from validated common-band envelopes.
+Phase primitives smooth ordered oldest/previous/current IPD and OPD phasors
+with weights 1/4, 1/2, 1, rotate left/right columns and optionally conjugate
+all coefficients for starred hybrid bindings, then applies them to mono and
+decorrelated complex signals to produce separate left/right outputs. The history owner must map
+phase history to current geometry and reset it at required configuration
+transitions; this pure stage does not invent temporal state.
+
+An offline 90-digit Decimal oracle covers all 736 coarse/fine IID x ICC x
+Ra/Rb matrices. Rb uses independent algebraic eigenvectors instead of the
+production trigonometric path. All 512 phase histories are checked separately
+for IPD and OPD (1024 rotations), with conjugation and invalid-input checks.
+Energy, channel intensity ratio and coherence invariants also verify matrix
+orientation. The seven saved mixed-resolution MP4 regressions now verify the
+real matrix stage after container/SBR/PS/history/common-grid processing.
+
+This completes these numeric primitives, not native PS playback. Stateful
+phase history, temporal interpolation, hybrid filters, decorrelator, final
+stereo QMF synthesis and independent full PCM acceptance remain necessary.
