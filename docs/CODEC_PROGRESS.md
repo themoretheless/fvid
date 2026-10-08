@@ -5704,3 +5704,26 @@ output rates for bounded sources, phase parity and coverage. These remain DSP
 traces, not encoded HE-AAC playback acceptance. Rate-derived frequency bounds,
 limiter tables, envelope adjustment, frame buffering and production integration
 are still required.
+
+### Owned SBR limiter frequency borders
+
+`aac_sbr_limiter::borders` implements limiter modes 0–3, merging low-resolution
+borders and internal patch borders. The Figure 10 density/0.49-octave rule
+removes duplicates and close non-patch boundaries while preserving distinct
+patch boundaries. It validates contiguous parity-aligned patch geometry and
+the optional one/two-band unpatched tail. Mode zero uses the full low-table
+endpoints. The nonzero-mode algorithm follows the protocol's candidate and
+protected sets exactly; a discarded tail is not itself a patch boundary.
+
+1680 original geometries are independently evaluated with 80-digit Decimal
+exponential thresholds, rather than the implementation's floating log2.
+Coverage includes all modes, duplicate borders, varied low-table spacing,
+multiple patches, and tails. Source: ISO SBR Figure 10 (printed page 41),
+with published GOST R53556.4-2013 6.18.3.2.3 confirming table construction.
+This is frequency geometry, not amplitude limiting or encoded HE-AAC
+acceptance. Envelope energy estimation, gain/noise/sinusoid adjustment and
+production frame integration remain necessary.
+
+The arbitrary-geometry oracle includes 68 incompatible cases (source range
+exceeds the low-band boundary or merging leaves no limiter band); these are
+refusal checks. The remaining 1612 cases accept frequency geometry.

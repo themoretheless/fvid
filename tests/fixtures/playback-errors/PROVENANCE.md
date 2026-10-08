@@ -1734,3 +1734,19 @@ ISO/IEC 14496-3:2001 Amendment 1 working draft Figure 9, printed page 40
 slots, two contiguous parity-aligned patches, two noise bands, a discarded
 two-band tail, and envelope offset 1. No private media/parameters or copied
 decoder algorithms. Numeric DSP acceptance is not encoded HE-AAC acceptance.
+
+### SBR limiter frequency geometry reference
+
+`aac-sbr-limiter-decimal.json` contains 1680 original geometries generated
+offline by `scripts/generate_aac_sbr_limiter_oracles.py`. Independent 80-digit
+Decimal exponential thresholds implement the log-spacing predicate without
+using floating logarithms. Protocol: ISO/IEC 14496-3:2001 Amendment 1 working
+draft Figure 10, printed page 41
+(http://www.mp3-tech.org/programmer/docs/w4611.pdf), and GOST R53556.4-2013
+6.18.3.2.3 (https://allgosts.ru/33/170/gost_r_53556.4-2013). Original low-table
+and patch borders contain no private media or codec parameter sets. These
+are numeric geometry acceptance vectors, not encoded HE-AAC acceptance.
+
+The arbitrary-geometry oracle includes 68 incompatible cases (source range
+exceeds the low-band boundary or merging leaves no limiter band); these are
+refusal checks. The remaining 1612 cases accept frequency geometry.

@@ -281,3 +281,8 @@ Tests read saved traces; they do not run generators or external codecs.
 SBR HF references: explicitly run `python3 scripts/generate_aac_sbr_hf_oracles.py`.
 The offline 80-digit Decimal generator creates original complex QMF input and
 independent covariance/predictor/HF output. Ordinary tests read saved traces.
+
+SBR limiter border references: explicitly run
+`python3 scripts/generate_aac_sbr_limiter_oracles.py`. The offline generator
+compares Decimal ratios with an 80-digit exponential threshold, producing
+1680 original geometries covering all modes. Tests consume the saved JSON.

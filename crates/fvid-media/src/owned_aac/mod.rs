@@ -10,6 +10,7 @@ pub mod aac_sbr_controls;
 pub mod aac_sbr_chirp;
 pub mod aac_sbr_predictor;
 pub mod aac_sbr_hf;
+pub mod aac_sbr_limiter;
 pub mod aac_sbr_huffman;
 pub mod aac_sbr_coefficients;
 pub mod aac_sbr_dequant;
