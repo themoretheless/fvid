@@ -6523,3 +6523,44 @@ Both PCM channels and every QMF sample pass comparison; checkpoint replay,
 reset, overlap rejection and late-error rollback pass. Existing synthetic MP4
 packets provide native parameter parsing; encoded full PS playback remains
 refused. This is component acceptance, not full HE-AAC v2 conformance.
+
+### Owned streamed SBR/PS stereo PCM bridge (2026-10-09)
+
+`aac_sbr_qmf_dsp` is now the shared preparation/adjustment/routing stage used
+by ordinary SBR PCM synthesis and the new PS bridge. Its 16-bit-unit QMF rows
+are exposed before synthesis; existing mono/stereo, 960/1024, upsampling,
+header/history, rollback and normalized PCM references remain accepted.
+
+`aac_sbr_ps::Decoder` owns SBR syntax/history, native PS parameters, the shared
+QMF stage, full PS DSP and one queued frame. First input returns no PCM;
+subsequent input renders the prior frame with six actual future QMF slots.
+`frame_index` identifies the original input frame, not the later packet that
+supplied lookahead. EOF renders the final frame with zero lookahead once;
+repeated EOF returns None, and new input requires reset. All readers, history,
+queue and DSP states commit together. Output is normalized unclipped f64.
+Rate/slot/output-mode changes require reset. Missing/multiple PS elements remain
+explicit refusals; native AAC dispatch and startup/timeline trimming remain open.
+
+Four original three-packet synthetic MP4s cover 960/1024 silent native LC cores,
+30/32 PS slots, phase retention/toggles and 20/34/20 grid changes. Actual SCE
+bits extracted from the authored packet are decoded by the native AAC-LC core;
+the corresponding original SBR payload is then supplied to the bridge. Numeric
+QMF references independently use normative noise and Decimal envelope gain.
+Full stereo PCM references use direct allpass convolution, weighted transients,
+independent matrix coefficients and direct QMF synthesis contributions. Both
+output rates compare every QMF/PCM value, replay/reset, actual lookahead and EOF.
+The 960 MP4 wrapper uses correct 1920-tick packets and 5760-tick duration.
+CRC, malformed PCM, missing PS and format failures reproduce specific errors
+without changing reader position or pending state. All generation is explicit,
+offline and separate from tests; original 1024 wrappers remain byte-identical.
+
+This accepts the streamed SCE/core + SBR/PS bridge, not the combined native AAC
+packet API or general HE-AAC v2 conformance. Nonzero-core independent PCM,
+missing/late PS, native buffering/checkpoints/memory/timestamps and seek still
+require qualification before removing the native PS refusal.
+
+Validation: 829 tests passed offline (root lib 347, owned media lib 432,
+11 HE-AAC integration suites 50); one existing owned test remains ignored.
+The player build check, rustfmt, Python syntax and diff checks passed. Seven
+new/current reference assets regenerate identically, and both original
+1024-sample PS MP4 wrappers remain byte-identical.

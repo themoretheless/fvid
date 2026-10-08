@@ -4,7 +4,7 @@ Explicit offline generation; Decimal hybrid/convolution/transients/mixing,
 then direct QMF synthesis contributions. No Rust or foreign decoder output.
 """
 import json,struct,re,math
-from decimal import Decimal as D
+from decimal import Decimal as D, localcontext
 from generate_aac_ps_decorrelation_oracles import ROOT,DEST,MAP,ZERO,mul,add,scale,response
 from generate_aac_ps_hybrid_oracles import KERNELS,NAMES,TOPOLOGY,signal
 from functools import lru_cache
@@ -39,12 +39,24 @@ def main():
  window=[float(v) for v in re.findall(r'-?\d+\.\d+',source.split('= [',1)[1])];assert len(window)==640
  matrices=json.loads((DEST/'aac-ps-matrix-controller-oracles.json').read_text())
  sources=[(dict(kind='video',name=v['video']['file']),v['expected']) for v in matrices['videos']]
+ sources += [(dict(kind='sbr-video',name=v['video']['file']),v['expected']) for v in matrices['videos']]
  sources += [(dict(kind='sequence',name=matrices['sequences'][i]['name']),matrices['sequences'][i]['frames'][:3]) for i in [0,6]]
+ sources += [(dict(kind='sbr-video-30',name=v['video']['file']),v['expected']) for v in json.loads((DEST/'aac-sbr-ps-30-oracles.json').read_text())['videos']]
  cases=[]
  for source,expected in sources:
   for eof in [False,True]:
    total=sum(e['slots'] for e in expected)
-   qmf=[[signal(n,k,'complex') if n<total or not eof else ZERO for k in range(64)] for n in range(total+6)]
+   if source['kind'].startswith('sbr-video'):
+    # Authored SBR payload: silent core, EOrig=128, QOrig=.5, no attack,
+    # limiter density=2/gains=2, smoothing disabled (smoothing_mode=1).
+    raw_noise=(DEST/'aac-sbr-noise-protocol.f64le').read_bytes()
+    noise=[tuple(D.from_float(v) for v in struct.unpack_from('<dd',raw_noise,i*16)) for i in range(512)]
+    with localcontext() as context:
+     context.prec=80
+     amplitude=(D(128)*D('.5')/D('1.5')).sqrt()*min(D(3).sqrt(),D('1.584893192'))
+    qmf=[[scale(noise[(n*17+k-10+1)%512],amplitude) if 10<=k<27 and (n<total or not eof) else ZERO for k in range(64)] for n in range(total+6)]
+   else:
+    qmf=[[signal(n,k,'complex') if n<total or not eof else ZERO for k in range(64)] for n in range(total+6)]
    outputs=[[],[]];frames=[];history=[];power=[];peak=[];previous=None
    start=0
    for fi,e in enumerate(expected):
@@ -71,7 +83,7 @@ def main():
       h=response(bands,k,len(history));y=ZERO
       for j in range(n+1):y=add(y,mul(h[n-j],history[j][k]))
       diffuse.append(scale(y,gain[b['parameter']]))
-     coeff=read(e['coefficients'][offset],'aac-ps-matrix-controller-coefficients.bin')
+     coeff=read(e['coefficients'][offset],e.get('coefficients_file','aac-ps-matrix-controller-coefficients.bin'))
      left=[ZERO]*64;right=[ZERO]*64
      for k,b in enumerate(bindings):
       base=b['parameter']*8;h=[tuple(coeff[base+m*2:base+m*2+2]) for m in range(4)]

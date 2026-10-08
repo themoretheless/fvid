@@ -94,6 +94,18 @@ fn parameters(case: &Value) -> Vec<Parameters> {
         "fixtures/playback-errors/aac-ps-matrix-controller-oracles.json"
     ))
     .unwrap();
+    let mut m = m;
+    if source["kind"] == "sbr-video-30" {
+        m = serde_json::from_str(include_str!(
+            "fixtures/playback-errors/aac-sbr-ps-30-oracles.json"
+        ))
+        .unwrap();
+    }
+    let slots = if source["kind"] == "sbr-video-30" {
+        15
+    } else {
+        16
+    };
     let v = m["videos"]
         .as_array()
         .unwrap()
@@ -115,8 +127,11 @@ fn parameters(case: &Value) -> Vec<Parameters> {
         NativeAacDecoder::new(asc).err().unwrap().to_string(),
         "AAC parametric stereo synthesis is not yet implemented"
     );
-    let packets =
-        include_bytes!("fixtures/playback-errors/he-aac-ps-matrix-controller-packets.bin");
+    let packets: &[u8] = if slots == 15 {
+        include_bytes!("fixtures/playback-errors/he-aac-sbr-ps-960-packets.bin")
+    } else {
+        include_bytes!("fixtures/playback-errors/he-aac-ps-matrix-controller-packets.bin")
+    };
     let mut sbr = aac_sbr_history::Stream::default();
     (0..3)
         .map(|n| {
@@ -131,10 +146,10 @@ fn parameters(case: &Value) -> Vec<Parameters> {
             let kind = bits.read(4).unwrap();
             assert_eq!(kind, if n == 1 { 14 } else { 13 });
             let f = sbr
-                .read(&mut bits, raw.len() * 8, kind == 14, 48000, 16, 1)
+                .read(&mut bits, raw.len() * 8, kind == 14, 48000, slots, 1)
                 .unwrap();
             let mut parsed = ps
-                .read_sbr_extensions(f.syntax.data.extended_data.as_ref().unwrap(), 32)
+                .read_sbr_extensions(f.syntax.data.extended_data.as_ref().unwrap(), slots * 2)
                 .unwrap();
             assert_eq!(parsed.len(), 1);
             parsed.remove(0).parameters
@@ -145,7 +160,7 @@ fn parameters(case: &Value) -> Vec<Parameters> {
 fn every_left_right_pcm_and_qmf_sample_matches_the_aligned_independent_reference() {
     let refs = reference();
     let cases = refs["cases"].as_array().unwrap();
-    assert_eq!(cases.len(), 8);
+    assert_eq!(cases.len(), 16);
     assert_eq!(LOOKAHEAD, 6);
     for case in cases {
         let params = parameters(case);

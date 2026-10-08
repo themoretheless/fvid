@@ -1628,3 +1628,16 @@ They reuse the original PS matrix synthetic MP4 packets and syntax sequences;
 no private media or codec parameters are used. Decimal direct convolution and
 direct per-lag QMF synthesis qualify both output rates and lookahead alignment.
 Native encoded PS refusal remains; these accept the composed component DSP.
+
+## Streamed SBR/PS 960/1024 regression references
+
+`scripts/generate_aac_sbr_ps_fixtures.py` explicitly generates two original
+960-sample SCE/SBR/PS MP4s, `he-aac-sbr-ps-960-packets.bin`,
+`aac-sbr-ps-30-oracles.json` and `aac-sbr-ps-30-coefficients.bin`.
+The MP4s reuse only authored video/container seeds and own codec parameter sets.
+`scripts/generate_aac_ps_dsp_oracles.py` extends saved stereo PCM references
+with independently computed silent-core SBR noise QMF for both 960 and 1024.
+Tests decode original SCE bits natively and compare the streamed SBR/PS bridge
+against both PCM channels, real lookahead, zero EOF and rollback. Native combined
+PS packet playback remains refused until its buffering/timeline integration.
+No ordinary test runs generation, FFmpeg or network access.

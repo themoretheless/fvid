@@ -1,15 +1,9 @@
 //! Owned non-scalable SBR extension + core PCM to normalized output PCM.
-//! PS, core AAC element dispatch and codec/container timing belong to the
-//! enclosing decoder; this module does not silently interpret PS as stereo.
+//! Extended audio dispatch and codec/container timing belong to the enclosing decoder.
 use super::{
-    Result,
-    aac_sbr_assembly::Assembly,
-    aac_sbr_buffers::SynthesisRows,
-    aac_sbr_downsampled_qmf, aac_sbr_gain, aac_sbr_hf,
+    Result, aac_sbr_downsampled_qmf,
     aac_sbr_history::{Frame, Stream},
-    aac_sbr_limiter,
-    aac_sbr_prepare::Preparation,
-    aac_sbr_synthesis_qmf,
+    aac_sbr_qmf_dsp, aac_sbr_synthesis_qmf,
     bits::BitReader,
     invalid, unsupported,
 };
@@ -23,16 +17,33 @@ enum Synthesis {
     Double(aac_sbr_synthesis_qmf::Synthesis),
     Core(aac_sbr_downsampled_qmf::Synthesis),
 }
-#[derive(Clone, Debug, PartialEq)]
-struct Channel {
-    assembly: Assembly,
-    rows: SynthesisRows,
-    synthesis: Synthesis,
+impl Synthesis {
+    fn new(rate: OutputRate) -> Self {
+        match rate {
+            OutputRate::Double => Self::Double(Default::default()),
+            OutputRate::Core => Self::Core(Default::default()),
+        }
+    }
+    fn process(&mut self, rows: &[[super::aac_sbr_qmf::Complex; 64]]) -> Result<Vec<f64>> {
+        let mut pcm = match self {
+            Self::Double(s) => s.process(rows)?,
+            Self::Core(s) => s.process(
+                &rows
+                    .iter()
+                    .map(|r| r[..32].try_into().unwrap())
+                    .collect::<Vec<_>>(),
+            )?,
+        };
+        for value in &mut pcm {
+            *value /= 32768.0;
+        }
+        Ok(pcm)
+    }
 }
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Dsp {
-    preparation: Preparation,
-    channels: Vec<Channel>,
+    qmf: aac_sbr_qmf_dsp::Dsp,
+    synthesis: Vec<Synthesis>,
     output_rate: Option<OutputRate>,
 }
 impl Dsp {
@@ -40,17 +51,34 @@ impl Dsp {
         &self,
         footprint: &mut super::memory::Footprint,
     ) -> std::result::Result<(), String> {
-        self.preparation.visit_retained(footprint)?;
-        footprint.vector(&self.channels)
+        self.qmf.visit_retained(footprint)?;
+        footprint.vector(&self.synthesis)
     }
-
     pub fn reset(&mut self) {
         *self = Self::default();
     }
-    /// GOST 6.18.5 pure upsampling: XLow(k,l+tHFAdj), k<32, zero high bands.
-    /// Keeps analysis, delay and synthesis histories; no invented HF payload.
-    /// Native AAC dispatch and transitions back to header-bearing SBR are
-    /// qualified separately before routing missing FIL blocks through this API.
+    fn synthesize(
+        &mut self,
+        rows: &[Vec<[super::aac_sbr_qmf::Complex; 64]>],
+        rate: OutputRate,
+    ) -> Result<Vec<Vec<f64>>> {
+        if self.output_rate.is_some_and(|old| old != rate) {
+            return Err(invalid("SBR output rate changed without reset"));
+        }
+        if self.synthesis.is_empty() {
+            self.synthesis
+                .resize_with(rows.len(), || Synthesis::new(rate));
+        }
+        if self.synthesis.len() != rows.len() {
+            return Err(invalid("SBR channel count changed without reset"));
+        }
+        let mut output = Vec::with_capacity(rows.len());
+        for (state, rows) in self.synthesis.iter_mut().zip(rows) {
+            output.push(state.process(rows)?);
+        }
+        self.output_rate = Some(rate);
+        Ok(output)
+    }
     pub fn process_upsampling(
         &mut self,
         pcm: &[&[f32]],
@@ -58,53 +86,14 @@ impl Dsp {
         slots: u8,
         mode: OutputRate,
     ) -> Result<Vec<Vec<f64>>> {
-        if self.output_rate.is_some_and(|old| old != mode) {
-            return Err(invalid("SBR output rate changed without reset"));
-        }
         let mut trial = self.clone();
-        let rows = trial.preparation.upsample_rows(pcm, rate, slots)?;
-        if trial.channels.is_empty() {
-            for _ in &rows {
-                trial.channels.push(Channel {
-                    assembly: Assembly::default(),
-                    rows: SynthesisRows::default(),
-                    synthesis: match mode {
-                        OutputRate::Double => {
-                            Synthesis::Double(aac_sbr_synthesis_qmf::Synthesis::default())
-                        }
-                        OutputRate::Core => {
-                            Synthesis::Core(aac_sbr_downsampled_qmf::Synthesis::default())
-                        }
-                    },
-                });
-            }
-        }
-        let mut output = Vec::with_capacity(rows.len());
-        for (state, rows) in trial.channels.iter_mut().zip(rows) {
-            let mut pcm = match &mut state.synthesis {
-                Synthesis::Double(s) => s.process(&rows)?,
-                Synthesis::Core(s) => s.process(
-                    &rows
-                        .iter()
-                        .map(|r| r[..32].try_into().unwrap())
-                        .collect::<Vec<_>>(),
-                )?,
-            };
-            for sample in &mut pcm {
-                *sample /= 32768.0;
-            }
-            state.rows.reset();
-            output.push(pcm);
-        }
-        trial.output_rate = Some(mode);
+        let rows = trial.qmf.process_upsampling(pcm, rate, slots)?;
+        let output = trial.synthesize(&rows, mode)?;
         *self = trial;
         Ok(output)
     }
-    /// One complete frame per channel. Values remain unclipped normalized f64;
-    /// the caller owns interleaving, final sample format and timestamp policy.
-    /// Header geometry reset preserves synthesis/overlap, while full format
-    /// reset or seek clears the complete stream. Output-rate changes require
-    /// full reset, because the two synthesis banks have different histories.
+    /// One complete frame per channel. Header geometry resets preserve PCM history;
+    /// format resets clear the complete pipeline. Both channels commit together.
     pub fn process(
         &mut self,
         frame: &Frame,
@@ -118,96 +107,19 @@ impl Dsp {
             .data
             .extended_data
             .as_ref()
-            .is_some_and(|bytes| !bytes.is_empty())
+            .is_some_and(|v| !v.is_empty())
         {
             return Err(unsupported(
                 "SBR extended audio/PS synthesis is not yet implemented",
             ));
         }
-        // First received header may follow delay-only frames of the same format.
-        // Initializing SBR syntax must not discard their QMF analysis/synthesis.
-        let mut frame = frame.clone();
-        if frame.syntax.format_reset && self.preparation.matches_format(rate, slots, pcm.len()) {
-            frame.syntax.format_reset = false;
-        }
         let mut trial = self.clone();
-        if frame.syntax.format_reset {
-            trial.reset();
+        let qmf = trial.qmf.process(frame, pcm, rate, slots)?;
+        if qmf.format_reset {
+            trial.synthesis.clear();
+            trial.output_rate = None;
         }
-        if trial.output_rate.is_some_and(|old| old != output_rate) {
-            return Err(invalid("SBR output rate changed without reset"));
-        }
-        let prepared = trial.preparation.process(&frame, pcm, rate, slots)?;
-        if trial.channels.is_empty() {
-            for _ in &prepared {
-                trial.channels.push(Channel {
-                    assembly: Assembly::default(),
-                    rows: SynthesisRows::default(),
-                    synthesis: match output_rate {
-                        OutputRate::Double => {
-                            Synthesis::Double(aac_sbr_synthesis_qmf::Synthesis::default())
-                        }
-                        OutputRate::Core => {
-                            Synthesis::Core(aac_sbr_downsampled_qmf::Synthesis::default())
-                        }
-                    },
-                });
-            }
-        }
-        let tables = &frame.syntax.data.frequency;
-        let header = &frame.syntax.header;
-        let kx = tables.high[0];
-        let end = *tables.high.last().unwrap();
-        let patches = aac_sbr_hf::patches(&tables.master, kx, rate)?;
-        let borders = aac_sbr_limiter::borders(&tables.low, &patches, header.limiter_bands)?;
-        let mut output = Vec::with_capacity(prepared.len());
-        for (index, prepared) in prepared.into_iter().enumerate() {
-            let state = &mut trial.channels[index];
-            let grid = frame.syntax.data.channels[index].grid.time_grid(slots)?;
-            let mut levels = Vec::with_capacity(prepared.mapped.bands.len());
-            for (bands, &suppress) in prepared
-                .mapped
-                .bands
-                .iter()
-                .zip(&prepared.mapped.suppress_noise)
-            {
-                let initial = aac_sbr_gain::calculate(bands, suppress)?;
-                levels.push(aac_sbr_gain::limit(
-                    bands,
-                    &initial,
-                    kx,
-                    &borders,
-                    header.limiter_gains,
-                    suppress,
-                )?);
-            }
-            let adjusted = state.assembly.process(
-                &prepared.high,
-                slots,
-                &grid,
-                kx,
-                &levels,
-                &prepared.mapped.suppress_noise,
-                header.smoothing_mode,
-                frame.syntax.header_reset,
-            )?;
-            let rows = state
-                .rows
-                .process(&prepared.low, &adjusted, slots, &grid, kx, end)?;
-            let mut channel = match &mut state.synthesis {
-                Synthesis::Double(synthesis) => synthesis.process(&rows)?,
-                Synthesis::Core(synthesis) => {
-                    let low: Vec<[super::aac_sbr_qmf::Complex; 32]> =
-                        rows.iter().map(|r| r[..32].try_into().unwrap()).collect();
-                    synthesis.process(&low)?
-                }
-            };
-            for value in &mut channel {
-                *value /= 32768.0;
-            }
-            output.push(channel);
-        }
-        trial.output_rate = Some(output_rate);
+        let output = trial.synthesize(&qmf.rows, output_rate)?;
         *self = trial;
         Ok(output)
     }

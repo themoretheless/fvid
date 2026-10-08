@@ -33,6 +33,8 @@ pub mod aac_sbr_assembly;
 pub mod aac_sbr_buffers;
 pub mod aac_sbr_prepare;
 pub mod aac_sbr_dsp;
+pub mod aac_sbr_qmf_dsp;
+pub mod aac_sbr_ps;
 mod aac_sbr_noise_table;
 pub mod aac_sbr_huffman;
 pub mod aac_sbr_coefficients;
