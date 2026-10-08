@@ -233,7 +233,16 @@ impl NativePsAacDecoder {
             return Err(invalid("PS AAC block has no mono element"));
         }
         if !extension_seen {
-            return Err(unsupported("PS AAC block requires SBR/PS fill"));
+            output = trial.extension.process_upsampling(
+                core.as_ref().unwrap(),
+                trial
+                    .config
+                    .sample_rate
+                    .checked_mul(2)
+                    .ok_or_else(|| invalid("PS frequency overflow"))?,
+                (trial.config.frame_samples / 64) as u8,
+                trial.mode,
+            )?;
         }
         if bits.remaining() > 7 {
             return Err(invalid("trailing bytes after PS AAC END"));

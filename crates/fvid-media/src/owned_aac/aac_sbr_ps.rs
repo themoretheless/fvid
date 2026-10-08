@@ -140,6 +140,49 @@ impl Decoder {
         *bits = reader;
         Ok(output)
     }
+    /// A frame without an SBR payload still advances core QMF and stereo
+    /// synthesis at the configured output clock. Syntax/parameter histories
+    /// remain available for the next transmitted extension; no PS is detected.
+    pub fn process_upsampling(
+        &mut self,
+        pcm: &[f32],
+        rate: u32,
+        slots: u8,
+        output_rate: OutputRate,
+    ) -> Result<Option<Frame>> {
+        if self.finished {
+            return Err(invalid("SBR PS input after EOF requires reset"));
+        }
+        let format = (rate, slots, output_rate);
+        if self.format.is_some_and(|old| old != format) {
+            return Err(invalid("SBR PS format changed without reset"));
+        }
+        let mut trial = self.clone();
+        let rows = trial
+            .qmf
+            .process_upsampling(&[pcm], rate, slots)?
+            .into_iter()
+            .next()
+            .ok_or_else(|| invalid("missing mono SBR QMF rows"))?;
+        trial.format = Some(format);
+        let output = trial.render(&rows[..aac_ps_dsp::LOOKAHEAD])?;
+        trial.pending = Some(Pending {
+            parameters: None,
+            rows,
+            controls: FrameControls {
+                previous_ps_present: trial.previous_ps_present,
+                qmf_limit: 32,
+            },
+            frame_index: trial.next_index,
+        });
+        trial.previous_ps_present = false;
+        trial.next_index = trial
+            .next_index
+            .checked_add(1)
+            .ok_or_else(|| invalid("SBR PS frame index overflow"))?;
+        *self = trial;
+        Ok(output)
+    }
     /// Emit the last frame using zero EOF lookahead once. Repeated EOF returns
     /// None. A failed render leaves the pending frame and every history intact.
     pub fn finish(&mut self) -> Result<Option<Frame>> {

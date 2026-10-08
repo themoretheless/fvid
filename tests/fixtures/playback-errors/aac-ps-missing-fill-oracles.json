@@ -1,0 +1,501 @@
+{
+  "kind": "original silent native core, SBR noise and independent mono/PS stereo transitions",
+  "cases": [
+    {
+      "name": "startup",
+      "video": {
+        "file": "he-aac-ps-missing-fill-startup-960-synthetic.mp4",
+        "sha256": "1af2d1a65475e8d58c7f27a835c7274a6a288d0524bb2f7284ab36c5606e6339",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "implicit_video": {
+        "file": "he-aac-ps-missing-fill-startup-inband-960-synthetic.mp4",
+        "sha256": "8190a64fed9747e450ae943efd6201092b27d69d9d7ee30c956aee8e89f2d4bc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 4
+        },
+        {
+          "offset": 4,
+          "bytes": 136
+        },
+        {
+          "offset": 140,
+          "bytes": 17
+        }
+      ],
+      "ps_present": [
+        false,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            0,
+            5760
+          ],
+          [
+            46080,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            92160,
+            2880
+          ],
+          [
+            115200,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "middle",
+      "video": {
+        "file": "he-aac-ps-missing-fill-middle-960-synthetic.mp4",
+        "sha256": "0297bbf7ea496ac276bab63aba03d28557bde328ad01f7c3464b4feb0244587d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "implicit_video": {
+        "file": "he-aac-ps-missing-fill-middle-inband-960-synthetic.mp4",
+        "sha256": "4be7ebabb82189a4a4dd79bc57cfb1feaf30baec8e6e933fcaa3334fe0670200",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 157,
+          "bytes": 136
+        },
+        {
+          "offset": 293,
+          "bytes": 4
+        },
+        {
+          "offset": 297,
+          "bytes": 17
+        }
+      ],
+      "ps_present": [
+        true,
+        false,
+        true
+      ],
+      "stereo_active": [
+        true,
+        false,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            138240,
+            5760
+          ],
+          [
+            184320,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            230400,
+            2880
+          ],
+          [
+            253440,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "tail",
+      "video": {
+        "file": "he-aac-ps-missing-fill-tail-960-synthetic.mp4",
+        "sha256": "a420c386fed6a2797cfcbd124ab9d12ce7db3033f0ccad39ea4747a85dea907b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "implicit_video": {
+        "file": "he-aac-ps-missing-fill-tail-inband-960-synthetic.mp4",
+        "sha256": "f06500df0890fe83e7a3913191be461f59eadb77785f16662627734daa9f46c3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 314,
+          "bytes": 136
+        },
+        {
+          "offset": 450,
+          "bytes": 17
+        },
+        {
+          "offset": 467,
+          "bytes": 4
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        false
+      ],
+      "stereo_active": [
+        true,
+        true,
+        false
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            276480,
+            5760
+          ],
+          [
+            322560,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            368640,
+            2880
+          ],
+          [
+            391680,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "all-missing",
+      "video": {
+        "file": "he-aac-ps-missing-fill-all-missing-960-synthetic.mp4",
+        "sha256": "2ede3a6aa30bda311df70f46d4eca69cd52478962c090d0a8399477040329bca",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "implicit_video": null,
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 471,
+          "bytes": 4
+        },
+        {
+          "offset": 475,
+          "bytes": 4
+        },
+        {
+          "offset": 479,
+          "bytes": 4
+        }
+      ],
+      "ps_present": [
+        false,
+        false,
+        false
+      ],
+      "stereo_active": [
+        false,
+        false,
+        false
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            414720,
+            5760
+          ],
+          [
+            460800,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            506880,
+            2880
+          ],
+          [
+            529920,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "startup",
+      "video": {
+        "file": "he-aac-ps-missing-fill-startup-1024-synthetic.mp4",
+        "sha256": "138bf3fc8e64aa400e6967a71bfbd847326ee21d378d6db4573566eef9bbd9e2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "implicit_video": {
+        "file": "he-aac-ps-missing-fill-startup-inband-1024-synthetic.mp4",
+        "sha256": "adda6d293eb82f174347b9f7f363135a947ac0daf2b2588d05193630a5ea8080",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 483,
+          "bytes": 4
+        },
+        {
+          "offset": 487,
+          "bytes": 136
+        },
+        {
+          "offset": 623,
+          "bytes": 17
+        }
+      ],
+      "ps_present": [
+        false,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            552960,
+            6144
+          ],
+          [
+            602112,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            651264,
+            3072
+          ],
+          [
+            675840,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "middle",
+      "video": {
+        "file": "he-aac-ps-missing-fill-middle-1024-synthetic.mp4",
+        "sha256": "e2319a9fa1dbe42420bd57dfef1b82d194c7a58c45fafa2f788d779f9d7de2ef",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "implicit_video": {
+        "file": "he-aac-ps-missing-fill-middle-inband-1024-synthetic.mp4",
+        "sha256": "3f520b1dd0c3f725fecab7f9102e2871873285ce4b7fa6f987ad4f385b845444",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 640,
+          "bytes": 136
+        },
+        {
+          "offset": 776,
+          "bytes": 4
+        },
+        {
+          "offset": 780,
+          "bytes": 17
+        }
+      ],
+      "ps_present": [
+        true,
+        false,
+        true
+      ],
+      "stereo_active": [
+        true,
+        false,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            700416,
+            6144
+          ],
+          [
+            749568,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            798720,
+            3072
+          ],
+          [
+            823296,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "tail",
+      "video": {
+        "file": "he-aac-ps-missing-fill-tail-1024-synthetic.mp4",
+        "sha256": "9da210e5a64fdbff505d37fb406cbf57ee7df114f54abe7dd4658f64cc82b6ee",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "implicit_video": {
+        "file": "he-aac-ps-missing-fill-tail-inband-1024-synthetic.mp4",
+        "sha256": "df5f7d5196fd093bfb0b598c10ef4724be82d356262ff2226113ac60f1db769e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 797,
+          "bytes": 136
+        },
+        {
+          "offset": 933,
+          "bytes": 17
+        },
+        {
+          "offset": 950,
+          "bytes": 4
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        false
+      ],
+      "stereo_active": [
+        true,
+        true,
+        false
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            847872,
+            6144
+          ],
+          [
+            897024,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            946176,
+            3072
+          ],
+          [
+            970752,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "all-missing",
+      "video": {
+        "file": "he-aac-ps-missing-fill-all-missing-1024-synthetic.mp4",
+        "sha256": "1f6a2ee54dc38fb7c1c8023b2d6bc7f708cdcd97bb8534b2a83289e830b46f78",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "implicit_video": null,
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 954,
+          "bytes": 4
+        },
+        {
+          "offset": 958,
+          "bytes": 4
+        },
+        {
+          "offset": 962,
+          "bytes": 4
+        }
+      ],
+      "ps_present": [
+        false,
+        false,
+        false
+      ],
+      "stereo_active": [
+        false,
+        false,
+        false
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            995328,
+            6144
+          ],
+          [
+            1044480,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1093632,
+            3072
+          ],
+          [
+            1118208,
+            3072
+          ]
+        ]
+      }
+    }
+  ],
+  "packet_sha256": "a59e5f260d0caae8640371d6ede19c8a13ad9dfbd1374df559c264c1fb088d72",
+  "pcm_sha256": "9d17c1a1e3be35806e107cb71f0d3873350d9a45680c4ba453beba1e76a3cefd"
+}

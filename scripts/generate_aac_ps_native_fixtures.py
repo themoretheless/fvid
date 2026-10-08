@@ -28,6 +28,6 @@ def main():
   video=video_fixture([case],blob,channels=2,filename=f'he-aac-ps-native-{name}-synthetic.mp4');video.pop('pcm_offset');video.pop('samples')
   bad.append(dict(name=name,video=video,frames=frames,error=error,failing_packet=1))
  (DEST/'he-aac-ps-native-malformed-packets.bin').write_bytes(blob)
- (DEST/'aac-ps-native-oracles.json').write_text(json.dumps(dict(kind='full native SCE/SBR/PS packet API cases; original synthetic malformed MP4s',cases=cases,malformed=bad,packet_sha256=hashlib.sha256(blob).hexdigest()),indent=2)+'\n')
- print(len(cases),'original native packet cases;',len(bad),'malformed synthetic MP4s')
+ (DEST/'aac-ps-native-oracles.json').write_text(json.dumps(dict(kind='full native SCE/SBR/PS packet API cases; original synthetic malformed MP4s',cases=cases,malformed=[c for c in bad if c['name']!='missing-fill'],accepted_missing_fill=[{k:v for k,v in c.items() if k not in ('error','failing_packet')} for c in bad if c['name']=='missing-fill'],packet_sha256=hashlib.sha256(blob).hexdigest()),indent=2)+'\n')
+ print(len(cases),'original native packet cases;',len(bad)-1,'malformed synthetic MP4s; one accepted missing-fill MP4')
 if __name__=='__main__':main()

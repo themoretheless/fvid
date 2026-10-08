@@ -889,3 +889,23 @@ assets regenerate offline and deterministically. AAC CodecPrivate carries ASC:
 https://www.matroska.org/technical/codec_specs.html#a_aac . This closes ASC-declared
 geometry, not implicit output-clock discovery from bare LC payloads or PS
 playback without SBR fills.
+
+AAC/PS missing SBR fill (2026-10-09): the native decoder now advances core
+analysis/QMF and delayed stereo synthesis at the configured output clock when
+raw_data_block has no SBR extension. It retains transmitted syntax histories,
+queues direct dual mono for that frame, and does not invent PS presence. Eight
+original 960/1024 video sequences cover startup, middle, trailing and all-missing
+fills, with independent stereo PCM for both 24/48 kHz output clocks. Six additional
+mono-metadata videos qualify actual in-band PS discovery. Before the fix the
+acceptance fixture failed exactly with `PS AAC block requires SBR/PS fill`.
+Four nonzero core PCM direct-convolution oracles verify that the bridge does
+not replace core audio with zeros. Acceptance covers checkpoint/replay/reset,
+EOF, root/owned MP4 PCM, WAV and playback decoder factories with original source
+windows. A candidate that never receives PS still refuses EOF without committing
+its pending frame; this is a refusal test, not PS playback acceptance. The former
+missing-fill refusal entry is moved to accepted metadata; malformed trailing,
+truncated, duplicate and late-element cases retain rollback checks. Seventeen
+new assets regenerate offline deterministically, and ordinary tests require no
+FFmpeg or generator. This supersedes the missing-fill limitation for the tested
+sole-SCE layouts; it does not qualify general multi-element/coupled SBR/PS or
+implicit output-clock discovery from bare LC metadata.

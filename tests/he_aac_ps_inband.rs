@@ -421,9 +421,8 @@ fn syntax_probe_accepts_lc_without_fill_then_detects_late_ps_transactionally() {
         NativePsAacDecoder::new_with_in_band_ps(&asc, 48000)
             .unwrap()
             .decode(&packet)
-            .unwrap_err()
-            .to_string()
-            .contains("requires SBR/PS fill")
+            .unwrap()
+            .is_none()
     );
     assert!(!probe.read(&packet).unwrap());
     let mut reader = Mp4Reader::open(
