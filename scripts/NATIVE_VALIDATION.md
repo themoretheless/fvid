@@ -909,3 +909,20 @@ new assets regenerate offline deterministically, and ordinary tests require no
 FFmpeg or generator. This supersedes the missing-fill limitation for the tested
 sole-SCE layouts; it does not qualify general multi-element/coupled SBR/PS or
 implicit output-clock discovery from bare LC metadata.
+
+Sole-element PCE SBR (2026-10-09): native SBR admission now permits an explicit
+normal front PCE containing one SCE or CPE without coupling. Existing PCE tag,
+in-band layout and checkpoint identity validation remains active; QMF/DSP uses
+the decoded one/two-channel geometry. Thirty original cases qualify 960/1024,
+24/48 kHz, explicit/sync SBR and container-hinted implicit double-rate SBR, with
+coupled and uncoupled CPE SBR. Before admission changed, the synthetic acceptance
+fixture failed exactly with `SBR multielement/PCE synthesis is not yet implemented`.
+All samples match the independent existing mono DSP oracle in every channel,
+including reset and checkpoint replay. Eighteen original MP4 videos accept
+root/owned PCM, intervals, WAV and playback decoder factories; implicit SBR is
+also discovered from actual FIL payloads. Four tagged/layout-error videos refuse
+with the intended PCE errors and preserve filter/noise state; these are refusal
+tests. Twenty-four new assets regenerate offline deterministically; ordinary
+tests never run generators or codec executables. Multi-element PCE, coupling
+with SBR, height-layer PCE and implicit downsampled SBR remain unqualified and
+are not claimed by this sole-element acceptance.

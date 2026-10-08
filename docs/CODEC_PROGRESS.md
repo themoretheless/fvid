@@ -6841,3 +6841,19 @@ Validation: all 17 HE-AAC suites passed 64 tests, full owned media library
 432 passed / 1 existing ignored, full offline player library 906 passed / 23
 existing ignored. Five new assets regenerate byte-identically; Python syntax,
 Rust formatting and diff checks pass. No test runs generation or codec tools.
+
+### 2026-10-09 — sole-element PCE SBR acceptance
+
+The owned native SBR decoder now accepts a normal front PCE with one tagged SCE
+or CPE and no AAC coupling elements. PCE does not require indexed configuration
+1/2 to use the existing mono/stereo QMF pipeline. Tags, in-band PCE layouts and
+checkpoint configuration identity remain checked. Thirty authored cases match
+independent PCM for 960/1024 and 24/48 kHz; explicit and sync SBR are qualified,
+as is container-hinted implicit double-rate SBR. Centered coupled/uncoupled CPE
+SBR is included. Eighteen MP4 videos qualify PCM, intervals, WAV, decoder factory
+source windows and actual implicit payload discovery. Four malformed videos
+retain exact tag/layout refusals with state rollback. The blanket PCE/SBR refusal
+is superseded only for these sole-element layouts. Multi-element/coupled AAC
+PCE with SBR, height layers and implicit downsampled SBR remain open.
+
+Full fixture and validation details are recorded in `scripts/NATIVE_VALIDATION.md`.

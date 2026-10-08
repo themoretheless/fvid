@@ -50,6 +50,17 @@ pub struct AacCheckpoint {
     sbr_stream: Option<sbr_history::Stream>,
     sbr_dsp: Option<sbr_dsp::Dsp>,
 }
+fn sole_sbr_layout(parsed: &AudioSpecificConfig) -> Result<bool> {
+    let Some(program) = &parsed.program else {
+        return Ok(matches!(parsed.core.channel_configuration, 1 | 2));
+    };
+    Ok(parsed.core.channel_configuration == 0
+        && program.coupling.is_empty()
+        && program.elements.len() == 1
+        && program.elements[0].position == super::aac_pce::Position::Front
+        && parsed.core.channels == (if program.elements[0].pair { 2 } else { 1 })
+        && program.height_layers()? == [super::aac_pce::HeightLayer::Normal])
+}
 impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
         let parsed = AudioSpecificConfig::parse(asc)?;
@@ -62,8 +73,8 @@ impl NativeAacDecoder {
             if rate != core && core.checked_mul(2) != Some(rate) {
                 return Err(unsupported("SBR output frequency requires single or double core rate"));
             }
-            if parsed.program.is_some() || !matches!(parsed.core.channel_configuration, 1 | 2) {
-                return Err(unsupported("SBR multielement/PCE synthesis is not yet implemented"));
+            if !sole_sbr_layout(&parsed)? {
+                return Err(unsupported("SBR requires one normal front SCE/CPE without coupling"));
             }
             Some(rate)
         } else { None };
@@ -134,8 +145,8 @@ impl NativeAacDecoder {
         parsed.resolve_output_rate(output_rate)?;
         let mut decoder=Self::new(asc)?;
         if decoder.sample_rate()!=output_rate {
-            if parsed.program.is_some() || !matches!(parsed.core.channel_configuration,1|2) {
-                return Err(unsupported("implicit SBR multielement/PCE synthesis is not yet implemented"));
+            if !sole_sbr_layout(&parsed)? {
+                return Err(unsupported("implicit SBR requires one normal front SCE/CPE without coupling"));
             }
             decoder.sbr_rate=Some(output_rate);
             decoder.sbr_stream=Some(sbr_history::Stream::default());
@@ -149,7 +160,7 @@ impl NativeAacDecoder {
     pub fn new_with_sbr_detection(asc:&[u8]) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         let mut decoder=Self::new(asc)?;
-        decoder.detect_sbr=parsed.sbr_present.is_none() && parsed.program.is_none() && matches!(parsed.core.channel_configuration,1|2);
+        decoder.detect_sbr=parsed.sbr_present.is_none() && sole_sbr_layout(&parsed)?;
         if decoder.detect_sbr {decoder.sbr_dsp=Some(sbr_dsp::Dsp::default());}
         Ok(decoder)
     }
