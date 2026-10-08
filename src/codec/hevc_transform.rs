@@ -185,17 +185,7 @@ pub fn reconstruct_with_precision(
 // Even frequencies form the smaller transform; odd frequencies are antisymmetric.
 // Caller bounds the dynamic range to 19 bits: 32 * 90 * 2^18 fits i32.
 fn inverse_dct(input: &[i32], output: &mut [i32]) {
-    if input[1..].iter().all(|&v| v == 0) {
-        output.fill(input[0] * 64);
-        return;
-    }
-    match input.len() {
-        4 => inverse4(input, output),
-        8 => inverse8(input, output),
-        16 => inverse16(input, output),
-        32 => inverse32(input, output),
-        _ => unreachable!("validated HEVC transform size"),
-    }
+    fvid_cpu::hevc_inverse_dct(input, output);
 }
 fn inverse2(input: &[i32], output: &mut [i32]) {
     output[0] = 64 * (input[0] + input[1]);
