@@ -50,10 +50,10 @@ pub struct VideoFrame {
 /// Hardware decoding through VideoToolbox, with the stream's SPS kept for
 /// colour information the hardware path does not report.
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-struct Hardware {
-    session: fvid_vt::Session,
-    colour: crate::playback_native::AvcColour,
-    shared: bool,
+pub(crate) struct Hardware {
+    pub(crate) session: fvid_vt::Session,
+    pub(crate) colour: crate::playback_native::AvcColour,
+    pub(crate) shared: bool,
 }
 
 enum Decoder {
@@ -387,7 +387,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             ));
         }
         if self.hardware.is_none()
-            || !matches!(&self.track().codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1")
+            || !matches!(
+                &self.track().codec,
+                b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
+            )
         {
             return Ok(false);
         }
@@ -762,7 +765,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
 /// Open a VideoToolbox session for the stream's parameter sets; `None` (with a
 /// note on stderr) leaves decoding to the software decoder.
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn open_hardware(
+pub(crate) fn open_hardware(
     codec: &[u8],
     configuration: &[u8],
     width: u64,
@@ -771,10 +774,10 @@ fn open_hardware(
     shared: bool,
 ) -> Option<Hardware> {
     match codec {
-        b"hvc1" | b"hev1" => open_hardware_hevc(configuration, budget, shared),
-        b"avc1" | b"avc3" => open_hardware_avc(configuration, shared),
-        b"vp09" => open_hardware_vp9(configuration, width, height),
-        b"av01" => open_hardware_av1(configuration, width, height),
+        b"hvc1" | b"hev1" | b"V_MPEGH/ISO/HEVC" => open_hardware_hevc(configuration, budget, shared),
+        b"avc1" | b"avc3" | b"V_MPEG4/ISO/AVC" => open_hardware_avc(configuration, shared),
+        b"vp09" | b"V_VP9" => open_hardware_vp9(configuration, width, height, shared),
+        b"av01" | b"V_AV1" => open_hardware_av1(configuration, width, height, shared),
         _ => None,
     }
 }
@@ -845,13 +848,43 @@ fn open_hardware_hevc(configuration: &[u8], budget: usize, shared: bool) -> Opti
     }
 }
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn open_hardware_vp9(configuration: &[u8], width: u64, height: u64) -> Option<Hardware> {
+fn open_hardware_vp9(
+    configuration: &[u8],
+    width: u64,
+    height: u64,
+    shared: bool,
+) -> Option<Hardware> {
+    let default_vpcc = [1u8, 0, 0, 0, 0, 10, (8 << 4) | (1 << 1), 1, 1, 1, 0, 0];
+    let configuration = if configuration.is_empty() {
+        &default_vpcc[..]
+    } else {
+        configuration
+    };
     let colour = crate::playback_native::AvcColour::default();
-    match fvid_vt::Session::new_vp9(configuration, width as u32, height as u32) {
+    let (depth, full_range) = if configuration.len() >= 7 {
+        let d = (configuration[6] >> 4) & 0x0F;
+        let depth = if d == 0 { 8 } else { d };
+        let full = (configuration[6] & 1) != 0;
+        (depth, full)
+    } else {
+        (8, false)
+    };
+    let session = if shared {
+        fvid_vt::Session::new_vp9_surface(
+            configuration,
+            width as u32,
+            height as u32,
+            depth,
+            full_range,
+        )
+    } else {
+        fvid_vt::Session::new_vp9(configuration, width as u32, height as u32)
+    };
+    match session {
         Ok(session) => Some(Hardware {
             session,
             colour,
-            shared: false,
+            shared,
         }),
         Err(error) => {
             eprintln!("{error}; using the software VP9 decoder");
@@ -860,13 +893,36 @@ fn open_hardware_vp9(configuration: &[u8], width: u64, height: u64) -> Option<Ha
     }
 }
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn open_hardware_av1(configuration: &[u8], width: u64, height: u64) -> Option<Hardware> {
+fn open_hardware_av1(
+    configuration: &[u8],
+    width: u64,
+    height: u64,
+    shared: bool,
+) -> Option<Hardware> {
     let colour = crate::playback_native::AvcColour::default();
-    match fvid_vt::Session::new_av1(configuration, width as u32, height as u32) {
+    let depth = if configuration.len() >= 3 {
+        let high_bitdepth = (configuration[2] & 0x40) != 0;
+        let twelve_bit = (configuration[2] & 0x20) != 0;
+        if !high_bitdepth { 8 } else if !twelve_bit { 10 } else { 12 }
+    } else {
+        8
+    };
+    let session = if shared {
+        fvid_vt::Session::new_av1_surface(
+            configuration,
+            width as u32,
+            height as u32,
+            depth,
+            false,
+        )
+    } else {
+        fvid_vt::Session::new_av1(configuration, width as u32, height as u32)
+    };
+    match session {
         Ok(session) => Some(Hardware {
             session,
             colour,
-            shared: false,
+            shared,
         }),
         Err(error) => {
             eprintln!("{error}; using the software AV1 decoder");
@@ -879,7 +935,7 @@ fn open_hardware_av1(configuration: &[u8], width: u64, height: u64) -> Option<Ha
 /// source-depth path packs for GPU upload. A geometry-only picture accompanies
 /// 8-bit planes, while Main10 owns samples and crops any padded odd border.
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn hardware_frame(
+pub(crate) fn hardware_frame(
     planes: fvid_vt::Planes,
     colour: crate::playback_native::AvcColour,
 ) -> (IntraPicture, Option<crate::playback_native::Planar8>) {

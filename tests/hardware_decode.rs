@@ -754,3 +754,18 @@ fn playback_queue_keeps_hardware_surfaces_from_first_frame_and_after_seek() {
         }
     }
 }
+
+#[test]
+#[ignore = "requires an available physical VideoToolbox VP9 decoder"]
+fn webm_hardware_decode_and_shared_surfaces() {
+    use fvid::playback_native::{NativeReader, RawFrame};
+    let bytes = include_bytes!("fixtures/short/vp9-motion.webm");
+    let mut reader = NativeReader::new(std::io::Cursor::new(bytes), 64 * 1024 * 1024).unwrap();
+    if reader.hardware_accelerated() {
+        assert!(reader.enable_shared_surfaces().unwrap());
+        if let Some(RawFrame::Surface { surface, .. }) = reader.read_frame_raw().unwrap() {
+            assert!(surface.width() > 0);
+            assert!(surface.height() > 0);
+        }
+    }
+}
