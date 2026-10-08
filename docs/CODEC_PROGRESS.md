@@ -4412,3 +4412,29 @@ or measured 60 fps performance.
 Final offline validation passed 35 core AV1 tests and 62 integration
 tests across 36 AV1 suites. The restoration regression binary links
 only system libraries; no FFmpeg/libav, libaom or dav1d linkage was present.
+
+
+### Owned inter restoration qualification and remaining inter failures
+
+An 18-stream set (three frames each, 192x128, 8/10/12-bit 4:2:0) exercises
+restoration in actual inter frame headers. A matching 18-stream control set
+disables restoration. Both were generated from owned moving gradients and
+deterministic noise, with libaom/dav1d pixel agreement and 108 verified hashes.
+
+Seven parameter combinations fail native entropy decoding, on the same
+frame with restoration enabled or disabled:
+8-bit q48/orientation0 (frame 2), q56/orientation0 (frame 3);
+10-bit q48/orientation0 (frame 2), q56/orientation0 (frame 3),
+q56/orientation1 (frame 2); 12-bit q32/orientation0 (frame 2),
+q48/orientation0 (frame 3). Diagnostics located failure in block decoding,
+not in reading restoration unit syntax. The cause is not yet established.
+
+A separate 10-bit q32/orientation0 case decodes but differs at byte 110558
+of the three-frame planar reference: native 240 versus reference 241, with
+or without restoration. The test pins this specific mismatch.
+
+The default tests reproduce these eight gaps and check full native reset,
+WebM replay, timestamps, rewind and seek on the other ten streams in each
+set. The distinct full acceptance test remains ignored pending the fixes;
+passing reproduction tests do not mean these streams are supported.
+Generator options and reference data remain separate from offline tests.
