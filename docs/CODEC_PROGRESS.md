@@ -5027,3 +5027,26 @@ Final validation: 49 AV1 release unit tests and 15 selected offline integration
 tests passed, zero failures/ignored tests. Generator syntax, Rust formatting,
 all 144 artifact hashes and scoped diff checks pass. The intrabc test binary
 links only system libSystem/libiconv, with no external codec/libav linkage.
+
+### AV1 full-chroma inter tools and scaled-reference acceptance (2026-10-08)
+
+24 original eight-frame moving sequences at 4:2:2/4:4:4 and 8/10/12 bits
+match stock libaom/dav1d goldens in every output sample. Two authored patterns
+exercise fixed 191x127 output and a 96x64 keyframe followed by 191x127 inter
+frames. Finish/reset, all raw WebM frames, 20ms intervals, EOF rewind and sync
+seek/full replay pass. Every layout/depth group has actual selected single,
+average/distance compound, wedge/difference masks, OBMC, inter-intra,
+local/global warp and scaled-reference prediction. New block statistics make
+that coverage explicit; merely enabled encoder flags do not satisfy acceptance.
+
+First-decode block totals are [70328,2908,596,515,141,9599,883,2562,168,8294]
+in the tool order above. Actual scaled references are required in every resized
+stream and forbidden in fixed-size streams. All 72 artifact hashes verify.
+This qualifies these owned combinations; it does not prove whole-codec
+conformance, every profile/tool interaction or layered/tile-list streams.
+
+Final validation: 49 AV1 release unit tests and 23 selected offline integration
+tests passed, zero failures/ignored tests, including existing OBMC, masked
+compound, inter-intra and scaled-reference suites. Generator syntax, Rust
+formatting, all 72 artifact hashes and scoped diff checks pass. The new test
+binary links only system libSystem/libiconv, with no FFmpeg/libav/codec linkage.

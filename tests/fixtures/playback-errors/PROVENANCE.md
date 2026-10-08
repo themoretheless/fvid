@@ -1154,3 +1154,33 @@ half phases for 4:2:2, integral copies for 4:4:4). All native pixels, finish/res
 raw WebM, 20ms intervals, EOF rewind and sync seek replay are checked. Control
 streams must have no intrabc blocks/residuals/phases/parities. Generation is
 separate; ordinary tests invoke no codec process, FFmpeg or network.
+
+### Full-chroma AV1 inter tools and resized-reference qualification
+
+`generate_av1_chroma_inter_samples.py` creates 24 original moving textured
+sequences, eight frames each, at 4:2:2/4:4:4 and 8/10/12 bits. Each group has
+two authored motion/color patterns with fixed 191x127 output and with a 96x64
+keyframe followed by 191x127 inter frames. Stock aomenc, CQ40, CPU0, SB64,
+rectangular partitions and minimum 4x4 blocks are used; lag/altref and temporal
+reference-MVs are disabled, as are intrabc/palette/CDEF/restoration. Source
+patterns, source SHA-256 and OBU/WebM/YUV SHA-256 are recorded; no private samples
+or parameter sets are used. Both unmodified aomdec and dav1d must emit identical
+full-precision raw pixels, including the changed display sizes. The expected
+variable-size frame byte count is checked independently during generation.
+
+`tests/av1_chroma_inter.rs` checks all 192 native displayed frames against those
+goldens, depth/layout/dimensions, finish/reset, raw WebM and 20ms intervals,
+EOF rewind, and sync seek inside the sequence followed by full replay.
+`Picture::inter_prediction` records reconstructed block tool selections.
+Acceptance requires positive single, average/distance compound, wedge/difference
+compound, OBMC, inter-intra, actual local/global warp and scaled-reference counts
+in every layout/depth group. This rejects enabled-but-unused flags. Resized
+streams must execute scaled reference prediction; fixed-size streams must not.
+Generation is separate: ordinary tests read only the checked-in synthetic assets
+and run FVid, with no codec process, FFmpeg or network invocation.
+
+First-decode totals: 70,328 single-reference, 2,908 average compound, 596 distance
+compound, 515 wedge, 141 difference, 9,599 OBMC, 883 inter-intra, 2,562 local warp,
+168 global warp and 8,294 blocks using scaled references. These counts can overlap
+across categories (for example, single-reference OBMC), and are not frame counts.
+This set does not establish every inter-tool/profile/tile/layer combination.

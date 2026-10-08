@@ -1,0 +1,1348 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-chroma-inter-layout422-depth8-resize0-pattern0.obu",
+      "reference": "av1-chroma-inter-layout422-depth8-resize0-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout422-depth8-resize0-pattern0.webm",
+      "sha256": "71d16408a261f2a479936f7429f356acdd767a2d6c04750c318daafff468d338",
+      "reference_sha256": "f806f5fcb91448873b35ae7bcd56600c855bfcf6249d32417c1067f10143ac07",
+      "webm_sha256": "ab30b7d75d36329b52742c12d1deecb8059bdc01eb5b60ac12551da887a7ae71",
+      "source_sha256": "54c5718aa11c5bdf893f0b2479202ad5a0bae61257ace4e437de7f8733247c8b",
+      "layout": "422",
+      "depth": 8,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth8-resize0-pattern1.obu",
+      "reference": "av1-chroma-inter-layout422-depth8-resize0-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout422-depth8-resize0-pattern1.webm",
+      "sha256": "4b202f03b6b51bb18798bab978c3e22f04b3b0dcd9ffbb4da4b0a763b77f4b8b",
+      "reference_sha256": "0da6b399318e02cdc965ca78601c9b0f39c7627a7ea2a399b91ab32ed3666aa2",
+      "webm_sha256": "2aa2a21ab67064f756edafaedd805e6e35b3afa2a422dbeba5e1e5667a3854f8",
+      "source_sha256": "8ca4f739d64a0fbb284a8fb17411409c4d84e46bcff21044cba0f5258a04fd92",
+      "layout": "422",
+      "depth": 8,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth8-resize1-pattern0.obu",
+      "reference": "av1-chroma-inter-layout422-depth8-resize1-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout422-depth8-resize1-pattern0.webm",
+      "sha256": "48164891f9d7656c46025f4636162d6bd884f3a1afd41c44a8c99df93408d189",
+      "reference_sha256": "dae096382ed777c04c8f3d4e7fbc672b1f036749504d9599f8de7078ffe2cdff",
+      "webm_sha256": "3ea10d2835086bc197115d5ff1d2cd01f08717326b5479e9f7e29d8d7437c5e1",
+      "source_sha256": "54c5718aa11c5bdf893f0b2479202ad5a0bae61257ace4e437de7f8733247c8b",
+      "layout": "422",
+      "depth": 8,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth8-resize1-pattern1.obu",
+      "reference": "av1-chroma-inter-layout422-depth8-resize1-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout422-depth8-resize1-pattern1.webm",
+      "sha256": "d3f39d85f2fe41a9d0f2201ac5eb43b669cd28723c45499bd097435823ff4f87",
+      "reference_sha256": "410878ee19f9a4cddc0581a56ed6fe19cf65e49002b80e1f4ab5bd7027a9872d",
+      "webm_sha256": "f12b3edec827ee7f68d898501bcb4cf97a78ad2f02bc73ac6aa1af67ff54e2a4",
+      "source_sha256": "8ca4f739d64a0fbb284a8fb17411409c4d84e46bcff21044cba0f5258a04fd92",
+      "layout": "422",
+      "depth": 8,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth8-resize0-pattern0.obu",
+      "reference": "av1-chroma-inter-layout444-depth8-resize0-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout444-depth8-resize0-pattern0.webm",
+      "sha256": "912d4050ed9d49b73204ad73f1ad6b5aa0d674326536511622c6f8dc52f33752",
+      "reference_sha256": "01a903c33c6531cb00635ddf0303141131b34f766693f4c3996416d6d7ad9f27",
+      "webm_sha256": "0d6ee25bc95df3eeac0f703dc79078567fba9167f116ddc4f970912e6e24b68e",
+      "source_sha256": "7b7e98c045c0e1ea2eb5f86c15454a733b20a2a6c8b4cdc8e482aeb524381f11",
+      "layout": "444",
+      "depth": 8,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth8-resize0-pattern1.obu",
+      "reference": "av1-chroma-inter-layout444-depth8-resize0-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout444-depth8-resize0-pattern1.webm",
+      "sha256": "3bdda3bb48e68550b57f8f743761e18c4258d031c5a972c919331a650d8c102e",
+      "reference_sha256": "480196fad2223822e9d6b788a33d0b336dcec1b9f1665a8cda51b6c87cc6947d",
+      "webm_sha256": "8daee747f49e543a734fe9ca43476485c6287f11548ab9654c934e87072fd04b",
+      "source_sha256": "6ef9d4ea37c0e3a47a19a2b560bdd2b4ab38d5f7b96c54dd71d707a6b2718d2d",
+      "layout": "444",
+      "depth": 8,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth8-resize1-pattern0.obu",
+      "reference": "av1-chroma-inter-layout444-depth8-resize1-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout444-depth8-resize1-pattern0.webm",
+      "sha256": "914442a14a6fb4ae114040460ae6e85a099c938e40793b0207dbe5d075c8476c",
+      "reference_sha256": "1bdd0fe00be7dda7fea325318383aca040bda3b286ea730ed8a7fbe634b393ff",
+      "webm_sha256": "c7849ad70ae4d5105898b9c109cf8bf56578b3f05c5f79f2f2738c2c02c7ba6f",
+      "source_sha256": "7b7e98c045c0e1ea2eb5f86c15454a733b20a2a6c8b4cdc8e482aeb524381f11",
+      "layout": "444",
+      "depth": 8,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth8-resize1-pattern1.obu",
+      "reference": "av1-chroma-inter-layout444-depth8-resize1-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout444-depth8-resize1-pattern1.webm",
+      "sha256": "dc68ce331bf998f63202a4a6a10d5526df804e218b220c752468fe9ad2db2fbb",
+      "reference_sha256": "335cb1fbaa341184f71b3774b320094419c507695f77fe23889286c5cea8efae",
+      "webm_sha256": "20b295f77cf34d73450b4a850bbc0ea6a656f07ba101b341cf53a584dba7134c",
+      "source_sha256": "6ef9d4ea37c0e3a47a19a2b560bdd2b4ab38d5f7b96c54dd71d707a6b2718d2d",
+      "layout": "444",
+      "depth": 8,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth10-resize0-pattern0.obu",
+      "reference": "av1-chroma-inter-layout422-depth10-resize0-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout422-depth10-resize0-pattern0.webm",
+      "sha256": "e1fb69d3161f6ba32a5225dcad289de3e9b891a32933720b22d11a90428f4512",
+      "reference_sha256": "c4d9e66140a93367e9a1653bb507e6bf36b0442c4a7c7e9e886d43beddb67423",
+      "webm_sha256": "a7dcb1a2d8763f801dfec262de463e803ea7a6ed37d8e90c901822217c4fc577",
+      "source_sha256": "4ff35263cd6f143a608c886f8b6f464c328bcce36438698323ae36d9af5e3cc1",
+      "layout": "422",
+      "depth": 10,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth10-resize0-pattern1.obu",
+      "reference": "av1-chroma-inter-layout422-depth10-resize0-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout422-depth10-resize0-pattern1.webm",
+      "sha256": "676de722276c1db6392e829a130fe928b232b076882e67fefd167635311e1cc9",
+      "reference_sha256": "eccc171113c65ae412e9bad4a7254889a83952f3cfae8e06364321c3a589a84d",
+      "webm_sha256": "cd054425a95b2fdef84ba0e07f5d1f3dd51dff083bbae28283a742d5a6be1f5d",
+      "source_sha256": "9ff43af3dbf79f15aaf4f4832377f7e7a9f54e5d36c5d15f7e1fe5815068d493",
+      "layout": "422",
+      "depth": 10,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth10-resize1-pattern0.obu",
+      "reference": "av1-chroma-inter-layout422-depth10-resize1-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout422-depth10-resize1-pattern0.webm",
+      "sha256": "4c8a4326a4e3929f01f64b85a72c4bcf6bd4cc3917c54a102699a4ed30ad2649",
+      "reference_sha256": "c4604d87eba9aedfd6cd55e5a4b04d00e4c5c658f906837da159864b8898b59b",
+      "webm_sha256": "f5a48e41c211163a6010a349bd2b4d9f9321c102fec94685b7608676004bf6be",
+      "source_sha256": "4ff35263cd6f143a608c886f8b6f464c328bcce36438698323ae36d9af5e3cc1",
+      "layout": "422",
+      "depth": 10,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth10-resize1-pattern1.obu",
+      "reference": "av1-chroma-inter-layout422-depth10-resize1-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout422-depth10-resize1-pattern1.webm",
+      "sha256": "d8564ab882c632e9f7c0c13a449c17194b07b176490d28fed4d70a6ea54c1646",
+      "reference_sha256": "ff2b06db8fe8acb42dff6dd9d5d18a6c1ffc43b5f91a341196949ce464898290",
+      "webm_sha256": "708bfd283289ac51aaa2f39e67777e4679e1ff24e272ed56ce8e7ec64d7dff16",
+      "source_sha256": "9ff43af3dbf79f15aaf4f4832377f7e7a9f54e5d36c5d15f7e1fe5815068d493",
+      "layout": "422",
+      "depth": 10,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth10-resize0-pattern0.obu",
+      "reference": "av1-chroma-inter-layout444-depth10-resize0-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout444-depth10-resize0-pattern0.webm",
+      "sha256": "83c2bbc2b02fea723086d5da2989507d9a5ed2de5f55a440281c4657ad1a75d3",
+      "reference_sha256": "721044dbe37a8da1d80ce9141e28b23f6eeedaeed3972a1cbe190e9a6463648d",
+      "webm_sha256": "121232b6f4c6a1968833ac181899e5a20037cca88fdbfedf71ae3d1f02559396",
+      "source_sha256": "48c01496243f5a06c729d8749fc85d9e437e5f6238bbba442881f34adfd43c9e",
+      "layout": "444",
+      "depth": 10,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth10-resize0-pattern1.obu",
+      "reference": "av1-chroma-inter-layout444-depth10-resize0-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout444-depth10-resize0-pattern1.webm",
+      "sha256": "bf831a2fd42ba457ed0fcd5caad6e3f29ff14da49b813c052b5cd61ddc497f76",
+      "reference_sha256": "3daeabb638d836c737e08591b27824f429a05ebb858dfc137362cae34f60ada2",
+      "webm_sha256": "6781167b4f62ca8f9051f74ecc24027608568334d69686292d0ecb8638f23eb5",
+      "source_sha256": "9cb1151904f078ead6bef029915f0c0b8b4b55d366980f02a66a26b9f6ccae7c",
+      "layout": "444",
+      "depth": 10,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth10-resize1-pattern0.obu",
+      "reference": "av1-chroma-inter-layout444-depth10-resize1-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout444-depth10-resize1-pattern0.webm",
+      "sha256": "087310523e27f9b25f48304b9694c5ac83c5f4816771c5d1eebeb581e18706f4",
+      "reference_sha256": "c8774c83420b2b9e4b4a0dfc13c2f50fb80686931ae6225fa039feacad7f63f1",
+      "webm_sha256": "000568c614379538e49ff68c30d6253a92ecdc72fd29b36c073c3ac0124ea259",
+      "source_sha256": "48c01496243f5a06c729d8749fc85d9e437e5f6238bbba442881f34adfd43c9e",
+      "layout": "444",
+      "depth": 10,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth10-resize1-pattern1.obu",
+      "reference": "av1-chroma-inter-layout444-depth10-resize1-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout444-depth10-resize1-pattern1.webm",
+      "sha256": "92798e2d9375298a459e87ac69bd2cdbdc516fd3996723b2153bc71212297a97",
+      "reference_sha256": "9b3d16407620d191cf6ad575394c9f75a3f98ef11b0f54a2acf1cc9b4a6a595c",
+      "webm_sha256": "1fcfb379a1add2394a33f900ae80103989a0be4dcfffdf460cce84f78a0698f2",
+      "source_sha256": "9cb1151904f078ead6bef029915f0c0b8b4b55d366980f02a66a26b9f6ccae7c",
+      "layout": "444",
+      "depth": 10,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth12-resize0-pattern0.obu",
+      "reference": "av1-chroma-inter-layout422-depth12-resize0-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout422-depth12-resize0-pattern0.webm",
+      "sha256": "9d5f338e375e58603d74c8953e517647447b3fba947e82b8d64ed27bccfacbff",
+      "reference_sha256": "dab62cf01d6ddfb11bbbd97ebcbedd78133c28209c92cd43436cf7a8027e8517",
+      "webm_sha256": "739443cbe32aa53c9f090fe9ad853ee1c7f06a5b2556991224c74d42e3f39b3e",
+      "source_sha256": "c40fe8acdc2e2ad57bd9bc8b2cf9f266f3111ca7bd6bc41ab5564b3810c56470",
+      "layout": "422",
+      "depth": 12,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth12-resize0-pattern1.obu",
+      "reference": "av1-chroma-inter-layout422-depth12-resize0-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout422-depth12-resize0-pattern1.webm",
+      "sha256": "1a37e0dca19332e98ab344e1bdfcf557b65564317235892e044ca346ad6a31f3",
+      "reference_sha256": "29188aded19078c129a35f324f83787ec429462b99544ceb710e67aa62f7ae1e",
+      "webm_sha256": "c77f00c8c143b98d64f4723328874aa1b78db4a8bd6cd2dd939fd1651a9fa9b7",
+      "source_sha256": "0bc576221f925f102c9c56e5fc430d90648ec95d304b6b1110af4c2b315e2a2f",
+      "layout": "422",
+      "depth": 12,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth12-resize1-pattern0.obu",
+      "reference": "av1-chroma-inter-layout422-depth12-resize1-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout422-depth12-resize1-pattern0.webm",
+      "sha256": "cf260a806ae09f293aea7dee60d4bd37b2cc5bb2d9c71df98969b3efddc6a02f",
+      "reference_sha256": "2e125ebdf45fe6b5cc250384c4dd2b8962645809dbfac2c43504235cf059b159",
+      "webm_sha256": "a5b30d7e2a5ac13b2d7ee9656ebc69b935bde9c358f30b6dc3b495764bad6dd8",
+      "source_sha256": "c40fe8acdc2e2ad57bd9bc8b2cf9f266f3111ca7bd6bc41ab5564b3810c56470",
+      "layout": "422",
+      "depth": 12,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout422-depth12-resize1-pattern1.obu",
+      "reference": "av1-chroma-inter-layout422-depth12-resize1-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout422-depth12-resize1-pattern1.webm",
+      "sha256": "eaeae33921a4add9e3398f7c0d332926801af88e28f7abaf032c021efa1160d8",
+      "reference_sha256": "f284d918f634406d197815f54c4cd926ce841c71706aef115f68d008c9ffbb9f",
+      "webm_sha256": "10f1a4d50d74ea3c30ec99c7a1b61f54d38697bb15caf495410fe92c409c2c9b",
+      "source_sha256": "0bc576221f925f102c9c56e5fc430d90648ec95d304b6b1110af4c2b315e2a2f",
+      "layout": "422",
+      "depth": 12,
+      "subsampling": [
+        1,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth12-resize0-pattern0.obu",
+      "reference": "av1-chroma-inter-layout444-depth12-resize0-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout444-depth12-resize0-pattern0.webm",
+      "sha256": "382d47618ec7d3fb0e3ddadba0994a83cbd7af0aafeaaa89e423ddcd9d599537",
+      "reference_sha256": "ac6f6adfa0cf58227b3e6183071e4a260a3282682e1e775e921adc1eea5f67bd",
+      "webm_sha256": "5d92b2e513bf058537b49198f50ef28028e354a82c38ba57c1c94abf7fb98a05",
+      "source_sha256": "51e6880217d46c253a60a87754f88668faf539a5982ca82f8076637fbd4e05d6",
+      "layout": "444",
+      "depth": 12,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth12-resize0-pattern1.obu",
+      "reference": "av1-chroma-inter-layout444-depth12-resize0-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout444-depth12-resize0-pattern1.webm",
+      "sha256": "4f4d1c7083521f060ca730e8cc38782c359f982ebd52d6ba8dffbc03e4db4f94",
+      "reference_sha256": "1c57373d037ebaa8b102b19d0d0186eee4ef07b43c5ddd9d2ed3fa2553241d2c",
+      "webm_sha256": "9c96938b2d5c4a07bf5a488ee84e314d1d48748d0b6486ef9fbd2c3861942656",
+      "source_sha256": "f84c2d90f63df6525e35219c8dd2386417389379225e51bf40a2cf74b8aac854",
+      "layout": "444",
+      "depth": 12,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": false,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth12-resize1-pattern0.obu",
+      "reference": "av1-chroma-inter-layout444-depth12-resize1-pattern0.yuv",
+      "webm": "av1-chroma-inter-layout444-depth12-resize1-pattern0.webm",
+      "sha256": "f8090a1a7e0e9366d6b8c2de9a852f2011945b3b95deb5f1ce0c59046c33bb31",
+      "reference_sha256": "085ea2da4b2fd33608fcb134c0cd09b2b2f9f082cad073d031aca9d79e3af8ed",
+      "webm_sha256": "a9f7213fa199e0a19d1d45933be8a71d2fe2ee2936e47c4a0a853c547828d4ba",
+      "source_sha256": "51e6880217d46c253a60a87754f88668faf539a5982ca82f8076637fbd4e05d6",
+      "layout": "444",
+      "depth": 12,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    },
+    {
+      "file": "av1-chroma-inter-layout444-depth12-resize1-pattern1.obu",
+      "reference": "av1-chroma-inter-layout444-depth12-resize1-pattern1.yuv",
+      "webm": "av1-chroma-inter-layout444-depth12-resize1-pattern1.webm",
+      "sha256": "2f074eab6c14d2c4624d218cc8e35b48e7e34db315428f0972ac0157c6e99b93",
+      "reference_sha256": "90f6d7a6bf3b691d95e63ecbe881292020edfe1d8c363724a864063ce10e9444",
+      "webm_sha256": "957ca8a3ebe112c6f92b5e47976da2c0eb2aa08a8003b62acaeabc2d4f861a7e",
+      "source_sha256": "f84c2d90f63df6525e35219c8dd2386417389379225e51bf40a2cf74b8aac854",
+      "layout": "444",
+      "depth": 12,
+      "subsampling": [
+        0,
+        0
+      ],
+      "frames": 8,
+      "sizes": [
+        [
+          96,
+          64
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ],
+        [
+          191,
+          127
+        ]
+      ],
+      "resized": true,
+      "pattern": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ]
+    }
+  ]
+}

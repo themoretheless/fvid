@@ -61,3 +61,15 @@ Each set has 24 one-frame streams at 769x257, SB64/128, two tile columns,
 lossless/lossy, 4:2:2/4:4:4 and 8/10/12 bits. Both unchanged decoders must agree.
 Offline acceptance includes exact pixels, actual copied blocks/chroma phases,
 source displacement parity coverage, residuals, reset and WebM rewind/seek.
+
+## Full-chroma inter prediction and reference resizing
+
+```sh
+python3 /path/to/fvid/scripts/generate_av1_chroma_inter_samples.py --encoder /opt/homebrew/bin/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+```
+
+The stock encoder produces 24 owned eight-frame moving sequences. Both unmodified
+oracles must agree on every raw pixel, including the 96x64 keyframe to 191x127
+inter transition. Offline tests require actual compound variants, OBMC,
+inter-intra, local/global warp and scaled-reference execution in each
+4:2:2/4:4:4 and 8/10/12-bit group, plus reset/WebM timing/rewind/seek.

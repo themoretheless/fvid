@@ -29,6 +29,20 @@ pub struct SavedMotion {
     pub mv: [i32; 2],
 }
 
+/// Reconstructed inter blocks by selected prediction tool, for qualification.
+#[derive(Clone, Debug, Default)]
+pub struct InterPredictionStats {
+    pub single_reference_blocks: u32,
+    pub average_compound_blocks: u32,
+    pub distance_compound_blocks: u32,
+    pub wedge_compound_blocks: u32,
+    pub difference_compound_blocks: u32,
+    pub obmc_blocks: u32,
+    pub interintra_blocks: u32,
+    pub local_warp_blocks: u32,
+    pub global_warp_blocks: u32,
+    pub scaled_reference_blocks: u32,
+}
 #[derive(Clone, Debug)]
 pub struct Plane {
     pub width: usize,
@@ -66,6 +80,7 @@ pub struct Picture {
     /// Sub-8 chroma groups with decoded intra neighbors: 4x4, 4xN, Nx4 luma.
     pub mixed_intra_chroma_groups: [u32; 3],
     pub sub8_inter_chroma_groups: u32,
+    pub inter_prediction: InterPredictionStats,
     /// Actually filtered CDEF blocks per Y/U/V plane.
     pub cdef_filtered_blocks: [u32; 3],
     pub deblocking_edges: [u32; 3],
@@ -274,6 +289,7 @@ pub(crate) fn decode(
         intrabc_residual_blocks: [0; 3],
         mixed_intra_chroma_groups: [0; 3],
         sub8_inter_chroma_groups: 0,
+        inter_prediction: InterPredictionStats::default(),
         cdef_filtered_blocks: [0; 3],
         deblocking_edges: [0; 3],
         restoration_unit_counts: [[0; 3]; 3],

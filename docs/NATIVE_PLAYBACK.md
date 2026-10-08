@@ -865,8 +865,10 @@ Release-сборка обязательна для практического и
   Sub-8x8 chroma со смешанными intra/inter соседями проверен для 4×4,
   4×N и N×4, включая выбор отдельного вектора для all-inter групп.
   Базовые lossless/lossy 4:2:2/4:4:4 в 8/10/12 битах проверены по всем
-  пикселям, decoder reset и WebM raw output/rewind/seek. Квалификация сложных
-  inter-комбинаций в этих форматах пока не завершена. Intrabc отдельно проверен
+  пикселям, decoder reset и WebM raw output/rewind/seek. Ещё 24 восьмикадровых
+  потока проверяют average/distance compound, wedge/difference masks, OBMC,
+  inter-intra, local/global warp и scaled references во всех layout/depth-группах;
+  keyframe 96×64 сменяется inter-кадрами 191×127. Intrabc отдельно проверен
   на 24 потоках 769×257 и 24 controls: SB64/128, два tile, lossless/lossy,
   sub-8 блоки, chroma-фазы и Y/U/V residuals; исправлены проверки границ tile.
   CDEF, deblocking и Wiener/SGR restoration уже

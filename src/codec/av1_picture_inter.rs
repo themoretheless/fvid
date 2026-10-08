@@ -856,7 +856,43 @@ impl Decoder<'_> {
             mv,
             filters,
         };
-        self.finish_motion_block(d, c, [x, y], block, obmc, interintra_mode, interintra_wedge)
+        self.finish_motion_block(d, c, [x, y], block, obmc, interintra_mode, interintra_wedge)?;
+        let scaled_refs = [
+            self.reference_is_scaled(reference)?,
+            compound && self.reference_is_scaled(refs[1])?,
+        ];
+        let scaled = scaled_refs.iter().any(|s| *s);
+        let global_warp = !self.h.integer_mv
+            && w >= 2
+            && h >= 2
+            && matches!(mode, 15 | 23)
+            && refs
+                .iter()
+                .zip(scaled_refs)
+                .take(if compound { 2 } else { 1 })
+                .any(|(r, scaled)| {
+                    !scaled
+                        && self.h.global_types[*r - 1] > 1
+                        && super::super::av1_warp::valid(self.h.global_params[*r - 1])
+                });
+        let stats = &mut self.image.inter_prediction;
+        if compound {
+            match compound_mask {
+                Some(CompoundMask::Wedge { .. }) => stats.wedge_compound_blocks += 1,
+                Some(CompoundMask::Difference { .. }) => stats.difference_compound_blocks += 1,
+                None if compound_average => stats.average_compound_blocks += 1,
+                None => stats.distance_compound_blocks += 1,
+            }
+        } else {
+            stats.single_reference_blocks += 1;
+        }
+        stats.obmc_blocks += u32::from(obmc);
+        stats.interintra_blocks += u32::from(interintra_mode.is_some());
+        stats.local_warp_blocks +=
+            u32::from(local_warp && warp.is_some() && !scaled && w >= 2 && h >= 2);
+        stats.global_warp_blocks += u32::from(global_warp);
+        stats.scaled_reference_blocks += u32::from(scaled);
+        Ok(())
     }
     fn finish_motion_block(
         &mut self,
