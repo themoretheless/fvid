@@ -3,8 +3,11 @@ use super::{Result, aac_sbr_hf::Patch, invalid};
 /// Merge low-resolution borders and internal patch borders, then remove close
 /// non-patch borders. Patch borders win when only one of a close pair is a
 /// patch boundary; two distinct patch boundaries are both retained.
-/// The protocol includes all patch ends in the protected set, but only
-/// internal patch ends in the candidates. A discarded HF tail is not a patch.
+/// Internal patch ends are candidates; all patch ends are protected. The SBR
+/// range endpoints are also protected: Cor.1 gain equations define k(m) for
+/// every 0<=m<M, requiring a covering partition even after a short final HF
+/// patch was discarded. This resolves Figure 4.40's endpoint-removal ambiguity
+/// without inventing a new patch, limiter interval, or limiter-mode fallback.
 pub fn borders(low: &[u8], patches: &[Patch], mode: u8) -> Result<Vec<u8>> {
     if mode > 3
         || low.len() < 2
@@ -51,9 +54,12 @@ pub fn borders(low: &[u8], patches: &[Patch], mode: u8) -> Result<Vec<u8>> {
             i += 1;
             continue;
         }
-        if current == previous || !patch_borders.contains(&current) {
+        let protected = |border| {
+            border == low[0] || border == *low.last().unwrap() || patch_borders.contains(&border)
+        };
+        if current == previous || !protected(current) {
             candidates.remove(i);
-        } else if !patch_borders.contains(&previous) {
+        } else if !protected(previous) {
             candidates.remove(i - 1);
         } else {
             i += 1;
@@ -109,10 +115,54 @@ mod tests {
                 "low {low:?} patches {patches:?} mode {mode}"
             );
             assert_eq!(actual[0], low[0]);
+            assert_eq!(actual.last(), low.last());
             assert!(actual.windows(2).all(|x| x[0] < x[1]));
             if mode > 0 {
                 for p in &patches[1..] {
                     assert!(actual.contains(&p.target));
+                }
+            }
+        }
+    }
+    #[test]
+    fn discarded_short_tail_still_has_limiter_interval_for_every_gain_band() {
+        use super::super::aac_sbr_gain::{self, Band};
+        let patches = [
+            Patch {
+                source: 2,
+                target: 10,
+                bands: 8,
+            },
+            Patch {
+                source: 2,
+                target: 18,
+                bands: 8,
+            },
+        ];
+        for tail in 0..=2 {
+            let end = 26 + tail;
+            let low: Vec<_> = (10..end).step_by(2).chain(std::iter::once(end)).collect();
+            for mode in 0..=3 {
+                let borders = borders(&low, &patches, mode).unwrap();
+                assert_eq!((borders[0], *borders.last().unwrap()), (10, end));
+                let bands = vec![
+                    Band {
+                        target: 64.0,
+                        current: 0.0,
+                        noise_ratio: 0.25,
+                        harmonic_band: false,
+                        harmonic_line: false
+                    };
+                    usize::from(end - 10)
+                ];
+                let levels = aac_sbr_gain::calculate(&bands, false).unwrap();
+                let output = aac_sbr_gain::limit(&bands, &levels, 10, &borders, 2, false).unwrap();
+                assert_eq!(output.len(), bands.len());
+                assert!(output.iter().all(|x| x.gain.is_finite() && x.noise > 0.0));
+                // The old missing terminal boundary reproduces the actual
+                // preparation -> gain interface error, rather than patch refusal.
+                if tail > 0 {
+                    assert!(aac_sbr_gain::limit(&bands, &levels, 10, &[10, 26], 2, false).is_err());
                 }
             }
         }

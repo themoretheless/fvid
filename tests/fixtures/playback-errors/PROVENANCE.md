@@ -1931,3 +1931,28 @@ second-channel dequantized envelope value prove whole-call state rollback. The o
 standard-unit scaling in the composed path. These are composed DSP/protocol
 regressions, not encoded HE-AAC PCM playback acceptance or new private-media
 failure reproducers.
+
+#### Composed SBR payload-to-PCM fixtures and limiter coverage
+
+`generate_aac_sbr_dsp_fixtures.py` authors original SBR headers/data/CRC bits
+in `aac-sbr-dsp-syntax.bin` and 32 independent three-frame PCM traces in
+`aac-sbr-dsp-pcm.f64le`, with metadata/hashes in `aac-sbr-dsp-oracles.json`.
+No private content, codec parameter sets, foreign encoder/decoder, FFmpeg or
+network is used. Supplied core PCM is zero. The SBR noise table is the saved
+normative table; only numeric QMF window constants are extracted from the
+local normative-table asset, not synthesis algorithm code. 80-digit Decimal
+computes the constant gain/boost, and output samples are evaluated as direct
+sums of contributions from earlier columns/bands, independently of Rust's
+shifted histories. Ordinary tests only consume saved assets.
+
+All limiter modes, smoothing flags, 960/1024 core frames, double/core output
+rates, header reuse, CRC, temporal deltas and noise wrap are exercised. Original
+headers select a short discarded HF tail; the regression reaches the intended
+limiter/gain acceptance and output PCM, unlike a syntax refusal. The direct
+typed missing-terminal-boundary regression also checks old gain failure.
+Range-end preservation is an explicit interpretation of the full-range k(m)
+requirement in ISO/IEC 14496-3:2001/Amd.1:2003/Cor.1:2004 4.6.18.7.5, resolving
+Figure 4.40's endpoint-removal ambiguity. It still needs encoded/reference
+PCM conformance qualification; the Decimal geometry generator now enforces
+that coverage invariant. This is SBR payload + supplied core PCM acceptance,
+not full HE-AAC file playback, and no new private-media failure was discovered.

@@ -5711,9 +5711,12 @@ are still required.
 borders and internal patch borders. The Figure 10 density/0.49-octave rule
 removes duplicates and close non-patch boundaries while preserving distinct
 patch boundaries. It validates contiguous parity-aligned patch geometry and
-the optional one/two-band unpatched tail. Mode zero uses the full low-table
-endpoints. The nonzero-mode algorithm follows the protocol's candidate and
-protected sets exactly; a discarded tail is not itself a patch boundary.
+the optional one/two-band unpatched tail. All modes preserve the full low-table
+endpoints. Internal candidates follow Figure 4.40; range endpoints additionally
+remain protected so the corrected gain k(m) covers every m<M. A discarded
+tail is not itself a patch boundary. See the composed DSP qualification below
+for the distinction between this coverage resolution and literal flowchart
+conformance.
 
 1680 original geometries are independently evaluated with 80-digit Decimal
 exponential thresholds, rather than the implementation's floating log2.
@@ -5724,9 +5727,10 @@ This is frequency geometry, not amplitude limiting or encoded HE-AAC
 acceptance. Envelope energy estimation, gain/noise/sinusoid adjustment and
 production frame integration remain necessary.
 
-The arbitrary-geometry oracle includes 68 incompatible cases (source range
-exceeds the low-band boundary or merging leaves no limiter band); these are
-refusal checks. The remaining 1612 cases accept frequency geometry.
+After retaining range endpoints, the arbitrary-geometry oracle has 48
+incompatible source-range cases (refusal checks), and 1632 frequency-geometry
+acceptances. Twenty formerly empty-partition refusal expectations became
+acceptance checks; retaining full endpoints gives every gain band an interval.
 
 ### Owned SBR current-envelope energy estimation
 
@@ -5993,3 +5997,48 @@ range. No silent mode substitution or limiter bypass was added. Remaining
 work includes resolving that boundary, gain/assembly/synthesis composition,
 production FIL/ASC wiring, PCM output/delay/EOF handling and original encoded
 HE-AAC playback acceptance.
+
+### Composed non-scalable SBR payload/core-PCM to output-PCM
+
+`aac_sbr_dsp::{Dsp,Decoder}` now composes owned preparation, gain calculation,
+limiter/boost, smoothing/noise/sine assembly, previous/current QMF row routing,
+and either 64-band or downsampled 32-band synthesis. Normalized core f32 is
+converted to standard QMF units and synthesized f64 is divided by 32768, with
+no clipping or accidental change in sample gain. Output is channel-planar;
+ordinary/double-rate modes yield 960/1024 or 1920/2048 samples per channel.
+Core decoder dispatch, interleaving, timestamp/delay compensation and EOF
+handling are deliberately still responsibilities to implement in the caller.
+
+`Decoder::read` commits the reader, retained header/coefficients and both
+channels' DSP histories together. Seek/format resets clear everything;
+header geometry reset retains QMF overlap/synthesis history. Output-rate
+changes require a full reset. Nonempty SBR extended audio (including PS) is
+explicitly unsupported, not silently rendered as ordinary mono/stereo.
+
+The limiter table now retains the terminal range endpoint as well as the
+initial one. This is an explicit resolution of conflicting normative
+requirements, not a claimed ISO flowchart erratum: literal Figure 4.40 may
+remove the final 1/2-band unpatched tail boundary; corrected Cor.1 4.6.18.7.5
+requires k(m) for every 0<=m<M, and the limiter definition specifies coverage
+of the SBR range. Protecting that endpoint maintains the selected limiter
+mode and supplies the required full partition. 1680 independent Decimal
+geometries were updated (1632 acceptance, 48 source-range refusal); a direct
+short-tail preparation-to-gain regression reproduces the old missing-boundary
+error and now accepts all limiter modes. Real encoded-stream/reference PCM
+qualification of this endpoint resolution remains necessary.
+
+32 original three-frame SBR payload-to-PCM traces cover both core frame sizes,
+all limiter densities, both smoothing flags, CRC/header reuse, temporal
+coefficient history, noise-index wrapping and ordinary/downsampled synthesis.
+Their supplied core PCM is silent; the independently computed nonzero output
+uses 80-digit Decimal noise gain/boost and a direct time-index synthesis
+convolution without production history buffers. The headers select k0=10,
+k2=27 and a discarded short HF tail, so the payloads reach actual gain and PCM
+acceptance rather than an unrelated unsupported syntax refusal. This proves
+composed SBR payload/core-PCM DSP, not an encoded complete AAC/HE-AAC file.
+Additional 12 four-frame mono/coupled/uncoupled sequences with original varying
+core PCM reach finite output for all time grids; checkpoint/reset, late DSP
+failure rollback, output-mode refusal and explicit PS refusal are checked.
+
+Production AAC FIL/ASC integration, original encoded HE-AAC playback/PCM
+acceptance, EOF/delay handling and PS/other codec gaps remain unfinished.
