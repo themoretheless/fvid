@@ -1013,3 +1013,19 @@ Every OBU/WebM/YUV file and source pattern has a recorded SHA-256. Both oracles
 run solely during generation and explicitly enable grain. The checked-in
 acceptance tests use only native FVid, including reset, EOF, rewind and seek.
 The initial grain-synthesis refusal expectation is removed.
+
+### AV1 mixed intra/inter sub-8 chroma
+
+`generate_av1_mixed_sub8_samples.py` authors nine deterministic 128x96 four-frame
+patterns with sparse changing 4-sample hashed patches among predictable moving
+texture, at Q16 and 8/10/12-bit 4:2:0. Square and both rectangular orientations
+exercise actual mixed intra/inter 4x4, 4xN and Nx4 chroma groups. A preliminary
+periodic Q32 pattern was not accepted as a reproducer because it had no actual
+mixed groups. No private media or parameter sets are used.
+
+Unmodified Homebrew aomenc generates the streams. Unmodified aomdec and dav1d
+independently emit identical full packed YUV goldens. The manifest records source,
+OBU, WebM and YUV SHA-256 values. The offline regression requires decoded mixed
+groups for every stream, both rectangular forms in each rectangular stream and
+positive all-inter sub-8 groups, then compares all pixels/reset/rewind/seek and
+presentation intervals using the native implementation only.

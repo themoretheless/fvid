@@ -57,6 +57,9 @@ pub struct Picture {
     /// Copy blocks by chroma half-sample phase: y*2+x.
     pub intrabc_phases: [u32; 4],
     pub intrabc_residual_blocks: [u32; 3],
+    /// Sub-8 chroma groups with decoded intra neighbors: 4x4, 4xN, Nx4 luma.
+    pub mixed_intra_chroma_groups: [u32; 3],
+    pub sub8_inter_chroma_groups: u32,
     pub planes: [Plane; 3],
 }
 #[derive(Clone, Copy)]
@@ -260,6 +263,8 @@ pub(crate) fn decode(
         intrabc_sub8_blocks: 0,
         intrabc_phases: [0; 4],
         intrabc_residual_blocks: [0; 3],
+        mixed_intra_chroma_groups: [0; 3],
+        sub8_inter_chroma_groups: 0,
         planes,
     };
     let mut dec = Decoder {

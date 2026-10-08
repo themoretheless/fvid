@@ -4795,3 +4795,43 @@ ignored tests. All 252 qualification asset hashes and all 2048 normative Gaussia
 constants were verified. The grain test binary links only libSystem/libiconv,
 not libav, libaom or dav1d. Both controlled mutations failed and production code
 was restored before the final regression run.
+
+### AV1 mixed intra/inter sub-8 chroma qualification (2026-10-08)
+
+The previously listed mixed sub-8 chroma gap was an unqualified existing path,
+not absent reconstruction. The prediction syntax's `SomeUseIntra` selection was
+already implemented: any intra constituent selects the current inter block's
+vector for the entire UV group; an all-inter group uses its constituent luma
+blocks' inter predictions. The invalid-reference invariant guard misleadingly used an `Unsupported` error
+naming the whole feature as missing. It now reports inconsistent reference state
+as invalid input instead, and the source comment states the normative selection.
+
+Nine owned four-frame 128x96 streams at 8/10/12 bits now qualify actual decoded
+mixed groups. A first periodic Q32 pattern had zero mixed groups despite matching
+pixels; it was rejected as insufficient evidence. Original deterministic hashed
+4-sample patches at Q16, surrounded by predictable moving texture, produce 458
+mixed chroma groups: 423 with 4x4 luma, 23 with 4xN and 12 with Nx4. Every depth
+and rectangular orientation must contain both rectangular mixed shapes, and each
+stream must contain a 4x4 mixed group and all-inter sub-8 groups. Intra counts
+exclude undecoded padding and intrabc. The same streams exercise 1003 all-inter
+sub-8 groups. These are decoded-block counts, not only encoder permission flags.
+
+Both unmodified aomdec and dav1d give identical goldens for all 36 frames. Native
+acceptance compares every sample after decoder reset, through WebM/EOF/rewind,
+with presentation intervals and seek replay. No external decoder, FFmpeg or
+network is used during ordinary tests. Fixture generation remains separate in
+`scripts/generate_av1_mixed_sub8_samples.py`.
+
+Disabling the intra-neighbor selection fails on the specific inconsistent
+inter-chroma reference. Collapsing all-inter groups to the current block's vector
+fails at frame 1 byte 12296 (U plane sample 8) of the first 8-bit stream. Both
+mutations are restored before the final regression run. Broader chroma/profile
+and layer/tile-list tools remain separate gaps; this qualification does not imply
+full AV1 conformance.
+
+Validation: all 44 AV1 fvid-codecs unit tests and 84 integration tests across
+53 AV1 suites pass in release with locked offline dependencies, no FFmpeg and
+zero ignored tests. All 27 new asset hashes and generator syntax were verified.
+The mixed-sub8 test binary links only libSystem/libiconv, not libav, libaom or
+dav1d. The two controlled mutations failed for the intended chroma selection
+errors, and production code was restored before the final regression run.

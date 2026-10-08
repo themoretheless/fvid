@@ -890,7 +890,9 @@ impl Decoder<'_> {
             let py = (y >> sub) * 4;
             let pw = ((w * 4) >> sub).max(4);
             let ph = ((h * 4) >> sub).max(4);
-            // Sub-8x8 chroma can use a distinct vector for each constituent luma block.
+            // AV1 prediction syntax SomeUseIntra: an intra constituent selects
+            // the current inter block for the whole chroma group. Otherwise
+            // each constituent luma block supplies its own inter prediction.
             let mixed = block.intrabc
                 || p > 0
                     && (w == 1 || h == 1)
@@ -899,6 +901,26 @@ impl Decoder<'_> {
                             self.blocks[((y & !1) + yy) * self.cols + (x & !1) + xx].reference == 0
                         })
                     });
+            if p == 1 && (w == 1 || h == 1) && !block.intrabc {
+                let actual_intra = (0..(ph / 2).min(self.rows.saturating_sub(y & !1))).any(|yy| {
+                    (0..(pw / 2).min(self.cols.saturating_sub(x & !1))).any(|xx| {
+                        let neighbor = self.blocks[((y & !1) + yy) * self.cols + (x & !1) + xx];
+                        neighbor.w != 0 && neighbor.reference == 0 && !neighbor.intrabc
+                    })
+                });
+                if actual_intra {
+                    let shape = if w == 1 && h == 1 {
+                        0
+                    } else if w == 1 {
+                        1
+                    } else {
+                        2
+                    };
+                    self.image.mixed_intra_chroma_groups[shape] += 1;
+                } else if !mixed {
+                    self.image.sub8_inter_chroma_groups += 1;
+                }
+            }
             let step_x = if p > 0 && w == 1 && !mixed { 2 } else { pw };
             let step_y = if p > 0 && h == 1 && !mixed { 2 } else { ph };
             for yy in (0..ph).step_by(step_y) {
@@ -909,9 +931,7 @@ impl Decoder<'_> {
                         block
                     };
                     if b.reference == 0 && !b.intrabc {
-                        return Err(crate::unsupported(
-                            "AV1 sub-8x8 mixed intra/inter chroma not implemented",
-                        ));
+                        return Err(invalid("inconsistent AV1 inter chroma reference"));
                     }
                     if b.intrabc {
                         self.intrabc_predict(p, px + xx, py + yy, [step_x, step_y], b.mv)?;
