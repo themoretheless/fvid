@@ -51,6 +51,12 @@ pub struct Picture {
     pub palette_cache_hits: [u32; 2],
     /// Palette transform blocks with nonzero dequantized residuals, per Y/UV group.
     pub palette_residual_blocks: [u32; 2],
+    /// Intra block copy blocks and nonzero residual transform counts.
+    pub intrabc_blocks: u32,
+    pub intrabc_sub8_blocks: u32,
+    /// Copy blocks by chroma half-sample phase: y*2+x.
+    pub intrabc_phases: [u32; 4],
+    pub intrabc_residual_blocks: [u32; 3],
     pub planes: [Plane; 3],
 }
 #[derive(Clone, Copy)]
@@ -71,6 +77,7 @@ struct Block {
     mv: [i32; 2],
     reference2: usize,
     interintra: bool,
+    intrabc: bool,
     mv2: [i32; 2],
     skip_mode: bool,
     compound_average: bool,
@@ -171,11 +178,6 @@ pub(crate) fn decode(
     distances: [i32; 8],
 ) -> Result<(Picture, Cdfs)> {
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
-    if h.intrabc {
-        return Err(crate::unsupported(
-            "AV1 segmentation/intrabc/superres reconstruction not implemented",
-        ));
-    }
     if s.color.subsampling != [true, true] {
         return Err(crate::unsupported(
             "AV1 native reconstruction requires 4:2:0",
@@ -254,6 +256,10 @@ pub(crate) fn decode(
         palette_counts: [[0; 7]; 2],
         palette_cache_hits: [0; 2],
         palette_residual_blocks: [0; 2],
+        intrabc_blocks: 0,
+        intrabc_sub8_blocks: 0,
+        intrabc_phases: [0; 4],
+        intrabc_residual_blocks: [0; 3],
         planes,
     };
     let mut dec = Decoder {
@@ -740,6 +746,9 @@ impl Decoder<'_> {
                 return self.inter_block(d, c, x, y, w, h, skip, skip_mode);
             }
         }
+        if self.h.intrabc && symbol(d, c, av1_cdfs::INTRABC, [])? != 0 {
+            return self.intrabc_block(d, c, x, y, w, h, skip);
+        }
         let ac = MODE_CONTEXT[above.map_or(0, |b| if b.reference == 0 { b.mode } else { 0 })];
         let lc = MODE_CONTEXT[left.map_or(0, |b| if b.reference == 0 { b.mode } else { 0 })];
         let mode = if matches!(self.h.frame_type, 0 | 2) {
@@ -915,11 +924,19 @@ impl Decoder<'_> {
         // AV1 read_tx_size returns TX_4X4 immediately for this segment's
         // lossless blocks; no tx_depth symbol is present even in SELECT mode.
         if self.h.tx_mode == 2 && w * h > 1 && !self.h.lossless[self.current_segment] {
-            let ctx = usize::from(
-                above.is_some_and(|b| (if b.reference > 0 { b.w * 4 } else { b.tx[0] }) >= tx[0]),
-            ) + usize::from(
-                left.is_some_and(|b| (if b.reference > 0 { b.h * 4 } else { b.tx[1] }) >= tx[1]),
-            );
+            let ctx = usize::from(above.is_some_and(|b| {
+                (if b.reference > 0 || b.intrabc {
+                    b.w * 4
+                } else {
+                    b.tx[0]
+                }) >= tx[0]
+            })) + usize::from(left.is_some_and(|b| {
+                (if b.reference > 0 || b.intrabc {
+                    b.h * 4
+                } else {
+                    b.tx[1]
+                }) >= tx[1]
+            }));
             let depth = tx[0].max(tx[1]).ilog2() - 2;
             let id = [
                 usize::MAX,
@@ -975,10 +992,7 @@ impl Decoder<'_> {
                         [(bw * 4).min(32), (bh * 4).min(32)]
                     };
                     let [tw, th] = size;
-                    let smooth_neighbor = above
-                        .into_iter()
-                        .chain(left)
-                        .any(|b| (9..=11).contains(&if p == 0 { b.mode } else { b.uv_mode }));
+                    let smooth_neighbor = self.smooth_neighbor(p, [x, y]);
                     for yy in (base_y..base_y + chunk_h).step_by(th / 4) {
                         for xx in (base_x..base_x + chunk_w).step_by(tw / 4) {
                             if xx >= self.cols >> sub || yy >= self.rows >> sub {
@@ -1080,6 +1094,32 @@ impl Decoder<'_> {
             }
         }
         Ok(())
+    }
+    // AV1 intra filter type: chroma neighbours refer to the MI containing coded UV
+    // modes, which can differ from the adjacent 4x4 luma MI.
+    fn smooth_neighbor(&self, plane: usize, origin: [usize; 2]) -> bool {
+        let [x, y] = origin.map(|v| v as isize);
+        let points = if plane == 0 {
+            [[x, y - 1], [x - 1, y]]
+        } else {
+            [
+                [x + isize::from(x & 1 == 0), y - 1 - (y & 1)],
+                [x - 1 - (x & 1), y + isize::from(y & 1 == 0)],
+            ]
+        };
+        points.into_iter().any(|[col, row]| {
+            if col < self.x0 as isize
+                || col >= self.x1 as isize
+                || row < self.y0 as isize
+                || row >= self.y1 as isize
+            {
+                return false;
+            }
+            let b = self.blocks[row as usize * self.cols + col as usize];
+            b.w != 0
+                && (plane == 0 || b.reference == 0)
+                && (9..=11).contains(&if plane == 0 { b.mode } else { b.uv_mode })
+        })
     }
     fn predict(
         &mut self,
@@ -1438,9 +1478,8 @@ impl Decoder<'_> {
         let mut total = 0;
         let mut dc_category = 0;
         if symbol(d, c, av1_cdfs::TXB_SKIP, [txctx, ctx])? == 0 {
-            let inter = self.blocks[self.current_block[1] * self.cols + self.current_block[0]]
-                .reference
-                != 0;
+            let block = self.blocks[self.current_block[1] * self.cols + self.current_block[0]];
+            let inter = block.reference != 0 || block.intrabc;
             if inter && !self.h.lossless[self.current_segment] && w.max(h) <= 32 {
                 if p == 0 && self.h.quant.base > 0 {
                     kind = if self.h.reduced_tx_set || w.max(h) == 32 {

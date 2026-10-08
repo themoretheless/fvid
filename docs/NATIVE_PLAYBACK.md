@@ -854,10 +854,12 @@ Release-сборка обязательна для практического и
   и 4:2:2/4:4:4.
 - AV1: собственные fixture проверяют global motion, OBMC, compound/inter-intra,
   palette, segmentation, quantization matrices, super-resolution и restoration
-  в 8/10/12-битном 4:2:0. Temporal reference motion fields теперь проходят первые
-  шесть последовательностей с forward references; bidirectional, tiled и
-  super-resolution сочетания ещё требуют отдельной квалификации.
-  Явные оставшиеся отказы: film grain, intrabc, sub-8x8 mixed intra/inter chroma,
+  в 8/10/12-битном 4:2:0. Temporal reference motion fields проверены на forward
+  и future references, а также вместе с super-resolution/restoration. Wrapped
+  order hints, changing coded grids и tiled sampling ещё не квалифицированы.
+  Собственный intra block copy проходит lossless/lossy-потоки, superblock
+  64/128, два tile, нечётные размеры, sub-8x8 блоки и chroma half-sample phases.
+  Явные оставшиеся отказы: film grain, sub-8x8 mixed intra/inter chroma,
   4:2:2/4:4:4, layered operating points, spatial layering и tile-list OBU.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.

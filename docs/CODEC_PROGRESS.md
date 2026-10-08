@@ -4686,3 +4686,49 @@ reference distances. The production source was restored byte-for-byte before
 final acceptance. This qualifies the owned single-tile, fixed-grid streams;
 wrapped order hints, changing coded grids and tiled temporal sampling remain
 unproven, along with film grain, intrabc and additional chroma/profiles.
+
+
+### Native AV1 intra block copy
+
+The native decoder now reads the intra-block-copy flag and its separate
+displacement-vector CDF context, builds the spatial stack from previously
+copied blocks, applies the normative default displacement, and copies from
+the current coded picture. Integer luma displacement permits half-sample
+chroma phases; these use bilinear interpolation with normative rounding.
+Tile bounds, vector magnitude/precision, 256-pixel delay and wavefront
+constraints are validated, and each source sample must already be decoded.
+Transform syntax and coefficient contexts distinguish copied blocks from
+ordinary intra blocks while retaining INTRA_FRAME as their reference role.
+Existing admitted prediction/residual buffers are reused.
+
+Twelve owned 384x192 single-frame streams at 8/10/12 bits, lossless/lossy and
+two repeating texture patterns reproduced the specific former
+`AV1 segmentation/intrabc/superres reconstruction not implemented` refusal.
+Their enabled acceptance verifies actual copied blocks, independent libaom
+and dav1d YUV parity, reset, WebM replay, EOF, rewind and seek. Replacing the
+copy predictor with zeros differs at byte 320 in the first 8-bit lossless
+fixture, proving use of copied pixels rather than only the header flag.
+The source is restored before final validation.
+
+Twelve additional 769x257 streams combine two tiles, superblock 64/128,
+sub-8x8 copy blocks, all four chroma half-sample phases and nonzero Y/U/V copy
+residuals, for every 8/10/12-bit lossless/lossy combination. They exposed two
+real context gaps: chroma smooth-neighbour lookup must select the MI carrying
+coded UV modes, and intra transform-size contexts must treat an intrabc
+neighbour as inter-coded. The first issue also occurs with copying disabled:
+12 owned control streams reproduce the original pixel difference at byte
+197717 in the first 8-bit lossless stream, and pass with corrected parity
+offsets. The second previously desynchronised the 10-bit lossy stream and
+produced a spurious invalid displacement; correcting the CDF context restores
+complete pixel parity without relaxing displacement validation.
+
+All three fixture groups are generated separately from ordinary tests; their
+108 OBU/WebM/YUV asset hashes are pinned in manifests. Tests need neither
+external codecs nor FFmpeg/network access. This qualifies the owned 4:2:0
+combinations; film grain, mixed sub-8x8 intra/inter chroma, other chroma/profiles
+and layered/tile-list decoding remain separate gaps.
+
+Validation: all 38 AV1 fvid-codecs unit tests and 78 integration tests across
+50 AV1 suites pass in release mode with locked offline dependencies, no
+FFmpeg and no ignored acceptance tests. The initial 12-stream acceptance and
+all 12 extended copy cases also pass in debug mode.

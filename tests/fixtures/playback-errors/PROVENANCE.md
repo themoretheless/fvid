@@ -964,3 +964,23 @@ goldens. All 18 OBU/WebM/YUV assets have hashes in
 or codec parameters are included. External codecs run only during generation,
 not ordinary regression execution. WebM packet-index PTS intentionally include
 hidden coded frames; displayed intervals end at the next shown frame.
+
+
+## Owned AV1 intra block copy and chroma-neighbour controls
+
+`generate_av1_intrabc_samples.py` creates twelve deterministic 384x192
+repeating textured Y/U/V pictures, at 8/10/12 bits, lossless/lossy and two
+patterns. `generate_av1_intrabc_tools_samples.py` creates twelve 769x257
+pictures at each depth/lossless combination with SB64/SB128, two tiles,
+63x31 luma repeats and small partitions. Its `--control` option creates
+twelve counterparts with intra block copy disabled. All source pixels and
+codec parameters are synthetic and owned. No private samples are included.
+
+Generation uses unmodified libaom encoding and matching independent libaom
+and dav1d decoded goldens. Source hashes and `source_exact` are retained;
+lossless even-sized sources match the original input. Odd-sized Y4M goldens
+can differ in the last chroma column from the packed input, so the independent
+decoded goldens define acceptance there. OBU/WebM/YUV hashes are stored in
+`av1-intrabc-generated.json`, `av1-intrabc-tools-generated.json` and
+`av1-intrabc-tools-control-generated.json` (108 assets total). External
+codecs run only during generation. Ordinary tests are offline and native.

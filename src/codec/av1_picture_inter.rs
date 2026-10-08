@@ -1,6 +1,8 @@
 //! AV1 single-reference motion compensation and spatial motion-vector prediction.
 #[path = "av1_interintra.rs"]
 mod blend;
+#[path = "av1_intrabc.rs"]
+mod intrabc;
 use super::*;
 const SIZES: [(usize, usize); 22] = [
     (1, 1),
@@ -60,6 +62,9 @@ impl Search<'_, '_> {
     }
     fn candidate(&mut self, b: Block, weight: usize) -> bool {
         let mut found = false;
+        if b.reference == 0 && !b.intrabc {
+            return false;
+        }
         if self.refs[1] > 0 {
             if [b.reference, b.reference2] == self.refs {
                 self.add(
@@ -92,7 +97,10 @@ impl Search<'_, '_> {
                 found = true;
             }
         } else {
-            for (reference, mv) in [(b.reference, b.mv), (b.reference2, b.mv2)] {
+            for (reference, mv) in [(b.reference, b.mv), (b.reference2, b.mv2)]
+                .into_iter()
+                .take(if b.intrabc { 1 } else { 2 })
+            {
                 if reference == self.refs[0] {
                     let mv = if matches!(b.mode, 15 | 23)
                         && b.w.min(b.h) >= 2
@@ -839,6 +847,7 @@ impl Decoder<'_> {
             reference,
             reference2: refs[1],
             interintra: interintra_mode.is_some(),
+            intrabc: false,
             mv2: mvs[1],
             skip_mode,
             compound_average,
@@ -847,6 +856,20 @@ impl Decoder<'_> {
             mv,
             filters,
         };
+        self.finish_motion_block(d, c, [x, y], block, obmc, interintra_mode, interintra_wedge)
+    }
+    fn finish_motion_block(
+        &mut self,
+        d: &mut SymbolDecoder<'_>,
+        c: &mut Cdfs,
+        origin: [usize; 2],
+        block: Block,
+        obmc: bool,
+        interintra_mode: Option<usize>,
+        interintra_wedge: Option<usize>,
+    ) -> Result<()> {
+        let [x, y] = origin;
+        let Block { w, h, skip, tx, .. } = block;
         for yy in y..(y + h).min(self.rows) {
             for xx in x..(x + w).min(self.cols) {
                 self.blocks[yy * self.cols + xx] = block;
@@ -868,13 +891,14 @@ impl Decoder<'_> {
             let pw = ((w * 4) >> sub).max(4);
             let ph = ((h * 4) >> sub).max(4);
             // Sub-8x8 chroma can use a distinct vector for each constituent luma block.
-            let mixed = p > 0
-                && (w == 1 || h == 1)
-                && (0..(ph / 2)).any(|yy| {
-                    (0..(pw / 2)).any(|xx| {
-                        self.blocks[((y & !1) + yy) * self.cols + (x & !1) + xx].reference == 0
-                    })
-                });
+            let mixed = block.intrabc
+                || p > 0
+                    && (w == 1 || h == 1)
+                    && (0..(ph / 2)).any(|yy| {
+                        (0..(pw / 2)).any(|xx| {
+                            self.blocks[((y & !1) + yy) * self.cols + (x & !1) + xx].reference == 0
+                        })
+                    });
             let step_x = if p > 0 && w == 1 && !mixed { 2 } else { pw };
             let step_y = if p > 0 && h == 1 && !mixed { 2 } else { ph };
             for yy in (0..ph).step_by(step_y) {
@@ -884,12 +908,16 @@ impl Decoder<'_> {
                     } else {
                         block
                     };
-                    if b.reference == 0 {
+                    if b.reference == 0 && !b.intrabc {
                         return Err(crate::unsupported(
                             "AV1 sub-8x8 mixed intra/inter chroma not implemented",
                         ));
                     }
-                    self.motion_predict(p, px + xx, py + yy, [step_x, step_y], b)?;
+                    if b.intrabc {
+                        self.intrabc_predict(p, px + xx, py + yy, [step_x, step_y], b.mv)?;
+                    } else {
+                        self.motion_predict(p, px + xx, py + yy, [step_x, step_y], b)?;
+                    }
                     if obmc {
                         self.overlap_predict(p, [x, y], [w, h], [pw, ph])?;
                     }
@@ -984,6 +1012,9 @@ impl Decoder<'_> {
                         } else {
                             let (coeff, kind) =
                                 self.coefficients(d, c, p, xx, yy, bw, bh, size, 0)?;
+                            if block.intrabc && coeff.iter().any(|v| *v != 0) {
+                                self.image.intrabc_residual_blocks[p] += 1;
+                            }
                             if self.h.lossless[self.current_segment] {
                                 vp9_transform::inverse(
                                     &coeff,
@@ -1143,7 +1174,7 @@ impl Decoder<'_> {
                 64
             } else {
                 let b = self.blocks[(y - 1) * self.cols + x];
-                if y == origin[1] && b.skip && b.reference > 0 {
+                if y == origin[1] && b.skip && (b.reference > 0 || b.intrabc) {
                     b.w * 4
                 } else {
                     b.tx[0]
@@ -1153,7 +1184,7 @@ impl Decoder<'_> {
                 64
             } else {
                 let b = self.blocks[y * self.cols + x - 1];
-                if x == origin[0] && b.skip && b.reference > 0 {
+                if x == origin[0] && b.skip && (b.reference > 0 || b.intrabc) {
                     b.h * 4
                 } else {
                     b.tx[1]
