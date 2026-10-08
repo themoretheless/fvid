@@ -1,4 +1,4 @@
-//! AAC-LC file export through owned decoding and the shared WAVE DSP pipeline.
+//! AAC-LC/HE-AAC file export through owned decoding and the shared WAVE DSP pipeline.
 use fvid_control::{CopyOptions, ProgressEvent, ProgressHook};
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
@@ -58,7 +58,7 @@ pub(crate) fn supports(
         )
         .map_err(|e| e.to_string())?;
         let config = reader.configuration();
-        crate::owned_aac::stream::check_decode_admission(config.channels, options)
+        crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
             .map_err(|e| e.to_string())?;
         let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
             .map_err(|e| e.to_string())?
@@ -106,6 +106,14 @@ fn resample_lookahead(input_rate: u32, output_rate: Option<i32>) -> std::time::D
     let nanos = (u128::from(frames) * 1_000_000_000).div_ceil(u128::from(input_rate));
     std::time::Duration::from_nanos(nanos as u64)
 }
+// Before ADTS negotiation, either the core or doubled SBR clock may feed the
+// resampler. Retain enough physical-time lookahead for both, including when
+// the requested output rate equals the core clock. Packet limits still bound
+// this prefix; no output is published from the lookahead region itself.
+fn adts_resample_lookahead(core_rate: u32, output_rate: Option<i32>) -> std::time::Duration {
+    resample_lookahead(core_rate, output_rate).max(
+        resample_lookahead(core_rate.saturating_mul(2), output_rate))
+}
 /// Retain origin/preroll and the actual sinc radius beyond the selected end.
 /// The final WAVE stage still applies the requested output-clock window.
 pub(crate) fn decoded_prefix(
@@ -116,7 +124,7 @@ pub(crate) fn decoded_prefix(
         (
             std::time::Duration::ZERO,
             std::time::Duration::from_micros(to as u64)
-                + resample_lookahead(input_rate, transform.sample_rate),
+                + adts_resample_lookahead(input_rate, transform.sample_rate),
         )
     })
 }
@@ -252,12 +260,12 @@ fn decode_to_wave_with_rate(
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
-    crate::owned_aac::stream::check_decode_admission(config.channels, options)
+    crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
         .map_err(|e| e.to_string())?;
     let interval = interval.map(|(from, to)| {
         (
             from,
-            to + resample_lookahead(config.sample_rate, output_rate),
+            to + adts_resample_lookahead(config.sample_rate, output_rate),
         )
     });
     let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
@@ -326,7 +334,7 @@ pub(crate) fn spool_decoded_with_precision(
     let decoded = decode(&mut writer, &decode_options)?;
     writer.flush().map_err(|e| e.to_string())?;
     let header = crate::owned_wav::float_wav_header_with_precision(
-        rate,
+        decoded.sample_rate,
         channels,
         decoded.sample_frames,
         mask,

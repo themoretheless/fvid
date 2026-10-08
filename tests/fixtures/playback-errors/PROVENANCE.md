@@ -2026,5 +2026,21 @@ the container-output constructor supplies acceptance for the intended case.
 as `he-aac-implicit-sbr.mp4`: original AAC-LC ADTS headers (24 kHz core) wrap
 the paired video's three original SBR-bearing packets. The new native
 discovery API must produce the same 48 kHz PCM as the video. No private
-parameters, FFmpeg or foreign codec implementation is involved. This checks
-packet discovery, not high-level ADTS output-clock negotiation.
+parameters, FFmpeg or foreign codec implementation is involved. The raw
+discovery and high-level stream/export APIs must agree on the negotiated
+output clock and PCM.
+
+
+`he-aac-delayed-sbr.aac/.mp4` and `he-aac-implicit-sbr-stereo.aac/.mp4`
+are emitted by `scripts/generate_he_aac_implicit_fixtures.py`. The delayed
+pair reuses the original `[no FIL, SBR FIL, no FIL]` three-packet sequence
+and independent direct-convolution PCM from `he-aac-missing-sbr`; its core-only
+ASC reproduces strict rejection at the second packet, not a framing error.
+The stereo pair uses original coupled centered CPE/SBR packets and the mono
+Decimal/direct-convolution oracle repeated in both channels. Their ADTS headers
+state 24 kHz core; rewritten MP4 metadata states 48 kHz output. Original authored
+AVC supplies the video. No private media/parameter sets, FFmpeg, foreign decoder
+or network is used. Ordinary tests read checked-in fixtures only. Acceptance
+covers output-clock negotiation, replay of the LC prefix with QMF history,
+fractional ranges, packet limits, memory admission, WAVE headers and resampling
+lookahead when requested output equals the ADTS core rate.

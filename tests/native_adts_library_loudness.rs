@@ -62,7 +62,7 @@ fn adts_loudness_matches_independent_decoded_wave_and_encoded_packet_progress() 
         fs::write(&wave, payload).unwrap();
         let mut expected =
             fvid_media::owned_wave_loudness::measure_loudness(&wave, &Default::default()).unwrap();
-        expected.backend = "owned ADTS AAC-LC loudness";
+        expected.backend = "owned ADTS AAC loudness";
         let actual = fvid_media::measure_loudness(&path, &options).unwrap();
         assert_eq!(
             serde_json::to_value(actual).unwrap(),

@@ -1,7 +1,7 @@
-//! Sequential AAC-LC decoding to caller-owned interleaved float32 PCM.
+//! Sequential AAC-LC/HE-AAC decoding to caller-owned interleaved float32 PCM.
 use super::{
     Error, NativeAacDecoder as AdtsPacketDecoder, Result, adts::StreamReader as AdtsStreamReader,
-    invalid,
+    config::AudioSpecificConfig as AdtsAudioConfig, invalid,
 };
 use fvid_control::{CopyOptions, ProgressEvent};
 use std::{
@@ -21,8 +21,8 @@ pub(crate) struct DecodeProgress<'a> {
     event: ProgressEvent,
 }
 impl DecodeProgress<'_> {
-    fn check_admission(&self, channels: u16) -> Result<()> {
-        check_decode_admission(channels, self.options)
+    fn check_admission(&self, asc: &[u8]) -> Result<()> {
+        check_adts_decode_admission(asc, self.options)
     }
     fn check(&self) -> Result<()> {
         if self
@@ -98,6 +98,34 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     }
     Ok(bytes)
 }
+/// ADTS discovery reserves the SBR DSP even before the first FIL. Disk records
+/// use bounded packet/PCM scratch included in the fixed LC I/O reserve.
+pub(crate) fn check_adts_decode_admission(asc: &[u8], options: &CopyOptions) -> Result<()> {
+    let config = AdtsAudioConfig::parse(asc)?;
+    let discovery = config.sbr_present.is_none()
+        && config.program.is_none()
+        && matches!(config.core.channel_configuration, 1 | 2);
+    let rate = if discovery {
+        config
+            .core
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("AAC output rate overflow"))?
+    } else {
+        config.output_sample_rate()
+    };
+    let estimated = decode_config_admission_bytes(asc, rate)?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|limit| estimated > limit)
+    {
+        return Err(invalid(&format!(
+            "controlled memory budget exceeded: need {estimated} bytes, limit {}",
+            options.max_controlled_bytes.unwrap()
+        )));
+    }
+    Ok(())
+}
 pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Result<()> {
     let Some(limit) = options.max_controlled_bytes else {
         return Ok(());
@@ -115,6 +143,14 @@ pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Re
 /// retained. Ranges use ceil-rounded sample boundaries and retain preroll.
 /// Packet counts include preroll; reaching the count/range stops before reading
 /// the next header. Full decoding validates the complete source.
+///
+/// Mono/stereo ADTS negotiates implicit SBR over the selected packet/range
+/// prefix before publishing PCM. Encoded packets and core PCM are retained in
+/// private temporary storage until SBR is found or the prefix ends. A prefix
+/// that ends before any SBR FIL keeps its observed core clock; it never reads
+/// past the requested boundary to inspect a later extension. Full LC input is
+/// decoded once, with cached PCM copied at EOF; SBR replays the encoded prefix
+/// at its selected output clock. Storage is removed on success and error.
 ///
 /// The caller owns publication and flushing; failures can leave partial PCM in
 /// its writer. Progress never emits completion for a caller-owned destination.
@@ -158,6 +194,36 @@ pub fn decode_adts_pcm<R: Read>(
     }
     let reader = AdtsStreamReader::open_with_packet_limit(source, options.max_packet_bytes)?;
     decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
+}
+/// Read-only clock/layout negotiation for file plans and loudness admission.
+/// Uses the same selected prefix and decoder budget as execution, but never
+/// emits progress or publishes PCM. SBR can be identified before source EOF.
+pub(crate) fn adts_prefix_info<R: Read>(
+    source: R,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<(u32, u16, u32)> {
+    let mut quiet = crate::owned_adts_export::pcm_decode_options(options);
+    quiet.progress = None;
+    let mut control = DecodeProgress {
+        options: &quiet,
+        event: ProgressEvent {
+            packets: 0,
+            payload_bytes: 0,
+            done: false,
+        },
+    };
+    control.check()?;
+    if control.packet_limit_reached() {
+        return Err(invalid("audio interval contains no samples"));
+    }
+    let reader = AdtsStreamReader::open_with_packet_limit(source, quiet.max_packet_bytes)?;
+    let negotiated = negotiate_adts_aac_reader(reader, interval, &mut control)?;
+    Ok((
+        negotiated.sample_rate(),
+        negotiated.channels(),
+        negotiated.channel_mask(),
+    ))
 }
 include!("stream_impl.rs");
 
@@ -220,5 +286,62 @@ mod tests {
                 .to_string()
                 .contains("fill whole buffer")
         );
+    }
+    #[test]
+    fn clock_spool_preserves_pcm_bits_and_removes_storage_on_decode_writer_error() {
+        let mut spool = super::AdtsClockSpool::new().unwrap();
+        let path = spool.path.clone();
+        let samples = [f32::from_bits(0x7fc01234), -0.0, f32::INFINITY];
+        spool.push(&[1, 2, 3], &samples).unwrap();
+        spool.rewind().unwrap();
+        let mut packet = Vec::new();
+        let mut pcm = Vec::new();
+        spool
+            .read_record(Some(&mut packet), Some(&mut pcm))
+            .unwrap();
+        assert_eq!(packet, [1, 2, 3]);
+        assert_eq!(
+            pcm.iter().map(|s| s.to_bits()).collect::<Vec<_>>(),
+            samples.iter().map(|s| s.to_bits()).collect::<Vec<_>>()
+        );
+        drop(spool);
+        assert!(!path.exists());
+
+        struct Fails;
+        impl std::io::Write for Fails {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::other("negotiated sink failed"))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        for name in [
+            "playback-errors/he-aac-delayed-sbr.aac",
+            "audio/aac-mono-44k.aac",
+        ] {
+            let bytes = std::fs::read(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../tests/fixtures")
+                    .join(name),
+            )
+            .unwrap();
+            let options = fvid_control::CopyOptions::default();
+            let mut control = super::DecodeProgress {
+                options: &options,
+                event: fvid_control::ProgressEvent {
+                    packets: 0,
+                    payload_bytes: 0,
+                    done: false,
+                },
+            };
+            let reader = super::AdtsStreamReader::open(bytes.as_slice()).unwrap();
+            let negotiated = super::negotiate_adts_aac_reader(reader, None, &mut control).unwrap();
+            let path = negotiated.spool.as_ref().unwrap().path.clone();
+            assert!(path.exists());
+            let error = negotiated.decode(&mut Fails, &mut control).unwrap_err();
+            assert!(error.to_string().contains("negotiated sink failed"));
+            assert!(!path.exists());
+        }
     }
 }

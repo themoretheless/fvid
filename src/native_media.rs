@@ -215,7 +215,7 @@ impl<'a> DecodeProgress<'a> {
     }
     // This core streaming API exposes RSS/packet controls, not a controlled
     // allocation limit. The media-file adapter supplies admission separately.
-    pub(crate) fn check_admission(&self, _channels: u16) -> Result<()> {
+    pub(crate) fn check_admission(&self, _asc: &[u8]) -> Result<()> {
         Ok(())
     }
     pub(crate) fn check(&self) -> Result<()> {
@@ -271,50 +271,10 @@ pub fn decode_aac_pcm_interval(
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    let stream = crate::container::adts::Aac::parse(data, limits)?;
-    let boundary = |time: Duration| -> Result<u64> {
-        let ticks = time
-            .as_nanos()
-            .checked_mul(u128::from(stream.sample_rate))
-            .ok_or_else(|| invalid("audio interval overflow"))?;
-        u64::try_from(ticks.div_ceil(1_000_000_000)).map_err(|_| invalid("audio interval overflow"))
-    };
-    let (from, to) = match interval {
-        Some((from, to)) => (boundary(from)?, boundary(to)?),
-        None => (0, u64::MAX),
-    };
-    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&stream.configuration)?;
-    let mut stats = AudioDecodeStats {
-        sample_frames: 0,
-        decoded_frames: 0,
-        sample_rate: stream.sample_rate,
-        channels: stream.channels,
-    };
-    let mut position = 0u64;
-    for index in 0..stream.packets() {
-        if position >= to {
-            break;
-        }
-        let samples = decoder.decode(stream.packet(index))?;
-        let channels = usize::from(stream.channels);
-        let frames = (samples.len() / channels) as u64;
-        let end = position
-            .checked_add(frames)
-            .ok_or_else(|| invalid("audio position overflow"))?;
-        let first = from.saturating_sub(position).min(frames) as usize;
-        let last = to.saturating_sub(position).min(frames) as usize;
-        let selected = &samples[first * channels..last.max(first) * channels];
-        for sample in selected {
-            output.write_all(&sample.to_le_bytes())?;
-        }
-        stats.sample_frames += (selected.len() / channels) as u64;
-        stats.decoded_frames += 1;
-        position = end;
-    }
-    if stats.sample_frames == 0 {
-        return Err(invalid("audio interval contains no samples"));
-    }
-    Ok(stats)
+    // Preserve indexed-source admission and full structural validation, then
+    // use the same negotiated output clock as the sequential ADTS API.
+    crate::container::adts::Aac::parse(data, limits)?;
+    decode_adts_aac_reader(crate::container::adts::StreamReader::open(data)?, output, interval)
 }
 
 /// Decode a sequential ADTS source, retaining decoder pre-roll but no file index.
@@ -330,6 +290,7 @@ pub fn decode_adts_aac_reader<R: std::io::Read>(
 }
 
 use crate::container::adts::StreamReader as AdtsStreamReader;
+use crate::codec::config::AudioSpecificConfig as AdtsAudioConfig;
 use crate::codec::aac_native::NativeAacDecoder as AdtsPacketDecoder;
 include!("../crates/fvid-media/src/owned_aac/stream_impl.rs");
 
@@ -467,6 +428,7 @@ pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
 }
 
 /// Select a zero-based container stream index; None requires one audio track.
+/// ADTS scans through the first SBR FIL or EOF to negotiate its output clock.
 pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Result<AacSourceInfo> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
     let mut input = BufReader::new(std::fs::File::open(source)?);
@@ -487,8 +449,10 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let reader = crate::container::adts::StreamReader::open(input)?;
-        let header = reader.configuration();
-        (0, reader.audio_specific_config().to_vec(), (u64::from(header.sample_rate), u64::from(header.channels)))
+        let mut control = DecodeProgress::new(None, None)?;
+        let negotiated = negotiate_adts_aac_reader(reader, None, &mut control)?;
+        return Ok(AacSourceInfo { stream_index: 0, sample_rate: negotiated.sample_rate(),
+            channels: negotiated.channels(), channel_mask: negotiated.channel_mask() });
     };
     let decoder = crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(&asc,u32::try_from(declared.0).map_err(|_|invalid("AAC output clock overflow"))?)?;
     let sample_rate = decoder.sample_rate();

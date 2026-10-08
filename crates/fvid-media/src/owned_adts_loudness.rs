@@ -1,4 +1,4 @@
-//! Own AAC-LC decoding followed by the existing streaming PCM loudness meter.
+//! Own AAC-LC/HE-AAC decoding followed by the existing streaming PCM loudness meter.
 use fvid_control::{CopyOptions, ProgressEvent};
 use fvid_media_info::{LoudnessStats, MediaPlan, PlanStep};
 use std::{fs::File, io::BufReader, path::Path};
@@ -10,7 +10,7 @@ fn policies(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-fn rate(source: &Path, options: &CopyOptions) -> Result<u32> {
+pub(crate) fn validate_configuration(source: &Path, options: &CopyOptions) -> Result<u32> {
     if !policies(options) {
         return Err("owned ADTS loudness requires stream 0 and no metadata edits".into());
     }
@@ -24,7 +24,7 @@ fn rate(source: &Path, options: &CopyOptions) -> Result<u32> {
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
-    crate::owned_aac::stream::check_decode_admission(config.channels, options)
+    crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
         .map_err(|e| e.to_string())?;
     let rate = config.sample_rate;
     let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
@@ -40,7 +40,7 @@ fn rate(source: &Path, options: &CopyOptions) -> Result<u32> {
     Ok(rate)
 }
 pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
-    match rate(source, options) {
+    match validate_configuration(source, options) {
         Ok(_) => {
             crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options).is_ok()
         }
@@ -48,13 +48,13 @@ pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
     }
 }
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
-    match rate(source, options) {
+    match validate_configuration(source, options) {
         Ok(_) => crate::owned_adts_export::supports(source, Default::default(), options),
         Err(error) => error.starts_with("controlled memory budget exceeded:"),
     }
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
-    rate(source, options)?;
+    validate_configuration(source, options)?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
     let mut pcm_options = options.clone();
     pcm_options.max_packets = None;
@@ -65,7 +65,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    stats.backend = "owned ADTS AAC-LC loudness";
+    stats.backend = "owned ADTS AAC loudness";
     if let Some(hook) = &options.progress {
         hook.emit(ProgressEvent {
             done: true,
@@ -75,7 +75,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     Ok(stats)
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
-    rate(source, options)?;
+    validate_configuration(source, options)?;
     let mut plan =
         crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options)?;
     plan.command = "loudness".into();

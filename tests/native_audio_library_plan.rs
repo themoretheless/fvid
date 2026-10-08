@@ -6,7 +6,7 @@ fn fixture(name: &str) -> PathBuf {
         .join(name)
 }
 #[test]
-fn public_audio_plan_uses_owned_stages_without_decoding_or_progress() {
+fn public_audio_plan_uses_owned_stages_without_publication_or_progress() {
     for name in ["wave-probe-info.wav", "aac-packet-prefix.aac"] {
         let source = fixture(name);
         let before = std::fs::read(&source).unwrap();
@@ -40,8 +40,8 @@ fn public_audio_plan_uses_owned_stages_without_decoding_or_progress() {
         assert!(public.graph.is_none());
         assert_eq!(std::fs::read(source).unwrap(), before);
         assert!(public.notes.iter().any(|s| s.contains("during execution")));
-        // The truncated fourth AAC header is intentionally not decoded by this
-        // preflight. Execution with max_packets=3 is covered by file-export tests.
+        // ADTS clock negotiation decodes the requested prefix but leaves the
+        // truncated fourth header unread. WAVE planning stays metadata-only.
     }
 }
 #[test]

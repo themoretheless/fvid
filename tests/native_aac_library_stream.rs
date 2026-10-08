@@ -194,7 +194,9 @@ fn writer_errors_and_mid_decode_cancellation_never_report_completion() {
             .to_string()
             .contains("cancelled")
     );
-    assert_eq!(output.len(), 1024 * 4);
+    // Unspecified ADTS clock is still being negotiated at packet one;
+    // cancellation must not publish a prefix whose output rate is unknown.
+    assert!(output.is_empty());
 }
 
 #[test]

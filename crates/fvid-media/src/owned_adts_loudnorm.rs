@@ -1,4 +1,4 @@
-//! AAC-LC normalization via owned decoding, private spool and the owned DSP.
+//! AAC-LC/HE-AAC normalization via owned decoding, private spool and the owned DSP.
 use fvid_control::{CopyOptions, ProgressHook};
 use fvid_media_info::{LoudnormStats, MediaPlan, PlanStep};
 use std::path::Path;
@@ -34,7 +34,7 @@ pub fn apply(
     }
     // Read-only configuration/policy preflight; actual packet failures propagate
     // once execution starts, without retry through the legacy backend.
-    crate::owned_adts_loudness::plan_loudness(source, options)?;
+    crate::owned_adts_loudness::validate_configuration(source, options)?;
     let spool = crate::owned_adts_export::decode_to_wave(source, None, options)?;
     let mut pcm_options = options.clone();
     pcm_options.max_packets = None;

@@ -86,6 +86,10 @@ pub(crate) struct AudioDescriptor {
 }
 
 pub(crate) fn source_descriptor(source: &Path, options: &CopyOptions) -> Result<AudioDescriptor> {
+    source_descriptor_for_decode(source, options, None)
+}
+fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
+    transform: Option<&AudioDecodeTransform>) -> Result<AudioDescriptor> {
     let adts = crate::owned_adts_export::recognizes(source)?;
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
     let matroska = matroska_descriptor(source, options)?;
@@ -114,13 +118,16 @@ pub(crate) fn source_descriptor(source: &Path, options: &CopyOptions) -> Result<
         )
         .map_err(|e| e.to_string())?;
         let config = reader.configuration();
-        crate::owned_aac::stream::check_decode_admission(config.channels, options).map_err(|e| e.to_string())?;
-        let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
+        let prefix = transform.and_then(|transform|
+            crate::owned_adts_export::decoded_prefix(*transform, config.sample_rate));
+        drop(reader);
+        let (rate, channels, mask) = crate::owned_aac::stream::adts_prefix_info(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?), prefix, options)
             .map_err(|e| e.to_string())?;
         (
-            config.sample_rate,
-            config.channels,
-            decoder.channel_mask(),
+            rate,
+            channels,
+            mask,
             "aac".to_owned(),
             "float32".to_owned(),
         )
@@ -169,7 +176,7 @@ pub fn plan_decode_audio(
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
         adts, mp4, is_matroska,
-    } = source_descriptor(source, options)?;
+    } = source_descriptor_for_decode(source, options, Some(transform))?;
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
     if output_channels != i32::from(channels) {
         if !((channels <= 8 && matches!(output_channels, 1 | 2))
@@ -191,7 +198,7 @@ pub fn plan_decode_audio(
         } else if is_matroska {
             format!("owned Matroska {codec} decoder and presentation scheduler; preserve CodecDelay, signed padding and gaps; private {precision} WAVE disk spool")
         } else if adts {
-            "owned AAC-LC decoder; retain ADTS priming and preroll; private float32 WAVE disk spool"
+            "owned AAC-LC/HE-AAC decoder; negotiate implicit SBR output clock; retain ADTS priming and preroll; private float32 WAVE disk spool"
                 .into()
         } else {
             format!("owned WAVE reader; retain {precision} precision and speaker mask {mask:#x}")
@@ -225,5 +232,5 @@ pub fn plan_decode_audio(
         });
     }
     steps.push(PlanStep{action:"write".into(),detail:format!("owned .wav writer; preserve {precision} precision; publish without overwriting; cleanup on failure")});
-    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),if adts || mp4 || is_matroska {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
+    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),if adts {"read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()} else {"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()},if adts || mp4 || is_matroska {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
 }

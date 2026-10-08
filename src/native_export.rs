@@ -586,6 +586,10 @@ fn export_pcm_selected(    source: &Path,
     } else {
         (None, None, Some(crate::container::adts::StreamReader::open_with_packet_limit(input, max_packet_bytes.unwrap_or(usize::MAX))?),None)
     };
+    let adts = if let Some(reader) = adts {
+        if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
+        Some(crate::native_media::negotiate_adts_aac_reader(reader, interval, &mut control)?)
+    } else { None };
     let (input_rate, input_channels, native_mask) = if let Some(reader) = &mp4 {
         let index = if allow_wave {crate::native_media::mp4_audio_index(reader,selected)?} else {crate::native_media::mp4_aac_index(reader,selected)?};
         let decoder=crate::native_audio_decoder::PacketPcmDecoder::new(&reader.tracks()[index])?;
@@ -598,8 +602,8 @@ fn export_pcm_selected(    source: &Path,
         (info.sample_rate,info.channels,Some(info.channel_mask))
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
-        let config = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?.configuration();
-        (config.sample_rate, config.channels,Some(crate::codec::aac_native::NativeAacDecoder::new(adts.as_ref().unwrap().audio_specific_config())?.channel_mask()))
+        let reader = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?;
+        (reader.sample_rate(), reader.channels(), Some(reader.channel_mask()))
     };
     let unknown_pcm_layout = if let Some(reader)=&matroska {
         let index=crate::native_media::matroska_audio_index(reader,selected)?;
@@ -643,7 +647,7 @@ fn export_pcm_selected(    source: &Path,
     } else if let Some((reader,info))=wave {
         crate::native_pcm::decode_reader(reader,info,&mut pcm,interval,&mut control,max_packet_bytes)?
     } else {
-        crate::native_media::decode_adts_aac_reader_controlled(adts.ok_or_else(|| invalid("missing ADTS reader"))?, &mut pcm, interval, &mut control)?
+        adts.ok_or_else(|| invalid("missing ADTS reader"))?.decode(&mut pcm, &mut control)?
     };
     control.emit(false);
     control.check()?;
