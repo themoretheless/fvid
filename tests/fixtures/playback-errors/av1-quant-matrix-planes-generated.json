@@ -1,0 +1,211 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-quant-matrix-planes-depth8-qm0-7-14.obu",
+      "reference": "av1-quant-matrix-planes-depth8-qm0-7-14.yuv",
+      "webm": "av1-quant-matrix-planes-depth8-qm0-7-14.webm",
+      "depth": 8,
+      "matrix": [
+        0,
+        7,
+        14
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "036429e94e4985bd976904be59d4a26beeba48391f7fc4c291fa6f1ca818508a",
+      "reference_sha256": "7436d785d107a07855662ff6c3b5a891d38eaabaf54465617763b0432a8fc9e8",
+      "webm_sha256": "9a434e4b09fc856d59686ad92c7ba3bf266b3b140444fac9b125bc92c41e79c4"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth8-qm14-0-7.obu",
+      "reference": "av1-quant-matrix-planes-depth8-qm14-0-7.yuv",
+      "webm": "av1-quant-matrix-planes-depth8-qm14-0-7.webm",
+      "depth": 8,
+      "matrix": [
+        14,
+        0,
+        7
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "2b5209f45fa4e0f90740194571b67b3e79a24d7130af52b0116ce553d836db60",
+      "reference_sha256": "9d8473216c1c7d471fd1c13d040c023e3f4c5a02343d65b1b053d1bd676af176",
+      "webm_sha256": "79f71b559e9c1e1ab497bd9868815b4d6c50bd2ff982b030bdce9d8eeb46e732"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth8-qm7-14-0.obu",
+      "reference": "av1-quant-matrix-planes-depth8-qm7-14-0.yuv",
+      "webm": "av1-quant-matrix-planes-depth8-qm7-14-0.webm",
+      "depth": 8,
+      "matrix": [
+        7,
+        14,
+        0
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "3dfef48f473cf8bda6f22ee9ad9f6e4cbd24251b6068c35dabe70e6dae5ff9a6",
+      "reference_sha256": "fc25270ad3bc13329dbdceb6a7bdcbd69fef15eeef706c3212e29b1d2dfabb47",
+      "webm_sha256": "bd63578e156029a1222a39144f0c9e559b688e99640d77d572597cd7ef8e0346"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth10-qm0-7-14.obu",
+      "reference": "av1-quant-matrix-planes-depth10-qm0-7-14.yuv",
+      "webm": "av1-quant-matrix-planes-depth10-qm0-7-14.webm",
+      "depth": 10,
+      "matrix": [
+        0,
+        7,
+        14
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "c9270ac63ebd6bd34073a96b5b651ebc70d3cae0e6663b2759777ad49b76a39c",
+      "reference_sha256": "59facca2a1d8c375a0a3de202b2d4f86402a18155601a907544520363817ce18",
+      "webm_sha256": "22915985f4a10df0aa69204fb12338e7e9c9ec2550d99c36c9a0c0ed7091afa8"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth10-qm14-0-7.obu",
+      "reference": "av1-quant-matrix-planes-depth10-qm14-0-7.yuv",
+      "webm": "av1-quant-matrix-planes-depth10-qm14-0-7.webm",
+      "depth": 10,
+      "matrix": [
+        14,
+        0,
+        7
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "ff77bd90296fe65cd45a8e960670fdb85a6f112ac6d996cdaacee145ae3842e1",
+      "reference_sha256": "73b45e8915764c27ea391077c02bee5a57ee49f57156ae0a8ded809ce44ed091",
+      "webm_sha256": "f22c1cc805b324d442477270a84a11743a7c72ab4d5492c252862b2fa8b732f5"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth10-qm7-14-0.obu",
+      "reference": "av1-quant-matrix-planes-depth10-qm7-14-0.yuv",
+      "webm": "av1-quant-matrix-planes-depth10-qm7-14-0.webm",
+      "depth": 10,
+      "matrix": [
+        7,
+        14,
+        0
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "10d87c21702627f495b7286750e2a3ed15fba04677d5bc34cadc36c8042e12b9",
+      "reference_sha256": "19f01dd1575b729250263841602561f5bc0e205416c4c3028c2b51c8f95d59c8",
+      "webm_sha256": "51e2b407a0f2c7ecbd8b81aef725ea3b3bd424e61cf8461503dfccdd26174ea2"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth12-qm0-7-14.obu",
+      "reference": "av1-quant-matrix-planes-depth12-qm0-7-14.yuv",
+      "webm": "av1-quant-matrix-planes-depth12-qm0-7-14.webm",
+      "depth": 12,
+      "matrix": [
+        0,
+        7,
+        14
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "a492ca467826fe79a2cee09ef937fb4f7da2d38e39d22673c53eaee37c23dd9e",
+      "reference_sha256": "96f4457d30d085539a72279728d83be0152ea8a986482f58cc5cee362fa19d10",
+      "webm_sha256": "cbc264351b8fbfff970e7349ea35a0ebfa7462e158e0a4d64c1242eaa342fa7b"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth12-qm14-0-7.obu",
+      "reference": "av1-quant-matrix-planes-depth12-qm14-0-7.yuv",
+      "webm": "av1-quant-matrix-planes-depth12-qm14-0-7.webm",
+      "depth": 12,
+      "matrix": [
+        14,
+        0,
+        7
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "14a5726c95da48bd5ad147d6e7dc93bb4dc437a19703d80c48cc4fffc96c1ed8",
+      "reference_sha256": "2cec65d817393f97b0a6fbebbe5bb90ed0b88efb1259770d0e4cce86f56ab130",
+      "webm_sha256": "d026c551509b95123f829bbb5798a5ec606ee3cd4e0ed73e9505f10755dde20c"
+    },
+    {
+      "file": "av1-quant-matrix-planes-depth12-qm7-14-0.obu",
+      "reference": "av1-quant-matrix-planes-depth12-qm7-14-0.yuv",
+      "webm": "av1-quant-matrix-planes-depth12-qm7-14-0.webm",
+      "depth": 12,
+      "matrix": [
+        7,
+        14,
+        0
+      ],
+      "size": [
+        64,
+        64
+      ],
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "generation": "owned baseline; matrix levels plus required separate-UV flag/alignment; all other parsed header fields identical",
+      "sha256": "5b0c07b5b14d9a6c9f77e0f8976b22ceeed39f45eb6b6b7379fe6f61ef2c1dac",
+      "reference_sha256": "dc4d6c69d6c706357a223e5295dadda48db8e861101b6289ebbbe5b8750882a9",
+      "webm_sha256": "f090409d3d4af92b08709cb8f94758988393e8f6108171f8a111ab38974b3e27"
+    }
+  ]
+}
