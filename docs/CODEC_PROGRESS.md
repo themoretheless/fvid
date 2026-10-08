@@ -5777,3 +5777,27 @@ The same official corrigendum p8 replaces the patch goal equality test with
 table 21..63 step 2 at 48 kHz distinguishes the corrected two-patch result
 from the old unnecessary internal two-band patch. This is a protocol geometry
 regression, not a newly reported failure of an encoded/private source video.
+
+### Owned SBR parameter and harmonic mapping history
+
+`aac_sbr_mapping::History` maps dequantized envelope/noise rows and estimated
+current energy to the gain calculator's per-QMF `Band` inputs. It computes
+attack index for all four frame classes, including an attack at the frame end
+carried to the next frame. Harmonic lines start at the attack unless that
+absolute QMF line was active in the previous frame's final envelope; bandwise
+harmonic presence is separate from actual center-line placement. The midpoint
+is the integer floor of the high-resolution band borders.
+
+History is transactional and clone/reset capable, retaining absolute QMF
+lines rather than high-table indices. New/out-of-range lines cannot inherit
+unrelated harmonic history after a frequency-range change. The bounded
+`read_harmonics` parser rolls back on truncation and clears the entire list
+when the enclosing harmonic flag is absent.
+
+256 original exact mapping oracles cover FIXVAR/VARFIX pointers, all five-band
+harmonic masks, mixed frequency resolution and both noise-time rows. Other
+tests cover FIXFIX/VARVAR, 15/16-slot frames, deferred attack/history replay,
+range changes, late-row invalid input rollback, and all short harmonic bit
+patterns at every bit offset/truncation. Mapping connects to the owned gain
+calculator. These are protocol/DSP tests, not encoded HE-AAC playback
+acceptance; final signal assembly and production extension integration remain.

@@ -296,3 +296,8 @@ SBR gain/limiter references: explicitly run
 `python3 scripts/generate_aac_sbr_gain_oracles.py`. The offline 80-digit
 Decimal generator applies the official ISO Cor.1 corrections and saves 60
 original input/output cases. Ordinary tests consume the saved JSON.
+
+SBR mapping references: explicitly run
+`python3 scripts/generate_aac_sbr_mapping_oracles.py`. It saves 256 original
+exact integer/boolean mapping cases from explicit time-grid/attack tables.
+Tests consume the saved JSON without generators or external codec processes.
