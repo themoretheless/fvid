@@ -47,6 +47,13 @@ fn lossy_camera_tile_list_transform_reconstruction_matrix() {
 }
 #[test]
 fn adapted_anchor_cdf_camera_tile_list_matrix() {
+    camera_context_matrix("cdf");
+}
+#[test]
+fn primary_ref_none_camera_tile_list_matrix() {
+    camera_context_matrix("none");
+}
+fn camera_context_matrix(context: &str) {
     for q in [0, 32] {
         for sb in [64, 128] {
             for depth in [8, 10, 12] {
@@ -62,14 +69,15 @@ fn adapted_anchor_cdf_camera_tile_list_matrix() {
                     } else {
                         format!("d{depth}-c{chroma}-sb{sb}-")
                     };
-                    camera_tile_list_case(&format!("cdf-{tag}"), sb, depth, chroma, q);
+                    camera_tile_list_case(&format!("{context}-{tag}"), sb, depth, chroma, q);
                 }
             }
         }
     }
 }
 fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u8) {
-    let adapted = prefix.starts_with("cdf-");
+    let reset = prefix.starts_with("none-");
+    let adapted = reset || prefix.starts_with("cdf-");
     let bytes = |name: &str| bytes(&format!("{prefix}{name}"));
     let anchor = bytes("anchor.obu");
     let header = bytes("header.obu");
@@ -106,7 +114,11 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     let camera = Header::parse(&sequence, frame.payload, 0, 0, &[Some(&ah); 8]).unwrap();
     assert_eq!(camera.frame_type, 1);
     if adapted {
-        assert_eq!(camera.primary_reference, 0, "{prefix}: inherit LAST CDF");
+        assert_eq!(
+            camera.primary_reference,
+            if reset { 7 } else { 0 },
+            "{prefix}: encoded primary CDF selection"
+        );
     }
     assert_eq!(camera.refresh_flags, 0);
     assert_eq!(camera.quant.base > 0, q > 0);
@@ -150,9 +162,9 @@ fn camera_tile_list_case(prefix: &str, sb: usize, depth: u8, chroma: usize, q: u
     }
     if adapted {
         let mut default_cdf = camera.clone();
-        default_cdf.primary_reference = 7;
+        default_cdf.primary_reference = if reset { 0 } else { 7 };
         match decoder.decode_tile_list(&default_cdf, &anchors, obu.payload, None) {
-            Ok(changed) => assert_ne!(pixels(&changed), golden, "{prefix}: inherited CDF mutation"),
+            Ok(changed) => assert_ne!(pixels(&changed), golden, "{prefix}: primary CDF mutation"),
             Err(_) => decoder
                 .finish()
                 .expect("advanced context refusal must not poison ordinary decoder"),

@@ -1397,3 +1397,22 @@ pixels. Switching the camera to default CDF is a mutation control: wrong pixels
 or entropy refusal pass that control, not playback acceptance. All original
 lossless/lossy acceptance, dequantization/anchor mutations, sparse-canvas and
 malformed/memory checks remain enabled. Ordinary tests run no generators.
+
+
+### Encoded AV1 camera PRIMARY_REF_NONE
+
+The original generator's final mode 2 keeps the adapted anchor setup and omits
+priming, then sets `AOM_EFLAG_SET_PRIMARY_REF_NONE` on the camera encode call.
+This creates genuine PRIMARY_REF_NONE camera syntax and entropy coding, rather
+than mutating a LAST-coded header. The 36 `av1-tile-list-none-*` cases cover all
+previous quantizer/SB/depth/chroma combinations and record `primary_ref_none`
+in each SHA-256 manifest.
+
+Generation requires stock libaom acceptance and agreement between tile-list
+and separately assembled camera-tile reconstruction, plus authored lossless
+checks and lossy source differences. Offline Rust tests assert camera primary
+reference 7 while the normal anchor saves adapted CDF, then compare every
+pixel. An inverse mutation loading LAST must fail or change pixels; its refusal
+is not an acceptance test. Existing pixel/dequantization/anchor mutations,
+sparse canvas and malformed/memory tests also run for every new case.
+No private media, runtime generators, network or FFmpeg are involved.

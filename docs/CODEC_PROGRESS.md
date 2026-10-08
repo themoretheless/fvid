@@ -5243,3 +5243,24 @@ Primary-ref-none encoded camera streams, more reference/CDF slot mappings,
 context-update-tile choices, motion/border interactions and automatic container
 side information remain separate qualifications. This evidence does not imply
 whole-codec conformance.
+
+
+## AV1 camera PRIMARY_REF_NONE encoded acceptance (2026-10-08)
+
+The external-context matrix adds 36 camera streams that genuinely encode
+PRIMARY_REF_NONE using stock libaom's frame flag. Anchors retain adapted CDF
+state, so the camera must initialize fresh non-coefficient and coefficient
+contexts instead of silently loading LAST. All lossless/Q32, SB64/SB128,
+8/10/12 and 420/422/444 cases match stock list and separate tile reconstructions.
+
+Native tests assert primary_reference=7 in parsed camera headers, actual anchor
+adaptation/save flags and all one/two-anchor samples. A mutation selecting LAST
+instead must produce wrong pixels or entropy refusal; it is distinct from the
+passing encoded PRIMARY_REF_NONE acceptance. Existing dequantization mutation,
+anchor selection, sparse canvas and malformed/memory checks remain active.
+Seven offline test functions cover 108 accepted cases and a separate ordinary
+packet missing-context refusal, with no external codec calls/linkage.
+
+Additional reference-slot mappings, context-update-tile choices, motion/border
+interactions and automatic container external context remain unqualified, as
+do other codec/profile gaps. This stage does not establish complete conformance.

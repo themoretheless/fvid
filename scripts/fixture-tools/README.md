@@ -163,3 +163,9 @@ large-scale priming, preserving its frame context for camera LAST. Six offline
 test functions exercise the 72 cases and missing-side-information refusal.
 The C generator's final optional integer selects adapted-anchor mode (0/1);
 the Python driver enumerates both modes and writes explicit manifest metadata.
+
+The camera generator's final mode now accepts 0 (default anchor context),
+1 (adapted anchor CDF inherited through LAST), or 2 (adapted anchor retained
+but camera encodes PRIMARY_REF_NONE). The Python driver covers all three:
+108 cases total, with `none-` tags for genuine fresh-CDF camera syntax.
+Seven offline test functions cover these cases and missing external context.

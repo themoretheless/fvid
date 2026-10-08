@@ -12,6 +12,7 @@
   "chroma": 422,
   "quantizer": 32,
   "adapted_anchor_cdf": true,
+  "primary_ref_none": false,
   "order": [
     3,
     0,

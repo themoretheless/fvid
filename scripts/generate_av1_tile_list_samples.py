@@ -55,12 +55,12 @@ def main():
     parser.add_argument("--generator", type=Path, required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1] / "tests/fixtures/playback-errors"
-    for adapted, q, sb, depth, chroma in itertools.product([0, 1], [0, 32], [64, 128], [8, 10, 12], [420, 422, 444]):
+    for adapted, q, sb, depth, chroma in itertools.product([0, 1, 2], [0, 32], [64, 128], [8, 10, 12], [420, 422, 444]):
         tag = ("" if sb == 64 else "sb128-") if depth == 8 and chroma == 420 else f"d{depth}-c{chroma}-sb{sb}-"
         if q:
             tag = f"q{q}-d{depth}-c{chroma}-sb{sb}-"
         if adapted:
-            tag = "cdf-" + tag
+            tag = ("none-" if adapted == 2 else "cdf-") + tag
         name_prefix = "av1-tile-list-" + tag
         with tempfile.TemporaryDirectory(prefix="fvid-tile-list-") as tmp:
             prefix = Path(tmp) / "fixture"
@@ -81,7 +81,7 @@ def main():
                 (root / name).write_bytes(data)
                 records[suffix] = {"file": name, "sha256": hashlib.sha256(data).hexdigest()}
             manifest = {"size": [sb * 2, sb * 2], "tile_size": [sb, sb],
-                        "superblock": sb, "depth": depth, "chroma": chroma, "quantizer": q, "adapted_anchor_cdf": bool(adapted),
+                        "superblock": sb, "depth": depth, "chroma": chroma, "quantizer": q, "adapted_anchor_cdf": bool(adapted), "primary_ref_none": adapted == 2,
                         "order": ORDER, "oracle": "stock libaom",
                         "multi_anchor_offsets": [0, 9 << (depth - 8)],
                         "multi_anchor_indices": [0, 1, 0, 1], "artifacts": records}
