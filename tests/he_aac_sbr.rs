@@ -281,3 +281,47 @@ fn original_stereo_he_aac_video_preserves_both_channels_in_player_and_export() {
     .unwrap();
     assert_eq!(output, exported);
 }
+
+#[test]
+fn synthetic_video_with_missing_sbr_fill_decodes_and_seeks_without_clock_changes() {
+    use std::{io::Cursor, time::Duration};
+    let fixture = include_bytes!("fixtures/playback-errors/he-aac-missing-sbr.mp4");
+    let metadata: serde_json::Value = serde_json::from_slice(include_bytes!(
+        "fixtures/playback-errors/he-aac-missing-sbr.json"
+    ))
+    .unwrap();
+    let mut pcm = Vec::new();
+    let options = fvid_media::CopyOptions {
+        max_controlled_bytes: Some(64 * 1024 * 1024),
+        ..Default::default()
+    };
+    let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(fixture.as_slice()),
+        &mut pcm,
+        None,
+        &options,
+    )
+    .unwrap();
+    assert_eq!((stats.sample_rate, stats.sample_frames), (48000, 6144));
+    let offset = metadata["video"]["pcm_offset"].as_u64().unwrap() as usize;
+    let expected = include_bytes!("fixtures/playback-errors/he-aac-missing-sbr.f64le");
+    for (actual, b) in pcm.chunks_exact(4).zip(expected[offset..].chunks_exact(8)) {
+        assert!(
+            (f32::from_le_bytes(actual.try_into().unwrap())
+                - (f64::from_le_bytes(b.try_into().unwrap()) as f32))
+                .abs()
+                < 1e-7
+        );
+    }
+    for (from, to) in [(0, 128), (32, 96), (64, 128), (0, 32)] {
+        let mut player = Vec::new();
+        let reader = Mp4Reader::open(Cursor::new(fixture.as_slice()), Limits::default()).unwrap();
+        fvid::native_media::decode_mp4_aac_reader(
+            reader,
+            &mut player,
+            Some((Duration::from_millis(from), Duration::from_millis(to))),
+        )
+        .unwrap();
+        assert_eq!(player, &pcm[from as usize * 48 * 4..to as usize * 48 * 4]);
+    }
+}

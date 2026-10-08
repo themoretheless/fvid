@@ -2000,3 +2000,13 @@ No private media, FFmpeg, encoder, foreign decoder or production state buffers
 are used. These are standalone DSP acceptance assets, not acceptance of
 missing SBR FIL packets in the native AAC/player path.
 Source: https://allgosts.ru/33/170/gost_r_53556.4-2013
+
+
+`he-aac-missing-sbr.bin/.f64le/.json/.mp4` are authored by
+`scripts/generate_he_aac_missing_sbr_fixtures.py`. Their valid silent LC SCE
+blocks intentionally alternate SBR FIL and no FIL, reproducing the exact
+former signalled-SBR missing-payload refusal. Original SBR noise gain uses
+Decimal; direct synthesis convolution supplies PCM including filter history
+across zero-HF intervals. The video uses the original AVC seed with rewritten
+audio packets/tables. No private parameters, media, FFmpeg or foreign decoder
+is used. Generation is explicit; ordinary tests only read saved assets.

@@ -200,3 +200,43 @@ fn complete_stereo_cpe_sbr_matches_both_independent_mono_oracles_and_crc_rollbac
         }
     }
 }
+
+#[test]
+fn missing_sbr_fill_keeps_pcm_clock_noise_history_and_checkpoint_replay() {
+    let manifest: Value = serde_json::from_slice(include_bytes!(
+        "../../../../tests/fixtures/playback-errors/he-aac-missing-sbr.json"
+    ))
+    .unwrap();
+    let packets =
+        include_bytes!("../../../../tests/fixtures/playback-errors/he-aac-missing-sbr.bin");
+    let pcm = include_bytes!("../../../../tests/fixtures/playback-errors/he-aac-missing-sbr.f64le");
+    for case in manifest["cases"].as_array().unwrap() {
+        let mut decoder = NativeAacDecoder::new(&asc(case)).unwrap();
+        let mut output = Vec::new();
+        for frame in case["frames"].as_array().unwrap() {
+            let at = frame["offset"].as_u64().unwrap() as usize;
+            let raw = &packets[at..at + frame["bytes"].as_u64().unwrap() as usize];
+            let checkpoint = decoder.checkpoint();
+            assert!(decoder.decode(&[]).is_err());
+            let rendered = decoder.decode(raw).unwrap();
+            assert_eq!(
+                rendered.len(),
+                64 * case["slots"].as_u64().unwrap() as usize
+                    * if case["bands"] == 64 { 2 } else { 1 }
+            );
+            decoder.reset();
+            decoder.restore(&checkpoint).unwrap();
+            assert_eq!(rendered, decoder.decode(raw).unwrap());
+            output.extend(rendered);
+        }
+        let offset = case["pcm_offset"].as_u64().unwrap() as usize;
+        assert_eq!(output.len(), case["samples"].as_u64().unwrap() as usize);
+        for (&value, b) in output.iter().zip(pcm[offset..].chunks_exact(8)) {
+            let expected = f64::from_le_bytes(b.try_into().unwrap()) as f32;
+            assert!(
+                (value - expected).abs() < 1e-7,
+                "{case}: {value} vs {expected}"
+            );
+        }
+    }
+}

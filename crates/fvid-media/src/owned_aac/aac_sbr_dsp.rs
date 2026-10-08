@@ -124,6 +124,12 @@ impl Dsp {
                 "SBR extended audio/PS synthesis is not yet implemented",
             ));
         }
+        // First received header may follow delay-only frames of the same format.
+        // Initializing SBR syntax must not discard their QMF analysis/synthesis.
+        let mut frame = frame.clone();
+        if frame.syntax.format_reset && self.preparation.matches_format(rate, slots, pcm.len()) {
+            frame.syntax.format_reset = false;
+        }
         let mut trial = self.clone();
         if frame.syntax.format_reset {
             trial.reset();
@@ -131,7 +137,7 @@ impl Dsp {
         if trial.output_rate.is_some_and(|old| old != output_rate) {
             return Err(invalid("SBR output rate changed without reset"));
         }
-        let prepared = trial.preparation.process(frame, pcm, rate, slots)?;
+        let prepared = trial.preparation.process(&frame, pcm, rate, slots)?;
         if trial.channels.is_empty() {
             for _ in &prepared {
                 trial.channels.push(Channel {
@@ -458,6 +464,51 @@ mod tests {
 #[cfg(test)]
 mod upsampling_tests {
     use super::*;
+    #[test]
+    fn first_header_after_delay_only_nonzero_pcm_keeps_qmf_history() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        let manifest: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(root.join("aac-sbr-dsp-oracles.json")).unwrap())
+                .unwrap();
+        let case = manifest["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["slots"] == 16 && c["bands"] == 64 && c["smoothing"] == true)
+            .unwrap();
+        let raw = std::fs::read(root.join("aac-sbr-dsp-syntax.bin")).unwrap();
+        let record = &case["frames"][0];
+        let at = record["offset"].as_u64().unwrap() as usize;
+        let len = record["byte_length"].as_u64().unwrap() as usize;
+        let mut bits = BitReader::new(&raw[at..at + len]);
+        bits.skip(4).unwrap();
+        let frame = Stream::default()
+            .read(&mut bits, len * 8, false, 48000, 16, 1)
+            .unwrap();
+        assert!(frame.syntax.format_reset);
+        let dense: Vec<_> = (0..1024)
+            .map(|i| ((i * 73 + 19) % 257) as f32 / 256.0 - 0.5)
+            .collect();
+        let quiet = vec![0.0; 1024];
+        let mut delayed = Dsp::default();
+        delayed
+            .process_upsampling(&[&dense], 48000, 16, OutputRate::Double)
+            .unwrap();
+        let with_history = delayed
+            .process(&frame, &[&quiet], 48000, 16, OutputRate::Double)
+            .unwrap();
+        let fresh = Dsp::default()
+            .process(&frame, &[&quiet], 48000, 16, OutputRate::Double)
+            .unwrap();
+        assert!(
+            with_history[0]
+                .iter()
+                .zip(&fresh[0])
+                .any(|(a, b)| (a - b).abs() > 1e-4),
+            "first SBR header discarded prior QMF history"
+        );
+    }
     #[test]
     fn pure_upsampling_matches_direct_nonzero_time_convolution_and_rolls_back() {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))

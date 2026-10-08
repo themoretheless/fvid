@@ -47,6 +47,9 @@ impl Preparation {
         Ok(())
     }
 
+    pub(crate) fn matches_format(&self, rate: u32, slots: u8, channels: usize) -> bool {
+        self.format == Some((rate, slots, channels))
+    }
     pub fn reset(&mut self) {
         *self = Self::default();
     }

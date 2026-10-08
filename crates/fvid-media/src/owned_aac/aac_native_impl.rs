@@ -285,9 +285,6 @@ impl NativeAacDecoder {
             }
             previous_element = Some(element);
         }
-        if self.sbr_rate.is_some() && sbr_frame.is_none() {
-            return Err(unsupported("signalled SBR block without SBR payload is not yet implemented"));
-        }
         if channels.len() != self.config.channels as usize {
             return Err(invalid("AAC block has no configured audio element"));
         }
@@ -375,12 +372,17 @@ impl NativeAacDecoder {
                     }
                 }
             }
-            if let Some(frame) = &sbr_frame {
+            if self.sbr_rate.is_some() {
                 let planar: Vec<Vec<f32>> = (0..channels.len()).map(|c| output.chunks_exact(channels.len()).map(|row| row[c]).collect()).collect();
                 let refs: Vec<_> = planar.iter().map(Vec::as_slice).collect();
                 let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
                 let mode = if self.sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
-                let rendered = sbr_dsp.as_mut().ok_or_else(|| invalid("missing SBR DSP state"))?.process(frame, &refs, rate, (self.config.frame_samples/64) as u8, mode).map_err(|e| invalid(&e.0))?;
+                let dsp = sbr_dsp.as_mut().ok_or_else(|| invalid("missing SBR DSP state"))?;
+                let rendered = if let Some(frame) = &sbr_frame {
+                    dsp.process(frame, &refs, rate, (self.config.frame_samples/64) as u8, mode)
+                } else {
+                    dsp.process_upsampling(&refs, rate, (self.config.frame_samples/64) as u8, mode)
+                }.map_err(|e| invalid(&e.0))?;
                 let samples = rendered[0].len();
                 output = vec![0.0; samples*channels.len()];
                 for (channel, data) in rendered.iter().enumerate() {

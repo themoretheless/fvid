@@ -6135,3 +6135,26 @@ header-bearing SBR must preserve the correct QMF/history state, and requires
 a short encoded synthetic video regression before native dispatch is enabled.
 The old working draft has different delay constants and was not used for
 this delay-only path.
+
+
+### Native HE-AAC blocks without SBR FIL
+
+Signalled HE-AAC now routes a valid AAC block with no SBR FIL through owned
+delay-only upsampling, preserving the configured output clock and QMF history.
+The first received SBR header initializes frequency-dependent state without
+resetting an already established delay-only pipeline of the same format.
+Malformed FIL/core packets still fail transactionally.
+
+Twelve original three-packet sequences cover SBR/no-FIL/SBR, no-FIL/SBR/no-FIL
+and all-no-FIL for both core frame sizes and output modes. A short authored AVC
+MP4 reproduces the former missing-payload refusal and now decodes 6144 samples
+at 48 kHz; full/seek/rewind PCM is checked against a direct-convolution oracle
+and across player/controlled export paths. These packet fixtures use a silent
+LC core and nonzero authored SBR noise; nonzero core transition/reference PCM,
+all grids/overhangs, concealment and implicit signalling remain unqualified.
+
+The first-header regression also feeds nonzero core PCM through the delay-only
+DSP before the first SBR header and verifies that retained QMF contributions
+are not replaced by a fresh decoder. Reinstating the former native missing-FIL
+refusal makes the new encoded fixture test fail with that exact diagnostic;
+restoring the fix passes the complete owned media suite.
