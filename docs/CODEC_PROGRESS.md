@@ -5083,3 +5083,23 @@ Commands used `--release --locked --offline`; root integrations additionally use
 five new fixture hashes passed. The operating-points test executable links only
 libSystem and libiconv, with no libav or external codec library. This verification
 does not qualify spatial layers, tile lists, every codec tool or live 60 fps.
+
+### AV1 two-spatial-layer reconstruction acceptance (2026-10-08)
+
+The spatial-ID blanket refusal is removed. Decoded frames expose `spatial_id`,
+including show-existing outputs, so callers can distinguish included layers.
+The original two-layer SVC fixture reconstructs four temporal units at
+32x24/64x48, with actual scaled interlayer GOLDEN predictions; all outputs
+match both stock libaom and dav1d. The lower operating point filters the upper
+layer and reproduces its four independent lower frames. Whole-stream and
+individual-OBU input, seeded/unseeded configuration and reset are qualified.
+
+The raw decoder returns all included decoded frames. This milestone does not
+qualify display-layer selection within temporal units, layered container
+timing/seek, three/four-layer combinations, tile-list assembly, or all codec
+profiles/tools. Those requirements remain open for the full codec goal.
+
+Final validation: 49 AV1 unit tests and 12 selected integration tests passed
+offline in release mode (zero failed/ignored). Scoped Rust formatting, generator
+syntax, three artifact hashes and diff checks pass. The spatial acceptance binary
+links only libSystem/libiconv; no external codec or libav linkage.

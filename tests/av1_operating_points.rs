@@ -277,19 +277,18 @@ fn excluded_extended_obus_do_not_parse_payload_or_mutate_metadata() {
         before,
         "the same unextended HDR payload is valid and global"
     );
-    // Included spatial-layer reconstruction remains explicit until implemented;
-    // filtering excluded spatial OBUs is not claimed as decoding that layer.
+    // Included empty spatial frames must reach payload validation. Actual spatial
+    // reconstruction is qualified by the owned two-layer acceptance suite.
     let mut included = Decoder::new(16 << 20);
     let mut spatial_sequence = data[..end].to_vec();
     let start = seq.payload.as_ptr() as usize - data.as_ptr() as usize;
     spatial_sequence[start + 1] |= 2; // authored op0 idc 0x107 -> 0x307, include spatial 1
     included.decode_packet(&spatial_sequence).unwrap();
-    assert!(
-        included
-            .decode_packet(&[0x36, 8, 0])
-            .err()
-            .unwrap()
-            .to_string()
-            .contains("spatial layering not implemented")
-    );
+    let error = included
+        .decode_packet(&[0x36, 8, 0])
+        .err()
+        .unwrap()
+        .to_string();
+    assert!(!error.contains("not implemented"), "{error}");
+    assert!(error.contains("truncated"), "{error}");
 }

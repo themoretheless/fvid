@@ -87,3 +87,15 @@ python3 /path/to/fvid/scripts/generate_av1_temporal_operating_points_samples.py 
 Only generation uses libaom/dav1d. Ordinary acceptance reads the owned OBU/WebM
 and three raw goldens, checking selection, inactive-reference invalidation,
 configuration/reset, exact pixels, packetized input and WebM rewind/seek.
+
+### Spatial SVC operating points
+
+Generation only (stock libaom 3.15.1; no external codec in ordinary tests):
+
+```sh
+cc scripts/av1_spatial_operating_points_fixture.c $(pkg-config --cflags --libs aom) -o /tmp/fvid-av1-spatial-fixture
+python3 scripts/generate_av1_spatial_operating_points_samples.py --encoder /tmp/fvid-av1-spatial-fixture --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+```
+
+The generator requires exact agreement for both operating points and outputs all
+spatial layers. See the fixture provenance for source pattern and qualification.

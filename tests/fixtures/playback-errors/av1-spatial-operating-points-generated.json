@@ -1,0 +1,104 @@
+{
+  "file": "av1-spatial-operating-points.obu",
+  "sha256": "79f7990eaca134e9928e12a6b81a0fc7e78e2273dad4f53041be6dd23f8cd690",
+  "spatial_ids": [
+    0,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1
+  ],
+  "size": [
+    64,
+    48
+  ],
+  "oracles": [
+    "libaom",
+    "dav1d"
+  ],
+  "points": [
+    {
+      "point": 0,
+      "idc": 769,
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "sizes": [
+        [
+          32,
+          24
+        ],
+        [
+          64,
+          48
+        ],
+        [
+          32,
+          24
+        ],
+        [
+          64,
+          48
+        ],
+        [
+          32,
+          24
+        ],
+        [
+          64,
+          48
+        ],
+        [
+          32,
+          24
+        ],
+        [
+          64,
+          48
+        ]
+      ],
+      "reference": "av1-spatial-operating-points-op0.yuv",
+      "reference_sha256": "cecce70d14f43992f61f1b7834d094b777bdf35ac1adc4ca1d94bfca9b062db7"
+    },
+    {
+      "point": 1,
+      "idc": 257,
+      "indices": [
+        0,
+        2,
+        4,
+        6
+      ],
+      "sizes": [
+        [
+          32,
+          24
+        ],
+        [
+          32,
+          24
+        ],
+        [
+          32,
+          24
+        ],
+        [
+          32,
+          24
+        ]
+      ],
+      "reference": "av1-spatial-operating-points-op1.yuv",
+      "reference_sha256": "6b10017b8db80da9d31c7762d475e76af9e7ff69c0f11c2ccbd379d9e740ef3e"
+    }
+  ]
+}

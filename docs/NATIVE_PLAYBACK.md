@@ -882,7 +882,11 @@ Release-сборка обязательна для практического и
   Temporal operating points поддержаны: выбор point, фильтрация extended OBU
   до изменения состояния, reset/configuration и error-resilient invalidation
   проверены на собственном 8-битном 4:2:0 SVC-потоке с тремя temporal layers.
-  Явные оставшиеся отказы: включённые spatial layers и tile-list OBU.
+  Включённые spatial layers декодируются: собственный двухслойный 8-bit 4:2:0
+  SVC сравнивается по всем пикселям с libaom/dav1d, включая scaled interlayer
+  prediction, operating-point selection и reset. Raw API возвращает все слои
+  с `spatial_id`; выбор показанного слоя, container timing/seek и остальные
+  layered combinations ещё требуют проверки. Tile-list OBU пока отклоняется.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption

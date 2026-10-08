@@ -15,6 +15,9 @@ use std::sync::Arc;
 pub struct Decoded {
     pub picture: Arc<Picture>,
     pub color: Color,
+    /// Spatial layer of this output frame. Applications choose one shown layer
+    /// per temporal unit; decoding retains all included layers for prediction.
+    pub spatial_id: u8,
     pub show: bool,
 }
 #[path = "av1_grain.rs"]
@@ -296,9 +299,6 @@ impl Decoder {
                         .sequence
                         .as_ref()
                         .ok_or_else(|| invalid("AV1 frame precedes sequence header"))?;
-                    if obu.spatial_id != 0 {
-                        return Err(crate::unsupported("AV1 spatial layering not implemented"));
-                    }
                     if obu.kind != 4
                         && !s.reduced_header
                         && obu.payload.first().is_some_and(|v| v & 128 != 0)
@@ -342,6 +342,7 @@ impl Decoder {
                             .clone()
                             .ok_or_else(|| invalid("missing AV1 reference"))?;
                         decoded.show = true;
+                        decoded.spatial_id = obu.spatial_id;
                         if self.reference_types[index] == 0 {
                             self.previous_frame_id =
                                 self.headers[index].as_ref().and_then(|h| h.frame_id);
@@ -513,6 +514,7 @@ impl Decoder {
                         let decoded = Decoded {
                             picture: Arc::new(picture),
                             color: s.color.clone(),
+                            spatial_id: obu.spatial_id,
                             show: h.show,
                         };
                         let displayed = self.displayed(decoded.clone(), &h, &output, compressed)?;
