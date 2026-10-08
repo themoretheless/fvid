@@ -1,5 +1,9 @@
 //! Owned packet-to-PCM codecs used by the owned container audio timelines.
 use crate::{Result, container::mp4::Track, invalid};
+pub(crate) enum NativeAudioCheckpoint {
+    Aac(crate::codec::aac_native::AacCheckpoint),
+    Ps(crate::codec::aac_ps_native::Checkpoint),
+}
 pub(crate) enum PacketPcmDecoder {
     Pcm(crate::codec::pcm_decoder::PcmDecoder),
     Aac(crate::codec::aac_native::NativeAacDecoder),
@@ -11,34 +15,45 @@ pub(crate) enum PacketPcmDecoder {
     },
 }
 impl PacketPcmDecoder {
-    pub(crate) fn checkpoint(&self) -> Option<crate::codec::aac_native::AacCheckpoint> {
-        if let Self::Aac(d) = self {
-            Some(d.checkpoint())
-        } else {
-            None
+    pub(crate) fn checkpoint(&self) -> Option<NativeAudioCheckpoint> {
+        match self {
+            Self::Aac(d) => Some(NativeAudioCheckpoint::Aac(d.checkpoint())),
+            Self::Ps(d) => Some(NativeAudioCheckpoint::Ps(d.checkpoint())),
+            _ => None,
         }
     }
-    pub(crate) fn restore_checkpoint(
-        &mut self,
-        state: &crate::codec::aac_native::AacCheckpoint,
-    ) -> Result<bool> {
-        if let Self::Aac(d) = self {
-            d.restore(state)?;
-            Ok(true)
-        } else {
-            Ok(false)
+    pub(crate) fn restore_checkpoint(&mut self, state: &NativeAudioCheckpoint) -> Result<bool> {
+        match (self, state) {
+            (Self::Aac(d), NativeAudioCheckpoint::Aac(s)) => {
+                d.restore(s)?;
+                Ok(true)
+            }
+            (Self::Ps(d), NativeAudioCheckpoint::Ps(s)) => {
+                d.restore(s)?;
+                Ok(true)
+            }
+            _ => Ok(false),
         }
     }
 
     pub(crate) const SAMPLE_BYTES: usize = 4;
     pub(crate) fn new(track: &Track) -> Result<Self> {
         match &track.codec {
-            b"mp4a" => Ok(Self::Aac(
-                crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
-                    crate::codec::config::aac_specific_config(&track.configuration)?,
-                    track.sample_rate,
-                )?,
-            )),
+            b"mp4a" => {
+                let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
+                if crate::codec::config::AudioSpecificConfig::parse(asc)?.ps_present == Some(true) {
+                    Ok(Self::Ps(Box::new(
+                        crate::codec::aac_ps_native::NativePsAacDecoder::new(asc)?,
+                    )))
+                } else {
+                    Ok(Self::Aac(
+                        crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(
+                            asc,
+                            track.sample_rate,
+                        )?,
+                    ))
+                }
+            }
             b"raw " => {
                 if track.bit_depth != 8 || !(1..=64).contains(&track.channels) {
                     return Err(invalid(

@@ -25,10 +25,15 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         if numerator % denominator != 0 {
             return Err(invalid("MP4 audio timestamp is not aligned to a sample"));
         }
-        u64::try_from(numerator / denominator).map_err(|_| invalid("audio sample position overflow"))
+        u64::try_from(numerator / denominator)
+            .map_err(|_| invalid("audio sample position overflow"))
     };
     let presentation = Mp4AudioSchedule::new(
-        &track.edits, track.duration, track.timescale, reader.movie_timescale(), rate,
+        &track.edits,
+        track.duration,
+        track.timescale,
+        reader.movie_timescale(),
+        rate,
     )?;
     let timeline = presentation.sample_frames;
     let segments = presentation.segments;
@@ -57,10 +62,18 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     let mut packet = Vec::new();
     // One source-boundary checkpoint bounds retained state regardless of the
     // number of edits. The stream and configuration never change in this call.
-    let mut checkpoint: Option<(usize,u64,Option<u64>,Mp4AacCheckpoint)> = None;
+    let mut checkpoint: Option<(
+        usize,
+        u64,
+        Option<u64>,
+        Mp4AacCheckpoint,
+        Option<(u64, u64)>,
+    )> = None;
     for segment in segments {
         control.check()?;
-        if control.packet_limit_reached() { break; }
+        if control.packet_limit_reached() {
+            break;
+        }
         let segment_start = segment.presentation.start;
         let segment_end = segment.presentation.end;
         let source = segment.source_start;
@@ -91,40 +104,85 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             .checked_add(length)
             .ok_or_else(|| invalid("audio source edit overflow"))?;
         decoder.reset();
-        let mut first_sample=0;
-        let mut expected=None;
-        if let Some((index,start,previous,state)) = &checkpoint
-            && *start <= from && decoder.restore_checkpoint(state)? {
-                first_sample = *index;
-                expected = *previous;
-            }
-        let mut captured=false;
+        let mut first_sample = 0;
+        let mut expected = None;
+        let mut pending_window = None;
+        if let Some((index, start, previous, state, pending)) = &checkpoint
+            && *start <= from
+            && decoder.restore_checkpoint(state)?
+        {
+            first_sample = *index;
+            expected = *previous;
+            pending_window = *pending;
+        }
+        let mut captured = false;
         let mut written = 0u64;
-        for sample_index in first_sample..track.samples.len() {
+        for sample_index in first_sample..=track.samples.len() {
             control.check()?;
-            if control.packet_limit_reached() { break; }
-            let sample = track
-                .samples
-                .get(sample_index)
-                .ok_or_else(|| invalid("missing audio sample"))?;
-            let start = sample_position(
-                u64::try_from(sample.pts).map_err(|_| invalid("negative audio timestamp"))?,
-            )?;
-            let duration = sample_position(u64::from(sample.duration))?;
-            if expected.is_some_and(|value| value != start) {
-                return Err(invalid("non-contiguous MP4 audio timeline"));
-            }
-            if start >= to {
-                break;
-            }
-            if !captured && start.checked_add(duration).ok_or_else(||invalid("audio timestamp overflow"))?>from {
-                if let Some(state) = decoder.checkpoint() {
-                    checkpoint=Some((sample_index,start,expected,state));
+            let terminal = sample_index == track.samples.len() || control.packet_limit_reached();
+            let (start, duration, samples) = if terminal {
+                let Some(samples) = decoder.finish_delayed()? else {
+                    break;
+                };
+                let (start, duration) = pending_window
+                    .take()
+                    .ok_or_else(|| invalid("delayed MP4 audio has no source window"))?;
+                (start, duration, samples)
+            } else {
+                let sample = track
+                    .samples
+                    .get(sample_index)
+                    .ok_or_else(|| invalid("missing audio sample"))?;
+                let start = sample_position(
+                    u64::try_from(sample.pts).map_err(|_| invalid("negative audio timestamp"))?,
+                )?;
+                let duration = sample_position(u64::from(sample.duration))?;
+                if expected.is_some_and(|value| value != start) {
+                    return Err(invalid("non-contiguous MP4 audio timeline"));
                 }
-                captured=true;
+                if start >= to
+                    && (!decoder.delayed() || pending_window.is_none_or(|(at, _)| at >= to))
+                {
+                    break;
+                }
+                if !captured
+                    && start
+                        .checked_add(duration)
+                        .ok_or_else(|| invalid("audio timestamp overflow"))?
+                        > from
+                {
+                    if let Some(state) = decoder.checkpoint() {
+                        checkpoint = Some((sample_index, start, expected, state, pending_window));
+                    }
+                    captured = true;
+                }
+                expected = Some(
+                    start
+                        .checked_add(duration)
+                        .ok_or_else(|| invalid("audio timestamp overflow"))?,
+                );
+                reader.read_packet(index, sample_index, &mut packet)?;
+                let samples = decoder.decode_delayed(&packet)?;
+                control.packet(packet.len())?;
+                if decoder.delayed() {
+                    let previous = pending_window.replace((start, duration));
+                    let Some(samples) = samples else {
+                        continue;
+                    };
+                    let (start, duration) =
+                        previous.ok_or_else(|| invalid("delayed MP4 source identity mismatch"))?;
+                    (start, duration, samples)
+                } else {
+                    (
+                        start,
+                        duration,
+                        samples.ok_or_else(|| invalid("immediate MP4 audio returned no PCM"))?,
+                    )
+                }
+            };
+            if !samples.len().is_multiple_of(usize::from(channels)) {
+                return Err(invalid("invalid MP4 decoded PCM stride"));
             }
-            reader.read_packet(index, sample_index, &mut packet)?;
-            let samples = decoder.decode(&packet)?;
             let frames = (samples.len() / usize::from(channels)) as u64;
             if duration == 0 || duration > frames {
                 return Err(invalid(
@@ -134,11 +192,6 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             // The container assigns a presentation window to every packet.
             // Short windows trim decoded padding even in the interior; decoder
             // overlap state still consumes the complete compressed packet.
-            expected = Some(
-                start
-                    .checked_add(duration)
-                    .ok_or_else(|| invalid("audio timestamp overflow"))?,
-            );
             let first = from.saturating_sub(start).min(duration) as usize;
             let last = to.saturating_sub(start).min(duration) as usize;
             for value in
@@ -148,7 +201,9 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             }
             written += last.saturating_sub(first) as u64;
             stats.decoded_frames += 1;
-            control.packet(packet.len())?;
+            if written == length || terminal {
+                break;
+            }
         }
         if written != length && !control.packet_limit_reached() {
             return Err(invalid("audio edit extends outside available samples"));

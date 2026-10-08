@@ -1,7 +1,10 @@
 //! Owned MP4 AAC/ALAC/PCM/IMA4 presentation decoding, including silence and repeated edits.
-use crate::owned_aac::AacCheckpoint as Mp4AacCheckpoint;
-use crate::owned_matroska_audio::{invalid, DecodeProgress};
+pub(crate) enum Mp4AacCheckpoint {
+    Aac(crate::owned_aac::AacCheckpoint),
+    Ps(crate::owned_aac::aac_ps_native::Checkpoint),
+}
 pub use crate::owned_matroska_audio::{AudioDecodeStats, Error};
+use crate::owned_matroska_audio::{DecodeProgress, invalid};
 use crate::owned_mp4::Mp4Reader as Mp4TimelineReader;
 use crate::owned_mp4_audio_schedule::AudioTimeline as Mp4AudioSchedule;
 use fvid_control::CopyOptions;
@@ -17,6 +20,7 @@ impl From<crate::owned_mp4::Error> for Error {
 }
 pub(crate) enum Mp4TimelineDecoder {
     Aac(crate::owned_aac::NativeAacDecoder),
+    Ps(Box<crate::owned_aac::aac_ps_native::NativePsAacDecoder>),
     Alac(crate::owned_alac::AlacDecoder),
     Pcm(crate::owned_pcm_decoder::PcmDecoder),
     Ima4(crate::owned_ima4::Ima4Decoder),
@@ -26,26 +30,45 @@ pub(crate) enum Mp4TimelineDecoder {
 impl Mp4TimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
     pub(crate) fn checkpoint(&self) -> Option<Mp4AacCheckpoint> {
-        if let Self::Aac(d) = self {
-            Some(d.checkpoint())
-        } else {
-            None
+        match self {
+            Self::Aac(d) => Some(Mp4AacCheckpoint::Aac(d.checkpoint())),
+            Self::Ps(d) => Some(Mp4AacCheckpoint::Ps(d.checkpoint())),
+            _ => None,
         }
     }
     pub(crate) fn restore_checkpoint(&mut self, state: &Mp4AacCheckpoint) -> Result<bool> {
-        if let Self::Aac(d) = self {
-            d.restore(state)?;
-            Ok(true)
-        } else {
-            Ok(false)
+        match (self, state) {
+            (Self::Aac(d), Mp4AacCheckpoint::Aac(s)) => {
+                d.restore(s)?;
+                Ok(true)
+            }
+            (Self::Ps(d), Mp4AacCheckpoint::Ps(s)) => {
+                d.restore(s)?;
+                Ok(true)
+            }
+            _ => Ok(false),
         }
     }
 
     pub(crate) fn new(track: &crate::owned_mp4::Track) -> Result<Self> {
         match &track.codec {
-            b"mp4a" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new_with_output_rate(
-                crate::owned_codec_config::aac_specific_config(&track.configuration)?, track.sample_rate,
-            )?)),
+            b"mp4a" => {
+                let asc = crate::owned_codec_config::aac_specific_config(&track.configuration)?;
+                if crate::owned_aac::config::AudioSpecificConfig::parse(asc)?.ps_present
+                    == Some(true)
+                {
+                    Ok(Self::Ps(Box::new(
+                        crate::owned_aac::aac_ps_native::NativePsAacDecoder::new(asc)?,
+                    )))
+                } else {
+                    Ok(Self::Aac(
+                        crate::owned_aac::NativeAacDecoder::new_with_output_rate(
+                            asc,
+                            track.sample_rate,
+                        )?,
+                    ))
+                }
+            }
             b"alac" => {
                 if track.configuration.len() < 24
                     || u32::from_be_bytes(track.configuration[20..24].try_into().unwrap())
@@ -91,6 +114,7 @@ impl Mp4TimelineDecoder {
     pub(crate) fn sample_rate(&self) -> u32 {
         match self {
             Self::Aac(d) => d.sample_rate(),
+            Self::Ps(d) => d.sample_rate(),
             Self::Alac(d) => d.sample_rate(),
             Self::Pcm(d) => d.sample_rate(),
             Self::Ima4(d) => d.sample_rate(),
@@ -101,6 +125,7 @@ impl Mp4TimelineDecoder {
     pub(crate) fn channels(&self) -> u16 {
         match self {
             Self::Aac(d) => u16::from(d.channels()),
+            Self::Ps(d) => u16::from(d.channels()),
             Self::Alac(d) => d.channels(),
             Self::Pcm(d) => d.channels(),
             Self::Ima4(d) => d.channels(),
@@ -111,29 +136,51 @@ impl Mp4TimelineDecoder {
     pub(crate) fn channel_mask(&self) -> u32 {
         match self {
             Self::Aac(d) => d.channel_mask(),
+            Self::Ps(d) => d.channel_mask(),
             Self::ImaWav(d) => {
                 crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
             }
-            Self::MsAdpcm(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
-            Self::Ima4(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
-            Self::Pcm(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
-            Self::Alac(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
+            Self::MsAdpcm(d) => {
+                crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
+            }
+            Self::Ima4(d) => {
+                crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
+            }
+            Self::Pcm(d) => {
+                crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
+            }
+            Self::Alac(d) => {
+                crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
+            }
         }
     }
     fn reset(&mut self) {
-        if let Self::Aac(d) = self {
-            d.reset();
+        match self {
+            Self::Aac(d) => d.reset(),
+            Self::Ps(d) => d.reset(),
+            _ => {}
         }
     }
-    fn decode(&mut self, bytes: &[u8]) -> Result<Vec<f32>> {
+    fn delayed(&self) -> bool {
+        matches!(self, Self::Ps(_))
+    }
+    fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
         match self {
-            Self::Aac(d) => Ok(d.decode(bytes)?),
-            Self::Alac(d) => Ok(d.decode_pcm(bytes)?),
-            Self::Pcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
-            Self::Ima4(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
-            Self::ImaWav(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
-            Self::MsAdpcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
+            Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+            _ => Ok(None),
         }
+    }
+    fn decode_delayed(&mut self, bytes: &[u8]) -> Result<Option<Vec<f32>>> {
+        let pcm = match self {
+            Self::Ps(d) => return Ok(d.decode(bytes)?.map(|f| f.pcm)),
+            Self::Aac(d) => d.decode(bytes)?,
+            Self::Alac(d) => d.decode_pcm(bytes)?,
+            Self::Pcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
+            Self::Ima4(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
+            Self::ImaWav(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
+            Self::MsAdpcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
+        };
+        Ok(Some(pcm))
     }
 }
 pub(crate) fn mp4_audio_index<R: Read + Seek>(
@@ -171,10 +218,11 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         b"mp4a" => {
             // Decoder, checkpoint and restore scratch; includes SBR state and DSP.
             crate::owned_aac::stream::decode_config_admission_bytes(
-                crate::owned_codec_config::aac_specific_config(&track.configuration)?, track.sample_rate,
+                crate::owned_codec_config::aac_specific_config(&track.configuration)?,
+                track.sample_rate,
             )?
-                .checked_mul(3)
-                .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?
+            .checked_mul(3)
+            .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?
         }
         b"alac" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
             &track.configuration,
@@ -266,11 +314,13 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     // each coded byte into at most two f32 samples. A factor of ten covers output together
     // with geometric growth of the reusable encoded packet buffer.
     add(largest_packet
-        .checked_mul(if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
-            10
-        } else {
-            2
-        })
+        .checked_mul(
+            if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
+                10
+            } else {
+                2
+            },
+        )
         .ok_or_else(overflow)?)?;
     if estimated > limit {
         return Err(invalid(&format!(
@@ -404,9 +454,16 @@ mod precise {
         fn restore_checkpoint(&mut self, _: &Mp4AacCheckpoint) -> Result<bool> {
             Ok(false)
         }
-        fn decode(&mut self, bytes: &[u8]) -> Result<Vec<f64>> {
+        fn delayed(&self) -> bool {
+            false
+        }
+        fn finish_delayed(&mut self) -> Result<Option<Vec<f64>>> {
+            Ok(None)
+        }
+        fn decode_delayed(&mut self, bytes: &[u8]) -> Result<Option<Vec<f64>>> {
             self.0
                 .decode_pcm_f64(bytes)
+                .map(Some)
                 .map_err(|e| invalid(&e.to_string()))
         }
     }

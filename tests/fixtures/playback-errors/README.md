@@ -1725,3 +1725,24 @@ gap positions derive directly from original timestamps and first-source origin.
 and accepts every PCM sample, gap, interval and accepted-packet tail. It also
 checks root reader byte equality, public WAVE export and admission before output.
 Ordinary tests invoke neither generation, codec executables nor network.
+
+
+## MP4 PS export repeated source and queued checkpoints
+
+`generate_aac_ps_mp4_export_fixtures.py` writes
+`he-aac-ps-export-repeat-{960,1024}-synthetic.mp4` and
+`aac-ps-mp4-export-oracles.json`. Original authored AVC/SCE/SBR/PS packets
+are reused with silence and two 3200-sample ranges starting at source 1920;
+these ranges require the last queued packet at source EOF. References point
+to the independent DSP stereo oracle, not decoder-generated PCM.
+`he_aac_ps_mp4_export` reproduces the pre-fix PS synthesis refusal and accepts
+all output PCM, selected intervals, accepted packet-limit tail and public WAV.
+Repeated ranges exercise retained decoder/pending-window checkpoints. Existing
+original unequal-window fixtures additionally prove source duration/PTS and
+real lookahead beyond early interval endpoints. Root reader output must match
+owned export byte-for-byte. Generation is offline and never run by tests.
+
+The MP4 export suite also reuses the original worker source-gap MP4s to assert
+the exact invalid-range refusal only after pending EOF PCM is written to the
+caller-owned raw output. This is a refusal test for an invalid timeline, distinct
+from the valid edited/unequal-window playback and export acceptance tests.

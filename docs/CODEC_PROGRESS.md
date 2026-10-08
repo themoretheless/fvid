@@ -6771,5 +6771,39 @@ These are caller-selected test limits, not an unconditional player cap.
 Validation: target export acceptance passed; full owned media library 432 passed
 and 1 existing ignored, full offline player library 906 passed and 23 existing
 ignored. Three new assets regenerate byte-identically; generation is offline
-and separate from tests. MP4 PS exports, unhinted PS, nonzero-core startup PCM
+and separate from tests. MP4 PS exports are qualified below; unhinted PS, nonzero-core startup PCM
 and other codec/profile gaps remain unqualified.
+
+
+## Owned MP4 delayed PS PCM/WAV export with edits and checkpoints
+
+MP4 export dispatches declared PS to the owned delayed decoder. Typed AAC/PS
+checkpoints retain decoder histories and queued PCM together with pending source
+window metadata in the timeline checkpoint. Restoring a repeated source range
+therefore preserves the previous packet's PTS/duration as well as its lookahead.
+Both root native reader and owned media export use this timeline; f64 PCM
+retains its immediate decoder. PS state is heap-owned; aggregate MP4 admission
+charges the existing decoder/checkpoint/restore estimate including PS reserves.
+
+Source EOF and an accepted-input packet limit drain the pending frame. A selected
+range that ends before source EOF reads one real lookahead packet when required,
+presents only the original queued window, and drops out-of-range queued output
+at the next range reset. Container windows can trim complete decoded packet
+padding even internally; unequal-window acceptance checks every PCM sample.
+
+Two new original short AVC+PS MP4s present silence, a source range reaching the
+last queued packet, a repeated range and trailing silence. They reproduce the
+old exact PS synthesis refusal. Acceptance compares full independent stereo PCM,
+interval selection, accepted three-packet tail, controlled admission, root reader
+byte equality and public WAVE export. Existing authored unequal-window MP4s
+add full EOF and early intervals requiring real lookahead beyond selection.
+
+This qualifies the tested declared-PS MP4 export route, not full HE-AAC v2
+conformance. Nonzero-core PS startup, unhinted discovery, missing whole SBR FIL,
+coupling/PCE and other codec/profile tools remain separate work.
+
+Validation: three MP4 export regressions passed, including exact invalid-source
+refusal after all pending EOF PCM. Matroska export acceptance still passed.
+Full owned media library 432 passed / 1 existing ignored; full offline player
+library 906 passed / 23 existing ignored. Three new MP4 assets regenerate
+byte-identically; Python syntax, Rust formatting and diff checks pass.

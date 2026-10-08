@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-export-repeat-960-synthetic.mp4",
+      "reference": 13,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "a2acbc1fdf15e5e43b84f97603d6facf0ef27a1ba57561a6b8135240e50b5eb6"
+    },
+    {
+      "file": "he-aac-ps-export-repeat-1024-synthetic.mp4",
+      "reference": 5,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "467aff77895d2d916de487c1ca15bb04b4d038919f2cc20924f611cc11c8036a"
+    }
+  ]
+}

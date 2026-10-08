@@ -343,7 +343,7 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
 use crate::container::mp4::Mp4Reader as Mp4TimelineReader;
 use crate::native_audio_decoder::PacketPcmDecoder as Mp4TimelineDecoder;
 use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
-use crate::codec::aac_native::AacCheckpoint as Mp4AacCheckpoint;
+use crate::native_audio_decoder::NativeAudioCheckpoint as Mp4AacCheckpoint;
 include!("../crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs");
 
 /// Decode a contiguous Matroska AAC stream, discarding codec delay and per-block
