@@ -815,3 +815,17 @@ and source speaker mask, and rejects low controlled budgets before PCM output.
 No raw ASC or timestamps are rewritten at runtime. Output clock changes and
 PS playback without SBR fills remain unqualified; the prior implicit-PS export
 limitations are superseded only for the tested MP4 and Matroska geometries.
+
+Implicit-PS MP4 presentation geometry (2026-10-09): real worker regression on
+original mono-metadata LC/SBR 960/1024 video fixtures reproduced two distinct
+failures: EOF attempted on a freshly reset in-band candidate after the edited
+source range had already completed, and packet presentation reported 1024
+frames where negotiated stereo PCM had 512. Completed ranges now suppress
+codec EOF drain while retaining source validation; silence allocation and both edit and no-edit PCM
+trim use negotiated channels. Four additional no-edit fixtures isolate the
+ordinary presentation branch. Worker acceptance compares all rendered bytes to
+independently qualified export, verifies contiguous stereo timestamps, source
+EOF, seeks inside both ranges and silence, packet-boundary seek for no-edit
+files, and rewind. Codec EOF/refusal checks
+remain enabled for actual pending source output. Output-clock changes are not
+qualified by this geometry fix.

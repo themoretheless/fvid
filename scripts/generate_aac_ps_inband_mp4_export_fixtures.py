@@ -19,6 +19,12 @@ def rewrite(tag,body,setup):
    body=body[:8]+box(b'mp4a',bytes(entry)+box(b'esds',esds))
  return box(tag,body)
 
+def without_edits(tag,body):
+ if tag==b'edts':return b''
+ if tag in [b'moov',b'trak',b'mdia',b'minf',b'stbl']:
+  body=b''.join(without_edits(k,p) for k,p in boxes(body))
+ return box(tag,body)
+
 def main():
  source=json.loads((DEST/'aac-ps-mp4-export-oracles.json').read_text());out=[]
  for c in source['cases']:
@@ -30,7 +36,9 @@ def main():
    data=b''.join(rewrite(k,p,setup) for k,p in outer)
    name=f'he-aac-ps-inband-export-{kind.lower()}-{size}-synthetic.mp4'
    (DEST/name).write_bytes(data)
-   row=dict(c);row.update(file=name,kind=kind,asc=setup.hex(),sha256=hashlib.sha256(data).hexdigest());out.append(row)
+   unedited=name.replace('inband-export','inband-unedited')
+   plain=b''.join(without_edits(k,p) for k,p in boxes(data));(DEST/unedited).write_bytes(plain)
+   row=dict(c);row.update(file=name,kind=kind,asc=setup.hex(),sha256=hashlib.sha256(data).hexdigest(),no_edit_file=unedited,no_edit_sha256=hashlib.sha256(plain).hexdigest());out.append(row)
  (DEST/'aac-ps-inband-mp4-export-oracles.json').write_text(json.dumps(dict(cases=out),indent=2)+'\n')
  print('original implicit PS MP4 exports:',len(out))
 if __name__=='__main__':main()

@@ -316,7 +316,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             let source=segment.source_start.ok_or_else(||invalid("decoded AAC inside silence edit"))?;
             let rate=u128::from(track.sample_rate);let scale=u128::from(track.timescale);
             let start=(source_pts.max(0) as u128*rate/scale) as u64;
-            let stride=usize::from(track.channels)*4;
+            let stride=usize::from(self.channels())*4;
             if stride==0 || !packet.data.len().is_multiple_of(stride) {return Err(invalid("invalid AAC PCM stride"));}
             let frames=packet.data.len()/stride;
             let wanted=source.checked_add(cursor-segment.presentation.start).ok_or_else(||invalid("AAC edit source overflow"))?;
@@ -345,7 +345,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         } else { (0, (u128::from(track.duration) * rate).div_ceil(scale)) };
         let media_end = media_start.checked_add(length).ok_or_else(|| invalid("MP4 audio edit overflow"))?;
         let source_start = i128::from(source_pts) * i128::from(track.sample_rate) / i128::from(track.timescale);
-        let stride = usize::from(track.channels).checked_mul(4).filter(|n| *n != 0).ok_or_else(|| invalid("invalid AAC PCM stride"))?;
+        let stride = usize::from(self.channels()).checked_mul(4).filter(|n| *n != 0).ok_or_else(|| invalid("invalid AAC PCM stride"))?;
         if !packet.data.len().is_multiple_of(stride) { return Err(invalid("unaligned AAC PCM buffer")); }
         let frames = packet.data.len()/stride;
         let floor = (self.presentation_floor.max(0) as u128 * rate).div_ceil(scale).max(media_start);
@@ -409,7 +409,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         if source.is_none() {
             let frames=(timeline.segments[index].presentation.end-cursor).min(1024);
-            let stride=usize::from(self.track().channels)*4;
+            let stride=usize::from(self.channels())*4;
             let data=crate::buffer(frames as usize*stride)?;
             self.edit_cursor.set(cursor+frames);
             return Ok(Some(AudioStep::Pcm(AudioPacket {data,pts:cursor,timebase_num:1,timebase_den:self.track().sample_rate})));

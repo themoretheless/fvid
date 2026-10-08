@@ -217,7 +217,14 @@ impl Worker {
         let step = match self.stream.next_step() {
             Ok(Some(p)) => p,
             Ok(None) => {
-                if !self.stream.drain_decoded_at_eof() { self.decoder.reset(); }
+                if !self.stream.drain_decoded_at_eof() {
+                    self.decoder.reset();
+                    self.ended = true;
+                    return match self.stream.validate_eof() {
+                        Ok(()) => (Some(AudioEvent::Ended(self.generation)), Duration::ZERO),
+                        Err(error) => (Some(AudioEvent::Error(error.to_string())), Duration::ZERO),
+                    };
+                }
                 return match self.decoder.finish_packet() {
                     Ok(Some(frame)) => self.present_frame(frame),
                     Ok(None) => {
@@ -1090,6 +1097,33 @@ mod ps_edit_worker_tests {
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
             check(0);
             for request in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.handle(Command::Seek(request));run(&mut worker);check(request as usize);}
+            captured.lock().unwrap().clear();worker.handle(Command::Rewind);run(&mut worker);check(0);
+        }
+    }
+    #[test]
+    fn implicit_ps_mono_metadata_edits_seek_and_rewind_use_negotiated_stereo_stride() {
+        for edited in [
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-export-lc-1024-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-export-lc-960-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-export-sbr-1024-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-export-sbr-960-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-unedited-lc-1024-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-unedited-lc-960-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-unedited-sbr-1024-synthetic.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-inband-unedited-sbr-960-synthetic.mp4").as_slice(),
+        ] {
+            let mut expected = vec![];
+            crate::native_media::decode_mp4_aac_pcm(edited, &mut expected).unwrap();
+            let total=expected.len()/8;assert!(matches!(total,5760|6144|9600));
+            let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(edited),Default::default()).unwrap();
+            let has_edits=!stream.track().edits.is_empty();
+            assert_eq!(stream.channels(),2);
+            let decoder=stream.make_decoder().unwrap();
+            let captured=Arc::new(Mutex::new(Vec::new()));let (_,commands)=sync_channel(1);let (events,_)=sync_channel(1);
+            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
+            run(&mut worker);check(0);
+            for request in [4000,(total*2/3) as i64,(total-480) as i64,0] {captured.lock().unwrap().clear();worker.handle(Command::Seek(request));run(&mut worker);let landed=if has_edits {request as usize} else {request as usize/(total/3)*(total/3)};check(landed);}
             captured.lock().unwrap().clear();worker.handle(Command::Rewind);run(&mut worker);check(0);
         }
     }
