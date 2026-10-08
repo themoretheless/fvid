@@ -4146,3 +4146,39 @@ retaining delta-LF across tiles caused a pixel mismatch on the reversed-period
 case. Each controlled mutation was restored; canonical and verification
 production sources match. The focused restored run across all 77 delta-LF fixtures passed offline. This qualifies the saved accumulation/reset cases,
 not full AV1 conformance or its remaining unsupported tools.
+
+## Native AV1 quantization matrices in progress
+
+Native coefficient reconstruction now applies the normative per-coefficient
+quantizer weight with rounding before multiplying the decoded coefficient.
+Lossless segments, level 15 and identity/one-dimensional transform types
+bypass matrix adjustment. Large transform shapes use the specified 32-sized
+coefficient layouts and matrix offsets. The saved matrix data contains 100320
+bytes generated from the AV1 specification tables; source/data SHA-256 values
+are embedded in the private Rust module. No runtime dependency is added.
+
+The owned encoder generator saves 48 single-frame 4:2:0 streams covering all
+16 coded levels at 8/10/12 bits with nonzero residuals, palette disabled and
+loop filtering disabled to isolate reconstruction. Both independent libaom
+and dav1d decoders agree; all 144 stream/pixel/container hashes were verified.
+The pre-fix test independently parsed the intended matrix levels and
+reproduced the precise native refusal on every stream. The refusal was then
+replaced with pixel acceptance; its initial 48-case run passed. Ignoring the
+weights in the verification copy caused a pixel mismatch on the level-0
+owned stream, and the source was restored to match canonical code.
+
+Final reset/finish and WebM replay/rewind/seek acceptance passed for all 48
+streams; all 35 core AV1 tests also passed. The full integration regression passed: 53 tests across 27 AV1 suites. Inter frames, independently selected plane levels,
+lossless/identity bypass and rectangular transform combinations need
+additional owned qualification; the current streams do not prove full AV1
+conformance or the remaining codec tools.
+
+An additional 48 owned 64x64 streams fix partition sizes 4/8/16/64 with
+largest-transform selection and levels 0/7/14/15 across all three depths.
+High-frequency perturbations ensure small transforms contain AC residuals.
+Both independent references agree. Temporary reconstruction diagnostics
+confirmed actual weighted nonzero AC coefficients at square sizes 4, 8, 16,
+32 and 64, including chroma and the normative capped layout for 64x64.
+The diagnostics were removed and sources matched canonical code. All 96
+matrix streams passed restored pixel/reset/WebM replay/rewind/seek checks;
+the extra block-suite test passed separately alongside the full 53-test run.

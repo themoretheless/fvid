@@ -11,6 +11,8 @@ use crate::{invalid, Result};
 mod inter;
 #[path = "av1_palette.rs"]
 mod palette;
+#[path = "av1_quant_matrix.rs"]
+mod quant_matrix;
 
 #[derive(Clone, Debug)]
 pub struct Plane {
@@ -152,10 +154,8 @@ pub(crate) fn decode(
         ));
     }
 
-    if h.quant.matrix.is_some() || h.restoration_types != [0; 3] {
-        return Err(crate::unsupported(
-            "AV1 quantization matrices or in-loop filtering not implemented",
-        ));
+    if h.restoration_types != [0; 3] {
+        return Err(crate::unsupported("AV1 loop restoration not implemented"));
     }
     // Segment reference/skip/global tools use pre-skip IDs in block decoding.
     if h.intrabc || h.superres_denom != 8 {
@@ -1629,12 +1629,26 @@ impl Decoder<'_> {
                 0
             };
             let limit = 1i64 << (7 + self.s.color.depth);
+            let matrix = if kind < 9 && !self.h.lossless[self.current_segment] {
+                self.h
+                    .quant
+                    .matrix
+                    .map(|levels| levels[p])
+                    .filter(|level| *level < 15)
+                    .map(|level| quant_matrix::weights(level, p > 0, size))
+            } else {
+                None
+            };
             // Rows of the coefficient block map one to one onto rows of the
             // residual, so walking them keeps the store sequential instead of
             // dividing the linear coefficient index back out per sample.
             for (r, row) in q.chunks(tw).enumerate() {
                 for (c, value) in row.iter().enumerate() {
-                    let dq = i64::from(*value) * i64::from(if r == 0 && c == 0 { dc } else { ac });
+                    let mut step = if r == 0 && c == 0 { dc } else { ac };
+                    if let Some(matrix) = matrix {
+                        step = (step * i32::from(matrix[r * tw + c]) + 16) >> 5;
+                    }
+                    let dq = i64::from(*value) * i64::from(step);
                     // The magnitude is truncated towards zero, which for a
                     // power of two is a shift of the absolute value.
                     dequant[r * w + c] = (dq.signum() * ((dq.abs() & 0xffffff) >> shift))
