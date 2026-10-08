@@ -6201,8 +6201,35 @@ discovery after a valid silent LC block retains the same QMF contributions
 as the fixed-clock decoder. Original ADTS framing of the paired synthetic
 video's packets is decoded through the new discovery API and matches its PCM.
 
-The high-level ADTS streaming exporter/player has not yet switched to this API.
-It must negotiate one output clock before publishing PCM and replay any LC
-prefix after late discovery, with bounded retained storage and correct packet
-limits/interval semantics. Automatic stereo/implicit downsampled signalling,
-PS and broader codec gaps remain open.
+The high-level ADTS streaming exporter/player now negotiates one output clock
+before publishing PCM, including late mono/stereo SBR discovery. It spools
+the selected prefix to a bounded disk stream and replays that prefix through
+the fixed-clock decoder; replay does not double-count source progress. Original
+delayed/stereo ADTS and paired MP4 fixtures cover fractional ranges, packet
+limits, memory admission, WAVE headers, resampling, plans and loudness exports
+(`tests/native_adts_sbr.rs`). Implicit downsampled signalling, PS and broader
+codec gaps remain open.
+
+### Owned parametric stereo syntax (2026-10-08)
+
+`owned_aac::aac_ps_data` and `aac_ps_huffman` implement the normative PS
+payload syntax with all six IID/ICC modes: 10/20/34 bands, both IID quantizers,
+both ICC mixing modes, 5/11/17 IPD/OPD bands, frequency/time deltas, retained
+headers, fixed/variable 0-4 envelopes, and nested escaped extension lengths.
+Mode fields survive disabled tools. Failed/truncated parsing commits neither
+reader position nor header state. SBR extension ID 2 routes to PS; the other
+SBR IDs consume the remaining fill area as specified in appendix A.
+
+All 242 normative words have an independent saved protocol oracle, exhaustive
+bit-truncation tests, and prefix/Kraft checks. Twenty-eight authored sequences
+cover 24/30/32 QMF slots and header continuity. Two original short MP4 videos
+contain explicit and implicit PS, with valid LC/SBR syntax and an independently
+verified second-packet CRC. `tests/he_aac_ps.rs` accepts their PS syntax and
+reproduces the exact pending synthesis refusals. Generation is offline and
+separate from ordinary tests; it uses no foreign codec or FFmpeg.
+
+This closes PS syntax, not HE-AACv2 playback. Delta reconstruction, parameter
+mapping/dequantization, hybrid filters, decorrelation, interpolated complex
+stereo mixing, PCM synthesis and stereo geometry/implicit PS negotiation still
+need implementation and stereo PCM acceptance references. The native player
+continues to refuse PS explicitly until those stages are implemented.

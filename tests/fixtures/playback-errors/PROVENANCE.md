@@ -2044,3 +2044,37 @@ or network is used. Ordinary tests read checked-in fixtures only. Acceptance
 covers output-clock negotiation, replay of the LC prefix with QMF history,
 fractional ranges, packet limits, memory admission, WAVE headers and resampling
 lookahead when requested output equals the ADTS core rate.
+
+### Parametric stereo syntax and HE-AACv2 synthesis reproductions
+
+`aac-ps-huffman-codewords.json` contains numeric protocol words only, from
+GOST R 53556.8-2013 appendix B tables B.17-B.21:
+https://allgosts.ru/33/170/gost_r_53556.8-2013 and the textual tables at
+https://meganorm.ru/mega_doc/norm/gost-r_gosudarstvennyj-standart/17/gost_r_53556_8-2013_natsionalnyy_standart_rossiyskoy.html.
+No foreign codec implementation is used. The FVid Rust prefix decoder and
+parser are original implementations of the normative syntax in tables 9-14.
+`scripts/generate_aac_ps_huffman_tables.py` explicitly generates the Rust
+numeric tables offline from the checked-in protocol words.
+
+`scripts/generate_aac_ps_fixtures.py` authors 28 original PS sequences in
+`aac-ps-syntax.bin/.json`: all six IID/ICC modes, coarse/fine quantization,
+Ra/Rb, 10/20/34 bands, 5/11/17 phase bands, frequency/time delta coding,
+24/30/32 QMF slots, fixed/variable borders, no-envelope reuse, header retention
+across tool disable/re-enable, escaped extension lengths and disabled phase.
+The JSON includes independently selected parameter deltas and bit boundaries.
+Ordinary tests only consume these saved assets and do not run any generator.
+
+`he-aac-ps-packets.bin` and `he-aac-ps-explicit-synthetic.mp4` /
+`he-aac-ps-implicit-synthetic.mp4` carry three original silent LC + authored
+noise-only SBR + PS packets. The second SBR payload has its own valid CRC.
+They reuse the authored AVC seed `avc-slice-lists-temporal.mp4`; only container
+structure is reused from `audio/aac-native-edit.m4a`, with ASC, audio packets,
+sample tables and edits all replaced. Hashes are recorded in `aac-ps-syntax.json`.
+No private video, frames, audio or parameter sets are used.
+
+These are acceptance fixtures for full PS *syntax*, not for stereo PCM.
+`tests/he_aac_ps.rs` proves the valid SBR and PS payloads parse, then asserts
+the exact still-pending synthesis errors for both explicit and implicit PS.
+The PCM acceptance expectations must replace those refusal assertions when
+real hybrid/decorrelation/mixing stereo DSP is connected. No duplicated mono
+output or unrelated parsing failure counts as HE-AACv2 playback acceptance.

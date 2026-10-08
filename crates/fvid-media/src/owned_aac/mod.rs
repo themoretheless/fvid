@@ -1,5 +1,8 @@
 //! Owned AAC-LC framing, decoding and transforms. No foreign decoder or libav.
 #![forbid(unsafe_code)]
+pub mod aac_ps_data;
+pub mod aac_ps_huffman;
+mod aac_ps_huffman_tables;
 pub mod aac_coupling;
 pub mod aac_imdct;
 pub mod aac_synthesis;
