@@ -1125,3 +1125,32 @@ also verified. Every layout/depth group must contain overlap on/off, full/limite
 range (preset sets), both chroma scaling modes (tools/custom), every AR lag
 (custom), and actual inherited parameters (tools). Ordinary tests run only FVid,
 reading checked-in artifacts, with no external codec or network invocation.
+
+### Full-chroma AV1 intrabc tile-boundary regression
+
+`generate_av1_chroma_intrabc_samples.py` generates 24 owned one-frame 769x257
+streams and 24 `--control` streams with intrabc disabled. Each set covers
+4:2:2/4:4:4, 8/10/12 bits, lossless/lossy and SB64/128 with two tile columns.
+Original periodic Y/U/V patterns and independent chroma ceil dimensions are
+specified by the generator; no private content or parameter sets are used.
+Stock aomenc generates streams and unmodified aomdec/dav1d must agree exactly
+on full-precision pixels. Odd 4:2:2 Y4M encoder sampling means a lossless golden
+need not equal the packed source pattern; `source_exact` records this distinction.
+It is not substituted for independent decoded-pixel agreement.
+
+The first 4:2:2/8-bit lossless/SB64 fixture reproduced the specific native error:
+`invalid AV1 intra block copy displacement at 113,31 size 1,1: [-992, 0]`.
+Its source top edge is legal at zero: the four-luma-pixel sub-8 chroma tile margin
+only applies along subsampled axes. AV1 `HasChroma` must also account for each
+axis independently. The owned fixture enables full acceptance after that fix;
+a direct unit test checks the exact displacement plus full-resolution and
+subsampled top/left boundaries. Normative source: AV1 bitstream semantics
+`is_mv_valid`, <https://aomediacodec.github.io/av1-spec/>.
+
+`tests/av1_chroma_intrabc.rs` checks headers/layout/depth, actual copying and
+sub-8 blocks, nonzero Y/U/V residuals, complete luma displacement parity coverage
+in each layout/depth group and actual chroma phases in every stream (horizontal
+half phases for 4:2:2, integral copies for 4:4:4). All native pixels, finish/reset,
+raw WebM, 20ms intervals, EOF rewind and sync seek replay are checked. Control
+streams must have no intrabc blocks/residuals/phases/parities. Generation is
+separate; ordinary tests invoke no codec process, FFmpeg or network.

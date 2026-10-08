@@ -58,8 +58,10 @@ pub struct Picture {
     /// Intra block copy blocks and nonzero residual transform counts.
     pub intrabc_blocks: u32,
     pub intrabc_sub8_blocks: u32,
-    /// Copy blocks by chroma half-sample phase: y*2+x.
+    /// Chroma-reference copy blocks by actual half-sample phase: y*2+x.
     pub intrabc_phases: [u32; 4],
+    /// Copy blocks by luma displacement parity: y*2+x, before chroma subsampling.
+    pub intrabc_displacement_parities: [u32; 4],
     pub intrabc_residual_blocks: [u32; 3],
     /// Sub-8 chroma groups with decoded intra neighbors: 4x4, 4xN, Nx4 luma.
     pub mixed_intra_chroma_groups: [u32; 3],
@@ -268,6 +270,7 @@ pub(crate) fn decode(
         intrabc_blocks: 0,
         intrabc_sub8_blocks: 0,
         intrabc_phases: [0; 4],
+        intrabc_displacement_parities: [0; 4],
         intrabc_residual_blocks: [0; 3],
         mixed_intra_chroma_groups: [0; 3],
         sub8_inter_chroma_groups: 0,

@@ -4997,3 +4997,33 @@ Validation: 48 AV1 release unit tests and nine offline integration tests pass,
 zero failures/ignored tests. Generator syntax, Rust formatting, all 468 artifact
 hashes and scoped diff checks pass. The new test binary links only system
 libSystem/libiconv, with no FFmpeg/libav or external codec linkage.
+
+### Full-chroma AV1 intrabc tile-boundary acceptance (2026-10-08)
+
+24 owned one-frame 769x257 intrabc streams and 24 disabled controls cover
+4:2:2/4:4:4, 8/10/12 bits, lossless/lossy, SB64/128 and two tile columns.
+The initial 4:2:2/8-bit lossless/SB64 fixture failed on displacement [-992,0]
+at MI [113,31], 4x4 luma: an obsolete 4:2:0-only chroma margin incorrectly
+rejected a legal zero top edge. `HasChroma` and sub-8 source margins now use
+each subsampling axis independently, as required by AV1 `is_mv_valid`. An exact
+unit regression checks that case plus the analogous full-resolution left edge.
+
+Actual decode covers 31,661 copy blocks, including 20,525 sub-8 blocks, with
+nonzero residual transform counts [2719,80061,80061] for Y/U/V. All source
+luma displacement parities are required in every layout/depth group; a single
+12-bit 4:4:4 lossless case does not select every parity and is not misreported
+as such. Each stream verifies actual chroma phases: both horizontal phases in
+4:2:2, only integral samples in 4:4:4. Phase statistics now count actual
+chroma-reference blocks; displacement parity is recorded separately.
+
+All pixels match independent unmodified libaom/dav1d goldens, including raw
+WebM, 20ms intervals, finish/reset, EOF rewind and sync seek inside the frame.
+Controls have zero copy/residual/phase/parity counters. All 144 artifact hashes
+are verified. Fixtures and generation remain separate from offline tests.
+Broader full-chroma inter combinations, layered streams and codec conformance
+outside these owned cases remain open.
+
+Final validation: 49 AV1 release unit tests and 15 selected offline integration
+tests passed, zero failures/ignored tests. Generator syntax, Rust formatting,
+all 144 artifact hashes and scoped diff checks pass. The intrabc test binary
+links only system libSystem/libiconv, with no external codec/libav linkage.

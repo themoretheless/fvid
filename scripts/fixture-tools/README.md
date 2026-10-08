@@ -47,3 +47,17 @@ python3 /path/to/fvid/scripts/generate_av1_chroma_grain_samples.py --show-existi
 The 156 owned streams cover 4:2:2/4:4:4 at 8/10/12 bits. Both grain-enabled
 oracles must agree. Offline tests check all pixels, per-layout/depth header
 coverage, reset and WebM timing/rewind/seek; generation remains separate.
+
+## Full-chroma intrabc fixtures
+
+Stock tools generate both acceptance and intrabc-disabled controls separately:
+
+```sh
+python3 /path/to/fvid/scripts/generate_av1_chroma_intrabc_samples.py --encoder /opt/homebrew/bin/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+python3 /path/to/fvid/scripts/generate_av1_chroma_intrabc_samples.py --control --encoder /opt/homebrew/bin/aomenc --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+```
+
+Each set has 24 one-frame streams at 769x257, SB64/128, two tile columns,
+lossless/lossy, 4:2:2/4:4:4 and 8/10/12 bits. Both unchanged decoders must agree.
+Offline acceptance includes exact pixels, actual copied blocks/chroma phases,
+source displacement parity coverage, residuals, reset and WebM rewind/seek.

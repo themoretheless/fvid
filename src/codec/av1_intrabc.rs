@@ -8,7 +8,7 @@ fn valid_source(
     mv: [i32; 2],
     tile: [usize; 4],
     sb128: bool,
-    chroma: bool,
+    chroma: [bool; 2],
 ) -> bool {
     if mv.iter().any(|v| v.abs() >= 16384 || v & 7 != 0) {
         return false;
@@ -20,8 +20,8 @@ fn valid_source(
     let top = y + mv[0] / 8;
     let right = left + w;
     let bottom = top + h;
-    if left - i32::from(chroma && w < 8) * 4 < x0
-        || top - i32::from(chroma && h < 8) * 4 < y0
+    if left - i32::from(chroma[0] && w < 8) * 4 < x0
+        || top - i32::from(chroma[1] && h < 8) * 4 < y0
         || right > x1
         || bottom > y1
     {
@@ -82,14 +82,16 @@ impl Decoder<'_> {
                 *value += if sign { -magnitude } else { magnitude };
             }
         }
-        let chroma = !self.s.color.monochrome && !(w == 1 && x & 1 == 0 || h == 1 && y & 1 == 0);
+        let [sub_x, sub_y] = self.s.color.subsampling;
+        let chroma = !self.s.color.monochrome
+            && !(sub_x && w == 1 && x & 1 == 0 || sub_y && h == 1 && y & 1 == 0);
         if !valid_source(
             [x, y],
             [w, h],
             mv,
             [self.x0, self.y0, self.x1, self.y1],
             self.s.superblock128,
-            chroma,
+            [chroma && sub_x, chroma && sub_y],
         ) {
             return Err(invalid(&format!(
                 "invalid AV1 intra block copy displacement at {x},{y} size {w},{h}: {mv:?}"
@@ -113,7 +115,12 @@ impl Decoder<'_> {
         };
         self.image.intrabc_blocks += 1;
         self.image.intrabc_sub8_blocks += u32::from(w == 1 || h == 1);
-        self.image.intrabc_phases[(((mv[0] / 8) & 1) * 2 + ((mv[1] / 8) & 1)) as usize] += 1;
+        let parity = [((mv[1] / 8) & 1) as usize, ((mv[0] / 8) & 1) as usize];
+        self.image.intrabc_displacement_parities[parity[1] * 2 + parity[0]] += 1;
+        if chroma {
+            self.image.intrabc_phases
+                [parity[1] * usize::from(sub_y) * 2 + parity[0] * usize::from(sub_x)] += 1;
+        }
         self.finish_motion_block(d, c, [x, y], block, false, None, None)
     }
 
@@ -178,16 +185,69 @@ impl Decoder<'_> {
 mod tests {
     use super::*;
     #[test]
+    fn sub8_source_tile_margin_only_applies_to_subsampled_axes() {
+        // Exact first failing owned 4:2:2 fixture block: top source edge is 0.
+        let tile = [0, 0, 128, 66];
+        assert!(valid_source(
+            [113, 31],
+            [1, 1],
+            [-992, 0],
+            tile,
+            false,
+            [true, false]
+        ));
+        assert!(valid_source(
+            [113, 31],
+            [1, 1],
+            [-992, 0],
+            tile,
+            false,
+            [false; 2]
+        ));
+        assert!(!valid_source(
+            [113, 31],
+            [1, 1],
+            [-992, 0],
+            tile,
+            false,
+            [true; 2]
+        ));
+        // Analogous left-edge case: full-resolution chroma is legal, 4:2:2 is not.
+        assert!(valid_source(
+            [80, 16],
+            [1, 1],
+            [0, -2560],
+            tile,
+            false,
+            [false; 2]
+        ));
+        assert!(!valid_source(
+            [80, 16],
+            [1, 1],
+            [0, -2560],
+            tile,
+            false,
+            [true, false]
+        ));
+    }
+    #[test]
     fn source_displacement_respects_tile_wavefront_and_integer_precision() {
         let tile = [0, 0, 96, 48];
-        assert!(valid_source([80, 0], [8, 8], [0, -2560], tile, false, true));
+        assert!(valid_source(
+            [80, 0],
+            [8, 8],
+            [0, -2560],
+            tile,
+            false,
+            [true; 2]
+        ));
         assert!(!valid_source(
             [80, 0],
             [8, 8],
             [0, -2048],
             tile,
             false,
-            true
+            [true; 2]
         ));
         assert!(!valid_source(
             [80, 0],
@@ -195,7 +255,7 @@ mod tests {
             [0, -2561],
             tile,
             false,
-            true
+            [true; 2]
         ));
         assert!(!valid_source(
             [80, 0],
@@ -203,17 +263,31 @@ mod tests {
             [0, -2560],
             [16, 0, 96, 48],
             false,
-            true
+            [true; 2]
         ));
-        assert!(valid_source([0, 16], [8, 8], [-512, 0], tile, false, true));
-        assert!(!valid_source([0, 0], [8, 8], [-512, 0], tile, false, true));
+        assert!(valid_source(
+            [0, 16],
+            [8, 8],
+            [-512, 0],
+            tile,
+            false,
+            [true; 2]
+        ));
+        assert!(!valid_source(
+            [0, 0],
+            [8, 8],
+            [-512, 0],
+            tile,
+            false,
+            [true; 2]
+        ));
         assert!(!valid_source(
             [80, 0],
             [8, 8],
             [0, -16384],
             tile,
             false,
-            true
+            [true; 2]
         ));
     }
 }
