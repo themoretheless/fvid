@@ -102,6 +102,8 @@ pub struct Frame {
     /// Increases with every frame handed to the window; the GPU uploads a
     /// frame once and skips repaints that show the same one.
     pub serial: u64,
+    /// Degrees clockwise the frame is turned away from upright.
+    pub rotation: u16,
 }
 
 pub enum Event {
@@ -211,17 +213,6 @@ fn into_pixels(
             Pixels::Rgb(rgb)
         }
     };
-    // The turn the container asked for, still owed to the planes: packed RGB
-    // reaches this thread already turned, shaped that way by the reader.
-    let pixels = match (pixels, rotation) {
-        (Pixels::Planar(planes, None), rotation) if rotation != 0 => {
-            Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)), None)
-        }
-        (Pixels::Packed(planes, None), rotation) if rotation != 0 => {
-            Pixels::Packed(Arc::new(planes.rotated(rotation)?), None)
-        }
-        (pixels, _) => pixels,
-    };
     let Some(grade) = grade.filter(|grade| !grade.is_identity()) else {
         return Ok(pixels);
     };
@@ -233,7 +224,12 @@ fn into_pixels(
         }
         Pixels::Packed(planes, _) => {
             let mut rgb = Vec::new();
-            planes.to_rgb(&mut rgb, budget)?;
+            if rotation != 0 {
+                let packed = planes.rotated(rotation)? ;
+                packed.to_rgb(&mut rgb, budget)?;
+            } else {
+                planes.to_rgb(&mut rgb, budget)?;
+            }
             grade.apply(&mut rgb);
             Ok(Pixels::Rgb(rgb))
         }
@@ -248,8 +244,15 @@ fn into_pixels(
             Ok(Pixels::Planar(planes, Some(Arc::clone(grade))))
         }
         Pixels::Planar(planes, _) => {
+            let turned;
+            let planes_ref = if rotation != 0 {
+                turned = rotate_planar8(&planes, rotation);
+                &turned
+            } else {
+                &planes
+            };
             let mut rgb = Vec::new();
-            planar8_to_rgb(&planes, &mut rgb, budget)?;
+            planar8_to_rgb(planes_ref, &mut rgb, budget)?;
             grade.apply(&mut rgb);
             Ok(Pixels::Rgb(rgb))
         }
@@ -357,6 +360,7 @@ impl Playback {
                                     pts,
                                     generation,
                                     serial,
+                                    rotation,
                                 })
                             }
                             Err(error) => Event::Error(error.to_string()),

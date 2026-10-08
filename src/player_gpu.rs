@@ -529,6 +529,7 @@ impl MetalEncoderRenderer {
             self.window,
             IDENTITY_ADJUST,
             grade,
+            self.gpu.rotation,
         );
         self.render(device, queue, output_size)
     }
@@ -550,6 +551,7 @@ impl MetalEncoderRenderer {
             self.window,
             IDENTITY_ADJUST,
             grade,
+            self.gpu.rotation,
         )?;
         self.render(device, queue, output_size)
     }
@@ -659,6 +661,7 @@ pub struct VideoGpu {
     planes: Option<Planes>,
     surface_mode: f32,
     rgb_source: Option<Arc<Vec<u8>>>,
+    rgb_staging: Vec<u8>,
     rotation: u16,
     /// The grade the shader reads, which travels with the bind group below.
     grid: Grid,
@@ -1088,6 +1091,7 @@ fn build_with_source(
         planes: None,
         surface_mode: 0.0,
         rgb_source: None,
+        rgb_staging: Vec::new(),
         rotation: 0,
         grid: Grid::empty(device),
         bind_group: None,
@@ -1439,6 +1443,7 @@ impl VideoGpu {
         window: [f32; 4],
         adjust: [f32; 5],
         grade: Option<&Arc<Grade>>,
+        rotation: u16,
     ) {
         self.upload_planes(
             device,
@@ -1454,6 +1459,7 @@ impl VideoGpu {
             window,
             adjust,
             grade,
+            rotation,
         );
     }
     #[allow(clippy::too_many_arguments)]
@@ -1466,6 +1472,7 @@ impl VideoGpu {
         window: [f32; 4],
         adjust: [f32; 5],
         grade: Option<&Arc<Grade>>,
+        rotation: u16,
     ) -> crate::Result<()> {
         let data = frame.plane_data()?;
         let [sx, sy] = frame
@@ -1489,6 +1496,7 @@ impl VideoGpu {
             window,
             adjust,
             grade,
+            rotation,
         );
         Ok(())
     }
@@ -1540,13 +1548,20 @@ impl VideoGpu {
         self.adjust = adjust;
         self.grid.set(device, queue, None);
         self.bind_planes(device, size, [1, 1]);
-        let rgba: Vec<u8> = rgb
-            .chunks_exact(3)
-            .flat_map(|p| [p[0], p[1], p[2], 255])
-            .collect();
+        let needed = size[0] * size[1] * 4;
+        if self.rgb_staging.len() < needed {
+            self.rgb_staging.resize(needed, 0);
+        }
+        let rgba = &mut self.rgb_staging[..needed];
+        for (src, dst) in rgb.chunks_exact(3).zip(rgba.chunks_exact_mut(4)) {
+            dst[0] = src[0];
+            dst[1] = src[1];
+            dst[2] = src[2];
+            dst[3] = 255;
+        }
         queue.write_texture(
             self.planes.as_ref().unwrap().textures[0].as_image_copy(),
-            &rgba,
+            rgba,
             wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(size[0] as u32 * 4),
@@ -1561,6 +1576,7 @@ impl VideoGpu {
         self.write_params(queue, 8, AvcColour::default(), window, adjust);
         Ok(())
     }
+    #[allow(clippy::too_many_arguments)]
     fn upload_planes(
         &mut self,
         device: &wgpu::Device,
@@ -1570,12 +1586,14 @@ impl VideoGpu {
         window: [f32; 4],
         adjust: [f32; 5],
         grade: Option<&Arc<Grade>>,
+        rotation: u16,
     ) {
         if self.surface_mode == 0.0
             && self.serial == serial
             && self.window == window
             && self.adjust == adjust
             && self.grid.holds(grade)
+            && self.rotation == rotation
         {
             return;
         }
@@ -1596,7 +1614,7 @@ impl VideoGpu {
         }
         self.surface_mode = 0.0;
         self.rgb_source = None;
-        self.rotation = 0;
+        self.rotation = rotation;
         self.grid.set(device, queue, grade);
         self.bind_planes(device, size, chroma);
         let planes = self.planes.as_ref().unwrap();
@@ -1871,6 +1889,7 @@ pub struct VideoCallback {
     /// frame kept its planes for: a grade whose grid the shader cannot carry
     /// was applied on the way here, and arrives as packed RGB with this `None`.
     pub grade: Option<Arc<Grade>>,
+    pub rotation: u16,
 }
 
 /// Display already graded RGB codes through the same custom shader as planar frames.
@@ -1937,6 +1956,7 @@ impl egui_wgpu::CallbackTrait for VideoCallback {
                 self.window,
                 self.adjust,
                 self.grade.as_ref(),
+                self.rotation,
             );
         }
         Vec::new()
@@ -1966,6 +1986,7 @@ pub struct PackedVideoCallback {
     pub window: [f32; 4],
     pub adjust: [f32; 5],
     pub grade: Option<Arc<Grade>>,
+    pub rotation: u16,
 }
 impl egui_wgpu::CallbackTrait for PackedVideoCallback {
     fn prepare(
@@ -1985,6 +2006,7 @@ impl egui_wgpu::CallbackTrait for PackedVideoCallback {
                 self.window,
                 self.adjust,
                 self.grade.as_ref(),
+                self.rotation,
             ) {
                 gpu.bind_group = None;
                 eprintln!("{error}");
@@ -3308,6 +3330,7 @@ mod tests {
             [0.0, 0.0, 1.0, 1.0],
             IDENTITY_ADJUST,
             None,
+            0,
         );
         assert_eq!(
             read_picture(&device, &queue, &gpu, 64, 64),
@@ -3444,6 +3467,7 @@ mod tests {
                         [0.0, 0.0, 1.0, 1.0],
                         IDENTITY_ADJUST,
                         None,
+                        0,
                     )
                     .unwrap();
                     serial += 1;
@@ -3481,6 +3505,7 @@ mod tests {
                         [0.0, 0.0, 1.0, 1.0],
                         IDENTITY_ADJUST,
                         Some(&grade),
+                        0,
                     )
                     .unwrap();
                     serial += 1;
@@ -3505,6 +3530,7 @@ mod tests {
                             [0.0, 0.0, 1.0, 1.0],
                             IDENTITY_ADJUST,
                             Some(&grade),
+                            0,
                         )
                         .unwrap();
                     let pixels = read_picture(&device, &queue, &custom, width, height);
@@ -3634,7 +3660,7 @@ mod tests {
                             for adjust in [IDENTITY_ADJUST, [1.1, 2.0, 0.9, 0.8, 0.1]] {
                                 serial += 1;
                                 gpu.upload_packed(
-                                    &device, &queue, &turned, serial, window, adjust, grade,
+                                    &device, &queue, &turned, serial, window, adjust, grade, 0,
                                 )
                                 .unwrap();
                                 let reference = read_picture(
@@ -3673,7 +3699,7 @@ mod tests {
                                         .unwrap()
                                 );
                                 gpu.upload_packed(
-                                    &device, &queue, &turned, serial, window, adjust, grade,
+                                    &device, &queue, &turned, serial, window, adjust, grade, 0,
                                 )
                                 .unwrap();
                                 assert_eq!(
@@ -3771,7 +3797,7 @@ mod tests {
         adjust: [f32; 5],
     ) -> Vec<u8> {
         let (width, height) = (frame.width, frame.height);
-        gpu.upload(device, queue, frame, 0, [0.0, 0.0, 1.0, 1.0], adjust, grade);
+        gpu.upload(device, queue, frame, 0, [0.0, 0.0, 1.0, 1.0], adjust, grade, 0);
         read_picture(device, queue, gpu, width, height)
     }
     fn read_picture(
@@ -4309,6 +4335,7 @@ mod tests {
                     [0.0, 0.0, 1.0, 1.0],
                     IDENTITY_ADJUST,
                     None,
+                    0,
                 );
                 let plain = read_picture(&device, &queue, &gpu, 64, 64);
                 let mut expected: Vec<u8> = plain
@@ -4324,6 +4351,7 @@ mod tests {
                     [0.0, 0.0, 1.0, 1.0],
                     IDENTITY_ADJUST,
                     Some(&grade),
+                    0,
                 );
                 let shown = read_picture(&device, &queue, &gpu, 64, 64);
                 let worst = worst_between(&shown, &expected);

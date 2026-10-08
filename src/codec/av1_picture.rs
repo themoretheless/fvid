@@ -28,6 +28,8 @@ pub struct Picture {
     pub palette_counts: [[u32; 7]; 2],
     /// Palette colors selected from the above/left neighbor cache, per Y/UV group.
     pub palette_cache_hits: [u32; 2],
+    /// Palette transform blocks with nonzero dequantized residuals, per Y/UV group.
+    pub palette_residual_blocks: [u32; 2],
     pub planes: [Plane; 3],
 }
 #[derive(Clone, Copy)]
@@ -205,6 +207,7 @@ pub(crate) fn decode(
         segment_ids,
         palette_counts: [[0; 7]; 2],
         palette_cache_hits: [0; 2],
+        palette_residual_blocks: [0; 2],
         planes,
     };
     let mut dec = Decoder {
@@ -902,6 +905,11 @@ impl Decoder<'_> {
                                     },
                                 )?
                             };
+                            if palette_sizes[usize::from(p > 0)] > 0
+                                && dequant.iter().any(|v| *v != 0)
+                            {
+                                self.image.palette_residual_blocks[usize::from(p > 0)] += 1;
+                            }
                             let residual: &[i32] = if self.h.lossless[self.current_segment] {
                                 vp9_transform::inverse(
                                     &dequant,
