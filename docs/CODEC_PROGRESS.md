@@ -6703,3 +6703,7 @@ Generation is explicit and offline; tests do not invoke FFmpeg or network.
 Uninitialized PS is routed to mono in the bridge but dedicated startup acceptance
 remains unqualified. Missing whole SBR FIL, unhinted discovery, nonzero-core
 startup trimming and export/other-container routing remain separate gaps.
+
+Validation: owned media library 432 passed / 1 existing ignored; player library
+905 passed / 23 existing ignored; all 14 HE-AAC suites 58 passed. The 11 new
+assets regenerate byte-identically; Python syntax, Rust format and diff checks pass.
