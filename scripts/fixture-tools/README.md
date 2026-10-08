@@ -261,3 +261,9 @@ SBR synthesis QMF: explicitly run `scripts/generate_aac_sbr_synthesis_oracles.py
 with local ISO draft text after generating the analysis traces. It writes four
 original complex input/reference PCM pairs and hashes using a direct prior-slot
 calculation. Ordinary tests use saved traces and require no codec processes.
+
+
+Use `scripts/generate_aac_sbr_synthesis_oracles.py --bands 32` with local ISO
+draft text for downsampled synthesis references. Published 6.18.4.3 specifies
+the half-sample phase; references also enforce the exact full-rate decimation
+identity. Default `--bands 64` retains the existing byte-identical output.

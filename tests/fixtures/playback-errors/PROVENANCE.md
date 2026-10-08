@@ -1680,3 +1680,20 @@ been cross-checked against published GOST A.89 and ISO 1.A.12 by the analysis
 generator. Synthesis modulation and sample ordering follow GOST R53556.4-2013
 6.18.4.2 / ISO w4611 Figure 6. No private media, FFmpeg, foreign codec or
 network in generation/testing. These are DSP traces, not encoded HE-AAC playback.
+
+
+### Downsampled SBR synthesis QMF numerical traces
+
+`aac-sbr-synthesis32-{low-real,high-imag,dense,analysis-bypass}.complex-f64le`
+and `.pcm-f64le` cover 22 original 32-band complex slots and 704 PCM outputs.
+The synthesis oracle generator's explicit `--bands 32` mode computes direct
+prior-slot contributions, using the normative phase offset 127.5, normalization
+1/64 and every-other coefficient of the verified QMF window. Reference: GOST
+R53556.4-2013 section 6.18.4.3. Manifest contains input/output hashes.
+
+This also has an independent structural check: zero-upper-band 64-channel
+synthesis must match every second output sample exactly. The composed owned
+analysis/downsampled-synthesis chain is compared to the saved direct PCM trace.
+No private source media or foreign codec process. Ordinary tests are offline.
+The existing 64-band generator mode was rerun and remained byte-identical.
+These are DSP references, not encoded HE-AAC playback acceptance.

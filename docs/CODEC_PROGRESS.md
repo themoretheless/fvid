@@ -5635,3 +5635,18 @@ rate-dependent bounds, full frame syntax/history integration and high-frequency
 generation/adjustment with encoded PCM acceptance. The direct matrix kernels
 have no performance qualification yet. Downsampled 32-band synthesis remains
 to be implemented as part of full SBR coverage.
+
+
+### Owned downsampled SBR QMF synthesis
+
+`aac_sbr_downsampled_qmf::Synthesis` implements 32-band complex synthesis with
+640 retained samples, 64-sample shifts, the normative half-sample phase and
+every-other window coefficient. It produces 32 chronological samples per slot
+(960/1024 per 30/32 slots), preserving atomic call commit and clone/reset state.
+Four independently calculated direct traces and an exact decimation identity
+against zero-upper-band 64-channel synthesis qualify phase, scaling, window
+extraction and ordering. The actual owned analysis/synthesis composition,
+chunking, checkpoint replay, reset and invalid-input rollback are also tested.
+Both output-rate synthesis variants are now present as standalone DSP; neither
+is wired into production HE-AAC playback yet. Rate bounds, frame integration,
+HF generation/adjustment and encoded acceptance remain. No performance claim.
