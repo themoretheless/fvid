@@ -1,6 +1,32 @@
 //! Separate horizontal/vertical AV1 plane geometry; shared by reconstruction storage.
 use super::super::av1_sequence::Color;
 use crate::{Result, invalid};
+pub(super) fn shifts(color: &Color, p: usize) -> [usize; 2] {
+    if p == 0 {
+        [0; 2]
+    } else {
+        color.subsampling.map(usize::from)
+    }
+}
+/// AV1 CFL subsampling produces luma with three fractional bits.
+pub(super) fn cfl_luma(
+    color: &Color,
+    samples: &[u16],
+    stride: usize,
+    chroma: [usize; 2],
+    max_luma: [usize; 2],
+) -> i32 {
+    let [sx, sy] = shifts(color, 1);
+    let x = (chroma[0] << sx).min(max_luma[0] - (1 << sx));
+    let y = (chroma[1] << sy).min(max_luma[1] - (1 << sy));
+    let mut total = 0;
+    for dy in 0..=sy {
+        for dx in 0..=sx {
+            total += i32::from(samples[(y + dy) * stride + x + dx]);
+        }
+    }
+    total << (3 - sx - sy)
+}
 pub(super) fn plane_size(color: &Color, p: usize, luma: [usize; 2]) -> [usize; 2] {
     let sub = if p == 0 {
         [false; 2]
@@ -44,6 +70,20 @@ mod tests {
             subsampling,
             chroma_position: 0,
             separate_uv_delta_q: false,
+        }
+    }
+    #[test]
+    fn cfl_preserves_three_fractional_bits_for_each_layout_and_edge() {
+        let samples = [10, 20, 30, 40, 50, 60, 70, 80];
+        for (sub, first, last) in [
+            ([true, true], 280, 440),
+            ([true, false], 120, 600),
+            ([false, false], 80, 640),
+        ] {
+            let c = color(sub);
+            assert_eq!(cfl_luma(&c, &samples, 4, [0, 0], [4, 2]), first);
+            assert_eq!(cfl_luma(&c, &samples, 4, [99, 99], [4, 2]), last);
+            assert_eq!(shifts(&c, 0), [0, 0]);
         }
     }
     #[test]

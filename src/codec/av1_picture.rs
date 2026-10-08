@@ -767,8 +767,9 @@ impl Decoder<'_> {
         if w >= 2 && h >= 2 && (1..=8).contains(&mode) {
             angle = symbol(d, c, av1_cdfs::ANGLE_DELTA, [mode - 1])? as i32 - 3;
         }
+        let [sx, sy] = self.s.color.subsampling;
         let has_chroma =
-            !self.s.color.monochrome && !(w == 1 && x % 2 == 0 || h == 1 && y % 2 == 0);
+            !self.s.color.monochrome && !(sx && w == 1 && x % 2 == 0 || sy && h == 1 && y % 2 == 0);
         let mut uv = 0;
         let mut uv_angle = 0;
         let mut cfl = [0i32; 2];
@@ -984,13 +985,13 @@ impl Decoder<'_> {
             for cx in 0..w.div_ceil(16) {
                 let mut max_luma = [0; 2];
                 for p in 0..if has_chroma { 3 } else { 1 } {
-                    let sub = usize::from(p > 0);
-                    let bw = (w >> sub).max(1);
-                    let bh = (h >> sub).max(1);
-                    let chunk_w = (w.min(16) >> sub).max(1);
-                    let chunk_h = (h.min(16) >> sub).max(1);
-                    let base_x = (x >> sub) + cx * (16 >> sub);
-                    let base_y = (y >> sub) + cy * (16 >> sub);
+                    let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
+                    let bw = (w >> sub_x).max(1);
+                    let bh = (h >> sub_y).max(1);
+                    let chunk_w = (w.min(16) >> sub_x).max(1);
+                    let chunk_h = (h.min(16) >> sub_y).max(1);
+                    let base_x = (x >> sub_x) + cx * (16 >> sub_x);
+                    let base_y = (y >> sub_y) + cy * (16 >> sub_y);
                     let size = if self.h.lossless[self.current_segment] {
                         [4, 4]
                     } else if p == 0 {
@@ -1002,7 +1003,7 @@ impl Decoder<'_> {
                     let smooth_neighbor = self.smooth_neighbor(p, [x, y]);
                     for yy in (base_y..base_y + chunk_h).step_by(th / 4) {
                         for xx in (base_x..base_x + chunk_w).step_by(tw / 4) {
-                            if xx >= self.cols >> sub || yy >= self.rows >> sub {
+                            if xx >= self.cols >> sub_x || yy >= self.rows >> sub_y {
                                 continue;
                             }
                             let m = if p == 0 { mode } else { uv };
@@ -1106,12 +1107,13 @@ impl Decoder<'_> {
     // modes, which can differ from the adjacent 4x4 luma MI.
     fn smooth_neighbor(&self, plane: usize, origin: [usize; 2]) -> bool {
         let [x, y] = origin.map(|v| v as isize);
+        let [sx, sy] = chroma_geometry::shifts(&self.s.color, plane).map(|v| v as isize);
         let points = if plane == 0 {
             [[x, y - 1], [x - 1, y]]
         } else {
             [
-                [x + isize::from(x & 1 == 0), y - 1 - (y & 1)],
-                [x - 1 - (x & 1), y + isize::from(y & 1 == 0)],
+                [x + sx * isize::from(x & 1 == 0), y - 1 - (y & sy)],
+                [x - 1 - (x & sx), y + sy * isize::from(y & 1 == 0)],
             ]
         };
         points.into_iter().any(|[col, row]| {
@@ -1140,14 +1142,14 @@ impl Decoder<'_> {
         smooth_neighbor: bool,
     ) -> Result<()> {
         let [w, h] = size;
-        let sub = usize::from(p > 0);
-        let above = y > (self.y0 * 4 >> sub);
-        let left = x > (self.x0 * 4 >> sub);
+        let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
+        let above = y > (self.y0 * 4 >> sub_y);
+        let left = x > (self.x0 * 4 >> sub_x);
         let mid = 1u16 << (self.s.color.depth - 1);
         let plane = &self.image.planes[p];
         let grid = plane.width / 4;
-        let logical_width = self.cols * 4 >> sub;
-        let logical_height = self.rows * 4 >> sub;
+        let logical_width = self.cols * 4 >> sub_x;
+        let logical_height = self.rows * 4 >> sub_y;
         let above_right =
             above && x + w < logical_width && self.decoded[p][((y - 1) / 4) * grid + (x + w) / 4];
         let below_left =
@@ -1231,17 +1233,13 @@ impl Decoder<'_> {
         let mut values = vec![0i32; w * h];
         for r in 0..h {
             for col in 0..w {
-                let lx = ((x + col) * 2).min(max_luma[0] - 2);
-                let ly = ((y + r) * 2).min(max_luma[1] - 2);
-                values[r * w + col] = 2 * [
-                    luma.samples[ly * luma.width + lx],
-                    luma.samples[ly * luma.width + lx + 1],
-                    luma.samples[(ly + 1) * luma.width + lx],
-                    luma.samples[(ly + 1) * luma.width + lx + 1],
-                ]
-                .iter()
-                .map(|v| i32::from(*v))
-                .sum::<i32>();
+                values[r * w + col] = chroma_geometry::cfl_luma(
+                    &self.s.color,
+                    &luma.samples,
+                    luma.width,
+                    [x + col, y + r],
+                    max_luma,
+                );
             }
         }
         let average = (values.iter().sum::<i32>() + (w * h / 2) as i32) / (w * h) as i32;
@@ -1266,25 +1264,25 @@ impl Decoder<'_> {
                 if (p > 0 && base == 0) || (p == 0 && self.h.filter.levels[..2] == [0, 0]) {
                     continue;
                 }
-                let sub = usize::from(p > 0);
+                let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
                 let plane = &mut self.image.planes[p];
                 let stride = plane.width / 4;
-                for y in (0..self.rows * 4 >> sub).step_by(4) {
-                    for x in (0..self.cols * 4 >> sub).step_by(4) {
-                        if x << sub >= self.h.size[0] as usize
-                            || y << sub >= self.h.size[1] as usize
+                for y in (0..self.rows * 4 >> sub_y).step_by(4) {
+                    for x in (0..self.cols * 4 >> sub_x).step_by(4) {
+                        if x << sub_x >= self.h.size[0] as usize
+                            || y << sub_y >= self.h.size[1] as usize
                             || (pass == 0 && x == 0)
                             || (pass == 1 && y == 0)
                         {
                             continue;
                         }
-                        let row = ((y / 4) << sub) | sub;
-                        let col = ((x / 4) << sub) | sub;
+                        let row = ((y / 4) << sub_y) | sub_y;
+                        let col = ((x / 4) << sub_x) | sub_x;
                         let block = self.blocks[row * self.cols + col];
                         let block_extent = if pass == 0 {
-                            (block.w * 4 >> sub).max(4)
+                            (block.w * 4 >> sub_x).max(4)
                         } else {
-                            (block.h * 4 >> sub).max(4)
+                            (block.h * 4 >> sub_y).max(4)
                         };
                         if block.skip
                             && block.reference > 0
@@ -1322,9 +1320,9 @@ impl Decoder<'_> {
                         let mut level = strength(block);
                         if level == 0 {
                             let previous = if pass == 0 {
-                                row * self.cols + col - (1 << sub)
+                                row * self.cols + col - (1 << sub_x)
                             } else {
-                                (row - (1 << sub)) * self.cols + col
+                                (row - (1 << sub_y)) * self.cols + col
                             };
                             level = strength(self.blocks[previous]);
                         }
@@ -1440,9 +1438,9 @@ impl Decoder<'_> {
         let min_log = w.min(h).ilog2() as usize - 2;
         let max_log = w.max(h).ilog2() as usize - 2;
         let txctx = (min_log + max_log + 1) / 2;
-        let sub = usize::from(p > 0);
-        let max_x = self.cols >> sub;
-        let max_y = self.rows >> sub;
+        let [sub_x, sub_y] = chroma_geometry::shifts(&self.s.color, p);
+        let max_x = self.cols >> sub_x;
+        let max_y = self.rows >> sub_y;
         let top_slice = &self.above[p][x..(x + w4).min(max_x)];
         let left_slice = &self.left[p][y..(y + h4).min(max_y)];
         let top = top_slice.iter().map(|v| v.0).max().unwrap_or(0);
@@ -1499,8 +1497,8 @@ impl Decoder<'_> {
                             [symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET1, [min_log])?]
                     };
                 } else if p > 0 {
-                    kind = self.tx_types[(y << sub).max(self.current_block[1]) * self.cols
-                        + (x << sub).max(self.current_block[0])];
+                    kind = self.tx_types[(y << sub_y).max(self.current_block[1]) * self.cols
+                        + (x << sub_x).max(self.current_block[0])];
                     if (self.h.reduced_tx_set || w.max(h) == 32) && kind != 0 && kind != 9
                         || w.min(h) == 16 && kind >= 12
                     {

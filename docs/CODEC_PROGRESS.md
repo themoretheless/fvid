@@ -4863,3 +4863,22 @@ on the basis of passing header/refusal or geometry tests.
 Validation: 46 AV1 release unit tests and seven selected offline integration
 tests passed, including the twelve-case chroma refusal, intrabc, film grain,
 odd restoration and temporal-motion super-resolution suites.
+
+### AV1 intra/CFL/deblocking axis conversion (2026-10-08, playback pending)
+
+Reconstruction intra chroma presence, residual chunk/transform coordinates,
+intra edges and smooth-neighbor selection, coefficient contexts and deblocking
+now use independent horizontal/vertical sequence subsampling. CFL sums the
+corresponding 2x2, 2x1 or 1x1 reconstructed luma footprint and retains three
+fractional bits; edge clamping uses the matching footprint on each axis.
+A deterministic unit vector checks all three layouts and replicated edges.
+The existing 4:2:0 reconstruction gate remains: inter chroma-reference grouping,
+motion paths, other filters and output still need conversion and whole-stream
+pixel/reset/WebM/seek acceptance. This step does not enable 4:2:2/4:4:4 playback.
+
+Validation: 47 AV1 release unit tests and eight selected offline integration
+tests passed, with zero failures/ignored tests. The integration set includes
+chroma refusal, mixed-sub8 prediction, intrabc tools, film-grain tools, odd
+restoration and temporal-motion super-resolution. Existing 4:2:0 full-pixel,
+reference/reset and seek comparisons remain passing; these checks do not prove
+4:2:2/4:4:4 reconstruction acceptance while the production gate is present.
