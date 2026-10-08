@@ -23,10 +23,17 @@ def main():
   context.prec=80;amplitude=(D(128)*D('.5')/D('1.5')).sqrt()*min(D(3).sqrt(),D('1.584893192'))
  for slots in [15,16]:
   source_manifest=json.loads((DEST/('aac-sbr-ps-30-oracles.json' if slots==15 else 'aac-ps-matrix-controller-oracles.json')).read_text());matrix=source_manifest['videos'][0]['expected']
-  for name,flags in [('all-mono',[False,False,False]),('late-ps',[False,True,True]),('missing-middle',[True,False,True]),('trailing-mono',[True,True,False])]:
+  for name,flags in [('all-mono',[False,False,False]),('late-ps',[False,True,True]),('missing-middle',[True,False,True]),('trailing-mono',[True,True,False]),('headerless-start',[True,True,True]),('header-only-start',[True,True,True]),('dependent-start',[True,True,True])]:
    frames=[];parameter=zero();ps_index=0;spec=[]
    for fi,present in enumerate(flags):
-    if present:
+    if fi==0 and name.endswith('-start'):
+     header=name!='headerless-start';dependent=name=='dependent-start'
+     mode=0 if dependent else 1
+     rows=[targets(mode,mode,0,phase=True)] if dependent else []
+     text,borders=encode(header,mode,mode,header,header,dependent,rows,parameter,slots*2,first_time=dependent,extension=dependent)
+     raw=sbr(text,fi);spec.append(None)
+     if rows:parameter=rows[-1]
+    elif present:
      enabled=ps_index==0;count=2 if enabled else 0;rows=[targets(1,1,e,phase=True) for e in range(count)]
      text,borders=encode(True,1,1,True,True,enabled,rows,parameter,slots*2)
      raw=sbr(text,fi);spec.append(matrix[ps_index]);ps_index+=1
@@ -63,7 +70,7 @@ def main():
     previous_present=True
    refs={}
    for mode,bands in [('Double',64),('Core',32)]:refs[mode]=[save(v/D(32768) for v in map(D.from_float,synthesize(c,bands,window))) for c in output]
-   cases.append(dict(name=name,video=video,slots=slots,frames=frames,ps_present=flags,asc_core=asc(24000,24000,slots,'explicit',ps=True).hex(),pcm=refs))
+   cases.append(dict(name=name,video=video,slots=slots,frames=frames,ps_present=flags,stereo_active=[e is not None for e in spec],asc_core=asc(24000,24000,slots,'explicit',ps=True).hex(),pcm=refs))
  (DEST/'he-aac-ps-absence-packets.bin').write_bytes(blob);(DEST/'aac-ps-absence-pcm.bin').write_bytes(gold)
  (DEST/'aac-ps-absence-oracles.json').write_text(json.dumps(dict(kind='original silent native core, SBR noise and independent mono/PS stereo transitions',cases=cases,packet_sha256=hashlib.sha256(blob).hexdigest(),pcm_sha256=hashlib.sha256(gold).hexdigest()),indent=2)+'\n')
  print(len(cases),'original absent/late PS videos')

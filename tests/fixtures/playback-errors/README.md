@@ -1690,3 +1690,10 @@ rates. The normative mono mapping follows GOST R 53556.8-2013 6.5.1 and A.1;
 decorrelation reset on returning PS follows A.3. Tests accept absent/late PS,
 compare all PCM, retain synthesis tails, and replay checkpoint/reset/EOF.
 Generation is separate, offline and never invoked by ordinary tests.
+
+The same generator also creates six `he-aac-ps-{headerless-start,header-only-start,
+dependent-start}-{960,1024}-synthetic.mp4` fixtures. They transmit a PS element
+before a usable independent header, including zero envelopes or same-mode time
+deltas. The first frame must emit nonzero dual mono; subsequent independent
+headers must yield distinct stereo. The shared independent PCM oracle includes
+all 14 videos, both output rates, continuous synthesis and replay.

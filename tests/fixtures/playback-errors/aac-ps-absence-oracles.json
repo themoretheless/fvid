@@ -29,6 +29,11 @@
         false,
         false
       ],
+      "stereo_active": [
+        false,
+        false,
+        false
+      ],
       "asc_core": "eb0b0a00",
       "pcm": {
         "Double": [
@@ -77,6 +82,11 @@
         }
       ],
       "ps_present": [
+        false,
+        true,
+        true
+      ],
+      "stereo_active": [
         false,
         true,
         true
@@ -133,6 +143,11 @@
         false,
         true
       ],
+      "stereo_active": [
+        true,
+        false,
+        true
+      ],
       "asc_core": "eb0b0a00",
       "pcm": {
         "Double": [
@@ -185,6 +200,11 @@
         true,
         false
       ],
+      "stereo_active": [
+        true,
+        true,
+        false
+      ],
       "asc_core": "eb0b0a00",
       "pcm": {
         "Double": [
@@ -210,6 +230,177 @@
       }
     },
     {
+      "name": "headerless-start",
+      "video": {
+        "file": "he-aac-ps-headerless-start-960-synthetic.mp4",
+        "sha256": "381a63b12f7125ae216d7672210c17dd43437ac9df4cbc793492f9ebfd792561",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 535,
+          "bytes": 18
+        },
+        {
+          "offset": 553,
+          "bytes": 132
+        },
+        {
+          "offset": 685,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            552960,
+            5760
+          ],
+          [
+            599040,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            645120,
+            2880
+          ],
+          [
+            668160,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "header-only-start",
+      "video": {
+        "file": "he-aac-ps-header-only-start-960-synthetic.mp4",
+        "sha256": "4eaef8d5344470d1ee2121da4faaf6227f3ed5e5bb40adb4d5b507237c3897da",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 701,
+          "bytes": 19
+        },
+        {
+          "offset": 720,
+          "bytes": 132
+        },
+        {
+          "offset": 852,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            691200,
+            5760
+          ],
+          [
+            737280,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            783360,
+            2880
+          ],
+          [
+            806400,
+            2880
+          ]
+        ]
+      }
+    },
+    {
+      "name": "dependent-start",
+      "video": {
+        "file": "he-aac-ps-dependent-start-960-synthetic.mp4",
+        "sha256": "39b260bdd1720232dd539efae0091124b65c3b8b120fa7eed55b3f1c02e78124",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098a00"
+      },
+      "slots": 15,
+      "frames": [
+        {
+          "offset": 868,
+          "bytes": 47
+        },
+        {
+          "offset": 915,
+          "bytes": 132
+        },
+        {
+          "offset": 1047,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0a00",
+      "pcm": {
+        "Double": [
+          [
+            829440,
+            5760
+          ],
+          [
+            875520,
+            5760
+          ]
+        ],
+        "Core": [
+          [
+            921600,
+            2880
+          ],
+          [
+            944640,
+            2880
+          ]
+        ]
+      }
+    },
+    {
       "name": "all-mono",
       "video": {
         "file": "he-aac-ps-all-mono-1024-synthetic.mp4",
@@ -220,15 +411,15 @@
       "slots": 16,
       "frames": [
         {
-          "offset": 535,
+          "offset": 1063,
           "bytes": 16
         },
         {
-          "offset": 551,
+          "offset": 1079,
           "bytes": 13
         },
         {
-          "offset": 564,
+          "offset": 1092,
           "bytes": 12
         }
       ],
@@ -237,25 +428,30 @@
         false,
         false
       ],
+      "stereo_active": [
+        false,
+        false,
+        false
+      ],
       "asc_core": "eb0b0800",
       "pcm": {
         "Double": [
           [
-            552960,
+            967680,
             6144
           ],
           [
-            602112,
+            1016832,
             6144
           ]
         ],
         "Core": [
           [
-            651264,
+            1065984,
             3072
           ],
           [
-            675840,
+            1090560,
             3072
           ]
         ]
@@ -272,15 +468,15 @@
       "slots": 16,
       "frames": [
         {
-          "offset": 576,
+          "offset": 1104,
           "bytes": 16
         },
         {
-          "offset": 592,
+          "offset": 1120,
           "bytes": 132
         },
         {
-          "offset": 724,
+          "offset": 1252,
           "bytes": 16
         }
       ],
@@ -289,25 +485,30 @@
         true,
         true
       ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
       "asc_core": "eb0b0800",
       "pcm": {
         "Double": [
           [
-            700416,
+            1115136,
             6144
           ],
           [
-            749568,
+            1164288,
             6144
           ]
         ],
         "Core": [
           [
-            798720,
+            1213440,
             3072
           ],
           [
-            823296,
+            1238016,
             3072
           ]
         ]
@@ -324,15 +525,15 @@
       "slots": 16,
       "frames": [
         {
-          "offset": 740,
+          "offset": 1268,
           "bytes": 136
         },
         {
-          "offset": 876,
+          "offset": 1404,
           "bytes": 13
         },
         {
-          "offset": 889,
+          "offset": 1417,
           "bytes": 16
         }
       ],
@@ -341,25 +542,30 @@
         false,
         true
       ],
+      "stereo_active": [
+        true,
+        false,
+        true
+      ],
       "asc_core": "eb0b0800",
       "pcm": {
         "Double": [
           [
-            847872,
+            1262592,
             6144
           ],
           [
-            897024,
+            1311744,
             6144
           ]
         ],
         "Core": [
           [
-            946176,
+            1360896,
             3072
           ],
           [
-            970752,
+            1385472,
             3072
           ]
         ]
@@ -376,15 +582,15 @@
       "slots": 16,
       "frames": [
         {
-          "offset": 905,
+          "offset": 1433,
           "bytes": 136
         },
         {
-          "offset": 1041,
+          "offset": 1569,
           "bytes": 17
         },
         {
-          "offset": 1058,
+          "offset": 1586,
           "bytes": 12
         }
       ],
@@ -393,31 +599,207 @@
         true,
         false
       ],
+      "stereo_active": [
+        true,
+        true,
+        false
+      ],
       "asc_core": "eb0b0800",
       "pcm": {
         "Double": [
           [
-            995328,
+            1410048,
             6144
           ],
           [
-            1044480,
+            1459200,
             6144
           ]
         ],
         "Core": [
           [
-            1093632,
+            1508352,
             3072
           ],
           [
-            1118208,
+            1532928,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "headerless-start",
+      "video": {
+        "file": "he-aac-ps-headerless-start-1024-synthetic.mp4",
+        "sha256": "eef26db97972fe0f965c884f545da9f55a8a4482077bc4237204aadbf860a883",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 1598,
+          "bytes": 18
+        },
+        {
+          "offset": 1616,
+          "bytes": 132
+        },
+        {
+          "offset": 1748,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            1557504,
+            6144
+          ],
+          [
+            1606656,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1655808,
+            3072
+          ],
+          [
+            1680384,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "header-only-start",
+      "video": {
+        "file": "he-aac-ps-header-only-start-1024-synthetic.mp4",
+        "sha256": "b023bf99b9ab0dd98b443a91c5e2aaa0c2bcec77aa4ec6543109c097ea513f85",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 1764,
+          "bytes": 19
+        },
+        {
+          "offset": 1783,
+          "bytes": 132
+        },
+        {
+          "offset": 1915,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            1704960,
+            6144
+          ],
+          [
+            1754112,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1803264,
+            3072
+          ],
+          [
+            1827840,
+            3072
+          ]
+        ]
+      }
+    },
+    {
+      "name": "dependent-start",
+      "video": {
+        "file": "he-aac-ps-dependent-start-1024-synthetic.mp4",
+        "sha256": "18619fdecd83151a312dd408870ee8d1a8dffd9819544db26663a559833c9655",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098800"
+      },
+      "slots": 16,
+      "frames": [
+        {
+          "offset": 1931,
+          "bytes": 47
+        },
+        {
+          "offset": 1978,
+          "bytes": 132
+        },
+        {
+          "offset": 2110,
+          "bytes": 16
+        }
+      ],
+      "ps_present": [
+        true,
+        true,
+        true
+      ],
+      "stereo_active": [
+        false,
+        true,
+        true
+      ],
+      "asc_core": "eb0b0800",
+      "pcm": {
+        "Double": [
+          [
+            1852416,
+            6144
+          ],
+          [
+            1901568,
+            6144
+          ]
+        ],
+        "Core": [
+          [
+            1950720,
+            3072
+          ],
+          [
+            1975296,
             3072
           ]
         ]
       }
     }
   ],
-  "packet_sha256": "7d63cd2712ab1ed528f0d979c3c3d95cf89fb44264ee6329b9d5fab20f8d0f58",
-  "pcm_sha256": "47387458cfbb066743c695f4a0f9605281f269748d0f9d26520414635c05b4b8"
+  "packet_sha256": "31cdda1918a3ff8e86464d6ecbeac1919eb21940c1d9db5b3632dde489141320",
+  "pcm_sha256": "f567c0747aa2619cc8794195ce22f1e50e88d8bd699cf22e8dc3ae8a8520627e"
 }

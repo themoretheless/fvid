@@ -41,6 +41,7 @@ fn original_absent_late_and_returning_ps_videos_accept_both_independent_stereo_p
             .iter()
             .position(|t| t.handler == *b"soun")
             .unwrap();
+        assert_eq!(mp4.tracks()[ai].samples.len(), 3);
         let mut packets = vec![];
         for i in 0..3 {
             let mut data = vec![];
@@ -97,13 +98,18 @@ fn original_absent_late_and_returning_ps_videos_accept_both_independent_stereo_p
                     f.pcm.len(),
                     c["slots"].as_u64().unwrap() as usize * 2 * width * 2
                 );
-                if c["ps_present"][i] == false {
+                if c["stereo_active"][i] == false {
                     let tail = &f.pcm[10 * width * 2..];
                     assert!(
                         tail.chunks_exact(2).all(|r| r[0] == r[1]),
                         "dual-mono filter histories did not settle"
                     );
                     assert!(tail.iter().any(|&v| v != 0.));
+                } else {
+                    assert!(
+                        f.pcm.chunks_exact(2).any(|r| r[0] != r[1]),
+                        "independent PS header did not start stereo"
+                    );
                 }
             }
             d.reset();
@@ -118,5 +124,5 @@ fn original_absent_late_and_returning_ps_videos_accept_both_independent_stereo_p
             assert_eq!(d.finish().unwrap(), frames.last().cloned());
         }
     }
-    assert_eq!(count, 16);
+    assert_eq!(count, 28);
 }

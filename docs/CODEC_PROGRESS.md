@@ -6700,10 +6700,24 @@ and trailing-mono at 960/1024 core samples. `he_aac_ps_absence` compares every
 PCM sample against independent synthesis/decorrelation references at both core
 and double output rates, plus packet identity, EOF, checkpoint and reset.
 Generation is explicit and offline; tests do not invoke FFmpeg or network.
-Uninitialized PS is routed to mono in the bridge but dedicated startup acceptance
-remains unqualified. Missing whole SBR FIL, unhinted discovery, nonzero-core
+Dedicated startup acceptance now covers headerless PS, a zero-envelope header
+and a temporal first envelope at the unchanged initial mode. Each stays dual
+mono until a subsequent independent header starts stereo. Missing whole SBR FIL, unhinted discovery, nonzero-core
 startup trimming and export/other-container routing remain separate gaps.
 
 Validation: owned media library 432 passed / 1 existing ignored; player library
 905 passed / 23 existing ignored; all 14 HE-AAC suites 58 passed. The 11 new
 assets regenerate byte-identically; Python syntax, Rust format and diff checks pass.
+
+
+## PS startup acceptance before independent headers
+
+Six more original three-packet MP4s exercise headerless PS, an enabled header
+with zero envelopes, and a same-mode temporal first envelope. The stream remains
+uninitialized in the first frame; all normalized PCM samples match independent
+dual-mono synthesis. The next independently coded header starts stereo and the
+last packet retains it. Both 960/1024 frames and core/double output rates are
+covered, with exact packet count, nonzero mono, distinct stereo, checkpoints,
+reset and EOF. The extended absence suite covers 14 videos / 28 rate cases.
+A temporal envelope changing modes is not used as a startup reproducer because
+it triggers the separate frequency-coded mode-transition requirement.
