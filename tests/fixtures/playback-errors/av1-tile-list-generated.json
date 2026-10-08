@@ -14,14 +14,24 @@
     1
   ],
   "oracle": "stock libaom",
+  "multi_anchor_offsets": [
+    0,
+    9
+  ],
+  "multi_anchor_indices": [
+    0,
+    1,
+    0,
+    1
+  ],
   "artifacts": {
     "anchor.obu": {
       "file": "av1-tile-list-anchor.obu",
-      "sha256": "4b4c1699cc3ae91cc87fb154d397acaeb56594d10ac39172772812cdc52b3336"
+      "sha256": "019b40a0d0612d3401e4f34f5e64acb573bf16a3854073d0e485552b3ab9238b"
     },
     "camera.obu": {
       "file": "av1-tile-list-camera.obu",
-      "sha256": "beb25c9201e5f17673a2f4ea05cb232deb6dca4d92752bb2da9634ab0234d09a"
+      "sha256": "868206f9e3e5fad2e057fe59683c3d5f19d01c4c7c88276a896902c52b9e5dbb"
     },
     "header.obu": {
       "file": "av1-tile-list-header.obu",
@@ -29,11 +39,19 @@
     },
     "list.obu": {
       "file": "av1-tile-list-list.obu",
-      "sha256": "60b6b8b3a5ab0893e9ad2586341d0319f97597dfd4e337094da4d631b25b90b0"
+      "sha256": "8571248bcea84409be9d6be205cd8775148c3ec97b7410fe8791e69fedacd6da"
     },
     "list.yuv": {
       "file": "av1-tile-list-list.yuv",
-      "sha256": "5f7910a59e96eaafa7cead23caf24cb27a105e8f6d08ce9f5de0cd4be4658cad"
+      "sha256": "453fdb2e1d9aef8f51af8009fcb2edd4b1aa2dce3810088f5fe7aea938cfbe17"
+    },
+    "multi-list.obu": {
+      "file": "av1-tile-list-multi-list.obu",
+      "sha256": "4b090702eadc6e3cde84f19093ec8afd6bfdcd91c966ac5afa55d7b83ba39b65"
+    },
+    "multi-list.yuv": {
+      "file": "av1-tile-list-multi-list.yuv",
+      "sha256": "c4b8f87174946dc250676ba57f8695aa82c7352f65c0463ef02eb741a21d601c"
     }
   }
 }

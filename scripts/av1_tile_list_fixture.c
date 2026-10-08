@@ -21,12 +21,12 @@ int main(int argc,char **argv){
  aom_svc_params_t svc={0};svc.number_spatial_layers=1;svc.number_temporal_layers=1;svc.scaling_factor_num[0]=1;svc.scaling_factor_den[0]=1;svc.framerate_factor[0]=1;svc.layer_target_bitrate[0]=256;
  check(aom_codec_control(&enc,AV1E_SET_SVC_PARAMS,&svc));
  aom_image_t *img=aom_img_alloc(NULL,AOM_IMG_FMT_I420,128,128,1);if(!img)return 2;
- for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++)for(int x=0;x<(p?64:128);x++)img->planes[p][y*img->stride[p]+x]=(64+3*x+5*y+23*p)%192;
+ for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++)for(int x=0;x<(p?64:128);x++)img->planes[p][y*img->stride[p]+x]=64+(3*x+5*y+23*p)%96;
  check(aom_codec_encode(&enc,img,0,1,AOM_EFLAG_FORCE_KF));size_t an;unsigned char *ab=packet(&enc,&an);save(prefix,"-anchor.obu",ab,an);
  cfg.large_scale_tile=1;check(aom_codec_enc_config_set(&enc,&cfg));check(aom_codec_control(&enc,AV1E_SET_TILE_COLUMNS,1u));check(aom_codec_control(&enc,AV1E_SET_TILE_ROWS,1u));check(aom_codec_control(&enc,AV1E_SET_SINGLE_TILE_DECODING,1u));
  check(aom_codec_encode(&enc,img,1,1,AOM_EFLAG_FORCE_KF));size_t prime_size;unsigned char *prime=packet(&enc,&prime_size);free(prime);
  av1_ref_frame_t forced={0};forced.idx=0;forced.img=*img;check(aom_codec_control(&enc,AV1_SET_REFERENCE,&forced));check(aom_codec_control(&enc,AV1E_SET_FRAME_PARALLEL_DECODING,1u));
- for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++)for(int x=0;x<(p?64:128);x++)img->planes[p][y*img->stride[p]+x]=(71+3*x+5*y+23*p)%192;
+ for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++)for(int x=0;x<(p?64:128);x++)img->planes[p][y*img->stride[p]+x]=71+(3*x+5*y+23*p)%96;
  int flags=AOM_EFLAG_NO_REF_LAST2|AOM_EFLAG_NO_REF_LAST3|AOM_EFLAG_NO_REF_GF|AOM_EFLAG_NO_REF_ARF|AOM_EFLAG_NO_REF_BWD|AOM_EFLAG_NO_REF_ARF2|AOM_EFLAG_NO_UPD_LAST|AOM_EFLAG_NO_UPD_GF|AOM_EFLAG_NO_UPD_ARF|AOM_EFLAG_NO_UPD_ENTROPY;
  aom_svc_ref_frame_config_t refs={0};refs.reference[0]=1;
  check(aom_codec_control(&enc,AV1E_SET_SVC_REF_FRAME_CONFIG,&refs));
@@ -49,6 +49,18 @@ int main(int argc,char **argv){
  aom_codec_iter_t it=NULL;aom_image_t *out=aom_codec_get_frame(&oracle,&it);if(!out||out->d_w!=128||out->d_h!=128)return 2;
  unsigned char golden[128*128*3/2];size_t pos=0;
  for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++){size_t width=p?64:128;memcpy(golden+pos,out->planes[p]+y*out->stride[p],width);pos+=width;}
- save(prefix,"-list.yuv",golden,pos);aom_img_free(&anchor);check(aom_codec_destroy(&oracle));
+ save(prefix,"-list.yuv",golden,pos);
+ /* A second, distinct owned external anchor proves per-entry anchor selection. */
+ aom_image_t alternate;if(!aom_img_alloc_with_border(&alternate,format,128,128,32,8,64))return 2;
+ for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++)for(int x=0;x<(p?64:128);x++)alternate.planes[p][y*alternate.stride[p]+x]=anchor.planes[p][y*anchor.stride[p]+x]+9;
+ aom_image_t external_images[2]={anchor,alternate};external=(av1_ext_ref_frame_t){external_images,2};
+ check(aom_codec_control(&oracle,AV1D_SET_EXT_REF_PTR,&external));
+ size_t entry_at=4;
+ for(int i=0;i<4;i++){payload[entry_at]=i%2;size_t length=((size_t)payload[entry_at+3]<<8)+payload[entry_at+4]+1;entry_at+=5+length;}
+ memcpy(list+ln-at,payload,at);save(prefix,"-multi-list.obu",list,ln);
+ check(aom_codec_decode(&oracle,hb,hn,NULL));check(aom_codec_decode(&oracle,list,ln,NULL));
+ it=NULL;out=aom_codec_get_frame(&oracle,&it);if(!out||out->d_w!=128||out->d_h!=128)return 2;
+ pos=0;for(int p=0;p<3;p++)for(int y=0;y<(p?64:128);y++){size_t width=p?64:128;memcpy(golden+pos,out->planes[p]+y*out->stride[p],width);pos+=width;}
+ save(prefix,"-multi-list.yuv",golden,pos);aom_img_free(&alternate);aom_img_free(&anchor);check(aom_codec_destroy(&oracle));
  free(hb);free(ab);free(cb);aom_img_free(img);check(aom_codec_destroy(&enc));check(aom_codec_destroy(&dec));return 0;
 }

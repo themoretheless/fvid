@@ -60,6 +60,60 @@ fn owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output() 
             .collect::<Vec<_>>(),
         golden
     );
+    // Distinct anchors make selecting the wrong entry's anchor observable.
+    let mut alternate = (*anchors[0]).clone();
+    for plane in &mut alternate.planes {
+        for sample in &mut plane.samples {
+            *sample += 9;
+        }
+    }
+    let distinct = vec![anchors[0].clone(), std::sync::Arc::new(alternate)];
+    let multi_bytes = bytes("multi-list.obu");
+    let multi_obu = Obus::new(&multi_bytes).next().unwrap().unwrap();
+    let multi_entries = TileList::parse(multi_obu.payload).unwrap();
+    assert_eq!(
+        multi_entries
+            .entries
+            .iter()
+            .map(|e| e.anchor)
+            .collect::<Vec<_>>(),
+        vec![0, 1, 0, 1]
+    );
+    let multi = decoder
+        .decode_tile_list(&camera, &distinct, multi_obu.payload, None)
+        .unwrap();
+    assert_eq!(multi.decoded_tiles, 4);
+    assert!(multi.inter_blocks > 0);
+    let multi_pixels = multi
+        .planes
+        .iter()
+        .flat_map(|p| p.samples.iter().map(|v| *v as u8))
+        .collect::<Vec<_>>();
+    assert_eq!(multi_pixels, bytes("multi-list.yuv"));
+    assert_ne!(multi_pixels, golden);
+    for p in 0..3 {
+        let tile = if p == 0 { 64 } else { 32 };
+        for y in 0..tile * 2 {
+            for x in 0..tile * 2 {
+                let offset = 9 * ((y / tile * 2 + x / tile) % 2) as u16;
+                let i = y * tile * 2 + x;
+                assert_eq!(
+                    multi.planes[p].samples[i],
+                    output.planes[p].samples[i] + offset
+                );
+            }
+        }
+    }
+    // Mutation sensitivity: identical pointers cannot accidentally pass this oracle.
+    let wrong = decoder
+        .decode_tile_list(
+            &camera,
+            &[anchors[0].clone(), anchors[0].clone()],
+            multi_obu.payload,
+            None,
+        )
+        .unwrap();
+    assert_ne!(wrong.planes[0].samples, multi.planes[0].samples);
     // A sparse list replaces the first tile, preserving all other canvas samples.
     let entry = &parsed.entries[1];
     let mut partial = vec![1, 1, 0, 0, 0, entry.row as u8, entry.column as u8];

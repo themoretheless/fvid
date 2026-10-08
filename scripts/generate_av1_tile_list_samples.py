@@ -15,11 +15,20 @@ def main():
                 for x in range(dimension):
                     source=[3,0,2,1][(y//tile)*2+x//tile]
                     sx=(source%2)*tile+x%tile;sy=(source//2)*tile+y%tile
-                    expected.append((71+3*sx+5*sy+23*plane)%192)
+                    expected.append(71+(3*sx+5*sy+23*plane)%96)
         assert reference==expected,'stock oracle must reproduce lossless authored tile permutation'
+        multi_expected=bytearray()
+        for plane in range(3):
+            tile=64 if plane==0 else 32;dimension=tile*2
+            for y in range(dimension):
+                for x in range(dimension):
+                    index=(y//tile)*2+x//tile;source=[3,0,2,1][index]
+                    sx=(source%2)*tile+x%tile;sy=(source//2)*tile+y%tile
+                    multi_expected.append(71+(3*sx+5*sy+23*plane)%96+9*(index%2))
+        assert Path(str(prefix)+'-multi-list.yuv').read_bytes()==multi_expected,'distinct anchors must change the selected tiles exactly'
         records={}
-        for suffix in ['anchor.obu','camera.obu','header.obu','list.obu','list.yuv']:
+        for suffix in ['anchor.obu','camera.obu','header.obu','list.obu','list.yuv','multi-list.obu','multi-list.yuv']:
             data=Path(str(prefix)+'-'+suffix).read_bytes();name='av1-tile-list-'+suffix;(root/name).write_bytes(data)
             records[suffix]={'file':name,'sha256':hashlib.sha256(data).hexdigest()}
-        (root/'av1-tile-list-generated.json').write_text(json.dumps({'size':[128,128],'tile_size':[64,64],'order':[3,0,2,1],'oracle':'stock libaom','artifacts':records},indent=2)+'\n')
+        (root/'av1-tile-list-generated.json').write_text(json.dumps({'size':[128,128],'tile_size':[64,64],'order':[3,0,2,1],'oracle':'stock libaom','multi_anchor_offsets':[0,9],'multi_anchor_indices':[0,1,0,1],'artifacts':records},indent=2)+'\n')
 if __name__=='__main__':main()

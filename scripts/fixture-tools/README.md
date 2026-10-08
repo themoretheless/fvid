@@ -139,3 +139,8 @@ Ordinary offline acceptance uses checked-in artifacts:
 ```sh
 cargo test --release --locked --offline --no-default-features --test av1_tile_list
 ```
+
+The tile-list generator also writes a distinct two-anchor list and oracle.
+The second external image adds 9 to the clipping-safe owned anchor pattern;
+entries alternate anchors 0/1. Python independently verifies both outputs
+before replacing the checked-in artifacts and their SHA-256 manifest.

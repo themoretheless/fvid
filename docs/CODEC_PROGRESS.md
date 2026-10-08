@@ -5170,4 +5170,16 @@ permutation. Tests cover sparse updates, repeat calls, anchor index 127, malform
 lists, camera/canvas geometry and memory refusal. Ordinary packet decoding
 refuses OBU 8 with a request for external camera context; that refusal is distinct
 from explicit API acceptance. Automatic container-side provisioning, additional
-depths/chroma, SB128 and multi-anchor/CDF combinations remain unqualified.
+depths/chroma, SB128 and additional CDF combinations remain unqualified.
+
+
+## AV1 distinct tile-list anchors (2026-10-08)
+
+The owned tile-list regression now qualifies two different external anchors,
+selected 0,1,0,1 across four output tiles. Every native output pixel matches
+stock libaom and the independent authored formula. Replacing the second anchor
+with the first is a failing pixel mutation, demonstrating that this case
+actually exercises anchor selection rather than repeated pointers. Generation
+uses a clipping-safe original pattern; previous one-anchor, sparse-canvas,
+bounds and memory regressions remain enabled. This does not establish all
+external camera profiles or automatic container-side camera context.
