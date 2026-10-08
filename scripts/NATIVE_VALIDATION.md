@@ -759,3 +759,14 @@ The separate physical root CLI regression `native_cuda_cli` also passed. It
 launches the Windows binary, exports the saved synthetic Main10 fixture, and
 checks owned software decoding of every output frame with no host copies.
 The six playback-control integration tests passed after conflict migration.
+
+MP4 in-band PS reader dispatch (2026-10-09): the selected AAC track is probed
+with the owned native candidate before decoder/backend creation. Actual accepted
+PS payload selects the delayed stereo playback bridge without rewriting ASC or
+consuming the logical packet cursor. `he_aac_ps_inband` compares original
+LC/SBR 960/1024 synthetic video PCM to independent references, checks source
+windows, EOF and rewind. Explicit disable flags retain ordinary dispatch.
+This does not yet qualify output-clock changes, missing SBR fills in a selected
+PS stream, PCE/coupling layouts, or Matroska implicit-PS discovery. The current
+probe decodes eligible packets and may scan the complete track; startup cost
+still needs a syntax-only probe and performance qualification.

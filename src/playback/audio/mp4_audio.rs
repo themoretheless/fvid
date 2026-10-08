@@ -24,6 +24,7 @@ pub struct AudioPacket {
 pub struct Mp4AudioReader<R> {
     demuxer: Mp4Reader<R>,
     track_index: usize,
+    in_band_ps: bool,
     sample_index: usize,
     presentation_floor: i64,
     packet: Vec<u8>,
@@ -126,7 +127,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     }
 
     /// Open a specific audio track by index.
-    pub fn from_demuxer(demuxer: Mp4Reader<R>, index: usize) -> Result<Self> {
+    pub fn from_demuxer(mut demuxer: Mp4Reader<R>, index: usize) -> Result<Self> {
         let track = demuxer
             .tracks()
             .get(index)
@@ -137,7 +138,29 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let timeline = if track.codec == *b"mp4a" && (track.edits.len()>1 || track.edits.first().is_some_and(|e|e.media_time<0)) {
             Some(crate::container::audio_timeline::AudioTimeline::new(&track.edits,track.duration,track.timescale,demuxer.movie_timescale(),track.sample_rate)?)
         } else {None};
+        // Probe with the owned parser, rather than guessing from the sample
+        // entry's channel count. Keep raw ASC and packet timestamps unchanged.
+        let candidate = if track.codec == *b"mp4a" {
+            let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
+            let config = crate::codec::config::AudioSpecificConfig::parse(asc)?;
+            if config.ps_present.is_none() && config.sbr_present != Some(false) {
+                crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(asc, track.sample_rate).ok()
+            } else { None }
+        } else { None };
+        let count = track.samples.len();
+        let mut in_band_ps = false;
+        if let Some(mut probe) = candidate {
+            let mut payload = Vec::new();
+            for sample in 0..count {
+                demuxer.read_packet(index, sample, &mut payload)?;
+                // A valid LC-only block has no SBR fill. It remains on normal
+                // AAC dispatch; subsequent extension runs can still be probed.
+                if probe.decode(&payload).is_err() { probe.reset(); continue; }
+                if probe.ps_detected() { in_band_ps = true; break; }
+            }
+        }
         Ok(Self {
+            in_band_ps,
             timeline,
             edit_cursor:std::cell::Cell::new(0),
             edit_segment:std::cell::Cell::new(None),
@@ -204,6 +227,16 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// Packets are timestamped in the *track* timescale, which differs from the
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
+    fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.in_band_ps {
+            Ok(Box::new(crate::codec::aac_ps_playback::PsAacDecoder::new_with_in_band_ps(
+                &self.track().configuration, self.track().sample_rate, 2,
+            )?))
+        } else {
+            crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())
+        }
+    }
+
     fn codec(&self) -> &str {
         let track = self.track();
         match codec_name(&track.codec) {
@@ -221,7 +254,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn channels(&self) -> u16 {
-        self.track().channels
+        if self.in_band_ps { 2 } else { self.track().channels }
     }
 
     fn bits_per_sample(&self) -> u16 {
