@@ -1859,3 +1859,22 @@ No private video, frames, audio or codec parameter sets; no copied decoder
 algorithm, external encoder, FFmpeg or network. These are syntax acceptance
 vectors, not encoded HE-AAC playback fixtures. Retained extension bytes do
 not establish PS decoding acceptance.
+
+### SBR outer extension framing and CRC vectors
+
+`aac-sbr-extension-syntax.bin`/JSON contain 280 original extensions generated
+explicitly offline by `scripts/generate_aac_sbr_extension_fixtures.py`, wrapping
+the saved original mono/stereo data vectors. The binary is 6575 bytes, SHA-256
+`c644ec99c22eb760899126333e540ae6709633a7dcadbf472d0703839c3897b6`.
+The generator computes CRC independently by GF(2) long division of the message
+polynomial times x^10. Production uses a ten-bit feedback register instead.
+Nonzero original fill bits test their inclusion; trailing extension bytes test
+their exclusion. Present/headerless cases exercise retained header state.
+
+Source: published ISO/IEC 14496-3:2001/Amd.1:2003 4.5.2.8.2.1 and syntax,
+cross-checked with GOST R53556.4-2013 table 62 and CRC definition:
+https://rags.ru/documents/prod/gost-r_gosudarstvennyj-standart/38/gost_50462.html
+The old ISO working draft's 7-bit CRC/partial coverage are intentionally not
+used. Ordinary tests do not generate fixtures or access FFmpeg/the network.
+No private media/codec parameter sets or copied decoder algorithm. These are
+framing/CRC acceptance vectors, not encoded HE-AAC PCM playback acceptance.

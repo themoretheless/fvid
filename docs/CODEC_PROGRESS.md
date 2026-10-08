@@ -5879,3 +5879,27 @@ not generate fixtures or invoke FFmpeg/network access.
 These are payload syntax acceptance checks, not HE-AAC PCM acceptance. Outer
 FIL/header/CRC handling, coefficient history, QMF overlap/scaling and production
 AAC integration remain; PS needs its own extension decoder.
+
+### Owned legacy SBR outer extension, CRC and retained headers
+
+`aac_sbr_extension::State::read` now wraps the data parser in non-scalable
+`sbr_extension_data` framing. It reads the optional 10-bit checksum, header
+presence flag and header, retains the last valid header for headerless frames,
+and consumes this element's 0..7 fill bits while leaving following extensions
+untouched. It enforces AAC FIL's byte-count/bit boundaries. Header geometry
+reset is separate from full stream reset for rate/frame-size/channel changes.
+Reader and retained state commit together after all syntax and CRC checks;
+reset/seek clears the saved header and format.
+
+CRC is the published zero-initialized polynomial x^10+x^9+x^5+x^4+x+1,
+covering header flag through fill bits. The earlier working draft's shorter
+CRC and limited coverage are not used. 280 original binary extension vectors
+use an independent Python GF(2) polynomial-division oracle instead of the
+Rust feedback register. They cover both CRC modes, present/reused headers,
+all eight bit offsets, every truncation, following-extension preservation,
+checkpoint replay and stream reset. CRC-field and fill-bit mutations must
+fail with the specific checksum error and preserve both input and state.
+
+This validates outer syntax and CRC, not decoded HE-AAC PCM. Production FIL
+dispatch, retained/reconstructed coefficient history, QMF overlap/scaling
+and original encoded HE-AAC playback acceptance still remain.

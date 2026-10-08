@@ -19,6 +19,7 @@ mod aac_sbr_noise_table;
 pub mod aac_sbr_huffman;
 pub mod aac_sbr_coefficients;
 pub mod aac_sbr_data;
+pub mod aac_sbr_extension;
 pub mod aac_sbr_dequant;
 pub mod aac_sbr_qmf;
 pub mod aac_sbr_synthesis_qmf;
