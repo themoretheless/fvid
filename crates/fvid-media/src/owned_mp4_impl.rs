@@ -1254,6 +1254,15 @@ fn parse_track(
         // track leaves out; past them both spell the same fields.
         let at = usize::from(kind == b"alac") * 4;
         result.configuration = atom.get(at..).unwrap_or_default().to_vec();
+        // ASC defines decoded geometry; sample entries may retain LC-core
+        // clocks/channels. Keep the source media timescale and sample table.
+        if result.codec == *b"mp4a"
+            && let Ok(asc) = crate::owned_codec_config::aac_specific_config(&result.configuration)
+            && let Ok(config) = crate::owned_aac::config::AudioSpecificConfig::parse(asc) {
+                result.sample_rate = config.resolve_output_rate(result.sample_rate).unwrap_or_else(|_| config.output_sample_rate());
+                result.channels = u16::from(config.output_channels());
+            }
+
     }
     // A fragmented track describes its coding here and its samples nowhere: the
     // tables beside this entry either are absent or hold one entry each at zero,

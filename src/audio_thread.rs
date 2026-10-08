@@ -1128,6 +1128,32 @@ mod ps_edit_worker_tests {
         }
     }
     #[test]
+    fn core_clock_ps_mp4_uses_asc_output_rate_for_pcm_edits_seek_and_rewind() {
+        let manifest: serde_json::Value=serde_json::from_str(include_str!("../tests/fixtures/playback-errors/aac-ps-core-clock-oracles.json")).unwrap();
+        for case in manifest["cases"].as_array().unwrap() {
+            let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+            let bytes=std::fs::read(root.join(case["file"].as_str().unwrap())).unwrap();
+            let mut expected=vec![];
+            crate::native_media::decode_mp4_aac_pcm(&std::fs::read(root.join(case["source"].as_str().unwrap())).unwrap(),&mut expected).unwrap();
+            let mut owned=vec![];
+            let stats=fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(std::io::Cursor::new(&bytes),&mut owned,None,&fvid_control::CopyOptions::default()).unwrap();
+            assert_eq!((stats.sample_rate,stats.channels,stats.sample_frames),(48000,2,9600));assert!(owned==expected);
+            let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap();
+            assert_eq!((stream.track().sample_rate,stream.timescale(),stream.sample_rate(),stream.channels()),(48000,24000,48000,2));
+            let old_error=match crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),24000,1,stream.bits_per_sample()) {
+                Err(error)=>error.to_string(),Ok(_)=>panic!("ASC-only factory using raw geometry must reproduce the clock failure"),
+            };
+            assert!(old_error.contains("configuration disagrees with container sample rate or channels"));
+            let decoder=stream.make_decoder().unwrap();
+            let captured=Arc::new(Mutex::new(Vec::new()));let (_,commands)=sync_channel(1);let (events,_)=sync_channel(1);
+            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert!(bytes==expected[from*8..],"core/output clock changes altered PCM");};
+            run(&mut worker);check(0);
+            for sample in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.handle(Command::Seek(sample/2));run(&mut worker);check(sample as usize);}
+            captured.lock().unwrap().clear();worker.handle(Command::Rewind);run(&mut worker);check(0);
+        }
+    }
+    #[test]
     fn source_gap_is_rejected_after_pending_ps_pcm_is_drained() {
         for bytes in [include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-1024-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-960-synthetic.mp4").as_slice()] {
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap();let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();

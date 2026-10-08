@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "file": "he-aac-ps-core-clock-repeat-960-synthetic.mp4",
+      "reference": 13,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "ad3640300c8dd15b0d2a46008cb500c4b7c2a8c4567e8701bce70b28ef14c677",
+      "source": "he-aac-ps-export-repeat-960-synthetic.mp4",
+      "container_rate": 24000,
+      "output_rate": 48000
+    },
+    {
+      "file": "he-aac-ps-core-clock-repeat-1024-synthetic.mp4",
+      "reference": 5,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "acfe878514623696a5bd6e300fa11dc8562179b6b4cdad5b8b7f06ccdf9c542f",
+      "source": "he-aac-ps-export-repeat-1024-synthetic.mp4",
+      "container_rate": 24000,
+      "output_rate": 48000
+    },
+    {
+      "file": "he-aac-ps-inband-core-clock-sbr-960-synthetic.mp4",
+      "reference": 13,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "471b0e63fe4140d6d952a3a4d54ad2c57aa307b8c5d7eb4f5b690330c3e6b2b2",
+      "kind": "SBR",
+      "asc": "2b098a00",
+      "no_edit_file": "he-aac-ps-inband-unedited-sbr-960-synthetic.mp4",
+      "no_edit_sha256": "a13365ff2c9dee9bfbeb1e8b2e6cac0d52d4033d7ca1ea407e4ce4a0579967d3",
+      "source": "he-aac-ps-inband-export-sbr-960-synthetic.mp4",
+      "container_rate": 24000,
+      "output_rate": 48000
+    },
+    {
+      "file": "he-aac-ps-inband-core-clock-sbr-1024-synthetic.mp4",
+      "reference": 5,
+      "source_start": 1920,
+      "source_samples": 3200,
+      "silence": 1600,
+      "presentation_samples": 9600,
+      "sha256": "fb71c55921e4e0baaff663d3bfaac3b7e363622a14c643e829519599a3ad950f",
+      "kind": "SBR",
+      "asc": "2b098800",
+      "no_edit_file": "he-aac-ps-inband-unedited-sbr-1024-synthetic.mp4",
+      "no_edit_sha256": "c4147cfc877fd137882b583c481eac69a160071a886bf643900e5d746183f0cf",
+      "source": "he-aac-ps-inband-export-sbr-1024-synthetic.mp4",
+      "container_rate": 24000,
+      "output_rate": 48000
+    }
+  ]
+}

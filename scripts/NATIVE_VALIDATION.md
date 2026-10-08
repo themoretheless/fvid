@@ -829,3 +829,17 @@ EOF, seeks inside both ranges and silence, packet-boundary seek for no-edit
 files, and rewind. Codec EOF/refusal checks
 remain enabled for actual pending source output. Output-clock changes are not
 qualified by this geometry fix.
+
+Owned MP4 AAC decoded-geometry parity (2026-10-09): the owned parser now uses
+ASC decoded rate/channels with the same resolution policy as the existing root
+parser, retaining original media timescale, sample timestamps, durations and
+edits. Four original explicit/in-band SBR/PS 960/1024 fixtures use mono 24 kHz
+sample entries and 24 kHz source ticks with a 48 kHz ASC output clock. Reverting
+only the owned parser change reproduces the exact former export refusal
+`MP4 audio export requires valid clock and matching audio geometry` on the first
+fixture. Acceptance compares independent PCM through repeated ranges, intervals
+and packet-limit drain, root/owned bytes, WAV header and stereo speaker mask;
+worker tests cover source-to-output clock conversion, seek and rewind. Five
+assets regenerate deterministically without codec executables. This qualifies
+MP4 explicit SBR output clocks; Matroska core-clock metadata, bare LC implicit
+SBR clock discovery and missing-fill PS playback remain separate gaps.
