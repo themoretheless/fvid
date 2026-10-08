@@ -160,6 +160,54 @@ impl Decoder {
         }
         result
     }
+    /// Decode a timestamped temporal unit and select its highest present shown
+    /// spatial layer. Raw `decode_packet` keeps all layers available to callers.
+    /// Multiple temporal units or repeated shown layers need separate timestamps.
+    pub fn decode_temporal_unit(&mut self, data: &[u8]) -> Result<Option<Decoded>> {
+        let result = (|| {
+            let mut frame_seen = false;
+            let mut ended = false;
+            for obu in Obus::new(data) {
+                let obu = obu?;
+                if obu.kind == 2 && frame_seen {
+                    ended = true;
+                }
+                if matches!(obu.kind, 3 | 6) {
+                    if ended {
+                        return Err(invalid(
+                            "multiple AV1 temporal units need distinct timestamps",
+                        ));
+                    }
+                    frame_seen = true;
+                }
+            }
+            let mut selected: Option<Decoded> = None;
+            let mut shown_layers = 0u8;
+            for frame in self.decode_packet(data)? {
+                if !frame.show {
+                    continue;
+                }
+                let bit = 1 << frame.spatial_id;
+                if shown_layers & bit != 0 {
+                    return Err(invalid(
+                        "multiple AV1 temporal units need distinct timestamps",
+                    ));
+                }
+                shown_layers |= bit;
+                if selected
+                    .as_ref()
+                    .is_none_or(|previous| frame.spatial_id > previous.spatial_id)
+                {
+                    selected = Some(frame);
+                }
+            }
+            Ok(selected)
+        })();
+        if result.is_err() {
+            self.failed = true;
+        }
+        result
+    }
     fn displayed(
         &self,
         mut frame: Decoded,

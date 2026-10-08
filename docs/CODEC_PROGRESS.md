@@ -5103,3 +5103,29 @@ Final validation: 49 AV1 unit tests and 12 selected integration tests passed
 offline in release mode (zero failed/ignored). Scoped Rust formatting, generator
 syntax, three artifact hashes and diff checks pass. The spatial acceptance binary
 links only libSystem/libiconv; no external codec or libav linkage.
+
+### AV1 spatial container presentation and temporal-unit boundaries (2026-10-08)
+
+`decode_temporal_unit` reconstructs every included layer, then selects the
+highest actually shown spatial ID for the container timestamp; raw decoding
+continues returning all layers. WebM previously refused two visible spatial
+layers in a packet, while MP4 returned the first/lower one. Owned MP4 and WebM
+wrappers reproduce both errors. Four 20ms temporal units now show the upper
+64x48 frame; a separate stream omitting the last upper layer shows the actual
+32x24 lower frame in that unit. All selected pixels, timestamps and durations,
+EOF rewind and full sync-seek replay are checked against committed dual-oracle
+raw goldens.
+
+Multiple temporal units in one timestamped packet remain refused, including
+explicit delimiters and repeated shown layers without a delimiter. Errors
+require reset; the raw all-layer API remains available. The wrappers are
+generated with repository-owned Python only, without FFmpeg or external codecs.
+This qualifies the two-layer owned cases, not all layered profiles, tile lists,
+live playback performance or overall codec conformance.
+
+Final validation: 49 release AV1 unit tests and 19 unique selected integration
+tests passed offline, zero failures/ignored. The strengthened four-test container
+suite passes after the full selected run. All eight container hashes, generator
+syntax, scoped formatting and commit diff checks pass. The container test binary
+links only libSystem/libiconv. These checks use the current local checkout;
+whole-codec conformance and live GUI/performance remain separate qualifications.

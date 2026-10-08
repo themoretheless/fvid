@@ -99,3 +99,12 @@ python3 scripts/generate_av1_spatial_operating_points_samples.py --encoder /tmp/
 
 The generator requires exact agreement for both operating points and outputs all
 spatial layers. See the fixture provenance for source pattern and qualification.
+
+The spatial container wrappers are authored offline, without reference tools:
+
+```sh
+python3 scripts/generate_av1_spatial_container_samples.py
+```
+
+They group actual temporal delimiters into 20ms WebM blocks/MP4 samples and
+produce the missing-last-upper acceptance and multiple-unit refusal variants.

@@ -885,8 +885,10 @@ Release-сборка обязательна для практического и
   Включённые spatial layers декодируются: собственный двухслойный 8-bit 4:2:0
   SVC сравнивается по всем пикселям с libaom/dav1d, включая scaled interlayer
   prediction, operating-point selection и reset. Raw API возвращает все слои
-  с `spatial_id`; выбор показанного слоя, container timing/seek и остальные
-  layered combinations ещё требуют проверки. Tile-list OBU пока отклоняется.
+  с `spatial_id`; MP4/WebM выбирают верхний фактически доступный показанный слой
+  в temporal unit. Собственные 20ms-пакеты, отсутствие верхнего слоя в последнем
+  unit, пиксели/timestamps, rewind/seek проверены. Остальные layered combinations
+  ещё требуют квалификации. Tile-list OBU пока отклоняется.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption

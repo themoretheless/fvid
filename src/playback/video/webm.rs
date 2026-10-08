@@ -678,19 +678,12 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     }
                 }
                 VideoDecoder::Av1(d) => {
-                    for decoded in d.decode_packet(&packet)? {
-                        if decoded.show {
-                            if visible.is_some() {
-                                return Err(invalid(
-                                    "multiple visible frames in one WebM packet need distinct timestamps",
-                                ));
-                            }
-                            visible = Some(Frame {
-                                decoded: Picture::Av1(decoded),
-                                pts,
-                                duration,
-                            });
-                        }
+                    if let Some(decoded) = d.decode_temporal_unit(&packet)? {
+                        visible = Some(Frame {
+                            decoded: Picture::Av1(decoded),
+                            pts,
+                            duration,
+                        });
                     }
                 }
             }

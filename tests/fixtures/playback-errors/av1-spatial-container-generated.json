@@ -1,0 +1,70 @@
+{
+  "fixtures": [
+    {
+      "name": "complete",
+      "shown_indices": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "artifacts": [
+        {
+          "file": "av1-spatial-container-complete.webm",
+          "sha256": "2c867736d3cf9ad1f1f400a4b739b66ef5e7055a4f79ef2fc961ccde75c5a226"
+        },
+        {
+          "file": "av1-spatial-container-complete.mp4",
+          "sha256": "8b4a1ddc8f785a1f987f06b0908de8c0cb5e0aa1d7870a0f5720a6f6e2867f70"
+        }
+      ]
+    },
+    {
+      "name": "missing-last-upper",
+      "shown_indices": [
+        1,
+        3,
+        5,
+        6
+      ],
+      "artifacts": [
+        {
+          "file": "av1-spatial-container-missing-last-upper.webm",
+          "sha256": "685a92ab890e53081a5ce0bdd45af7b9c47b7e25477a1767532fba31252c7ffb"
+        },
+        {
+          "file": "av1-spatial-container-missing-last-upper.mp4",
+          "sha256": "3c0d77099f5dfb9f3f2c34ce1f67ffee7dd8682d5164ff472a881bfc4f307339"
+        }
+      ]
+    },
+    {
+      "name": "invalid-two-units",
+      "shown_indices": [],
+      "artifacts": [
+        {
+          "file": "av1-spatial-container-invalid-two-units.webm",
+          "sha256": "58b74413a42217cb2580309bf0c4f9552f648cc85b27ae8d013a92037ba9545f"
+        },
+        {
+          "file": "av1-spatial-container-invalid-two-units.mp4",
+          "sha256": "196dd8579dc4c7d0fcada5a641e1c313918a30ddecc8cf042393ed3b43e6cdcd"
+        }
+      ]
+    },
+    {
+      "name": "invalid-repeated-layers",
+      "shown_indices": [],
+      "artifacts": [
+        {
+          "file": "av1-spatial-container-invalid-repeated-layers.webm",
+          "sha256": "21e928113af664fbf44303187ff2df8127e0e16b9160a5aaf73a91e925bb2b07"
+        },
+        {
+          "file": "av1-spatial-container-invalid-repeated-layers.mp4",
+          "sha256": "2f0308a0845feef87237a9f271f35a5a32bf25fd18f58dfde479508502eccf70"
+        }
+      ]
+    }
+  ]
+}

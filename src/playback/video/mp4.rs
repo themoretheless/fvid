@@ -549,7 +549,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 Ok(None)
             }
             Decoder::Av1(d) => {
-                for decoded in d.decode_packet(&self.packet)? {
+                if let Some(decoded) = d.decode_temporal_unit(&self.packet)? {
                     if decoded.show {
                         let p = &decoded.picture;
                         let colour = crate::playback_native::AvcColour {

@@ -1248,3 +1248,22 @@ The old included-empty-spatial-OBU check now expects malformed-payload validatio
 not the removed unsupported gate. This raw API outputs every included frame;
 choosing the displayed highest spatial layer within a temporal unit, container
 playback/seek and broader layered conformance require separate qualification.
+
+## Owned AV1 spatial container display regression (2026-10-08)
+
+`scripts/generate_av1_spatial_container_samples.py` wraps the original spatial
+SVC OBUs in authored WebM/MP4 sample tables: four 20ms samples, each containing
+one full temporal unit. No external codec, network or FFmpeg runs during this
+wrapping or ordinary tests. The complete variant selects raw goldens 1/3/5/7;
+`missing-last-upper` removes only the final upper frame (no later picture can
+depend on it), selecting goldens 1/3/5/6. The dual-oracle raw goldens and their
+provenance are unchanged. All container artifacts have recorded SHA256 hashes.
+
+Before the fix WebM failed exactly with `multiple visible frames in one WebM
+packet need distinct timestamps`; MP4 produced the lower layer at unit zero
+instead of the golden upper layer. Acceptance requires all selected samples,
+20ms timestamps/durations, EOF rewind and full seek replay including dynamic
+final 32x24 output. Invalid-two-units fixtures join two temporal units under one
+timestamp. Invalid-repeated-layers joins them without the second delimiter.
+Both are refusal tests, not acceptance for timestamp recovery. Reset-after-error
+and independent raw all-layer decoding are also checked.
