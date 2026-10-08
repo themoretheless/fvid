@@ -14,15 +14,15 @@ def pieces(data):
             b=data[at];at+=1;n|=(b&127)<<shift;shift+=7
             if not b&128:break
         at+=n;yield (h>>3)&15,sid,data[begin:at]
-def webm(packets,seq):
+def webm(packets,seq,size=(64,48)):
     track=ebml('d7',b'\1')+ebml('83',b'\1')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
-    track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',b'\x40')+ebml('ba',b'\x30'))
+    track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',size[0].to_bytes(max(1,(size[0].bit_length()+7)//8),'big'))+ebml('ba',size[1].to_bytes(max(1,(size[1].bit_length()+7)//8),'big')))
     cluster=ebml('e7',b'\0')
     for i,p in enumerate(packets):cluster+=ebml('a3',b'\x81'+(i*20).to_bytes(2,'big')+bytes([128 if i==0 else 0])+p)
     info=ebml('1549a966',ebml('2ad7b1',(1000000).to_bytes(3,'big')))
     return ebml('1a45dfa3',ebml('4282',b'webm'))+ebml('18538067',info+ebml('1654ae6b',ebml('ae',track))+ebml('1f43b675',cluster))
-def mp4(packets,seq):
-    count=len(packets);size=[64,48]
+def mp4(packets,seq,size=(64,48)):
+    count=len(packets)
     ftyp=atom(b'ftyp',b'isom'+word(0)+b'isomav01');mdat=atom(b'mdat',b''.join(packets))
     entry=bytearray(78);entry[6:8]=(1).to_bytes(2,'big');entry[24:28]=struct.pack('>HH',*size);entry[40:42]=(1).to_bytes(2,'big');entry[74:76]=(24).to_bytes(2,'big')
     stsd=atom(b'stsd',word(0,1)+atom(b'av01',entry+atom(b'av1C',bytes([0x81,0,0,0])+seq)))

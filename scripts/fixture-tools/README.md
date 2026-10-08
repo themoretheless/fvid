@@ -108,3 +108,18 @@ python3 scripts/generate_av1_spatial_container_samples.py
 
 They group actual temporal delimiters into 20ms WebM blocks/MP4 samples and
 produce the missing-last-upper acceptance and multiple-unit refusal variants.
+
+### Combined spatial/temporal SVC
+
+Original three-spatial/three-temporal-layer source (stock libaom 3.15.1 tools
+run only during generation; tests read the committed results):
+
+```sh
+cc scripts/av1_spatiotemporal_operating_points_fixture.c $(pkg-config --cflags --libs aom) -o /tmp/fvid-av1-spatiotemporal-fixture
+python3 scripts/generate_av1_spatiotemporal_operating_points_samples.py --encoder /tmp/fvid-av1-spatiotemporal-fixture --oracle /opt/homebrew/bin/aomdec --second-oracle /opt/homebrew/bin/dav1d
+python3 scripts/generate_av1_spatiotemporal_container_samples.py
+```
+
+The raw generator requires agreement at all nine operating points. Containers
+are authored offline; generalized size arguments preserve previous two-layer
+fixture bytes. Actual interlayer/temporal prediction is checked in acceptance.

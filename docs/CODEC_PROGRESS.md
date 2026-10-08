@@ -5129,3 +5129,28 @@ suite passes after the full selected run. All eight container hashes, generator
 syntax, scoped formatting and commit diff checks pass. The container test binary
 links only libSystem/libiconv. These checks use the current local checkout;
 whole-codec conformance and live GUI/performance remain separate qualifications.
+
+### AV1 combined three-spatial/three-temporal operating points (2026-10-08)
+
+The original 32x24/64x48/128x96 SVC sequence has eight temporal units and all
+nine operating points, with temporal IDs 0/2/1/2/0/2/1/2. Complete independent
+libaom/dav1d goldens qualify every output sample at every point; FVid passes
+configuration/reset, temporal-unit/individual-OBU input and actual display
+selection, including temporal units entirely excluded by the selected point.
+Reference routing uses all eight physical slots without coupling excluded
+temporal layers into admitted lower layers. Reconstructed scaled blocks are
+required in all six upper spatial/temporal combinations, and base-layer
+temporal prediction is measured at all three IDs. No runtime algorithm change
+was needed for these owned cases.
+
+MP4/WebM qualify eight 20ms units, upper 128x96 display, final 64x48 fallback
+when the top frame is absent, all pixels and intervals, EOF rewind and full
+sync-seek replay. Distinct multiple-unit/repeated-layer refusal fixtures and
+reset-after-error remain covered. These generators use no FFmpeg; ordinary
+tests read committed assets only. Broader layered bit depths/chroma, reference
+motion fields, tile lists, decoder-model timing and whole-codec conformance
+remain open.
+
+Final validation: 18 selected offline release integration tests passed, zero
+failed/ignored. All 18 new artifact hashes plus eight unchanged prior container
+hashes verify; scoped formatting, Python syntax and commit diff checks pass.

@@ -1267,3 +1267,40 @@ final 32x24 output. Invalid-two-units fixtures join two temporal units under one
 timestamp. Invalid-repeated-layers joins them without the second delimiter.
 Both are refusal tests, not acceptance for timestamp recovery. Reset-after-error
 and independent raw all-layer decoding are also checked.
+
+## Owned AV1 three-spatial/three-temporal-layer qualification (2026-10-08)
+
+`scripts/av1_spatiotemporal_operating_points_fixture.c` is an original generation-
+only stock-libaom 3.15.1 encoder. It authors eight 128x96 time steps using
+`64 + (3*x + 5*y + 7*t + 23*plane) % 128`, with 32x24/64x48/128x96 spatial
+layers and temporal IDs 0/2/1/2/0/2/1/2. Eight-bit 4:2:0, realtime CPU 6,
+CBR, Q20–40, error resilience, no lag; CDEF/restoration/palette/intrabc and
+reference-motion fields are disabled. No private samples or parameters occur.
+
+Reference slots 0/1, 2/3 and 4/5 hold each spatial layer's temporal base/middle
+frames; scratch slots 6/7 hold the current lower layers at temporal ID 2.
+Upper layers use GOLDEN from the current adjacent lower spatial layer; LAST
+temporal prediction is allowed for the base layer and upper temporal-ID-zero
+frames. Actual scaled blocks are required for each of the six upper-layer
+spatial/temporal combinations; actual base-layer temporal blocks are required
+at each of the three temporal IDs. This is measured reconstruction coverage,
+not a claim inferred from encoder controls.
+
+All nine operating-point masks (0x707/703/701/307/303/301/107/103/101) have
+complete raw goldens agreed independently by unmodified aomdec and dav1d.
+The generator records output indices, sizes, spatial/temporal IDs and SHA256.
+Native acceptance compares every sample with whole-temporal-unit and individual
+OBU input, seeded/unseeded configuration, reset, excluded temporal units and
+highest-present display selection at each point. Ordinary tests run no external
+codec processes or network requests.
+
+The owned container generator produces MP4/WebM with eight 20ms temporal units.
+Complete presentation selects raw frames 2/5/8/11/14/17/20/23. Removing only
+the last upper frame selects 22 instead, preserving all later dependencies
+because no later frame exists. Acceptance checks all pixels/timestamps/durations,
+EOF rewind, complete seek replay and final 64x48 fallback. Multiple temporal
+units under one timestamp, including delimiter-free repeated shown layers,
+remain explicitly labelled refusal fixtures. Eight container artifacts and ten
+raw/golden artifacts have hashes. No FFmpeg is involved in these generators.
+This qualifies the authored 8-bit 4:2:0 combinations, not all layered profiles
+or tile-list/decoder-model/reference-motion-field interactions.

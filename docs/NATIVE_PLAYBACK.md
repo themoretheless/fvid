@@ -888,7 +888,11 @@ Release-сборка обязательна для практического и
   с `spatial_id`; MP4/WebM выбирают верхний фактически доступный показанный слой
   в temporal unit. Собственные 20ms-пакеты, отсутствие верхнего слоя в последнем
   unit, пиксели/timestamps, rewind/seek проверены. Остальные layered combinations
-  ещё требуют квалификации. Tile-list OBU пока отклоняется.
+  ещё требуют квалификации. Дополнительно проверены три spatial × три temporal
+  слоя: все девять operating points, 24 raw-кадра, фактические scaled blocks
+  во всех шести верхних сочетаниях, MP4/WebM timestamps и rewind/seek. Это
+  собственные 8-bit 4:2:0 cases; остальные профили остаются открытыми.
+  Tile-list OBU пока отклоняется.
   Полный перечень проверенных комбинаций и оставшихся пробелов см. в
   `docs/CODEC_PROGRESS.md`; это не заявление полного соответствия AV1.
 - WebM/Matroska: пока отсутствуют lacing, track content compression/encryption

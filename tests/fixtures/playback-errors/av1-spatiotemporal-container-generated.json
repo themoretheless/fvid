@@ -1,0 +1,78 @@
+{
+  "fixtures": [
+    {
+      "name": "complete",
+      "shown_indices": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        17,
+        20,
+        23
+      ],
+      "artifacts": [
+        {
+          "file": "av1-spatiotemporal-container-complete.webm",
+          "sha256": "0a7468d35961eaff095e35df769aaa2a04b7b60ceef8cec87fe34a0a3f5b76f9"
+        },
+        {
+          "file": "av1-spatiotemporal-container-complete.mp4",
+          "sha256": "bf986c22df0fc8df3972dfb1ec21439e6beb50e3e9b8e3f92547760a65c1c47e"
+        }
+      ]
+    },
+    {
+      "name": "missing-last-upper",
+      "shown_indices": [
+        2,
+        5,
+        8,
+        11,
+        14,
+        17,
+        20,
+        22
+      ],
+      "artifacts": [
+        {
+          "file": "av1-spatiotemporal-container-missing-last-upper.webm",
+          "sha256": "c4cdc8954bf7f03a6cc3698f219bc4618944dac930e7970db88453b326201ff0"
+        },
+        {
+          "file": "av1-spatiotemporal-container-missing-last-upper.mp4",
+          "sha256": "f5637d2d12a291856da992d0d1f186a3ad5fd71337c4dba23894af630f97e2f6"
+        }
+      ]
+    },
+    {
+      "name": "invalid-two-units",
+      "shown_indices": [],
+      "artifacts": [
+        {
+          "file": "av1-spatiotemporal-container-invalid-two-units.webm",
+          "sha256": "def855d8f6d0a96e3c7af70de69d1613b928430f75c1706c5682fd455fdeb3c0"
+        },
+        {
+          "file": "av1-spatiotemporal-container-invalid-two-units.mp4",
+          "sha256": "cc48ded2f750574d50938bc7cf2142a6825d0faad8f9918bd8233b456d95cefc"
+        }
+      ]
+    },
+    {
+      "name": "invalid-repeated-layers",
+      "shown_indices": [],
+      "artifacts": [
+        {
+          "file": "av1-spatiotemporal-container-invalid-repeated-layers.webm",
+          "sha256": "f83431c299cffa0aefbb98cb2f9201d8cd7f23c02069b9069bf8e4153f4a20b3"
+        },
+        {
+          "file": "av1-spatiotemporal-container-invalid-repeated-layers.mp4",
+          "sha256": "0594e51b6452d30150eb3704f8ddff1f648045d92efe0d7ecfbb46b838362226"
+        }
+      ]
+    }
+  ]
+}
