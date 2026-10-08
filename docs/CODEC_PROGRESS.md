@@ -5498,3 +5498,16 @@ sentinel proving the parser stops before the following payload. These are syntax
 acceptance tests, not encoded HE-AAC playback acceptance. Rate-dependent bounds,
 grid/envelope/noise parsing, QMF and high-frequency reconstruction remain pending.
 Reference: GOST R 53556.4-2013 tables 63 and 105–111 (MPEG-4 Audio syntax).
+
+
+### Owned SBR grid syntax foundation
+
+`owned_aac::aac_sbr_grid::GridSyntax` transactionally parses FIXFIX, FIXVAR,
+VARFIX and VARVAR, retaining both relative-border lists and the pointer.
+FIXVAR frequency-resolution fields are reversed into envelope order. Noise
+envelope counts and the one-envelope FIXFIX amplitude-resolution override are
+exposed. Hand-authored syntax vectors check exact consumption and rollback at
+every truncated bit and every byte offset. The layer parses bounded raw syntax;
+it does not yet validate envelope counts, pointer legality, time geometry or
+frame-to-frame continuity, and is not HE-AAC playback acceptance.
+Reference: GOST R 53556.4-2013 table 69 (legacy MPEG-4 SBR).
