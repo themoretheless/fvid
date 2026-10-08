@@ -2253,3 +2253,20 @@ test signals, not decoded PCM: hybrid analysis, decorrelation and stereo QMF
 synthesis remain pending. Full native PS playback refusal is checked separately.
 Generation is explicit and offline; ordinary tests need no FFmpeg/libav,
 network, Python generator, or copied foreign codec implementation.
+
+### PS raw hybrid FIR numerical references (2026-10-09)
+
+`aac-ps-hybrid-filter-oracles.json` is generated explicitly by
+`scripts/generate_aac_ps_hybrid_filter_oracles.py`. Prototype decimals and
+modulation formulas are protocol constants from GOST R 53556.8-2013 6.4.3,
+tables 36–38 (https://allgosts.ru/33/170/gost_r_53556.8-2013).
+The independently authored reference uses 90-digit Decimal trigonometric
+series and full linear convolution, not Rust output or a foreign decoder.
+Its input consists solely of original real/imaginary impulses and rational
+complex numerical sequences; it contains no media or private parameter sets.
+All five raw prototypes are covered. `tests/he_aac_ps_hybrid_filter.rs`
+accepts raw FIR numerics and state behavior, not full PS playback. Existing
+PS synthetic videos still retain their distinct full-synthesis refusal tests.
+No newly discovered media parsing/playback failure is represented by this
+numeric component fixture. Tests only read the saved JSON; no generator,
+FFmpeg/libav or network is needed.

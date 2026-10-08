@@ -6411,3 +6411,25 @@ This completes the numeric matrix controller and supplied-hybrid mixing stage.
 Hybrid analysis, decorrelation and stereo QMF synthesis are still missing
 from native PS playback; valid videos keep the full synthesis refusal until
 those stages and full independent PCM acceptance are implemented.
+
+### Owned PS raw hybrid FIR primitives (2026-10-09)
+
+`aac_ps_hybrid_filter` implements all five 13-tap low-frequency prototypes
+from GOST R 53556.8-2013 6.4.3, tables 36–38: 20-band Q=8 Type A and Q=2
+Type B, and 34-band Q=12/8/4 Type A. Complex modulation uses the positive
+exponent and half-bin offset; the two-band real cosine has no half-bin offset.
+A causal stream owner retains all 13 history samples across arbitrary chunks,
+checkpoint replay and empty calls, and commits only after every output is
+finite. Raw synthesis sums split bands without an extra FIR or normalization.
+
+Independent saved Decimal convolution references cover every raw subband of
+real/imaginary impulses and an original complex rational sequence. Tests also
+verify six-slot delayed reconstruction, published decimal precision, arbitrary
+chunk boundaries, reset/checkpoints and rollback on late overflow. Generator
+execution is separate from ordinary offline tests and uses no FFmpeg or codec.
+
+This is the raw modulation-index layer, not the complete routed hybrid bank.
+20-band folding/order, the 71/91-band bank with aligned upper QMF channels,
+decorrelation, stereo QMF synthesis and whole-PCM startup/timeline integration
+remain to be implemented and independently qualified. No full PS playback
+acceptance or PCM output is claimed; existing native synthesis refusals remain.
