@@ -171,7 +171,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             let asc = crate::codec::config::aac_specific_config(&extra_data)?;
             let config = crate::codec::config::AudioSpecificConfig::parse(asc)?;
             if config.ps_present.is_none() && config.sbr_present != Some(false) {
-                crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(asc, track.sample_rate as u32).ok()
+                crate::codec::aac_ps_native::InBandPsProbe::new(asc, track.sample_rate as u32).ok()
             } else { None }
         } else { None };
         let mut in_band_ps = false;
@@ -180,7 +180,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             while index < demuxer.packets.len() || demuxer.scan_more()? {
                 if demuxer.packets[index].track == track_number {
                     let payload = demuxer.read_packet(index)?;
-                    if probe.decode(&payload).is_err() { probe.reset(); }
+                    if probe.read(&payload).is_err() { probe.reset(); }
                     else if probe.ps_detected() { in_band_ps = true; break; }
                 }
                 index += 1;

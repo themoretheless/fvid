@@ -144,7 +144,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
             let config = crate::codec::config::AudioSpecificConfig::parse(asc)?;
             if config.ps_present.is_none() && config.sbr_present != Some(false) {
-                crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(asc, track.sample_rate).ok()
+                crate::codec::aac_ps_native::InBandPsProbe::new(asc, track.sample_rate).ok()
             } else { None }
         } else { None };
         let count = track.samples.len();
@@ -155,7 +155,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 demuxer.read_packet(index, sample, &mut payload)?;
                 // A valid LC-only block has no SBR fill. It remains on normal
                 // AAC dispatch; subsequent extension runs can still be probed.
-                if probe.decode(&payload).is_err() { probe.reset(); continue; }
+                if probe.read(&payload).is_err() { probe.reset(); continue; }
                 if probe.ps_detected() { in_band_ps = true; break; }
             }
         }

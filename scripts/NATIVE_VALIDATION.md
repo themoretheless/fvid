@@ -782,3 +782,13 @@ retaining original source timestamps and configuration. Generation is offline
 and deterministic. Output-clock changes, missing SBR fill playback, complex
 AAC layouts, implicit-PS export dispatch and probe startup performance remain
 unqualified; this supersedes the Matroska discovery limitation above only.
+
+Syntax-only in-band PS negotiation (2026-10-09): `InBandPsProbe` replaces full
+native PCM decoding during MP4/Matroska reader preflight. It parses original
+mono SCE, SBR and PS syntax transactionally, retaining syntax histories and
+validating END/trailing bytes before publishing presence. It does not run IMDCT,
+core synthesis, QMF, hybrid or stereo DSP. The existing synthetic missing-fill
+video verifies that normal LC without SBR fill is accepted for discovery,
+followed by late PS discovery, malformed-tail rollback, reset/replay and explicit
+disable guards. This qualifies discovery only: native PS playback still refuses
+missing SBR fill. Track-wide scanning and output clock negotiation remain gaps.

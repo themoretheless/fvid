@@ -387,3 +387,79 @@ fn matroska_reader_discovers_unhinted_ps_and_retains_negative_source_timestamps(
         assert_eq!(replay, pcm);
     }
 }
+
+#[test]
+fn syntax_probe_accepts_lc_without_fill_then_detects_late_ps_transactionally() {
+    use fvid::codec::aac_ps_native::InBandPsProbe;
+    let manifest: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-inband-oracles.json"
+    ))
+    .unwrap();
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let case = manifest["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["kind"] == "LC" && c["slots"] == 16)
+        .unwrap();
+    let asc = hex(case["video"]["asc"].as_str().unwrap());
+    let mut probe = InBandPsProbe::new(&asc, 48000).unwrap();
+    let mut missing = Mp4Reader::open(
+        std::fs::File::open(root.join("he-aac-ps-native-missing-fill-synthetic.mp4")).unwrap(),
+        Limits::default(),
+    )
+    .unwrap();
+    let track = missing
+        .tracks()
+        .iter()
+        .position(|t| t.handler == *b"soun")
+        .unwrap();
+    let mut packet = vec![];
+    missing.read_packet(track, 1, &mut packet).unwrap();
+    assert!(
+        NativePsAacDecoder::new_with_in_band_ps(&asc, 48000)
+            .unwrap()
+            .decode(&packet)
+            .unwrap_err()
+            .to_string()
+            .contains("requires SBR/PS fill")
+    );
+    assert!(!probe.read(&packet).unwrap());
+    let mut reader = Mp4Reader::open(
+        std::fs::File::open(root.join(case["video"]["file"].as_str().unwrap())).unwrap(),
+        Limits::default(),
+    )
+    .unwrap();
+    let track = reader
+        .tracks()
+        .iter()
+        .position(|t| t.handler == *b"soun")
+        .unwrap();
+    for i in 0..3 {
+        reader.read_packet(track, i, &mut packet).unwrap();
+        let mut malformed = packet.clone();
+        malformed.push(0xa5);
+        let before = probe.ps_detected();
+        assert!(
+            probe
+                .read(&malformed)
+                .unwrap_err()
+                .to_string()
+                .contains("trailing bytes after PS AAC END")
+        );
+        assert_eq!(probe.ps_detected(), before);
+        assert_eq!(probe.read(&packet).unwrap(), i > 0);
+    }
+    probe.reset();
+    assert!(!probe.ps_detected());
+    for i in 0..3 {
+        reader.read_packet(track, i, &mut packet).unwrap();
+        assert_eq!(probe.read(&packet).unwrap(), i > 0);
+    }
+    for row in manifest["explicit_false"].as_array().unwrap() {
+        for key in ["ps_false", "sbr_false"] {
+            assert!(InBandPsProbe::new(&hex(row[key].as_str().unwrap()), 48000).is_err());
+        }
+    }
+}

@@ -257,3 +257,108 @@ impl NativePsAacDecoder {
         Ok(output)
     }
 }
+
+/// Transactional syntax-only PS presence negotiation. No core synthesis, QMF,
+/// hybrid, decorrelation or stereo PCM is allocated or computed by this probe.
+#[derive(Clone)]
+pub struct InBandPsProbe {
+    config: AacConfig,
+    sbr: super::aac_sbr_history::Stream,
+    ps: super::aac_ps_history::Stream,
+    seen: bool,
+}
+impl InBandPsProbe {
+    pub fn new(asc: &[u8], output_rate: u32) -> Result<Self> {
+        let parsed = AudioSpecificConfig::parse(asc)?;
+        if parsed.ps_present == Some(false) || parsed.sbr_present == Some(false) {
+            return Err(invalid(
+                "in-band PS cannot override explicitly disabled PS or SBR",
+            ));
+        }
+        parsed.resolve_output_rate(output_rate)?;
+        if parsed.program.is_some()
+            || parsed.core.channels != 1
+            || parsed.core.channel_configuration != 1
+        {
+            return Err(unsupported(
+                "in-band PS probe requires one mono AAC-LC element",
+            ));
+        }
+        BandTables::for_config(&parsed.core)?;
+        Ok(Self {
+            config: parsed.core,
+            sbr: Default::default(),
+            ps: Default::default(),
+            seen: false,
+        })
+    }
+    pub fn ps_detected(&self) -> bool {
+        self.seen
+    }
+    pub fn reset(&mut self) {
+        self.sbr = Default::default();
+        self.ps = Default::default();
+        self.seen = false;
+    }
+    /// A packet without SBR fill is valid for discovery, but does not claim PS.
+    /// Syntax errors never commit partial headers, histories or presence flags.
+    pub fn read(&mut self, packet: &[u8]) -> Result<bool> {
+        let mut trial = self.clone();
+        let mut bits = BitReader::new(packet);
+        let mut core = false;
+        let mut fill = false;
+        loop {
+            match bits.read(3)? {
+                0 => {
+                    if core {
+                        return Err(invalid("duplicate PS AAC mono element"));
+                    }
+                    bits.read(4)?;
+                    ChannelData::read(&mut bits, &trial.config)?;
+                    core = true;
+                }
+                4 => aac_pce::skip_data_stream(&mut bits)?,
+                6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
+                    if !core {
+                        return Err(invalid("PS SBR fill precedes mono element"));
+                    }
+                    if fill {
+                        return Err(invalid("duplicate PS SBR fill extension"));
+                    }
+                    let rate = trial
+                        .config
+                        .sample_rate
+                        .checked_mul(2)
+                        .ok_or_else(|| invalid("PS frequency overflow"))?;
+                    let slots = (trial.config.frame_samples / 64) as u8;
+                    let frame = trial.sbr.read(reader, end, crc, rate, slots, 1)?;
+                    let parsed = trial.ps.read_sbr_extensions(
+                        frame.syntax.data.extended_data.as_deref().unwrap_or(&[]),
+                        slots * 2,
+                    )?;
+                    if parsed.len() > 1 {
+                        return Err(unsupported("SBR PS frame permits at most one PS element"));
+                    }
+                    trial.seen |= !parsed.is_empty();
+                    fill = true;
+                    Ok(())
+                })?,
+                7 => break,
+                _ => {
+                    return Err(unsupported(
+                        "PS AAC block requires a sole mono SCE without coupling or PCE",
+                    ));
+                }
+            }
+        }
+        if !core {
+            return Err(invalid("PS AAC block has no mono element"));
+        }
+        if bits.remaining() > 7 {
+            return Err(invalid("trailing bytes after PS AAC END"));
+        }
+        let seen = trial.seen;
+        *self = trial;
+        Ok(seen)
+    }
+}
