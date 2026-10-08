@@ -1500,3 +1500,35 @@ FFmpeg or network is used by generation or ordinary tests.
 Extension syntax was checked against FDK AAC's `EXT_DATA_ELEMENT` parser:
 https://github.com/mstorsjo/fdk-aac/blob/master/libAACdec/src/aacdecoder.cpp
 The Rust implementation is independently written; FDK is not linked or invoked.
+
+### AAC PCE height layers and explicit PCM positions (2026-10-08)
+
+`generate_aac_height_samples.py` hand-authors seventeen six-frame AAC-LC
+streams and two malformed derivatives, with a six-frame 16x16 Y4M companion
+at 48000/1024 fps. Each channel has four +/-1 spectral coefficients and a
+distinct gain; PCM references use direct cosine evaluation and sine-window
+overlap, without an AAC decoder or external process. The hash manifest records
+37 artifacts. Huffman codewords come from the already owned protocol tables;
+no private media, frames, audio or parameter sets are used.
+
+Height comments carry a sync byte, two bits per non-LFE element, byte padding
+and CRC-8. The generator computes CRC bitwise; Rust validates it bytewise.
+Normal/top/bottom layouts exercise front, side, back, pairs, center channels,
+LFE, wide top groups and a deliberately permuted layer sequence. Separately
+authored expected channel order prevents the oracle from adopting decoder
+mapping. Short 0xac comments remain ordinary comments. Top positions that
+WAVE can name retain exact speaker bits; other groups expose explicit positions
+and a zero mask rather than a false horizontal assignment.
+
+Before the fix, enabled PCM acceptance failed specifically with `AAC PCE height
+layout is not implemented`; the additional normal four-channel case reproduced
+`ambiguous AAC PCE speaker layout`. Tests now accept these valid groups with
+explicit element order. CRC damage and reserved layer 3 are rejection tests.
+A top/bottom swap with the same zero mask must reject in-band configuration
+change without altering subsequent audio. PCE truncations are transactional.
+Native WAV, MP4 and Matroska paths preserve channel order and initialization.
+Ordinary tests consume committed bytes and need no FFmpeg or network.
+
+Syntax references (no source code or runtime imported):
+https://github.com/mstorsjo/fdk-aac/blob/master/libMpegTPEnc/src/tpenc_asc.cpp
+https://learn.microsoft.com/en-us/windows/win32/medfound/mf-mt-audio-channel-mask-attribute

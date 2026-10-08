@@ -5380,3 +5380,36 @@ construction was corrected from invalid zero padding to the required 0xa5 bytes.
 This closes ancillary fill playback, not SBR/HE-AAC, gain control, height layouts
 or the broader unresolved codec tools. Generation is explicit, uses committed
 owned media only, and requires no external encoder or network.
+
+## AAC explicit PCE height layouts (2026-10-08)
+
+The owned PCE implementation now parses normal/top/bottom information from
+CRC-protected height comments, with bounded payload reads and transactional
+PCE cursor updates. Short 0xac comments remain ordinary application comments.
+The decoder exposes `channel_positions()` in emitted PCM order; positions carry
+layer, front/side/back/LFE group and ordinal/group size. Recognized horizontal
+and top layouts retain exact WAVE masks. Layouts absent from WAVE or lacking
+a unique standard bit assignment use mask zero and explicit positions rather
+than rejecting audio or inventing a horizontal speaker mapping. This also
+accepts valid four-front-channel, multiple-LFE and separate-SCE PCE groups.
+
+In-band PCE checks now compare height layers in addition to the previous
+configuration fields. Equal zero masks cannot hide a top/bottom layout change.
+Checkpoint configuration equality and per-channel synthesis state remain intact.
+WAV retains PCM and representable masks; unrepresentable positions require the
+explicit decoder metadata because the standard WAVE mask cannot encode them.
+MP4 and Matroska remux retain complete AAC initialization and exact decoded PCM.
+
+Seventeen originally authored six-frame cases compare each channel to an
+independent direct-cosine/sine-window oracle. Two malformed derivatives cover
+CRC damage and reserved layer 3; additional tests cover all PCE truncations,
+reset, same-mask layout-change rollback, explicit positions, WAV export and
+container remux. A matching six-frame Y4M companion and 37 artifact hashes are
+committed. The pre-fix height refusal and the independent unrecognized-group
+refusal were each reproduced before enabling their acceptance.
+
+Five height tests, four fill tests, thirteen existing PCE and five coupling
+tests pass in a clean copy without active drafts. Fifty-two AAC unit tests pass
+locally. The clean binary links only libiconv/libSystem, without FFmpeg/libav.
+This closes explicit PCE height/group decoding; HE-AAC/SBR, gain control and
+other unresolved codec tools remain independent work.

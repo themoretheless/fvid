@@ -199,3 +199,12 @@ owned AAC derivatives, their six-frame Y4M companion and hash manifest. No
 external codec is needed. Ordinary acceptance uses committed files:
 `cargo test --release --locked --offline --no-default-features --test aac_fill_extensions`.
 Audio-tool refusals are kept separate from ancillary-data playback acceptance.
+
+### AAC height PCE and explicit channel placements
+
+`python3 scripts/generate_aac_height_samples.py` explicitly generates seventeen
+original six-frame AAC streams, independent cosine PCM, two malformed headers,
+a Y4M companion and hashes. No external encoder is required. Run ordinary
+acceptance with `cargo test --release --locked --offline --no-default-features
+--test aac_height_layouts`. Invalid CRC/layer and changed-layout tests are
+separate from accepted nonzero per-channel playback.

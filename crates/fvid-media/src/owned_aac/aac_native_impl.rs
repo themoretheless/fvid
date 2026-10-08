@@ -105,6 +105,10 @@ impl NativeAacDecoder {
         self.channel_mask
     }
     /// Save overlap/window and perceptual-noise history after a complete packet.
+    /// Explicit PCE positions in emitted PCM order; None for indexed layouts.
+    pub fn channel_positions(&self) -> Result<Option<Vec<super::aac_pce::ChannelPosition>>> {
+        self.program.as_ref().map(|p| p.pcm_positions()).transpose()
+    }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {config:self.config.clone(),program:self.program.clone(),
             synthesis:self.synthesis.clone(),coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
@@ -219,6 +223,7 @@ impl NativeAacDecoder {
                         || program.elements != expected.elements
                         || program.sample_rate != expected.sample_rate
                         || program.object_type != expected.object_type
+                        || program.height_layers()? != expected.height_layers()?
                         || program.pcm_layout()?.0 != self.channel_mask
                     {
                         return Err(invalid("AAC in-band PCE changed the configured layout"));

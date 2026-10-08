@@ -7,6 +7,22 @@ pub enum Position {
     Back,
     Lfe,
 }
+/// PCE's explicit vertical speaker layer.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum HeightLayer {
+    Normal,
+    Top,
+    Bottom,
+}
+/// One PCM channel's PCE placement. Within each layer/position, index follows
+/// PCE element order (and left/right order within a pair).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ChannelPosition {
+    pub height: HeightLayer,
+    pub position: Position,
+    pub index: u8,
+    pub group_channels: u8,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Element {
     pub position: Position,
@@ -33,64 +49,154 @@ impl ProgramConfig {
             .map(|e| if e.pair { 2 } else { 1 })
             .sum()
     }
-    /// Canonical WAVE speaker order for unambiguous horizontal PCE layouts.
-    pub fn pcm_layout(&self) -> Result<(u32, Vec<usize>)> {
-        if self.comment.first() == Some(&0xac) {
-            return Err(invalid(
-                "AAC PCE height layout is not implemented",
-            ));
+    /// Height per configured element, including normal-height LFE elements.
+    /// Ordinary comments and short comments without a complete sync header do
+    /// not constitute a height extension. Trailing application comment is kept.
+    pub fn height_layers(&self) -> Result<Vec<HeightLayer>> {
+        let mut result = vec![HeightLayer::Normal; self.elements.len()];
+        if self.comment.first() != Some(&0xac) || self.comment.len() < 3 {
+            return Ok(result);
         }
-        let mut speakers = Vec::new();
-        for position in [
-            Position::Front,
-            Position::Side,
-            Position::Back,
-            Position::Lfe,
-        ] {
-            let elements: Vec<_> = self
-                .elements
-                .iter()
-                .filter(|e| e.position == position)
-                .collect();
-            let count: usize = elements.iter().map(|e| if e.pair { 2 } else { 1 }).sum();
-            let group: &[u8] = match (position, count) {
-                (_, 0) => &[],
-                (Position::Front, 1) => &[2],
-                (Position::Front, 2) => &[0, 1],
-                (Position::Front, 3) => &[2, 0, 1],
-                (Position::Front, 5) => &[2, 6, 7, 0, 1],
-                (Position::Side, 2) => &[9, 10],
-                (Position::Back, 1) => &[8],
-                (Position::Back, 2) => &[4, 5],
-                (Position::Back, 3) => &[8, 4, 5],
-                (Position::Lfe, 1) => &[3],
-                _ => return Err(invalid("ambiguous AAC PCE speaker layout")),
-            };
-            let expected_pairs: &[bool] = match count {
-                0 => &[],
-                1 => &[false],
-                2 => &[true],
-                3 => &[false, true],
-                5 => &[false, true, true],
-                _ => unreachable!(),
-            };
-            if elements
-                .iter()
-                .map(|e| e.pair)
-                .ne(expected_pairs.iter().copied())
-            {
-                return Err(invalid(
-                    "AAC PCE element grouping does not identify speakers",
-                ));
-            }
-            speakers.extend_from_slice(group);
-        }
-        let mask = speakers.iter().fold(0u32, |m, s| m | (1 << s));
-        let mapping = speakers
+        let count = self
+            .elements
             .iter()
-            .map(|s| (mask & ((1 << s) - 1)).count_ones() as usize)
-            .collect();
+            .filter(|e| e.position != Position::Lfe)
+            .count();
+        let payload_bytes = (count * 2).div_ceil(8);
+        let end = 1 + payload_bytes;
+        if self.comment.len() <= end {
+            return Err(invalid("truncated AAC PCE height extension"));
+        }
+        let mut crc = 0xffu8;
+        for &byte in &self.comment[..end] {
+            crc ^= byte;
+            for _ in 0..8 {
+                crc = if crc & 0x80 != 0 {
+                    (crc << 1) ^ 0x07
+                } else {
+                    crc << 1
+                };
+            }
+        }
+        if crc != self.comment[end] {
+            return Err(invalid("AAC PCE height CRC mismatch"));
+        }
+        let mut bits = BitReader::new(&self.comment[1..end]);
+        // PCE syntax groups front, side, back; manually constructed programs
+        // need the same interpretation even if their vector order differs.
+        for position in [Position::Front, Position::Side, Position::Back] {
+            for (i, element) in self.elements.iter().enumerate() {
+                if element.position == position {
+                    result[i] = match bits.read(2)? {
+                        0 => HeightLayer::Normal,
+                        1 => HeightLayer::Top,
+                        2 => HeightLayer::Bottom,
+                        _ => return Err(invalid("invalid AAC PCE height layer")),
+                    };
+                }
+            }
+        }
+        Ok(result)
+    }
+    /// WAVE speaker order if all positions have WAVE bits. Otherwise mask zero
+    /// denotes explicitly positioned PCM in normal/top/bottom, front/side/back/
+    /// LFE order. Use pcm_positions() to retain placements absent from WAVE.
+    pub fn pcm_layout(&self) -> Result<(u32, Vec<usize>)> {
+        let (mask, mapping, _) = self.layout()?;
         Ok((mask, mapping))
+    }
+    /// Positions in emitted PCM channel order, including layers WAVE cannot name.
+    pub fn pcm_positions(&self) -> Result<Vec<ChannelPosition>> {
+        Ok(self.layout()?.2)
+    }
+    fn layout(&self) -> Result<(u32, Vec<usize>, Vec<ChannelPosition>)> {
+        if self.channels() == 0 || self.channels() > 64 {
+            return Err(invalid("AAC PCE requires 1..=64 channels"));
+        }
+        let heights = self.height_layers()?;
+        let offsets: Vec<_> = self
+            .elements
+            .iter()
+            .scan(0usize, |at, e| {
+                let offset = *at;
+                *at += if e.pair { 2 } else { 1 };
+                Some(offset)
+            })
+            .collect();
+        let mut channels = Vec::new();
+        for height in [HeightLayer::Normal, HeightLayer::Top, HeightLayer::Bottom] {
+            for position in [
+                Position::Front,
+                Position::Side,
+                Position::Back,
+                Position::Lfe,
+            ] {
+                let elements: Vec<_> = self
+                    .elements
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, e)| e.position == position && heights[*i] == height)
+                    .collect();
+                let count: usize = elements
+                    .iter()
+                    .map(|(_, e)| if e.pair { 2 } else { 1 })
+                    .sum();
+                let expected_pairs: Option<&[bool]> = match count {
+                    0 => Some(&[]), 1 => Some(&[false]), 2 => Some(&[true]),
+                    3 => Some(&[false,true]), 5 => Some(&[false,true,true]),
+                    _ => None,
+                };
+                let identified = expected_pairs.is_some_and(|expected|
+                    elements.iter().map(|(_,e)| e.pair).eq(expected.iter().copied()));
+                let bits: Option<&[u8]> = match (height, position, count) {
+                    (_, _, 0) => Some(&[]),
+                    (HeightLayer::Normal, Position::Front, 1) => Some(&[2]),
+                    (HeightLayer::Normal, Position::Front, 2) => Some(&[0, 1]),
+                    (HeightLayer::Normal, Position::Front, 3) => Some(&[2, 0, 1]),
+                    (HeightLayer::Normal, Position::Front, 5) => Some(&[2, 6, 7, 0, 1]),
+                    (HeightLayer::Normal, Position::Side, 2) => Some(&[9, 10]),
+                    (HeightLayer::Normal, Position::Back, 1) => Some(&[8]),
+                    (HeightLayer::Normal, Position::Back, 2) => Some(&[4, 5]),
+                    (HeightLayer::Normal, Position::Back, 3) => Some(&[8, 4, 5]),
+                    (HeightLayer::Normal, Position::Lfe, 1) => Some(&[3]),
+                    (HeightLayer::Top, Position::Front, 1) => Some(&[13]),
+                    (HeightLayer::Top, Position::Front, 2) => Some(&[12, 14]),
+                    (HeightLayer::Top, Position::Front, 3) => Some(&[13, 12, 14]),
+                    (HeightLayer::Top, Position::Back, 1) => Some(&[16]),
+                    (HeightLayer::Top, Position::Back, 2) => Some(&[15, 17]),
+                    (HeightLayer::Top, Position::Back, 3) => Some(&[16, 15, 17]),
+                    _ => None,
+                };
+                let bits = if identified { bits } else { None };
+                let mut index = 0;
+                for (i, e) in elements {
+                    for ch in 0..if e.pair { 2 } else { 1 } {
+                        channels.push((
+                            offsets[i] + ch,
+                            bits.map(|b| b[index]),
+                            ChannelPosition {
+                                height,
+                                position,
+                                index: index as u8,
+                                group_channels: count as u8,
+                            },
+                        ));
+                        index += 1;
+                    }
+                }
+            }
+        }
+        let mask = if channels.iter().all(|c| c.1.is_some()) {
+            channels.sort_by_key(|c| c.1.unwrap());
+            channels.iter().fold(0u32, |m, c| m | (1 << c.1.unwrap()))
+        } else {
+            0
+        };
+        let mut mapping = vec![0; self.channels()];
+        for (out, c) in channels.iter().enumerate() {
+            mapping[c.0] = out;
+        }
+        Ok((mask, mapping, channels.into_iter().map(|c| c.2).collect()))
     }
     /// Serialize AAC-LC initialization with this explicit program.
     pub fn audio_specific_config(&self) -> Result<Vec<u8>> {
@@ -282,6 +388,7 @@ impl ProgramConfig {
         if result.channels() == 0 || result.channels() > 64 {
             return Err(invalid("AAC PCE requires 1..=64 channels"));
         }
+        result.height_layers()?;
         *bits = input;
         Ok(result)
     }

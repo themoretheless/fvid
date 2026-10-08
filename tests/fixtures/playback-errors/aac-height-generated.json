@@ -1,0 +1,589 @@
+{
+  "cases": {
+    "mono-top": {
+      "order": [
+        0
+      ],
+      "mask": 8192,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-mono-top.aac",
+          "sha256": "a75ca14dcbfe15e7a054ac758f40b04caecbabee15a4e7e157448f28750622ef"
+        },
+        ".f32le": {
+          "file": "aac-height-mono-top.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "invalid-crc": {
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-invalid-crc.aac",
+          "sha256": "03ad701ae9ff8d0e547b64a923d07155750b765e87270639209858a741d52f34"
+        }
+      }
+    },
+    "invalid-layer": {
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-invalid-layer.aac",
+          "sha256": "dbe1d8f0647c9188bb54739a23a0a239d9a387f445f321ee6f006f2a8c1daeb6"
+        }
+      }
+    },
+    "mono-bottom": {
+      "order": [
+        0
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          2
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-mono-bottom.aac",
+          "sha256": "5c659efd574992bb6325f4f2823b0f6bd918ca73f554d6011807a98d86e6920b"
+        },
+        ".f32le": {
+          "file": "aac-height-mono-bottom.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "layered-front": {
+      "order": [
+        2,
+        0,
+        1
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ],
+        [
+          "front",
+          false,
+          1,
+          2
+        ],
+        [
+          "front",
+          false,
+          2,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-layered-front.aac",
+          "sha256": "76a2ccec881fe9480c26742594baf35fcd49978b4871764b4b9ed3c0ee5bc21d"
+        },
+        ".f32le": {
+          "file": "aac-height-layered-front.f32le",
+          "sha256": "1209514bed95c6b7ba9b1afb84b3d35ec25ec7c295d9ad144a85e40c770a836d"
+        }
+      }
+    },
+    "layered-front-swap": {
+      "order": [
+        2,
+        1,
+        0
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          2
+        ],
+        [
+          "front",
+          false,
+          1,
+          1
+        ],
+        [
+          "front",
+          false,
+          2,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-layered-front-swap.aac",
+          "sha256": "28f12181c5da623e229ae3430d65d54e9caf4d00ca62f8f21ea4caba9a932075"
+        },
+        ".f32le": {
+          "file": "aac-height-layered-front-swap.f32le",
+          "sha256": "f3ce70ce0a17b4679e22ecdd73cc8205664d9e2bde311493074ee4195b49b259"
+        }
+      }
+    },
+    "top-front-pair": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "mask": 20484,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "front",
+          true,
+          0,
+          1
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-top-front-pair.aac",
+          "sha256": "3676cc23b6284a901ed25e556e3aaae003028396a3f24befe50b4159be059cf6"
+        },
+        ".f32le": {
+          "file": "aac-height-top-front-pair.f32le",
+          "sha256": "df4ddf3f54353a76bdbcfcb930573d188bc653d02b31771ac2ca9b0f80c2f3f4"
+        }
+      }
+    },
+    "top-front-three": {
+      "order": [
+        1,
+        0,
+        2
+      ],
+      "mask": 28672,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ],
+        [
+          "front",
+          true,
+          0,
+          1
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-top-front-three.aac",
+          "sha256": "bdbbec9fceb99e15c1a871b3ecfc77c035c612a76c331c466ca6c8d6b268b6c3"
+        },
+        ".f32le": {
+          "file": "aac-height-top-front-three.f32le",
+          "sha256": "6062321b5e6092b0402161766c14ae3209f16dfc974c79f1cfafe6a0284f40dc"
+        }
+      }
+    },
+    "top-back-three": {
+      "order": [
+        1,
+        0,
+        2
+      ],
+      "mask": 229376,
+      "elements": [
+        [
+          "back",
+          false,
+          0,
+          1
+        ],
+        [
+          "back",
+          true,
+          0,
+          1
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-top-back-three.aac",
+          "sha256": "c7cd00b0a1cb8c16b637cbfc79f1182c41c01ca83753ee8d65b118acd483cc1a"
+        },
+        ".f32le": {
+          "file": "aac-height-top-back-three.f32le",
+          "sha256": "6062321b5e6092b0402161766c14ae3209f16dfc974c79f1cfafe6a0284f40dc"
+        }
+      }
+    },
+    "top-side": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "side",
+          true,
+          0,
+          1
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-top-side.aac",
+          "sha256": "bbb9db4dab2d9eeacfb0eaf9d01ce8fb0ac9a2dcadb63b1bb194772d471457e8"
+        },
+        ".f32le": {
+          "file": "aac-height-top-side.f32le",
+          "sha256": "df4ddf3f54353a76bdbcfcb930573d188bc653d02b31771ac2ca9b0f80c2f3f4"
+        }
+      }
+    },
+    "bottom-surround": {
+      "order": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          2
+        ],
+        [
+          "side",
+          true,
+          0,
+          2
+        ],
+        [
+          "back",
+          true,
+          1,
+          2
+        ],
+        [
+          "lfe",
+          false,
+          0,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-bottom-surround.aac",
+          "sha256": "7de7b8a94844c14393b599cab343eb0c30c8614cb44434fd95f29005630fc0fc"
+        },
+        ".f32le": {
+          "file": "aac-height-bottom-surround.f32le",
+          "sha256": "ff0e8c99a3f31c761bc2fd347bef324bbe2ad08ab198936eb8e6dbee55c114b6"
+        }
+      }
+    },
+    "top-wide": {
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ],
+        [
+          "front",
+          true,
+          0,
+          1
+        ],
+        [
+          "front",
+          true,
+          1,
+          1
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-top-wide.aac",
+          "sha256": "cfa48480984db8d139667b4b3a326027d024ad64924a0c0bdcbf8a86c5ada3a2"
+        },
+        ".f32le": {
+          "file": "aac-height-top-wide.f32le",
+          "sha256": "ece9cfd8cab98e783fe2cb915ce79018f073f74f71174f2e02a6306eb89d1a76"
+        }
+      }
+    },
+    "top-with-lfe": {
+      "order": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "mask": 73740,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "front",
+          false,
+          1,
+          1
+        ],
+        [
+          "back",
+          false,
+          2,
+          1
+        ],
+        [
+          "lfe",
+          false,
+          0,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-top-with-lfe.aac",
+          "sha256": "5858d60a1d4f386928c89e7c91bd71dc82440084a81bb418642856526d3adf9d"
+        },
+        ".f32le": {
+          "file": "aac-height-top-with-lfe.f32le",
+          "sha256": "758aa7fa57b56502abc5e990e0064bee320ab369b7bd08e5660eb937a687028d"
+        }
+      }
+    },
+    "normal-four": {
+      "order": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          true,
+          0,
+          0
+        ],
+        [
+          "front",
+          true,
+          1,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-normal-four.aac",
+          "sha256": "76c2717616b703f4e7fde2c55e0ca350d4aef95cd421a050e89d90564c2ac3bd"
+        },
+        ".f32le": {
+          "file": "aac-height-normal-four.f32le",
+          "sha256": "6fce765ca2e3e6ee3a0874d17fe0511bb75f52434b706e7b9d659e5a447e1cfa"
+        }
+      }
+    },
+    "multiple-lfe": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "lfe",
+          false,
+          0,
+          0
+        ],
+        [
+          "lfe",
+          false,
+          1,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-multiple-lfe.aac",
+          "sha256": "283f25b1e8f0e844ba473475ce618de6354d1b4766355eb4aeec314ad9d0ea95"
+        },
+        ".f32le": {
+          "file": "aac-height-multiple-lfe.f32le",
+          "sha256": "df4ddf3f54353a76bdbcfcb930573d188bc653d02b31771ac2ca9b0f80c2f3f4"
+        }
+      }
+    },
+    "normal-three-sce": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "front",
+          false,
+          1,
+          0
+        ],
+        [
+          "front",
+          false,
+          2,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-normal-three-sce.aac",
+          "sha256": "cbf7d8018ae0a04af45d117ff294e003524ac32321a03acffb1ffe40b1302e73"
+        },
+        ".f32le": {
+          "file": "aac-height-normal-three-sce.f32le",
+          "sha256": "df4ddf3f54353a76bdbcfcb930573d188bc653d02b31771ac2ca9b0f80c2f3f4"
+        }
+      }
+    },
+    "normal-crc": {
+      "order": [
+        0
+      ],
+      "mask": 4,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-normal-crc.aac",
+          "sha256": "14d5f74263635c26075ea5897fb0aecc44d1c2e851d0d7c7e4009e9e827af91e"
+        },
+        ".f32le": {
+          "file": "aac-height-normal-crc.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "short-comment": {
+      "order": [
+        0
+      ],
+      "mask": 4,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-short-comment.aac",
+          "sha256": "bb03693a2116625775513465e3f8d7f38b622ba00dcf321b1825247ee45bae73"
+        },
+        ".f32le": {
+          "file": "aac-height-short-comment.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    },
+    "short-comment-two": {
+      "order": [
+        0
+      ],
+      "mask": 4,
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-short-comment-two.aac",
+          "sha256": "44182012d02a318ac9729e7524199350d05d9f0e52b0b16a4c65b90d985a5ecb"
+        },
+        ".f32le": {
+          "file": "aac-height-short-comment-two.f32le",
+          "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
+        }
+      }
+    }
+  },
+  "video": {
+    "file": "aac-height-companion.y4m",
+    "sha256": "00824b4afd8f5527bf7d279bb5892ab13b5edc82f7a506df55964cc704675439"
+  }
+}
