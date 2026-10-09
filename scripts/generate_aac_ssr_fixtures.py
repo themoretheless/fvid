@@ -89,11 +89,11 @@ def curve(points,size):
         out.append(2**((1-t)*a+t*b))
     return 2**levels[0][1],out
 
-def oracle(shapes,channels,active,spectral_source=None):
+def oracle(shapes,channels,active,spectral_source=None,sequences=None):
     previous_shape=None;fragment=[[[1.]*256 for _ in range(3)] for _ in range(channels)]
     overlap=[[[0.]*256 for _ in range(4)] for _ in range(channels)]
     band_history=[[] for _ in range(channels)];out=bytearray();frames=[]
-    for frame,(seq,shape) in enumerate(zip(SEQUENCES,shapes)):
+    for frame,(seq,shape) in enumerate(zip(SEQUENCES if sequences is None else sequences,shapes)):
         old=shape if previous_shape is None else previous_shape;rows=[]
         for c in range(channels):
             sp=(spectral_source or spectrum)(frame,seq,c);raw=[]

@@ -7396,3 +7396,32 @@ unsupported-tool reason; the fixed path passes PCM/export/seek/rewind/ranges.
 This qualification does not prove all coupling gain-list/TNS interactions.
 Independent source/target windows with unequal output extents still explicitly
 refuse until PCM alignment is implemented; SSR SBR/PS and ADTS remain gaps.
+
+### 2026-10-09 — bounded SSR PCM alignment primitive and video reproductions
+
+`aac_ssr_alignment::SsrPcmAlignment` queues independently produced mono lanes
+and their per-chunk output gains. It emits the previous complete target frame
+with the caller's original stamp after one packet of lookahead. Each lane is
+bounded to two maximum-sized SSR blocks; arbitrary cumulative drift and
+incomplete stream ends return precise errors. It preserves per-source gain
+changes even where source and target frame boundaries differ. Data/gain/geometry
+validation, scaled and mixed f32 overflow, clone checkpoints and reset are
+transactional. Retained allocation payload can be inspected independently of
+allocator headers or caller buffers.
+
+Tests cover every sample in ahead/behind/opposite window patterns, 1024 legal
+transition steps across all 16 initial state pairs, gain changes across source
+chunk boundaries, numeric overflow in a later lane, and incomplete EOF recovery.
+`generate_aac_ssr_alignment_fixtures.py` adds six original MP4 videos (three
+coupled streams and three standalone sources). The standalone native SSR output
+feeds the alignment primitive and agrees with the separate scalar PCM oracle
+for all 6144 samples while retaining target frame stamps. Ordinary tests read
+committed assets; they do not generate media or invoke FFmpeg/network access.
+
+This is not native playback acceptance for unequal windows. The coupled streams
+still reproduce `AAC SSR independent coupling window extents require alignment`
+with exact state rollback. The native MP4/root export acceptance test is ignored
+with an explicit integration reason and was run separately to confirm that
+precise refusal. It must be enabled after native delayed-frame dispatch, source
+PTS/checkpoints and EOF draining are integrated. A passing refusal or primitive
+test does not close that remaining codec gap. SSR SBR/PS and ADTS remain separate.

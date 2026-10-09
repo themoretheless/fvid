@@ -13,11 +13,12 @@ def silent(seq,shape,c,active,common):
     remain=len(swb)-1;escape=7 if seq==2 else 31;size=3 if seq==2 else 5
     while remain>=escape:result+=field(escape,size);remain-=escape
     return result+field(remain,size)+'00'+'1'+gain_bits(seq,active,c)
-def packet(frame,seq,target_shape,source_shape,channels,point,active,missing=False,bad_gain=False,tags=(1,)):
+def packet(frame,seq,target_shape,source_shape,channels,point,active,missing=False,bad_gain=False,tags=(1,),source_sequence=None):
     target='0000000'+silent(seq,target_shape,0,active,False) if channels==1 else '0010000'+'1'+info(seq,target_shape)+'00'+''.join(silent(seq,target_shape,c,active,True) for c in range(2))
     sources=[]
+    source_seq=seq if source_sequence is None else source_sequence
     for tag in tags:
-        source='010'+field(tag,4)+field(point==3,1)+'000'+field(channels==2,1)+field(1 if missing else 0,4)+('00' if channels==2 else '')+field(point==1,1)+'0'+'10'+channel(frame,seq,source_shape,0,active and point==3,False,bad_gain and tag==tags[-1])
+        source='010'+field(tag,4)+field(point==3,1)+'000'+field(channels==2,1)+field(1 if missing else 0,4)+('00' if channels==2 else '')+field(point==1,1)+'0'+'10'+channel(frame,source_seq,source_shape,0,active and point==3,False,bad_gain and tag==tags[-1])
         sources.append(source)
     source=''.join(sources)
     # Alternate source ordering; PCE is authoritative in either order.

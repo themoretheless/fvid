@@ -1,0 +1,379 @@
+{
+  "cases": [
+    {
+      "name": "source-ahead",
+      "slots": 16,
+      "bands": 32,
+      "asc": "1b0009840002011000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 120,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 246,
+          "bytes": 119,
+          "samples": 1024
+        },
+        {
+          "offset": 473,
+          "bytes": 70,
+          "samples": 1024
+        },
+        {
+          "offset": 601,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 721,
+          "bytes": 66,
+          "samples": 1024
+        }
+      ],
+      "source_frames": [
+        {
+          "pcm_offset": 0,
+          "samples": 1024,
+          "offset": 66,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 4096,
+          "samples": 1472,
+          "offset": 189,
+          "bytes": 57
+        },
+        {
+          "pcm_offset": 9984,
+          "samples": 1024,
+          "offset": 365,
+          "bytes": 108
+        },
+        {
+          "pcm_offset": 14080,
+          "samples": 576,
+          "offset": 543,
+          "bytes": 58
+        },
+        {
+          "pcm_offset": 16384,
+          "samples": 1024,
+          "offset": 667,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 20480,
+          "samples": 1024,
+          "offset": 787,
+          "bytes": 54
+        }
+      ],
+      "source_asc": "1b08",
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "target_sequences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "source_sequences": [
+        0,
+        1,
+        2,
+        3,
+        0,
+        0
+      ],
+      "error": "AAC SSR independent coupling window extents require alignment",
+      "video": {
+        "file": "aac-ssr-alignment-source-ahead-synthetic.mp4",
+        "sha256": "3ecf9a00120ca76c9b267052ab9b5d47b51d692c157d1c04184ce79d8f117da5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "source_video": {
+        "file": "aac-ssr-alignment-source-ahead-source-synthetic.mp4",
+        "sha256": "60d820f11fee4a221fafb5912ee48d1fef5df79c0665ddade5ceceff3155435f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b08",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "source-behind",
+      "slots": 16,
+      "bands": 32,
+      "asc": "1b0009840002011000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 841,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 961,
+          "bytes": 69,
+          "samples": 1472
+        },
+        {
+          "offset": 1084,
+          "bytes": 88,
+          "samples": 1024
+        },
+        {
+          "offset": 1226,
+          "bytes": 70,
+          "samples": 576
+        },
+        {
+          "offset": 1350,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 1470,
+          "bytes": 66,
+          "samples": 1024
+        }
+      ],
+      "source_frames": [
+        {
+          "pcm_offset": 0,
+          "samples": 1024,
+          "offset": 907,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 4096,
+          "samples": 1024,
+          "offset": 1030,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 8192,
+          "samples": 1024,
+          "offset": 1172,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 12288,
+          "samples": 1024,
+          "offset": 1296,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 16384,
+          "samples": 1024,
+          "offset": 1416,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 20480,
+          "samples": 1024,
+          "offset": 1536,
+          "bytes": 54
+        }
+      ],
+      "source_asc": "1b08",
+      "pcm_offset": 24576,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        576,
+        1024,
+        1024
+      ],
+      "target_sequences": [
+        0,
+        1,
+        2,
+        3,
+        0,
+        0
+      ],
+      "source_sequences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "error": "AAC SSR independent coupling window extents require alignment",
+      "video": {
+        "file": "aac-ssr-alignment-source-behind-synthetic.mp4",
+        "sha256": "548191379daa4145ce61126fef9c04fa35cfb663ca9985eda2d779fd5fe5a0cf",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 24576,
+        "samples": 6144
+      },
+      "source_video": {
+        "file": "aac-ssr-alignment-source-behind-source-synthetic.mp4",
+        "sha256": "4ee1e6e4da1b14b4f67d91ea523acb277dc93951edb2ed5568b70fae67e6921d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b08",
+        "pcm_offset": 24576,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "opposite-switches",
+      "slots": 16,
+      "bands": 32,
+      "asc": "1b0009840002011000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1590,
+          "bytes": 119,
+          "samples": 1024
+        },
+        {
+          "offset": 1817,
+          "bytes": 73,
+          "samples": 1472
+        },
+        {
+          "offset": 1948,
+          "bytes": 88,
+          "samples": 1024
+        },
+        {
+          "offset": 2090,
+          "bytes": 73,
+          "samples": 576
+        },
+        {
+          "offset": 2220,
+          "bytes": 119,
+          "samples": 1024
+        },
+        {
+          "offset": 2447,
+          "bytes": 119,
+          "samples": 1024
+        }
+      ],
+      "source_frames": [
+        {
+          "pcm_offset": 0,
+          "samples": 1024,
+          "offset": 1709,
+          "bytes": 108
+        },
+        {
+          "pcm_offset": 4096,
+          "samples": 576,
+          "offset": 1890,
+          "bytes": 58
+        },
+        {
+          "pcm_offset": 6400,
+          "samples": 1024,
+          "offset": 2036,
+          "bytes": 54
+        },
+        {
+          "pcm_offset": 10496,
+          "samples": 1472,
+          "offset": 2163,
+          "bytes": 57
+        },
+        {
+          "pcm_offset": 16384,
+          "samples": 1024,
+          "offset": 2339,
+          "bytes": 108
+        },
+        {
+          "pcm_offset": 20480,
+          "samples": 1024,
+          "offset": 2566,
+          "bytes": 108
+        }
+      ],
+      "source_asc": "1b08",
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        576,
+        1024,
+        1024
+      ],
+      "target_sequences": [
+        0,
+        1,
+        2,
+        3,
+        0,
+        0
+      ],
+      "source_sequences": [
+        2,
+        3,
+        0,
+        1,
+        2,
+        2
+      ],
+      "error": "AAC SSR independent coupling window extents require alignment",
+      "video": {
+        "file": "aac-ssr-alignment-opposite-switches-synthetic.mp4",
+        "sha256": "fa3fcc909920fd3a77804bead79879226c4f7dfa1dfb77fa71b0fd6729bfbcae",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 49152,
+        "samples": 6144
+      },
+      "source_video": {
+        "file": "aac-ssr-alignment-opposite-switches-source-synthetic.mp4",
+        "sha256": "8a9ceb24de39b67c601a93a2a6368355d536b1a78496556cd2def40b3fa118e7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b08",
+        "pcm_offset": 49152,
+        "samples": 6144
+      }
+    }
+  ],
+  "packet_sha256": "a13d01e2a44edd272e0a9c8f592b023350b19de796ac768d90a5193898e08227",
+  "pcm_sha256": "c16985d50f2ad8e801ce30ff5d60a8e831bd438dd1606111939d25d5df1a4e0a",
+  "qualification": "native standalone source plus alignment primitive acceptance; coupled native playback still refuses"
+}
