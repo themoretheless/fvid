@@ -8714,3 +8714,30 @@ The absence/roster matrix now has 30 positive videos and two negative companions
 Generation and ordinary tests use no private media, FFmpeg or network. Dynamic
 Main/LC source SBR, source PS, multiple late SSR sources, actual target layout
 and profile changes and wider codec tools remain separate work.
+
+
+### Main/LC source SBR under dynamic CCE PCE rosters (2026-10-09)
+
+Thirty-six authored videos qualify independent CCE1 with Main/LC core, source
+SBR at 24/48 kHz, and static/dynamic PCE rosters. Six-packet programs cover
+source absence/return, initially empty roster arrival and final retirement.
+Twelve core controls retain nonzero spectra, alternating window shapes and
+Main prediction activation/reset. Target is silent mono SCE0.
+
+The generator evaluates scalar prediction and direct IMDCT/overlap per coded
+source ordinal, then direct QMF/SBR convolution on that source clock. When a
+complete CCE is omitted, its coded synthesis/extension history pauses while
+target presentation continues with zero coupling. This ordinary Main/LC contract
+is distinct from SSR's variable-length chunk alignment and absent-lane padding.
+Static and dynamic PCM must be identical and both agree with the scalar oracle.
+
+Four enabled tests passed: complete PCM and silence intervals, trailing-syntax
+rollback/checkpoint/reset/EOF, playback ranges/rewind/seek, and reference
+sensitivity to discarding source extension DSP at return. Incorrect numerical
+controls retain core predictor/overlap and reset only extension DSP; all eight
+paired SBR programs differ measurably. No production decoder change was needed.
+Generation and ordinary tests use no private media, FFmpeg or network.
+
+Dependent coupling with dynamic target/source SBR, source PS, simultaneous
+multiple late SBR sources, actual output-layout/profile changes and wider codec
+tools remain separate work. This qualification does not claim full codec parity.

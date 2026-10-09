@@ -1,0 +1,2093 @@
+{
+  "cases": [
+    {
+      "name": "1-return-0-24000-static",
+      "object_type": 1,
+      "sbr": false,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "0b0001840002011000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 13
+        },
+        {
+          "offset": 13,
+          "bytes": 14
+        },
+        {
+          "offset": 27,
+          "bytes": 6
+        },
+        {
+          "offset": 33,
+          "bytes": 14
+        },
+        {
+          "offset": 47,
+          "bytes": 14
+        },
+        {
+          "offset": 61,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-return-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-return-0-24000-static-synthetic.mp4",
+        "sha256": "3f519458b3aaafbffce0184001fe199b525b9f1c139deed68c00151b1bb9fc63",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-return-0-24000-dynamic",
+      "object_type": 1,
+      "sbr": false,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "0b0001840002011000",
+      "frames": [
+        {
+          "offset": 67,
+          "bytes": 13
+        },
+        {
+          "offset": 80,
+          "bytes": 14
+        },
+        {
+          "offset": 94,
+          "bytes": 13
+        },
+        {
+          "offset": 107,
+          "bytes": 21
+        },
+        {
+          "offset": 128,
+          "bytes": 14
+        },
+        {
+          "offset": 142,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-return-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-return-0-24000-dynamic-synthetic.mp4",
+        "sha256": "5f8984b80dd2ca3a817404a4aaf5422a4999ff7f1c9ac649dce5f1876904bbda",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-return-1-24000-static",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b030400c20001008800",
+      "frames": [
+        {
+          "offset": 155,
+          "bytes": 25
+        },
+        {
+          "offset": 180,
+          "bytes": 23
+        },
+        {
+          "offset": 203,
+          "bytes": 6
+        },
+        {
+          "offset": 209,
+          "bytes": 22
+        },
+        {
+          "offset": 231,
+          "bytes": 26
+        },
+        {
+          "offset": 257,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-return-1-24000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-1-return-24000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-1-return-1-24000-static-synthetic.mp4",
+        "sha256": "761a957870899bfce5d56bd841b3c9fba433497c2282f6cadafcce7dcf480e31",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030400c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-return-1-24000-dynamic",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b030400c20001008800",
+      "frames": [
+        {
+          "offset": 263,
+          "bytes": 25
+        },
+        {
+          "offset": 288,
+          "bytes": 23
+        },
+        {
+          "offset": 311,
+          "bytes": 13
+        },
+        {
+          "offset": 324,
+          "bytes": 29
+        },
+        {
+          "offset": 353,
+          "bytes": 26
+        },
+        {
+          "offset": 379,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-return-1-24000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-1-return-24000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-1-return-1-24000-dynamic-synthetic.mp4",
+        "sha256": "3a10f9f573f293ac38e08a499457b53d494aead1d270fafd11e6662b9146a23f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030400c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-return-1-48000-static",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b018400c20001008800",
+      "frames": [
+        {
+          "offset": 392,
+          "bytes": 25
+        },
+        {
+          "offset": 417,
+          "bytes": 23
+        },
+        {
+          "offset": 440,
+          "bytes": 6
+        },
+        {
+          "offset": 446,
+          "bytes": 22
+        },
+        {
+          "offset": 468,
+          "bytes": 26
+        },
+        {
+          "offset": 494,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-return-1-48000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-1-return-48000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-1-return-1-48000-static-synthetic.mp4",
+        "sha256": "3a91d22decaa860ce4186cebb9ff6bcbe34ce321be47fd63e6749811b3f5ff18",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018400c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-return-1-48000-dynamic",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b018400c20001008800",
+      "frames": [
+        {
+          "offset": 500,
+          "bytes": 25
+        },
+        {
+          "offset": 525,
+          "bytes": 23
+        },
+        {
+          "offset": 548,
+          "bytes": 13
+        },
+        {
+          "offset": 561,
+          "bytes": 29
+        },
+        {
+          "offset": 590,
+          "bytes": 26
+        },
+        {
+          "offset": 616,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-return-1-48000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-1-return-48000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-1-return-1-48000-dynamic-synthetic.mp4",
+        "sha256": "0a17e7619a1d5fb43fc55f251b20b70a806f4e3e28f2246dc598cd3597787ebd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018400c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-arrival-0-24000-static",
+      "object_type": 1,
+      "sbr": false,
+      "dynamic": false,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "0b0001840002011000",
+      "frames": [
+        {
+          "offset": 629,
+          "bytes": 6
+        },
+        {
+          "offset": 635,
+          "bytes": 6
+        },
+        {
+          "offset": 641,
+          "bytes": 13
+        },
+        {
+          "offset": 654,
+          "bytes": 14
+        },
+        {
+          "offset": 668,
+          "bytes": 14
+        },
+        {
+          "offset": 682,
+          "bytes": 14
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-arrival-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-arrival-0-24000-static-synthetic.mp4",
+        "sha256": "5841f487f0d12946cd040241cab2ddae24bc7e14a98eb6d949a3a47005b62526",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-arrival-0-24000-dynamic",
+      "object_type": 1,
+      "sbr": false,
+      "dynamic": true,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "0b00018400000000",
+      "frames": [
+        {
+          "offset": 696,
+          "bytes": 6
+        },
+        {
+          "offset": 702,
+          "bytes": 6
+        },
+        {
+          "offset": 708,
+          "bytes": 20
+        },
+        {
+          "offset": 728,
+          "bytes": 14
+        },
+        {
+          "offset": 742,
+          "bytes": 14
+        },
+        {
+          "offset": 756,
+          "bytes": 14
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-arrival-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-arrival-0-24000-dynamic-synthetic.mp4",
+        "sha256": "390a2794f5d239a241068e0c2832c17c988e8282d5d964af1fb8e9a17bf0dc47",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b00018400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-arrival-1-24000-static",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b030400c20001008800",
+      "frames": [
+        {
+          "offset": 770,
+          "bytes": 6
+        },
+        {
+          "offset": 776,
+          "bytes": 6
+        },
+        {
+          "offset": 782,
+          "bytes": 25
+        },
+        {
+          "offset": 807,
+          "bytes": 23
+        },
+        {
+          "offset": 830,
+          "bytes": 22
+        },
+        {
+          "offset": 852,
+          "bytes": 26
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-arrival-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-arrival-1-24000-static-synthetic.mp4",
+        "sha256": "7065e7d0821dabd90b79336aa69b356b4387182dd604dc5196a2736f59d0fc23",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030400c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-arrival-1-24000-dynamic",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b030400c200000000",
+      "frames": [
+        {
+          "offset": 878,
+          "bytes": 6
+        },
+        {
+          "offset": 884,
+          "bytes": 6
+        },
+        {
+          "offset": 890,
+          "bytes": 32
+        },
+        {
+          "offset": 922,
+          "bytes": 23
+        },
+        {
+          "offset": 945,
+          "bytes": 22
+        },
+        {
+          "offset": 967,
+          "bytes": 26
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-arrival-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-arrival-1-24000-dynamic-synthetic.mp4",
+        "sha256": "b1cbbbf962f5a8a67d191c2df6af7cde1c2c922a617e18edf23997be71122f65",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030400c200000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-arrival-1-48000-static",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b018400c20001008800",
+      "frames": [
+        {
+          "offset": 993,
+          "bytes": 6
+        },
+        {
+          "offset": 999,
+          "bytes": 6
+        },
+        {
+          "offset": 1005,
+          "bytes": 25
+        },
+        {
+          "offset": 1030,
+          "bytes": 23
+        },
+        {
+          "offset": 1053,
+          "bytes": 22
+        },
+        {
+          "offset": 1075,
+          "bytes": 26
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-arrival-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-arrival-1-48000-static-synthetic.mp4",
+        "sha256": "ac86ba941b19d76191c4ce498745b70a9acea0ca119258c2a184a684cb340e40",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018400c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-arrival-1-48000-dynamic",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b018400c200000000",
+      "frames": [
+        {
+          "offset": 1101,
+          "bytes": 6
+        },
+        {
+          "offset": 1107,
+          "bytes": 6
+        },
+        {
+          "offset": 1113,
+          "bytes": 32
+        },
+        {
+          "offset": 1145,
+          "bytes": 23
+        },
+        {
+          "offset": 1168,
+          "bytes": 22
+        },
+        {
+          "offset": 1190,
+          "bytes": 26
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-arrival-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-arrival-1-48000-dynamic-synthetic.mp4",
+        "sha256": "7facd8febb654c948224887bdea4758cd0c8dcdd7227a92137bb6f4ca3318aab",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018400c200000000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-retire-0-24000-static",
+      "object_type": 1,
+      "sbr": false,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "0b0001840002011000",
+      "frames": [
+        {
+          "offset": 1216,
+          "bytes": 13
+        },
+        {
+          "offset": 1229,
+          "bytes": 14
+        },
+        {
+          "offset": 1243,
+          "bytes": 6
+        },
+        {
+          "offset": 1249,
+          "bytes": 6
+        },
+        {
+          "offset": 1255,
+          "bytes": 6
+        },
+        {
+          "offset": 1261,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-retire-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-retire-0-24000-static-synthetic.mp4",
+        "sha256": "9b3b3d224fa4d3413e56af8dae2eb516ed6978fe99073539fb31b80d275ac3e8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-retire-0-24000-dynamic",
+      "object_type": 1,
+      "sbr": false,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "0b0001840002011000",
+      "frames": [
+        {
+          "offset": 1267,
+          "bytes": 13
+        },
+        {
+          "offset": 1280,
+          "bytes": 14
+        },
+        {
+          "offset": 1294,
+          "bytes": 13
+        },
+        {
+          "offset": 1307,
+          "bytes": 6
+        },
+        {
+          "offset": 1313,
+          "bytes": 6
+        },
+        {
+          "offset": 1319,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-retire-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-retire-0-24000-dynamic-synthetic.mp4",
+        "sha256": "afb0e1875fb5e46b753081959f9121a183734c7b4b69eb7eeb5b29e5ebe013af",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-retire-1-24000-static",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b030400c20001008800",
+      "frames": [
+        {
+          "offset": 1325,
+          "bytes": 25
+        },
+        {
+          "offset": 1350,
+          "bytes": 23
+        },
+        {
+          "offset": 1373,
+          "bytes": 6
+        },
+        {
+          "offset": 1379,
+          "bytes": 6
+        },
+        {
+          "offset": 1385,
+          "bytes": 6
+        },
+        {
+          "offset": 1391,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-retire-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-retire-1-24000-static-synthetic.mp4",
+        "sha256": "3fbe52aec0eebbd4786ff224f06aeb1f0ca93989435c0d2c6ca038f78e1b0536",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030400c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-retire-1-24000-dynamic",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b030400c20001008800",
+      "frames": [
+        {
+          "offset": 1397,
+          "bytes": 25
+        },
+        {
+          "offset": 1422,
+          "bytes": 23
+        },
+        {
+          "offset": 1445,
+          "bytes": 13
+        },
+        {
+          "offset": 1458,
+          "bytes": 6
+        },
+        {
+          "offset": 1464,
+          "bytes": 6
+        },
+        {
+          "offset": 1470,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-retire-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-retire-1-24000-dynamic-synthetic.mp4",
+        "sha256": "7d195d85e6bf96aa302e52efbfb7c938a4a00938fda486bb53996f539e8b7874",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030400c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-retire-1-48000-static",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b018400c20001008800",
+      "frames": [
+        {
+          "offset": 1476,
+          "bytes": 25
+        },
+        {
+          "offset": 1501,
+          "bytes": 23
+        },
+        {
+          "offset": 1524,
+          "bytes": 6
+        },
+        {
+          "offset": 1530,
+          "bytes": 6
+        },
+        {
+          "offset": 1536,
+          "bytes": 6
+        },
+        {
+          "offset": 1542,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-retire-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-retire-1-48000-static-synthetic.mp4",
+        "sha256": "81c3be5c36aaf6e21b1fc696d4cf233d97f63d02867eeb3a5bcf2553368d1b7d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018400c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-retire-1-48000-dynamic",
+      "object_type": 1,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b018400c20001008800",
+      "frames": [
+        {
+          "offset": 1548,
+          "bytes": 25
+        },
+        {
+          "offset": 1573,
+          "bytes": 23
+        },
+        {
+          "offset": 1596,
+          "bytes": 13
+        },
+        {
+          "offset": 1609,
+          "bytes": 6
+        },
+        {
+          "offset": 1615,
+          "bytes": 6
+        },
+        {
+          "offset": 1621,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-1-retire-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-1-retire-1-48000-dynamic-synthetic.mp4",
+        "sha256": "b8b5eda887c435ce5db69c6b5dbadd403a77176d6e81e4b2561929e157e2b17d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018400c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "2-return-0-24000-static",
+      "object_type": 2,
+      "sbr": false,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "130005840002011000",
+      "frames": [
+        {
+          "offset": 1627,
+          "bytes": 13
+        },
+        {
+          "offset": 1640,
+          "bytes": 13
+        },
+        {
+          "offset": 1653,
+          "bytes": 6
+        },
+        {
+          "offset": 1659,
+          "bytes": 13
+        },
+        {
+          "offset": 1672,
+          "bytes": 13
+        },
+        {
+          "offset": 1685,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-return-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-return-0-24000-static-synthetic.mp4",
+        "sha256": "cf9a029d77b90a69d27c6164ce5276fd6451965477b2ae75742c06faeb061640",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-return-0-24000-dynamic",
+      "object_type": 2,
+      "sbr": false,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "130005840002011000",
+      "frames": [
+        {
+          "offset": 1691,
+          "bytes": 13
+        },
+        {
+          "offset": 1704,
+          "bytes": 13
+        },
+        {
+          "offset": 1717,
+          "bytes": 13
+        },
+        {
+          "offset": 1730,
+          "bytes": 20
+        },
+        {
+          "offset": 1750,
+          "bytes": 13
+        },
+        {
+          "offset": 1763,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-return-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-return-0-24000-dynamic-synthetic.mp4",
+        "sha256": "eeee816793956ce5f3ae7dd8094a8972652c3dedf9a270706bc3464a61def372",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-return-1-24000-static",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b030802c20001008800",
+      "frames": [
+        {
+          "offset": 1776,
+          "bytes": 25
+        },
+        {
+          "offset": 1801,
+          "bytes": 22
+        },
+        {
+          "offset": 1823,
+          "bytes": 6
+        },
+        {
+          "offset": 1829,
+          "bytes": 21
+        },
+        {
+          "offset": 1850,
+          "bytes": 25
+        },
+        {
+          "offset": 1875,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-return-1-24000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-2-return-24000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-2-return-1-24000-static-synthetic.mp4",
+        "sha256": "9d969bec602ad4ca3ab0461f9a54f5abe73c7c71d80a9090016c0f00d3071e28",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030802c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-return-1-24000-dynamic",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b030802c20001008800",
+      "frames": [
+        {
+          "offset": 1881,
+          "bytes": 25
+        },
+        {
+          "offset": 1906,
+          "bytes": 22
+        },
+        {
+          "offset": 1928,
+          "bytes": 13
+        },
+        {
+          "offset": 1941,
+          "bytes": 28
+        },
+        {
+          "offset": 1969,
+          "bytes": 25
+        },
+        {
+          "offset": 1994,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-return-1-24000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-2-return-24000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-2-return-1-24000-dynamic-synthetic.mp4",
+        "sha256": "30500a5dcac6ce57b0733092d4b1ad37c930043513997cafbbed413f6943c27e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030802c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-return-1-48000-static",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b018802c20001008800",
+      "frames": [
+        {
+          "offset": 2007,
+          "bytes": 25
+        },
+        {
+          "offset": 2032,
+          "bytes": 22
+        },
+        {
+          "offset": 2054,
+          "bytes": 6
+        },
+        {
+          "offset": 2060,
+          "bytes": 21
+        },
+        {
+          "offset": 2081,
+          "bytes": 25
+        },
+        {
+          "offset": 2106,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-return-1-48000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-2-return-48000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-2-return-1-48000-static-synthetic.mp4",
+        "sha256": "f6199ca0220c2aa8ebdc480b1301c513d0af22cd828fd46397da45763cea1acf",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "2-return-1-48000-dynamic",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "asc": "2b018802c20001008800",
+      "frames": [
+        {
+          "offset": 2112,
+          "bytes": 25
+        },
+        {
+          "offset": 2137,
+          "bytes": 22
+        },
+        {
+          "offset": 2159,
+          "bytes": 13
+        },
+        {
+          "offset": 2172,
+          "bytes": 28
+        },
+        {
+          "offset": 2200,
+          "bytes": 25
+        },
+        {
+          "offset": 2225,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-return-1-48000.f64le",
+      "discarded_sbr_reference": "aac-pce-roster-sbr-2-return-48000-discarded-dsp.f64le",
+      "video": {
+        "file": "aac-pce-roster-sbr-2-return-1-48000-dynamic-synthetic.mp4",
+        "sha256": "dc83e68bfe0dfab52a9fc9126fe3af60bc9393aec3828be9f158e893c4f7b944",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "2-arrival-0-24000-static",
+      "object_type": 2,
+      "sbr": false,
+      "dynamic": false,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "130005840002011000",
+      "frames": [
+        {
+          "offset": 2238,
+          "bytes": 6
+        },
+        {
+          "offset": 2244,
+          "bytes": 6
+        },
+        {
+          "offset": 2250,
+          "bytes": 13
+        },
+        {
+          "offset": 2263,
+          "bytes": 13
+        },
+        {
+          "offset": 2276,
+          "bytes": 13
+        },
+        {
+          "offset": 2289,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-arrival-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-arrival-0-24000-static-synthetic.mp4",
+        "sha256": "95be1e0f488f002eac5e17539d8d2a087a9990cbac00a4d26c4d4ab73c30b24d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-arrival-0-24000-dynamic",
+      "object_type": 2,
+      "sbr": false,
+      "dynamic": true,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "1300058400000000",
+      "frames": [
+        {
+          "offset": 2302,
+          "bytes": 6
+        },
+        {
+          "offset": 2308,
+          "bytes": 6
+        },
+        {
+          "offset": 2314,
+          "bytes": 20
+        },
+        {
+          "offset": 2334,
+          "bytes": 13
+        },
+        {
+          "offset": 2347,
+          "bytes": 13
+        },
+        {
+          "offset": 2360,
+          "bytes": 13
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-arrival-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-arrival-0-24000-dynamic-synthetic.mp4",
+        "sha256": "0adfd9ebb282901c526a9764bcb0e03dd67411e1cf3bd8c232f33796125568ea",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1300058400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-arrival-1-24000-static",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b030802c20001008800",
+      "frames": [
+        {
+          "offset": 2373,
+          "bytes": 6
+        },
+        {
+          "offset": 2379,
+          "bytes": 6
+        },
+        {
+          "offset": 2385,
+          "bytes": 25
+        },
+        {
+          "offset": 2410,
+          "bytes": 22
+        },
+        {
+          "offset": 2432,
+          "bytes": 21
+        },
+        {
+          "offset": 2453,
+          "bytes": 25
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-arrival-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-arrival-1-24000-static-synthetic.mp4",
+        "sha256": "ce4f2e1d5ad7166a07a0494939be9e83d684268188708d665c5fccb806134b99",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030802c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-arrival-1-24000-dynamic",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b030802c200000000",
+      "frames": [
+        {
+          "offset": 2478,
+          "bytes": 6
+        },
+        {
+          "offset": 2484,
+          "bytes": 6
+        },
+        {
+          "offset": 2490,
+          "bytes": 32
+        },
+        {
+          "offset": 2522,
+          "bytes": 22
+        },
+        {
+          "offset": 2544,
+          "bytes": 21
+        },
+        {
+          "offset": 2565,
+          "bytes": 25
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-arrival-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-arrival-1-24000-dynamic-synthetic.mp4",
+        "sha256": "9aa73ea42d82180f9e1911ceee2f124fb193050e910bb9e7745a9b8f393042ca",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030802c200000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-arrival-1-48000-static",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b018802c20001008800",
+      "frames": [
+        {
+          "offset": 2590,
+          "bytes": 6
+        },
+        {
+          "offset": 2596,
+          "bytes": 6
+        },
+        {
+          "offset": 2602,
+          "bytes": 25
+        },
+        {
+          "offset": 2627,
+          "bytes": 22
+        },
+        {
+          "offset": 2649,
+          "bytes": 21
+        },
+        {
+          "offset": 2670,
+          "bytes": 25
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-arrival-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-arrival-1-48000-static-synthetic.mp4",
+        "sha256": "06a9dea333ab68ca2d299dd7f2174ab9a9a46a002e8c2d30619a7900d75935b4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "2-arrival-1-48000-dynamic",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "asc": "2b018802c200000000",
+      "frames": [
+        {
+          "offset": 2695,
+          "bytes": 6
+        },
+        {
+          "offset": 2701,
+          "bytes": 6
+        },
+        {
+          "offset": 2707,
+          "bytes": 32
+        },
+        {
+          "offset": 2739,
+          "bytes": 22
+        },
+        {
+          "offset": 2761,
+          "bytes": 21
+        },
+        {
+          "offset": 2782,
+          "bytes": 25
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-arrival-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-arrival-1-48000-dynamic-synthetic.mp4",
+        "sha256": "a72a5d49df5f879c6a760f36f2f70594056d0269161c0fe8df24832dbd69ce01",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c200000000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "2-retire-0-24000-static",
+      "object_type": 2,
+      "sbr": false,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "130005840002011000",
+      "frames": [
+        {
+          "offset": 2807,
+          "bytes": 13
+        },
+        {
+          "offset": 2820,
+          "bytes": 13
+        },
+        {
+          "offset": 2833,
+          "bytes": 6
+        },
+        {
+          "offset": 2839,
+          "bytes": 6
+        },
+        {
+          "offset": 2845,
+          "bytes": 6
+        },
+        {
+          "offset": 2851,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-retire-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-retire-0-24000-static-synthetic.mp4",
+        "sha256": "cf3838df625c0efd4ab6ab19e8afb58f78aa5dc132a4233e64729f535e29365e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-retire-0-24000-dynamic",
+      "object_type": 2,
+      "sbr": false,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "130005840002011000",
+      "frames": [
+        {
+          "offset": 2857,
+          "bytes": 13
+        },
+        {
+          "offset": 2870,
+          "bytes": 13
+        },
+        {
+          "offset": 2883,
+          "bytes": 13
+        },
+        {
+          "offset": 2896,
+          "bytes": 6
+        },
+        {
+          "offset": 2902,
+          "bytes": 6
+        },
+        {
+          "offset": 2908,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-retire-0-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-retire-0-24000-dynamic-synthetic.mp4",
+        "sha256": "e0fab2b1fd07ae5d48344de883d97dcfcfe35e6b08016c37abd2aebb15592cd6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-retire-1-24000-static",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b030802c20001008800",
+      "frames": [
+        {
+          "offset": 2914,
+          "bytes": 25
+        },
+        {
+          "offset": 2939,
+          "bytes": 22
+        },
+        {
+          "offset": 2961,
+          "bytes": 6
+        },
+        {
+          "offset": 2967,
+          "bytes": 6
+        },
+        {
+          "offset": 2973,
+          "bytes": 6
+        },
+        {
+          "offset": 2979,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-retire-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-retire-1-24000-static-synthetic.mp4",
+        "sha256": "a84aefaf8fb031daedc8f08574fba8406249bf3102041e768c23bb287b7611ec",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030802c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-retire-1-24000-dynamic",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b030802c20001008800",
+      "frames": [
+        {
+          "offset": 2985,
+          "bytes": 25
+        },
+        {
+          "offset": 3010,
+          "bytes": 22
+        },
+        {
+          "offset": 3032,
+          "bytes": 13
+        },
+        {
+          "offset": 3045,
+          "bytes": 6
+        },
+        {
+          "offset": 3051,
+          "bytes": 6
+        },
+        {
+          "offset": 3057,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-retire-1-24000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-retire-1-24000-dynamic-synthetic.mp4",
+        "sha256": "0a728ffe99b1f14e17a1152a147554b5caeda523ed761f324b4920c9bda6ddb8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030802c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "2-retire-1-48000-static",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b018802c20001008800",
+      "frames": [
+        {
+          "offset": 3063,
+          "bytes": 25
+        },
+        {
+          "offset": 3088,
+          "bytes": 22
+        },
+        {
+          "offset": 3110,
+          "bytes": 6
+        },
+        {
+          "offset": 3116,
+          "bytes": 6
+        },
+        {
+          "offset": 3122,
+          "bytes": 6
+        },
+        {
+          "offset": 3128,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-retire-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-retire-1-48000-static-synthetic.mp4",
+        "sha256": "bfe648d142fa7210fe6ede719d54520111d0a69ed7ebc3fa93fedf9526e81a0a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "2-retire-1-48000-dynamic",
+      "object_type": 2,
+      "sbr": true,
+      "dynamic": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "asc": "2b018802c20001008800",
+      "frames": [
+        {
+          "offset": 3134,
+          "bytes": 25
+        },
+        {
+          "offset": 3159,
+          "bytes": 22
+        },
+        {
+          "offset": 3181,
+          "bytes": 13
+        },
+        {
+          "offset": 3194,
+          "bytes": 6
+        },
+        {
+          "offset": 3200,
+          "bytes": 6
+        },
+        {
+          "offset": 3206,
+          "bytes": 6
+        }
+      ],
+      "channels": 1,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-pce-roster-sbr-2-retire-1-48000.f64le",
+      "discarded_sbr_reference": null,
+      "video": {
+        "file": "aac-pce-roster-sbr-2-retire-1-48000-dynamic-synthetic.mp4",
+        "sha256": "3ed2a4c2edaab803c52590feae78afaaac1655a6db70a90e58c60101bba55b29",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018802c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ],
+  "provenance": "Own residuals and scalar Main prediction/IMDCT, direct QMF/SBR convolution. Independent coded source clock pauses on omitted CCE; target clock continues with zero coupling. No private media, foreign decoder, FFmpeg or network."
+}
