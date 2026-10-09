@@ -20,7 +20,7 @@ pub(super) fn decode(
     if slices.len() != lists.len() || sps.chroma_format != 3 {
         return Err(invalid("invalid HEVC separate colour plane slice set"));
     }
-    // Three reconstruction scratch sets plus the assembled output. Check
+    // Conservative reconstruction scratch reservation for all three planes. Check
     // before cloning any payloads or allocating plane storage.
     let pixels = (sps.dimensions[0] as usize)
         .checked_mul(sps.dimensions[1] as usize)
@@ -111,23 +111,27 @@ impl Picture {
     /// Retained allocations owned by this picture, including separate plane
     /// motion/reference state. Children never contain other pictures.
     pub(crate) fn storage_bytes(&self) -> Option<usize> {
-        let mut n = std::mem::size_of::<Self>();
-        for plane in &self.planes {
-            n = n.checked_add(plane.samples().len().checked_mul(3)?)?;
+        let mut n = std::mem::size_of::<Self>() + 2 * std::mem::size_of::<usize>();
+        // The assembled picture shares sample/availability allocations with
+        // its children. Charge those allocations exactly once, in the children.
+        if self.colour_planes.is_none() {
+            for plane in &self.planes {
+                n = n.checked_add(plane.storage_bytes()?)?;
+            }
         }
         n = n.checked_add(
             self.motion
-                .len()
+                .capacity()
                 .checked_mul(std::mem::size_of::<super::hevc_motion::Motion>())?,
         )?;
         n = n.checked_add(
             self.sao
-                .len()
+                .capacity()
                 .checked_mul(std::mem::size_of::<super::hevc_sao::CtuSao>())?,
         )?;
         for l in 0..2 {
-            n = n.checked_add(self.reference_pocs[l].len().checked_mul(4)?)?;
-            n = n.checked_add(self.reference_long_term[l].len())?;
+            n = n.checked_add(self.reference_pocs[l].capacity().checked_mul(4)?)?;
+            n = n.checked_add(self.reference_long_term[l].capacity())?;
         }
         if let Some(planes) = &self.colour_planes {
             for plane in planes {
@@ -135,5 +139,53 @@ impl Picture {
             }
         }
         Some(n)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::hevc_decoder::HevcDecoder;
+
+    #[test]
+    fn assembled_colour_planes_share_completed_pixel_storage() {
+        let bytes = include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-separate-colour-planes-distinct-synthetic.mp4"
+        );
+        let config_at = bytes.windows(4).position(|v| v == b"hvcC").unwrap();
+        let length =
+            u32::from_be_bytes(bytes[config_at - 4..config_at].try_into().unwrap()) as usize;
+        let config = &bytes[config_at + 4..config_at - 4 + length];
+        let mut at = 0;
+        let packet = loop {
+            let length = u32::from_be_bytes(bytes[at..at + 4].try_into().unwrap()) as usize;
+            assert!(length >= 8 && length <= bytes.len() - at);
+            if &bytes[at + 4..at + 8] == b"mdat" {
+                break &bytes[at + 8..at + length];
+            }
+            at += length;
+        };
+        let mut decoder = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
+        let decoded = decoder.decode_packet(packet).unwrap().unwrap();
+        let children = decoded.picture.colour_planes.as_ref().unwrap();
+        let storage = decoded.picture.storage_bytes().unwrap();
+        assert!(
+            storage >= 9 * 4096,
+            "all three sample/availability buffers are charged"
+        );
+        assert!(
+            storage < 18 * 4096,
+            "assembled output must not double-charge shared buffers"
+        );
+        for (plane, child) in decoded.picture.planes.iter().zip(children) {
+            assert_eq!(plane.samples().len(), 4096);
+            assert_eq!(plane.samples().as_ptr(), child.planes[0].samples().as_ptr());
+        }
+        let previous = decoded.picture;
+        decoder.reset();
+        let next = decoder.decode_packet(packet).unwrap().unwrap();
+        for (a, b) in previous.planes.iter().zip(&next.picture.planes) {
+            assert_eq!(a.samples(), b.samples());
+            assert_ne!(a.samples().as_ptr(), b.samples().as_ptr());
+        }
     }
 }

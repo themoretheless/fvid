@@ -7038,9 +7038,13 @@ decoded with a monochrome SPS view. The old exact slice-order refusal has
 become acceptance: the AU collector keeps per-plane slice order, reconstructs
 each plane as monochrome and assembles full-resolution 444 samples. References
 project to the corresponding plane's pixels, motion and reference POC maps.
-Separate-plane retained storage includes all plane states and output copies.
-This implementation currently copies planes during assembly; 60 fps and
-copy-free separate-plane storage are not qualified here.
+Separate-plane retained storage includes all plane states. Completed sample
+and availability buffers are shared by the assembled picture and its plane
+states; assembly does not copy their contents. Mutation detaches shared
+buffers, preserving held reference pixels. Accounting charges shared buffers
+once and includes vector capacities and Arc control/Vec headers. Pointer-sharing,
+mutation isolation, and held-frame stability after reset have direct tests.
+This establishes shared pixel storage, not a measured 60 fps result.
 Reordered planes, a three-frame reference/WPP video, reset/rewind, and distinct
 PCM plane pixels have acceptance coverage. Missing/repeated planes retain
 specific refusal tests. All seed parameters and samples are our synthetic data.

@@ -1,13 +1,14 @@
 //! Bounded, unfiltered HEVC plane reconstruction with decoded-sample availability.
 use super::hevc_intra::References;
 use crate::{Result, invalid};
+use std::sync::Arc;
 #[derive(Clone)]
 pub struct Plane {
     width: usize,
     height: usize,
     depth: u8,
-    samples: Vec<u16>,
-    ready: Vec<bool>,
+    samples: Arc<Vec<u16>>,
+    ready: Arc<Vec<bool>>,
 }
 impl Plane {
     pub(crate) fn absent(depth: u8) -> Self {
@@ -15,8 +16,8 @@ impl Plane {
             width: 0,
             height: 0,
             depth,
-            samples: Vec::new(),
-            ready: Vec::new(),
+            samples: Arc::new(Vec::new()),
+            ready: Arc::new(Vec::new()),
         }
     }
     pub(crate) fn ready_rect(&self, rect: [usize; 4]) -> bool {
@@ -82,7 +83,7 @@ impl Plane {
         for &sao in parameters {
             sao.apply(0, None, self.depth)?;
         }
-        let mut output = self.samples.clone();
+        let mut output = self.samples.as_ref().clone();
         let max = (1i32 << self.depth) - 1;
         for (index, &sao) in parameters.iter().enumerate() {
             let x0 = (index % columns) * ctu_width;
@@ -152,7 +153,7 @@ impl Plane {
                 }
             }
         }
-        self.samples = output;
+        self.samples = Arc::new(output);
         Ok(())
     }
     pub fn new(width: usize, height: usize, depth: u8, budget: usize) -> Result<Self> {
@@ -167,8 +168,8 @@ impl Plane {
             width,
             height,
             depth,
-            samples: vec![0; count],
-            ready: vec![false; count],
+            samples: Arc::new(vec![0; count]),
+            ready: Arc::new(vec![false; count]),
         })
     }
     pub(crate) fn reconstruct_inter(&mut self, rect: [usize; 4], prediction: &[u16]) -> Result<()> {
@@ -183,11 +184,12 @@ impl Plane {
         }
         for j in 0..h {
             let start = (y + j) * self.width + x;
-            let ready = &mut self.ready[start..start + w];
+            let ready = &mut Arc::make_mut(&mut self.ready)[start..start + w];
             if ready.iter().fold(false, |seen, &v| seen | v) {
                 return Err(invalid("overlapping HEVC inter prediction"));
             }
-            self.samples[start..start + w].copy_from_slice(&prediction[j * w..(j + 1) * w]);
+            Arc::make_mut(&mut self.samples)[start..start + w]
+                .copy_from_slice(&prediction[j * w..(j + 1) * w]);
             ready.fill(true);
         }
         Ok(())
@@ -217,7 +219,7 @@ impl Plane {
             {
                 return Err(invalid("HEVC residual has no prediction"));
             }
-            for (pixel, &delta) in self.samples[start..start + n]
+            for (pixel, &delta) in Arc::make_mut(&mut self.samples)[start..start + n]
                 .iter_mut()
                 .zip(&residual[j * n..(j + 1) * n])
             {
@@ -229,8 +231,15 @@ impl Plane {
     pub fn samples(&self) -> &[u16] {
         &self.samples
     }
+    pub(crate) fn storage_bytes(&self) -> Option<usize> {
+        self.samples
+            .capacity()
+            .checked_mul(std::mem::size_of::<u16>())?
+            .checked_add(self.ready.capacity())?
+            .checked_add(2 * (std::mem::size_of::<Vec<u16>>() + 2 * std::mem::size_of::<usize>()))
+    }
     pub(crate) fn samples_mut(&mut self) -> &mut [u16] {
-        &mut self.samples
+        Arc::make_mut(&mut self.samples).as_mut_slice()
     }
     pub fn complete(&self) -> bool {
         self.ready.iter().fold(true, |ready, &v| ready & v)
@@ -386,7 +395,7 @@ impl Plane {
         let max = (1i32 << self.depth) - 1;
         for yy in 0..n {
             let start = (y + yy) * self.width + x;
-            for (xx, (pixel, &prediction)) in self.samples[start..start + n]
+            for (xx, (pixel, &prediction)) in Arc::make_mut(&mut self.samples)[start..start + n]
                 .iter_mut()
                 .zip(&pred_scratch[yy * n..(yy + 1) * n])
                 .enumerate()
@@ -398,9 +407,32 @@ impl Plane {
                 };
                 *pixel = i32::from(prediction).saturating_add(delta).clamp(0, max) as u16;
             }
-            self.ready[start..start + n].fill(true);
+            Arc::make_mut(&mut self.ready)[start..start + n].fill(true);
         }
         Ok(())
+    }
+}
+#[cfg(test)]
+mod shared_storage_tests {
+    use super::*;
+
+    #[test]
+    fn cloned_plane_shares_storage_until_reconstruction_mutates_it() {
+        let mut original = Plane::new(4, 4, 8, 1024).unwrap();
+        let held = original.clone();
+        assert!(Arc::ptr_eq(&original.samples, &held.samples));
+        assert!(Arc::ptr_eq(&original.ready, &held.ready));
+        original.reconstruct_inter([0, 0, 4, 4], &[77; 16]).unwrap();
+        assert_eq!(held.samples(), &[0; 16]);
+        assert!(!held.complete());
+        assert_eq!(original.samples(), &[77; 16]);
+        assert!(original.complete());
+        assert!(!Arc::ptr_eq(&original.samples, &held.samples));
+        assert!(!Arc::ptr_eq(&original.ready, &held.ready));
+        let held = original.clone();
+        original.add_residual([0, 0], 2, &[3; 16]).unwrap();
+        assert_eq!(held.samples(), &[77; 16]);
+        assert_eq!(original.samples(), &[80; 16]);
     }
 }
 #[cfg(test)]
@@ -431,8 +463,8 @@ mod tests {
                     })
                     .collect();
                 let mut p = Plane::new(width, height, depth, width * height * 3).unwrap();
-                p.samples.clone_from(&samples);
-                p.ready.fill(true);
+                Arc::make_mut(&mut p.samples).clone_from(&samples);
+                Arc::make_mut(&mut p.ready).fill(true);
                 let mut expected = samples.clone();
                 for y in 0..height {
                     for x in 0..width {
@@ -465,7 +497,7 @@ mod tests {
                     |p| p[0] == 4,
                 )
                 .unwrap();
-                assert_eq!(p.samples, expected);
+                assert_eq!(p.samples(), expected);
                 let saved = p.samples.clone();
                 assert!(
                     p.apply_sao_rectangular([3, 4], &parameters[..8], |_, _| true, |_| false)
@@ -560,8 +592,8 @@ mod tests {
     fn sao_uses_original_neighbours_and_commits_only_valid_output() {
         use super::super::hevc_sao::Sao;
         let mut p = Plane::new(4, 4, 8, 48).unwrap();
-        p.samples = [100, 101, 100, 99].repeat(4);
-        p.ready.fill(true);
+        p.samples = Arc::new([100, 101, 100, 99].repeat(4));
+        Arc::make_mut(&mut p.ready).fill(true);
         p.apply_sao(
             3,
             &[Sao::Edge {
@@ -570,7 +602,7 @@ mod tests {
             }],
         )
         .unwrap();
-        assert_eq!(p.samples, [100, 94, 100, 99].repeat(4));
+        assert_eq!(p.samples(), [100, 94, 100, 99].repeat(4));
         let saved = p.samples.clone();
         assert!(
             p.apply_sao(
@@ -665,6 +697,7 @@ mod tests {
 
 #[cfg(test)]
 mod slice_filter_tests {
+    use std::sync::Arc;
     #[test]
     fn sao_edge_neighbours_obey_independent_slice_boundaries() {
         use super::{super::hevc_sao::Sao, Plane};
@@ -672,8 +705,8 @@ mod slice_filter_tests {
             .flat_map(|y| vec![if y % 2 == 0 { 200 } else { 100 }; 16])
             .collect();
         let mut plane = Plane::new(16, 16, 8, 768).unwrap();
-        plane.samples = samples.clone();
-        plane.ready.fill(true);
+        plane.samples = Arc::new(samples.clone());
+        Arc::make_mut(&mut plane.ready).fill(true);
         let sao = Sao::Edge {
             class: 1,
             offsets: [1, 2, -1, -2],
