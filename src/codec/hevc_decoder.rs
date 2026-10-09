@@ -8,6 +8,7 @@ use super::{
     hevc_sei,
     hevc_slice::SliceHeader,
     hevc_sps::Sps,
+    hevc_vps::Vps,
 };
 use crate::color::hdr::HdrMetadata;
 use crate::{Result, invalid};
@@ -41,6 +42,13 @@ pub struct HevcDecoder {
 impl HevcDecoder {
     pub fn from_configuration(data: &[u8], budget: usize) -> Result<Self> {
         let config = HevcConfig::parse(data)?;
+        for array in &config.arrays {
+            if array.nal_type == 32 {
+                for nal in &array.units {
+                    Vps::parse(nal, budget)?;
+                }
+            }
+        }
         let mut sets = Vec::new();
         for array in &config.arrays {
             if array.nal_type == 33 {
@@ -168,6 +176,9 @@ impl HevcDecoder {
             seen_slice |= header.is_vcl();
             let params = updated.as_ref().unwrap_or(&self.params);
             match header.unit_type {
+                32 => {
+                    Vps::parse(nal, self.budget)?;
+                }
                 33 => {
                     let new = Sps::parse(nal, self.budget)?;
                     if params.sets.iter().any(|s| *s == new) {

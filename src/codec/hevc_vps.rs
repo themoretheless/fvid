@@ -134,7 +134,11 @@ impl Vps {
             None
         };
         if bits.bit()? {
-            return Err(crate::unsupported("HEVC VPS extension is not implemented"));
+            // Annex A decoding without INBLD ignores VPS extension data.
+            // Base-layer admission above still rejects layered requirements.
+            while bits.more_rbsp_data() {
+                bits.bit()?;
+            }
         }
         bits.finish_rbsp()?;
         Ok(Self {

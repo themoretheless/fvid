@@ -1283,3 +1283,22 @@ requires bounded parsing failure. Generate separately using
 `python3 scripts/generate_hevc_extension_tail_fixtures.py`; neither generation
 nor ordinary tests need FFmpeg or network. This is future-tail compatibility,
 not implementation of the remaining layered or 3D coding tools.
+
+
+### HEVC VPS parsing reaches production decode
+
+VPS parsing previously existed only in helper/tests: the decoder ignored
+configuration and in-band VPS RBSP bodies. The authored
+`hevc-future-extension-vps-bad-stop-synthetic.mp4` reproduced malformed VPS
+being accepted at player open. The decoder now invokes owned VPS parsing for
+both paths. Annex A base decoding ignores extension data without enabling
+INBLD; the parser retains base-layer checks and validates RBSP termination.
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201612-S%21%21PDF-E&lang=s&type=items
+
+The extension-tail generator additionally produces valid/invalid VPS cases.
+Acceptance compares 17 output pictures, exact timestamps/durations and rewind
+with the authored Main IPB seed. Invalid configuration fails specifically on
+RBSP exhaustion; in-band validation tests refusal, poison-until-reset and
+first-picture recovery. No private media, FFmpeg, generation or network is
+needed during ordinary tests. Cross-parameter VPS/SPS identity/ordering
+consistency and actual multilayer/3D decoding still require further work.

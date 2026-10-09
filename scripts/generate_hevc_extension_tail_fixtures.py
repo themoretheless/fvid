@@ -18,7 +18,8 @@ def extended(nal, value, tail, bad_stop=False):
     stop = bits.rfind('1')
     syntax = bits[:stop]
     assert syntax[-1] == '0', 'seed must have extension_present_flag zero'
-    bits = syntax[:-1] + '1' + '0000' + f'{value:04b}' + tail + ('0' if bad_stop else '1')
+    flags = '' if (nal[0] >> 1) & 63 == 32 else '0000' + f'{value:04b}'
+    bits = syntax[:-1] + '1' + flags + tail + ('0' if bad_stop else '1')
     bits += '0' * (-len(bits) % 8)
     raw = bytes(int(bits[i:i+8], 2) for i in range(0, len(bits), 8))
     escaped = bytearray(nal[:2])
@@ -41,6 +42,8 @@ def main():
         ('pps', {34}, 15, '00000000000000000000000000000000'),
         ('both', {33, 34}, 9, '101010111001000101'),
         ('bad-stop', {33}, 1, '00000000000000000000000000000000'),
+        ('vps', {32}, 0, '001010000000000000000000000000001110'),
+        ('vps-bad-stop', {32}, 0, '00000000000000000000000000000000'),
     ]:
         def config(data):
             result = bytearray(data[:23])
@@ -55,7 +58,7 @@ def main():
                     nal = data[at:at+n]
                     at += n
                     if header[0] & 63 in kinds:
-                        nal = extended(nal, value, tail, label == 'bad-stop')
+                        nal = extended(nal, value, tail, label.endswith('bad-stop'))
                     result += struct.pack('>H', len(nal)) + nal
             assert at == len(data)
             return bytes(result)
