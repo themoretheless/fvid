@@ -259,3 +259,29 @@ fn target_tns_distinguishes_before_and_after_coupling() {
         );
     }
 }
+
+#[test]
+fn source_tns_omission_control_changes_ps_pcm() {
+    for c in m()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["source_tns"] == true)
+    {
+        let good = reference(c);
+        let mut omitted = c.clone();
+        omitted["reference"] = c["omitted_source_tns"].clone();
+        let bad = reference(&omitted);
+        assert_eq!(good.len(), bad.len());
+        let delta = good
+            .iter()
+            .zip(&bad)
+            .map(|(a, b)| (a - b).abs())
+            .fold(0f32, f32::max);
+        assert!(
+            delta > 1e-6,
+            "{} source TNS is not observable: {delta}",
+            c["name"]
+        );
+    }
+}

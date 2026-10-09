@@ -3297,3 +3297,33 @@ full AAC/all-codec parity remains incomplete.
 Validation: 11 integration tests passed across `aac_main_ps`,
 `aac_main_ps_cce` and `aac_pce_roster`, locked/offline with `media,player`.
 Production code remains unchanged; fixture generation stays outside tests.
+
+### AAC Main PS forward/reverse source TNS acceptance (2026-10-09)
+
+Eight additional authored MP4 videos extend the two-source Main PS matrix to
+16 videos. CCE tag 1 has forward first-order TNS and tag 15 has reverse TNS;
+they retain distinct predictor histories and reset groups. Cases combine
+source TNS with and without target TNS at coupling points 0/1 and output
+24/48 kHz. The independent scalar core oracle applies Main prediction before
+source TNS, then spectral coupling and target TNS at the appropriate point,
+followed by direct IMDCT. The previously qualified PS stage remains the
+extension composition reference rather than a new independent PS oracle.
+
+Enabled tests verify waveform, checkpoint/rollback, reset, delayed EOF,
+MP4 export, probe, intervals, rewind and seek across all 16 cases. An explicit
+numerical control omitting source TNS changes the final PS PCM in all eight
+new cases. A temporary production mutation omitting source TNS passes the
+prior eight cases, then fails `0-24000-source-tns` at sample 851. Production
+source has been restored byte-for-byte. All 38 generated artifacts are
+deterministic, and the 16 prior videos/core/control files remain unchanged.
+Generation is separate from ordinary tests and uses no private media,
+FFmpeg, foreign decoder or network.
+
+This covers first-order source TNS with long sine/KBD windows in this mono
+Main PS dependent CCE matrix. Higher orders, short-window source TNS,
+point 3/source SBR, PNS and CCE absence/roster transitions remain separate
+qualification gaps; no complete AAC or all-codec parity claim is made.
+
+Validation: 12 integration tests passed across `aac_main_ps`,
+`aac_main_ps_cce` and `aac_pce_roster`, locked/offline with `media,player`
+and no FFmpeg. Production code is unchanged.
