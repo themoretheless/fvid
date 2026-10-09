@@ -1,0 +1,964 @@
+{
+  "cases": [
+    {
+      "n": 960,
+      "sequence": 0,
+      "previous": 0,
+      "current": 0,
+      "lag": 960,
+      "coefficient": 0,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 0,
+      "reference_offset": 0
+    },
+    {
+      "n": 960,
+      "sequence": 0,
+      "previous": 0,
+      "current": 1,
+      "lag": 960,
+      "coefficient": 3,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 23040,
+      "reference_offset": 3840
+    },
+    {
+      "n": 960,
+      "sequence": 0,
+      "previous": 1,
+      "current": 0,
+      "lag": 960,
+      "coefficient": 1,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 46080,
+      "reference_offset": 7680
+    },
+    {
+      "n": 960,
+      "sequence": 0,
+      "previous": 1,
+      "current": 1,
+      "lag": 960,
+      "coefficient": 4,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 69120,
+      "reference_offset": 11520
+    },
+    {
+      "n": 960,
+      "sequence": 1,
+      "previous": 0,
+      "current": 0,
+      "lag": 480,
+      "coefficient": 1,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 92160,
+      "reference_offset": 15360
+    },
+    {
+      "n": 960,
+      "sequence": 1,
+      "previous": 0,
+      "current": 1,
+      "lag": 480,
+      "coefficient": 4,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 115200,
+      "reference_offset": 19200
+    },
+    {
+      "n": 960,
+      "sequence": 1,
+      "previous": 1,
+      "current": 0,
+      "lag": 480,
+      "coefficient": 2,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 138240,
+      "reference_offset": 23040
+    },
+    {
+      "n": 960,
+      "sequence": 1,
+      "previous": 1,
+      "current": 1,
+      "lag": 480,
+      "coefficient": 5,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 161280,
+      "reference_offset": 26880
+    },
+    {
+      "n": 960,
+      "sequence": 3,
+      "previous": 0,
+      "current": 0,
+      "lag": 1920,
+      "coefficient": 3,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 184320,
+      "reference_offset": 30720
+    },
+    {
+      "n": 960,
+      "sequence": 3,
+      "previous": 0,
+      "current": 1,
+      "lag": 1920,
+      "coefficient": 6,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 207360,
+      "reference_offset": 34560
+    },
+    {
+      "n": 960,
+      "sequence": 3,
+      "previous": 1,
+      "current": 0,
+      "lag": 1920,
+      "coefficient": 4,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 230400,
+      "reference_offset": 38400
+    },
+    {
+      "n": 960,
+      "sequence": 3,
+      "previous": 1,
+      "current": 1,
+      "lag": 1920,
+      "coefficient": 7,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        960
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 253440,
+      "reference_offset": 42240
+    },
+    {
+      "n": 1024,
+      "sequence": 0,
+      "previous": 0,
+      "current": 0,
+      "lag": 1024,
+      "coefficient": 0,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 276480,
+      "reference_offset": 46080
+    },
+    {
+      "n": 1024,
+      "sequence": 0,
+      "previous": 0,
+      "current": 1,
+      "lag": 1024,
+      "coefficient": 3,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 301056,
+      "reference_offset": 50176
+    },
+    {
+      "n": 1024,
+      "sequence": 0,
+      "previous": 1,
+      "current": 0,
+      "lag": 1024,
+      "coefficient": 1,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 325632,
+      "reference_offset": 54272
+    },
+    {
+      "n": 1024,
+      "sequence": 0,
+      "previous": 1,
+      "current": 1,
+      "lag": 1024,
+      "coefficient": 4,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 350208,
+      "reference_offset": 58368
+    },
+    {
+      "n": 1024,
+      "sequence": 1,
+      "previous": 0,
+      "current": 0,
+      "lag": 512,
+      "coefficient": 1,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 374784,
+      "reference_offset": 62464
+    },
+    {
+      "n": 1024,
+      "sequence": 1,
+      "previous": 0,
+      "current": 1,
+      "lag": 512,
+      "coefficient": 4,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 399360,
+      "reference_offset": 66560
+    },
+    {
+      "n": 1024,
+      "sequence": 1,
+      "previous": 1,
+      "current": 0,
+      "lag": 512,
+      "coefficient": 2,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 423936,
+      "reference_offset": 70656
+    },
+    {
+      "n": 1024,
+      "sequence": 1,
+      "previous": 1,
+      "current": 1,
+      "lag": 512,
+      "coefficient": 5,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 448512,
+      "reference_offset": 74752
+    },
+    {
+      "n": 1024,
+      "sequence": 3,
+      "previous": 0,
+      "current": 0,
+      "lag": 2048,
+      "coefficient": 3,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 473088,
+      "reference_offset": 78848
+    },
+    {
+      "n": 1024,
+      "sequence": 3,
+      "previous": 0,
+      "current": 1,
+      "lag": 2048,
+      "coefficient": 6,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 497664,
+      "reference_offset": 82944
+    },
+    {
+      "n": 1024,
+      "sequence": 3,
+      "previous": 1,
+      "current": 0,
+      "lag": 2048,
+      "coefficient": 4,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": false,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": true,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 522240,
+      "reference_offset": 87040
+    },
+    {
+      "n": 1024,
+      "sequence": 3,
+      "previous": 1,
+      "current": 1,
+      "lag": 2048,
+      "coefficient": 7,
+      "offsets": [
+        0,
+        4,
+        16,
+        32,
+        1024
+      ],
+      "used": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "filters": [
+        {
+          "length": 1,
+          "reverse": true,
+          "lpc": [
+            0.25,
+            -0.0625
+          ]
+        },
+        {
+          "length": 3,
+          "reverse": false,
+          "lpc": [
+            -0.125
+          ]
+        }
+      ],
+      "input_offset": 546816,
+      "reference_offset": 91136
+    }
+  ]
+}

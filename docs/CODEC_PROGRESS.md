@@ -9440,3 +9440,30 @@ integration, normalization/rounding and independent end-to-end PCM qualification
 remain required before AOT4 admission.
 
 Validation: 462 owned-library and 20 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. Both ICS artifacts regenerate with identical SHA-256 hashes.
+
+### Composed owned LTP spectral prediction pipeline (2026-10-09)
+
+`LtpAnalysis::predict_long` composes the owned i16 history estimate, shaped forward
+MDCT, optional TNS FIR analysis and selected-band addition. History is borrowed
+and never advanced; all intermediate spectra are packet-local. A nested TNS or
+geometry failure leaves the caller residual unchanged. This initial composition
+allocates bounded 2N and N temporary arrays; retained scratch/accounting must be
+handled at production decoder integration. The API explicitly uses matching raw
+synthesis/MDCT units, not a claim of normative AAC PCM scale or AOT4 admission.
+
+The own generator supplies 24 independent full-spectrum references across both
+frame sizes, long/start/stop and all previous/current sine/KBD combinations.
+It authors sparse physical previous/current PCM and overlap, quantizes independently,
+uses direct cosine sums, original-input FIR convolution in two opposite-direction
+intervals and an interval-union selection oracle. Tests check the combined result,
+repeated-call identity, unchanged history, nested TNS refusal and mismatched
+history geometry. Fixtures regenerate separately, without private media, external
+codecs, FFmpeg or network. These spectral-stage tests do not replace the pending
+video PCM acceptance or prove the history normalization/rounding contract.
+
+Ordering reference: [FAAD2 LTP/filterbank](https://github.com/knik0/faad2/blob/master/libfaad/filtbank.c).
+No external implementation is copied or linked. Production channel/pair state,
+profile dispatch, memory accounting and independent end-to-end PCM qualification
+remain required before enabling the existing LTP playback acceptance.
+
+Validation: 462 owned-library and 22 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. All three composite-pipeline artifacts regenerated with identical SHA-256 hashes.

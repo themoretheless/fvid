@@ -135,3 +135,38 @@ pub fn apply_long_prediction(
     }
     Ok(())
 }
+
+impl LtpAnalysis {
+    /// Compose the owned prediction stages without advancing decoder history.
+    /// Input residual uses raw synthesis/MDCT units. Packet admission and PCM
+    /// history normalization must be supplied and qualified by the decoder.
+    pub fn predict_long(
+        &mut self,
+        history: &super::aac_ltp_history::LtpHistory,
+        data: &super::aac_ltp_syntax::LtpData,
+        sequence: WindowSequence,
+        previous: WindowShape,
+        current: WindowShape,
+        offsets: &[usize],
+        tns_max_band: usize,
+        tns: Option<&super::aac_tns::TnsData>,
+        residual: &mut [f32],
+    ) -> Result<()> {
+        let super::aac_ltp_syntax::Usage::Bands(used) = &data.usage else {
+            return Err(unsupported(
+                "AAC short-window LTP analysis is not integrated",
+            ));
+        };
+        if residual.len() != self.n {
+            return Err(invalid("invalid AAC LTP residual geometry"));
+        }
+        let mut estimate = vec![0.; 2 * self.n];
+        let mut spectrum = vec![0.; self.n];
+        history.estimate_long(data, &mut estimate)?;
+        self.analyze(&estimate, sequence, previous, current, &mut spectrum)?;
+        if let Some(tns) = tns {
+            spectrum = tns.analyze_owned(spectrum, offsets, tns_max_band)?;
+        }
+        apply_long_prediction(residual, &spectrum, offsets, used)
+    }
+}

@@ -206,3 +206,173 @@ fn ltp_band_failure_is_transactional_and_band_40_is_not_applied() {
         assert_eq!(residual, before);
     }
 }
+
+#[test]
+fn composed_ltp_prediction_matches_independent_direct_reference() {
+    use fvid_media::owned_aac::{
+        aac_ltp_history::LtpHistory,
+        aac_ltp_syntax::{LtpData, Usage},
+        aac_tns::{TnsData, TnsFilter},
+    };
+    let m: Value = serde_json::from_slice(&bytes("aac-ltp-pipeline.json")).unwrap();
+    let raw = bytes("aac-ltp-pipeline-input.f64le");
+    let reference = bytes("aac-ltp-pipeline-reference.f32le");
+    assert_eq!(m["cases"].as_array().unwrap().len(), 24);
+    for c in m["cases"].as_array().unwrap() {
+        let n = c["n"].as_u64().unwrap() as usize;
+        let at = c["input_offset"].as_u64().unwrap() as usize;
+        let blocks = doubles(&raw[at..at + 3 * n * 8]);
+        let mut history = LtpHistory::new(n).unwrap();
+        history.update_raw(&blocks[..n], &vec![0.; n]).unwrap();
+        history
+            .update_raw(&blocks[n..2 * n], &blocks[2 * n..])
+            .unwrap();
+        let saved = history.clone();
+        let offsets: Vec<_> = c["offsets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_u64().unwrap() as usize)
+            .collect();
+        let data = LtpData {
+            lag: c["lag"].as_u64().unwrap() as u16,
+            coefficient_index: c["coefficient"].as_u64().unwrap() as u8,
+            usage: Usage::Bands(
+                c["used"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|v| v.as_bool().unwrap())
+                    .collect(),
+            ),
+        };
+        let tns = TnsData {
+            windows: vec![
+                c["filters"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|f| TnsFilter {
+                        length: f["length"].as_u64().unwrap() as usize,
+                        reverse: f["reverse"].as_bool().unwrap(),
+                        lpc: f["lpc"]
+                            .as_array()
+                            .unwrap()
+                            .iter()
+                            .map(|v| v.as_f64().unwrap())
+                            .collect(),
+                    })
+                    .collect(),
+            ],
+        };
+        let seq = match c["sequence"].as_u64().unwrap() {
+            0 => WindowSequence::OnlyLong,
+            1 => WindowSequence::LongStart,
+            _ => WindowSequence::LongStop,
+        };
+        let shape = |v: &Value| {
+            if v == 0 {
+                WindowShape::Sine
+            } else {
+                WindowShape::Kbd
+            }
+        };
+        let source: Vec<f32> = (0..n).map(|i| (i as i32 % 19 - 9) as f32 * 0.25).collect();
+        let mut residual = source.clone();
+        let mut analysis = LtpAnalysis::new(n).unwrap();
+        analysis
+            .predict_long(
+                &history,
+                &data,
+                seq,
+                shape(&c["previous"]),
+                shape(&c["current"]),
+                &offsets,
+                4,
+                Some(&tns),
+                &mut residual,
+            )
+            .unwrap();
+        let at = c["reference_offset"].as_u64().unwrap() as usize;
+        for (i, chunk) in reference[at..at + n * 4].chunks_exact(4).enumerate() {
+            let expected = f32::from_le_bytes(chunk.try_into().unwrap());
+            assert!(
+                (residual[i] - expected).abs() <= 0.00003 + expected.abs() * 2e-7,
+                "n={n} seq={seq:?} bin={i}: {} vs {expected}",
+                residual[i]
+            );
+        }
+        assert_eq!(history, saved);
+        let first = residual.clone();
+        residual.copy_from_slice(&source);
+        analysis
+            .predict_long(
+                &history,
+                &data,
+                seq,
+                shape(&c["previous"]),
+                shape(&c["current"]),
+                &offsets,
+                4,
+                Some(&tns),
+                &mut residual,
+            )
+            .unwrap();
+        assert_eq!(first, residual);
+        // A nested late TNS failure must not expose an intermediate spectrum.
+        let bad = TnsData {
+            windows: vec![vec![TnsFilter {
+                length: 4,
+                reverse: false,
+                lpc: vec![f64::NAN],
+            }]],
+        };
+        assert!(
+            analysis
+                .predict_long(
+                    &history,
+                    &data,
+                    seq,
+                    WindowShape::Sine,
+                    WindowShape::Sine,
+                    &offsets,
+                    4,
+                    Some(&bad),
+                    &mut residual
+                )
+                .is_err()
+        );
+        assert_eq!(first, residual);
+        assert_eq!(history, saved);
+    }
+}
+#[test]
+fn composed_ltp_prediction_refuses_mismatched_history_without_residual_write() {
+    use fvid_media::owned_aac::{
+        aac_ltp_history::LtpHistory,
+        aac_ltp_syntax::{LtpData, Usage},
+    };
+    let mut a = LtpAnalysis::new(1024).unwrap();
+    let h = LtpHistory::new(960).unwrap();
+    let mut residual = vec![123.; 1024];
+    let data = LtpData {
+        lag: 960,
+        coefficient_index: 0,
+        usage: Usage::Bands(vec![true]),
+    };
+    assert!(
+        a.predict_long(
+            &h,
+            &data,
+            WindowSequence::OnlyLong,
+            WindowShape::Sine,
+            WindowShape::Sine,
+            &[0, 1024],
+            1,
+            None,
+            &mut residual
+        )
+        .is_err()
+    );
+    assert!(residual.iter().all(|v| *v == 123.));
+}
