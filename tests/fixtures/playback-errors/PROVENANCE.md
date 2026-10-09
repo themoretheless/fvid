@@ -3216,3 +3216,30 @@ Generation and ordinary tests use no private media, FFmpeg or network.
 Dependent coupling with dynamic target/source SBR, source PS, simultaneous
 multiple late SBR sources, actual output-layout/profile changes and wider codec
 tools remain separate work. This qualification does not claim full codec parity.
+
+
+### Native nonzero AAC Main + PS acceptance (2026-10-09)
+
+The native PS core-profile gate now admits Main (AOT 1). Target spectrum passes
+through the existing owned Main predictor before TNS, coupling, synthesis and
+SBR/PS. One predictor bank belongs to the target; configured CCE banks are keyed
+by tag and updated before source TNS. Packet clones and opaque checkpoints
+retain those banks; reset clears target and source histories. Syntax-only PS
+probe admits the same Main mono configuration. Existing LC/SSR behavior remains
+covered by adjacent regression suites.
+
+Three authored videos reproduce the former exact profile refusal: a nonzero
+Main core control and explicit PS at 24/48 kHz. They exercise sine/KBD, long,
+start, short and stop windows, prediction warm-up/activation and group reset.
+The core control agrees with independent scalar prediction/IMDCT. Combined
+acceptance composes that core PCM with the already qualified owned PS stage;
+it is not a new fully independent PS numerical oracle. The refusal expectation
+is replaced by enabled waveform acceptance with original indices 0–11 and EOF.
+
+Tests verify malformed trailing syntax rollback, checkpoint replay, reset,
+MP4 export, PS probe, playback ranges, rewind and seek. Four integration suites
+passed (14 tests), together with all 461 owned-media unit tests (one existing
+ignored). Fixture generation and ordinary tests require no private media,
+FFmpeg or network. Main PS configured CCE/source SBR, PNS/TNS compositions,
+in-band discovery/transports and wider layouts/profiles need separate acceptance
+matrices; this mono qualification does not claim those tools are complete.

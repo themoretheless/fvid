@@ -33,6 +33,7 @@ struct CceState {
     dsp: aac_sbr_dsp::Dsp,
     synthesis: Option<LongSineSynthesis>,
     ssr_synthesis: Option<super::aac_ssr_synthesis::SsrSynthesis>,
+    prediction: Option<super::aac_main_predictor::MainPredictor>,
 }
 #[derive(Clone)]
 pub struct NativePsAacDecoder {
@@ -45,6 +46,7 @@ pub struct NativePsAacDecoder {
     synthesis: Option<LongSineSynthesis>,
     ssr: Option<SsrState>,
     noise: NoiseState,
+    prediction: Option<super::aac_main_predictor::MainPredictor>,
     // Large fixed QMF/PS histories live on heap so packet transactions and
     // checkpoints do not multiply them on a normal playback thread stack.
     extension: Box<aac_sbr_ps::Decoder>,
@@ -130,8 +132,10 @@ impl NativePsAacDecoder {
         } else {
             None
         };
+        let prediction = main_prediction(&parsed.core)?;
         Ok(Self {
             config: parsed.core,
+            prediction,
             initial_program: parsed.program.clone(),
             program: parsed.program,
             output_rate,
@@ -194,6 +198,7 @@ impl NativePsAacDecoder {
                 .expect("fixed mono SSR alignment geometry");
         }
         self.noise.reset();
+        if let Some(bank) = &mut self.prediction { bank.reset(); }
         self.extension.reset();
         self.cce_states.fill(None);
         self.pending_coupling = None;
@@ -250,16 +255,24 @@ impl NativePsAacDecoder {
                     let tag = bits.read(4)? as u8;
                     validate_sce_tag(trial.program.as_ref(), tag)?;
                     let channel = ChannelData::read(&mut bits, &trial.config)?;
-                    let spectrum = channel.spectrum_with_noise(&trial.config, &mut trial.noise)?;
+                    let mut spectrum = channel.spectrum_with_noise(&trial.config, &mut trial.noise)?;
+                    if let Some(bank) = &mut trial.prediction {
+                        channel.predict_main(&trial.config, bank, &mut spectrum)?;
+                    }
                     core = Some((channel, spectrum, tag));
                     previous_channel = Some((0, tag));
                 }
                 2 => {
                     let coupling = Coupling::read(&mut bits, &trial.config)?;
                     validate_coupling(trial.program.as_ref(), &coupling, &mut cce_tags)?;
-                    let spectrum = coupling
+                    let mut spectrum = coupling
                         .channel
                         .spectrum_with_noise(&trial.config, &mut trial.noise)?;
+                    if trial.config.object_type == 1 {
+                        let state = trial.cce_states[coupling.tag as usize].get_or_insert_with(CceState::default);
+                        if state.prediction.is_none() { state.prediction = main_prediction(&trial.config)?; }
+                        coupling.channel.predict_main(&trial.config, state.prediction.as_mut().unwrap(), &mut spectrum)?;
+                    }
                     let spectrum = coupling.channel.apply_tns(&trial.config, spectrum)?;
                     previous_channel = Some((2, coupling.tag));
                     couplings.push((coupling, spectrum));
@@ -822,8 +835,15 @@ impl InBandPsProbe {
     }
 }
 
+fn main_prediction(config: &AacConfig) -> Result<Option<super::aac_main_predictor::MainPredictor>> {
+    if config.object_type != 1 { return Ok(None); }
+    let tables = BandTables::for_config(config)?;
+    let bands = tables.prediction_limit.ok_or_else(|| invalid("AAC Main prediction band limit missing"))?;
+    Ok(Some(super::aac_main_predictor::MainPredictor::new(tables.long[bands])?))
+}
+
 fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
-    if !matches!(parsed.core.object_type, 2 | 3) {
+    if !matches!(parsed.core.object_type, 1 | 2 | 3) {
         return Err(unsupported(
             "AAC parametric stereo core profile is not implemented",
         ));

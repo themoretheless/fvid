@@ -1,0 +1,236 @@
+{
+  "control": {
+    "name": "core",
+    "asc": "0b08",
+    "frames": [
+      {
+        "offset": 0,
+        "bytes": 7
+      },
+      {
+        "offset": 146,
+        "bytes": 7
+      },
+      {
+        "offset": 173,
+        "bytes": 7
+      },
+      {
+        "offset": 199,
+        "bytes": 7
+      },
+      {
+        "offset": 345,
+        "bytes": 7
+      },
+      {
+        "offset": 372,
+        "bytes": 17
+      },
+      {
+        "offset": 418,
+        "bytes": 17
+      },
+      {
+        "offset": 584,
+        "bytes": 7
+      },
+      {
+        "offset": 611,
+        "bytes": 7
+      },
+      {
+        "offset": 637,
+        "bytes": 7
+      },
+      {
+        "offset": 783,
+        "bytes": 8
+      },
+      {
+        "offset": 812,
+        "bytes": 7
+      }
+    ],
+    "slots": 16,
+    "bands": 32,
+    "channels": 1,
+    "pcm_offset": 0,
+    "samples": 12288,
+    "container_rate": 24000,
+    "container_frame_samples": 1024,
+    "video": {
+      "file": "aac-main-ps-core-control-synthetic.mp4",
+      "sha256": "1bb27a1abf61cbdb3da04340ca156f33d016eca3fc7f59e10f27e6f5d1ada479",
+      "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+      "asc": "0b08",
+      "pcm_offset": 0,
+      "samples": 12288
+    }
+  },
+  "cases": [
+    {
+      "name": "24000",
+      "asc": "eb0b0400",
+      "frames": [
+        {
+          "offset": 7,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 153,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 180,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 206,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 352,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 389,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 435,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 591,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 618,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 644,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 791,
+          "bytes": 21,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 819,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-24000-synthetic.mp4",
+        "sha256": "a4a7d2dc2db4efc46eee9a3f31510fa2217237186d495cdc02cec56799bd13c8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b0400",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "48000",
+      "asc": "eb098400",
+      "frames": [
+        {
+          "offset": 7,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 153,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 180,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 206,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 352,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 389,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 435,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 591,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 618,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 644,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 791,
+          "bytes": 21,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 819,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-48000-synthetic.mp4",
+        "sha256": "9c16c7baf962a102bdf622ea16707131aa91610c94540e9ac0735bc4d5870f37",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098400",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    }
+  ],
+  "provenance": "Own Main residuals, prediction activation/reset, sine/KBD and window transitions; independent scalar prediction/IMDCT. Original authored PS payloads, no private media, foreign decoder, FFmpeg or network."
+}
