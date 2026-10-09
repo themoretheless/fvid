@@ -2919,3 +2919,28 @@ Independently switched sources use their own window state and are mixed in
 the time domain. The bounded absence/timeline policy above is explicitly
 tested against authored scalar data; it is not a claim of all MPEG-4
 SBR/PCE reconfiguration conformance.
+
+
+### SSR/PS syntax preparation prerequisite (2026-10-09)
+
+The owned mono SBR/PS stage now separates validated packet syntax from DSP:
+`prepare` / `prepare_upsampling` retain at most two unprocessed frames;
+`process_prepared` consumes them in wire order when aligned core PCM arrives.
+The existing immediate `read` and absent-FIL API remain transactional wrappers.
+EOF refuses to discard unprocessed syntax. The retained queue compares the full
+opaque prepared frame, so a foreign same-index payload cannot substitute for
+accepted syntax. Failed CRC, truncated or nonfinite PCM, duplicate/out-of-order
+frames and excess lookahead leave the relevant reader/history/DSP unchanged.
+Checkpoint replay and reset preserve that contract. Independent authored scalar
+stereo references qualify delayed submission at core and doubled output clocks.
+
+`scripts/generate_aac_ssr_ps_fixtures.py` authors three silent SSR sine/KBD window
+schedules with existing original SBR/PS payloads, explicit/sync signaling and
+both clocks: three core controls and twelve combined videos. Stereo gold comes
+from the independently authored PS/QMF scalar references, not this decoder.
+Ordinary tests read committed artifacts; no FFmpeg, foreign decoder, network or
+private media is used. Enabled tests prove valid SSR core and PS stage output
+and reproduce the exact native SSR/PS profile gate. Combined native waveform
+acceptance is explicitly ignored until SSR alignment, PS lookahead and the two
+EOF frames are integrated. This change does not claim native SSR/PS playback
+acceptance or complete codec conformance.

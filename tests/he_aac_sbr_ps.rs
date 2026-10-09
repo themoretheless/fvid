@@ -361,3 +361,182 @@ fn reader_queue_and_all_histories_roll_back_on_crc_pcm_and_epoch_failures() {
         0
     );
 }
+
+#[test]
+fn delayed_syntax_and_aligned_pcm_match_independent_stereo_oracles() {
+    let m = matrices();
+    let refs = manifest();
+    for case in refs["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["source"]["kind"] == "sbr-video" && c["zero_eof"] == true)
+    {
+        let video = m["videos"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["video"]["file"] == case["source"]["name"])
+            .unwrap();
+        let (payloads, pcm) = packets(video);
+        for mode in [OutputRate::Core, OutputRate::Double] {
+            let mut state = Decoder::default();
+            let mut queued = std::collections::VecDeque::new();
+            let mut frames = vec![];
+            for (i, raw) in payloads.iter().enumerate() {
+                let (mut bits, crc) = open(raw);
+                let prepared = state
+                    .prepare(&mut bits, raw.len() * 8, crc, 48000, 16, mode)
+                    .unwrap();
+                assert_eq!(prepared.frame_index(), i as u64);
+                assert_eq!(bits.remaining(), 0);
+                queued.push_back(prepared);
+                // The next packet's syntax is validated before previous core PCM
+                // becomes available, as required by SSR alignment.
+                if queued.len() == 2 {
+                    let saved = state.clone();
+                    let result = state
+                        .process_prepared(queued.front().unwrap(), &pcm[i - 1])
+                        .unwrap();
+                    let committed = state.clone();
+                    state = saved;
+                    assert_eq!(
+                        state
+                            .process_prepared(queued.front().unwrap(), &pcm[i - 1])
+                            .unwrap(),
+                        result
+                    );
+                    assert_eq!(state, committed);
+                    queued.pop_front();
+                    if let Some(frame) = result {
+                        frames.push(frame);
+                    }
+                }
+            }
+            let saved = state.clone();
+            assert!(
+                state
+                    .finish()
+                    .unwrap_err()
+                    .to_string()
+                    .contains("aligned PCM before EOF")
+            );
+            assert_eq!(state, saved);
+            if let Some(frame) = state
+                .process_prepared(queued.front().unwrap(), pcm.last().unwrap())
+                .unwrap()
+            {
+                frames.push(frame);
+            }
+            frames.push(state.finish().unwrap().unwrap());
+            assert!(state.finish().unwrap().is_none());
+            assert_eq!(frames.len(), payloads.len());
+            for (i, frame) in frames.iter().enumerate() {
+                compare(frame, &case["frames"][i], mode, i);
+            }
+        }
+    }
+}
+
+#[test]
+fn delayed_syntax_rejects_wrong_frames_and_retries_bad_pcm_without_losing_history() {
+    let m = matrices();
+    let (payloads, pcm) = packets(&m["videos"][0]);
+    let mode = OutputRate::Double;
+    let mut state = Decoder::default();
+    let (mut bits, crc) = open(&payloads[0]);
+    let first = state
+        .prepare(&mut bits, payloads[0].len() * 8, crc, 48000, 16, mode)
+        .unwrap();
+    let saved = state.clone();
+    let mut broken = payloads[1].clone();
+    broken[0] ^= 1;
+    let (mut bits, crc) = open(&broken);
+    let pos = bits.position();
+    assert!(
+        state
+            .prepare(&mut bits, broken.len() * 8, crc, 48000, 16, mode)
+            .unwrap_err()
+            .to_string()
+            .contains("SBR CRC mismatch")
+    );
+    assert_eq!(bits.position(), pos);
+    assert_eq!(state, saved);
+    let (mut bits, crc) = open(&payloads[1]);
+    let second = state
+        .prepare(&mut bits, payloads[1].len() * 8, crc, 48000, 16, mode)
+        .unwrap();
+    let saved = state.clone();
+    let (mut bits, crc) = open(&payloads[2]);
+    let pos = bits.position();
+    assert!(
+        state
+            .prepare(&mut bits, payloads[2].len() * 8, crc, 48000, 16, mode)
+            .unwrap_err()
+            .to_string()
+            .contains("lookahead bound")
+    );
+    assert_eq!(bits.position(), pos);
+    assert_eq!(state, saved);
+    // A same-index/same-format frame prepared by another stream must not
+    // substitute for the original transmitted SBR/PS syntax.
+    let foreign = Decoder::default()
+        .prepare_upsampling(48000, 16, mode)
+        .unwrap();
+    for frame in [&second, &foreign] {
+        assert!(
+            state
+                .process_prepared(frame, &pcm[0])
+                .unwrap_err()
+                .to_string()
+                .contains("identity mismatch")
+        );
+        assert_eq!(state, saved);
+    }
+    let mut bad = pcm[0].clone();
+    bad[1023] = f32::NAN;
+    for samples in [&bad[..], &pcm[0][..1000]] {
+        assert!(
+            state
+                .process_prepared(&first, samples)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid SBR preparation frame")
+        );
+        assert_eq!(state, saved);
+    }
+    assert!(state.process_prepared(&first, &pcm[0]).unwrap().is_none());
+    let saved = state.clone();
+    assert!(
+        state
+            .process_prepared(&first, &pcm[0])
+            .unwrap_err()
+            .to_string()
+            .contains("identity mismatch")
+    );
+    assert_eq!(state, saved);
+    assert_eq!(
+        state
+            .process_prepared(&second, &pcm[1])
+            .unwrap()
+            .unwrap()
+            .frame_index,
+        0
+    );
+    let missing = state.prepare_upsampling(48000, 16, mode).unwrap();
+    let saved = state.clone();
+    assert!(state.finish().is_err());
+    assert_eq!(state, saved);
+    assert_eq!(
+        state
+            .process_prepared(&missing, &pcm[2])
+            .unwrap()
+            .unwrap()
+            .frame_index,
+        1
+    );
+    assert_eq!(state.finish().unwrap().unwrap().frame_index, 2);
+    assert!(state.finish().unwrap().is_none());
+    state.reset();
+    assert_eq!(state, Decoder::default());
+}

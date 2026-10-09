@@ -8429,3 +8429,36 @@ new absence tests and replacement roster acceptance are enabled. All checks
 were locked/offline without FFmpeg; four original Main/SSR scalar references
 also remain bit-identical after the oracle extension. Changed-test/alignment
 module formatting and `git diff --check` pass.
+
+
+### SSR/PS syntax preparation prerequisite (2026-10-09)
+
+The owned mono SBR/PS stage now separates validated packet syntax from DSP:
+`prepare` / `prepare_upsampling` retain at most two unprocessed frames;
+`process_prepared` consumes them in wire order when aligned core PCM arrives.
+The existing immediate `read` and absent-FIL API remain transactional wrappers.
+EOF refuses to discard unprocessed syntax. The retained queue compares the full
+opaque prepared frame, so a foreign same-index payload cannot substitute for
+accepted syntax. Failed CRC, truncated or nonfinite PCM, duplicate/out-of-order
+frames and excess lookahead leave the relevant reader/history/DSP unchanged.
+Checkpoint replay and reset preserve that contract. Independent authored scalar
+stereo references qualify delayed submission at core and doubled output clocks.
+
+`scripts/generate_aac_ssr_ps_fixtures.py` authors three silent SSR sine/KBD window
+schedules with existing original SBR/PS payloads, explicit/sync signaling and
+both clocks: three core controls and twelve combined videos. Stereo gold comes
+from the independently authored PS/QMF scalar references, not this decoder.
+Ordinary tests read committed artifacts; no FFmpeg, foreign decoder, network or
+private media is used. Enabled tests prove valid SSR core and PS stage output
+and reproduce the exact native SSR/PS profile gate. Combined native waveform
+acceptance is explicitly ignored until SSR alignment, PS lookahead and the two
+EOF frames are integrated. This change does not claim native SSR/PS playback
+acceptance or complete codec conformance.
+
+Validation for the preparation prerequisite: locked/offline root unit tests
+(909 passes), owned-media unit tests (461 passes), and the SSR/PS, native PS,
+SBR/PS, PS absence and PS coupling integration suites. The ignored combined
+SSR/PS acceptance was explicitly run separately and fails at the exact native
+profile gate; this is a red acceptance check, not a passing playback test.
+The 19 new artifacts regenerate identically. Changed Rust formatting and
+`git diff --check` pass.
