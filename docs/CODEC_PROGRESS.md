@@ -7879,3 +7879,28 @@ generator and region helper. No private media or parameter sets are copied.
 Tests use saved files without generators, FFmpeg/libav or network access.
 These selected mono PCE/CCE combinations do not establish complete AAC profile,
 gain/tool or HE-AAC v2 conformance.
+
+
+### Stereo PCE SBR in ADTS
+
+`adts_pce_sbr` reproduces the extension-signalling refusal caused by excluding
+every explicit PCE from ordinary ADTS SBR discovery. The underlying own
+AAC decoder already supported a tagged sole normal-front CPE program. The
+discovery gate now uses the resolved mono/stereo channel count and leaves
+supported SBR program-shape validation to the native decoder.
+
+Two short authored companion videos and twelve ADTS variants qualify coupled
+and uncoupled SBR with CPE tag 3, single/three/mixed raw-block grouping and
+CRC/plain protection. Both channels are compared directly with the existing
+independent scalar SBR PCM. Acceptance verifies complete PCM, exact interval
+selection, output rate/count/duration, raw companion packet identity, indexed
+and streaming MP4 and Matroska remux, output-clock timestamps, rewind and seek.
+
+Generator: `scripts/generate_adts_pce_sbr_fixtures.py`, sharing the own offline
+ADTS fixture writer and CRC region helper. Only authored PCE/SBR payloads,
+independent scalar PCM and AVC/container seeds are used. No private media or
+parameters are copied. Ordinary tests read saved fixtures and invoke no
+generator, FFmpeg/libav or network access. This qualifies the sole normal-front
+stereo CPE at the implicit double-rate clock; arbitrary multichannel SBR
+programs and other AAC tools/profiles still require separate implementation
+and qualification.

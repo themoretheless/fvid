@@ -1,0 +1,20 @@
+{
+  "files": [
+    "adts-pce-sbr-uncoupled-111-synthetic.aac",
+    "adts-pce-sbr-uncoupled-111-crc-synthetic.aac",
+    "adts-pce-sbr-uncoupled-3-synthetic.aac",
+    "adts-pce-sbr-uncoupled-3-crc-synthetic.aac",
+    "adts-pce-sbr-uncoupled-12-synthetic.aac",
+    "adts-pce-sbr-uncoupled-12-crc-synthetic.aac"
+  ],
+  "video": {
+    "file": "adts-pce-sbr-uncoupled-synthetic.mp4",
+    "sha256": "1c24ff1778dbf53cbcb4357c6318d4dc6b30c3888984c502848939e2fd0213c7",
+    "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+    "asc": "1300058400002600",
+    "pcm_offset": 0,
+    "samples": 6144
+  },
+  "pcm": null,
+  "provenance": "authored tagged sole CPE PCE and SBR; independent scalar PCM and polynomial CRC"
+}
