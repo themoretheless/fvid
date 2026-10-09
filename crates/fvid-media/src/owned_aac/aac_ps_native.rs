@@ -493,11 +493,6 @@ impl InBandPsProbe {
                                 frame.syntax.data.extended_data.as_deref().unwrap_or(&[]),
                                 slots * 2,
                             )?;
-                            if parsed.len() > 1 {
-                                return Err(unsupported(
-                                    "SBR PS frame permits at most one PS element",
-                                ));
-                            }
                             trial.seen |= !parsed.is_empty();
                             fill = true;
                         }

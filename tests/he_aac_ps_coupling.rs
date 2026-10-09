@@ -246,7 +246,13 @@ fn ps_cce_failures_leave_pending_pcm_overlap_and_probe_histories_unchanged() {
 fn ps_cce_videos_accept_root_owned_export_ranges_wav_and_delayed_playback_seek() {
     use fvid::audio::AudioStream;
     use std::io::Cursor;
-    for c in manifest()["cases"].as_array().unwrap() {
+    let m = manifest();
+    for c in m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(m["multiple"].as_array().unwrap())
+    {
         if c["video"].is_null() {
             continue;
         }
@@ -269,7 +275,13 @@ fn ps_cce_videos_accept_root_owned_export_ranges_wav_and_delayed_playback_seek()
         let mut root = vec![];
         fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut root).unwrap();
         assert_eq!(owned, root);
-        let expected = reference(c);
+        let mut baseline = c.clone();
+        for row in baseline["frames"].as_array_mut().unwrap() {
+            if !row["baseline_sbr"].is_null() {
+                row["sbr"] = row["baseline_sbr"].clone();
+            }
+        }
+        let expected = reference(&baseline);
         assert_eq!(owned.len(), expected.len() * 4);
         for (a, e) in owned.chunks_exact(4).zip(expected) {
             assert!(
@@ -429,5 +441,70 @@ fn source_only_sbr_fil_accepts_mono_and_late_target_ps_negotiates_stereo_export(
             play(&mut stream),
             pcm[landed as usize * stats.channels as usize * 4..]
         );
+    }
+}
+
+#[test]
+fn multiple_ps_extensions_use_final_native_parameters_not_first_frame() {
+    for c in manifest()["multiple"].as_array().unwrap() {
+        let mut d = decoder(c);
+        let mut probe = InBandPsProbe::new(
+            &hex(c["asc"].as_str().unwrap()),
+            c["output_rate"].as_u64().unwrap() as u32,
+        )
+        .unwrap();
+        let mut sbr_syntax = Stream::default();
+        let mut history = fvid_media::owned_aac::aac_ps_history::Stream::default();
+        let mut baseline = c.clone();
+        let mut actual = vec![];
+        for (index, row) in c["frames"].as_array().unwrap().iter().enumerate() {
+            baseline["frames"][index]["sbr"] = row["baseline_sbr"].clone();
+            let raw = hex(row["sbr"].as_str().unwrap());
+            let mut bits = BitReader::new(&raw);
+            let kind = bits.read(4).unwrap();
+            let syntax = sbr_syntax
+                .read(
+                    &mut bits,
+                    raw.len() * 8,
+                    kind == 14,
+                    48000,
+                    c["slots"].as_u64().unwrap() as u8,
+                    1,
+                )
+                .unwrap();
+            let parsed = history
+                .read_sbr_extensions(
+                    syntax.syntax.data.extended_data.as_deref().unwrap(),
+                    c["slots"].as_u64().unwrap() as u8 * 2,
+                )
+                .unwrap();
+            assert_eq!(parsed.len(), 2);
+            assert_eq!(parsed[0].parameters.iid_mode.value(), 0);
+            assert_eq!(parsed[1].parameters.iid_mode.value(), 5);
+            assert!(probe.read(packet(row)).unwrap());
+            let saved = d.checkpoint();
+            let frame = d.decode(packet(row)).unwrap();
+            d.restore(&saved).unwrap();
+            assert_eq!(frame, d.decode(packet(row)).unwrap());
+            if let Some(frame) = frame {
+                actual.extend(frame.pcm);
+            }
+        }
+        actual.extend(d.finish().unwrap().unwrap().pcm);
+        let expected = reference(&baseline);
+        assert_eq!(actual.len(), expected.len());
+        assert!(expected.iter().any(|v| v.abs() > 1e-5));
+        for (a, e) in actual.iter().zip(expected) {
+            assert!((a - e).abs() < 2e-7);
+        }
+        d.reset();
+        let mut replay = vec![];
+        for row in c["frames"].as_array().unwrap() {
+            if let Some(frame) = d.decode(packet(row)).unwrap() {
+                replay.extend(frame.pcm);
+            }
+        }
+        replay.extend(d.finish().unwrap().unwrap().pcm);
+        assert_eq!(actual, replay);
     }
 }

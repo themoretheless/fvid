@@ -5,7 +5,7 @@
 use super::{
     Result, aac_ps_decorrelation::FrameControls, aac_ps_dsp, aac_ps_history,
     aac_sbr_dsp::OutputRate, aac_sbr_history, aac_sbr_qmf::Complex, aac_sbr_qmf_dsp,
-    bits::BitReader, invalid, unsupported,
+    bits::BitReader, invalid,
 };
 #[derive(Clone, Debug, PartialEq)]
 struct Pending {
@@ -73,7 +73,7 @@ impl Decoder {
             pcm: output.pcm,
         }))
     }
-    /// Read one mono SBR payload with at most one PS element. The first call
+    /// Read one mono SBR payload, applying PS elements in wire order. The first call
     /// queues output and returns None; later calls return the preceding frame.
     /// Reader, SBR, native parameters, QMF, PS and queue commit atomically.
     /// Absent or independently uninitialized PS maps normal SBR mono to stereo.
@@ -102,9 +102,6 @@ impl Decoder {
         let frame = trial.sbr.read(&mut reader, end, crc, rate, slots, 1)?;
         let data = frame.syntax.data.extended_data.as_deref().unwrap_or(&[]);
         let parsed = trial.parameters.read_sbr_extensions(data, slots * 2)?;
-        if parsed.len() > 1 {
-            return Err(unsupported("SBR PS frame permits at most one PS element"));
-        }
         let rows = trial.qmf.process(&frame, &[pcm], rate, slots)?;
         if rows.format_reset && trial.pending.is_some() {
             return Err(invalid(
@@ -119,8 +116,10 @@ impl Decoder {
             .ok_or_else(|| invalid("missing mono SBR QMF rows"))?;
         let output = trial.render(&rows[..aac_ps_dsp::LOOKAHEAD])?;
         trial.pending = Some(Pending {
+            // All elements update parameter history; only the final state
+            // describes this audio frame. QMF/PS synthesis advances once.
             parameters: parsed
-                .first()
+                .last()
                 .filter(|p| p.parameters.initialized)
                 .map(|p| p.parameters.clone()),
             rows,

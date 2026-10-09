@@ -97,27 +97,48 @@ def main():
                 c['video']=video_fixture([c],blob,channels=c['channels'],
                     filename=f"he-aac-ps-coupling-{slots*64}-{point}-{'late-target-ps' if late else 'source-fil-only'}-synthetic.mp4")
                 negotiation.append(c)
+    multiple=[]
+    for slots in [15,16]:
+        frames=[]
+        for frame in range(6):
+            first=ps(0,0,0,slots=slots*2,count=1)[0]
+            last=ps(5,5,0,slots=slots*2,count=1)[0]
+            target_raw=sbr(first+'10'+last,frame)
+            baseline=sbr(last,frame)
+            data=packet(frame,[15],1,target_raw,{15:b''})
+            frames.append(dict(offset=len(blob),bytes=len(data),sbr=target_raw.hex(),
+                               baseline_sbr=baseline.hex(),cce=[dict(tag=15,sbr='')]));blob.extend(data)
+        for rate,bands in [(24000,32),(48000,64)]:
+            for kind in ['PS','SBR','LC']:
+                c=dict(slots=slots,bands=bands,frames=frames,asc=config(slots,rate,kind,[15],1).hex(),
+                       point=1,tags=[15],kind=kind,output_rate=rate,channels=2,
+                       core_pcm=offsets[slots,1],pcm_offset=0,samples=slots*bands*12,video=None)
+                if rate==48000:
+                    c['video']=video_fixture([c],blob,channels=2,
+                        filename=f'he-aac-ps-coupling-{slots*64}-{kind.lower()}-multiple-ps-synthetic.mp4')
+                multiple.append(c)
     invalid=[]
-    for failure in ['target','crc','source-ps']:
+    for failure in ['target','crc','source-ps','last-ps']:
         c=next(c for c in cases if c['slots']==16 and c['point']==1 and c['tags']==[15] and c['kind']=='PS' and c['bands']==64)
         frames=[]
         for frame in range(3):
             target_raw=sbr(ps(1,1,frame,slots=32,count=1)[0],frame)
             source=bytearray(mono_payload(nhigh,2,True,frame))
             if frame==1:
-                if failure=='crc':source[0]^=1
+                if failure=='last-ps':target_raw=sbr(ps(0,0,0,slots=32,count=1)[0]+'10'+'11111',frame)
+                elif failure=='crc':source[0]^=1
                 elif failure=='source-ps':source=bytearray(sbr(ps(1,1,0,slots=32,count=1)[0],0))
             data=packet(frame,[15],1,target_raw,{15:bytes(source)},missing=failure=='target' and frame==1)
             frames.append(dict(offset=len(blob),bytes=len(data),sbr=target_raw.hex()));blob.extend(data)
         bad=dict(c,frames=frames,samples=6144)
-        bad['error']={'target':'AAC coupling target is absent','crc':'SBR CRC','source-ps':'SBR extended audio/PS synthesis is not yet implemented'}[failure]
+        bad['error']={'target':'AAC coupling target is absent','crc':'SBR CRC','source-ps':'SBR extended audio/PS synthesis is not yet implemented','last-ps':'reserved PS IID mode'}[failure]
         bad['video']=video_fixture([bad],blob,channels=2,filename=f'he-aac-ps-coupling-{failure}-synthetic.mp4')
         invalid.append(bad)
     (DEST/'he-aac-ps-coupling-packets.bin').write_bytes(blob)
     (DEST/'he-aac-ps-coupling-core.f32le').write_bytes(pcm)
     (DEST/'he-aac-ps-coupling-oracles.json').write_text(json.dumps(dict(
         kind='own PS/CCE packets; independent direct-cosine core, separately qualified PS/SBR composition',
-        cases=cases,invalid=invalid,negotiation=negotiation,packet_sha256=hashlib.sha256(blob).hexdigest(),core_sha256=hashlib.sha256(pcm).hexdigest()),indent=2)+'\n')
+        cases=cases,invalid=invalid,negotiation=negotiation,multiple=multiple,packet_sha256=hashlib.sha256(blob).hexdigest(),core_sha256=hashlib.sha256(pcm).hexdigest()),indent=2)+'\n')
     print(len(cases),'PS/CCE cases;',sum(c['video'] is not None for c in cases),'acceptance videos')
 
 

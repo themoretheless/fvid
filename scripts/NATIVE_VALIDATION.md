@@ -1100,3 +1100,20 @@ not a claim of CCE-owned PS support. Root/owned PCM agrees; the expected PCM
 uses the independent core oracle and qualified own SBR/PS stage composition.
 Full playback, rewind and seek agree with export. Fixture generation remains
 offline and deterministic; tests do not generate fixtures or invoke FFmpeg.
+
+### 2026-10-09 — sequential PS elements in one extension area
+
+The former at-most-one-PS refusal is superseded for multiple PS elements
+inside one mono target SBR extension area. Syntax and native parameter history
+advance in wire order; the final parameters drive one QMF/PS synthesis step.
+This matches the extension-area loop in the reference parser:
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aacsbr_template.c
+No reference implementation is linked or invoked by production or tests.
+
+Twelve authored 960/1024, core/double-clock, explicit/implicit cases contain
+a first coarse 10-band PS followed by a distinct fine 34-band PS. PCM must
+equal a single-final-PS baseline using independent core PCM and the separately
+qualified owned DSP. Six MP4 acceptance videos cover root/owned export, ranges,
+WAV, playback, rewind and seek. A reserved IID mode in a later PS element
+requires exact refusal and transactional rollback; it is not an acceptance.
+Multi-element target audio programs and CCE-owned PS remain separate gaps.
