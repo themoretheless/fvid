@@ -3807,3 +3807,34 @@ No external decoder code or dependency is imported.
 Sensitivity: replacing the previous-PCM carry with zeros failed the independent history oracle at n=960, lag=1920, coefficient=0. Source was restored. All three artifacts reproduce identical hashes and cover 216 full two-frame estimates, including the separately encoded 2047 lag boundary.
 
 Validation: owned-library tests passed 461 with zero failures and one pre-existing ignored. Offline media/player integration passed 11 with zero failures and one pending LTP playback acceptance ignored. The chosen raw-signal scale and integer rounding still require end-to-end LTP PCM qualification when analysis/synthesis is integrated.
+
+### AAC LTP owned FFT forward analysis foundation (2026-10-09)
+
+`Imdct::forward_with_scratch` now folds the 2N input into the DCT-IV domain
+and reuses the owned chirp convolution/FFT tables for an unnormalized cosine-sum
+MDCT. It is O(N log N), accepts caller-owned scratch, and validates geometry,
+finite input and transformed output before publishing any output samples.
+An independent dense direct-cosine unit test covers all six supported transform
+lengths (32,120,128,256,960,1024) and preserves output on bad scratch geometry.
+
+`aac_ltp_analysis::LtpAnalysis` applies previous/current sine/KBD windows for
+only-long, long-start and long-stop at 960/1024 geometry, then runs the forward
+transform with retained scratch and no per-call allocations. It does not
+advance decoder history; short-window analysis explicitly refuses. A separate
+own generator creates 24 sparse boundary-signal full-spectrum references and
+four dense harmonic selected-bin references using scalar windows/direct cosine
+sums. Acceptance checks repeated calls, invalid input, overflow, short refusal
+and recovery without corrupting caller output.
+
+This remains a required computation stage, not LTP playback. TNS analysis,
+selected-band application, profile/ICS admission and transactional decoder state
+remain unconnected, as does final end-to-end scale/rounding qualification. The
+existing synthetic LTP videos still reproduce the explicit AOT4 refusal and
+playback acceptance remains ignored. Generation is separate from tests and uses
+no private media, foreign decoder execution, FFmpeg or network.
+Window-sequence reference consulted: [FAAD2 LTP filterbank](https://github.com/knik0/faad2/blob/master/libfaad/filtbank.c).
+No external decoder code/dependency is imported.
+
+Sensitivity: substituting current shape for previous shape failed the independent analysis oracle: `n=960 seq=OnlyLong bin=0: -1024.3450776386292 vs -1026.0142568988708`. Source was restored. All three generated artifacts reproduce identical hashes.
+
+Validation: restored owned-library tests passed 462 with zero failures and one pre-existing ignored. Offline media/player integration passed 13 with zero failures and one pending LTP playback acceptance ignored. All six forward-transform sizes passed dense direct-cosine comparison.
