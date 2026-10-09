@@ -1537,3 +1537,38 @@ is unchanged. This qualifies long-window PNS across the selected compatible
 roster schedules only. Short-window PNS, dependent-coupling PNS, wider band
 geometry/profiles, additional SBR tools and all-codec parity remain open;
 SBR/PS uses previously qualified owned stages, not a new independent oracle.
+
+### AAC Main PS short-window PNS point-3 acceptance (2026-10-09)
+
+A separate 56-video matrix qualifies PNS in grouped eight-short windows and
+long/start/short/stop source transitions, with distinct schedules for CCE
+tags 1/15. Source clocks pause on single/simultaneous absence and late
+arrival; initially empty, static and dynamic PCE variants combine with
+source-SBR on/off and 24/48 kHz output. Optional directional first-order TNS
+runs on non-short windows only; this does not qualify short-window TNS.
+A scalar global noise generator follows actual source wire order and generates
+one independently normalized noise band per short window. Scalar per-tag
+Main prediction resets all history on short windows before subsequent long
+prediction; direct IMDCT/overlap supplies the independent core reference.
+Qualified owned SBR/PS stages remain the extension composition reference.
+
+The wrong core control retains old long-window predictor state throughout
+short windows, without applying prediction to short PCM. It changes final
+PCM in every case. A temporary production mutation omitting `bank.short_window()`
+fails waveform at sample 12122 for 24 kHz upsampling. Production source is
+restored byte-for-byte. Acceptance also covers checkpoint/rollback including
+noise RNG, reset, all target frame indices/delayed EOF, export, syntax probe,
+intervals, rewind and seek; static/dynamic PCM equality, absent-DSP discard,
+source FIL binding and target-only empty frames remain checked.
+
+Generator `scripts/generate_aac_main_ps_pns_short_fixtures.py` reproduces 90
+artifacts deterministically, separately from ordinary tests, without private
+media, FFmpeg, foreign decoders or network. Prior fixture sets are unchanged.
+This covers one grouped short-window geometry for mono Main PS independent
+coupling point 3. Other grouping patterns, short-window TNS, dependent-coupling
+PNS, broader band/profile/layout geometry and all-codec parity remain open.
+
+Validation: 12 integration tests passed across `aac_main_ps_pns_short`,
+`aac_main_tools` and `aac_main_ps`, locked/offline with `media,player`
+and no FFmpeg. Existing TNS order-21 coverage remains a refusal test,
+not order-21 acceptance. Production code is unchanged.
