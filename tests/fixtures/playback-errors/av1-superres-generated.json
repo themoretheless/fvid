@@ -1,0 +1,490 @@
+{
+  "fixtures": [
+    {
+      "file": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.obu",
+      "sha256": "935dea9a875fcbdd5d77117cf9e95705ef61b3e869c66da3bb823730a32c04a6",
+      "reference": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.yuv",
+      "reference_sha256": "8d7ba28c160c2e9a580aece46f345ad79a53d666dbe59b42eb6026745cbf9ec6",
+      "source_sha256": "161e9cff136762d2cc9a6ec40d43179b184301e55ab66df0a3fe664f11f078a1",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 9,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.webm",
+      "webm_sha256": "3f30bd3fc85a33acbf816a0e8c2504c3e10b6a571d2c0097ff4630b5acaf9d46",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.obu",
+      "sha256": "1c1e029ed6a9b0b8b69859bbfa7b35ce22544b6f57715794ee492ccea7848f17",
+      "reference": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.yuv",
+      "reference_sha256": "84fbdd7cf038a496d1644abefd19510c74bc49c4f35040f4ecafbb14a5d1503f",
+      "source_sha256": "7ad9b331bc59ecd33dbea6c22a65bd01caf5ba1eb92bbce4167dfd514b9b04dd",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 9,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.webm",
+      "webm_sha256": "634338bcf467b2fea805d0d8582d4665d15939b99f2d9232fcca31efc47b8da6",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.obu",
+      "sha256": "2cd266d0dfcbd401200ef14f41b2866d65aeedeb12ecab7808ec309dd66e5ef0",
+      "reference": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.yuv",
+      "reference_sha256": "e6adb5458321cb2384002c9e785fa7e0b03e1874de264a010e41aa467291ae58",
+      "source_sha256": "161e9cff136762d2cc9a6ec40d43179b184301e55ab66df0a3fe664f11f078a1",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 12,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.webm",
+      "webm_sha256": "936709de22dbebbdc1c2c659300c6a7e133a5d62642951a135f2d9474a8cea05",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.obu",
+      "sha256": "9a73dcce754842fe5df3bcf927598bb53866f02e2fd0460bb9d0eca43b2912b8",
+      "reference": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.yuv",
+      "reference_sha256": "a2d626d30a0d9ecb7ee69be1a8667ce608c77fa19d1705b009d2b88ddb017123",
+      "source_sha256": "7ad9b331bc59ecd33dbea6c22a65bd01caf5ba1eb92bbce4167dfd514b9b04dd",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 12,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.webm",
+      "webm_sha256": "bf2235470c65e452985aa8d9e1f5365d95338382accc20730e23cb3f59eaa148",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.obu",
+      "sha256": "5393f8595e32f53cb20f228e76a4a7503f438e9309fa16c96380b011db9652e7",
+      "reference": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.yuv",
+      "reference_sha256": "39f1183cffe70c7ca5fee6c244d8f091b6ddc2dee5532bb8fc17db14e2f6c74e",
+      "source_sha256": "161e9cff136762d2cc9a6ec40d43179b184301e55ab66df0a3fe664f11f078a1",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 16,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.webm",
+      "webm_sha256": "3426cd7b82858602c525ac5555fe1596984cd3e61b78206075734a2e92988607",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.obu",
+      "sha256": "69c94ee87046d23241db4dae66be1c7b50469f2e14e3441220a375007ee1ddf1",
+      "reference": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.yuv",
+      "reference_sha256": "160e2cfc3a40ea7a2aa1c42b8378f22c61c333ec01f4417cbbe7b14518120c62",
+      "source_sha256": "7ad9b331bc59ecd33dbea6c22a65bd01caf5ba1eb92bbce4167dfd514b9b04dd",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 16,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth8-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.webm",
+      "webm_sha256": "0f17824e0cfa2877f46f253735865d79639b3f4483722c27c77d3dff330658d4",
+      "depth": 8,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.obu",
+      "sha256": "0aa6d82eaf1d298bbe22f246b962f67ab6b2b9570446d0f8ffc497147eca7c50",
+      "reference": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.yuv",
+      "reference_sha256": "45172502a0fe8c78b7c6a3f0b1dbbbc4064976ceb856e055629a2fe183635836",
+      "source_sha256": "add29e3f40e673fc80434ba502c54f577c5fcf9c4f5a45bbb2a2c7fce08168c8",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 9,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.webm",
+      "webm_sha256": "489a569da04eed0ef7035764d76fdf10b60487ffac039bdf01a915af595b92c3",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.obu",
+      "sha256": "a9a0b471774828f6a191625454455c1794e24cf6408525d3eae101c4c8af73dc",
+      "reference": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.yuv",
+      "reference_sha256": "cd622b37126df2af934e37765ec5d8a78c627346ccd351743691f76b74887c3d",
+      "source_sha256": "5a5bf8aaa21ab7f428e5d6e926f845349769b30bae450360599b3d58749b190f",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 9,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.webm",
+      "webm_sha256": "135e1beb3467710585d7bbe4b8f6f55216817bebc5158a294dc37269c43f143d",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.obu",
+      "sha256": "38f3a17c4210e951cf9100cbba18ea3594431d07e77fc1b57e084b6b00d87a94",
+      "reference": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.yuv",
+      "reference_sha256": "6340dd201d4f6e2d771beb100a50b4e9b5ae3556fc73ca4d0f65d004e5263eda",
+      "source_sha256": "add29e3f40e673fc80434ba502c54f577c5fcf9c4f5a45bbb2a2c7fce08168c8",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 12,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.webm",
+      "webm_sha256": "d350c60c416e868510509a8cfd904ea7c4ad1b612a82f9e8ca89aaf56c3d42b5",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.obu",
+      "sha256": "3db9b37be89cca7362ebebb7ff8e32d5fdf1b988bc36e50a354b3246dfd66b9a",
+      "reference": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.yuv",
+      "reference_sha256": "d35d5c04d241f3d21e536e81a6592aca165b79cb20189e27f55a137a91d2b742",
+      "source_sha256": "5a5bf8aaa21ab7f428e5d6e926f845349769b30bae450360599b3d58749b190f",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 12,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.webm",
+      "webm_sha256": "d74752913313a5a1aa0ad19b1e33ff4acc2277e857b60463c792c804e181241f",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.obu",
+      "sha256": "809b1727ded13d23fe90c80831cc10e41168bca32d22480ecfe6a1efda3b7017",
+      "reference": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.yuv",
+      "reference_sha256": "a8fce601593b01c2b0f749d94c961592d16d03f6c5df28a31a77bb81c70174b7",
+      "source_sha256": "add29e3f40e673fc80434ba502c54f577c5fcf9c4f5a45bbb2a2c7fce08168c8",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 16,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.webm",
+      "webm_sha256": "e60f6517956c107f103c1d3f28605482520c025cda8849dc76626c89f3eed426",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.obu",
+      "sha256": "a9d6730bc6298258be45714fbca4ed2dad2941f9ea222835f44f76a413d85af4",
+      "reference": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.yuv",
+      "reference_sha256": "b0d554a5c9579a81693e0240af6eafe853c6824fe0994e38f7fc63052807de68",
+      "source_sha256": "5a5bf8aaa21ab7f428e5d6e926f845349769b30bae450360599b3d58749b190f",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 16,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth10-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.webm",
+      "webm_sha256": "e54aea3fae0a83c53947cac5b99700ff5d02b20c293893e40791b49e178bd335",
+      "depth": 10,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.obu",
+      "sha256": "54808d30e4c99f7c1f6f238635d38a368f8ceb631638d03b601f49ba66455c62",
+      "reference": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.yuv",
+      "reference_sha256": "4f483f3b87e0bfd291bb4057c9aafdd55cdc4b9dd1437e89e5e03167300f8601",
+      "source_sha256": "1331647418366311a9b5ff5c48379fb52d1099614764d25461719360a44bc82b",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 9,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom9-orientation0.webm",
+      "webm_sha256": "507ff8973751c407dc7da13345e6e12c37ddf407b9bac4ebd17e75a99cef8408",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.obu",
+      "sha256": "c13e173d26b93439089212cc9614672fd7005680fe748511beeabc0f5d2ba69d",
+      "reference": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.yuv",
+      "reference_sha256": "871adccedc83bfcbd1c612382677c53497b2f857a584d36e090c91777720f964",
+      "source_sha256": "4931aa88cc8c7fd0dbeac9143aed47bf9254338fa63203f26ebda0ae9491d06b",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 9,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom9-orientation1.webm",
+      "webm_sha256": "1c28a8f3de8e3c348164f8ebbba64eded613ba0118c61ac0c5edcb949dc291ab",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.obu",
+      "sha256": "5e030761ce75d7320ec44e750f4680d79335e2a6924ed824c3e4376fd7412847",
+      "reference": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.yuv",
+      "reference_sha256": "2f51ed4f9eb36b56cc94595d84ac2cbd360d0558285cfe4115aa1c81835361f5",
+      "source_sha256": "1331647418366311a9b5ff5c48379fb52d1099614764d25461719360a44bc82b",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 12,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom12-orientation0.webm",
+      "webm_sha256": "70629e81b5e7a0f8a80870fe16301c65c1c27f7ed35d072ea8acdf8893f20c14",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.obu",
+      "sha256": "1b67841eae0df8e49656de85f44626688bcfc0d166dd2942ee4d29c27b785351",
+      "reference": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.yuv",
+      "reference_sha256": "1c676d5e1ce9e0fd5746aceb5294f8d0f24cd28bd4c98ce129c05d19e5b09750",
+      "source_sha256": "4931aa88cc8c7fd0dbeac9143aed47bf9254338fa63203f26ebda0ae9491d06b",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 12,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom12-orientation1.webm",
+      "webm_sha256": "19c5922e031ec045f494c8f73c10b84b9e1b2975f0af446fe0ad3871a558a01b",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.obu",
+      "sha256": "5f1e33d40b787075d74e54227aa9b70b875e911905dd26afa53d5afc0d91c874",
+      "reference": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.yuv",
+      "reference_sha256": "24cf46329146a1ba131a4817b8139d8630a8490fa829d155d98a07fb8fbccb23",
+      "source_sha256": "1331647418366311a9b5ff5c48379fb52d1099614764d25461719360a44bc82b",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 16,
+      "matrix_enabled": false,
+      "orientation": 0,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom16-orientation0.webm",
+      "webm_sha256": "2df889b73b9a03e028ea5ba7a97d1d6bac3cf4748cca122dd297e3380dcb4de0",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    },
+    {
+      "file": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.obu",
+      "sha256": "dc8f7d7549147859c1d0a376912b3210d7e19f0141406984ee2252812129ce78",
+      "reference": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.yuv",
+      "reference_sha256": "c29c8ec86b692d0d3f194c3c33904ec12694ed97ee6ffaca185850918984c268",
+      "source_sha256": "4931aa88cc8c7fd0dbeac9143aed47bf9254338fa63203f26ebda0ae9491d06b",
+      "source_exact": false,
+      "quality": 32,
+      "denominator": 16,
+      "matrix_enabled": false,
+      "orientation": 1,
+      "oracles": [
+        "libaom",
+        "dav1d"
+      ],
+      "mirror": true,
+      "webm": "av1-superres-depth12-colors3-chroma1-layout0-vflip1-q32-denom16-orientation1.webm",
+      "webm_sha256": "3bbecac1d36da52ef8017e6a1b2c1f438315fae6454aad5006e6c6a5077ead3a",
+      "depth": 12,
+      "colors": 3,
+      "chroma": true,
+      "layout": 0,
+      "size": [
+        192,
+        128
+      ]
+    }
+  ]
+}
