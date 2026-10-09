@@ -8569,3 +8569,25 @@ PCM with the qualified owned SBR/PS stage, rather than providing a new fully
 independent PS oracle. This qualification does not cover independently switched
 source window sequences, source absence/return under PS, or PCE replacement.
 No production decoder change was required for this extension.
+
+
+### SSR/PS independent CCE absence and return (2026-10-09)
+
+Sixteen further authored videos qualify final disappearance and coded-history
+pause/return for CCE1 under PS. Source-ahead, source-behind, exactly aligned
+absence and return schedules run at 24/48 kHz with and without source SBR.
+Target packets remain long-window silent SSR with the original PS payloads.
+Source coded ordinals pause during absence; the original scalar SSR alignment
+PCM is preserved, including queued samples beyond the last present packet.
+Per-chunk gain intervals distinguish those samples from zero absent lanes.
+
+The reference warms source QMF with aligned PCM even when output gain is absent,
+then applies the original gain intervals after extension DSP. It composes the
+independent scalar SSR source oracle with the already qualified owned SBR/PS
+stage; it is not a new independent full PS numerical oracle. Native acceptance
+checks checkpoint/retry, reset, packet indices, both delayed EOF frames and
+MP4 export. The existing playback test also covers ranges, rewind and seek.
+The matrix now has 20 core controls and 64 PS programs. No production decoder
+change was needed. PCE replacement, multiple disappearing sources and wider
+profiles/tools remain separate work. No private media, FFmpeg or network is
+used by the generator or ordinary tests.

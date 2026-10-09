@@ -137,6 +137,51 @@ def main():
                           distinct_sources=True,**combined_ref)
                 case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-'+case['name']+'-synthetic.mp4')
                 cases.append(case)
+    # Reuse original scalar SSR alignment, with explicit absent-lane output
+    # gains. Coded source ordinal pauses while target packet time continues.
+    alignment = json.loads((DEST/'aac-ssr-alignment.json').read_text())
+    for name,base_name,present in [('ahead','source-ahead',[1,1,0,0,0,0]),
+                                 ('behind','opposite-switches',[1,1,0,0,0,0]),
+                                 ('exact','source-ahead',[1,0,0,0,0,0]),
+                                 ('resume','source-ahead',[1,1,0,1,1,0])]:
+        base = next(c for c in alignment['cases'] if c['name']==base_name)
+        source_pcm = (DEST/('aac-ssr-cce-absence-'+name+'-core.f32le')).read_bytes()
+        ref=dict(pcm_offset=len(gold),pcm_bytes=len(source_pcm));gold.extend(source_pcm)
+        gains=[];ordinal=0
+        for i,on in enumerate(present):
+            if on:
+                gains += [1]*SAMPLES[base['source_sequences'][ordinal]];ordinal+=1
+            else:gains += [0]*max(0,(i+1)*1024-len(gains))
+        assert len(gains)==6144
+        gain_ranges=[]
+        for i in range(6):
+            row=[];start=None
+            for j,value in enumerate(gains[i*1024:(i+1)*1024]+[0]):
+                if value and start is None:start=j
+                if not value and start is not None:row.append([start,j]);start=None
+            gain_ranges.append(row)
+        for sbr in (False,True):
+            rows=[];ordinal=0
+            for i,on in enumerate(present):
+                target='0000000'+silent(0,0,0,False,False)+fill(bytes.fromhex(ps[i%3]))
+                coded='';payloads={}
+                if on:
+                    seq=base['source_sequences'][ordinal]
+                    coded='0100001'+'1'+'000'+'0'+'0000'+'0'+'0'+'10'+channel(ordinal,seq,ordinal%2,0,True,False)
+                    if sbr:
+                        payload=mono_payload(len(tables(10,27,0,False,0,0)[1])-1,2,True,ordinal)
+                        coded+=fill(payload);payloads['1']=payload.hex()
+                    ordinal+=1
+                raw=packed((coded+target if i%2 else target+coded)+'111')
+                rows.append(dict(offset=len(blob),bytes=len(raw),payload=ps[i%3],source_payloads=payloads));blob.extend(raw)
+            for rate,bands in ((24000,32),(48000,64)):
+                prefix=field(29,5)+frequency(24000)+'0000'+frequency(rate)+field(3,5)+'000'
+                case=dict(name=f'absence-{name}-{int(sbr)}-{rate}',asc=packed(program(prefix,1,3,(1,))).hex(),
+                          point=3,tags=[1],active=True,frames=rows,slots=16,bands=bands,container_rate=rate,
+                          container_frame_samples=rate//24000*1024,samples=rate//24000*6144,
+                          source_pcm={'1':ref},distinct_sources=True,source_gain_ranges=gain_ranges,present=present,**ref)
+                case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-'+case['name']+'-synthetic.mp4')
+                cases.append(case)
     base = next(c for c in cases if c['point']==1 and c['active'] and c['tags']==[1,15] and c['bands']==64)
     for failure in ('shape','target'):
         rows = []

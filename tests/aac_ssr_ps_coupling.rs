@@ -122,8 +122,14 @@ fn reference(c: &Value) -> Vec<f32> {
                         .process_upsampling(&[&core], 48000, 16, mode)
                         .unwrap()
                 };
-                for (dest, &sample) in coupled.iter_mut().zip(&rendered[0]) {
-                    *dest = (*dest as f32 + sample as f32) as f64;
+                for (j, (dest, &sample)) in coupled.iter_mut().zip(&rendered[0]).enumerate() {
+                    let ranges = &c["source_gain_ranges"][i];
+                    let ratio = if mode == OutputRate::Core { 1 } else { 2 };
+                    let enabled = ranges.is_null() || ranges.as_array().unwrap().iter().any(|r| {
+                        j / ratio >= r[0].as_u64().unwrap() as usize
+                            && j / ratio < r[1].as_u64().unwrap() as usize
+                    });
+                    if enabled { *dest = (*dest as f32 + sample as f32) as f64; }
                 }
             }
         }
@@ -338,7 +344,7 @@ fn distinct_source_oracle_detects_history_substitution_and_fil_reassociation() {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|c| c["distinct_sources"] == true)
+        .filter(|c| c["distinct_sources"] == true && c["source_gain_ranges"].is_null())
         .collect();
     assert_eq!(cases.len(), 12);
     for c in cases {
@@ -385,6 +391,28 @@ fn distinct_source_oracle_detects_history_substitution_and_fil_reassociation() {
                 "FIL reassociation is invisible: {}",
                 c["name"]
             );
+        }
+    }
+}
+
+#[test]
+fn absent_source_oracle_keeps_queued_gain_boundaries_and_detects_unmuted_tail() {
+    let m = manifest();
+    let cases: Vec<_> = m["cases"].as_array().unwrap().iter()
+        .filter(|c| !c["source_gain_ranges"].is_null()).collect();
+    assert_eq!(cases.len(), 16);
+    for c in cases {
+        assert_eq!(c["present"].as_array().unwrap().len(), 6);
+        assert!(c["source_gain_ranges"].as_array().unwrap().iter()
+            .any(|r| r.as_array().unwrap().is_empty()));
+        if c["name"].as_str().unwrap().contains("-1-") {
+            let expected = reference(c);
+            let mut unmuted = c.clone();
+            unmuted.as_object_mut().unwrap().remove("source_gain_ranges");
+            let wrong = reference(&unmuted);
+            let error = expected.iter().zip(wrong)
+                .map(|(a,b)| (a-b).abs()).fold(0f32, f32::max);
+            assert!(error > 1e-6, "absent gains are invisible: {}", c["name"]);
         }
     }
 }
