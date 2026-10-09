@@ -5793,6 +5793,1246 @@
         "pcm_offset": 516096,
         "samples": 12288
       }
+    },
+    {
+      "name": "pce-roster-ahead-0-24000",
+      "asc": "eb030c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 46811,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47005,
+          "bytes": 78,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47083,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47109,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47248,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47268,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 442368,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 442368,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-ahead-0-24000-synthetic.mp4",
+        "sha256": "c8a923472ad0af54577a7b1eac1581735cc35db0b2ec08e92bae071d696aa875",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 442368,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-ahead-0-48000",
+      "asc": "eb018c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 47287,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47481,
+          "bytes": 78,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47559,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47585,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47724,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 47744,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 442368,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 442368,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-ahead-0-48000-synthetic.mp4",
+        "sha256": "2459ff833c87dfb6518f5ca934a19e12a43124e22090c0d39bcf7a9962db415b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 442368,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-ahead-1-24000",
+      "asc": "eb030c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 47763,
+          "bytes": 206,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d88c182b04010000000070"
+          }
+        },
+        {
+          "offset": 47969,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {
+            "1": "ee600e0000000000"
+          }
+        },
+        {
+          "offset": 48056,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48082,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48221,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48241,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 442368,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 442368,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-ahead-1-24000-synthetic.mp4",
+        "sha256": "a3137184fde28ebee572167d49229822d8a448764c5ff687c8cf6a6814044896",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 442368,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-ahead-1-48000",
+      "asc": "eb018c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 48260,
+          "bytes": 206,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d88c182b04010000000070"
+          }
+        },
+        {
+          "offset": 48466,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {
+            "1": "ee600e0000000000"
+          }
+        },
+        {
+          "offset": 48553,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48579,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48718,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48738,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 442368,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 442368,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-ahead-1-48000-synthetic.mp4",
+        "sha256": "5c121d69267661f77755247bff275061086bd9c141724e1595cf36a60b981109",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 442368,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-0-24000",
+      "asc": "eb030c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 48757,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48951,
+          "bytes": 27,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48978,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 48997,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49136,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49156,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 491520,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 491520,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-exact-0-24000-synthetic.mp4",
+        "sha256": "064aa788a7aef944c937630c60bfacd34faea75562819cefbe775d9323553612",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 491520,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-0-48000",
+      "asc": "eb018c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 49175,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49369,
+          "bytes": 27,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49396,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49415,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49554,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49574,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 491520,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 491520,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-exact-0-48000-synthetic.mp4",
+        "sha256": "b9ba6345762418c78860e51b681bffb5ec4d0333b3ae7eca41669bd4c540ba7d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 491520,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-1-24000",
+      "asc": "eb030c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 49593,
+          "bytes": 206,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d88c182b04010000000070"
+          }
+        },
+        {
+          "offset": 49799,
+          "bytes": 27,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49826,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49845,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 49984,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50004,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 491520,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 491520,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-exact-1-24000-synthetic.mp4",
+        "sha256": "c509a4bf7c4c9fb6712718216cf6a0747ff0dd47efef4cc9d227bd976c0edb11",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 491520,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-1-48000",
+      "asc": "eb018c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 50023,
+          "bytes": 206,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d88c182b04010000000070"
+          }
+        },
+        {
+          "offset": 50229,
+          "bytes": 27,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50256,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50275,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50414,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50434,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 491520,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pcm_offset": 491520,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-exact-1-48000-synthetic.mp4",
+        "sha256": "9e9eaad0ab8dd92d80909f4ab9d28dd471593211c5e504d81be53a8282d670e9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 491520,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-0-24000",
+      "asc": "eb030c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 50453,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50647,
+          "bytes": 78,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50725,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 50751,
+          "bytes": 255,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51006,
+          "bytes": 79,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51085,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 516096,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            576
+          ]
+        ],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "pcm_offset": 516096,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-resume-0-24000-synthetic.mp4",
+        "sha256": "fc5d3e3425c88b273dde0b479e4a5dca792c90dc37f0b94c979eceb8aed39b64",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 516096,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-0-48000",
+      "asc": "eb018c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 51111,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51305,
+          "bytes": 78,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51383,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51409,
+          "bytes": 255,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51664,
+          "bytes": 79,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {}
+        },
+        {
+          "offset": 51743,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 516096,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            576
+          ]
+        ],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "pcm_offset": 516096,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-resume-0-48000-synthetic.mp4",
+        "sha256": "593f224ab0b7bb4e0cb4af4e898057f2f3248f236b08e80a247935267480841a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 516096,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-1-24000",
+      "asc": "eb030c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 51769,
+          "bytes": 206,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d88c182b04010000000070"
+          }
+        },
+        {
+          "offset": 51975,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {
+            "1": "ee600e0000000000"
+          }
+        },
+        {
+          "offset": 52062,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 52088,
+          "bytes": 263,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d0380000000000"
+          }
+        },
+        {
+          "offset": 52351,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {
+            "1": "d0380000000000"
+          }
+        },
+        {
+          "offset": 52438,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 516096,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            576
+          ]
+        ],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "pcm_offset": 516096,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-resume-1-24000-synthetic.mp4",
+        "sha256": "52975913ebca521fb36b907b6507947e5bbc2b7b845b47e57f3ab8b0b064fe40",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 516096,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-1-48000",
+      "asc": "eb018c04c20001008800",
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "frames": [
+        {
+          "offset": 52464,
+          "bytes": 206,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d88c182b04010000000070"
+          }
+        },
+        {
+          "offset": 52670,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {
+            "1": "ee600e0000000000"
+          }
+        },
+        {
+          "offset": 52757,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        },
+        {
+          "offset": 52783,
+          "bytes": 263,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payloads": {
+            "1": "d0380000000000"
+          }
+        },
+        {
+          "offset": 53046,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payloads": {
+            "1": "d0380000000000"
+          }
+        },
+        {
+          "offset": 53133,
+          "bytes": 26,
+          "payload": "d0380000000052ccc097fc",
+          "source_payloads": {}
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "source_pcm": {
+        "1": {
+          "pcm_offset": 516096,
+          "pcm_bytes": 24576
+        }
+      },
+      "distinct_sources": true,
+      "source_gain_ranges": [
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            448
+          ]
+        ],
+        [
+          [
+            0,
+            1024
+          ]
+        ],
+        [
+          [
+            0,
+            576
+          ]
+        ],
+        []
+      ],
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "pcm_offset": 516096,
+      "pcm_bytes": 24576,
+      "video": {
+        "file": "aac-ssr-ps-cce-pce-roster-resume-1-48000-synthetic.mp4",
+        "sha256": "8cddf58fad40b8eab28cfb5f0a31036014cb22b13f483503d1281609869d191d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 516096,
+        "samples": 12288
+      },
+      "pce_roster": true
     }
   ],
   "invalid": [
@@ -5801,32 +7041,32 @@
       "asc": "eb018c04c20002000bc000",
       "frames": [
         {
-          "offset": 46811,
+          "offset": 53159,
           "bytes": 245,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
         },
         {
-          "offset": 47056,
+          "offset": 53404,
           "bytes": 132,
           "payload": "e3d80e0000000014b33021ff"
         },
         {
-          "offset": 47188,
+          "offset": 53536,
           "bytes": 227,
           "payload": "d0380000000052ccc097fc"
         },
         {
-          "offset": 47415,
+          "offset": 53763,
           "bytes": 347,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
         },
         {
-          "offset": 47762,
+          "offset": 54110,
           "bytes": 133,
           "payload": "e3d80e0000000014b33021ff"
         },
         {
-          "offset": 47895,
+          "offset": 54243,
           "bytes": 125,
           "payload": "d0380000000052ccc097fc"
         }
@@ -5860,32 +7100,32 @@
       "asc": "eb018c04c20002000bc000",
       "frames": [
         {
-          "offset": 48020,
+          "offset": 54368,
           "bytes": 245,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
         },
         {
-          "offset": 48265,
+          "offset": 54613,
           "bytes": 132,
           "payload": "e3d80e0000000014b33021ff"
         },
         {
-          "offset": 48397,
+          "offset": 54745,
           "bytes": 227,
           "payload": "d0380000000052ccc097fc"
         },
         {
-          "offset": 48624,
+          "offset": 54972,
           "bytes": 347,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
         },
         {
-          "offset": 48971,
+          "offset": 55319,
           "bytes": 133,
           "payload": "e3d80e0000000014b33021ff"
         },
         {
-          "offset": 49104,
+          "offset": 55452,
           "bytes": 125,
           "payload": "d0380000000052ccc097fc"
         }
@@ -5919,32 +7159,32 @@
       "asc": "eb018c04c20002008fc000",
       "frames": [
         {
-          "offset": 49229,
+          "offset": 55577,
           "bytes": 276,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
         },
         {
-          "offset": 49505,
+          "offset": 55853,
           "bytes": 160,
           "payload": "e3d80e0000000014b33021ff"
         },
         {
-          "offset": 49665,
+          "offset": 56013,
           "bytes": 278,
           "payload": "d0380000000052ccc097fc"
         },
         {
-          "offset": 49943,
+          "offset": 56291,
           "bytes": 398,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
         },
         {
-          "offset": 50341,
+          "offset": 56689,
           "bytes": 161,
           "payload": "e3d80e0000000014b33021ff"
         },
         {
-          "offset": 50502,
+          "offset": 56850,
           "bytes": 148,
           "payload": "d0380000000052ccc097fc"
         }
@@ -5972,6 +7212,64 @@
         "samples": 12288
       },
       "error": "SBR CRC mismatch"
+    },
+    {
+      "name": "pce-layout",
+      "asc": "eb018c04c20001008800",
+      "frames": [
+        {
+          "offset": 56998,
+          "bytes": 197,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 57195,
+          "bytes": 91,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 57286,
+          "bytes": 154,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 57440,
+          "bytes": 274,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 57714,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 57801,
+          "bytes": 77,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-invalid-pce-layout-synthetic.mp4",
+        "sha256": "69c9e7ae29ad462008961f99bb0c8b6e8ede940d3651d1e1a74f3c48d3ed777c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 245760,
+        "samples": 12288
+      },
+      "error": "PS AAC in-band PCE changed the configured layout"
     }
   ],
   "acceptance": "Enabled native SSR/PS coupling waveform for points 0/1/3, tags 1/15, gain and window transitions; stage composition uses independent scalar SSR core.",

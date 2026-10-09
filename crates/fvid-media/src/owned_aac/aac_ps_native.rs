@@ -37,6 +37,7 @@ struct CceState {
 #[derive(Clone)]
 pub struct NativePsAacDecoder {
     config: AacConfig,
+    initial_program: Option<aac_pce::ProgramConfig>,
     program: Option<aac_pce::ProgramConfig>,
     output_rate: u32,
     mode: OutputRate,
@@ -131,6 +132,7 @@ impl NativePsAacDecoder {
         };
         Ok(Self {
             config: parsed.core,
+            initial_program: parsed.program.clone(),
             program: parsed.program,
             output_rate,
             mode,
@@ -168,7 +170,7 @@ impl NativePsAacDecoder {
     }
     pub fn restore(&mut self, checkpoint: &Checkpoint) -> Result<()> {
         if self.config != checkpoint.state.config
-            || self.program != checkpoint.state.program
+            || self.initial_program != checkpoint.state.initial_program
             || self.output_rate != checkpoint.state.output_rate
             || self.mode != checkpoint.state.mode
             || self.requires_in_band != checkpoint.state.requires_in_band
@@ -179,6 +181,7 @@ impl NativePsAacDecoder {
         Ok(())
     }
     pub fn reset(&mut self) {
+        self.program = self.initial_program.clone();
         if let Some(synthesis) = &mut self.synthesis {
             synthesis.reset();
         }
@@ -262,7 +265,9 @@ impl NativePsAacDecoder {
                     couplings.push((coupling, spectrum));
                 }
                 4 => aac_pce::skip_data_stream(&mut bits)?,
-                5 => read_program(&mut bits, trial.program.as_ref())?,
+                5 => {
+                    trial.program = Some(read_program(&mut bits, trial.program.as_ref())?);
+                }
                 6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
                     match previous_channel {
                         Some((0, _)) => {
@@ -673,6 +678,7 @@ impl NativePsAacDecoder {
 #[derive(Clone)]
 pub struct InBandPsProbe {
     config: AacConfig,
+    initial_program: Option<aac_pce::ProgramConfig>,
     program: Option<aac_pce::ProgramConfig>,
     sbr: super::aac_sbr_history::Stream,
     ps: super::aac_ps_history::Stream,
@@ -698,6 +704,7 @@ impl InBandPsProbe {
         BandTables::for_config(&parsed.core)?;
         Ok(Self {
             config: parsed.core,
+            initial_program: parsed.program.clone(),
             program: parsed.program,
             sbr: Default::default(),
             ps: Default::default(),
@@ -709,6 +716,7 @@ impl InBandPsProbe {
         self.seen
     }
     pub fn reset(&mut self) {
+        self.program = self.initial_program.clone();
         self.sbr = Default::default();
         self.ps = Default::default();
         self.source_sbr.fill(None);
@@ -752,7 +760,9 @@ impl InBandPsProbe {
                     previous_channel = Some((2, coupling.tag));
                 }
                 4 => aac_pce::skip_data_stream(&mut bits)?,
-                5 => read_program(&mut bits, trial.program.as_ref())?,
+                5 => {
+                    trial.program = Some(read_program(&mut bits, trial.program.as_ref())?);
+                }
                 6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
                     match previous_channel {
                         Some((0, _)) => {
@@ -848,12 +858,11 @@ fn validate_sce_tag(program: Option<&aac_pce::ProgramConfig>, tag: u8) -> Result
     }
     Ok(())
 }
-fn read_program(bits: &mut BitReader<'_>, expected: Option<&aac_pce::ProgramConfig>) -> Result<()> {
+fn read_program(bits: &mut BitReader<'_>, expected: Option<&aac_pce::ProgramConfig>) -> Result<aac_pce::ProgramConfig> {
     let program = aac_pce::ProgramConfig::read(bits, 0)?;
     let expected = expected
         .ok_or_else(|| unsupported("in-band PS PCE needs an explicit configured program"))?;
-    if program.coupling != expected.coupling
-        || program.elements != expected.elements
+    if program.elements != expected.elements
         || program.sample_rate != expected.sample_rate
         || program.object_type != expected.object_type
         || program.height_layers()? != expected.height_layers()?
@@ -861,7 +870,9 @@ fn read_program(bits: &mut BitReader<'_>, expected: Option<&aac_pce::ProgramConf
     {
         return Err(invalid("PS AAC in-band PCE changed the configured layout"));
     }
-    Ok(())
+    // CCE roster is packet syntax state. Existing tag histories and queued PCM
+    // survive removal; a returning tag resumes its own synthesis state.
+    Ok(program)
 }
 
 fn validate_coupling(

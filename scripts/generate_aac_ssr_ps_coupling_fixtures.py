@@ -182,6 +182,19 @@ def main():
                           source_pcm={'1':ref},distinct_sources=True,source_gain_ranges=gain_ranges,present=present,**ref)
                 case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-'+case['name']+'-synthetic.mp4')
                 cases.append(case)
+    # PCE roster removal/return preserves already queued source PCM.
+    for base in list(cases):
+        if 'present' not in base or 'behind' in base['name']:continue
+        rows=[];previous=(1,)
+        for i,row in enumerate(base['frames']):
+            tags=(1,) if base['present'][i] else ()
+            raw=bytes(blob[row['offset']:row['offset']+row['bytes']])
+            if tags != previous:
+                raw=packed(program('101',1,3,tags))+raw
+            rows.append(dict(row,offset=len(blob),bytes=len(raw)));blob.extend(raw);previous=tags
+        case=dict(base,name=base['name'].replace('absence-','pce-roster-'),frames=rows,pce_roster=True)
+        case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-'+case['name']+'-synthetic.mp4')
+        cases.append(case)
     base = next(c for c in cases if c['point']==1 and c['active'] and c['tags']==[1,15] and c['bands']==64)
     for failure in ('shape','target'):
         rows = []
@@ -202,6 +215,15 @@ def main():
         rows.append(dict(offset=len(blob),bytes=len(raw),payload=ps[i%3]));blob.extend(raw)
     case = dict(base,name='crc',frames=rows,error='SBR CRC mismatch')
     case['video'] = video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-invalid-crc-synthetic.mp4')
+    invalid.append(case)
+    base = next(c for c in cases if c['point']==3 and c['active'] and c['tags']==[1] and c['bands']==64 and 'source-sbr' not in c['name'])
+    rows=[]
+    for i,row in enumerate(base['frames']):
+        raw=bytes(blob[row['offset']:row['offset']+row['bytes']])
+        if i==1:raw=packed(program('101',2,3,(1,)))+raw
+        rows.append(dict(row,offset=len(blob),bytes=len(raw)));blob.extend(raw)
+    case=dict(base,name='pce-layout',frames=rows,error='PS AAC in-band PCE changed the configured layout')
+    case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-invalid-pce-layout-synthetic.mp4')
     invalid.append(case)
     (DEST/'aac-ssr-ps-cce-packets.bin').write_bytes(blob)
     (DEST/'aac-ssr-ps-cce-core.f32le').write_bytes(gold)

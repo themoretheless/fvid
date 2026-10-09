@@ -1079,3 +1079,28 @@ The matrix now has 20 core controls and 64 PS programs. No production decoder
 change was needed. PCE replacement, multiple disappearing sources and wider
 profiles/tools remain separate work. No private media, FFmpeg or network is
 used by the generator or ordinary tests.
+
+
+### SSR/PS in-band PCE coupling roster changes (2026-10-09)
+
+Twelve synthetic programs reproduce the former exact refusal
+`PS AAC in-band PCE changed the configured layout` when only the CCE roster
+changes. The native PS decoder and syntax-only PS probe now accept that roster
+change transactionally while keeping profile, clock, target SCE tag and layout
+fixed. Existing source synthesis/QMF history remains keyed by tag; queued gain
+intervals and PCM survive removal and a returning tag resumes its history.
+
+The initial ASC program is retained separately from the current in-band PCE.
+Checkpoint restore compares the initial configuration and restores current PCE
+state; reset returns to ASC. A checkpoint from another initial roster remains
+incompatible. The videos cover aligned/ahead sources, final removal and return,
+with/without source SBR at 24/48 kHz. Their waveform reference equals the original
+absence/return programs, using independent scalar SSR core and qualified owned
+SBR/PS composition. An incompatible stereo PCE companion retains the exact
+layout refusal and verifies queued-frame rollback.
+
+This supersedes the fixed-CCE-roster restriction for native PS. General PCE
+layout/target-tag replacement, ordinary non-PS AAC roster changes and wider
+profiles remain separate work. The matrix has 20 core controls, 76 PS programs
+and four malformed/unsupported companions. Generation and ordinary tests use
+no private media, foreign decoder, FFmpeg or network.

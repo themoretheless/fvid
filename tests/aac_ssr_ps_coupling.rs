@@ -233,7 +233,7 @@ fn native_ssr_ps_cce_waveform_acceptance() {
 #[test]
 fn invalid_ssr_ps_cce_packets_reproduce_exact_errors_and_preserve_queued_pcm() {
     let m = manifest();
-    assert_eq!(m["invalid"].as_array().unwrap().len(), 3);
+    assert_eq!(m["invalid"].as_array().unwrap().len(), 4);
     for case in m["invalid"].as_array().unwrap() {
         let asc = hex(case["asc"].as_str().unwrap());
         let encoded = packets(case);
@@ -400,7 +400,7 @@ fn absent_source_oracle_keeps_queued_gain_boundaries_and_detects_unmuted_tail() 
     let m = manifest();
     let cases: Vec<_> = m["cases"].as_array().unwrap().iter()
         .filter(|c| !c["source_gain_ranges"].is_null()).collect();
-    assert_eq!(cases.len(), 16);
+    assert_eq!(cases.len(), 28);
     for c in cases {
         assert_eq!(c["present"].as_array().unwrap().len(), 6);
         assert!(c["source_gain_ranges"].as_array().unwrap().iter()
@@ -415,4 +415,30 @@ fn absent_source_oracle_keeps_queued_gain_boundaries_and_detects_unmuted_tail() 
             assert!(error > 1e-6, "absent gains are invisible: {}", c["name"]);
         }
     }
+}
+
+#[test]
+fn pce_roster_change_preserves_pending_frames() {
+    let m = manifest();
+    let c = m["cases"].as_array().unwrap().iter()
+        .find(|c| c["name"] == "pce-roster-ahead-0-48000").unwrap();
+    let mut d = NativePsAacDecoder::new(&hex(c["asc"].as_str().unwrap())).unwrap();
+    let p = packets(c);
+    d.decode(&p[0]).unwrap();
+    d.decode(&p[1]).unwrap();
+    let saved = d.checkpoint();
+    let result = d.decode(&p[2]).unwrap();
+    d.restore(&saved).unwrap();
+    assert_eq!(d.decode(&p[2]).unwrap(), result);
+    let mut probe = fvid_media::owned_aac::aac_ps_native::InBandPsProbe::new(
+        &hex(c["asc"].as_str().unwrap()), 48000).unwrap();
+    for packet in &p { assert!(probe.read(packet).unwrap()); }
+    probe.reset();
+    for packet in &p { assert!(probe.read(packet).unwrap()); }
+    // A checkpoint from a different initial roster remains incompatible.
+    let foreign = m["cases"].as_array().unwrap().iter()
+        .find(|v| v["tags"] == serde_json::json!([1,15]) && v["bands"] == 64).unwrap();
+    let foreign = NativePsAacDecoder::new(&hex(foreign["asc"].as_str().unwrap())).unwrap();
+    assert!(d.restore(&foreign.checkpoint()).unwrap_err().to_string()
+        .contains("checkpoint configuration mismatch"));
 }
