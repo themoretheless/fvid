@@ -1,7 +1,7 @@
 //! Audio playback adapter for the owned ADTS container reader.
-use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
-pub use crate::container::adts::{esds_for, header, Aac, Frame, Header, Limits, TAG};
 use crate::Result;
+use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
+pub use crate::container::adts::{Aac, Frame, Header, Limits, TAG, esds_for, header};
 use std::io::Read;
 use std::time::Duration;
 
@@ -196,6 +196,11 @@ impl AudioStream for AacAudioReader {
 
     fn seek_to(&mut self, pts: i64) -> i64 {
         let target = pts.max(0) as u64 / self.clock_ratio();
+        if target >= self.aac.samples() {
+            self.presentation_floor = self.aac.samples();
+            self.packet = self.aac.frames.len();
+            return (self.presentation_floor * self.clock_ratio()) as i64;
+        }
         let index = self
             .aac
             .frames
@@ -209,7 +214,7 @@ impl AudioStream for AacAudioReader {
 
 #[cfg(test)]
 mod tests {
-    use super::{esds_for, header, Aac, AacAudioReader, Frame, Header, Limits, TAG};
+    use super::{Aac, AacAudioReader, Frame, Header, Limits, TAG, esds_for, header};
     use crate::audio::{AudioStream, EncodedPacket};
     use crate::codec::{config::aac_specific_config, make_audio_decoder};
 
@@ -253,7 +258,9 @@ mod tests {
         assert_eq!(aac.packets(), 13);
         assert_eq!(
             aac.frames.iter().map(|at| at.size).collect::<Vec<_>>(),
-            [293, 370, 313, 314, 326, 319, 362, 358, 339, 356, 360, 324, 365]
+            [
+                293, 370, 313, 314, 326, 319, 362, 358, 339, 356, 360, 324, 365
+            ]
         );
         assert_eq!(
             aac.frames.last().map(|at| at.start + at.size),
@@ -463,9 +470,11 @@ mod tests {
         assert_eq!(reader.seek_to(0), 0);
         assert_eq!(
             reader.seek_to(1 << 30),
-            12 * 1024,
-            "past the end is the last"
+            reader.aac.samples() as i64,
+            "past the end lands at EOF"
         );
+        assert!(reader.next_packet().unwrap().is_none());
+        assert_eq!(reader.seek_to(3000), 2048);
         let packet = reader.next_packet().expect("packet").expect("frame");
         assert_eq!(packet.pts, 0, "seek consumes decoder preroll first");
         assert_eq!(packet.data, reader.aac.packet(0));

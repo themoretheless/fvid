@@ -167,6 +167,13 @@ impl PsAacDecoder {
                 "PS AAC decoder requires reset after an error",
             ));
         }
+        // An EOF seek may construct a decoder without feeding any packet.
+        // There is no candidate stream to validate and no delayed frame to drain.
+        // Consumed candidates still have pending source metadata and must pass
+        // the native in-band PS presence check below.
+        if self.pending.is_none() {
+            return Ok(None);
+        }
         let native = self.decoder.checkpoint();
         let output = match self.decoder.finish() {
             Ok(output) => output,

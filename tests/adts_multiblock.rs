@@ -83,10 +83,12 @@ fn multiblock_adts_exposes_exact_logical_packets_timestamps_and_complete_pcm() {
                 packets: 11,
                 ..Default::default()
             };
-            assert!(fvid_media::owned_aac::adts::Aac::parse(&data, &limits)
-                .unwrap_err()
-                .to_string()
-                .contains("packet limit"));
+            assert!(
+                fvid_media::owned_aac::adts::Aac::parse(&data, &limits)
+                    .unwrap_err()
+                    .to_string()
+                    .contains("packet limit")
+            );
         }
     }
 }
@@ -152,11 +154,19 @@ fn malformed_multiblock_crc_positions_and_count_are_exact_refusals() {
             .to_string(),
             expected
         );
-        assert_eq!(
-            output.len(),
-            warm * 1024 * 4,
-            "no PCM from invalid transport"
-        );
+        // Discovery buffers PCM until the output clock is known. A later
+        // malformed frame must not publish an unnegotiated core-rate prefix.
+        assert!(output.is_empty(), "no PCM from failed clock negotiation");
+        if warm > 0 {
+            let options = fvid_media::CopyOptions {
+                max_packets: Some(warm as u64),
+                ..Default::default()
+            };
+            let mut prefix = Vec::new();
+            fvid_media::owned_aac::decode_adts_pcm(Cursor::new(&data), &mut prefix, None, &options)
+                .unwrap();
+            assert_eq!(prefix.len(), warm * 1024 * 4, "explicit valid prefix");
+        }
     }
 }
 #[cfg(feature = "player")]

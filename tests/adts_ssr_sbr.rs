@@ -92,3 +92,66 @@ fn ssr_adts_remux_negotiates_clock_and_preserves_pcm() {
         }
     }
 }
+
+#[cfg(feature = "player")]
+#[test]
+fn ssr_adts_player_clock_rewind_seek_and_eof_preserve_aligned_pcm() {
+    use fvid::audio::AudioStream;
+    fn play(reader: &mut dyn AudioStream) -> Vec<u8> {
+        let mut decoder = reader.make_decoder().unwrap();
+        let mut pcm = Vec::new();
+        while let Some(packet) = reader.next_packet().unwrap() {
+            if let Some(frame) = decoder
+                .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+                .unwrap()
+            {
+                if let Some(frame) = reader
+                    .present_decoded(frame.packet, frame.source_pts)
+                    .unwrap()
+                {
+                    pcm.extend(frame.data);
+                }
+            }
+        }
+        while let Some(frame) = decoder.finish_packet().unwrap() {
+            if let Some(frame) = reader
+                .present_decoded(frame.packet, frame.source_pts)
+                .unwrap()
+            {
+                pcm.extend(frame.data);
+            }
+        }
+        assert!(decoder.finish_packet().unwrap().is_none());
+        pcm
+    }
+    for case in cases()["cases"].as_array().unwrap() {
+        let expected = expected(case);
+        let rate = case["container_rate"].as_u64().unwrap() as u32;
+        for name in case["files"].as_array().unwrap() {
+            let data = std::fs::read(root().join(name.as_str().unwrap())).unwrap();
+            let mut reader =
+                fvid::playback_aac::AacAudioReader::open(Cursor::new(&data), Default::default())
+                    .unwrap();
+            assert_eq!(
+                (reader.sample_rate(), reader.timescale(), reader.channels()),
+                (rate, rate, 1)
+            );
+            assert_eq!(reader.duration(), Some(Duration::from_millis(256)));
+            assert_eq!(play(&mut reader), expected, "{name}: complete");
+            reader.rewind();
+            assert_eq!(play(&mut reader), expected, "{name}: rewind");
+            let total = expected.len() as i64 / 4;
+            for target in [1100, 3500, total, total + 5000] {
+                let landed = reader.seek_to(target);
+                if target >= total {
+                    assert_eq!(landed, total, "{name}: EOF seek");
+                }
+                assert_eq!(
+                    play(&mut reader),
+                    expected[landed as usize * 4..],
+                    "{name}: seek {target}"
+                );
+            }
+        }
+    }
+}

@@ -2685,3 +2685,9 @@ transport groupings and CRC/plain framing. CRC uses owned protected-region
 parsing and independent polynomial division. No private media or foreign
 codec data is copied. Generation is separate from offline test execution.
 ADTS acceptance covers full PCM, intervals and MP4/Matroska remux only.
+
+The same short SSR ADTS programs and companion synthetic videos reproduce
+ADTS EOF seek replay: the old adapter returned last-packet PTS 10240 rather
+than EOF 12288 for the double-rate SBR program. The player acceptance test
+now requires exact EOF with no repeated audio, as well as rewind and
+midstream seek PCM equality for all 24 ADTS variants.

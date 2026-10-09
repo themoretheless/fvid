@@ -256,3 +256,57 @@ fn original_timing_videos_decode_and_checkpoint_on_a_two_mib_playback_thread_sta
         .join()
         .unwrap();
 }
+
+#[test]
+fn empty_in_band_ps_playback_drain_is_empty_but_consumed_mono_is_refused() {
+    let inband: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-inband-oracles.json"
+    ))
+    .unwrap();
+    let case = inband["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["kind"] == "LC" && c["slots"] == 16)
+        .unwrap();
+    let text = case["video"]["asc"].as_str().unwrap();
+    let asc: Vec<u8> = text
+        .as_bytes()
+        .chunks_exact(2)
+        .map(|c| u8::from_str_radix(std::str::from_utf8(c).unwrap(), 16).unwrap())
+        .collect();
+    let configuration = fvid::container::adts::esds_for(&asc).unwrap();
+    let mut decoder = PsAacDecoder::new_with_in_band_ps(&configuration, 48000, 2).unwrap();
+    let saved = decoder.checkpoint().unwrap();
+    assert!(decoder.finish().unwrap().is_none());
+    assert!(decoder.finish().unwrap().is_none());
+    decoder.restore(&saved).unwrap();
+    let absence: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/aac-ps-absence-oracles.json"
+    ))
+    .unwrap();
+    let mono = absence["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["name"] == "all-mono" && c["slots"] == 16)
+        .unwrap();
+    let row = &mono["frames"][0];
+    let start = row["offset"].as_u64().unwrap() as usize;
+    let end = start + row["bytes"].as_u64().unwrap() as usize;
+    let payload = include_bytes!("fixtures/playback-errors/he-aac-ps-absence-packets.bin");
+    assert!(
+        decoder
+            .decode(&payload[start..end], 0, 2048)
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        decoder
+            .finish()
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("without a PS element")
+    );
+}

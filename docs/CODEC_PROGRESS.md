@@ -8059,3 +8059,38 @@ Delivery checks: 909 root unit tests and 457 owned-media unit tests passed;
 AAC remux tests passed. All 25 ADTS artifacts regenerate identically.
 Changed Rust files pass formatting; repository-wide formatting still reports
 pre-existing differences outside this change. `git diff --check` passes.
+
+
+### 2026-10-09 — ADTS player EOF seek and SSR playback acceptance
+
+The ADTS adapter formerly clamped a seek at/beyond stream duration to the
+start of the final packet, replaying its audio. The owned six-frame SSR/SBR
+fixture reproduced 10240 instead of the requested EOF 12288 output samples.
+The adapter now lands at the exact stream duration with no pending packet.
+The former last-packet unit expectation is replaced with EOF acceptance.
+
+The SSR ADTS playback regression covers all 24 existing owned files: clock,
+duration, complete PCM, rewind, midstream seeks, exact EOF and beyond-EOF seek,
+and repeated decoder drain. PCM is compared with the previously qualified
+companion synthetic video. This qualifies the player path in addition to
+export/remux; broader SSR tools and other codec gaps remain open.
+
+A neighboring late implicit-PS fixture exposed a second EOF-path issue: a
+new playback decoder with no input required an in-band PS element on drain.
+The playback bridge now returns empty only when no source frame is pending.
+A separate regression verifies checkpointed empty drain while a consumed
+mono/SBR candidate still refuses EOF without PS. Native presence validation
+is retained for every consumed candidate.
+
+Broader multiblock checks retained exact transport errors, but an old test
+expected publication of two warm LC packets before a malformed frame.
+Clock negotiation deliberately buffers that prefix; the regression now
+requires zero published PCM on negotiation failure and separately verifies
+that an explicit two-packet limit exports the valid prefix (8192 bytes).
+
+Final checks: 909 root unit tests plus 24 distinct integration tests passed
+(ADTS SSR/SBR 3, implicit PS 3, layout SBR 3, multiblock 4, PS in-band 6,
+PS playback 5); 23 existing root tests remain ignored. The updated multiblock
+refusal/prefix assertion passed separately after the other three tests.
+All checks were locked/offline without FFmpeg. Changed-file formatting and
+`git diff --check` pass. These results do not establish complete codec parity.
