@@ -1,0 +1,95 @@
+{
+  "cases": [
+    {
+      "name": "core-control",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 62
+        },
+        {
+          "offset": 62,
+          "bytes": 66
+        },
+        {
+          "offset": 128,
+          "bytes": 124
+        },
+        {
+          "offset": 252,
+          "bytes": 124
+        },
+        {
+          "offset": 376,
+          "bytes": 67
+        },
+        {
+          "offset": 443,
+          "bytes": 62
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "reference": "aac-ssr-sbr-active-core-reference.f32le",
+      "video": {
+        "file": "aac-ssr-sbr-cce-core-control-synthetic.mp4",
+        "sha256": "cb5182a45ff4fc8d9a0b06ec145b483ec9d55dcc82073badd5778825e2152ba2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "sbr",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 505,
+          "bytes": 74
+        },
+        {
+          "offset": 579,
+          "bytes": 75
+        },
+        {
+          "offset": 654,
+          "bytes": 132
+        },
+        {
+          "offset": 786,
+          "bytes": 136
+        },
+        {
+          "offset": 922,
+          "bytes": 76
+        },
+        {
+          "offset": 998,
+          "bytes": 70
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-ssr-sbr-active-reference.f64le",
+      "video": {
+        "file": "aac-ssr-sbr-cce-sbr-synthetic.mp4",
+        "sha256": "0b6ec181de5547cbb765e93b0b88fc98d1cf48eadd9a652c95fc6621b1034036",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ],
+  "provenance": "Owned silent target, active SSR CCE1, unit independent gain and authored SBR on CCE only. Existing independent SSR/IPQF and SBR reference PCM; no private media or external codec."
+}

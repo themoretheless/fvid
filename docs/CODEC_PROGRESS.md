@@ -8116,3 +8116,19 @@ qualified against synthetic nonzero CCE fixtures and independent PCM.
 Validation: all 460 owned-media unit tests passed (one existing ignored),
 as did 9 SSR alignment and 5 SSR/SBR integration tests. Locked offline checks
 used no FFmpeg; changed-file formatting and `git diff --check` pass.
+
+
+### 2026-10-09 — valid SSR/SBR independent CCE regression
+
+An authored six-packet mono SSR program with silent SCE0 and active CCE1
+now isolates the per-source SSR/SBR coupling gap. Its nonzero core-only
+video decodes bit-exact to the independent SSR/IPQF control reference.
+Adding the owned SBR FIL to CCE1 reproduces precisely
+`SSR SBR independent coupling requires per-source aligned synthesis`,
+without a syntax/configuration failure.
+
+The regression includes an explicitly ignored PCM acceptance against the
+independent SSR/SBR reference; enable it and replace the refusal expectation
+when source-aligned synthesis is connected. Two reproduction/control tests
+pass offline without FFmpeg. All four artifacts regenerate identically.
+This qualifies the reproducer, not SSR/SBR CCE playback.
