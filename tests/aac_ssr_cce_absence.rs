@@ -36,7 +36,7 @@ fn absent_cce_core_preserves_queued_pcm_without_repeating_or_dropping_samples() 
         );
         count += 1;
     }
-    assert_eq!(count, 4);
+    assert_eq!(count, 8);
 }
 #[test]
 fn absent_cce_sbr_preserves_scalar_qmf_and_original_chunk_gain_boundaries() {
@@ -66,7 +66,7 @@ fn absent_cce_sbr_preserves_scalar_qmf_and_original_chunk_gain_boundaries() {
         }
         count += 1;
     }
-    assert_eq!(count, 8);
+    assert_eq!(count, 16);
 }
 #[test]
 fn absent_cce_checkpoint_invalid_packet_reset_and_eof_keep_sources() {
@@ -195,5 +195,61 @@ fn absent_cce_player_rewind_seek_and_eof_keep_pcm() {
             let landed = reader.seek_to(target);
             assert_eq!(play(&mut reader), expected[landed as usize * stride..]);
         }
+    }
+}
+
+#[test]
+fn in_band_pce_roster_change_accepts_the_unchanged_pcm_layout() {
+    let m = cases();
+    let c = m["cases"].as_array().unwrap().iter()
+        .find(|c| c["name"] == "pce-roster-ahead-core").unwrap();
+    let mut pcm = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(&video(c), &mut pcm).unwrap();
+    let baseline = m["cases"].as_array().unwrap().iter()
+        .find(|c| c["name"] == "ahead-core").unwrap();
+    let mut expected = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(&video(baseline), &mut expected).unwrap();
+    assert_eq!(pcm, expected);
+}
+
+#[test]
+fn invalid_pce_layout_and_unconfigured_cce_leave_packet_configuration_and_pcm_unchanged() {
+    use fvid_media::owned_aac::NativeAacDecoder;
+    let m = cases();
+    let blob = include_bytes!("fixtures/playback-errors/aac-ssr-cce-absence-packets.bin");
+    let get = |row: &serde_json::Value| {
+        let at = row["offset"].as_u64().unwrap() as usize;
+        &blob[at..at + row["bytes"].as_u64().unwrap() as usize]
+    };
+    let baseline = m["cases"].as_array().unwrap().iter()
+        .find(|c| c["name"] == "ahead-core").unwrap();
+    let asc: Vec<_> = baseline["asc"].as_str().unwrap().as_bytes().chunks_exact(2)
+        .map(|s| u8::from_str_radix(std::str::from_utf8(s).unwrap(),16).unwrap()).collect();
+    assert_eq!(m["invalid"].as_array().unwrap().len(),2);
+    for case in m["invalid"].as_array().unwrap() {
+        let mut d = NativeAacDecoder::new_with_output_rate(&asc,24000).unwrap();
+        let first = d.decode_timed(get(&case["frames"][0]),0,1024).unwrap();
+        let saved = d.checkpoint();
+        let err = d.decode_timed(get(&case["frames"][1]),1024,1024).unwrap_err().to_string();
+        assert!(err.contains(case["error"].as_str().unwrap()),"{err}");
+        let finish = |d: &mut NativeAacDecoder| {
+            let mut result = vec![];
+            for (i,row) in baseline["frames"].as_array().unwrap().iter().enumerate().skip(1) {
+                if let Some(f) = d.decode_timed(get(row),i as i64*1024,1024).unwrap() { result.push(f); }
+            }
+            while let Some(f) = d.finish().unwrap() { result.push(f); }
+            result
+        };
+        let after = finish(&mut d);
+        d.restore(&saved).unwrap();
+        assert_eq!(finish(&mut d), after);
+        let samples: Vec<_> = first.into_iter().chain(after).flat_map(|f|f.samples)
+            .flat_map(|s|s.to_le_bytes()).collect();
+        let mut expected = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(&video(baseline),&mut expected).unwrap();
+        assert_eq!(samples,expected);
+        let error = fvid::native_media::decode_mp4_aac_pcm(&video(case),&mut vec![])
+            .unwrap_err().to_string();
+        assert!(error.contains(case["error"].as_str().unwrap()),"{error}");
     }
 }

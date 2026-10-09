@@ -659,6 +659,792 @@
         "pcm_offset": 0,
         "samples": 12288
       }
+    },
+    {
+      "name": "pce-roster-ahead-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 2590,
+          "bytes": 62
+        },
+        {
+          "offset": 2652,
+          "bytes": 65
+        },
+        {
+          "offset": 2717,
+          "bytes": 15
+        },
+        {
+          "offset": 2732,
+          "bytes": 8
+        },
+        {
+          "offset": 2740,
+          "bytes": 8
+        },
+        {
+          "offset": 2748,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-ahead-core-synthetic.mp4",
+        "sha256": "b0240b36c46cfe5979359f0a8bc61858bd079ab9533adb912ba33147ecc0280a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-ahead-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 2756,
+          "bytes": 74
+        },
+        {
+          "offset": 2830,
+          "bytes": 74
+        },
+        {
+          "offset": 2904,
+          "bytes": 15
+        },
+        {
+          "offset": 2919,
+          "bytes": 8
+        },
+        {
+          "offset": 2927,
+          "bytes": 8
+        },
+        {
+          "offset": 2935,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-ahead-sbr-24000-synthetic.mp4",
+        "sha256": "e12aa77b1b970d53b438c2edbb1b32ea615959484e430f8432403b0ec1a814d6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-ahead-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 2943,
+          "bytes": 74
+        },
+        {
+          "offset": 3017,
+          "bytes": 74
+        },
+        {
+          "offset": 3091,
+          "bytes": 15
+        },
+        {
+          "offset": 3106,
+          "bytes": 8
+        },
+        {
+          "offset": 3114,
+          "bytes": 8
+        },
+        {
+          "offset": 3122,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-ahead-sbr-48000-synthetic.mp4",
+        "sha256": "97e0078b2b7e3f43f8cf965d8d4edf95071f1f2f804e0b6c0ec0e0937902196c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-behind-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 3130,
+          "bytes": 116
+        },
+        {
+          "offset": 3246,
+          "bytes": 66
+        },
+        {
+          "offset": 3312,
+          "bytes": 15
+        },
+        {
+          "offset": 3327,
+          "bytes": 8
+        },
+        {
+          "offset": 3335,
+          "bytes": 8
+        },
+        {
+          "offset": 3343,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-behind-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-behind-core-synthetic.mp4",
+        "sha256": "f6624faca4925d76bd57a3ce3a07f420173b7eff9f621afdd26bd7aa84db6cc0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-behind-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 3351,
+          "bytes": 128
+        },
+        {
+          "offset": 3479,
+          "bytes": 75
+        },
+        {
+          "offset": 3554,
+          "bytes": 15
+        },
+        {
+          "offset": 3569,
+          "bytes": 8
+        },
+        {
+          "offset": 3577,
+          "bytes": 8
+        },
+        {
+          "offset": 3585,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-behind-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-behind-sbr-24000-synthetic.mp4",
+        "sha256": "8cdadf0dc9c67ab4adc53d5a23a07142cdf30fc39edd3e9066f4b665960ed0cd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-behind-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 3593,
+          "bytes": 128
+        },
+        {
+          "offset": 3721,
+          "bytes": 75
+        },
+        {
+          "offset": 3796,
+          "bytes": 15
+        },
+        {
+          "offset": 3811,
+          "bytes": 8
+        },
+        {
+          "offset": 3819,
+          "bytes": 8
+        },
+        {
+          "offset": 3827,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-behind-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-behind-sbr-48000-synthetic.mp4",
+        "sha256": "e026fa90e9a77dd8511b0622152d995951b232ce8f1079a51cde3cf7b3d2bba9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 3835,
+          "bytes": 62
+        },
+        {
+          "offset": 3897,
+          "bytes": 15
+        },
+        {
+          "offset": 3912,
+          "bytes": 8
+        },
+        {
+          "offset": 3920,
+          "bytes": 8
+        },
+        {
+          "offset": 3928,
+          "bytes": 8
+        },
+        {
+          "offset": 3936,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-exact-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-exact-core-synthetic.mp4",
+        "sha256": "be362fa278984f2bf6e6b14e70e4e2c12b4efc98438b1e6ed2652be521e084a8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 3944,
+          "bytes": 74
+        },
+        {
+          "offset": 4018,
+          "bytes": 15
+        },
+        {
+          "offset": 4033,
+          "bytes": 8
+        },
+        {
+          "offset": 4041,
+          "bytes": 8
+        },
+        {
+          "offset": 4049,
+          "bytes": 8
+        },
+        {
+          "offset": 4057,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-exact-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-exact-sbr-24000-synthetic.mp4",
+        "sha256": "38f460b142020c5569f31301d4061efa0c9901e6b6f8d593ac04e3df355391f0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-exact-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 4065,
+          "bytes": 74
+        },
+        {
+          "offset": 4139,
+          "bytes": 15
+        },
+        {
+          "offset": 4154,
+          "bytes": 8
+        },
+        {
+          "offset": 4162,
+          "bytes": 8
+        },
+        {
+          "offset": 4170,
+          "bytes": 8
+        },
+        {
+          "offset": 4178,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-exact-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-exact-sbr-48000-synthetic.mp4",
+        "sha256": "28e41942bd684524a3c1ebe4acb141ada003bcfd7810a6532d5d42332b2d0c97",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 4186,
+          "bytes": 62
+        },
+        {
+          "offset": 4248,
+          "bytes": 65
+        },
+        {
+          "offset": 4313,
+          "bytes": 15
+        },
+        {
+          "offset": 4328,
+          "bytes": 123
+        },
+        {
+          "offset": 4451,
+          "bytes": 66
+        },
+        {
+          "offset": 4517,
+          "bytes": 15
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-resume-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-resume-core-synthetic.mp4",
+        "sha256": "f06b3562ae837d0a8ecb6fa87b2a0134e9ae9c8a11333a26f6a6bfaa0572f37c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 4532,
+          "bytes": 74
+        },
+        {
+          "offset": 4606,
+          "bytes": 74
+        },
+        {
+          "offset": 4680,
+          "bytes": 15
+        },
+        {
+          "offset": 4695,
+          "bytes": 131
+        },
+        {
+          "offset": 4826,
+          "bytes": 78
+        },
+        {
+          "offset": 4904,
+          "bytes": 15
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-resume-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-resume-sbr-24000-synthetic.mp4",
+        "sha256": "d3ac6da12e0a9063855c13d5c32580667ffb0a06dc65e660fbcd875439cd0ff7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pce_roster": true
+    },
+    {
+      "name": "pce-roster-resume-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 4919,
+          "bytes": 74
+        },
+        {
+          "offset": 4993,
+          "bytes": 74
+        },
+        {
+          "offset": 5067,
+          "bytes": 15
+        },
+        {
+          "offset": 5082,
+          "bytes": 131
+        },
+        {
+          "offset": 5213,
+          "bytes": 78
+        },
+        {
+          "offset": 5291,
+          "bytes": 15
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-resume-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-pce-roster-resume-sbr-48000-synthetic.mp4",
+        "sha256": "64b8ad383656283d1bfa810c9b3cf41843bc087538bd5654418801857d501f1e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pce_roster": true
+    }
+  ],
+  "invalid": [
+    {
+      "name": "invalid-pce-layout",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 5306,
+          "bytes": 62
+        },
+        {
+          "offset": 5368,
+          "bytes": 72
+        },
+        {
+          "offset": 5440,
+          "bytes": 8
+        },
+        {
+          "offset": 5448,
+          "bytes": 8
+        },
+        {
+          "offset": 5456,
+          "bytes": 8
+        },
+        {
+          "offset": 5464,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-invalid-pce-layout-synthetic.mp4",
+        "sha256": "baa9620fd7c36a92d466905ced458604a2a213ebf9db33eb270157fd346bceb8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "error": "AAC in-band PCE changed the configured layout"
+    },
+    {
+      "name": "invalid-pce-unconfigured-cce",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 5472,
+          "bytes": 62
+        },
+        {
+          "offset": 5534,
+          "bytes": 72
+        },
+        {
+          "offset": 5606,
+          "bytes": 8
+        },
+        {
+          "offset": 5614,
+          "bytes": 8
+        },
+        {
+          "offset": 5622,
+          "bytes": 8
+        },
+        {
+          "offset": 5630,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-invalid-pce-unconfigured-cce-synthetic.mp4",
+        "sha256": "823e17c19b55bb39d4430c1232495d6ea95a0894f1b6ea6779fbdd9bcf3b677a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "error": "AAC coupling is absent from configured PCE"
     }
   ],
   "provenance": "Own SSR spectra/gain/window IPQF core oracle, explicit CCE1 gaps and paused coded-source history; retain queued PCM before zero absent intervals. Independent direct QMF/SBR with pure upsampling on absent FIL and preserved noise/smoothing state; apply original source chunk gains after DSP. No private media, decoder, FFmpeg or network."

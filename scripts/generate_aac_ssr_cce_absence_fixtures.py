@@ -76,8 +76,31 @@ def main():
                         reference=gold_files[rate] if sbr else core_name)
             case['video'] = video_fixture([case],blob,filename='aac-ssr-cce-absence-'+case_name+'-synthetic.mp4')
             cases.append(case)
+    for base in list(cases):
+        rows=[];previous=(1,)
+        for i,row in enumerate(base['frames']):
+            tags=(1,) if base['present'][i] else ()
+            raw=bytes(blob[row['offset']:row['offset']+row['bytes']])
+            if tags != previous:raw=packed(program('101',1,3,tags))+raw
+            rows.append(dict(row,offset=len(blob),bytes=len(raw)));blob.extend(raw);previous=tags
+        case=dict(base,name='pce-roster-'+base['name'],frames=rows,pce_roster=True)
+        case['video']=video_fixture([case],blob,filename='aac-ssr-cce-absence-'+case['name']+'-synthetic.mp4')
+        cases.append(case)
+    invalid=[]
+    base=next(c for c in cases if c['name']=='ahead-core')
+    for name,channels,roster,error in [
+        ('layout',2,(1,),'AAC in-band PCE changed the configured layout'),
+        ('unconfigured-cce',1,(),'AAC coupling is absent from configured PCE')]:
+        rows=[]
+        for i,row in enumerate(base['frames']):
+            raw=bytes(blob[row['offset']:row['offset']+row['bytes']])
+            if i==1:raw=packed(program('101',channels,3,roster))+raw
+            rows.append(dict(row,offset=len(blob),bytes=len(raw)));blob.extend(raw)
+        case=dict(base,name='invalid-pce-'+name,frames=rows,error=error)
+        case['video']=video_fixture([case],blob,filename='aac-ssr-cce-absence-'+case['name']+'-synthetic.mp4')
+        invalid.append(case)
     (DEST/'aac-ssr-cce-absence-packets.bin').write_bytes(blob)
-    (DEST/'aac-ssr-cce-absence.json').write_text(json.dumps(dict(cases=cases,
+    (DEST/'aac-ssr-cce-absence.json').write_text(json.dumps(dict(cases=cases,invalid=invalid,
         provenance='Own SSR spectra/gain/window IPQF core oracle, explicit CCE1 gaps and paused coded-source history; retain queued PCM before zero absent intervals. Independent direct QMF/SBR with pure upsampling on absent FIL and preserved noise/smoothing state; apply original source chunk gains after DSP. No private media, decoder, FFmpeg or network.'),indent=2)+'\n')
 
 

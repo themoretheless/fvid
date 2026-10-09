@@ -1104,3 +1104,25 @@ layout/target-tag replacement, ordinary non-PS AAC roster changes and wider
 profiles remain separate work. The matrix has 20 core controls, 76 PS programs
 and four malformed/unsupported companions. Generation and ordinary tests use
 no private media, foreign decoder, FFmpeg or network.
+
+
+### Ordinary AAC in-band PCE coupling roster changes (2026-10-09)
+
+NativeAacDecoder now treats the in-band CCE roster as transactional packet
+state, retaining its initial ASC program separately. The fixed profile, sample
+clock, tagged output elements, height and PCM layout remain checked. Checkpoints
+restore current PCE together with synthesis and queued PCM; reset restores ASC.
+SBR reserves the four-bit CCE slot domain for explicit PCE programs even when
+the current roster is empty, preserving histories through removal/return.
+
+Twelve additional SSR core/SBR videos reproduce the former exact layout refusal
+for a valid roster-only change. Their accepted PCM equals the original scalar
+SSR/QMF absence/return oracle. They cover source-ahead/behind/exact/return with
+core-only and 24/48 kHz SBR output. Tests cover timing, checkpoint replay, reset,
+rewind, seek and EOF. Two malformed companions retain exact layout and absent
+CCE errors and prove configuration/PCM rollback before continuing the baseline.
+
+Fixtures are authored and generated offline without FFmpeg, foreign decoders
+or private media. Dynamic Main/LC roster acceptance, initially empty roster
+arrival, output element/tag/layout changes and broader profiles/tools remain
+separate qualifications; this does not claim those cases are complete.

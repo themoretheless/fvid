@@ -234,6 +234,7 @@ pub struct NativeAacDecoder {
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     main_prediction: Vec<Option<super::aac_main_predictor::MainPredictor>>,
     noise: NoiseState,
+    initial_program: Option<super::aac_pce::ProgramConfig>,
     program: Option<super::aac_pce::ProgramConfig>,
     mapping: Vec<usize>,
     channel_mask: u32,
@@ -248,6 +249,7 @@ pub struct NativeAacDecoder {
 #[derive(Clone)]
 pub struct AacCheckpoint {
     config: AacConfig,
+    initial_program: Option<super::aac_pce::ProgramConfig>,
     program: Option<super::aac_pce::ProgramConfig>,
     synthesis: Vec<LongSineSynthesis>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -339,7 +341,7 @@ impl NativeAacDecoder {
         ] };
         let ssr_synthesis = if config.object_type == 3 { vec![super::aac_ssr_synthesis::SsrSynthesis::new()?; usize::from(config.channels)] } else { Vec::new() };
         // Four-bit CCE tags occupy a separate fixed domain after audio slots.
-        let element_slots = usize::from(config.channels) + if program.as_ref().is_some_and(|p| !p.coupling.is_empty()) { 16 } else { 0 };
+        let element_slots = usize::from(config.channels) + if program.is_some() { 16 } else { 0 };
         let ssr_coupling_synthesis = if config.object_type==3 {vec![None;16]} else {Vec::new()};
         let main_prediction = if config.object_type == 1 {
             let tables = BandTables::for_config(&config)?;
@@ -355,6 +357,7 @@ impl NativeAacDecoder {
             ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,ssr_source_alignment:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
+            initial_program: program.clone(),
             program,
             mapping,
             channel_mask,
@@ -399,7 +402,7 @@ impl NativeAacDecoder {
         Ok(decoder)
     }
     fn sbr_slots(&self) -> usize {
-        usize::from(self.config.channels) + if self.program.as_ref().is_some_and(|p| !p.coupling.is_empty()) { 16 } else { 0 }
+        usize::from(self.config.channels) + if self.program.is_some() { 16 } else { 0 }
     }
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
@@ -417,22 +420,24 @@ impl NativeAacDecoder {
         self.program.as_ref().map(|p| p.pcm_positions()).transpose()
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
-        AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),program:self.program.clone(),
+        AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
             synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
             sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_detection_rate:self.sbr_detection_rate,sbr_elements:self.sbr_elements.clone()}
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
-        if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
+        if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
         self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration.clone();self.ssr_fixed_clock=state.ssr_fixed_clock;self.ssr_source_alignment=state.ssr_source_alignment;
+        self.program=state.program.clone();
         self.main_prediction=state.main_prediction.clone();
         self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.ssr_coupling_synthesis=state.ssr_coupling_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
+        self.program=self.initial_program.clone();
         self.ssr_alignment=None; self.ssr_alignment_tags.clear(); self.ssr_pending_duration=Default::default();self.ssr_fixed_clock=false;self.ssr_source_alignment=false;
         for synth in &mut self.synthesis {
             synth.reset();
@@ -475,6 +480,7 @@ impl NativeAacDecoder {
     }
     pub fn decode_timed(&mut self, packet: &[u8], pts:i64, duration:u64) -> Result<Option<AacFrame>> {
         let mut bits = BitReader::new(packet);
+        let mut current_program = self.program.clone();
         let mut main_prediction = self.main_prediction.clone();
         let mut noise = self.noise.clone();
         let mut sbr_rate = self.sbr_rate;
@@ -502,14 +508,14 @@ impl NativeAacDecoder {
             let element = bits.read(3)?;
             let mut target_offset = channels.len();
             if matches!(element, 0 | 1 | 3) {
-                if self.program.is_none() && elements.get(element_index) != Some(&element) {
+                if current_program.is_none() && elements.get(element_index) != Some(&element) {
                     return Err(unsupported(
                         "AAC element order differs from standard layout",
                     ));
                 }
                 element_index += 1;
                 let tag = bits.read(4)?;
-                if let Some(program) = &self.program {
+                if let Some(program) = &current_program {
                     let mut offset = 0;
                     let mut found = None;
                     for configured in &program.elements {
@@ -556,8 +562,7 @@ impl NativeAacDecoder {
                 }
                 2 => {
                     let coupling = Coupling::read(&mut bits, &self.config)?;
-                    if self
-                        .program
+                    if current_program
                         .as_ref()
                         .is_none_or(|p| !p.coupling.contains(&(coupling.point == 3, coupling.tag)))
                     {
@@ -583,11 +588,10 @@ impl NativeAacDecoder {
                 4 => super::aac_pce::skip_data_stream(&mut bits)?,
                 5 => {
                     let program = super::aac_pce::ProgramConfig::read(&mut bits, 0)?;
-                    let expected = self.program.as_ref().ok_or_else(|| {
+                    let expected = current_program.as_ref().ok_or_else(|| {
                         unsupported("in-band PCE needs an explicit configured program")
                     })?;
-                    if program.coupling != expected.coupling
-                        || program.elements != expected.elements
+                    if program.elements != expected.elements
                         || program.sample_rate != expected.sample_rate
                         || program.object_type != expected.object_type
                         || program.height_layers()? != expected.height_layers()?
@@ -595,6 +599,7 @@ impl NativeAacDecoder {
                     {
                         return Err(invalid("AAC in-band PCE changed the configured layout"));
                     }
+                    current_program = Some(program);
                 }
                 6 => super::aac_pce::read_fill(&mut bits, |input, end, crc| {
                     if sbr_rate.is_none() && self.detect_sbr {
@@ -946,6 +951,7 @@ impl NativeAacDecoder {
         })();
         match result {
             Ok(output) => {
+                self.program = current_program;
                 self.main_prediction = main_prediction;
                 self.noise = noise;
                 self.sbr_rate = sbr_rate;
