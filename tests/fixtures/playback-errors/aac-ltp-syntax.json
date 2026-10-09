@@ -1,0 +1,8405 @@
+{
+  "cases": [
+    {
+      "offset": 0,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 0,
+      "used": []
+    },
+    {
+      "offset": 3,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 0,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 6,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 14,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 22,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 1,
+      "used": []
+    },
+    {
+      "offset": 25,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 1,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 28,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 36,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 44,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 2,
+      "used": []
+    },
+    {
+      "offset": 47,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 2,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 50,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 58,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 66,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 3,
+      "used": []
+    },
+    {
+      "offset": 69,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 3,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 72,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 80,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 88,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 4,
+      "used": []
+    },
+    {
+      "offset": 91,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 4,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 94,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 102,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 110,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 5,
+      "used": []
+    },
+    {
+      "offset": 113,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 5,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 116,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 124,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 132,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 6,
+      "used": []
+    },
+    {
+      "offset": 135,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 6,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 138,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 146,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 154,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 7,
+      "used": []
+    },
+    {
+      "offset": 157,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 7,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 160,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 168,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 176,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 0,
+      "used": []
+    },
+    {
+      "offset": 179,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 0,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 182,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 190,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 198,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 1,
+      "used": []
+    },
+    {
+      "offset": 201,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 1,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 204,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 212,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 220,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 2,
+      "used": []
+    },
+    {
+      "offset": 223,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 2,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 226,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 234,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 242,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 3,
+      "used": []
+    },
+    {
+      "offset": 245,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 3,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 248,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 256,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 264,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 4,
+      "used": []
+    },
+    {
+      "offset": 267,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 4,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 270,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 278,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 286,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 5,
+      "used": []
+    },
+    {
+      "offset": 289,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 5,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 292,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 300,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 308,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 6,
+      "used": []
+    },
+    {
+      "offset": 311,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 6,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 314,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 322,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 330,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 960,
+      "coefficient": 7,
+      "used": []
+    },
+    {
+      "offset": 333,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 960,
+      "coefficient": 7,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 336,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 960,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 344,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 960,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 352,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 0,
+      "used": []
+    },
+    {
+      "offset": 355,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 0,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 358,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 366,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 374,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 1,
+      "used": []
+    },
+    {
+      "offset": 377,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 1,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 380,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 388,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 396,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 2,
+      "used": []
+    },
+    {
+      "offset": 399,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 2,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 402,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 410,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 418,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 3,
+      "used": []
+    },
+    {
+      "offset": 421,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 3,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 424,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 432,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 440,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 4,
+      "used": []
+    },
+    {
+      "offset": 443,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 4,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 446,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 454,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 462,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 5,
+      "used": []
+    },
+    {
+      "offset": 465,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 5,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 468,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 476,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 484,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 6,
+      "used": []
+    },
+    {
+      "offset": 487,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 6,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 490,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 498,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 506,
+      "bytes": 3,
+      "bits": 17,
+      "n": 960,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1920,
+      "coefficient": 7,
+      "used": []
+    },
+    {
+      "offset": 509,
+      "bytes": 3,
+      "bits": 18,
+      "n": 960,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1920,
+      "coefficient": 7,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 512,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1920,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 520,
+      "bytes": 8,
+      "bits": 57,
+      "n": 960,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1920,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 528,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 0,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 535,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 0,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 540,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 0,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 544,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 1,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 551,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 1,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 556,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 1,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 560,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 2,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 567,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 2,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 572,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 2,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 576,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 3,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 583,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 3,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 588,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 3,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 592,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 4,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 599,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 4,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 604,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 4,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 608,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 5,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 615,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 5,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 620,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 5,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 624,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 6,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 631,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 6,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 636,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 6,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 640,
+      "bytes": 7,
+      "bits": 53,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 7,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 647,
+      "bytes": 5,
+      "bits": 37,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 7,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 652,
+      "bytes": 4,
+      "bits": 25,
+      "n": 960,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 960,
+      "coefficient": 7,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 656,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 0,
+      "used": []
+    },
+    {
+      "offset": 659,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 0,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 662,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 670,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 678,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 1,
+      "used": []
+    },
+    {
+      "offset": 681,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 1,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 684,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 692,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 700,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 2,
+      "used": []
+    },
+    {
+      "offset": 703,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 2,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 706,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 714,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 722,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 3,
+      "used": []
+    },
+    {
+      "offset": 725,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 3,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 728,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 736,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 744,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 4,
+      "used": []
+    },
+    {
+      "offset": 747,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 4,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 750,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 758,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 766,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 5,
+      "used": []
+    },
+    {
+      "offset": 769,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 5,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 772,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 780,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 788,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 6,
+      "used": []
+    },
+    {
+      "offset": 791,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 6,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 794,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 802,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 810,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 0,
+      "coefficient": 7,
+      "used": []
+    },
+    {
+      "offset": 813,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 0,
+      "coefficient": 7,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 816,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 0,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 824,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 0,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 832,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 0,
+      "used": []
+    },
+    {
+      "offset": 835,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 0,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 838,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 846,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 854,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 1,
+      "used": []
+    },
+    {
+      "offset": 857,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 1,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 860,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 868,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 876,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 2,
+      "used": []
+    },
+    {
+      "offset": 879,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 2,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 882,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 890,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 898,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 3,
+      "used": []
+    },
+    {
+      "offset": 901,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 3,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 904,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 912,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 920,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 4,
+      "used": []
+    },
+    {
+      "offset": 923,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 4,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 926,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 934,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 942,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 5,
+      "used": []
+    },
+    {
+      "offset": 945,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 5,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 948,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 956,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 964,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 6,
+      "used": []
+    },
+    {
+      "offset": 967,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 6,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 970,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 978,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 986,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 1024,
+      "coefficient": 7,
+      "used": []
+    },
+    {
+      "offset": 989,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 1024,
+      "coefficient": 7,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 992,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 1024,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1000,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 1024,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1008,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 0,
+      "used": []
+    },
+    {
+      "offset": 1011,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 0,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 1014,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 1022,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 0,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 1030,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 1,
+      "used": []
+    },
+    {
+      "offset": 1033,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 1,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 1036,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1044,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 1,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1052,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 2,
+      "used": []
+    },
+    {
+      "offset": 1055,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 2,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 1058,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 1066,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 2,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 1074,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 3,
+      "used": []
+    },
+    {
+      "offset": 1077,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 3,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 1080,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 1088,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 3,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 1096,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 4,
+      "used": []
+    },
+    {
+      "offset": 1099,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 4,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 1102,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1110,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 4,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1118,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 5,
+      "used": []
+    },
+    {
+      "offset": 1121,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 5,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 1124,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 1132,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 5,
+      "used": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "offset": 1140,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 6,
+      "used": []
+    },
+    {
+      "offset": 1143,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 6,
+      "used": [
+        true
+      ]
+    },
+    {
+      "offset": 1146,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 1154,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 6,
+      "used": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "offset": 1162,
+      "bytes": 3,
+      "bits": 17,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 0,
+      "lag": 2047,
+      "coefficient": 7,
+      "used": []
+    },
+    {
+      "offset": 1165,
+      "bytes": 3,
+      "bits": 18,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 1,
+      "lag": 2047,
+      "coefficient": 7,
+      "used": [
+        false
+      ]
+    },
+    {
+      "offset": 1168,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 40,
+      "lag": 2047,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1176,
+      "bytes": 8,
+      "bits": 57,
+      "n": 1024,
+      "sequence": 0,
+      "bands": 63,
+      "lag": 2047,
+      "coefficient": 7,
+      "used": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "offset": 1184,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 0,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1191,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 0,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1196,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 0,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1200,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 1,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1207,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 1,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1212,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 1,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1216,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 2,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1223,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 2,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1228,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 2,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1232,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 3,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1239,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 3,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1244,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 3,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1248,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 4,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1255,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 4,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1260,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 4,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1264,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 5,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1271,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 5,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1276,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 5,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1280,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 6,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1287,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 6,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1292,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 6,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1296,
+      "bytes": 7,
+      "bits": 53,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 7,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 2
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": true,
+          "lag": 10
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 14
+        }
+      ]
+    },
+    {
+      "offset": 1303,
+      "bytes": 5,
+      "bits": 37,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 7,
+      "windows": [
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 4
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": 8
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": true,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    },
+    {
+      "offset": 1308,
+      "bytes": 4,
+      "bits": 25,
+      "n": 1024,
+      "sequence": 2,
+      "bands": 2,
+      "lag": 1024,
+      "coefficient": 7,
+      "windows": [
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        },
+        {
+          "enabled": false,
+          "lag": null
+        }
+      ]
+    }
+  ],
+  "invalid_lag": {
+    "offset": 1312,
+    "bytes": 3
+  },
+  "videos": [
+    {
+      "name": "inactive",
+      "asc": "2308",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 9
+        },
+        {
+          "offset": 9,
+          "bytes": 9
+        },
+        {
+          "offset": 18,
+          "bytes": 9
+        },
+        {
+          "offset": 27,
+          "bytes": 9
+        },
+        {
+          "offset": 36,
+          "bytes": 9
+        },
+        {
+          "offset": 45,
+          "bytes": 9
+        },
+        {
+          "offset": 54,
+          "bytes": 9
+        },
+        {
+          "offset": 63,
+          "bytes": 9
+        },
+        {
+          "offset": 72,
+          "bytes": 9
+        },
+        {
+          "offset": 81,
+          "bytes": 9
+        },
+        {
+          "offset": 90,
+          "bytes": 9
+        },
+        {
+          "offset": 99,
+          "bytes": 9
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-inactive-synthetic.mp4",
+        "sha256": "29a78d03c890b4f983b17456cc9c330b2a85355b7cd82220e5a5c3039e348845",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2308",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "active",
+      "asc": "2308",
+      "frames": [
+        {
+          "offset": 108,
+          "bytes": 9
+        },
+        {
+          "offset": 117,
+          "bytes": 9
+        },
+        {
+          "offset": 126,
+          "bytes": 9
+        },
+        {
+          "offset": 135,
+          "bytes": 12
+        },
+        {
+          "offset": 147,
+          "bytes": 12
+        },
+        {
+          "offset": 159,
+          "bytes": 12
+        },
+        {
+          "offset": 171,
+          "bytes": 12
+        },
+        {
+          "offset": 183,
+          "bytes": 12
+        },
+        {
+          "offset": 195,
+          "bytes": 12
+        },
+        {
+          "offset": 207,
+          "bytes": 12
+        },
+        {
+          "offset": 219,
+          "bytes": 12
+        },
+        {
+          "offset": 231,
+          "bytes": 12
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-active-synthetic.mp4",
+        "sha256": "268ac3167ccb4239575c9a62287aa01b003695e3baa78f33a41fa8176450ec9d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2308",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ],
+  "provenance": "Own ordinary LTP syntax and AOT4 videos; independent bit writer, no private source or external codecs. Playback not implemented."
+}

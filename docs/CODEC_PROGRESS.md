@@ -9279,3 +9279,27 @@ all grouping/TNS Cartesian combinations remain separate qualification work.
 Sensitivity: truncating short-window LPC to one coefficient after fully reading the syntax failed waveform acceptance: `"0-1-0-24000" sample 8451: -0.000034607547 vs -0.00003488504`. Production TNS source was restored byte-for-byte. All 36 generated artifacts reproduced identical hashes.
 
 Validation: restored offline media/player run passed 15 tests across short TNS orders/resolution/compression, first-order short TNS/PNS, Main/PS and Main tools; zero failures.
+
+### AAC LTP syntax foundation and playback gap (2026-10-09)
+
+The owned `aac_ltp_syntax` module parses ordinary LTP side information after
+its presence flag: lag/coefficient index and long-band or short-window usage.
+It validates frame geometry and lag, and commits the bit cursor only on success.
+It does not implement ER/LD lag-update syntax or change profile admission.
+The independent authored fixture generator supplies 240 unaligned cases across
+960/1024 frame lengths, eight coefficient indices, lag boundaries, band counts,
+and short-window optional lag fields, plus malformed geometry/lag/truncation.
+
+Two synthetic MP4s reproduce the existing exact AOT4 configuration refusal,
+with active and inactive LTP flags. A passing refusal test is not playback
+acceptance. The intended playback test is explicitly ignored until LTP signal
+history, prediction, forward transform/TNS integration and profile admission
+are implemented; independent PCM qualification will also be required.
+Fixtures are generated separately from ordinary offline tests with no private
+media, FFmpeg or external decoder execution.
+
+Bit-field reference consulted: [FAAD2 Table 4.4.28 implementation](https://github.com/knik0/faad2/blob/master/libfaad/syntax.c)
+and [40-band LTP syntax bound](https://github.com/knik0/faad2/blob/master/libfaad/structs.h).
+These are syntax references, not code or runtime dependencies.
+
+Validation: all five artifacts regenerate identically. Owned-library tests: 461 passed, 0 failed, 1 pre-existing ignored. Offline media/player integration: 8 passed, 0 failed, 1 explicitly pending LTP playback acceptance. Syntax acceptance and configuration-refusal reproduction do not establish LTP playback.

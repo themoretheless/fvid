@@ -80,6 +80,7 @@ pub mod aac_coupling_syntax;
 pub mod aac_channel;
 
 pub mod aac_ics;
+pub mod aac_ltp_syntax;
 
 pub mod aac_pair;
 
