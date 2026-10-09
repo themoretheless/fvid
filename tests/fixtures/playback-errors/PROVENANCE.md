@@ -3038,3 +3038,9 @@ PCM with the qualified owned SBR/PS stage, rather than providing a new fully
 independent PS oracle. This qualification does not cover independently switched
 source window sequences, source absence/return under PS, or PCE replacement.
 No production decoder change was required for this extension.
+
+The distinct-source regression additionally verifies oracle sensitivity: tag 15
+PCM differs from twice tag 1 PCM despite the authored 2:1 spectral amplitude,
+substituting source history changes the reference, and reassociating asymmetric
+SBR/FIL with the other tag changes output. These checks run on all twelve
+distinct-source programs and do not claim PS source absence/return acceptance.

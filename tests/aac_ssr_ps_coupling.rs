@@ -330,3 +330,61 @@ fn ssr_ps_cce_ranges_rewind_seek_and_doubly_delayed_eof_preserve_pcm() {
         assert_eq!(play(&mut stream), full[landed as usize * 8..]);
     }
 }
+
+#[test]
+fn distinct_source_oracle_detects_history_substitution_and_fil_reassociation() {
+    let m = manifest();
+    let cases: Vec<_> = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["distinct_sources"] == true)
+        .collect();
+    assert_eq!(cases.len(), 12);
+    for c in cases {
+        let first = core(&c["source_pcm"]["1"]);
+        let second = core(&c["source_pcm"]["15"]);
+        let shape_error = first
+            .iter()
+            .zip(&second)
+            .map(|(a, b)| (2. * a - b).abs())
+            .fold(0., f32::max);
+        assert!(
+            shape_error > 1e-6,
+            "source windows are indistinguishable: {}",
+            c["name"]
+        );
+        let expected = reference(c);
+        let mut wrong_history = c.clone();
+        wrong_history["source_pcm"]["15"] = c["source_pcm"]["1"].clone();
+        let substituted = reference(&wrong_history);
+        let error: f32 = expected
+            .iter()
+            .zip(&substituted)
+            .map(|(a, b)| (a - b).abs())
+            .fold(0., f32::max);
+        assert!(
+            error > 1e-6,
+            "history substitution is invisible: {}",
+            c["name"]
+        );
+        if c["name"].as_str().unwrap().contains("asymmetric") {
+            let mut wrong_fil = c.clone();
+            for row in wrong_fil["frames"].as_array_mut().unwrap() {
+                let payload = row["source_payloads"]["15"].take();
+                row["source_payloads"] = serde_json::json!({"1": payload});
+            }
+            let reassociated = reference(&wrong_fil);
+            let error: f32 = expected
+                .iter()
+                .zip(&reassociated)
+                .map(|(a, b)| (a - b).abs())
+                .fold(0., f32::max);
+            assert!(
+                error > 1e-6,
+                "FIL reassociation is invisible: {}",
+                c["name"]
+            );
+        }
+    }
+}
