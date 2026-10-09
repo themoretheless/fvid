@@ -21,7 +21,7 @@ pub fn read_profile(bits: &mut BitReader<'_>, sequence: WindowSequence, main: bo
             let length = cursor.read(if short { 4 } else { 6 })? as usize;
             let order = cursor.read(if short { 3 } else { 5 })? as usize;
             if order > if short { 7 } else if main { 20 } else { 12 } {
-                return Err(invalid("AAC-LC TNS order exceeds limit"));
+                return Err(invalid(if main { "AAC Main TNS order exceeds limit" } else { "AAC-LC TNS order exceeds limit" }));
             }
             let mut reverse = false;
             let mut lpc = Vec::with_capacity(order);

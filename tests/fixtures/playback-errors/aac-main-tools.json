@@ -1,0 +1,3817 @@
+{
+  "provenance": "Own spectra, bit writer, sparse direct IMDCT, scalar Main predictor and TNS recurrence. Own existing AVC/container seeds; no private media or foreign codec tools.",
+  "cases": [
+    {
+      "name": "ms-explicit",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 16,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 32,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 48,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 64,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 80,
+          "bytes": 46,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 126,
+          "bytes": 46,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 172,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 188,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 204,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 220,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 237,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-ms-explicit-synthetic.mp4",
+        "sha256": "7e785b9bb786da5c88a32e6d0f83cc90003ad1cebc20b96dfae1d144c0cfbb2b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-ms-explicit-pcm.bin"
+    },
+    {
+      "name": "ms-all",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 253,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 269,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 285,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 301,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 317,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 333,
+          "bytes": 46,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 379,
+          "bytes": 46,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 425,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 441,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 457,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 473,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 490,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-ms-all-synthetic.mp4",
+        "sha256": "ab66baee887ef313f877b11c5a8ed4070604ddf89a51e42d65987581b437ea67",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-ms-all-pcm.bin"
+    },
+    {
+      "name": "independent",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 506,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 523,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 540,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 557,
+          "bytes": 32,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 589,
+          "bytes": 32,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 621,
+          "bytes": 32,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 653,
+          "bytes": 33,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 686,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 703,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 720,
+          "bytes": 32,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 752,
+          "bytes": 18,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 3,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 770,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-independent-synthetic.mp4",
+        "sha256": "98510c43092bee66b79ff7098a7e2e15705ae06fd87b578bba3810bab3469800",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-independent-pcm.bin"
+    },
+    {
+      "name": "intensity-explicit",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 787,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 803,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 819,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 835,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 851,
+          "bytes": 15,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 866,
+          "bytes": 37,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 903,
+          "bytes": 36,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 939,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 955,
+          "bytes": 15,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 970,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 986,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1003,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-intensity-explicit-synthetic.mp4",
+        "sha256": "7dd8c0c872b89457e98ab69d8416f3b30990e51f74c17d554ebae1c46b7891cf",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-intensity-explicit-pcm.bin"
+    },
+    {
+      "name": "intensity-all",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1019,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1035,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1051,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1067,
+          "bytes": 15,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1082,
+          "bytes": 15,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1097,
+          "bytes": 36,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1133,
+          "bytes": 36,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1169,
+          "bytes": 15,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1184,
+          "bytes": 15,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1199,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1215,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1232,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-intensity-all-synthetic.mp4",
+        "sha256": "5433462766b2b93a65730e738cc0b131de3a21cd51d2a32a917570bc9631e300",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-intensity-all-pcm.bin"
+    },
+    {
+      "name": "pns-right-switch",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1248,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1264,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1280,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1296,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1312,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1328,
+          "bytes": 37,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1365,
+          "bytes": 37,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1402,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1418,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1434,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1450,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1467,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-pns-right-switch-synthetic.mp4",
+        "sha256": "870baa2244b6b26b43042bc21273f82228e889b30c44743f3ab4d486d0322b13",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-pns-right-switch-pcm.bin"
+    },
+    {
+      "name": "pns-correlated-switch",
+      "asc": "0b10",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1483,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1499,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1515,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1531,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1547,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1563,
+          "bytes": 31,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1594,
+          "bytes": 31,
+          "samples": 1024,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1625,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1641,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1657,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1673,
+          "bytes": 17,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1690,
+          "bytes": 16,
+          "samples": 1024,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-main-tools-pns-correlated-switch-synthetic.mp4",
+        "sha256": "3a0f0ac44136c774b26708976e65a92991aefc87fcb47875c4d431cf23194870",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b10",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-main-tools-pns-correlated-switch-pcm.bin"
+    },
+    {
+      "name": "ms-explicit-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1706,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1722,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1738,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1754,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1770,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1786,
+          "bytes": 46,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1832,
+          "bytes": 46,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1878,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1894,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1910,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1926,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 1943,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-ms-explicit-960-synthetic.mp4",
+        "sha256": "81afb8ada77b8a76f80aeaae8027abfc81921b388380cdad256020c2ba8d6206",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-ms-explicit-960-pcm.bin"
+    },
+    {
+      "name": "ms-all-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 1959,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1975,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 1991,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2007,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2023,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2039,
+          "bytes": 46,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2085,
+          "bytes": 46,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2131,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2147,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2163,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2179,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2196,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-ms-all-960-synthetic.mp4",
+        "sha256": "43030ab6809d4dac97436de1aebcdd7c820f02f81ff126d072d9b1222804bf9a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-ms-all-960-pcm.bin"
+    },
+    {
+      "name": "independent-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 2212,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2229,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2246,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2263,
+          "bytes": 32,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2295,
+          "bytes": 32,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2327,
+          "bytes": 32,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2359,
+          "bytes": 33,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2392,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2409,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2426,
+          "bytes": 32,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2458,
+          "bytes": 18,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 3,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        },
+        {
+          "offset": 2476,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": null
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-independent-960-synthetic.mp4",
+        "sha256": "9628bb2ecfb2298879fc3ec578026a940e39c13c3a8e3175ddd65fe1f7fa874b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-independent-960-pcm.bin"
+    },
+    {
+      "name": "intensity-explicit-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 2493,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2509,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2525,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 2541,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 2557,
+          "bytes": 15,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2572,
+          "bytes": 37,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2609,
+          "bytes": 36,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 2645,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 2661,
+          "bytes": 15,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2676,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2692,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 2709,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-intensity-explicit-960-synthetic.mp4",
+        "sha256": "e55b0478eb7aed4a2b170702cd16ac8b0de63bc9b374447aaaccb64517540be4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-intensity-explicit-960-pcm.bin"
+    },
+    {
+      "name": "intensity-all-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 2725,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2741,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2757,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2773,
+          "bytes": 15,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2788,
+          "bytes": 15,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2803,
+          "bytes": 36,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2839,
+          "bytes": 36,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2875,
+          "bytes": 15,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            14
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2890,
+          "bytes": 15,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            15
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2905,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2921,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2938,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-intensity-all-960-synthetic.mp4",
+        "sha256": "d02edcdfae377dde86d93e3a8d268a0b7dfc6b8c5121fc2aa22543f920bb6402",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-intensity-all-960-pcm.bin"
+    },
+    {
+      "name": "pns-right-switch-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 2954,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2970,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 2986,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3002,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3018,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3034,
+          "bytes": 37,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3071,
+          "bytes": 37,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3108,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3124,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3140,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3156,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3173,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-pns-right-switch-960-synthetic.mp4",
+        "sha256": "95275e1a2d067548b119af2c81e0170282088550cfffb79a7bc4fe8dfd098a30",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-pns-right-switch-960-pcm.bin"
+    },
+    {
+      "name": "pns-correlated-switch-960",
+      "asc": "0994",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 3189,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3205,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3221,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3237,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3253,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 1,
+          "right_sequence": 1,
+          "shape": 0,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3269,
+          "bytes": 31,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 1,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3300,
+          "bytes": 31,
+          "samples": 960,
+          "sequence": 2,
+          "right_sequence": 2,
+          "shape": 0,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3331,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 3,
+          "right_sequence": 3,
+          "shape": 1,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3347,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            13
+          ],
+          "right_books": [
+            1,
+            13
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3363,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 3379,
+          "bytes": 17,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 0,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 3396,
+          "bytes": 16,
+          "samples": 960,
+          "sequence": 0,
+          "right_sequence": 0,
+          "shape": 1,
+          "left_books": [
+            1,
+            1
+          ],
+          "right_books": [
+            1,
+            1
+          ],
+          "mask": [
+            true,
+            false
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-main-tools-pns-correlated-switch-960-synthetic.mp4",
+        "sha256": "5b4171f2902803fccf699fbad701ed2f196846259e2d048996ebb01f613bbbae",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0994",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "pcm_file": "aac-main-tools-pns-correlated-switch-960-pcm.bin"
+    },
+    {
+      "name": "tns20-forward",
+      "asc": "0b08",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3412,
+          "bytes": 26,
+          "samples": 1024
+        },
+        {
+          "offset": 3455,
+          "bytes": 26,
+          "samples": 1024
+        },
+        {
+          "offset": 3498,
+          "bytes": 26,
+          "samples": 1024
+        },
+        {
+          "offset": 3541,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3586,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3631,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3676,
+          "bytes": 28,
+          "samples": 1024
+        },
+        {
+          "offset": 3722,
+          "bytes": 27,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 8192,
+      "video": {
+        "file": "aac-main-tools-tns20-forward-synthetic.mp4",
+        "sha256": "da8dbe0647a707843ad632c1f8ff19e01a69831483e0de33ef584bffac246f5e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "control_video": {
+        "file": "aac-main-tools-tns20-forward-control-synthetic.mp4",
+        "sha256": "1629ef71361f02f355cce5910df96b4a712f3aa8706bcef8d819901c8b393aa1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "pcm_file": "aac-main-tools-tns20-forward-pcm.bin",
+      "control_pcm_file": "aac-main-tools-tns20-forward-control-pcm.bin"
+    },
+    {
+      "name": "tns20-reverse",
+      "asc": "0b08",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3794,
+          "bytes": 26,
+          "samples": 1024
+        },
+        {
+          "offset": 3837,
+          "bytes": 26,
+          "samples": 1024
+        },
+        {
+          "offset": 3880,
+          "bytes": 26,
+          "samples": 1024
+        },
+        {
+          "offset": 3923,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3968,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 4013,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 4058,
+          "bytes": 28,
+          "samples": 1024
+        },
+        {
+          "offset": 4104,
+          "bytes": 27,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 8192,
+      "video": {
+        "file": "aac-main-tools-tns20-reverse-synthetic.mp4",
+        "sha256": "a95ce23f5f6a2a1bd81b3ccb1fb7ee9adb14bb9690be5d06cd08ceb02664eaf7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "control_video": {
+        "file": "aac-main-tools-tns20-reverse-control-synthetic.mp4",
+        "sha256": "0c318dd79873b8a95873f2bde1593fd2c2666c40e96b731f2802044e4afefa66",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "pcm_file": "aac-main-tools-tns20-reverse-pcm.bin",
+      "control_pcm_file": "aac-main-tools-tns20-reverse-control-pcm.bin"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "tns20-forward-invalid21",
+      "asc": "0b08",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3767,
+          "bytes": 27,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 1024,
+      "video": {
+        "file": "aac-main-tools-tns20-forward-invalid21-synthetic.mp4",
+        "sha256": "9f596c064249f6bccc2bf75a53497f09bb5b2d416552ec1973fcbf98d16ea549",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 1024
+      },
+      "control_video": {
+        "file": "aac-main-tools-tns20-forward-control-synthetic.mp4",
+        "sha256": "1629ef71361f02f355cce5910df96b4a712f3aa8706bcef8d819901c8b393aa1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "pcm_file": "aac-main-tools-tns20-forward-pcm.bin",
+      "control_pcm_file": "aac-main-tools-tns20-forward-control-pcm.bin"
+    },
+    {
+      "name": "tns20-reverse-invalid21",
+      "asc": "0b08",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 4149,
+          "bytes": 27,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 1024,
+      "video": {
+        "file": "aac-main-tools-tns20-reverse-invalid21-synthetic.mp4",
+        "sha256": "835f49ebd7bb17eaa932ede18bb4270be288393179fdcf1e00cf1227609111d5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 1024
+      },
+      "control_video": {
+        "file": "aac-main-tools-tns20-reverse-control-synthetic.mp4",
+        "sha256": "0c318dd79873b8a95873f2bde1593fd2c2666c40e96b731f2802044e4afefa66",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b08",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "pcm_file": "aac-main-tools-tns20-reverse-pcm.bin",
+      "control_pcm_file": "aac-main-tools-tns20-reverse-control-pcm.bin"
+    }
+  ]
+}

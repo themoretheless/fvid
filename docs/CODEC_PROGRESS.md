@@ -7631,3 +7631,47 @@ executions; 24 existing unrelated ignored tests). The native Main acceptance
 has no ignored test remaining. The eight Main fixture files regenerated
 byte-for-byte. These numbers qualify the stated fixtures and affected suites,
 not all production profiles or hardware performance.
+
+### AAC Main stereo/PNS and order-20 TNS qualification (2026-10-09)
+
+`scripts/generate_aac_main_tools_fixtures.py` writes original AAC bits and
+independent scalar PCM oracles, without external encoders, private media or
+network. Seven stereo cases each run at 24 kHz/1024 and 48 kHz/960: explicit MS,
+full MS, independent ICS, explicit/full-mask intensity, right-only PNS transition
+and correlated two-channel PNS transition. They exercise all four window
+sequences, sine/KBD changes, active prediction after warm-up, periodic resets,
+and ordinary/intensity/noise recoding. Explicit intensity covers both codebooks
+14/15 with enabled/disabled mask inversion. Independent ICS also has different
+window sequences and opposite shapes in the two channels, with separate
+prediction flags/history. PNS recoding returns to ordinary spectral bands after
+noise, testing that old predictor history cannot leak through.
+
+Two additional mono videos use a genuine order-20 TNS filter with only the
+last reflection coefficient nonzero, applied forwards and backwards over 32
+spectral coefficients. Independent delay-20 recurrences and direct IMDCT verify
+the resulting PCM. Two corresponding unfiltered videos have their own PCM
+oracles; decoded audio differs by more than 1e-5, making this signal-effect
+acceptance rather than a zero-filter parser test. LC refuses these packets at
+its order-12 limit, with the expected profile diagnostic. Both illegal order-21
+videos refuse at the Main limit while preserving prior history.
+
+The initial new regression exposed a misleading diagnostic: invalid Main TNS
+order 21 was called an AAC-LC error. `read_profile` now names Main correctly,
+leaving the LC diagnostic unchanged. Passing invalid-order tests prove refusal,
+not additional supported TNS orders.
+
+Three enabled integration tests cover all sixteen valid scenarios: scalar PCM
+within 2e-8, exact root/owned packet and MP4 export equality, checkpoints, reset,
+truncated-packet rollback, playback checkpoints, rewind, seeks at 1100/3000/6100
+and exact EOF. All forty fixture files regenerate identically offline; ordinary
+tests only read committed artifacts. Remaining Main gaps include explicit CCE
+and PCE/ADTS/SBR/PS qualification and wider normative conformance; LTP/ER/ELD/USAC
+remain unimplemented. This milestone does not claim all codec gaps are closed.
+
+Final verification for the same production change: 908 root library tests,
+456 owned media tests, 3 Main tools tests, 6 Main prediction tests, 3 extension
+flag tests, 3 SSR tests, 9 SSR alignment tests and 3 SSR coupling tests passed
+offline without FFmpeg (1391 selected successful executions). Twenty-four
+existing unrelated tests remain ignored. All new Main tools acceptance tests
+are enabled. These results qualify the saved scenarios, not unrestricted codec
+conformance or throughput.
