@@ -91,6 +91,14 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     let config = super::config::AudioSpecificConfig::parse(asc)?;
     config.resolve_output_rate(output_rate)?;
     let mut bytes = decode_admission_bytes(u16::from(config.core.channels))?;
+    if config.core.object_type==4 {
+        // One MiB per output/source state additionally reserves the analysis
+        // transform/windows, float history, synthesis and source candidates,
+        // checkpoints, spectral estimates and transactional scratch. Eighteen
+        // slots cover all 16 CCE tags plus construction/parse candidates.
+        bytes=bytes.checked_add((usize::from(config.core.channels)+18)*1024*1024)
+            .ok_or_else(||invalid("AAC LTP memory estimate overflow"))?;
+    }
     // Unknown signalling can admit implicit SBR at a fixed core-rate clock.
     // Optional admission must cover that candidate even before the first FIL.
     if config.sbr_present == Some(true) || output_rate != config.core.sample_rate
@@ -369,6 +377,24 @@ mod tests {
             let error = negotiated.decode(&mut Fails, &mut control).unwrap_err();
             assert!(error.to_string().contains("negotiated sink failed"));
             assert!(!path.exists());
+        }
+    }
+}
+
+#[cfg(test)]
+mod ltp_admission_tests {
+    #[test]
+    fn ltp_asc_reserves_float_analysis_and_transaction_storage_before_decode() {
+        // Ordinary mono LTP, 24 kHz, 1024 and 960 samples respectively.
+        for asc in [[0x23,0x08],[0x23,0x0c]] {
+            let parsed=super::super::config::AudioSpecificConfig::parse(&asc).unwrap();
+            assert_eq!(parsed.core.object_type,4);
+            let base=super::decode_admission_bytes(1).unwrap();
+            let admitted=super::decode_config_admission_bytes(&asc,24000).unwrap();
+            assert!(admitted>=base+19*1024*1024);
+            let decoder=super::super::NativeAacDecoder::new(&asc).unwrap();
+            let checkpoint=decoder.checkpoint();
+            assert!(decoder.retained_payload_bytes_with_checkpoint(Some(&checkpoint)).unwrap()<admitted);
         }
     }
 }

@@ -286,6 +286,74 @@ mod he_aac_native_tests { include!("../../crates/fvid-media/src/owned_aac/he_aac
 mod ltp_compat_dispatch_tests {
     use super::*;
     #[test]
+    fn root_ltp_long_short_transitions_match_scalar_pcm() {
+        let root =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let bytes = |name: &str| std::fs::read(root.join(name)).unwrap();
+        let manifest: serde_json::Value =
+            serde_json::from_slice(&bytes("aac-ltp-transitions.json")).unwrap();
+        let blob = bytes("aac-ltp-transitions-packets.bin");
+        let gold = bytes("aac-ltp-transitions-reference.f32le");
+        let wrong = bytes("aac-ltp-transitions-stale-short-reference.f32le");
+        for case in manifest["cases"].as_array().unwrap() {
+            let mut asc: Vec<u8> = case["asc"]
+                .as_str()
+                .unwrap()
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+                .collect();
+            asc[0] = (asc[0] & 7) | (2 << 3);
+            let mut parsed = AudioSpecificConfig::parse(&asc).unwrap();
+            parsed.core.object_type = 4;
+            parsed.signaled_object_type = 4;
+            let mut state = NativeAacDecoder::from_parsed(parsed).unwrap();
+            let initial = state.checkpoint();
+            let n = case["n"].as_u64().unwrap() as usize;
+            let mut first = Vec::new();
+            let mut stale_peak = 0f32;
+            for row in case["frames"].as_array().unwrap() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                let at = row["reference_offset"].as_u64().unwrap() as usize;
+                assert_eq!(pcm.len(), n);
+                for (i, &sample) in pcm.iter().enumerate() {
+                    let expected =
+                        f32::from_le_bytes(gold[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    let stale =
+                        f32::from_le_bytes(wrong[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    stale_peak = stale_peak.max((sample - stale).abs());
+                    assert!(
+                        (sample - expected).abs() < 1e-7,
+                        "n={n} seq={} sample={i}: {sample} vs {expected}",
+                        row["sequence"]
+                    );
+                }
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
+                first.push(pcm);
+            }
+            assert!(
+                stale_peak > 1e-6,
+                "fixture must detect stale short-frame history: {stale_peak}"
+            );
+            state.reset();
+            state.restore(&initial).unwrap();
+            for (row, expected) in case["frames"].as_array().unwrap().iter().zip(first) {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                assert_eq!(
+                    state
+                        .decode(&blob[at..at + row["bytes"].as_u64().unwrap() as usize])
+                        .unwrap(),
+                    expected
+                );
+            }
+        }
+    }
+
+    #[test]
     fn root_cce_prediction_metadata_matches_coupled_scalar_pcm() {
         let root =
             std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");

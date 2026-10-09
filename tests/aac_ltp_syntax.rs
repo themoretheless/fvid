@@ -87,26 +87,7 @@ fn authored_ltp_syntax_long_short_boundaries_and_transactional_truncation() {
     }
 }
 #[test]
-fn ltp_profile_video_reproduces_configuration_refusal() {
-    for c in manifest()["videos"].as_array().unwrap() {
-        let mut pcm = vec![];
-        let error = fvid::native_media::decode_mp4_aac_pcm(
-            &bytes(c["video"]["file"].as_str().unwrap()),
-            &mut pcm,
-        )
-        .unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .contains("only AAC Main, LC and SSR core configurations are implemented"),
-            "{error}"
-        );
-        assert!(pcm.is_empty());
-    }
-}
-#[test]
-#[ignore = "AAC LTP profile admission and remaining tool/layout qualification are pending"]
-fn ltp_video_playback_acceptance_pending() {
+fn ltp_video_playback_accepts_active_and_inactive_prediction() {
     for c in manifest()["videos"].as_array().unwrap() {
         let mut pcm = vec![];
         fvid::native_media::decode_mp4_aac_pcm(

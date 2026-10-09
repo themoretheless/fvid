@@ -372,6 +372,58 @@ mod ltp_dispatch_tests {
             assert_eq!(state.decode(packet).unwrap(), pcm);
         }
     }
+    #[test]
+    fn native_ltp_long_short_transitions_and_960_geometry_match_scalar_pcm() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-transitions.json")).unwrap();
+        let blob = bytes("aac-ltp-transitions-packets.bin");
+        let gold = bytes("aac-ltp-transitions-reference.f32le");
+        let wrong = bytes("aac-ltp-transitions-stale-short-reference.f32le");
+        for case in manifest["cases"].as_array().unwrap() {
+            let mut state = decoder(case["asc"].as_str().unwrap());
+            let initial = state.checkpoint();
+            let n = case["n"].as_u64().unwrap() as usize;
+            let mut first = Vec::new();
+            let mut stale_peak = 0f32;
+            for row in case["frames"].as_array().unwrap() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                let at = row["reference_offset"].as_u64().unwrap() as usize;
+                assert_eq!(pcm.len(), n);
+                for (i, &sample) in pcm.iter().enumerate() {
+                    let expected =
+                        f32::from_le_bytes(gold[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    let stale =
+                        f32::from_le_bytes(wrong[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    stale_peak = stale_peak.max((sample - stale).abs());
+                    assert!(
+                        (sample - expected).abs() < 1e-7,
+                        "n={n} seq={} sample={i}: {sample} vs {expected}",
+                        row["sequence"]
+                    );
+                }
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
+                first.push(pcm);
+            }
+            assert!(
+                stale_peak > 1e-6,
+                "fixture must detect stale short-frame history: {stale_peak}"
+            );
+            state.reset();
+            state.restore(&initial).unwrap();
+            for (row, expected) in case["frames"].as_array().unwrap().iter().zip(first) {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                assert_eq!(
+                    state
+                        .decode(&blob[at..at + row["bytes"].as_u64().unwrap() as usize])
+                        .unwrap(),
+                    expected
+                );
+            }
+        }
+    }
     fn bytes(name: &str) -> Vec<u8> {
         std::fs::read(
             std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -380,26 +432,11 @@ mod ltp_dispatch_tests {
         )
         .unwrap()
     }
-    // Test real packet dispatch without changing public ASC admission. All
-    // unrelated metadata comes from the same authored ASC with its LC tag.
+    // Use authored AOT4 ASC through the public constructor, including PCE tags.
     fn decoder(asc: &str) -> NativeAacDecoder {
-        let mut raw: Vec<u8> = asc
-            .as_bytes()
-            .chunks_exact(2)
-            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-            .collect();
-        assert_eq!(raw[0] >> 3, 4);
-        raw[0] = (raw[0] & 7) | (2 << 3);
-        if (raw[1] >> 3) & 15 == 0 {
-            raw[2] = (raw[2] & !0x0c) | 0x04;
-        }
-        let mut parsed = AudioSpecificConfig::parse(&raw).unwrap();
-        parsed.signaled_object_type = 4;
-        parsed.core.object_type = 4;
-        if let Some(program) = &mut parsed.program {
-            program.object_type = 4;
-        }
-        NativeAacDecoder::from_parsed(parsed).unwrap()
+        let raw:Vec<u8>=asc.as_bytes().chunks_exact(2).map(|pair|u8::from_str_radix(std::str::from_utf8(pair).unwrap(),16).unwrap()).collect();
+        assert_eq!(raw[0]>>3,4);
+        NativeAacDecoder::new(&raw).unwrap()
     }
     fn qualify(case: &Value, blob: &[u8], reference: &[u8]) {
         let mut state = decoder(case["asc"].as_str().unwrap());

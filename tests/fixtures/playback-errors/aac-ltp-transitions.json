@@ -1,0 +1,383 @@
+{
+  "cases": [
+    {
+      "n": 960,
+      "asc": "230c",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 9,
+          "reference_offset": 0,
+          "sequence": 0,
+          "shape": 0,
+          "active": false,
+          "lag": 960,
+          "coefficient": 0,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 9,
+          "bytes": 11,
+          "reference_offset": 3840,
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 947,
+          "coefficient": 1,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 20,
+          "bytes": 11,
+          "reference_offset": 7680,
+          "sequence": 1,
+          "shape": 0,
+          "active": true,
+          "lag": 934,
+          "coefficient": 2,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 31,
+          "bytes": 24,
+          "reference_offset": 11520,
+          "sequence": 2,
+          "shape": 1,
+          "active": false,
+          "lag": 960,
+          "coefficient": 3,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 55,
+          "bytes": 23,
+          "reference_offset": 15360,
+          "sequence": 2,
+          "shape": 0,
+          "active": false,
+          "lag": 947,
+          "coefficient": 4,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 78,
+          "bytes": 11,
+          "reference_offset": 19200,
+          "sequence": 3,
+          "shape": 1,
+          "active": true,
+          "lag": 934,
+          "coefficient": 5,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 89,
+          "bytes": 11,
+          "reference_offset": 23040,
+          "sequence": 0,
+          "shape": 0,
+          "active": true,
+          "lag": 960,
+          "coefficient": 6,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 100,
+          "bytes": 11,
+          "reference_offset": 26880,
+          "sequence": 1,
+          "shape": 1,
+          "active": true,
+          "lag": 947,
+          "coefficient": 7,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 111,
+          "bytes": 24,
+          "reference_offset": 30720,
+          "sequence": 2,
+          "shape": 0,
+          "active": false,
+          "lag": 934,
+          "coefficient": 0,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 135,
+          "bytes": 11,
+          "reference_offset": 34560,
+          "sequence": 3,
+          "shape": 1,
+          "active": true,
+          "lag": 960,
+          "coefficient": 1,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 146,
+          "bytes": 11,
+          "reference_offset": 38400,
+          "sequence": 0,
+          "shape": 0,
+          "active": true,
+          "lag": 947,
+          "coefficient": 2,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 157,
+          "bytes": 11,
+          "reference_offset": 42240,
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 934,
+          "coefficient": 3,
+          "used": [
+            true,
+            true
+          ]
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-transitions-960-synthetic.mp4",
+        "sha256": "69ca86ea87f9629145965184e42f464693e66b9eea42709052479016d40b486e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "230c",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "n": 1024,
+      "asc": "2308",
+      "frames": [
+        {
+          "offset": 168,
+          "bytes": 9,
+          "reference_offset": 46080,
+          "sequence": 0,
+          "shape": 0,
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 177,
+          "bytes": 11,
+          "reference_offset": 50176,
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 1011,
+          "coefficient": 1,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 188,
+          "bytes": 11,
+          "reference_offset": 54272,
+          "sequence": 1,
+          "shape": 0,
+          "active": true,
+          "lag": 998,
+          "coefficient": 2,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 199,
+          "bytes": 24,
+          "reference_offset": 58368,
+          "sequence": 2,
+          "shape": 1,
+          "active": false,
+          "lag": 1024,
+          "coefficient": 3,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 223,
+          "bytes": 23,
+          "reference_offset": 62464,
+          "sequence": 2,
+          "shape": 0,
+          "active": false,
+          "lag": 1011,
+          "coefficient": 4,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 246,
+          "bytes": 11,
+          "reference_offset": 66560,
+          "sequence": 3,
+          "shape": 1,
+          "active": true,
+          "lag": 998,
+          "coefficient": 5,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 257,
+          "bytes": 11,
+          "reference_offset": 70656,
+          "sequence": 0,
+          "shape": 0,
+          "active": true,
+          "lag": 1024,
+          "coefficient": 6,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 268,
+          "bytes": 11,
+          "reference_offset": 74752,
+          "sequence": 1,
+          "shape": 1,
+          "active": true,
+          "lag": 1011,
+          "coefficient": 7,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 279,
+          "bytes": 24,
+          "reference_offset": 78848,
+          "sequence": 2,
+          "shape": 0,
+          "active": false,
+          "lag": 998,
+          "coefficient": 0,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 303,
+          "bytes": 11,
+          "reference_offset": 82944,
+          "sequence": 3,
+          "shape": 1,
+          "active": true,
+          "lag": 1024,
+          "coefficient": 1,
+          "used": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 314,
+          "bytes": 11,
+          "reference_offset": 87040,
+          "sequence": 0,
+          "shape": 0,
+          "active": true,
+          "lag": 1011,
+          "coefficient": 2,
+          "used": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 325,
+          "bytes": 11,
+          "reference_offset": 91136,
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 998,
+          "coefficient": 3,
+          "used": [
+            true,
+            true
+          ]
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 1,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-transitions-1024-synthetic.mp4",
+        "sha256": "1b7c4675e90b4390728f39c95c1ef4a516920cb8a7ae0ae7f112c99e9b4105ec",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2308",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ],
+  "provenance": "Own AOT4 long/start/eight-short/stop packets; direct sparse cosine sums, sine/KBD and scalar float history. No private or foreign codec data."
+}

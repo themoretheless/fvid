@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Own AAC LTP syntax and profile refusal videos; no codec executables."""
+"""Own AAC LTP syntax and profile acceptance videos; no codec executables."""
 import json
 from generate_aac_main_tools_fixtures import channel,ics
 from generate_he_aac_packet_fixtures import DEST,field,frequency,packed,video_fixture
@@ -38,5 +38,5 @@ def main():
         c=dict(name='active' if active else 'inactive',asc=packed(field(4,5)+frequency(24000)+'0001'+'000').hex(),frames=rows,container_rate=24000,container_frame_samples=1024,channels=1,slots=16,bands=32,samples=12288,pcm_offset=0)
         c['video']=video_fixture([c],packets,filename='aac-ltp-'+c['name']+'-synthetic.mp4');videos.append(c)
     (DEST/'aac-ltp-packets.bin').write_bytes(packets)
-    (DEST/'aac-ltp-syntax.json').write_text(json.dumps(dict(cases=cases,invalid_lag=invalid,videos=videos,provenance='Own ordinary LTP syntax and AOT4 videos; independent bit writer, no private source or external codecs. Playback not implemented.'),indent=2)+'\n')
+    (DEST/'aac-ltp-syntax.json').write_text(json.dumps(dict(cases=cases,invalid_lag=invalid,videos=videos,provenance='Own ordinary LTP syntax and AOT4 videos; independent bit writer, no private source or external codecs. Ordinary native AOT4 playback admitted; full profile qualification remains separate.'),indent=2)+'\n')
 if __name__=='__main__':main()

@@ -30,6 +30,6 @@ def main():
   case=dict(name=name,channels=channels,point=point,selection=selection,signed=signed,asc=program(channels,point).hex(),frames=rows,container_rate=24000,container_frame_samples=1024,slots=16,bands=32,samples=12288,pcm_offset=0)
   case['video']=video_fixture([case],blob,channels=channels,filename=f'aac-ltp-coupling-{name}-synthetic.mp4');cases.append(case)
  (DEST/'aac-ltp-coupling-packets.bin').write_bytes(blob)
- (DEST/'aac-ltp-coupling.json').write_text(json.dumps(dict(cases=cases,provenance='Own ordinary LTP CCE syntax, all points and stereo selections, alternating wire order, independent prediction flags/lag/gain/usage, common and signed band gain lists; packet parsing acceptance only, native coupling playback remains pending.'),indent=2)+'\n')
+ (DEST/'aac-ltp-coupling.json').write_text(json.dumps(dict(cases=cases,provenance='Own ordinary LTP CCE syntax, all points and stereo selections, alternating wire order, independent prediction flags/lag/gain/usage, common and signed band gain lists; packet parsing, native dispatch and public MP4 admission acceptance; full stereo coupled PCM oracle qualification remains separate.'),indent=2)+'\n')
  print('generated',len(cases),'own LTP CCE videos')
 if __name__=='__main__':main()

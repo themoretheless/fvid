@@ -8401,5 +8401,5 @@
       }
     }
   ],
-  "provenance": "Own ordinary LTP syntax and AOT4 videos; independent bit writer, no private source or external codecs. Playback not implemented."
+  "provenance": "Own ordinary LTP syntax and AOT4 videos; independent bit writer, no private source or external codecs. Ordinary native AOT4 playback admitted; full profile qualification remains separate."
 }

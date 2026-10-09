@@ -1,5 +1,10 @@
 # Audio Implementation Status
 
+Ordinary AAC LTP (AOT4) is now admitted by the native decoder and MP4 path.
+Mono/stereo, dependent/independent CCE, and 960/1024 long/short transitions
+are qualified on authored PCM fixtures; LTP SBR/PS and broader layouts remain
+unqualified. The incremental sections below retain historical states.
+
 AAC Main: owned frequency-domain prediction is integrated with channel/CCE
 history, checkpoint/reset and stereo tool ordering. Two mono MP4 fixtures
 qualify 1024/960 samples. Fourteen stereo fixtures additionally qualify explicit
@@ -2223,3 +2228,47 @@ Validation: owned library 470 passed / 1 pre-existing ignored; root native AAC
 LTP playback acceptance ignored. Eleven phase fixture artifacts are deterministic.
 Existing PCM references and tolerances remain unchanged. Coupled native dispatch
 and public AOT4 admission are still pending; their refusal expectations are kept.
+
+### Ordinary AOT4 admission and long/short LTP transitions (2026-10-10)
+
+Native CCE source tag histories, transactional decode, history checkpoints and
+retained accounting were integrated in `6eec840ca`; coupled phase PCM is qualified
+against the own direct scalar oracle. Ordinary AOT4 is now admitted by ASC parsing,
+native decoders and PCE ASC serialization. Native MP4 playback acceptance replaces
+the former exact configuration refusal, and the old ignored playback test is enabled.
+
+Two new authored 12-frame MP4s use 960/1024 samples, long/start/eight-short/stop,
+sine/KBD, varying prediction flags, lag, gains and band masks. All eight short
+windows contain nonzero residuals; ordinary short ICS carries no prediction flags.
+Independent sparse cosine transforms and float-history PCM match both native
+parser paths. A stale short-history control must differ by >1e-6, proving the
+fixture exercises prediction after the short-frame history transition.
+Every frame replays exactly from checkpoints; reset and full rewind are exact.
+
+Public MP4 tests compare every sample of both transition videos, three coupled
+phase videos and four stereo pair videos to the saved scalar PCM at 1e-7.
+Seventeen PCE/CCE gain-selection videos have admission/finite-output checks;
+those checks do not independently qualify every stereo gain PCM combination.
+The absent-target video now fails at its specific routing error through public
+MP4 decoding, rather than being blocked by ASC. PCE roundtrip preserves AOT4,
+layout and coupling. Owned MP4 budget refusal precedes PCM publication; admitted
+256 MiB decoding equals the default path.
+
+LTP admission additionally reserves one MiB per output/source state (channels+18),
+covering float history, analysis tables/transforms, candidates, snapshots and
+scratch above the existing generic reserve. This is conservative controlled
+allocation admission, not process RSS or measured peak/60 fps qualification.
+LTP SBR/PS combinations, ER/LD/ELD/USAC and broader layouts/tools still need
+implementation/qualification; finite AOT4 fixtures do not establish full AAC
+conformance. All generation and ordinary tests are offline and FFmpeg-free.
+
+Ordinary short ICS/prediction separation was cross-checked against the
+[primary syntax reference](https://github.com/knik0/faad2/blob/master/libfaad/syntax.c).
+Only syntax/algorithm behavior was consulted; no foreign decoder code was copied.
+
+Validation: owned library 474 passed / 1 pre-existing ignored; root native AAC
+17 passed; seventeen offline AAC integration suites 62 passed / zero ignored.
+The final seven-test public LTP suite additionally passed the new exact-range
+check (six other tests repeated). Four fixture generators regenerate identically;
+existing media, packets and PCM references are unchanged, with only three
+provenance strings updated to reflect public admission. No tolerances relaxed.

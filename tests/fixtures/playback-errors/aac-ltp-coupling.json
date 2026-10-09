@@ -5101,5 +5101,5 @@
       }
     }
   ],
-  "provenance": "Own ordinary LTP CCE syntax, all points and stereo selections, alternating wire order, independent prediction flags/lag/gain/usage, common and signed band gain lists; packet parsing acceptance only, native coupling playback remains pending."
+  "provenance": "Own ordinary LTP CCE syntax, all points and stereo selections, alternating wire order, independent prediction flags/lag/gain/usage, common and signed band gain lists; packet parsing, native dispatch and public MP4 admission acceptance; full stereo coupled PCM oracle qualification remains separate."
 }

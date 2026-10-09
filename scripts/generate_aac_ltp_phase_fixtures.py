@@ -79,6 +79,6 @@ def main():
  (DEST/'aac-ltp-phase-control-reference.f32le').write_bytes(control_gold)
  (DEST/'aac-ltp-phase-packets.bin').write_bytes(blob)
  (DEST/'aac-ltp-phase-reference.f32le').write_bytes(gold)
- (DEST/'aac-ltp-phase.json').write_text(json.dumps(dict(cases=cases,provenance='Own mono CCE point0/1/3 with target LTP, independent-source LTP, directional source/target TNS and sine/KBD; direct sparse MDCT/IMDCT, scalar FIR/AR and float history. Staged channel acceptance, not public native playback admission.'),indent=2)+'\n')
+ (DEST/'aac-ltp-phase.json').write_text(json.dumps(dict(cases=cases,provenance='Own mono CCE point0/1/3 with target LTP, independent-source LTP, directional source/target TNS and sine/KBD; direct sparse MDCT/IMDCT, scalar FIR/AR and float history. Staged, native and public MP4 PCM acceptance; broader profile combinations remain separate.'),indent=2)+'\n')
  print('generated three coupling-phase and three target-only control videos')
 if __name__=='__main__':main()
