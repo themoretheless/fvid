@@ -1981,3 +1981,32 @@ CCE/PCE interactions and memory accounting. The adapter currently clones channel
 state and allocates temporary buffers; it does not claim production performance.
 
 Validation: 462 owned-library and 24 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. Both channel artifacts regenerate with identical SHA-256 hashes.
+
+### LTP floating-history external-reference correction (2026-10-09)
+
+An explicit FFmpeg reference benchmark of the existing own inactive/active LTP
+MP4s found inactive PCM peak error 2.6021e-11, but active error 5.2731e-6 with the
+initial integer-history channel. The former validates base synthesis scaling on
+this fixture; the latter is a specific active-prediction reproduction, not a
+claim of general codec acceptance. The same own videos reproduce the issue;
+no private source was added.
+
+`LtpHistory::new_float` preserves fractional raw synthesis values without i16
+rounding/saturation and is now used by `LtpChannel`. The original fixed-history
+constructor and its independently qualified integer behavior remain separate.
+Restore refuses a precision-mode mismatch. Nonfinite updates and floating
+estimate overflow refuse before state/output mutation. The own channel scalar
+oracle was updated explicitly to floating history, rather than retaining the
+old integer convention as expected behavior. Fixed-history stage references
+remain unchanged.
+
+`scripts/benchmark_aac_ltp_reference.py` is the explicit external benchmark;
+ordinary tests only read its saved f32 PCM and version/source/reference SHA-256
+manifest. The acceptance covers the channel chain with the known authored
+residuals of these two 24k/1024 mono long-window videos, not production packet
+parse/dispatch, other tools/layouts or all LTP profiles. Full root playback
+acceptance remains pending. External implementation details consulted:
+[FFmpeg LTP float DSP](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec_dsp_template.c).
+No external source code was copied or runtime decoder dependency added.
+
+Validation: after the floating-history fix, active fixture PCM peak error fell to 3.37394e-10 (inactive remains 2.60203e-11), passing the unchanged 1e-7 tolerance. 462 owned-library and 26 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending root LTP playback acceptance remain ignored. Reference source/PCM hashes were verified against the benchmark manifest; both own channel artifacts regenerated identically.

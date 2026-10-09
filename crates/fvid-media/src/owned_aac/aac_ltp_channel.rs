@@ -27,7 +27,7 @@ impl LtpChannel {
     pub fn new(n: usize) -> Result<Self> {
         Ok(Self {
             n,
-            history: LtpHistory::new(n)?,
+            history: LtpHistory::new_float(n)?,
             analysis: LtpAnalysis::new(n)?,
             synthesis: LongSineSynthesis::new(n)?,
             previous: WindowShape::Sine,

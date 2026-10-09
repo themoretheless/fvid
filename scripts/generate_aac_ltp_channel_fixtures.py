@@ -30,7 +30,7 @@ for n in (960,1024):
   transformed=[2/n*sum(v*math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for k,v in enumerate(spectrum)) for i in range(2*n)]
   weighted=[v*weight(i,previous if i<n else shape) for i,v in enumerate(transformed)]
   raw=[overlap[i]+weighted[i] for i in range(n)];overlap=weighted[n:]
-  prior_pcm=current_pcm;current_pcm=[max(-32768,min(32767,round(x))) for x in raw];current_overlap=[max(-32768,min(32767,round(x))) for x in overlap]
+  prior_pcm=current_pcm;current_pcm=raw.copy();current_overlap=overlap.copy()
   frames.append(dict(shape=shape,coefficient=coef,active=active,reverse=reverse,residual=residual,reference_offset=len(blob)))
   blob.extend(struct.pack('<'+str(n)+'d',*(v/65536 for v in raw)));previous=shape
  cases.append(dict(n=n,frames=frames))

@@ -142,3 +142,49 @@ fn raw_synthesis_overlap_can_feed_ltp_history() {
         assert!(prediction[n..].iter().all(|x| *x == 0.));
     }
 }
+
+#[test]
+fn floating_history_preserves_fractional_samples_and_refuses_transactionally() {
+    for n in [960, 1024] {
+        let mut history = LtpHistory::new_float(n).unwrap();
+        let pcm: Vec<_> = (0..n)
+            .map(|i| if i % 2 == 0 { 0.25 } else { -40000.125 })
+            .collect();
+        let overlap: Vec<_> = (0..n).map(|i| i as f64 * 0.125 - 10.5).collect();
+        history.update_raw(&pcm, &overlap).unwrap();
+        let saved = history.clone();
+        let mut out = vec![0.; 2 * n];
+        let data = LtpData {
+            lag: n as u16,
+            coefficient_index: 0,
+            usage: Usage::Bands(vec![true]),
+        };
+        history.estimate_long(&data, &mut out).unwrap();
+        for i in 0..n {
+            assert_eq!(out[i], pcm[i] * 0.570829);
+            assert_eq!(out[n + i], overlap[i] * 0.570829);
+        }
+        let fixed = LtpHistory::new(n).unwrap();
+        assert!(history.restore(&fixed).is_err());
+        assert_eq!(history, saved);
+        let mut bad = pcm.clone();
+        bad[n - 1] = f64::NAN;
+        assert!(history.update_raw(&bad, &overlap).is_err());
+        assert_eq!(history, saved);
+        history
+            .update_raw(&vec![f64::MAX; n], &vec![f64::MAX; n])
+            .unwrap();
+        out.fill(123.);
+        let overflow = LtpData {
+            coefficient_index: 7,
+            ..data.clone()
+        };
+        assert!(history.estimate_long(&overflow, &mut out).is_err());
+        assert!(out.iter().all(|v| *v == 123.));
+        history.restore(&saved).unwrap();
+        history.reset();
+        history.estimate_long(&data, &mut out).unwrap();
+        assert!(out.iter().all(|v| *v == 0.));
+        assert_eq!(history.storage_bytes(), 4 * n * std::mem::size_of::<f64>());
+    }
+}

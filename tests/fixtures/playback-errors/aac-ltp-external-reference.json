@@ -1,0 +1,20 @@
+{
+  "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "cases": [
+    {
+      "name": "inactive",
+      "source_sha256": "29a78d03c890b4f983b17456cc9c330b2a85355b7cd82220e5a5c3039e348845",
+      "reference_sha256": "469928411224df12c7d5ba57ac9c9072dc272a009ee43e5f49ed8727ca4292c2",
+      "samples": 12288,
+      "elapsed_ms": 40.486874990165234
+    },
+    {
+      "name": "active",
+      "source_sha256": "268ac3167ccb4239575c9a62287aa01b003695e3baa78f33a41fa8176450ec9d",
+      "reference_sha256": "70a12a40fe8111fdab032feb9bdb6e0893ae243da9b4fa7219d332de9d848814",
+      "samples": 12288,
+      "elapsed_ms": 54.05229202006012
+    }
+  ],
+  "scope": "Authored mono 24k/1024 long-window inactive and active ordinary LTP videos; explicit external-reference benchmark, not full-profile certification."
+}
