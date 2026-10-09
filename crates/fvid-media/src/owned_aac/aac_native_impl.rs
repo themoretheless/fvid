@@ -83,7 +83,41 @@ fn render_ssr_sources(
     core_rate: u32,
     channels: usize,
 ) -> Result<AacFrame> {
-    if frame.rows != 1024 || frame.lanes.len() != channels + tags.len() {
+    if frame.lanes.len() != channels + tags.len() {
+        return Err(invalid("SSR SBR source geometry mismatch"));
+    }
+    // Upgrading the queue must not turn a still-pending core-only packet into
+    // SBR output. Its original chunks/gains survive in the same source lanes.
+    if metadata.sbr.is_none() {
+        let mut samples = vec![0.0; frame.rows * channels];
+        for lane in &frame.lanes {
+            let mut row = 0;
+            for chunk in lane {
+                for &sample in &chunk.samples {
+                    if row >= frame.rows {
+                        return Err(invalid("SSR core source length mismatch"));
+                    }
+                    for gain in &chunk.outputs {
+                        let slot = &mut samples[row * channels + gain.channel];
+                        *slot += sample * gain.gain;
+                        if !slot.is_finite() {
+                            return Err(invalid("AAC coupled PCM exceeds finite f32 output"));
+                        }
+                    }
+                    row += 1;
+                }
+            }
+            if row != frame.rows {
+                return Err(invalid("SSR core source length mismatch"));
+            }
+        }
+        return Ok(AacFrame {
+            samples,
+            pts: frame.stamp as i64,
+            duration: metadata.duration,
+        });
+    }
+    if frame.rows != 1024 {
         return Err(invalid("SSR SBR source geometry mismatch"));
     }
     let extension = metadata
@@ -729,9 +763,11 @@ impl NativeAacDecoder {
                     }
                     gains.push(outputs);
                 }
-                let separate=sbr_rate.is_some() && !tags.is_empty();
-                if self.ssr_alignment.is_some() && separate!=self.ssr_source_alignment {
-                    return Err(unsupported("SSR SBR alignment mode changes require source history continuity"));
+                let separate=self.ssr_source_alignment || (sbr_rate.is_some() && !tags.is_empty());
+                if separate {
+                    // Mixed alignment already retains each unmixed source and
+                    // its gains. Upgrade without dropping or rebuilding it.
+                    self.ssr_source_alignment=true;
                 }
                 let metadata=SsrPacketMetadata {duration,sbr:sbr_rate.map(|output_rate|SsrSbrMetadata {
                     output_rate, mapping:self.mapping.clone(),

@@ -8254,3 +8254,30 @@ distinct integration tests passed (7 SSR/SBR, 5 CCE, 2 Main/SBR, 3 ADTS SSR).
 Twenty-four existing unit tests remain ignored. All 66 combined SSR/SBR
 artifacts regenerate identically. Checks were locked/offline without FFmpeg;
 changed-test formatting and `git diff --check` pass.
+
+
+### 2026-10-09 — mixed-to-source SSR queue transition on late SBR
+
+An owned six-frame video reproduced precisely
+`SSR SBR alignment mode changes require source history continuity` when
+first SBR FIL appeared on CCE1 at packet 3. Its valid core control stays
+silent; authored SBR noise produces a nonzero suffix with an independent
+32-band QMF expectation.
+
+The existing alignment queue already retains unmixed source chunks/gains.
+It now upgrades to source output without rebuilding or discarding those
+lanes. A pending descriptor with no SBR still emits its original core PCM
+and duration; it is not retroactively rendered using the next packet's SBR.
+The selected source mode persists and is restored/reset transactionally.
+The former refusal/ignored acceptance has been replaced by enabled PCM,
+checkpoint/error/reset/EOF and player rewind/seek acceptance.
+
+This closes the alignment-mode refusal for the stated zero-prefix case.
+Nonzero pre-FIL QMF history, broader late signalling/rate transitions, source
+retirement, SSR PS and other codec tools/profiles still require work.
+
+Validation: 909 root and 460 owned-media unit tests, 9 SSR alignment,
+7 SSR/SBR, 5 CCE and 4 late-FIL integration tests passed: 1394 distinct
+passes, 24 existing ignored outside the new enabled acceptance. All four
+new artifacts regenerate identically. Locked/offline checks used no FFmpeg;
+changed-test formatting and `git diff --check` pass.

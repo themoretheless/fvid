@@ -2749,3 +2749,19 @@ target video reproduced precisely `AAC fill extension tool SBR requires
 extension-aware stream signalling`. Acceptance now compares the same
 independent 32-band QMF reference, with native replay and player seek.
 The generated media contains no private data or foreign codec parameters.
+
+
+`aac-ssr-sbr-late-{core-control,late}-synthetic.mp4`, its packet blob and
+manifest are authored by `scripts/generate_aac_ssr_sbr_late_fixtures.py`.
+Both programs have six independently coupled silent SSR SCE0/CCE1 packets
+with long/start/short/stop transitions. In the late program, a valid owned
+SBR header/FIL begins on CCE1 at packet 3; SBR noise then makes PCM nonzero.
+The core control decodes to exactly 6144 zero samples. The late suffix is
+compared with the first 3072 samples of the independent silent-core 32-band
+QMF reference, after the 3072-sample zero prefix.
+
+Before the fix this reproduced precisely the mixed/source alignment-mode
+continuity refusal. Acceptance now runs scalar PCM, checkpoint/error/reset
+and EOF, and player rewind/seek on both sides of the transition. This isolates
+source-queue transition with a zero core prefix; it does not qualify nonzero
+QMF history before the first FIL. No private/foreign codec data is copied.

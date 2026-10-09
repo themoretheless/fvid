@@ -1,0 +1,94 @@
+{
+  "cases": [
+    {
+      "name": "core-control",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 16
+        },
+        {
+          "offset": 16,
+          "bytes": 18
+        },
+        {
+          "offset": 34,
+          "bytes": 32
+        },
+        {
+          "offset": 66,
+          "bytes": 32
+        },
+        {
+          "offset": 98,
+          "bytes": 18
+        },
+        {
+          "offset": 116,
+          "bytes": 16
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ssr-sbr-late-core-control-synthetic.mp4",
+        "sha256": "b32e66ff9f6b6ff97e1016f9b6dd3e1f639e7a310eaf15fdabda1b662d877219",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "late",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 132,
+          "bytes": 16
+        },
+        {
+          "offset": 148,
+          "bytes": 18
+        },
+        {
+          "offset": 166,
+          "bytes": 32
+        },
+        {
+          "offset": 198,
+          "bytes": 44
+        },
+        {
+          "offset": 242,
+          "bytes": 27
+        },
+        {
+          "offset": 269,
+          "bytes": 24
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ssr-sbr-late-late-synthetic.mp4",
+        "sha256": "a338505347cb215013e395e87c62687c4b8098a6fe0cc9ef1970e683b2dbdb23",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    }
+  ],
+  "first_sbr_packet": 3,
+  "provenance": "Own silent SSR SCE0/CCE1 with independent unit gain; SBR CCE noise starts at packet 3 after valid header. No private/foreign media."
+}

@@ -870,3 +870,8 @@ and player rewind/seek pass for both 24 and 48 kHz output clocks.
 Implicit FIL present from the first packet is now also qualified at an unchanged
 24 kHz container clock for direct target and CCE programs. Late FIL discovery,
 SSR PS, arbitrary source switching/retirement and wider tools remain separate.
+
+A late-FIL CCE video with a zero core prefix now qualifies mixed-to-source
+queue upgrade without dropping pending PCM, including checkpoint/reset/EOF
+and player seek across the boundary. Nonzero pre-FIL QMF history is still
+unqualified; this example does not establish general late-SBR conformance.
