@@ -165,7 +165,10 @@ fn main_ps_independent_source_prediction_sbr_and_delay_acceptance() {
             indices.push(f.frame_index);
             pcm.extend(f.pcm);
         }
-        assert_eq!(indices, (0..12).collect::<Vec<_>>());
+        assert_eq!(
+            indices,
+            (0..c["frames"].as_array().unwrap().len() as u64).collect::<Vec<_>>()
+        );
         let gold = reference(c);
         assert_eq!(pcm.len(), gold.len());
         assert!(gold.chunks_exact(2).any(|s| (s[0] - s[1]).abs() > 1e-6));
@@ -292,5 +295,102 @@ fn source_sbr_fil_reassociation_changes_independent_ps_pcm() {
             "{} source FIL reassociation is not observable: {delta}",
             c["name"]
         );
+    }
+}
+
+#[test]
+fn dynamic_rosters_preserve_point3_source_histories_and_dsp() {
+    let manifest = m();
+    let cases = manifest["cases"].as_array().unwrap();
+    for c in cases.iter().filter(|c| c["dynamic"] == true) {
+        let stable = cases
+            .iter()
+            .find(|s| {
+                s["dynamic"] == false
+                    && s["schedule"] == c["schedule"]
+                    && s["source_sbr"] == c["source_sbr"]
+                    && s["source_tns"] == c["source_tns"]
+                    && s["container_rate"] == c["container_rate"]
+            })
+            .unwrap();
+        let mut dynamic_pcm = vec![];
+        let mut static_pcm = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["video"]["file"].as_str().unwrap()),
+            &mut dynamic_pcm,
+        )
+        .unwrap();
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(stable["video"]["file"].as_str().unwrap()),
+            &mut static_pcm,
+        )
+        .unwrap();
+        assert_eq!(
+            dynamic_pcm, static_pcm,
+            "{} PCE roster changed source state",
+            c["name"]
+        );
+        if c["schedule"].as_str().unwrap().ends_with("return") {
+            let good = reference(c);
+            let wrong = reference_state(c, false, true);
+            assert_eq!(good.len(), wrong.len());
+            let delta = good
+                .iter()
+                .zip(&wrong)
+                .map(|(a, b)| (a - b).abs())
+                .fold(0f32, f32::max);
+            assert!(
+                delta > 1e-6,
+                "{} discarded DSP history is not observable: {delta}",
+                c["name"]
+            );
+        }
+    }
+}
+
+#[test]
+fn empty_rosters_keep_target_ps_clock_and_uncoupled_channel() {
+    for c in m()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["schedule"].as_str().unwrap().starts_with("both-"))
+    {
+        let mut target = c.clone();
+        for row in target["frames"].as_array_mut().unwrap() {
+            row["sources"] = serde_json::json!([]);
+        }
+        let target_pcm = reference(&target);
+        let mut raw = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["video"]["file"].as_str().unwrap()),
+            &mut raw,
+        )
+        .unwrap();
+        let actual: Vec<f32> = raw
+            .chunks_exact(4)
+            .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
+            .collect();
+        assert_eq!(actual.len(), target_pcm.len());
+        let frame_samples = c["container_frame_samples"].as_u64().unwrap() as usize;
+        for (frame, row) in c["frames"].as_array().unwrap().iter().enumerate() {
+            let at = frame * frame_samples * 2;
+            for i in 0..frame_samples {
+                assert_eq!(
+                    actual[at + i * 2 + 1],
+                    target_pcm[at + i * 2 + 1],
+                    "{} source changed right target channel",
+                    c["name"]
+                );
+                if row["sources"].as_array().unwrap().is_empty() {
+                    assert_eq!(
+                        actual[at + i * 2],
+                        target_pcm[at + i * 2],
+                        "{} absent source leaked PCM at frame {frame}",
+                        c["name"]
+                    );
+                }
+            }
+        }
     }
 }

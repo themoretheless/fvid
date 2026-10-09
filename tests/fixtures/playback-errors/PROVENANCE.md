@@ -3494,3 +3494,33 @@ Validation: 10 integration tests passed across `aac_main_ps_pns`,
 `aac_main_tools` and `aac_main_ps`, locked/offline with `media,player`
 and no FFmpeg. The existing Main TNS order-21 check remains a refusal
 regression, not order-21 acceptance. Production code is unchanged.
+
+### AAC Main PS PNS source absence and PCE changes (2026-10-09)
+
+48 additional authored MP4 videos extend the Main PS PNS matrix to 56 cases.
+Single-source return, simultaneous-source return and initially empty-roster
+arrival combine with static/dynamic PCE, source TNS on/off, source-SBR on/off
+and 24/48 kHz output. New programs have 16 target frames, allowing ordinary
+coefficients to return after the compact source-clock PNS interval despite
+three-frame source absence. The scalar noise RNG consumes only coded PNS
+bands in actual wire order; per-tag prediction and IMDCT states pause while
+that source is absent. Dynamic PCE preserves target layout and histories.
+
+Six enabled integration tests pass for every case: independent core plus
+qualified SBR/PS waveform composition, omitted-PNS-reset control, source FIL
+binding sensitivity, rollback/checkpoints, reset, all target frame indices
+including EOF, export, syntax probe, interval, rewind and seek. Static/dynamic
+roster PCM is identical. Discarding absent source DSP is numerically observable,
+and frames with no sources equal target-only PS PCM; the right target channel
+remains unaffected by point-3 coupling. The dynamic/static comparison also
+matches source-TNS mode, so different tool programs cannot be confused.
+
+All 90 artifacts reproduce deterministically and the 16 prior video/core/
+control files remain byte-identical. Generator execution remains separate
+from tests, with no private media, FFmpeg, foreign decoder or network.
+Command: `cargo test --locked --offline --no-default-features --features
+media,player --test aac_main_ps_pns` (6 passed, no failures). Production code
+is unchanged. This qualifies long-window PNS across the selected compatible
+roster schedules only. Short-window PNS, dependent-coupling PNS, wider band
+geometry/profiles, additional SBR tools and all-codec parity remain open;
+SBR/PS uses previously qualified owned stages, not a new independent oracle.
