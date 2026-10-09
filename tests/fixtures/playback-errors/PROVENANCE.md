@@ -3672,3 +3672,33 @@ restored byte-for-byte. Regeneration reproduced identical hashes for all 34
 artifacts.
 
 Validation: restored offline media/player run passed 14 tests across grouped dependent PNS, dependent short PNS, Main/PS and Main tools; zero failures.
+
+### AAC Main PS dependent PNS all grouping masks (2026-10-09)
+
+The owned `generate_aac_main_ps_dependent_pns_all_groups_fixtures.py` writes
+four synthetic MP4s spanning coupling points 0/1 and 24/48 kHz. Each has 136
+core packets: long/start, 128 consecutive short packets, stop and long-window
+prediction return. Tag 1 visits masks 0–127, tag 15 their complement, and target
+a cyclic permutation. Alternating ordinary/PNS band layouts make group order
+visible in PCM. A separate Rust test reads ICS at each actual coded bit offset,
+reconstructs its grouping mask, and asserts all 128 masks for each element.
+
+An independent scalar oracle reconstructs noise in group/band/window order,
+Main short-window reset, f32 dependent spectral addition and direct IMDCT
+window overlap. The target PS stage remains a composition of the separately
+qualified owned DSP rather than an independent PS numerical oracle. Acceptance
+covers whole-flow PCM, checkpoints/rollback, EOF/reset, MP4 export, probe replay,
+interval cropping, rewind and seek. The negative core control retains old Main
+prediction during short windows. Fixture generation is separate from tests and
+uses no private media, foreign decoder, FFmpeg or network.
+
+This supersedes the grouping-mask count gap for this two-band, two-source Main/PS
+dependent PNS setup. It does not qualify every band count, source absence/window
+transition combination, short TNS, profile or layout, or complete codec parity.
+
+Sensitivity: reversing window order within each physical group in production
+ICS deinterleave failed waveform acceptance in case `0-0-0-24000`, sample
+8466 (`0.00026192036` versus `0.00026214647`). The shared source was restored
+byte-for-byte. All 10 generated artifacts reproduced identical SHA-256 hashes.
+
+Validation: restored offline media/player run passed 14 tests across all grouping masks, nonuniform groups, Main/PS and Main tools; zero failures.
