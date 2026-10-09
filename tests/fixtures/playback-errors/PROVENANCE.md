@@ -4463,3 +4463,29 @@ This closes the mono 960 LTP/PS transition qualification gap at these clocks.
 960 CCE, other SBR/PS payload geometries, wider source/tag histories, layout/
 PNS combinations and ER/LD/ELD/USAC remain distinct gaps. Generation is offline
 and separate from tests, with no private media, FFmpeg or network.
+
+### Owned 960 LTP/PS coupling qualification (2026-10-10)
+
+The 960 LTP/PS fixture set now includes 18 additional MP4 configurations:
+CCE points 0/1/3, explicit/sync/implicit signalling at 24/48 kHz. Independent
+scalar LTP history and directional TNS run separately for target and source,
+with sine/KBD and alternating element order. Dependent sources are mixed at
+the corresponding spectral boundary; independent source PCM passes through
+its own QMF history and is added only to the final left PS lane. The reference
+composes scalar core/source PCM with separately qualified owned PS/QMF stages;
+it is not an independent complete PS oracle. Production decoder is unchanged.
+
+A source-prediction-disabled control changes left PCM by more than 1e-7 while
+leaving every right sample unchanged. Three additional CRC videos and an
+absent-target video after active histories reproduce precisely `SBR CRC
+mismatch` and `AAC coupling target is absent`. Packet failures are followed
+by valid decode/checkpoint replay, preserving source, core and delayed PS state.
+All samples, ranges, reset, delayed EOF and player rewind/seek are acceptance
+checks across all 24 configurations (six mono and 18 coupled).
+
+Validation: expanded 960 suite passed four tests and existing 1024 LTP/PS suite
+passed six tests, offline without FFmpeg. Parameterizing the original scalar
+phase oracle preserved every original 1024 artifact byte-for-byte; the expanded
+960 set is deterministic on regeneration. Wider CCE tags/absence/roster/source
+extensions and additional PNS/window/layout combinations remain separate gaps,
+as do ER/LD/ELD/USAC. These finite checks do not establish universal codec parity.

@@ -37,7 +37,9 @@ def main():
                 bad_rows=rows[:7]+[dict(rows[7],offset=rows[7]['bad_offset'],bytes=rows[7]['bad_bytes'])]
                 c['bad_video']=video_fixture([dict(c,frames=bad_rows)],blob,channels=2,filename='aac-ltp-ps-960-bad-crc-synthetic.mp4')
             cases.append(c)
+    from generate_aac_ltp_ps_960_cce_fixtures import generate
+    cases.extend(generate(blob,payloads))
     (DEST/'aac-ltp-ps-960-core.f32le').write_bytes(core)
     (DEST/'aac-ltp-ps-960-packets.bin').write_bytes(blob)
-    (DEST/'aac-ltp-ps-960.json').write_text(json.dumps(dict(cases=cases,provenance='Own 960 LTP transition bit writer and scalar core; authored 30-slot PS payloads. No private media, external codec, FFmpeg or network.'),indent=2)+'\n')
+    (DEST/'aac-ltp-ps-960.json').write_text(json.dumps(dict(cases=cases,provenance='Own 960 LTP transitions and CCE point0/1/3 with scalar core/source histories; authored 30-slot PS payloads. No private media, external codec, FFmpeg or network.'),indent=2)+'\n')
 if __name__=='__main__':main()

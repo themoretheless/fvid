@@ -1,5 +1,7 @@
 use fvid_media::owned_aac::{
-    aac_ps_native::NativePsAacDecoder, aac_sbr_dsp::OutputRate, aac_sbr_ps::Decoder,
+    aac_ps_native::NativePsAacDecoder,
+    aac_sbr_dsp::{Dsp, OutputRate},
+    aac_sbr_ps::Decoder,
     bits::BitReader,
 };
 use serde_json::Value;
@@ -30,17 +32,34 @@ fn floats(name: &str) -> Vec<f32> {
 // Independent scalar LTP core through the separately qualified owned PS stage.
 // This qualifies dispatch/composition; it is not an independent full PS oracle.
 fn reference(c: &Value) -> Vec<f32> {
-    let core = floats("aac-ltp-ps-960-core.f32le");
+    let core = floats(c["core"].as_str().unwrap_or("aac-ltp-ps-960-core.f32le"));
     let mode = if c["bands"] == 32 {
         OutputRate::Core
     } else {
         OutputRate::Double
     };
     let mut stage = Decoder::default();
+    let mut lanes = Vec::new();
+    if let Some(file) = c["source_core"].as_str() {
+        let mut dsp = Dsp::default();
+        for frame in floats(file).chunks_exact(960) {
+            lanes.push(
+                dsp.process_upsampling(&[frame], 48000, 15, mode).unwrap()[0]
+                    .iter()
+                    .map(|v| *v as f32)
+                    .collect::<Vec<_>>(),
+            );
+        }
+    }
     let mut output = Vec::new();
     let append = |f: fvid_media::owned_aac::aac_sbr_ps::Frame, out: &mut Vec<f32>| {
         for i in 0..f.pcm[0].len() {
-            out.push(f.pcm[0][i] as f32);
+            let left = f.pcm[0][i] as f32;
+            out.push(if lanes.is_empty() {
+                left
+            } else {
+                left + lanes[f.frame_index as usize][i]
+            });
             out.push(f.pcm[1][i] as f32);
         }
     };
@@ -106,6 +125,15 @@ fn native_ltp_ps_960_transitions_match_scalar_core_composition() {
                     let len = row["bad_bytes"].as_u64().unwrap() as usize;
                     let error = decoder.decode(&blob[offset..offset + len]).unwrap_err();
                     assert!(error.to_string().contains("SBR CRC mismatch"), "{error}");
+                }
+                if let Some(offset) = row["absent_offset"].as_u64() {
+                    let offset = offset as usize;
+                    let len = row["absent_bytes"].as_u64().unwrap() as usize;
+                    let error = decoder.decode(&blob[offset..offset + len]).unwrap_err();
+                    assert!(
+                        error.to_string().contains("AAC coupling target is absent"),
+                        "{error}"
+                    );
                 }
                 let first = decoder.decode(packet).unwrap();
                 decoder.restore(&saved).unwrap();
@@ -232,6 +260,45 @@ fn ltp_ps_960_public_pcm_ranges_and_crc_video() {
             .err()
             .unwrap();
             assert!(error.to_string().contains("SBR CRC mismatch"), "{error}");
+        }
+    }
+}
+
+#[test]
+fn ltp_ps_960_independent_source_prediction_changes_pcm_and_absent_target_is_specific() {
+    for c in manifest()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["point"] == 3)
+    {
+        let expected = reference(c);
+        let mut inactive = c.clone();
+        inactive["source_core"] =
+            Value::String("aac-ltp-ps-960-cce-3-inactive-source-core.f32le".into());
+        let wrong = reference(&inactive);
+        assert!(expected
+            .iter()
+            .zip(&wrong)
+            .enumerate()
+            .any(|(i, (a, b))| i % 2 == 0 && (a - b).abs() > 1e-7));
+        for (i, (a, b)) in expected.iter().zip(&wrong).enumerate() {
+            if i % 2 == 1 {
+                assert_eq!(a, b);
+            }
+        }
+        if let Some(video) = c.get("absent_video") {
+            let mut output = vec![];
+            let error = fvid::native_media::decode_mp4_aac_pcm(
+                &bytes(video["file"].as_str().unwrap()),
+                &mut output,
+            )
+            .err()
+            .unwrap();
+            assert!(
+                error.to_string().contains("AAC coupling target is absent"),
+                "{error}"
+            );
         }
     }
 }

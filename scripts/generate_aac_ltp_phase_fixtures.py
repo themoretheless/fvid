@@ -13,8 +13,13 @@ KBD=windows(N,4)
 def f32(x):return struct.unpack('<f',struct.pack('<f',x))[0]
 def window(i,shape):return KBD[i] if shape else math.sin(math.pi*(i+.5)/(2*N))
 class Oracle:
- def __init__(self):self.history=[0.]*(4*N);self.overlap=[0.]*N;self.previous=0
+ def __init__(self,n=N):
+  self.n=n;self.history=[0.]*(4*n);self.overlap=[0.]*n;self.previous=0
+  self.cos=COS if n==N else [[math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for i in range(2*n)] for k in range(8)]
+  self.kbd=KBD if n==N else windows(n,4)
+ def window(self,i,shape):return self.kbd[i] if shape else math.sin(math.pi*(i+.5)/(2*self.n))
  def prepare(self,source,data):
+  N=self.n;COS=self.cos;window=self.window
   spectrum=[v*1024. for v in source]
   if data['active']:
    lag=data['lag'];gain=GAINS[data['coefficient']]
@@ -33,12 +38,13 @@ class Oracle:
   for i in order:value=spectrum[i]-COEF*previous;out[i]=f32(value);previous=value
   return out
  def synthesize(self,spectrum,data):
+  N=self.n;COS=self.cos;window=self.window
   weighted=[2/N*sum(spectrum[k]*COS[k][i] for k in range(8))*window(i,self.previous if i<N else data['shape']) for i in range(2*N)]
   raw=[self.overlap[i]+weighted[i] for i in range(N)];self.overlap=weighted[N:]
   self.history=self.history[N:2*N]+raw+self.overlap+[0.]*N;self.previous=data['shape']
   return [v/65536 for v in raw]
-def metadata(frame,role,point):
- return dict(active=frame>=3 and (frame%4!=2 if role==0 else point==3 and frame%3!=1),lag=N-role*17-point*5,coefficient=(frame+role*3+point)%8,used=[True,(frame+role)%2==0],shape=(frame+role+point)%2 if point==3 else (frame+point)%2,reverse=bool((frame+role+point)%2))
+def metadata(frame,role,point,n=N):
+ return dict(active=frame>=3 and (frame%4!=2 if role==0 else point==3 and frame%3!=1),lag=n-role*17-point*5,coefficient=(frame+role*3+point)%8,used=[True,(frame+role)%2==0],shape=(frame+role+point)%2 if point==3 else (frame+point)%2,reverse=bool((frame+role+point)%2))
 def info(data):
  base=ics(0,2,False,shape=data['shape'])
  return base[:-1]+'11'+field(data['lag'],11)+field(data['coefficient'],3)+''.join(str(int(v)) for v in data['used']) if data['active'] else base
