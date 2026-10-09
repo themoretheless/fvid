@@ -1657,3 +1657,31 @@ after long-window prediction resumed. Shared production source was restored
 byte-for-byte before final verification.
 
 Validation: 34 generated artifacts reproduced identical SHA-256 hashes. The restored offline media/player run passed 14 tests across dependent short PNS, dependent PNS absence, Main/PS and Main tools; zero failures.
+
+### AAC Main PS dependent grouped short PNS (2026-10-09)
+
+`generate_aac_main_ps_dependent_pns_grouped_fixtures.py` authors 16 synthetic
+MP4 videos with unequal short-window groups in target and dependent CCEs.
+The first short packet uses tag 1 groups [1,3,4], tag 15 [2,1,2,3] and target
+[3,2,3]; the next uses eight singleton windows, [4,4], and [8], respectively.
+Each source alternates ordinary/PNS and PNS/ordinary band layouts between
+groups. The own writer serializes group/band/window order and independent
+scalar noise reconstruction maps each group into physical window spectra.
+Main reset, optional non-short source/target TNS, f32 spectral mixing and direct
+IMDCT overlap compose the mono core oracle. Target PS uses the separately
+qualified owned stage; the oracle is independent for the core, not PS DSP.
+
+The matrix spans coupling points 0/1 and 24/48 kHz, with checkpoint/rollback,
+EOF/reset, export, probe replay, interval crop, rewind and seek acceptance.
+These specific nonuniform layouts do not qualify all 128 grouping masks or
+short-window TNS. Fixture generation remains separate from tests; no FFmpeg,
+foreign decoder, network or private media is used.
+
+Sensitivity: reversing all physical windows was rejected by a different special
+band layout and is not waveform evidence. Reversing windows within each group
+kept band layouts valid and failed PCM acceptance in case `0-0-0-24000`,
+sample 8466 (`0.00026189064` versus `0.0002621318`). Production ICS source was
+restored byte-for-byte. Regeneration reproduced identical hashes for all 34
+artifacts.
+
+Validation: restored offline media/player run passed 14 tests across grouped dependent PNS, dependent short PNS, Main/PS and Main tools; zero failures.
