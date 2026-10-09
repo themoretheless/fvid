@@ -9980,3 +9980,30 @@ coverage or establish an independent full PS oracle.
 Validation: 477 owned library tests passed (one pre-existing ignored),
 11 distinct selected integration tests passed, all offline without FFmpeg.
 All five new fixture artifacts were byte-identical on regeneration.
+
+### Owned 960-frame LTP/PS qualification (2026-10-10)
+
+Six own MP4s combine the independently qualified 960-sample LTP transition
+packets with authored 30-slot PS payloads: long/start/eight-short/stop,
+sine/KBD, active prediction with varied lag/gain/used bands, explicit/sync/
+implicit signalling at 24/48 kHz. Each underlying core packet is checked
+byte-for-byte against the original transition writer; scalar core PCM is
+preserved independently. The PCM oracle composes that core with the separately
+qualified owned SBR/PS stage; it is not an independent full PS implementation.
+
+All final stereo samples match within 1e-7, frame identities and delayed EOF
+are exact, checkpoints/reset replay identically. Trailing bytes and corrupted
+SBR CRC after active history must fail transactionally, followed by valid
+packet replay. A short corrupt companion video reports exactly `SBR CRC
+mismatch`. Public root/owned decode, repeated/reversed ranges and player
+rewind/seek/EOF accept all six positive videos. This qualifies an existing
+owned path; production decoder sources are unchanged.
+
+This closes the mono 960 LTP/PS transition qualification gap at these clocks.
+960 CCE, other SBR/PS payload geometries, wider source/tag histories, layout/
+PNS combinations and ER/LD/ELD/USAC remain distinct gaps. Generation is offline
+and separate from tests, with no private media, FFmpeg or network.
+
+Validation: three new acceptance tests and three existing full PS native
+regressions passed offline without FFmpeg; all ten new fixture artifacts
+were byte-identical on regeneration. Production decoder code is unchanged.
