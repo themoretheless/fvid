@@ -9141,3 +9141,31 @@ restored byte-for-byte. All 34 generated artifacts reproduced identical SHA-256
 hashes on regeneration.
 
 Validation: restored offline media/player run passed 14 tests across dependent PNS absence, dependent PNS, Main/PS and Main tools; zero failures.
+
+### AAC Main PS dependent short-window PNS acceptance (2026-10-09)
+
+The owned `generate_aac_main_ps_dependent_pns_short_fixtures.py` authors
+16 synthetic MP4s with shared long/start/eight-short/stop transitions for target
+and two dependent CCE sources. It spans coupling points 0/1, 24/48 kHz output,
+and directional source/target TNS on non-short packets. Both sources use distinct
+spectral residuals; global PNS consumes each coded short window in wire order.
+The scalar oracle computes Main prediction, per-source short-window history
+reset, PNS, f32 spectral mixing, optional TNS, direct short IMDCT/windowing and
+overlap. Its negative control omits short-window predictor reset and resumes
+with the old long-window history. Target PS uses the separately qualified owned
+PS composition stage; this is not independent numerical PS qualification.
+
+Acceptance checks waveform, checkpoint/rollback, reset/EOF, root export,
+probe replay, interval crop, rewind and seek. The short windows form one group;
+other grouping patterns, short-window TNS, source absence during dependent
+window transitions and wider profiles remain separate qualification work.
+No private source media, foreign decoder, FFmpeg or network is used, and
+fixture generation remains separate from ordinary tests.
+
+Sensitivity control: temporarily omitting `bank.short_window()` in the owned
+Main channel decoder failed dependent waveform acceptance in case
+`0-0-0-24000`, sample 13834 (`-0.0009294358` versus `-0.00092922425`),
+after long-window prediction resumed. Shared production source was restored
+byte-for-byte before final verification.
+
+Validation: 34 generated artifacts reproduced identical SHA-256 hashes. The restored offline media/player run passed 14 tests across dependent short PNS, dependent PNS absence, Main/PS and Main tools; zero failures.
