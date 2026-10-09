@@ -1,4 +1,4 @@
-//! Complete owned mono AAC-LC or AAC-SSR/SBR/PS raw-data-block decoder.
+//! Owned mono AAC Main/LC/SSR/LTP core with SBR/PS raw-data-block decoding.
 //! Stereo PCM is delayed one LC or two SSR packets for alignment/lookahead; frame_index
 //! refers to the original packet. Container timing/startup trimming is external.
 use super::{
@@ -32,6 +32,7 @@ struct CceState {
     stream: aac_sbr_history::Stream,
     dsp: aac_sbr_dsp::Dsp,
     synthesis: Option<LongSineSynthesis>,
+    ltp: Option<super::aac_ltp_channel::LtpChannel>,
     ssr_synthesis: Option<super::aac_ssr_synthesis::SsrSynthesis>,
     prediction: Option<super::aac_main_predictor::MainPredictor>,
 }
@@ -44,6 +45,7 @@ pub struct NativePsAacDecoder {
     mode: OutputRate,
     requires_in_band: bool,
     synthesis: Option<LongSineSynthesis>,
+    ltp: Option<super::aac_ltp_channel::LtpChannel>,
     ssr: Option<SsrState>,
     noise: NoiseState,
     prediction: Option<super::aac_main_predictor::MainPredictor>,
@@ -115,7 +117,7 @@ impl NativePsAacDecoder {
             ));
         };
         BandTables::for_config(&parsed.core)?;
-        let synthesis = if parsed.core.object_type == 3 {
+        let synthesis = if matches!(parsed.core.object_type, 3 | 4) {
             None
         } else {
             Some(LongSineSynthesis::new(usize::from(
@@ -132,6 +134,9 @@ impl NativePsAacDecoder {
         } else {
             None
         };
+        let ltp = if parsed.core.object_type == 4 {
+            Some(super::aac_ltp_channel::LtpChannel::new(usize::from(parsed.core.frame_samples))?)
+        } else {None};
         let prediction = main_prediction(&parsed.core)?;
         Ok(Self {
             config: parsed.core,
@@ -142,6 +147,7 @@ impl NativePsAacDecoder {
             mode,
             requires_in_band,
             synthesis,
+            ltp,
             ssr,
             noise: NoiseState::default(),
             extension: Default::default(),
@@ -197,6 +203,7 @@ impl NativePsAacDecoder {
             ssr.alignment = super::aac_ssr_alignment::SsrPcmAlignment::new(1, 1)
                 .expect("fixed mono SSR alignment geometry");
         }
+        if let Some(ltp) = &mut self.ltp { ltp.reset(); }
         self.noise.reset();
         if let Some(bank) = &mut self.prediction { bank.reset(); }
         self.extension.reset();
@@ -235,6 +242,7 @@ impl NativePsAacDecoder {
         let mut trial = self.clone();
         let mut bits = BitReader::new(packet);
         let mut core = None;
+        let mut ltp_prediction = None;
         let mut extension = None;
         let mut previous_channel = None;
         let mut couplings = Vec::new();
@@ -254,7 +262,11 @@ impl NativePsAacDecoder {
                     }
                     let tag = bits.read(4)? as u8;
                     validate_sce_tag(trial.program.as_ref(), tag)?;
-                    let channel = ChannelData::read(&mut bits, &trial.config)?;
+                    let channel = if trial.config.object_type == 4 {
+                        let (channel, prediction) = ChannelData::read_ltp(&mut bits, &trial.config)?;
+                        ltp_prediction = prediction;
+                        channel
+                    } else { ChannelData::read(&mut bits, &trial.config)? };
                     let mut spectrum = channel.spectrum_with_noise(&trial.config, &mut trial.noise)?;
                     if let Some(bank) = &mut trial.prediction {
                         channel.predict_main(&trial.config, bank, &mut spectrum)?;
@@ -263,7 +275,9 @@ impl NativePsAacDecoder {
                     previous_channel = Some((0, tag));
                 }
                 2 => {
-                    let coupling = Coupling::read(&mut bits, &trial.config)?;
+                    let (coupling, ltp_data) = if trial.config.object_type == 4 {
+                        Coupling::read_ltp(&mut bits, &trial.config)?
+                    } else { (Coupling::read(&mut bits, &trial.config)?, None) };
                     validate_coupling(trial.program.as_ref(), &coupling, &mut cce_tags)?;
                     let mut spectrum = coupling
                         .channel
@@ -273,7 +287,15 @@ impl NativePsAacDecoder {
                         if state.prediction.is_none() { state.prediction = main_prediction(&trial.config)?; }
                         coupling.channel.predict_main(&trial.config, state.prediction.as_mut().unwrap(), &mut spectrum)?;
                     }
-                    let spectrum = coupling.channel.apply_tns(&trial.config, spectrum)?;
+                    let spectrum = if trial.config.object_type == 4 {
+                        let state = trial.cce_states[coupling.tag as usize].get_or_insert_with(CceState::default);
+                        if state.ltp.is_none() {
+                            let mut source = trial.ltp.as_ref().ok_or_else(|| invalid("missing PS LTP state"))?.clone();
+                            source.reset();
+                            state.ltp = Some(source);
+                        }
+                        prepare_ltp(state.ltp.as_mut().unwrap(), &trial.config, &coupling.channel, ltp_data.as_ref(), spectrum)?
+                    } else { coupling.channel.apply_tns(&trial.config, spectrum)? };
                     previous_channel = Some((2, coupling.tag));
                     couplings.push((coupling, spectrum));
                 }
@@ -330,7 +352,9 @@ impl NativePsAacDecoder {
             core.ok_or_else(|| invalid("PS AAC block has no mono element"))?;
         for point in [0, 1] {
             if point == 1 {
-                spectrum = channel.apply_tns(&trial.config, spectrum)?;
+                spectrum = if let Some(ltp) = &mut trial.ltp {
+                    prepare_ltp(ltp, &trial.config, &channel, ltp_prediction.as_ref(), spectrum)?
+                } else { channel.apply_tns(&trial.config, spectrum)? };
             }
             for (coupling, source) in &couplings {
                 if coupling.point != point {
@@ -369,6 +393,8 @@ impl NativePsAacDecoder {
                 &spectrum,
                 &mut pcm,
             )?;
+        } else if let Some(ltp) = &mut trial.ltp {
+            pcm = ltp.synthesize_spectrum(&spectrum, channel.info.sequence, channel.info.shape)?;
         } else {
             trial
                 .synthesis
@@ -509,17 +535,16 @@ impl NativePsAacDecoder {
             }
             let state =
                 trial.cce_states[coupling.tag as usize].get_or_insert_with(CceState::default);
-            if state.synthesis.is_none() {
-                state.synthesis = Some(LongSineSynthesis::new(n)?);
-            }
-            let synthesis = state.synthesis.as_mut().unwrap();
-            let mut core = vec![0.; n];
-            synthesis.synthesize_pcm(
-                coupling.channel.info.sequence,
-                coupling.channel.info.shape,
-                &spectrum,
-                &mut core,
-            )?;
+            let core = if let Some(ltp) = &mut state.ltp {
+                ltp.synthesize_spectrum(&spectrum, coupling.channel.info.sequence, coupling.channel.info.shape)?
+            } else {
+                if state.synthesis.is_none() {state.synthesis = Some(LongSineSynthesis::new(n)?);}
+                let mut core = vec![0.; n];
+                state.synthesis.as_mut().unwrap().synthesize_pcm(
+                    coupling.channel.info.sequence, coupling.channel.info.shape, &spectrum, &mut core,
+                )?;
+                core
+            };
             let core: Vec<f32> = core.into_iter().map(|v| v as f32).collect();
             let rendered = if let Some(frame) = &cce_frames[coupling.tag as usize] {
                 state
@@ -759,12 +784,16 @@ impl InBandPsProbe {
                     }
                     let tag = bits.read(4)? as u8;
                     validate_sce_tag(trial.program.as_ref(), tag)?;
-                    ChannelData::read(&mut bits, &trial.config)?;
+                    if trial.config.object_type == 4 {
+                        ChannelData::read_ltp(&mut bits, &trial.config)?;
+                    } else {ChannelData::read(&mut bits, &trial.config)?;}
                     core = true;
                     previous_channel = Some((0, tag));
                 }
                 2 => {
-                    let coupling = Coupling::read(&mut bits, &trial.config)?;
+                    let coupling = if trial.config.object_type == 4 {
+                        Coupling::read_ltp(&mut bits, &trial.config)?.0
+                    } else {Coupling::read(&mut bits, &trial.config)?};
                     validate_coupling(trial.program.as_ref(), &coupling, &mut tags)?;
                     let tag = trial.program.as_ref().map_or(0, |p| p.elements[0].tag);
                     for target in &coupling.targets {
@@ -835,6 +864,21 @@ impl InBandPsProbe {
     }
 }
 
+fn prepare_ltp(
+    state: &mut super::aac_ltp_channel::LtpChannel,
+    config: &AacConfig,
+    channel: &ChannelData,
+    prediction: Option<&super::aac_ltp_syntax::LtpData>,
+    spectrum: Vec<f32>,
+) -> Result<Vec<f32>> {
+    let tables = BandTables::for_config(config)?;
+    let short = channel.info.sequence == super::aac_synthesis::WindowSequence::EightShort;
+    let offsets = if short {tables.short} else {tables.long};
+    let limit = BandTables::tns_limit(config.sample_rate, short).min(channel.info.max_sfb as usize);
+    state.prepare_spectrum(spectrum, prediction, channel.info.sequence, channel.info.shape,
+        offsets, limit, channel.tns.as_ref())
+}
+
 fn main_prediction(config: &AacConfig) -> Result<Option<super::aac_main_predictor::MainPredictor>> {
     if config.object_type != 1 { return Ok(None); }
     let tables = BandTables::for_config(config)?;
@@ -843,7 +887,7 @@ fn main_prediction(config: &AacConfig) -> Result<Option<super::aac_main_predicto
 }
 
 fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
-    if !matches!(parsed.core.object_type, 1 | 2 | 3) {
+    if !matches!(parsed.core.object_type, 1 | 2 | 3 | 4) {
         return Err(unsupported(
             "AAC parametric stereo core profile is not implemented",
         ));

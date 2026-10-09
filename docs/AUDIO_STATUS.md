@@ -3,8 +3,12 @@
 Ordinary AAC LTP (AOT4) is now admitted by the native decoder and MP4 path.
 Mono/stereo, dependent/independent CCE, and 960/1024 long/short transitions
 are qualified on authored PCM fixtures. Mono LTP/SBR explicit/sync/implicit
-24/48 kHz signalling and unprotected ADTS are now qualified; LTP/PS, late SBR
-and broader layouts remain unqualified. The incremental sections below retain historical states.
+24/48 kHz signalling, late SBR and protected/multiplexed ADTS are qualified
+on authored fixtures. Owned LTP/PS now covers 1024-frame window transitions,
+CCE points 0/1/3, explicit/sync/implicit 24/48 kHz and stereo ADTS discovery.
+Wider PS geometry/layouts, additional CCE/absence/source-extension combinations
+and ER/LD/ELD/USAC remain incomplete. The incremental sections below retain
+historical states.
 
 AAC Main: owned frequency-domain prediction is integrated with channel/CCE
 history, checkpoint/reset and stereo tool ordering. Two mono MP4 fixtures
@@ -2395,3 +2399,58 @@ Validation: five offline integration suites passed 23 tests / 0 ignored, includi
 five new late-LTP-SBR acceptance/refusal tests. All 45 new fixture artifacts
 reproduce identical SHA-256 hashes. Production decoder sources are unchanged;
 this delivers concrete qualification of existing owned paths, not a new fallback.
+
+### Owned LTP/SBR/PS dispatch and coupling (2026-10-10)
+
+Twenty-four own MP4 configurations reproduced precisely `AAC parametric stereo
+core profile is not implemented` before this fix. The previous refusal test is
+replaced with actual PCM acceptance. Native PS now uses owned LTP syntax and
+channel states for AOT4, with no LC synthesis fallback. The target prediction
+is applied between coupling point 0 and inverse TNS, then coupling point 1.
+Core synthesis advances its floating LTP history before SBR/PS. Independent
+CCE sources retain separate tag-keyed LTP histories and contribute only to final
+left-channel PCM; dependent sources remain spectral and do not advance a PCM
+history. New source states share immutable target tables but reset all semantic
+history. Whole-decoder transactions/checkpoints and reset include these states.
+The syntax-only PS probe consumes LTP SCE/CCE metadata without synthesis.
+ADTS PS negotiation and bounded rate probing now include AOT4.
+
+Fixtures cover 1024 long/start/short/stop with sine/KBD, three coupling points,
+directional source/target TNS, alternating CCE/target wire order, and explicit,
+sync and implicit signalling at 24/48 kHz. Original scalar LTP/CCE bit writers
+are replayed and checked against the previously qualified core packets.
+The output reference composes independent scalar core PCM with the separately
+qualified owned SBR/PS and source-QMF stages. This is a dispatch/composition
+oracle, not an independent end-to-end PS oracle. Source point 3 is mixed after
+PS and aligned with the delayed target frame; right PCM remains untouched.
+
+All samples, original frame indices and delayed EOF are checked, along with
+checkpoint replay/reset, root/owned MP4 equivalence, repeated/reversed ranges,
+four mono/PCE ADTS stereo-discovery streams and syntax-probe rollback. Corrupt
+SBR CRC packets exercise failure after core synthesis, then valid packet replay;
+four short own corrupt videos reproduce exactly `SBR CRC mismatch`. Player
+rewind/seek and low controlled-memory admission are additional acceptance gates.
+Generation stays separate and uses neither FFmpeg nor network/private media.
+
+Ordering was checked against the primary
+[AAC dispatch reference](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec.c)
+(LTP/TNS/core history before SBR and final independent coupling). No foreign
+implementation is copied or linked. These finite fixtures do not qualify 960
+PS geometry, all CCE tags/absence/roster changes, source SBR/PS combinations,
+all PNS/layout combinations or ER/LD/ELD/USAC.
+
+
+The separate ADTS playback adapter also excluded AOT4 from its implicit PS/SBR
+negotiation. Before the fix, all four authored LTP/PS ADTS programs opened as
+mono 24 kHz and decoding refused with `SBR extended audio/PS synthesis is not yet
+implemented`. The adapter now includes AOT4 in both detection paths. The
+acceptance suite checks stereo 48 kHz LTP/PS and mono 48 kHz late LTP/SBR,
+complete PCM, rewind, repeated seeks, and delayed EOF against owned decoding.
+
+Validation: owned library 477 passed / one pre-existing ignored; ten PS
+integration suites 51 passed; three core LTP suites 11 passed. After the
+ADTS playback adapter fix, five selected suites passed all 19 tests, including
+the two new player acceptance tests (541 distinct selected tests overall).
+All runs were offline, without FFmpeg. The 39 generated artifacts were
+byte-identical on regeneration. This is finite qualification, not complete
+AAC profile/tool parity.
