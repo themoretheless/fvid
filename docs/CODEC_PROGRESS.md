@@ -7487,3 +7487,48 @@ Owned media library passed 448 tests with one existing ignored test. These are
 1375 successful test executions, not 1375 independent codec profiles. The
 media-only offline build passed; regeneration reproduced all 26 alignment
 fixture files byte-for-byte. The new playback acceptances are enabled.
+
+### 2026-10-09 — independent SSR CCE first occurrence during alignment
+
+The earlier blanket roster-change refusal also rejected adding a configured CCE
+at its first occurrence. Two new own videos reproduce that precise error on
+packet 2 after alignment has started: old tag 15 followed by new tag 1, and old
+tag 1 followed by new tag 15. Their standalone scalar oracle combines the old
+source with a newly initialized source starting at packet 2; the new source has
+no contribution before that point. Six qualified variants use 24 kHz mono, active gain, alternating sine/KBD
+source shapes and an existing long/start/short/stop source. The newly arriving
+source starts either with long, LongStart or EightShort windows; both tag orders
+are covered. Packet element order changes independently of tags.
+
+`SsrPcmAlignment::extend_lanes` now preserves every existing lane exactly once,
+permits adding lanes and canonical reordering, and prefixes a new source only
+for the already pending past interval. That prefix contains no gain mapping or
+source contribution. The new packet's actual PCM is retained separately. The
+operation rejects duplicates, out-of-range indices, output-channel movement,
+lane retirement, post-EOF changes and counts beyond the 16-tag domain before
+mutating queues. Unit acceptance verifies samples, gains, stamps, checkpoint
+replay and the allocation bound. Native SSR dispatch uses this only for a
+superset of already active tags. Its transaction snapshot covers new source
+histories, queue topology, gains and source timing.
+
+Enabled native acceptance compares every emitted sample against the scalar
+oracle and replays each packet through a checkpoint. All six new MP4s also join
+full root/owned export, rewind, seek, repeated range and EOF acceptance. The same
+own packets have Matroska fixtures for full/interval root/owned comparisons.
+Generators remain offline and separate from tests; no private source media or
+codec parameter sets are included.
+
+This closes first occurrence of an additional configured CCE for those authored
+switch schedules. It does not define concealment or retirement for a source that
+disappears with queued/filter history: the separate removal fixture retains its
+precise refusal and rollback regression. General CCE disappearance/reappearance,
+SSR SBR/PS and the other documented codec/profile gaps remain unfinished.
+
+Verification: the current production change passed 909 core, 4 gain-control,
+3 SSR, 3 coupling and 9 alignment integration tests, plus 450 owned-media unit
+tests: 1378 successful test executions (24 existing unrelated tests remain
+ignored). After broadening the first-window schedules, the full 9-test alignment
+suite passed again, including both MP4 and Matroska paths, every-sample scalar
+comparison and playback/range coverage. The earlier failure log records the
+precise roster-continuity refusal before the fix. No new acceptance is ignored.
+Regeneration reproduced all 38 alignment fixture files byte-for-byte.

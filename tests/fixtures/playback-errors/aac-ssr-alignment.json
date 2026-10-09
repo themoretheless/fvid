@@ -1460,7 +1460,445 @@
     },
     "error": "AAC SSR aligned coupling roster changes require lane continuity"
   },
-  "packet_sha256": "d4b50fa50f5f54b91796257e9e927afd5cdf5d4cfd61b9983c6d3785d1563b3f",
-  "pcm_sha256": "c9fe69aa3df9603b27fe48a5c75980a0f21a48d83b777db9437e9a0e1ada76ba",
+  "arrival_cases": [
+    {
+      "name": "late-cce-1-after-15",
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 5141,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 5207,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 5276,
+          "bytes": 174,
+          "samples": 1024
+        },
+        {
+          "offset": 5450,
+          "bytes": 124,
+          "samples": 1024
+        },
+        {
+          "offset": 5574,
+          "bytes": 120,
+          "samples": 1024
+        },
+        {
+          "offset": 5694,
+          "bytes": 120,
+          "samples": 1024
+        }
+      ],
+      "pcm_offset": 172032,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "arrival_index": 2,
+      "new_sequences": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "old_tag": 15,
+      "new_tag": 1,
+      "video": {
+        "file": "aac-ssr-alignment-late-cce-1-after-15-synthetic.mp4",
+        "sha256": "5c3c78d7bcda3ab86f4111df40726f8017f150495362be73fd0451cdb652403a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 172032,
+        "samples": 6144
+      },
+      "matroska": {
+        "file": "aac-ssr-alignment-late-cce-1-after-15-synthetic.mkv",
+        "sha256": "aa49228139b64843018e589ce6db7b6c98f75d15f9a18af0bac1dbc270e1d743"
+      }
+    },
+    {
+      "name": "late-cce-15-after-1",
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 5814,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 5880,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 5949,
+          "bytes": 174,
+          "samples": 1024
+        },
+        {
+          "offset": 6123,
+          "bytes": 124,
+          "samples": 1024
+        },
+        {
+          "offset": 6247,
+          "bytes": 120,
+          "samples": 1024
+        },
+        {
+          "offset": 6367,
+          "bytes": 120,
+          "samples": 1024
+        }
+      ],
+      "pcm_offset": 196608,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "arrival_index": 2,
+      "new_sequences": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "old_tag": 1,
+      "new_tag": 15,
+      "video": {
+        "file": "aac-ssr-alignment-late-cce-15-after-1-synthetic.mp4",
+        "sha256": "3a38540eb95da91fada8f7200b5efae5a87734562687f3e8170ce1a0190a38db",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 196608,
+        "samples": 6144
+      },
+      "matroska": {
+        "file": "aac-ssr-alignment-late-cce-15-after-1-synthetic.mkv",
+        "sha256": "b7639ba5f6e590225eaa08547447d38186675e93de1dda822c2cfd772dfe0a01"
+      }
+    },
+    {
+      "name": "late-cce-1-after-15-start",
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 6487,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 6553,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 6622,
+          "bytes": 119,
+          "samples": 1024
+        },
+        {
+          "offset": 6741,
+          "bytes": 127,
+          "samples": 1024
+        },
+        {
+          "offset": 6868,
+          "bytes": 174,
+          "samples": 1024
+        },
+        {
+          "offset": 7042,
+          "bytes": 124,
+          "samples": 1024
+        }
+      ],
+      "pcm_offset": 221184,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "arrival_index": 3,
+      "new_sequences": [
+        1,
+        2,
+        3
+      ],
+      "old_tag": 15,
+      "new_tag": 1,
+      "video": {
+        "file": "aac-ssr-alignment-late-cce-1-after-15-start-synthetic.mp4",
+        "sha256": "ab05d66dd3eaa76d84c3fce7a07247ae63683c6983edb982555c6751c5eba089",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 221184,
+        "samples": 6144
+      },
+      "matroska": {
+        "file": "aac-ssr-alignment-late-cce-1-after-15-start-synthetic.mkv",
+        "sha256": "a7abddec60ec99a9c2b6ec7cbd2924e4dd5de57d7bcae2697400a45b8fb2e933"
+      }
+    },
+    {
+      "name": "late-cce-15-after-1-start",
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 7166,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 7232,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 7301,
+          "bytes": 119,
+          "samples": 1024
+        },
+        {
+          "offset": 7420,
+          "bytes": 127,
+          "samples": 1024
+        },
+        {
+          "offset": 7547,
+          "bytes": 174,
+          "samples": 1024
+        },
+        {
+          "offset": 7721,
+          "bytes": 124,
+          "samples": 1024
+        }
+      ],
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "arrival_index": 3,
+      "new_sequences": [
+        1,
+        2,
+        3
+      ],
+      "old_tag": 1,
+      "new_tag": 15,
+      "video": {
+        "file": "aac-ssr-alignment-late-cce-15-after-1-start-synthetic.mp4",
+        "sha256": "c24319edd97f9e40b271c317eaaa645bb13a537e6c9215525cc03a695648830e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 245760,
+        "samples": 6144
+      },
+      "matroska": {
+        "file": "aac-ssr-alignment-late-cce-15-after-1-start-synthetic.mkv",
+        "sha256": "874ea9ce0b652b7a6d9286edff6bdca4646656c71fd3ff1e822ee6a26345a105"
+      }
+    },
+    {
+      "name": "late-cce-1-after-15-short",
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 7845,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 7911,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 7980,
+          "bytes": 228,
+          "samples": 1024
+        },
+        {
+          "offset": 8208,
+          "bytes": 128,
+          "samples": 1024
+        },
+        {
+          "offset": 8336,
+          "bytes": 123,
+          "samples": 1024
+        },
+        {
+          "offset": 8459,
+          "bytes": 174,
+          "samples": 1024
+        }
+      ],
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "arrival_index": 2,
+      "new_sequences": [
+        2,
+        3,
+        1,
+        2
+      ],
+      "old_tag": 15,
+      "new_tag": 1,
+      "video": {
+        "file": "aac-ssr-alignment-late-cce-1-after-15-short-synthetic.mp4",
+        "sha256": "68d22448fad5e811fb71195d427ff2b649b688c59a60183304204021033e080d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 270336,
+        "samples": 6144
+      },
+      "matroska": {
+        "file": "aac-ssr-alignment-late-cce-1-after-15-short-synthetic.mkv",
+        "sha256": "9360a315c2334dd91615f8946cc48c3254d8f82cc8b61b0ce2e404c27c26b436"
+      }
+    },
+    {
+      "name": "late-cce-15-after-1-short",
+      "slots": 16,
+      "bands": 32,
+      "channels": 1,
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 8633,
+          "bytes": 66,
+          "samples": 1024
+        },
+        {
+          "offset": 8699,
+          "bytes": 69,
+          "samples": 1024
+        },
+        {
+          "offset": 8768,
+          "bytes": 228,
+          "samples": 1024
+        },
+        {
+          "offset": 8996,
+          "bytes": 128,
+          "samples": 1024
+        },
+        {
+          "offset": 9124,
+          "bytes": 123,
+          "samples": 1024
+        },
+        {
+          "offset": 9247,
+          "bytes": 174,
+          "samples": 1024
+        }
+      ],
+      "pcm_offset": 294912,
+      "pcm_bytes": 24576,
+      "samples": 6144,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "durations": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "arrival_index": 2,
+      "new_sequences": [
+        2,
+        3,
+        1,
+        2
+      ],
+      "old_tag": 1,
+      "new_tag": 15,
+      "video": {
+        "file": "aac-ssr-alignment-late-cce-15-after-1-short-synthetic.mp4",
+        "sha256": "85a74d77efa74540ce455a8d65839c024062fba7a2db846f224cfe0cca40e5ad",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 294912,
+        "samples": 6144
+      },
+      "matroska": {
+        "file": "aac-ssr-alignment-late-cce-15-after-1-short-synthetic.mkv",
+        "sha256": "5cab9e590a4d4226c82bc50e892e37afcf76ada81657a248afde2fb4ca1f089b"
+      }
+    }
+  ],
+  "packet_sha256": "edd23c7f1535193ce13b3567444535593a6b67da6b9dbbab01c5503a8d74865c",
+  "pcm_sha256": "382f62d60be209e1ce8b59194a3fa628a2b5499d636e91eeef7cd3b6f825f7a7",
   "qualification": "native coupled MP4 and timed playback acceptance including delayed EOF"
 }

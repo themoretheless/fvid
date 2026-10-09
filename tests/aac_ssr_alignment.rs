@@ -20,6 +20,7 @@ fn acceptance_cases() -> Vec<Value> {
         .chain(m["channels_cases"].as_array().unwrap())
         .chain(m["fixed_cases"].as_array().unwrap())
         .chain(m["tail_cases"].as_array().unwrap())
+        .chain(m["arrival_cases"].as_array().unwrap())
         .cloned()
         .collect()
 }
@@ -423,7 +424,12 @@ fn aligned_ssr_fixed_clock_adts_and_matroska_exports_match_mp4() {
     let manifest = manifest();
     let folder =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
-    for case in manifest["fixed_cases"].as_array().unwrap() {
+    for case in manifest["fixed_cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(manifest["arrival_cases"].as_array().unwrap())
+    {
         let mp4 = std::fs::read(folder.join(case["video"]["file"].as_str().unwrap())).unwrap();
         let mkv = std::fs::read(folder.join(case["matroska"]["file"].as_str().unwrap())).unwrap();
         for (interval, first, last) in [
@@ -553,4 +559,52 @@ fn changing_ssr_cce_roster_is_a_precise_refusal_with_complete_rollback() {
     let resumed = decoder.decode_timed(&good[2], 2048, 1024).unwrap();
     decoder.restore(&saved).unwrap();
     assert_eq!(decoder.decode_timed(&good[2], 2048, 1024).unwrap(), resumed);
+}
+
+#[test]
+fn late_ssr_cce_sources_enter_without_backdating_pcm_or_losing_old_history() {
+    let manifest = manifest();
+    let gold = include_bytes!("fixtures/playback-errors/aac-ssr-alignment-pcm.f32le");
+    for case in manifest["arrival_cases"].as_array().unwrap() {
+        let encoded = packets(&case["video"]);
+        let mut decoder = NativeAacDecoder::new(&hex(case["asc"].as_str().unwrap())).unwrap();
+        let mut output = Vec::new();
+        for (i, packet) in encoded.iter().enumerate() {
+            let checkpoint = decoder.checkpoint();
+            let frame = decoder
+                .decode_timed(packet, (i * 1024) as i64, 1024)
+                .unwrap();
+            decoder.restore(&checkpoint).unwrap();
+            assert_eq!(
+                decoder
+                    .decode_timed(packet, (i * 1024) as i64, 1024)
+                    .unwrap(),
+                frame
+            );
+            if let Some(frame) = frame {
+                let origin = if i < 2 { i } else { i - 1 };
+                assert_eq!((frame.pts, frame.duration), ((origin * 1024) as i64, 1024));
+                output.extend(frame.samples);
+            } else {
+                assert_eq!(i, 1);
+            }
+        }
+        let final_frame = decoder.finish().unwrap().unwrap();
+        assert_eq!(final_frame.pts, 5120);
+        output.extend(final_frame.samples);
+        assert_eq!(output.len(), 6144);
+        let off = case["pcm_offset"].as_u64().unwrap() as usize;
+        for (i, (&actual, bytes)) in output
+            .iter()
+            .zip(gold[off..off + output.len() * 4].chunks_exact(4))
+            .enumerate()
+        {
+            let expected = f32::from_le_bytes(bytes.try_into().unwrap());
+            assert!(
+                (actual - expected).abs() < 2e-7,
+                "{} sample {i}: {actual} != {expected}",
+                case["name"]
+            );
+        }
+    }
 }

@@ -54,6 +54,66 @@ impl SsrPcmAlignment {
             finished: false,
         })
     }
+    /// Reorder existing source lanes and add sources at the current packet.
+    /// New sources have no contribution in the already pending frame. Their
+    /// silent prefix belongs only to that past interval, not their new samples.
+    /// All old lanes must survive exactly once; retiring a source with retained
+    /// synthesis/PCM history is a different operation, never an implicit drop.
+    pub fn extend_lanes(&mut self, order: &[Option<usize>]) -> Result<()> {
+        if self.finished {
+            return Err(invalid("SSR PCM alignment requires reset after finish"));
+        }
+        if order.len() < self.lanes.len()
+            || order.len() > self.channels + 16
+            || order
+                .iter()
+                .take(self.channels)
+                .enumerate()
+                .any(|(i, index)| *index != Some(i))
+        {
+            return Err(invalid("SSR PCM alignment invalid lane extension"));
+        }
+        let mut visited = vec![false; self.lanes.len()];
+        for index in order.iter().flatten() {
+            let slot = visited
+                .get_mut(*index)
+                .ok_or_else(|| invalid("SSR PCM alignment invalid lane extension"))?;
+            if *slot {
+                return Err(invalid("SSR PCM alignment duplicate source lane"));
+            }
+            *slot = true;
+        }
+        if visited.iter().any(|v| !*v) {
+            return Err(invalid("SSR PCM alignment cannot discard an existing lane"));
+        }
+        let prefix = self.pending.iter().try_fold(0usize, |rows, frame| {
+            rows.checked_add(frame.rows)
+                .ok_or_else(|| invalid("SSR PCM alignment prefix overflow"))
+        })?;
+        if prefix > MAX_QUEUED {
+            return Err(invalid("SSR PCM alignment prefix exceeds lookahead bound"));
+        }
+        let lanes = order
+            .iter()
+            .map(|index| match index {
+                Some(index) => self.lanes[*index].clone(),
+                None => {
+                    let mut lane = Lane::default();
+                    if prefix > 0 {
+                        lane.chunks.push_back(Chunk {
+                            samples: vec![0.0; prefix],
+                            used: 0,
+                            outputs: Vec::new(),
+                        });
+                        lane.rows = prefix;
+                    }
+                    lane
+                }
+            })
+            .collect();
+        self.lanes = lanes;
+        Ok(())
+    }
     pub fn reset(&mut self) {
         for lane in &mut self.lanes {
             lane.chunks.clear();
@@ -245,6 +305,113 @@ impl SsrPcmAlignment {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn new_source_prefix_is_silent_and_reordering_preserves_old_samples_and_gains() {
+        let target = vec![0.0; 1024];
+        let old = vec![3.0; 1024];
+        let new = vec![10.0; 1024];
+        let unity = [OutputGain {
+            channel: 0,
+            gain: 1.0,
+        }];
+        let old_gain = [OutputGain {
+            channel: 0,
+            gain: 2.0,
+        }];
+        let new_gain = [OutputGain {
+            channel: 0,
+            gain: 0.5,
+        }];
+        let mut alignment = SsrPcmAlignment::new(1, 2).unwrap();
+        assert!(
+            alignment
+                .submit(
+                    11,
+                    1024,
+                    &[
+                        LaneInput {
+                            samples: &target,
+                            outputs: &unity
+                        },
+                        LaneInput {
+                            samples: &old,
+                            outputs: &old_gain
+                        }
+                    ]
+                )
+                .unwrap()
+                .is_none()
+        );
+        let checkpoint = alignment.clone();
+        let before = alignment.retained_payload_bytes().unwrap();
+        for bad in [
+            &[Some(0), Some(0), None][..],
+            &[None, Some(0), Some(1)][..],
+            &[Some(0), None][..],
+        ] {
+            assert!(alignment.extend_lanes(bad).is_err());
+            assert_eq!(alignment.retained_payload_bytes().unwrap(), before);
+        }
+        alignment.extend_lanes(&[Some(0), None, Some(1)]).unwrap();
+        let inputs = [
+            LaneInput {
+                samples: &target,
+                outputs: &unity,
+            },
+            LaneInput {
+                samples: &new,
+                outputs: &new_gain,
+            },
+            LaneInput {
+                samples: &old,
+                outputs: &old_gain,
+            },
+        ];
+        let previous = alignment.submit(12, 1024, &inputs).unwrap().unwrap();
+        assert_eq!(
+            previous,
+            AlignedFrame {
+                stamp: 11,
+                samples: vec![6.0; 1024]
+            }
+        );
+        assert_eq!(
+            alignment.finish().unwrap().unwrap(),
+            AlignedFrame {
+                stamp: 12,
+                samples: vec![11.0; 1024]
+            }
+        );
+        assert!(
+            alignment
+                .extend_lanes(&[Some(0), Some(1), Some(2)])
+                .is_err()
+        );
+        alignment = checkpoint;
+        alignment.extend_lanes(&[Some(0), None, Some(1)]).unwrap();
+        assert_eq!(
+            alignment.submit(12, 1024, &inputs).unwrap().unwrap(),
+            previous
+        );
+    }
+    #[test]
+    fn new_source_count_is_bounded_and_every_old_lane_must_be_preserved() {
+        let mut alignment = SsrPcmAlignment::new(1, 1).unwrap();
+        let mut order = vec![None; 17];
+        order[0] = Some(0);
+        alignment.extend_lanes(&order).unwrap();
+        let bytes = alignment.retained_payload_bytes().unwrap();
+        let mut too_many: Vec<_> = (0..17).map(Some).collect();
+        too_many.push(None);
+        assert!(alignment.extend_lanes(&too_many).is_err());
+        let mut lost: Vec<_> = (0..17).map(Some).collect();
+        lost[16] = None;
+        assert_eq!(
+            alignment.extend_lanes(&lost).unwrap_err().to_string(),
+            "SSR PCM alignment cannot discard an existing lane"
+        );
+        assert_eq!(alignment.retained_payload_bytes().unwrap(), bytes);
+    }
     #[test]
     fn legal_window_transitions_stay_within_one_packet_lookahead() {
         let extents = [1024, 1472, 1024, 576];

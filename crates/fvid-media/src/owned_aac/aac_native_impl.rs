@@ -544,9 +544,14 @@ impl NativeAacDecoder {
                 }
                 if let Some(alignment) = &mut self.ssr_alignment {
                     if tags != self.ssr_alignment_tags {
-                        return Err(unsupported(
-                            "AAC SSR aligned coupling roster changes require lane continuity",
-                        ));
+                        if self.ssr_alignment_tags.iter().any(|tag|!tags.contains(tag)) {
+                            return Err(unsupported("AAC SSR aligned coupling roster changes require lane continuity"));
+                        }
+                        let order:Vec<_>=(0..channels.len()).map(Some).chain(tags.iter().map(|tag|
+                            self.ssr_alignment_tags.iter().position(|old|old==tag).map(|index|channels.len()+index)
+                        )).collect();
+                        alignment.extend_lanes(&order)?;
+                        self.ssr_alignment_tags=tags.clone();
                     }
                     let inputs: Vec<_> = lanes
                         .iter()

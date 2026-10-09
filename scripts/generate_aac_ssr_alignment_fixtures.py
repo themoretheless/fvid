@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Original independent SSR window drift cases with scalar PCM; offline only."""
 import json,hashlib,struct
-from generate_aac_ssr_fixtures import DEST,field,frequency,packed,video_fixture,SAMPLES,oracle,channel
-from generate_aac_ssr_coupling_fixtures import packet,config
+from generate_aac_ssr_fixtures import DEST,field,frequency,packed,video_fixture,SAMPLES,oracle,channel,spectrum
+from generate_aac_ssr_coupling_fixtures import packet,config,silent
 
 def matroska_fixture(case,blob):
     from generate_aac_ps_matroska_fixtures import element,number,child
@@ -92,7 +92,32 @@ def main():
     roster['frames'][2].update(offset=len(blob),bytes=len(payload));blob.extend(payload)
     roster['video']=video_fixture([roster],blob,filename='aac-ssr-alignment-roster-change-synthetic.mp4')
     roster['error']='AAC SSR aligned coupling roster changes require lane continuity'
+    arrival_cases=[]
+    for old,new,start,new_sequences,suffix in [
+        (15,1,2,[0]*4,''),(1,15,2,[0]*4,''),
+        (15,1,3,[1,2,3],'-start'),(1,15,3,[1,2,3],'-start'),
+        (15,1,2,[2,3,1,2],'-short'),(1,15,2,[2,3,1,2],'-short'),
+    ]:
+        base=cases[0]
+        earlier=gold[base['pcm_offset']:base['pcm_offset']+base['pcm_bytes']]
+        later,_=oracle([i%2 for i in range(start,6)],1,True,lambda f,s,c:spectrum(f+start,s,c),sequences=new_sequences)
+        later=bytes(start*1024*4)+later
+        pcm=b''.join(struct.pack('<f',a+b) for (a,),(b,) in zip(struct.iter_unpack('<f',earlier),struct.iter_unpack('<f',later)))
+        off=len(gold);gold.extend(pcm);frames=[]
+        for i,seq in enumerate(base['source_sequences']):
+            target='0000000'+silent(0,0,0,True,False)
+            specs=[(old,seq,i%2)] + ([(new,new_sequences[i-start],i%2)] if i>=start else [])
+            # Current packet element order changes; old/new histories are tags,
+            # independent of order or their positions in the canonical queue.
+            if i%2:specs.reverse()
+            sources=''.join('010'+field(tag,4)+'1'+'000'+'0'+field(0,4)+'0'+'0'+'10'+channel(i,s,shape,0,True,False) for tag,s,shape in specs)
+            data=packed((sources+target if i%2 else target+sources)+'111')
+            frames.append(dict(offset=len(blob),bytes=len(data),samples=1024));blob.extend(data)
+        arrival=dict(name=f'late-cce-{new}-after-{old}{suffix}',slots=16,bands=32,channels=1,asc=config(1,3,(1,15)).hex(),frames=frames,pcm_offset=off,pcm_bytes=len(pcm),samples=6144,container_rate=24000,container_frame_samples=1024,durations=[1024]*6,arrival_index=start,new_sequences=new_sequences,old_tag=old,new_tag=new)
+        arrival['video']=video_fixture([arrival],blob,filename='aac-ssr-alignment-'+arrival['name']+'-synthetic.mp4')
+        arrival['matroska']=matroska_fixture(arrival,blob)
+        arrival_cases.append(arrival)
     (DEST/'aac-ssr-alignment-packets.bin').write_bytes(blob);(DEST/'aac-ssr-alignment-pcm.f32le').write_bytes(gold)
-    (DEST/'aac-ssr-alignment.json').write_text(json.dumps(dict(cases=cases,channels_cases=channels_cases,fixed_cases=fixed_cases,tail_cases=tail_cases,incomplete=incomplete,roster=roster,packet_sha256=hashlib.sha256(blob).hexdigest(),pcm_sha256=hashlib.sha256(gold).hexdigest(),qualification='native coupled MP4 and timed playback acceptance including delayed EOF'),indent=2)+'\n')
+    (DEST/'aac-ssr-alignment.json').write_text(json.dumps(dict(cases=cases,channels_cases=channels_cases,fixed_cases=fixed_cases,tail_cases=tail_cases,incomplete=incomplete,roster=roster,arrival_cases=arrival_cases,packet_sha256=hashlib.sha256(blob).hexdigest(),pcm_sha256=hashlib.sha256(gold).hexdigest(),qualification='native coupled MP4 and timed playback acceptance including delayed EOF'),indent=2)+'\n')
     print(len(cases),'coupled SSR alignment scenarios; one independently switched CPE and one unfinished video')
 if __name__=='__main__':main()

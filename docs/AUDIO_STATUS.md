@@ -10,8 +10,11 @@ transitions. Fourteen further videos qualify dependent and independent SSR
 coupling, including simultaneous CCE tags 1/15. Five more coupled videos and
 one independently switched stereo CPE video qualify unequal SSR window extents,
 bounded PCM alignment, original packet timing, EOF drain, checkpoint replay,
-rewind, seek and interval export. SSR SBR/PS and changing independent CCE rosters
-while alignment is active remain unsupported. Four fixed-clock MP4 variants
+rewind, seek and interval export. SSR SBR/PS and removal of independent CCEs
+with queued history remain unsupported. New independent CCEs can appear while alignment is active: six
+further MP4/Matroska pairs qualify first occurrence, canonical tag reordering,
+source timing and preservation of prior filter/PCM histories. Four fixed-clock
+MP4 variants
 and a shortened final-packet fixture qualify reassembly into 1024 samples per
 AAC access unit and final duration trimming. Four Matroska videos and one
 stereo ADTS stream qualify full/interval root and owned export against the same
