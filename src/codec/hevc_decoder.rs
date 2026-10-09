@@ -450,7 +450,9 @@ impl HevcDecoder {
             return Ok(None);
         }
         let poc = super::hevc_poc::derive(sps, header.nal, header.poc_lsb, self.previous_poc)?;
-        if header.nal.is_idr() {
+        if header.nal.is_irap() && self.suppress_rasl {
+            // An IRAP starting a CVS marks every prior DPB reference unused.
+            // BLA carries RPS syntax, but that syntax cannot retain the old CVS.
             self.references.clear();
         }
         let (retained, lists) = reference_lists(&header, poc, &self.references, sps.poc_bits)?;
@@ -612,6 +614,21 @@ fn reference_lists(
 mod long_term_list_tests {
     use super::super::{hevc_long_term::LongTermReference, hevc_rps::ShortTermReference};
     use super::*;
+    #[test]
+    fn bla_starts_with_no_prior_reference_pictures() {
+        let file = include_bytes!("../../tests/fixtures/playback-errors/hevc-bla-w-lp-synthetic.mp4");
+        let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(file), Default::default()).unwrap();
+        let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+        let mut packet = vec![];
+        for index in 0..=5 {
+            input.read_packet(0, index, &mut packet).unwrap();
+            assert!(decoder.decode_packet(&packet).unwrap().is_some());
+        }
+        assert!(!decoder.references.is_empty());
+        let bla_poc = decoder.previous_poc.unwrap();
+        assert!(decoder.references.iter().all(|r| r.poc >= bla_poc),
+            "BLA retained prior-sequence POCs: {:?}", decoder.references.iter().map(|r| r.poc).collect::<Vec<_>>());
+    }
     #[test]
     fn mixed_reference_lists_append_long_term_pictures_and_apply_modifications() {
         let data = include_bytes!("../../tests/fixtures/playback-errors/shared-hevc-main.mp4");

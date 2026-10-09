@@ -27,9 +27,15 @@ def main():
     original = []
     for n in lengths:
         original.append(data[at:at+n]); at += n
-    for label, nal in [('valid', bytes([72, 1, 128])), ('bad-trailing', bytes([72, 1, 0])), ('bad-temporal', bytes([72, 2, 128]))]:
+    for label, nal in [('valid', bytes([72, 1, 128])), ('bad-trailing', bytes([72, 1, 0])), ('bad-temporal', bytes([72, 2, 128])), ('bla-w-lp', None)]:
         packets = original.copy()
-        packets[cra-1] += len(nal).to_bytes(4, 'big') + nal
+        if label == 'bla-w-lp':
+            packet = bytearray(packets[cra])
+            assert (packet[4] >> 1) & 63 == 21
+            packet[4] = (packet[4] & 129) | (16 << 1)
+            packets[cra] = bytes(packet)
+        else:
+            packets[cra-1] += len(nal).to_bytes(4, 'big') + nal
         def rewrite(tag, payload):
             if tag in (b'moov', b'trak', b'mdia', b'minf', b'stbl'):
                 payload = b''.join(rewrite(t, p) for t, p in boxes(payload))
@@ -39,7 +45,8 @@ def main():
                 payload = payload[:8] + struct.pack('>I', len(root[b'ftyp'])+16)
             return box(tag, payload)
         movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(packets)) + rewrite(b'moov', root[b'moov'])
-        (DEST / f'hevc-eos-before-cra-{label}-synthetic.mp4').write_bytes(movie)
+        name = 'hevc-bla-w-lp-synthetic.mp4' if label == 'bla-w-lp' else f'hevc-eos-before-cra-{label}-synthetic.mp4'
+        (DEST / name).write_bytes(movie)
 
 if __name__ == '__main__':
     main()

@@ -125,7 +125,6 @@ fn standalone_end_markers_restart_cra_without_emitting_a_picture() {
 fn eos_playback_preserves_pixels_timestamps_and_rewind() {
     use fvid::{container::mp4::Limits, playback_mp4::Mp4VideoReader};
     let original = include_bytes!("fixtures/hevc/weighted-tmvp.mp4");
-    let ended = include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4");
     let mut baseline =
         Mp4VideoReader::open_software(Cursor::new(original), Limits::default(), 16 << 20).unwrap();
     let mut expected = Vec::new();
@@ -135,28 +134,34 @@ fn eos_playback_preserves_pixels_timestamps_and_rewind() {
         }
     }
     assert_eq!(expected.len(), 14);
-    let mut source =
-        Mp4VideoReader::open_software(Cursor::new(ended), Limits::default(), 16 << 20).unwrap();
-    for pass in 0..2 {
-        let mut previous_end = None;
-        for reference in &expected {
-            let frame = source.read_frame().unwrap().unwrap();
-            assert_eq!(frame.sample_index, reference.sample_index, "pass {pass}");
-            assert_eq!(frame.presentation_time, reference.presentation_time);
-            assert_eq!(frame.picture.y, reference.picture.y);
-            assert_eq!(frame.picture.cb, reference.picture.cb);
-            assert_eq!(frame.picture.cr, reference.picture.cr);
-            if let Some(end) = previous_end {
-                assert_eq!(
-                    end, frame.presentation_time.ticks,
-                    "sample {}",
-                    frame.sample_index
-                );
+    for ended in [
+        include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/hevc-bla-w-lp-synthetic.mp4").as_slice(),
+    ] {
+        let mut source =
+            Mp4VideoReader::open_software(Cursor::new(ended), Limits::default(), 16 << 20).unwrap();
+        for pass in 0..2 {
+            let mut previous_end = None;
+            for reference in &expected {
+                let frame = source.read_frame().unwrap().unwrap();
+                assert_eq!(frame.sample_index, reference.sample_index, "pass {pass}");
+                assert_eq!(frame.presentation_time, reference.presentation_time);
+                assert_eq!(frame.picture.y, reference.picture.y);
+                assert_eq!(frame.picture.cb, reference.picture.cb);
+                assert_eq!(frame.picture.cr, reference.picture.cr);
+                if let Some(end) = previous_end {
+                    assert_eq!(
+                        end, frame.presentation_time.ticks,
+                        "sample {}",
+                        frame.sample_index
+                    );
+                }
+                previous_end = Some(frame.presentation_time.ticks + frame.duration.ticks);
             }
-            previous_end = Some(frame.presentation_time.ticks + frame.duration.ticks);
+            assert!(source.read_frame().unwrap().is_none());
+            source.rewind();
         }
-        assert!(source.read_frame().unwrap().is_none());
-        source.rewind();
     }
 }
 
@@ -164,35 +169,40 @@ fn eos_playback_preserves_pixels_timestamps_and_rewind() {
 fn eos_native_seek_matches_the_output_timeline() {
     use fvid::playback_native::NativeReader;
     use std::time::Duration;
-    let file = include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4");
-    let mut reader = NativeReader::software(Cursor::new(file), 32 << 20).unwrap();
-    let mut frames = Vec::new();
-    while reader.read_frame().unwrap() {
-        frames.push((reader.frame_interval().unwrap(), reader.rgb().to_vec()));
-    }
-    assert_eq!(frames.len(), 14);
-    // Probe both sides of frame boundaries and the interval extended across
-    // suppressed RASL samples, alternating forward and backward seeks.
-    for millis in [
-        0, 566, 100, 533, 166, 500, 199, 433, 200, 400, 233, 399, 266, 350, 267, 334, 299, 333,
-        300, 332,
+    for file in [
+        include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4")
+            .as_slice(),
+        include_bytes!("fixtures/playback-errors/hevc-bla-w-lp-synthetic.mp4").as_slice(),
     ] {
-        let expected = frames
-            .iter()
-            .find(|((start, end, scale), _)| {
-                *start * 1000 <= u128::from(millis) * u128::from(*scale)
-                    && *end * 1000 > u128::from(millis) * u128::from(*scale)
-            })
-            .unwrap();
-        reader.seek(Duration::from_millis(millis)).unwrap();
-        assert_eq!(
-            reader.frame_interval().unwrap(),
-            expected.0,
-            "seek {millis}"
-        );
-        assert_eq!(reader.rgb(), expected.1, "seek {millis}");
+        let mut reader = NativeReader::software(Cursor::new(file), 32 << 20).unwrap();
+        let mut frames = Vec::new();
+        while reader.read_frame().unwrap() {
+            frames.push((reader.frame_interval().unwrap(), reader.rgb().to_vec()));
+        }
+        assert_eq!(frames.len(), 14);
+        // Probe both sides of frame boundaries and the interval extended across
+        // suppressed RASL samples, alternating forward and backward seeks.
+        for millis in [
+            0, 566, 100, 533, 166, 500, 199, 433, 200, 400, 233, 399, 266, 350, 267, 334, 299, 333,
+            300, 332,
+        ] {
+            let expected = frames
+                .iter()
+                .find(|((start, end, scale), _)| {
+                    *start * 1000 <= u128::from(millis) * u128::from(*scale)
+                        && *end * 1000 > u128::from(millis) * u128::from(*scale)
+                })
+                .unwrap();
+            reader.seek(Duration::from_millis(millis)).unwrap();
+            assert_eq!(
+                reader.frame_interval().unwrap(),
+                expected.0,
+                "seek {millis}"
+            );
+            assert_eq!(reader.rgb(), expected.1, "seek {millis}");
+        }
+        reader.rewind().unwrap();
+        assert!(reader.read_frame().unwrap());
+        assert_eq!(reader.rgb(), frames[0].1);
     }
-    reader.rewind().unwrap();
-    assert!(reader.read_frame().unwrap());
-    assert_eq!(reader.rgb(), frames[0].1);
 }

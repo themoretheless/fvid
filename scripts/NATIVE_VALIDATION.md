@@ -1342,3 +1342,23 @@ The generator is offline and tests consume authored files only. BLA and SEI
 activation need separate qualification; this does not claim every CVS rule or
 layered profile implemented. H.265 7.4.2.4.2 defines active VPS lifetime:
 https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201802-S%21%21PDF-E&lang=e&type=items
+
+
+### HEVC BLA starts a fresh reference buffer
+
+The own `hevc-bla-w-lp-synthetic.mp4` changes the first CRA header of the
+authored open-GOP seed to BLA_W_LP while preserving slice bits and picture
+samples. Its legal leading RASL pictures must be suppressed. The decoder
+previously kept reference pictures with POC 0, 4 and 2 after BLA POC 8; a
+private-state regression reproduced that exact DPB failure. IRAP pictures with
+NoRaslOutputFlag now clear prior stored references before constructing RPS
+lists, including BLA even when parsed RPS syntax lists prior unused pictures.
+
+Acceptance compares all 14 retained pictures with the unchanged authored
+source, exact sample timestamps and continuous intervals through rewind, and
+checks native seek at 20 forward/backward boundary positions. VPS update
+acceptance also includes BLA followed by its own remaining inter pictures.
+Generate separately using `python3 scripts/generate_hevc_eos_fixtures.py`;
+ordinary tests use checked-in own video only. BLA_W_RADL/BLA_N_LP, SEI activation
+and layered tools remain separate qualification work. H.265 reference marking:
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202601-I%21%21PDF-E&lang=f&type=items

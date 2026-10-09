@@ -249,6 +249,10 @@ fn changed_vps_is_accepted_at_idr_and_post_eos_cra() {
                 .as_slice(),
             5,
         ),
+        (
+            include_bytes!("fixtures/playback-errors/hevc-bla-w-lp-synthetic.mp4").as_slice(),
+            5,
+        ),
     ] {
         let mut r = Mp4Reader::open(Cursor::new(bytes), Limits::default()).unwrap();
         let config = &r.tracks()[0].configuration;
