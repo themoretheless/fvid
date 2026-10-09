@@ -1,0 +1,181 @@
+{
+  "cases": [
+    {
+      "name": "explicit",
+      "asc": "2b098c00",
+      "frames": [
+        {
+          "offset": 4,
+          "bytes": 16
+        },
+        {
+          "offset": 24,
+          "bytes": 13
+        },
+        {
+          "offset": 42,
+          "bytes": 13
+        },
+        {
+          "offset": 60,
+          "bytes": 17
+        },
+        {
+          "offset": 81,
+          "bytes": 13
+        },
+        {
+          "offset": 98,
+          "bytes": 12
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-ssr-sbr-explicit-synthetic.mp4",
+        "sha256": "5c4e907f0a2df77a0d8fec010caf9c6390b57489cf07f9f6117366652abd54c7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098c00",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "sync",
+      "asc": "1b0856e598",
+      "frames": [
+        {
+          "offset": 4,
+          "bytes": 16
+        },
+        {
+          "offset": 24,
+          "bytes": 13
+        },
+        {
+          "offset": 42,
+          "bytes": 13
+        },
+        {
+          "offset": 60,
+          "bytes": 17
+        },
+        {
+          "offset": 81,
+          "bytes": 13
+        },
+        {
+          "offset": 98,
+          "bytes": 12
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-ssr-sbr-sync-synthetic.mp4",
+        "sha256": "946dba882984087ee4e381d3ca68c542806f68b53c2e4cf1ff276950397719bc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0856e598",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "implicit",
+      "asc": "1b08",
+      "frames": [
+        {
+          "offset": 4,
+          "bytes": 16
+        },
+        {
+          "offset": 24,
+          "bytes": 13
+        },
+        {
+          "offset": 42,
+          "bytes": 13
+        },
+        {
+          "offset": 60,
+          "bytes": 17
+        },
+        {
+          "offset": 81,
+          "bytes": 13
+        },
+        {
+          "offset": 98,
+          "bytes": 12
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-ssr-sbr-implicit-synthetic.mp4",
+        "sha256": "0ec71bcfe37a1d79f9f13d7e6910ee47b8d206d631d4b11274519aa94bdf4c95",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b08",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "core-control",
+      "asc": "1b08",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 4
+        },
+        {
+          "offset": 20,
+          "bytes": 4
+        },
+        {
+          "offset": 37,
+          "bytes": 5
+        },
+        {
+          "offset": 55,
+          "bytes": 5
+        },
+        {
+          "offset": 77,
+          "bytes": 4
+        },
+        {
+          "offset": 94,
+          "bytes": 4
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-sbr-core-control-synthetic.mp4",
+        "sha256": "55cbc732cb286cd5e136a1152804511f3fa263272b5897a20ac47063ab2e41f9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b08",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    }
+  ],
+  "provenance": "Own silent SSR SCE across long/start/short/stop transitions; existing authored SBR syntax and owned AVC/container seeds. No private media, external codec or network."
+}

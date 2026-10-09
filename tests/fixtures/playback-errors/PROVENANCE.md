@@ -2647,3 +2647,16 @@ active prediction is exercised. All three oracle artifacts regenerate identicall
 This qualifies this authored composition, not all Main/SBR tools or geometries.
 ISO/IEC 14496-3 subpart 1 Table 1.2 permits Main (AOT1)
 with SBR. SSR and other unimplemented core families remain explicit gaps.
+
+### SSR + SBR transition reproducer — 2026-10-09
+
+`generate_aac_ssr_sbr_fixtures.py` authors silent SSR SCE0 across the six window
+sequences long/start/short/short/stop/long, paired with already authored SBR
+noise syntax. It writes explicit, sync and implicit-clock MP4 videos, a valid
+SSR-only control video and packet/manifest files. No private material, external
+codec or network. All six artifacts regenerate identically.
+`tests/aac_ssr_sbr.rs` verifies that the control decodes to exactly 6144 silent
+core samples, while all three extension variants refuse for the exact SSR SBR
+synthesis gap. That is a passing reproduction/refusal test, not acceptance.
+The ignored intended-playback test is explicitly red when run with `--ignored`.
+Enable it and replace the old refusal expectation with the actual SSR/SBR fix.

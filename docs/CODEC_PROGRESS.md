@@ -7969,3 +7969,20 @@ FFmpeg/network. Measured maximum absolute full-composition PCM difference is
 The stricter 1e-9 and 2e-8 trials failed; they are not claimed as passed.
 All 14 existing/new encoded and oracle artifacts regenerated identically;
 `git diff --check` passed. Production code did not change in this oracle step.
+
+### 2026-10-09 — SSR + SBR alignment gap reproduced
+
+Own six-frame SSR window transitions with explicit/sync/implicit-clock SBR now
+have companion videos and a valid SSR-only control. The control produces 6144
+silent samples. All SBR variants reproduce the exact `AAC SSR SBR synthesis is
+not implemented` diagnostic; ordinary offline reproduction passes, intended
+playback acceptance remains ignored and explicitly fails when requested.
+This is diagnostic progress, not implementation or successful SSR/SBR playback.
+
+The next implementation must preserve SBR frame metadata through SSR's bounded
+PCM alignment queue: SSR long/start/short/stop synthesis outputs variable internal
+extents, while a timed SBR access unit consumes exactly 1024 core samples.
+Pending SBR metadata must follow the aligned frame stamp, including checkpoint,
+rewind, delayed return and EOF drain, before broadening discovery/admission.
+Simply removing the profile guard or feeding unaligned PCM is insufficient.
+Six authored artifacts regenerate identically; no FFmpeg/network/test-time generator.
