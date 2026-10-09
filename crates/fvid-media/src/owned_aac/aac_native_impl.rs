@@ -38,6 +38,8 @@ struct SsrPacketMetadata {
 }
 #[derive(Clone)]
 struct SsrSbrMetadata {
+    // Discovery candidates advance DSP but publish the original core PCM.
+    active: bool,
     output_rate: u32,
     groups: Vec<(usize, usize, Option<sbr_history::Frame>)>,
     mapping: Vec<usize>,
@@ -72,7 +74,7 @@ fn render_ssr_sbr(
             }
         }
     }
-    pcm.samples=expanded;
+    if metadata.active {pcm.samples=expanded;}
     Ok(pcm)
 }
 fn render_ssr_sources(
@@ -126,6 +128,7 @@ fn render_ssr_sources(
         .ok_or_else(|| invalid("SSR separated sources require SBR metadata"))?;
     let couplings = extension.couplings.clone();
     let output_rate = extension.output_rate;
+    let active = extension.active;
     let mut core = vec![0.0; 1024 * channels];
     for channel in 0..channels {
         let samples: Vec<_> = frame.lanes[channel]
@@ -155,11 +158,12 @@ fn render_ssr_sources(
     } else {
         sbr_dsp::OutputRate::Double
     };
-    let ratio = if mode == sbr_dsp::OutputRate::Core {
+    let dsp_ratio = if mode == sbr_dsp::OutputRate::Core {
         1
     } else {
         2
     };
+    let ratio = if active {dsp_ratio} else {1};
     let rate = core_rate
         .checked_mul(2)
         .ok_or_else(|| invalid("SBR frequency overflow"))?;
@@ -186,13 +190,13 @@ fn render_ssr_sources(
             state.dsp.process_upsampling(&[&core], rate, 16, mode)
         }
         .map_err(|e| invalid(&e.0))?;
-        if rendered.len() != 1 || rendered[0].len() != 1024 * ratio {
+        if rendered.len() != 1 || rendered[0].len() != 1024 * dsp_ratio {
             return Err(invalid("SSR SBR coupling output length mismatch"));
         }
         let mut row = 0;
         for chunk in chunks {
             for _ in 0..chunk.samples.len() * ratio {
-                let sample = rendered[0][row] as f32;
+                let sample = if active {rendered[0][row] as f32} else {core[row]};
                 if !sample.is_finite() {
                     return Err(invalid("SSR SBR coupling PCM exceeds finite output"));
                 }
@@ -763,18 +767,26 @@ impl NativeAacDecoder {
                     }
                     gains.push(outputs);
                 }
-                let separate=self.ssr_source_alignment || (sbr_rate.is_some() && !tags.is_empty());
+                // Timed discovery must warm each unmixed source before the first
+                // FIL. Retain the caller's core PCM until SBR becomes active.
+                let candidate_rate=sbr_rate.or_else(|| {
+                    if self.detect_sbr && (self.ssr_fixed_clock || duration==u64::from(self.config.frame_samples)) {
+                        self.sbr_detection_rate.or_else(||self.config.sample_rate.checked_mul(2))
+                    } else {None}
+                });
+                let separate=self.ssr_source_alignment || (candidate_rate.is_some() && !tags.is_empty());
                 if separate {
                     // Mixed alignment already retains each unmixed source and
                     // its gains. Upgrade without dropping or rebuilding it.
                     self.ssr_source_alignment=true;
                 }
-                let metadata=SsrPacketMetadata {duration,sbr:sbr_rate.map(|output_rate|SsrSbrMetadata {
+                let metadata=SsrPacketMetadata {duration,sbr:candidate_rate.map(|output_rate|SsrSbrMetadata {
+                    active:sbr_rate.is_some(),
                     output_rate, mapping:self.mapping.clone(),
                     groups:decoded_elements.iter().map(|&(kind,_,offset)|(offset,if kind==1 {2} else {1},sbr_frames[offset].clone())).collect(),
                     couplings:tags.iter().map(|&tag|(tag,sbr_frames[channels.len()+usize::from(tag)].clone())).collect(),
                 })};
-                let needs_alignment = separate || lanes.iter().any(|lane| lane.len() != n);
+                let needs_alignment = separate || candidate_rate.is_some() || lanes.iter().any(|lane| lane.len() != n);
                 if self.ssr_alignment.is_none() && needs_alignment {
                     self.ssr_alignment = Some(SsrPcmAlignment::new(channels.len(), lanes.len())?);
                     self.ssr_alignment_tags = tags.clone();

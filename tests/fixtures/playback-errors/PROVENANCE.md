@@ -2765,3 +2765,33 @@ continuity refusal. Acceptance now runs scalar PCM, checkpoint/error/reset
 and EOF, and player rewind/seek on both sides of the transition. This isolates
 source-queue transition with a zero core prefix; it does not qualify nonzero
 QMF history before the first FIL. No private/foreign codec data is copied.
+
+
+### Nonzero SSR pre-FIL QMF history — 2026-10-09
+
+The owned late-FIL generator now includes nonzero direct SCE and independent
+CCE programs, each with a core-only control. Before the fix the CCE program
+failed at sample 3072: native output was zero versus the independent scalar
+expectation 0.0003223548776518015. The core control remains bit-exact.
+
+Timed implicit SSR discovery now carries warm-only metadata and uses the
+source-preserving queue before the first FIL. QMF analysis, low-delay and
+synthesis advance for every aligned source, with the candidate output clock;
+only original core PCM and original gains are published until FIL arrives.
+Header initialization therefore retains nonzero pre-FIL history. Target-only
+streams use the same aligned warm-up path. The untimed variable-length core
+API remains unchanged outside timed discovery.
+
+The reference extends the independent direct convolution oracle to 32 low
+bands during the three-frame prefix, followed by authored 10/27-band SBR
+with noise phase starting at FIL. Prefix PCM is original core output, not
+QMF output. Four prior Main/SSR scalar references regenerate bit-identically.
+Enabled acceptance compares the full waveform and additionally covers
+checkpoint/invalid-packet rollback, reset, EOF, player rewind and seek on
+both sides of the FIL boundary. The nine late-FIL artifacts regenerate
+identically without any external codec, FFmpeg or network access.
+
+This qualifies the authored six-frame, 24 kHz, 1024-tick direct SCE and unit
+independent CCE programs. Arbitrary late rate changes, untimed variable-length
+discovery, source retirement, SSR PS and wider codec profiles/tools remain
+open; this fixture qualification is not complete codec conformance.

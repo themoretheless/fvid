@@ -873,5 +873,8 @@ SSR PS, arbitrary source switching/retirement and wider tools remain separate.
 
 A late-FIL CCE video with a zero core prefix now qualifies mixed-to-source
 queue upgrade without dropping pending PCM, including checkpoint/reset/EOF
-and player seek across the boundary. Nonzero pre-FIL QMF history is still
-unqualified; this example does not establish general late-SBR conformance.
+and player seek across the boundary. The additional nonzero SCE/CCE programs
+now qualify pre-FIL QMF history at a fixed 24 kHz clock: each aligned source
+is analyzed and synthesized before FIL, while the published prefix remains
+bit-exact core PCM. This does not establish arbitrary late rate changes,
+untimed variable-length SSR discovery, PS or source retirement.

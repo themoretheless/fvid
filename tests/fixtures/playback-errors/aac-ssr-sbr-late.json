@@ -87,8 +87,184 @@
         "pcm_offset": 0,
         "samples": 6144
       }
+    },
+    {
+      "name": "core-control-active",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 293,
+          "bytes": 62
+        },
+        {
+          "offset": 355,
+          "bytes": 66
+        },
+        {
+          "offset": 421,
+          "bytes": 124
+        },
+        {
+          "offset": 545,
+          "bytes": 124
+        },
+        {
+          "offset": 669,
+          "bytes": 67
+        },
+        {
+          "offset": 736,
+          "bytes": 62
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ssr-sbr-late-core-control-active-synthetic.mp4",
+        "sha256": "cb5182a45ff4fc8d9a0b06ec145b483ec9d55dcc82073badd5778825e2152ba2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "late-active",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 798,
+          "bytes": 62
+        },
+        {
+          "offset": 860,
+          "bytes": 66
+        },
+        {
+          "offset": 926,
+          "bytes": 124
+        },
+        {
+          "offset": 1050,
+          "bytes": 136
+        },
+        {
+          "offset": 1186,
+          "bytes": 76
+        },
+        {
+          "offset": 1262,
+          "bytes": 70
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ssr-sbr-late-late-active-synthetic.mp4",
+        "sha256": "2caa2f7e889bc59fba1edaf8bcf539c95f6d70e46cf5a4ed8182d11d7e91cec3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "core-control-active-target",
+      "asc": "1b00098400000000",
+      "frames": [
+        {
+          "offset": 1332,
+          "bytes": 54
+        },
+        {
+          "offset": 1386,
+          "bytes": 57
+        },
+        {
+          "offset": 1443,
+          "bytes": 108
+        },
+        {
+          "offset": 1551,
+          "bytes": 108
+        },
+        {
+          "offset": 1659,
+          "bytes": 58
+        },
+        {
+          "offset": 1717,
+          "bytes": 54
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ssr-sbr-late-core-control-active-target-synthetic.mp4",
+        "sha256": "b6503f55cf1504d694331654086502ac8d23b89df66114f562a1725970a77782",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b00098400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "late-active-target",
+      "asc": "1b00098400000000",
+      "frames": [
+        {
+          "offset": 1771,
+          "bytes": 54
+        },
+        {
+          "offset": 1825,
+          "bytes": 57
+        },
+        {
+          "offset": 1882,
+          "bytes": 108
+        },
+        {
+          "offset": 1990,
+          "bytes": 120
+        },
+        {
+          "offset": 2110,
+          "bytes": 67
+        },
+        {
+          "offset": 2177,
+          "bytes": 62
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ssr-sbr-late-late-active-target-synthetic.mp4",
+        "sha256": "6d0cced89ec95d8a8e4df97e665b8ad5809dc37755cd115ecde128f0c32a29cf",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b00098400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
     }
   ],
   "first_sbr_packet": 3,
-  "provenance": "Own silent SSR SCE0/CCE1 with independent unit gain; SBR CCE noise starts at packet 3 after valid header. No private/foreign media."
+  "provenance": "Own silent/nonzero SSR SCE0 and optional CCE1 with independent unit gain; valid SBR FIL starts at packet 3. Active scalar reference includes full 32-band pre-FIL analysis and synthesis history, then fixed authored HF/noise. No private/foreign media."
 }

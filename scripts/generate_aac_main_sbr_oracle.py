@@ -38,18 +38,20 @@ def patch_sources():
     assert patches==[(2,10,8),(2,18,7)]
     return {target+i:source+i for source,target,width in patches for i in range(width)}
 
-def reference(prediction=True, pcm_override=None, bands=64):
+def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0):
     assert bands in (32,64)
+    assert 0 <= first_sbr_frame < 6
+    width = 32 if first_sbr_frame else 10
     source=Path(__file__).resolve().parents[1]/'crates/fvid-media/src/owned_aac/aac_sbr_qmf_window.rs'
     window=[float(x) for x in re.findall(r'-?\d+\.\d+',source.read_text().split('= [',1)[1])]
     noise_bytes=(DEST/'aac-sbr-noise-protocol.f64le').read_bytes()
     noise=[complex(*struct.unpack_from('<dd',noise_bytes,16*i)) for i in range(512)]
     pcm=core(prediction) if pcm_override is None else pcm_override;analysis=[]
     assert len(pcm)==6144
-    factors=[[window[2*lag]*complex(math.cos(math.pi*(b+.5)*(2*(lag%64)-.5)/64),math.sin(math.pi*(b+.5)*(2*(lag%64)-.5)/64))*65536 for lag in range(320)] for b in range(10)]
+    factors=[[window[2*lag]*complex(math.cos(math.pi*(b+.5)*(2*(lag%64)-.5)/64),math.sin(math.pi*(b+.5)*(2*(lag%64)-.5)/64))*65536 for lag in range(320)] for b in range(width)]
     for last in range(31,len(pcm),32):
-        analysis.append([complex(math.fsum(pcm[last-lag]*factors[b][lag].real for lag in range(min(320,last+1))),math.fsum(pcm[last-lag]*factors[b][lag].imag for lag in range(min(320,last+1)))) for b in range(10)])
-    delayed=[[0j]*10 for _ in range(6)]+analysis
+        analysis.append([complex(math.fsum(pcm[last-lag]*factors[b][lag].real for lag in range(min(320,last+1))),math.fsum(pcm[last-lag]*factors[b][lag].imag for lag in range(min(320,last+1)))) for b in range(width)])
+    delayed=[[0j]*width for _ in range(6)]+analysis
     # Figure 4.48 gives 8-band and 7-band patches. The final two-band
     # patch at 25 is discarded; unpatched bands still receive envelope noise.
     mapping=patch_sources()
@@ -57,6 +59,9 @@ def reference(prediction=True, pcm_override=None, bands=64):
     levels=[];rows=[];history=[]
     for frame in range(6):
         low=delayed[frame*32:frame*32+32]
+        if frame < first_sbr_frame:
+            rows.extend(low)
+            continue
         high=[[r[mapping[k]] if k in mapping else 0j for k in range(10,27)] for r in low]
         energy=[math.fsum(abs(r[k])**2 for r in high)/32 for k in range(17)]
         gains=[math.sqrt(128/(1.5*(1+e))) for e in energy];q=[math.sqrt(128/3)]*17
@@ -69,10 +74,12 @@ def reference(prediction=True, pcm_override=None, bands=64):
         if not history:history=[level]*4
         for t,r in enumerate(high):
             sequence=history+[level];blended=[tuple(math.fsum(weights[j]*sequence[-1-j][k][p] for j in range(5)) for p in range(2)) for k in range(17)]
-            row=low[t]+[blended[k][0]*r[k]+blended[k][1]*noise[((frame*32+t)*17+k+1)%512] for k in range(17)]
+            row=low[t][:10]+[blended[k][0]*r[k]+blended[k][1]*noise[(((frame-first_sbr_frame)*32+t)*17+k+1)%512] for k in range(17)]
+            if first_sbr_frame: row += [0j]*5
             rows.append(row);history=(history+[level])[-4:]
-    terms=[[[window[(64//bands)*(bands*lag+k)]*complex(math.cos(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)),math.sin(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)))/64 for b in range(27)] for k in range(bands)] for lag in range(10)]
-    output=[math.fsum((rows[t-lag][b]*terms[lag][k][b]).real for lag in range(min(10,t+1)) for b in range(27))/32768 for t in range(192) for k in range(bands)]
+    synthesis_width = 32 if first_sbr_frame else 27
+    terms=[[[window[(64//bands)*(bands*lag+k)]*complex(math.cos(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)),math.sin(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)))/64 for b in range(synthesis_width)] for k in range(bands)] for lag in range(10)]
+    output=[math.fsum((rows[t-lag][b]*terms[lag][k][b]).real for lag in range(min(10,t+1)) for b in range(synthesis_width))/32768 for t in range(192) for k in range(bands)]
     return output
 
 def main():

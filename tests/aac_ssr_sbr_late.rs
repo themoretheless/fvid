@@ -46,50 +46,52 @@ fn late_sbr_cce_pcm_acceptance() {
 fn late_sbr_transition_checkpoint_replay_and_reset_keep_pending_core_and_sbr() {
     use fvid_media::owned_aac::NativeAacDecoder;
     let m = manifest();
-    let case = &m["cases"][1];
-    let asc: Vec<u8> = case["asc"]
-        .as_str()
-        .unwrap()
-        .as_bytes()
-        .chunks_exact(2)
-        .map(|s| u8::from_str_radix(std::str::from_utf8(s).unwrap(), 16).unwrap())
-        .collect();
-    let blob = include_bytes!("fixtures/playback-errors/aac-ssr-sbr-late-packets.bin");
-    let mut decoder = NativeAacDecoder::new_with_output_rate(&asc, 24000).unwrap();
-    let mut expected = Vec::new();
-    fvid::native_media::decode_mp4_aac_pcm(&video(case), &mut expected).unwrap();
-    for replay in 0..2 {
-        if replay > 0 {
-            decoder.reset();
-        }
-        let mut pcm = Vec::new();
-        for (i, row) in case["frames"].as_array().unwrap().iter().enumerate() {
-            let at = row["offset"].as_u64().unwrap() as usize;
-            let end = at + row["bytes"].as_u64().unwrap() as usize;
+    for index in [1, 3, 5] {
+        let case = &m["cases"][index];
+        let asc: Vec<u8> = case["asc"]
+            .as_str()
+            .unwrap()
+            .as_bytes()
+            .chunks_exact(2)
+            .map(|s| u8::from_str_radix(std::str::from_utf8(s).unwrap(), 16).unwrap())
+            .collect();
+        let blob = include_bytes!("fixtures/playback-errors/aac-ssr-sbr-late-packets.bin");
+        let mut decoder = NativeAacDecoder::new_with_output_rate(&asc, 24000).unwrap();
+        let mut expected = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&video(case), &mut expected).unwrap();
+        for replay in 0..2 {
+            if replay > 0 {
+                decoder.reset();
+            }
+            let mut pcm = Vec::new();
+            for (i, row) in case["frames"].as_array().unwrap().iter().enumerate() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let end = at + row["bytes"].as_u64().unwrap() as usize;
+                let saved = decoder.checkpoint();
+                assert!(decoder.decode_timed(&[], i as i64 * 1024, 1024).is_err());
+                let first = decoder
+                    .decode_timed(&blob[at..end], i as i64 * 1024, 1024)
+                    .unwrap();
+                decoder.restore(&saved).unwrap();
+                let again = decoder
+                    .decode_timed(&blob[at..end], i as i64 * 1024, 1024)
+                    .unwrap();
+                assert_eq!(first, again);
+                if let Some(frame) = again {
+                    assert_eq!(frame.pts, (pcm.len() / 4) as i64);
+                    pcm.extend(frame.samples.iter().flat_map(|s| s.to_le_bytes()));
+                }
+            }
             let saved = decoder.checkpoint();
-            assert!(decoder.decode_timed(&[], i as i64 * 1024, 1024).is_err());
-            let first = decoder
-                .decode_timed(&blob[at..end], i as i64 * 1024, 1024)
-                .unwrap();
+            let tail = decoder.finish().unwrap();
             decoder.restore(&saved).unwrap();
-            let again = decoder
-                .decode_timed(&blob[at..end], i as i64 * 1024, 1024)
-                .unwrap();
-            assert_eq!(first, again);
-            if let Some(frame) = again {
-                assert_eq!(frame.pts, (pcm.len() / 4) as i64);
+            assert_eq!(decoder.finish().unwrap(), tail);
+            if let Some(frame) = tail {
                 pcm.extend(frame.samples.iter().flat_map(|s| s.to_le_bytes()));
             }
+            assert!(decoder.finish().unwrap().is_none());
+            assert_eq!(pcm, expected);
         }
-        let saved = decoder.checkpoint();
-        let tail = decoder.finish().unwrap();
-        decoder.restore(&saved).unwrap();
-        assert_eq!(decoder.finish().unwrap(), tail);
-        if let Some(frame) = tail {
-            pcm.extend(frame.samples.iter().flat_map(|s| s.to_le_bytes()));
-        }
-        assert!(decoder.finish().unwrap().is_none());
-        assert_eq!(pcm, expected);
     }
 }
 
@@ -123,20 +125,54 @@ fn late_sbr_player_seek_on_both_sides_of_transition_preserves_pcm() {
         }
         pcm
     }
-    let data = video(&manifest()["cases"][1]);
-    let mut expected = Vec::new();
-    fvid::native_media::decode_mp4_aac_pcm(&data, &mut expected).unwrap();
-    let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
-        std::io::Cursor::new(&data),
-        Default::default(),
-    )
-    .unwrap();
-    assert_eq!(reader.sample_rate(), 24000);
-    assert_eq!(play(&mut reader), expected);
-    reader.rewind();
-    assert_eq!(play(&mut reader), expected);
-    for target in [1100, 3072, 4300, 6144] {
-        let landed = reader.seek_to(target);
-        assert_eq!(play(&mut reader), expected[landed as usize * 4..]);
+    for index in [1, 3, 5] {
+        let data = video(&manifest()["cases"][index]);
+        let mut expected = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&data, &mut expected).unwrap();
+        let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+            std::io::Cursor::new(&data),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(reader.sample_rate(), 24000);
+        assert_eq!(play(&mut reader), expected);
+        reader.rewind();
+        assert_eq!(play(&mut reader), expected);
+        for target in [1100, 3072, 4300, 6144] {
+            let landed = reader.seek_to(target);
+            assert_eq!(play(&mut reader), expected[landed as usize * 4..]);
+        }
+    }
+}
+
+#[test]
+fn late_sbr_nonzero_prefix_preserves_independent_qmf_history() {
+    let m = manifest();
+    for (control_index, late_index) in [(2, 3), (4, 5)] {
+        let mut control = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&video(&m["cases"][control_index]), &mut control)
+            .unwrap();
+        let core =
+            include_bytes!("fixtures/playback-errors/aac-ssr-sbr-active-core-reference.f32le");
+        assert_eq!(control, core);
+        assert!(
+            control
+                .chunks_exact(4)
+                .any(|s| f32::from_le_bytes(s.try_into().unwrap()).abs() > 1e-8)
+        );
+        let mut pcm = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&video(&m["cases"][late_index]), &mut pcm).unwrap();
+        let gold =
+            include_bytes!("fixtures/playback-errors/aac-ssr-sbr-late-active-reference.f64le");
+        assert_eq!(pcm.len(), 6144 * 4);
+        assert_eq!(&pcm[..3072 * 4], &control[..3072 * 4]);
+        for (i, (sample, gold)) in pcm.chunks_exact(4).zip(gold.chunks_exact(8)).enumerate() {
+            let sample = f32::from_le_bytes(sample.try_into().unwrap()) as f64;
+            let gold = f64::from_le_bytes(gold.try_into().unwrap());
+            assert!(
+                (sample - gold).abs() < 1e-9,
+                "sample {i}: {sample} vs {gold}"
+            );
+        }
     }
 }
