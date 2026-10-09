@@ -1,6 +1,6 @@
 //! ADTS raw-block and multiplexed-header error protection (ISO/IEC 13818-7 §8.1.1.1).
 //! Uses the owned syntax readers; no PCM synthesis or predictor state is changed.
-use super::{Result, bits::BitReader, config::AacConfig, invalid};
+use super::{bits::BitReader, config::AacConfig, invalid, Result};
 
 /// A protected bit span, zero padded after `end` to `width` bits.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -13,13 +13,18 @@ pub struct Region {
 /// Ordered raw-block protection spans. Element IDs and ID_END are excluded.
 /// CPE's second ICS intentionally overlaps the first 192-bit region.
 pub fn regions(payload: &[u8], configuration: &[u8]) -> Result<Vec<Region>> {
-    scan(payload, configuration).map(|(regions, _)| regions)
+    scan(payload, configuration, false).map(|(regions, _, _)| regions)
 }
 
-fn scan(payload: &[u8], configuration: &[u8]) -> Result<(Vec<Region>, usize)> {
+fn scan(
+    payload: &[u8],
+    configuration: &[u8],
+    inspect_sbr: bool,
+) -> Result<(Vec<Region>, usize, bool)> {
     let config = AacConfig::parse(configuration)?;
     let mut bits = BitReader::new(payload);
     let mut regions = Vec::new();
+    let mut has_sbr = false;
     loop {
         let kind = bits.read(3)?;
         let start = bits.position();
@@ -42,13 +47,20 @@ fn scan(payload: &[u8], configuration: &[u8]) -> Result<(Vec<Region>, usize)> {
                 super::aac_pce::ProgramConfig::read(&mut bits, 0)?;
             }
             6 => {
-                // FIL is not ADTS protected; its count still bounds the next element.
-                let mut count = bits.read(4)? as usize;
-                if count == 15 {
-                    count += bits.read(8)? as usize;
-                    count -= 1;
+                if inspect_sbr {
+                    super::aac_pce::read_fill(&mut bits, |input, end, _| {
+                        has_sbr = true;
+                        input.skip(end - input.position())
+                    })?;
+                } else {
+                    // FIL is not ADTS protected; its count still bounds the next element.
+                    let mut count = bits.read(4)? as usize;
+                    if count == 15 {
+                        count += bits.read(8)? as usize;
+                        count -= 1;
+                    }
+                    bits.skip(count * 8)?;
                 }
-                bits.skip(count * 8)?;
             }
             7 => break,
             _ => unreachable!(),
@@ -70,13 +82,19 @@ fn scan(payload: &[u8], configuration: &[u8]) -> Result<(Vec<Region>, usize)> {
             }
         }
     }
-    Ok((regions, bits.position().div_ceil(8)))
+    Ok((regions, bits.position().div_ceil(8), has_sbr))
 }
 
 /// Byte extent through ID_END and raw-block byte alignment. Needed when an
 /// unprotected ADTS transport frame multiplexes several variable-length blocks.
 pub fn raw_block_bytes(payload: &[u8], configuration: &[u8]) -> Result<usize> {
-    scan(payload, configuration).map(|(_, bytes)| bytes)
+    scan(payload, configuration, false).map(|(_, bytes, _)| bytes)
+}
+
+/// Locate a bounded SBR FIL without synthesizing PCM. The caller must validate
+/// the candidate SBR data before publishing a negotiated output clock.
+pub fn has_sbr_fill(payload: &[u8], configuration: &[u8]) -> Result<bool> {
+    scan(payload, configuration, true).map(|(_, _, sbr)| sbr)
 }
 
 fn bit(crc: u16, value: bool) -> u16 {

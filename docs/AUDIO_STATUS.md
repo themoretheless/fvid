@@ -654,3 +654,25 @@ These short fixture measurements show AAC headroom on this machine; they are not
 before/after end-to-end speedup numbers, video FPS, a virtual-camera delivery test,
 or a guarantee for all input streams. Correctness remains covered separately by
 the saved PCM and direct-transform reference tests.
+
+
+### ADTS multichannel and implicit SBR clock qualification
+
+The authored `adts-layout-sbr` matrix contains 28 companion MP4 videos and
+56 protected/unprotected ADTS streams: indexed and PCE 5.1/7.1 with LFE,
+implicit mono/stereo SBR, and SBR arriving after the first core packet.
+Each stream multiplexes two, three, four, or varying raw blocks per transport
+frame. Independent scalar PCM qualifies the four LC layouts; own MP4 PCM
+qualifies transport equivalence, output length, intervals, rewind and seek.
+
+A regression reproduced the player reporting 24 kHz for 48 kHz SBR output.
+The reader now locates and validates an SBR candidate before publishing its
+output rate, and rescales packet timestamps and seek/preroll boundaries into
+that output clock. This is selected fixture qualification, not complete AAC
+profile or SBR/PS conformance.
+
+Generator: `scripts/generate_adts_layout_sbr_fixtures.py`; sources are authored
+synthetic AAC and AVC/container seeds. No private media or parameters are
+copied. CRC values use independent polynomial division and the own offline
+region helper. Ordinary tests only read saved fixtures; generation and tests
+use neither FFmpeg/libav nor network access.

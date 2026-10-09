@@ -1,9 +1,9 @@
 //! Audio playback adapter for the owned ADTS container reader.
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
+pub use crate::container::adts::{esds_for, header, Aac, Frame, Header, Limits, TAG};
 use crate::Result;
 use std::io::Read;
 use std::time::Duration;
-pub use crate::container::adts::{Aac, Frame, Header, Limits, TAG, esds_for, header};
 
 /// A `.aac` file read as an audio track.
 pub struct AacAudioReader {
@@ -11,6 +11,7 @@ pub struct AacAudioReader {
     extra_data: Vec<u8>,
     packet: usize,
     presentation_floor: u64,
+    output_rate: u32,
 }
 
 impl AacAudioReader {
@@ -22,12 +23,34 @@ impl AacAudioReader {
         reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
         let aac = Aac::parse(&bytes, &limits)?;
         let extra_data = aac.extra_data();
+        let mut output_rate = aac.sample_rate;
+        let parsed = crate::codec::config::AudioSpecificConfig::parse(&aac.configuration)?;
+        if parsed.core.object_type == 2 && parsed.sbr_present.is_none() {
+            for i in 0..aac.packets() {
+                if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)
+                    .map_err(|e| crate::invalid(&e.0))?
+                {
+                    let mut probe =
+                        crate::codec::aac_native::NativeAacDecoder::new_with_sbr_detection(
+                            &aac.configuration,
+                        )?;
+                    probe.decode(aac.packet(i))?;
+                    output_rate = probe.sample_rate();
+                    break;
+                }
+            }
+        }
         Ok(Self {
             aac,
             extra_data,
             packet: 0,
             presentation_floor: 0,
+            output_rate,
         })
+    }
+
+    fn clock_ratio(&self) -> u64 {
+        u64::from(self.output_rate / self.aac.sample_rate)
     }
 
     /// The file's own shape, for a caller that wants to say what it opened.
@@ -37,12 +60,24 @@ impl AacAudioReader {
 }
 
 impl AudioStream for AacAudioReader {
-    fn preroll_target(&self)->Option<i64> {i64::try_from(self.presentation_floor).ok()}
-    fn resume_preroll(&mut self,pts:i64)->bool {
-        if pts<0 || pts as u64>self.presentation_floor {return false;}
-        let index=self.aac.frames.partition_point(|f|f.pts<pts as u64);
-        if self.aac.frames.get(index).is_none_or(|f|f.pts!=pts as u64) {return false;}
-        self.packet=index;true
+    fn preroll_target(&self) -> Option<i64> {
+        i64::try_from(self.presentation_floor * self.clock_ratio()).ok()
+    }
+    fn resume_preroll(&mut self, pts: i64) -> bool {
+        let ratio = self.clock_ratio();
+        if pts < 0 || pts as u64 % ratio != 0 {
+            return false;
+        }
+        let pts = pts as u64 / ratio;
+        if pts > self.presentation_floor {
+            return false;
+        }
+        let index = self.aac.frames.partition_point(|f| f.pts < pts);
+        if self.aac.frames.get(index).is_none_or(|f| f.pts != pts) {
+            return false;
+        }
+        self.packet = index;
+        true
     }
 
     fn codec(&self) -> &str {
@@ -51,11 +86,11 @@ impl AudioStream for AacAudioReader {
 
     /// Packets are stamped in samples, the same timescale the decoder reports.
     fn timescale(&self) -> u32 {
-        self.aac.sample_rate
+        self.output_rate
     }
 
     fn sample_rate(&self) -> u32 {
-        self.aac.sample_rate
+        self.output_rate
     }
 
     fn channels(&self) -> u16 {
@@ -74,7 +109,7 @@ impl AudioStream for AacAudioReader {
 
     fn audio_tracks(&self) -> Vec<AudioTrack> {
         vec![AudioTrack {
-            sample_rate: self.aac.sample_rate,
+            sample_rate: self.output_rate,
             channels: self.aac.channels,
             name: String::new(),
             language: String::new(),
@@ -87,8 +122,8 @@ impl AudioStream for AacAudioReader {
         };
         let packet = EncodedPacket {
             data: self.aac.packet(self.packet).to_vec(),
-            pts: at.pts as i64,
-            duration: i64::from(self.aac.samples_per_frame),
+            pts: (at.pts * self.clock_ratio()) as i64,
+            duration: (u64::from(self.aac.samples_per_frame) * self.clock_ratio()) as i64,
         };
         self.packet += 1;
         Ok(Some(packet))
@@ -99,12 +134,20 @@ impl AudioStream for AacAudioReader {
         self.presentation_floor = 0;
     }
 
-    fn present_decoded(&self, packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
-        if source_pts < 0 || (source_pts as u64) < self.presentation_floor { Ok(None) } else { Ok(Some(packet)) }
+    fn present_decoded(
+        &self,
+        packet: crate::audio::AudioPacket,
+        source_pts: i64,
+    ) -> Result<Option<crate::audio::AudioPacket>> {
+        if source_pts < 0 || (source_pts as u64) < self.presentation_floor * self.clock_ratio() {
+            Ok(None)
+        } else {
+            Ok(Some(packet))
+        }
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let target = pts.max(0) as u64;
+        let target = pts.max(0) as u64 / self.clock_ratio();
         let index = self
             .aac
             .frames
@@ -112,13 +155,13 @@ impl AudioStream for AacAudioReader {
             .saturating_sub(1);
         self.presentation_floor = self.aac.frames[index].pts;
         self.packet = 0;
-        self.presentation_floor as i64
+        (self.presentation_floor * self.clock_ratio()) as i64
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Aac, AacAudioReader, Frame, Header, Limits, TAG, esds_for, header};
+    use super::{esds_for, header, Aac, AacAudioReader, Frame, Header, Limits, TAG};
     use crate::audio::{AudioStream, EncodedPacket};
     use crate::codec::{config::aac_specific_config, make_audio_decoder};
 
@@ -162,9 +205,7 @@ mod tests {
         assert_eq!(aac.packets(), 13);
         assert_eq!(
             aac.frames.iter().map(|at| at.size).collect::<Vec<_>>(),
-            [
-                293, 370, 313, 314, 326, 319, 362, 358, 339, 356, 360, 324, 365
-            ]
+            [293, 370, 313, 314, 326, 319, 362, 358, 339, 356, 360, 324, 365]
         );
         assert_eq!(
             aac.frames.last().map(|at| at.start + at.size),
@@ -441,7 +482,13 @@ mod tests {
         let mut pce = STEREO[293..293 + 14].to_vec();
         pce[2] &= !1;
         pce[3] &= 0x3F;
-        assert_eq!(header(&pce).expect("PCE configuration is admitted").channels, 0, "layout is deferred to the PCE in the access unit");
+        assert_eq!(
+            header(&pce)
+                .expect("PCE configuration is admitted")
+                .channels,
+            0,
+            "layout is deferred to the PCE in the access unit"
+        );
         // Rate indexes 13, 14 and 15 are reserved in this header, unlike the
         // AudioSpecificConfig, which spells a 24-bit rate for 15.
         let mut reserved = STEREO[293..293 + 14].to_vec();
@@ -450,24 +497,41 @@ mod tests {
         // The transport count is admitted; the reader separates logical packets.
         let mut packed = STEREO[293..293 + 14].to_vec();
         packed[6] |= 1;
-        assert_eq!(header(&packed).unwrap().raw_blocks, 2, "two logical raw blocks");
+        assert_eq!(
+            header(&packed).unwrap().raw_blocks,
+            2,
+            "two logical raw blocks"
+        );
     }
 
     /// Genuine own protected raw blocks exercise CRC checking and packet boundaries.
     #[test]
     fn a_frame_with_crc_states_a_nine_byte_header() {
-        let crc = include_bytes!("../../../tests/fixtures/playback-errors/adts-crc-2-2-1-0-indexed-synthetic.aac");
+        let crc = include_bytes!(
+            "../../../tests/fixtures/playback-errors/adts-crc-2-2-1-0-indexed-synthetic.aac"
+        );
         let protected = header(crc).expect("valid protected header");
         assert_eq!(protected.header_bytes, 9);
         let aac = Aac::parse(crc, &Limits::default()).expect("correct CRC verifies");
         assert_eq!(aac.frames.len(), 4);
-        assert_eq!(aac.frames[0], Frame {
-            start: 0, size: protected.frame_bytes, header_bytes: 9,
-            asc: protected.asc, pts: 0,
-        });
+        assert_eq!(
+            aac.frames[0],
+            Frame {
+                start: 0,
+                size: protected.frame_bytes,
+                header_bytes: 9,
+                asc: protected.asc,
+                pts: 0,
+            }
+        );
         assert_eq!(aac.packet(0), &crc[9..protected.frame_bytes]);
         let mut bad = crc.to_vec();
         bad[7] ^= 1;
-        assert_eq!(Aac::parse(&bad, &Limits::default()).unwrap_err().to_string(), "ADTS CRC mismatch");
+        assert_eq!(
+            Aac::parse(&bad, &Limits::default())
+                .unwrap_err()
+                .to_string(),
+            "ADTS CRC mismatch"
+        );
     }
 }
