@@ -8983,3 +8983,39 @@ claimed.
 Validation: 15 integration tests passed across `aac_main_ps`,
 `aac_main_ps_cce` and `aac_main_ps_independent_tns`, locked/offline with
 `media,player` and no FFmpeg. Production code is unchanged.
+
+### AAC Main PS independent source PNS/TNS/SBR acceptance (2026-10-09)
+
+Eight authored MP4 videos qualify PNS-band switching in two independent Main
+PS CCE sources (tags 1/15), with source TNS on/off, source-SBR on/off and
+24/48 kHz output. Both sources switch a second band from ordinary residuals
+to PNS and back, with distinct noise energies and alternating wire order.
+A single scalar noise generator follows actual CCE parse order; per-tag
+scalar Main predictors reset the noise-band lines before subsequent ordinary
+prediction. Optional first-order TNS runs forward on tag 1 and reverse on
+tag 15, followed by direct IMDCT/overlap. Qualified owned SBR/PS stages
+provide the extension composition reference rather than a new numerical PS
+oracle.
+
+The explicit wrong core control advances predictor state on zeroed PNS input
+but omits per-line reset, matching the targeted production mutation. Its
+final PS PCM observably differs in every case. Temporarily removing
+`bank.reset_lines(range)` from production Main/PNS reconstruction causes
+waveform acceptance to fail at sample 21544 after ordinary coefficients
+return. Production source is restored byte-for-byte. Other acceptance checks
+cover packet rollback/checkpoints (including noise RNG), reset, delayed EOF
+indices, MP4 export, syntax probe, intervals, rewind and seek; source FIL
+reassociation remains numerically observable.
+
+Generator `scripts/generate_aac_main_ps_pns_fixtures.py` reproduces 18 artifacts
+deterministically, separately from tests, with no private media, FFmpeg,
+foreign decoder or network. Prior fixture sets remain unchanged. This matrix
+uses continuously coded long-window mono Main PS point-3 sources. PNS with
+short windows, source absence/PCE changes, broader band geometry, additional
+SBR profiles, source PS and wider codecs remain separate gaps; full AAC or
+all-codec completion is not claimed.
+
+Validation: 10 integration tests passed across `aac_main_ps_pns`,
+`aac_main_tools` and `aac_main_ps`, locked/offline with `media,player`
+and no FFmpeg. The existing Main TNS order-21 check remains a refusal
+regression, not order-21 acceptance. Production code is unchanged.
