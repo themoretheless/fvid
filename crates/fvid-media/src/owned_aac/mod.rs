@@ -1,6 +1,8 @@
 //! Owned AAC-LC framing, decoding and transforms. No foreign decoder or libav.
 #![forbid(unsafe_code)]
 pub mod aac_gain_control;
+pub mod aac_ssr_ipqf;
+pub mod aac_ssr_gain;
 pub mod aac_ps_data;
 pub mod aac_ps_hybrid_filter;
 pub mod aac_ps_hybrid;

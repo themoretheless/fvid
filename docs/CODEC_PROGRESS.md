@@ -7315,3 +7315,29 @@ existing active-parameter fixture script; ordinary tests need no FFmpeg,
 generation or network. This qualifies the active-parameter payload, not all SEI
 messages or layered syntax.
 https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201304-S%21%21PDF-E&lang=e&type=items
+
+### 2026-10-09 — owned AAC SSR synthesis building blocks
+
+The shared owned IMDCT now admits the SSR 256/32 coefficient geometries,
+verified against dense direct cosine sums and individual basis vectors. New
+`aac_ssr_gain::SsrGainOverlap` implements bounded gain interpolation in log2
+space, previous-fragment compensation, and gain-controlled overlap for all four
+window sequences. It emits 256, 368, or 144 quarter-rate rows as specified,
+rather than forcing transition blocks into LC geometry. Nonempty gain tests
+cover all three controlled bands and long/start/short/stop history. Invalid
+locations, levels, window counts, and geometry leave output/history unchanged.
+
+`aac_ssr_ipqf::SsrIpqf` implements the four-band 96-tap synthesis filter with a
+24-row polyphase history. Nonzero streaming input and every band impulse match
+an independent literal zero-insertion/convolution oracle; irregular packet
+boundaries, checkpoint recovery and reset are covered. Prototype coefficients
+and equations come from ISO/IEC 14496-3:2009 sections 4.6.12.3.1–4 and Table
+4.164, not a foreign codec implementation:
+https://csclub.uwaterloo.ca/~pbarfuss/ISO14496-3-2009.pdf
+
+These are synthesis building blocks, not SSR playback acceptance. The packet
+pipeline still rejects active gain and AOT 3. Quarter-band spectral ordering,
+SSR windows, appropriate band tables/TNS, and ASC/native-decoder integration
+remain required, followed by an independently qualified synthetic AOT 3 video.
+The existing active-gain refusal fixtures remain refusals. Ordinary tests do
+not fetch the standard or invoke FFmpeg.

@@ -1,6 +1,6 @@
 //! Owned inverse MDCT via a chirp convolution and radix-2 FFT.
 //! Windowed normalization is 2/N; windowing and overlap-add belong to the caller.
-use super::{invalid, Result};
+use super::{Result, invalid};
 use std::{f64::consts::PI, sync::Arc};
 type Complex = [f64; 2];
 fn mul(a: Complex, b: Complex) -> Complex {
@@ -35,9 +35,9 @@ impl Imdct {
         Ok(())
     }
 
-    /// AAC-LC long/short transforms, including the alternate 960/120 geometry.
+    /// AAC-LC long/short transforms and AAC-SSR quarter-band transforms.
     pub fn new(coefficients: usize) -> Result<Self> {
-        if !matches!(coefficients, 120 | 128 | 960 | 1024) {
+        if !matches!(coefficients, 32 | 120 | 128 | 256 | 960 | 1024) {
             return Err(invalid("unsupported AAC IMDCT length"));
         }
         let size = (2 * coefficients - 1).next_power_of_two();
@@ -164,7 +164,7 @@ mod tests {
     use super::*;
     #[test]
     fn every_aac_length_matches_direct_cosine_basis() {
-        for n in [120, 128, 960, 1024] {
+        for n in [32, 120, 128, 256, 960, 1024] {
             let plan = Imdct::new(n).unwrap();
             let mut spectrum = vec![0.0; n];
             let mut output = vec![0.0; 2 * n];
@@ -188,7 +188,7 @@ mod tests {
     }
     #[test]
     fn dense_spectra_match_direct_basis_with_reused_scratch() {
-        for n in [120, 128, 960, 1024] {
+        for n in [32, 120, 128, 256, 960, 1024] {
             let plan = Imdct::new(n).unwrap();
             let mut scratch = vec![[999.0; 2]; plan.scratch_len()];
             let mut output = vec![0.0; 2 * n];
@@ -220,9 +220,10 @@ mod tests {
                 .unwrap();
             assert!(output.iter().all(|&x| x == 0.0));
             output.fill(123.0);
-            assert!(plan
-                .inverse_with_scratch(&spectrum, &mut output, &mut scratch[..1])
-                .is_err());
+            assert!(
+                plan.inverse_with_scratch(&spectrum, &mut output, &mut scratch[..1])
+                    .is_err()
+            );
             assert!(output.iter().all(|&x| x == 123.0));
         }
     }
