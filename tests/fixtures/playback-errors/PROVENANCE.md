@@ -4113,7 +4113,7 @@ spectra, gain values, target selections and payload boundaries; truncated CCEs
 must leave the complete element cursor unchanged. No private parameters/media,
 foreign codec or FFmpeg/network dependency is used by generation or tests.
 
-This is CCE parsing acceptance, not native coupling playback acceptance. A
+At this historical stage this was CCE parsing acceptance, not native coupling playback acceptance. A
 separate private-metadata native test reproduces the existing specific LTP
 coupling-state refusal on these same packets and verifies retained payload,
 noise state and deterministic history probes are unchanged by the failed decode.
@@ -4172,3 +4172,38 @@ Validation: owned library 470 passed / 1 pre-existing ignored; root native AAC
 LTP playback acceptance ignored. Eleven phase fixture artifacts are deterministic.
 Existing PCM references and tolerances remain unchanged. Coupled native dispatch
 and public AOT4 admission are still pending; their refusal expectations are kept.
+
+### Native LTP CCE dispatch and transactional source histories (2026-10-10)
+
+The former native CCE-state refusal is replaced by actual decoding acceptance.
+Source states occupy a separate 16-tag domain, share immutable tables with fresh
+reset target prototypes, and preserve independent float histories. Source prediction
+and TNS precede target mixing; dependent sources do not synthesize or advance
+history. Independent sources synthesize separately, then mix normalized PCM after
+target synthesis without feeding coupled PCM back into target LTP history.
+Local candidate source states commit only on successful decode. Checkpoints retain
+only semantic source histories and slot presence; reset removes source slots.
+Retained payload accounting includes source vectors, mutable storage, shared
+transforms/windows, and checkpoint histories.
+
+The three existing 12-frame phase videos now exercise both owned and root native
+dispatch against every scalar PCM sample at 1e-7, including exact checkpoint replay.
+The 17 CCE gain/selection videos decode and replay all 204 packets; these tests
+qualify routing acceptance and replay, not an independent full PCM oracle for
+all stereo gain variants. Public AOT4 ASC admission remains gated.
+
+The generator adds `aac-ltp-phase-absent-target-synthetic.mp4` and its raw packet:
+an independent CCE selects absent target tag 1 while the authored PCE/audio
+configure tag 0. The regression checks the precise routing diagnostic after
+synthesis, before and after source histories exist, retained memory, noise, slot
+presence, and exact subsequent valid decoding against checkpoint replay.
+Only authored bits/media are used. Fixture generation is separate; ordinary
+tests require no FFmpeg, libav or network. No external decoder code is copied.
+
+Source candidates currently clone mutable scratch/history for transactional decode.
+Retained-storage accounting does not establish peak decode memory or 60 fps.
+
+Validation: owned library 472 passed / 1 pre-existing ignored; root native AAC
+16 passed; sixteen offline AAC integration suites 56 passed / 1 pending public
+LTP acceptance ignored. All thirteen phase artifacts regenerate identically.
+Existing PCM references and tolerances remain unchanged.

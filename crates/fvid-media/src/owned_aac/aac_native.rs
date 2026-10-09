@@ -74,7 +74,11 @@ impl NativeAacDecoder {
         let mut footprint = super::memory::Footprint::new();
         footprint.vector(&self.ltp_synthesis).map_err(|e|invalid(&e))?;
         for state in &self.ltp_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        footprint.vector(&self.ltp_coupling_synthesis).map_err(|e|invalid(&e))?;
+        for state in self.ltp_coupling_synthesis.iter().flatten() {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
         if let Some(saved)=checkpoint {
+            footprint.vector(&saved.ltp_coupling_synthesis).map_err(|e|invalid(&e))?;
+            for state in saved.ltp_coupling_synthesis.iter().flatten() {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
             footprint.vector(&saved.ltp_synthesis).map_err(|e|invalid(&e))?;
             for state in &saved.ltp_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
         }
@@ -254,91 +258,118 @@ mod ltp_dispatch_tests {
     use serde_json::Value;
     #[test]
     fn native_target_only_phase_controls_match_scalar_ltp_tns_pcm() {
-        let manifest:Value=serde_json::from_slice(&bytes("aac-ltp-phase.json")).unwrap();
-        let blob=bytes("aac-ltp-phase-control-packets.bin");let gold=bytes("aac-ltp-phase-control-reference.f32le");
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-phase.json")).unwrap();
+        let blob = bytes("aac-ltp-phase-control-packets.bin");
+        let gold = bytes("aac-ltp-phase-control-reference.f32le");
         for case in manifest["cases"].as_array().unwrap() {
-            let mut state=decoder(case["asc"].as_str().unwrap());
+            let mut state = decoder(case["asc"].as_str().unwrap());
             for row in case["frames"].as_array().unwrap() {
-                let at=row["control_offset"].as_u64().unwrap() as usize;
-                let packet=&blob[at..at+row["control_bytes"].as_u64().unwrap() as usize];
-                let saved=state.checkpoint();let pcm=state.decode(packet).unwrap();
-                let at=row["control_reference_offset"].as_u64().unwrap() as usize;
-                assert_eq!(pcm.len(),1024);
-                for (i,&sample) in pcm.iter().enumerate() {
-                    let expected=f32::from_le_bytes(gold[at+i*4..at+i*4+4].try_into().unwrap());
-                    assert!((sample-expected).abs()<1e-7,"native staged TNS frame sample={i}: {sample} vs {expected}");
+                let at = row["control_offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["control_bytes"].as_u64().unwrap() as usize];
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                let at = row["control_reference_offset"].as_u64().unwrap() as usize;
+                assert_eq!(pcm.len(), 1024);
+                for (i, &sample) in pcm.iter().enumerate() {
+                    let expected =
+                        f32::from_le_bytes(gold[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    assert!(
+                        (sample - expected).abs() < 1e-7,
+                        "native staged TNS frame sample={i}: {sample} vs {expected}"
+                    );
                 }
-                state.restore(&saved).unwrap();assert_eq!(state.decode(packet).unwrap(),pcm);
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
             }
         }
     }
     #[test]
-    fn authored_cce_videos_reproduce_pending_native_coupling_state_without_advance() {
-        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-coupling.json")).unwrap();
-        let blob = bytes("aac-ltp-coupling-packets.bin");
+    fn native_coupled_phase_videos_match_scalar_ltp_tns_pcm() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-phase.json")).unwrap();
+        let blob = bytes("aac-ltp-phase-packets.bin");
+        let gold = bytes("aac-ltp-phase-reference.f32le");
         for case in manifest["cases"].as_array().unwrap() {
-            let mut asc: Vec<u8> = case["asc"]
-                .as_str()
-                .unwrap()
-                .as_bytes()
-                .chunks_exact(2)
-                .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
-                .collect();
-            // Both outer AOT and PCE object tag must agree for existing ASC parsing.
-            asc[0] = (asc[0] & 7) | (2 << 3);
-            asc[2] = (asc[2] & !0x0c) | 0x04;
-            let mut parsed = AudioSpecificConfig::parse(&asc).unwrap();
-            parsed.core.object_type = 4;
-            parsed.signaled_object_type = 4;
-            parsed.program.as_mut().unwrap().object_type = 4;
-            let mut decoder = NativeAacDecoder::from_parsed(parsed).unwrap();
-            let probe = |decoder: &NativeAacDecoder| {
-                let tables = BandTables::for_config(&decoder.config).unwrap();
-                let data = super::super::aac_ltp_syntax::LtpData {
-                    lag: 1024,
-                    coefficient_index: 7,
-                    usage: super::super::aac_ltp_syntax::Usage::Bands(vec![true, true]),
-                };
-                decoder
-                    .ltp_synthesis
-                    .iter()
-                    .map(|state| {
-                        let mut state = state.clone();
-                        let mut spectrum = vec![0f32; 1024];
-                        spectrum[0] = 1024.;
-                        state
-                            .process(
-                                spectrum,
-                                Some(&data),
-                                super::super::aac_synthesis::WindowSequence::OnlyLong,
-                                super::super::aac_synthesis::WindowShape::Kbd,
-                                tables.long,
-                                2,
-                                None,
-                            )
-                            .unwrap()
-                    })
-                    .collect::<Vec<_>>()
-            };
-            let saved = decoder.checkpoint();
+            let mut state = decoder(case["asc"].as_str().unwrap());
+            let initial = state.checkpoint();
             for row in case["frames"].as_array().unwrap() {
                 let at = row["offset"].as_u64().unwrap() as usize;
                 let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
-                let before = decoder.retained_payload_bytes().unwrap();
-                let pcm = probe(&decoder);
-                let noise = decoder.noise.clone();
-                let error = decoder.decode(packet).unwrap_err();
-                assert!(
-                    error
-                        .to_string()
-                        .contains("AAC LTP coupling state is not integrated"),
-                    "{error}"
-                );
-                assert_eq!(decoder.retained_payload_bytes().unwrap(), before);
-                assert_eq!(probe(&decoder), pcm);
-                assert_eq!(decoder.noise, noise);
-                decoder.restore(&saved).unwrap();
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                let at = row["reference_offset"].as_u64().unwrap() as usize;
+                assert_eq!(pcm.len(), 1024);
+                for (i, &sample) in pcm.iter().enumerate() {
+                    let expected =
+                        f32::from_le_bytes(gold[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    assert!(
+                        (sample - expected).abs() < 1e-7,
+                        "point={} sample={i}: {sample} vs {expected}",
+                        case["point"]
+                    );
+                }
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
             }
+            state.reset();
+            assert!(state.ltp_coupling_synthesis.iter().all(Option::is_none));
+            state.restore(&initial).unwrap();
+        }
+    }
+    #[test]
+    fn authored_cce_gain_and_selection_videos_decode_and_replay() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-coupling.json")).unwrap();
+        let blob = bytes("aac-ltp-coupling-packets.bin");
+        for case in manifest["cases"].as_array().unwrap() {
+            let mut state = decoder(case["asc"].as_str().unwrap());
+            for row in case["frames"].as_array().unwrap() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                assert_eq!(pcm.len(), 1024 * usize::from(state.config.channels));
+                assert!(pcm.iter().all(|x| x.is_finite()));
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
+            }
+        }
+    }
+    #[test]
+    fn independent_cce_late_routing_failure_preserves_slots_histories_and_memory() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-phase.json")).unwrap();
+        let case = &manifest["cases"][2];
+        let blob = bytes("aac-ltp-phase-packets.bin");
+        let bad = bytes("aac-ltp-phase-absent-target.bin");
+        let mut state = decoder(case["asc"].as_str().unwrap());
+        for row in case["frames"].as_array().unwrap() {
+            let at = row["offset"].as_u64().unwrap() as usize;
+            let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+            let saved = state.checkpoint();
+            let before = state.retained_payload_bytes().unwrap();
+            let noise = state.noise.clone();
+            assert!(
+                state
+                    .decode(&bad)
+                    .unwrap_err()
+                    .to_string()
+                    .contains("AAC coupling target is absent")
+            );
+            assert_eq!(state.retained_payload_bytes().unwrap(), before);
+            assert_eq!(state.noise, noise);
+            assert_eq!(
+                state
+                    .ltp_coupling_synthesis
+                    .iter()
+                    .map(Option::is_some)
+                    .collect::<Vec<_>>(),
+                saved
+                    .ltp_coupling_synthesis
+                    .iter()
+                    .map(Option::is_some)
+                    .collect::<Vec<_>>()
+            );
+            let pcm = state.decode(packet).unwrap();
+            state.restore(&saved).unwrap();
+            assert_eq!(state.decode(packet).unwrap(), pcm);
         }
     }
     fn bytes(name: &str) -> Vec<u8> {
@@ -359,11 +390,15 @@ mod ltp_dispatch_tests {
             .collect();
         assert_eq!(raw[0] >> 3, 4);
         raw[0] = (raw[0] & 7) | (2 << 3);
-        if (raw[1]>>3)&15==0 {raw[2]=(raw[2]&!0x0c)|0x04;}
+        if (raw[1] >> 3) & 15 == 0 {
+            raw[2] = (raw[2] & !0x0c) | 0x04;
+        }
         let mut parsed = AudioSpecificConfig::parse(&raw).unwrap();
         parsed.signaled_object_type = 4;
         parsed.core.object_type = 4;
-        if let Some(program)=&mut parsed.program {program.object_type=4;}
+        if let Some(program) = &mut parsed.program {
+            program.object_type = 4;
+        }
         NativeAacDecoder::from_parsed(parsed).unwrap()
     }
     fn qualify(case: &Value, blob: &[u8], reference: &[u8]) {
@@ -439,7 +474,8 @@ mod ltp_dispatch_tests {
         }
     }
     #[test]
-    fn native_ltp_checkpoints_count_only_histories_and_right_preparation_failure_preserves_histories() {
+    fn native_ltp_checkpoints_count_only_histories_and_right_preparation_failure_preserves_histories()
+     {
         let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-pair.json")).unwrap();
         let case = &manifest["cases"][3];
         let blob = bytes("aac-ltp-pair-packets.bin");
@@ -448,6 +484,9 @@ mod ltp_dispatch_tests {
         let expected = saved.ltp_synthesis.capacity()
             * std::mem::size_of::<super::super::aac_ltp_channel::LtpChannelCheckpoint>()
             + 2 * 5 * 1024 * std::mem::size_of::<f64>()
+            + saved.ltp_coupling_synthesis.capacity()
+                * std::mem::size_of::<Option<super::super::aac_ltp_channel::LtpChannelCheckpoint>>(
+                )
             + saved.mapping.capacity() * std::mem::size_of::<usize>()
             + saved.coupling_synthesis.capacity()
                 * std::mem::size_of::<Option<LongSineSynthesis>>();

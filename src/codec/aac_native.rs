@@ -286,6 +286,51 @@ mod he_aac_native_tests { include!("../../crates/fvid-media/src/owned_aac/he_aac
 mod ltp_compat_dispatch_tests {
     use super::*;
     #[test]
+    fn root_cce_prediction_metadata_matches_coupled_scalar_pcm() {
+        let root =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let read = |name: &str| std::fs::read(root.join(name)).unwrap();
+        let m: serde_json::Value = serde_json::from_slice(&read("aac-ltp-phase.json")).unwrap();
+        let blob = read("aac-ltp-phase-packets.bin");
+        let gold = read("aac-ltp-phase-reference.f32le");
+        for case in m["cases"].as_array().unwrap() {
+            let mut asc: Vec<u8> = case["asc"]
+                .as_str()
+                .unwrap()
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+                .collect();
+            asc[0] = (asc[0] & 7) | (2 << 3);
+            asc[2] = (asc[2] & !0x0c) | 0x04;
+            let mut parsed = AudioSpecificConfig::parse(&asc).unwrap();
+            parsed.core.object_type = 4;
+            parsed.signaled_object_type = 4;
+            parsed.program.as_mut().unwrap().object_type = 4;
+            let mut state = NativeAacDecoder::from_parsed(parsed).unwrap();
+            for row in case["frames"].as_array().unwrap() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                let at = row["reference_offset"].as_u64().unwrap() as usize;
+                assert_eq!(pcm.len(), 1024);
+                for (i, &sample) in pcm.iter().enumerate() {
+                    let expected =
+                        f32::from_le_bytes(gold[at + i * 4..at + i * 4 + 4].try_into().unwrap());
+                    assert!(
+                        (sample - expected).abs() < 1e-7,
+                        "point={} sample={i}: {sample} vs {expected}",
+                        case["point"]
+                    );
+                }
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
+            }
+        }
+    }
+
+    #[test]
     fn root_syntax_metadata_reaches_owned_ltp_state_without_pcm_or_checkpoint_drift() {
         let root =
             std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");

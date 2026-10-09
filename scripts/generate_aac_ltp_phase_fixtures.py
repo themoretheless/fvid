@@ -70,6 +70,11 @@ def main():
   case=dict(name=str(point),point=point,channels=1,asc=program(1,point).hex(),frames=rows,container_rate=24000,container_frame_samples=1024,slots=16,bands=32,samples=12288,pcm_offset=gold_start)
   case['control_video']=video_fixture([dict(case,frames=[dict(row,offset=row['control_offset'],bytes=row['control_bytes']) for row in rows])],control_blob,channels=1,filename=f'aac-ltp-phase-target-only-{point}-synthetic.mp4')
   case['video']=video_fixture([case],blob,channels=1,filename=f'aac-ltp-phase-{point}-synthetic.mp4');cases.append(case)
+ # Own independent CCE with an absent target: synthesis succeeds before routing fails.
+ bad_case=cases[2];row=bad_case['frames'][1]
+ bad=bytearray(blob[row['offset']:row['offset']+row['bytes']]);bad[1]=(bad[1]&0xf0)|1
+ (DEST/'aac-ltp-phase-absent-target.bin').write_bytes(bad)
+ video_fixture([dict(bad_case,frames=[dict(row,offset=0,bytes=len(bad))])],bad,channels=1,filename='aac-ltp-phase-absent-target-synthetic.mp4')
  (DEST/'aac-ltp-phase-control-packets.bin').write_bytes(control_blob)
  (DEST/'aac-ltp-phase-control-reference.f32le').write_bytes(control_gold)
  (DEST/'aac-ltp-phase-packets.bin').write_bytes(blob)
