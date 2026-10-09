@@ -17,7 +17,7 @@ def main():
  malformed=[('trailing-byte',original[1]+b'\xa5','trailing bytes after PS AAC END'),
  ('missing-fill',packed(bits[:29]+'111'),'PS AAC block requires SBR/PS fill'),
  ('duplicate-sce',packed(bits[:29]+bits),'duplicate PS AAC mono element'),
- ('late-element',packed(bits[:end]+'001'+bits[end+3:]),'PS AAC block requires a sole mono SCE'),
+ ('late-element',packed(bits[:end]+'001'+bits[end+3:]),'PS AAC block requires one mono SCE and configured coupling'),
  ('fill-before-sce',packed(bits[29:]),'PS SBR fill precedes mono element'),
  ('truncated-fill',original[1][:-1],'truncated AAC fill payload')]
  blob=bytearray();bad=[]

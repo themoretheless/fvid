@@ -179,7 +179,7 @@
           "bytes": 16
         }
       ],
-      "error": "PS AAC block requires a sole mono SCE",
+      "error": "PS AAC block requires one mono SCE and configured coupling",
       "failing_packet": 1
     },
     {
