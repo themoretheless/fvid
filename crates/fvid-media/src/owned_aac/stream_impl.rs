@@ -147,7 +147,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
             .checked_mul(2)
             .ok_or_else(|| invalid("AAC output rate overflow"))?;
         let mut probe = AdtsPsProbe::new(&asc, double_rate)?;
-        let mut storage = AdtsClockSpool::new()?;
+        let mut storage = AdtsClockSpool::new(config.channels)?;
         let mut rate = config.sample_rate;
         let mut position = 0u64;
         let core_to = match interval {
@@ -192,9 +192,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
         });
     }
 
-    let discovery = parsed.core.object_type == 2
-        && parsed.sbr_present.is_none()
-        && matches!(parsed.core.channels, 1 | 2);
+    let discovery = parsed.core.object_type == 2 && parsed.sbr_present.is_none();
     let mut decoder = if discovery {
         AdtsPacketDecoder::new_with_sbr_detection(&asc)?
     } else {
@@ -212,7 +210,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
             Some((_, to)) => adts_sample_boundary(to, config.sample_rate)?,
             None => u64::MAX,
         };
-        let mut storage = AdtsClockSpool::new()?;
+        let mut storage = AdtsClockSpool::new(config.channels)?;
         let mut core_position = 0u64;
         while core_position < core_to && !control.packet_limit_reached() {
             control.check()?;
@@ -313,15 +311,20 @@ fn emit_adts_samples(
 }
 
 /// Private variable-size records. Retained RAM is one bounded ADTS packet and
-/// one mono/stereo PCM block, regardless of prefix length. Close before unlink
+/// one admitted PCM block, regardless of prefix length. Close before unlink
 /// for Windows; the RAII guard also removes storage after decode/write errors.
 struct AdtsClockSpool {
     file: Option<std::fs::File>,
     path: std::path::PathBuf,
     records: u64,
+    max_pcm_samples: usize,
 }
 impl AdtsClockSpool {
-    fn new() -> Result<Self> {
+    fn new(channels: u16) -> Result<Self> {
+        let max_pcm_samples = usize::from(channels)
+            .max(2)
+            .checked_mul(2048)
+            .ok_or_else(|| invalid("ADTS spool PCM extent overflow"))?;
         use std::sync::atomic::{AtomicU64, Ordering};
         static NEXT: AtomicU64 = AtomicU64::new(0);
         loop {
@@ -343,6 +346,7 @@ impl AdtsClockSpool {
                         file: Some(file),
                         path,
                         records: 0,
+                        max_pcm_samples,
                     });
                 }
                 Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
@@ -356,6 +360,9 @@ impl AdtsClockSpool {
             u32::try_from(packet.len()).map_err(|_| invalid("ADTS packet length overflow"))?;
         let pcm_samples =
             u32::try_from(samples.len()).map_err(|_| invalid("ADTS PCM length overflow"))?;
+        if packet.len() > 8191 || samples.len() > self.max_pcm_samples {
+            return Err(invalid("ADTS clock spool record exceeds admitted extent"));
+        }
         let file = self.file.as_mut().unwrap();
         file.write_all(&packet_bytes.to_le_bytes())?;
         file.write_all(&pcm_samples.to_le_bytes())?;
@@ -383,9 +390,9 @@ impl AdtsClockSpool {
         file.read_exact(&mut header)?;
         let packet_bytes = u32::from_le_bytes(header[..4].try_into().unwrap()) as usize;
         let pcm_samples = u32::from_le_bytes(header[4..].try_into().unwrap()) as usize;
-        // ADTS frame_length is 13 bits; discovery is limited to mono/stereo
-        // and two 1024-sample output blocks. Validate private records as well.
-        if packet_bytes > 8191 || pcm_samples > 4096 {
+        // ADTS frame_length is 13 bits. One decoded record has at most 2048
+        // frames per admitted channel (or stereo for implicit PS).
+        if packet_bytes > 8191 || pcm_samples > self.max_pcm_samples {
             return Err(invalid("invalid ADTS clock spool record"));
         }
         if let Some(packet) = packet {

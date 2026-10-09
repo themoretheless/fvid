@@ -120,9 +120,7 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
 /// use bounded packet/PCM scratch included in the fixed LC I/O reserve.
 pub(crate) fn check_adts_decode_admission(asc: &[u8], options: &CopyOptions) -> Result<()> {
     let config = AdtsAudioConfig::parse(asc)?;
-    let discovery = config.sbr_present.is_none()
-        && config.program.is_none()
-        && matches!(config.core.channel_configuration, 1 | 2);
+    let discovery = config.core.object_type == 2 && config.sbr_present.is_none();
     let rate = if discovery {
         config
             .core
@@ -307,7 +305,7 @@ mod tests {
     }
     #[test]
     fn clock_spool_preserves_pcm_bits_and_removes_storage_on_decode_writer_error() {
-        let mut spool = super::AdtsClockSpool::new().unwrap();
+        let mut spool = super::AdtsClockSpool::new(2).unwrap();
         let path = spool.path.clone();
         let samples = [f32::from_bits(0x7fc01234), -0.0, f32::INFINITY];
         spool.push(&[1, 2, 3], &samples).unwrap();

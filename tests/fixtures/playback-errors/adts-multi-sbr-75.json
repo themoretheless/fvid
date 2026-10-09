@@ -1,0 +1,20 @@
+{
+  "files": [
+    "adts-multi-sbr-75-111-synthetic.aac",
+    "adts-multi-sbr-75-111-crc-synthetic.aac",
+    "adts-multi-sbr-75-3-synthetic.aac",
+    "adts-multi-sbr-75-3-crc-synthetic.aac",
+    "adts-multi-sbr-75-12-synthetic.aac",
+    "adts-multi-sbr-75-12-crc-synthetic.aac"
+  ],
+  "video": {
+    "file": "adts-multi-sbr-75-synthetic.mp4",
+    "sha256": "6b76a865f4f1461e61fe9fd72d55750a53cd9b8e23fd88b1b4829d2d0487c110",
+    "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+    "asc": "130005840400064000",
+    "pcm_offset": 0,
+    "samples": 6144
+  },
+  "pcm": null,
+  "provenance": "authored multi-element PCE/indexed SBR, height and silent LFE; independent per-lane scalar PCM and polynomial CRC"
+}

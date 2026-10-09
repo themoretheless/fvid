@@ -13,11 +13,11 @@ def region_helper():
     meta=json.loads(subprocess.check_output(['cargo','metadata','--offline','--no-deps','--format-version','1']))
     return str(Path(meta['target_directory'])/'debug/examples/adts_crc_regions')
 
-def generate(source, stem='adts-implicit-ps', provenance='existing authored late PS packets and independent scalar stereo PCM; own CRC regions and independent polynomial division', setup='1308', packet_file='he-aac-ps-absence-packets.bin', configuration=1, groups=None):
+def generate(source, stem='adts-implicit-ps', provenance='existing authored late PS packets and independent scalar stereo PCM; own CRC regions and independent polynomial division', setup='1308', packet_file='he-aac-ps-absence-packets.bin', configuration=1, groups=None, channels=2):
     blob=(DEST/packet_file).read_bytes()
     frames=[dict(row,header=fixed(bytes.fromhex(setup),blob[row['offset']:row['offset']+row['bytes']],configuration)) for row in source['frames']]
     case=dict(asc=setup,slots=16,bands=64,frames=frames,sample_rate=48000,container_rate=48000,container_frame_samples=2048,samples=2048*len(frames),pcm_offset=0)
-    video=video_fixture([case],blob,channels=2,filename=stem+'-synthetic.mp4')
+    video=video_fixture([case],blob,channels=channels,filename=stem+'-synthetic.mp4')
     helper=region_helper()
     inputs=[dict(asc=setup,payload=blob[r['offset']:r['offset']+r['bytes']].hex()) for r in frames]
     spans=json.loads(subprocess.run([helper],input=json.dumps(inputs),text=True,capture_output=True,check=True).stdout)

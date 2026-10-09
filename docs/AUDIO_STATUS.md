@@ -790,3 +790,32 @@ generator, FFmpeg/libav or network access. This qualifies the sole normal-front
 stereo CPE at the implicit double-rate clock; arbitrary multichannel SBR
 programs and other AAC tools/profiles still require separate implementation
 and qualification.
+
+
+### Multi-element ADTS SBR discovery and bounded PCM spool
+
+`adts_multi_sbr` separately reproduces the former multichannel extension
+signalling refusal and, after enabling discovery, the fixed mono/stereo spool
+record rejection. LC ADTS discovery now admits the native decoder's supported
+resolved layout instead of limiting its channel count to two. Private PCM
+records are bounded by 2048 frames times the admitted channels (at least stereo
+for PS); push/read enforce that extent. Encoded records remain at most 8191
+bytes and retained RAM does not grow with prefix length. Optional controlled
+memory admission now reserves possible SBR state for all discovered channels.
+
+Nine authored short companion videos and 54 CRC/plain ADTS variants qualify
+two-SCE, height two-SCE, 5.1 PCE/indexed, element reordering, silent LFE and
+missing-element SBR. Every output lane is compared with independent scalar
+SBR or missing-SBR PCM using the canonical channel mapping. Acceptance checks
+full PCM, exact intervals, packet identity, output geometry/clocks, indexed
+and sequential MP4 and Matroska remux, timestamps, rewind and seek. A controlled
+budget rejection is tested before publishing PCM.
+
+Generator: `scripts/generate_adts_multi_sbr_fixtures.py`, sharing the own ADTS
+writer and offline CRC region helper. Only authored payloads, independent PCM
+and AVC/container seeds are used; no private media or parameters are copied.
+Ordinary tests read saved files without generation, FFmpeg/libav or network
+access. This qualifies the tested implicit double-rate programs, not arbitrary
+multichannel SBR, nonzero LFE extension processing or complete AAC conformance.
+The 14-valued indexed height layout cannot be directly represented by the
+three-bit ADTS channel configuration and is not included in this matrix.
