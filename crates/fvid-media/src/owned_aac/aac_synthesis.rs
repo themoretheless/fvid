@@ -73,6 +73,10 @@ pub struct SynthesisHistory {
     overlap: Vec<f64>,
 }
 impl SynthesisHistory {
+    pub(crate) fn visit_retained(&self, footprint: &mut super::memory::Footprint) -> std::result::Result<(), String> {
+        footprint.vector(&self.overlap)
+    }
+
     /// Raw overlap in synthesis units, before PCM output normalization.
     pub fn overlap_raw(&self) -> &[f64] { &self.overlap }
 }

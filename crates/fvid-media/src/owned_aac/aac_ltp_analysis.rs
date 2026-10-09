@@ -5,16 +5,34 @@ use super::{
     aac_synthesis::{WindowSequence, WindowShape, kbd_window},
     invalid, unsupported,
 };
-use std::f64::consts::PI;
+use std::{f64::consts::PI, sync::Arc};
+#[derive(Clone)]
 pub struct LtpAnalysis {
     n: usize,
-    long: [Vec<f64>; 2],
-    short: [Vec<f64>; 2],
+    long: Arc<[Vec<f64>; 2]>,
+    short: Arc<[Vec<f64>; 2]>,
     transform: Imdct,
     windowed: Vec<f64>,
     scratch: Vec<[f64; 2]>,
 }
 impl LtpAnalysis {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        for windows in [&self.long, &self.short] {
+            if footprint.shared(windows)? {
+                for window in windows.iter() {
+                    footprint.vector(window)?;
+                }
+            }
+        }
+        self.transform.visit_retained(footprint)?;
+        footprint.vector(&self.windowed)?;
+        footprint.vector(&self.scratch)?;
+        Ok(())
+    }
+
     pub fn new(n: usize) -> Result<Self> {
         if !matches!(n, 960 | 1024) {
             return Err(invalid("invalid AAC LTP analysis geometry"));
@@ -28,8 +46,8 @@ impl LtpAnalysis {
         let scratch = vec![[0.0; 2]; transform.scratch_len()];
         Ok(Self {
             n,
-            long: [sine(n), kbd_window(n, 4.0)],
-            short: [sine(n / 8), kbd_window(n / 8, 6.0)],
+            long: Arc::new([sine(n), kbd_window(n, 4.0)]),
+            short: Arc::new([sine(n / 8), kbd_window(n / 8, 6.0)]),
             transform,
             windowed: vec![0.0; 2 * n],
             scratch,
@@ -168,5 +186,33 @@ impl LtpAnalysis {
             spectrum = tns.analyze_owned(spectrum, offsets, tns_max_band)?;
         }
         apply_long_prediction(residual, &spectrum, offsets, used)
+    }
+}
+
+#[cfg(test)]
+mod retained_tests {
+    use super::*;
+    #[test]
+    fn spare_analysis_capacity_is_counted_including_shared_windows() {
+        let mut analysis = LtpAnalysis::new(1024).unwrap();
+        let inspect = |value: &LtpAnalysis| {
+            let mut footprint = super::super::memory::Footprint::new();
+            value.visit_retained(&mut footprint).unwrap();
+            footprint.total()
+        };
+        let before = inspect(&analysis);
+        let old_input = analysis.windowed.capacity();
+        let old_scratch = analysis.scratch.capacity();
+        let old_window = analysis.long[0].capacity();
+        analysis.windowed.reserve(17);
+        analysis.scratch.reserve(31);
+        Arc::get_mut(&mut analysis.long).unwrap()[0].reserve(43);
+        let added = (analysis.windowed.capacity() - old_input + analysis.long[0].capacity()
+            - old_window)
+            * std::mem::size_of::<f64>()
+            + (analysis.scratch.capacity() - old_scratch) * std::mem::size_of::<[f64; 2]>();
+        assert!(added > 0);
+        assert_eq!(inspect(&analysis), before + added);
+        assert_eq!(inspect(&analysis), before + added);
     }
 }

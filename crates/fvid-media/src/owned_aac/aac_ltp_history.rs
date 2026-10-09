@@ -16,6 +16,17 @@ pub struct LtpHistory {
     floating: Option<Vec<f64>>,
 }
 impl LtpHistory {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        footprint.vector(&self.samples)?;
+        if let Some(samples) = &self.floating {
+            footprint.vector(samples)?;
+        }
+        Ok(())
+    }
+
     pub fn new(frame_samples: usize) -> Result<Self> {
         if !matches!(frame_samples, 960 | 1024) {
             return Err(invalid("invalid AAC LTP history geometry"));

@@ -1,8 +1,9 @@
 //! Retained allocation payload accounting; no allocation during inspection.
 use std::{mem::size_of, sync::Arc};
 // Two owners (decoder + checkpoint), u8 channel count, 16 coupling tags,
-// four windows and two IMDCT tables per synthesis state.
-const MAX_SHARED: usize = 2 * (u8::MAX as usize + 16) * 6;
+// Four synthesis windows, two inverse transforms, and up to three LTP
+// analysis allocations (two window arrays and one forward transform).
+const MAX_SHARED: usize = 2 * (u8::MAX as usize + 16) * 9;
 pub(crate) struct Footprint {
     seen: [usize; MAX_SHARED],
     used: usize,

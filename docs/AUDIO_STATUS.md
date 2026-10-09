@@ -2089,3 +2089,26 @@ Validation: owned library 462 passed / 1 pre-existing ignored; root AAC pair
 5 passed; fourteen offline AAC integration suites 53 passed / 1 pending root
 LTP acceptance ignored. Own pair generation is deterministic and all saved
 benchmark source/reference SHA-256 hashes are verified.
+
+### LTP retained storage and shared analysis tables (2026-10-09)
+
+`LtpChannel` now exposes retained-payload inspection, including its optional
+packet-boundary checkpoint. Analysis sine/KBD windows and immutable forward
+transform tables are shared by cloned channels; histories and analysis/synthesis
+scratch remain independent. Both live and saved history capacities are counted.
+Checkpoints retain five N-sized f64 buffers (four LTP history blocks plus one
+synthesis overlap), without duplicating transform scratch or windows.
+
+The internal visitor composes with native decoder accounting, and the bounded
+shared-table workspace allows nine allocations per LTP channel/coupling state.
+Tests cover 960/1024 geometry, exact incremental mutable storage for clones,
+checkpoint storage, spare analysis/window capacity, independent history,
+processing, restore and reset. Inspection excludes allocator/Arc control headers,
+stack objects, packet temporaries and caller-owned PCM; this is retained heap
+payload, not a new memory cap, peak decode budget or process RSS estimate.
+Production AOT4 dispatch/admission and adding LTP fields to the native decoder's
+checkpoint/visitor are still pending, as are remaining tool/layout qualification.
+
+Validation: owned library 465 passed / 1 pre-existing ignored; eight offline
+LTP/TNS integration suites 23 passed / 1 pending root LTP acceptance ignored.
+All PCM oracles and tolerances remain unchanged.
