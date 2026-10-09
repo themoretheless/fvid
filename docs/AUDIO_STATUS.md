@@ -2531,3 +2531,32 @@ phase oracle preserved every original 1024 artifact byte-for-byte; the expanded
 960 set is deterministic on regeneration. Wider CCE tags/absence/roster/source
 extensions and additional PNS/window/layout combinations remain separate gaps,
 as do ER/LD/ELD/USAC. These finite checks do not establish universal codec parity.
+
+### LTP/PS independent-source roster histories (2026-10-10)
+
+Seventy-two original MP4s cover 960/1024-frame active LTP targets and two
+independent CCE tags (1 and 15) with distinct window/shape, lag/gain/usage and
+coded histories. Fixtures vary 24/48 kHz output, source SBR, single/both-source
+arrival or disappearance/return and static/dynamic PCE coupling rosters.
+Source clocks pause when absent; returning tags resume their own LTP and QMF
+state. Target LTP and PS continue independently across empty rosters.
+
+The reference uses independent scalar float LTP/IMDCT for target and each
+source and composes their PCM through separately qualified owned PS/QMF/SBR
+stages. This is a composition oracle, not an independent full PS implementation.
+Controls disable source LTP, reassign source FIL and discard QMF state during
+absence; each must alter PCM observably. Right target PCM remains uncoupled,
+and absent sources contribute no left PCM. Static and dynamic roster versions
+must produce identical audio for the same coded schedule. Packet checkpoint,
+trailing-byte rollback, reset, delayed frame identity/EOF, syntax probe,
+public PCM/ranges and playback rewind/seek are additional acceptance gates.
+
+Generation is offline and separate from tests, with no FFmpeg/network/private
+media. Production decoder is unchanged. These fixtures qualify explicit PS
+with the selected PCE/SBR/window/tool combinations; wider tags and source
+extension geometry, dependent-source absence, arbitrary gains/layout/PNS,
+ER/LD/ELD/USAC and broad conformance/performance remain distinct gaps.
+
+Validation: all six expanded acceptance/control tests passed offline without
+FFmpeg (72 configurations, 261.65 s debug run). All 86 fixture artifacts
+were byte-identical on regeneration. No production decoder changes.
