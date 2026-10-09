@@ -3166,3 +3166,26 @@ generator and ordinary tests use no private media, FFmpeg or network. These
 programs qualify core mono dependent coupling and first-order target TNS;
 source SBR across dynamic rosters, stereo/multichannel changes, changing actual
 output layouts/profiles and wider codec tools remain separate work.
+
+
+### SSR source SBR after initially empty PCE roster (2026-10-09)
+
+Six authored videos qualify CCE1 arrival after two complete target packets.
+Static-roster controls and initially empty dynamic PCE variants cover core-only
+SSR and source SBR at 24/48 kHz. On packet two the dynamic program announces
+CCE1 before its coded source/FIL. Independent scalar SSR alignment provides
+2048 silent samples followed by four source-window chunks totaling 4096 samples;
+the direct QMF/SBR oracle evaluates extension output at each negotiated clock.
+
+Native PCM must agree with that oracle and static/dynamic exports must match
+exactly. Tests additionally check the initial silence, checkpoint/replay, reset,
+rewind, seek and EOF. Reset restores the empty initial roster and rejects a CCE
+without its new PCE; foreign initial-roster checkpoints remain incompatible.
+This qualifies the fixed four-bit SBR slot domain added by the earlier roster
+fix: an empty current roster does not remove storage for a later CCE tag.
+No additional production decoder change was needed.
+
+The absence/roster matrix now has 30 positive videos and two negative companions.
+Generation and ordinary tests use no private media, FFmpeg or network. Dynamic
+Main/LC source SBR, source PS, multiple late SSR sources, actual target layout
+and profile changes and wider codec tools remain separate work.

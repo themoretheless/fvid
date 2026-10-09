@@ -99,6 +99,40 @@ def main():
         case=dict(base,name='invalid-pce-'+name,frames=rows,error=error)
         case['video']=video_fixture([case],blob,filename='aac-ssr-cce-absence-'+case['name']+'-synthetic.mp4')
         invalid.append(case)
+    # Initially empty PCE: CCE arrives only after two complete target packets.
+    base=next(c for c in m['cases'] if c['name']=='source-ahead')
+    source=raw_core[base['pcm_offset']:base['pcm_offset']+base['pcm_bytes']]
+    pcm=[0.]*2048+[v[0] for v in struct.iter_unpack('<f',source[:4096*4])]
+    present=[0,0,1,1,1,1]
+    core_name='aac-ssr-cce-absence-arrival-core.f32le'
+    (DEST/core_name).write_bytes(struct.pack('<6144f',*pcm))
+    references={}
+    for rate in (24000,48000):
+        values=reference(pcm_override=pcm,bands=32*(rate//24000),sbr_frames=present)
+        filename=f'aac-ssr-cce-absence-arrival-{rate}.f64le'
+        (DEST/filename).write_bytes(struct.pack('<'+str(len(values))+'d',*values));references[rate]=filename
+    for rate,sbr in ((24000,False),(24000,True),(48000,True)):
+        for dynamic in (False,True):
+            rows=[];ordinal=0
+            for i,on in enumerate(present):
+                target='0000000'+silent(0,0,0,False,False);coded=''
+                if on:
+                    seq=base['source_sequences'][ordinal]
+                    coded='0100001'+'1'+'000'+'0'+'0000'+'0'+'0'+'10'+channel(ordinal,seq,ordinal%2,0,True,False)
+                    if sbr:
+                        row=geometry['frames'][ordinal%3];payload=syntax[row['offset']:row['offset']+row['byte_length']]
+                        coded+='110'+(field(len(payload),4) if len(payload)<15 else '1111'+field(len(payload)-14,8))+''.join(field(b,8) for b in payload)
+                    ordinal+=1
+                raw=packed((coded+target if i%2 else target+coded)+'111')
+                if dynamic and i==2:raw=packed(program('101',1,3,(1,)))+raw
+                rows.append(dict(offset=len(blob),bytes=len(raw)));blob.extend(raw)
+            prefix=(field(5,5)+frequency(24000)+'0000'+frequency(rate)+field(3,5)+'000' if sbr else field(3,5)+frequency(24000)+'0000'+'000')
+            name=f'arrival-{int(sbr)}-{rate}-'+('dynamic' if dynamic else 'static')
+            case=dict(name=name,asc=packed(program(prefix,1,3,() if dynamic else (1,))).hex(),frames=rows,channels=1,
+                      container_rate=rate,container_frame_samples=1024*(rate//24000),samples=6144*(rate//24000),
+                      slots=16,bands=32*(rate//24000),pcm_offset=0,core=not sbr,present=present,
+                      reference=references[rate] if sbr else core_name,initially_empty=dynamic)
+            case['video']=video_fixture([case],blob,filename='aac-ssr-cce-absence-'+name+'-synthetic.mp4');cases.append(case)
     (DEST/'aac-ssr-cce-absence-packets.bin').write_bytes(blob)
     (DEST/'aac-ssr-cce-absence.json').write_text(json.dumps(dict(cases=cases,invalid=invalid,
         provenance='Own SSR spectra/gain/window IPQF core oracle, explicit CCE1 gaps and paused coded-source history; retain queued PCM before zero absent intervals. Independent direct QMF/SBR with pure upsampling on absent FIL and preserved noise/smoothing state; apply original source chunk gains after DSP. No private media, decoder, FFmpeg or network.'),indent=2)+'\n')
