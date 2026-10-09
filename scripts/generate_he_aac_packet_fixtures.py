@@ -42,7 +42,8 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
     video=(DEST/'avc-slice-lists-temporal.mp4').read_bytes()
     template=(DEST.parent/'audio/aac-native-edit.m4a').read_bytes()
     case=next((c for c in cases if c['slots']==16 and c['bands']==64), cases[0])
-    frame_samples=2*64*case['slots']
+    frame_samples=case.get('container_frame_samples',2*64*case['slots'])
+    container_rate=case.get('container_rate',48000)
     durations=case.get('durations',[frame_samples]*len(case['frames']))
     assert len(durations)==len(case['frames']) and all(0<d<=frame_samples for d in durations)
     duration=sum(durations)
@@ -56,17 +57,17 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
     movie_header=next(p for t,p in boxes(original_moov) if t==b'mvhd')
     assert movie_header[0]==0
     movie_rate=struct.unpack_from('>I',movie_header,12)[0]
-    audio_duration=(duration*movie_rate+47999)//48000
+    audio_duration=(duration*movie_rate+container_rate-1)//container_rate
     offset=len(video)+8
     def rewrite(tag,body):
         if tag==b'edts':return b''
         if tag==b'tkhd':
             body=bytearray(body);assert body[0]==0;struct.pack_into('>I',body,12,2);struct.pack_into('>I',body,20,audio_duration);body=bytes(body)
         elif tag==b'mdhd':
-            body=bytearray(body);assert body[0]==0;struct.pack_into('>II',body,12,48000,duration);body=bytes(body)
+            body=bytearray(body);assert body[0]==0;struct.pack_into('>II',body,12,container_rate,duration);body=bytes(body)
         elif tag==b'stsd':
             entries=list(boxes(body[8:]));assert len(entries)==1 and entries[0][0]==b'mp4a'
-            entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,channels);struct.pack_into('>I',entry,24,48000<<16)
+            entry=bytearray(entries[0][1][:28]);struct.pack_into('>H',entry,16,channels);struct.pack_into('>I',entry,24,container_rate<<16)
             body=bytes(4)+struct.pack('>I',1)+box(b'mp4a',bytes(entry)+box(b'esds',esds))
         elif tag==b'stts':
             body=(bytes(4)+struct.pack('>III',1,len(packets),frame_samples) if all(d==frame_samples for d in durations) else

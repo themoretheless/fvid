@@ -166,6 +166,10 @@ mod tests {
                 (0, 1),
                 (tns, 1),
                 (gain, 1),
+                (1, 2), // one gain band
+                (1, 3), // active adjustment, not the newly supported no-op
+                (8, 4),
+                (0, 5),
             ]);
             let mut bits = BitReader::new(&data);
             assert!(ChannelData::read(&mut bits, &config).is_err());

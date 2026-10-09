@@ -165,7 +165,10 @@ impl ChannelData {
             None
         };
         if cursor.bit()? {
-            return Err(unsupported("owned AAC gain control is not implemented"));
+            let gain = super::aac_gain_control::GainControl::read(&mut cursor, info.sequence)?;
+            if !gain.is_empty() {
+                return Err(unsupported("owned AAC active gain control synthesis is not implemented"));
+            }
         }
         let offsets = if info.sequence == WindowSequence::EightShort {
             tables.short

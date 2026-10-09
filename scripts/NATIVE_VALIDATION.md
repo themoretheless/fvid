@@ -1129,3 +1129,24 @@ absolute-parameter packets. Six own MP4 videos qualify export/ranges/WAV and
 playback seek/rewind. This extends qualification of the sequential-PS fix; it
 does not introduce a new production implementation or close other AAC profiles.
 The generator's default behavior preserves the existing PS fixture bytes.
+
+### 2026-10-09 — AAC gain-control syntax and empty adjustments
+
+The channel reader no longer refuses every gain-control flag. A shared owned
+parser reads max_band, adjustment counts, levels and locations for OnlyLong,
+LongStart, EightShort and LongStop. Syntax storage is bounded by wire fields
+(3 bands, 8 windows, 7 adjustments), and a truncated input commits no cursor.
+Empty lists are a no-op and now proceed to spectral decoding. Active lists
+retain a specific unsupported-synthesis error; SSR inverse PQF and actual gain
+compensation remain gaps. This is not full SSR/gain-control acceptance.
+The field widths are checked against the primary reference parser:
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aac/aacdec.c
+
+32 own long-window videos cover 960/1024, LC/PS, target/CCE and max_band 0..3.
+PCM equals no-gain baseline exactly, with independent cosine core PCM for LC;
+root/owned export, repeated ranges and playback rewind/seek agree. Two active
+adjustment videos reproduce the precise refusal and preserve overlap/history.
+Separate syntax tests cover all window modes, maximum lists and every byte
+truncation. Fixture generation is deterministic/offline and outside tests.
+Container clock overrides were added to the own MP4 generator; existing default
+fixture bytes are unchanged.

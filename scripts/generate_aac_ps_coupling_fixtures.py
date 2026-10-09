@@ -24,10 +24,10 @@ def config(slots, rate, kind, tags, point):
     return packed(program(prefix,tags,point))
 
 
-def channel(frame, silent, tns):
+def channel(frame, silent, tns, gain=None):
     bits=field(140,8)+info()+field(0 if silent else 1,4)+field(1,5)
     if not silent:bits+=word(60)
-    bits+='0'+('1'+field(1,2)+'0'+field(49,6)+field(1,5)+'00'+field(1,3) if tns else '0')+'0'
+    bits+='0'+('1'+field(1,2)+'0'+field(49,6)+field(1,5)+'00'+field(1,3) if tns else '0')+('0' if gain is None else '1'+gain)
     if not silent:
         index=80 if frame%2==0 else 0
         bits+=field(codes[index],lens[index])
@@ -40,12 +40,12 @@ def fill(raw):
     return '110'+(field(size,4) if size<15 else '1111'+field(size-14,8))+''.join(field(b,8) for b in raw)
 
 
-def packet(frame,tags,point,target_raw,cce_raw,missing=False):
-    target='000'+field(3,4)+channel(frame,True,True)+fill(target_raw)
+def packet(frame,tags,point,target_raw,cce_raw,missing=False,target_gain=None,source_gain=None):
+    target='000'+field(3,4)+channel(frame,True,True,target_gain)+fill(target_raw)
     sources=[]
     for tag in tags:
         text=('010'+field(tag,4)+field(point==3,1)+'000'+'0'+field(4 if missing and tag==tags[-1] else 3,4)
-              +field(point==1,1)+'000'+channel(frame,False,False)+fill(cce_raw[tag]))
+              +field(point==1,1)+'000'+channel(frame,False,False,source_gain)+fill(cce_raw[tag]))
         sources.append(text)
     if frame%2:sources.reverse()
     # CCE appears before or after target; target FIL is bound to that target.

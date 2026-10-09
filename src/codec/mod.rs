@@ -282,6 +282,7 @@ pub mod aac_spectral;
 
 pub mod aac_bands;
 
+pub mod aac_gain_control;
 pub mod aac_channel;
 
 pub mod aac_pair;
