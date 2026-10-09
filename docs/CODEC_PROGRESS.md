@@ -7124,3 +7124,10 @@ and malformed markers; `tests/hevc_eos.rs` checks acceptance and exact errors.
 Generate separately with `python3 scripts/generate_hevc_eos_fixtures.py`;
 ordinary tests require neither FFmpeg nor network access. This qualifies the
 base-layer sequence transition, not remaining HEVC profiles or multilayer tools.
+
+The EOS acceptance target additionally verifies standalone EOS/EOB packets,
+repeated end markers, reset/replay, and poison-until-reset recovery after
+malformed EOS. Subsequent CRA pictures are compared against a fresh decoder,
+including every reconstructed plane; the three leading RASL pictures must be
+discarded. These checks reuse our synthetic fixture and require no generation
+or external codec during test execution.
