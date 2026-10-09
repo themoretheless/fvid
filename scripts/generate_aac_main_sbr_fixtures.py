@@ -9,7 +9,7 @@ from generate_adts_ps_fixtures import region_helper
 
 def main():
     syntax=(DEST/'aac-sbr-dsp-syntax.bin').read_bytes()
-    ref=next(c for c in json.loads((DEST/'aac-sbr-dsp-oracles.json').read_text())['cases'] if c['slots']==16 and c['bands']==64)
+    ref=next(c for c in json.loads((DEST/'aac-sbr-dsp-oracles.json').read_text())['cases'] if c['slots']==16 and c['bands']==64 and c['limiter']==0 and not c['smoothing'])
     blob=bytearray();rows=[];implicit=packed(field(1,5)+frequency(24000)+'0001'+'000')
     for frame in range(6):
         active=frame>=3

@@ -827,5 +827,7 @@ FIL in ADTS export, native player and owned remux. Main predictor state remains
 in the core decoder; PS probing stays restricted to LC. The six-frame authored
 active-prediction fixture verifies explicit/sync/implicit PCM equivalence,
 protected/multiplexed ADTS, MP4/Matroska remux and rewind/seek. This is transport
-and signalling qualification, not complete AAC Main+SBR conformance. SSR+SBR,
+and signalling qualification plus independent scalar PCM for the fixed authored
+composition (Main prediction through SBR, 1e-7 tolerance), not complete AAC
+Main+SBR conformance. SSR+SBR,
 LTP/ER/ELD/USAC and broader profile tools still require implementation/qualification.

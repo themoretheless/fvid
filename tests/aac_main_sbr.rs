@@ -19,6 +19,37 @@ fn main_prediction_sbr_signalling_and_adts_transport_agree() {
             assert_eq!(pcm, expected);
         }
     }
+    let gold = include_bytes!("fixtures/playback-errors/aac-main-sbr-reference.f64le");
+    assert_eq!(gold.len(), expected.len() * 2);
+    let mut maximum_error = 0.0f64;
+    for (i, (actual, reference)) in expected
+        .chunks_exact(4)
+        .zip(gold.chunks_exact(8))
+        .enumerate()
+    {
+        let actual = f32::from_le_bytes(actual.try_into().unwrap()) as f64;
+        let reference = f64::from_le_bytes(reference.try_into().unwrap());
+        maximum_error = maximum_error.max((actual - reference).abs());
+        assert!(
+            (actual - reference).abs() < 1e-7,
+            "sample {i}: {actual} vs scalar {reference}"
+        );
+    }
+    eprintln!("Main/SBR maximum scalar PCM error: {maximum_error:e}");
+    let control =
+        include_bytes!("fixtures/playback-errors/aac-main-sbr-no-prediction-control.f64le");
+    assert_eq!(control.len(), gold.len());
+    assert!(
+        expected
+            .chunks_exact(4)
+            .zip(control.chunks_exact(8))
+            .any(|(actual, control)| {
+                let actual = f32::from_le_bytes(actual.try_into().unwrap()) as f64;
+                let control = f64::from_le_bytes(control.try_into().unwrap());
+                (actual - control).abs() > 1e-5
+            }),
+        "acceptance must exercise active Main prediction through SBR"
+    );
     for file in manifest["files"].as_array().unwrap() {
         let data = std::fs::read(root.join(file.as_str().unwrap())).unwrap();
         let mut pcm = Vec::new();

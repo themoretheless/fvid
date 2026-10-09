@@ -2637,7 +2637,13 @@ The old implementation accepts explicit/container-clock Main + SBR but refuses
 ADTS with `AAC fill extension tool SBR requires extension-aware stream signalling`.
 `tests/aac_main_sbr.rs` now accepts the same encoded data across these signalling
 forms, full export, indexed/sequential MP4 remux, Matroska remux and player
-rewind/seek. PCM equivalence validates composition/transport, not an independent
-whole-composition scalar oracle; existing independent Main and SBR component
-oracles remain separate. ISO/IEC 14496-3 subpart 1 Table 1.2 permits Main (AOT1)
+rewind/seek. The additional `generate_aac_main_sbr_oracle.py` independently
+computes the entire six-frame PCM using scalar Main prediction, direct IMDCT
+and direct QMF convolutions with the fixed authored SBR gain/noise geometry.
+Numeric normative window/noise constants are shared, but no decoder, DSP output
+or production history buffers are used. The committed f64 reference is compared
+with tolerance 1e-7; a no-prediction control differs by over 1e-5, proving that
+active prediction is exercised. All three oracle artifacts regenerate identically.
+This qualifies this authored composition, not all Main/SBR tools or geometries.
+ISO/IEC 14496-3 subpart 1 Table 1.2 permits Main (AOT1)
 with SBR. SSR and other unimplemented core families remain explicit gaps.

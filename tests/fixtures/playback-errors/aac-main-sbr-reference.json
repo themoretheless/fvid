@@ -1,0 +1,7 @@
+{
+  "samples": 12288,
+  "sha256": "a1e77229938057780004080f5f617a36841f3ee380424e9e550dd8ba9368bcd9",
+  "control_sha256": "9b1369008b99c32f819ce966d990ff3faa7e9e73a34696b94ec044d759d60176",
+  "prediction_max_difference": 0.00010474879680852812,
+  "source": "ISO/IEC14496-3 4.6.18; independent Main scalar predictor/direct IMDCT, direct QMF convolution and fixed authored SBR geometry"
+}

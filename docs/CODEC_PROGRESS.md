@@ -7941,10 +7941,31 @@ ADTS admission/export, player and mux clock probe. Own six-frame active Main
 prediction + SBR videos reproduce the previous ADTS-specific refusal while
 explicit/container-clock forms already decode. Acceptance compares all signalling
 forms, six protected/plain raw-block layouts, both MP4 mux paths, Matroska and
-player seek/rewind. Independent whole-composition PCM qualification remains a gap;
+player seek/rewind. The fixed authored six-frame composition also has an
+independent scalar Main/IMDCT/QMF/SBR PCM reference (1e-7 tolerance), with a
+no-prediction control. Broader Main/SBR tools and geometries remain unqualified;
 this change does not claim complete AAC or other codec conformance.
 
 Validation: 931 root/core and selected integration tests passed (23 existing
 ignored), plus 456 owned-media tests (one existing ignored); the expanded
 Main+SBR acceptance pair also passed. Offline, no FFmpeg/network. All 11 fixture
 artifacts regenerated identically; `git diff --check` passed.
+
+
+### 2026-10-09 — independent Main + SBR composition PCM
+
+`generate_aac_main_sbr_oracle.py` evaluates the existing authored nonzero Main
+program without calling any decoder. Main predictor + sparse direct IMDCT feed
+direct analysis/synthesis QMF convolutions, fixed patch geometry, per-frame
+energy/gain limiting and cross-frame smoothing/noise phases. A prediction-off
+control differs by 1.04749e-4. Committed reference and control cover 12288 samples;
+ordinary tests remain offline and do not invoke generators. This closes the
+whole-composition oracle gap for this fixture only; arbitrary SBR tools,
+profiles and channel layouts remain separate qualification work.
+
+Validation: 11 Main/prediction/SBR/tools acceptance tests passed offline with no
+FFmpeg/network. Measured maximum absolute full-composition PCM difference is
+4.27283e-8 over all 12288 samples, with fixed acceptance tolerance 1e-7.
+The stricter 1e-9 and 2e-8 trials failed; they are not claimed as passed.
+All 14 existing/new encoded and oracle artifacts regenerated identically;
+`git diff --check` passed. Production code did not change in this oracle step.
