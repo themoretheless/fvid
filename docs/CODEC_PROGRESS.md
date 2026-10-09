@@ -8949,3 +8949,37 @@ new independent numerical SBR/PS oracle.
 Validation: 14 integration tests passed across `aac_main_ps`,
 `aac_main_ps_cce` and `aac_main_ps_independent`, locked/offline with
 `media,player` and no FFmpeg. Production code is unchanged.
+
+### AAC Main PS point-3 source TNS/SBR matrix (2026-10-09)
+
+A separate 36-video authored matrix qualifies forward first-order source TNS
+on tag 1 and reverse TNS on tag 15 for independent Main PS coupling point 3.
+Long sine/KBD source windows, distinct predictor histories/reset groups,
+source-SBR on/off and 24/48 kHz output combine with continuous sources,
+single-source absence/arrival, simultaneous absence/arrival, initially empty
+rosters and static/dynamic PCE variants. The scalar oracle predicts each
+source before directional TNS and direct IMDCT/overlap; qualified owned
+SBR/PS stages supply the extension composition reference. A separate source
+core control omits TNS, preserving prediction and overlap.
+
+Enabled acceptance checks waveform, packet rollback/checkpoints, reset,
+frame indices/delayed EOF, export, syntax probe, intervals, rewind and seek.
+Static/dynamic roster PCM stays identical; absent-source DSP discard,
+predictor-history discard, source FIL reassociation and source-TNS omission
+controls all change final PCM. Empty frames equal target-only PS PCM and
+independent sources do not change the right target channel. A temporary
+production mutation omitting source TNS fails waveform at sample 968 for
+24 kHz upsampling; original production source is restored byte-for-byte.
+
+Generator `scripts/generate_aac_main_ps_independent_tns_fixtures.py` reproduces
+44 artifacts deterministically. It stays separate from test execution and
+uses no private media, FFmpeg, foreign decoder or network. Prior fixture sets
+are unchanged. This qualifies first-order long-window source TNS combinations
+in this mono Main PS point-3 matrix only. Short-window/higher-order source TNS,
+PNS, additional SBR geometries, source PS and broader profiles/layouts remain
+open; neither a new independent numerical PS oracle nor all-codec parity is
+claimed.
+
+Validation: 15 integration tests passed across `aac_main_ps`,
+`aac_main_ps_cce` and `aac_main_ps_independent_tns`, locked/offline with
+`media,player` and no FFmpeg. Production code is unchanged.
