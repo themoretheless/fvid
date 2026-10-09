@@ -37,6 +37,8 @@ pub struct HevcDecoder {
     active_pps: Option<u8>,
     hdr: HdrMetadata,
     primed: HdrMetadata,
+    pending_active_parameters: Option<hevc_sei::ActiveParameterSets>,
+    active_parameters: Option<hevc_sei::ActiveParameterSets>,
     length: u8,
     budget: usize,
     failed: bool,
@@ -122,6 +124,8 @@ impl HevcDecoder {
             active_pps: None,
             hdr: primed,
             primed,
+            pending_active_parameters: None,
+            active_parameters: None,
             length: config.length_size,
             budget,
             failed: false,
@@ -144,6 +148,8 @@ impl HevcDecoder {
         self.sequence_ended = false;
         self.active_pps = None;
         self.hdr = self.primed;
+        self.pending_active_parameters = None;
+        self.active_parameters = None;
         self.failed = false;
     }
     /// The static HDR light the stream stated of itself: the SEI messages its
@@ -156,6 +162,11 @@ impl HevcDecoder {
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
     }
+    /// Last validated base-layer active-parameter declaration in this CVS.
+    pub fn active_parameter_sets(&self) -> Option<&hevc_sei::ActiveParameterSets> {
+        self.active_parameters.as_ref()
+    }
+
     /// Inspect in-band SEI NAL units in a packet to update HDR metadata without full picture decoding.
     pub fn observe_packet(&mut self, packet: &[u8]) {
         if let Ok(units) = NalUnits::new(packet, self.length) {
@@ -377,6 +388,12 @@ impl HevcDecoder {
             } else if matches!(header.unit_type, 32..=34) {
                 // Parameter sets were validated before parsing slices.
             } else if hevc_sei::is_sei_unit(header.unit_type) {
+                if let Ok(Some(active)) = hevc_sei::active_parameters_from_nal(nal, self.budget) {
+                    if slice.is_some() {
+                        return Err(invalid("HEVC active parameter SEI follows picture slices"));
+                    }
+                    self.pending_active_parameters = Some(active);
+                }
                 // An SEI this module cannot walk costs the guidance, never the
                 // picture it travels with.
                 if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, self.budget) {
@@ -409,6 +426,18 @@ impl HevcDecoder {
         let begins_cvs = new_sequence || self.previous_poc.is_none()
             || header.nal.is_idr() || matches!(header.nal.unit_type, 16..=18);
         self.sequence_ended = end_after_picture;
+        if let Some(active) = self.pending_active_parameters.take() {
+            if active.vps_id != sps.vps_id || active.sps_ids[0] != sps.id {
+                return Err(invalid("HEVC active parameter SEI disagrees with picture binding"));
+            }
+            if !begins_cvs && (self.decoded_vps.as_ref() != Some(vps)
+                || self.decoded_sps.as_ref() != Some(sps)) {
+                return Err(invalid("HEVC active parameter SEI requires new sequence"));
+            }
+            self.active_parameters = Some(active);
+        } else if begins_cvs {
+            self.active_parameters = None;
+        }
         if new_sequence {
             self.references.clear();
             self.previous_poc = None;

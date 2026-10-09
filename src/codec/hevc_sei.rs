@@ -133,6 +133,64 @@ pub fn messages(rbsp: &[u8]) -> Result<Vec<Message<'_>>> {
     }
 }
 
+/// Base-layer active_parameter_sets (payload type 129), H.265 D.2.21.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ActiveParameterSets {
+    pub vps_id: u8,
+    pub self_contained_cvs: bool,
+    pub no_parameter_set_update: bool,
+    /// Only the first SPS is activated for base-layer Annex A decoding.
+    /// Additional IDs are bounded and preserved as reserved guidance.
+    pub sps_ids: Vec<u8>,
+}
+impl ActiveParameterSets {
+    pub fn parse(payload: &[u8]) -> Result<Self> {
+        let mut bits = super::bits::BitReader::new(payload);
+        let vps_id = bits.read(4)? as u8;
+        let self_contained_cvs = bits.bit()?;
+        let no_parameter_set_update = bits.bit()?;
+        let count = bits.unsigned_golomb()?;
+        if count > 15 {
+            return Err(invalid("HEVC active parameter SEI exceeds SPS count"));
+        }
+        let mut sps_ids = Vec::with_capacity(count as usize + 1);
+        for _ in 0..=count {
+            let id = bits.unsigned_golomb()?;
+            if id > 15 {
+                return Err(invalid("HEVC active parameter SEI SPS ID outside range"));
+            }
+            sps_ids.push(id as u8);
+        }
+        // Payloads ending at a byte boundary have no payload alignment bits.
+        // Otherwise the SEI payload uses a stop bit followed by alignment zeros.
+        if bits.remaining() != 0 {
+            bits.finish_rbsp()?;
+        }
+        Ok(Self { vps_id, self_contained_cvs, no_parameter_set_update, sps_ids })
+    }
+}
+
+/// Read active-parameter guidance from a base-layer prefix SEI. Other messages
+/// remain opaque; malformed guidance is reported to callers separately from HDR.
+pub fn active_parameters_from_nal(nal: &[u8], budget: usize) -> Result<Option<ActiveParameterSets>> {
+    let rbsp = NalRbsp::parse(nal, budget)?;
+    if rbsp.header.unit_type != NAL_UNIT_PREFIX_SEI {
+        return Ok(None);
+    }
+    rbsp.header.require_base_layer()?;
+    let mut active = None;
+    let found = messages(&rbsp.bytes)?;
+    for message in &found {
+        if message.payload_type == 129 {
+            if found.len() != 1 {
+                return Err(invalid("HEVC active parameter SEI must occupy its own NAL"));
+            }
+            active = Some(ActiveParameterSets::parse(message.payload)?);
+        }
+    }
+    Ok(active)
+}
+
 /// The static HDR metadata an SEI RBSP states, message by message.
 ///
 /// A malformed 137 or 144 payload is dropped rather than failed: the metadata
@@ -167,6 +225,39 @@ pub fn hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<HdrMetadata>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn active_parameter_payload_bounds_flags_and_alignment() {
+        fn payload(count: u32, ids: &[u32]) -> Vec<u8> {
+            fn ue(v: u32) -> String {
+                let word = format!("{:b}", v + 1);
+                "0".repeat(word.len() - 1) + &word
+            }
+            let mut bits = String::from("111111");
+            bits += &ue(count);
+            for &id in ids { bits += &ue(id); }
+            if bits.len() % 8 != 0 {
+                bits.push('1');
+                while bits.len() % 8 != 0 { bits.push('0'); }
+            }
+            bits.as_bytes().chunks(8).map(|c| c.iter().fold(0, |v, &b| (v << 1) | u8::from(b == b'1'))).collect()
+        }
+        let data = payload(0, &[15]);
+        let active = ActiveParameterSets::parse(&data).unwrap();
+        assert_eq!(active.vps_id, 15);
+        assert_eq!(active.sps_ids, [15]);
+        assert!(active.self_contained_cvs && active.no_parameter_set_update);
+        let data = payload(15, &[15; 16]);
+        assert_eq!(ActiveParameterSets::parse(&data).unwrap().sps_ids, [15; 16]);
+        assert_eq!(ActiveParameterSets::parse(&payload(16, &[])).unwrap_err().to_string(), "HEVC active parameter SEI exceeds SPS count");
+        assert_eq!(ActiveParameterSets::parse(&payload(0, &[16])).unwrap_err().to_string(), "HEVC active parameter SEI SPS ID outside range");
+        assert!(ActiveParameterSets::parse(&[]).is_err());
+        let mixed = sei(&[129, 1, 7, 5, 0, 128]);
+        assert_eq!(active_parameters_from_nal(&mixed, 1024).unwrap_err().to_string(),
+            "HEVC active parameter SEI must occupy its own NAL");
+        for end in 0..data.len() - 1 {
+            assert!(ActiveParameterSets::parse(&data[..end]).is_err());
+        }
+    }
     #[test]
     fn output_metadata_roundtrips_escaped_rbsp_and_rejects_invalid_light() {
         let hdr = HdrMetadata {

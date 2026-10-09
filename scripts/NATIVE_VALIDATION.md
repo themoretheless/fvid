@@ -1362,3 +1362,32 @@ Generate separately using `python3 scripts/generate_hevc_eos_fixtures.py`;
 ordinary tests use checked-in own video only. BLA_W_RADL/BLA_N_LP, SEI activation
 and layered tools remain separate qualification work. H.265 reference marking:
 https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202601-I%21%21PDF-E&lang=f&type=items
+
+
+### HEVC active_parameter_sets SEI
+
+Owned prefix-SEI payload type 129 parsing now reads bounded VPS/SPS IDs and
+self-contained/no-update declaration flags. A maximum of 16 SPS IDs is allowed;
+base-layer decoding binds the first and preserves extra IDs as guidance.
+The decoder stages a valid parameter-only SEI until its associated picture,
+checks the declared IDs against that picture's VPS/SPS binding and validates
+new activation at a CVS boundary. Repeated guidance for already active sets
+is permitted. `active_parameter_sets()` exposes the last validated declaration
+within the current CVS; reset or a new CVS without guidance clears it.
+
+Own `hevc-active-parameters-*` short videos reproduce previously ignored
+wrong-VPS/SPS declarations and qualify valid/repeated/extra-ID guidance by
+comparing 17 pictures, POC and exact playback timing against the authored seed,
+including decoder reset. The empty and mixed-message cases are malformed
+guidance refusal/opaque-playback tests, not activation acceptance: malformed
+SEI does not cost the accompanying picture under the existing metadata policy.
+Unit tests require SPS-count/ID bounds, payload alignment and the requirement
+that active-parameter SEI occupy its own NAL. Generate separately using
+`python3 scripts/generate_hevc_active_parameter_fixtures.py`; tests are offline
+and do not invoke generation, external codecs or network.
+
+The flags are exposed as declarations; full self-contained/no-update promise
+verification, configuration-carried activation, multilayer layer_sps_idx and
+other SEI tools remain work. H.265 D.2.21/D.3.21 and 7.4.2.4.2 are the syntax
+and activation basis:
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201911-S%21%21PDF-E&lang=e&type=items
