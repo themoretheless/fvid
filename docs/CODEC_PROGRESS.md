@@ -8040,3 +8040,22 @@ acceptance tests passed: 1385 distinct tests, 24 existing ignored. The SSR/SBR
 acceptance is no longer ignored. All run offline without FFmpeg/network.
 All 27 SSR/SBR and Main/SBR artifacts regenerate identically; `git diff --check`
 passes. No hardware/real-time throughput or full profile conformance is inferred.
+
+
+### 2026-10-09 — SSR ADTS discovery and delayed core drain
+
+ADTS discovery admits SSR alongside Main and LC. Timed core decoding preserves
+SSR window alignment; core-only discovery caches the final delayed PCM at EOF.
+The owned synthetic corpus covers silent and active SSR, implicit SBR and core
+controls, six-packet programs in 111111/33/123 framing with and without CRC.
+Acceptance compares complete PCM and 20–200 ms intervals with the already
+qualified companion MP4, and checks indexed/streaming MP4 and Matroska remux.
+This does not qualify arbitrary late SBR changes, incomplete SSR transition
+prefixes, SSR PS, independent coupling, or all SSR profiles/tools.
+Ordinary tests use checked-in fixtures without FFmpeg or network access.
+
+Delivery checks: 909 root unit tests and 457 owned-media unit tests passed;
+24 pre-existing tests remain ignored. Both new ADTS tests and all four native
+AAC remux tests passed. All 25 ADTS artifacts regenerate identically.
+Changed Rust files pass formatting; repository-wide formatting still reports
+pre-existing differences outside this change. `git diff --check` passes.

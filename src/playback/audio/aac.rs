@@ -47,7 +47,7 @@ impl AacAudioReader {
                 }
             }
             in_band_ps = probe.ps_detected();
-        } else if matches!(parsed.core.object_type, 1 | 2) && parsed.sbr_present.is_none() {
+        } else if matches!(parsed.core.object_type, 1 | 2 | 3) && parsed.sbr_present.is_none() {
             for i in 0..aac.packets() {
                 if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)
                     .map_err(|e| crate::invalid(&e.0))?

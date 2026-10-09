@@ -192,7 +192,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
         });
     }
 
-    let discovery = matches!(parsed.core.object_type, 1 | 2) && parsed.sbr_present.is_none();
+    let discovery = matches!(parsed.core.object_type, 1 | 2 | 3) && parsed.sbr_present.is_none();
     let mut decoder = if discovery {
         AdtsPacketDecoder::new_with_sbr_detection(&asc)?
     } else {
@@ -203,8 +203,8 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
     let mut cached_lc = false;
     if discovery {
         // ADTS has no extension clock. Until a valid SBR FIL or the requested
-        // prefix ends, retain encoded packets and LC PCM on disk. Never publish
-        // a core-rate prefix followed by a double-rate suffix. LC replay copies
+        // prefix ends, retain encoded packets and core PCM on disk. Never publish
+        // a core-rate prefix followed by a double-rate suffix. Core replay copies
         // its cached PCM; SBR replay reconstructs the prefix with QMF history.
         let core_to = match interval {
             Some((_, to)) => adts_sample_boundary(to, config.sample_rate)?,
@@ -217,7 +217,9 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
             let Some(packet) = reader.next_packet()? else {
                 break;
             };
-            let samples = decoder.decode(&packet)?;
+            let samples = decoder
+                .decode_timed(&packet, 0, u64::from(decoder.core_frame_samples()))?
+                .map_or_else(Vec::new, |f| f.samples);
             let frames = (samples.len() / channels) as u64;
             let core_frames = if decoder.sample_rate() == config.sample_rate {
                 frames
@@ -244,6 +246,14 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
         }
         let rate = decoder.sample_rate();
         cached_lc = rate == config.sample_rate;
+        if cached_lc && core_position < core_to {
+            // Delayed SSR may retain the final core frame after the last encoded
+            // packet. Store its PCM as a tail-only record; this path never replays
+            // encoded data and never publishes before negotiation succeeds.
+            if let Some(frame) = decoder.finish()? {
+                storage.push(&[], &frame.samples)?;
+            }
+        }
         if !cached_lc {
             // Admission covers one decoder, not two simultaneous histories.
             drop(decoder);

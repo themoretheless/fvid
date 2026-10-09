@@ -128,7 +128,7 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
 /// use bounded packet/PCM scratch included in the fixed LC I/O reserve.
 pub(crate) fn check_adts_decode_admission(asc: &[u8], options: &CopyOptions) -> Result<()> {
     let config = AdtsAudioConfig::parse(asc)?;
-    let discovery = matches!(config.core.object_type, 1 | 2) && config.sbr_present.is_none();
+    let discovery = matches!(config.core.object_type, 1 | 2 | 3) && config.sbr_present.is_none();
     let rate = if discovery {
         config
             .core

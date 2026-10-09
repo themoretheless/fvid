@@ -240,7 +240,7 @@ impl NativeAacDecoder {
     pub fn new_with_sbr_detection(asc:&[u8]) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         let mut decoder=Self::new(asc)?;
-        decoder.detect_sbr=matches!(parsed.core.object_type, 1 | 2) && parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
+        decoder.detect_sbr=matches!(parsed.core.object_type, 1 | 2 | 3) && parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
         if decoder.detect_sbr { decoder.sbr_elements=vec![None; decoder.sbr_slots()]; }
 
         Ok(decoder)

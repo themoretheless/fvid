@@ -107,9 +107,9 @@ fn extended_audio_entry_rejects_invalid_rates_and_channels() {
 #[test]
 fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
     use std::io::{Read, Seek, SeekFrom, Write};
-    // Framing-only SSR-profile packets have no implicit SBR discovery.
-    // The muxer copies these dummy payloads without decoding them.
-    // Repetition and sparse output exercise >4 GiB without allocating that data.
+    // Valid silent SSR blocks with bounded FIL padding, no SBR. A virtual
+    // sparse payload overlay preserves the bytes without allocating >4 GiB
+    // of disk blocks. Real container headers/index are stored in the file.
     struct Repeat {
         frame: Vec<u8>,
         position: u64,
@@ -127,23 +127,47 @@ fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
             Ok(n)
         }
     }
-    struct Sparse(std::fs::File);
+    struct Sparse {
+        file: std::fs::File,
+        payload: Vec<u8>,
+        starts: Vec<u64>,
+    }
+    impl Read for Sparse {
+        fn read(&mut self, out: &mut [u8]) -> std::io::Result<usize> {
+            let start = self.file.stream_position()?;
+            let n = self.file.read(out)?;
+            let end = start + n as u64;
+            let mut index = self
+                .starts
+                .partition_point(|p| p + self.payload.len() as u64 <= start);
+            while index < self.starts.len() && self.starts[index] < end {
+                let offset = self.starts[index];
+                let lo = start.max(offset);
+                let hi = end.min(offset + self.payload.len() as u64);
+                out[(lo - start) as usize..(hi - start) as usize]
+                    .copy_from_slice(&self.payload[(lo - offset) as usize..(hi - offset) as usize]);
+                index += 1;
+            }
+            Ok(n)
+        }
+    }
     impl Write for Sparse {
         fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
-            if bytes.len() == 8184 && bytes.iter().all(|b| *b == 0) {
-                self.0.seek(SeekFrom::Current(bytes.len() as i64))?;
+            if bytes == self.payload {
+                self.starts.push(self.file.stream_position()?);
+                self.file.seek(SeekFrom::Current(bytes.len() as i64))?;
                 Ok(bytes.len())
             } else {
-                self.0.write(bytes)
+                self.file.write(bytes)
             }
         }
         fn flush(&mut self) -> std::io::Result<()> {
-            self.0.flush()
+            self.file.flush()
         }
     }
     impl Seek for Sparse {
         fn seek(&mut self, pos: SeekFrom) -> std::io::Result<u64> {
-            self.0.seek(pos)
+            self.file.seek(pos)
         }
     }
     let path = std::env::temp_dir().join(format!("fvid-remux-64-{}.mp4", std::process::id()));
@@ -154,7 +178,29 @@ fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
         }
     }
     let _cleanup = Cleanup(path.clone());
+    let mut bits = vec![false; 29]; // silent SCE0, long sine, zero bands/tools.
+    fn field(bits: &mut Vec<bool>, value: u32, width: usize) {
+        for shift in (0..width).rev() {
+            bits.push((value >> shift) & 1 != 0);
+        }
+    }
+    for count in std::iter::repeat_n(269, 30).chain([51]) {
+        field(&mut bits, 6, 3);
+        field(&mut bits, 15, 4);
+        field(&mut bits, count - 14, 8);
+        bits.resize(bits.len() + count as usize * 8, false); // EXT_FILL, zero payload.
+    }
+    field(&mut bits, 7, 3);
+    while bits.len() % 8 != 0 {
+        bits.push(false);
+    }
+    let payload: Vec<u8> = bits
+        .chunks_exact(8)
+        .map(|b| b.iter().fold(0, |v, x| (v << 1) | u8::from(*x)))
+        .collect();
+    assert_eq!(payload.len(), 8184);
     let mut frame = vec![0; 8191];
+    frame[7..].copy_from_slice(&payload);
     frame[..7].copy_from_slice(&include_bytes!("fixtures/audio/aac-mono-44k.aac")[..7]);
     frame[2] = (frame[2] & 0x3f) | 0x80; // SSR framing; this test does not decode dummy PCM.
     frame[3] = (frame[3] & !3) | 3;
@@ -169,18 +215,22 @@ fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
     .unwrap();
     let file = std::fs::OpenOptions::new()
         .write(true)
+        .read(true)
         .create_new(true)
         .open(&path)
         .unwrap();
-    let mut output = Sparse(file);
+    let mut output = Sparse {
+        file,
+        payload: payload.clone(),
+        starts: Vec::new(),
+    };
     assert_eq!(
         mp4_write::write_adts_aac_reader(input, &mut output).unwrap(),
         count
     );
     assert!(output.stream_position().unwrap() > u64::from(u32::MAX));
-    drop(output);
-    let mut reader =
-        mp4::Mp4Reader::open(std::fs::File::open(&path).unwrap(), Default::default()).unwrap();
+    output.rewind().unwrap();
+    let mut reader = mp4::Mp4Reader::open(output, Default::default()).unwrap();
     let track = &reader.tracks()[0];
     assert_eq!(track.samples.len(), count as usize);
     assert_eq!(track.duration, count * 1024);
@@ -189,5 +239,5 @@ fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
     reader
         .read_packet(0, count as usize - 1, &mut packet)
         .unwrap();
-    assert_eq!(packet, vec![0; 8184]);
+    assert_eq!(packet, payload);
 }
