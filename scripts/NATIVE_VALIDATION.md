@@ -1117,3 +1117,15 @@ qualified owned DSP. Six MP4 acceptance videos cover root/owned export, ranges,
 WAV, playback, rewind and seek. A reserved IID mode in a later PS element
 requires exact refusal and transactional rollback; it is not an acceptance.
 Multi-element target audio programs and CCE-owned PS remain separate gaps.
+
+### 2026-10-09 — sequential PS temporal history
+
+Twelve further sequential-PS cases (960/1024, core/double clock, three ASC
+signallings) transmit nonzero positive/negative temporal IID/ICC and modulo-8
+IPD/OPD deltas. The second PS depends on the first in the same extension area;
+following packets retain both updates. Assertions check every native band index
+against scalar accumulated values before PCM comparison to separately encoded
+absolute-parameter packets. Six own MP4 videos qualify export/ranges/WAV and
+playback seek/rewind. This extends qualification of the sequential-PS fix; it
+does not introduce a new production implementation or close other AAC profiles.
+The generator's default behavior preserves the existing PS fixture bytes.

@@ -252,6 +252,7 @@ fn ps_cce_videos_accept_root_owned_export_ranges_wav_and_delayed_playback_seek()
         .unwrap()
         .iter()
         .chain(m["multiple"].as_array().unwrap())
+        .chain(m["temporal"].as_array().unwrap())
     {
         if c["video"].is_null() {
             continue;
@@ -446,7 +447,13 @@ fn source_only_sbr_fil_accepts_mono_and_late_target_ps_negotiates_stereo_export(
 
 #[test]
 fn multiple_ps_extensions_use_final_native_parameters_not_first_frame() {
-    for c in manifest()["multiple"].as_array().unwrap() {
+    let m = manifest();
+    for c in m["multiple"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(m["temporal"].as_array().unwrap())
+    {
         let mut d = decoder(c);
         let mut probe = InBandPsProbe::new(
             &hex(c["asc"].as_str().unwrap()),
@@ -479,7 +486,22 @@ fn multiple_ps_extensions_use_final_native_parameters_not_first_frame() {
                 )
                 .unwrap();
             assert_eq!(parsed.len(), 2);
-            assert_eq!(parsed[0].parameters.iid_mode.value(), 0);
+            assert_eq!(
+                parsed[0].parameters.iid_mode.value(),
+                if row["level"].is_null() { 0 } else { 5 }
+            );
+            if let Some(level) = row["level"].as_i64() {
+                let envelope = &parsed[1].parameters.envelopes[0];
+                assert!(envelope.iid.iter().all(|&v| i64::from(v) == level));
+                assert!(envelope.icc.iter().all(|&v| i64::from(v) == level));
+                assert!(
+                    envelope
+                        .ipd
+                        .iter()
+                        .chain(&envelope.opd)
+                        .all(|&v| i64::from(v) == row["phase_level"].as_i64().unwrap())
+                );
+            }
             assert_eq!(parsed[1].parameters.iid_mode.value(), 5);
             assert!(probe.read(packet(row)).unwrap());
             let saved = d.checkpoint();

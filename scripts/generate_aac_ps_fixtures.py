@@ -26,7 +26,8 @@ def sized(text, escaped=False):
     return (field(count,4) if count<15 else '1111'+field(count-15,8)) + text
 
 def ps(iid_mode, icc_mode, stage, slots=32, variable=False, count=None,
-       phase=True, escaped=False, include_header=None):
+       phase=True, escaped=False, include_header=None,
+       iid_value=2, icc_value=2, phase_value=1, temporal_delta=0):
     if count is None:
         count = [1,2,0][stage]
     if include_header is None:
@@ -51,7 +52,7 @@ def ps(iid_mode, icc_mode, stage, slots=32, variable=False, count=None,
         bands = [10,20,34][mode%3]
         for e in range(count):
             temporal = stage>0 or e>0
-            values = ([0]*bands if temporal else [2]+[0]*(bands-1))
+            values = ([temporal_delta]*bands if temporal else [iid_value if label=='iid' else icc_value]+[0]*(bands-1))
             family = 'Icc' if label=='icc' else 'IidFine' if mode>=3 else 'IidCoarse'
             codebook = BOOKS[family+('Time' if temporal else 'Frequency')]
             bits += field(temporal,1)+''.join(codebook[v] for v in values)
@@ -65,7 +66,7 @@ def ps(iid_mode, icc_mode, stage, slots=32, variable=False, count=None,
             for e in range(count):
                 for label in ['ipd','opd']:
                     temporal = stage>0 or e>0
-                    values = [0]*bands if temporal else [1]+[0]*(bands-1)
+                    values = [temporal_delta%8]*bands if temporal else [phase_value]+[0]*(bands-1)
                     codebook = BOOKS[label.title()+('Time' if temporal else 'Frequency')]
                     inner += field(temporal,1)+''.join(codebook[v] for v in values)
                     phase_rows[label].append(dict(temporal=temporal,values=values))
