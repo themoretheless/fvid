@@ -1,0 +1,29 @@
+{
+  "files": [
+    "adts-first-ps-111-synthetic.aac",
+    "adts-first-ps-111-crc-synthetic.aac",
+    "adts-first-ps-3-synthetic.aac",
+    "adts-first-ps-3-crc-synthetic.aac",
+    "adts-first-ps-12-synthetic.aac",
+    "adts-first-ps-12-crc-synthetic.aac"
+  ],
+  "video": {
+    "file": "adts-first-ps-synthetic.mp4",
+    "sha256": "cd62b03146ab10f26b80c99a1a085ad9d91b0da762ea581ad8c65ef3e37574dd",
+    "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+    "asc": "1308",
+    "pcm_offset": 0,
+    "samples": 6144
+  },
+  "pcm": [
+    [
+      1262592,
+      6144
+    ],
+    [
+      1311744,
+      6144
+    ]
+  ],
+  "provenance": "existing authored first-packet PS, missing-middle and independent scalar stereo PCM; own CRC regions and independent polynomial division"
+}

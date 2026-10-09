@@ -712,3 +712,28 @@ independent polynomial division. Tests read saved fixtures without generation,
 FFmpeg/libav or network access. This qualifies the tested 1024-sample late PS
 route; first-packet PS remux, broader PCE/coupling combinations and complete
 HE-AAC v2 conformance still require separate qualification.
+
+
+### First-packet PS ADTS remux and source geometry
+
+`adts_ps_remux` reproduces two failures: the mux probe passed an initial PS
+payload to the ordinary AAC synthesis decoder, and `aac_source_info` reported
+mono/core speaker geometry for verified in-band PS. Six new authored ADTS
+streams (single/multiplexed, CRC/plain) and a short AVC+AAC companion cover
+first-packet PS, missing-middle PS and restart, alongside the prior late-PS
+fixtures. Independent scalar stereo PCM qualifies the new video and ADTS.
+
+Mono implicit SBR/PS mux candidates are now validated by the own transactional
+syntax probe. Indexed/sequential MP4 and streaming Matroska preserve original
+raw packets, negotiated rate, sample clock/duration and complete stereo PCM.
+ASC/core channel declarations remain mono; verified in-band PS selects stereo
+output. Source inspection now probes MP4/Matroska payloads before returning
+decoded rate, channel count and speaker mask. Tests cover companion source
+inspection and both remux outputs, including late PS.
+
+Generator: `scripts/generate_adts_ps_first_fixtures.py`, sharing the existing
+own ADTS PS generator. Only authored packets, independent scalar PCM and
+AVC/container seeds are used. No private media or parameter sets are copied.
+Ordinary tests read saved fixtures and use neither FFmpeg/libav nor network
+access. This supersedes the first-packet PS remux gap; broader mono PCE/CCE
+combinations and complete HE-AAC v2 conformance still need qualification.

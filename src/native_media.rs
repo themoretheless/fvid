@@ -461,24 +461,27 @@ pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
 }
 
 /// Select a zero-based container stream index; None requires one audio track.
-/// ADTS scans through the first SBR FIL or EOF to negotiate its output clock.
+/// Implicit PS is verified from MP4/Matroska payloads. Mono ADTS scans the
+/// encoded stream before publishing its negotiated output clock and layout.
 pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Result<AacSourceInfo> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
     let mut input = BufReader::new(std::fs::File::open(source)?);
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    let (stream_index, asc, declared) = if crate::container::mp4::recognizes_prefix(&prefix) {
-        let reader = crate::container::mp4::Mp4Reader::open(input, Default::default())?;
+    let (stream_index, asc, declared, in_band_ps) = if crate::container::mp4::recognizes_prefix(&prefix) {
+        let mut reader = crate::container::mp4::Mp4Reader::open(input, Default::default())?;
         let index = mp4_aac_index(&reader, selected)?;
+        let in_band_ps = negotiate_mp4_ps(&mut reader, index, || Ok(()))?;
         let track = &reader.tracks()[index];
         (index, crate::codec::config::aac_specific_config(&track.configuration)?.to_vec(),
-            (u64::from(track.sample_rate), u64::from(track.channels)))
+            (u64::from(track.sample_rate), u64::from(track.channels)), in_band_ps)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
         let index = matroska_aac_index(&reader, selected)?;
+        let in_band_ps = negotiate_matroska_ps(&mut reader, index, || Ok(()))?;
         let track = &reader.tracks[index];
-        (index, track.codec_private.clone(), (track.sample_rate, track.channels))
+        (index, track.codec_private.clone(), (track.sample_rate, track.channels), in_band_ps)
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let reader = crate::container::adts::StreamReader::open(input)?;
@@ -487,6 +490,15 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
         return Ok(AacSourceInfo { stream_index: 0, sample_rate: negotiated.sample_rate(),
             channels: negotiated.channels(), channel_mask: negotiated.channel_mask() });
     };
+    let parsed = crate::codec::config::AudioSpecificConfig::parse(&asc)?;
+    if in_band_ps || parsed.ps_present == Some(true) {
+        let rate = u32::try_from(declared.0).map_err(|_| invalid("AAC output clock overflow"))?;
+        let decoder = crate::codec::aac_ps_native::NativePsAacDecoder::new_with_in_band_ps(&asc, rate)?;
+        if !matches!(declared.1, 1 | 2) || decoder.sample_rate() != rate {
+            return Err(invalid("PS AAC container geometry disagrees with decoded layout"));
+        }
+        return Ok(AacSourceInfo { stream_index, sample_rate: rate, channels: 2, channel_mask: decoder.channel_mask() });
+    }
     let decoder = crate::codec::aac_native::NativeAacDecoder::new_with_output_rate(&asc,u32::try_from(declared.0).map_err(|_|invalid("AAC output clock overflow"))?)?;
     let sample_rate = decoder.sample_rate();
     let channels = u16::from(decoder.channels());

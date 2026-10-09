@@ -171,6 +171,19 @@ pub fn probe_sbr_rate(payload: &[u8], configuration: &[u8]) -> Result<Option<u32
     if !has_sbr_fill(payload, configuration)? {
         return Ok(None);
     }
+    if config.core.channel_configuration == 1
+        && config.program.is_none()
+        && config.ps_present.is_none()
+    {
+        let rate = config
+            .core
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("AAC output rate overflow"))?;
+        let mut probe = super::aac_ps_native::InBandPsProbe::new(configuration, rate)?;
+        probe.read(payload)?;
+        return Ok(Some(rate));
+    }
     let mut decoder = super::NativeAacDecoder::new_with_sbr_detection(configuration)?;
     decoder.decode(payload)?;
     Ok(Some(decoder.sample_rate()))
