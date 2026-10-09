@@ -5,7 +5,7 @@ from generate_he_aac_packet_fixtures import DEST, boxes
 from hevc_fixture_mp4 import box
 
 
-def extended(nal, value, tail, bad_stop=False):
+def extended(nal, value, tail, bad_stop=False, raised_level=False):
     rbsp = bytearray()
     zeros = 0
     for byte in nal[2:]:
@@ -14,6 +14,10 @@ def extended(nal, value, tail, bad_stop=False):
             continue
         rbsp.append(byte)
         zeros = zeros + 1 if byte == 0 else 0
+    if raised_level:
+        assert (nal[0] >> 1) & 63 == 32 and rbsp[1] & 15 == 1
+        assert rbsp[15] == 30
+        rbsp[15] = 60
     bits = ''.join(f'{b:08b}' for b in rbsp)
     stop = bits.rfind('1')
     syntax = bits[:stop]
@@ -46,6 +50,7 @@ def main():
         ('vps-bad-stop', {32}, 0, '00000000000000000000000000000000'),
         ('vps-wrong-id', {32}, 0, ''),
         ('paired-id', {32, 33}, 0, ''),
+        ('vps-level-change', {32}, 0, '00101'),
     ]:
         def config(data):
             result = bytearray(data[:23])
@@ -63,7 +68,7 @@ def main():
                         if label in ('vps-wrong-id', 'paired-id'):
                             nal = nal[:2] + bytes([(nal[2] & 15) | 16]) + nal[3:]
                         else:
-                            nal = extended(nal, value, tail, label.endswith('bad-stop'))
+                            nal = extended(nal, value, tail, label.endswith('bad-stop'), label == 'vps-level-change')
                     result += struct.pack('>H', len(nal)) + nal
             assert at == len(data)
             return bytes(result)
@@ -75,6 +80,38 @@ def main():
             return box(tag, data)
         movie = b''.join(rewrite(t, p) for t, p in roots)
         (DEST / f'hevc-future-extension-{label}-synthetic.mp4').write_bytes(movie)
+
+
+    def child(data, tag):
+        return next(p for t, p in boxes(data) if t == tag)
+    root = dict(roots)
+    stbl = child(child(child(child(root[b'moov'], b'trak'), b'mdia'), b'minf'), b'stbl')
+    sizes = child(stbl, b'stsz')
+    constant, count = struct.unpack_from('>II', sizes, 4)
+    assert constant == 0
+    lengths = struct.unpack('>' + str(count) + 'I', sizes[12:])
+    chunks = child(stbl, b'stco')
+    assert int.from_bytes(chunks[4:8], 'big') == 1
+    at = int.from_bytes(chunks[8:12], 'big')
+    packets = []
+    for n in lengths:
+        packets.append(seed[at:at+n])
+        at += n
+    entry = next(boxes(child(stbl, b'stsd')[8:]))[1]
+    hvcc = child(entry[78:], b'hvcC')
+    assert hvcc[23] & 63 == 32 and int.from_bytes(hvcc[24:26], 'big') == 1
+    size = int.from_bytes(hvcc[26:28], 'big')
+    nal = extended(hvcc[28:28+size], 0, '00101', raised_level=True)
+    packets[1] = struct.pack('>I', len(nal)) + nal + packets[1]
+    def inter_switch(tag, data):
+        if tag in (b'moov', b'trak', b'mdia', b'minf', b'stbl'):
+            data = b''.join(inter_switch(t, p) for t, p in boxes(data))
+        elif tag == b'stsz':
+            data = data[:12] + b''.join(struct.pack('>I', len(p)) for p in packets)
+        elif tag == b'mdat':
+            data = b''.join(packets)
+        return box(tag, data)
+    (DEST / 'hevc-vps-change-inter-synthetic.mp4').write_bytes(b''.join(inter_switch(t, p) for t, p in roots))
 
 
 if __name__ == '__main__':

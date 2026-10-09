@@ -29,6 +29,7 @@ pub struct HevcDecoder {
     params: ParameterSets,
     initial_params: ParameterSets,
     decoded_sps: Option<Sps>,
+    decoded_vps: Option<Vps>,
     references: Vec<Reference>,
     previous_poc: Option<i32>,
     suppress_rasl: bool,
@@ -113,6 +114,7 @@ impl HevcDecoder {
             initial_params: params.clone(),
             params,
             decoded_sps: None,
+            decoded_vps: None,
             references: Vec::new(),
             previous_poc: None,
             suppress_rasl: false,
@@ -135,6 +137,7 @@ impl HevcDecoder {
     pub fn reset(&mut self) {
         self.params.clone_from(&self.initial_params);
         self.decoded_sps = None;
+        self.decoded_vps = None;
         self.references.clear();
         self.previous_poc = None;
         self.suppress_rasl = false;
@@ -403,6 +406,8 @@ impl HevcDecoder {
         }
         let header = &headers[0];
         let new_sequence = self.sequence_ended;
+        let begins_cvs = new_sequence || self.previous_poc.is_none()
+            || header.nal.is_idr() || matches!(header.nal.unit_type, 16..=18);
         self.sequence_ended = end_after_picture;
         if new_sequence {
             self.references.clear();
@@ -424,6 +429,15 @@ impl HevcDecoder {
             self.previous_poc = None;
             self.suppress_rasl = false;
         }
+        if self.decoded_vps.as_ref().is_some_and(|previous| previous != vps) {
+            if !begins_cvs {
+                return Err(invalid("HEVC active VPS changed within sequence"));
+            }
+            self.references.clear();
+            self.previous_poc = None;
+            self.suppress_rasl = false;
+        }
+        self.decoded_vps = Some(vps.clone());
         if self.decoded_sps.as_ref() != Some(sps) {
             self.decoded_sps = Some(sps.clone());
         }

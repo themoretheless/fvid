@@ -7210,3 +7210,23 @@ Activation availability follows H.265 7.4.2.4.2; temporal relationships follow
 not prove full CVS activation restrictions, every temporal hierarchy, layered
 profiles or 3D decoding.
 https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201911-S%21%21PDF-E&lang=e&type=items
+
+
+### HEVC active VPS remains stable inside a CVS
+
+An authored `hevc-vps-change-inter-synthetic.mp4` changes the active VPS level
+from 30 to 60 before sample 1 while keeping all original pictures/parameters
+otherwise. Before this fix player lookahead accepted the changed VPS and
+continued dependent reconstruction. Decoder state now retains the last active
+VPS and refuses a changed binding inside the sequence. IDR/BLA and a sequence
+restart after EOS provide a new CVS boundary; reset forgets activation.
+
+Acceptance tests additionally deliver the changed VPS as a parameter-only
+packet before IDR and before the existing own EOS-to-CRA fixture. Both are
+compared with a fresh decoder for POC and every pixel, repeated through reset;
+the CRA case still discards its three leading RASL pictures. Initial higher
+VPS level in configuration also preserves all baseline frames and timing.
+The generator is offline and tests consume authored files only. BLA and SEI
+activation need separate qualification; this does not claim every CVS rule or
+layered profile implemented. H.265 7.4.2.4.2 defines active VPS lifetime:
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201802-S%21%21PDF-E&lang=e&type=items

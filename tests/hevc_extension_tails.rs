@@ -13,6 +13,13 @@ fn future_parameter_extension_tails_preserve_base_picture_playback() {
     assert_eq!(expected.len(), 17);
     for (label, bytes) in [
         (
+            "raised-vps-level",
+            include_bytes!(
+                "fixtures/playback-errors/hevc-future-extension-vps-level-change-synthetic.mp4"
+            )
+            .as_slice(),
+        ),
+        (
             "paired-id",
             include_bytes!(
                 "fixtures/playback-errors/hevc-future-extension-paired-id-synthetic.mp4"
@@ -195,4 +202,86 @@ fn inband_named_vps_becomes_available_and_reset_restores_initial_sets() {
     d.reset();
     assert!(d.decode_packet(&prefix).unwrap().is_none());
     assert!(d.decode_packet(&packet).unwrap().is_some());
+}
+
+#[test]
+fn active_vps_cannot_change_between_dependent_pictures() {
+    let file = include_bytes!("fixtures/playback-errors/hevc-vps-change-inter-synthetic.mp4");
+    let mut reader =
+        Mp4VideoReader::open_software(Cursor::new(file), Limits::default(), 16 << 20).unwrap();
+    assert_eq!(
+        reader
+            .read_frame()
+            .err()
+            .expect("active VPS changed mid-sequence")
+            .to_string(),
+        "HEVC active VPS changed within sequence"
+    );
+}
+
+#[test]
+fn changed_vps_is_accepted_at_idr_and_post_eos_cra() {
+    use fvid::{
+        codec::{config::HevcConfig, hevc_decoder::HevcDecoder, hevc_vps::Vps},
+        container::mp4::Mp4Reader,
+    };
+    let changed = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-future-extension-vps-level-change-synthetic.mp4"
+        )),
+        Limits::default(),
+    )
+    .unwrap();
+    let config = HevcConfig::parse(&changed.tracks()[0].configuration).unwrap();
+    let nal = &config
+        .arrays
+        .iter()
+        .find(|a| a.nal_type == 32)
+        .unwrap()
+        .units[0];
+    assert_eq!(Vps::parse(nal, 16 << 20).unwrap().profile.level, 60);
+    let mut prefix = (nal.len() as u32).to_be_bytes().to_vec();
+    prefix.extend_from_slice(nal);
+    for (bytes, restart) in [
+        (include_bytes!("fixtures/hevc/main-ipb.mp4").as_slice(), 0),
+        (
+            include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4")
+                .as_slice(),
+            5,
+        ),
+    ] {
+        let mut r = Mp4Reader::open(Cursor::new(bytes), Limits::default()).unwrap();
+        let config = &r.tracks()[0].configuration;
+        let mut actual = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
+        let mut expected = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
+        let mut packet = vec![];
+        for _ in 0..2 {
+            actual.reset();
+            expected.reset();
+            // Establish an active old VPS, including the EOS suffix for CRA.
+            for i in 0..restart.max(1) {
+                r.read_packet(0, i, &mut packet).unwrap();
+                assert!(actual.decode_packet(&packet).unwrap().is_some());
+            }
+            assert!(actual.decode_packet(&prefix).unwrap().is_none());
+            let mut count = 0;
+            for i in restart..r.tracks()[0].samples.len() {
+                r.read_packet(0, i, &mut packet).unwrap();
+                let a = actual.decode_packet(&packet).unwrap();
+                let b = expected.decode_packet(&packet).unwrap();
+                assert_eq!(a.is_some(), b.is_some(), "restart {restart}, sample {i}");
+                if let (Some(a), Some(b)) = (a, b) {
+                    assert_eq!(a.poc, b.poc);
+                    for plane in 0..3 {
+                        assert_eq!(
+                            a.picture.planes[plane].samples(),
+                            b.picture.planes[plane].samples()
+                        );
+                    }
+                    count += 1;
+                }
+            }
+            assert_eq!(count, if restart == 0 { 17 } else { 9 });
+        }
+    }
 }
