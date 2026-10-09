@@ -8638,3 +8638,32 @@ Fixtures are authored and generated offline without FFmpeg, foreign decoders
 or private media. Dynamic Main/LC roster acceptance, initially empty roster
 arrival, output element/tag/layout changes and broader profiles/tools remain
 separate qualifications; this does not claim those cases are complete.
+
+
+### Main/LC dynamic CCE PCE roster qualification (2026-10-09)
+
+Twelve authored mono Main/LC videos qualify the ordinary decoder's roster
+changes: static/dynamic PCE controls for mixed-window absence/return, long-only
+source absence/return, and two independently arriving sources after an empty
+initial roster. CCE1/15 have distinct residual spectra and window histories,
+wire order alternates, and each source's coded ordinal pauses during absence.
+Target PCM is also nonzero; Main prediction warms, activates and resets on the
+authored schedule. Each program has twelve packets (512 ms at 24 kHz).
+
+`scripts/generate_aac_pce_roster_fixtures.py` evaluates independent scalar Main
+prediction and direct IMDCT/window overlap. Static and dynamic variants must
+produce identical PCM and agree with that oracle. Incorrect scalar controls
+that discard source histories on absence differ measurably; the long-window
+Main program additionally detects discarding predictor alone while preserving
+overlap. No production decoder is used by generation.
+
+Enabled tests cover full native export, exact dynamic/static PCM identity,
+checkpoint replay around every PCE, malformed trailing syntax rollback, reset
+to empty ASC roster, rejection of a foreign initial roster checkpoint, playback
+ranges, rewind and seek. All three tests passed on all twelve videos; fixture
+generation and ordinary tests require no private media, FFmpeg or network.
+No production change was needed beyond the preceding roster-state fix.
+
+This qualifies Main/LC core independent coupling at point 3. Dynamic dependent
+coupling, source SBR across initially empty rosters, multi-channel roster changes
+and actual output layout/profile transitions remain separate work.
