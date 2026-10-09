@@ -2,7 +2,7 @@
 """Authored SSR independent CCE with its own SBR FIL, no external codec."""
 import json
 from generate_aac_ssr_coupling_fixtures import program, silent
-from generate_aac_ssr_fixtures import channel, info
+from generate_aac_ssr_fixtures import channel, info, SC, SL
 from generate_he_aac_packet_fixtures import DEST, field, frequency, packed, video_fixture
 
 def main():
@@ -11,7 +11,7 @@ def main():
                if c['slots'] == 16 and c['bands'] == 64 and c['limiter'] == 0 and not c['smoothing'])
     blob = bytearray()
     cases = []
-    for sbr, channels, tags in [(False,1,(1,)), (True,1,(1,)), (True,1,(1,15)), (True,2,(1,)), (True,2,(1,15))]:
+    for sbr, channels, tags, deltas in [(False,1,(1,),None), (True,1,(1,),None), (True,1,(1,15),None), (True,2,(1,),None), (True,2,(1,15),None), (True,2,(1,),[2]*6), (True,2,(1,),[0,2,-2,2,0,-2])]:
         rows = []
         for i, seq in enumerate([0, 1, 2, 2, 3, 0]):
             target = ('0000000' + silent(seq, 0, 0, False, False) if channels == 1
@@ -24,7 +24,9 @@ def main():
                 n = len(raw)
                 fill = '110' + (field(n, 4) if n < 15 else '1111' + field(n - 14, 8)) + ''.join(field(b, 8) for b in raw)
             for tag in tags:
-                source = '010' + field(tag,4) + '1' + '000' + field(channels==2,1) + '0000' + ('00' if channels==2 else '') + '0' + '0' + '10' + channel(i, seq, 0, 0, True, False)
+                source = '010' + field(tag,4) + '1' + '000' + field(channels==2,1) + '0000' + (('11' if deltas else '00') if channels==2 else '') + '0' + '0' + '10' + channel(i, seq, 0, 0, True, False)
+                if deltas:
+                    source += field(SC[60+deltas[i]],SL[60+deltas[i]])
                 sources.append(source + fill)
             packet = packed(target + ''.join(sources) + '111')
             rows.append(dict(offset=len(blob), bytes=len(packet)))
@@ -35,11 +37,15 @@ def main():
                     slots=16, bands=64, container_rate=48000 if sbr else 24000,
                     container_frame_samples=2048 if sbr else 1024, samples=12288 if sbr else 6144,
                     pcm_offset=0, reference='aac-ssr-sbr-active-reference.f64le' if sbr else 'aac-ssr-sbr-active-core-reference.f32le')
+        if deltas:
+            case['name'] += '-gain-' + ('static' if len(set(deltas))==1 else 'varying')
+            case['right_gain'] = [2.0**(-d*0.5) for d in deltas]
+            case['gain_core_rows'] = [1024,1472,1024,1024,576,1024]
         case['video'] = video_fixture([case], blob, channels=channels, filename='aac-ssr-sbr-cce-' + case['name'] + '-synthetic.mp4')
         cases.append(case)
     (DEST / 'aac-ssr-sbr-cce-packets.bin').write_bytes(blob)
     (DEST / 'aac-ssr-sbr-cce.json').write_text(json.dumps(dict(cases=cases,
-        provenance='Owned silent target, active SSR CCE1, unit independent gain and authored SBR on CCE only. Existing independent SSR/IPQF and SBR reference PCM; no private media or external codec.'), indent=2) + '\n')
+        provenance='Owned silent target, active SSR CCE1, unit and positive separate-channel independent gain and authored SBR on CCE only. Existing independent SSR/IPQF and SBR reference PCM; no private media or external codec.'), indent=2) + '\n')
 
 if __name__ == '__main__':
     main()

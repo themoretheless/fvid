@@ -42,7 +42,23 @@ fn ssr_sbr_independent_cce_pcm_acceptance() {
             .enumerate()
         {
             let gold = f64::from_le_bytes(gold.try_into().unwrap()) * factor;
-            for sample in row.chunks_exact(4) {
+            for (channel, sample) in row.chunks_exact(4).enumerate() {
+                let gain = if channel == 1 && case["right_gain"].is_array() {
+                    let mut boundary = 0usize;
+                    let index = case["gain_core_rows"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .position(|rows| {
+                            boundary += rows.as_u64().unwrap() as usize * 2;
+                            i < boundary
+                        })
+                        .unwrap();
+                    case["right_gain"][index].as_f64().unwrap()
+                } else {
+                    1.0
+                };
+                let gold = gold * gain;
                 let sample = f32::from_le_bytes(sample.try_into().unwrap()) as f64;
                 assert!(
                     (sample - gold).abs() < 1e-9,

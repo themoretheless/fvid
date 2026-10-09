@@ -8160,3 +8160,20 @@ Final validation: 909 root unit tests, 460 owned-media unit tests and
 18 SSR integration tests passed, 24 existing ignored outside CCE acceptance.
 All seven CCE artifacts regenerate identically. Checks were locked/offline
 without FFmpeg; `git diff --check` passes.
+
+
+### 2026-10-09 — SSR/SBR separate target gain qualification
+
+Two additional authored stereo SSR/SBR CCE programs exercise target selection
+3, separate left/right gain lists, constant right gain 0.5 and positive
+time-varying gain 1/0.5/2. An independent expectation scales the previously
+qualified scalar SBR reference at the original SSR source-chunk boundaries,
+including the 1472/576 transition. All six SBR CCE programs now run scalar
+PCM, native checkpoint/error/reset/EOF and player rewind/seek acceptance.
+The four integration tests pass locked/offline without FFmpeg; all nine
+artifacts regenerate identically. Production code needed no further change.
+
+This supersedes the earlier unqualified non-unit/time-varying gain note for
+these stated positive-gain programs only. Negative gain, more target lists,
+other gain scales, unequal source switching, signalling/transport variants
+and wider codec tools/profiles still require qualification or implementation.

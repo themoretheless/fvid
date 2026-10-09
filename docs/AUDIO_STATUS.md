@@ -849,6 +849,8 @@ rewind/seek/intervals pass. ADTS discovery and its player EOF/seek path are
 qualified separately. Independent CCE SBR now runs through per-source aligned
 PCM and independent SBR DSP before final gain/mixing; the qualified authored
 programs cover mono/stereo targets and one/two simultaneous unit-gain CCE tags
-1/15. Wider tools/layouts, non-unit/time-varying CCE gain, transitions between
+1/15. Two additional stereo programs qualify separate left/right gain lists,
+a constant right gain of 0.5 and positive time-varying gain 1/0.5/2 across
+SSR source-chunk boundaries. Wider tools/layouts, broader CCE gain configurations, transitions between
 mixed and source-aligned modes, source retirement and downsampled SSR/SBR
 remain separate work, not claimed as complete.

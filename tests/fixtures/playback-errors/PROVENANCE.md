@@ -2712,3 +2712,12 @@ its own SBR FIL and unit output gain. Stereo targets replicate the independent
 mono reference; two identical sources sum to twice that reference. All four
 nonzero SBR programs match at 1e-9 tolerance. This covers the stated programs,
 not arbitrary CCE gain/roster transitions or all SSR/SBR tools.
+
+Two further `aac-ssr-sbr-cce-sbr-2-1-gain-{static,varying}-synthetic.mp4`
+programs use stereo CPE target selection 3 and an authored second common gain
+list. Scale-factor deltas encode a constant right gain 0.5 and the positive
+sequence 1/0.5/2/0.5/1/2; left gain remains one. The expected PCM applies
+these mathematical coefficients to the independent SBR reference at authored
+source-chunk boundaries 1024/1472/1024/1024/576/1024 core samples, doubled
+for output. No production decoded PCM supplies the oracle. Both gain cases
+run scalar, native checkpoint/reset/error/EOF and player rewind/seek acceptance.
