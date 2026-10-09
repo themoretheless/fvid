@@ -84,6 +84,7 @@ mod tests {
                 shape: crate::codec::aac_synthesis::WindowShape::Sine,
                 max_sfb: 2,
                 group_lengths: vec![3, 5],
+            prediction: None,
             },
             codebooks: vec![vec![5, 5], vec![5, 5]],
             scales: vec![
@@ -128,6 +129,7 @@ mod tests {
                 shape: crate::codec::aac_synthesis::WindowShape::Sine,
                 max_sfb: 2,
                 group_lengths: vec![8],
+            prediction: None,
             },
             codebooks: vec![vec![13, 13]],
             scales: vec![vec![BandScale::Noise(0), BandScale::Noise(4)]],

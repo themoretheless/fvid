@@ -34,11 +34,24 @@ impl ChannelPair {
         *noise = next;
         Ok(result)
     }
-    fn stereo_tools(
+    pub(crate) fn spectra_with_main_prediction(&self, config: &AacConfig, noise: &mut super::aac_noise::NoiseState, left_bank: &mut super::aac_main_predictor::MainPredictor, right_bank: &mut super::aac_main_predictor::MainPredictor) -> Result<(Vec<f32>, Vec<f32>)> {
+        let left = self.left.spectrum_tools(config, false, Some(noise))?;
+        let right = self.right.spectrum_tools(config, self.mid_side.is_some(), Some(noise))?;
+        let (mut left, right) = self.stereo_phase(config, left, right, true, false)?;
+        self.left.predict_main(config, left_bank, &mut left)?;
+        let (left, mut right) = self.stereo_phase(config, left, right, false, true)?;
+        self.right.predict_main(config, right_bank, &mut right)?;
+        Ok((left, right))
+    }
+    fn stereo_tools(&self, config: &AacConfig, left: Vec<f32>, right: Vec<f32>) -> Result<(Vec<f32>, Vec<f32>)> {
+        self.stereo_phase(config, left, right, true, true)
+    }
+    fn stereo_phase(
         &self,
         config: &AacConfig,
         mut left: Vec<f32>,
         mut right: Vec<f32>,
+        mid_side_phase: bool, intensity_phase: bool,
     ) -> Result<(Vec<f32>, Vec<f32>)> {
         if let Some(mask) = &self.mid_side {
             if self.left.info != self.right.info
@@ -70,12 +83,14 @@ impl ChannelPair {
                     for window in first..first + length as usize {
                         for i in window * size + offsets[band]..window * size + offsets[band + 1] {
                             if let Some(position) = intensity {
+                                if !intensity_phase { continue; }
                                 let positive = self.right.codebooks[group][band] == 15;
                                 let invert = self.explicit_mask && enabled;
                                 let sign = if positive != invert { 1.0 } else { -1.0 };
                                 right[i] = left[i] * sign * 2.0f32.powf(-f32::from(position) / 4.0);
                                 continue;
                             }
+                            if !mid_side_phase { continue; }
                             let left_noise = self.left.codebooks[group][band] == 13;
                             let right_noise = self.right.codebooks[group][band] == 13;
                             if left_noise || right_noise {

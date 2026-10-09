@@ -58,10 +58,10 @@ impl TnsData {
                 let start = window * size + offsets[bottom.min(max_band)];
                 let end = window * size + offsets[top.min(max_band)];
                 top = bottom;
-                if filter.lpc.len() > 12 || filter.lpc.iter().any(|x| !x.is_finite()) {
+                if filter.lpc.len() > 20 || filter.lpc.iter().any(|x| !x.is_finite()) {
                     return Err(invalid("invalid AAC TNS predictor"));
                 }
-                let mut history = [0.0f64; 12];
+                let mut history = [0.0f64; 20];
                 for step in 0..end - start {
                     let index = if filter.reverse {
                         end - 1 - step

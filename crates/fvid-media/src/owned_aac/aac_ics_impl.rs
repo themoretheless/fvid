@@ -4,17 +4,26 @@ use super::{
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MainPrediction {
+    pub reset_group: Option<u8>,
+    pub used: Vec<bool>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct IcsInfo {
     pub sequence: WindowSequence,
     pub shape: WindowShape,
     pub max_sfb: u8,
     pub group_lengths: Vec<u8>,
+    pub prediction: Option<MainPrediction>,
 }
 impl IcsInfo {
     /// Parse LC window syntax. `bands` is the number of scale-factor bands in
     /// the selected sample-rate/frame-length table (long, short).
     /// Failure leaves the caller's bit cursor unchanged.
     pub fn read(bits: &mut BitReader<'_>, bands: (u8, u8)) -> Result<Self> {
+        Self::read_profile(bits, bands, None)
+    }
+    pub fn read_profile(bits: &mut BitReader<'_>, bands: (u8, u8), prediction_limit: Option<usize>) -> Result<Self> {
         let mut cursor = bits.clone();
         if cursor.bit()? {
             return Err(invalid("AAC reserved ICS bit is set"));
@@ -36,6 +45,7 @@ impl IcsInfo {
         if max_sfb > limit {
             return Err(invalid("AAC max_sfb exceeds band table"));
         }
+        let mut prediction = None;
         let mut group_lengths = vec![1];
         if short {
             for _ in 0..7 {
@@ -46,7 +56,15 @@ impl IcsInfo {
                 }
             }
         } else if cursor.bit()? {
-            return Err(unsupported("prediction is not allowed in AAC-LC"));
+            let limit = prediction_limit.ok_or_else(|| unsupported("prediction is not allowed in AAC-LC"))?;
+            let reset_group = if cursor.bit()? {
+                let group = cursor.read(5)? as u8;
+                if !(1..=30).contains(&group) { return Err(invalid("invalid AAC Main predictor reset group")); }
+                Some(group)
+            } else { None };
+            let mut used = Vec::new();
+            for _ in 0..usize::from(max_sfb).min(limit) { used.push(cursor.bit()?); }
+            prediction = Some(MainPrediction { reset_group, used });
         }
         *bits = cursor;
         Ok(Self {
@@ -54,6 +72,7 @@ impl IcsInfo {
             shape,
             max_sfb,
             group_lengths,
+            prediction,
         })
     }
 
@@ -192,6 +211,7 @@ mod quantized_deinterleave_tests {
                     shape: WindowShape::Sine,
                     max_sfb: 2,
                     group_lengths: groups,
+                    prediction: None,
                 };
                 let mut grouped = Vec::new();
                 let mut expected = vec![0i16; samples];

@@ -1,6 +1,6 @@
 //! Owned AAC Main frequency-domain prediction (ISO/IEC 13818-7, clause 13).
-//! This DSP bank is not yet wired into raw-data-block playback. Its snapshots
-//! are plain clones; the caller must retain one bank per channel/CCE identity.
+//! Native raw-data-block playback retains one bank per channel/CCE identity.
+//! Plain clones provide packet transactions and checkpoint histories.
 use super::{Result, invalid};
 const ATTENUATION: f32 = 0.953125;
 const ADAPTATION: f32 = 0.90625;
@@ -116,6 +116,16 @@ impl MainPredictor {
         Ok(Self {
             lines: vec![Predictor::default(); lines],
         })
+    }
+    pub fn retained_payload_bytes(&self) -> usize {
+        self.lines.capacity() * std::mem::size_of::<Predictor>()
+    }
+    pub fn reset_lines(&mut self, range: std::ops::Range<usize>) -> Result<()> {
+        self.lines
+            .get_mut(range)
+            .ok_or_else(|| invalid("invalid AAC Main predictor reset range"))?
+            .fill(Predictor::default());
+        Ok(())
     }
     pub fn reset(&mut self) {
         self.lines.fill(Predictor::default());

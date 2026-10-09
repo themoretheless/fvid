@@ -124,6 +124,28 @@ impl ChannelData {
         Ok(ordered)
     }
 
+    pub(crate) fn predict_main(&self, config: &AacConfig, bank: &mut super::aac_main_predictor::MainPredictor, spectrum: &mut [f32]) -> Result<()> {
+        if self.info.sequence == WindowSequence::EightShort { bank.short_window(); return Ok(()); }
+        let tables = BandTables::for_config(config)?;
+        let count = tables.prediction_limit.ok_or_else(|| invalid("AAC Main predictor requires Main configuration"))?;
+        let offsets = &tables.long[..=count];
+        let mut used = self.info.prediction.as_ref().map_or_else(Vec::new, |p| p.used.clone());
+        let mut source = spectrum.to_vec();
+        let mut pns = Vec::new();
+        for band in 0..usize::from(self.info.max_sfb).min(count) {
+            if self.codebooks[0][band] >= 13 {
+                if let Some(flag) = used.get_mut(band) { *flag = false; }
+                if self.codebooks[0][band] == 13 {
+                    source[offsets[band]..offsets[band+1]].fill(0.0);
+                    pns.push(offsets[band]..offsets[band+1]);
+                }
+            }
+        }
+        bank.process(&mut source, offsets, &used, self.info.prediction.as_ref().and_then(|p| p.reset_group))?;
+        for range in pns { source[range.clone()].copy_from_slice(&spectrum[range.clone()]); bank.reset_lines(range)?; }
+        spectrum.copy_from_slice(&source);
+        Ok(())
+    }
     /// Apply TNS after stereo tools, immediately before window synthesis.
     pub fn apply_tns(&self, config: &AacConfig, spectrum: Vec<f32>) -> Result<Vec<f32>> {
         if let Some(tns) = &self.tns {
@@ -161,7 +183,7 @@ impl ChannelData {
             None
         };
         let tns = if cursor.bit()? {
-            Some(tns_syntax::read(&mut cursor, info.sequence)?)
+            Some(tns_syntax::read_profile(&mut cursor, info.sequence, config.object_type == 1)?)
         } else {
             None
         };

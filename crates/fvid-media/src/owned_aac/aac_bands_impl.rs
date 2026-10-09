@@ -3,11 +3,12 @@ use super::{aac_ics::IcsInfo, bits::BitReader, config::AacConfig};
 pub struct BandTables {
     pub long: &'static [usize],
     pub short: &'static [usize],
+    pub prediction_limit: Option<usize>,
 }
 impl BandTables {
     pub fn for_config(config: &AacConfig) -> Result<Self> {
-        if !matches!(config.object_type, 2 | 3) {
-            return Err(unsupported("band tables require AAC-LC or AAC-SSR"));
+        if !matches!(config.object_type, 1 | 2 | 3) {
+            return Err(unsupported("band tables require AAC Main, LC or SSR"));
         }
         if !matches!(config.frame_samples, 960 | 1024) {
             return Err(unsupported("AAC band tables require 960 or 1024 samples"));
@@ -18,7 +19,11 @@ impl BandTables {
         }
         let tables = band_geometry::BandTables::new(config.sample_rate, config.frame_samples as usize)
             .map_err(|e| invalid(&e.0))?;
-        Ok(Self { long: tables.long, short: tables.short })
+        let prediction_limit = (config.object_type == 1).then(|| match config.sample_rate {
+            75132.. => 33, 55426..=75131 => 38, 27713..=55425 => 40,
+            18783..=27712 => 41, 9391..=18782 => 37, _ => 34,
+        });
+        Ok(Self { long: tables.long, short: tables.short, prediction_limit })
     }
     pub fn tns_limit(rate: u32, short: bool) -> usize {
         band_geometry::BandTables::tns_limit(rate, short)
@@ -31,9 +36,10 @@ impl BandTables {
         if short {small} else {long}
     }
     pub fn read_ics(&self, bits: &mut BitReader<'_>) -> Result<IcsInfo> {
-        IcsInfo::read(
+        IcsInfo::read_profile(
             bits,
             ((self.long.len() - 1) as u8, (self.short.len() - 1) as u8),
+            self.prediction_limit,
         )
     }
 }

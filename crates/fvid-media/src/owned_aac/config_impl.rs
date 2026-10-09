@@ -39,8 +39,8 @@ impl AacConfig {
         sample_rate: u32,
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
-        if !matches!(object_type, 2 | 3) {
-            return Err(invalid("only AAC-LC and AAC-SSR core configurations are implemented"));
+        if !matches!(object_type, 1 | 2 | 3) {
+            return Err(invalid("only AAC Main, LC and SSR core configurations are implemented"));
         }
         let mut channels = match config {
             0 => 0,

@@ -2343,3 +2343,12 @@ The enabled MP4 test proves the current AOT 1 refusal, packet extraction and LC
 control decoding through the first active prediction failure. Native AAC Main
 playback acceptance remains ignored pending production integration; neither a
 passing refusal nor this spectral oracle claims profile playback support.
+
+AAC Main native integration extends the same generator with the 960-sample
+48 kHz video, two invalid-reset-group videos, and independent sparse direct
+IMDCT/window/overlap-add PCM files for both valid videos. The original mono
+video now has 12 frames and all four window sequences. Native playback
+acceptance is enabled; the old AOT refusal expectation is replaced by config,
+packet and PCM acceptance. The earlier DSP-only note describes the prior
+foundation commit, not the current packet/playback status. No private inputs or
+external media tools were added.

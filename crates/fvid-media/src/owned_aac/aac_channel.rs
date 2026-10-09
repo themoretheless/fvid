@@ -76,6 +76,7 @@ mod memory_tests {
                 shape: super::super::aac_synthesis::WindowShape::Sine,
                 max_sfb: 0,
                 group_lengths,
+                prediction: None,
             },
             codebooks,
             scales,

@@ -3,6 +3,9 @@ use std::f64::consts::FRAC_PI_2;
 
 /// Called after tns_data_present. Input cursor commits only on success.
 pub fn read(bits: &mut BitReader<'_>, sequence: WindowSequence) -> Result<TnsData> {
+    read_profile(bits, sequence, false)
+}
+pub fn read_profile(bits: &mut BitReader<'_>, sequence: WindowSequence, main: bool) -> Result<TnsData> {
     let short = sequence == WindowSequence::EightShort;
     let mut cursor = bits.clone();
     let mut windows = Vec::with_capacity(if short { 8 } else { 1 });
@@ -17,7 +20,7 @@ pub fn read(bits: &mut BitReader<'_>, sequence: WindowSequence) -> Result<TnsDat
         for _ in 0..count {
             let length = cursor.read(if short { 4 } else { 6 })? as usize;
             let order = cursor.read(if short { 3 } else { 5 })? as usize;
-            if order > if short { 7 } else { 12 } {
+            if order > if short { 7 } else if main { 20 } else { 12 } {
                 return Err(invalid("AAC-LC TNS order exceeds limit"));
             }
             let mut reverse = false;
@@ -35,7 +38,7 @@ pub fn read(bits: &mut BitReader<'_>, sequence: WindowSequence) -> Result<TnsDat
                     let base = (1u32 << (resolution - 1)) as f64;
                     let denominator = base + if signed < 0 { 0.5 } else { -0.5 };
                     let reflection = (f64::from(signed) * FRAC_PI_2 / denominator).sin();
-                    let mut previous = [0.0; 12];
+                    let mut previous = [0.0; 20];
                     let count = lpc.len();
                     previous[..count].copy_from_slice(&lpc);
                     for i in 0..count {

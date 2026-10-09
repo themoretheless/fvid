@@ -80,6 +80,10 @@ impl NativeAacDecoder {
                 state.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
             }
         }
+        for banks in [Some(&self.main_prediction), checkpoint.map(|state| &state.main_prediction)].into_iter().flatten() {
+            footprint.vector(banks).map_err(|e| invalid(&e))?;
+            for bank in banks.iter().flatten() { footprint.add(bank.retained_payload_bytes()).map_err(|e| invalid(&e))?; }
+        }
         for tags in [Some(&self.ssr_alignment_tags), checkpoint.map(|state| &state.ssr_alignment_tags)].into_iter().flatten() {
             footprint.vector(tags).map_err(|e| invalid(&e))?;
         }
@@ -198,5 +202,24 @@ mod sbr_memory_tests {
         assert!(combined>after+16_000);assert!(combined<after*2);
         decoder.reset();assert_eq!(decoder.retained_payload_bytes().unwrap(),before);
         decoder.restore(&checkpoint).unwrap();assert!(decoder.retained_payload_bytes().unwrap()>before+16_000);
+    }
+}
+
+#[cfg(test)]
+mod main_prediction_memory_tests {
+    use super::*;
+    #[test]
+    fn main_predictor_allocations_and_cloned_checkpoints_are_accounted() {
+        let main = NativeAacDecoder::new(&[0x0b, 0x08]).unwrap();
+        let lc = NativeAacDecoder::new(&[0x13, 0x08]).unwrap();
+        let bank_bytes = main.main_prediction.capacity()
+            * std::mem::size_of::<Option<super::super::aac_main_predictor::MainPredictor>>()
+            + main.main_prediction.iter().flatten().map(|bank| bank.retained_payload_bytes()).sum::<usize>();
+        assert!(bank_bytes > 0);
+        assert_eq!(main.retained_payload_bytes().unwrap(), lc.retained_payload_bytes().unwrap() + bank_bytes);
+        let main_checkpoint = main.checkpoint();
+        let lc_checkpoint = lc.checkpoint();
+        assert_eq!(main.retained_payload_bytes_with_checkpoint(Some(&main_checkpoint)).unwrap(),
+            lc.retained_payload_bytes_with_checkpoint(Some(&lc_checkpoint)).unwrap() + 2*bank_bytes);
     }
 }

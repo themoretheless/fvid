@@ -7594,3 +7594,40 @@ profile refusal does not qualify AAC Main playback. LTP/ER/ELD/USAC remain gaps.
 
 Algorithm reference: ISO/IEC 13818-7:2004 clause 13, referenced for frequency-domain
 prediction by ISO/IEC 14496-3. No foreign decoder implementation is incorporated.
+
+### AAC Main native packet and playback integration (2026-10-09)
+
+AOT 1 now uses profile-aware ICS prediction flags/reset groups and the Main
+spectral limit for the selected rate; LC/SSR retain their no-prediction syntax.
+Long Main TNS syntax admits order 20; LC/SSR retain order 12, and short order 7
+is unchanged. The generic TNS filter's bounded history can hold 20 coefficients.
+Each mapped output channel and each CCE tag has an independent predictor bank.
+Parsing/reconstruction uses cloned candidate banks and commits only on successful
+packet synthesis. Checkpoint/restore/reset and retained payload accounting include
+all allocated banks. Prediction follows MS and precedes dependent coupling/TNS;
+left prediction precedes intensity reconstruction, while right intensity bands
+adapt without prediction. PNS bands suppress prediction and reset history.
+
+The old Main profile refusal test is replaced by acceptance, and the previously
+ignored MP4 acceptance test is enabled. Two own mono videos cover 24 kHz/1024
+and 48 kHz/960, all window sequences, disabled warm-up, active prediction and
+interleaved reset. Independent sparse direct-IMDCT/window/overlap-add PCM matches
+native output within 2e-8. Root/owned packet PCM and MP4 exports match exactly;
+packet checkpoints, malformed-packet rollback and reset replay are checked.
+The player adapter exercises checkpoint replay, rewind, intermediate seeks and
+exact EOF. Two malformed group 0/31 videos require the exact reset-group refusal
+and preservation of prior predictor/synthesis history. Generator output is
+reproducible offline and no generator is invoked by tests.
+
+Qualification remains limited to these inputs. Main stereo MS/intensity/PNS,
+CCE combinations, order-20 TNS signal effects, PCE bootstrap/ADTS and SBR/PS
+interactions need further synthetic acceptance, rather than inheriting LC/SSR
+claims. Main support does not close LTP/ER/ELD/USAC or all remaining codec gaps.
+
+Verification for this integration: 908 root library tests, 456 owned media tests,
+6 Main integration tests, 3 ASC extension-flag, 3 SSR, 9 SSR alignment and 3 SSR
+coupling tests passed offline without FFmpeg (1388 selected successful test
+executions; 24 existing unrelated ignored tests). The native Main acceptance
+has no ignored test remaining. The eight Main fixture files regenerated
+byte-for-byte. These numbers qualify the stated fixtures and affected suites,
+not all production profiles or hardware performance.

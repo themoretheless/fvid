@@ -61,21 +61,23 @@ fn main_prediction_matches_independent_scalar_oracle_and_snapshot_replay() {
     }
 }
 #[test]
-fn main_prediction_video_documents_current_profile_refusal() {
+fn main_prediction_video_config_and_payload_reach_prediction() {
     let m = manifest();
     let asc = config(&m);
-    for error in [
-        NativeAacDecoder::new(&asc).err().unwrap().to_string(),
-        fvid::codec::aac_native::NativeAacDecoder::new(&asc)
-            .err()
+    assert_eq!(
+        fvid_media::owned_aac::config::AudioSpecificConfig::parse(&asc)
             .unwrap()
-            .to_string(),
-    ] {
-        assert_eq!(
-            error,
-            "only AAC-LC and AAC-SSR core configurations are implemented"
-        );
-    }
+            .core
+            .object_type,
+        1
+    );
+    assert_eq!(
+        fvid::codec::config::AudioSpecificConfig::parse(&asc)
+            .unwrap()
+            .core
+            .object_type,
+        1
+    );
     let bytes = include_bytes!("fixtures/playback-errors/aac-main-prediction-synthetic.mp4");
     let blob = include_bytes!("fixtures/playback-errors/aac-main-prediction-packets.bin");
     let mut reader =
@@ -108,16 +110,241 @@ fn main_prediction_video_documents_current_profile_refusal() {
     }
 }
 #[test]
-#[ignore = "AAC Main predictor bank still needs channel/tool/checkpoint integration; refusal is not playback acceptance"]
 fn main_prediction_video_has_native_playback_acceptance() {
     let m = manifest();
-    let mut decoder = NativeAacDecoder::new(&config(&m)).unwrap();
     let blob = include_bytes!("fixtures/playback-errors/aac-main-prediction-packets.bin");
-    for row in m["case"]["frames"].as_array().unwrap() {
+    for case in m["cases"].as_array().unwrap() {
+        let config_case = serde_json::json!({"case":case});
+        let asc = config(&config_case);
+        let mut decoder = NativeAacDecoder::new(&asc).unwrap();
+        let mut root = fvid::codec::aac_native::NativeAacDecoder::new(&asc).unwrap();
+        let mut pcm = Vec::new();
+        for row in case["frames"].as_array().unwrap() {
+            let start = row["offset"].as_u64().unwrap() as usize;
+            let len = row["bytes"].as_u64().unwrap() as usize;
+            let packet = &blob[start..start + len];
+            let saved = decoder.checkpoint();
+            let output = decoder.decode(packet).unwrap();
+            decoder.restore(&saved).unwrap();
+            assert_eq!(decoder.decode(packet).unwrap(), output);
+            assert_eq!(root.decode(packet).unwrap(), output);
+            assert_eq!(output.len(), row["samples"].as_u64().unwrap() as usize);
+            pcm.extend(output);
+            let stable = decoder.checkpoint();
+            assert!(decoder.decode(&packet[..packet.len() / 2]).is_err());
+            let a = decoder.decode(packet).unwrap();
+            decoder.restore(&stable).unwrap();
+            assert_eq!(decoder.decode(packet).unwrap(), a);
+            decoder.restore(&stable).unwrap();
+        }
+        let path =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let expected = std::fs::read(path.join(case["pcm_file"].as_str().unwrap())).unwrap();
+        for (i, (a, b)) in pcm.iter().zip(expected.chunks_exact(4)).enumerate() {
+            let b = f32::from_le_bytes(b.try_into().unwrap());
+            assert!(
+                (a - b).abs() < 2e-8,
+                "{} sample {i}: {a} vs {b}",
+                case["name"]
+            );
+        }
+        assert_eq!(pcm.len() * 4, expected.len());
+        let video = std::fs::read(path.join(case["video"]["file"].as_str().unwrap())).unwrap();
+        let mut owned = Vec::new();
+        let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            std::io::Cursor::new(&video),
+            &mut owned,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(stats.sample_frames, case["samples"].as_u64().unwrap());
+        let bytes: Vec<u8> = pcm.iter().flat_map(|v| v.to_le_bytes()).collect();
+        assert_eq!(owned, bytes);
+        let mut exported = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&video, &mut exported).unwrap();
+        assert_eq!(exported, bytes);
+        decoder.reset();
+        let row = &case["frames"][0];
         let start = row["offset"].as_u64().unwrap() as usize;
         let len = row["bytes"].as_u64().unwrap() as usize;
-        let output = decoder.decode(&blob[start..start + len]).unwrap();
-        assert_eq!(output.len(), 1024);
-        assert!(output.iter().any(|v| *v != 0.0));
+        let mut fresh = NativeAacDecoder::new(&asc).unwrap();
+        assert_eq!(
+            decoder.decode(&blob[start..start + len]).unwrap(),
+            fresh.decode(&blob[start..start + len]).unwrap()
+        );
     }
+}
+#[test]
+fn main_prediction_invalid_reset_video_refuses_exactly_without_history_loss() {
+    let m = manifest();
+    let blob = include_bytes!("fixtures/playback-errors/aac-main-prediction-packets.bin");
+    let valid = &m["cases"][0];
+    let mut decoder = NativeAacDecoder::new(&config(&m)).unwrap();
+    for row in valid["frames"].as_array().unwrap().iter().take(4) {
+        let start = row["offset"].as_u64().unwrap() as usize;
+        let len = row["bytes"].as_u64().unwrap() as usize;
+        decoder.decode(&blob[start..start + len]).unwrap();
+    }
+    let saved = decoder.checkpoint();
+    let next = &valid["frames"][4];
+    let start = next["offset"].as_u64().unwrap() as usize;
+    let len = next["bytes"].as_u64().unwrap() as usize;
+    let expected = decoder.decode(&blob[start..start + len]).unwrap();
+    decoder.restore(&saved).unwrap();
+    for case in m["invalid"].as_array().unwrap() {
+        let row = &case["frames"][0];
+        let at = row["offset"].as_u64().unwrap() as usize;
+        let size = row["bytes"].as_u64().unwrap() as usize;
+        assert_eq!(
+            decoder
+                .decode(&blob[at..at + size])
+                .unwrap_err()
+                .to_string(),
+            "invalid AAC Main predictor reset group"
+        );
+        assert_eq!(decoder.decode(&blob[start..start + len]).unwrap(), expected);
+        decoder.restore(&saved).unwrap();
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(case["video"]["file"].as_str().unwrap());
+        let video = std::fs::read(path).unwrap();
+        assert!(
+            fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                std::io::Cursor::new(video),
+                &mut Vec::new(),
+                None,
+                &Default::default()
+            )
+            .unwrap_err()
+            .to_string()
+            .contains("invalid AAC Main predictor reset group")
+        );
+    }
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn main_prediction_playback_checkpoint_rewind_seek_and_eof_replay_exactly() {
+    use fvid::audio::AudioStream;
+    fn play(
+        reader: &mut fvid::playback_mp4_audio::Mp4AudioReader<std::io::Cursor<&Vec<u8>>>,
+    ) -> Vec<u8> {
+        let mut decoder = reader.make_decoder().unwrap();
+        let mut output = Vec::new();
+        while let Some(packet) = reader.next_packet().unwrap() {
+            let saved = decoder.checkpoint().unwrap();
+            let actual = decoder
+                .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+                .unwrap();
+            decoder.restore(&saved).unwrap();
+            let replay = decoder
+                .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+                .unwrap();
+            assert_eq!(
+                actual
+                    .as_ref()
+                    .map(|f| (&f.packet.data, f.source_pts, f.source_duration)),
+                replay
+                    .as_ref()
+                    .map(|f| (&f.packet.data, f.source_pts, f.source_duration))
+            );
+            if let Some(frame) = actual {
+                if let Some(pcm) = reader
+                    .present_decoded(frame.packet, frame.source_pts)
+                    .unwrap()
+                {
+                    output.extend(pcm.data);
+                }
+            }
+        }
+        assert!(decoder.finish_packet().unwrap().is_none());
+        output
+    }
+    for case in manifest()["cases"].as_array().unwrap() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(case["video"]["file"].as_str().unwrap());
+        let bytes = std::fs::read(path).unwrap();
+        let mut expected = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut expected).unwrap();
+        let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+            std::io::Cursor::new(&bytes),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(play(&mut reader), expected);
+        reader.rewind();
+        assert_eq!(play(&mut reader), expected);
+        for position in [1100, 3000, 6100, case["samples"].as_u64().unwrap()] {
+            let landed = reader.seek_to(position as i64);
+            assert_eq!(
+                play(&mut reader),
+                expected[landed as usize * 4..],
+                "{} seek {position}",
+                case["name"]
+            );
+        }
+    }
+}
+
+#[test]
+fn main_ics_predictor_side_information_respects_limits_and_cursor_transactions() {
+    use fvid_media::owned_aac::{aac_ics::IcsInfo, bits::BitReader};
+    fn packed(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {
+        let mut data = Vec::new();
+        let mut count = 0;
+        for &(value, width) in fields {
+            for shift in (0..width).rev() {
+                if count % 8 == 0 {
+                    data.push(0);
+                }
+                *data.last_mut().unwrap() |= (((value >> shift) & 1) as u8) << (7 - count % 8);
+                count += 1;
+            }
+        }
+        (data, count)
+    }
+    for group in 1..=30 {
+        let (data, count) = packed(&[
+            (0, 1),
+            (0, 2),
+            (0, 1),
+            (5, 6),
+            (1, 1),
+            (1, 1),
+            (group, 5),
+            (5, 3),
+        ]);
+        let mut bits = BitReader::new(&data);
+        let info = IcsInfo::read_profile(&mut bits, (49, 14), Some(3)).unwrap();
+        assert_eq!(bits.position(), count);
+        let prediction = info.prediction.unwrap();
+        assert_eq!(prediction.reset_group, Some(group as u8));
+        assert_eq!(prediction.used, vec![true, false, true]);
+    }
+    for group in [0, 31] {
+        let (data, _) = packed(&[
+            (0, 1),
+            (0, 2),
+            (0, 1),
+            (5, 6),
+            (1, 1),
+            (1, 1),
+            (group, 5),
+            (5, 3),
+        ]);
+        let mut bits = BitReader::new(&data);
+        assert_eq!(
+            IcsInfo::read_profile(&mut bits, (49, 14), Some(3))
+                .unwrap_err()
+                .to_string(),
+            "invalid AAC Main predictor reset group"
+        );
+        assert_eq!(bits.position(), 0);
+    }
+    let (data, _) = packed(&[(0, 1), (0, 2), (0, 1), (5, 6), (1, 1), (1, 1)]);
+    let mut bits = BitReader::new(&data);
+    assert!(IcsInfo::read_profile(&mut bits, (49, 14), Some(40)).is_err());
+    assert_eq!(bits.position(), 0);
 }

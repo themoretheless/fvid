@@ -3,7 +3,7 @@
 Oracle uses explicit scalar stage updates and generated inverse tables from
 ISO/IEC 13818-7 clause 13, not a call to the production predictor.
 """
-import json, struct
+import json, struct, math
 from generate_aac_ssr_fixtures import DEST, CODES, LENS, SC, SL, field, frequency, packed
 from generate_he_aac_packet_fixtures import video_fixture
 
@@ -55,20 +55,55 @@ def main():
         if reset:
             for i in range(reset-1,64,30):states[i]=initial()
         rows.append(dict(input=source,used=used,reset=reset,output_bits=output))
-    blob=bytearray();frames=[]
-    for frame in range(8):
-        active=frame>=3;reset=1 if frame==6 else None
-        prediction=('1'+('1'+field(reset,5) if reset else '0')+str(int(active))) if active else '0'
-        # One ordinary band (4 coefficients), no pulse/TNS/gain, SCE tag 0.
-        info='0000'+field(1,6)+prediction
-        indices=[1,-1,1,-1] if frame%2 else [-1,1,-1,1]
-        index=0
-        for value in indices:index=index*3+value+1
-        packet=packed('0000000'+field(140,8)+info+field(1,4)+field(1,5)+field(SC[60],SL[60])+'000'+field(CODES[index],LENS[index])+'111')
-        frames.append(dict(offset=len(blob),bytes=len(packet),samples=1024));blob.extend(packet)
-    asc=packed(field(1,5)+frequency(24000)+field(1,4)+'000')
-    case=dict(asc=asc.hex(),frames=frames,slots=16,bands=32,container_rate=24000,container_frame_samples=1024,pcm_offset=0,samples=8192)
-    case['video']=video_fixture([case],blob,filename='aac-main-prediction-synthetic.mp4')
+    blob=bytearray();cases=[];invalid=[]
+    sequences=[0,0,0,0,1,2,2,3,0,0,0,0]
+    for name,n,rate in [('mono-1024',1024,24000),('mono-960',960,48000)]:
+        frames=[];pcm=bytearray();history=[initial() for _ in range(4)];overlap=[0.]*n
+        for frame,seq in enumerate(sequences):
+            active=frame>=3 and seq!=2;reset=1 if frame==10 else None
+            prediction=('1'+('1'+field(reset,5) if reset else '0')+str(int(active))) if active else '0'
+            info='0'+field(seq,2)+'0'+field(1,4 if seq==2 else 6)+('1111111' if seq==2 else prediction)
+            indices=[1,-1,1,-1] if frame%2 else [-1,1,-1,1]
+            index=0
+            for value in indices:index=index*3+value+1
+            spectral=field(CODES[index],LENS[index])*(8 if seq==2 else 1)
+            packet=packed('0000000'+field(140,8)+info+field(1,4)+field(1,3 if seq==2 else 5)+field(SC[60],SL[60])+'000'+spectral+'111')
+            frames.append(dict(offset=len(blob),bytes=len(packet),samples=n));blob.extend(packet)
+            if seq==2:history=[initial() for _ in range(4)];coefficients=[float(v*1024) for v in indices]*8
+            else:
+                coefficients=[]
+                for i,residual in enumerate(indices):
+                    value,history[i]=step(history[i],float(residual*1024),active);coefficients.append(value)
+                if reset:history[reset-1]=initial()
+            # Sparse direct IMDCT with literal window placement and overlap-add.
+            short=n//8;offset=(n-short)//2;block=[0.]*(2*n)
+            def imdct(values,size):
+                return [2/size*sum(value*math.cos(math.pi/size*(j+.5+size/2)*(k+.5)) for k,value in enumerate(values)) for j in range(2*size)]
+            def sine(size,j):return math.sin(math.pi*(j+.5)/(2*size))
+            if seq==2:
+                for w in range(8):
+                    transformed=imdct(coefficients[4*w:4*w+4],short)
+                    for j,value in enumerate(transformed):block[offset+w*short+j]+=value*sine(short,j)
+            else:
+                block=imdct(coefficients,n)
+                for j in range(2*n):
+                    weight=sine(n,j)
+                    if seq==1 and j>=n:
+                        t=j-n;weight=1. if t<offset else (sine(short,short+t-offset) if t<offset+short else 0.)
+                    if seq==3 and j<n:weight=0. if j<offset else (sine(short,j-offset) if j<offset+short else 1.)
+                    block[j]*=weight
+            for j in range(n):pcm+=struct.pack('<f',f32(overlap[j]+block[j])/65536)
+            overlap=block[n:]
+        asc=packed(field(1,5)+frequency(rate)+field(1,4)+str(int(n==960))+'00')
+        case=dict(name=name,asc=asc.hex(),frames=frames,slots=16,bands=32,container_rate=rate,container_frame_samples=n,pcm_offset=0,samples=n*len(frames))
+        filename='aac-main-prediction-synthetic.mp4' if n==1024 else 'aac-main-prediction-960-synthetic.mp4'
+        case['video']=video_fixture([case],blob,filename=filename)
+        case['pcm_file']='aac-main-prediction-'+name+'-pcm.bin';(DEST/case['pcm_file']).write_bytes(pcm);cases.append(case)
+        if n==1024:
+            for group in (0,31):
+                bad_packet=packed('0000000'+field(140,8)+'0000'+field(1,6)+'11'+field(group,5)+'1'+field(1,4)+field(1,5)+field(SC[60],SL[60])+'000'+field(CODES[index],LENS[index])+'111')
+                bad=dict(case,frames=[dict(offset=len(blob),bytes=len(bad_packet),samples=n)],samples=n);blob.extend(bad_packet)
+                bad['video']=video_fixture([bad],blob,filename='aac-main-prediction-invalid-reset-'+str(group)+'-synthetic.mp4');invalid.append(bad)
     (DEST/'aac-main-prediction-packets.bin').write_bytes(blob)
-    (DEST/'aac-main-prediction.json').write_text(json.dumps(dict(provenance='Own integer spectra, own bit writer and scalar ISO13818-7 clause13 oracle; own existing AVC seed/container templates. No private media or external codecs.',offsets=[0,4,34,64],oracle=rows,case=case),indent=2)+'\n')
+    (DEST/'aac-main-prediction.json').write_text(json.dumps(dict(provenance='Own integer spectra, own bit writer and scalar ISO13818-7 clause13 oracle; own existing AVC seed/container templates. No private media or external codecs.',offsets=[0,4,34,64],oracle=rows,case=cases[0],cases=cases,invalid=invalid),indent=2)+'\n')
 if __name__=='__main__':main()

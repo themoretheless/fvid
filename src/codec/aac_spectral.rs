@@ -14,6 +14,7 @@ mod tests {
             shape: WindowShape::Sine,
             max_sfb: bands,
             group_lengths: groups,
+            prediction: None,
         }
     }
     fn pack(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {

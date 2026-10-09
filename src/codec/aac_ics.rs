@@ -79,6 +79,7 @@ mod tests {
             shape: WindowShape::Sine,
             max_sfb: 1,
             group_lengths: vec![1],
+            prediction: None,
         };
         let mut output = vec![17.0; 1024];
         for offsets in [&[1, 1024][..], &[0, 0, 1024], &[0, 1025], &[0]] {
@@ -136,6 +137,7 @@ mod tests {
             shape: WindowShape::Sine,
             max_sfb: 8,
             group_lengths: vec![3, 5],
+            prediction: None,
         };
         let (data, count) = packed(&[(13, 4), (7, 3), (1, 3), (14, 4), (4, 3), (15, 4), (4, 3)]);
         let mut bits = BitReader::new(&data);
@@ -152,6 +154,7 @@ mod tests {
             shape: WindowShape::Sine,
             max_sfb: 40,
             group_lengths: vec![1],
+            prediction: None,
         };
         let (data, count) = packed(&[(5, 4), (31, 5), (4, 5), (0, 4), (5, 5)]);
         let mut bits = BitReader::new(&data);
