@@ -59,10 +59,11 @@ def transform(plane, value):
     return value if plane == 0 else ((value+37) % 256 if plane == 1 else 255-value)
 
 
-def distinct_pcm(unit, gold, plane):
+def distinct_pcm(unit, gold, plane, depth=8):
     """Replace only exactly located authored 32x32 PCM sample blocks."""
-    assert len(gold) == 64*64
-    blocks = [b''.join(gold[y*64+x:y*64+x+32] for y in range(top, top+32))
+    assert len(gold) == 64*64*(1 if depth == 8 else 2)
+    samples = list(gold) if depth == 8 else struct.unpack('<4096H', gold)
+    blocks = [packed(''.join(f'{v:0{depth}b}' for y in range(top, top+32) for v in samples[y*64+x:y*64+x+32]))
               for top in (0, 32) for x in (0, 32)]
     payload = bytearray(unescape(unit[6:]))
     spans = []
@@ -72,9 +73,17 @@ def distinct_pcm(unit, gold, plane):
         spans.append((pos, block))
     assert all(a+len(block) <= b for (a, block), (b, _) in zip(sorted(spans), sorted(spans)[1:]))
     for pos, block in spans:
-        payload[pos:pos+len(block)] = bytes(transform(plane, b) for b in block)
+        value = bits(block)
+        values = [int(value[i:i+depth], 2) for i in range(0, len(value), depth)]
+        new = [transform(plane, b) if depth == 8 else depth_transform(plane, b, depth) for b in values]
+        payload[pos:pos+len(block)] = packed(''.join(f'{v:0{depth}b}' for v in new))
     nal = unit[4:6] + escape(payload)
     return len(nal).to_bytes(4, 'big') + nal
+
+
+def depth_transform(plane, value, depth):
+    mask = (1 << depth)-1
+    return (value+(1 if plane == 0 else 37)) & mask if plane < 2 else mask-value
 
 
 def parameter(nal):
@@ -150,7 +159,10 @@ def main():
                     if (unit[0] >> 1) & 63 == 33:
                         config[1:13] = unescape(unit[2:])[1:13]
             config[16] = (config[16] & 252) | 3
-            config[18] = config[17]
+            # Retain the SPS-signalled chroma bit depth in hvcC. Separate
+            # planes use the luma decoding path; this does not rewrite the SPS
+            # bit_depth_chroma_minus8 syntax element.
+            config[18] = (config[18] & 248) | (meta['chroma_depth'] - 8)
             config = bytes(config[:23] + arrays)
             payload = payload[:8] + box(kind, entry[:78] + b''.join(box(t, config if t == b'hvcC' else p) for t, p in boxes(entry[78:])))
         return box(tag, payload)
@@ -158,8 +170,9 @@ def main():
     movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
     name = sys.argv[2] if len(sys.argv) > 2 else 'hevc-separate-colour-planes-pcm-synthetic.mp4'
     (DEST / name).write_bytes(movie)
-    if len(sys.argv) > 3:
-        assert sys.argv[3] == 'distinct-reference'
+    mode = sys.argv[3] if len(sys.argv) > 3 else None
+    assert mode in (None, 'distinct-reference', 'distinct-depth')
+    if mode == 'distinct-reference':
         assert len(outputs) == 3
         gold = seed.with_suffix('.yuv').read_bytes()
         assert len(gold) == 3*4096
@@ -174,6 +187,18 @@ def main():
         (DEST / name).write_bytes(movie)
         expected = b''.join(bytes(transform(p, b) for b in gold[frame*4096:(frame+1)*4096])
                             for frame in range(3) for p in range(3))
+        (DEST / name).with_suffix('.yuv').write_bytes(expected)
+    if mode == 'distinct-depth':
+        assert len(outputs) == 1
+        depth = meta['depth']
+        assert depth in (10, 12) and meta['pcm_depth'] == depth
+        gold = seed.with_suffix('.yuv').read_bytes()
+        units = packet_units(outputs[0])
+        outputs[0] = b''.join(distinct_pcm(unit, gold, plane, depth) for plane, unit in enumerate(units))
+        movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
+        (DEST / name).write_bytes(movie)
+        values = struct.unpack('<4096H', gold)
+        expected = b''.join(struct.pack('<H', depth_transform(p, v, depth)) for p in range(3) for v in values)
         (DEST / name).with_suffix('.yuv').write_bytes(expected)
     if len(sys.argv) == 1:
         original = outputs[0]

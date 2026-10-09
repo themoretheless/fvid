@@ -7068,3 +7068,19 @@ plane 0 for every plane: the new test failed specifically at frame 1, plane 1.
 The production projection was restored before the final regression run.
 Generate with
 `python3 scripts/generate_hevc_colour_plane_fixtures.py hevc-pcm-mono-reference-wpp-rext8.mp4 hevc-separate-colour-planes-distinct-reference-wpp-synthetic.mp4 distinct-reference`.
+
+Separate-plane PCM now has 10/12-bit acceptance qualification as well. Four
+own one-frame videos retain full-depth PCM syntax: baseline copies and distinct
+planes containing nonzero least-significant bits. Their expected YUV comes
+from the saved mono fixture and explicit PCM sample transforms. Tests compare
+every 16-bit sample and packed 444 byte after reset, rewind and seek, and
+require hvcC bit-depth fields to agree with the signalled SPS fields. The
+generator preserves the SPS-signalled chroma-depth field rather than silently
+replacing it with luma depth. These are intra PCM tests; high-depth inter,
+distinct motion histories and the remaining profiles/tools remain unqualified.
+Use `hevc-pcm-mono-full10-rext10.mp4` / `hevc-pcm-mono-full12-rext12.mp4`
+as generator inputs and `hevc-separate-colour-planes-full10-synthetic.mp4` /
+`hevc-separate-colour-planes-full12-synthetic.mp4` as outputs. For distinct
+low-bit samples, use output `hevc-separate-colour-planes-distinct-full10-synthetic.mp4`
+or `hevc-separate-colour-planes-distinct-full12-synthetic.mp4` and the third
+argument `distinct-depth`.

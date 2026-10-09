@@ -9,6 +9,76 @@ use fvid::{
 use std::io::Cursor;
 
 #[test]
+fn separate_colour_planes_keep_full_10_and_12_bit_pcm_samples() {
+    let path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for depth in [10, 12] {
+        for distinct in [false, true] {
+            let prefix = if distinct { "distinct-" } else { "" };
+            let name = format!("hevc-separate-colour-planes-{prefix}full{depth}-synthetic");
+            let bytes = std::fs::read(path.join(format!("{name}.mp4"))).unwrap();
+            let gold = if distinct {
+                std::fs::read(path.join(format!("{name}.yuv"))).unwrap()
+            } else {
+                let mono =
+                    std::fs::read(path.join(format!("hevc-pcm-mono-full{depth}-rext{depth}.yuv")))
+                        .unwrap();
+                assert_eq!(mono.len(), 4096 * 2);
+                mono.repeat(3)
+            };
+            assert_eq!(gold.len(), 3 * 4096 * 2);
+            let samples: Vec<_> = gold
+                .chunks_exact(2)
+                .map(|v| u16::from_le_bytes([v[0], v[1]]))
+                .collect();
+            assert!(samples.iter().any(|&v| v > 255));
+            if distinct {
+                assert!(samples.iter().any(|&v| v & 1 != 0));
+                assert_ne!(&samples[..4096], &samples[4096..8192]);
+            }
+            let mut reader = Mp4Reader::open(Cursor::new(&bytes), Default::default()).unwrap();
+            let mut decoder =
+                HevcDecoder::from_configuration(&reader.tracks()[0].configuration, 16 << 20)
+                    .unwrap();
+            let signalled = decoder.parameters().0.depth;
+            let config = &reader.tracks()[0].configuration;
+            assert_eq!(signalled[0], depth);
+            assert_eq!(signalled, [8 + (config[17] & 7), 8 + (config[18] & 7)]);
+            let mut packet = vec![];
+            reader.read_packet(0, 0, &mut packet).unwrap();
+            for _ in 0..2 {
+                let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+                assert_eq!(decoded.picture.depth, [depth; 2]);
+                for (i, plane) in decoded.picture.planes.iter().enumerate() {
+                    assert_eq!(plane.samples(), &samples[i * 4096..(i + 1) * 4096]);
+                }
+                decoder.reset();
+            }
+            let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+                Cursor::new(&bytes),
+                Default::default(),
+                16 << 20,
+            )
+            .unwrap();
+            for pass in 0..3 {
+                let frame = player.read_frame().unwrap().unwrap();
+                let packed = frame.packed.unwrap();
+                assert_eq!(packed.depth, depth);
+                assert_eq!(packed.frame.subsampling, Some([1, 1]));
+                assert_eq!(packed.frame.data, gold);
+                assert!(player.read_frame().unwrap().is_none());
+                if pass == 0 {
+                    player.rewind();
+                }
+                if pass == 1 {
+                    assert_eq!(player.seek_to_sync(0), 0);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn separate_colour_planes_reconstruct_all_three_planes() {
     let bytes =
         include_bytes!("fixtures/playback-errors/hevc-separate-colour-planes-pcm-synthetic.mp4");

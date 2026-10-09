@@ -1212,3 +1212,11 @@ The `hevc_` unit-test selection also checks pointer sharing in assembled
 colour-plane pictures, detachment on prediction/residual writes, retained
 allocation accounting and held pixels across decoder reset. This is storage
 qualification; no frame-rate measurement is implied.
+The same acceptance target covers four 10/12-bit separate-plane PCM videos,
+including distinct planes with nonzero low bits. It checks full 16-bit pixels,
+packed 444 bytes, hvcC/SPS depth consistency, reset, rewind and seek. Generation
+uses mono `full10-rext10` / `full12-rext12` inputs with `full10-synthetic` /
+`full12-synthetic` outputs; prefix the output depth with `distinct-` and add
+`distinct-depth` for explicitly transformed low-bit PCM. No external encoder
+or decoder is used by this generator or the tests. High-depth inter remains
+outside this fixture qualification.

@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     println!(
         "{}",
-        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets})
+        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets,"depth":s.depth[0],"chroma_depth":s.depth[1],"pcm_depth":s.pcm.as_ref().map(|pcm| pcm.depth[0])})
     );
     Ok(())
 }
