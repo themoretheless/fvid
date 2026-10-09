@@ -1406,3 +1406,34 @@ is not established.
 Validation: 13 integration tests passed across `aac_main_ps`,
 `aac_main_ps_cce` and `aac_main_ps_independent`, locked/offline with
 `media,player` and no FFmpeg. Production code is unchanged.
+
+### AAC Main PS empty rosters and simultaneous source absence (2026-10-09)
+
+Sixteen authored MP4 videos extend the independent point-3 matrix to 36
+videos. Both CCE sources disappear together for three target frames and
+return, or first appear after three target-only frames. Static and dynamic
+PCE variants cover source-SBR on/off and 24/48 kHz output; the dynamic late
+arrival ASC begins with an empty coupling roster. Source clocks remain
+compact coded ordinals, while target PS advances throughout absence.
+
+The existing scalar Main/core plus qualified SBR/PS composition checks now
+cover every case, including waveform, packet rollback/checkpoints, reset,
+all target frame indices and delayed EOF, export, probe, intervals, rewind
+and seek. Static/dynamic roster PCM must remain identical. The discarded-DSP
+numerical control also covers simultaneous source absence. A dedicated test
+compares frames with no CCE against a target-only PS reference, and requires
+the right channel to remain target-only for every frame even when sources
+return. This guards leaked stale coupling PCM and target-clock disruption.
+
+All 42 generated artifacts are deterministic; the 24 prior videos/core/control
+files remain byte-identical. Fixture generation is separate from ordinary
+tests and uses no private media, FFmpeg, foreign decoder or network.
+This covers empty initial rosters and simultaneous absence for this mono
+Main PS point-3 matrix. Source TNS/PNS combinations, multiple source-SBR
+geometries, source PS, broader profiles/layouts and all-codec parity remain
+unqualified. The SBR/PS reference uses qualified owned stages rather than a
+new independent numerical SBR/PS oracle.
+
+Validation: 14 integration tests passed across `aac_main_ps`,
+`aac_main_ps_cce` and `aac_main_ps_independent`, locked/offline with
+`media,player` and no FFmpeg. Production code is unchanged.

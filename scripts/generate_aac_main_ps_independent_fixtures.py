@@ -33,14 +33,14 @@ def main():
         for name,data in ((core,pcm),(wrong,bad_pcm)):(DEST/name).write_bytes(struct.pack('<'+str(len(data))+'f',*data))
         cores[tag]=core;discarded[tag]=wrong;source_channels[tag]=channels
     blob=bytearray();cases=[]
-    schedules=[('full',False),('return',False),('return',True),('arrival',False),('arrival',True)]
+    schedules=[('full',False),('return',False),('return',True),('arrival',False),('arrival',True),('both-return',False),('both-return',True),('both-arrival',False),('both-arrival',True)]
     for source_sbr in (False,True):
         for schedule,dynamic in schedules:
             rows=[];ordinals={1:0,15:0}
-            initial_tags=(15,) if schedule=='arrival' and dynamic else (1,15)
+            initial_tags=(() if schedule=='both-arrival' else (15,)) if schedule in ('arrival','both-arrival') and dynamic else (1,15)
             previous=initial_tags
             for i in range(12):
-                present=(15,) if (schedule=='return' and 4<=i<7) or (schedule=='arrival' and i<3) else (1,15)
+                present=(() if schedule.startswith('both-') else (15,)) if (schedule.endswith('return') and 4<=i<7) or (schedule.endswith('arrival') and i<3) else (1,15)
                 roster=present if dynamic else (1,15)
                 payload=payloads[i%3];target='0000000'+channel(0,[0],[[0]*4],info=ics(0,1,False))+fill(bytes.fromhex(payload))
                 sources=[];metadata=[]

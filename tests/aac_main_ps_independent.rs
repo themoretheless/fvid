@@ -326,7 +326,7 @@ fn dynamic_rosters_preserve_point3_source_histories_and_dsp() {
             "{} PCE roster changed source state",
             c["name"]
         );
-        if c["schedule"] == "return" {
+        if c["schedule"].as_str().unwrap().ends_with("return") {
             let good = reference(c);
             let wrong = reference_state(c, false, true);
             assert_eq!(good.len(), wrong.len());
@@ -340,6 +340,53 @@ fn dynamic_rosters_preserve_point3_source_histories_and_dsp() {
                 "{} discarded DSP history is not observable: {delta}",
                 c["name"]
             );
+        }
+    }
+}
+
+#[test]
+fn empty_rosters_keep_target_ps_clock_and_uncoupled_channel() {
+    for c in m()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["schedule"].as_str().unwrap().starts_with("both-"))
+    {
+        let mut target = c.clone();
+        for row in target["frames"].as_array_mut().unwrap() {
+            row["sources"] = serde_json::json!([]);
+        }
+        let target_pcm = reference(&target);
+        let mut raw = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["video"]["file"].as_str().unwrap()),
+            &mut raw,
+        )
+        .unwrap();
+        let actual: Vec<f32> = raw
+            .chunks_exact(4)
+            .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
+            .collect();
+        assert_eq!(actual.len(), target_pcm.len());
+        let frame_samples = c["container_frame_samples"].as_u64().unwrap() as usize;
+        for (frame, row) in c["frames"].as_array().unwrap().iter().enumerate() {
+            let at = frame * frame_samples * 2;
+            for i in 0..frame_samples {
+                assert_eq!(
+                    actual[at + i * 2 + 1],
+                    target_pcm[at + i * 2 + 1],
+                    "{} source changed right target channel",
+                    c["name"]
+                );
+                if row["sources"].as_array().unwrap().is_empty() {
+                    assert_eq!(
+                        actual[at + i * 2],
+                        target_pcm[at + i * 2],
+                        "{} absent source leaked PCM at frame {frame}",
+                        c["name"]
+                    );
+                }
+            }
         }
     }
 }
