@@ -3778,3 +3778,32 @@ and [40-band LTP syntax bound](https://github.com/knik0/faad2/blob/master/libfaa
 These are syntax references, not code or runtime dependencies.
 
 Validation: all five artifacts regenerate identically. Owned-library tests: 461 passed, 0 failed, 1 pre-existing ignored. Offline media/player integration: 8 passed, 0 failed, 1 explicitly pending LTP playback acceptance. Syntax acceptance and configuration-refusal reproduction do not establish LTP playback.
+
+### AAC LTP owned time-domain history foundation (2026-10-09)
+
+`aac_ltp_history::LtpHistory` owns a bounded four-frame signed-16-bit history
+for 960/1024 core samples. Updates consume raw synthesis PCM/overlap before
+normalization, using saturation and nearest-even integer rounding. Estimate
+preparation uses lag and one of eight ordinary LTP gains to produce two-frame
+long-window analysis input. The future tail remains zero. Reset and matching
+checkpoint restore are allocation-free; invalid updates, estimates and restores
+leave state/output intact. Short-window analysis explicitly refuses.
+
+`SynthesisHistory::overlap_raw` exposes a borrowed raw overlap snapshot for
+future decoder integration. It does not advance synthesis or normalize samples.
+The independent Python oracle uses piecewise physical time rather than a
+production buffer shift and covers past PCM, overlap, zero future, all gains,
+clipping/ties and lag boundaries including 2047. A separate test feeds actual
+owned synthesis PCM/overlap into the history. Generation is separate from tests
+and uses no private media, foreign codec execution, FFmpeg or network.
+
+This is a required LTP computation stage, not LTP playback acceptance. Forward
+analysis/window selection, TNS analysis, band application, transactional decoder
+history and AOT4 admission remain unintegrated; the two existing synthetic LTP
+videos still reproduce configuration refusal and playback acceptance is ignored.
+Gain/history layout reference consulted: [FAAD2 LTP reference](https://github.com/knik0/faad2/blob/master/libfaad/lt_predict.c).
+No external decoder code or dependency is imported.
+
+Sensitivity: replacing the previous-PCM carry with zeros failed the independent history oracle at n=960, lag=1920, coefficient=0. Source was restored. All three artifacts reproduce identical hashes and cover 216 full two-frame estimates, including the separately encoded 2047 lag boundary.
+
+Validation: owned-library tests passed 461 with zero failures and one pre-existing ignored. Offline media/player integration passed 11 with zero failures and one pending LTP playback acceptance ignored. The chosen raw-signal scale and integer rounding still require end-to-end LTP PCM qualification when analysis/synthesis is integrated.

@@ -1,0 +1,1125 @@
+{
+  "cases": [
+    {
+      "n": 960,
+      "steps": [
+        {
+          "input_offset": 0,
+          "estimates": [
+            {
+              "lag": 0,
+              "coefficient": 0,
+              "offset": 0
+            },
+            {
+              "lag": 0,
+              "coefficient": 1,
+              "offset": 15360
+            },
+            {
+              "lag": 0,
+              "coefficient": 2,
+              "offset": 30720
+            },
+            {
+              "lag": 0,
+              "coefficient": 3,
+              "offset": 46080
+            },
+            {
+              "lag": 0,
+              "coefficient": 4,
+              "offset": 61440
+            },
+            {
+              "lag": 0,
+              "coefficient": 5,
+              "offset": 76800
+            },
+            {
+              "lag": 0,
+              "coefficient": 6,
+              "offset": 92160
+            },
+            {
+              "lag": 0,
+              "coefficient": 7,
+              "offset": 107520
+            },
+            {
+              "lag": 1,
+              "coefficient": 0,
+              "offset": 122880
+            },
+            {
+              "lag": 1,
+              "coefficient": 1,
+              "offset": 138240
+            },
+            {
+              "lag": 1,
+              "coefficient": 2,
+              "offset": 153600
+            },
+            {
+              "lag": 1,
+              "coefficient": 3,
+              "offset": 168960
+            },
+            {
+              "lag": 1,
+              "coefficient": 4,
+              "offset": 184320
+            },
+            {
+              "lag": 1,
+              "coefficient": 5,
+              "offset": 199680
+            },
+            {
+              "lag": 1,
+              "coefficient": 6,
+              "offset": 215040
+            },
+            {
+              "lag": 1,
+              "coefficient": 7,
+              "offset": 230400
+            },
+            {
+              "lag": 960,
+              "coefficient": 0,
+              "offset": 245760
+            },
+            {
+              "lag": 960,
+              "coefficient": 1,
+              "offset": 261120
+            },
+            {
+              "lag": 960,
+              "coefficient": 2,
+              "offset": 276480
+            },
+            {
+              "lag": 960,
+              "coefficient": 3,
+              "offset": 291840
+            },
+            {
+              "lag": 960,
+              "coefficient": 4,
+              "offset": 307200
+            },
+            {
+              "lag": 960,
+              "coefficient": 5,
+              "offset": 322560
+            },
+            {
+              "lag": 960,
+              "coefficient": 6,
+              "offset": 337920
+            },
+            {
+              "lag": 960,
+              "coefficient": 7,
+              "offset": 353280
+            },
+            {
+              "lag": 1920,
+              "coefficient": 0,
+              "offset": 368640
+            },
+            {
+              "lag": 1920,
+              "coefficient": 1,
+              "offset": 384000
+            },
+            {
+              "lag": 1920,
+              "coefficient": 2,
+              "offset": 399360
+            },
+            {
+              "lag": 1920,
+              "coefficient": 3,
+              "offset": 414720
+            },
+            {
+              "lag": 1920,
+              "coefficient": 4,
+              "offset": 430080
+            },
+            {
+              "lag": 1920,
+              "coefficient": 5,
+              "offset": 445440
+            },
+            {
+              "lag": 1920,
+              "coefficient": 6,
+              "offset": 460800
+            },
+            {
+              "lag": 1920,
+              "coefficient": 7,
+              "offset": 476160
+            }
+          ]
+        },
+        {
+          "input_offset": 15360,
+          "estimates": [
+            {
+              "lag": 0,
+              "coefficient": 0,
+              "offset": 491520
+            },
+            {
+              "lag": 0,
+              "coefficient": 1,
+              "offset": 506880
+            },
+            {
+              "lag": 0,
+              "coefficient": 2,
+              "offset": 522240
+            },
+            {
+              "lag": 0,
+              "coefficient": 3,
+              "offset": 537600
+            },
+            {
+              "lag": 0,
+              "coefficient": 4,
+              "offset": 552960
+            },
+            {
+              "lag": 0,
+              "coefficient": 5,
+              "offset": 568320
+            },
+            {
+              "lag": 0,
+              "coefficient": 6,
+              "offset": 583680
+            },
+            {
+              "lag": 0,
+              "coefficient": 7,
+              "offset": 599040
+            },
+            {
+              "lag": 1,
+              "coefficient": 0,
+              "offset": 614400
+            },
+            {
+              "lag": 1,
+              "coefficient": 1,
+              "offset": 629760
+            },
+            {
+              "lag": 1,
+              "coefficient": 2,
+              "offset": 645120
+            },
+            {
+              "lag": 1,
+              "coefficient": 3,
+              "offset": 660480
+            },
+            {
+              "lag": 1,
+              "coefficient": 4,
+              "offset": 675840
+            },
+            {
+              "lag": 1,
+              "coefficient": 5,
+              "offset": 691200
+            },
+            {
+              "lag": 1,
+              "coefficient": 6,
+              "offset": 706560
+            },
+            {
+              "lag": 1,
+              "coefficient": 7,
+              "offset": 721920
+            },
+            {
+              "lag": 960,
+              "coefficient": 0,
+              "offset": 737280
+            },
+            {
+              "lag": 960,
+              "coefficient": 1,
+              "offset": 752640
+            },
+            {
+              "lag": 960,
+              "coefficient": 2,
+              "offset": 768000
+            },
+            {
+              "lag": 960,
+              "coefficient": 3,
+              "offset": 783360
+            },
+            {
+              "lag": 960,
+              "coefficient": 4,
+              "offset": 798720
+            },
+            {
+              "lag": 960,
+              "coefficient": 5,
+              "offset": 814080
+            },
+            {
+              "lag": 960,
+              "coefficient": 6,
+              "offset": 829440
+            },
+            {
+              "lag": 960,
+              "coefficient": 7,
+              "offset": 844800
+            },
+            {
+              "lag": 1920,
+              "coefficient": 0,
+              "offset": 860160
+            },
+            {
+              "lag": 1920,
+              "coefficient": 1,
+              "offset": 875520
+            },
+            {
+              "lag": 1920,
+              "coefficient": 2,
+              "offset": 890880
+            },
+            {
+              "lag": 1920,
+              "coefficient": 3,
+              "offset": 906240
+            },
+            {
+              "lag": 1920,
+              "coefficient": 4,
+              "offset": 921600
+            },
+            {
+              "lag": 1920,
+              "coefficient": 5,
+              "offset": 936960
+            },
+            {
+              "lag": 1920,
+              "coefficient": 6,
+              "offset": 952320
+            },
+            {
+              "lag": 1920,
+              "coefficient": 7,
+              "offset": 967680
+            }
+          ]
+        },
+        {
+          "input_offset": 30720,
+          "estimates": [
+            {
+              "lag": 0,
+              "coefficient": 0,
+              "offset": 983040
+            },
+            {
+              "lag": 0,
+              "coefficient": 1,
+              "offset": 998400
+            },
+            {
+              "lag": 0,
+              "coefficient": 2,
+              "offset": 1013760
+            },
+            {
+              "lag": 0,
+              "coefficient": 3,
+              "offset": 1029120
+            },
+            {
+              "lag": 0,
+              "coefficient": 4,
+              "offset": 1044480
+            },
+            {
+              "lag": 0,
+              "coefficient": 5,
+              "offset": 1059840
+            },
+            {
+              "lag": 0,
+              "coefficient": 6,
+              "offset": 1075200
+            },
+            {
+              "lag": 0,
+              "coefficient": 7,
+              "offset": 1090560
+            },
+            {
+              "lag": 1,
+              "coefficient": 0,
+              "offset": 1105920
+            },
+            {
+              "lag": 1,
+              "coefficient": 1,
+              "offset": 1121280
+            },
+            {
+              "lag": 1,
+              "coefficient": 2,
+              "offset": 1136640
+            },
+            {
+              "lag": 1,
+              "coefficient": 3,
+              "offset": 1152000
+            },
+            {
+              "lag": 1,
+              "coefficient": 4,
+              "offset": 1167360
+            },
+            {
+              "lag": 1,
+              "coefficient": 5,
+              "offset": 1182720
+            },
+            {
+              "lag": 1,
+              "coefficient": 6,
+              "offset": 1198080
+            },
+            {
+              "lag": 1,
+              "coefficient": 7,
+              "offset": 1213440
+            },
+            {
+              "lag": 960,
+              "coefficient": 0,
+              "offset": 1228800
+            },
+            {
+              "lag": 960,
+              "coefficient": 1,
+              "offset": 1244160
+            },
+            {
+              "lag": 960,
+              "coefficient": 2,
+              "offset": 1259520
+            },
+            {
+              "lag": 960,
+              "coefficient": 3,
+              "offset": 1274880
+            },
+            {
+              "lag": 960,
+              "coefficient": 4,
+              "offset": 1290240
+            },
+            {
+              "lag": 960,
+              "coefficient": 5,
+              "offset": 1305600
+            },
+            {
+              "lag": 960,
+              "coefficient": 6,
+              "offset": 1320960
+            },
+            {
+              "lag": 960,
+              "coefficient": 7,
+              "offset": 1336320
+            },
+            {
+              "lag": 1920,
+              "coefficient": 0,
+              "offset": 1351680
+            },
+            {
+              "lag": 1920,
+              "coefficient": 1,
+              "offset": 1367040
+            },
+            {
+              "lag": 1920,
+              "coefficient": 2,
+              "offset": 1382400
+            },
+            {
+              "lag": 1920,
+              "coefficient": 3,
+              "offset": 1397760
+            },
+            {
+              "lag": 1920,
+              "coefficient": 4,
+              "offset": 1413120
+            },
+            {
+              "lag": 1920,
+              "coefficient": 5,
+              "offset": 1428480
+            },
+            {
+              "lag": 1920,
+              "coefficient": 6,
+              "offset": 1443840
+            },
+            {
+              "lag": 1920,
+              "coefficient": 7,
+              "offset": 1459200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "n": 1024,
+      "steps": [
+        {
+          "input_offset": 46080,
+          "estimates": [
+            {
+              "lag": 0,
+              "coefficient": 0,
+              "offset": 1474560
+            },
+            {
+              "lag": 0,
+              "coefficient": 1,
+              "offset": 1490944
+            },
+            {
+              "lag": 0,
+              "coefficient": 2,
+              "offset": 1507328
+            },
+            {
+              "lag": 0,
+              "coefficient": 3,
+              "offset": 1523712
+            },
+            {
+              "lag": 0,
+              "coefficient": 4,
+              "offset": 1540096
+            },
+            {
+              "lag": 0,
+              "coefficient": 5,
+              "offset": 1556480
+            },
+            {
+              "lag": 0,
+              "coefficient": 6,
+              "offset": 1572864
+            },
+            {
+              "lag": 0,
+              "coefficient": 7,
+              "offset": 1589248
+            },
+            {
+              "lag": 1,
+              "coefficient": 0,
+              "offset": 1605632
+            },
+            {
+              "lag": 1,
+              "coefficient": 1,
+              "offset": 1622016
+            },
+            {
+              "lag": 1,
+              "coefficient": 2,
+              "offset": 1638400
+            },
+            {
+              "lag": 1,
+              "coefficient": 3,
+              "offset": 1654784
+            },
+            {
+              "lag": 1,
+              "coefficient": 4,
+              "offset": 1671168
+            },
+            {
+              "lag": 1,
+              "coefficient": 5,
+              "offset": 1687552
+            },
+            {
+              "lag": 1,
+              "coefficient": 6,
+              "offset": 1703936
+            },
+            {
+              "lag": 1,
+              "coefficient": 7,
+              "offset": 1720320
+            },
+            {
+              "lag": 1024,
+              "coefficient": 0,
+              "offset": 1736704
+            },
+            {
+              "lag": 1024,
+              "coefficient": 1,
+              "offset": 1753088
+            },
+            {
+              "lag": 1024,
+              "coefficient": 2,
+              "offset": 1769472
+            },
+            {
+              "lag": 1024,
+              "coefficient": 3,
+              "offset": 1785856
+            },
+            {
+              "lag": 1024,
+              "coefficient": 4,
+              "offset": 1802240
+            },
+            {
+              "lag": 1024,
+              "coefficient": 5,
+              "offset": 1818624
+            },
+            {
+              "lag": 1024,
+              "coefficient": 6,
+              "offset": 1835008
+            },
+            {
+              "lag": 1024,
+              "coefficient": 7,
+              "offset": 1851392
+            },
+            {
+              "lag": 2047,
+              "coefficient": 0,
+              "offset": 1867776
+            },
+            {
+              "lag": 2047,
+              "coefficient": 1,
+              "offset": 1884160
+            },
+            {
+              "lag": 2047,
+              "coefficient": 2,
+              "offset": 1900544
+            },
+            {
+              "lag": 2047,
+              "coefficient": 3,
+              "offset": 1916928
+            },
+            {
+              "lag": 2047,
+              "coefficient": 4,
+              "offset": 1933312
+            },
+            {
+              "lag": 2047,
+              "coefficient": 5,
+              "offset": 1949696
+            },
+            {
+              "lag": 2047,
+              "coefficient": 6,
+              "offset": 1966080
+            },
+            {
+              "lag": 2047,
+              "coefficient": 7,
+              "offset": 1982464
+            },
+            {
+              "lag": 2048,
+              "coefficient": 0,
+              "offset": 1998848
+            },
+            {
+              "lag": 2048,
+              "coefficient": 1,
+              "offset": 2015232
+            },
+            {
+              "lag": 2048,
+              "coefficient": 2,
+              "offset": 2031616
+            },
+            {
+              "lag": 2048,
+              "coefficient": 3,
+              "offset": 2048000
+            },
+            {
+              "lag": 2048,
+              "coefficient": 4,
+              "offset": 2064384
+            },
+            {
+              "lag": 2048,
+              "coefficient": 5,
+              "offset": 2080768
+            },
+            {
+              "lag": 2048,
+              "coefficient": 6,
+              "offset": 2097152
+            },
+            {
+              "lag": 2048,
+              "coefficient": 7,
+              "offset": 2113536
+            }
+          ]
+        },
+        {
+          "input_offset": 62464,
+          "estimates": [
+            {
+              "lag": 0,
+              "coefficient": 0,
+              "offset": 2129920
+            },
+            {
+              "lag": 0,
+              "coefficient": 1,
+              "offset": 2146304
+            },
+            {
+              "lag": 0,
+              "coefficient": 2,
+              "offset": 2162688
+            },
+            {
+              "lag": 0,
+              "coefficient": 3,
+              "offset": 2179072
+            },
+            {
+              "lag": 0,
+              "coefficient": 4,
+              "offset": 2195456
+            },
+            {
+              "lag": 0,
+              "coefficient": 5,
+              "offset": 2211840
+            },
+            {
+              "lag": 0,
+              "coefficient": 6,
+              "offset": 2228224
+            },
+            {
+              "lag": 0,
+              "coefficient": 7,
+              "offset": 2244608
+            },
+            {
+              "lag": 1,
+              "coefficient": 0,
+              "offset": 2260992
+            },
+            {
+              "lag": 1,
+              "coefficient": 1,
+              "offset": 2277376
+            },
+            {
+              "lag": 1,
+              "coefficient": 2,
+              "offset": 2293760
+            },
+            {
+              "lag": 1,
+              "coefficient": 3,
+              "offset": 2310144
+            },
+            {
+              "lag": 1,
+              "coefficient": 4,
+              "offset": 2326528
+            },
+            {
+              "lag": 1,
+              "coefficient": 5,
+              "offset": 2342912
+            },
+            {
+              "lag": 1,
+              "coefficient": 6,
+              "offset": 2359296
+            },
+            {
+              "lag": 1,
+              "coefficient": 7,
+              "offset": 2375680
+            },
+            {
+              "lag": 1024,
+              "coefficient": 0,
+              "offset": 2392064
+            },
+            {
+              "lag": 1024,
+              "coefficient": 1,
+              "offset": 2408448
+            },
+            {
+              "lag": 1024,
+              "coefficient": 2,
+              "offset": 2424832
+            },
+            {
+              "lag": 1024,
+              "coefficient": 3,
+              "offset": 2441216
+            },
+            {
+              "lag": 1024,
+              "coefficient": 4,
+              "offset": 2457600
+            },
+            {
+              "lag": 1024,
+              "coefficient": 5,
+              "offset": 2473984
+            },
+            {
+              "lag": 1024,
+              "coefficient": 6,
+              "offset": 2490368
+            },
+            {
+              "lag": 1024,
+              "coefficient": 7,
+              "offset": 2506752
+            },
+            {
+              "lag": 2047,
+              "coefficient": 0,
+              "offset": 2523136
+            },
+            {
+              "lag": 2047,
+              "coefficient": 1,
+              "offset": 2539520
+            },
+            {
+              "lag": 2047,
+              "coefficient": 2,
+              "offset": 2555904
+            },
+            {
+              "lag": 2047,
+              "coefficient": 3,
+              "offset": 2572288
+            },
+            {
+              "lag": 2047,
+              "coefficient": 4,
+              "offset": 2588672
+            },
+            {
+              "lag": 2047,
+              "coefficient": 5,
+              "offset": 2605056
+            },
+            {
+              "lag": 2047,
+              "coefficient": 6,
+              "offset": 2621440
+            },
+            {
+              "lag": 2047,
+              "coefficient": 7,
+              "offset": 2637824
+            },
+            {
+              "lag": 2048,
+              "coefficient": 0,
+              "offset": 2654208
+            },
+            {
+              "lag": 2048,
+              "coefficient": 1,
+              "offset": 2670592
+            },
+            {
+              "lag": 2048,
+              "coefficient": 2,
+              "offset": 2686976
+            },
+            {
+              "lag": 2048,
+              "coefficient": 3,
+              "offset": 2703360
+            },
+            {
+              "lag": 2048,
+              "coefficient": 4,
+              "offset": 2719744
+            },
+            {
+              "lag": 2048,
+              "coefficient": 5,
+              "offset": 2736128
+            },
+            {
+              "lag": 2048,
+              "coefficient": 6,
+              "offset": 2752512
+            },
+            {
+              "lag": 2048,
+              "coefficient": 7,
+              "offset": 2768896
+            }
+          ]
+        },
+        {
+          "input_offset": 78848,
+          "estimates": [
+            {
+              "lag": 0,
+              "coefficient": 0,
+              "offset": 2785280
+            },
+            {
+              "lag": 0,
+              "coefficient": 1,
+              "offset": 2801664
+            },
+            {
+              "lag": 0,
+              "coefficient": 2,
+              "offset": 2818048
+            },
+            {
+              "lag": 0,
+              "coefficient": 3,
+              "offset": 2834432
+            },
+            {
+              "lag": 0,
+              "coefficient": 4,
+              "offset": 2850816
+            },
+            {
+              "lag": 0,
+              "coefficient": 5,
+              "offset": 2867200
+            },
+            {
+              "lag": 0,
+              "coefficient": 6,
+              "offset": 2883584
+            },
+            {
+              "lag": 0,
+              "coefficient": 7,
+              "offset": 2899968
+            },
+            {
+              "lag": 1,
+              "coefficient": 0,
+              "offset": 2916352
+            },
+            {
+              "lag": 1,
+              "coefficient": 1,
+              "offset": 2932736
+            },
+            {
+              "lag": 1,
+              "coefficient": 2,
+              "offset": 2949120
+            },
+            {
+              "lag": 1,
+              "coefficient": 3,
+              "offset": 2965504
+            },
+            {
+              "lag": 1,
+              "coefficient": 4,
+              "offset": 2981888
+            },
+            {
+              "lag": 1,
+              "coefficient": 5,
+              "offset": 2998272
+            },
+            {
+              "lag": 1,
+              "coefficient": 6,
+              "offset": 3014656
+            },
+            {
+              "lag": 1,
+              "coefficient": 7,
+              "offset": 3031040
+            },
+            {
+              "lag": 1024,
+              "coefficient": 0,
+              "offset": 3047424
+            },
+            {
+              "lag": 1024,
+              "coefficient": 1,
+              "offset": 3063808
+            },
+            {
+              "lag": 1024,
+              "coefficient": 2,
+              "offset": 3080192
+            },
+            {
+              "lag": 1024,
+              "coefficient": 3,
+              "offset": 3096576
+            },
+            {
+              "lag": 1024,
+              "coefficient": 4,
+              "offset": 3112960
+            },
+            {
+              "lag": 1024,
+              "coefficient": 5,
+              "offset": 3129344
+            },
+            {
+              "lag": 1024,
+              "coefficient": 6,
+              "offset": 3145728
+            },
+            {
+              "lag": 1024,
+              "coefficient": 7,
+              "offset": 3162112
+            },
+            {
+              "lag": 2047,
+              "coefficient": 0,
+              "offset": 3178496
+            },
+            {
+              "lag": 2047,
+              "coefficient": 1,
+              "offset": 3194880
+            },
+            {
+              "lag": 2047,
+              "coefficient": 2,
+              "offset": 3211264
+            },
+            {
+              "lag": 2047,
+              "coefficient": 3,
+              "offset": 3227648
+            },
+            {
+              "lag": 2047,
+              "coefficient": 4,
+              "offset": 3244032
+            },
+            {
+              "lag": 2047,
+              "coefficient": 5,
+              "offset": 3260416
+            },
+            {
+              "lag": 2047,
+              "coefficient": 6,
+              "offset": 3276800
+            },
+            {
+              "lag": 2047,
+              "coefficient": 7,
+              "offset": 3293184
+            },
+            {
+              "lag": 2048,
+              "coefficient": 0,
+              "offset": 3309568
+            },
+            {
+              "lag": 2048,
+              "coefficient": 1,
+              "offset": 3325952
+            },
+            {
+              "lag": 2048,
+              "coefficient": 2,
+              "offset": 3342336
+            },
+            {
+              "lag": 2048,
+              "coefficient": 3,
+              "offset": 3358720
+            },
+            {
+              "lag": 2048,
+              "coefficient": 4,
+              "offset": 3375104
+            },
+            {
+              "lag": 2048,
+              "coefficient": 5,
+              "offset": 3391488
+            },
+            {
+              "lag": 2048,
+              "coefficient": 6,
+              "offset": 3407872
+            },
+            {
+              "lag": 2048,
+              "coefficient": 7,
+              "offset": 3424256
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "provenance": "Own integer-quantized piecewise time-axis history and eight gain coefficients; no foreign codec execution, network or private media."
+}

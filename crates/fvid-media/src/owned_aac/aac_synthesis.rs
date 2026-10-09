@@ -72,6 +72,10 @@ pub struct SynthesisHistory {
     previous_shape: WindowShape,
     overlap: Vec<f64>,
 }
+impl SynthesisHistory {
+    /// Raw overlap in synthesis units, before PCM output normalization.
+    pub fn overlap_raw(&self) -> &[f64] { &self.overlap }
+}
 impl LongSineSynthesis {
     pub fn history(&self) -> SynthesisHistory {
         SynthesisHistory {
