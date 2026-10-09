@@ -4281,7 +4281,7 @@ Generation remains separate; ordinary tests use no FFmpeg, libav or network.
 
 These fixtures qualify one mono 1024-frame LTP/SBR program with sine windows,
 varying prediction lag/gain and 16-slot SBR geometry. Late SBR, wider LTP/SBR
-layouts/tools, LTP/PS, protected LTP ADTS transport and ER/LD/ELD/USAC remain
+layouts/tools, LTP/PS, additional LTP ADTS combinations and ER/LD/ELD/USAC remain
 separate gaps; this does not establish complete AAC conformance or performance.
 Primary configuration/processing order was checked against the
 [primary AAC dispatch reference](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec.c).
@@ -4291,3 +4291,41 @@ Validation: owned library 477 passed / 1 pre-existing ignored; root native AAC
 17 passed; nineteen offline AAC integration suites 68 passed / 0 ignored.
 All fifteen generated artifacts reproduce identical SHA-256 hashes. Existing
 PCM references and tolerances are unchanged.
+
+### Active LTP ADTS protection and multiplexed blocks (2026-10-10)
+
+Eight own short companion videos and their protected single-block ADTS transports
+reproduced `prediction is not allowed in AAC-LC` before the fix. This was a
+transport scanner gap: CRC spans, raw-block boundaries and SBR discovery still
+used legacy ICS readers for AOT4. The reproduction expectation is replaced by
+actual playback acceptance.
+
+The scanner now dispatches SCE/LFE, CPE and CCE to owned LTP readers. CPE parsing
+returns the second ICS span without changing its independent predictor flags or
+whole-pair rollback. AOT4 is also included in the bounded implicit-SBR rate probe.
+No PCM/predictor state is advanced by CRC or block-boundary scanning.
+
+`generate_adts_ltp_fixtures.py` authors all boundaries from bit-writer lengths and
+computes CRC through independent GF(2) polynomial division. It never obtains its
+expected spans from the decoder. Eight programs cover common-window stereo with
+MS 0/1/2, independent stereo, mono/SBR, and PCE/CCE coupling points 0/1/3 with
+alternating element order. The 78 ADTS variants use protected/unprotected groups
+of 1/2/3/4 blocks, including mixed 1+2+1+4+4 and six-frame SBR 4+2. Root and owned indexed and
+streaming readers expose the exact authored packets and core timestamps. Full
+PCM matches companion MP4 and the previously qualified scalar references;
+repeated/reversed ranges match exact full-output slices. No tolerance is relaxed.
+Eight corrupt transports flip a CRC bit in the fourth, active-LTP block and
+must report precisely `ADTS CRC mismatch`; streaming readers then remain poisoned.
+SBR discovery is checked from an initial header-bearing block, not from payloads
+that require retained header state.
+
+This closes protected/multiplexed transport for these authored 1024-frame
+programs, not all AAC profiles/tools/layouts. Late SBR, LTP/PS, wider SBR geometry,
+additional short-window/layout combinations and ER/LD/ELD/USAC remain separate
+qualification gaps. Fixtures and ordinary tests need no FFmpeg, libav or network.
+
+Validation: owned library 477 passed / 1 pre-existing ignored; eight offline
+integration suites 26 passed / 0 ignored. The expanded 78-transport LTP suite
+passed again after adding mixed groups. All 96 fixture artifacts have identical
+SHA-256 hashes after regeneration; previously generated binary media and packets
+are unchanged. No foreign codec or network is used by generation or tests.

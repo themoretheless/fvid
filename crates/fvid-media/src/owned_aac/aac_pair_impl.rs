@@ -172,6 +172,14 @@ impl ChannelPair {
     /// Parse ordinary AOT4 pairs with independent per-channel LTP data.
     /// A failure in either stream restores the complete pair cursor.
     pub fn read_ltp(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<(Self, [Option<super::aac_ltp_syntax::LtpData>; 2])> {
+        Self::read_ltp_with_right_span(bits, config).map(|(pair, prediction, _)| (pair, prediction))
+    }
+
+    /// LTP-aware second ICS span for ADTS protection, with whole-pair rollback.
+    pub(crate) fn read_ltp_with_right_span(
+        bits: &mut BitReader<'_>,
+        config: &AacConfig,
+    ) -> Result<(Self, [Option<super::aac_ltp_syntax::LtpData>; 2], std::ops::Range<usize>)> {
         if config.object_type != 4 { return Err(invalid("AAC LTP pair requires AOT4")); }
         let tables = BandTables::for_config(config)?;
         let mut cursor = bits.clone();
@@ -180,16 +188,20 @@ impl ChannelPair {
                 ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8), config.frame_samples,true)?)
         } else { None };
         let (explicit_mask, mid_side) = Self::read_mask(&mut cursor, common.as_ref().map(|header| &header.info))?;
-        let (left, right, prediction) = if let Some(header) = common {
-            (ChannelData::read_common(&mut cursor,config,Some(&header.info))?,
-             ChannelData::read_common(&mut cursor,config,Some(&header.info))?, header.channels)
+        let (left, right, prediction, right_start) = if let Some(header) = common {
+            let left = ChannelData::read_common(&mut cursor,config,Some(&header.info))?;
+            let right_start = cursor.position();
+            let right = ChannelData::read_common(&mut cursor,config,Some(&header.info))?;
+            (left, right, header.channels, right_start)
         } else {
             let (left, before) = ChannelData::read_ltp(&mut cursor,config)?;
+            let right_start = cursor.position();
             let (right, after) = ChannelData::read_ltp(&mut cursor,config)?;
-            (left,right,[before,after])
+            (left,right,[before,after],right_start)
         };
+        let right_span = right_start..cursor.position();
         *bits = cursor;
-        Ok((Self { left,right,mid_side,explicit_mask },prediction))
+        Ok((Self { left,right,mid_side,explicit_mask },prediction,right_span))
     }
 
 }

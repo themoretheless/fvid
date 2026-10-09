@@ -1,0 +1,2903 @@
+{
+  "cases": [
+    {
+      "name": "pair-common-ms0",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 122,
+              "width": 192
+            },
+            {
+              "start": 72,
+              "end": 122,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 16,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 122,
+              "width": 192
+            },
+            {
+              "start": 72,
+              "end": 122,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 32,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 122,
+              "width": 192
+            },
+            {
+              "start": 72,
+              "end": 122,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 48,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 68,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 88,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 106,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 124,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 144,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 164,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 182,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 200,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        }
+      ],
+      "channels": 2,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-pair-common-ms0-synthetic.mp4",
+        "sha256": "28f7b3f82d1361761897074da03f5ae8b29ec90d8f8baf31aff3e82774d0a2c7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-pair-common-ms0-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms0-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pair-common-ms1",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 220,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 124,
+              "width": 192
+            },
+            {
+              "start": 74,
+              "end": 124,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 236,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 124,
+              "width": 192
+            },
+            {
+              "start": 74,
+              "end": 124,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 252,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 124,
+              "width": 192
+            },
+            {
+              "start": 74,
+              "end": 124,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 268,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 158,
+              "width": 192
+            },
+            {
+              "start": 108,
+              "end": 158,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 289,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 158,
+              "width": 192
+            },
+            {
+              "start": 108,
+              "end": 158,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 310,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 92,
+              "end": 142,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 329,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 92,
+              "end": 142,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 348,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 158,
+              "width": 192
+            },
+            {
+              "start": 108,
+              "end": 158,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 369,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 158,
+              "width": 192
+            },
+            {
+              "start": 108,
+              "end": 158,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 390,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 92,
+              "end": 142,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 409,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 92,
+              "end": 142,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 428,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 158,
+              "width": 192
+            },
+            {
+              "start": 108,
+              "end": 158,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        }
+      ],
+      "channels": 2,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-pair-common-ms1-synthetic.mp4",
+        "sha256": "ae300b82a49a28d4ba732d60141275ff2f44c74cf16d88a089bc20ec5f2e756d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-pair-common-ms1-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms1-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pair-common-ms2",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 449,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 122,
+              "width": 192
+            },
+            {
+              "start": 72,
+              "end": 122,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 465,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 122,
+              "width": 192
+            },
+            {
+              "start": 72,
+              "end": 122,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 481,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 122,
+              "width": 192
+            },
+            {
+              "start": 72,
+              "end": 122,
+              "width": 128
+            }
+          ],
+          "header": "fff1d88002fffc"
+        },
+        {
+          "offset": 497,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 517,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 537,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 555,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 573,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 593,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        },
+        {
+          "offset": 613,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 631,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 140,
+              "width": 192
+            },
+            {
+              "start": 90,
+              "end": 140,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880033ffc"
+        },
+        {
+          "offset": 649,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 156,
+              "width": 192
+            },
+            {
+              "start": 106,
+              "end": 156,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880037ffc"
+        }
+      ],
+      "channels": 2,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-pair-common-ms2-synthetic.mp4",
+        "sha256": "07fe305741e3f05a5c62d6e9f05d90c1840e2a191c6506154ae5731957f10f37",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-pair-common-ms2-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-common-ms2-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pair-independent",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 669,
+          "bytes": 17,
+          "regions": [
+            {
+              "start": 3,
+              "end": 131,
+              "width": 192
+            },
+            {
+              "start": 70,
+              "end": 131,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880031ffc"
+        },
+        {
+          "offset": 686,
+          "bytes": 17,
+          "regions": [
+            {
+              "start": 3,
+              "end": 131,
+              "width": 192
+            },
+            {
+              "start": 70,
+              "end": 131,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880031ffc"
+        },
+        {
+          "offset": 703,
+          "bytes": 17,
+          "regions": [
+            {
+              "start": 3,
+              "end": 131,
+              "width": 192
+            },
+            {
+              "start": 70,
+              "end": 131,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880031ffc"
+        },
+        {
+          "offset": 720,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 165,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 165,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 741,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 165,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 165,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 762,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 148,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 148,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 781,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 148,
+              "width": 192
+            },
+            {
+              "start": 70,
+              "end": 148,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 800,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 165,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 165,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 821,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 165,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 165,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        },
+        {
+          "offset": 842,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 148,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 148,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 861,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 148,
+              "width": 192
+            },
+            {
+              "start": 70,
+              "end": 148,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880035ffc"
+        },
+        {
+          "offset": 880,
+          "bytes": 21,
+          "regions": [
+            {
+              "start": 3,
+              "end": 165,
+              "width": 192
+            },
+            {
+              "start": 87,
+              "end": 165,
+              "width": 128
+            }
+          ],
+          "header": "fff1d880039ffc"
+        }
+      ],
+      "channels": 2,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-pair-independent-synthetic.mp4",
+        "sha256": "a77ba30d918e58a80402d49a72c01299c619a49d3674b2903a27bfe2e5725cb3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-pair-independent-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-pair-independent-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "mono-sbr",
+      "asc": "2308",
+      "frames": [
+        {
+          "offset": 901,
+          "bytes": 20,
+          "regions": [
+            {
+              "start": 3,
+              "end": 61,
+              "width": 192
+            }
+          ],
+          "header": "fff1d840037ffc"
+        },
+        {
+          "offset": 921,
+          "bytes": 17,
+          "regions": [
+            {
+              "start": 3,
+              "end": 61,
+              "width": 192
+            }
+          ],
+          "header": "fff1d840031ffc"
+        },
+        {
+          "offset": 938,
+          "bytes": 16,
+          "regions": [
+            {
+              "start": 3,
+              "end": 61,
+              "width": 192
+            }
+          ],
+          "header": "fff1d84002fffc"
+        },
+        {
+          "offset": 954,
+          "bytes": 22,
+          "regions": [
+            {
+              "start": 3,
+              "end": 78,
+              "width": 192
+            }
+          ],
+          "header": "fff1d84003bffc"
+        },
+        {
+          "offset": 976,
+          "bytes": 19,
+          "regions": [
+            {
+              "start": 3,
+              "end": 78,
+              "width": 192
+            }
+          ],
+          "header": "fff1d840035ffc"
+        },
+        {
+          "offset": 995,
+          "bytes": 18,
+          "regions": [
+            {
+              "start": 3,
+              "end": 78,
+              "width": 192
+            }
+          ],
+          "header": "fff1d840033ffc"
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "slots": 16,
+      "bands": 64,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-mono-sbr-synthetic.mp4",
+        "sha256": "479a0db986aca0a4078394160c4245f3aaba3bb8dc24f16c61ae80b662fae1d1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2308",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-mono-sbr-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-mono-sbr-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cce-0",
+      "asc": "23000d840002001000",
+      "frames": [
+        {
+          "offset": 1013,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 241,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1044,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1075,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1106,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 155,
+              "width": 192
+            },
+            {
+              "start": 158,
+              "end": 258,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1139,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 159,
+              "width": 192
+            },
+            {
+              "start": 162,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1172,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1205,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 241,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1236,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1269,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 159,
+              "width": 192
+            },
+            {
+              "start": 162,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1302,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 155,
+              "width": 192
+            },
+            {
+              "start": 158,
+              "end": 258,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1335,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1366,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-cce-0-synthetic.mp4",
+        "sha256": "37a97df6dc88d26531c5e48b1692c2fa6c61766cd9dc935b83e2060962f4f1bb",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002001000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-cce-0-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-0-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cce-1",
+      "asc": "23000d840002001000",
+      "frames": [
+        {
+          "offset": 1399,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 241,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1430,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1461,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1492,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 155,
+              "width": 192
+            },
+            {
+              "start": 158,
+              "end": 258,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1525,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 159,
+              "width": 192
+            },
+            {
+              "start": 162,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1558,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1591,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 241,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1622,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1655,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 159,
+              "width": 192
+            },
+            {
+              "start": 162,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1688,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 155,
+              "width": 192
+            },
+            {
+              "start": 158,
+              "end": 258,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1721,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1752,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-cce-1-synthetic.mp4",
+        "sha256": "f3f094eeb0b92a61d460785962c8be9a133b77f9793401da1d5f78f26f5818a3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002001000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-cce-1-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-1-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cce-3",
+      "asc": "23000d840002011000",
+      "frames": [
+        {
+          "offset": 1785,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 241,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1816,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1847,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 1878,
+          "bytes": 35,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 172,
+              "width": 192
+            },
+            {
+              "start": 175,
+              "end": 275,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800055ffc"
+        },
+        {
+          "offset": 1913,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 159,
+              "width": 192
+            },
+            {
+              "start": 162,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 1946,
+          "bytes": 35,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 170,
+              "width": 192
+            },
+            {
+              "start": 173,
+              "end": 273,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800055ffc"
+        },
+        {
+          "offset": 1981,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 258,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 2014,
+          "bytes": 33,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 153,
+              "width": 192
+            },
+            {
+              "start": 156,
+              "end": 256,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800051ffc"
+        },
+        {
+          "offset": 2047,
+          "bytes": 35,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 159,
+              "width": 192
+            },
+            {
+              "start": 162,
+              "end": 273,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800055ffc"
+        },
+        {
+          "offset": 2082,
+          "bytes": 35,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 172,
+              "width": 192
+            },
+            {
+              "start": 175,
+              "end": 275,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800055ffc"
+        },
+        {
+          "offset": 2117,
+          "bytes": 31,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 142,
+              "width": 192
+            },
+            {
+              "start": 145,
+              "end": 239,
+              "width": 192
+            }
+          ],
+          "header": "fff1d80004dffc"
+        },
+        {
+          "offset": 2148,
+          "bytes": 35,
+          "regions": [
+            {
+              "start": 3,
+              "end": 56,
+              "width": 53
+            },
+            {
+              "start": 59,
+              "end": 170,
+              "width": 192
+            },
+            {
+              "start": 173,
+              "end": 273,
+              "width": 192
+            }
+          ],
+          "header": "fff1d800055ffc"
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "adts-ltp-cce-3-synthetic.mp4",
+        "sha256": "144be4a3e1a5858a928938ecda01cdae5a861fa94f9a395a3993bd0146e1be37",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002011000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "transports": [
+        {
+          "file": "adts-ltp-cce-3-1-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-1-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-2-synthetic.aac",
+          "crc": false,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-2-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 2,
+          "counts": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-3-synthetic.aac",
+          "crc": false,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-3-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 3,
+          "counts": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-4-synthetic.aac",
+          "crc": false,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-4-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 4,
+          "counts": [
+            4,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-mixed-synthetic.aac",
+          "crc": false,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        },
+        {
+          "file": "adts-ltp-cce-3-mixed-crc-synthetic.aac",
+          "crc": true,
+          "blocks": 1,
+          "counts": [
+            1,
+            2,
+            1,
+            4,
+            4
+          ]
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "adts-ltp-pair-common-ms0-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-pair-common-ms1-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-pair-common-ms2-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-pair-independent-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-mono-sbr-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-cce-0-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-cce-1-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    },
+    {
+      "file": "adts-ltp-cce-3-bad-active-crc-synthetic.aac",
+      "warm_blocks": 3,
+      "error": "ADTS CRC mismatch"
+    }
+  ],
+  "provenance": "Own bit-authored active AOT4 SCE/SBR, CPE common/independent, PCE/CCE points 0/1/3. CRC uses independent GF(2) division and writer-measured spans, never decoder-discovered regions."
+}

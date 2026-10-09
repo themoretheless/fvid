@@ -32,15 +32,26 @@ fn scan(
         match kind {
             0 | 3 => {
                 bits.skip(4)?;
-                super::aac_channel::ChannelData::read(&mut bits, &config)?;
+                if config.object_type == 4 {
+                    super::aac_channel::ChannelData::read_ltp(&mut bits, &config)?;
+                } else {
+                    super::aac_channel::ChannelData::read(&mut bits, &config)?;
+                }
             }
             1 => {
                 bits.skip(4)?;
-                right =
-                    Some(super::aac_pair::ChannelPair::read_with_right_span(&mut bits, &config)?.1);
+                right = Some(if config.object_type == 4 {
+                    super::aac_pair::ChannelPair::read_ltp_with_right_span(&mut bits, &config)?.2
+                } else {
+                    super::aac_pair::ChannelPair::read_with_right_span(&mut bits, &config)?.1
+                });
             }
             2 => {
-                super::aac_coupling_syntax::Coupling::read(&mut bits, &config)?;
+                if config.object_type == 4 {
+                    super::aac_coupling_syntax::Coupling::read_ltp(&mut bits, &config)?;
+                } else {
+                    super::aac_coupling_syntax::Coupling::read(&mut bits, &config)?;
+                }
             }
             4 => super::aac_pce::skip_data_stream(&mut bits)?,
             5 => {
@@ -162,10 +173,10 @@ pub fn verify(header: &[u8; 7], stored: u16, payload: &[u8], configuration: &[u8
 }
 
 /// Validate a candidate implicit SBR payload and return its output rate.
-/// Main/LC/SSR may use implicit SBR; other cores and explicit signalling stay strict.
+/// Main/LC/SSR/LTP may use implicit SBR; other cores and explicit signalling stay strict.
 pub fn probe_sbr_rate(payload: &[u8], configuration: &[u8]) -> Result<Option<u32>> {
     let config = super::config::AudioSpecificConfig::parse(configuration)?;
-    if !matches!(config.core.object_type, 1 | 2 | 3) || config.sbr_present.is_some() {
+    if !matches!(config.core.object_type, 1 | 2 | 3 | 4) || config.sbr_present.is_some() {
         return Ok(None);
     }
     if !has_sbr_fill(payload, configuration)? {
