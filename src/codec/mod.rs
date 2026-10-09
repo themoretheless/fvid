@@ -268,6 +268,7 @@ pub mod aac_imdct;
 pub mod aac_synthesis;
 
 pub mod aac_ics;
+pub mod aac_ltp_syntax;
 
 pub mod aac_quant;
 

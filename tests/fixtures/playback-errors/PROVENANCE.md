@@ -3997,3 +3997,37 @@ acceptance remains pending. External implementation details consulted:
 No external source code was copied or runtime decoder dependency added.
 
 Validation: after the floating-history fix, active fixture PCM peak error fell to 3.37394e-10 (inactive remains 2.60203e-11), passing the unchanged 1e-7 tolerance. 462 owned-library and 26 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending root LTP playback acceptance remain ignored. Reference source/PCM hashes were verified against the benchmark manifest; both own channel artifacts regenerated identically.
+
+### Owned ordinary LTP individual-channel packet reader (2026-10-09)
+
+`ChannelData::read_ltp` consumes global gain, ordinary AOT4 ICS/LTP, sections,
+scalefactors, pulse, TNS, gain-control and spectral Huffman payload through the
+shared channel-body parser. Whole-channel failures restore the original cursor;
+non-AOT4 calls refuse. Geometry tables now accept AOT4 for this explicit reader
+and reconstruction; production ASC/profile dispatch remains unchanged and gated.
+The refactor shares the existing Main/LC/SSR body rather than duplicating tools.
+
+The offline acceptance reads all 24 channel packets from the existing own active
+and inactive LTP video fixtures, verifies element/tag and the following END code,
+reconstructs the actual coded spectrum and runs owned channel synthesis against
+the saved external PCM. Truncated channel prefixes and incorrect profile calls
+must preserve the cursor. This replaces metadata-authored residuals with actual
+packet spectral parsing for this path. Tests do not execute FFmpeg or use network.
+
+This is individual-channel adapter acceptance, not root-container/player AOT4
+acceptance. Common-window/non-common pairs, CCE/PCE state mapping, production
+checkpoint dispatch and memory accounting remain required at integration. The
+existing root LTP refusal and ignored root playback acceptance remain explicit.
+
+### SSR regression helper EOF-drain correction (2026-10-09)
+
+The expanded channel-body regression found the SSR playback helper returning
+20480 bytes against the 24576-byte export: all common bytes were identical, with
+only the final queued frame absent. The failure reproduced with the previous
+channel/body implementation restored, so it was not introduced by LTP parsing.
+Production `audio_thread` already calls `finish_packet` at EOF. The regression
+helper now drains that same API and checks repeated EOF is empty before comparing
+full, rewind and seek output. The existing short own SSR video supplies the exact
+reproducer; no private media or replacement tolerance was introduced.
+
+Validation: 462 owned-library tests, four root channel unit tests and 51 offline integration tests across 13 suites passed with zero failures. One pre-existing library test and 1 integration test(s) remain ignored, including pending root LTP playback acceptance. The previously failing SSR helper now passes full/rewind/seek/ranges with exact PCM equality after EOF drain.

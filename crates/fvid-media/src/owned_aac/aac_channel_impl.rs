@@ -175,6 +175,31 @@ impl ChannelData {
             Some(info) => info.clone(),
             None => tables.read_ics(&mut cursor)?,
         };
+        let channel = Self::read_payload(&mut cursor, config, &tables, gain, info)?;
+        *bits = cursor;
+        Ok(channel)
+    }
+    /// Read an ordinary AOT4 single-channel stream, including LTP side data.
+    /// Transactional; production ASC/profile admission remains separate.
+    pub fn read_ltp(
+        bits: &mut BitReader<'_>, config: &AacConfig,
+    ) -> Result<(Self, Option<super::aac_ltp_syntax::LtpData>)> {
+        if config.object_type != 4 { return Err(invalid("AAC LTP channel requires AOT4")); }
+        let tables = BandTables::for_config(config)?;
+        let mut cursor = bits.clone();
+        let gain = cursor.read(8)? as u8;
+        let header = super::aac_ltp_syntax::LtpIcsInfo::read(
+            &mut cursor, ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8), config.frame_samples, false,
+        )?;
+        let channel = Self::read_payload(&mut cursor, config, &tables, gain, header.info)?;
+        *bits = cursor;
+        Ok((channel, header.channels.into_iter().next().unwrap()))
+    }
+    fn read_payload(
+        bits: &mut BitReader<'_>, config: &AacConfig, tables: &BandTables,
+        gain: u8, info: IcsInfo,
+    ) -> Result<Self> {
+        let mut cursor = bits.clone();
         let codebooks = info.read_sections(&mut cursor)?;
         let scales = aac_scalefactors::read(&mut cursor, gain, &codebooks)?;
         let pulse = if cursor.bit()? {

@@ -137,6 +137,12 @@ fn ssr_video_playback_rewind_seek_and_ranges_keep_variable_window_timing() {
                 }
             }
         }
+        while let Some(frame) = decoder.finish_packet().unwrap() {
+            if let Some(pcm) = s.present_decoded(frame.packet, frame.source_pts).unwrap() {
+                out.extend(pcm.data);
+            }
+        }
+        assert!(decoder.finish_packet().unwrap().is_none());
         out
     }
     for case in cases()["cases"].as_array().unwrap() {
