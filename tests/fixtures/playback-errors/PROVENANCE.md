@@ -3728,3 +3728,29 @@ versus `0.00020408037`). Non-short TNS remained enabled. Shared production
 source was restored byte-for-byte. All 34 artifacts reproduced identical hashes.
 
 Validation: restored offline media/player run passed 14 tests across short-window TNS/PNS, grouped dependent PNS, Main/PS and Main tools; zero failures.
+
+### AAC Main PS short TNS orders/resolution/compression (2026-10-09)
+
+The owned `generate_aac_main_ps_dependent_pns_tns_orders_fixtures.py` writes
+16 short synthetic MP4s with four consecutive short packets covering TNS
+orders 1–7, resolutions 3/4 and compression off/on: all 28 combinations.
+Coefficients use both signs, with direction alternating by physical window
+and opposite patterns in two dependent CCE sources. Source/target TNS on/off,
+coupling points 0/1 and 24/48 kHz remain in the matrix, together with nonuniform
+window groups and alternating PNS bands. The independent scalar core oracle
+converts authored reflection coefficients to LPC, runs per-window recurrence,
+performs f32 spectral addition and direct IMDCT/window overlap, with Main reset.
+Target PS uses separately qualified owned DSP; this does not independently
+qualify PS numerics.
+
+A syntax companion and Rust test read the actual order/resolution/compression
+bits and assert all 28 combinations, finite parsed LPC and both coefficient
+signs. Waveform, checkpoint/rollback, EOF/reset, export, probe replay, intervals,
+rewind and seek cover the whole flow. All fixture generation stays separate
+from ordinary tests and uses no private media, foreign decoder, FFmpeg or
+network. Broader coefficient magnitudes, band lengths, profile/layouts and
+all grouping/TNS Cartesian combinations remain separate qualification work.
+
+Sensitivity: truncating short-window LPC to one coefficient after fully reading the syntax failed waveform acceptance: `"0-1-0-24000" sample 8451: -0.000034607547 vs -0.00003488504`. Production TNS source was restored byte-for-byte. All 36 generated artifacts reproduced identical hashes.
+
+Validation: restored offline media/player run passed 15 tests across short TNS orders/resolution/compression, first-order short TNS/PNS, Main/PS and Main tools; zero failures.

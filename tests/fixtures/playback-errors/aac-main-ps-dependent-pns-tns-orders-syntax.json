@@ -1,0 +1,114 @@
+[
+  {
+    "offset": 0,
+    "bytes": 3
+  },
+  {
+    "offset": 3,
+    "bytes": 3
+  },
+  {
+    "offset": 6,
+    "bytes": 4
+  },
+  {
+    "offset": 10,
+    "bytes": 4
+  },
+  {
+    "offset": 14,
+    "bytes": 5
+  },
+  {
+    "offset": 19,
+    "bytes": 5
+  },
+  {
+    "offset": 24,
+    "bytes": 5
+  },
+  {
+    "offset": 29,
+    "bytes": 3
+  },
+  {
+    "offset": 32,
+    "bytes": 3
+  },
+  {
+    "offset": 35,
+    "bytes": 3
+  },
+  {
+    "offset": 38,
+    "bytes": 4
+  },
+  {
+    "offset": 42,
+    "bytes": 4
+  },
+  {
+    "offset": 46,
+    "bytes": 4
+  },
+  {
+    "offset": 50,
+    "bytes": 4
+  },
+  {
+    "offset": 54,
+    "bytes": 3
+  },
+  {
+    "offset": 57,
+    "bytes": 4
+  },
+  {
+    "offset": 61,
+    "bytes": 4
+  },
+  {
+    "offset": 65,
+    "bytes": 5
+  },
+  {
+    "offset": 70,
+    "bytes": 5
+  },
+  {
+    "offset": 75,
+    "bytes": 6
+  },
+  {
+    "offset": 81,
+    "bytes": 6
+  },
+  {
+    "offset": 87,
+    "bytes": 3
+  },
+  {
+    "offset": 90,
+    "bytes": 3
+  },
+  {
+    "offset": 93,
+    "bytes": 4
+  },
+  {
+    "offset": 97,
+    "bytes": 4
+  },
+  {
+    "offset": 101,
+    "bytes": 5
+  },
+  {
+    "offset": 106,
+    "bytes": 5
+  },
+  {
+    "offset": 111,
+    "bytes": 5
+  }
+]
