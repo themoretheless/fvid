@@ -1715,3 +1715,29 @@ ICS deinterleave failed waveform acceptance in case `0-0-0-24000`, sample
 byte-for-byte. All 10 generated artifacts reproduced identical SHA-256 hashes.
 
 Validation: restored offline media/player run passed 14 tests across all grouping masks, nonuniform groups, Main/PS and Main tools; zero failures.
+
+### AAC Main PS dependent short-window TNS/PNS (2026-10-09)
+
+The owned `generate_aac_main_ps_dependent_pns_short_tns_fixtures.py` authors
+16 synthetic MP4s spanning source/target TNS on/off, coupling points 0/1 and
+24/48 kHz. Each of eight short windows carries a first-order filter with a
+three-bit coefficient and direction alternating by window; tag 15 reverses
+tag 1's direction pattern. Nonuniform target/source groups and alternating
+ordinary/PNS band layouts remain independent of TNS windows. The scalar core
+oracle computes separate recurrence histories per physical short window,
+source TNS before coupling, target TNS at the correct coupling stage, f32 sums,
+Main reset, direct IMDCT and overlap. Target PS still uses the separately
+qualified owned PS DSP; this is not an independent numerical PS oracle.
+
+Waveform, checkpoint/rollback, EOF/reset, MP4 export, probe replay, interval
+crop, rewind and seek acceptance cover the matrix. Generation remains separate
+from tests with no private media, FFmpeg, foreign decoder or network. Higher
+short TNS orders/resolutions/compression, all group/TNS combinations and wider
+AAC profiles/layouts remain separate qualification work.
+
+Sensitivity: bypassing only short-window TNS in production channel reconstruction
+failed target-only TNS case `0-1-0-24000` at sample 8442 (`0.00020383533`
+versus `0.00020408037`). Non-short TNS remained enabled. Shared production
+source was restored byte-for-byte. All 34 artifacts reproduced identical hashes.
+
+Validation: restored offline media/player run passed 14 tests across short-window TNS/PNS, grouped dependent PNS, Main/PS and Main tools; zero failures.
