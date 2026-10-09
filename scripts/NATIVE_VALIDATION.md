@@ -1228,3 +1228,12 @@ identical in these fixtures; distinct high-depth motion/reference histories
 are not qualified by this target. Generate with existing mono `filtered-rext10`,
 `wpp-rext12` / `parallel-rext12` inputs and separate-plane `filtered10`, `wpp12`
 / `parallel12` synthetic MP4 outputs using the existing offline generator.
+The same high-depth target additionally checks 12-bit tiles with mixed
+independent/dependent slices per colour plane. Generate from
+`hevc-monochrome-mixed-tiles-rext12.mp4` to
+`hevc-separate-colour-planes-mixed-tiles12-synthetic.mp4`. Dependent NAL syntax
+contains no explicit plane ID and remains unchanged in the authored video;
+independent headers carry each plane's ID after slice-address syntax. The
+acceptance checks multiple independent slices plus dependent segments in
+every plane, saved YUV, reset, rewind and seek. Generation remains separate
+from ordinary offline tests.

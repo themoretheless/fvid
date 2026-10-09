@@ -24,6 +24,11 @@ fn high_depth_inter_planes_keep_filtered_and_wpp_pixels_after_reset_and_seek() {
             "hevc-monochrome-parallel-rext12",
             12,
         ),
+        (
+            "hevc-separate-colour-planes-mixed-tiles12-synthetic",
+            "hevc-monochrome-mixed-tiles-rext12",
+            12,
+        ),
     ] {
         let bytes = std::fs::read(path.join(format!("{name}.mp4"))).unwrap();
         let gold = std::fs::read(path.join(format!("{seed}.yuv"))).unwrap();
@@ -37,8 +42,12 @@ fn high_depth_inter_planes_keep_filtered_and_wpp_pixels_after_reset_and_seek() {
         let pixels = sps.dimensions[0] as usize * sps.dimensions[1] as usize;
         assert_eq!(gold.len(), count * pixels * 2);
         assert!(sps.sao);
-        if depth == 12 {
+        if depth == 12 && !name.contains("tiles") {
             assert!(decoder.parameters().1.entropy_sync);
+        }
+        if name.contains("tiles") {
+            assert!(decoder.parameters().1.tiles.is_some());
+            assert!(decoder.parameters().1.dependent_slices);
         }
         let expected: Vec<_> = gold
             .chunks_exact(pixels * 2)
@@ -51,7 +60,26 @@ fn high_depth_inter_planes_keep_filtered_and_wpp_pixels_after_reset_and_seek() {
             for frame in 0..count {
                 reader.read_packet(0, frame, &mut packet).unwrap();
                 let headers = decoder.slice_headers(&packet).unwrap();
-                assert_eq!(headers.len(), 3);
+                if name.contains("tiles") {
+                    assert!(headers.len() > 3);
+                    assert!(headers.iter().any(|h| h.dependent));
+                    for plane in 0..3 {
+                        assert!(
+                            headers
+                                .iter()
+                                .filter(|h| h.colour_plane == plane && !h.dependent)
+                                .count()
+                                > 1
+                        );
+                        assert!(
+                            headers
+                                .iter()
+                                .any(|h| h.colour_plane == plane && h.dependent)
+                        );
+                    }
+                } else {
+                    assert_eq!(headers.len(), 3);
+                }
                 if name.contains("parallel") {
                     assert!(headers.iter().all(|h| h.entropy_substreams.len() > 1));
                 }

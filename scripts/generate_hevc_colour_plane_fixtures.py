@@ -118,22 +118,29 @@ def main():
     offset = struct.unpack_from('>I', child(stbl, b'stco'), 8)[0]
     outputs = []
     for size, metadata in zip(sizes, meta['packets'], strict=True):
-        assert len(metadata) == 1
         packet = seed.read_bytes()[offset:offset+size]; offset += size
-        n = int.from_bytes(packet[:4], 'big')
-        assert n == len(packet)-4
-        nal = packet[4:]
-        s = metadata[0]
-        value = bits(bytes(s['rbsp']))
-        end = s['entropy_byte_offset']*8
-        align = value[:end].rfind('1')
-        insert = ue_end(value, 2 if s['idr'] else 1)
-        insert += meta['extra_bits']
-        insert = ue_end(value, insert) + int(meta['output_flag'])
+        units = packet_units(packet)
+        assert len(units) == len(metadata)
         planes = []
         for plane in range(3):
-            header = value[:insert] + f'{plane:02b}' + value[insert:align] + '1'
-            planes.append(nal[:2] + escape(packed(header) + bytes(s['rbsp'][end//8:])))
+            for unit, s in zip(units, metadata, strict=True):
+                nal = unit[4:]
+                if s['dependent']:
+                    # Dependent syntax inherits the preceding independent
+                    # segment's plane ID; no colour_plane_id is present here.
+                    planes.append(nal)
+                    continue
+                value = bits(bytes(s['rbsp']))
+                end = s['entropy_byte_offset']*8
+                align = value[:end].rfind('1')
+                insert = ue_end(value, 2 if s['idr'] else 1)
+                if not s['first']:
+                    insert += int(meta['dependent_enabled'])
+                    insert += (meta['ctu_count']-1).bit_length()
+                insert += meta['extra_bits']
+                insert = ue_end(value, insert) + int(meta['output_flag'])
+                header = value[:insert] + f'{plane:02b}' + value[insert:align] + '1'
+                planes.append(nal[:2] + escape(packed(header) + bytes(s['rbsp'][end//8:])))
         outputs.append(b''.join(len(n).to_bytes(4, 'big') + n for n in planes))
 
     def rewrite(tag, payload):

@@ -7099,3 +7099,16 @@ input and output `hevc-separate-colour-planes-filtered10-synthetic.mp4`,
 `hevc-separate-colour-planes-wpp12-synthetic.mp4` or
 `hevc-separate-colour-planes-parallel12-synthetic.mp4`. Ordinary tests consume
 checked-in video/YUV only and do not invoke a generator or external codec.
+
+The high-depth target also covers a fourth, tiled 12-bit synthetic video from
+`hevc-monochrome-mixed-tiles-rext12`. Each colour plane contains multiple
+independent slices and dependent segments. The generator now walks complete
+AU headers, inserts plane IDs after the address syntax in independent slices,
+and preserves dependent NALs unchanged so their plane identity/context inherit
+from the preceding segment. Acceptance requires tiles/dependent syntax and
+independent/dependent headers for every plane, then compares saved pixels
+through decoder reset and playback rewind/seek. Source samples and parameters
+remain our authored fixtures. These plane histories are still identical;
+distinct histories and remaining codec profiles/tools are not qualified here.
+Generate with
+`python3 scripts/generate_hevc_colour_plane_fixtures.py hevc-monochrome-mixed-tiles-rext12.mp4 hevc-separate-colour-planes-mixed-tiles12-synthetic.mp4`.
