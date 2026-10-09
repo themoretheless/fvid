@@ -7145,3 +7145,9 @@ regression checks all retained sample indices, saved-source pixels, exact PTS,
 continuous intervals, EOF and rewind; native playback additionally checks seek.
 The fixture is our existing short authored `hevc-eos-before-cra-valid-synthetic`
 video, not private media. Ordinary tests remain offline and generation-free.
+
+EOS native seek qualification now probes 20 positions on both sides of output
+frame boundaries, including the interval extended across suppressed RASL, in
+alternating forward/backward order. It requires the requested time to lie in
+the sequentially derived interval and compares both that exact interval and
+pixels; matching some output frame alone is not sufficient.

@@ -171,10 +171,25 @@ fn eos_native_seek_matches_the_output_timeline() {
         frames.push((reader.frame_interval().unwrap(), reader.rgb().to_vec()));
     }
     assert_eq!(frames.len(), 14);
-    for millis in [0, 100, 200, 267, 350, 533] {
+    // Probe both sides of frame boundaries and the interval extended across
+    // suppressed RASL samples, alternating forward and backward seeks.
+    for millis in [
+        0, 566, 100, 533, 166, 500, 199, 433, 200, 400, 233, 399, 266, 350, 267, 334, 299, 333,
+        300, 332,
+    ] {
+        let expected = frames
+            .iter()
+            .find(|((start, end, scale), _)| {
+                *start * 1000 <= u128::from(millis) * u128::from(*scale)
+                    && *end * 1000 > u128::from(millis) * u128::from(*scale)
+            })
+            .unwrap();
         reader.seek(Duration::from_millis(millis)).unwrap();
-        let interval = reader.frame_interval().unwrap();
-        let expected = frames.iter().find(|(i, _)| *i == interval).unwrap();
+        assert_eq!(
+            reader.frame_interval().unwrap(),
+            expected.0,
+            "seek {millis}"
+        );
         assert_eq!(reader.rgb(), expected.1, "seek {millis}");
     }
     reader.rewind().unwrap();
