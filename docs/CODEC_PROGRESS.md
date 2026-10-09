@@ -7695,3 +7695,34 @@ Delivery validation: 908 root library, 456 owned library, 5 new PCE profile,
 13 existing PCE, 6 Main prediction, 3 Main tools, 3 extension flag, 3 SSR,
 9 SSR alignment and 3 SSR coupling tests passed offline (1409 executions).
 Twenty-four existing tests remain ignored; no new acceptance is ignored.
+
+## Owned single-block ADTS CRC protection
+
+`owned_aac::adts_crc` selects normative protection spans with the existing owned
+channel, pair, coupling and PCE/DSE readers. CPE parsing additionally returns the
+second ICS span transactionally; that span intentionally overlaps the first
+192-bit CPE span when needed. The CRC uses polynomial 0x8005, initial all ones,
+MSB-first, no final inversion, and zero padding of short audio regions. FIL and
+element IDs are excluded. Indexed and streaming ADTS verify before decoding;
+CRC failure poisons the streaming reader. Multi-raw-block frames remain refused.
+
+Eighteen new authored companion videos and CRC ADTS streams cover Main/LC/SSR,
+mono/stereo, shorter/longer-than-192-bit elements, CPE overlap and independent
+Main CCE. Twelve use explicit PCE; six use standard header layouts. DSE and unprotected
+FIL occur in every raw block. Their
+authored boundaries and independent Python GF(2) long division qualify the
+checksums. Corrupted-checksum fixtures test first-frame refusal, and later-frame
+mutations test stream poisoning. Complete MP4/ADTS nonzero PCM must match.
+
+Earlier PCE-profile placeholder checksums have been replaced by real checksums:
+the offline generator uses the owned region export helper and independent Python
+polynomial division. Ordinary tests read committed artifacts; no generator,
+FFmpeg, network access or helper compilation is required during execution.
+This supersedes the earlier CRC-framing-only limitation; it does not qualify
+multi-block protection or all AAC profile/tool combinations.
+
+Final validation: 1418 selected tests passed offline without FFmpeg: 908 root
+library, 456 owned library, 3 CRC, 5 PCE profiles, 13 existing PCE, 6 streaming,
+6 Main prediction, 3 Main tools, 3 extension flag, 3 SSR, 9 alignment and
+3 coupling. Twenty-four existing tests remain ignored. All 116 CRC/PCE-profile
+artifacts regenerate identically; no new acceptance test is ignored.

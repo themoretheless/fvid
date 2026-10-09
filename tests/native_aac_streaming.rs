@@ -255,7 +255,8 @@ fn sequential_adts_removes_crc_bytes_and_full_export_does_not_publish_truncation
     crc[3] = (crc[3] & !3) | ((length >> 11) as u8 & 3);
     crc[4] = (length >> 3) as u8;
     crc[5] = (crc[5] & 31) | (((length & 7) as u8) << 5);
-    crc.extend_from_slice(&[0, 0]);
+    let checksum = fvid_media::owned_aac::adts_crc::checksum(crc.as_slice().try_into().unwrap(), &data[7..size], &header(data).unwrap().asc).unwrap();
+    crc.extend_from_slice(&checksum.to_be_bytes());
     crc.extend_from_slice(&data[7..size]);
     let mut reader = StreamReader::open(crc.as_slice()).unwrap();
     assert_eq!(reader.next_packet().unwrap().unwrap(), data[7..size]);

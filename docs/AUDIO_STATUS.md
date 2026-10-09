@@ -9,8 +9,10 @@ exercise a nonzero twentieth-order TNS effect in both spectral directions.
 Independent PCM oracles, export, rollback, checkpoint and playback seeks pass.
 Explicit PCE bootstrap preserves Main/LC/SSR profiles in mono/stereo ADTS.
 Six Main coupling cases qualify tags 1/15 at points 0/1/3 with unity gains
-and no target TNS, including checkpoint, rewind and seek. CRC-framed fixtures
-exercise header offsets only: ADTS checksums are not validated. Wider Main
+and no target TNS, including checkpoint, rewind and seek. Single-raw-block
+ADTS CRC checks header bits, protected SCE/CPE/CCE/LFE prefixes, the second
+CPE ICS and complete PCE/DSE, with prescribed zero padding. Multi-raw-block
+ADTS framing remains unsupported. Wider Main
 coupling, multichannel PCE and SBR/PS interactions still need qualification;
 these fixtures do not establish complete AAC profile conformance.
 

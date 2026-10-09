@@ -212,6 +212,11 @@ impl Aac {
                     first.channels
                 )));
             }
+            if at.header_bytes == 9 {
+                let fixed: &[u8; 7] = bytes[*start..*start + 7].try_into().unwrap();
+                adts_crc::verify(fixed, u16::from_be_bytes(bytes[*start + 7..*start + 9].try_into().unwrap()),
+                    &bytes[*start + 9..*start + at.frame_bytes], &configuration).map_err(|e| invalid(&e.0))?;
+            }
             frames.push(Frame {
                 start: *start,
                 size: at.frame_bytes,
@@ -306,7 +311,7 @@ fn check_packet_limit(header: Header, max: usize) -> Result<()> {
 pub struct StreamReader<R> {
     source: R,
     configuration: Header,
-    first: Option<Header>,
+    first: Option<(Header, [u8; 7])>,
     pending: Option<Vec<u8>>,
     asc: Vec<u8>,
     finished: bool,
@@ -327,8 +332,10 @@ impl<R: std::io::Read> StreamReader<R> {
         let mut pending=None;
         let asc=if configuration.channels==0 {
             let mut packet=vec![0;configuration.frame_bytes-7];source.read_exact(&mut packet)?;
-            if configuration.header_bytes==9 {packet.drain(..2);}
+            let stored = if configuration.header_bytes==9 {Some(u16::from_be_bytes([packet[0],packet[1]]))} else {None};
+            if stored.is_some() {packet.drain(..2);}
             let asc=packet_configuration(configuration,&packet)?;
+            if let Some(stored) = stored { adts_crc::verify(&bytes, stored, &packet, &asc).map_err(|e|invalid(&e.0))?; }
             pending=Some(packet);asc
         } else {configuration.asc.to_vec()};
         let config = AacConfig::parse(&asc)?;
@@ -341,7 +348,7 @@ impl<R: std::io::Read> StreamReader<R> {
         Ok(Self {
             source,
             configuration,
-            first: if pending.is_some() {None} else {Some(configuration)},
+            first: if pending.is_some() {None} else {Some((configuration, bytes))},
             pending, asc,
             finished: false,
             max_packet_bytes,
@@ -362,7 +369,7 @@ impl<R: std::io::Read> StreamReader<R> {
         }
         if let Some(packet)=self.pending.take() {return Ok(Some(packet));}
         self.finished = true;
-        let next = if let Some(header) = self.first.take() {
+        let (next, fixed) = if let Some(header) = self.first.take() {
             header
         } else {
             let mut bytes = [0; 7];
@@ -372,7 +379,7 @@ impl<R: std::io::Read> StreamReader<R> {
                 Err(error) => return Err(error.into()),
             }
             self.source.read_exact(&mut bytes[1..])?;
-            header(&bytes).ok_or_else(|| invalid("invalid ADTS frame boundary"))?
+            (header(&bytes).ok_or_else(|| invalid("invalid ADTS frame boundary"))?, bytes)
         };
         if next.asc != self.configuration.asc
             || next.header_bytes != self.configuration.header_bytes
@@ -383,7 +390,9 @@ impl<R: std::io::Read> StreamReader<R> {
         let mut remaining = vec![0; next.frame_bytes - 7];
         self.source.read_exact(&mut remaining)?;
         if next.header_bytes == 9 {
+            let stored = u16::from_be_bytes([remaining[0], remaining[1]]);
             remaining.drain(..2);
+            adts_crc::verify(&fixed, stored, &remaining, &self.asc).map_err(|e|invalid(&e.0))?;
         }
         self.finished = false;
         Ok(Some(remaining))

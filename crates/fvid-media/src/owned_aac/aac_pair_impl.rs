@@ -123,6 +123,13 @@ impl ChannelPair {
     /// Starts after element_instance_tag. A failure in either channel rolls
     /// back the entire pair's input cursor.
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
+        Self::read_with_right_span(bits, config).map(|(pair, _)| pair)
+    }
+    /// Return the second ICS bit span for ADTS error protection. Parsing is transactional.
+    pub(crate) fn read_with_right_span(
+        bits: &mut BitReader<'_>,
+        config: &AacConfig,
+    ) -> Result<(Self, std::ops::Range<usize>)> {
         let mut cursor = bits.clone();
         let common = if cursor.bit()? {
             Some(BandTables::for_config(config)?.read_ics(&mut cursor)?)
@@ -149,13 +156,13 @@ impl ChannelPair {
             None
         };
         let left = ChannelData::read_common(&mut cursor, config, common.as_ref())?;
+        let right_start = cursor.position();
         let right = ChannelData::read_common(&mut cursor, config, common.as_ref())?;
+        let right_span = right_start..cursor.position();
         *bits = cursor;
-        Ok(Self {
-            left,
-            right,
-            mid_side,
-            explicit_mask,
-        })
+        Ok((
+            Self { left, right, mid_side, explicit_mask },
+            right_span,
+        ))
     }
 }

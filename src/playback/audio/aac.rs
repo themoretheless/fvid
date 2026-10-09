@@ -452,36 +452,21 @@ mod tests {
         assert_eq!(header(&packed), None, "several blocks in one frame");
     }
 
-    /// With the protection bit clear a frame carries two CRC bytes after its
-    /// header, so the header is nine bytes long and the stated length still ends
-    /// the frame. This machine's FFmpeg writes no CRC, so the width is read from
-    /// the specification and checked here on the walk alone: the two bytes the
-    /// frame counts as CRC are stripped with the header, and the audio that
-    /// follows is left to a decoder no fixture exercises.
+    /// Genuine own protected raw blocks exercise CRC checking and packet boundaries.
     #[test]
     fn a_frame_with_crc_states_a_nine_byte_header() {
-        let unprotected = header(&STEREO[293..]).expect("a real frame");
-        assert_eq!(unprotected.header_bytes, 7);
-        let mut crc = STEREO[293..293 + 370].to_vec();
-        crc[1] = 0xF0;
-        let protected = header(&crc).expect("the same frame, protected");
+        let crc = include_bytes!("../../../tests/fixtures/playback-errors/adts-crc-2-2-1-0-indexed-synthetic.aac");
+        let protected = header(crc).expect("valid protected header");
         assert_eq!(protected.header_bytes, 9);
-        assert_eq!(protected.frame_bytes, unprotected.frame_bytes);
-        assert_eq!(
-            protected.asc, unprotected.asc,
-            "the CRC is no part of the coding"
-        );
-        let aac = Aac::parse(&crc, &Limits::default()).expect("a protected stream walks");
-        assert_eq!(
-            aac.frames[0],
-            Frame {
-                start: 0,
-                size: 370,
-                header_bytes: 9,
-                asc: [0x11, 0x90],
-                pts: 0,
-            }
-        );
-        assert_eq!(aac.packet(0).len(), 370 - 9);
+        let aac = Aac::parse(crc, &Limits::default()).expect("correct CRC verifies");
+        assert_eq!(aac.frames.len(), 4);
+        assert_eq!(aac.frames[0], Frame {
+            start: 0, size: protected.frame_bytes, header_bytes: 9,
+            asc: protected.asc, pts: 0,
+        });
+        assert_eq!(aac.packet(0), &crc[9..protected.frame_bytes]);
+        let mut bad = crc.to_vec();
+        bad[7] ^= 1;
+        assert_eq!(Aac::parse(&bad, &Limits::default()).unwrap_err().to_string(), "ADTS CRC mismatch");
     }
 }

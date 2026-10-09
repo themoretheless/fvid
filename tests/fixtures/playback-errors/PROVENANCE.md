@@ -2389,3 +2389,33 @@ The generator is `scripts/generate_aac_pce_profile_fixtures.py`; it uses only
 existing authored audio/video seeds, own PCE/ADTS bit writing, scalar Main
 prediction and direct filterbank references. No private media or parameter
 sets are copied. PCM agreement qualifies these authored scenarios only.
+
+## ADTS CRC fixture provenance
+
+`owned_aac::adts_crc` selects normative protection spans with the existing owned
+channel, pair, coupling and PCE/DSE readers. CPE parsing additionally returns the
+second ICS span transactionally; that span intentionally overlaps the first
+192-bit CPE span when needed. The CRC uses polynomial 0x8005, initial all ones,
+MSB-first, no final inversion, and zero padding of short audio regions. FIL and
+element IDs are excluded. Indexed and streaming ADTS verify before decoding;
+CRC failure poisons the streaming reader. Multi-raw-block frames remain refused.
+
+Eighteen new authored companion videos and CRC ADTS streams cover Main/LC/SSR,
+mono/stereo, shorter/longer-than-192-bit elements, CPE overlap and independent
+Main CCE. Twelve use explicit PCE; six use standard header layouts. DSE and unprotected
+FIL occur in every raw block. Their
+authored boundaries and independent Python GF(2) long division qualify the
+checksums. Corrupted-checksum fixtures test first-frame refusal, and later-frame
+mutations test stream poisoning. Complete MP4/ADTS nonzero PCM must match.
+
+Earlier PCE-profile placeholder checksums have been replaced by real checksums:
+the offline generator uses the owned region export helper and independent Python
+polynomial division. Ordinary tests read committed artifacts; no generator,
+FFmpeg, network access or helper compilation is required during execution.
+This supersedes the earlier CRC-framing-only limitation; it does not qualify
+multi-block protection or all AAC profile/tool combinations.
+
+Generator: `scripts/generate_adts_crc_fixtures.py`. Existing authored AVC and
+container seed only; AAC syntax and protection boundaries are written locally.
+No private frames, audio, codec parameter sets or foreign codec executable.
+Normative region definition: ISO/IEC 13818-7:2004 section 8.1.1.1.

@@ -1,6 +1,7 @@
 //! Compatibility entrypoint for the owned media-library ADTS parser.
 use crate::codec::{config::AacConfig, bits::BitReader, aac_pce::{ProgramConfig, skip_data_stream, skip_fill}};
 use crate::{Result, invalid};
+use fvid_media::owned_aac::adts_crc;
 include!("../../crates/fvid-media/src/owned_aac/adts_impl.rs");
 
 #[cfg(test)]

@@ -91,7 +91,7 @@
         },
         {
           "file": "aac-pce-profile-main-1-crc-synthetic.aac",
-          "sha256": "069f47871174bc3f4257c30ea388bacef06a5204953d30e40ec59d9c29a2ba16",
+          "sha256": "175b9b3ff2fe3cdb48e2d16ee19739175f74d90972313d98d638b3c8faa5ced7",
           "crc": true
         }
       ]
@@ -186,7 +186,7 @@
         },
         {
           "file": "aac-pce-profile-main-2-crc-synthetic.aac",
-          "sha256": "0ac4b2c09d066d5808a198a404b2c06a8ead46710a4ca42b14a42d2f66c7dd80",
+          "sha256": "75d5e7c3e331bf73f1b16ac46f82b64944af5766e564553d4d4a281ea541ce0b",
           "crc": true
         }
       ]
@@ -251,7 +251,7 @@
         },
         {
           "file": "aac-pce-profile-lc-1-crc-synthetic.aac",
-          "sha256": "6198fac0487322789c3fcab3439d16dcbbe678c43776d023c05aba299efaaa1e",
+          "sha256": "d2444da8cbde993d876b82ce91cf26bb2f7a91587a4c742d35a13991bebb1f52",
           "crc": true
         }
       ]
@@ -316,7 +316,7 @@
         },
         {
           "file": "aac-pce-profile-lc-2-crc-synthetic.aac",
-          "sha256": "92ae39447adc8f9aab4daab27de46bbb5e0600400d007451b41b52a0b96d2c6c",
+          "sha256": "990a31e69f9271f9f43cba158ea198caaf068c6ab0ab0354609d0a78623eae58",
           "crc": true
         }
       ]
@@ -381,7 +381,7 @@
         },
         {
           "file": "aac-pce-profile-ssr-1-crc-synthetic.aac",
-          "sha256": "0e0e33ce4f570dd84bca128beef67d48cb5ed43c471bbf3889461b13e59cd25e",
+          "sha256": "42948c520117d6872886c2401121e934755432e87378178704610ab53a949936",
           "crc": true
         }
       ]
@@ -446,7 +446,7 @@
         },
         {
           "file": "aac-pce-profile-ssr-2-crc-synthetic.aac",
-          "sha256": "66c3e311117117ae88fb904944576c6a2e44a7bc8cd7cc03b35436cea1a8283b",
+          "sha256": "afa7e2104d982021f60537ff8aa4f2cb83179cbce3a2a1cbd4eb636aecb65fe6",
           "crc": true
         }
       ]
@@ -546,7 +546,7 @@
         },
         {
           "file": "aac-pce-profile-main-cce-1-0-crc-synthetic.aac",
-          "sha256": "89960a745639dad30b664f9d45cb6da842596ccb461b3341c7b830e8865b6649",
+          "sha256": "404ce0ed430ac7a867f7c47310ea73ebecf3d72090ec2481b7d792cc8ff93fb4",
           "crc": true
         }
       ]
@@ -646,7 +646,7 @@
         },
         {
           "file": "aac-pce-profile-main-cce-1-1-crc-synthetic.aac",
-          "sha256": "e4eb29489919f99d74229e4ef2648eb441e7d4f931c72feba0aa7898595fcac9",
+          "sha256": "d09899b83322f437fde99d0a2e3c27a595a1fb1e02eb728ec0cc62590ff0110e",
           "crc": true
         }
       ]
@@ -746,7 +746,7 @@
         },
         {
           "file": "aac-pce-profile-main-cce-1-3-crc-synthetic.aac",
-          "sha256": "d71f3ff732e728acd5fbb2aa6979eae033192f454bd85a353c3e8eb547397102",
+          "sha256": "88e83d54bdb2571db68912f0c356ea26b4e74418c1e7d36c48f0668f52acd26d",
           "crc": true
         }
       ]
@@ -846,7 +846,7 @@
         },
         {
           "file": "aac-pce-profile-main-cce-2-0-crc-synthetic.aac",
-          "sha256": "0fb05a9726a9de510f92ae4e3bc718a12c2befb868c11ad918d6984bbf1b5888",
+          "sha256": "c88216078451973917180fd5aa8bbf21a9db3e1f7d88a7fdfcab126a32e12535",
           "crc": true
         }
       ]
@@ -946,7 +946,7 @@
         },
         {
           "file": "aac-pce-profile-main-cce-2-1-crc-synthetic.aac",
-          "sha256": "9af7a40a3d54a3d37ef7f9decf6241c24c7ae57107dd0d5af5823fcc5d1c338c",
+          "sha256": "ac3e1dc2f4b09e0c6afdbbd0bdad1e37e83474f42829ed92fb7082992eb7b592",
           "crc": true
         }
       ]
@@ -1046,7 +1046,7 @@
         },
         {
           "file": "aac-pce-profile-main-cce-2-3-crc-synthetic.aac",
-          "sha256": "7a4fa573ef332232425f5076d0f6a658214b6ed036a2495616e51006abefab53",
+          "sha256": "490b767785c58188ea132bcd7b060d89b11bd334adf9589d017a432f1ccb7665",
           "crc": true
         }
       ]

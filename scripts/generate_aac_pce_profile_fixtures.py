@@ -2,7 +2,7 @@
 """Own Main/LC/SSR explicit PCE videos and ADTS bootstrap regressions.
 Reads only existing authored fixtures; no private source, codec tool or network.
 """
-import json,struct,hashlib
+import json,struct,hashlib,subprocess
 from generate_aac_ssr_fixtures import DEST,field,frequency,packed,SEQUENCES
 from generate_aac_main_tools_fixtures import channel,ics,Filterbank,predict,SEQUENCES as MAIN_SEQUENCES
 from generate_aac_main_prediction_fixtures import initial,add
@@ -14,13 +14,34 @@ def program(prefix,obj,channels,rate=24000,coupling=()):
     return bits+'0'*(-len(bits)%8)+field(0,8)
 def config(obj,channels,outer=None,rate=24000,outer_rate=None,coupling=()):
     return packed(program(field(obj if outer is None else outer,5)+frequency(rate if outer_rate is None else outer_rate)+'0000'+'000',obj,channels,rate,coupling))
-def adts(packets,obj,crc=False,rate=24000):
+CRC_HELPER=None
+def adts(packets,obj,crc=False,rate=24000,configuration=None):
+    global CRC_HELPER
     output=bytearray()
+    spans=[]
+    if crc:
+        assert configuration is not None
+        rows=[dict(payload=p.hex(),asc=configuration.hex()) for p in packets]
+        if CRC_HELPER is None:
+            from pathlib import Path
+            subprocess.run(['cargo','build','--offline','--quiet','--no-default-features','--example','adts_crc_regions'],capture_output=True,check=True,cwd=DEST.parents[2])
+            metadata=subprocess.run(['cargo','metadata','--offline','--format-version','1','--no-deps'],capture_output=True,text=True,check=True,cwd=DEST.parents[2])
+            CRC_HELPER=Path(json.loads(metadata.stdout)['target_directory'])/'debug/examples/adts_crc_regions'
+        result=subprocess.run([str(CRC_HELPER)],input=json.dumps(rows),text=True,capture_output=True,check=True)
+        spans=json.loads(result.stdout)
+    for_index=0
     for payload in packets:
         size=len(payload)+(9 if crc else 7)
         header=field(0xfff,12)+'0'+'00'+field(not crc,1)+field(obj-1,2)+frequency(rate)+'0'+'000'+'0000'+field(size,13)+field(0x7ff,11)+'00'
         assert len(header)==56
-        output+=packed(header)+(bytes(2) if crc else b'')+payload
+        if crc:
+            from generate_adts_crc_fixtures import polynomial
+            raw=''.join(field(b,8) for b in payload)
+            protected=header+''.join(raw[s['start']:s['end']]+'0'*(s['width']-(s['end']-s['start'])) for s in spans[for_index])
+            check=polynomial(protected).to_bytes(2,'big')
+        else:check=b''
+        output+=packed(header)+check+payload
+        for_index+=1
     return output
 
 def main():
@@ -65,7 +86,7 @@ def main():
             case['pcm_file']='aac-pce-profile-'+name+'-pcm.bin';(DEST/case['pcm_file']).write_bytes(pcm)
             case['adts']=[]
             for crc in (False,True):
-                file='aac-pce-profile-'+name+('-crc' if crc else '')+'-synthetic.aac';data=adts(packets,obj,crc);(DEST/file).write_bytes(data)
+                file='aac-pce-profile-'+name+('-crc' if crc else '')+'-synthetic.aac';data=adts(packets,obj,crc,configuration=bytes.fromhex(case['asc']));(DEST/file).write_bytes(data)
                 case['adts'].append(dict(file=file,sha256=hashlib.sha256(data).hexdigest(),crc=crc))
             cases.append(case)
             if obj in (1,3) and channels==1:
@@ -117,7 +138,7 @@ def main():
             case['video']=video_fixture([case],blob,channels=channels,filename='aac-pce-profile-'+name+'-synthetic.mp4')
             case['pcm_file']='aac-pce-profile-'+name+'-pcm.bin';(DEST/case['pcm_file']).write_bytes(pcm);case['adts']=[]
             for crc in (False,True):
-                file='aac-pce-profile-'+name+('-crc' if crc else '')+'-synthetic.aac';data=adts(packets,1,crc);(DEST/file).write_bytes(data)
+                file='aac-pce-profile-'+name+('-crc' if crc else '')+'-synthetic.aac';data=adts(packets,1,crc,configuration=bytes.fromhex(case['asc']));(DEST/file).write_bytes(data)
                 case['adts'].append(dict(file=file,sha256=hashlib.sha256(data).hexdigest(),crc=crc))
             cases.append(case)
     invalid_packets=[]

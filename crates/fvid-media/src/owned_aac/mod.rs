@@ -65,6 +65,7 @@ pub mod aac_bands;
 
 pub mod aac_pce;
 pub mod adts;
+pub mod adts_crc;
 pub mod bits;
 pub mod config;
 fn unsupported(message: &str) -> Error {
