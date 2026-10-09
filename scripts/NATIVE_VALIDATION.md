@@ -1200,3 +1200,10 @@ not universal profile/tool or performance qualification. Fixture generation
 remains offline and separate: `python3 scripts/generate_hevc_colour_plane_fixtures.py`.
 The inter case uses the same generator with `hevc-pcm-mono-reference-wpp-rext8.mp4`
 and output `hevc-separate-colour-planes-reference-wpp-synthetic.mp4` arguments.
+For distinct reference pixels use output
+`hevc-separate-colour-planes-distinct-reference-wpp-synthetic.mp4` and a third
+argument `distinct-reference`. The three-frame fixture rotates plane order
+between AUs and changes only the first-frame PCM blocks. Expected YUV uses
+explicit sample transforms; test execution does not generate it or invoke an
+external decoder. It verifies predictive headers, independent reference pixels,
+reset, rewind and seek; distinct motion histories are not qualified by it.

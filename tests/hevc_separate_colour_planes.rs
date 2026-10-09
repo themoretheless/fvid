@@ -178,3 +178,72 @@ fn distinct_colour_planes_follow_ids_and_budget() {
         "HEVC colour planes exceed decode budget"
     );
 }
+
+#[test]
+fn distinct_inter_planes_keep_their_own_reference_pixels_across_au_orders() {
+    let bytes = include_bytes!(
+        "fixtures/playback-errors/hevc-separate-colour-planes-distinct-reference-wpp-synthetic.mp4"
+    );
+    let gold = include_bytes!(
+        "fixtures/playback-errors/hevc-separate-colour-planes-distinct-reference-wpp-synthetic.yuv"
+    );
+    assert_eq!(gold.len(), 3 * 3 * 4096);
+    let mut r = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
+    assert_eq!(r.tracks()[0].samples.len(), 3);
+    let mut d = HevcDecoder::from_configuration(&r.tracks()[0].configuration, 16 << 20).unwrap();
+    let orders = [[2, 0, 1], [1, 2, 0], [0, 2, 1]];
+    for _ in 0..2 {
+        let mut packet = vec![];
+        for (frame, order) in orders.iter().enumerate() {
+            r.read_packet(0, frame, &mut packet).unwrap();
+            let headers = d.slice_headers(&packet).unwrap();
+            assert_eq!(
+                headers.iter().map(|h| h.colour_plane).collect::<Vec<_>>(),
+                order
+            );
+            if frame > 0 {
+                assert!(
+                    headers
+                        .iter()
+                        .all(|h| h.slice_type != fvid::codec::hevc_cabac::SliceType::I
+                            && h.references[0] > 0)
+                );
+            }
+            let decoded = d.decode_packet(&packet).unwrap().unwrap();
+            assert_eq!(decoded.poc, frame as i32);
+            for (plane, pixels) in decoded.picture.planes.iter().enumerate() {
+                let start = (frame * 3 + plane) * 4096;
+                let expected = &gold[start..start + 4096];
+                assert_eq!(pixels.samples().len(), expected.len());
+                assert!(
+                    pixels
+                        .samples()
+                        .iter()
+                        .zip(expected)
+                        .all(|(&a, &b)| a == u16::from(b)),
+                    "frame {frame} plane {plane}"
+                );
+            }
+        }
+        d.reset();
+    }
+    let mut player = fvid::playback_mp4::Mp4VideoReader::open_software(
+        Cursor::new(bytes),
+        Default::default(),
+        16 << 20,
+    )
+    .unwrap();
+    for pass in 0..3 {
+        let mut output = vec![];
+        while let Some(frame) = player.read_frame().unwrap() {
+            output.extend_from_slice(&frame.packed.unwrap().frame.data);
+        }
+        assert!(output == gold, "playback pass {pass}");
+        if pass == 0 {
+            player.rewind();
+        }
+        if pass == 1 {
+            assert_eq!(player.seek_to_sync(2), 0);
+        }
+    }
+}

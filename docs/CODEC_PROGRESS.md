@@ -7049,3 +7049,18 @@ Generate offline with `python3 scripts/generate_hevc_colour_plane_fixtures.py`;
 ordinary tests only consume the checked-in video and YUV seed.
 Generate the inter/WPP case separately with
 `python3 scripts/generate_hevc_colour_plane_fixtures.py hevc-pcm-mono-reference-wpp-rext8.mp4 hevc-separate-colour-planes-reference-wpp-synthetic.mp4`.
+
+The distinct inter-plane regression extends this to three visibly different
+reference planes. Only the authored first-frame PCM sample blocks change;
+subsequent predictive payloads remain intact. Plane order rotates as 2/0/1,
+1/2/0 and 0/2/1 across the three AUs. Saved YUV is derived by the explicit
+PCM sample transforms, not by decoding the new stream. Acceptance checks
+non-I headers with nonempty reference lists, every plane's pixels after reset,
+and full 444 playback after rewind and seek. This qualifies reference pixel
+isolation; distinct per-plane motion histories and wider profiles remain to
+be qualified.
+Mutation verification replaced the plane-indexed reference projection with
+plane 0 for every plane: the new test failed specifically at frame 1, plane 1.
+The production projection was restored before the final regression run.
+Generate with
+`python3 scripts/generate_hevc_colour_plane_fixtures.py hevc-pcm-mono-reference-wpp-rext8.mp4 hevc-separate-colour-planes-distinct-reference-wpp-synthetic.mp4 distinct-reference`.

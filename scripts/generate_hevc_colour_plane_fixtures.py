@@ -44,6 +44,39 @@ def ue_end(value, start):
     return start + 2*n + 1
 
 
+def packet_units(packet):
+    units = []
+    pos = 0
+    while pos < len(packet):
+        length = int.from_bytes(packet[pos:pos+4], 'big')
+        assert length >= 2 and pos+4+length <= len(packet)
+        units.append(packet[pos:pos+4+length])
+        pos += 4+length
+    return units
+
+
+def transform(plane, value):
+    return value if plane == 0 else ((value+37) % 256 if plane == 1 else 255-value)
+
+
+def distinct_pcm(unit, gold, plane):
+    """Replace only exactly located authored 32x32 PCM sample blocks."""
+    assert len(gold) == 64*64
+    blocks = [b''.join(gold[y*64+x:y*64+x+32] for y in range(top, top+32))
+              for top in (0, 32) for x in (0, 32)]
+    payload = bytearray(unescape(unit[6:]))
+    spans = []
+    for block in blocks:
+        pos = payload.find(block)
+        assert pos >= 0 and payload.find(block, pos+1) < 0
+        spans.append((pos, block))
+    assert all(a+len(block) <= b for (a, block), (b, _) in zip(sorted(spans), sorted(spans)[1:]))
+    for pos, block in spans:
+        payload[pos:pos+len(block)] = bytes(transform(plane, b) for b in block)
+    nal = unit[4:6] + escape(payload)
+    return len(nal).to_bytes(4, 'big') + nal
+
+
 def parameter(nal):
     kind = (nal[0] >> 1) & 63
     if kind not in (32, 33):
@@ -125,13 +158,26 @@ def main():
     movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
     name = sys.argv[2] if len(sys.argv) > 2 else 'hevc-separate-colour-planes-pcm-synthetic.mp4'
     (DEST / name).write_bytes(movie)
+    if len(sys.argv) > 3:
+        assert sys.argv[3] == 'distinct-reference'
+        assert len(outputs) == 3
+        gold = seed.with_suffix('.yuv').read_bytes()
+        assert len(gold) == 3*4096
+        units = packet_units(outputs[0])
+        outputs[0] = b''.join(distinct_pcm(units[p], gold[:4096], p) for p in (2, 0, 1))
+        # Vary the first plane of each AU so reference selection cannot rely
+        # on either the first header or the preceding packet's ordering.
+        for frame, order in [(1, (1, 2, 0)), (2, (0, 2, 1))]:
+            units = packet_units(outputs[frame])
+            outputs[frame] = b''.join(units[p] for p in order)
+        movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
+        (DEST / name).write_bytes(movie)
+        expected = b''.join(bytes(transform(p, b) for b in gold[frame*4096:(frame+1)*4096])
+                            for frame in range(3) for p in range(3))
+        (DEST / name).with_suffix('.yuv').write_bytes(expected)
     if len(sys.argv) == 1:
         original = outputs[0]
-        units = []
-        pos = 0
-        while pos < len(original):
-            length = int.from_bytes(original[pos:pos+4], 'big')
-            units.append(original[pos:pos+4+length]); pos += 4+length
+        units = packet_units(original)
         for suffix, order in [('reordered', [2, 0, 1]), ('missing', [0, 1]), ('duplicate', [0, 1, 2, 0])]:
             outputs[0] = b''.join(units[i] for i in order)
             movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
@@ -141,23 +187,11 @@ def main():
         # exact saved blocks; never guess byte offsets in an entropy payload.
         gold = seed.with_suffix('.yuv').read_bytes()
         assert len(gold) == 64*64
-        blocks = [b''.join(gold[y*64+x:y*64+x+32] for y in range(top, top+32))
-                  for top in (0, 32) for x in (0, 32)]
         distinct = []
         expected = []
         for plane, unit in enumerate(units):
-            payload = bytearray(unescape(unit[6:]))
-            transform = (lambda b: b) if plane == 0 else ((lambda b: (b+37) % 256) if plane == 1 else (lambda b: 255-b))
-            spans = []
-            for block in blocks:
-                pos = payload.find(block)
-                assert pos >= 0 and payload.find(block, pos+1) < 0
-                spans.append((pos, block))
-            for pos, block in spans:
-                payload[pos:pos+len(block)] = bytes(transform(b) for b in block)
-            nal = unit[4:6] + escape(payload)
-            distinct.append(len(nal).to_bytes(4, 'big') + nal)
-            expected.append(bytes(transform(b) for b in gold))
+            distinct.append(distinct_pcm(unit, gold, plane))
+            expected.append(bytes(transform(plane, b) for b in gold))
         outputs[0] = b''.join(distinct)
         movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
         (DEST / 'hevc-separate-colour-planes-distinct-synthetic.mp4').write_bytes(movie)
