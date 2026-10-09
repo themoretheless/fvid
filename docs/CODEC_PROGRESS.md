@@ -6905,3 +6905,22 @@ missing CCE FIL and actual in-band discovery. Four CRC/PS videos retain explicit
 refusals with transactional rollback; those PS checks are not PS acceptance.
 Coupling with PS and further profiles/tools remain open. Detailed evidence is
 in `scripts/NATIVE_VALIDATION.md`.
+
+### 2026-10-09 — AAC coupling with target PS
+
+Owned PS decoding now admits dependent CCE before/after target TNS and
+independent CCE with its own mono SBR, mixed into the target SCE left channel
+after PS. Packet-indexed pending PCM follows PS lookahead and EOF draining;
+checkpoint/reset and failed-packet rollback include CCE histories.
+108 authored long-window cases and 54 synthetic acceptance MP4s cover
+960/1024 samples, three coupling points, sparse tags, changing wire order,
+missing FIL, output clocks and explicit/in-band signalling. Three malformed
+or unsupported videos check missing targets, source CRC and source PS refusal.
+Core PCM uses an independent cosine oracle; full output is stage composition
+with the previously qualified owned SBR/PS DSP, not an independent full decoder.
+Root/owned export, repeated ranges, WAV and playback seek/rewind are tested.
+CCE-owned PS and multi-element target PS remain unqualified. Fixture generation
+is separate and offline; ordinary tests need neither FFmpeg nor network.
+
+Delivery checks: core library 908 passed / 23 ignored; owned media library
+432 passed / 1 ignored. Commands used locked offline builds; no FFmpeg.

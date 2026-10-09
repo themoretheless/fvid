@@ -4,16 +4,23 @@
 use super::{
     Result,
     aac_channel::ChannelData,
+    aac_coupling_syntax::{Coupling, Target},
     aac_geometry::BandTables,
     aac_noise::NoiseState,
-    aac_pce,
+    aac_pce, aac_sbr_dsp,
     aac_sbr_dsp::OutputRate,
-    aac_sbr_ps,
+    aac_sbr_history, aac_sbr_ps,
     aac_synthesis::LongSineSynthesis,
     bits::BitReader,
     config::{AacConfig, AudioSpecificConfig},
     invalid, unsupported,
 };
+#[derive(Clone, Default)]
+struct CceState {
+    stream: aac_sbr_history::Stream,
+    dsp: aac_sbr_dsp::Dsp,
+    synthesis: Option<LongSineSynthesis>,
+}
 #[derive(Clone)]
 pub struct NativePsAacDecoder {
     config: AacConfig,
@@ -26,6 +33,8 @@ pub struct NativePsAacDecoder {
     // Large fixed QMF/PS histories live on heap so packet transactions and
     // checkpoints do not multiply them on a normal playback thread stack.
     extension: Box<aac_sbr_ps::Decoder>,
+    cce_states: Vec<Option<CceState>>,
+    pending_coupling: Option<(u64, Vec<f32>)>,
 }
 /// Complete opaque packet boundary, including queued frame and EOF status.
 #[derive(Clone)]
@@ -99,6 +108,8 @@ impl NativePsAacDecoder {
             synthesis,
             noise: NoiseState::default(),
             extension: Default::default(),
+            cce_states: vec![None; 16],
+            pending_coupling: None,
         })
     }
     pub fn sample_rate(&self) -> u32 {
@@ -137,6 +148,8 @@ impl NativePsAacDecoder {
         self.synthesis.reset();
         self.noise.reset();
         self.extension.reset();
+        self.cce_states.fill(None);
+        self.pending_coupling = None;
     }
     fn output(&self, frame: Option<aac_sbr_ps::Frame>) -> Result<Option<Frame>> {
         let Some(frame) = frame else {
@@ -169,8 +182,17 @@ impl NativePsAacDecoder {
         let mut trial = self.clone();
         let mut bits = BitReader::new(packet);
         let mut core = None;
-        let mut extension_seen = false;
-        let mut output = None;
+        let mut extension = None;
+        let mut previous_channel = None;
+        let mut couplings = Vec::new();
+        let mut cce_tags = 0u16;
+        let mut cce_frames = vec![None; 16];
+        let rate = trial
+            .config
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("PS frequency overflow"))?;
+        let slots = (trial.config.frame_samples / 64) as u8;
         loop {
             match bits.read(3)? {
                 0 => {
@@ -181,75 +203,191 @@ impl NativePsAacDecoder {
                     validate_sce_tag(trial.program.as_ref(), tag)?;
                     let channel = ChannelData::read(&mut bits, &trial.config)?;
                     let spectrum = channel.spectrum_with_noise(&trial.config, &mut trial.noise)?;
-                    let spectrum = channel.apply_tns(&trial.config, spectrum)?;
-                    let mut pcm = vec![0.; usize::from(trial.config.frame_samples)];
-                    trial.synthesis.synthesize_pcm(
-                        channel.info.sequence,
-                        channel.info.shape,
-                        &spectrum,
-                        &mut pcm,
-                    )?;
-                    let pcm: Vec<f32> = pcm.into_iter().map(|v| v as f32).collect();
-                    if pcm.iter().any(|v| !v.is_finite()) {
-                        return Err(invalid("PS AAC core PCM exceeds finite f32 output"));
-                    }
-                    core = Some(pcm);
+                    core = Some((channel, spectrum, tag));
+                    previous_channel = Some((0, tag));
+                }
+                2 => {
+                    let coupling = Coupling::read(&mut bits, &trial.config)?;
+                    validate_coupling(trial.program.as_ref(), &coupling, &mut cce_tags)?;
+                    let spectrum = coupling
+                        .channel
+                        .spectrum_with_noise(&trial.config, &mut trial.noise)?;
+                    let spectrum = coupling.channel.apply_tns(&trial.config, spectrum)?;
+                    previous_channel = Some((2, coupling.tag));
+                    couplings.push((coupling, spectrum));
                 }
                 4 => aac_pce::skip_data_stream(&mut bits)?,
                 5 => read_program(&mut bits, trial.program.as_ref())?,
                 6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
-                    let pcm = core
-                        .as_ref()
-                        .ok_or_else(|| invalid("PS SBR fill precedes mono element"))?;
-                    if extension_seen {
-                        return Err(invalid("duplicate PS SBR fill extension"));
+                    match previous_channel {
+                        Some((0, _)) => {
+                            if extension.is_some() {
+                                return Err(invalid("duplicate PS SBR fill extension"));
+                            }
+                            // Defer synthesis: a CCE can follow the target's FIL.
+                            extension = Some((reader.position(), end, crc));
+                            reader.skip(end - reader.position())?;
+                        }
+                        Some((2, tag)) => {
+                            if cce_frames[tag as usize].is_some() {
+                                return Err(invalid("duplicate SBR fill for AAC element"));
+                            }
+                            let state = trial.cce_states[tag as usize]
+                                .get_or_insert_with(CceState::default);
+                            let frame = state.stream.read(reader, end, crc, rate, slots, 1)?;
+                            if frame
+                                .syntax
+                                .data
+                                .extended_data
+                                .as_ref()
+                                .is_some_and(|v| !v.is_empty())
+                            {
+                                return Err(unsupported(
+                                    "SBR extended audio/PS synthesis is not yet implemented",
+                                ));
+                            }
+                            cce_frames[tag as usize] = Some(frame);
+                        }
+                        _ => return Err(invalid("PS SBR fill precedes mono element")),
                     }
-                    let rate = trial
-                        .config
-                        .sample_rate
-                        .checked_mul(2)
-                        .ok_or_else(|| invalid("PS frequency overflow"))?;
-                    output = trial.extension.read(
-                        reader,
-                        end,
-                        crc,
-                        pcm,
-                        rate,
-                        (trial.config.frame_samples / 64) as u8,
-                        trial.mode,
-                    )?;
-                    extension_seen = true;
                     Ok(())
                 })?,
                 7 => break,
                 _ => {
                     return Err(unsupported(
-                        "PS AAC block requires a sole mono SCE without coupling",
+                        "PS AAC block requires one mono SCE and configured coupling",
                     ));
                 }
             }
         }
-        if core.is_none() {
-            return Err(invalid("PS AAC block has no mono element"));
-        }
-        if !extension_seen {
-            output = trial.extension.process_upsampling(
-                core.as_ref().unwrap(),
-                trial
-                    .config
-                    .sample_rate
-                    .checked_mul(2)
-                    .ok_or_else(|| invalid("PS frequency overflow"))?,
-                (trial.config.frame_samples / 64) as u8,
-                trial.mode,
-            )?;
-        }
         if bits.remaining() > 7 {
             return Err(invalid("trailing bytes after PS AAC END"));
         }
-        let output = trial.output(output)?;
+        let (channel, mut spectrum, tag) =
+            core.ok_or_else(|| invalid("PS AAC block has no mono element"))?;
+        for point in [0, 1] {
+            if point == 1 {
+                spectrum = channel.apply_tns(&trial.config, spectrum)?;
+            }
+            for (coupling, source) in &couplings {
+                if coupling.point != point {
+                    continue;
+                }
+                for target in &coupling.targets {
+                    validate_coupling_target(target, tag)?;
+                    if channel.info.sequence != coupling.channel.info.sequence {
+                        return Err(invalid("AAC coupling target window sequence mismatch"));
+                    }
+                    coupling.mix_spectrum(target, &trial.config, source, &mut spectrum)?;
+                }
+            }
+        }
+        let n = usize::from(trial.config.frame_samples);
+        let mut pcm = vec![0.; n];
+        trial.synthesis.synthesize_pcm(
+            channel.info.sequence,
+            channel.info.shape,
+            &spectrum,
+            &mut pcm,
+        )?;
+        let pcm: Vec<f32> = pcm.into_iter().map(|v| v as f32).collect();
+        if pcm.iter().any(|v| !v.is_finite()) {
+            return Err(invalid("PS AAC core PCM exceeds finite f32 output"));
+        }
+        let output = if let Some((position, end, crc)) = extension {
+            let mut reader = BitReader::new(packet);
+            reader.skip(position)?;
+            let output =
+                trial
+                    .extension
+                    .read(&mut reader, end, crc, &pcm, rate, slots, trial.mode)?;
+            if reader.position() != end {
+                return Err(invalid("invalid SBR fill extension consumption"));
+            }
+            output
+        } else {
+            trial
+                .extension
+                .process_upsampling(&pcm, rate, slots, trial.mode)?
+        };
+        let mut left = Vec::new();
+        for (coupling, spectrum) in couplings {
+            if coupling.point != 3 {
+                continue;
+            }
+            let state =
+                trial.cce_states[coupling.tag as usize].get_or_insert_with(CceState::default);
+            if state.synthesis.is_none() {
+                state.synthesis = Some(LongSineSynthesis::new(n)?);
+            }
+            let synthesis = state.synthesis.as_mut().unwrap();
+            let mut core = vec![0.; n];
+            synthesis.synthesize_pcm(
+                coupling.channel.info.sequence,
+                coupling.channel.info.shape,
+                &spectrum,
+                &mut core,
+            )?;
+            let core: Vec<f32> = core.into_iter().map(|v| v as f32).collect();
+            let rendered = if let Some(frame) = &cce_frames[coupling.tag as usize] {
+                state
+                    .dsp
+                    .process(frame, &[&core], rate, slots, trial.mode)?
+            } else {
+                state
+                    .dsp
+                    .process_upsampling(&[&core], rate, slots, trial.mode)?
+            };
+            let samples = if trial.mode == OutputRate::Core {
+                n
+            } else {
+                n * 2
+            };
+            if rendered[0].len() != samples {
+                return Err(invalid("SBR coupling output length mismatch"));
+            }
+            if left.is_empty() {
+                left = vec![0f32; samples];
+            }
+            for target in coupling.targets {
+                validate_coupling_target(&target, tag)?;
+                // CCE selects the SCE's channel 0, after SBR/PS. It does not
+                // select a CPE pair or feed the PS mono analysis a second time.
+                for (dest, &value) in left.iter_mut().zip(&rendered[0]) {
+                    *dest += value as f32 * target.gain;
+                }
+            }
+        }
+        if left.iter().any(|v| !v.is_finite()) {
+            return Err(invalid("AAC coupled PCM exceeds finite f32 output"));
+        }
+        let output = trial.coupled_output(output)?;
+        if !left.is_empty() {
+            let index = trial
+                .extension
+                .pending_frame_index()
+                .ok_or_else(|| invalid("missing PS pending frame"))?;
+            trial.pending_coupling = Some((index, left));
+        }
         *self = trial;
         Ok(output)
+    }
+    fn coupled_output(&mut self, frame: Option<aac_sbr_ps::Frame>) -> Result<Option<Frame>> {
+        let Some(mut frame) = self.output(frame)? else {
+            return Ok(None);
+        };
+        if let Some((index, left)) = self.pending_coupling.take() {
+            if index != frame.frame_index || left.len() * 2 != frame.pcm.len() {
+                return Err(invalid("PS coupling pending frame mismatch"));
+            }
+            for (pair, value) in frame.pcm.chunks_exact_mut(2).zip(left) {
+                pair[0] += value;
+                if !pair[0].is_finite() {
+                    return Err(invalid("AAC coupled PCM exceeds finite f32 output"));
+                }
+            }
+        }
+        Ok(Some(frame))
     }
     pub fn finish(&mut self) -> Result<Option<Frame>> {
         if self.requires_in_band && !self.ps_detected() {
@@ -259,7 +397,7 @@ impl NativePsAacDecoder {
         }
         let mut trial = self.clone();
         let output = trial.extension.finish()?;
-        let output = trial.output(output)?;
+        let output = trial.coupled_output(output)?;
         *self = trial;
         Ok(output)
     }
@@ -273,6 +411,7 @@ pub struct InBandPsProbe {
     program: Option<aac_pce::ProgramConfig>,
     sbr: super::aac_sbr_history::Stream,
     ps: super::aac_ps_history::Stream,
+    source_sbr: Vec<Option<aac_sbr_history::Stream>>,
     seen: bool,
 }
 impl InBandPsProbe {
@@ -291,6 +430,7 @@ impl InBandPsProbe {
             program: parsed.program,
             sbr: Default::default(),
             ps: Default::default(),
+            source_sbr: vec![None; 16],
             seen: false,
         })
     }
@@ -300,6 +440,7 @@ impl InBandPsProbe {
     pub fn reset(&mut self) {
         self.sbr = Default::default();
         self.ps = Default::default();
+        self.source_sbr.fill(None);
         self.seen = false;
     }
     /// A packet without SBR fill is valid for discovery, but does not claim PS.
@@ -309,6 +450,15 @@ impl InBandPsProbe {
         let mut bits = BitReader::new(packet);
         let mut core = false;
         let mut fill = false;
+        let mut source_fills = 0u16;
+        let mut tags = 0u16;
+        let mut previous_channel = None;
+        let rate = trial
+            .config
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("PS frequency overflow"))?;
+        let slots = (trial.config.frame_samples / 64) as u8;
         loop {
             match bits.read(3)? {
                 0 => {
@@ -319,38 +469,67 @@ impl InBandPsProbe {
                     validate_sce_tag(trial.program.as_ref(), tag)?;
                     ChannelData::read(&mut bits, &trial.config)?;
                     core = true;
+                    previous_channel = Some((0, tag));
+                }
+                2 => {
+                    let coupling = Coupling::read(&mut bits, &trial.config)?;
+                    validate_coupling(trial.program.as_ref(), &coupling, &mut tags)?;
+                    let tag = trial.program.as_ref().map_or(0, |p| p.elements[0].tag);
+                    for target in &coupling.targets {
+                        validate_coupling_target(target, tag)?;
+                    }
+                    previous_channel = Some((2, coupling.tag));
                 }
                 4 => aac_pce::skip_data_stream(&mut bits)?,
                 5 => read_program(&mut bits, trial.program.as_ref())?,
                 6 => aac_pce::read_fill(&mut bits, |reader, end, crc| {
-                    if !core {
-                        return Err(invalid("PS SBR fill precedes mono element"));
+                    match previous_channel {
+                        Some((0, _)) => {
+                            if fill {
+                                return Err(invalid("duplicate PS SBR fill extension"));
+                            }
+                            let frame = trial.sbr.read(reader, end, crc, rate, slots, 1)?;
+                            let parsed = trial.ps.read_sbr_extensions(
+                                frame.syntax.data.extended_data.as_deref().unwrap_or(&[]),
+                                slots * 2,
+                            )?;
+                            if parsed.len() > 1 {
+                                return Err(unsupported(
+                                    "SBR PS frame permits at most one PS element",
+                                ));
+                            }
+                            trial.seen |= !parsed.is_empty();
+                            fill = true;
+                        }
+                        Some((2, tag)) => {
+                            let mask = 1u16 << tag;
+                            if source_fills & mask != 0 {
+                                return Err(invalid("duplicate SBR fill for AAC element"));
+                            }
+                            source_fills |= mask;
+                            let source = trial.source_sbr[tag as usize]
+                                .get_or_insert_with(aac_sbr_history::Stream::default);
+                            let frame = source.read(reader, end, crc, rate, slots, 1)?;
+                            if frame
+                                .syntax
+                                .data
+                                .extended_data
+                                .as_ref()
+                                .is_some_and(|v| !v.is_empty())
+                            {
+                                return Err(unsupported(
+                                    "SBR extended audio/PS synthesis is not yet implemented",
+                                ));
+                            }
+                        }
+                        _ => return Err(invalid("PS SBR fill precedes mono element")),
                     }
-                    if fill {
-                        return Err(invalid("duplicate PS SBR fill extension"));
-                    }
-                    let rate = trial
-                        .config
-                        .sample_rate
-                        .checked_mul(2)
-                        .ok_or_else(|| invalid("PS frequency overflow"))?;
-                    let slots = (trial.config.frame_samples / 64) as u8;
-                    let frame = trial.sbr.read(reader, end, crc, rate, slots, 1)?;
-                    let parsed = trial.ps.read_sbr_extensions(
-                        frame.syntax.data.extended_data.as_deref().unwrap_or(&[]),
-                        slots * 2,
-                    )?;
-                    if parsed.len() > 1 {
-                        return Err(unsupported("SBR PS frame permits at most one PS element"));
-                    }
-                    trial.seen |= !parsed.is_empty();
-                    fill = true;
                     Ok(())
                 })?,
                 7 => break,
                 _ => {
                     return Err(unsupported(
-                        "PS AAC block requires a sole mono SCE without coupling",
+                        "PS AAC block requires one mono SCE and configured coupling",
                     ));
                 }
             }
@@ -375,7 +554,6 @@ fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
     }
     if let Some(program) = &parsed.program {
         if parsed.core.channel_configuration != 0
-            || !program.coupling.is_empty()
             || program.elements.len() != 1
             || program.elements[0].pair
             || program.elements[0].position != aac_pce::Position::Front
@@ -383,7 +561,7 @@ fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
             || program.pcm_layout()? != (4, vec![0])
         {
             return Err(unsupported(
-                "native PS PCE requires a sole normal front mono SCE without coupling",
+                "native PS PCE requires a sole normal front mono SCE",
             ));
         }
     } else if parsed.core.channel_configuration != 1 {
@@ -411,6 +589,28 @@ fn read_program(bits: &mut BitReader<'_>, expected: Option<&aac_pce::ProgramConf
         || program.pcm_layout()? != expected.pcm_layout()?
     {
         return Err(invalid("PS AAC in-band PCE changed the configured layout"));
+    }
+    Ok(())
+}
+
+fn validate_coupling(
+    program: Option<&aac_pce::ProgramConfig>,
+    coupling: &Coupling,
+    tags: &mut u16,
+) -> Result<()> {
+    if program.is_none_or(|p| !p.coupling.contains(&(coupling.point == 3, coupling.tag))) {
+        return Err(invalid("AAC coupling is absent from configured PCE"));
+    }
+    let mask = 1u16 << coupling.tag;
+    if *tags & mask != 0 {
+        return Err(invalid("duplicate AAC coupling tag"));
+    }
+    *tags |= mask;
+    Ok(())
+}
+fn validate_coupling_target(target: &Target, tag: u8) -> Result<()> {
+    if target.pair || target.tag != tag || target.channel != 0 {
+        return Err(invalid("AAC coupling target is absent"));
     }
     Ok(())
 }
