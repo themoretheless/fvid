@@ -115,6 +115,17 @@ impl NativeAacDecoder {
                 element.dsp.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
             }
         }
+        for queue in [Some(&self.ssr_pending_duration),checkpoint.map(|s|&s.ssr_pending_duration)].into_iter().flatten() {
+            for packet in queue.iter() {
+                if let Some(sbr)=&packet.sbr {
+                    footprint.vector(&sbr.groups).map_err(|e|invalid(&e))?;
+                    footprint.vector(&sbr.mapping).map_err(|e|invalid(&e))?;
+                    for (_,_,frame) in &sbr.groups {
+                        if let Some(frame)=frame {footprint.add(frame.retained_payload_bytes()?).map_err(|e|invalid(&e))?;}
+                    }
+                }
+            }
+        }
         Ok(footprint.total())
     }
 }

@@ -7942,7 +7942,7 @@ prediction + SBR videos reproduce the previous ADTS-specific refusal while
 explicit/container-clock forms already decode. Acceptance compares all signalling
 forms, six protected/plain raw-block layouts, both MP4 mux paths, Matroska and
 player seek/rewind. The fixed authored six-frame composition also has an
-independent scalar Main/IMDCT/QMF/SBR PCM reference (1e-7 tolerance), with a
+independent scalar Main/IMDCT/QMF/SBR PCM reference (1e-9 tolerance), with a
 no-prediction control. Broader Main/SBR tools and geometries remain unqualified;
 this change does not claim complete AAC or other codec conformance.
 
@@ -8004,3 +8004,39 @@ SSR/alignment/reproduction integration tests passed (one intended SSR/SBR
 acceptance ignored), and the root metadata queue test passed. All offline with
 no FFmpeg/network; `git diff --check` passed. Queue tests cover bounded capacity,
 negative stamps, mismatch atomicity, wraparound and checkpoint replay.
+
+
+### 2026-10-09 — SSR + SBR synthesis after aligned core PCM
+
+SSR packet metadata now retains parsed/dequantized SBR frames and layout through
+PCM alignment. The matching source frame drives SBR only after 1024 core samples
+are available. Both immediate and delayed paths use the same synthesis helper;
+EOF commits alignment, metadata and DSP together only after success. Checkpoint,
+reset and decode rollback include the queue. Retained payload counts all pending
+frame vectors; optional memory admission reserves bounded metadata copies.
+
+The former SSR/SBR refusal and ignored acceptance have been replaced by passing
+container playback acceptance. Six-frame mono programs cover all window
+transitions, silent and nonzero spectra with active SSR gain control, explicit,
+sync and implicit container clocks, full export, malformed packet rollback,
+checkpoint/EOF replay, reset, player rewind/seek and intervals.
+
+The active case revealed an old independent SBR oracle error: its fixed patch
+map wrongly included QMF band25 for a width-two final master interval. Correct
+normative patch construction discards the final two-band patch. The reference
+now derives its patches from independent Decimal master borders; production
+patching was already correct. Prior 1e-7/4e-6 tolerance trials are superseded,
+not used as acceptance. SSR core matches the scalar IPQF reference bit for bit;
+SSR/SBR maximum absolute difference is 2.26381e-10 (nonzero) / 1.81536e-12
+(silent). Corrected Main/SBR maximum is 7.26431e-12. Both use 1e-9 tolerance.
+
+Remaining scope: SSR/SBR independent CCE per-source synthesis (explicit refusal),
+ADTS discovery, wider layouts/tools, downsampled SSR/SBR and broader codec gaps.
+This is qualified container composition, not complete SSR or AAC conformance.
+
+Validation on final production code: 909 root/core + 457 owned-media unit tests,
+3 existing SSR + 9 SSR alignment tests, and the final 5 SSR/SBR + 2 Main/SBR
+acceptance tests passed: 1385 distinct tests, 24 existing ignored. The SSR/SBR
+acceptance is no longer ignored. All run offline without FFmpeg/network.
+All 27 SSR/SBR and Main/SBR artifacts regenerate identically; `git diff --check`
+passes. No hardware/real-time throughput or full profile conformance is inferred.

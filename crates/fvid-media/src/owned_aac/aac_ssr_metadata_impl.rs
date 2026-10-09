@@ -14,6 +14,9 @@ impl<T> Default for PacketQueue<T> {
     }
 }
 impl<T> PacketQueue<T> {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+        self.entries.iter().flatten().map(|(_, value)| value)
+    }
     pub(crate) fn push(&mut self, stamp: i64, value: T) -> Result<()> {
         if self.len == 2 {
             return Err(invalid("SSR metadata exceeds one packet lookahead"));

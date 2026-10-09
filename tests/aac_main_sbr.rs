@@ -31,7 +31,7 @@ fn main_prediction_sbr_signalling_and_adts_transport_agree() {
         let reference = f64::from_le_bytes(reference.try_into().unwrap());
         maximum_error = maximum_error.max((actual - reference).abs());
         assert!(
-            (actual - reference).abs() < 1e-7,
+            (actual - reference).abs() < 1e-9,
             "sample {i}: {actual} vs scalar {reference}"
         );
     }

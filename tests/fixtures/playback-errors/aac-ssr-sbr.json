@@ -175,7 +175,186 @@
         "pcm_offset": 0,
         "samples": 6144
       }
+    },
+    {
+      "name": "explicit-active",
+      "asc": "2b098c00",
+      "frames": [
+        {
+          "offset": 164,
+          "bytes": 66
+        },
+        {
+          "offset": 287,
+          "bytes": 66
+        },
+        {
+          "offset": 461,
+          "bytes": 116
+        },
+        {
+          "offset": 685,
+          "bytes": 120
+        },
+        {
+          "offset": 863,
+          "bytes": 67
+        },
+        {
+          "offset": 984,
+          "bytes": 62
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-ssr-sbr-explicit-active-synthetic.mp4",
+        "sha256": "d81b3d601dfe0469bdc9c74854a5f81254244711e52d7baf67170f5e9432f079",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b098c00",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "reference": "aac-ssr-sbr-active-reference.f64le"
+    },
+    {
+      "name": "sync-active",
+      "asc": "1b0856e598",
+      "frames": [
+        {
+          "offset": 164,
+          "bytes": 66
+        },
+        {
+          "offset": 287,
+          "bytes": 66
+        },
+        {
+          "offset": 461,
+          "bytes": 116
+        },
+        {
+          "offset": 685,
+          "bytes": 120
+        },
+        {
+          "offset": 863,
+          "bytes": 67
+        },
+        {
+          "offset": 984,
+          "bytes": 62
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-ssr-sbr-sync-active-synthetic.mp4",
+        "sha256": "ff02d3a636368b39917d0476ec1b7ab696755bbb040403cbbebeb34db18efe35",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0856e598",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "reference": "aac-ssr-sbr-active-reference.f64le"
+    },
+    {
+      "name": "implicit-active",
+      "asc": "1b08",
+      "frames": [
+        {
+          "offset": 164,
+          "bytes": 66
+        },
+        {
+          "offset": 287,
+          "bytes": 66
+        },
+        {
+          "offset": 461,
+          "bytes": 116
+        },
+        {
+          "offset": 685,
+          "bytes": 120
+        },
+        {
+          "offset": 863,
+          "bytes": 67
+        },
+        {
+          "offset": 984,
+          "bytes": 62
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-ssr-sbr-implicit-active-synthetic.mp4",
+        "sha256": "6ab21de73c187b71f9ccdc30a5da68b2dfbc284f5c4493892bc13b43ec9261db",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b08",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "reference": "aac-ssr-sbr-active-reference.f64le"
     }
   ],
-  "provenance": "Own silent SSR SCE across long/start/short/stop transitions; existing authored SBR syntax and owned AVC/container seeds. No private media, external codec or network."
+  "active_core_control": {
+    "name": "core-control",
+    "asc": "1b08",
+    "frames": [
+      {
+        "offset": 110,
+        "bytes": 54
+      },
+      {
+        "offset": 230,
+        "bytes": 57
+      },
+      {
+        "offset": 353,
+        "bytes": 108
+      },
+      {
+        "offset": 577,
+        "bytes": 108
+      },
+      {
+        "offset": 805,
+        "bytes": 58
+      },
+      {
+        "offset": 930,
+        "bytes": 54
+      }
+    ],
+    "slots": 16,
+    "bands": 64,
+    "container_rate": 24000,
+    "container_frame_samples": 1024,
+    "pcm_offset": 0,
+    "samples": 6144,
+    "video": {
+      "file": "aac-ssr-sbr-active-core-control-synthetic.mp4",
+      "sha256": "f9430b1708e9312759183ffdafdc397d646beb384d4497a02b78aca698de7f45",
+      "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+      "asc": "1b08",
+      "pcm_offset": 0,
+      "samples": 6144
+    }
+  },
+  "provenance": "Own silent and nonzero SSR SCE with active gain control across long/start/short/stop transitions; existing authored SBR syntax and owned AVC/container seeds. No private media, external codec or network."
 }

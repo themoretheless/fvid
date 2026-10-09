@@ -2642,21 +2642,37 @@ computes the entire six-frame PCM using scalar Main prediction, direct IMDCT
 and direct QMF convolutions with the fixed authored SBR gain/noise geometry.
 Numeric normative window/noise constants are shared, but no decoder, DSP output
 or production history buffers are used. The committed f64 reference is compared
-with tolerance 1e-7; a no-prediction control differs by over 1e-5, proving that
+with tolerance 1e-9; a no-prediction control differs by over 1e-5, proving that
 active prediction is exercised. All three oracle artifacts regenerate identically.
 This qualifies this authored composition, not all Main/SBR tools or geometries.
 ISO/IEC 14496-3 subpart 1 Table 1.2 permits Main (AOT1)
 with SBR. SSR and other unimplemented core families remain explicit gaps.
 
-### SSR + SBR transition reproducer — 2026-10-09
+### SSR + SBR transition acceptance — 2026-10-09
 
-`generate_aac_ssr_sbr_fixtures.py` authors silent SSR SCE0 across the six window
-sequences long/start/short/short/stop/long, paired with already authored SBR
-noise syntax. It writes explicit, sync and implicit-clock MP4 videos, a valid
-SSR-only control video and packet/manifest files. No private material, external
-codec or network. All six artifacts regenerate identically.
-`tests/aac_ssr_sbr.rs` verifies that the control decodes to exactly 6144 silent
-core samples, while all three extension variants refuse for the exact SSR SBR
-synthesis gap. That is a passing reproduction/refusal test, not acceptance.
-The ignored intended-playback test is explicitly red when run with `--ignored`.
-Enable it and replace the old refusal expectation with the actual SSR/SBR fix.
+`generate_aac_ssr_sbr_fixtures.py` authors SCE0 across long/start/short/short/
+stop/long window sequences with both silent core and nonzero spectra/active SSR
+gain control, paired with the existing authored SBR syntax. Explicit, sync and
+implicit-container-clock variants have independent six-frame PCM references.
+SSR-only silent and active controls distinguish the core from extension stages.
+No private media, parameter sets, external codec or network. All 13 artifacts
+regenerate identically. Ordinary tests never invoke the generator.
+
+The original precise refusal test has been replaced by acceptance, and the
+previously ignored playback test is enabled. `tests/aac_ssr_sbr.rs` verifies full
+PCM, checkpoint/replay, malformed-packet rollback, reset, delayed output/EOF,
+player rewind/seek and intervals. The independent active-core control matches
+SSR/IPQF PCM bit for bit. Whole-composition references combine the independent
+SSR synthesis with direct QMF convolution and authored fixed SBR geometry;
+maximal difference is 2.26381e-10 (active) / 1.81536e-12 (silent), tolerance 1e-9.
+
+The nonzero case exposed a patch-geometry error in the old scalar reference:
+master borders for k0=10,k2=27 have a final width-two interval. Figure 4.48 gives
+patches (source2,target10,width8) and (source2,target18,width7); the final width-two
+patch at target25 is discarded. The independent generator now derives geometry
+from its own Decimal frequency tables and the normative flow. Existing Main/SBR
+references were corrected too; their maximal difference is now 7.26431e-12.
+This corrects the oracle, not the already correct production patch construction.
+Coverage remains mono 1024-core double-rate SBR in containers; ADTS discovery,
+independent CCE synthesis, other layouts/tools and downsampled SSR/SBR require
+further implementation or qualification.

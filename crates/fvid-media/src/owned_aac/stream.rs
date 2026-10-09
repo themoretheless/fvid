@@ -92,6 +92,14 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     config.resolve_output_rate(output_rate)?;
     let mut bytes = decode_admission_bytes(u16::from(config.core.channels))?;
     if config.sbr_present == Some(true) || output_rate != config.core.sample_rate {
+        if config.core.object_type == 3 {
+            // Two retained aligned packet descriptors, nested transactional copies,
+            // frequency/grid syntax and quantized/dequantized coefficient vectors.
+            // One MiB per channel bounds their small (<64 bands, <=5 envelopes)
+            // metadata alongside SSR alignment; checkpoints charge separately.
+            bytes=bytes.checked_add(usize::from(config.core.channels)*1024*1024)
+                .ok_or_else(||invalid("SSR SBR metadata memory estimate overflow"))?;
+        }
         let coupling_states = config.program.as_ref().map_or(0, |p| p.coupling.len());
         bytes = bytes
             .checked_add((usize::from(config.core.channels) + coupling_states) * 2 * 1024 * 1024)

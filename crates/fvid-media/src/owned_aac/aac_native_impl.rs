@@ -31,6 +31,49 @@ impl ElementSbr {
         Self { width, stream: Default::default(), dsp: Default::default() }
     }
 }
+#[derive(Clone)]
+struct SsrPacketMetadata {
+    duration: u64,
+    sbr: Option<SsrSbrMetadata>,
+}
+#[derive(Clone)]
+struct SsrSbrMetadata {
+    output_rate: u32,
+    groups: Vec<(usize, usize, Option<sbr_history::Frame>)>,
+    mapping: Vec<usize>,
+}
+fn render_ssr_sbr(
+    mut pcm: AacFrame,
+    metadata: SsrPacketMetadata,
+    elements: &mut [Option<ElementSbr>],
+    core_rate: u32,
+    channels: usize,
+) -> Result<AacFrame> {
+    pcm.duration = metadata.duration;
+    let Some(metadata) = metadata.sbr else { return Ok(pcm); };
+    if pcm.samples.len() != 1024 * channels {return Err(invalid("SSR SBR requires aligned 1024-sample core PCM"));}
+    let mode = if metadata.output_rate == core_rate {sbr_dsp::OutputRate::Core} else {sbr_dsp::OutputRate::Double};
+    let samples = if mode == sbr_dsp::OutputRate::Core {1024} else {2048};
+    let mut expanded = vec![0.0; samples*channels];
+    for (offset,width,frame) in &metadata.groups {
+        let state = elements[*offset].get_or_insert_with(||ElementSbr::new(*width));
+        if state.width != *width {return Err(invalid("SSR SBR element width changed"));}
+        let planar:Vec<Vec<f32>>=(0..*width).map(|c|pcm.samples.chunks_exact(channels).map(|row|row[metadata.mapping[offset+c]]).collect()).collect();
+        let refs:Vec<_>=planar.iter().map(Vec::as_slice).collect();
+        let rate=core_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?;
+        let rendered=if let Some(frame)=frame {state.dsp.process(frame,&refs,rate,16,mode)} else {state.dsp.process_upsampling(&refs,rate,16,mode)}.map_err(|e|invalid(&e.0))?;
+        for (c,data) in rendered.iter().enumerate() {
+            if data.len()!=samples {return Err(invalid("SSR SBR output length mismatch"));}
+            for (i,&sample) in data.iter().enumerate() {
+                let value=sample as f32;
+                if !value.is_finite() {return Err(invalid("SSR SBR PCM exceeds finite output"));}
+                expanded[i*channels+metadata.mapping[offset+c]]=value;
+            }
+        }
+    }
+    pcm.samples=expanded;
+    Ok(pcm)
+}
 /// PCM retains the timing of its source packet, including delayed SSR output.
 #[derive(Debug, PartialEq)]
 pub struct AacFrame {
@@ -45,7 +88,7 @@ pub struct NativeAacDecoder {
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
     ssr_alignment_tags: Vec<u8>,
-    ssr_pending_duration: super::aac_ssr_metadata::PacketQueue<u64>,
+    ssr_pending_duration: super::aac_ssr_metadata::PacketQueue<SsrPacketMetadata>,
     ssr_fixed_clock: bool,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     main_prediction: Vec<Option<super::aac_main_predictor::MainPredictor>>,
@@ -69,7 +112,7 @@ pub struct AacCheckpoint {
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
     ssr_alignment_tags: Vec<u8>,
-    ssr_pending_duration: super::aac_ssr_metadata::PacketQueue<u64>,
+    ssr_pending_duration: super::aac_ssr_metadata::PacketQueue<SsrPacketMetadata>,
     ssr_fixed_clock: bool,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     main_prediction: Vec<Option<super::aac_main_predictor::MainPredictor>>,
@@ -103,9 +146,6 @@ impl NativeAacDecoder {
             }
             Some(rate)
         } else { None };
-        if parsed.core.object_type == 3 && sbr_rate.is_some() {
-            return Err(unsupported("AAC SSR SBR synthesis is not implemented"));
-        }
         let config = parsed.core;
         let program = parsed.program;
         BandTables::for_config(&config)?;
@@ -185,7 +225,6 @@ impl NativeAacDecoder {
         parsed.resolve_output_rate(output_rate)?;
         let mut decoder=Self::new(asc)?;
         if decoder.sample_rate()!=output_rate {
-            if parsed.core.object_type == 3 { return Err(unsupported("AAC SSR SBR synthesis is not implemented")); }
             if !sbr_layout(&parsed)? {
                 return Err(unsupported("implicit SBR AAC coupling synthesis is not yet implemented"));
             }
@@ -266,15 +305,14 @@ impl NativeAacDecoder {
         self.ssr_alignment.is_some()
     }
     pub fn finish(&mut self) -> Result<Option<AacFrame>> {
-        let Some(alignment) = &mut self.ssr_alignment else {
-            return Ok(None);
-        };
-        let frame = alignment.finish()?;
-        frame.map(|frame| Ok(AacFrame {
-            samples: frame.samples,
-            pts: frame.stamp as i64,
-            duration: self.ssr_pending_duration.take(frame.stamp as i64)?,
-        })).transpose()
+        let Some(mut alignment) = self.ssr_alignment.clone() else {return Ok(None);};
+        let Some(frame)=alignment.finish()? else {self.ssr_alignment=Some(alignment);return Ok(None);};
+        let mut pending=self.ssr_pending_duration.clone();
+        let metadata=pending.take(frame.stamp as i64)?;
+        let mut elements=self.sbr_elements.clone();
+        let output=render_ssr_sbr(AacFrame {samples:frame.samples,pts:frame.stamp as i64,duration:0},metadata,&mut elements,self.config.sample_rate,usize::from(self.config.channels))?;
+        self.ssr_alignment=Some(alignment);self.ssr_pending_duration=pending;self.sbr_elements=elements;
+        Ok(Some(output))
     }
     pub fn decode_timed(&mut self, packet: &[u8], pts:i64, duration:u64) -> Result<Option<AacFrame>> {
         let mut bits = BitReader::new(packet);
@@ -400,7 +438,6 @@ impl NativeAacDecoder {
                     }
                 }
                 6 => super::aac_pce::read_fill(&mut bits, |input, end, crc| {
-                    if self.config.object_type == 3 { return Err(unsupported("AAC SSR SBR synthesis is not implemented")); }
                     if sbr_rate.is_none() && self.detect_sbr {
                         sbr_rate=Some(self.config.sample_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?);
                     }
@@ -482,6 +519,7 @@ impl NativeAacDecoder {
         }
         // byte_alignment bits have no audio payload.
         let fixed_clock_history=self.ssr_fixed_clock;
+        if self.config.object_type==3 && sbr_rate.is_some() {self.ssr_fixed_clock=true;}
         let n = if self.config.object_type == 3 {
             let sequence = channels.iter().find(|(_,_,target)|*target==0).ok_or_else(||invalid("AAC primary output channel is absent"))?.0.info.sequence;
             let samples = super::aac_ssr_synthesis::SsrSynthesis::output_samples(sequence);
@@ -569,6 +607,11 @@ impl NativeAacDecoder {
                     }
                     gains.push(outputs);
                 }
+                if sbr_rate.is_some() && !tags.is_empty() {return Err(unsupported("SSR SBR independent coupling requires per-source aligned synthesis"));}
+                let metadata=SsrPacketMetadata {duration,sbr:sbr_rate.map(|output_rate|SsrSbrMetadata {
+                    output_rate, mapping:self.mapping.clone(),
+                    groups:decoded_elements.iter().map(|&(kind,_,offset)|(offset,if kind==1 {2} else {1},sbr_frames[offset].clone())).collect(),
+                })};
                 let needs_alignment = lanes.iter().any(|lane| lane.len() != n);
                 if self.ssr_alignment.is_none() && needs_alignment {
                     self.ssr_alignment = Some(SsrPcmAlignment::new(channels.len(), lanes.len())?);
@@ -590,13 +633,12 @@ impl NativeAacDecoder {
                         .zip(&gains)
                         .map(|(samples, outputs)| LaneInput { samples, outputs })
                         .collect();
-                    self.ssr_pending_duration.push(pts, duration)?;
+                    self.ssr_pending_duration.push(pts, metadata)?;
                     let output = alignment.submit(pts as u64, n, &inputs)?;
-                    return output.map(|f| Ok(AacFrame {
-                        samples: f.samples,
-                        pts: f.stamp as i64,
-                        duration: self.ssr_pending_duration.take(f.stamp as i64)?,
-                    })).transpose();
+                    return output.map(|f| {
+                        let metadata=self.ssr_pending_duration.take(f.stamp as i64)?;
+                        render_ssr_sbr(AacFrame {samples:f.samples,pts:f.stamp as i64,duration:0},metadata,&mut sbr_elements,self.config.sample_rate,channels.len())
+                    }).transpose();
                 }
                 let mut samples = vec![0.0; n * channels.len()];
                 for (lane, outputs) in lanes.iter().zip(&gains) {
@@ -610,11 +652,7 @@ impl NativeAacDecoder {
                         }
                     }
                 }
-                return Ok(Some(AacFrame {
-                    samples,
-                    pts,
-                    duration,
-                }));
+                return render_ssr_sbr(AacFrame {samples,pts,duration},metadata,&mut sbr_elements,self.config.sample_rate,channels.len()).map(Some);
             }
             let mut output = vec![0.0; n * channels.len()];
             let mut pcm = vec![0.0; n];

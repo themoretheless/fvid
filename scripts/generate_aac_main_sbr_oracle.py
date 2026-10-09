@@ -7,6 +7,7 @@ one limiter band, gain mode2, enabled smoothing, no harmonics/attack.
 import math,re,struct,json,hashlib
 from generate_aac_main_prediction_fixtures import step,initial,f32
 from generate_aac_ssr_fixtures import DEST
+from generate_aac_sbr_frequency_oracles import tables
 from pathlib import Path
 
 def core(prediction=True):
@@ -20,23 +21,42 @@ def core(prediction=True):
         pcm.extend(f32(f32(overlap[j]+block[j])/65536) for j in range(1024));overlap=block[1024:]
     return pcm
 
-def reference(prediction=True):
+def patch_sources():
+    # ISO Figure 4.48 over independently computed frequency borders. The odd
+    # 17-band span has a final width-two master interval, not 17 unit intervals.
+    master=tables(10,27,0,False,0,0)[0]
+    low=10;target=10;search=len(master)-1;patches=[]
+    while target<27:
+        edge=max(b for b in master[:search+1] if b<=9+low-((b+8)%2))
+        width=max(0,edge-target)
+        if width:
+            patches.append((10-((edge+8)%2)-width,target,width))
+            target=edge;low=edge
+        else:low=10
+        if master[search]-edge<3:search=len(master)-1
+    if len(patches)>1 and patches[-1][2]<3:patches.pop()
+    assert patches==[(2,10,8),(2,18,7)]
+    return {target+i:source+i for source,target,width in patches for i in range(width)}
+
+def reference(prediction=True, pcm_override=None):
     source=Path(__file__).resolve().parents[1]/'crates/fvid-media/src/owned_aac/aac_sbr_qmf_window.rs'
     window=[float(x) for x in re.findall(r'-?\d+\.\d+',source.read_text().split('= [',1)[1])]
     noise_bytes=(DEST/'aac-sbr-noise-protocol.f64le').read_bytes()
     noise=[complex(*struct.unpack_from('<dd',noise_bytes,16*i)) for i in range(512)]
-    pcm=core(prediction);analysis=[]
+    pcm=core(prediction) if pcm_override is None else pcm_override;analysis=[]
+    assert len(pcm)==6144
     factors=[[window[2*lag]*complex(math.cos(math.pi*(b+.5)*(2*(lag%64)-.5)/64),math.sin(math.pi*(b+.5)*(2*(lag%64)-.5)/64))*65536 for lag in range(320)] for b in range(10)]
     for last in range(31,len(pcm),32):
         analysis.append([complex(math.fsum(pcm[last-lag]*factors[b][lag].real for lag in range(min(320,last+1))),math.fsum(pcm[last-lag]*factors[b][lag].imag for lag in range(min(320,last+1)))) for b in range(10)])
     delayed=[[0j]*10 for _ in range(6)]+analysis
-    # Figure 4.48 gives two 8-band patches (2->10 and 2->18).
-    # The final one-band patch at 26 is discarded; band26 still gets noise.
+    # Figure 4.48 gives 8-band and 7-band patches. The final two-band
+    # patch at 25 is discarded; unpatched bands still receive envelope noise.
+    mapping=patch_sources()
     weights=[.33333333333333,.30150283239582,.21816949906249,.11516383427084,.03183050093751]
     levels=[];rows=[];history=[]
     for frame in range(6):
         low=delayed[frame*32:frame*32+32]
-        high=[[r[2+(k-10)%8] if k<26 else 0j for k in range(10,27)] for r in low]
+        high=[[r[mapping[k]] if k in mapping else 0j for k in range(10,27)] for r in low]
         energy=[math.fsum(abs(r[k])**2 for r in high)/32 for k in range(17)]
         gains=[math.sqrt(128/(1.5*(1+e))) for e in energy];q=[math.sqrt(128/3)]*17
         maximum=min(math.sqrt((128*17+1e-12)/(sum(energy)+1e-12))*1.41254,1e5)

@@ -27,8 +27,9 @@ transitions. Fourteen further videos qualify dependent and independent SSR
 coupling, including simultaneous CCE tags 1/15. Five more coupled videos and
 one independently switched stereo CPE video qualify unequal SSR window extents,
 bounded PCM alignment, original packet timing, EOF drain, checkpoint replay,
-rewind, seek and interval export. SSR SBR/PS and removal of independent CCEs
-with queued history remain unsupported. New independent CCEs can appear while alignment is active: six
+rewind, seek and interval export. SSR SBR beyond the qualified mono container
+composition, SSR PS and removal of independent CCEs with queued history remain
+unsupported. New independent CCEs can appear while alignment is active: six
 further MP4/Matroska pairs qualify first occurrence, canonical tag reordering,
 source timing and preservation of prior filter/PCM histories. Four fixed-clock
 MP4 variants
@@ -828,6 +829,22 @@ in the core decoder; PS probing stays restricted to LC. The six-frame authored
 active-prediction fixture verifies explicit/sync/implicit PCM equivalence,
 protected/multiplexed ADTS, MP4/Matroska remux and rewind/seek. This is transport
 and signalling qualification plus independent scalar PCM for the fixed authored
-composition (Main prediction through SBR, 1e-7 tolerance), not complete AAC
-Main+SBR conformance. SSR+SBR,
+composition (Main prediction through SBR, 1e-9 tolerance), not complete AAC
+Main+SBR conformance. Wider SSR+SBR tools/layouts,
 LTP/ER/ELD/USAC and broader profile tools still require implementation/qualification.
+
+
+### AAC SSR + SBR container synthesis — 2026-10-09
+
+Explicit/sync/container-clock SBR now runs after SSR PCM alignment. A two-slot
+packet queue preserves parsed SBR frames, layout and original duration until
+corresponding PCM is ready; EOF, checkpoint/reset and rollback preserve all
+histories. Delayed metadata allocations are counted in retained payload;
+optional controlled-memory admission reserves their bounded transactional copies.
+No new global/default memory limit is introduced.
+
+Mono 24→48 kHz synthetic transitions with silent/nonzero core and active gain
+control match independent scalar PCM at 1e-9 tolerance. Native export and player
+rewind/seek/intervals pass. Independent CCE SBR requires per-source aligned
+synthesis and is explicitly refused; implicit ADTS discovery, other layouts/tools
+and downsampled SSR/SBR remain separate work, not claimed as complete.

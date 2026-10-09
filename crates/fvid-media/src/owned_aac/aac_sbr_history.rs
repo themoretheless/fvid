@@ -1,7 +1,7 @@
 //! Owned SBR quantized coefficient history and frame dequantization.
 use super::{
-    Result, aac_sbr_coefficients::reconstruct, aac_sbr_controls::DeltaDirection,
-    aac_sbr_data::Data, aac_sbr_dequant, aac_sbr_extension, bits::BitReader, invalid,
+    aac_sbr_coefficients::reconstruct, aac_sbr_controls::DeltaDirection, aac_sbr_data::Data,
+    aac_sbr_dequant, aac_sbr_extension, bits::BitReader, invalid, Result,
 };
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -205,6 +205,60 @@ pub struct Frame {
     pub syntax: aac_sbr_extension::Frame,
     pub parameters: Parameters,
 }
+impl Frame {
+    /// Retained vector payload of this parsed/dequantized frame; excludes stack fields.
+    pub fn retained_payload_bytes(&self) -> Result<usize> {
+        let mut f = super::memory::Footprint::new();
+        let count = (|| -> std::result::Result<(), String> {
+            let d = &self.syntax.data;
+            for v in [
+                &d.frequency.master,
+                &d.frequency.high,
+                &d.frequency.low,
+                &d.frequency.noise,
+            ] {
+                f.vector(v)?;
+            }
+            f.vector(&d.channels)?;
+            if let Some(v) = &d.extended_data {
+                f.vector(v)?;
+            }
+            for c in &d.channels {
+                f.vector(&c.grid.leading_relative)?;
+                f.vector(&c.grid.trailing_relative)?;
+                f.vector(&c.grid.high_resolution)?;
+                f.vector(&c.delta.envelope)?;
+                f.vector(&c.delta.noise)?;
+                f.vector(&c.inverse_filter)?;
+                f.vector(&c.harmonics)?;
+                for rows in [&c.envelope, &c.noise] {
+                    f.vector(rows)?;
+                    for row in rows {
+                        f.vector(&row.values)?;
+                    }
+                }
+            }
+            f.vector(&self.parameters.channels)?;
+            for c in &self.parameters.channels {
+                for rows in [&c.quantized_envelope, &c.quantized_noise] {
+                    f.vector(rows)?;
+                    for row in rows {
+                        f.vector(row)?;
+                    }
+                }
+                for rows in [&c.envelope, &c.noise] {
+                    f.vector(rows)?;
+                    for row in rows {
+                        f.vector(row)?;
+                    }
+                }
+            }
+            Ok(())
+        })();
+        count.map_err(|e| invalid(&e))?;
+        Ok(f.total())
+    }
+}
 impl Stream {
     pub(crate) fn visit_retained(
         &self,
@@ -259,7 +313,7 @@ impl Stream {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::{Value, json};
+    use serde_json::{json, Value};
     const BINARY: &[u8] =
         include_bytes!("../../../../tests/fixtures/playback-errors/aac-sbr-history-syntax.bin");
     fn manifest() -> Value {
@@ -411,21 +465,17 @@ mod tests {
             let mut reader = BitReader::new(bytes);
             reader.skip(4).unwrap();
             for end in 4..bytes.len() * 8 {
-                assert!(
-                    stream
-                        .read(&mut reader, end, true, 48_000, slots, count)
-                        .is_err()
-                );
+                assert!(stream
+                    .read(&mut reader, end, true, 48_000, slots, count)
+                    .is_err());
                 assert_eq!(reader.position(), 4);
                 assert_eq!(stream, checkpoint);
             }
             let mut empty = Stream::default();
-            assert!(
-                read(&mut empty, &sequence["frames"][1], slots, count)
-                    .unwrap_err()
-                    .to_string()
-                    .contains("missing previous SBR envelope")
-            );
+            assert!(read(&mut empty, &sequence["frames"][1], slots, count)
+                .unwrap_err()
+                .to_string()
+                .contains("missing previous SBR envelope"));
             assert_eq!(empty, Stream::default());
             let mut data = read(&mut stream, &sequence["frames"][1], slots, count)
                 .unwrap()
