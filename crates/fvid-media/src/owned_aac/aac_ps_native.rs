@@ -1,5 +1,5 @@
-//! Complete owned mono AAC-LC/SBR/PS raw-data-block decoder.
-//! Stereo PCM is delayed one packet for real hybrid lookahead; frame_index
+//! Complete owned mono AAC-LC or AAC-SSR/SBR/PS raw-data-block decoder.
+//! Stereo PCM is delayed one LC or two SSR packets for alignment/lookahead; frame_index
 //! refers to the original packet. Container timing/startup trimming is external.
 use super::{
     Result,
@@ -15,6 +15,12 @@ use super::{
     config::{AacConfig, AudioSpecificConfig},
     invalid, unsupported,
 };
+#[derive(Clone)]
+struct SsrState {
+    synthesis: super::aac_ssr_synthesis::SsrSynthesis,
+    alignment: super::aac_ssr_alignment::SsrPcmAlignment,
+    prepared: std::collections::VecDeque<aac_sbr_ps::PreparedFrame>,
+}
 #[derive(Clone, Default)]
 struct CceState {
     stream: aac_sbr_history::Stream,
@@ -28,7 +34,8 @@ pub struct NativePsAacDecoder {
     output_rate: u32,
     mode: OutputRate,
     requires_in_band: bool,
-    synthesis: LongSineSynthesis,
+    synthesis: Option<LongSineSynthesis>,
+    ssr: Option<SsrState>,
     noise: NoiseState,
     // Large fixed QMF/PS histories live on heap so packet transactions and
     // checkpoints do not multiply them on a normal playback thread stack.
@@ -98,7 +105,22 @@ impl NativePsAacDecoder {
             ));
         };
         BandTables::for_config(&parsed.core)?;
-        let synthesis = LongSineSynthesis::new(usize::from(parsed.core.frame_samples))?;
+        let synthesis = if parsed.core.object_type == 3 {
+            None
+        } else {
+            Some(LongSineSynthesis::new(usize::from(
+                parsed.core.frame_samples,
+            ))?)
+        };
+        let ssr = if parsed.core.object_type == 3 {
+            Some(SsrState {
+                synthesis: super::aac_ssr_synthesis::SsrSynthesis::new()?,
+                alignment: super::aac_ssr_alignment::SsrPcmAlignment::new(1, 1)?,
+                prepared: Default::default(),
+            })
+        } else {
+            None
+        };
         Ok(Self {
             config: parsed.core,
             program: parsed.program,
@@ -106,6 +128,7 @@ impl NativePsAacDecoder {
             mode,
             requires_in_band,
             synthesis,
+            ssr,
             noise: NoiseState::default(),
             extension: Default::default(),
             cce_states: vec![None; 16],
@@ -125,7 +148,10 @@ impl NativePsAacDecoder {
         self.extension.ps_seen()
     }
     pub fn pending_frame_index(&self) -> Option<u64> {
-        self.extension.pending_frame_index()
+        self.ssr
+            .as_ref()
+            .and_then(|s| s.prepared.back().map(|p| p.frame_index()))
+            .or_else(|| self.extension.pending_frame_index())
     }
     pub fn checkpoint(&self) -> Checkpoint {
         Checkpoint {
@@ -145,7 +171,14 @@ impl NativePsAacDecoder {
         Ok(())
     }
     pub fn reset(&mut self) {
-        self.synthesis.reset();
+        if let Some(synthesis) = &mut self.synthesis {
+            synthesis.reset();
+        }
+        if let Some(ssr) = &mut self.ssr {
+            ssr.synthesis.reset();
+            ssr.alignment.reset();
+            ssr.prepared.clear();
+        }
         self.noise.reset();
         self.extension.reset();
         self.cce_states.fill(None);
@@ -176,7 +209,8 @@ impl NativePsAacDecoder {
     }
     /// Decode the full original packet, including native SCE spectral tools,
     /// IMDCT/window overlap, FIL length/CRC/SBR/PS and ID_END validation.
-    /// First packet queues output; later packets emit the preceding frame.
+    /// LC retains one packet; SSR additionally aligns variable window PCM.
+    /// Frame identity always refers to the original packet, including EOF.
     /// Malformed trailing syntax rolls back core, extension and pending PCM.
     pub fn decode(&mut self, packet: &[u8]) -> Result<Option<Frame>> {
         let mut trial = self.clone();
@@ -283,18 +317,71 @@ impl NativePsAacDecoder {
             }
         }
         let n = usize::from(trial.config.frame_samples);
-        let mut pcm = vec![0.; n];
-        trial.synthesis.synthesize_pcm(
-            channel.info.sequence,
-            channel.info.shape,
-            &spectrum,
-            &mut pcm,
-        )?;
+        let mut pcm = if trial.ssr.is_some() {
+            vec![0.; super::aac_ssr_synthesis::SsrSynthesis::output_samples(channel.info.sequence)]
+        } else {
+            vec![0.; n]
+        };
+        if let Some(ssr) = &mut trial.ssr {
+            let gain = channel
+                .gain
+                .clone()
+                .unwrap_or(super::aac_gain_control::GainControl { bands: Vec::new() })
+                .into();
+            ssr.synthesis.synthesize_pcm(
+                channel.info.sequence,
+                channel.info.shape,
+                &gain,
+                &spectrum,
+                &mut pcm,
+            )?;
+        } else {
+            trial
+                .synthesis
+                .as_mut()
+                .ok_or_else(|| invalid("missing PS LC synthesis"))?
+                .synthesize_pcm(
+                    channel.info.sequence,
+                    channel.info.shape,
+                    &spectrum,
+                    &mut pcm,
+                )?;
+        }
         let pcm: Vec<f32> = pcm.into_iter().map(|v| v as f32).collect();
         if pcm.iter().any(|v| !v.is_finite()) {
             return Err(invalid("PS AAC core PCM exceeds finite f32 output"));
         }
-        let output = if let Some((position, end, crc)) = extension {
+        let output = if trial.ssr.is_some() {
+            let prepared = if let Some((position, end, crc)) = extension {
+                let mut reader = BitReader::new(packet);
+                reader.skip(position)?;
+                let prepared =
+                    trial
+                        .extension
+                        .prepare(&mut reader, end, crc, rate, slots, trial.mode)?;
+                if reader.position() != end {
+                    return Err(invalid("invalid SBR fill extension consumption"));
+                }
+                prepared
+            } else {
+                trial
+                    .extension
+                    .prepare_upsampling(rate, slots, trial.mode)?
+            };
+            let stamp = prepared.frame_index();
+            let ssr = trial.ssr.as_mut().unwrap();
+            ssr.prepared.push_back(prepared);
+            let gain = [super::aac_ssr_alignment::OutputGain {
+                channel: 0,
+                gain: 1.0,
+            }];
+            let input = [super::aac_ssr_alignment::LaneInput {
+                samples: &pcm,
+                outputs: &gain,
+            }];
+            let aligned = ssr.alignment.submit(stamp, n, &input)?;
+            trial.aligned_output(aligned)?
+        } else if let Some((position, end, crc)) = extension {
             let mut reader = BitReader::new(packet);
             reader.skip(position)?;
             let output =
@@ -372,6 +459,30 @@ impl NativePsAacDecoder {
         *self = trial;
         Ok(output)
     }
+    fn aligned_output(
+        &mut self,
+        aligned: Option<super::aac_ssr_alignment::AlignedFrame>,
+    ) -> Result<Option<aac_sbr_ps::Frame>> {
+        let Some(aligned) = aligned else {
+            return Ok(None);
+        };
+        let ssr = self
+            .ssr
+            .as_mut()
+            .ok_or_else(|| invalid("missing PS SSR alignment"))?;
+        let prepared = ssr
+            .prepared
+            .front()
+            .ok_or_else(|| invalid("missing PS SSR prepared frame"))?;
+        if prepared.frame_index() != aligned.stamp {
+            return Err(invalid("PS SSR aligned frame identity mismatch"));
+        }
+        let output = self
+            .extension
+            .process_prepared(prepared, &aligned.samples)?;
+        ssr.prepared.pop_front();
+        Ok(output)
+    }
     fn coupled_output(&mut self, frame: Option<aac_sbr_ps::Frame>) -> Result<Option<Frame>> {
         let Some(mut frame) = self.output(frame)? else {
             return Ok(None);
@@ -396,7 +507,15 @@ impl NativePsAacDecoder {
             ));
         }
         let mut trial = self.clone();
-        let output = trial.extension.finish()?;
+        let aligned = if let Some(ssr) = &mut trial.ssr {
+            ssr.alignment.finish()?
+        } else {
+            None
+        };
+        let mut output = trial.aligned_output(aligned)?;
+        if output.is_none() {
+            output = trial.extension.finish()?;
+        }
         let output = trial.coupled_output(output)?;
         *self = trial;
         Ok(output)
@@ -548,8 +667,20 @@ impl InBandPsProbe {
 }
 
 fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
-    if parsed.core.object_type != 2 {
-        return Err(unsupported("AAC SSR parametric stereo synthesis is not implemented"));
+    if !matches!(parsed.core.object_type, 2 | 3) {
+        return Err(unsupported(
+            "AAC parametric stereo core profile is not implemented",
+        ));
+    }
+    if parsed.core.object_type == 3
+        && parsed
+            .program
+            .as_ref()
+            .is_some_and(|p| !p.coupling.is_empty())
+    {
+        return Err(unsupported(
+            "AAC SSR parametric stereo coupling synthesis is not implemented",
+        ));
     }
     if parsed.core.channels != 1 {
         return Err(unsupported(

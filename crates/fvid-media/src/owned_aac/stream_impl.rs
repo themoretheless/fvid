@@ -109,10 +109,9 @@ impl<R: std::io::Read> NegotiatedAdts<R> {
             emit_adts_samples(&samples, output, from, to, &mut position, &mut stats)?;
             control.packet(packet.len())?;
         }
-        if position < to {
-            if let Some(frame) = self.decoder.finish()? {
-                emit_adts_samples(&frame, output, from, to, &mut position, &mut stats)?;
-            }
+        while position < to {
+            let Some(frame) = self.decoder.finish()? else { break; };
+            emit_adts_samples(&frame, output, from, to, &mut position, &mut stats)?;
         }
         if stats.sample_frames == 0 {
             return Err(invalid("audio interval contains no samples"));
@@ -134,7 +133,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
     let asc = reader.audio_specific_config().to_vec();
     control.check_admission(&asc)?;
     let parsed = AdtsAudioConfig::parse(&asc)?;
-    if parsed.core.object_type == 2
+    if matches!(parsed.core.object_type, 2 | 3)
         && AdtsPsProbe::accepts_mono_program(&asc)?
         && parsed.ps_present.is_none()
         && parsed.sbr_present.is_none()

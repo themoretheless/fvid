@@ -27,9 +27,12 @@ transitions. Fourteen further videos qualify dependent and independent SSR
 coupling, including simultaneous CCE tags 1/15. Five more coupled videos and
 one independently switched stereo CPE video qualify unequal SSR window extents,
 bounded PCM alignment, original packet timing, EOF drain, checkpoint replay,
-rewind, seek and interval export. SSR SBR beyond the qualified mono/stereo container
-composition with one/two unit-gain CCE sources, SSR PS and removal of independent CCEs with queued history remain
-unsupported. New independent CCEs can appear while alignment is active: six
+rewind, seek and interval export. Explicit independent CCE absence/return now
+preserves queued source history. Mono SSR/PS is qualified across three silent
+core window schedules, explicit/sync signalling, both output clocks, MP4,
+Matroska, ADTS and two-frame EOF drain. SSR PS coupling, nonzero SSR spectral/gain
+composition with PS and wider profiles/layouts still require implementation or
+additional acceptance evidence. New independent CCEs can appear while alignment is active: six
 further MP4/Matroska pairs qualify first occurrence, canonical tag reordering,
 source timing and preservation of prior filter/PCM histories. Four fixed-clock
 MP4 variants
@@ -946,3 +949,48 @@ SSR/PS acceptance was explicitly run separately and fails at the exact native
 profile gate; this is a red acceptance check, not a passing playback test.
 The 19 new artifacts regenerate identically. Changed Rust formatting and
 `git diff --check` pass.
+
+
+### Native mono SSR/PS alignment and transport acceptance (2026-10-09)
+
+Mono AAC-SSR now uses its own four-band gain/window/IPQF synthesis before a
+fixed 1024-core-sample alignment queue. SBR/PS syntax validates in the original
+packet; retained prepared frames are consumed with matching aligned core PCM.
+Alignment and PS hybrid lookahead retain two original packet identities.
+EOF feeds the final aligned PCM and returns both remaining PS frames on
+successive calls (one-input streams still produce their single complete frame).
+Native packet transactions, checkpoint/replay and reset retain syntax, gain,
+overlap, aligned PCM and PS state together. SSR does not allocate the unused
+LC filterbank. Configured SSR PS coupling remains an explicit unsupported tool.
+
+The playback bridge now retains up to two signed source timestamps/durations.
+MP4 and Matroska export queues retain source windows/packets and drain every
+EOF frame. ADTS owned export and playback discover mono SSR PS in-band,
+provide negotiated stereo at twice the core clock and drain both frames.
+
+The old native SSR/PS profile refusal test has been removed and its waveform
+acceptance enabled. The 12 mono MP4 cases cover explicit/sync signalling,
+24/48 kHz output, sine/KBD and long/start-stop/start-short-stop schedules.
+Their nonzero stereo PCM matches the independent authored scalar gold.
+Twelve Matroska and three unprotected ADTS streams qualify the same PCM;
+twelve additional MP4s add silence and repeated source ranges. Enabled tests
+cover full/range export, both EOF identities, source timing including negative
+PTS and short durations, malformed packet rollback, checkpoint replay, reset,
+rewind and player seek. Repeated-range playback uses the actual AudioStep
+reset/silence scheduling contract. The intermediate missing EOF/window bug
+reproduced `audio edit extends outside available samples` before the queue fix.
+
+All artifacts come from `scripts/generate_aac_ssr_ps_fixtures.py`, original
+silent SSR core syntax and existing original independent SBR/PS scalar gold.
+No private source, foreign decoder, FFmpeg or network is used. Ordinary tests
+read committed artifacts and do not run generators. This qualifies these mono
+programs; nonzero SSR spectral/gain tools composed with PS, SSR PS CCE, broader
+layouts/profiles and general codec conformance remain separate requirements.
+This section supersedes the earlier preparation-only native refusal status.
+
+Validation: 909 root and 461 owned-media unit tests plus 36 selected integration
+tests passed (1406 distinct passes, 24 existing ignored unit tests). All five
+SSR/PS tests, including the formerly ignored native waveform acceptance, are
+enabled. Checks were locked/offline without FFmpeg. All 46 artifacts regenerate
+identically, and the 18 original binary fixtures/references remain unchanged.
+Changed Rust module/test formatting and `git diff --check` pass.

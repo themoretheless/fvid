@@ -68,7 +68,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         u64,
         Option<u64>,
         Mp4AacCheckpoint,
-        Option<(u64, u64)>,
+        std::collections::VecDeque<(u64, u64)>,
     )> = None;
     for segment in segments {
         control.check()?;
@@ -107,18 +107,19 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         decoder.reset();
         let mut first_sample = 0;
         let mut expected = None;
-        let mut pending_window = None;
+        let mut pending_window = std::collections::VecDeque::new();
         if let Some((index, start, previous, state, pending)) = &checkpoint
             && *start <= from
             && decoder.restore_checkpoint(state)?
         {
             first_sample = *index;
             expected = *previous;
-            pending_window = *pending;
+            pending_window = pending.clone();
         }
         let mut captured = false;
         let mut written = 0u64;
-        for sample_index in first_sample..=track.samples.len() {
+        let mut sample_index = first_sample;
+        loop {
             control.check()?;
             let terminal = sample_index == track.samples.len() || control.packet_limit_reached();
             let (start, duration, samples) = if terminal {
@@ -126,7 +127,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                     break;
                 };
                 let (start, duration) = pending_window
-                    .take()
+                    .pop_front()
                     .ok_or_else(|| invalid("delayed MP4 audio has no source window"))?;
                 (start, duration, samples)
             } else {
@@ -142,7 +143,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                     return Err(invalid("non-contiguous MP4 audio timeline"));
                 }
                 if start >= to
-                    && (!decoder.delayed() || pending_window.is_none_or(|(at, _)| at >= to))
+                    && (!decoder.delayed() || pending_window.front().is_none_or(|(at, _)| *at >= to))
                 {
                     break;
                 }
@@ -153,7 +154,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                         > from
                 {
                     if let Some(state) = decoder.checkpoint() {
-                        checkpoint = Some((sample_index, start, expected, state, pending_window));
+                        checkpoint = Some((sample_index, start, expected, state, pending_window.clone()));
                     }
                     captured = true;
                 }
@@ -165,13 +166,15 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                 reader.read_packet(index, sample_index, &mut packet)?;
                 let samples = decoder.decode_timed(&packet,start,duration)?;
                 control.packet(packet.len())?;
+                sample_index += 1;
                 if decoder.delayed() {
-                    let previous = pending_window.replace((start, duration));
+                    pending_window.push_back((start, duration));
+                    if pending_window.len() > 3 { return Err(invalid("delayed MP4 source lookahead exceeded")); }
                     let Some(samples) = samples else {
                         continue;
                     };
                     let (start, duration) =
-                        previous.ok_or_else(|| invalid("delayed MP4 source identity mismatch"))?;
+                        pending_window.pop_front().ok_or_else(|| invalid("delayed MP4 source identity mismatch"))?;
                     (start, duration, samples)
                 } else {
                     (
@@ -202,7 +205,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             }
             written += last.saturating_sub(first) as u64;
             stats.decoded_frames += 1;
-            if written == length || terminal {
+            if written == length {
                 break;
             }
         }

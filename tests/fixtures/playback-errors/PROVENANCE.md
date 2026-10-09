@@ -2944,3 +2944,41 @@ and reproduce the exact native SSR/PS profile gate. Combined native waveform
 acceptance is explicitly ignored until SSR alignment, PS lookahead and the two
 EOF frames are integrated. This change does not claim native SSR/PS playback
 acceptance or complete codec conformance.
+
+
+### Native mono SSR/PS alignment and transport acceptance (2026-10-09)
+
+Mono AAC-SSR now uses its own four-band gain/window/IPQF synthesis before a
+fixed 1024-core-sample alignment queue. SBR/PS syntax validates in the original
+packet; retained prepared frames are consumed with matching aligned core PCM.
+Alignment and PS hybrid lookahead retain two original packet identities.
+EOF feeds the final aligned PCM and returns both remaining PS frames on
+successive calls (one-input streams still produce their single complete frame).
+Native packet transactions, checkpoint/replay and reset retain syntax, gain,
+overlap, aligned PCM and PS state together. SSR does not allocate the unused
+LC filterbank. Configured SSR PS coupling remains an explicit unsupported tool.
+
+The playback bridge now retains up to two signed source timestamps/durations.
+MP4 and Matroska export queues retain source windows/packets and drain every
+EOF frame. ADTS owned export and playback discover mono SSR PS in-band,
+provide negotiated stereo at twice the core clock and drain both frames.
+
+The old native SSR/PS profile refusal test has been removed and its waveform
+acceptance enabled. The 12 mono MP4 cases cover explicit/sync signalling,
+24/48 kHz output, sine/KBD and long/start-stop/start-short-stop schedules.
+Their nonzero stereo PCM matches the independent authored scalar gold.
+Twelve Matroska and three unprotected ADTS streams qualify the same PCM;
+twelve additional MP4s add silence and repeated source ranges. Enabled tests
+cover full/range export, both EOF identities, source timing including negative
+PTS and short durations, malformed packet rollback, checkpoint replay, reset,
+rewind and player seek. Repeated-range playback uses the actual AudioStep
+reset/silence scheduling contract. The intermediate missing EOF/window bug
+reproduced `audio edit extends outside available samples` before the queue fix.
+
+All artifacts come from `scripts/generate_aac_ssr_ps_fixtures.py`, original
+silent SSR core syntax and existing original independent SBR/PS scalar gold.
+No private source, foreign decoder, FFmpeg or network is used. Ordinary tests
+read committed artifacts and do not run generators. This qualifies these mono
+programs; nonzero SSR spectral/gain tools composed with PS, SSR PS CCE, broader
+layouts/profiles and general codec conformance remain separate requirements.
+This section supersedes the earlier preparation-only native refusal status.

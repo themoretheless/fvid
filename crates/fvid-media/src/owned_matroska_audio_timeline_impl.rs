@@ -49,8 +49,9 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         sample_rate: rate,
         channels,
     };
-    let mut pending_packet = None;
-    for index in 0..=reader.packets.len() {
+    let mut pending_packet = std::collections::VecDeque::new();
+    let mut index = 0;
+    loop {
         control.check()?;
         if position >= to {
             break;
@@ -61,23 +62,26 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
                 break;
             };
             let packet = pending_packet
-                .take()
+                .pop_front()
                 .ok_or_else(|| invalid("delayed Matroska audio has no source packet"))?;
             (packet, samples)
         } else {
             let packet = reader.packets[index].clone();
             if packet.track != track.number {
+                index += 1;
                 continue;
             }
             let encoded = reader.read_packet(index)?;
             let samples = decoder.decode(&encoded)?;
             control.packet(encoded.len())?;
+            index += 1;
             if decoder.delayed() {
-                let previous = pending_packet.replace(packet);
+                pending_packet.push_back(packet);
+                if pending_packet.len() > 3 { return Err(invalid("delayed Matroska source lookahead exceeded")); }
                 let Some(samples) = samples else {
                     continue;
                 };
-                let packet = previous
+                let packet = pending_packet.pop_front()
                     .ok_or_else(|| invalid("delayed Matroska audio source identity mismatch"))?;
                 (packet, samples)
             } else {

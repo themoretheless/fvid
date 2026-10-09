@@ -3,6 +3,8 @@
 import json
 import struct
 from generate_aac_ssr_coupling_fixtures import silent
+from generate_aac_ps_matroska_fixtures import element, number
+from generate_aac_ps_worker_fixtures import edited
 from generate_he_aac_packet_fixtures import DEST, field, frequency, packed, video_fixture
 
 
@@ -38,6 +40,14 @@ def main():
                      slots=16,bands=32,pcm_offset=0,container_rate=24000,container_frame_samples=1024,samples=3072)
         control['video']=video_fixture([control],blob,filename='aac-ssr-ps-'+name+'-core-control-synthetic.mp4')
         controls.append(control)
+        adts = bytearray()
+        for row in ps_frames:
+            packet = blob[row['offset']:row['offset']+row['bytes']]
+            header = field(0xfff,12)+'0'+'00'+'1'+field(2,2)+frequency(24000)+'0'+'001'+'0000'+field(len(packet)+7,13)+field(0x7ff,11)+'00'
+            adts += packed(header)+packet
+        adts_name = 'aac-ssr-ps-'+name+'-synthetic.aac'
+        (DEST/adts_name).write_bytes(adts)
+        control['adts'] = adts_name
         for signal in ('explicit','sync'):
             for rate in (24000,48000):
                 config=(field(29,5)+frequency(24000)+'0001'+frequency(rate)+field(3,5)+'000' if signal=='explicit'
@@ -47,11 +57,25 @@ def main():
                           container_frame_samples=rate//24000*1024,samples=rate//24000*3072,
                           reference=references[rate])
                 case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-'+case['name']+'-synthetic.mp4')
+                audio = element(0xe1,element(0xb5,struct.pack('>d',rate))+number(0x9f,2))
+                track = element(0xae,number(0xd7,1)+number(0x73c5,1)+number(0x83,2)+element(0x86,b'A_AAC')+element(0x63a2,packed(config))+audio)
+                clusters = bytearray()
+                for i,row in enumerate(ps_frames):
+                    packet = blob[row['offset']:row['offset']+row['bytes']]
+                    ns = (i*case['container_frame_samples']*1_000_000_000+rate//2)//rate
+                    clusters += element(0x1f43b675,number(0xe7,ns)+element(0xa3,b'\x81\x00\x00\x80'+packet))
+                header = element(0x1a45dfa3,element(0x4282,b'matroska')+number(0x4287,4)+number(0x4285,2))
+                info = element(0x1549a966,number(0x2ad7b1,1))
+                mka = header+element(0x18538067,info+element(0x1654ae6b,track)+clusters)
+                case['matroska'] = 'aac-ssr-ps-'+case['name']+'-synthetic.mka'
+                (DEST/case['matroska']).write_bytes(mka)
+                case['edited'] = 'aac-ssr-ps-'+case['name']+'-repeat-synthetic.mp4'
+                edited(case['video']['file'],case['edited'],[(1600,-1),(3200,rate//50),(3200,rate//50),(1600,-1)])
                 cases.append(case)
     (DEST/'aac-ssr-ps-packets.bin').write_bytes(blob)
     (DEST/'aac-ssr-ps.json').write_text(json.dumps(dict(controls=controls,cases=cases,payloads=video['sbr_payloads'],
-        error='AAC SSR parametric stereo synthesis is not implemented',
-        qualification='Core and independent PS stage acceptance; native combined SSR/PS remains unsupported.',
+        acceptance='Enabled mono native SSR/PS waveform, both EOF frames and transport timing.',
+        qualification='Silent mono SSR window schedules with authored nonzero SBR/PS stereo. SSR PS coupling remains unsupported; broader profiles and nonzero SSR spectral tools require additional qualification.',
         provenance='Own silent SSR sine/KBD core across three valid window schedules; own authored SBR/PS matrix payloads and independent Decimal PS/direct QMF scalar reference. No private media, foreign decoder, FFmpeg or network.'),indent=2)+'\n')
 
 

@@ -30,7 +30,8 @@
         "asc": "1b08",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "adts": "aac-ssr-ps-long-synthetic.aac"
     },
     {
       "name": "start-stop",
@@ -62,7 +63,8 @@
         "asc": "1b08",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "adts": "aac-ssr-ps-start-stop-synthetic.aac"
     },
     {
       "name": "start-short-stop",
@@ -94,7 +96,8 @@
         "asc": "1b08",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "adts": "aac-ssr-ps-start-short-stop-synthetic.aac"
     }
   ],
   "cases": [
@@ -129,7 +132,9 @@
         "asc": "eb0b0c00",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "matroska": "aac-ssr-ps-long-explicit-24000-synthetic.mka",
+      "edited": "aac-ssr-ps-long-explicit-24000-repeat-synthetic.mp4"
     },
     {
       "name": "long-explicit-48000",
@@ -162,7 +167,9 @@
         "asc": "eb098c00",
         "pcm_offset": 0,
         "samples": 6144
-      }
+      },
+      "matroska": "aac-ssr-ps-long-explicit-48000-synthetic.mka",
+      "edited": "aac-ssr-ps-long-explicit-48000-repeat-synthetic.mp4"
     },
     {
       "name": "long-sync-24000",
@@ -195,7 +202,9 @@
         "asc": "1b0856e5b54880",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "matroska": "aac-ssr-ps-long-sync-24000-synthetic.mka",
+      "edited": "aac-ssr-ps-long-sync-24000-repeat-synthetic.mp4"
     },
     {
       "name": "long-sync-48000",
@@ -228,7 +237,9 @@
         "asc": "1b0856e59d4880",
         "pcm_offset": 0,
         "samples": 6144
-      }
+      },
+      "matroska": "aac-ssr-ps-long-sync-48000-synthetic.mka",
+      "edited": "aac-ssr-ps-long-sync-48000-repeat-synthetic.mp4"
     },
     {
       "name": "start-stop-explicit-24000",
@@ -261,7 +272,9 @@
         "asc": "eb0b0c00",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "matroska": "aac-ssr-ps-start-stop-explicit-24000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-stop-explicit-24000-repeat-synthetic.mp4"
     },
     {
       "name": "start-stop-explicit-48000",
@@ -294,7 +307,9 @@
         "asc": "eb098c00",
         "pcm_offset": 0,
         "samples": 6144
-      }
+      },
+      "matroska": "aac-ssr-ps-start-stop-explicit-48000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-stop-explicit-48000-repeat-synthetic.mp4"
     },
     {
       "name": "start-stop-sync-24000",
@@ -327,7 +342,9 @@
         "asc": "1b0856e5b54880",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "matroska": "aac-ssr-ps-start-stop-sync-24000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-stop-sync-24000-repeat-synthetic.mp4"
     },
     {
       "name": "start-stop-sync-48000",
@@ -360,7 +377,9 @@
         "asc": "1b0856e59d4880",
         "pcm_offset": 0,
         "samples": 6144
-      }
+      },
+      "matroska": "aac-ssr-ps-start-stop-sync-48000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-stop-sync-48000-repeat-synthetic.mp4"
     },
     {
       "name": "start-short-stop-explicit-24000",
@@ -393,7 +412,9 @@
         "asc": "eb0b0c00",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "matroska": "aac-ssr-ps-start-short-stop-explicit-24000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-short-stop-explicit-24000-repeat-synthetic.mp4"
     },
     {
       "name": "start-short-stop-explicit-48000",
@@ -426,7 +447,9 @@
         "asc": "eb098c00",
         "pcm_offset": 0,
         "samples": 6144
-      }
+      },
+      "matroska": "aac-ssr-ps-start-short-stop-explicit-48000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-short-stop-explicit-48000-repeat-synthetic.mp4"
     },
     {
       "name": "start-short-stop-sync-24000",
@@ -459,7 +482,9 @@
         "asc": "1b0856e5b54880",
         "pcm_offset": 0,
         "samples": 3072
-      }
+      },
+      "matroska": "aac-ssr-ps-start-short-stop-sync-24000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-short-stop-sync-24000-repeat-synthetic.mp4"
     },
     {
       "name": "start-short-stop-sync-48000",
@@ -492,7 +517,9 @@
         "asc": "1b0856e59d4880",
         "pcm_offset": 0,
         "samples": 6144
-      }
+      },
+      "matroska": "aac-ssr-ps-start-short-stop-sync-48000-synthetic.mka",
+      "edited": "aac-ssr-ps-start-short-stop-sync-48000-repeat-synthetic.mp4"
     }
   ],
   "payloads": [
@@ -500,7 +527,7 @@
     "e3d80e0000000014b33021ff",
     "d0380000000052ccc097fc"
   ],
-  "error": "AAC SSR parametric stereo synthesis is not implemented",
-  "qualification": "Core and independent PS stage acceptance; native combined SSR/PS remains unsupported.",
+  "acceptance": "Enabled mono native SSR/PS waveform, both EOF frames and transport timing.",
+  "qualification": "Silent mono SSR window schedules with authored nonzero SBR/PS stereo. SSR PS coupling remains unsupported; broader profiles and nonzero SSR spectral tools require additional qualification.",
   "provenance": "Own silent SSR sine/KBD core across three valid window schedules; own authored SBR/PS matrix payloads and independent Decimal PS/direct QMF scalar reference. No private media, foreign decoder, FFmpeg or network."
 }

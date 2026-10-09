@@ -11,13 +11,13 @@ struct Source {
 }
 pub struct PsAacDecoder {
     decoder: NativePsAacDecoder,
-    pending: Option<Source>,
+    pending: std::collections::VecDeque<Source>,
     failed: bool,
 }
 #[derive(Clone)]
 pub struct Checkpoint {
     native: NativeCheckpoint,
-    pending: Option<Source>,
+    pending: std::collections::VecDeque<Source>,
 }
 /// Full decoded PCM and timing of the packet it actually belongs to.
 /// Duration is a container presentation window, not the decoded sample count.
@@ -38,7 +38,7 @@ impl PsAacDecoder {
         }
         Ok(Self {
             decoder,
-            pending: None,
+            pending: Default::default(),
             failed: false,
         })
     }
@@ -60,7 +60,7 @@ impl PsAacDecoder {
         }
         Ok(Self {
             decoder,
-            pending: None,
+            pending: Default::default(),
             failed: false,
         })
     }
@@ -72,7 +72,7 @@ impl PsAacDecoder {
         }
     }
     pub fn pending_frame_index(&self) -> Option<u64> {
-        self.pending.as_ref().map(|p| p.index)
+        self.pending.back().map(|p| p.index)
     }
     pub fn checkpoint(&self) -> Option<Checkpoint> {
         (!self.failed).then(|| Checkpoint {
@@ -90,22 +90,23 @@ impl PsAacDecoder {
     }
     pub fn reset(&mut self) {
         self.decoder.reset();
-        self.pending = None;
+        self.pending.clear();
         self.failed = false;
     }
-    fn frame(&self, output: Option<Frame>) -> crate::Result<Option<DecodedFrame>> {
+    fn frame(&mut self, output: Option<Frame>) -> crate::Result<Option<DecodedFrame>> {
         let Some(output) = output else {
             return Ok(None);
         };
         let source = self
             .pending
-            .as_ref()
+            .front()
             .ok_or_else(|| crate::invalid("PS AAC output has no source timestamp"))?;
         if source.index != output.frame_index {
             return Err(crate::invalid(
                 "PS AAC output/source frame identity mismatch",
             ));
         }
+        let source = self.pending.pop_front().unwrap();
         Ok(Some(DecodedFrame {
             packet: AudioPacket {
                 data: output.pcm.iter().flat_map(|v| v.to_le_bytes()).collect(),
@@ -118,7 +119,7 @@ impl PsAacDecoder {
             source_duration: source.duration,
         }))
     }
-    /// Decode a full access unit. Output belongs to the preceding packet, whose
+    /// Decode a full access unit. Output belongs to a queued original packet, whose
     /// signed source timestamp and own duration are returned unchanged.
     pub fn decode(
         &mut self,
@@ -139,6 +140,25 @@ impl PsAacDecoder {
                 return Err(crate::invalid(&format!("PS AAC decode: {e}")));
             }
         };
+        let index = match self.decoder.pending_frame_index() {
+            Some(index) => index,
+            None => {
+                self.decoder
+                    .restore(&native)
+                    .map_err(|e| crate::invalid(&e.0))?;
+                self.failed = true;
+                return Err(crate::invalid(
+                    "PS AAC accepted input without a pending frame",
+                ));
+            }
+        };
+        if self.pending.len() + 1 > 2 + usize::from(output.is_some()) {
+            self.decoder
+                .restore(&native)
+                .map_err(|e| crate::invalid(&e.0))?;
+            self.failed = true;
+            return Err(crate::invalid("PS AAC source timing lookahead exceeded"));
+        }
         let output = match self.frame(output) {
             Ok(output) => output,
             Err(e) => {
@@ -149,18 +169,15 @@ impl PsAacDecoder {
                 return Err(e);
             }
         };
-        let index = self
-            .decoder
-            .pending_frame_index()
-            .ok_or_else(|| crate::invalid("PS AAC accepted input without a pending frame"))?;
-        self.pending = Some(Source {
+        self.pending.push_back(Source {
             index,
             pts,
             duration,
         });
         Ok(output)
     }
-    /// Drain the last original packet. Its timing survives EOF and checkpoint replay.
+    /// Drain one original packet. Call repeatedly until None; SSR can retain two.
+    /// Original timing survives EOF and checkpoint replay.
     pub fn finish(&mut self) -> crate::Result<Option<DecodedFrame>> {
         if self.failed {
             return Err(crate::invalid(
@@ -171,7 +188,7 @@ impl PsAacDecoder {
         // There is no candidate stream to validate and no delayed frame to drain.
         // Consumed candidates still have pending source metadata and must pass
         // the native in-band PS presence check below.
-        if self.pending.is_none() {
+        if self.pending.is_empty() {
             return Ok(None);
         }
         let native = self.decoder.checkpoint();
@@ -192,7 +209,13 @@ impl PsAacDecoder {
                 return Err(e);
             }
         };
-        self.pending = None;
+        if output.is_none() && !self.pending.is_empty() {
+            self.decoder
+                .restore(&native)
+                .map_err(|e| crate::invalid(&e.0))?;
+            self.failed = true;
+            return Err(crate::invalid("PS AAC EOF lost pending source timing"));
+        }
         Ok(output)
     }
 }
