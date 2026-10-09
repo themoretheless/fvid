@@ -1572,3 +1572,33 @@ Validation: 12 integration tests passed across `aac_main_ps_pns_short`,
 `aac_main_tools` and `aac_main_ps`, locked/offline with `media,player`
 and no FFmpeg. Existing TNS order-21 coverage remains a refusal test,
 not order-21 acceptance. Production code is unchanged.
+
+### AAC Main PS dependent-coupling PNS/TNS acceptance (2026-10-09)
+
+16 authored MP4 videos qualify two PNS-switching Main CCE sources at dependent
+coupling points 0/1, source TNS on/off, target TNS on/off and 24/48 kHz PS
+output. Sources use distinct residuals and noise energies, alternating wire
+order and long sine/KBD windows. Independent scalar reconstruction applies
+wire-order PNS and per-tag Main prediction/reset, directional source TNS,
+f32 spectral addition, target TNS at the selected point and direct IMDCT.
+The qualified owned PS stage supplies extension composition reference.
+
+A first draft used exactly opposite residuals, causing omitted-reset errors
+to cancel in the mixed core. The distinct-source fixture replaces that weak
+control: skipped PNS line reset now changes every core oracle. Acceptance
+verifies all 16 waveforms, checkpoint/rollback/reset, delayed EOF indices,
+export, probe, interval, rewind and seek. Target TNS distinguishes points 0/1
+at both rates with source TNS enabled and disabled. A temporary production
+mutation reversing point selection fails waveform at sample 751 in
+`0-1-0-24000`; production source has been restored byte-for-byte.
+
+Generator `scripts/generate_aac_main_ps_dependent_pns_fixtures.py` reproduces
+34 artifacts deterministically, separately from ordinary tests, without
+private media, FFmpeg, foreign decoders or network. Prior fixture sets are
+unchanged. This matrix covers continuously coded, long-window mono Main PS
+dependent sources with first-order TNS and one two-band PNS geometry.
+Dependent short-window/grouping PNS, source absence/PCE changes, wider
+profiles/layouts and all-codec parity remain open. It does not establish a
+new independent numerical SBR/PS oracle.
+
+Validation: the offline media/player integration run passed 10 tests across `aac_main_ps_dependent_pns`, `aac_main_ps`, and `aac_main_tools`; no failures. Production source was restored byte-for-byte after the mutation check.
