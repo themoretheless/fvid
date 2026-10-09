@@ -1,0 +1,157 @@
+{
+  "cases": [
+    {
+      "name": "immediate",
+      "asc": "eb098400",
+      "frames": [
+        {
+          "offset": 7,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 153,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 180,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 206,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 352,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 389,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 435,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 591,
+          "bytes": 20,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 618,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 644,
+          "bytes": 139,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 791,
+          "bytes": 21,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 819,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-adts-immediate-synthetic.mp4",
+        "sha256": "9c16c7baf962a102bdf622ea16707131aa91610c94540e9ac0735bc4d5870f37",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098400",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "adts": "aac-main-ps-adts-immediate-synthetic.aac"
+    },
+    {
+      "name": "late",
+      "asc": "eb098400",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 7
+        },
+        {
+          "offset": 146,
+          "bytes": 7
+        },
+        {
+          "offset": 173,
+          "bytes": 7
+        },
+        {
+          "offset": 199,
+          "bytes": 7
+        },
+        {
+          "offset": 838,
+          "bytes": 139
+        },
+        {
+          "offset": 977,
+          "bytes": 30
+        },
+        {
+          "offset": 1007,
+          "bytes": 29
+        },
+        {
+          "offset": 1036,
+          "bytes": 139
+        },
+        {
+          "offset": 1175,
+          "bytes": 20
+        },
+        {
+          "offset": 1195,
+          "bytes": 19
+        },
+        {
+          "offset": 1214,
+          "bytes": 140
+        },
+        {
+          "offset": 1354,
+          "bytes": 20
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-adts-late-synthetic.mp4",
+        "sha256": "a09fd090eaab0a7ed96dc747c0fd4b0381e458c74b3bda5283cf8e48fafd4239",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb098400",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "adts": "aac-main-ps-adts-late-synthetic.aac"
+    }
+  ],
+  "provenance": "Own Main prediction residual/window packets and PS payloads from aac-main-ps; Main ADTS headers, immediate and late PS. No private media, FFmpeg or network."
+}

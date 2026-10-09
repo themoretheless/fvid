@@ -4420,3 +4420,23 @@ mono 24 kHz and decoding refused with `SBR extended audio/PS synthesis is not ye
 implemented`. The adapter now includes AOT4 in both detection paths. The
 acceptance suite checks stereo 48 kHz LTP/PS and mono 48 kHz late LTP/SBR,
 complete PCM, rewind, repeated seeks, and delayed EOF against owned decoding.
+
+### AAC Main implicit PS in ADTS (2026-10-10)
+
+Owned Main/PS decoding was admitted in MP4 but three ADTS negotiation guards
+still excluded AOT1. Two original streams (PS immediately, or after four Main
+core frames including active prediction) reproduced precisely
+`SBR extended audio/PS synthesis is not yet implemented`. Their companion
+MP4 videos accept the same core and extension packets. The refusal test was
+replaced by PCM acceptance after adding Main to owned prefix negotiation,
+syntax-only SBR rate probing and the ADTS player adapter.
+
+The generator reuses original Main residual/prediction/window bit writers and
+authored PS payloads. The late extension starts with its own SBR header;
+a delta-only initial extension is not accepted as a reproducer. No private
+media, external codec or FFmpeg/network is used. Acceptance checks complete
+PCM against explicit MP4 companions, repeated/reversed ranges, player rewind,
+seek and delayed EOF. Prefix limits and intervals before PS retain the mono
+core clock; a selected prefix containing PS negotiates stereo double-rate.
+This transport/dispatch qualification does not extend codec geometry/layout
+coverage or establish an independent full PS oracle.

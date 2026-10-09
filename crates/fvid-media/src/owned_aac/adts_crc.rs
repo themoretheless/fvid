@@ -182,7 +182,7 @@ pub fn probe_sbr_rate(payload: &[u8], configuration: &[u8]) -> Result<Option<u32
     if !has_sbr_fill(payload, configuration)? {
         return Ok(None);
     }
-    if matches!(config.core.object_type, 2 | 4)
+    if matches!(config.core.object_type, 1 | 2 | 4)
         && super::aac_ps_native::InBandPsProbe::accepts_mono_program(configuration)?
         && config.ps_present.is_none()
     {
