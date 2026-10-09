@@ -7279,3 +7279,21 @@ verification, configuration-carried activation, multilayer layer_sps_idx and
 other SEI tools remain work. H.265 D.2.21/D.3.21 and 7.4.2.4.2 are the syntax
 and activation basis:
 https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201911-S%21%21PDF-E&lang=e&type=items
+
+
+### Configuration-carried HEVC activation guidance
+
+The decoder now reads valid `active_parameter_sets` prefix SEI from hvcC
+arrays as well as packets. Initial guidance is retained separately, staged
+for the first picture and restored on reset without publishing it as an
+activated declaration before a picture is validated. In-band guidance can
+override the pending value without mutating the initial configuration.
+
+Own `hevc-active-parameters-config*` videos place the SEI exclusively in the
+configuration and leave every packet/picture unchanged. Before the fix valid
+configuration guidance disappeared and wrong-VPS guidance was ignored. Tests
+now require exact picture/POC/timestamp/duration parity through reset, specific
+wrong-binding refusal, and restoration of the original declaration after an
+in-band override. The existing offline generator produces these cases; ordinary
+tests invoke no generator, external codec or network. Full declaration-promise
+validation and multilayer activation remain explicit gaps.

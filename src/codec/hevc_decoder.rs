@@ -37,6 +37,7 @@ pub struct HevcDecoder {
     active_pps: Option<u8>,
     hdr: HdrMetadata,
     primed: HdrMetadata,
+    primed_active_parameters: Option<hevc_sei::ActiveParameterSets>,
     pending_active_parameters: Option<hevc_sei::ActiveParameterSets>,
     active_parameters: Option<hevc_sei::ActiveParameterSets>,
     length: u8,
@@ -91,6 +92,7 @@ impl HevcDecoder {
             return Err(invalid("HEVC configuration has no parameter-set pair"));
         }
         let mut primed = HdrMetadata::default();
+        let mut primed_active_parameters = None;
         for array in &config.arrays {
             // A muxer that wrote the encoder's HDR SEI messages into the
             // configuration record states the light before a single packet is
@@ -101,6 +103,9 @@ impl HevcDecoder {
                 continue;
             }
             for nal in &array.units {
+                if let Ok(Some(active)) = hevc_sei::active_parameters_from_nal(nal, budget) {
+                    primed_active_parameters = Some(active);
+                }
                 if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, budget) {
                     primed.merge(hdr);
                 }
@@ -124,7 +129,8 @@ impl HevcDecoder {
             active_pps: None,
             hdr: primed,
             primed,
-            pending_active_parameters: None,
+            pending_active_parameters: primed_active_parameters.clone(),
+            primed_active_parameters,
             active_parameters: None,
             length: config.length_size,
             budget,
@@ -148,7 +154,7 @@ impl HevcDecoder {
         self.sequence_ended = false;
         self.active_pps = None;
         self.hdr = self.primed;
-        self.pending_active_parameters = None;
+        self.pending_active_parameters.clone_from(&self.primed_active_parameters);
         self.active_parameters = None;
         self.failed = false;
     }

@@ -4,6 +4,10 @@ use std::io::Cursor;
 #[test]
 fn active_parameter_signal_must_match_picture_parameter_binding() {
     for file in [
+        include_bytes!(
+            "fixtures/playback-errors/hevc-active-parameters-config-wrong-vps-synthetic.mp4"
+        )
+        .as_slice(),
         include_bytes!("fixtures/playback-errors/hevc-active-parameters-wrong-vps-synthetic.mp4")
             .as_slice(),
         include_bytes!("fixtures/playback-errors/hevc-active-parameters-wrong-sps-synthetic.mp4")
@@ -26,6 +30,11 @@ fn active_parameter_guidance_preserves_pixels_and_resets() {
     use fvid::{codec::hevc_decoder::HevcDecoder, container::mp4::Mp4Reader};
     let source = include_bytes!("fixtures/hevc/main-ipb.mp4");
     for (file, ids) in [
+        (
+            include_bytes!("fixtures/playback-errors/hevc-active-parameters-config-synthetic.mp4")
+                .as_slice(),
+            Some(vec![0]),
+        ),
         (
             include_bytes!(
                 "fixtures/playback-errors/hevc-active-parameters-repeated-synthetic.mp4"
@@ -151,4 +160,61 @@ fn parameter_only_sei_is_applied_to_the_following_picture() {
     d.reset();
     assert!(d.decode_packet(&packet).unwrap().is_some());
     assert!(d.active_parameter_sets().is_none());
+}
+
+#[test]
+fn reset_restores_configured_declaration_after_inband_override() {
+    use fvid::{
+        codec::{
+            config::{HevcConfig, NalUnits},
+            hevc_decoder::HevcDecoder,
+            hevc_sei,
+        },
+        container::mp4::Mp4Reader,
+    };
+    let file = include_bytes!(
+        "fixtures/playback-errors/hevc-active-parameters-config-wrong-vps-synthetic.mp4"
+    );
+    let mut r = Mp4Reader::open(Cursor::new(file), Limits::default()).unwrap();
+    let mut d = HevcDecoder::from_configuration(&r.tracks()[0].configuration, 16 << 20).unwrap();
+    let mut packet = vec![];
+    r.read_packet(0, 0, &mut packet).unwrap();
+    assert_eq!(
+        d.decode_packet(&packet).err().unwrap().to_string(),
+        "HEVC active parameter SEI disagrees with picture binding"
+    );
+    d.reset();
+    let mut valid = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-active-parameters-valid-synthetic.mp4"
+        )),
+        Limits::default(),
+    )
+    .unwrap();
+    let length = HevcConfig::parse(&valid.tracks()[0].configuration)
+        .unwrap()
+        .length_size;
+    let mut valid_packet = vec![];
+    valid.read_packet(0, 0, &mut valid_packet).unwrap();
+    let nal = NalUnits::new(&valid_packet, length)
+        .unwrap()
+        .map(Result::unwrap)
+        .find(|n| {
+            hevc_sei::active_parameters_from_nal(n, 16 << 20)
+                .ok()
+                .flatten()
+                .is_some()
+        })
+        .unwrap();
+    let mut prefix = (nal.len() as u32).to_be_bytes().to_vec();
+    prefix.extend_from_slice(nal);
+    assert!(d.decode_packet(&prefix).unwrap().is_none());
+    assert!(d.decode_packet(&packet).unwrap().is_some());
+    assert_eq!(d.active_parameter_sets().unwrap().vps_id, 0);
+    d.reset();
+    assert!(d.active_parameter_sets().is_none());
+    assert_eq!(
+        d.decode_packet(&packet).err().unwrap().to_string(),
+        "HEVC active parameter SEI disagrees with picture binding"
+    );
 }
