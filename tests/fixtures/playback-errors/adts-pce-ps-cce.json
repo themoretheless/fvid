@@ -1,0 +1,193 @@
+{
+  "cases": [
+    {
+      "files": [
+        "adts-pce-ps-cce-0-1-111111-synthetic.aac",
+        "adts-pce-ps-cce-0-1-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-0-1-33-synthetic.aac",
+        "adts-pce-ps-cce-0-1-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-0-1-123-synthetic.aac",
+        "adts-pce-ps-cce-0-1-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-0-1-synthetic.mp4",
+        "sha256": "f4fd9008fd2ade7dc8888003427ad30eeab6f22e761a9211304101df2a76ceb1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002061000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-0-15-111111-synthetic.aac",
+        "adts-pce-ps-cce-0-15-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-0-15-33-synthetic.aac",
+        "adts-pce-ps-cce-0-15-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-0-15-123-synthetic.aac",
+        "adts-pce-ps-cce-0-15-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-0-15-synthetic.mp4",
+        "sha256": "cb2319cd7065a76f8ecf8be705227ca40beaca17ade18fb760fbc89e3e2d2cbb",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000206f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-0-115-111111-synthetic.aac",
+        "adts-pce-ps-cce-0-115-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-0-115-33-synthetic.aac",
+        "adts-pce-ps-cce-0-115-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-0-115-123-synthetic.aac",
+        "adts-pce-ps-cce-0-115-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-0-115-synthetic.mp4",
+        "sha256": "b347469c01b8c5e424b94ac74655d1c207d3fd0705bed333dcee0b71641fae39",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000406178000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-1-1-111111-synthetic.aac",
+        "adts-pce-ps-cce-1-1-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-1-1-33-synthetic.aac",
+        "adts-pce-ps-cce-1-1-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-1-1-123-synthetic.aac",
+        "adts-pce-ps-cce-1-1-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-1-1-synthetic.mp4",
+        "sha256": "2c3df31a06328ed7848d4778b7f6f8909760216f9f79f5a95ebe418ae8a51296",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002061000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-1-15-111111-synthetic.aac",
+        "adts-pce-ps-cce-1-15-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-1-15-33-synthetic.aac",
+        "adts-pce-ps-cce-1-15-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-1-15-123-synthetic.aac",
+        "adts-pce-ps-cce-1-15-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-1-15-synthetic.mp4",
+        "sha256": "3bdb6fa94ea04eace24afaeeaf2cd9ad26474729503dc37f4b18c4bc40343d6d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000206f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-1-115-111111-synthetic.aac",
+        "adts-pce-ps-cce-1-115-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-1-115-33-synthetic.aac",
+        "adts-pce-ps-cce-1-115-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-1-115-123-synthetic.aac",
+        "adts-pce-ps-cce-1-115-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-1-115-synthetic.mp4",
+        "sha256": "945db6a15212f121d05a98b06f0f7ce1104d2cd87b25680cc5cadf67473f25b7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000406178000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-3-1-111111-synthetic.aac",
+        "adts-pce-ps-cce-3-1-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-3-1-33-synthetic.aac",
+        "adts-pce-ps-cce-3-1-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-3-1-123-synthetic.aac",
+        "adts-pce-ps-cce-3-1-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-3-1-synthetic.mp4",
+        "sha256": "fe7b2f55a09b12e68e6e527dd4cb0ad67e8b1eb002f2e6439144cd43dd5a9ebc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840002071000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-3-15-111111-synthetic.aac",
+        "adts-pce-ps-cce-3-15-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-3-15-33-synthetic.aac",
+        "adts-pce-ps-cce-3-15-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-3-15-123-synthetic.aac",
+        "adts-pce-ps-cce-3-15-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-3-15-synthetic.mp4",
+        "sha256": "14c93e97f4b5104102d27aedb89c8c3edc5a2b2b0504df38995aeb6edca981ab",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000207f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    },
+    {
+      "files": [
+        "adts-pce-ps-cce-3-115-111111-synthetic.aac",
+        "adts-pce-ps-cce-3-115-111111-crc-synthetic.aac",
+        "adts-pce-ps-cce-3-115-33-synthetic.aac",
+        "adts-pce-ps-cce-3-115-33-crc-synthetic.aac",
+        "adts-pce-ps-cce-3-115-123-synthetic.aac",
+        "adts-pce-ps-cce-3-115-123-crc-synthetic.aac"
+      ],
+      "video": {
+        "file": "adts-pce-ps-cce-3-115-synthetic.mp4",
+        "sha256": "d077dded5e7ffebe566100ea7784e73f84d186f48e8a069bfeeec111ec43e718",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "130005840004071f8000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm": null,
+      "provenance": "authored PCE/PS/CCE; previously qualified direct-cosine core and PS/SBR composition; independent polynomial CRC",
+      "samples": 12288
+    }
+  ]
+}

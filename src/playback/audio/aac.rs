@@ -30,8 +30,7 @@ impl AacAudioReader {
         if parsed.core.object_type == 2
             && parsed.sbr_present.is_none()
             && parsed.ps_present.is_none()
-            && parsed.program.is_none()
-            && parsed.core.channel_configuration == 1
+            && crate::codec::aac_ps_native::InBandPsProbe::accepts_mono_program(&aac.configuration)?
         {
             let rate = aac
                 .sample_rate

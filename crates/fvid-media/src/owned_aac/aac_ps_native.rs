@@ -415,6 +415,12 @@ pub struct InBandPsProbe {
     seen: bool,
 }
 impl InBandPsProbe {
+    /// Whether the configured mono program is supported by the own PS parser.
+    /// Other valid AAC layouts remain candidates for the ordinary decoder.
+    pub fn accepts_mono_program(asc: &[u8]) -> Result<bool> {
+        let parsed = AudioSpecificConfig::parse(asc)?;
+        Ok(validate_mono_program(&parsed).is_ok())
+    }
     pub fn new(asc: &[u8], output_rate: u32) -> Result<Self> {
         let parsed = AudioSpecificConfig::parse(asc)?;
         if parsed.ps_present == Some(false) || parsed.sbr_present == Some(false) {

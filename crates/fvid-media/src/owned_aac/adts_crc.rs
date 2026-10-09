@@ -171,8 +171,7 @@ pub fn probe_sbr_rate(payload: &[u8], configuration: &[u8]) -> Result<Option<u32
     if !has_sbr_fill(payload, configuration)? {
         return Ok(None);
     }
-    if config.core.channel_configuration == 1
-        && config.program.is_none()
+    if super::aac_ps_native::InBandPsProbe::accepts_mono_program(configuration)?
         && config.ps_present.is_none()
     {
         let rate = config

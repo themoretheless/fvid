@@ -135,8 +135,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
     control.check_admission(&asc)?;
     let parsed = AdtsAudioConfig::parse(&asc)?;
     if parsed.core.object_type == 2
-        && parsed.core.channel_configuration == 1
-        && parsed.program.is_none()
+        && AdtsPsProbe::accepts_mono_program(&asc)?
         && parsed.ps_present.is_none()
         && parsed.sbr_present.is_none()
     {

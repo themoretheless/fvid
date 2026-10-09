@@ -7851,3 +7851,31 @@ AVC/container seeds are used. No private media or parameter sets are copied.
 Ordinary tests read saved fixtures and use neither FFmpeg/libav nor network
 access. This supersedes the first-packet PS remux gap; broader mono PCE/CCE
 combinations and complete HE-AAC v2 conformance still need qualification.
+
+
+### Mono PCE / PS / CCE ADTS transport qualification
+
+The new `adts-pce-ps` companion video and six protected/plain ADTS variants
+reproduce the prior SBR signalling refusal for an explicitly configured normal
+front mono PCE. The own PS syntax parser already supported this program and SCE
+tag; discovery incorrectly excluded every PCE. Selection now uses the parser's
+validated mono-program shape in export, native playback and mux rate probing.
+Other AAC layouts remain on the ordinary decoder path.
+
+Independent scalar stereo PCM qualifies the mono PCE video and ADTS. The
+`adts-pce-ps-cce` matrix adds nine previously qualified authored PS/CCE programs:
+coupling points 0/1/3, tags 1/15/both, reordered sources, source SBR and missing
+target FIL. Fifty-four ADTS variants cover single, three-block and varying
+transport grouping, with CRC/plain protection. Core direct-cosine and separately
+qualified PS/SBR composition remain covered by `he_aac_ps_coupling`; the new
+matrix qualifies transport and playback rather than claiming a new independent
+whole-decoder oracle for CCE.
+
+Acceptance checks complete PCM, exact raw packet preservation in MP4/Matroska,
+output clocks/durations, source geometry, EOF drain, rewind and seek. Generators:
+`scripts/generate_adts_pce_ps_fixtures.py` and
+`scripts/generate_adts_pce_ps_cce_fixtures.py`, sharing the own offline ADTS PS
+generator and region helper. No private media or parameter sets are copied.
+Tests use saved files without generators, FFmpeg/libav or network access.
+These selected mono PCE/CCE combinations do not establish complete AAC profile,
+gain/tool or HE-AAC v2 conformance.
