@@ -99,6 +99,7 @@ pub const DC_SIGN: usize = 92;
 pub const COEFF_BASE_EOB: usize = 93;
 pub const COEFF_BASE: usize = 94;
 pub const COEFF_BR: usize = 95;
+pub const DELTA_LF_MULTI: usize = 96;
 
 #[derive(Clone)]
 pub struct Table {
@@ -509,6 +510,10 @@ impl Cdfs {
         cdfs.insert(Table {
             shape: &[5, 2, 21, 5],
             values: DEFAULT_COEFF_BR_CDF[qi * 1050..(qi + 1) * 1050].to_vec(),
+        });
+        cdfs.insert(Table {
+            shape: &[4, 5],
+            values: DEFAULT_DELTA_LF_CDF.repeat(4),
         });
         cdfs
     }
