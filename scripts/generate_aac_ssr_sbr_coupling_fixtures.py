@@ -11,7 +11,13 @@ def main():
                if c['slots'] == 16 and c['bands'] == 64 and c['limiter'] == 0 and not c['smoothing'])
     blob = bytearray()
     cases = []
-    for sbr, channels, tags, deltas in [(False,1,(1,),None), (True,1,(1,),None), (True,1,(1,15),None), (True,2,(1,),None), (True,2,(1,15),None), (True,2,(1,),[2]*6), (True,2,(1,),[0,2,-2,2,0,-2])]:
+    specs = [(sbr, channels, tags, deltas, 2, 0) for sbr, channels, tags, deltas in
+             [(False,1,(1,),None), (True,1,(1,),None), (True,1,(1,15),None),
+              (True,2,(1,),None), (True,2,(1,15),None), (True,2,(1,),[2]*6),
+              (True,2,(1,),[0,2,-2,2,0,-2])]]
+    specs += [(True,2,(1,),[0,1,-1,2,-2,1],scale,sign)
+              for scale in range(4) for sign in range(2)]
+    for sbr, channels, tags, deltas, scale, sign in specs:
         rows = []
         for i, seq in enumerate([0, 1, 2, 2, 3, 0]):
             target = ('0000000' + silent(seq, 0, 0, False, False) if channels == 1
@@ -24,7 +30,7 @@ def main():
                 n = len(raw)
                 fill = '110' + (field(n, 4) if n < 15 else '1111' + field(n - 14, 8)) + ''.join(field(b, 8) for b in raw)
             for tag in tags:
-                source = '010' + field(tag,4) + '1' + '000' + field(channels==2,1) + '0000' + (('11' if deltas else '00') if channels==2 else '') + '0' + '0' + '10' + channel(i, seq, 0, 0, True, False)
+                source = '010' + field(tag,4) + '1' + '000' + field(channels==2,1) + '0000' + (('11' if deltas else '00') if channels==2 else '') + '0' + field(sign,1) + field(scale,2) + channel(i, seq, 0, 0, True, False)
                 if deltas:
                     source += field(SC[60+deltas[i]],SL[60+deltas[i]])
                 sources.append(source + fill)
@@ -39,7 +45,11 @@ def main():
                     pcm_offset=0, reference='aac-ssr-sbr-active-reference.f64le' if sbr else 'aac-ssr-sbr-active-core-reference.f32le')
         if deltas:
             case['name'] += '-gain-' + ('static' if len(set(deltas))==1 else 'varying')
-            case['right_gain'] = [2.0**(-d*0.5) for d in deltas]
+            if deltas == [0,1,-1,2,-2,1]:
+                case['name'] += '-scale-' + str(scale) + '-sign-' + str(sign)
+            case['right_gain'] = [2.0**(-d*[0.125,0.25,0.5,1.0][scale]) for d in deltas]
+            case['gain_scale'] = scale
+            case['gain_sign'] = sign
             case['gain_core_rows'] = [1024,1472,1024,1024,576,1024]
         case['video'] = video_fixture([case], blob, channels=channels, filename='aac-ssr-sbr-cce-' + case['name'] + '-synthetic.mp4')
         cases.append(case)

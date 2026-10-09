@@ -2721,3 +2721,12 @@ these mathematical coefficients to the independent SBR reference at authored
 source-chunk boundaries 1024/1472/1024/1024/576/1024 core samples, doubled
 for output. No production decoded PCM supplies the oracle. Both gain cases
 run scalar, native checkpoint/reset/error/EOF and player rewind/seek acceptance.
+
+Eight `*-gain-varying-scale-{0..3}-sign-{0..1}-synthetic.mp4` variants
+encode common-gain deltas 0/1/-1/2/-2/1 for every gain scale and sign flag.
+The independent oracle uses positive multipliers 2^(-delta*factor), factors
+1/8, 1/4, 1/2 and 1. Independent CCE uses common gain; its sign is positive
+under ISO/IEC 13818-7:2004 §12.3.3. The sign flag is not an independently
+transmitted negative common gain. Raw videos differ for flag pairs while
+decoded PCM must be identical. Negative differential gain is a distinct
+dependent-coupling feature. No new production-code change is required.

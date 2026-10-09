@@ -851,6 +851,8 @@ PCM and independent SBR DSP before final gain/mixing; the qualified authored
 programs cover mono/stereo targets and one/two simultaneous unit-gain CCE tags
 1/15. Two additional stereo programs qualify separate left/right gain lists,
 a constant right gain of 0.5 and positive time-varying gain 1/0.5/2 across
-SSR source-chunk boundaries. Wider tools/layouts, broader CCE gain configurations, transitions between
+SSR source-chunk boundaries. Eight more programs qualify all four common
+gain scales and both sign-flag values, which preserve positive common gain
+for independent CCE; signed differential gain belongs to dependent coupling. Wider tools/layouts, broader CCE gain configurations, transitions between
 mixed and source-aligned modes, source retirement and downsampled SSR/SBR
 remain separate work, not claimed as complete.

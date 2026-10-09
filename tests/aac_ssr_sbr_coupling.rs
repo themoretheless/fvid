@@ -187,3 +187,31 @@ fn ssr_sbr_cce_player_rewind_seek_and_eof_match_source_pcm() {
         }
     }
 }
+
+#[test]
+fn independent_common_gain_sign_flag_does_not_invert_the_output() {
+    let manifest = cases();
+    let rows = manifest["cases"].as_array().unwrap();
+    for scale in 0..4 {
+        let select = |sign| {
+            rows.iter()
+                .find(|case| {
+                    case["name"].as_str().unwrap().contains("-scale-")
+                        && case["gain_scale"] == scale
+                        && case["gain_sign"] == sign
+                })
+                .unwrap()
+        };
+        let unsigned = video(select(0));
+        let signed = video(select(1));
+        assert_ne!(
+            unsigned, signed,
+            "the sign flag must differ in authored syntax"
+        );
+        let mut expected = Vec::new();
+        let mut actual = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&unsigned, &mut expected).unwrap();
+        fvid::native_media::decode_mp4_aac_pcm(&signed, &mut actual).unwrap();
+        assert_eq!(actual, expected, "common gain scale {scale}");
+    }
+}

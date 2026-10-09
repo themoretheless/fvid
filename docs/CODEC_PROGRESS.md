@@ -8174,6 +8174,28 @@ The four integration tests pass locked/offline without FFmpeg; all nine
 artifacts regenerate identically. Production code needed no further change.
 
 This supersedes the earlier unqualified non-unit/time-varying gain note for
-these stated positive-gain programs only. Negative gain, more target lists,
+these stated positive-gain programs only. Signed dependent coupling, more target lists,
 other gain scales, unequal source switching, signalling/transport variants
 and wider codec tools/profiles still require qualification or implementation.
+
+
+### 2026-10-09 — SSR/SBR common gain scales and sign semantics
+
+Eight more authored stereo CCE programs cover all four gain scales and both
+`gain_element_sign` values with nonzero positive/negative common-gain deltas.
+The expected multiplier remains positive: ISO/IEC 13818-7:2004 §12.3.3
+specifies common gain for independent CCE and positive common-gain sign,
+while signed differential gain belongs to dependent coupling. This corrects
+the earlier planned “negative independent gain” gap rather than inventing
+an unsupported bitstream combination.
+Source: https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_13818-7-AAC-2004-67b015c6ddfc9a4af83665738477124a.pdf
+
+Fourteen SBR CCE programs now run independent scalar PCM comparison, native
+checkpoint/error/reset/EOF and player rewind/seek acceptance. A dedicated
+regression requires identical PCM for sign-flag pairs at every common-gain
+scale. Wider target lists, signed dependent spectral coupling, unequal
+SSR/SBR switching and broader codec tools/profiles remain separate work.
+
+Validation: five distinct integration tests pass locked/offline without
+FFmpeg; all seventeen artifacts regenerate identically. Changed Rust test
+formatting and `git diff --check` pass. Production code is unchanged.
