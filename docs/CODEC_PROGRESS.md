@@ -7790,3 +7790,13 @@ synthetic AAC and AVC/container seeds. No private media or parameters are
 copied. CRC values use independent polynomial division and the own offline
 region helper. Ordinary tests only read saved fixtures; generation and tests
 use neither FFmpeg/libav nor network access.
+
+
+The same authored matrix now covers indexed/sequential ADTS-to-MP4 and
+ADTS-to-Matroska remux. A red acceptance reproduced SBR rejection after remux
+at a wrongly declared core rate. Writers validate the first SBR candidate and
+publish the negotiated output rate. MP4 sample durations scale with that rate;
+Matroska preserves nanosecond timing and rewrites its fixed-size track header
+before finalization. Packet payloads are not transcoded or buffered as a whole
+stream. Acceptance verifies exact full PCM and container output clocks, including
+delayed SBR, protected/unprotected multiplexing and multichannel LC.

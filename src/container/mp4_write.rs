@@ -1,4 +1,5 @@
-//! Owned single-track AAC MP4 muxing. No decoder or foreign muxer is used.
+//! Owned single-track AAC MP4 muxing. Implicit SBR metadata is validated by
+//! the own decoder; encoded packet payloads are copied without transcoding.
 use crate::{Result, invalid};
 use std::io::Write;
 
@@ -34,6 +35,14 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     }
     let mut config = super::adts::header(data).ok_or_else(|| invalid("invalid ADTS header"))?;
     config.channels = stream.channels;
+    let core_rate = config.sample_rate;
+    for i in 0..stream.packets() {
+        if let Some(rate) = super::adts::probe_output_rate(stream.packet(i), &stream.configuration)? {
+            config.sample_rate = rate;
+            break;
+        }
+    }
+    let samples = stream.samples_per_frame * (config.sample_rate / core_rate);
     let ftyp = file_type(config.sample_rate)?;
     let sizes: Vec<_> = (0..stream.packets())
         .map(|i| stream.packet(i).len() as u32)
@@ -43,7 +52,7 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     let moov = movie(
         config,
         &stream.configuration,
-        stream.samples_per_frame,
+        samples,
         &sizes,
         ftyp.len() as u64 + 8,
     )?;
@@ -192,7 +201,7 @@ pub fn concat_adts_readers<R: std::io::Read, W: Write + std::io::Seek>(
 }
 
 fn write_aac_packets<W: Write + std::io::Seek>(
-    config: super::adts::Header,
+    mut config: super::adts::Header,
     asc: &[u8],
     mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>, output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
@@ -218,7 +227,11 @@ fn write_aac_packets<W: Write + std::io::Seek>(
         return Err(invalid("MP4 output must start at byte zero"));
     }
     let samples = u32::from(crate::codec::config::AacConfig::parse(asc)?.frame_samples);
-    output.write_all(&file_type(config.sample_rate)?)?;
+    let core_rate = config.sample_rate;
+    let mut discovered = false;
+    // The output clock can double after a later FIL. Reserve a compatible brand
+    // before streaming payloads; the final movie publishes the validated rate.
+    output.write_all(&file_type(config.sample_rate.saturating_mul(2))?)?;
     let mdat = output.stream_position()?;
     output.write_all(&1u32.to_be_bytes())?;
     output.write_all(b"mdat")?;
@@ -232,6 +245,12 @@ fn write_aac_packets<W: Write + std::io::Seek>(
         };
         if sizes.len() >= super::mp4::Limits::default().samples {
             return Err(invalid("AAC remux sample index exceeds limit"));
+        }
+        if !discovered {
+            if let Some(rate) = super::adts::probe_output_rate(&packet, asc)? {
+                config.sample_rate = rate;
+                discovered = true;
+            }
         }
         sizes.push(u32::try_from(packet.len()).map_err(|_| invalid("AAC packet size overflow"))?);
         output.write_all(&packet)?;
@@ -250,7 +269,7 @@ fn write_aac_packets<W: Write + std::io::Seek>(
     let length = end
         .checked_sub(mdat)
         .ok_or_else(|| invalid("MP4 output position moved backwards"))?;
-    let moov = movie(config, asc, samples, &sizes, offset)?;
+    let moov = movie(config, asc, samples * (config.sample_rate / core_rate), &sizes, offset)?;
     output.seek(SeekFrom::Start(mdat + 8))?;
     output.write_all(&length.to_be_bytes())?;
     output.seek(SeekFrom::Start(end))?;

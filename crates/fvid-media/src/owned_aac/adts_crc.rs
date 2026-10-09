@@ -160,3 +160,18 @@ pub fn verify(header: &[u8; 7], stored: u16, payload: &[u8], configuration: &[u8
     }
     Ok(())
 }
+
+/// Validate a candidate implicit SBR payload and return its output rate.
+/// Non-LC and explicitly signalled configurations do not require discovery.
+pub fn probe_sbr_rate(payload: &[u8], configuration: &[u8]) -> Result<Option<u32>> {
+    let config = super::config::AudioSpecificConfig::parse(configuration)?;
+    if config.core.object_type != 2 || config.sbr_present.is_some() {
+        return Ok(None);
+    }
+    if !has_sbr_fill(payload, configuration)? {
+        return Ok(None);
+    }
+    let mut decoder = super::NativeAacDecoder::new_with_sbr_detection(configuration)?;
+    decoder.decode(payload)?;
+    Ok(Some(decoder.sample_rate()))
+}

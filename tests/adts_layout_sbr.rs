@@ -182,3 +182,78 @@ fn multichannel_and_implicit_sbr_playback_has_negotiated_rate_rewind_and_seek() 
         }
     }
 }
+
+#[test]
+fn implicit_sbr_remux_preserves_pcm_and_output_clock() {
+    use fvid::container::{adts, matroska_write, mp4_write};
+    for case in manifest()["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["name"].as_str().unwrap().ends_with("mixed"))
+    {
+        for file in case["adts"].as_array().unwrap() {
+            let data = bytes(file.as_str().unwrap());
+            let mut expected = Vec::new();
+            fvid_media::owned_aac::decode_adts_pcm(
+                Cursor::new(&data),
+                &mut expected,
+                None,
+                &Default::default(),
+            )
+            .unwrap();
+            for sequential in [false, true] {
+                let mut output = Cursor::new(Vec::new());
+                if sequential {
+                    mp4_write::write_adts_aac_reader(
+                        adts::StreamReader::open(Cursor::new(&data)).unwrap(),
+                        &mut output,
+                    )
+                    .unwrap();
+                } else {
+                    mp4_write::write_adts_aac(&data, &mut output).unwrap();
+                }
+                let mut actual = Vec::new();
+                let indexed = fvid::container::mp4::Mp4Reader::open(
+                    Cursor::new(output.get_ref()),
+                    Default::default(),
+                )
+                .unwrap();
+                let track = &indexed.tracks()[0];
+                assert_eq!(
+                    track.sample_rate,
+                    case["sample_rate"].as_u64().unwrap() as u32
+                );
+                assert_eq!(track.timescale, track.sample_rate);
+                assert_eq!(track.duration, case["samples"].as_u64().unwrap());
+                fvid::native_media::decode_mp4_aac_pcm(output.get_ref(), &mut actual).unwrap();
+                assert_eq!(actual, expected, "{} MP4", file);
+            }
+            let mut output = Cursor::new(Vec::new());
+            matroska_write::write_adts(
+                adts::StreamReader::open(Cursor::new(&data)).unwrap(),
+                &mut output,
+                None,
+                None,
+            )
+            .unwrap();
+            let mut actual = Vec::new();
+            let indexed = fvid::container::webm::WebmReader::open(
+                Cursor::new(output.get_ref()),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(
+                indexed.tracks[0].sample_rate,
+                case["sample_rate"].as_u64().unwrap()
+            );
+            fvid::native_media::decode_matroska_aac_pcm_interval(
+                output.get_ref(),
+                &mut actual,
+                None,
+            )
+            .unwrap();
+            assert_eq!(actual, expected, "{} Matroska", file);
+        }
+    }
+}

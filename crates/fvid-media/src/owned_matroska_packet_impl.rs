@@ -14,6 +14,8 @@ pub struct PacketWriter<'a, W> {
     output: &'a mut W,
     segment_size: u64,
     duration_offset: u64,
+    tracks_offset: u64,
+    tracks_bytes: usize,
     written: Vec<bool>,
     delays: Vec<u64>,
     pcm: Vec<Option<(u32, u16)>>,
@@ -61,12 +63,17 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         )?;
         let duration_offset = output.stream_position()? + info.len() as u64 - 8;
         output.write_all(&info)?;
-        output.write_all(&element(0x1654ae6b, entries)?)?;
+        let tracks = element(0x1654ae6b, entries)?;
+        let tracks_offset = output.stream_position()?;
+        let tracks_bytes = tracks.len();
+        output.write_all(&tracks)?;
         output.write_all(file_elements)?;
         Ok(Self {
             output,
             segment_size,
             duration_offset,
+            tracks_offset,
+            tracks_bytes,
             written: vec![false; delays.len()],
             delays,
             pcm,
@@ -78,6 +85,20 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
             },
             failed: false,
         })
+    }
+    // Only the private single-track ADTS adapter uses this fixed-size rewrite.
+    // Payload timestamps remain in nanoseconds, independent of output rate.
+    fn rewrite_adts_rate(&mut self, asc: &[u8], rate: u32, channels: u16) -> Result<()> {
+        let spec = TrackSpec { encoding: Encoding::Aac { configuration: asc, sample_rate: rate, channels }, name: "", language: "" };
+        let tracks = element(0x1654ae6b, &track_entry(&spec, 1, None)?)?;
+        if self.written.len() != 1 || tracks.len() != self.tracks_bytes {
+            return Err(invalid("ADTS track rewrite changed header size"));
+        }
+        let end = self.output.stream_position()?;
+        self.output.seek(SeekFrom::Start(self.tracks_offset))?;
+        self.output.write_all(&tracks)?;
+        self.output.seek(SeekFrom::Start(end))?;
+        Ok(())
     }
     pub fn event(&self) -> ProgressEvent {
         self.event

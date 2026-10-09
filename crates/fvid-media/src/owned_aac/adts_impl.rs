@@ -487,3 +487,8 @@ impl<R:std::io::Read> SequenceReader<R> {
         }
     }
 }
+
+/// Probe implicit SBR signalling without rewriting the encoded packet.
+pub fn probe_output_rate(packet: &[u8], asc: &[u8]) -> Result<Option<u32>> {
+    adts_crc::probe_sbr_rate(packet, asc).map_err(|e| invalid(&e.to_string()))
+}

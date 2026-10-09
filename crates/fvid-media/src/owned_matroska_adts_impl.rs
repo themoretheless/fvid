@@ -30,7 +30,7 @@ pub fn write_adts_limited<R: Read, W: Write + Seek>(
     )
 }
 
-/// Append compatible ADTS segments to one Matroska track without decoding.
+/// Append compatible ADTS segments to one Matroska track without transcoding.
 pub fn concat_adts<R: Read, W: Write + Seek>(
     readers: Vec<adts::StreamReader<R>>,
     output: &mut W,
@@ -99,6 +99,7 @@ fn write_aac_packets<W: Write + Seek>(
     if let Some(h) = progress {
         h.emit(writer.event());
     }
+    let mut negotiated_rate = None;
     loop {
         check()?;
         if max_packets.is_some_and(|limit| writer.event().packets >= limit) {
@@ -107,6 +108,9 @@ fn write_aac_packets<W: Write + Seek>(
         let Some(packet) = next_packet()? else {
             break;
         };
+        if negotiated_rate.is_none() {
+            negotiated_rate = adts::probe_output_rate(&packet, asc).map_err(|e| invalid(&e.to_string()))?;
+        }
         let index = writer.event().packets;
         let next = index
             .checked_add(1)
@@ -118,6 +122,9 @@ fn write_aac_packets<W: Write + Seek>(
         }
     }
     check()?;
+    if let Some(rate) = negotiated_rate {
+        writer.rewrite_adts_rate(asc, rate, config.channels)?;
+    }
     let event = writer.finish()?;
     check()?;
     Ok(event)
