@@ -41,7 +41,7 @@ fn video(c: &Value) -> Vec<u8> {
 fn main_lc_dynamic_rosters_match_scalar_prediction_and_independent_source_overlap() {
     let m = manifest();
     let gold = file("aac-pce-roster-pcm.f32le");
-    assert_eq!(m["cases"].as_array().unwrap().len(), 12);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 44);
     for c in m["cases"].as_array().unwrap() {
         let mut actual = vec![];
         fvid::native_media::decode_mp4_aac_pcm(&video(c), &mut actual).unwrap();
@@ -62,7 +62,7 @@ fn main_lc_dynamic_rosters_match_scalar_prediction_and_independent_source_overla
             let b = f32::from_le_bytes(b.try_into().unwrap());
             assert!((a - b).abs() < 1e-8, "{} sample {i}: {a} vs {b}", c["name"]);
         }
-        if c["schedule"].as_str().unwrap().starts_with("return") {
+        if c["point"] == 3 && c["schedule"].as_str().unwrap().starts_with("return") {
             let wrong_at = c["discarded_history_pcm_offset"].as_u64().unwrap() as usize;
             let wrong = &gold[wrong_at..wrong_at + expected.len()];
             let error = expected
@@ -104,6 +104,8 @@ fn main_lc_dynamic_rosters_match_scalar_prediction_and_independent_source_overla
             .iter()
             .find(|p| {
                 p["object_type"] == c["object_type"]
+                    && p["point"] == c["point"]
+                    && p["tns"] == c["tns"]
                     && p["schedule"] == c["schedule"]
                     && p["dynamic"] != c["dynamic"]
             })
@@ -159,6 +161,8 @@ fn dynamic_pce_is_transactional_checkpointed_and_reset_to_initial_roster() {
                 .iter()
                 .find(|p| {
                     p["object_type"] == c["object_type"]
+                        && p["point"] == c["point"]
+                        && p["tns"] == c["tns"]
                         && p["schedule"] == "arrival"
                         && p["dynamic"] == false
                 })
@@ -228,4 +232,49 @@ fn dynamic_roster_playback_ranges_rewind_seek_preserve_exact_pcm() {
         let landed = s.seek_to(4800);
         assert_eq!(play(&mut s), full[landed as usize * 4..]);
     }
+}
+
+#[test]
+fn dependent_roster_oracle_distinguishes_coupling_before_and_after_target_tns() {
+    let m = manifest();
+    let gold = file("aac-pce-roster-pcm.f32le");
+    let samples = |c: &Value| {
+        let at = c["pcm_offset"].as_u64().unwrap() as usize;
+        gold[at..at + c["pcm_bytes"].as_u64().unwrap() as usize]
+            .chunks_exact(4)
+            .map(|s| f32::from_le_bytes(s.try_into().unwrap()))
+            .collect::<Vec<_>>()
+    };
+    let mut count = 0;
+    for c in m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["point"] == 0 && c["tns"] == true)
+    {
+        let paired = m["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| {
+                p["point"] == 1
+                    && p["tns"] == true
+                    && p["object_type"] == c["object_type"]
+                    && p["schedule"] == c["schedule"]
+                    && p["dynamic"] == c["dynamic"]
+            })
+            .unwrap();
+        let error = samples(c)
+            .iter()
+            .zip(samples(paired))
+            .map(|(a, b)| (a - b).abs())
+            .fold(0f32, f32::max);
+        assert!(
+            error > 1e-6,
+            "coupling point is invisible to TNS oracle: {}",
+            c["name"]
+        );
+        count += 1;
+    }
+    assert_eq!(count, 8);
 }

@@ -8667,3 +8667,27 @@ No production change was needed beyond the preceding roster-state fix.
 This qualifies Main/LC core independent coupling at point 3. Dynamic dependent
 coupling, source SBR across initially empty rosters, multi-channel roster changes
 and actual output layout/profile transitions remain separate work.
+
+
+### Main/LC dependent CCE roster qualification (2026-10-09)
+
+Thirty-two further videos qualify dependent coupling points 0/1 with changing
+CCE1/15 rosters in Main and LC. Each has nonzero target and source spectra,
+static/dynamic PCE controls, source removal/return or initially empty roster
+arrival. Window-transition programs use matching target/source ICS geometry.
+Long-window companions carry first-order target TNS: point 0 mixes sources
+before TNS, while point 1 mixes after TNS. The scalar predictor, spectral sum,
+TNS recurrence and direct IMDCT/overlap oracle computes those stages explicitly.
+
+An oracle-sensitivity test checks eight paired TNS programs and proves the two
+points produce different PCM. Native export for both agrees with the oracle,
+and static/dynamic variants remain exactly equal. All four roster tests passed
+on the resulting 44-video matrix, including trailing-syntax rollback around
+PCE changes, checkpoint/reset, empty-initial-roster rejection, playback ranges,
+rewind and seek. No production decoder change was required.
+
+Existing twelve videos and scalar/packet prefixes remain unchanged. The
+generator and ordinary tests use no private media, FFmpeg or network. These
+programs qualify core mono dependent coupling and first-order target TNS;
+source SBR across dynamic rosters, stereo/multichannel changes, changing actual
+output layouts/profiles and wider codec tools remain separate work.
