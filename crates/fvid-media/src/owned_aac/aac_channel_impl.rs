@@ -207,11 +207,11 @@ impl ChannelData {
         } else {
             None
         };
-        let tns = if cursor.bit()? {
+        let tns_present = cursor.bit()?;
+        let er = config.object_type == 17;
+        let mut tns = if tns_present && !er {
             Some(tns_syntax::read_profile(&mut cursor, info.sequence, config.object_type == 1)?)
-        } else {
-            None
-        };
+        } else { None };
         let gain_control = if cursor.bit()? {
             let gain = super::aac_gain_control::GainControl::read(&mut cursor, info.sequence)?;
             if config.object_type != 3 && !gain.is_empty() {
@@ -219,6 +219,9 @@ impl ChannelData {
             }
             Some(gain)
         } else { None };
+        if tns_present && er {
+            tns = Some(tns_syntax::read_profile(&mut cursor, info.sequence, false)?);
+        }
         let offsets = if info.sequence == WindowSequence::EightShort {
             tables.short
         } else {

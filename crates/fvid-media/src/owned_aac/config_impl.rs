@@ -39,8 +39,11 @@ impl AacConfig {
         sample_rate: u32,
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
-        if !matches!(object_type, 1 | 2 | 3 | 4) {
-            return Err(invalid("only AAC Main, LC, SSR and LTP core configurations are implemented"));
+        if !matches!(object_type, 1 | 2 | 3 | 4 | 17) {
+            return Err(invalid("only AAC Main, LC, SSR, LTP and ER-LC core configurations are implemented"));
+        }
+        if object_type == 17 && config == 0 {
+            return Err(invalid("ER AAC LC PCE layout is not yet implemented"));
         }
         let mut channels = match config {
             0 => 0,
@@ -72,8 +75,14 @@ impl AacConfig {
         // GASpecificConfig carries extensionFlag3 after any PCE. For LC/SSR
         // there are no ER/sub-frame fields before it; this future-use bit must
         // be zero. Do not mistake extensionFlag itself for unsupported audio.
+        if extension_flag && object_type == 17 && b.read(3)? != 0 {
+            return Err(invalid("ER AAC LC resilience tools are not yet implemented"));
+        }
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
+        }
+        if object_type == 17 && b.read(2)? != 0 {
+            return Err(invalid("ER AAC LC epConfig is not yet implemented"));
         }
         Ok((
             Self {
@@ -174,6 +183,9 @@ impl AudioSpecificConfig {
                     ps_present = Some(b.bit()?);
                 }
             }
+        }
+        if core.object_type == 17 && (sbr_present == Some(true) || ps_present == Some(true)) {
+            return Err(invalid("ER AAC LC SBR/PS is not yet implemented"));
         }
         if ps_present == Some(true) && core.channels != 1 {
             return Err(invalid("AAC parametric stereo requires a mono core"));

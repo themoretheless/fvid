@@ -10062,3 +10062,39 @@ ER/LD/ELD/USAC and broad conformance/performance remain distinct gaps.
 Validation: all six expanded acceptance/control tests passed offline without
 FFmpeg (72 configurations, 261.65 s debug run). All 86 fixture artifacts
 were byte-identical on regeneration. No production decoder changes.
+
+### Owned ER AAC-LC baseline syntax and playback (2026-10-10)
+
+Forty original MP4s reproduced the former core-profile admission refusal.
+They now use actual owned AOT17 decoding, preserving the signaled core type.
+ER-LC reads the configured sequence of tagged elements without ordinary
+raw-element IDs/END, and defers TNS data until after the gain-control field.
+ASC admits epConfig0 and zero resilience flags, with extensionFlag false/true;
+nonzero resilience/epConfig and extensionFlag3 remain specific refusals.
+The syntax order was checked against the primary
+[AAC reference](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec.c).
+No foreign decoder code is copied, linked or executed.
+
+Own bit writers cover 960/1024, long/start/short/stop, sine/KBD, directional
+long TNS, mono/stereo/3.0/5.1, and common-window MS modes0/1/2. Independent
+scalar MS/TNS/sparse IMDCT/window synthesis and channel mapping qualify all
+PCM samples within 1e-7. Packet checkpoint/reset and truncated/trailing-packet
+rollback precede valid replay. Root/owned MP4 PCM, repeated/reversed ranges,
+player channels/rate, rewind and seeks are acceptance gates. Alignment-bit
+variants preserve PCM; no unsupported zero-padding restriction is introduced.
+
+Twenty-two original short videos check nonzero resilience/epConfig or future
+extensionFlag3 refusal, separately from playback acceptance. Two trailing-byte
+videos fail specifically after seven valid frames. Two alignment variants
+accept and match scalar PCM. Generation is offline and separate from tests;
+no private media, codec parameters, FFmpeg or network is used.
+
+This implements ER-LC without error-resilience tools; it does not implement
+HCR/RVLC/section resilience, epConfig protection, PCE, ER SBR/PS, ER-LTP,
+LD/ELD/USAC or broad profile conformance. Additional indexed layouts/tools
+need qualification. The full codec-gap objective remains open.
+
+Validation: 477 owned library tests passed (one pre-existing ignored);
+five final ER-LC acceptance/refusal tests and ten Main/SSR/LTP regressions
+passed offline without FFmpeg (492 distinct selected tests). All 69 ER-LC
+fixture artifacts were byte-identical on regeneration.

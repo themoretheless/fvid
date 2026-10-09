@@ -528,7 +528,10 @@ impl NativeAacDecoder {
         let mut element_index = 0;
         let mut tags = ElementTags::default();
         loop {
-            let element = bits.read(3)?;
+            // ER-LC omits element IDs and END: the configured layout fixes
+            // element kinds and count. Each element still carries four tag bits.
+            let er = self.config.object_type == 17;
+            let element = if er {elements.get(element_index).copied().unwrap_or(7)} else {bits.read(3)?};
             let mut target_offset = channels.len();
             if matches!(element, 0 | 1 | 3) {
                 if current_program.is_none() && elements.get(element_index) != Some(&element) {
@@ -537,7 +540,8 @@ impl NativeAacDecoder {
                     ));
                 }
                 element_index += 1;
-                let tag = bits.read(4)?;
+                let signaled_tag = bits.read(4)?;
+                let tag = if er {element_index as u32} else {signaled_tag};
                 if let Some(program) = &current_program {
                     let mut offset = 0;
                     let mut found = None;
@@ -687,7 +691,7 @@ impl NativeAacDecoder {
             return Err(invalid("AAC block has no configured audio element"));
         }
         if bits.remaining() > 7 {
-            return Err(invalid("trailing bytes after AAC END"));
+            return Err(invalid(if self.config.object_type == 17 {"trailing bytes after ER AAC block"} else {"trailing bytes after AAC END"}));
         }
         for point in [0, 1] {
             if point == 1 {
