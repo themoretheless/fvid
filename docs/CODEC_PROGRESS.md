@@ -8094,3 +8094,25 @@ PS playback 5); 23 existing root tests remain ignored. The updated multiblock
 refusal/prefix assertion passed separately after the other three tests.
 All checks were locked/offline without FFmpeg. Changed-file formatting and
 `git diff --check` pass. These results do not establish complete codec parity.
+
+
+### 2026-10-09 — source-preserving SSR alignment for SBR coupling
+
+The SSR alignment queue now offers `submit_sources`/`finish_sources` alongside
+its existing mixed-output API. Each output lane retains separate PCM chunks
+and their original output gains when a 1024-sample aligned interval crosses
+1472/576-sample synthesis submissions. Packet stamps, bounded lookahead,
+checkpoint cloning, EOF completeness and transactional errors are preserved.
+Source admission defers gain multiplication/mixing to the extension consumer;
+it does not reject a finite source solely because an unused core-domain mix
+would overflow. Existing mixed output retains its finite-mix checks.
+
+Three new unit regressions cover opposite drift/gain boundaries and replay,
+incomplete EOF/error rollback, and deferred gain overflow. This is the required
+source-alignment substrate, not CCE acceptance: SSR/SBR independent coupling
+remains refused until per-source SBR history and rendering are integrated and
+qualified against synthetic nonzero CCE fixtures and independent PCM.
+
+Validation: all 460 owned-media unit tests passed (one existing ignored),
+as did 9 SSR alignment and 5 SSR/SBR integration tests. Locked offline checks
+used no FFmpeg; changed-file formatting and `git diff --check` pass.

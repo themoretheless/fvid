@@ -5,7 +5,7 @@ use super::{Result, invalid};
 use std::collections::VecDeque;
 const MAX_ROWS: usize = 1472;
 const MAX_QUEUED: usize = 2 * MAX_ROWS;
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct OutputGain {
     pub channel: usize,
     pub gain: f32,
@@ -34,6 +34,19 @@ struct Pending {
 pub struct AlignedFrame {
     pub stamp: u64,
     pub samples: Vec<f32>,
+}
+/// One source interval before output gain/mixing. Chunk boundaries preserve
+/// gain changes when an aligned packet crosses two synthesis submissions.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SourceChunk {
+    pub samples: Vec<f32>,
+    pub outputs: Vec<OutputGain>,
+}
+#[derive(Clone, Debug, PartialEq)]
+pub struct AlignedSources {
+    pub stamp: u64,
+    pub rows: usize,
+    pub lanes: Vec<Vec<SourceChunk>>,
 }
 #[derive(Clone)]
 pub struct SsrPcmAlignment {
@@ -141,7 +154,7 @@ impl SsrPcmAlignment {
         }
         Ok(bytes)
     }
-    fn validate(&self, rows: usize, inputs: &[LaneInput<'_>]) -> Result<()> {
+    fn validate(&self, rows: usize, inputs: &[LaneInput<'_>], mixed: bool) -> Result<()> {
         if self.finished {
             return Err(invalid("SSR PCM alignment requires reset after finish"));
         }
@@ -159,12 +172,14 @@ impl SsrPcmAlignment {
             {
                 return Err(invalid("SSR PCM alignment invalid samples or output gains"));
             }
-            if input.samples.iter().any(|sample| {
-                input
-                    .outputs
-                    .iter()
-                    .any(|gain| !(*sample * gain.gain).is_finite())
-            }) {
+            if mixed
+                && input.samples.iter().any(|sample| {
+                    input
+                        .outputs
+                        .iter()
+                        .any(|gain| !(*sample * gain.gain).is_finite())
+                })
+            {
                 return Err(invalid(
                     "SSR PCM alignment scaled samples exceed finite f32",
                 ));
@@ -220,6 +235,78 @@ impl SsrPcmAlignment {
             samples,
         })
     }
+    fn separate(&self, frame: Pending, inputs: Option<&[LaneInput<'_>]>) -> Result<AlignedSources> {
+        let mut lanes = Vec::with_capacity(self.lanes.len());
+        for (index, lane) in self.lanes.iter().enumerate() {
+            let mut chunks = Vec::new();
+            let mut remaining = frame.rows;
+            for chunk in &lane.chunks {
+                let count = (chunk.samples.len() - chunk.used).min(remaining);
+                if count > 0 {
+                    chunks.push(SourceChunk {
+                        samples: chunk.samples[chunk.used..chunk.used + count].to_vec(),
+                        outputs: chunk.outputs.clone(),
+                    });
+                    remaining -= count;
+                }
+                if remaining == 0 {
+                    break;
+                }
+            }
+            if remaining > 0 {
+                let input = inputs
+                    .and_then(|v| v.get(index))
+                    .ok_or_else(|| invalid("SSR PCM alignment incomplete at stream end"))?;
+                let samples = input.samples.get(..remaining).ok_or_else(|| {
+                    invalid("SSR PCM alignment requires more than one packet of lookahead")
+                })?;
+                chunks.push(SourceChunk {
+                    samples: samples.to_vec(),
+                    outputs: input.outputs.to_vec(),
+                });
+            }
+            lanes.push(chunks);
+        }
+        Ok(AlignedSources {
+            stamp: frame.stamp,
+            rows: frame.rows,
+            lanes,
+        })
+    }
+    /// Preserve each source independently for per-source extension synthesis.
+    /// Gain application is deferred; sources are checked for finite values and
+    /// bounded geometry, without requiring an unused core-domain mix to fit.
+    pub fn submit_sources(
+        &mut self,
+        stamp: u64,
+        rows: usize,
+        inputs: &[LaneInput<'_>],
+    ) -> Result<Option<AlignedSources>> {
+        self.validate(rows, inputs, false)?;
+        let sources = self
+            .pending
+            .front()
+            .copied()
+            .map(|frame| self.separate(frame, Some(inputs)))
+            .transpose()?;
+        self.enqueue(stamp, rows, inputs);
+        Ok(sources)
+    }
+    /// Drain separate sources. Failure leaves pending samples and stamps intact.
+    pub fn finish_sources(&mut self) -> Result<Option<AlignedSources>> {
+        let Some(frame) = self.pending.front().copied() else {
+            self.finished = true;
+            return Ok(None);
+        };
+        if self.lanes.iter().any(|v| v.rows != frame.rows) {
+            return Err(invalid("SSR PCM alignment incomplete at stream end"));
+        }
+        let sources = self.separate(frame, None)?;
+        self.consume(frame.rows);
+        self.pending.pop_front();
+        self.finished = true;
+        Ok(Some(sources))
+    }
     fn mix(
         source: &[f32],
         gains: &[OutputGain],
@@ -262,13 +349,17 @@ impl SsrPcmAlignment {
         rows: usize,
         inputs: &[LaneInput<'_>],
     ) -> Result<Option<AlignedFrame>> {
-        self.validate(rows, inputs)?;
+        self.validate(rows, inputs, true)?;
         let emitted = self
             .pending
             .front()
             .copied()
             .map(|frame| self.render(frame, Some(inputs)))
             .transpose()?;
+        self.enqueue(stamp, rows, inputs);
+        Ok(emitted)
+    }
+    fn enqueue(&mut self, stamp: u64, rows: usize, inputs: &[LaneInput<'_>]) {
         for (lane, input) in self.lanes.iter_mut().zip(inputs) {
             lane.chunks.push_back(Chunk {
                 samples: input.samples.to_vec(),
@@ -281,7 +372,6 @@ impl SsrPcmAlignment {
             self.consume(frame.rows);
         }
         self.pending.push_back(Pending { stamp, rows });
-        Ok(emitted)
     }
     /// Emits the final complete frame. Unequal stream ends refuse without
     /// inserting silence or discarding queued contributions. Repeated finish is
@@ -736,5 +826,118 @@ mod tests {
         assert_eq!(frame.stamp, 100);
         assert!(frame.samples.chunks_exact(2).all(|r| r == [1.0, 2.0]));
         assert!(alignment.finish().is_err());
+    }
+    #[test]
+    fn separate_sources_preserve_drift_gain_boundaries_checkpoint_and_eof() {
+        let mut queue = SsrPcmAlignment::new(1, 2).unwrap();
+        let first = vec![vec![2.0; 1472], vec![3.0; 576]];
+        let gains = vec![
+            vec![OutputGain {
+                channel: 0,
+                gain: 1.0,
+            }],
+            vec![OutputGain {
+                channel: 0,
+                gain: 0.5,
+            }],
+        ];
+        assert!(
+            queue
+                .submit_sources(10, 1024, &inputs(&first, &gains))
+                .unwrap()
+                .is_none()
+        );
+        let saved = queue.clone();
+        let next = vec![vec![5.0; 576], vec![7.0; 1472]];
+        let next_gains = vec![
+            vec![OutputGain {
+                channel: 0,
+                gain: 0.25,
+            }],
+            vec![OutputGain {
+                channel: 0,
+                gain: -1.0,
+            }],
+        ];
+        let frame = queue
+            .submit_sources(20, 1024, &inputs(&next, &next_gains))
+            .unwrap()
+            .unwrap();
+        assert_eq!((frame.stamp, frame.rows), (10, 1024));
+        assert_eq!(frame.lanes[0].len(), 1);
+        assert_eq!(frame.lanes[0][0].samples, vec![2.0; 1024]);
+        assert_eq!(frame.lanes[1][0].samples, vec![3.0; 576]);
+        assert_eq!(frame.lanes[1][0].outputs, gains[1]);
+        assert_eq!(frame.lanes[1][1].samples, vec![7.0; 448]);
+        assert_eq!(frame.lanes[1][1].outputs, next_gains[1]);
+        let mut replay = saved;
+        assert_eq!(
+            Some(frame),
+            replay
+                .submit_sources(20, 1024, &inputs(&next, &next_gains))
+                .unwrap()
+        );
+        let tail = queue.finish_sources().unwrap().unwrap();
+        assert_eq!((tail.stamp, tail.rows), (20, 1024));
+        assert_eq!(tail.lanes[0][0].samples, vec![2.0; 448]);
+        assert_eq!(tail.lanes[0][1].samples, vec![5.0; 576]);
+        assert_eq!(tail.lanes[0][1].outputs, next_gains[0]);
+        assert_eq!(tail.lanes[1][0].samples, vec![7.0; 1024]);
+        assert_eq!(queue.finish_sources().unwrap(), None);
+        assert_eq!(replay.finish_sources().unwrap(), Some(tail));
+    }
+    #[test]
+    fn separate_source_failure_preserves_pending_state() {
+        let mut queue = SsrPcmAlignment::new(1, 1).unwrap();
+        let samples = vec![vec![1.0; 576]];
+        let gains = vec![vec![OutputGain {
+            channel: 0,
+            gain: 1.0,
+        }]];
+        queue
+            .submit_sources(7, 1024, &inputs(&samples, &gains))
+            .unwrap();
+        let before = queue.retained_payload_bytes().unwrap();
+        assert!(queue.finish_sources().is_err());
+        assert_eq!(queue.retained_payload_bytes().unwrap(), before);
+        assert_eq!(queue.pending.front().unwrap().stamp, 7);
+        let short = vec![vec![1.0; 1]];
+        assert!(
+            queue
+                .submit_sources(8, 1024, &inputs(&short, &gains))
+                .is_err()
+        );
+        assert_eq!(queue.retained_payload_bytes().unwrap(), before);
+        let next = vec![vec![4.0; 1472]];
+        let frame = queue
+            .submit_sources(8, 1024, &inputs(&next, &gains))
+            .unwrap()
+            .unwrap();
+        assert_eq!(frame.lanes[0][0].samples.len(), 576);
+        assert_eq!(frame.lanes[0][1].samples.len(), 448);
+        assert_eq!(
+            queue.finish_sources().unwrap().unwrap().lanes[0][0].samples,
+            vec![4.0; 1024]
+        );
+    }
+    #[test]
+    fn separate_sources_defer_core_mix_overflow_to_the_extension_consumer() {
+        let signals = vec![vec![f32::MAX; 1024], vec![f32::MAX; 1024]];
+        let gains = vec![
+            vec![OutputGain {
+                channel: 0,
+                gain: 2.0
+            }];
+            2
+        ];
+        let mut mixed = SsrPcmAlignment::new(1, 2).unwrap();
+        assert!(mixed.submit(0, 1024, &inputs(&signals, &gains)).is_err());
+        let mut separate = SsrPcmAlignment::new(1, 2).unwrap();
+        separate
+            .submit_sources(0, 1024, &inputs(&signals, &gains))
+            .unwrap();
+        let frame = separate.finish_sources().unwrap().unwrap();
+        assert_eq!(frame.lanes[0][0].samples, signals[0]);
+        assert_eq!(frame.lanes[1][0].outputs, gains[1]);
     }
 }
