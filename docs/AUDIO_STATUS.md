@@ -819,3 +819,13 @@ access. This qualifies the tested implicit double-rate programs, not arbitrary
 multichannel SBR, nonzero LFE extension processing or complete AAC conformance.
 The 14-valued indexed height layout cannot be directly represented by the
 three-bit ADTS channel configuration and is not included in this matrix.
+
+### AAC Main implicit SBR — 2026-10-09
+
+Main (AOT1), as well as LC, now negotiates implicit double-rate SBR from a valid
+FIL in ADTS export, native player and owned remux. Main predictor state remains
+in the core decoder; PS probing stays restricted to LC. The six-frame authored
+active-prediction fixture verifies explicit/sync/implicit PCM equivalence,
+protected/multiplexed ADTS, MP4/Matroska remux and rewind/seek. This is transport
+and signalling qualification, not complete AAC Main+SBR conformance. SSR+SBR,
+LTP/ER/ELD/USAC and broader profile tools still require implementation/qualification.

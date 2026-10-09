@@ -107,7 +107,7 @@ fn extended_audio_entry_rejects_invalid_rates_and_channels() {
 #[test]
 fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
     use std::io::{Read, Seek, SeekFrom, Write};
-    // Framing-only Main-profile packets have no implicit SBR discovery.
+    // Framing-only SSR-profile packets have no implicit SBR discovery.
     // The muxer copies these dummy payloads without decoding them.
     // Repetition and sparse output exercise >4 GiB without allocating that data.
     struct Repeat {
@@ -156,7 +156,7 @@ fn streaming_remux_writes_extended_mdat_beyond_four_gibibytes() {
     let _cleanup = Cleanup(path.clone());
     let mut frame = vec![0; 8191];
     frame[..7].copy_from_slice(&include_bytes!("fixtures/audio/aac-mono-44k.aac")[..7]);
-    frame[2] &= 0x3f; // AAC Main, not LC with an unknown in-band SBR clock.
+    frame[2] = (frame[2] & 0x3f) | 0x80; // SSR framing; this test does not decode dummy PCM.
     frame[3] = (frame[3] & !3) | 3;
     frame[4] = 255;
     frame[5] |= 224;

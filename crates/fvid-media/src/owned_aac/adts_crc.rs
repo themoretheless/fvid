@@ -162,16 +162,17 @@ pub fn verify(header: &[u8; 7], stored: u16, payload: &[u8], configuration: &[u8
 }
 
 /// Validate a candidate implicit SBR payload and return its output rate.
-/// Non-LC and explicitly signalled configurations do not require discovery.
+/// Main/LC may use implicit SBR; other cores and explicit signalling stay strict.
 pub fn probe_sbr_rate(payload: &[u8], configuration: &[u8]) -> Result<Option<u32>> {
     let config = super::config::AudioSpecificConfig::parse(configuration)?;
-    if config.core.object_type != 2 || config.sbr_present.is_some() {
+    if !matches!(config.core.object_type, 1 | 2) || config.sbr_present.is_some() {
         return Ok(None);
     }
     if !has_sbr_fill(payload, configuration)? {
         return Ok(None);
     }
-    if super::aac_ps_native::InBandPsProbe::accepts_mono_program(configuration)?
+    if config.core.object_type == 2
+        && super::aac_ps_native::InBandPsProbe::accepts_mono_program(configuration)?
         && config.ps_present.is_none()
     {
         let rate = config

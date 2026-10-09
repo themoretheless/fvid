@@ -2622,3 +2622,22 @@ access. This qualifies the tested implicit double-rate programs, not arbitrary
 multichannel SBR, nonzero LFE extension processing or complete AAC conformance.
 The 14-valued indexed height layout cannot be directly represented by the
 three-bit ADTS channel configuration and is not included in this matrix.
+
+### AAC Main + SBR discovery (2026-10-09)
+
+`generate_aac_main_sbr_fixtures.py` authors six nonzero SCE frames with Main
+prediction active on frames 4–6 and combines them with the existing authored SBR
+syntax. It creates explicit, sync-extension and implicit companion MP4 videos,
+and plain/protected ADTS with raw-block grouping 1/1/1/1/1/1, 3/3 and 1/2/3.
+CRC uses independent polynomial division; the owned syntax helper only locates
+protected spans. No private media, parameter sets, external codec or network.
+The 11 artifacts regenerate identically. Ordinary tests read committed fixtures.
+
+The old implementation accepts explicit/container-clock Main + SBR but refuses
+ADTS with `AAC fill extension tool SBR requires extension-aware stream signalling`.
+`tests/aac_main_sbr.rs` now accepts the same encoded data across these signalling
+forms, full export, indexed/sequential MP4 remux, Matroska remux and player
+rewind/seek. PCM equivalence validates composition/transport, not an independent
+whole-composition scalar oracle; existing independent Main and SBR component
+oracles remain separate. ISO/IEC 14496-3 subpart 1 Table 1.2 permits Main (AOT1)
+with SBR. SSR and other unimplemented core families remain explicit gaps.

@@ -7933,3 +7933,18 @@ access. This qualifies the tested implicit double-rate programs, not arbitrary
 multichannel SBR, nonzero LFE extension processing or complete AAC conformance.
 The 14-valued indexed height layout cannot be directly represented by the
 three-bit ADTS channel configuration and is not included in this matrix.
+
+### 2026-10-09 — Main + SBR discovery
+
+Removed LC-only SBR discovery gates for supported Main cores in native decoder,
+ADTS admission/export, player and mux clock probe. Own six-frame active Main
+prediction + SBR videos reproduce the previous ADTS-specific refusal while
+explicit/container-clock forms already decode. Acceptance compares all signalling
+forms, six protected/plain raw-block layouts, both MP4 mux paths, Matroska and
+player seek/rewind. Independent whole-composition PCM qualification remains a gap;
+this change does not claim complete AAC or other codec conformance.
+
+Validation: 931 root/core and selected integration tests passed (23 existing
+ignored), plus 456 owned-media tests (one existing ignored); the expanded
+Main+SBR acceptance pair also passed. Offline, no FFmpeg/network. All 11 fixture
+artifacts regenerated identically; `git diff --check` passed.

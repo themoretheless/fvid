@@ -192,7 +192,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
         });
     }
 
-    let discovery = parsed.core.object_type == 2 && parsed.sbr_present.is_none();
+    let discovery = matches!(parsed.core.object_type, 1 | 2) && parsed.sbr_present.is_none();
     let mut decoder = if discovery {
         AdtsPacketDecoder::new_with_sbr_detection(&asc)?
     } else {
