@@ -7297,3 +7297,21 @@ wrong-binding refusal, and restoration of the original declaration after an
 in-band override. The existing offline generator produces these cases; ordinary
 tests invoke no generator, external codec or network. Full declaration-promise
 validation and multilayer activation remain explicit gaps.
+
+
+### HEVC reserved SEI payload-extension data
+
+`active_parameter_sets` parsing now ignores reserved payload-extension bits
+after its known fields while retaining final marker/alignment validation.
+H.265 D.3.1 requires decoders to ignore this future data. Previously such a
+tail made the whole valid declaration disappear, and a wrong-VPS declaration
+with the same tail was silently ignored instead of triggering binding refusal.
+The two own `hevc-active-parameters-extension-tail*` videos reproduce both
+specific failures. Acceptance retains the declaration, all 17 pictures/POC and
+exact playback timing through reset; the invalid binding gives its exact error.
+A unit test verifies known fields survive opaque extension bytes and a missing
+final marker is still a bounded parser error. Generate separately using the
+existing active-parameter fixture script; ordinary tests need no FFmpeg,
+generation or network. This qualifies the active-parameter payload, not all SEI
+messages or layered syntax.
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201304-S%21%21PDF-E&lang=e&type=items

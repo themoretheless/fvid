@@ -36,7 +36,7 @@ def main():
     for n in lengths:
         packets.append(seed[at:at+n])
         at += n
-    for label, p in [('config', payload(0, [0])), ('config-wrong-vps', payload(1, [0])), ('valid', payload(0, [0])), ('repeated', payload(0, [0])), ('extra-ids', payload(0, [0, 7, 15])), ('wrong-vps', payload(1, [0])), ('wrong-sps', payload(0, [1])), ('empty', b''), ('mixed', payload(0, [0]))]:
+    for label, p in [('extension-tail', payload(0, [0]) + bytes([0xab, 0xcd, 128])), ('extension-tail-wrong-vps', payload(1, [0]) + bytes([0xab, 0xcd, 128])), ('config', payload(0, [0])), ('config-wrong-vps', payload(1, [0])), ('valid', payload(0, [0])), ('repeated', payload(0, [0])), ('extra-ids', payload(0, [0, 7, 15])), ('wrong-vps', payload(1, [0])), ('wrong-sps', payload(0, [1])), ('empty', b''), ('mixed', payload(0, [0]))]:
         raw = bytes([129, len(p)]) + p
         if label == 'mixed':
             raw += bytes([5, 0])

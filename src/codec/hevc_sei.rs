@@ -161,9 +161,13 @@ impl ActiveParameterSets {
             }
             sps_ids.push(id as u8);
         }
-        // Payloads ending at a byte boundary have no payload alignment bits.
-        // Otherwise the SEI payload uses a stop bit followed by alignment zeros.
+        // H.265 D.3.1 requires ignoring reserved payload-extension data.
+        // Retain the known fields and validate the final marker/alignment;
+        // syntax ending exactly at the payload boundary needs no marker.
         if bits.remaining() != 0 {
+            while bits.more_rbsp_data() {
+                bits.bit()?;
+            }
             bits.finish_rbsp()?;
         }
         Ok(Self { vps_id, self_contained_cvs, no_parameter_set_update, sps_ids })
@@ -251,6 +255,15 @@ mod tests {
         assert_eq!(ActiveParameterSets::parse(&payload(16, &[])).unwrap_err().to_string(), "HEVC active parameter SEI exceeds SPS count");
         assert_eq!(ActiveParameterSets::parse(&payload(0, &[16])).unwrap_err().to_string(), "HEVC active parameter SEI SPS ID outside range");
         assert!(ActiveParameterSets::parse(&[]).is_err());
+        let original = payload(0, &[15]);
+        let expected = ActiveParameterSets::parse(&original).unwrap();
+        let mut extended = original.clone();
+        extended.extend_from_slice(&[0xab, 0xcd, 128]);
+        assert_eq!(ActiveParameterSets::parse(&extended).unwrap(), expected);
+        let mut no_stop = original;
+        no_stop.extend_from_slice(&[0, 0, 0]);
+        assert_eq!(ActiveParameterSets::parse(&no_stop).unwrap_err().to_string(),
+            "truncated or oversized bit field");
         let mixed = sei(&[129, 1, 7, 5, 0, 128]);
         assert_eq!(active_parameters_from_nal(&mixed, 1024).unwrap_err().to_string(),
             "HEVC active parameter SEI must occupy its own NAL");

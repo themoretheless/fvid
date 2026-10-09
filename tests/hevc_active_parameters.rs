@@ -5,6 +5,10 @@ use std::io::Cursor;
 fn active_parameter_signal_must_match_picture_parameter_binding() {
     for file in [
         include_bytes!(
+            "fixtures/playback-errors/hevc-active-parameters-extension-tail-wrong-vps-synthetic.mp4"
+        )
+        .as_slice(),
+        include_bytes!(
             "fixtures/playback-errors/hevc-active-parameters-config-wrong-vps-synthetic.mp4"
         )
         .as_slice(),
@@ -30,6 +34,13 @@ fn active_parameter_guidance_preserves_pixels_and_resets() {
     use fvid::{codec::hevc_decoder::HevcDecoder, container::mp4::Mp4Reader};
     let source = include_bytes!("fixtures/hevc/main-ipb.mp4");
     for (file, ids) in [
+        (
+            include_bytes!(
+                "fixtures/playback-errors/hevc-active-parameters-extension-tail-synthetic.mp4"
+            )
+            .as_slice(),
+            Some(vec![0]),
+        ),
         (
             include_bytes!("fixtures/playback-errors/hevc-active-parameters-config-synthetic.mp4")
                 .as_slice(),
