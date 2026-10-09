@@ -3942,3 +3942,29 @@ profile dispatch, memory accounting and independent end-to-end PCM qualification
 remain required before enabling the existing LTP playback acceptance.
 
 Validation: 462 owned-library and 22 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. All three composite-pipeline artifacts regenerated with identical SHA-256 hashes.
+
+### Owned LTP channel histories and scalar PCM chain (2026-10-09)
+
+`LtpChannel` joins spectral prediction, TNS synthesis, window synthesis and LTP
+history updates. Checkpoints contain both synthesis overlap and quantized history
+plus the previous window shape. Reset restores zero histories and sine shape;
+mismatched checkpoint geometry refuses before mutation. Processing advances
+histories only after all stages succeed, using temporary cloned state in this
+initial adapter. It returns the existing owned 1/65536-normalized PCM convention.
+This is not yet production AOT4 profile admission or proof of normative LTP scale.
+
+The independent own scalar generator authors 12 sequential PCM frames across
+960/1024, alternating sine/KBD, inactive then active LTP, signed large residuals,
+clipped/rounded history and both TNS directions. It uses direct cosine sums and
+scalar original-input FIR/feedback AR recurrences, distinct from the FFT adapter.
+Tests compare full PCM, checkpoint replay, reset, refusal rollback and mismatched
+restore. Generation is separate from ordinary offline tests and uses no private
+media, FFmpeg, network or foreign decoder. The existing two own LTP MP4s remain
+production configuration refusals, with intended video playback still pending.
+
+Before decoder admission, normative history/PCM scaling and rounding require
+external-reference qualification, followed by production channel/pair dispatch,
+CCE/PCE interactions and memory accounting. The adapter currently clones channel
+state and allocates temporary buffers; it does not claim production performance.
+
+Validation: 462 owned-library and 24 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. Both channel artifacts regenerate with identical SHA-256 hashes.

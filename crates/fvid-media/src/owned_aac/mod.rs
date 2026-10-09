@@ -112,3 +112,5 @@ pub mod stream;
 pub use stream::{decode_adts_pcm, AudioDecodeStats as AdtsPcmStats};
 
 mod memory;
+
+pub mod aac_ltp_channel;
