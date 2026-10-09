@@ -1218,5 +1218,13 @@ packed 444 bytes, hvcC/SPS depth consistency, reset, rewind and seek. Generation
 uses mono `full10-rext10` / `full12-rext12` inputs with `full10-synthetic` /
 `full12-synthetic` outputs; prefix the output depth with `distinct-` and add
 `distinct-depth` for explicitly transformed low-bit PCM. No external encoder
-or decoder is used by this generator or the tests. High-depth inter remains
-outside this fixture qualification.
+or decoder is used by this generator or the tests. High-depth inter has a
+separate target: `--test hevc_separate_colour_planes_high_inter`. Three short
+videos cover 10-bit filtered inter, 12-bit WPP and a 128x96 WPP picture with
+multiple entropy substreams. The test requires predictive references and
+nonzero SAO offsets, checks every 16-bit sample against saved mono YUV and
+full packed 444 output through reset, rewind and seek. Plane histories are
+identical in these fixtures; distinct high-depth motion/reference histories
+are not qualified by this target. Generate with existing mono `filtered-rext10`,
+`wpp-rext12` / `parallel-rext12` inputs and separate-plane `filtered10`, `wpp12`
+/ `parallel12` synthetic MP4 outputs using the existing offline generator.

@@ -7076,11 +7076,26 @@ from the saved mono fixture and explicit PCM sample transforms. Tests compare
 every 16-bit sample and packed 444 byte after reset, rewind and seek, and
 require hvcC bit-depth fields to agree with the signalled SPS fields. The
 generator preserves the SPS-signalled chroma-depth field rather than silently
-replacing it with luma depth. These are intra PCM tests; high-depth inter,
-distinct motion histories and the remaining profiles/tools remain unqualified.
+replacing it with luma depth. These are intra PCM tests; their own scope does
+not qualify inter, distinct motion histories or the remaining profiles/tools.
 Use `hevc-pcm-mono-full10-rext10.mp4` / `hevc-pcm-mono-full12-rext12.mp4`
 as generator inputs and `hevc-separate-colour-planes-full10-synthetic.mp4` /
 `hevc-separate-colour-planes-full12-synthetic.mp4` as outputs. For distinct
 low-bit samples, use output `hevc-separate-colour-planes-distinct-full10-synthetic.mp4`
 or `hevc-separate-colour-planes-distinct-full12-synthetic.mp4` and the third
 argument `distinct-depth`.
+
+High-depth inter now has separate acceptance coverage in
+`hevc_separate_colour_planes_high_inter`: three own videos derived from
+`hevc-monochrome-filtered-rext10`, `hevc-monochrome-wpp-rext12` and
+`hevc-monochrome-parallel-rext12`. It requires predicted pictures with active
+references and nonzero SAO offsets, compares every plane against saved mono
+YUV, and checks full packed 444 playback through reset/rewind/seek. The 128x96
+case requires multiple entropy substreams, so WPP qualification goes beyond
+an enabled PPS flag. These three components deliberately have identical
+pixels/motion histories; distinct high-depth plane histories remain a gap.
+Generate each using the existing generator with the corresponding mono MP4
+input and output `hevc-separate-colour-planes-filtered10-synthetic.mp4`,
+`hevc-separate-colour-planes-wpp12-synthetic.mp4` or
+`hevc-separate-colour-planes-parallel12-synthetic.mp4`. Ordinary tests consume
+checked-in video/YUV only and do not invoke a generator or external codec.
