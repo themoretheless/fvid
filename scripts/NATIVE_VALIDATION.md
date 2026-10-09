@@ -1237,3 +1237,15 @@ independent headers carry each plane's ID after slice-address syntax. The
 acceptance checks multiple independent slices plus dependent segments in
 every plane, saved YUV, reset, rewind and seek. Generation remains separate
 from ordinary offline tests.
+
+
+### HEVC sequence-end state
+
+EOS/EOB NALs now validate trailing bits and temporal layer zero and close
+the sequence after the accompanying picture. The next CRA starts with a fresh
+DPB/POC state and suppresses leading RASL pictures. The own synthetic
+`hevc-eos-before-cra-*` fixtures reproduce the formerly emitted RASL picture
+and malformed markers; `tests/hevc_eos.rs` checks acceptance and exact errors.
+Generate separately with `python3 scripts/generate_hevc_eos_fixtures.py`;
+ordinary tests require neither FFmpeg nor network access. This qualifies the
+base-layer sequence transition, not remaining HEVC profiles or multilayer tools.

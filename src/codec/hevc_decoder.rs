@@ -2,7 +2,7 @@
 use super::{
     config::{HevcConfig, NalUnits},
     hevc_motion::Reference,
-    hevc_nal::NalHeader,
+    hevc_nal::{NalHeader, NalRbsp},
     hevc_picture::{self, Picture},
     hevc_pps::Pps,
     hevc_sei,
@@ -30,6 +30,7 @@ pub struct HevcDecoder {
     references: Vec<Reference>,
     previous_poc: Option<i32>,
     suppress_rasl: bool,
+    sequence_ended: bool,
     active_pps: Option<u8>,
     hdr: HdrMetadata,
     primed: HdrMetadata,
@@ -100,6 +101,7 @@ impl HevcDecoder {
             references: Vec::new(),
             previous_poc: None,
             suppress_rasl: false,
+            sequence_ended: false,
             active_pps: None,
             hdr: primed,
             primed,
@@ -121,6 +123,7 @@ impl HevcDecoder {
         self.references.clear();
         self.previous_poc = None;
         self.suppress_rasl = false;
+        self.sequence_ended = false;
         self.active_pps = None;
         self.hdr = self.primed;
         self.failed = false;
@@ -315,6 +318,7 @@ impl HevcDecoder {
         }
         let headers = self.slice_headers(packet)?;
         let mut slice = None;
+        let mut end_after_picture = false;
         for nal in NalUnits::new(packet, self.length)? {
             let nal = nal?;
             let header = NalHeader::parse(nal)?;
@@ -322,6 +326,20 @@ impl HevcDecoder {
             if header.is_vcl() {
                 if slice.is_none() {
                     slice = Some(nal);
+                }
+            } else if matches!(header.unit_type, 36 | 37) {
+                if header.temporal_id != 0 {
+                    return Err(invalid("HEVC EOS/EOB requires temporal layer zero"));
+                }
+                if NalRbsp::parse(nal, self.budget)?.bytes.as_slice() != [128] {
+                    return Err(invalid("invalid HEVC EOS/EOB trailing bits"));
+                }
+                if slice.is_some() {
+                    // A suffix closes the current picture's sequence only
+                    // after that picture has used its existing DPB/POC state.
+                    end_after_picture = true;
+                } else {
+                    self.sequence_ended = true;
                 }
             } else if matches!(header.unit_type, 32..=34) {
                 // Parameter sets were validated before parsing slices.
@@ -332,7 +350,7 @@ impl HevcDecoder {
                     self.hdr.merge(hdr);
                 }
             } else {
-                // AUD/EOS/EOB/filler and reserved/unspecified non-VCL units
+                // AUD/filler and reserved/unspecified non-VCL units
                 // do not contribute slices or change the decoded base picture.
                 // Header validity and base-layer admission were checked above.
             }
@@ -346,6 +364,13 @@ impl HevcDecoder {
             .find(|(_, p)| p.id == id)
             .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
         let header = &headers[0];
+        let new_sequence = self.sequence_ended;
+        self.sequence_ended = end_after_picture;
+        if new_sequence {
+            self.references.clear();
+            self.previous_poc = None;
+            self.suppress_rasl = false;
+        }
         if header.nal.temporal_id as usize >= sps.ordering.len() {
             return Err(invalid("HEVC slice exceeds SPS temporal layers"));
         }

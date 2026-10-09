@@ -7112,3 +7112,15 @@ remain our authored fixtures. These plane histories are still identical;
 distinct histories and remaining codec profiles/tools are not qualified here.
 Generate with
 `python3 scripts/generate_hevc_colour_plane_fixtures.py hevc-monochrome-mixed-tiles-rext12.mp4 hevc-separate-colour-planes-mixed-tiles12-synthetic.mp4`.
+
+
+### HEVC sequence-end state
+
+EOS/EOB NALs now validate trailing bits and temporal layer zero and close
+the sequence after the accompanying picture. The next CRA starts with a fresh
+DPB/POC state and suppresses leading RASL pictures. The own synthetic
+`hevc-eos-before-cra-*` fixtures reproduce the formerly emitted RASL picture
+and malformed markers; `tests/hevc_eos.rs` checks acceptance and exact errors.
+Generate separately with `python3 scripts/generate_hevc_eos_fixtures.py`;
+ordinary tests require neither FFmpeg nor network access. This qualifies the
+base-layer sequence transition, not remaining HEVC profiles or multilayer tools.

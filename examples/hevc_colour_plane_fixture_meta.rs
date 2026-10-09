@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         r.read_packet(0, i, &mut packet)?;
         let mut slices = vec![];
         for header in d.slice_headers(&packet)? {
-            slices.push(serde_json::json!({"entropy_byte_offset":header.entropy_byte_offset,"rbsp":header.rbsp,"idr":header.nal.is_irap(),"first":header.first,"dependent":header.dependent}));
+            slices.push(serde_json::json!({"entropy_byte_offset":header.entropy_byte_offset,"rbsp":header.rbsp,"idr":header.nal.is_irap(),"first":header.first,"dependent":header.dependent,"kind":header.nal.unit_type}));
         }
         packets.push(slices);
     }
