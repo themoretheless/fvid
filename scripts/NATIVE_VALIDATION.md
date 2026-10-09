@@ -950,3 +950,42 @@ core and filter state; it is refusal evidence, not acceptance. Sixty-three new
 assets regenerate deterministically with no foreign codec or network. Ordinary
 tests never execute the generator. This qualifies the listed layouts, not AAC
 coupling, all possible profiles/height combinations or PS on multi-element cores.
+
+### 2026-10-09 — dependent AAC CCE before target SBR
+
+`generate_he_aac_dependent_coupling_fixtures.py` hand-authors 80 nonzero AAC
+cases and 48 short MP4 videos. It covers 960/1024 core samples, SCE/CPE target,
+coupling points before/after target TNS, separate stereo gains, 24/48 kHz
+output, explicit/sync signalling and container-hinted implicit double-rate SBR,
+and both present and absent target FIL. The spectral CCE has four alternating
+nonzero coefficients; target TNS is active, so coupling before/after TNS is
+observably different. The generator is offline and reads owned Huffman tables
+and existing originally authored container/video seeds; no private media or
+FFmpeg is involved. Ordinary tests consume checked-in fixtures only.
+
+The PCM evidence has two parts: Python independently evaluates direct-cosine
+IMDCT, sine windows, first-order TNS and chronological overlap for the core;
+the Rust test passes that core into the separately qualified standalone SBR
+DSP to verify decoder composition. This is not a newly independent complete
+SBR implementation or a new external-codec accuracy comparison.
+
+`he_aac_dependent_coupling` checks all samples, checkpoint replay, reset,
+actual in-band SBR discovery, root/owned demux/export agreement, playback
+sample windows, interval slices and WAV geometry. Two malformed MP4 videos
+reproduce the exact missing-CCE-target error after a valid frame, and verify
+that parsed SBR histories roll back. Independent PCE coupling remains a
+refusal, explicitly tested across the signalling/rate/layout variants.
+
+The original constructor refusal was reproduced before admission changed:
+`SBR AAC coupling synthesis is not yet implemented`. Admission now allows
+only dependent PCE coupling: existing spectral mixing happens before target
+IMDCT and SBR. Independent CCE needs its own SBR state and mixing after SBR;
+SBR FIL directly following CCE is still unsupported. The reference order was
+inspected in [the primary decoder source](https://ffmpeg.org/doxygen/trunk/libavcodec_2aac_2aacdec_8c_source.html),
+used for research only, without production linkage or code copying.
+
+Local offline verification for this change: root/player library 909 passed,
+23 ignored; owned media library 432 passed, 1 ignored; all 42 AAC integration
+suites 172 passed. Total: 1513 passed, 24 ignored, no failures. Regeneration of
+all 53 new assets was byte-identical. This does not establish acceptance of
+independent CCE/SBR, CCE FIL, or untested profiles.

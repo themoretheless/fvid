@@ -64,7 +64,9 @@ fn sbr_layout(parsed: &AudioSpecificConfig) -> Result<bool> {
         return Ok(matches!(parsed.core.channel_configuration, 1..=7 | 11 | 12 | 14));
     };
     Ok(parsed.core.channel_configuration == 0
-        && program.coupling.is_empty())
+        // Dependent CCE is mixed into target spectra before their IMDCT/SBR.
+        // Independent CCE needs its own SBR state and mixing after SBR.
+        && program.coupling.iter().all(|(independent, _)| !independent))
 }
 impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {

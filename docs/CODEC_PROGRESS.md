@@ -6870,3 +6870,14 @@ export, intervals, WAV speaker masks and playback decoder factories. A CRC error
 in a later element preserves previous histories and rolls back earlier parsed extensions. AAC
 coupling with SBR and multi-element PS remain open; this is not universal codec
 profile qualification. See `scripts/NATIVE_VALIDATION.md` for fixture evidence.
+
+### 2026-10-09 — dependent AAC coupling with SBR
+
+The blanket coupled-PCE/SBR refusal above is superseded for dependent CCE.
+Nonzero spectral coupling before/after TNS now reaches target IMDCT and SBR;
+80 cases and 48 synthetic MP4 videos qualify mono/stereo, both frame sizes,
+core/double output clocks, target FIL present/absent and explicit/sync/hinted
+implicit signalling. Core PCM is independently computed; SBR composition uses
+the separately qualified own DSP. Missing-target videos verify exact refusal
+and rollback. Independent coupling with SBR and CCE-owned SBR FIL remain open,
+as do other unqualified AAC profiles/tools. Details: `scripts/NATIVE_VALIDATION.md`.
