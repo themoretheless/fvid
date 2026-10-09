@@ -27,11 +27,7 @@ fn matrix(bytes: &mut [u8], offset: usize) {
 /// Caller owns output and is responsible for discarding partial output on error.
 pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     let stream = super::adts::Aac::parse(data, &Default::default())?;
-    let last = stream
-        .frames
-        .last()
-        .ok_or_else(|| invalid("empty ADTS stream"))?;
-    if stream.frames[0].start != 0 || last.start + last.size != data.len() {
+    if !stream.has_complete_transport() {
         return Err(invalid(
             "ADTS remux requires complete frames without unrepresented leading or trailing data",
         ));

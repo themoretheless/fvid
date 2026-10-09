@@ -417,6 +417,7 @@ mod tests {
             Header {
                 sample_rate: 48_000,
                 channels: 2,
+                raw_blocks: 1,
                 header_bytes: 7,
                 frame_bytes: 370,
                 asc: [0x11, 0x90],
@@ -446,10 +447,10 @@ mod tests {
         let mut reserved = STEREO[293..293 + 14].to_vec();
         reserved[2] = (reserved[2] & 0b1100_0011) | (15 << 2);
         assert_eq!(header(&reserved), None, "reserved frequency");
-        // Two raw blocks in one frame are two sets of samples under one stamp.
+        // The transport count is admitted; the reader separates logical packets.
         let mut packed = STEREO[293..293 + 14].to_vec();
         packed[6] |= 1;
-        assert_eq!(header(&packed), None, "several blocks in one frame");
+        assert_eq!(header(&packed).unwrap().raw_blocks, 2, "two logical raw blocks");
     }
 
     /// Genuine own protected raw blocks exercise CRC checking and packet boundaries.

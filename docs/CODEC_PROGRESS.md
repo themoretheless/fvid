@@ -7726,3 +7726,45 @@ library, 456 owned library, 3 CRC, 5 PCE profiles, 13 existing PCE, 6 streaming,
 6 Main prediction, 3 Main tools, 3 extension flag, 3 SSR, 9 alignment and
 3 coupling. Twenty-four existing tests remain ignored. All 116 CRC/PCE-profile
 artifacts regenerate identically; no new acceptance test is ignored.
+
+## Owned ADTS multiplexed raw blocks
+
+ADTS transport headers now admit one to four raw blocks. Indexed and sequential
+readers separate them into logical AAC packets; each advances 1024 samples.
+Unprotected frames use the owned syntax readers through ID_END and byte
+alignment to find variable-length blocks. Protected frames validate the position
+table relative to the first raw block, header CRC and every block CRC before
+exposing any block. An invalid transport poisons the streaming reader without
+publishing its first block. Transport counts may vary while configuration and
+protection presence remain fixed. The indexed packet limit counts logical blocks.
+
+One hundred twenty authored companion videos have 240 ADTS variants: Main/LC/SSR,
+mono/stereo, explicit PCE or standard header layouts, short/long CPE and Main
+CCE, in two/three/four-block groups and mixed one/two/four-block groups.
+Independent Python polynomial division writes separate header/raw CRCs.
+Acceptance tests compare exact packet bytes, 1024-sample timestamps, complete
+nonzero MP4/ADTS PCM, intervals, playback checkpoint/replay, rewind and seeks.
+Six separate malformed transports retain valid authored AAC and isolate header
+CRC, raw CRC, invalid position, position/syntax disagreement and block count.
+Their passing refusal tests do not replace playback acceptance. A late raw CRC
+fixture checks whole-transport refusal after delivering the preceding frame.
+Forty-eight additional videos reuse explicit-PCE transition packets: all window
+sequences, sine/KBD changes, Main prediction and coupled source histories.
+
+The Frame index continues describing a logical AAC packet. Single-block frames
+retain existing header/offset metadata; multiplexed entries point directly to
+each raw payload and have header_bytes=0. This supersedes the prior multi-block
+framing refusal, without extending the supported AAC core tools or profiles.
+
+The remux acceptance exposed a production assumption that the final logical
+packet ended at the source EOF. For protected multiplexed frames the final CRC
+follows that packet. Indexed ADTS now records the complete transport span; the
+MP4 writer uses it to reject unrepresented data while preserving all logical
+packets. Indexed/sequential MP4 and Matroska remux PCM equals source ADTS.
+
+Final validation: 1422 selected successful test executions (908 root library,
+456 owned library and 58 integration tests), with 24 existing ignored tests.
+The expanded four multiblock tests passed for all 120 companion videos and
+240 ADTS variants. All 368 multiblock artifacts reproduce identically offline.
+No new acceptance test is ignored. This qualifies the saved core configurations,
+not all AAC profiles, SBR/PS combinations or hardware throughput.

@@ -1,4 +1,4 @@
-//! ADTS single-raw-block error protection (ISO/IEC 13818-7 §8.1.1.1).
+//! ADTS raw-block and multiplexed-header error protection (ISO/IEC 13818-7 §8.1.1.1).
 //! Uses the owned syntax readers; no PCM synthesis or predictor state is changed.
 use super::{Result, bits::BitReader, config::AacConfig, invalid};
 
@@ -13,6 +13,10 @@ pub struct Region {
 /// Ordered raw-block protection spans. Element IDs and ID_END are excluded.
 /// CPE's second ICS intentionally overlaps the first 192-bit region.
 pub fn regions(payload: &[u8], configuration: &[u8]) -> Result<Vec<Region>> {
+    scan(payload, configuration).map(|(regions, _)| regions)
+}
+
+fn scan(payload: &[u8], configuration: &[u8]) -> Result<(Vec<Region>, usize)> {
     let config = AacConfig::parse(configuration)?;
     let mut bits = BitReader::new(payload);
     let mut regions = Vec::new();
@@ -66,7 +70,13 @@ pub fn regions(payload: &[u8], configuration: &[u8]) -> Result<Vec<Region>> {
             }
         }
     }
-    Ok(regions)
+    Ok((regions, bits.position().div_ceil(8)))
+}
+
+/// Byte extent through ID_END and raw-block byte alignment. Needed when an
+/// unprotected ADTS transport frame multiplexes several variable-length blocks.
+pub fn raw_block_bytes(payload: &[u8], configuration: &[u8]) -> Result<usize> {
+    scan(payload, configuration).map(|(_, bytes)| bytes)
 }
 
 fn bit(crc: u16, value: bool) -> u16 {
@@ -90,6 +100,10 @@ pub fn checksum(header: &[u8; 7], payload: &[u8], configuration: &[u8]) -> Resul
             crc = bit(crc, byte & (1 << shift) != 0);
         }
     }
+    Ok(feed_regions(crc, payload, spans))
+}
+
+fn feed_regions(mut crc: u16, payload: &[u8], spans: Vec<Region>) -> u16 {
     for span in spans {
         for position in span.start..span.end {
             crc = bit(crc, payload[position / 8] & (1 << (7 - position % 8)) != 0);
@@ -98,7 +112,27 @@ pub fn checksum(header: &[u8; 7], payload: &[u8], configuration: &[u8]) -> Resul
             crc = bit(crc, false);
         }
     }
-    Ok(crc)
+    crc
+}
+
+/// Per-block CRC for multiplexed ADTS: protected raw regions without headers.
+pub fn raw_block_checksum(payload: &[u8], configuration: &[u8]) -> Result<u16> {
+    Ok(feed_regions(
+        0xffff,
+        payload,
+        regions(payload, configuration)?,
+    ))
+}
+
+/// Multiplexed ADTS header CRC includes fixed/variable headers and positions.
+pub fn header_checksum(header: &[u8; 7], positions: &[u8]) -> u16 {
+    let mut crc = 0xffff;
+    for byte in header.iter().chain(positions) {
+        for shift in (0..8).rev() {
+            crc = bit(crc, byte & (1 << shift) != 0);
+        }
+    }
+    crc
 }
 
 /// Reject corrupted single-block ADTS before handing its payload to a decoder.

@@ -37,7 +37,10 @@ const FREQUENCIES: [u32; 13] = [
 pub struct Header {
     pub sample_rate: u32,
     pub channels: u16,
-    /// Bytes of header, before the raw block: seven with no CRC, nine with one.
+    /// Raw AAC blocks multiplexed in this transport frame (one to four).
+    pub raw_blocks: u8,
+    /// Bytes before the first raw block: seven without CRC; 7 + 2*raw_blocks
+    /// with CRC (including positions and the header check).
     pub header_bytes: usize,
     /// Total frame length, header and CRC included, as the frame states it.
     pub frame_bytes: usize,
@@ -51,7 +54,7 @@ pub struct Header {
 ///
 /// `None` for a run of bytes no ADTS frame can start with: a missing syncword or
 /// layer, a reserved rate index, a frame length that does not reach past the header it
-/// is stored in, or a frame holding several raw blocks.
+/// is stored in, or a frame too short for its protection header.
 pub fn header(bytes: &[u8]) -> Option<Header> {
     let b = bytes.get(..7)?;
     // Twelve bits of syncword, then the one-bit version flag and the two-bit
@@ -66,14 +69,9 @@ pub fn header(bytes: &[u8]) -> Option<Header> {
     let channels = (u16::from(b[2] & 1) << 2) | u16::from(b[3] >> 6);
     let frame_bytes =
         (usize::from(b[3] & 3) << 11) | (usize::from(b[4]) << 3) | (usize::from(b[5]) >> 5);
-    let header_bytes = if b[1] & 1 == 1 { 7 } else { 9 };
+    let raw_blocks = (b[6] & 3) + 1;
+    let header_bytes = if b[1] & 1 == 1 { 7 } else { 7 + usize::from(raw_blocks) * 2 };
     if frame_bytes < header_bytes {
-        return None;
-    }
-    // Two bits at the end of the fixed header count the raw blocks after the
-    // first; a frame that holds two holds two sets of samples, and the running
-    // count of 1024 per frame would fall behind them.
-    if b[6] & 3 != 0 {
         return None;
     }
     let &sample_rate = FREQUENCIES.get(usize::from(frequency))?;
@@ -87,6 +85,7 @@ pub fn header(bytes: &[u8]) -> Option<Header> {
     Some(Header {
         sample_rate,
         channels: if channels == 7 {8} else {channels},
+        raw_blocks,
         header_bytes,
         frame_bytes,
         asc,
@@ -109,13 +108,58 @@ fn packet_configuration(header: Header, packet: &[u8]) -> Result<Vec<u8>> {
     program.audio_specific_config()
 }
 
+/// Return each raw block's byte range within the body following seven fixed
+/// header bytes. Verify all multiplexed checks before exposing any block.
+fn raw_ranges(fixed: &[u8; 7], body: &[u8], configuration: &[u8]) -> Result<Vec<std::ops::Range<usize>>> {
+    let frame = header(fixed).ok_or_else(|| invalid("invalid ADTS header"))?;
+    if body.len() != frame.frame_bytes - 7 { return Err(invalid("truncated ADTS frame")); }
+    let start = frame.header_bytes - 7;
+    if frame.raw_blocks == 1 {
+        if start == 2 {
+            adts_crc::verify(fixed, u16::from_be_bytes([body[0], body[1]]), &body[start..], configuration).map_err(|e|invalid(&e.0))?;
+        }
+        return Ok(vec![start..body.len()]);
+    }
+    let mut ranges = Vec::new();
+    if start == 0 {
+        let mut at = 0;
+        for _ in 0..frame.raw_blocks {
+            if at == body.len() { return Err(invalid("ADTS raw block count disagrees with frame length")); }
+            let bytes = adts_crc::raw_block_bytes(&body[at..], configuration).map_err(|e|invalid(&e.0))?;
+            ranges.push(at..at + bytes); at += bytes;
+        }
+        if at != body.len() { return Err(invalid("ADTS raw block count disagrees with frame length")); }
+    } else {
+        let table = start - 2;
+        let stored = u16::from_be_bytes([body[table], body[table + 1]]);
+        if adts_crc::header_checksum(fixed, &body[..table]) != stored { return Err(invalid("ADTS header CRC mismatch")); }
+        let mut boundaries = vec![start];
+        for offset in body[..table].chunks_exact(2) {
+            let next = start + usize::from(u16::from_be_bytes([offset[0], offset[1]]));
+            if next <= *boundaries.last().unwrap() || next >= body.len() { return Err(invalid("invalid ADTS raw block position")); }
+            boundaries.push(next);
+        }
+        boundaries.push(body.len());
+        for pair in boundaries.windows(2) {
+            let (at, end) = (pair[0], pair[1]);
+            if end - at < 3 { return Err(invalid("invalid ADTS raw block position")); }
+            let payload = &body[at..end - 2];
+            if adts_crc::raw_block_bytes(payload, configuration).map_err(|e|invalid(&e.0))? != payload.len() { return Err(invalid("ADTS raw block position disagrees with syntax")); }
+            let stored = u16::from_be_bytes([body[end - 2], body[end - 1]]);
+            if adts_crc::raw_block_checksum(payload, configuration).map_err(|e|invalid(&e.0))? != stored { return Err(invalid("ADTS raw block CRC mismatch")); }
+            ranges.push(at..end - 2);
+        }
+    }
+    Ok(ranges)
+}
+
 /// One frame of the stream: where it sits in the file, how long it is, and the
 /// sample it starts on.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Frame {
     pub start: usize,
     pub size: usize,
-    /// Bytes of ADTS header on this frame, which the packet leaves off.
+    /// Header bytes to strip; zero for a separately indexed multiplexed raw block.
     pub header_bytes: usize,
     /// The coding and geometry this frame's header states, kept so a test can
     /// name what was read rather than a copy of the numbers the file says, and
@@ -135,6 +179,7 @@ pub struct Aac {
     pub frames: Vec<Frame>,
     pub configuration: Vec<u8>,
     data: Vec<u8>,
+    transport_span: std::ops::Range<usize>,
 }
 
 impl Aac {
@@ -153,6 +198,7 @@ impl Aac {
         let mut found: Vec<Header> = Vec::new();
         let mut starts: Vec<usize> = Vec::new();
         let mut pos = 0usize;
+        let mut raw_count = 0usize;
         while pos + 7 <= bytes.len() && header(&bytes[pos..]).is_none() {
             pos += 1;
         }
@@ -162,7 +208,8 @@ impl Aac {
                 // A frame reaching past what the file holds is a truncated tail.
                 break;
             }
-            if found.len() >= limits.packets {
+            raw_count += usize::from(at.raw_blocks);
+            if raw_count > limits.packets {
                 return Err(invalid(&format!(
                     "stream is over the {} packet limit",
                     limits.packets
@@ -200,7 +247,7 @@ impl Aac {
         for (at, start) in found.iter().zip(&starts) {
             if at.sample_rate != first.sample_rate
                 || at.channels != first.channels
-                || at.header_bytes != first.header_bytes
+                || (at.header_bytes == 7) != (first.header_bytes == 7)
                 || at.asc != first.asc
             {
                 return Err(invalid(&format!(
@@ -212,19 +259,18 @@ impl Aac {
                     first.channels
                 )));
             }
-            if at.header_bytes == 9 {
-                let fixed: &[u8; 7] = bytes[*start..*start + 7].try_into().unwrap();
-                adts_crc::verify(fixed, u16::from_be_bytes(bytes[*start + 7..*start + 9].try_into().unwrap()),
-                    &bytes[*start + 9..*start + at.frame_bytes], &configuration).map_err(|e| invalid(&e.0))?;
+            let fixed: &[u8; 7] = bytes[*start..*start + 7].try_into().unwrap();
+            let body = &bytes[*start + 7..*start + at.frame_bytes];
+            for range in raw_ranges(fixed, body, &configuration)? {
+                if at.raw_blocks == 1 {
+                    frames.push(Frame { start: *start, size: at.frame_bytes,
+                        header_bytes: at.header_bytes, asc: at.asc, pts });
+                } else {
+                    frames.push(Frame { start: *start + 7 + range.start, size: range.len(),
+                        header_bytes: 0, asc: at.asc, pts });
+                }
+                pts += u64::from(config.frame_samples);
             }
-            frames.push(Frame {
-                start: *start,
-                size: at.frame_bytes,
-                header_bytes: at.header_bytes,
-                asc: at.asc,
-                pts,
-            });
-            pts += u64::from(config.frame_samples);
         }
         Ok(Self {
             sample_rate: first.sample_rate,
@@ -233,7 +279,14 @@ impl Aac {
             frames,
             configuration,
             data: bytes.to_vec(),
+            transport_span: first_start..pos,
         })
+    }
+
+    /// Every source byte belongs to a complete transport frame, including CRCs.
+    /// Recovery parsing may otherwise leave unrepresented leading/trailing data.
+    pub fn has_complete_transport(&self) -> bool {
+        self.transport_span.start == 0 && self.transport_span.end == self.data.len()
     }
 
     /// Frames the stream hands over as packets.
@@ -305,14 +358,15 @@ fn check_packet_limit(header: Header, max: usize) -> Result<()> {
     Ok(())
 }
 
-/// Sequential ADTS reader. Retains at most one frame (ADTS length is 13 bits),
+/// Sequential ADTS reader. Retains blocks from at most one transport frame
+/// (ADTS length is 13 bits),
 /// with no file-size or packet-count allocation. Input starts at an ADTS header;
 /// unlike the recovery-oriented slice parser, truncated tails are errors.
 pub struct StreamReader<R> {
     source: R,
     configuration: Header,
     first: Option<(Header, [u8; 7])>,
-    pending: Option<Vec<u8>>,
+    pending: std::collections::VecDeque<Vec<u8>>,
     asc: Vec<u8>,
     finished: bool,
     max_packet_bytes: usize,
@@ -322,21 +376,21 @@ impl<R: std::io::Read> StreamReader<R> {
         Self::open_with_packet_limit(source, usize::MAX)
     }
 
-    /// Bound raw AAC payload before allocating it, including PCE bootstrap.
+    /// Bound retained transport payload before allocating it, including PCE
+    /// bootstrap. A multiplexed frame's payload shares this one frame budget.
     /// ADTS headers and an optional two-byte CRC are framing, not payload.
     pub fn open_with_packet_limit(mut source: R, max_packet_bytes: usize) -> Result<Self> {
         let mut bytes = [0; 7];
         source.read_exact(&mut bytes)?;
         let mut configuration = header(&bytes).ok_or_else(|| invalid("invalid ADTS header"))?;
         check_packet_limit(configuration, max_packet_bytes)?;
-        let mut pending=None;
+        let mut pending=std::collections::VecDeque::new();
         let asc=if configuration.channels==0 {
             let mut packet=vec![0;configuration.frame_bytes-7];source.read_exact(&mut packet)?;
-            let stored = if configuration.header_bytes==9 {Some(u16::from_be_bytes([packet[0],packet[1]]))} else {None};
-            if stored.is_some() {packet.drain(..2);}
-            let asc=packet_configuration(configuration,&packet)?;
-            if let Some(stored) = stored { adts_crc::verify(&bytes, stored, &packet, &asc).map_err(|e|invalid(&e.0))?; }
-            pending=Some(packet);asc
+            let start = configuration.header_bytes - 7;
+            let asc=packet_configuration(configuration,&packet[start..])?;
+            for range in raw_ranges(&bytes, &packet, &asc)? { pending.push_back(packet[range].to_vec()); }
+            asc
         } else {configuration.asc.to_vec()};
         let config = AacConfig::parse(&asc)?;
         if configuration.channels==0 {configuration.channels=u16::from(config.channels);}
@@ -348,7 +402,7 @@ impl<R: std::io::Read> StreamReader<R> {
         Ok(Self {
             source,
             configuration,
-            first: if pending.is_some() {None} else {Some((configuration, bytes))},
+            first: if !pending.is_empty() {None} else {Some((configuration, bytes))},
             pending, asc,
             finished: false,
             max_packet_bytes,
@@ -367,7 +421,7 @@ impl<R: std::io::Read> StreamReader<R> {
         if self.finished {
             return Ok(None);
         }
-        if let Some(packet)=self.pending.take() {return Ok(Some(packet));}
+        if let Some(packet)=self.pending.pop_front() {return Ok(Some(packet));}
         self.finished = true;
         let (next, fixed) = if let Some(header) = self.first.take() {
             header
@@ -382,20 +436,16 @@ impl<R: std::io::Read> StreamReader<R> {
             (header(&bytes).ok_or_else(|| invalid("invalid ADTS frame boundary"))?, bytes)
         };
         if next.asc != self.configuration.asc
-            || next.header_bytes != self.configuration.header_bytes
+            || (next.header_bytes == 7) != (self.configuration.header_bytes == 7)
         {
             return Err(invalid("ADTS configuration changes between frames"));
         }
         check_packet_limit(next, self.max_packet_bytes)?;
         let mut remaining = vec![0; next.frame_bytes - 7];
         self.source.read_exact(&mut remaining)?;
-        if next.header_bytes == 9 {
-            let stored = u16::from_be_bytes([remaining[0], remaining[1]]);
-            remaining.drain(..2);
-            adts_crc::verify(&fixed, stored, &remaining, &self.asc).map_err(|e|invalid(&e.0))?;
-        }
+        for range in raw_ranges(&fixed, &remaining, &self.asc)? { self.pending.push_back(remaining[range].to_vec()); }
         self.finished = false;
-        Ok(Some(remaining))
+        Ok(self.pending.pop_front())
     }
 }
 

@@ -11,8 +11,9 @@ Explicit PCE bootstrap preserves Main/LC/SSR profiles in mono/stereo ADTS.
 Six Main coupling cases qualify tags 1/15 at points 0/1/3 with unity gains
 and no target TNS, including checkpoint, rewind and seek. Single-raw-block
 ADTS CRC checks header bits, protected SCE/CPE/CCE/LFE prefixes, the second
-CPE ICS and complete PCE/DSE, with prescribed zero padding. Multi-raw-block
-ADTS framing remains unsupported. Wider Main
+CPE ICS and complete PCE/DSE, with prescribed zero padding. ADTS transport
+frames with one to four raw blocks expose separate 1024-sample packets;
+multiplexed protection uses a header CRC and a CRC per raw block. Wider Main
 coupling, multichannel PCE and SBR/PS interactions still need qualification;
 these fixtures do not establish complete AAC profile conformance.
 

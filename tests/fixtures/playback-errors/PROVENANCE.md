@@ -2419,3 +2419,41 @@ Generator: `scripts/generate_adts_crc_fixtures.py`. Existing authored AVC and
 container seed only; AAC syntax and protection boundaries are written locally.
 No private frames, audio, codec parameter sets or foreign codec executable.
 Normative region definition: ISO/IEC 13818-7:2004 section 8.1.1.1.
+
+## ADTS multiblock fixture provenance
+
+ADTS transport headers now admit one to four raw blocks. Indexed and sequential
+readers separate them into logical AAC packets; each advances 1024 samples.
+Unprotected frames use the owned syntax readers through ID_END and byte
+alignment to find variable-length blocks. Protected frames validate the position
+table relative to the first raw block, header CRC and every block CRC before
+exposing any block. An invalid transport poisons the streaming reader without
+publishing its first block. Transport counts may vary while configuration and
+protection presence remain fixed. The indexed packet limit counts logical blocks.
+
+One hundred twenty authored companion videos have 240 ADTS variants: Main/LC/SSR,
+mono/stereo, explicit PCE or standard header layouts, short/long CPE and Main
+CCE, in two/three/four-block groups and mixed one/two/four-block groups.
+Independent Python polynomial division writes separate header/raw CRCs.
+Acceptance tests compare exact packet bytes, 1024-sample timestamps, complete
+nonzero MP4/ADTS PCM, intervals, playback checkpoint/replay, rewind and seeks.
+Six separate malformed transports retain valid authored AAC and isolate header
+CRC, raw CRC, invalid position, position/syntax disagreement and block count.
+Their passing refusal tests do not replace playback acceptance. A late raw CRC
+fixture checks whole-transport refusal after delivering the preceding frame.
+Forty-eight additional videos reuse explicit-PCE transition packets: all window
+sequences, sine/KBD changes, Main prediction and coupled source histories.
+
+The Frame index continues describing a logical AAC packet. Single-block frames
+retain existing header/offset metadata; multiplexed entries point directly to
+each raw payload and have header_bytes=0. This supersedes the prior multi-block
+framing refusal, without extending the supported AAC core tools or profiles.
+
+Generator: `scripts/generate_adts_multiblock_fixtures.py`. All AAC sources and
+AVC/container seeds are existing authored fixtures. No private source media,
+frames, audio or codec parameter sets are copied. Generation uses the own offline `adts_crc_regions` helper for transition
+packet boundaries and independent Python polynomial division for CRC values.
+Ordinary tests read saved files and invoke no generator or helper. Neither
+generation nor tests use FFmpeg, a foreign codec executable or network access.
+Position and error-protection semantics: ISO/IEC 13818-7:2004, tables 5-7 and
+section 8.1.1.1; CRC values use independent GF(2) polynomial division.
