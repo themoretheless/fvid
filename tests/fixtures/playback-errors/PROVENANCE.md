@@ -2369,3 +2369,23 @@ used, and no codec executable or network call occurs.
 Enabled acceptance tests require PCM oracle agreement and actual export/player
 replay for every valid case. Invalid-order refusal is separately named and does
 not stand in for playback acceptance. Fixtures are not generated during tests.
+
+## AAC Main/LC/SSR explicit PCE bootstrap
+
+PCE serialization now preserves the configured Main/LC/SSR object instead of
+writing LC; ADTS bootstrap requires PCE profile/rate to match its header. Twelve
+authored mono/stereo cases cover these profiles and Main CCE tags 1/15 at
+coupling points 0/1/3. Independent PCM references, MP4/ADTS export, intervals,
+checkpoint replay, rewind and seeks are covered by enabled acceptance tests.
+Main coupling uses unity gains and no target TNS; wider interactions remain
+unqualified. Four profile/rate mismatches and one truncated Main CCE END are
+separate refusal regressions, including decoder history rollback.
+
+All sixty artifacts regenerate offline without FFmpeg or network access. Tests
+read saved fixtures. CRC-framed ADTS variants contain placeholder CRC bytes and
+qualify framing offsets only, not checksum validation or CRC conformance.
+
+The generator is `scripts/generate_aac_pce_profile_fixtures.py`; it uses only
+existing authored audio/video seeds, own PCE/ADTS bit writing, scalar Main
+prediction and direct filterbank references. No private media or parameter
+sets are copied. PCM agreement qualifies these authored scenarios only.

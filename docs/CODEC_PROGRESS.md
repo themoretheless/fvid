@@ -7675,3 +7675,23 @@ offline without FFmpeg (1391 selected successful executions). Twenty-four
 existing unrelated tests remain ignored. All new Main tools acceptance tests
 are enabled. These results qualify the saved scenarios, not unrestricted codec
 conformance or throughput.
+
+## AAC Main/LC/SSR explicit PCE bootstrap
+
+PCE serialization now preserves the configured Main/LC/SSR object instead of
+writing LC; ADTS bootstrap requires PCE profile/rate to match its header. Twelve
+authored mono/stereo cases cover these profiles and Main CCE tags 1/15 at
+coupling points 0/1/3. Independent PCM references, MP4/ADTS export, intervals,
+checkpoint replay, rewind and seeks are covered by enabled acceptance tests.
+Main coupling uses unity gains and no target TNS; wider interactions remain
+unqualified. Four profile/rate mismatches and one truncated Main CCE END are
+separate refusal regressions, including decoder history rollback.
+
+All sixty artifacts regenerate offline without FFmpeg or network access. Tests
+read saved fixtures. CRC-framed ADTS variants contain placeholder CRC bytes and
+qualify framing offsets only, not checksum validation or CRC conformance.
+
+Delivery validation: 908 root library, 456 owned library, 5 new PCE profile,
+13 existing PCE, 6 Main prediction, 3 Main tools, 3 extension flag, 3 SSR,
+9 SSR alignment and 3 SSR coupling tests passed offline (1409 executions).
+Twenty-four existing tests remain ignored; no new acceptance is ignored.

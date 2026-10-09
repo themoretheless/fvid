@@ -198,7 +198,7 @@ impl ProgramConfig {
         }
         Ok((mask, mapping, channels.into_iter().map(|c| c.2).collect()))
     }
-    /// Serialize AAC-LC initialization with this explicit program.
+    /// Serialize 1024-sample Main/LC/SSR initialization with this explicit program.
     pub fn audio_specific_config(&self) -> Result<Vec<u8>> {
         if self.elements.len() > 48
             || self.associated_data.len() > 7
@@ -216,8 +216,8 @@ impl ProgramConfig {
             .iter()
             .position(|r| *r == self.sample_rate)
             .ok_or_else(|| invalid("PCE sample rate has no index"))?;
-        if !matches!(self.object_type, 2 | 3) {
-            return Err(invalid("PCE initialization requires AAC-LC"));
+        if !matches!(self.object_type, 1 | 2 | 3) {
+            return Err(invalid("PCE initialization requires AAC Main, LC or SSR"));
         }
         let mut fields = Vec::<bool>::new();
         let put = |fields: &mut Vec<bool>, value: u32, count: u8| {
@@ -225,12 +225,12 @@ impl ProgramConfig {
                 fields.push(value & (1 << shift) != 0);
             }
         };
-        put(&mut fields, 2, 5);
+        put(&mut fields, u32::from(self.object_type), 5);
         put(&mut fields, index as u32, 4);
         put(&mut fields, 0, 4);
         put(&mut fields, 0, 3);
         put(&mut fields, u32::from(self.tag), 4);
-        put(&mut fields, 1, 2);
+        put(&mut fields, u32::from(self.object_type - 1), 2);
         put(&mut fields, index as u32, 4);
         for (position, width) in [
             (Position::Front, 4),

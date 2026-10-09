@@ -105,7 +105,7 @@ fn packet_configuration(header: Header, packet: &[u8]) -> Result<Vec<u8>> {
         }
     }
     let program=ProgramConfig::read(&mut bits,0)?;
-    if program.sample_rate!=header.sample_rate || program.object_type!=2 || header.asc[0]>>3!=2 {return Err(invalid("ADTS PCE disagrees with frame coding or rate"));}
+    if program.sample_rate!=header.sample_rate || program.object_type!=(header.asc[0]>>3) {return Err(invalid("ADTS PCE disagrees with frame coding or rate"));}
     program.audio_specific_config()
 }
 
@@ -187,7 +187,7 @@ impl Aac {
         let first = found[0];
         // The setup block is one record for the stream, so the coding the first
         // frame states is checked against the repository's own AAC config
-        // parser: it is what names AAC-LC as the only object this build decodes.
+        // parser, which selects the supported Main/LC/SSR object and frame geometry.
         let configuration=packet_configuration(first,&bytes[starts[0]+first.header_bytes..starts[0]+first.frame_bytes])?;
         let config = AacConfig::parse(&configuration)?;
         if config.sample_rate != first.sample_rate || first.channels!=0 && u16::from(config.channels) != first.channels {

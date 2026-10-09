@@ -1,0 +1,1231 @@
+{
+  "provenance": "Own PCE/ADTS bits and authored AAC packet fixtures. Independent existing scalar Main/LC/SSR PCM references. No private media, foreign codec executable or network.",
+  "cases": [
+    {
+      "name": "main-1",
+      "object_type": 1,
+      "channels": 1,
+      "asc": "0b00018400000000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 14,
+          "samples": 1024
+        },
+        {
+          "offset": 14,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 21,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 28,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 35,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 42,
+          "bytes": 17,
+          "samples": 1024
+        },
+        {
+          "offset": 59,
+          "bytes": 17,
+          "samples": 1024
+        },
+        {
+          "offset": 76,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 83,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 90,
+          "bytes": 7,
+          "samples": 1024
+        },
+        {
+          "offset": 97,
+          "bytes": 8,
+          "samples": 1024
+        },
+        {
+          "offset": 105,
+          "bytes": 14,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-1-synthetic.mp4",
+        "sha256": "d47a6cd99248862881ebfaca9a0e178a20e963ef3bc51e3aa72fa3a06d0c84ff",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b00018400000000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-1-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-1-synthetic.aac",
+          "sha256": "af21e69a3d269a492000937938269d4cf81c35159e7f74545923e6f26e81ae30",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-1-crc-synthetic.aac",
+          "sha256": "069f47871174bc3f4257c30ea388bacef06a5204953d30e40ec59d9c29a2ba16",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-2",
+      "object_type": 1,
+      "channels": 2,
+      "asc": "0b00018400002000",
+      "frames": [
+        {
+          "offset": 119,
+          "bytes": 23,
+          "samples": 1024
+        },
+        {
+          "offset": 142,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 158,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 174,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 190,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 206,
+          "bytes": 46,
+          "samples": 1024
+        },
+        {
+          "offset": 252,
+          "bytes": 46,
+          "samples": 1024
+        },
+        {
+          "offset": 298,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 314,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 330,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 346,
+          "bytes": 17,
+          "samples": 1024
+        },
+        {
+          "offset": 363,
+          "bytes": 23,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-2-synthetic.mp4",
+        "sha256": "31702164763e1cc9f0c59c199d88c9781be7081abfb5b8c23c773fd074fadcf7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b00018400002000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-2-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-2-synthetic.aac",
+          "sha256": "0e63aa90eb2d164c8b1df3e0602ff1525d9322b4fc28da06b2988429905d0820",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-2-crc-synthetic.aac",
+          "sha256": "0ac4b2c09d066d5808a198a404b2c06a8ead46710a4ca42b14a42d2f66c7dd80",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "lc-1",
+      "object_type": 2,
+      "channels": 1,
+      "asc": "1300058400000000",
+      "frames": [
+        {
+          "offset": 386,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 402,
+          "bytes": 9,
+          "samples": 1024
+        },
+        {
+          "offset": 411,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 436,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 461,
+          "bytes": 9,
+          "samples": 1024
+        },
+        {
+          "offset": 470,
+          "bytes": 16,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "video": {
+        "file": "aac-pce-profile-lc-1-synthetic.mp4",
+        "sha256": "4212334d873f403d835ac9cf10569512c2ffd3a822607fbb7c547d74d010bcfb",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1300058400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pcm_file": "aac-pce-profile-lc-1-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-lc-1-synthetic.aac",
+          "sha256": "f652b30fc248c5232247fe78c9d5a444d814577b9e600f96748ce45ce1766138",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-lc-1-crc-synthetic.aac",
+          "sha256": "6198fac0487322789c3fcab3439d16dcbbe678c43776d023c05aba299efaaa1e",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "lc-2",
+      "object_type": 2,
+      "channels": 2,
+      "asc": "1300058400002000",
+      "frames": [
+        {
+          "offset": 486,
+          "bytes": 23,
+          "samples": 1024
+        },
+        {
+          "offset": 509,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 525,
+          "bytes": 47,
+          "samples": 1024
+        },
+        {
+          "offset": 572,
+          "bytes": 47,
+          "samples": 1024
+        },
+        {
+          "offset": 619,
+          "bytes": 16,
+          "samples": 1024
+        },
+        {
+          "offset": 635,
+          "bytes": 23,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "video": {
+        "file": "aac-pce-profile-lc-2-synthetic.mp4",
+        "sha256": "f03171dafddf1b52b73133f6049a8c3cb92066bad4d8eb8d17c65df8a42b896c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1300058400002000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pcm_file": "aac-pce-profile-lc-2-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-lc-2-synthetic.aac",
+          "sha256": "cc46a65a9712b35fd5cbb85b3300af2beaccd0b375735f86e06abefa12a0a6a2",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-lc-2-crc-synthetic.aac",
+          "sha256": "92ae39447adc8f9aab4daab27de46bbb5e0600400d007451b41b52a0b96d2c6c",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "ssr-1",
+      "object_type": 3,
+      "channels": 1,
+      "asc": "1b00098400000000",
+      "frames": [
+        {
+          "offset": 658,
+          "bytes": 61,
+          "samples": 1024
+        },
+        {
+          "offset": 719,
+          "bytes": 57,
+          "samples": 1024
+        },
+        {
+          "offset": 776,
+          "bytes": 108,
+          "samples": 1024
+        },
+        {
+          "offset": 884,
+          "bytes": 108,
+          "samples": 1024
+        },
+        {
+          "offset": 992,
+          "bytes": 58,
+          "samples": 1024
+        },
+        {
+          "offset": 1050,
+          "bytes": 61,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "video": {
+        "file": "aac-pce-profile-ssr-1-synthetic.mp4",
+        "sha256": "6d4d02b3f74ca2907998b11cda847830b790ccbb394c32d3295b3a0dec9c932b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b00098400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pcm_file": "aac-pce-profile-ssr-1-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-ssr-1-synthetic.aac",
+          "sha256": "a2e4df6e63e5501c509c9c73a9c5df8163f115b5d33123a7657b76380e8af6b9",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-ssr-1-crc-synthetic.aac",
+          "sha256": "0e0e33ce4f570dd84bca128beef67d48cb5ed43c471bbf3889461b13e59cd25e",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "ssr-2",
+      "object_type": 3,
+      "channels": 2,
+      "asc": "1b00098400002000",
+      "frames": [
+        {
+          "offset": 1111,
+          "bytes": 112,
+          "samples": 1024
+        },
+        {
+          "offset": 1223,
+          "bytes": 111,
+          "samples": 1024
+        },
+        {
+          "offset": 1334,
+          "bytes": 212,
+          "samples": 1024
+        },
+        {
+          "offset": 1546,
+          "bytes": 212,
+          "samples": 1024
+        },
+        {
+          "offset": 1758,
+          "bytes": 113,
+          "samples": 1024
+        },
+        {
+          "offset": 1871,
+          "bytes": 112,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "video": {
+        "file": "aac-pce-profile-ssr-2-synthetic.mp4",
+        "sha256": "e0859e766cf1f04f2f37e3b273eaeb0868963ec105eb78b76a35d921d9584cfb",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b00098400002000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "pcm_file": "aac-pce-profile-ssr-2-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-ssr-2-synthetic.aac",
+          "sha256": "566803558ebe460dfc08e305df05b78f79aaef559744065fd19a9639062953da",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-ssr-2-crc-synthetic.aac",
+          "sha256": "66c3e311117117ae88fb904944576c6a2e44a7bc8cd7cc03b35436cea1a8283b",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-cce-1-0",
+      "object_type": 1,
+      "channels": 1,
+      "point": 0,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b000184000400178000",
+      "frames": [
+        {
+          "offset": 1983,
+          "bytes": 29,
+          "samples": 1024
+        },
+        {
+          "offset": 2012,
+          "bytes": 21,
+          "samples": 1024
+        },
+        {
+          "offset": 2033,
+          "bytes": 21,
+          "samples": 1024
+        },
+        {
+          "offset": 2054,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2076,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2098,
+          "bytes": 39,
+          "samples": 1024
+        },
+        {
+          "offset": 2137,
+          "bytes": 39,
+          "samples": 1024
+        },
+        {
+          "offset": 2176,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2198,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2220,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2242,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 2266,
+          "bytes": 30,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-cce-1-0-synthetic.mp4",
+        "sha256": "8662f3976e6e3069fceaea6ff2b4be832914674347912eb5eb6e556ab62c1933",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b000184000400178000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-cce-1-0-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-cce-1-0-synthetic.aac",
+          "sha256": "5753fc8b41f2c2ee20a5a7d5c8a5813bcd371c1145b6bee9d4b2da0b60e85134",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-cce-1-0-crc-synthetic.aac",
+          "sha256": "89960a745639dad30b664f9d45cb6da842596ccb461b3341c7b830e8865b6649",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-cce-1-1",
+      "object_type": 1,
+      "channels": 1,
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b000184000400178000",
+      "frames": [
+        {
+          "offset": 2296,
+          "bytes": 29,
+          "samples": 1024
+        },
+        {
+          "offset": 2325,
+          "bytes": 21,
+          "samples": 1024
+        },
+        {
+          "offset": 2346,
+          "bytes": 21,
+          "samples": 1024
+        },
+        {
+          "offset": 2367,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2389,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2411,
+          "bytes": 39,
+          "samples": 1024
+        },
+        {
+          "offset": 2450,
+          "bytes": 39,
+          "samples": 1024
+        },
+        {
+          "offset": 2489,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2511,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2533,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2555,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 2579,
+          "bytes": 30,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-cce-1-1-synthetic.mp4",
+        "sha256": "8b0cc51b3afd97a934578b4d6c015d7a422f01d027669eee4564b883e9d0a4a3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b000184000400178000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-cce-1-1-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-cce-1-1-synthetic.aac",
+          "sha256": "a60a3d6ba2a494cf0aad79def0909a52b2c47707b08e29b018608dab75d6d562",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-cce-1-1-crc-synthetic.aac",
+          "sha256": "e4eb29489919f99d74229e4ef2648eb441e7d4f931c72feba0aa7898595fcac9",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-cce-1-3",
+      "object_type": 1,
+      "channels": 1,
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b0001840004011f8000",
+      "frames": [
+        {
+          "offset": 2609,
+          "bytes": 29,
+          "samples": 1024
+        },
+        {
+          "offset": 2638,
+          "bytes": 21,
+          "samples": 1024
+        },
+        {
+          "offset": 2659,
+          "bytes": 29,
+          "samples": 1024
+        },
+        {
+          "offset": 2688,
+          "bytes": 39,
+          "samples": 1024
+        },
+        {
+          "offset": 2727,
+          "bytes": 31,
+          "samples": 1024
+        },
+        {
+          "offset": 2758,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2780,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2802,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2824,
+          "bytes": 22,
+          "samples": 1024
+        },
+        {
+          "offset": 2846,
+          "bytes": 31,
+          "samples": 1024
+        },
+        {
+          "offset": 2877,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 2901,
+          "bytes": 30,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-cce-1-3-synthetic.mp4",
+        "sha256": "052b2d6d3d7366c0ed1c99a79445aa9ec06e2bab278ec61aa7653a9d7f468b83",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840004011f8000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-cce-1-3-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-cce-1-3-synthetic.aac",
+          "sha256": "ac883abe2bed16faec383544cbd1c12c1dd36895c7aea19bd34636bda96eada0",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-cce-1-3-crc-synthetic.aac",
+          "sha256": "d71f3ff732e728acd5fbb2aa6979eae033192f454bd85a353c3e8eb547397102",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-cce-2-0",
+      "object_type": 1,
+      "channels": 2,
+      "point": 0,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b000184000420178000",
+      "frames": [
+        {
+          "offset": 2931,
+          "bytes": 32,
+          "samples": 1024
+        },
+        {
+          "offset": 2963,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 2987,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 3011,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3036,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3061,
+          "bytes": 42,
+          "samples": 1024
+        },
+        {
+          "offset": 3103,
+          "bytes": 42,
+          "samples": 1024
+        },
+        {
+          "offset": 3145,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3170,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3195,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3220,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3247,
+          "bytes": 33,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-cce-2-0-synthetic.mp4",
+        "sha256": "f45d67325ae95e86cbf1399fb5ec73b3747ed2eefdb2fd067fef2856f52e25e8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b000184000420178000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-cce-2-0-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-cce-2-0-synthetic.aac",
+          "sha256": "c70d26c30b9750e39aec6f930ba082e08cfdadce95024439cc77c3b471ea89f7",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-cce-2-0-crc-synthetic.aac",
+          "sha256": "0fb05a9726a9de510f92ae4e3bc718a12c2befb868c11ad918d6984bbf1b5888",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-cce-2-1",
+      "object_type": 1,
+      "channels": 2,
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b000184000420178000",
+      "frames": [
+        {
+          "offset": 3280,
+          "bytes": 32,
+          "samples": 1024
+        },
+        {
+          "offset": 3312,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 3336,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 3360,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3385,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3410,
+          "bytes": 42,
+          "samples": 1024
+        },
+        {
+          "offset": 3452,
+          "bytes": 42,
+          "samples": 1024
+        },
+        {
+          "offset": 3494,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3519,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3544,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3569,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3596,
+          "bytes": 33,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-cce-2-1-synthetic.mp4",
+        "sha256": "1e69d9e25604a5936f96895272eefd3233994f1178b86b2ed1d126ef5d72aa02",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b000184000420178000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-cce-2-1-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-cce-2-1-synthetic.aac",
+          "sha256": "951ffb02c11819957e688357150a8f39cdf1008c710b1bb4baf430348aef09e6",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-cce-2-1-crc-synthetic.aac",
+          "sha256": "9af7a40a3d54a3d37ef7f9decf6241c24c7ae57107dd0d5af5823fcc5d1c338c",
+          "crc": true
+        }
+      ]
+    },
+    {
+      "name": "main-cce-2-3",
+      "object_type": 1,
+      "channels": 2,
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b0001840004211f8000",
+      "frames": [
+        {
+          "offset": 3629,
+          "bytes": 32,
+          "samples": 1024
+        },
+        {
+          "offset": 3661,
+          "bytes": 24,
+          "samples": 1024
+        },
+        {
+          "offset": 3685,
+          "bytes": 33,
+          "samples": 1024
+        },
+        {
+          "offset": 3718,
+          "bytes": 43,
+          "samples": 1024
+        },
+        {
+          "offset": 3761,
+          "bytes": 35,
+          "samples": 1024
+        },
+        {
+          "offset": 3796,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3821,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3846,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3871,
+          "bytes": 25,
+          "samples": 1024
+        },
+        {
+          "offset": 3896,
+          "bytes": 35,
+          "samples": 1024
+        },
+        {
+          "offset": 3931,
+          "bytes": 27,
+          "samples": 1024
+        },
+        {
+          "offset": 3958,
+          "bytes": 33,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-pce-profile-main-cce-2-3-synthetic.mp4",
+        "sha256": "1e12a92bf67d93c733c5c80c5254280246f33acdc3f2d77ca5dea82bd5d75d6f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840004211f8000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "pcm_file": "aac-pce-profile-main-cce-2-3-pcm.bin",
+      "adts": [
+        {
+          "file": "aac-pce-profile-main-cce-2-3-synthetic.aac",
+          "sha256": "4fefa1cdb99392a8d4f001f993cba2ff307dca560b1624578c1ee63ab55c0af6",
+          "crc": false
+        },
+        {
+          "file": "aac-pce-profile-main-cce-2-3-crc-synthetic.aac",
+          "sha256": "7a4fa573ef332232425f5076d0f6a658214b6ed036a2495616e51006abefab53",
+          "crc": true
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "name": "main-1-profile",
+      "object_type": 1,
+      "channels": 1,
+      "asc": "1300018400000000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 14,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 1024,
+      "video": {
+        "file": "aac-pce-profile-invalid-main-1-profile-synthetic.mp4",
+        "sha256": "c593d4c38ed539f8eddc308f91ef96a47f673e19097c2096fe952160ed88f62e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1300018400000000",
+        "pcm_offset": 0,
+        "samples": 1024
+      },
+      "pcm_file": "aac-pce-profile-main-1-pcm.bin",
+      "adts": {
+        "file": "aac-pce-profile-invalid-main-1-profile-synthetic.aac",
+        "sha256": "e760c506a265c16ac905078b45f6f8352e6f85c3561db8fb4803714fc0b459cf"
+      }
+    },
+    {
+      "name": "main-1-rate",
+      "object_type": 1,
+      "channels": 1,
+      "asc": "0980018400000000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 14,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 1024,
+      "video": {
+        "file": "aac-pce-profile-invalid-main-1-rate-synthetic.mp4",
+        "sha256": "f4f5c6340dc8d03ef33616556fc4f13c3aeecd2c61d25d6b27fd82db69521d5b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0980018400000000",
+        "pcm_offset": 0,
+        "samples": 1024
+      },
+      "pcm_file": "aac-pce-profile-main-1-pcm.bin",
+      "adts": {
+        "file": "aac-pce-profile-invalid-main-1-rate-synthetic.aac",
+        "sha256": "681ba7ad564cda5b8831b2aa086096533b2f422d422ac5597ab9a12fe4f79741"
+      }
+    },
+    {
+      "name": "ssr-1-profile",
+      "object_type": 3,
+      "channels": 1,
+      "asc": "1300098400000000",
+      "frames": [
+        {
+          "offset": 658,
+          "bytes": 61,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 1024,
+      "video": {
+        "file": "aac-pce-profile-invalid-ssr-1-profile-synthetic.mp4",
+        "sha256": "d9360c3b8fcb8ae125c0e4170c3f41eedd80e868ded92f1cfb2a565b3bd5d26b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1300098400000000",
+        "pcm_offset": 0,
+        "samples": 1024
+      },
+      "pcm_file": "aac-pce-profile-ssr-1-pcm.bin",
+      "adts": {
+        "file": "aac-pce-profile-invalid-ssr-1-profile-synthetic.aac",
+        "sha256": "4d27ef155a1db7f16e0f27dc409f585bf0fa844d1a5666c5363977c0f7ecf64a"
+      }
+    },
+    {
+      "name": "ssr-1-rate",
+      "object_type": 3,
+      "channels": 1,
+      "asc": "1980098400000000",
+      "frames": [
+        {
+          "offset": 658,
+          "bytes": 61,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 1024,
+      "video": {
+        "file": "aac-pce-profile-invalid-ssr-1-rate-synthetic.mp4",
+        "sha256": "e07b6ef77c27c6dcf7da2d1915f5287a20b85fd0fae05494c76a76365cbe14fb",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1980098400000000",
+        "pcm_offset": 0,
+        "samples": 1024
+      },
+      "pcm_file": "aac-pce-profile-ssr-1-pcm.bin",
+      "adts": {
+        "file": "aac-pce-profile-invalid-ssr-1-rate-synthetic.aac",
+        "sha256": "e303b251df4706f7f466a7c00ac147f5f291dde69ef0e2a13d8e9d90edc9441d"
+      }
+    }
+  ],
+  "invalid_packets": [
+    {
+      "name": "main-cce-truncated-end",
+      "object_type": 1,
+      "channels": 1,
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "asc": "0b0001840004011f8000",
+      "frames": [
+        {
+          "offset": 2609,
+          "bytes": 29,
+          "samples": 1024
+        },
+        {
+          "offset": 3991,
+          "bytes": 20,
+          "samples": 1024
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 2048,
+      "video": {
+        "file": "aac-pce-profile-main-cce-truncated-end-synthetic.mp4",
+        "sha256": "feab7cf2546d748a59ce52cd2815ff2935588bb869d98a9471d791a10c9ec73d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "0b0001840004011f8000",
+        "pcm_offset": 0,
+        "samples": 2048
+      },
+      "pcm_file": "aac-pce-profile-main-cce-1-3-pcm.bin",
+      "adts": {
+        "file": "aac-pce-profile-main-cce-truncated-end-synthetic.aac",
+        "sha256": "1240abe705d60f7198e36ddff43dd736f69701d32bbe76e1f32e2f0f8993fb95"
+      },
+      "error": "truncated or oversized bit field",
+      "valid_name": "main-cce-1-3"
+    }
+  ]
+}
