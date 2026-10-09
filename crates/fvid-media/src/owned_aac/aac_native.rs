@@ -562,3 +562,95 @@ mod ltp_dispatch_tests {
         assert_eq!(state.decode(packet).unwrap(), gold);
     }
 }
+#[cfg(test)]
+mod ltp_sbr_tests {
+    use super::*;
+    fn bytes(name: &str) -> Vec<u8> {
+        std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../tests/fixtures/playback-errors")
+                .join(name),
+        )
+        .unwrap()
+    }
+    #[test]
+    fn ltp_sbr_crc_failure_keeps_core_and_qmf_histories() {
+        let m: serde_json::Value = serde_json::from_slice(&bytes("aac-ltp-sbr.json")).unwrap();
+        let blob = bytes("aac-ltp-sbr-packets.bin");
+        for case in m["cases"].as_array().unwrap() {
+            let raw: Vec<u8> = case["asc"]
+                .as_str()
+                .unwrap()
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+                .collect();
+            let rate = case["rate"].as_u64().unwrap() as u32;
+            let mut state = NativeAacDecoder::new_with_output_rate(&raw, rate).unwrap();
+            let packet = |index: usize| {
+                let row = &case["frames"][index];
+                let at = row["offset"].as_u64().unwrap() as usize;
+                &blob[at..at + row["bytes"].as_u64().unwrap() as usize]
+            };
+            state.decode(packet(0)).unwrap();
+            let saved = state.checkpoint();
+            let before = state.retained_payload_bytes().unwrap();
+            let error = state.decode(&bytes("aac-ltp-sbr-bad-crc.bin")).unwrap_err();
+            assert!(error.to_string().contains("SBR CRC mismatch"), "{error}");
+            assert_eq!(state.retained_payload_bytes().unwrap(), before);
+            assert_eq!(state.sample_rate(), rate);
+            let actual = state.decode(packet(1)).unwrap();
+            state.restore(&saved).unwrap();
+            assert_eq!(state.decode(packet(1)).unwrap(), actual);
+        }
+    }
+    #[test]
+    fn ltp_sbr_signalling_clocks_match_scalar_pcm_and_restore() {
+        let m: serde_json::Value = serde_json::from_slice(&bytes("aac-ltp-sbr.json")).unwrap();
+        let blob = bytes("aac-ltp-sbr-packets.bin");
+        for case in m["cases"].as_array().unwrap() {
+            let raw: Vec<u8> = case["asc"]
+                .as_str()
+                .unwrap()
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+                .collect();
+            let rate = case["rate"].as_u64().unwrap() as u32;
+            let gold = bytes(&format!("aac-ltp-sbr-{rate}-reference.f64le"));
+            let mut state = NativeAacDecoder::new_with_output_rate(&raw, rate).unwrap();
+            let mut first = Vec::new();
+            let n = (rate / 24000 * 1024) as usize;
+            for (frame, row) in case["frames"].as_array().unwrap().iter().enumerate() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                let saved = state.checkpoint();
+                let pcm = state.decode(packet).unwrap();
+                assert_eq!(pcm.len(), n);
+                assert_eq!(state.sample_rate(), rate);
+                for (i, &sample) in pcm.iter().enumerate() {
+                    let at = (frame * n + i) * 8;
+                    let expected = f64::from_le_bytes(gold[at..at + 8].try_into().unwrap());
+                    assert!(
+                        (f64::from(sample) - expected).abs() < 1e-9,
+                        "rate={rate} signal={} frame={frame} sample={i}: {sample} vs {expected}",
+                        case["signal"]
+                    );
+                }
+                state.restore(&saved).unwrap();
+                assert_eq!(state.decode(packet).unwrap(), pcm);
+                first.push(pcm);
+            }
+            state.reset();
+            for (row, expected) in case["frames"].as_array().unwrap().iter().zip(first) {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                assert_eq!(
+                    state
+                        .decode(&blob[at..at + row["bytes"].as_u64().unwrap() as usize])
+                        .unwrap(),
+                    expected
+                );
+            }
+        }
+    }
+}

@@ -391,7 +391,7 @@ impl NativeAacDecoder {
             decoder.sbr_rate=Some(output_rate);
             decoder.sbr_elements=vec![None; decoder.sbr_slots()];
         } else if parsed.sbr_present.is_none()
-            && matches!(parsed.core.object_type,1|2|3) && sbr_layout(&parsed)? {
+            && matches!(parsed.core.object_type,1|2|3|4) && sbr_layout(&parsed)? {
             // A fixed core-rate hint does not mean SBR is absent. Keep the
             // negotiated clock while admitting a valid implicit SBR FIL.
             decoder.detect_sbr=true;
@@ -406,7 +406,7 @@ impl NativeAacDecoder {
     pub fn new_with_sbr_detection(asc:&[u8]) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         let mut decoder=Self::new(asc)?;
-        decoder.detect_sbr=matches!(parsed.core.object_type, 1 | 2 | 3) && parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
+        decoder.detect_sbr=matches!(parsed.core.object_type, 1 | 2 | 3 | 4) && parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
         if decoder.detect_sbr { decoder.sbr_elements=vec![None; decoder.sbr_slots()]; }
 
         Ok(decoder)

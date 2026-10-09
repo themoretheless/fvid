@@ -9779,3 +9779,43 @@ The final seven-test public LTP suite additionally passed the new exact-range
 check (six other tests repeated). Four fixture generators regenerate identically;
 existing media, packets and PCM references are unchanged, with only three
 provenance strings updated to reflect public admission. No tolerances relaxed.
+
+### LTP SBR signalling/discovery and transport acceptance (2026-10-10)
+
+A new authored implicit-SBR AOT4 packet reproduced the exact missing-discovery
+failure at a fixed 24 kHz output clock: `AAC fill extension tool SBR requires
+extension-aware stream signalling`. The reproduction passed before the fix.
+AOT4 is now included in native fixed-clock/negotiated SBR discovery, ADTS
+negotiation and unknown-signalling DSP admission. The refusal expectation is
+replaced by actual PCM acceptance. Explicit SBR disable flags remain honored.
+
+Six own six-frame MP4s cover explicit, sync and implicit signalling at 24/48 kHz.
+The generator composes sparse direct LTP cosine transforms/float histories with
+independent direct SBR QMF convolutions, using only saved numeric protocol tables.
+All output samples match the independent float64 reference within 1e-9. A control
+with LTP disabled differs by more than 1e-5; measured peaks are about 7.25e-5,
+so the acceptance exercises active prediction through SBR rather than noise alone.
+Packet checkpoints, reset and replay are exact through all six configurations.
+Public root and owned MP4 PCM are identical; repeated/reversed ranges are exact
+slices of full PCM. An own unprotected ADTS transport negotiates 48 kHz and
+matches explicit MP4 PCM through both APIs, including the active-prediction range.
+
+A separate short own CRC-error video and packet flip one SBR CRC bit while
+preserving the payload. Public decoding reports precisely `SBR CRC mismatch`;
+private-state tests verify retained storage/clock and subsequent valid PCM remain
+unchanged across rollback. Unknown AOT4 admission now reserves SBR DSP before
+FIL arrives, with the same estimate as explicit/sync signalling at both clocks.
+Generation remains separate; ordinary tests use no FFmpeg, libav or network.
+
+These fixtures qualify one mono 1024-frame LTP/SBR program with sine windows,
+varying prediction lag/gain and 16-slot SBR geometry. Late SBR, wider LTP/SBR
+layouts/tools, LTP/PS, protected LTP ADTS transport and ER/LD/ELD/USAC remain
+separate gaps; this does not establish complete AAC conformance or performance.
+Primary configuration/processing order was checked against the
+[primary AAC dispatch reference](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec.c).
+No foreign decoder implementation was copied.
+
+Validation: owned library 477 passed / 1 pre-existing ignored; root native AAC
+17 passed; nineteen offline AAC integration suites 68 passed / 0 ignored.
+All fifteen generated artifacts reproduce identical SHA-256 hashes. Existing
+PCM references and tolerances are unchanged.

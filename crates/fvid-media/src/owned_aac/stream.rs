@@ -102,7 +102,7 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     // Unknown signalling can admit implicit SBR at a fixed core-rate clock.
     // Optional admission must cover that candidate even before the first FIL.
     if config.sbr_present == Some(true) || output_rate != config.core.sample_rate
-        || (config.sbr_present.is_none() && matches!(config.core.object_type,1|2|3)) {
+        || (config.sbr_present.is_none() && matches!(config.core.object_type,1|2|3|4)) {
         let coupling_states = config.program.as_ref().map_or(0, |p| p.coupling.len());
         if config.core.object_type == 3 {
             // Two retained aligned packet descriptors, nested transactional copies,
@@ -139,7 +139,7 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
 /// use bounded packet/PCM scratch included in the fixed LC I/O reserve.
 pub(crate) fn check_adts_decode_admission(asc: &[u8], options: &CopyOptions) -> Result<()> {
     let config = AdtsAudioConfig::parse(asc)?;
-    let discovery = matches!(config.core.object_type, 1 | 2 | 3) && config.sbr_present.is_none();
+    let discovery = matches!(config.core.object_type, 1 | 2 | 3 | 4) && config.sbr_present.is_none();
     let rate = if discovery {
         config
             .core
@@ -384,17 +384,49 @@ mod tests {
 #[cfg(test)]
 mod ltp_admission_tests {
     #[test]
+    fn implicit_ltp_sbr_reserves_the_same_dsp_as_explicit_signalling() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        let m: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(root.join("aac-ltp-sbr.json")).unwrap()).unwrap();
+        for rate in [24000u32, 48000] {
+            let estimate = |signal: &str| {
+                let case = m["cases"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find(|c| c["rate"] == rate && c["signal"] == signal)
+                    .unwrap();
+                let asc: Vec<u8> = case["asc"]
+                    .as_str()
+                    .unwrap()
+                    .as_bytes()
+                    .chunks_exact(2)
+                    .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+                    .collect();
+                super::decode_config_admission_bytes(&asc, rate).unwrap()
+            };
+            assert_eq!(estimate("implicit"), estimate("explicit"));
+            assert_eq!(estimate("sync"), estimate("explicit"));
+        }
+    }
+    #[test]
     fn ltp_asc_reserves_float_analysis_and_transaction_storage_before_decode() {
         // Ordinary mono LTP, 24 kHz, 1024 and 960 samples respectively.
-        for asc in [[0x23,0x08],[0x23,0x0c]] {
-            let parsed=super::super::config::AudioSpecificConfig::parse(&asc).unwrap();
-            assert_eq!(parsed.core.object_type,4);
-            let base=super::decode_admission_bytes(1).unwrap();
-            let admitted=super::decode_config_admission_bytes(&asc,24000).unwrap();
-            assert!(admitted>=base+19*1024*1024);
-            let decoder=super::super::NativeAacDecoder::new(&asc).unwrap();
-            let checkpoint=decoder.checkpoint();
-            assert!(decoder.retained_payload_bytes_with_checkpoint(Some(&checkpoint)).unwrap()<admitted);
+        for asc in [[0x23, 0x08], [0x23, 0x0c]] {
+            let parsed = super::super::config::AudioSpecificConfig::parse(&asc).unwrap();
+            assert_eq!(parsed.core.object_type, 4);
+            let base = super::decode_admission_bytes(1).unwrap();
+            let admitted = super::decode_config_admission_bytes(&asc, 24000).unwrap();
+            assert!(admitted >= base + 19 * 1024 * 1024);
+            let decoder = super::super::NativeAacDecoder::new(&asc).unwrap();
+            let checkpoint = decoder.checkpoint();
+            assert!(
+                decoder
+                    .retained_payload_bytes_with_checkpoint(Some(&checkpoint))
+                    .unwrap()
+                    < admitted
+            );
         }
     }
 }
