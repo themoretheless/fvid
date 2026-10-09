@@ -91,7 +91,8 @@ def main():
     payload=packet(2,0,0,0,1,3,True,tags=())
     roster['frames'][2].update(offset=len(blob),bytes=len(payload));blob.extend(payload)
     roster['video']=video_fixture([roster],blob,filename='aac-ssr-alignment-roster-change-synthetic.mp4')
-    roster['error']='AAC SSR aligned coupling roster changes require lane continuity'
+    roster['accepted_samples']=3072
+    roster['retained_source_samples']=2496
     arrival_cases=[]
     for old,new,start,new_sequences,suffix in [
         (15,1,2,[0]*4,''),(1,15,2,[0]*4,''),

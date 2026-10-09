@@ -901,3 +901,15 @@ Checkpoint/error/reset/EOF and player rewind/seek cover all programs.
 The existing queue/DSP handles these schedules without decoder changes.
 This covers a stable mono target / unit independent CCE roster; dynamic
 retirement, SSR PS and broader tools/layouts remain separate work.
+
+
+### SSR independent CCE absence/return — 2026-10-09
+
+An absent CCE now keeps its canonical lane and previously queued PCM/gains.
+Only the uncovered explicitly absent timeline receives gainless zeros; coded
+SSR history is retained for return, and SBR uses its existing no-FIL
+pure-upsampling path. The old roster-change refusal is replaced with PCM
+acceptance. Ahead/behind/exact and return schedules have independent core
+and 24/48 kHz SBR waveform references, checkpoint/reset/EOF and player seek
+acceptance. Ordinary incomplete coded streams still refuse at EOF. This
+does not cover PCE replacement, SSR PS or all wider coupling/layout tools.

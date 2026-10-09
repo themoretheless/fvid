@@ -1458,7 +1458,8 @@
       "pcm_offset": 0,
       "samples": 6144
     },
-    "error": "AAC SSR aligned coupling roster changes require lane continuity"
+    "accepted_samples": 3072,
+    "retained_source_samples": 2496
   },
   "arrival_cases": [
     {

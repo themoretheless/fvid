@@ -8378,3 +8378,54 @@ This qualifies the five authored window/gain schedules, mono target and one
 independent unit-gain CCE with stable tag roster. Dynamic source retirement,
 SSR PS, arbitrary wider layouts, untimed late discovery and other codec
 profiles/tools remain open. The complete codec goal remains unproven.
+
+
+### 2026-10-09 — explicit SSR CCE absence and return
+
+The authored `ahead-core` program initially reproduced exactly
+`AAC SSR aligned coupling roster changes require lane continuity` when
+CCE1 disappeared after a long-start packet. Four schedules now cover source
+ahead, behind, exactly at the frame boundary, and return after an absent
+packet. Each has nonzero independent scalar core output and SBR at both
+24 and 48 kHz: twelve six-frame video programs.
+
+Established lanes now remain in a bounded canonical tag roster. A missing
+CCE contributes a zero, gainless input only for the timeline not already
+covered by retained source PCM. Queued chunks retain their old gains and
+are consumed first; missing input never truncates or repeats them. The
+source's coded SSR synthesis state remains keyed by tag for a later return.
+Per-source SBR receives the existing pure-upsampling path when its FIL is
+absent, preserving QMF history without inventing coded SSR windows.
+
+`absent_input_rows` is read-only and calculates coverage from the original
+pending frame plus the current requested frame. Explicit zero/gainless
+source spans may have noncoded extents (including 128 samples when 448
+queued samples already cover part of a 576-row interval). Ordinary coded
+geometry and incomplete EOF remain strict; a missing final coded block
+is not silently padded. A queue unit regression covers ahead/behind/exact
+extents, original gains, replay and invalid-input rollback. The old roster
+refusal is replaced by enabled PCM/checkpoint/EOF acceptance.
+
+The independent scalar reference now supports absent middle FIL frames:
+all 32 low bands for pure upsampling, retained analysis/synthesis history,
+noise advancement only for SBR frames, and unchanged gain smoothing history
+across the gap. Original source-chunk gains are applied after QMF synthesis.
+Core controls compare every byte; SBR programs compare every sample at
+1e-9 absolute tolerance. Native checkpoint/error/reset/EOF and player
+rewind/seek cover every program, including resumed coded source history.
+
+The new fixtures are authored by
+`scripts/generate_aac_ssr_cce_absence_fixtures.py` from the existing original
+SSR scalar alignment oracle. No private media, foreign codec, FFmpeg or
+network is used; ordinary tests do not run generators. The 134 combined
+alignment, absence, drift, late SSR and late Main/LC artifacts regenerate
+identically. This qualifies these stable-PCE, unit independent CCE programs;
+PCE replacement, SSR PS, dependent coupling and wider codec profiles/tools
+remain separate work.
+
+Validation: 909 root and 461 owned-media unit tests plus 42 integration
+tests passed: 1412 distinct passes, 24 existing ignored unit tests. The
+new absence tests and replacement roster acceptance are enabled. All checks
+were locked/offline without FFmpeg; four original Main/SSR scalar references
+also remain bit-identical after the oracle extension. Changed-test/alignment
+module formatting and `git diff --check` pass.

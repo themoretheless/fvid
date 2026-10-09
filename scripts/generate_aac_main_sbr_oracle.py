@@ -38,10 +38,12 @@ def patch_sources():
     assert patches==[(2,10,8),(2,18,7)]
     return {target+i:source+i for source,target,width in patches for i in range(width)}
 
-def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0):
+def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0, sbr_frames=None):
     assert bands in (32,64)
     assert 0 <= first_sbr_frame < 6
-    width = 32 if first_sbr_frame else 10
+    enabled = [i >= first_sbr_frame for i in range(6)] if sbr_frames is None else list(sbr_frames)
+    assert len(enabled) == 6
+    width = 32 if not all(enabled) else 10
     source=Path(__file__).resolve().parents[1]/'crates/fvid-media/src/owned_aac/aac_sbr_qmf_window.rs'
     window=[float(x) for x in re.findall(r'-?\d+\.\d+',source.read_text().split('= [',1)[1])]
     noise_bytes=(DEST/'aac-sbr-noise-protocol.f64le').read_bytes()
@@ -56,10 +58,10 @@ def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0):
     # patch at 25 is discarded; unpatched bands still receive envelope noise.
     mapping=patch_sources()
     weights=[.33333333333333,.30150283239582,.21816949906249,.11516383427084,.03183050093751]
-    levels=[];rows=[];history=[]
+    levels=[];rows=[];history=[];active_frame=0
     for frame in range(6):
         low=delayed[frame*32:frame*32+32]
-        if frame < first_sbr_frame:
+        if not enabled[frame]:
             rows.extend(low)
             continue
         high=[[r[mapping[k]] if k in mapping else 0j for k in range(10,27)] for r in low]
@@ -74,10 +76,11 @@ def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0):
         if not history:history=[level]*4
         for t,r in enumerate(high):
             sequence=history+[level];blended=[tuple(math.fsum(weights[j]*sequence[-1-j][k][p] for j in range(5)) for p in range(2)) for k in range(17)]
-            row=low[t][:10]+[blended[k][0]*r[k]+blended[k][1]*noise[(((frame-first_sbr_frame)*32+t)*17+k+1)%512] for k in range(17)]
-            if first_sbr_frame: row += [0j]*5
+            row=low[t][:10]+[blended[k][0]*r[k]+blended[k][1]*noise[((active_frame*32+t)*17+k+1)%512] for k in range(17)]
+            if width == 32: row += [0j]*5
             rows.append(row);history=(history+[level])[-4:]
-    synthesis_width = 32 if first_sbr_frame else 27
+        active_frame += 1
+    synthesis_width = 32 if width == 32 else 27
     terms=[[[window[(64//bands)*(bands*lag+k)]*complex(math.cos(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)),math.sin(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)))/64 for b in range(synthesis_width)] for k in range(bands)] for lag in range(10)]
     output=[math.fsum((rows[t-lag][b]*terms[lag][k][b]).real for lag in range(min(10,t+1)) for b in range(synthesis_width))/32768 for t in range(192) for k in range(bands)]
     return output

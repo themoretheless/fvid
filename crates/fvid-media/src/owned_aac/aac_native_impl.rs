@@ -767,6 +767,31 @@ impl NativeAacDecoder {
                     }
                     gains.push(outputs);
                 }
+                // Keep established source lanes when a CCE is absent. Their
+                // queued PCM/gains precede the explicitly silent missing input.
+                // Coded synthesis history stays keyed by tag for later return.
+                let coded_tags=tags.clone();
+                for &tag in &self.ssr_alignment_tags {
+                    if !tags.contains(&tag) {tags.push(tag);}
+                }
+                tags.sort_unstable();
+                if tags!=coded_tags {
+                    let mut canonical_lanes:Vec<_>=(0..channels.len()).map(|c|std::mem::take(&mut lanes[c])).collect();
+                    let mut canonical_gains:Vec<_>=(0..channels.len()).map(|c|std::mem::take(&mut gains[c])).collect();
+                    for &tag in &tags {
+                        if let Some(index)=coded_tags.iter().position(|v|*v==tag) {
+                            canonical_lanes.push(std::mem::take(&mut lanes[channels.len()+index]));
+                            canonical_gains.push(std::mem::take(&mut gains[channels.len()+index]));
+                        } else {
+                            let index=self.ssr_alignment_tags.iter().position(|v|*v==tag).ok_or_else(||invalid("SSR absent source lane is missing"))?;
+                            let alignment=self.ssr_alignment.as_ref().ok_or_else(||invalid("SSR absent source alignment is missing"))?;
+                            let rows=alignment.absent_input_rows(channels.len()+index,n)?;
+                            canonical_lanes.push(vec![0.0;rows]);
+                            canonical_gains.push(Vec::new());
+                        }
+                    }
+                    lanes=canonical_lanes;gains=canonical_gains;
+                }
                 // Timed discovery must warm each unmixed source before the first
                 // FIL. Retain the caller's core PCM until SBR becomes active.
                 let candidate_rate=sbr_rate.or_else(|| {
@@ -794,9 +819,6 @@ impl NativeAacDecoder {
                 }
                 if let Some(alignment) = &mut self.ssr_alignment {
                     if tags != self.ssr_alignment_tags {
-                        if self.ssr_alignment_tags.iter().any(|tag|!tags.contains(tag)) {
-                            return Err(unsupported("AAC SSR aligned coupling roster changes require lane continuity"));
-                        }
                         let order:Vec<_>=(0..channels.len()).map(Some).chain(tags.iter().map(|tag|
                             self.ssr_alignment_tags.iter().position(|old|old==tag).map(|index|channels.len()+index)
                         )).collect();

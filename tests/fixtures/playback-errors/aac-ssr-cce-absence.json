@@ -1,0 +1,665 @@
+{
+  "cases": [
+    {
+      "name": "ahead-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 62
+        },
+        {
+          "offset": 62,
+          "bytes": 65
+        },
+        {
+          "offset": 127,
+          "bytes": 8
+        },
+        {
+          "offset": 135,
+          "bytes": 8
+        },
+        {
+          "offset": 143,
+          "bytes": 8
+        },
+        {
+          "offset": 151,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-ahead-core-synthetic.mp4",
+        "sha256": "1d35e0a3620c96cb2b63064a3dd659eb44470a11733da702d7ca55c29ecaca2b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "ahead-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 159,
+          "bytes": 74
+        },
+        {
+          "offset": 233,
+          "bytes": 74
+        },
+        {
+          "offset": 307,
+          "bytes": 8
+        },
+        {
+          "offset": 315,
+          "bytes": 8
+        },
+        {
+          "offset": 323,
+          "bytes": 8
+        },
+        {
+          "offset": 331,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-ahead-sbr-24000-synthetic.mp4",
+        "sha256": "4e1947e114920ecc7c239df1a69ebbc52d0549a2c55d291dbccfba49fccaf39d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "ahead-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 339,
+          "bytes": 74
+        },
+        {
+          "offset": 413,
+          "bytes": 74
+        },
+        {
+          "offset": 487,
+          "bytes": 8
+        },
+        {
+          "offset": 495,
+          "bytes": 8
+        },
+        {
+          "offset": 503,
+          "bytes": 8
+        },
+        {
+          "offset": 511,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-ahead-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-ahead-sbr-48000-synthetic.mp4",
+        "sha256": "16ac031634271ad38b1226a1514c14263a5e0c1878ed62fa69429728f509cf1f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "behind-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 519,
+          "bytes": 116
+        },
+        {
+          "offset": 635,
+          "bytes": 66
+        },
+        {
+          "offset": 701,
+          "bytes": 8
+        },
+        {
+          "offset": 709,
+          "bytes": 8
+        },
+        {
+          "offset": 717,
+          "bytes": 8
+        },
+        {
+          "offset": 725,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-behind-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-behind-core-synthetic.mp4",
+        "sha256": "4a39e2f07d99ec1cb6df28f9d7cdce2194052cb38a9ade4f619b285ed9cf7378",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "behind-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 733,
+          "bytes": 128
+        },
+        {
+          "offset": 861,
+          "bytes": 75
+        },
+        {
+          "offset": 936,
+          "bytes": 8
+        },
+        {
+          "offset": 944,
+          "bytes": 8
+        },
+        {
+          "offset": 952,
+          "bytes": 8
+        },
+        {
+          "offset": 960,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-behind-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-behind-sbr-24000-synthetic.mp4",
+        "sha256": "e568f3b52102c91c4a58423301198267543d217592d8f4a07aa97702e0c785df",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "behind-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 968,
+          "bytes": 128
+        },
+        {
+          "offset": 1096,
+          "bytes": 75
+        },
+        {
+          "offset": 1171,
+          "bytes": 8
+        },
+        {
+          "offset": 1179,
+          "bytes": 8
+        },
+        {
+          "offset": 1187,
+          "bytes": 8
+        },
+        {
+          "offset": 1195,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-behind-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-behind-sbr-48000-synthetic.mp4",
+        "sha256": "072b340ce3112159f3ff87a7639cd85064c1082f9afad04facf010395dbeac2a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "exact-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 1203,
+          "bytes": 62
+        },
+        {
+          "offset": 1265,
+          "bytes": 8
+        },
+        {
+          "offset": 1273,
+          "bytes": 8
+        },
+        {
+          "offset": 1281,
+          "bytes": 8
+        },
+        {
+          "offset": 1289,
+          "bytes": 8
+        },
+        {
+          "offset": 1297,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-exact-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-exact-core-synthetic.mp4",
+        "sha256": "6dda54e60fe96b362a97a114e916218898d949c6be9a95b70c32273908943b46",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "exact-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 1305,
+          "bytes": 74
+        },
+        {
+          "offset": 1379,
+          "bytes": 8
+        },
+        {
+          "offset": 1387,
+          "bytes": 8
+        },
+        {
+          "offset": 1395,
+          "bytes": 8
+        },
+        {
+          "offset": 1403,
+          "bytes": 8
+        },
+        {
+          "offset": 1411,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-exact-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-exact-sbr-24000-synthetic.mp4",
+        "sha256": "e2d29cfa205e7a317e92ddada8cb2a8d89db3c383b91be38878b82e79a52ab60",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "exact-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 1419,
+          "bytes": 74
+        },
+        {
+          "offset": 1493,
+          "bytes": 8
+        },
+        {
+          "offset": 1501,
+          "bytes": 8
+        },
+        {
+          "offset": 1509,
+          "bytes": 8
+        },
+        {
+          "offset": 1517,
+          "bytes": 8
+        },
+        {
+          "offset": 1525,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-exact-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-exact-sbr-48000-synthetic.mp4",
+        "sha256": "d02ba550a1e9e2699d8d3861cbc2ca3c468e50cddefc76e1e255776782fc735e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "resume-core",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 1533,
+          "bytes": 62
+        },
+        {
+          "offset": 1595,
+          "bytes": 65
+        },
+        {
+          "offset": 1660,
+          "bytes": 8
+        },
+        {
+          "offset": 1668,
+          "bytes": 116
+        },
+        {
+          "offset": 1784,
+          "bytes": 66
+        },
+        {
+          "offset": 1850,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": true,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-resume-core.f32le",
+      "video": {
+        "file": "aac-ssr-cce-absence-resume-core-synthetic.mp4",
+        "sha256": "8127031be5d294f83affe4a79e73f194f558b823fa4026ddd28b8f4dd6a42f36",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "resume-sbr-24000",
+      "asc": "2b030c04c20001008800",
+      "frames": [
+        {
+          "offset": 1858,
+          "bytes": 74
+        },
+        {
+          "offset": 1932,
+          "bytes": 74
+        },
+        {
+          "offset": 2006,
+          "bytes": 8
+        },
+        {
+          "offset": 2014,
+          "bytes": 124
+        },
+        {
+          "offset": 2138,
+          "bytes": 78
+        },
+        {
+          "offset": 2216,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-resume-24000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-resume-sbr-24000-synthetic.mp4",
+        "sha256": "b1716015f6bb466d12d72c1b8e311a6827e9cecbfb4cc18cb03218e120e25d25",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b030c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "resume-sbr-48000",
+      "asc": "2b018c04c20001008800",
+      "frames": [
+        {
+          "offset": 2224,
+          "bytes": 74
+        },
+        {
+          "offset": 2298,
+          "bytes": 74
+        },
+        {
+          "offset": 2372,
+          "bytes": 8
+        },
+        {
+          "offset": 2380,
+          "bytes": 124
+        },
+        {
+          "offset": 2504,
+          "bytes": 78
+        },
+        {
+          "offset": 2582,
+          "bytes": 8
+        }
+      ],
+      "channels": 1,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "slots": 16,
+      "bands": 64,
+      "pcm_offset": 0,
+      "core": false,
+      "present": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "reference": "aac-ssr-cce-absence-resume-48000.f64le",
+      "video": {
+        "file": "aac-ssr-cce-absence-resume-sbr-48000-synthetic.mp4",
+        "sha256": "aace0d8cbc063aa041ec670cb2205117cfe491b44109c4bae3f3392cc928adc7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ],
+  "provenance": "Own SSR spectra/gain/window IPQF core oracle, explicit CCE1 gaps and paused coded-source history; retain queued PCM before zero absent intervals. Independent direct QMF/SBR with pure upsampling on absent FIL and preserved noise/smoothing state; apply original source chunk gains after DSP. No private media, decoder, FFmpeg or network."
+}

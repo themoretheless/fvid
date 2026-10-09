@@ -530,35 +530,38 @@ fn aligned_ssr_fixed_clock_adts_and_matroska_exports_match_mp4() {
 }
 
 #[test]
-fn changing_ssr_cce_roster_is_a_precise_refusal_with_complete_rollback() {
+fn absent_ssr_cce_preserves_pending_pcm_and_checkpoint_replay() {
     let manifest = manifest();
     let case = &manifest["roster"];
     let encoded = packets(&case["video"]);
-    let good = packets(&manifest["cases"][0]["video"]);
     let mut decoder = NativeAacDecoder::new(&hex(case["asc"].as_str().unwrap())).unwrap();
-    assert!(
-        decoder
-            .decode_timed(&encoded[0], 0, 1024)
-            .unwrap()
-            .is_some()
-    );
-    assert!(
-        decoder
-            .decode_timed(&encoded[1], 1024, 1024)
-            .unwrap()
-            .is_none()
-    );
+    let gold = include_bytes!("fixtures/playback-errors/aac-ssr-alignment-pcm.f32le");
+    let offset = manifest["cases"][0]["pcm_offset"].as_u64().unwrap() as usize;
+    let retained = case["retained_source_samples"].as_u64().unwrap() as usize;
+    let mut expected = gold[offset..offset + retained * 4].to_vec();
+    expected.resize(case["accepted_samples"].as_u64().unwrap() as usize * 4, 0);
+    let mut pcm = Vec::new();
+    for (i, packet) in encoded.iter().enumerate() {
+        let saved = decoder.checkpoint();
+        assert!(decoder.decode_timed(&[], i as i64 * 1024, 1024).is_err());
+        let first = decoder.decode_timed(packet, i as i64 * 1024, 1024).unwrap();
+        decoder.restore(&saved).unwrap();
+        let again = decoder.decode_timed(packet, i as i64 * 1024, 1024).unwrap();
+        assert_eq!(first, again);
+        if let Some(frame) = again {
+            assert_eq!(frame.pts, (pcm.len() / 4) as i64);
+            pcm.extend(frame.samples.iter().flat_map(|s| s.to_le_bytes()));
+        }
+    }
     let saved = decoder.checkpoint();
-    assert_eq!(
-        decoder
-            .decode_timed(&encoded[2], 2048, 1024)
-            .unwrap_err()
-            .to_string(),
-        case["error"].as_str().unwrap()
-    );
-    let resumed = decoder.decode_timed(&good[2], 2048, 1024).unwrap();
+    let tail = decoder.finish().unwrap();
     decoder.restore(&saved).unwrap();
-    assert_eq!(decoder.decode_timed(&good[2], 2048, 1024).unwrap(), resumed);
+    assert_eq!(decoder.finish().unwrap(), tail);
+    if let Some(frame) = tail {
+        pcm.extend(frame.samples.iter().flat_map(|s| s.to_le_bytes()));
+    }
+    assert!(decoder.finish().unwrap().is_none());
+    assert_eq!(pcm, expected);
 }
 
 #[test]

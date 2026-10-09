@@ -70,8 +70,8 @@ impl SsrPcmAlignment {
     /// Reorder existing source lanes and add sources at the current packet.
     /// New sources have no contribution in the already pending frame. Their
     /// silent prefix belongs only to that past interval, not their new samples.
-    /// All old lanes must survive exactly once; retiring a source with retained
-    /// synthesis/PCM history is a different operation, never an implicit drop.
+    /// All old lanes must survive exactly once. Explicitly absent sources use
+    /// `absent_input_rows` to retain queued PCM instead of dropping a lane.
     pub fn extend_lanes(&mut self, order: &[Option<usize>]) -> Result<()> {
         if self.finished {
             return Err(invalid("SSR PCM alignment requires reset after finish"));
@@ -127,6 +127,31 @@ impl SsrPcmAlignment {
         self.lanes = lanes;
         Ok(())
     }
+    /// Explicitly absent CCE input covers only the uncovered timeline. Existing
+    /// samples/gains remain queued; this does not pad missing coded input at EOF.
+    pub fn absent_input_rows(&self, lane: usize, rows: usize) -> Result<usize> {
+        if self.finished {
+            return Err(invalid("SSR PCM alignment requires reset after finish"));
+        }
+        if lane < self.channels || !matches!(rows, 576 | 1024 | 1472) {
+            return Err(invalid("SSR PCM alignment invalid absent source"));
+        }
+        let state = self
+            .lanes
+            .get(lane)
+            .ok_or_else(|| invalid("SSR PCM alignment invalid absent source"))?;
+        let required = self.pending.iter().try_fold(rows, |total, frame| {
+            total
+                .checked_add(frame.rows)
+                .ok_or_else(|| invalid("SSR PCM alignment absent timeline overflow"))
+        })?;
+        if required > MAX_QUEUED {
+            return Err(invalid(
+                "SSR PCM alignment absent timeline exceeds lookahead bound",
+            ));
+        }
+        Ok(required.saturating_sub(state.rows))
+    }
     pub fn reset(&mut self) {
         for lane in &mut self.lanes {
             lane.chunks.clear();
@@ -161,8 +186,14 @@ impl SsrPcmAlignment {
         if !matches!(rows, 576 | 1024 | 1472) || inputs.len() != self.lanes.len() {
             return Err(invalid("SSR PCM alignment invalid frame or lane geometry"));
         }
-        for (lane, input) in self.lanes.iter().zip(inputs) {
-            if !matches!(input.samples.len(), 576 | 1024 | 1472)
+        for (index, (lane, input)) in self.lanes.iter().zip(inputs).enumerate() {
+            // Missing CCE is explicit silence without output gains. Its extent
+            // compensates already queued source drift, not a coded SSR block.
+            let absent = index >= self.channels
+                && input.outputs.is_empty()
+                && input.samples.len() <= MAX_QUEUED
+                && input.samples.iter().all(|sample| *sample == 0.0);
+            if !matches!(input.samples.len(), 576 | 1024 | 1472) && !absent
                 || input.outputs.len() > 512
                 || input.samples.iter().any(|v| !v.is_finite())
                 || input
@@ -939,5 +970,118 @@ mod tests {
         let frame = separate.finish_sources().unwrap().unwrap();
         assert_eq!(frame.lanes[0][0].samples, signals[0]);
         assert_eq!(frame.lanes[1][0].outputs, gains[1]);
+    }
+    #[test]
+    fn explicit_source_absence_preserves_ahead_behind_and_partial_extent_gains() {
+        let unity = [OutputGain {
+            channel: 0,
+            gain: 1.0,
+        }];
+        let gain = [OutputGain {
+            channel: 0,
+            gain: 2.0,
+        }];
+        for (source_rows, next_rows) in [(576, 1024), (1024, 1024), (1472, 1024), (1472, 576)] {
+            let mut alignment = SsrPcmAlignment::new(1, 2).unwrap();
+            let target = vec![0.0; 1024];
+            let source = vec![3.0; source_rows];
+            assert!(
+                alignment
+                    .submit_sources(
+                        11,
+                        1024,
+                        &[
+                            LaneInput {
+                                samples: &target,
+                                outputs: &unity
+                            },
+                            LaneInput {
+                                samples: &source,
+                                outputs: &gain
+                            },
+                        ]
+                    )
+                    .unwrap()
+                    .is_none()
+            );
+            let count = alignment.absent_input_rows(1, next_rows).unwrap();
+            assert_eq!(count, 1024 + next_rows - source_rows);
+            assert!(alignment.absent_input_rows(0, next_rows).is_err());
+            let next = vec![0.0; next_rows];
+            let bad = vec![1.0; 128];
+            assert!(
+                alignment
+                    .submit_sources(
+                        22,
+                        next_rows,
+                        &[
+                            LaneInput {
+                                samples: &next,
+                                outputs: &unity
+                            },
+                            LaneInput {
+                                samples: &bad,
+                                outputs: &[]
+                            },
+                        ]
+                    )
+                    .is_err()
+            );
+            assert_eq!(alignment.absent_input_rows(1, next_rows).unwrap(), count);
+            let missing = vec![0.0; count];
+            let saved = alignment.clone();
+            let first = alignment
+                .submit_sources(
+                    22,
+                    next_rows,
+                    &[
+                        LaneInput {
+                            samples: &next,
+                            outputs: &unity,
+                        },
+                        LaneInput {
+                            samples: &missing,
+                            outputs: &[],
+                        },
+                    ],
+                )
+                .unwrap()
+                .unwrap();
+            let mut restored = saved;
+            assert_eq!(
+                restored
+                    .submit_sources(
+                        22,
+                        next_rows,
+                        &[
+                            LaneInput {
+                                samples: &next,
+                                outputs: &unity
+                            },
+                            LaneInput {
+                                samples: &missing,
+                                outputs: &[]
+                            },
+                        ]
+                    )
+                    .unwrap(),
+                Some(first.clone())
+            );
+            let last = alignment.finish_sources().unwrap().unwrap();
+            assert_eq!(first.stamp, 11);
+            assert_eq!(last.stamp, 22);
+            let mut values = Vec::new();
+            for frame in [first, last] {
+                for chunk in &frame.lanes[1] {
+                    let factor = chunk.outputs.first().map_or(0.0, |g| g.gain);
+                    values.extend(chunk.samples.iter().map(|s| s * factor));
+                }
+            }
+            assert_eq!(values.len(), 1024 + next_rows);
+            assert!(values[..source_rows].iter().all(|s| *s == 6.0));
+            assert!(values[source_rows..].iter().all(|s| *s == 0.0));
+            assert!(alignment.finish_sources().unwrap().is_none());
+            assert!(alignment.absent_input_rows(1, next_rows).is_err());
+        }
     }
 }
