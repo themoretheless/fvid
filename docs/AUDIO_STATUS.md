@@ -2302,7 +2302,8 @@ FIL arrives, with the same estimate as explicit/sync signalling at both clocks.
 Generation remains separate; ordinary tests use no FFmpeg, libav or network.
 
 These fixtures qualify one mono 1024-frame LTP/SBR program with sine windows,
-varying prediction lag/gain and 16-slot SBR geometry. Late SBR, wider LTP/SBR
+varying prediction lag/gain and 16-slot SBR geometry. Broader late-SBR
+layouts, wider LTP/SBR
 layouts/tools, LTP/PS, additional LTP ADTS combinations and ER/LD/ELD/USAC remain
 separate gaps; this does not establish complete AAC conformance or performance.
 Primary configuration/processing order was checked against the
@@ -2342,7 +2343,8 @@ SBR discovery is checked from an initial header-bearing block, not from payloads
 that require retained header state.
 
 This closes protected/multiplexed transport for these authored 1024-frame
-programs, not all AAC profiles/tools/layouts. Late SBR, LTP/PS, wider SBR geometry,
+programs, not all AAC profiles/tools/layouts. Broader late-SBR combinations,
+LTP/PS, wider SBR geometry,
 additional short-window/layout combinations and ER/LD/ELD/USAC remain separate
 qualification gaps. Fixtures and ordinary tests need no FFmpeg, libav or network.
 
@@ -2351,3 +2353,45 @@ integration suites 26 passed / 0 ignored. The expanded 78-transport LTP suite
 passed again after adding mixed groups. All 96 fixture artifacts have identical
 SHA-256 hashes after regeneration; previously generated binary media and packets
 are unchanged. No foreign codec or network is used by generation or tests.
+
+### Late SBR after active LTP, with independent source histories (2026-10-10)
+
+The previously unqualified late-SBR LTP path now has twelve own six-frame MP4s:
+core controls and late FIL at fixed 24/48 kHz, direct mono, independent CCE with
+silent target, and simultaneously active target/source LTP. Both active lanes
+have already advanced prediction history before the first SBR FIL at packet 4.
+The independent source receives SBR while the active target continues through
+its own full-band QMF upsampler; final mixing preserves separate core histories.
+The existing owned decoder passes these paths without production code changes.
+
+Scalar references use direct cosine transforms and float LTP history, followed
+by direct QMF convolutions. Each PCM sample agrees within 1e-9. Cold-QMF controls
+preserve the current LTP core waveform but remove the pre-FIL QMF input history;
+inactive-LTP controls keep the extension while disabling prediction. Both alter
+post-transition PCM by more than 1e-7, so silence/noise-only or cold-history
+playback cannot satisfy acceptance. Mixed controls apply the same f32 lane
+rounding and final independent-coupling addition as the signal contract.
+
+Three own ADTS inputs include indexed mono and in-band PCE bootstrap for each
+coupled program. Full decode negotiates 48 kHz and reconstructs its complete
+prefix; ranges ending before FIL, including an already-active LTP range, retain
+24 kHz core PCM. Repeated/reversed ranges, public root/owned PCM, checkpoint,
+reset, EOF, player rewind and seek before/after the first FIL are checked.
+
+Six additional own short videos/packets corrupt only a transmitted SBR CRC bit
+in the last frame, after valid core and extension history. Public refusal is
+precisely `SBR CRC mismatch`; packet tests then decode the valid frame and
+compare it with checkpoint replay and the complete scalar waveform. This
+negative check is separate from actual PCM acceptance.
+
+Generation is separate, uses no foreign codec/network, and copies no private
+media/parameters. This qualifies ordinary mono 1024-frame sine-window LTP with
+16-slot SBR and independent unit-gain CCE at these clocks. Wider layouts,
+short-window/other SBR geometry, additional coupling combinations, LTP/PS and
+ER/LD/ELD/USAC remain qualification/implementation gaps. No broad conformance or
+performance claim follows from these fixtures.
+
+Validation: five offline integration suites passed 23 tests / 0 ignored, including
+five new late-LTP-SBR acceptance/refusal tests. All 45 new fixture artifacts
+reproduce identical SHA-256 hashes. Production decoder sources are unchanged;
+this delivers concrete qualification of existing owned paths, not a new fallback.
