@@ -2489,3 +2489,29 @@ Matroska preserves nanosecond timing and rewrites its fixed-size track header
 before finalization. Packet payloads are not transcoded or buffered as a whole
 stream. Acceptance verifies exact full PCM and container output clocks, including
 delayed SBR, protected/unprotected multiplexing and multichannel LC.
+
+
+### Implicit PS in mono-core ADTS
+
+`adts_implicit_ps` reproduces the old ordinary AAC decoder refusal on a late
+in-band PS element. Six authored single/multiplexed ADTS streams, protected
+and unprotected, share a short synthetic AVC+AAC companion video and existing
+independent scalar stereo PCM. The core configuration stays mono AAC-LC at
+24 kHz; selected PS playback/export yields stereo at 48 kHz.
+
+Mono ADTS discovery now scans the selected encoded prefix with the own
+transactional syntax probe before publishing output geometry. Encoded records
+are spooled to a private temporary file; retained RAM does not grow with prefix
+length. Replay selects the own PS decoder and drains its delayed frame at EOF.
+The native player uses the same verified PS choice and rescales source timing.
+Acceptance verifies companion packet identity, independent full stereo PCM,
+exact intervals, packet-limit geometry, rewind, seek and repeated EOF drain.
+A one-packet prefix stays mono when its future PS packet was not selected.
+
+Generator: `scripts/generate_adts_ps_fixtures.py`. Only existing authored
+packets, scalar PCM and AVC/container seeds are used; no private media or
+parameters are copied. CRC values use the own offline region helper and
+independent polynomial division. Tests read saved fixtures without generation,
+FFmpeg/libav or network access. This qualifies the tested 1024-sample late PS
+route; first-packet PS remux, broader PCE/coupling combinations and complete
+HE-AAC v2 conformance still require separate qualification.

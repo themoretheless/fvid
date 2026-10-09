@@ -292,6 +292,7 @@ pub fn decode_adts_aac_reader<R: std::io::Read>(
 use crate::container::adts::StreamReader as AdtsStreamReader;
 use crate::codec::config::AudioSpecificConfig as AdtsAudioConfig;
 use crate::codec::aac_native::NativeAacDecoder as AdtsPacketDecoder;
+use crate::codec::aac_ps_native::{NativePsAacDecoder as AdtsPsDecoder, InBandPsProbe as AdtsPsProbe};
 include!("../crates/fvid-media/src/owned_aac/stream_impl.rs");
 
 /// Decode a single AAC MP4 track with its priming/tail edit applied.

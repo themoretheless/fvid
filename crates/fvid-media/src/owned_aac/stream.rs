@@ -1,6 +1,6 @@
 //! Sequential AAC-LC/HE-AAC decoding to caller-owned interleaved float32 PCM.
 use super::{
-    Error, NativeAacDecoder as AdtsPacketDecoder, Result, adts::StreamReader as AdtsStreamReader,
+    Error, NativeAacDecoder as AdtsPacketDecoder, aac_ps_native::{NativePsAacDecoder as AdtsPsDecoder, InBandPsProbe as AdtsPsProbe}, Result, adts::StreamReader as AdtsStreamReader,
     config::AudioSpecificConfig as AdtsAudioConfig, invalid,
 };
 use fvid_control::{CopyOptions, ProgressEvent};

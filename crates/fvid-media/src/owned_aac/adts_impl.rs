@@ -492,3 +492,9 @@ impl<R:std::io::Read> SequenceReader<R> {
 pub fn probe_output_rate(packet: &[u8], asc: &[u8]) -> Result<Option<u32>> {
     adts_crc::probe_sbr_rate(packet, asc).map_err(|e| invalid(&e.to_string()))
 }
+
+impl<R: std::io::Read> StreamReader<R> {
+    pub(crate) fn packet_has_sbr(packet: &[u8], asc: &[u8]) -> Result<bool> {
+        adts_crc::has_sbr_fill(packet, asc).map_err(|e| invalid(&e.to_string()))
+    }
+}

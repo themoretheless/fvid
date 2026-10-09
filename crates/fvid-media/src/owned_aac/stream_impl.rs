@@ -1,3 +1,36 @@
+enum AdtsOutputDecoder {
+    Core(AdtsPacketDecoder),
+    Ps(AdtsPsDecoder),
+}
+impl AdtsOutputDecoder {
+    fn sample_rate(&self) -> u32 {
+        match self {
+            Self::Core(d) => d.sample_rate(),
+            Self::Ps(d) => d.sample_rate(),
+        }
+    }
+    fn channel_mask(&self) -> u32 {
+        match self {
+            Self::Core(d) => d.channel_mask(),
+            Self::Ps(d) => d.channel_mask(),
+        }
+    }
+    fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
+        match self {
+            Self::Core(d) => Ok(d
+                .decode_timed(packet, 0, u64::from(d.core_frame_samples()))?
+                .map_or_else(Vec::new, |f| f.samples)),
+            Self::Ps(d) => Ok(d.decode(packet)?.map_or_else(Vec::new, |f| f.pcm)),
+        }
+    }
+    fn finish(&mut self) -> Result<Option<Vec<f32>>> {
+        match self {
+            Self::Core(d) => Ok(d.finish()?.map(|f| f.samples)),
+            Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+        }
+    }
+}
+
 pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
     reader: AdtsStreamReader<R>,
     output: &mut impl std::io::Write,
@@ -11,7 +44,7 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
 /// packet progress is counted during discovery, never a second time on replay.
 pub(crate) struct NegotiatedAdts<R: std::io::Read> {
     reader: AdtsStreamReader<R>,
-    decoder: AdtsPacketDecoder,
+    decoder: AdtsOutputDecoder,
     spool: Option<AdtsClockSpool>,
     cached_lc: bool,
     interval: Option<(Duration, Duration)>,
@@ -51,7 +84,7 @@ impl<R: std::io::Read> NegotiatedAdts<R> {
                     emit_adts_samples(&cached_pcm, output, from, to, &mut position, &mut stats)?;
                 } else {
                     spool.read_record(Some(&mut packet), None)?;
-                    let samples = self.decoder.decode_timed(&packet,0,u64::from(self.decoder.core_frame_samples()))?.map_or_else(Vec::new,|f|f.samples);
+                    let samples = self.decoder.decode(&packet)?;
                     emit_adts_samples(&samples, output, from, to, &mut position, &mut stats)?;
                 }
             }
@@ -72,13 +105,13 @@ impl<R: std::io::Read> NegotiatedAdts<R> {
             let Some(packet) = self.reader.next_packet()? else {
                 break;
             };
-            let samples = self.decoder.decode_timed(&packet,0,u64::from(self.decoder.core_frame_samples()))?.map_or_else(Vec::new,|f|f.samples);
+            let samples = self.decoder.decode(&packet)?;
             emit_adts_samples(&samples, output, from, to, &mut position, &mut stats)?;
             control.packet(packet.len())?;
         }
         if position < to {
-            if let Some(frame)=self.decoder.finish()? {
-                emit_adts_samples(&frame.samples,output,from,to,&mut position,&mut stats)?;
+            if let Some(frame) = self.decoder.finish()? {
+                emit_adts_samples(&frame, output, from, to, &mut position, &mut stats)?;
             }
         }
         if stats.sample_frames == 0 {
@@ -101,7 +134,67 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
     let asc = reader.audio_specific_config().to_vec();
     control.check_admission(&asc)?;
     let parsed = AdtsAudioConfig::parse(&asc)?;
-    let discovery = parsed.core.object_type == 2 && parsed.sbr_present.is_none()
+    if parsed.core.object_type == 2
+        && parsed.core.channel_configuration == 1
+        && parsed.program.is_none()
+        && parsed.ps_present.is_none()
+        && parsed.sbr_present.is_none()
+    {
+        // PS may arrive after an ordinary SBR packet. Scan the selected encoded
+        // prefix before publishing channel geometry, retaining only disk records.
+        // The syntax probe does not synthesize core/QMF/PS PCM.
+        let double_rate = config
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("AAC output rate overflow"))?;
+        let mut probe = AdtsPsProbe::new(&asc, double_rate)?;
+        let mut storage = AdtsClockSpool::new()?;
+        let mut rate = config.sample_rate;
+        let mut position = 0u64;
+        let core_to = match interval {
+            Some((_, to)) => adts_sample_boundary(to, config.sample_rate)?,
+            None => u64::MAX,
+        };
+        while position < core_to && !control.packet_limit_reached() {
+            control.check()?;
+            let Some(packet) = reader.next_packet()? else {
+                break;
+            };
+            probe.read(&packet)?;
+            // The probe has validated any SBR header/history before the FIL
+            // presence publishes the implicit double-rate ADTS output clock.
+            if AdtsStreamReader::<R>::packet_has_sbr(&packet, &asc)? {
+                rate = double_rate;
+            }
+            storage.push(&packet, &[])?;
+            position = position
+                .checked_add(u64::from(parsed.core.frame_samples))
+                .ok_or_else(|| invalid("audio position overflow"))?;
+            control.packet(packet.len())?;
+        }
+        let (decoder, channels) = if probe.ps_detected() {
+            (
+                AdtsOutputDecoder::Ps(AdtsPsDecoder::new_with_in_band_ps(&asc, rate)?),
+                2,
+            )
+        } else {
+            (
+                AdtsOutputDecoder::Core(AdtsPacketDecoder::new_with_output_rate(&asc, rate)?),
+                config.channels,
+            )
+        };
+        return Ok(NegotiatedAdts {
+            reader,
+            decoder,
+            spool: Some(storage),
+            cached_lc: false,
+            interval,
+            channels,
+        });
+    }
+
+    let discovery = parsed.core.object_type == 2
+        && parsed.sbr_present.is_none()
         && parsed.program.is_none()
         && matches!(parsed.core.channel_configuration, 1 | 2);
     let mut decoder = if discovery {
@@ -164,7 +257,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
     }
     Ok(NegotiatedAdts {
         reader,
-        decoder,
+        decoder: AdtsOutputDecoder::Core(decoder),
         spool,
         cached_lc,
         interval,
@@ -214,7 +307,9 @@ fn emit_adts_samples(
         .sample_frames
         .checked_add(last.saturating_sub(first) as u64)
         .ok_or_else(|| invalid("audio sample count overflow"))?;
-    if !samples.is_empty() { stats.decoded_frames += 1; }
+    if !samples.is_empty() {
+        stats.decoded_frames += 1;
+    }
     *position = end;
     Ok(())
 }

@@ -12,6 +12,7 @@ pub struct AacAudioReader {
     packet: usize,
     presentation_floor: u64,
     output_rate: u32,
+    in_band_ps: bool,
 }
 
 impl AacAudioReader {
@@ -24,8 +25,30 @@ impl AacAudioReader {
         let aac = Aac::parse(&bytes, &limits)?;
         let extra_data = aac.extra_data();
         let mut output_rate = aac.sample_rate;
+        let mut in_band_ps = false;
         let parsed = crate::codec::config::AudioSpecificConfig::parse(&aac.configuration)?;
-        if parsed.core.object_type == 2 && parsed.sbr_present.is_none() {
+        if parsed.core.object_type == 2
+            && parsed.sbr_present.is_none()
+            && parsed.ps_present.is_none()
+            && parsed.program.is_none()
+            && parsed.core.channel_configuration == 1
+        {
+            let rate = aac
+                .sample_rate
+                .checked_mul(2)
+                .ok_or_else(|| crate::invalid("AAC output rate overflow"))?;
+            let mut probe =
+                crate::codec::aac_ps_native::InBandPsProbe::new(&aac.configuration, rate)?;
+            for i in 0..aac.packets() {
+                probe.read(aac.packet(i))?;
+                if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)
+                    .map_err(|e| crate::invalid(&e.0))?
+                {
+                    output_rate = rate;
+                }
+            }
+            in_band_ps = probe.ps_detected();
+        } else if parsed.core.object_type == 2 && parsed.sbr_present.is_none() {
             for i in 0..aac.packets() {
                 if fvid_media::owned_aac::adts_crc::has_sbr_fill(aac.packet(i), &aac.configuration)
                     .map_err(|e| crate::invalid(&e.0))?
@@ -46,6 +69,7 @@ impl AacAudioReader {
             packet: 0,
             presentation_floor: 0,
             output_rate,
+            in_band_ps,
         })
     }
 
@@ -60,6 +84,27 @@ impl AacAudioReader {
 }
 
 impl AudioStream for AacAudioReader {
+    #[cfg(feature = "player")]
+    fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.in_band_ps {
+            Ok(Box::new(
+                crate::codec::aac_ps_playback::PsAacDecoder::new_with_in_band_ps(
+                    &self.extra_data,
+                    self.output_rate,
+                    2,
+                )?,
+            ))
+        } else {
+            crate::codec::make_audio_decoder(
+                self.codec(),
+                self.extra_data(),
+                self.sample_rate(),
+                self.channels(),
+                self.bits_per_sample(),
+            )
+        }
+    }
+
     fn preroll_target(&self) -> Option<i64> {
         i64::try_from(self.presentation_floor * self.clock_ratio()).ok()
     }
@@ -94,7 +139,11 @@ impl AudioStream for AacAudioReader {
     }
 
     fn channels(&self) -> u16 {
-        self.aac.channels
+        if self.in_band_ps {
+            2
+        } else {
+            self.aac.channels
+        }
     }
 
     fn duration(&self) -> Option<Duration> {
@@ -110,7 +159,7 @@ impl AudioStream for AacAudioReader {
     fn audio_tracks(&self) -> Vec<AudioTrack> {
         vec![AudioTrack {
             sample_rate: self.output_rate,
-            channels: self.aac.channels,
+            channels: self.channels(),
             name: String::new(),
             language: String::new(),
         }]
