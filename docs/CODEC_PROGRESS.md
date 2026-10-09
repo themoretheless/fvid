@@ -7131,3 +7131,17 @@ malformed EOS. Subsequent CRA pictures are compared against a fresh decoder,
 including every reconstructed plane; the three leading RASL pictures must be
 discarded. These checks reuse our synthetic fixture and require no generation
 or external codec during test execution.
+
+
+### MP4 output durations across suppressed pictures
+
+The EOS synthetic video also reproduced a player timing failure: the picture
+before the post-EOS CRA ended at tick 3584 while the next displayed picture
+started at 5120. A decode-only RASL sample had been used as its endpoint.
+MP4 reordering now uses future sample PTS only as a sorting bound and waits
+until the next actual output group is complete before deriving duration.
+This adds output lookahead inside the existing bounded reorder queue. The
+regression checks all retained sample indices, saved-source pixels, exact PTS,
+continuous intervals, EOF and rewind; native playback additionally checks seek.
+The fixture is our existing short authored `hevc-eos-before-cra-valid-synthetic`
+video, not private media. Ordinary tests remain offline and generation-free.

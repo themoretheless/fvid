@@ -657,17 +657,20 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 .min_by_key(|(_, frame)| (frame.presentation_time.ticks, frame.sample_index))
             {
                 let future = self.future_pts.get(self.sample_index).copied();
-                // Decode every equal-PTS picture before publishing the last
-                // one at that time. Earlier duplicates still serve as references.
-                if future.is_none_or(|pts| frame.presentation_time.ticks < pts) {
+                // A future sample can be decode-only (for example a RASL
+                // suppressed after EOS). Its PTS is a sorting bound, not a
+                // display endpoint. Decode until the next output's equal-PTS
+                // group is complete, or EOF establishes the final duration.
+                let following = self
+                    .pending
+                    .iter()
+                    .filter(|f| f.presentation_time.ticks > frame.presentation_time.ticks)
+                    .map(|f| f.presentation_time.ticks)
+                    .min();
+                if future.is_none_or(|pts| following.is_some_and(|next| next < pts)) {
                     let mut frame = self.pending.swap_remove(index);
                     self.pending_bytes -= frame_storage(&frame)?;
-                    let next = self
-                        .pending
-                        .iter()
-                        .map(|f| f.presentation_time.ticks)
-                        .chain(future)
-                        .min();
+                    let next = self.pending.iter().map(|f| f.presentation_time.ticks).min();
                     frame.duration.ticks = presentation_duration(
                         frame.presentation_time.ticks,
                         next,

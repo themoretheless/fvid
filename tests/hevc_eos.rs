@@ -120,3 +120,64 @@ fn standalone_end_markers_restart_cra_without_emitting_a_picture() {
         }
     }
 }
+
+#[test]
+fn eos_playback_preserves_pixels_timestamps_and_rewind() {
+    use fvid::{container::mp4::Limits, playback_mp4::Mp4VideoReader};
+    let original = include_bytes!("fixtures/hevc/weighted-tmvp.mp4");
+    let ended = include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4");
+    let mut baseline =
+        Mp4VideoReader::open_software(Cursor::new(original), Limits::default(), 16 << 20).unwrap();
+    let mut expected = Vec::new();
+    while let Some(frame) = baseline.read_frame().unwrap() {
+        if !(6..=8).contains(&frame.sample_index) {
+            expected.push(frame);
+        }
+    }
+    assert_eq!(expected.len(), 14);
+    let mut source =
+        Mp4VideoReader::open_software(Cursor::new(ended), Limits::default(), 16 << 20).unwrap();
+    for pass in 0..2 {
+        let mut previous_end = None;
+        for reference in &expected {
+            let frame = source.read_frame().unwrap().unwrap();
+            assert_eq!(frame.sample_index, reference.sample_index, "pass {pass}");
+            assert_eq!(frame.presentation_time, reference.presentation_time);
+            assert_eq!(frame.picture.y, reference.picture.y);
+            assert_eq!(frame.picture.cb, reference.picture.cb);
+            assert_eq!(frame.picture.cr, reference.picture.cr);
+            if let Some(end) = previous_end {
+                assert_eq!(
+                    end, frame.presentation_time.ticks,
+                    "sample {}",
+                    frame.sample_index
+                );
+            }
+            previous_end = Some(frame.presentation_time.ticks + frame.duration.ticks);
+        }
+        assert!(source.read_frame().unwrap().is_none());
+        source.rewind();
+    }
+}
+
+#[test]
+fn eos_native_seek_matches_the_output_timeline() {
+    use fvid::playback_native::NativeReader;
+    use std::time::Duration;
+    let file = include_bytes!("fixtures/playback-errors/hevc-eos-before-cra-valid-synthetic.mp4");
+    let mut reader = NativeReader::software(Cursor::new(file), 32 << 20).unwrap();
+    let mut frames = Vec::new();
+    while reader.read_frame().unwrap() {
+        frames.push((reader.frame_interval().unwrap(), reader.rgb().to_vec()));
+    }
+    assert_eq!(frames.len(), 14);
+    for millis in [0, 100, 200, 267, 350, 533] {
+        reader.seek(Duration::from_millis(millis)).unwrap();
+        let interval = reader.frame_interval().unwrap();
+        let expected = frames.iter().find(|(i, _)| *i == interval).unwrap();
+        assert_eq!(reader.rgb(), expected.1, "seek {millis}");
+    }
+    reader.rewind().unwrap();
+    assert!(reader.read_frame().unwrap());
+    assert_eq!(reader.rgb(), frames[0].1);
+}
