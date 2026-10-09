@@ -7190,3 +7190,23 @@ RBSP exhaustion; in-band validation tests refusal, poison-until-reset and
 first-picture recovery. No private media, FFmpeg, generation or network is
 needed during ordinary tests. Cross-parameter VPS/SPS identity/ordering
 consistency and actual multilayer/3D decoding still require further work.
+
+
+### HEVC VPS identity and availability
+
+The decoder now retains parsed VPS by ID, applies in-band VPS packets to
+parameter state and restores initial VPS sets on reset. At picture activation
+the SPS must resolve its named VPS; SPS temporal sublayers/nesting must also
+agree with that VPS. Changed VPS after VCL follows the existing parameter
+update ordering refusal. The wrong-ID authored fixture previously decoded
+despite its SPS naming absent VPS 0; it now refuses specifically at activation.
+A paired nonzero-ID fixture preserves all 17 pictures, timing and rewind.
+A parameter-only packet supplying missing VPS 0 enables decoding; reset removes
+that update and recovery can supply it again. Generate these using the existing
+offline extension-tail fixture script.
+
+Activation availability follows H.265 7.4.2.4.2; temporal relationships follow
+7.4.3.2.1. This milestone qualifies ID binding and in-band availability; it does
+not prove full CVS activation restrictions, every temporal hierarchy, layered
+profiles or 3D decoding.
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201911-S%21%21PDF-E&lang=e&type=items

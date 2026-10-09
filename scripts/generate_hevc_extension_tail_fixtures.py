@@ -44,6 +44,8 @@ def main():
         ('bad-stop', {33}, 1, '00000000000000000000000000000000'),
         ('vps', {32}, 0, '001010000000000000000000000000001110'),
         ('vps-bad-stop', {32}, 0, '00000000000000000000000000000000'),
+        ('vps-wrong-id', {32}, 0, ''),
+        ('paired-id', {32, 33}, 0, ''),
     ]:
         def config(data):
             result = bytearray(data[:23])
@@ -58,7 +60,10 @@ def main():
                     nal = data[at:at+n]
                     at += n
                     if header[0] & 63 in kinds:
-                        nal = extended(nal, value, tail, label.endswith('bad-stop'))
+                        if label in ('vps-wrong-id', 'paired-id'):
+                            nal = nal[:2] + bytes([(nal[2] & 15) | 16]) + nal[3:]
+                        else:
+                            nal = extended(nal, value, tail, label.endswith('bad-stop'))
                     result += struct.pack('>H', len(nal)) + nal
             assert at == len(data)
             return bytes(result)

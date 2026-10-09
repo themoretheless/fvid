@@ -20,6 +20,7 @@ pub struct Decoded {
 }
 #[derive(Clone)]
 struct ParameterSets {
+    vps: Vec<Vps>,
     sets: Vec<Sps>,
     pps_nals: Vec<(u8, Vec<u8>)>,
     pairs: Vec<(Sps, Pps)>,
@@ -42,10 +43,15 @@ pub struct HevcDecoder {
 impl HevcDecoder {
     pub fn from_configuration(data: &[u8], budget: usize) -> Result<Self> {
         let config = HevcConfig::parse(data)?;
+        let mut vps = Vec::new();
         for array in &config.arrays {
             if array.nal_type == 32 {
                 for nal in &array.units {
-                    Vps::parse(nal, budget)?;
+                    let new = Vps::parse(nal, budget)?;
+                    if vps.iter().any(|v: &Vps| v.id == new.id) {
+                        return Err(invalid("duplicate HEVC VPS"));
+                    }
+                    vps.push(new);
                 }
             }
         }
@@ -98,6 +104,7 @@ impl HevcDecoder {
             }
         }
         let params = ParameterSets {
+            vps,
             sets,
             pps_nals,
             pairs,
@@ -177,7 +184,19 @@ impl HevcDecoder {
             let params = updated.as_ref().unwrap_or(&self.params);
             match header.unit_type {
                 32 => {
-                    Vps::parse(nal, self.budget)?;
+                    let new = Vps::parse(nal, self.budget)?;
+                    if params.vps.iter().any(|v| *v == new) {
+                        continue;
+                    }
+                    if seen_slice {
+                        return Err(invalid("HEVC changed VPS follows picture slices"));
+                    }
+                    let params = updated.get_or_insert_with(|| self.params.clone());
+                    if let Some(old) = params.vps.iter_mut().find(|v| v.id == new.id) {
+                        *old = new;
+                    } else {
+                        params.vps.push(new);
+                    }
                 }
                 33 => {
                     let new = Sps::parse(nal, self.budget)?;
@@ -374,6 +393,14 @@ impl HevcDecoder {
             .iter()
             .find(|(_, p)| p.id == id)
             .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
+        let vps = self.params.vps.iter().find(|v| v.id == sps.vps_id)
+            .ok_or_else(|| invalid("HEVC SPS references unavailable VPS"))?;
+        if sps.ordering.len() > vps.ordering.len() {
+            return Err(invalid("HEVC SPS exceeds VPS temporal sublayers"));
+        }
+        if vps.temporal_id_nesting && !sps.temporal_id_nesting {
+            return Err(invalid("HEVC SPS contradicts VPS temporal nesting"));
+        }
         let header = &headers[0];
         let new_sequence = self.sequence_ended;
         self.sequence_ended = end_after_picture;

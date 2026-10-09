@@ -13,6 +13,13 @@ fn future_parameter_extension_tails_preserve_base_picture_playback() {
     assert_eq!(expected.len(), 17);
     for (label, bytes) in [
         (
+            "paired-id",
+            include_bytes!(
+                "fixtures/playback-errors/hevc-future-extension-paired-id-synthetic.mp4"
+            )
+            .as_slice(),
+        ),
+        (
             "vps",
             include_bytes!("fixtures/playback-errors/hevc-future-extension-vps-synthetic.mp4")
                 .as_slice(),
@@ -125,4 +132,67 @@ fn inband_vps_tail_validation_poison_and_reset() {
         r.read_packet(0, 0, &mut packet).unwrap();
         assert!(d.decode_packet(&packet).unwrap().is_some());
     }
+}
+
+#[test]
+fn activated_sps_requires_its_named_vps() {
+    let bytes =
+        include_bytes!("fixtures/playback-errors/hevc-future-extension-vps-wrong-id-synthetic.mp4");
+    let mut reader =
+        Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), 16 << 20).unwrap();
+    assert_eq!(
+        reader
+            .read_frame()
+            .err()
+            .expect("SPS names missing VPS")
+            .to_string(),
+        "HEVC SPS references unavailable VPS"
+    );
+}
+
+#[test]
+fn inband_named_vps_becomes_available_and_reset_restores_initial_sets() {
+    use fvid::{
+        codec::{config::HevcConfig, hevc_decoder::HevcDecoder},
+        container::mp4::Mp4Reader,
+    };
+    let wrong =
+        include_bytes!("fixtures/playback-errors/hevc-future-extension-vps-wrong-id-synthetic.mp4");
+    let mut r = Mp4Reader::open(Cursor::new(wrong), Limits::default()).unwrap();
+    let mut d = HevcDecoder::from_configuration(&r.tracks()[0].configuration, 16 << 20).unwrap();
+    let seed = Mp4Reader::open(
+        Cursor::new(include_bytes!("fixtures/hevc/main-ipb.mp4")),
+        Limits::default(),
+    )
+    .unwrap();
+    let config = HevcConfig::parse(&seed.tracks()[0].configuration).unwrap();
+    let nal = &config
+        .arrays
+        .iter()
+        .find(|a| a.nal_type == 32)
+        .unwrap()
+        .units[0];
+    let mut prefix = (nal.len() as u32).to_be_bytes().to_vec();
+    prefix.extend_from_slice(nal);
+    assert!(d.decode_packet(&prefix).unwrap().is_none());
+    let mut packet = vec![];
+    r.read_packet(0, 0, &mut packet).unwrap();
+    let actual = d.decode_packet(&packet).unwrap().unwrap();
+    let mut baseline =
+        HevcDecoder::from_configuration(&seed.tracks()[0].configuration, 16 << 20).unwrap();
+    let expected = baseline.decode_packet(&packet).unwrap().unwrap();
+    for plane in 0..3 {
+        assert_eq!(
+            actual.picture.planes[plane].samples(),
+            expected.picture.planes[plane].samples()
+        );
+    }
+    d.reset();
+    assert_eq!(
+        d.decode_packet(&packet).err().unwrap().to_string(),
+        "HEVC SPS references unavailable VPS"
+    );
+    d.reset();
+    assert!(d.decode_packet(&prefix).unwrap().is_none());
+    assert!(d.decode_packet(&packet).unwrap().is_some());
 }

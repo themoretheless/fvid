@@ -286,6 +286,14 @@ fn sps_change_without_random_access_or_after_slices_is_rejected() {
     .unwrap();
     let config = &old.tracks()[0].configuration.clone();
     let prefix = parameter_prefix(&new.tracks()[0].configuration);
+    let parsed = HevcConfig::parse(&new.tracks()[0].configuration).unwrap();
+    let mut without_vps = Vec::new();
+    for array in parsed.arrays.iter().filter(|a| matches!(a.nal_type, 33 | 34)) {
+        for nal in &array.units {
+            without_vps.extend_from_slice(&(nal.len() as u32).to_be_bytes());
+            without_vps.extend_from_slice(nal);
+        }
+    }
     let mut first = Vec::new();
     old.read_packet(0, 0, &mut first).unwrap();
     let mut inter = Vec::new();
@@ -293,6 +301,10 @@ fn sps_change_without_random_access_or_after_slices_is_rejected() {
     for (input, expected) in [
         (
             [first.as_slice(), &prefix].concat(),
+            "HEVC changed VPS follows picture slices",
+        ),
+        (
+            [first.as_slice(), &without_vps].concat(),
             "HEVC changed SPS follows picture slices",
         ),
         (
