@@ -214,3 +214,48 @@ fn main_ps_cce_probe_ranges_rewind_seek_keep_per_tag_prediction() {
         assert_eq!(play(&mut s), full[landed as usize * 8..]);
     }
 }
+
+#[test]
+fn target_tns_distinguishes_before_and_after_coupling() {
+    let manifest = m();
+    for rate in [24000, 48000] {
+        let find = |point| {
+            manifest["cases"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|c| c["tns"] == true && c["point"] == point && c["container_rate"] == rate)
+                .unwrap()
+        };
+        let before = find(0);
+        let after = find(1);
+        let a = reference(before);
+        let b = reference(after);
+        assert_eq!(a.len(), b.len());
+        let delta = a
+            .iter()
+            .zip(&b)
+            .map(|(a, b)| (a - b).abs())
+            .fold(0f32, f32::max);
+        assert!(
+            delta > 1e-6,
+            "{rate}: TNS ordering is not observable: {delta}"
+        );
+        let mut before_pcm = vec![];
+        let mut after_pcm = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(before["video"]["file"].as_str().unwrap()),
+            &mut before_pcm,
+        )
+        .unwrap();
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(after["video"]["file"].as_str().unwrap()),
+            &mut after_pcm,
+        )
+        .unwrap();
+        assert_ne!(
+            before_pcm, after_pcm,
+            "{rate}: production collapsed the coupling points"
+        );
+    }
+}

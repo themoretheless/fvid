@@ -8796,3 +8796,29 @@ Validation: 12 integration tests passed across `aac_main_ps_cce`,
 `aac_main_ps` and `he_aac_ps_coupling`, locked/offline with production
 `media,player` features and no FFmpeg. Production code is unchanged from
 `ec338f53a`; the temporary mutation was fully restored.
+
+### AAC Main PS target TNS/coupling ordering (2026-10-09)
+
+The Main PS CCE matrix now includes four additional long-window MP4 videos
+(points 0/1, output 24/48 kHz) with first-order target TNS and the same distinct
+source predictors/reset groups. An independent scalar all-pole recurrence is
+applied after spectral coupling for point 0; point 1 adds the source after the
+silent target's TNS. The full PS PCM reference composes the independent core
+with the previously qualified PS stage. Acceptance requires observable point
+0/1 PCM differences at both clocks and continues waveform, transactional
+checkpoint, reset, delayed EOF, probe, interval, rewind and seek checks.
+
+A temporary mutation reversing production point selection passed the original
+non-TNS cases but failed `0-24000-tns` at PCM sample 887, proving sensitivity to
+this specific stage-order error. Production source was restored byte-for-byte.
+The generator deterministically reproduces 18 artifacts; all eight previously
+committed videos/core/control files remain byte-identical.
+
+This supersedes the previous target-TNS qualification gap for this first-order,
+long-window mono Main PS matrix only. Source TNS, higher orders, independent
+point 3, source SBR and CCE absence/roster transitions still need qualification;
+full AAC/all-codec parity remains incomplete.
+
+Validation: 11 integration tests passed across `aac_main_ps`,
+`aac_main_ps_cce` and `aac_pce_roster`, locked/offline with `media,player`.
+Production code remains unchanged; fixture generation stays outside tests.
