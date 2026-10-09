@@ -1087,3 +1087,16 @@ with the previously qualified owned SBR/PS DSP, not an independent full decoder.
 Root/owned export, repeated ranges, WAV and playback seek/rewind are tested.
 CCE-owned PS and multi-element target PS remain unqualified. Fixture generation
 is separate and offline; ordinary tests need neither FFmpeg nor network.
+
+### 2026-10-09 — PS discovery belongs to the target SCE
+
+Twelve additional own synthetic videos cover 960/1024 and coupling points
+0/1/3 with CCE-owned mono SBR FIL. Without target PS, the syntax probe stays
+false, the PS candidate refuses EOF specifically for missing PS, and ordinary
+owned AAC playback/export accepts mono. With target PS first appearing in
+packet one, negotiation accepts stereo and preserves preceding core history
+and delayed PCM. These are acceptance tests for already implemented behavior,
+not a claim of CCE-owned PS support. Root/owned PCM agrees; the expected PCM
+uses the independent core oracle and qualified own SBR/PS stage composition.
+Full playback, rewind and seek agree with export. Fixture generation remains
+offline and deterministic; tests do not generate fixtures or invoke FFmpeg.

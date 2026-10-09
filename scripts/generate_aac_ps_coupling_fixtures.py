@@ -80,6 +80,23 @@ def main():
                         if rate==48000:
                             c['video']=video_fixture([c],blob,channels=2,filename=f'he-aac-ps-coupling-{slots*64}-{point}-{mode}-{kind.lower()}-synthetic.mp4')
                         cases.append(c)
+    negotiation=[]
+    for slots in [15,16]:
+        for point in [0,1,3]:
+            for late in [False, True]:
+                frames=[]
+                for frame in range(6):
+                    target_raw=sbr(ps(1,1,frame-1,slots=slots*2,count=1)[0],frame-1) if late and frame else b''
+                    source=mono_payload(nhigh,2,True,frame)
+                    data=packet(frame,[15],point,target_raw,{15:source})
+                    frames.append(dict(offset=len(blob),bytes=len(data),sbr=target_raw.hex(),
+                                       cce=[dict(tag=15,sbr=source.hex())]));blob.extend(data)
+                c=dict(slots=slots,bands=64,frames=frames,asc=config(slots,48000,'LC',[15],point).hex(),
+                       point=point,tags=[15],kind='LC',output_rate=48000,channels=2 if late else 1,
+                       core_pcm=offsets[slots,0 if point==0 else 1],pcm_offset=0,samples=slots*64*12,late=late)
+                c['video']=video_fixture([c],blob,channels=c['channels'],
+                    filename=f"he-aac-ps-coupling-{slots*64}-{point}-{'late-target-ps' if late else 'source-fil-only'}-synthetic.mp4")
+                negotiation.append(c)
     invalid=[]
     for failure in ['target','crc','source-ps']:
         c=next(c for c in cases if c['slots']==16 and c['point']==1 and c['tags']==[15] and c['kind']=='PS' and c['bands']==64)
@@ -100,7 +117,7 @@ def main():
     (DEST/'he-aac-ps-coupling-core.f32le').write_bytes(pcm)
     (DEST/'he-aac-ps-coupling-oracles.json').write_text(json.dumps(dict(
         kind='own PS/CCE packets; independent direct-cosine core, separately qualified PS/SBR composition',
-        cases=cases,invalid=invalid,packet_sha256=hashlib.sha256(blob).hexdigest(),core_sha256=hashlib.sha256(pcm).hexdigest()),indent=2)+'\n')
+        cases=cases,invalid=invalid,negotiation=negotiation,packet_sha256=hashlib.sha256(blob).hexdigest(),core_sha256=hashlib.sha256(pcm).hexdigest()),indent=2)+'\n')
     print(len(cases),'PS/CCE cases;',sum(c['video'] is not None for c in cases),'acceptance videos')
 
 

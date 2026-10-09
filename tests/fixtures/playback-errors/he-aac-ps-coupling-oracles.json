@@ -10682,17 +10682,17 @@
       "bands": 64,
       "frames": [
         {
-          "offset": 5760,
+          "offset": 8700,
           "bytes": 62,
           "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0"
         },
         {
-          "offset": 5822,
+          "offset": 8762,
           "bytes": 53,
           "sbr": "e3940e000000001b86000010000043fffffeff"
         },
         {
-          "offset": 5875,
+          "offset": 8815,
           "bytes": 51,
           "sbr": "d038000000006e1800004000010ffffffbfc"
         }
@@ -10726,17 +10726,17 @@
       "bands": 64,
       "frames": [
         {
-          "offset": 5926,
+          "offset": 8866,
           "bytes": 62,
           "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0"
         },
         {
-          "offset": 5988,
+          "offset": 8928,
           "bytes": 53,
           "sbr": "e3940e000000001b86000010000043fffffeff"
         },
         {
-          "offset": 6041,
+          "offset": 8981,
           "bytes": 51,
           "sbr": "d038000000006e1800004000010ffffffbfc"
         }
@@ -10770,17 +10770,17 @@
       "bands": 64,
       "frames": [
         {
-          "offset": 6092,
+          "offset": 9032,
           "bytes": 62,
           "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0"
         },
         {
-          "offset": 6154,
+          "offset": 9094,
           "bytes": 71,
           "sbr": "e3940e000000001b86000010000043fffffeff"
         },
         {
-          "offset": 6225,
+          "offset": 9165,
           "bytes": 51,
           "sbr": "d038000000006e1800004000010ffffffbfc"
         }
@@ -10810,6 +10810,1148 @@
       "error": "SBR extended audio/PS synthesis is not yet implemented"
     }
   ],
-  "packet_sha256": "d7d3b9e6aa99b9fcf10b2cfb2d04616b8c1c5232bf9dbd5ee60aa4d6d16ddea6",
+  "negotiation": [
+    {
+      "slots": 15,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 5760,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 5795,
+          "bytes": 32,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 5827,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 5858,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 5889,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 5920,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13040584000206f000",
+      "point": 0,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 1,
+      "core_pcm": [
+        0,
+        5760
+      ],
+      "pcm_offset": 0,
+      "samples": 11520,
+      "late": false,
+      "video": {
+        "file": "he-aac-ps-coupling-960-0-source-fil-only-synthetic.mp4",
+        "sha256": "edadaa460a3fcd9d642e15eeb5550980ceeb5fa54161fae94d2f8b60fc89fcbc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13040584000206f000",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "slots": 15,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 5951,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 5986,
+          "bytes": 59,
+          "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6045,
+          "bytes": 52,
+          "sbr": "e3940e000000001b86000010000043fffffeff",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6097,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6148,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6199,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13040584000206f000",
+      "point": 0,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 2,
+      "core_pcm": [
+        0,
+        5760
+      ],
+      "pcm_offset": 0,
+      "samples": 11520,
+      "late": true,
+      "video": {
+        "file": "he-aac-ps-coupling-960-0-late-target-ps-synthetic.mp4",
+        "sha256": "6e1dae98894830014a560c1f2f08930f0501f0b63e3520306d960e1582b01c94",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13040584000206f000",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "slots": 15,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 6250,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 6285,
+          "bytes": 32,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6317,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6348,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6379,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6410,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13040584000206f000",
+      "point": 1,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 1,
+      "core_pcm": [
+        23040,
+        5760
+      ],
+      "pcm_offset": 0,
+      "samples": 11520,
+      "late": false,
+      "video": {
+        "file": "he-aac-ps-coupling-960-1-source-fil-only-synthetic.mp4",
+        "sha256": "9d8b566f73e3b72e371cab843541d4aa73043093af5dfeac122e84fb2fd1dd68",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13040584000206f000",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "slots": 15,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 6441,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 6476,
+          "bytes": 59,
+          "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6535,
+          "bytes": 52,
+          "sbr": "e3940e000000001b86000010000043fffffeff",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6587,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6638,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6689,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13040584000206f000",
+      "point": 1,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 2,
+      "core_pcm": [
+        23040,
+        5760
+      ],
+      "pcm_offset": 0,
+      "samples": 11520,
+      "late": true,
+      "video": {
+        "file": "he-aac-ps-coupling-960-1-late-target-ps-synthetic.mp4",
+        "sha256": "eb8569cf3cde902dadf85ea9e229b9c5affff89aa96e27b92ee08c0036962cbf",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13040584000206f000",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "slots": 15,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 6740,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 6775,
+          "bytes": 32,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6807,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6838,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6869,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 6900,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13040584000207f000",
+      "point": 3,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 1,
+      "core_pcm": [
+        23040,
+        5760
+      ],
+      "pcm_offset": 0,
+      "samples": 11520,
+      "late": false,
+      "video": {
+        "file": "he-aac-ps-coupling-960-3-source-fil-only-synthetic.mp4",
+        "sha256": "45b25ae2c19182ac8b5a47fa22818cc722b114d42515337dd621761928307ea8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13040584000207f000",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "slots": 15,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 6931,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 6966,
+          "bytes": 59,
+          "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7025,
+          "bytes": 52,
+          "sbr": "e3940e000000001b86000010000043fffffeff",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7077,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7128,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7179,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13040584000207f000",
+      "point": 3,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 2,
+      "core_pcm": [
+        23040,
+        5760
+      ],
+      "pcm_offset": 0,
+      "samples": 11520,
+      "late": true,
+      "video": {
+        "file": "he-aac-ps-coupling-960-3-late-target-ps-synthetic.mp4",
+        "sha256": "f37b8ecfd19d1042bd159d00e083f2ef4621bf75305acbc89378345b118e83be",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13040584000207f000",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "slots": 16,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 7230,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 7265,
+          "bytes": 32,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7297,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7328,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7359,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7390,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13000584000206f000",
+      "point": 0,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 1,
+      "core_pcm": [
+        46080,
+        6144
+      ],
+      "pcm_offset": 0,
+      "samples": 12288,
+      "late": false,
+      "video": {
+        "file": "he-aac-ps-coupling-1024-0-source-fil-only-synthetic.mp4",
+        "sha256": "a692a1e041519fcc404d5beb1322d811c4a8043f29d940e1690171b2ff70ada3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000206f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "slots": 16,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 7421,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 7456,
+          "bytes": 59,
+          "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7515,
+          "bytes": 52,
+          "sbr": "e3940e000000001b86000010000043fffffeff",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7567,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7618,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7669,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13000584000206f000",
+      "point": 0,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 2,
+      "core_pcm": [
+        46080,
+        6144
+      ],
+      "pcm_offset": 0,
+      "samples": 12288,
+      "late": true,
+      "video": {
+        "file": "he-aac-ps-coupling-1024-0-late-target-ps-synthetic.mp4",
+        "sha256": "f45a12971dc66489800b5c8c080a27b2163e6a9d3424f5dbd0c0c06258957fab",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000206f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "slots": 16,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 7720,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 7755,
+          "bytes": 32,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7787,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7818,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7849,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 7880,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13000584000206f000",
+      "point": 1,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 1,
+      "core_pcm": [
+        70656,
+        6144
+      ],
+      "pcm_offset": 0,
+      "samples": 12288,
+      "late": false,
+      "video": {
+        "file": "he-aac-ps-coupling-1024-1-source-fil-only-synthetic.mp4",
+        "sha256": "c640350176260776d091f0bf13815b4898060dc4f6a07c7f90b44185a617a11b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000206f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "slots": 16,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 7911,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 7946,
+          "bytes": 59,
+          "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8005,
+          "bytes": 52,
+          "sbr": "e3940e000000001b86000010000043fffffeff",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8057,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8108,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8159,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13000584000206f000",
+      "point": 1,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 2,
+      "core_pcm": [
+        70656,
+        6144
+      ],
+      "pcm_offset": 0,
+      "samples": 12288,
+      "late": true,
+      "video": {
+        "file": "he-aac-ps-coupling-1024-1-late-target-ps-synthetic.mp4",
+        "sha256": "3ef9dad7786edc503012d11a284e27e1819f3832103ee6e6b23470866aed03c4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000206f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "slots": 16,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 8210,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 8245,
+          "bytes": 32,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8277,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8308,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8339,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8370,
+          "bytes": 31,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13000584000207f000",
+      "point": 3,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 1,
+      "core_pcm": [
+        70656,
+        6144
+      ],
+      "pcm_offset": 0,
+      "samples": 12288,
+      "late": false,
+      "video": {
+        "file": "he-aac-ps-coupling-1024-3-source-fil-only-synthetic.mp4",
+        "sha256": "f86a7e7a954b7ca852560c0944a8d26b9c88d8068ade03f8e4dc654bbc333dbe",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000207f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "slots": 16,
+      "bands": 64,
+      "frames": [
+        {
+          "offset": 8401,
+          "bytes": 35,
+          "sbr": "",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d88c182b04010000000070"
+            }
+          ]
+        },
+        {
+          "offset": 8436,
+          "bytes": 59,
+          "sbr": "d88c182b040100000000776cccb00000380000210ffc7ff7c0",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "ee600e0000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8495,
+          "bytes": 52,
+          "sbr": "e3940e000000001b86000010000043fffffeff",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8547,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8598,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        },
+        {
+          "offset": 8649,
+          "bytes": 51,
+          "sbr": "d038000000006e1800004000010ffffffbfc",
+          "cce": [
+            {
+              "tag": 15,
+              "sbr": "d0380000000000"
+            }
+          ]
+        }
+      ],
+      "asc": "13000584000207f000",
+      "point": 3,
+      "tags": [
+        15
+      ],
+      "kind": "LC",
+      "output_rate": 48000,
+      "channels": 2,
+      "core_pcm": [
+        70656,
+        6144
+      ],
+      "pcm_offset": 0,
+      "samples": 12288,
+      "late": true,
+      "video": {
+        "file": "he-aac-ps-coupling-1024-3-late-target-ps-synthetic.mp4",
+        "sha256": "73c9651f5d5159e74989ad51dd29f0cf70b8130b48a2d06accddcf6e0fe1bd90",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "13000584000207f000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ],
+  "packet_sha256": "586c07f11b82b1955439e4256dd59fea08330af22faf4e1664c19cfe71a0b939",
   "core_sha256": "07e76be1dca66bd80d90a867d83ef0c18292a3e6c93c130b2cbb5d57171e399a"
 }

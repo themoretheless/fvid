@@ -6924,3 +6924,16 @@ is separate and offline; ordinary tests need neither FFmpeg nor network.
 
 Delivery checks: core library 908 passed / 23 ignored; owned media library
 432 passed / 1 ignored. Commands used locked offline builds; no FFmpeg.
+
+### 2026-10-09 — PS discovery belongs to the target SCE
+
+Twelve additional own synthetic videos cover 960/1024 and coupling points
+0/1/3 with CCE-owned mono SBR FIL. Without target PS, the syntax probe stays
+false, the PS candidate refuses EOF specifically for missing PS, and ordinary
+owned AAC playback/export accepts mono. With target PS first appearing in
+packet one, negotiation accepts stereo and preserves preceding core history
+and delayed PCM. These are acceptance tests for already implemented behavior,
+not a claim of CCE-owned PS support. Root/owned PCM agrees; the expected PCM
+uses the independent core oracle and qualified own SBR/PS stage composition.
+Full playback, rewind and seek agree with export. Fixture generation remains
+offline and deterministic; tests do not generate fixtures or invoke FFmpeg.

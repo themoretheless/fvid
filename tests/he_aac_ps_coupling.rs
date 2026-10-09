@@ -1,3 +1,31 @@
+#[cfg(feature = "player")]
+fn play(
+    stream: &mut fvid::playback_mp4_audio::Mp4AudioReader<std::io::Cursor<&Vec<u8>>>,
+) -> Vec<u8> {
+    use fvid::audio::AudioStream;
+    let mut d = stream.make_decoder().unwrap();
+    let mut out = vec![];
+    while let Some(p) = stream.next_packet().unwrap() {
+        if let Some(frame) = d.decode_packet(&p.data, p.pts, p.duration as u64).unwrap() {
+            if let Some(pcm) = stream
+                .present_decoded(frame.packet, frame.source_pts)
+                .unwrap()
+            {
+                out.extend(pcm.data);
+            }
+        }
+    }
+    if let Some(frame) = d.finish_packet().unwrap() {
+        if let Some(pcm) = stream
+            .present_decoded(frame.packet, frame.source_pts)
+            .unwrap()
+        {
+            out.extend(pcm.data);
+        }
+    }
+    assert!(d.finish_packet().unwrap().is_none());
+    out
+}
 use fvid_media::owned_aac::{
     aac_ps_native::{InBandPsProbe, NativePsAacDecoder},
     aac_sbr_dsp::{Dsp, OutputRate},
@@ -218,30 +246,6 @@ fn ps_cce_failures_leave_pending_pcm_overlap_and_probe_histories_unchanged() {
 fn ps_cce_videos_accept_root_owned_export_ranges_wav_and_delayed_playback_seek() {
     use fvid::audio::AudioStream;
     use std::io::Cursor;
-    fn play(stream: &mut fvid::playback_mp4_audio::Mp4AudioReader<Cursor<&Vec<u8>>>) -> Vec<u8> {
-        let mut d = stream.make_decoder().unwrap();
-        let mut out = vec![];
-        while let Some(p) = stream.next_packet().unwrap() {
-            if let Some(frame) = d.decode_packet(&p.data, p.pts, p.duration as u64).unwrap() {
-                if let Some(pcm) = stream
-                    .present_decoded(frame.packet, frame.source_pts)
-                    .unwrap()
-                {
-                    out.extend(pcm.data);
-                }
-            }
-        }
-        if let Some(frame) = d.finish_packet().unwrap() {
-            if let Some(pcm) = stream
-                .present_decoded(frame.packet, frame.source_pts)
-                .unwrap()
-            {
-                out.extend(pcm.data);
-            }
-        }
-        assert!(d.finish_packet().unwrap().is_none());
-        out
-    }
     for c in manifest()["cases"].as_array().unwrap() {
         if c["video"].is_null() {
             continue;
@@ -312,5 +316,118 @@ fn ps_cce_videos_accept_root_owned_export_ranges_wav_and_delayed_playback_seek()
             (48000, 2, stats.sample_frames)
         );
         std::fs::remove_file(dest).unwrap();
+    }
+}
+
+#[test]
+fn source_cce_fil_does_not_detect_ps_and_late_target_ps_preserves_core_history() {
+    for c in manifest()["negotiation"].as_array().unwrap() {
+        let late = c["late"].as_bool().unwrap();
+        let mut p = InBandPsProbe::new(&hex(c["asc"].as_str().unwrap()), 48000).unwrap();
+        let mut d = decoder(c);
+        let mut pcm = vec![];
+        for (index, row) in c["frames"].as_array().unwrap().iter().enumerate() {
+            assert_eq!(p.read(packet(row)).unwrap(), late && index > 0);
+            if let Some(frame) = d.decode(packet(row)).unwrap() {
+                pcm.extend(frame.pcm);
+            }
+        }
+        if late {
+            pcm.extend(d.finish().unwrap().unwrap().pcm);
+            let expected = reference(c);
+            assert_eq!(pcm.len(), expected.len());
+            for (a, e) in pcm.iter().zip(expected) {
+                assert!((a - e).abs() < 2e-7);
+            }
+        } else {
+            assert!(
+                d.finish()
+                    .unwrap_err()
+                    .to_string()
+                    .contains("without a PS element")
+            );
+        }
+        p.reset();
+        assert!(!p.read(packet(&c["frames"][0])).unwrap());
+    }
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn source_only_sbr_fil_accepts_mono_and_late_target_ps_negotiates_stereo_export() {
+    use fvid::audio::AudioStream;
+    use std::io::Cursor;
+    for c in manifest()["negotiation"].as_array().unwrap() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(c["video"]["file"].as_str().unwrap());
+        let bytes = std::fs::read(path).unwrap();
+        let mut pcm = vec![];
+        let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(&bytes),
+            &mut pcm,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            (stats.sample_rate, stats.channels, stats.sample_frames),
+            (
+                48000,
+                c["channels"].as_u64().unwrap() as u16,
+                c["samples"].as_u64().unwrap()
+            )
+        );
+        let mut root = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut root).unwrap();
+        assert_eq!(root, pcm);
+        let mut stream =
+            fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        assert_eq!(stream.channels() as u64, c["channels"].as_u64().unwrap());
+        if c["late"] == true {
+            for (a, e) in pcm.chunks_exact(4).zip(reference(c)) {
+                assert!((f32::from_le_bytes(a.try_into().unwrap()) - e).abs() < 2e-7);
+            }
+        } else {
+            let off = c["core_pcm"][0].as_u64().unwrap() as usize;
+            let slots = c["slots"].as_u64().unwrap() as u8;
+            let n = slots as usize * 64;
+            let mut dsp = Dsp::default();
+            let mut source_stream = Stream::default();
+            let mut expected = vec![];
+            for i in 0..6 {
+                let core: Vec<f32> = CORE[off + i * n * 4..off + (i + 1) * n * 4]
+                    .chunks_exact(4)
+                    .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+                    .collect();
+                let rendered = if c["point"] == 3 {
+                    let raw = hex(c["frames"][i]["cce"][0]["sbr"].as_str().unwrap());
+                    let mut bits = BitReader::new(&raw);
+                    let kind = bits.read(4).unwrap();
+                    let frame = source_stream
+                        .read(&mut bits, raw.len() * 8, kind == 14, 48000, slots, 1)
+                        .unwrap();
+                    dsp.process(&frame, &[&core], 48000, slots, OutputRate::Double)
+                        .unwrap()
+                } else {
+                    dsp.process_upsampling(&[&core], 48000, slots, OutputRate::Double)
+                        .unwrap()
+                };
+                expected.extend(rendered[0].iter().map(|&v| v as f32));
+            }
+            assert_eq!(pcm.len(), expected.len() * 4);
+            for (a, e) in pcm.chunks_exact(4).zip(expected) {
+                assert!((f32::from_le_bytes(a.try_into().unwrap()) - e).abs() < 2e-7);
+            }
+        }
+        assert_eq!(play(&mut stream), pcm);
+        stream.rewind();
+        assert_eq!(play(&mut stream), pcm);
+        let landed = stream.seek_to(4800);
+        assert_eq!(
+            play(&mut stream),
+            pcm[landed as usize * stats.channels as usize * 4..]
+        );
     }
 }
