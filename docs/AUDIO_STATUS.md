@@ -1256,3 +1256,31 @@ ignored). Fixture generation and ordinary tests require no private media,
 FFmpeg or network. Main PS configured CCE/source SBR, PNS/TNS compositions,
 in-band discovery/transports and wider layouts/profiles need separate acceptance
 matrices; this mono qualification does not claim those tools are complete.
+
+### AAC Main PS dependent CCE prediction qualification (2026-10-09)
+
+Four authored MP4 videos cover two distinct Main CCE sources (tags 1 and 15),
+coupling points 0/1, 24/48 kHz PS output, long/start/short/stop sequences,
+sine/KBD windows, distinct predictor reset groups and alternating wire order.
+The scalar oracle maintains separate source predictors and combines spectra
+before direct IMDCT; the already qualified PS stage supplies the extension
+composition reference. No private media, FFmpeg, network or foreign decoder is
+used. Generator: `scripts/generate_aac_main_ps_cce_fixtures.py`; acceptance:
+`tests/aac_main_ps_cce.rs`. Generation is separate from ordinary tests.
+
+Acceptance checks waveform, per-packet rollback/checkpoint replay, delayed EOF
+indices, reset, MP4 export, probe replay, intervals, rewind and seek. A numerical
+control discarding predictor history differs from the oracle. Temporarily
+omitting the production CCE Main prediction hook makes waveform acceptance fail
+at sample 5317 for point 0 / 24 kHz; the production hook is restored byte-for-byte.
+All ten generated artifacts reproduce deterministically.
+
+This matrix has no target TNS, source SBR, CCE absence/roster transitions or
+independent point 3 coupling. Points 0/1 therefore share PCM in this matrix;
+TNS-sensitive ordering and those other combinations still need separate Main PS
+acceptance. This is bounded evidence, not full AAC or codec parity.
+
+Validation: 12 integration tests passed across `aac_main_ps_cce`,
+`aac_main_ps` and `he_aac_ps_coupling`, locked/offline with production
+`media,player` features and no FFmpeg. Production code is unchanged from
+`ec338f53a`; the temporary mutation was fully restored.
