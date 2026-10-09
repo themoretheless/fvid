@@ -285,6 +285,7 @@ pub mod aac_bands;
 pub mod aac_gain_control;
 pub use fvid_media::owned_aac::aac_main_predictor;
 pub use fvid_media::owned_aac::{aac_ssr_synthesis,aac_ssr_alignment};
+mod aac_ssr_metadata;
 pub mod aac_channel;
 
 pub mod aac_pair;

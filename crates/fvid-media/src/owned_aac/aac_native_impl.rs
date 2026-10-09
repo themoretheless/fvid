@@ -45,7 +45,7 @@ pub struct NativeAacDecoder {
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
     ssr_alignment_tags: Vec<u8>,
-    ssr_pending_duration: Option<u64>,
+    ssr_pending_duration: super::aac_ssr_metadata::PacketQueue<u64>,
     ssr_fixed_clock: bool,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     main_prediction: Vec<Option<super::aac_main_predictor::MainPredictor>>,
@@ -69,7 +69,7 @@ pub struct AacCheckpoint {
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
     ssr_alignment_tags: Vec<u8>,
-    ssr_pending_duration: Option<u64>,
+    ssr_pending_duration: super::aac_ssr_metadata::PacketQueue<u64>,
     ssr_fixed_clock: bool,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     main_prediction: Vec<Option<super::aac_main_predictor::MainPredictor>>,
@@ -168,7 +168,7 @@ impl NativeAacDecoder {
             main_prediction,
             config,
             synthesis, ssr_synthesis,
-            ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:None, ssr_fixed_clock:false,
+            ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
             program,
@@ -226,7 +226,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),program:self.program.clone(),
-            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration,ssr_fixed_clock:self.ssr_fixed_clock,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
+            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
             sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_elements:self.sbr_elements.clone()}
     }
@@ -235,13 +235,13 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
-        self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration;self.ssr_fixed_clock=state.ssr_fixed_clock;
+        self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration.clone();self.ssr_fixed_clock=state.ssr_fixed_clock;
         self.main_prediction=state.main_prediction.clone();
         self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.ssr_coupling_synthesis=state.ssr_coupling_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
-        self.ssr_alignment=None; self.ssr_alignment_tags.clear(); self.ssr_pending_duration=None;self.ssr_fixed_clock=false;
+        self.ssr_alignment=None; self.ssr_alignment_tags.clear(); self.ssr_pending_duration=Default::default();self.ssr_fixed_clock=false;
         for synth in &mut self.synthesis {
             synth.reset();
         }
@@ -270,11 +270,11 @@ impl NativeAacDecoder {
             return Ok(None);
         };
         let frame = alignment.finish()?;
-        Ok(frame.map(|frame| AacFrame {
+        frame.map(|frame| Ok(AacFrame {
             samples: frame.samples,
             pts: frame.stamp as i64,
-            duration: self.ssr_pending_duration.take().unwrap_or(0),
-        }))
+            duration: self.ssr_pending_duration.take(frame.stamp as i64)?,
+        })).transpose()
     }
     pub fn decode_timed(&mut self, packet: &[u8], pts:i64, duration:u64) -> Result<Option<AacFrame>> {
         let mut bits = BitReader::new(packet);
@@ -493,7 +493,7 @@ impl NativeAacDecoder {
         } else { self.config.frame_samples as usize };
         let alignment_history=self.ssr_alignment.clone();
         let alignment_tags_history=self.ssr_alignment_tags.clone();
-        let pending_duration_history=self.ssr_pending_duration;
+        let pending_duration_history=self.ssr_pending_duration.clone();
         let ssr_history = self.ssr_synthesis.clone();
         let ssr_coupling_history = self.ssr_coupling_synthesis.clone();
         let history: Vec<_> = self
@@ -590,13 +590,13 @@ impl NativeAacDecoder {
                         .zip(&gains)
                         .map(|(samples, outputs)| LaneInput { samples, outputs })
                         .collect();
+                    self.ssr_pending_duration.push(pts, duration)?;
                     let output = alignment.submit(pts as u64, n, &inputs)?;
-                    let previous = self.ssr_pending_duration.replace(duration);
-                    return Ok(output.map(|f| AacFrame {
+                    return output.map(|f| Ok(AacFrame {
                         samples: f.samples,
                         pts: f.stamp as i64,
-                        duration: previous.unwrap_or(0),
-                    }));
+                        duration: self.ssr_pending_duration.take(f.stamp as i64)?,
+                    })).transpose();
                 }
                 let mut samples = vec![0.0; n * channels.len()];
                 for (lane, outputs) in lanes.iter().zip(&gains) {

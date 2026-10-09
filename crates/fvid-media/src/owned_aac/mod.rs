@@ -6,6 +6,7 @@ pub mod aac_ssr_ipqf;
 pub mod aac_ssr_gain;
 pub mod aac_ssr_synthesis;
 pub mod aac_ssr_alignment;
+mod aac_ssr_metadata;
 pub mod aac_ps_data;
 pub mod aac_ps_hybrid_filter;
 pub mod aac_ps_hybrid;

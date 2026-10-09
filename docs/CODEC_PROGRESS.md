@@ -7986,3 +7986,21 @@ Pending SBR metadata must follow the aligned frame stamp, including checkpoint,
 rewind, delayed return and EOF drain, before broadening discovery/admission.
 Simply removing the profile guard or feeding unaligned PCM is insufficient.
 Six authored artifacts regenerate identically; no FFmpeg/network/test-time generator.
+
+### 2026-10-09 — bounded SSR packet metadata transport
+
+Native SSR alignment now stores packet durations in a two-slot source-stamped
+metadata queue rather than an untagged optional previous duration. A delayed
+output consumes only its matching metadata; wrong stamps and excess lookahead
+refuse without changing the queue. Checkpoint/restore/reset and decode rollback
+retain this state. The shared implementation uses each frontend's own error type
+in both root codec and owned-media decoder. The queue itself allocates no heap.
+This is the packet-metadata foundation for associating SBR frames with aligned
+SSR PCM; SBR frame storage and synthesis are not connected yet, and the SSR/SBR
+acceptance remains ignored/red rather than being represented as supported.
+
+Validation: 457 owned-media unit tests passed (one existing ignored), 13 selected
+SSR/alignment/reproduction integration tests passed (one intended SSR/SBR
+acceptance ignored), and the root metadata queue test passed. All offline with
+no FFmpeg/network; `git diff --check` passed. Queue tests cover bounded capacity,
+negative stamps, mismatch atomicity, wraparound and checkpoint replay.
