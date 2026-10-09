@@ -6,8 +6,9 @@ tables retain their MPL-2.0 provenance. Current AAC qualification is recorded in
 `CODEC_PROGRESS.md`; the incremental implementation notes below describe earlier
 states. AAC SSR now has native AOT 3 packet synthesis and headless MP4 acceptance
 for eight original 24 kHz mono/stereo fixtures with active gain and window
-transitions. SSR coupling, SBR/PS and independently switched channel windows
-with unequal output extents remain unsupported.
+transitions. Fourteen further videos qualify dependent and independent SSR
+coupling, including simultaneous CCE tags 1/15. SSR SBR/PS and independently
+switched channel/coupling windows with unequal output extents remain unsupported.
 Malformed AAC packets now return errors and require decoder reset; they are
 not reported as successful empty output. Out-of-range unsigned timestamps
 are rejected before touching codec state instead of wrapping to negative PTS.

@@ -7371,3 +7371,28 @@ Qualification is for these 24 kHz fixtures, not all SSR encoders/profiles.
 SSR coupling, SBR/PS, independently switched channel windows with unequal output
 extents, and dedicated ADTS discovery/profile integration remain explicit gaps.
 Full AAC profile parity (Main/LTP/ER/ELD/USAC) is still not achieved.
+
+### 2026-10-09 — SSR dependent and independent coupling acceptance
+
+SSR no longer unconditionally refuses CCE. Existing dependent spectral coupling
+runs before/after target TNS; SSR also requires the dependent CCE window shape
+to match its target. Independently switched CCE uses a separately retained owned
+SSR filterbank (including its own shape/gain/IPQF history), then scales/adds PCM.
+The four-bit CCE tag domain has 16 lazy boxed synthesis slots. Checkpoints,
+rollback, reset and retained heap accounting include those states. A failed
+later CCE restores both already-synthesized target and earlier CCE histories.
+
+`generate_aac_ssr_coupling_fixtures.py` authors 14 short MP4 acceptance videos:
+mono/stereo, points 0/1/3, active/empty gain, all window sequences, alternating
+CCE/target packet order, distinct independent source/target window shapes, and
+simultaneous tags 1/15. All four source PQF bands are nonzero. Expected PCM is
+computed by the separate scalar SSR oracle on source or target spectra; ordinary
+tests neither regenerate assets nor invoke FFmpeg. Three original failure
+videos cover missing target, dependent shape mismatch and invalid gain in a
+later independent CCE. Each refusal checks the exact error and state rollback.
+The prior blanket CCE guard makes the new acceptance test fail for its intended
+unsupported-tool reason; the fixed path passes PCM/export/seek/rewind/ranges.
+
+This qualification does not prove all coupling gain-list/TNS interactions.
+Independent source/target windows with unequal output extents still explicitly
+refuse until PCM alignment is implemented; SSR SBR/PS and ADTS remain gaps.

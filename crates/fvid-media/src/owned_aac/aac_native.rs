@@ -73,6 +73,13 @@ impl NativeAacDecoder {
             footprint.vector(states).map_err(|e| invalid(&e))?;
             for state in states { state.visit_retained(&mut footprint).map_err(|e| invalid(&e))?; }
         }
+        for states in [Some(&self.ssr_coupling_synthesis), checkpoint.map(|state| &state.ssr_coupling_synthesis)].into_iter().flatten() {
+            footprint.vector(states).map_err(|e| invalid(&e))?;
+            for state in states.iter().flatten() {
+                footprint.add(std::mem::size_of::<super::aac_ssr_synthesis::SsrSynthesis>()).map_err(|e| invalid(&e))?;
+                state.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
+            }
+        }
         visit(
             &self.synthesis,
             &self.coupling_synthesis,

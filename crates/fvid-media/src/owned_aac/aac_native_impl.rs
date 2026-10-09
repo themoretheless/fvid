@@ -35,6 +35,7 @@ pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
+    ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     noise: NoiseState,
     program: Option<super::aac_pce::ProgramConfig>,
@@ -53,6 +54,7 @@ pub struct AacCheckpoint {
     program: Option<super::aac_pce::ProgramConfig>,
     synthesis: Vec<LongSineSynthesis>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
+    ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     noise: NoiseState,
     mapping: Vec<usize>,
@@ -137,9 +139,11 @@ impl NativeAacDecoder {
         let ssr_synthesis = if config.object_type == 3 { vec![super::aac_ssr_synthesis::SsrSynthesis::new()?; usize::from(config.channels)] } else { Vec::new() };
         // Four-bit CCE tags occupy a separate fixed domain after audio slots.
         let element_slots = usize::from(config.channels) + if program.as_ref().is_some_and(|p| !p.coupling.is_empty()) { 16 } else { 0 };
+        let ssr_coupling_synthesis = if config.object_type==3 {vec![None;16]} else {Vec::new()};
         Ok(Self {
             config,
             synthesis, ssr_synthesis,
+            ssr_coupling_synthesis,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
             program,
@@ -196,7 +200,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {config:self.config.clone(),program:self.program.clone(),
-            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
+            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
             sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_elements:self.sbr_elements.clone()}
     }
@@ -205,7 +209,7 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
-        self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
+        self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.ssr_coupling_synthesis=state.ssr_coupling_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
@@ -214,6 +218,7 @@ impl NativeAacDecoder {
         }
         for synthesis in self.coupling_synthesis.iter_mut().flatten() {synthesis.reset();}
         for state in &mut self.ssr_synthesis { state.reset(); }
+        for state in self.ssr_coupling_synthesis.iter_mut().flatten() {state.reset();}
         self.noise.reset();
         if self.detect_sbr {self.sbr_rate=None;}
         self.sbr_elements.fill(None);
@@ -290,7 +295,6 @@ impl NativeAacDecoder {
                     channels.push((pair.right, right, self.mapping[target_offset + 1]));
                 }
                 2 => {
-                    if self.config.object_type == 3 { return Err(unsupported("AAC SSR coupling synthesis is not implemented")); }
                     let coupling = Coupling::read(&mut bits, &self.config)?;
                     if self
                         .program
@@ -398,6 +402,9 @@ impl NativeAacDecoder {
                     if channel.info.sequence != coupling.channel.info.sequence {
                         return Err(invalid("AAC coupling target window sequence mismatch"));
                     }
+                    if self.config.object_type==3 && channel.info.shape != coupling.channel.info.shape {
+                        return Err(invalid("AAC SSR dependent coupling window shape mismatch"));
+                    }
                     coupling.mix_spectrum(target, &self.config, source, destination)?;
                 }
             }
@@ -412,6 +419,7 @@ impl NativeAacDecoder {
             samples
         } else { self.config.frame_samples as usize };
         let ssr_history = self.ssr_synthesis.clone();
+        let ssr_coupling_history = self.ssr_coupling_synthesis.clone();
         let history: Vec<_> = self
             .synthesis
             .iter()
@@ -473,6 +481,15 @@ impl NativeAacDecoder {
                 if coupling.point != 3 {
                     continue;
                 }
+                if self.config.object_type == 3 {
+                    if super::aac_ssr_synthesis::SsrSynthesis::output_samples(coupling.channel.info.sequence)!=n {
+                        return Err(unsupported("AAC SSR independent coupling window extents require alignment"));
+                    }
+                    let state = &mut self.ssr_coupling_synthesis[coupling.tag as usize];
+                    if state.is_none() { *state=Some(Box::new(super::aac_ssr_synthesis::SsrSynthesis::new()?)); }
+                    let gain = coupling.channel.gain.clone().unwrap_or(super::aac_gain_control::GainControl {bands:Vec::new()}).into();
+                    state.as_mut().unwrap().synthesize_pcm(coupling.channel.info.sequence,coupling.channel.info.shape,&gain,&spectrum,&mut pcm)?;
+                } else {
                 let state = &mut self.coupling_synthesis[coupling.tag as usize];
                 if state.is_none() {
                     *state = Some(LongSineSynthesis::new(n)?);
@@ -483,6 +500,7 @@ impl NativeAacDecoder {
                     &spectrum,
                     &mut pcm,
                 )?;
+                }
                 let coupled: Vec<f32> = if sbr_rate.is_some() || self.detect_sbr {
                     let offset = usize::from(self.config.channels) + usize::from(coupling.tag);
                     let state = sbr_elements[offset].get_or_insert_with(|| ElementSbr::new(1));
@@ -522,7 +540,7 @@ impl NativeAacDecoder {
                 Ok(output)
             }
             Err(error) => {
-                self.ssr_synthesis=ssr_history;
+                self.ssr_synthesis=ssr_history;self.ssr_coupling_synthesis=ssr_coupling_history;
                 for (state, saved) in self.synthesis.iter_mut().zip(&history) {
                     state.restore_history(saved)?;
                 }
