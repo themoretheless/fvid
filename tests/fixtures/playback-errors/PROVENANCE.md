@@ -2324,3 +2324,22 @@ QMF signal is original numerical data; this is not decoded PCM acceptance.
 The full native PS constructor refusal remains separately tested. No private
 media, frames, audio or codec parameter sets are copied. Ordinary tests need
 no generator, FFmpeg/libav or network; generation is explicit and offline.
+
+### AAC Main frequency-domain prediction foundation
+
+`aac-main-prediction-synthetic.mp4`, `aac-main-prediction-packets.bin` and
+`aac-main-prediction.json` are generated offline by
+`scripts/generate_aac_main_prediction_fixtures.py`. Eight mono 24 kHz packets
+are authored from integer spectra, own Huffman tables and a bit writer; active
+Main prediction follows three unpredicted frames and includes a group reset.
+The container builder reuses the existing authored AVC video seed and replaces
+all AAC parameters/sample tables in the existing own audio template. No private
+media, frame, audio or parameter set is copied; no external encoder is run.
+
+The JSON contains an independent scalar spectral oracle (36 events, 64 lines),
+with inverse mantissa table construction, single-precision stage arithmetic,
+flags, cyclic resets and short-window reset. This qualifies the DSP bank only.
+The enabled MP4 test proves the current AOT 1 refusal, packet extraction and LC
+control decoding through the first active prediction failure. Native AAC Main
+playback acceptance remains ignored pending production integration; neither a
+passing refusal nor this spectral oracle claims profile playback support.

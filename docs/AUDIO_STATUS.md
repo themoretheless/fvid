@@ -1,5 +1,9 @@
 # Audio Implementation Status
 
+AAC Main: an owned frequency-domain predictor DSP bank and scalar oracle now
+exist; AOT 1 packet playback remains unsupported pending channel/tool/history
+integration. Its synthetic MP4 acceptance test is explicitly ignored.
+
 Ownership status: `codec::aac_decoder` now uses FVid NativeAacDecoder for AAC
 playback; the Symphonia AAC dependency/feature is removed. Numeric protocol
 tables retain their MPL-2.0 provenance. Current AAC qualification is recorded in

@@ -7565,3 +7565,32 @@ and 3 extension-flag integration tests, plus 450 owned media tests: 1381 passing
 test executions, with 24 existing unrelated ignored tests.
 The final eight-scenario 3-test suite passed, including sync PS; regeneration
 reproduced all 27 extension-flag fixture files byte-for-byte.
+
+## AAC Main prediction DSP foundation (2026-10-09)
+
+`owned_aac::aac_main_predictor` implements the per-line two-stage backward
+lattice predictor, reduced-precision stored state, rounded inverse variance and
+estimate, continuous adaptation while prediction is disabled, post-frame
+interleaved reset groups 1..30 and complete short-window reset. The spectral
+bank validates its band layout and commits spectrum/history together, including
+arithmetic failure rollback. It is shared with the root codec API.
+
+The independent Python scalar oracle uses generated inverse mantissa tables and
+explicit single-precision scalar stages. Thirty-six events cover changing band
+flags, flags omitted above max_sfb, reset groups, signed input, short resets and
+bit-exact checkpoint replay over 64 spectral lines. Five primitive unit tests
+also cover rounding ties, reset timing, malformed geometry and overflow rollback.
+Generation is offline and separate from tests.
+
+`aac-main-prediction-synthetic.mp4` contains eight own mono 24 kHz AAC Main
+packets with prediction enabled after three warm-up frames and a group reset.
+The first three packets also decode as LC controls; the first active prediction
+packet fails with the exact LC prediction refusal, establishing that the source
+is not an unrelated malformed packet. Root/owned constructors still reject
+AOT 1 explicitly. The playback acceptance test is **ignored** until channel
+syntax, per-channel/CCE predictor histories, stereo/PNS/coupling/TNS ordering,
+checkpoint accounting and playback/seek are integrated. A passing DSP oracle or
+profile refusal does not qualify AAC Main playback. LTP/ER/ELD/USAC remain gaps.
+
+Algorithm reference: ISO/IEC 13818-7:2004 clause 13, referenced for frequency-domain
+prediction by ISO/IEC 14496-3. No foreign decoder implementation is incorporated.
