@@ -308,11 +308,10 @@ impl HevcDecoder {
                 if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, self.budget) {
                     self.hdr.merge(hdr);
                 }
-            } else if !matches!(header.unit_type, 35..=40) {
-                return Err(invalid(&format!(
-                    "unsupported HEVC NAL type {}",
-                    header.unit_type
-                )));
+            } else {
+                // AUD/EOS/EOB/filler and reserved/unspecified non-VCL units
+                // do not contribute slices or change the decoded base picture.
+                // Header validity and base-layer admission were checked above.
             }
         }
         let Some(nal) = slice else { return Ok(None) };

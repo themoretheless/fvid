@@ -7006,3 +7006,24 @@ to the saved oracle after rewind/seek. Marker-only packets return no picture,
 and explicit decoder reset permits replay. Fixture generation is deterministic
 and requires neither FFmpeg nor network. These cases do not qualify auxiliary
 slices, scalable profiles or other still-unsupported AVC reconstruction tools.
+
+### 2026-10-09 — HEVC opaque reserved/unspecified non-VCL admission
+
+Validated base-layer non-VCL NALs beyond the known parameter/SEI/marker types
+no longer abort the complete AU. Types 41..63 are opaque to base-picture
+decoding; they do not add slices, POC changes or fabricated pictures. Header
+validity and unsupported-layer checks still run. This follows the reference
+decoder's unknown-NAL dispatch behavior:
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/hevc/hevcdec.c
+This is not decoding of future payload semantics, Dolby Vision RPU/EL processing
+or multilayer/3D profiles, which remain separate gaps.
+
+Six own short MP4s contain all 23 non-VCL types before/between/after the two
+slices at 2/4-byte NAL lengths. Source is the existing authored three-frame
+HEVC multislice fixture; config, timestamps/edits and visual samples are
+preserved. Before the change, decode and playback fail specifically with
+unsupported HEVC NAL type 41. Acceptance compares POC/output flags/planes
+to the unmodified baseline and complete playback to saved YUV through rewind
+and seek. Opaque-only packets produce no picture. Three malformed videos
+require exact forbidden/temporal-bit or unsupported-layer refusals and explicit
+reset before replay. Offline fixture generation is separate and deterministic.
