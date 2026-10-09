@@ -17,19 +17,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let d = HevcDecoder::from_configuration(&config, 16 << 20)?;
     let (s, p) = d.parameters();
     let mut packet = vec![];
-    r.read_packet(0, 0, &mut packet)?;
-    let mut slices = vec![];
-    for nal in NalUnits::new(&packet, h.length_size)? {
-        let nal = nal?;
-        if (nal[0] >> 1) & 63 > 31 {
-            continue;
+    let mut packets = vec![];
+    for i in 0..r.tracks()[0].samples.len() {
+        r.read_packet(0, i, &mut packet)?;
+        let mut slices = vec![];
+        for nal in NalUnits::new(&packet, h.length_size)? {
+            let nal = nal?;
+            if (nal[0] >> 1) & 63 > 31 {
+                continue;
+            }
+            let header = SliceHeader::parse(nal, s, p, 16 << 20)?;
+            slices.push(serde_json::json!({"entropy_byte_offset":header.entropy_byte_offset,"rbsp":header.rbsp,"idr":header.nal.is_irap()}));
         }
-        let header = SliceHeader::parse(nal, s, p, 16 << 20)?;
-        slices.push(serde_json::json!({"entropy_byte_offset":header.entropy_byte_offset,"rbsp":header.rbsp,"idr":header.nal.is_idr()}));
+        packets.push(slices);
     }
     println!(
         "{}",
-        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"slices":slices})
+        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets})
     );
     Ok(())
 }

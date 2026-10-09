@@ -145,6 +145,8 @@ pub mod hevc_motion;
 pub mod hevc_nal;
 #[path = "../../../src/codec/hevc_picture.rs"]
 pub mod hevc_picture;
+#[path = "../../../src/codec/hevc_colour_planes.rs"]
+mod hevc_colour_planes;
 #[path = "../../../src/codec/hevc_plane.rs"]
 pub mod hevc_plane;
 #[path = "../../../src/codec/hevc_poc.rs"]

@@ -838,6 +838,7 @@ mod tests {
             mv: [64, -32],
         });
         let picture = Arc::new(Picture {
+            colour_planes: None,
             pcm_luma_samples: 0,
             cross_component_blocks: 0,
             act_blocks: 0,
@@ -910,6 +911,7 @@ mod tests {
             let chroma_side = if chroma_format == 3 { 32 } else { 16 };
             let chroma_height = if chroma_format == 1 { 16 } else { 32 };
             let mut picture = Picture {
+                colour_planes: None,
                 pcm_luma_samples: 0,
                 cross_component_blocks: 0,
                 act_blocks: 0,

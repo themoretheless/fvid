@@ -9,7 +9,7 @@ use fvid::{
 use std::io::Cursor;
 
 #[test]
-fn separate_colour_plane_reproducer_reaches_valid_plane_headers() {
+fn separate_colour_planes_reconstruct_all_three_planes() {
     let bytes =
         include_bytes!("fixtures/playback-errors/hevc-separate-colour-planes-pcm-synthetic.mp4");
     let mut reader = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
@@ -50,9 +50,131 @@ fn separate_colour_plane_reproducer_reaches_valid_plane_headers() {
             gold
         );
     }
-    // Reproduction/refusal only; this is not playback acceptance.
+    assert_eq!(decoder.slice_headers(&packet).unwrap().len(), 3);
+    let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
+    for plane in &decoded.picture.planes {
+        assert_eq!(
+            plane.samples().iter().map(|&v| v as u8).collect::<Vec<_>>(),
+            gold
+        );
+    }
+}
+
+#[test]
+fn separate_colour_plane_partition_errors_are_specific() {
+    for (bytes, error) in [
+        (
+            include_bytes!(
+                "fixtures/playback-errors/hevc-separate-colour-planes-missing-synthetic.mp4"
+            )
+            .as_slice(),
+            "HEVC access unit is missing a colour plane",
+        ),
+        (
+            include_bytes!(
+                "fixtures/playback-errors/hevc-separate-colour-planes-duplicate-synthetic.mp4"
+            )
+            .as_slice(),
+            "HEVC slice addresses must increase within one picture",
+        ),
+    ] {
+        let mut r = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
+        let mut d =
+            HevcDecoder::from_configuration(&r.tracks()[0].configuration, 16 << 20).unwrap();
+        let mut packet = vec![];
+        r.read_packet(0, 0, &mut packet).unwrap();
+        assert_eq!(d.decode_packet(&packet).err().unwrap().to_string(), error);
+    }
+}
+
+#[test]
+fn reordered_and_inter_wpp_planes_match_saved_pixels_after_rewind() {
+    for (name, seed) in [
+        (
+            "hevc-separate-colour-planes-reordered-synthetic.mp4",
+            "hevc-pcm-mono-active-rext8",
+        ),
+        (
+            "hevc-separate-colour-planes-reference-wpp-synthetic.mp4",
+            "hevc-pcm-mono-reference-wpp-rext8",
+        ),
+    ] {
+        let path =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let bytes = std::fs::read(path.join(name)).unwrap();
+        let gold = std::fs::read(path.join(format!("{seed}.yuv"))).unwrap();
+        let mut r = fvid::playback_mp4::Mp4VideoReader::open_software(
+            Cursor::new(bytes),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for pass in 0..3 {
+            let mut output = vec![];
+            while let Some(frame) = r.read_frame().unwrap() {
+                let packed = frame.packed.as_ref().expect("444 playback geometry");
+                assert_eq!(packed.frame.subsampling, Some([1, 1]));
+                output.extend_from_slice(&packed.frame.data);
+            }
+            let pixels = 64 * 64;
+            let expected: Vec<u8> = gold
+                .chunks_exact(pixels)
+                .flat_map(|frame| frame.iter().chain(frame).chain(frame).copied())
+                .collect();
+            assert!(
+                output == expected,
+                "{name}: decoded bytes {} expected {}",
+                output.len(),
+                expected.len()
+            );
+            if pass == 0 {
+                r.rewind();
+            } else if pass == 1 {
+                let seed_bytes = std::fs::read(path.join(format!("{seed}.mp4"))).unwrap();
+                let mut baseline = fvid::playback_mp4::Mp4VideoReader::open_software(
+                    Cursor::new(seed_bytes),
+                    Default::default(),
+                    16 << 20,
+                )
+                .unwrap();
+                let sync = baseline.seek_to_sync(2);
+                assert_eq!(sync, 0);
+                assert_eq!(r.seek_to_sync(2), sync);
+            }
+        }
+    }
+}
+
+#[test]
+fn distinct_colour_planes_follow_ids_and_budget() {
+    let bytes = include_bytes!(
+        "fixtures/playback-errors/hevc-separate-colour-planes-distinct-synthetic.mp4"
+    );
+    let gold = include_bytes!(
+        "fixtures/playback-errors/hevc-separate-colour-planes-distinct-synthetic.yuv"
+    );
+    let mut r = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
+    let config = r.tracks()[0].configuration.clone();
+    let mut packet = vec![];
+    r.read_packet(0, 0, &mut packet).unwrap();
+    let mut d = HevcDecoder::from_configuration(&config, 16 << 20).unwrap();
+    let decoded = d.decode_packet(&packet).unwrap().unwrap();
+    for (i, plane) in decoded.picture.planes.iter().enumerate() {
+        let expected = &gold[i * 4096..(i + 1) * 4096];
+        assert!(
+            plane
+                .samples()
+                .iter()
+                .zip(expected)
+                .all(|(&a, &b)| a == u16::from(b))
+        );
+    }
+    assert_ne!(&gold[..4096], &gold[4096..8192]);
+    d.reset();
+    assert!(d.decode_packet(&packet).unwrap().is_some());
+    let mut limited = HevcDecoder::from_configuration(&config, 300_000).unwrap();
     assert_eq!(
-        decoder.decode_packet(&packet).err().unwrap().to_string(),
-        "HEVC slice addresses must increase within one picture"
+        limited.decode_packet(&packet).err().unwrap().to_string(),
+        "HEVC colour planes exceed decode budget"
     );
 }

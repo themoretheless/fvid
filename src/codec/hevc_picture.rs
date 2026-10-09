@@ -40,6 +40,8 @@ pub struct Picture {
     pub(crate) motion: Vec<Motion>,
     pub(crate) reference_pocs: [Vec<i32>; 2],
     pub(crate) reference_long_term: [Vec<bool>; 2],
+    /// Independent reconstructed/motion state for separately coded planes.
+    pub(crate) colour_planes: Option<[std::sync::Arc<Picture>; 3]>,
 }
 fn component_shifts(component: usize, format: u8) -> [usize; 2] {
     if component == 0 {
@@ -466,6 +468,7 @@ pub fn decode(
         grid
     };
     Ok(Picture {
+        colour_planes: None,
         #[cfg(test)]
         pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
         #[cfg(test)]
@@ -502,6 +505,9 @@ pub fn decode_slices(
     slice_lists: &[[Vec<Reference>; 2]],
     budget: usize,
 ) -> Result<Picture> {
+    if sps.separate_colour_plane {
+        return super::hevc_colour_planes::decode(sps, pps, slices, poc, slice_lists, budget);
+    }
     if slices.len() != slice_lists.len() {
         return Err(invalid("HEVC slice reference count mismatch"));
     }
@@ -923,6 +929,7 @@ pub fn decode_slices(
         }
     }
     Ok(Picture {
+        colour_planes: None,
         #[cfg(test)]
         pcm_luma_samples: decoder.cells.iter().filter(|c| c.pcm).count() * 16,
         #[cfg(test)]

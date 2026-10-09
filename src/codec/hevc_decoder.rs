@@ -140,7 +140,9 @@ impl HevcDecoder {
         if let Ok(units) = NalUnits::new(packet, self.length) {
             for nal in units {
                 let Ok(nal) = nal else { break };
-                let Ok(header) = NalHeader::parse(nal) else { continue };
+                let Ok(header) = NalHeader::parse(nal) else {
+                    continue;
+                };
                 if hevc_sei::is_sei_unit(header.unit_type) {
                     if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, self.budget) {
                         self.hdr.merge(hdr);
@@ -245,7 +247,16 @@ impl HevcDecoder {
                 return Err(invalid("HEVC slice exceeds SPS temporal layers"));
             }
             if let Some(first) = headers.first() {
-                let previous = headers.last().unwrap();
+                // Independent colour planes have independent slice-address
+                // spaces. A first slice in another plane is part of this AU.
+                let previous = if sps.separate_colour_plane {
+                    headers
+                        .iter()
+                        .rev()
+                        .find(|h| h.colour_plane == header.colour_plane)
+                } else {
+                    headers.last()
+                };
                 let order = |address| {
                     if let Some(tiles) = &pps.tiles {
                         let side = 1u32 << sps.coding_block_log2[1];
@@ -258,10 +269,14 @@ impl HevcDecoder {
                         Ok(address)
                     }
                 };
-                if header.first || order(header.address)? <= order(previous.address)? {
-                    return Err(invalid(
-                        "HEVC slice addresses must increase within one picture",
-                    ));
+                if let Some(previous) = previous {
+                    if header.first || order(header.address)? <= order(previous.address)? {
+                        return Err(invalid(
+                            "HEVC slice addresses must increase within one picture",
+                        ));
+                    }
+                } else if !header.first || header.address != 0 {
+                    return Err(invalid("HEVC colour plane must begin with the first slice"));
                 }
                 if header.pps_id != first.pps_id
                     || header.poc_lsb != first.poc_lsb
@@ -275,6 +290,14 @@ impl HevcDecoder {
                 return Err(invalid("HEVC access unit must begin with the first slice"));
             }
             headers.push(header);
+        }
+        if let Some(first) = headers.first() {
+            let (sps, _) = pairs.iter().find(|(_, p)| p.id == first.pps_id).unwrap();
+            if sps.separate_colour_plane
+                && (0..3).any(|plane| !headers.iter().any(|h| h.colour_plane == plane))
+            {
+                return Err(invalid("HEVC access unit is missing a colour plane"));
+            }
         }
         Ok(headers)
     }
@@ -376,9 +399,7 @@ impl HevcDecoder {
             .references
             .iter()
             .try_fold(0usize, |total, r| {
-                let count = (r.picture.as_deref()?.dimensions[0] as usize)
-                    .checked_mul(r.picture.as_deref()?.dimensions[1] as usize)?;
-                total.checked_add(count.checked_mul(5)?)
+                total.checked_add(r.picture.as_deref()?.storage_bytes()?)
             })
             .ok_or_else(|| invalid("HEVC reference storage size overflow"))?;
         let budget = self

@@ -3,6 +3,7 @@
 import json
 import struct
 import subprocess
+import sys
 from generate_he_aac_packet_fixtures import DEST, boxes
 from hevc_fixture_mp4 import box
 
@@ -61,38 +62,43 @@ def parameter(nal):
 
 
 def main():
-    seed = DEST / 'hevc-pcm-mono-active-rext8.mp4'
+    seed = DEST / (sys.argv[1] if len(sys.argv) > 1 else 'hevc-pcm-mono-active-rext8.mp4')
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--locked', '--offline', '--no-default-features',
         '--features', 'media,player', '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)]))
-    assert len(meta['slices']) == 1
     root = dict(boxes(seed.read_bytes()))
     track = child(root[b'moov'], b'trak')
     stbl = child(child(child(track, b'mdia'), b'minf'), b'stbl')
-    size = struct.unpack_from('>I', child(stbl, b'stsz'), 12)[0]
+    table = child(stbl, b'stsz')
+    constant, count = struct.unpack_from('>II', table, 4)
+    assert constant == 0
+    sizes = struct.unpack('>' + str(count) + 'I', table[12:])
     offset = struct.unpack_from('>I', child(stbl, b'stco'), 8)[0]
-    packet = seed.read_bytes()[offset:offset+size]
-    n = int.from_bytes(packet[:4], 'big')
-    assert n == len(packet)-4
-    nal = packet[4:]
-    s = meta['slices'][0]
-    value = bits(bytes(s['rbsp']))
-    end = s['entropy_byte_offset']*8
-    align = value[:end].rfind('1')
-    insert = ue_end(value, 2 if s['idr'] else 1)
-    insert += meta['extra_bits']
-    insert = ue_end(value, insert) + int(meta['output_flag'])
-    planes = []
-    for plane in range(3):
-        header = value[:insert] + f'{plane:02b}' + value[insert:align] + '1'
-        planes.append(nal[:2] + escape(packed(header) + bytes(s['rbsp'][end//8:])))
-    output = b''.join(len(n).to_bytes(4, 'big') + n for n in planes)
+    outputs = []
+    for size, metadata in zip(sizes, meta['packets'], strict=True):
+        assert len(metadata) == 1
+        packet = seed.read_bytes()[offset:offset+size]; offset += size
+        n = int.from_bytes(packet[:4], 'big')
+        assert n == len(packet)-4
+        nal = packet[4:]
+        s = metadata[0]
+        value = bits(bytes(s['rbsp']))
+        end = s['entropy_byte_offset']*8
+        align = value[:end].rfind('1')
+        insert = ue_end(value, 2 if s['idr'] else 1)
+        insert += meta['extra_bits']
+        insert = ue_end(value, insert) + int(meta['output_flag'])
+        planes = []
+        for plane in range(3):
+            header = value[:insert] + f'{plane:02b}' + value[insert:align] + '1'
+            planes.append(nal[:2] + escape(packed(header) + bytes(s['rbsp'][end//8:])))
+        outputs.append(b''.join(len(n).to_bytes(4, 'big') + n for n in planes))
 
     def rewrite(tag, payload):
         if tag in (b'moov', b'trak', b'mdia', b'minf', b'stbl'):
             payload = b''.join(rewrite(t, p) for t, p in boxes(payload))
         elif tag == b'stsz':
-            payload = payload[:12] + struct.pack('>I', len(output))
+            payload = payload[:12] + b''.join(struct.pack('>I', len(output)) for output in outputs)
         elif tag == b'stco':
             payload = payload[:8] + struct.pack('>I', len(root[b'ftyp'])+16)
         elif tag == b'stsd':
@@ -116,8 +122,46 @@ def main():
             payload = payload[:8] + box(kind, entry[:78] + b''.join(box(t, config if t == b'hvcC' else p) for t, p in boxes(entry[78:])))
         return box(tag, payload)
 
-    movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', output) + rewrite(b'moov', root[b'moov'])
-    (DEST / 'hevc-separate-colour-planes-pcm-synthetic.mp4').write_bytes(movie)
+    movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
+    name = sys.argv[2] if len(sys.argv) > 2 else 'hevc-separate-colour-planes-pcm-synthetic.mp4'
+    (DEST / name).write_bytes(movie)
+    if len(sys.argv) == 1:
+        original = outputs[0]
+        units = []
+        pos = 0
+        while pos < len(original):
+            length = int.from_bytes(original[pos:pos+4], 'big')
+            units.append(original[pos:pos+4+length]); pos += 4+length
+        for suffix, order in [('reordered', [2, 0, 1]), ('missing', [0, 1]), ('duplicate', [0, 1, 2, 0])]:
+            outputs[0] = b''.join(units[i] for i in order)
+            movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
+            (DEST / f'hevc-separate-colour-planes-{suffix}-synthetic.mp4').write_bytes(movie)
+        # Distinct planes expose accidental luma reuse or plane-ID swapping.
+        # This authored seed has four unfiltered 32x32 PCM blocks. Locate only
+        # exact saved blocks; never guess byte offsets in an entropy payload.
+        gold = seed.with_suffix('.yuv').read_bytes()
+        assert len(gold) == 64*64
+        blocks = [b''.join(gold[y*64+x:y*64+x+32] for y in range(top, top+32))
+                  for top in (0, 32) for x in (0, 32)]
+        distinct = []
+        expected = []
+        for plane, unit in enumerate(units):
+            payload = bytearray(unescape(unit[6:]))
+            transform = (lambda b: b) if plane == 0 else ((lambda b: (b+37) % 256) if plane == 1 else (lambda b: 255-b))
+            spans = []
+            for block in blocks:
+                pos = payload.find(block)
+                assert pos >= 0 and payload.find(block, pos+1) < 0
+                spans.append((pos, block))
+            for pos, block in spans:
+                payload[pos:pos+len(block)] = bytes(transform(b) for b in block)
+            nal = unit[4:6] + escape(payload)
+            distinct.append(len(nal).to_bytes(4, 'big') + nal)
+            expected.append(bytes(transform(b) for b in gold))
+        outputs[0] = b''.join(distinct)
+        movie = box(b'ftyp', root[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', root[b'moov'])
+        (DEST / 'hevc-separate-colour-planes-distinct-synthetic.mp4').write_bytes(movie)
+        (DEST / 'hevc-separate-colour-planes-distinct-synthetic.yuv').write_bytes(b''.join(expected))
 
 
 if __name__ == '__main__':

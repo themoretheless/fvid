@@ -1,6 +1,7 @@
 //! Bounded, unfiltered HEVC plane reconstruction with decoded-sample availability.
 use super::hevc_intra::References;
 use crate::{Result, invalid};
+#[derive(Clone)]
 pub struct Plane {
     width: usize,
     height: usize,

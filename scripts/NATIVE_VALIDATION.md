@@ -1191,9 +1191,12 @@ and seek. Opaque-only packets produce no picture. Three malformed videos
 require exact forbidden/temporal-bit or unsupported-layer refusals and explicit
 reset before replay. Offline fixture generation is separate and deterministic.
 
-Separate HEVC colour planes currently have a reproduction/refusal regression:
+Separate HEVC colour planes have owned reconstruction acceptance coverage:
 `cargo test --locked --offline --no-default-features --features media,player --test hevc_separate_colour_planes`.
-The own PCM fixture verifies three valid plane headers and independently
-decodable entropy payloads, then the specific AU slice-order refusal. It is
-not evidence of separate-plane playback support. Fixture generation remains
-offline and separate: `python3 scripts/generate_hevc_colour_plane_fixtures.py`.
+The own PCM fixtures verify all three planes, reordered IDs, distinct PCM
+pixels, reset/rewind and a three-frame reference/WPP sequence. Missing/duplicate
+plane fixtures verify specific refusals. This is fixture-qualified support,
+not universal profile/tool or performance qualification. Fixture generation
+remains offline and separate: `python3 scripts/generate_hevc_colour_plane_fixtures.py`.
+The inter case uses the same generator with `hevc-pcm-mono-reference-wpp-rext8.mp4`
+and output `hevc-separate-colour-planes-reference-wpp-synthetic.mp4` arguments.

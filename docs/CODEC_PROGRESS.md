@@ -7028,16 +7028,24 @@ and seek. Opaque-only packets produce no picture. Three malformed videos
 require exact forbidden/temporal-bit or unsupported-layer refusals and explicit
 reset before replay. Offline fixture generation is separate and deterministic.
 
-### HEVC separate colour planes: reproduction, not acceptance
+### HEVC separate colour planes: owned reconstruction and references
 
 The authored one-frame `hevc-separate-colour-planes-pcm-synthetic.mp4`
 contains independent first slices for colour planes 0/1/2. Its parameters and
 entropy payload derive only from our monochrome PCM fixture. Individual slice
 headers parse and each payload reconstructs the saved monochrome pixels when
-decoded with a monochrome SPS view. The full access unit still refuses with
-`HEVC slice addresses must increase within one picture`: the AU collector
-does not yet keep per-plane slice order. Separate reconstruction/reference
-state is also still missing. The regression is explicitly a refusal test;
-it must become playback acceptance when the decoder is implemented.
+decoded with a monochrome SPS view. The old exact slice-order refusal has
+become acceptance: the AU collector keeps per-plane slice order, reconstructs
+each plane as monochrome and assembles full-resolution 444 samples. References
+project to the corresponding plane's pixels, motion and reference POC maps.
+Separate-plane retained storage includes all plane states and output copies.
+This implementation currently copies planes during assembly; 60 fps and
+copy-free separate-plane storage are not qualified here.
+Reordered planes, a three-frame reference/WPP video, reset/rewind, and distinct
+PCM plane pixels have acceptance coverage. Missing/repeated planes retain
+specific refusal tests. All seed parameters and samples are our synthetic data.
+The fixtures do not qualify all separate-plane profiles, depths or tools.
 Generate offline with `python3 scripts/generate_hevc_colour_plane_fixtures.py`;
 ordinary tests only consume the checked-in video and YUV seed.
+Generate the inter/WPP case separately with
+`python3 scripts/generate_hevc_colour_plane_fixtures.py hevc-pcm-mono-reference-wpp-rext8.mp4 hevc-separate-colour-planes-reference-wpp-synthetic.mp4`.
