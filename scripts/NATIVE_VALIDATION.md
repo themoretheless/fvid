@@ -1190,3 +1190,10 @@ to the unmodified baseline and complete playback to saved YUV through rewind
 and seek. Opaque-only packets produce no picture. Three malformed videos
 require exact forbidden/temporal-bit or unsupported-layer refusals and explicit
 reset before replay. Offline fixture generation is separate and deterministic.
+
+Separate HEVC colour planes currently have a reproduction/refusal regression:
+`cargo test --locked --offline --no-default-features --features media,player --test hevc_separate_colour_planes`.
+The own PCM fixture verifies three valid plane headers and independently
+decodable entropy payloads, then the specific AU slice-order refusal. It is
+not evidence of separate-plane playback support. Fixture generation remains
+offline and separate: `python3 scripts/generate_hevc_colour_plane_fixtures.py`.
