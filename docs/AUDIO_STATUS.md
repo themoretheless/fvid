@@ -2112,3 +2112,38 @@ checkpoint/visitor are still pending, as are remaining tool/layout qualification
 Validation: owned library 465 passed / 1 pre-existing ignored; eight offline
 LTP/TNS integration suites 23 passed / 1 pending root LTP acceptance ignored.
 All PCM oracles and tolerances remain unchanged.
+
+### Native LTP SCE/CPE state and packet dispatch (2026-10-10)
+
+The native AAC decoder now owns specialized per-output-channel LTP states,
+reads SCE/LFE and common/independent CPE prediction data, and routes reconstructed
+spectra through LTP analysis, TNS and synthesis. The generic pre-synthesis TNS
+pass is bypassed for AOT4 to avoid applying TNS twice. Packet-boundary checkpoints
+save only LTP/synthesis histories; reset, restore, retained-memory inspection and
+late processing failure rollback include the new state. Initialized channels
+share immutable tables and keep mutable history/scratch independent.
+
+Tests invoke the same private parsed-metadata constructor used by `new`, with
+own 24k/1024 LTP metadata, while public ASC admission remains unchanged. Both
+mono streams and all four stereo streams pass actual raw packet dispatch against
+saved external or independent scalar PCM at 1e-7, with exact checkpoint replay,
+timed packet stamps, reset, END validation and stable retained storage. A controlled
+internal right-lane geometry error verifies rollback after the left lane advances;
+this is state-transaction qualification, not a reachable-input media reproducer.
+The native joint checkpoint footprint is checked against lightweight histories
+and existing metadata capacities.
+
+This completes the native state/packet-dispatch stage for those fixtures, not
+production LTP playback acceptance. Public AOT4 ASC admission remains gated;
+LTP CCE syntax/history, dependent coupling order, PCE/layout qualification,
+PNS/intensity interactions, short/transition and 960 packet cases, extension
+profiles and end-to-end root playback still require integration/qualification.
+Existing root refusal and pending acceptance expectations remain unchanged.
+
+Validation: owned library 468 passed / 1 pre-existing ignored; root native AAC
+15 passed, including the 72-packet compatibility bridge test; fourteen offline
+AAC integration suites 53 passed / 1 pending root LTP acceptance ignored.
+The final syntax suite also retains 5 passing tests and the pending acceptance;
+its ignore reason now names ASC admission and remaining tool/layout qualification.
+Root syntax metadata is explicitly adapted to owned LTP data; the library path
+borrows it directly. Existing synthetic packets/PCM references are unchanged.

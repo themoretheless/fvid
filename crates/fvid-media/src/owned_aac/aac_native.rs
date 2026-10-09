@@ -8,6 +8,9 @@ fn default_pcm_mask(channels: u16) -> Result<u32> {
 }
 use super::Error;
 use super::{aac_sbr_history as sbr_history, aac_sbr_dsp as sbr_dsp, bits::BitReader as SbrBitReader};
+fn ltp_data_for_channel(data: &super::aac_ltp_syntax::LtpData) -> std::borrow::Cow<'_, super::aac_ltp_syntax::LtpData> {
+    std::borrow::Cow::Borrowed(data)
+}
 include!("aac_native_impl.rs");
 
 #[cfg(test)]
@@ -69,6 +72,12 @@ impl NativeAacDecoder {
             Ok(())
         }
         let mut footprint = super::memory::Footprint::new();
+        footprint.vector(&self.ltp_synthesis).map_err(|e|invalid(&e))?;
+        for state in &self.ltp_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        if let Some(saved)=checkpoint {
+            footprint.vector(&saved.ltp_synthesis).map_err(|e|invalid(&e))?;
+            for state in &saved.ltp_synthesis {state.visit_retained(&mut footprint).map_err(|e|invalid(&e))?;}
+        }
         for states in [Some(&self.ssr_synthesis), checkpoint.map(|state| &state.ssr_synthesis)].into_iter().flatten() {
             footprint.vector(states).map_err(|e| invalid(&e))?;
             for state in states { state.visit_retained(&mut footprint).map_err(|e| invalid(&e))?; }
@@ -236,5 +245,152 @@ mod main_prediction_memory_tests {
         let lc_checkpoint = lc.checkpoint();
         assert_eq!(main.retained_payload_bytes_with_checkpoint(Some(&main_checkpoint)).unwrap(),
             lc.retained_payload_bytes_with_checkpoint(Some(&lc_checkpoint)).unwrap() + 2*bank_bytes);
+    }
+}
+
+#[cfg(test)]
+mod ltp_dispatch_tests {
+    use super::*;
+    use serde_json::Value;
+    fn bytes(name: &str) -> Vec<u8> {
+        std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../tests/fixtures/playback-errors")
+                .join(name),
+        )
+        .unwrap()
+    }
+    // Test real packet dispatch without changing public ASC admission. All
+    // unrelated metadata comes from the same authored ASC with its LC tag.
+    fn decoder(asc: &str) -> NativeAacDecoder {
+        let mut raw: Vec<u8> = asc
+            .as_bytes()
+            .chunks_exact(2)
+            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
+            .collect();
+        assert_eq!(raw[0] >> 3, 4);
+        raw[0] = (raw[0] & 7) | (2 << 3);
+        let mut parsed = AudioSpecificConfig::parse(&raw).unwrap();
+        parsed.signaled_object_type = 4;
+        parsed.core.object_type = 4;
+        NativeAacDecoder::from_parsed(parsed).unwrap()
+    }
+    fn qualify(case: &Value, blob: &[u8], reference: &[u8]) {
+        let mut state = decoder(case["asc"].as_str().unwrap());
+        let channels = usize::from(state.channels());
+        assert!(state.synthesis.is_empty());
+        assert_eq!(state.ltp_synthesis.len(), channels);
+        let memory = state.retained_payload_bytes().unwrap();
+        let mut first = None;
+        for (frame, row) in case["frames"].as_array().unwrap().iter().enumerate() {
+            let at = row["offset"].as_u64().unwrap() as usize;
+            let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+            let saved = state.checkpoint();
+            let output = state
+                .decode_timed(packet, (frame * 1024) as i64, 1024)
+                .unwrap()
+                .unwrap();
+            assert_eq!(output.pts, (frame * 1024) as i64);
+            assert_eq!(output.duration, 1024);
+            assert_eq!(output.samples.len(), 1024 * channels);
+            for (i, &sample) in output.samples.iter().enumerate() {
+                let at = (frame * 1024 * channels + i) * 4;
+                let gold = f32::from_le_bytes(reference[at..at + 4].try_into().unwrap());
+                assert!(
+                    (sample - gold).abs() < 1e-7,
+                    "native LTP frame={frame} sample={i}: {sample} vs {gold}"
+                );
+            }
+            if frame == 0 {
+                first = Some((packet.to_vec(), output.samples.clone()));
+            }
+            state.restore(&saved).unwrap();
+            assert_eq!(state.decode(packet).unwrap(), output.samples);
+            assert_eq!(state.retained_payload_bytes().unwrap(), memory);
+            // An invalid block leaves the complete LTP packet-boundary state unchanged.
+            let mut bad = packet.to_vec();
+            bad.extend([0, 0]);
+            assert!(state.decode(&bad).is_err());
+        }
+        assert!(state.finish().unwrap().is_none());
+        state.reset();
+        let (packet, pcm) = first.unwrap();
+        assert_eq!(state.decode(&packet).unwrap(), pcm);
+    }
+    #[test]
+    fn authored_mono_packets_use_native_ltp_dispatch_and_checkpoints() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-syntax.json")).unwrap();
+        let blob = bytes("aac-ltp-packets.bin");
+        for case in manifest["videos"].as_array().unwrap() {
+            qualify(
+                case,
+                &blob,
+                &bytes(&format!(
+                    "aac-ltp-{}-external-reference.f32le",
+                    case["name"].as_str().unwrap()
+                )),
+            );
+        }
+    }
+    #[test]
+    fn authored_stereo_packets_use_native_independent_ltp_states() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-pair.json")).unwrap();
+        let blob = bytes("aac-ltp-pair-packets.bin");
+        for case in manifest["cases"].as_array().unwrap() {
+            qualify(
+                case,
+                &blob,
+                &bytes(&format!(
+                    "aac-ltp-pair-{}-scalar-reference.f32le",
+                    case["name"].as_str().unwrap()
+                )),
+            );
+        }
+    }
+    #[test]
+    fn native_ltp_checkpoints_count_only_histories_and_packet_failure_rolls_back_left() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-pair.json")).unwrap();
+        let case = &manifest["cases"][3];
+        let blob = bytes("aac-ltp-pair-packets.bin");
+        let mut state = decoder(case["asc"].as_str().unwrap());
+        let saved = state.checkpoint();
+        let expected = saved.ltp_synthesis.capacity()
+            * std::mem::size_of::<super::super::aac_ltp_channel::LtpChannelCheckpoint>()
+            + 2 * 5 * 1024 * std::mem::size_of::<f64>()
+            + saved.mapping.capacity() * std::mem::size_of::<usize>()
+            + saved.coupling_synthesis.capacity()
+                * std::mem::size_of::<Option<LongSineSynthesis>>();
+        assert_eq!(
+            state
+                .retained_payload_bytes_with_checkpoint(Some(&saved))
+                .unwrap()
+                - state.retained_payload_bytes().unwrap(),
+            expected
+        );
+        for row in case["frames"].as_array().unwrap().iter().take(5) {
+            let at = row["offset"].as_u64().unwrap() as usize;
+            state
+                .decode(&blob[at..at + row["bytes"].as_u64().unwrap() as usize])
+                .unwrap();
+        }
+        let row = &case["frames"][5];
+        let at = row["offset"].as_u64().unwrap() as usize;
+        let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+        let saved = state.checkpoint();
+        let gold = state.decode(packet).unwrap();
+        state.restore(&saved).unwrap();
+        // Controlled internal geometry failure after the left lane advances;
+        // this is a rollback test, not a claim about a reachable valid ASC.
+        let right = state.ltp_synthesis[1].clone();
+        state.ltp_synthesis[1] = super::super::aac_ltp_channel::LtpChannel::new(960).unwrap();
+        assert!(
+            state
+                .decode(packet)
+                .unwrap_err()
+                .to_string()
+                .contains("residual geometry")
+        );
+        state.ltp_synthesis[1] = right;
+        assert_eq!(state.decode(packet).unwrap(), gold);
     }
 }

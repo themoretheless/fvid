@@ -105,7 +105,7 @@ fn ltp_profile_video_reproduces_configuration_refusal() {
     }
 }
 #[test]
-#[ignore = "AAC LTP history, prediction, synthesis and profile admission are not integrated"]
+#[ignore = "AAC LTP profile admission and remaining tool/layout qualification are pending"]
 fn ltp_video_playback_acceptance_pending() {
     for c in manifest()["videos"].as_array().unwrap() {
         let mut pcm = vec![];

@@ -6,6 +6,20 @@ use super::aac_coupling::Coupling;
 use crate::native_export::default_pcm_mask;
 use crate::Error;
 use fvid_media::owned_aac::{aac_sbr_history as sbr_history, aac_sbr_dsp as sbr_dsp, bits::BitReader as SbrBitReader};
+// Only syntax metadata crosses the compatibility boundary; decoder state and
+// transform processing remain owned by fvid-media.
+fn ltp_data_for_channel(data: &super::aac_ltp_syntax::LtpData) -> std::borrow::Cow<'_, fvid_media::owned_aac::aac_ltp_syntax::LtpData> {
+    use fvid_media::owned_aac::aac_ltp_syntax as owned;
+    use super::aac_ltp_syntax::Usage;
+    std::borrow::Cow::Owned(owned::LtpData {
+        lag: data.lag,
+        coefficient_index: data.coefficient_index,
+        usage: match &data.usage {
+            Usage::Bands(flags) => owned::Usage::Bands(flags.clone()),
+            Usage::Windows(windows) => owned::Usage::Windows(std::array::from_fn(|i| windows[i].as_ref().map(|data| owned::ShortPrediction { lag_offset: data.lag_offset }))),
+        },
+    })
+}
 include!("../../crates/fvid-media/src/owned_aac/aac_native_impl.rs");
 
 #[cfg(test)]
@@ -267,3 +281,70 @@ mod tests {
 
 #[cfg(test)]
 mod he_aac_native_tests { include!("../../crates/fvid-media/src/owned_aac/he_aac_native_tests.rs"); }
+
+#[cfg(test)]
+mod ltp_compat_dispatch_tests {
+    use super::*;
+    #[test]
+    fn root_syntax_metadata_reaches_owned_ltp_state_without_pcm_or_checkpoint_drift() {
+        let root =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let read = |name: &str| std::fs::read(root.join(name)).unwrap();
+        for (manifest, blob, group, prefix, suffix) in [
+            (
+                "aac-ltp-syntax.json",
+                "aac-ltp-packets.bin",
+                "videos",
+                "aac-ltp-",
+                "external-reference.f32le",
+            ),
+            (
+                "aac-ltp-pair.json",
+                "aac-ltp-pair-packets.bin",
+                "cases",
+                "aac-ltp-pair-",
+                "scalar-reference.f32le",
+            ),
+        ] {
+            let m: serde_json::Value = serde_json::from_slice(&read(manifest)).unwrap();
+            let blob = read(blob);
+            for case in m[group].as_array().unwrap() {
+                let asc = case["asc"].as_str().unwrap();
+                let mut asc: Vec<u8> = asc
+                    .as_bytes()
+                    .chunks_exact(2)
+                    .map(|b| u8::from_str_radix(std::str::from_utf8(b).unwrap(), 16).unwrap())
+                    .collect();
+                // Public AOT4 admission remains gated; exercise its real native
+                // dispatch from parsed metadata while testing the syntax bridge.
+                asc[0] = (asc[0] & 7) | (2 << 3);
+                let mut parsed = AudioSpecificConfig::parse(&asc).unwrap();
+                parsed.signaled_object_type = 4;
+                parsed.core.object_type = 4;
+                let mut decoder = NativeAacDecoder::from_parsed(parsed).unwrap();
+                let channels = usize::from(decoder.channels());
+                let reference = read(&format!(
+                    "{prefix}{}-{suffix}",
+                    case["name"].as_str().unwrap()
+                ));
+                for (frame, row) in case["frames"].as_array().unwrap().iter().enumerate() {
+                    let at = row["offset"].as_u64().unwrap() as usize;
+                    let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                    let saved = decoder.checkpoint();
+                    let pcm = decoder.decode(packet).unwrap();
+                    assert_eq!(pcm.len(), 1024 * channels);
+                    for (i, &sample) in pcm.iter().enumerate() {
+                        let at = (frame * 1024 * channels + i) * 4;
+                        let gold = f32::from_le_bytes(reference[at..at + 4].try_into().unwrap());
+                        assert!(
+                            (sample - gold).abs() < 1e-7,
+                            "root LTP frame={frame} sample={i}"
+                        );
+                    }
+                    decoder.restore(&saved).unwrap();
+                    assert_eq!(decoder.decode(packet).unwrap(), pcm);
+                }
+            }
+        }
+    }
+}

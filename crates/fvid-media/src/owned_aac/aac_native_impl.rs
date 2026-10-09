@@ -224,6 +224,7 @@ pub struct AacFrame {
 pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
+    ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannel>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
@@ -252,6 +253,7 @@ pub struct AacCheckpoint {
     initial_program: Option<super::aac_pce::ProgramConfig>,
     program: Option<super::aac_pce::ProgramConfig>,
     synthesis: Vec<LongSineSynthesis>,
+    ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannelCheckpoint>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
     ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
@@ -277,7 +279,9 @@ fn sbr_layout(parsed: &AudioSpecificConfig) -> Result<bool> {
 }
 impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
-        let parsed = AudioSpecificConfig::parse(asc)?;
+        Self::from_parsed(AudioSpecificConfig::parse(asc)?)
+    }
+    fn from_parsed(parsed: AudioSpecificConfig) -> Result<Self> {
         if parsed.ps_present == Some(true) {
             return Err(unsupported("AAC parametric stereo synthesis is not yet implemented"));
         }
@@ -335,10 +339,13 @@ impl NativeAacDecoder {
         };
         // Clone initialized state so channels share immutable transforms/windows
         // while every channel retains independent overlap and scratch buffers.
-        let synthesis = if config.object_type == 3 { Vec::new() } else { vec![
+        let synthesis = if matches!(config.object_type,3|4) { Vec::new() } else { vec![
             LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from)?;
             usize::from(config.channels)
         ] };
+        let ltp_synthesis = if config.object_type==4 {
+            vec![super::aac_ltp_channel::LtpChannel::new(config.frame_samples as usize)?; usize::from(config.channels)]
+        } else { Vec::new() };
         let ssr_synthesis = if config.object_type == 3 { vec![super::aac_ssr_synthesis::SsrSynthesis::new()?; usize::from(config.channels)] } else { Vec::new() };
         // Four-bit CCE tags occupy a separate fixed domain after audio slots.
         let element_slots = usize::from(config.channels) + if program.is_some() { 16 } else { 0 };
@@ -353,7 +360,7 @@ impl NativeAacDecoder {
         Ok(Self {
             main_prediction,
             config,
-            synthesis, ssr_synthesis,
+            synthesis, ssr_synthesis, ltp_synthesis,
             ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,ssr_source_alignment:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
@@ -421,7 +428,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
-            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
+            synthesis:self.synthesis.clone(),ltp_synthesis:self.ltp_synthesis.iter().map(super::aac_ltp_channel::LtpChannel::checkpoint).collect(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
             sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_detection_rate:self.sbr_detection_rate,sbr_elements:self.sbr_elements.clone()}
     }
@@ -430,6 +437,8 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
+        if self.ltp_synthesis.len()!=state.ltp_synthesis.len() { return Err(invalid("AAC LTP checkpoint channel count mismatch")); }
+        for (channel,saved) in self.ltp_synthesis.iter_mut().zip(&state.ltp_synthesis) {channel.restore(saved)?;}
         self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration.clone();self.ssr_fixed_clock=state.ssr_fixed_clock;self.ssr_source_alignment=state.ssr_source_alignment;
         self.program=state.program.clone();
         self.main_prediction=state.main_prediction.clone();
@@ -442,6 +451,7 @@ impl NativeAacDecoder {
         for synth in &mut self.synthesis {
             synth.reset();
         }
+        for channel in &mut self.ltp_synthesis {channel.reset();}
         for synthesis in self.coupling_synthesis.iter_mut().flatten() {synthesis.reset();}
         for state in &mut self.ssr_synthesis { state.reset(); }
         for state in self.ssr_coupling_synthesis.iter_mut().flatten() {state.reset();}
@@ -488,6 +498,7 @@ impl NativeAacDecoder {
         let mut sbr_frames = vec![None; self.sbr_slots()];
         let mut previous_element = None;
         let mut channels = Vec::new();
+        let mut ltp_data=if self.config.object_type==4 {vec![None;usize::from(self.config.channels)]} else {Vec::new()};
         let mut decoded_elements = Vec::new();
         let mut couplings = Vec::new();
         let elements: &[u32] = match self.config.channel_configuration {
@@ -539,7 +550,10 @@ impl NativeAacDecoder {
             }
             match element {
                 0 | 3 => {
-                    let channel = ChannelData::read(&mut bits, &self.config)?;
+                    let channel = if self.config.object_type==4 {
+                        let (channel,data)=ChannelData::read_ltp(&mut bits,&self.config)?;
+                        ltp_data[self.mapping[target_offset]]=data;channel
+                    } else {ChannelData::read(&mut bits,&self.config)?};
                     let mut spectrum = channel.spectrum_with_noise(&self.config, &mut noise)?;
                     if self.config.object_type == 1 {
                         channel.predict_main(&self.config, main_prediction[self.mapping[target_offset]].as_mut().unwrap(), &mut spectrum)?;
@@ -547,7 +561,12 @@ impl NativeAacDecoder {
                     channels.push((channel, spectrum, self.mapping[target_offset]));
                 }
                 1 => {
-                    let pair = ChannelPair::read(&mut bits, &self.config)?;
+                    let pair = if self.config.object_type==4 {
+                        let (pair,data)=ChannelPair::read_ltp(&mut bits,&self.config)?;
+                        let [left,right]=data;
+                        ltp_data[self.mapping[target_offset]]=left;
+                        ltp_data[self.mapping[target_offset+1]]=right;pair
+                    } else {ChannelPair::read(&mut bits,&self.config)?};
                     let (left, right) = if self.config.object_type == 1 {
                         let l = self.mapping[target_offset]; let r = self.mapping[target_offset+1];
                         let (left_bank, right_bank) = if l < r {
@@ -561,6 +580,7 @@ impl NativeAacDecoder {
                     channels.push((pair.right, right, self.mapping[target_offset + 1]));
                 }
                 2 => {
+                    if self.config.object_type==4 {return Err(unsupported("AAC LTP coupling state is not integrated"));}
                     let coupling = Coupling::read(&mut bits, &self.config)?;
                     if current_program
                         .as_ref()
@@ -650,7 +670,7 @@ impl NativeAacDecoder {
             return Err(invalid("trailing bytes after AAC END"));
         }
         for point in [0, 1] {
-            if point == 1 {
+            if point == 1 && self.config.object_type!=4 {
                 for (channel, spectrum, _) in &mut channels {
                     *spectrum = channel.apply_tns(&self.config, std::mem::take(spectrum))?;
                 }
@@ -697,6 +717,7 @@ impl NativeAacDecoder {
         let alignment_tags_history=self.ssr_alignment_tags.clone();
         let pending_duration_history=self.ssr_pending_duration.clone();
         let source_alignment_history=self.ssr_source_alignment;
+        let ltp_history:Vec<_>=self.ltp_synthesis.iter().map(super::aac_ltp_channel::LtpChannel::checkpoint).collect();
         let ssr_history = self.ssr_synthesis.clone();
         let ssr_coupling_history = self.ssr_coupling_synthesis.clone();
         let history: Vec<_> = self
@@ -866,9 +887,18 @@ impl NativeAacDecoder {
             let mut output = vec![0.0; n * channels.len()];
             let mut pcm = vec![0.0; n];
             for (channel, spectrum, target) in &channels {
-                self.synthesis[*target].synthesize_pcm(
-                    channel.info.sequence,channel.info.shape,spectrum,&mut pcm,
-                )?;
+                if self.config.object_type==4 {
+                    let tables=BandTables::for_config(&self.config)?;
+                    let short=channel.info.sequence==super::aac_synthesis::WindowSequence::EightShort;
+                    let offsets=if short {tables.short}else{tables.long};
+                    let limit=BandTables::tns_limit(self.config.sample_rate,short).min(channel.info.max_sfb as usize);
+                    let prediction=ltp_data[*target].as_ref().map(ltp_data_for_channel);
+                    pcm=self.ltp_synthesis[*target].process(spectrum.clone(),prediction.as_deref(),channel.info.sequence,channel.info.shape,offsets,limit,channel.tns.as_ref())?;
+                } else {
+                    self.synthesis[*target].synthesize_pcm(
+                        channel.info.sequence,channel.info.shape,spectrum,&mut pcm,
+                    )?;
+                }
                 for i in 0..n {
                     output[i * channels.len() + target] = pcm[i] as f32;
                 }
@@ -959,6 +989,7 @@ impl NativeAacDecoder {
                 Ok(output)
             }
             Err(error) => {
+                for (state,saved) in self.ltp_synthesis.iter_mut().zip(&ltp_history) {state.restore(saved)?;}
                 self.ssr_source_alignment=source_alignment_history;self.ssr_fixed_clock=fixed_clock_history;self.ssr_alignment=alignment_history;self.ssr_alignment_tags=alignment_tags_history;self.ssr_pending_duration=pending_duration_history;
                 self.ssr_synthesis=ssr_history;self.ssr_coupling_synthesis=ssr_coupling_history;
                 for (state, saved) in self.synthesis.iter_mut().zip(&history) {

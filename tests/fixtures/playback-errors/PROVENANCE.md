@@ -4076,3 +4076,23 @@ Validation: owned library 462 passed / 1 pre-existing ignored; root AAC pair
 5 passed; fourteen offline AAC integration suites 53 passed / 1 pending root
 LTP acceptance ignored. Own pair generation is deterministic and all saved
 benchmark source/reference SHA-256 hashes are verified.
+
+### Native LTP dispatch qualification (2026-10-10)
+
+Existing own `aac-ltp-{inactive,active}-synthetic.mp4` and the four
+`aac-ltp-pair-*-synthetic.mp4` retain their authored packets unchanged. Library
+and root compatibility unit tests exercise the shared native packet dispatcher
+from private parsed AOT4 metadata: 24 mono and 48 stereo packets, saved PCM
+references at 1e-7, checkpoint replay, reset and timing. Public ASC still refuses
+AOT4; this is native-state/dispatcher acceptance, not root playback acceptance.
+The controlled right-lane geometry fault tests internal rollback rather than
+representing a newly discovered source-media failure. No source video or codec
+parameters were copied, and ordinary test execution remains offline/FFmpeg-free.
+
+Validation: owned library 468 passed / 1 pre-existing ignored; root native AAC
+15 passed, including the 72-packet compatibility bridge test; fourteen offline
+AAC integration suites 53 passed / 1 pending root LTP acceptance ignored.
+The final syntax suite also retains 5 passing tests and the pending acceptance;
+its ignore reason now names ASC admission and remaining tool/layout qualification.
+Root syntax metadata is explicitly adapted to owned LTP data; the library path
+borrows it directly. Existing synthetic packets/PCM references are unchanged.
