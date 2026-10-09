@@ -8132,3 +8132,31 @@ independent SSR/SBR reference; enable it and replace the refusal expectation
 when source-aligned synthesis is connected. Two reproduction/control tests
 pass offline without FFmpeg. All four artifacts regenerate identically.
 This qualifies the reproducer, not SSR/SBR CCE playback.
+
+
+### 2026-10-09 — per-source SSR/SBR independent CCE synthesis
+
+The previous CCE refusal/ignored acceptance is superseded. SSR/SBR programs
+with independent CCEs now preserve aligned target and coupling PCM separately.
+Pending metadata retains each CCE SBR frame by source tag. Target elements and
+CCE sources run through their own SBR DSP; original chunk gains apply after
+source extension synthesis and before final interleaving. EOF and packet
+rollback clone alignment, pending metadata and DSP histories transactionally.
+Checkpoint/reset preserve the selected alignment mode. Optional admission and
+retained-payload accounting include configured CCE metadata allocations.
+
+Four authored nonzero programs qualify mono/stereo targets with one/two CCE
+sources, tags 1/15, explicit 24→48 kHz SBR and unit independent gain. The core
+control remains bit-exact; every SBR program matches the independent reference
+within 1e-9. Direct native checkpoints/error/reset/EOF and player rewind/seek
+acceptance run for all four cases. No CCE acceptance remains ignored.
+
+Remaining scope includes non-unit/time-varying CCE gain, unequal independent
+SSR/SBR switching, broader SBR signalling/ADTS transport, source retirement,
+transitions between core mixed alignment and SBR source alignment, downsampled
+SSR/SBR, PS and wider codec tools/profiles. This is not full codec conformance.
+
+Final validation: 909 root unit tests, 460 owned-media unit tests and
+18 SSR integration tests passed, 24 existing ignored outside CCE acceptance.
+All seven CCE artifacts regenerate identically. Checks were locked/offline
+without FFmpeg; `git diff --check` passes.

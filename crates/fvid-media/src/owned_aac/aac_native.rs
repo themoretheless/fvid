@@ -120,6 +120,10 @@ impl NativeAacDecoder {
                 if let Some(sbr)=&packet.sbr {
                     footprint.vector(&sbr.groups).map_err(|e|invalid(&e))?;
                     footprint.vector(&sbr.mapping).map_err(|e|invalid(&e))?;
+                    footprint.vector(&sbr.couplings).map_err(|e|invalid(&e))?;
+                    for (_,frame) in &sbr.couplings {
+                        if let Some(frame)=frame {footprint.add(frame.retained_payload_bytes()?).map_err(|e|invalid(&e))?;}
+                    }
                     for (_,_,frame) in &sbr.groups {
                         if let Some(frame)=frame {footprint.add(frame.retained_payload_bytes()?).map_err(|e|invalid(&e))?;}
                     }

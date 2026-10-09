@@ -2703,6 +2703,12 @@ SSR/IPQF PCM above. The intended SBR output uses the existing independently
 computed nonzero SSR/SBR reference with the same source spectra and windows.
 No private data, foreign codec or network is used.
 
-The exact per-source aligned synthesis refusal is reproduced. The SBR PCM
-acceptance remains explicitly ignored pending the implementation; neither
-this passing refusal nor the core control establishes SSR/SBR CCE support.
+The exact per-source aligned synthesis refusal was reproduced before the fix.
+The SBR PCM acceptance is now enabled and the old refusal test is replaced
+with native checkpoint/reset/error/EOF and player rewind/seek acceptance.
+The generator additionally authors mono/stereo targets with one/two CCE tags
+1/15. Target PCM stays silent, with no target SBR FIL; each active source has
+its own SBR FIL and unit output gain. Stereo targets replicate the independent
+mono reference; two identical sources sum to twice that reference. All four
+nonzero SBR programs match at 1e-9 tolerance. This covers the stated programs,
+not arbitrary CCE gain/roster transitions or all SSR/SBR tools.

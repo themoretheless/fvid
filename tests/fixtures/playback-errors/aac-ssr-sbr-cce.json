@@ -2,6 +2,8 @@
   "cases": [
     {
       "name": "core-control",
+      "channels": 1,
+      "factor": 1,
       "asc": "1b0009840002011000",
       "frames": [
         {
@@ -47,6 +49,8 @@
     },
     {
       "name": "sbr",
+      "channels": 1,
+      "factor": 1,
       "asc": "2b018c04c20001008800",
       "frames": [
         {
@@ -86,6 +90,147 @@
         "sha256": "0b6ec181de5547cbb765e93b0b88fc98d1cf48eadd9a652c95fc6621b1034036",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "2b018c04c20001008800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "sbr-1-2",
+      "channels": 1,
+      "factor": 2,
+      "asc": "2b018c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 1068,
+          "bytes": 141
+        },
+        {
+          "offset": 1209,
+          "bytes": 142
+        },
+        {
+          "offset": 1351,
+          "bytes": 249
+        },
+        {
+          "offset": 1600,
+          "bytes": 257
+        },
+        {
+          "offset": 1857,
+          "bytes": 144
+        },
+        {
+          "offset": 2001,
+          "bytes": 133
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-ssr-sbr-active-reference.f64le",
+      "video": {
+        "file": "aac-ssr-sbr-cce-sbr-1-2-synthetic.mp4",
+        "sha256": "42846d97eadf2bfb07532106be5299b5f022667d059ecd5c2f48eb82cc52eced",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "sbr-2-1",
+      "channels": 2,
+      "factor": 1,
+      "asc": "2b018c04c20001108800",
+      "frames": [
+        {
+          "offset": 2134,
+          "bytes": 79
+        },
+        {
+          "offset": 2213,
+          "bytes": 81
+        },
+        {
+          "offset": 2294,
+          "bytes": 145
+        },
+        {
+          "offset": 2439,
+          "bytes": 149
+        },
+        {
+          "offset": 2588,
+          "bytes": 83
+        },
+        {
+          "offset": 2671,
+          "bytes": 75
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-ssr-sbr-active-reference.f64le",
+      "video": {
+        "file": "aac-ssr-sbr-cce-sbr-2-1-synthetic.mp4",
+        "sha256": "be918685cd709435a2c3510cc566503dfd67ecc3e4e6bfe17b7235ce8e776e83",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20001108800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "sbr-2-2",
+      "channels": 2,
+      "factor": 2,
+      "asc": "2b018c04c20002108fc000",
+      "frames": [
+        {
+          "offset": 2746,
+          "bytes": 146
+        },
+        {
+          "offset": 2892,
+          "bytes": 148
+        },
+        {
+          "offset": 3040,
+          "bytes": 262
+        },
+        {
+          "offset": 3302,
+          "bytes": 270
+        },
+        {
+          "offset": 3572,
+          "bytes": 150
+        },
+        {
+          "offset": 3722,
+          "bytes": 138
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "reference": "aac-ssr-sbr-active-reference.f64le",
+      "video": {
+        "file": "aac-ssr-sbr-cce-sbr-2-2-synthetic.mp4",
+        "sha256": "edb601e1d5da751999eb20096724a881b4b7a9825850a976b7f4507e502725b2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b018c04c20002108fc000",
         "pcm_offset": 0,
         "samples": 12288
       }
