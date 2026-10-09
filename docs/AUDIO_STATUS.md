@@ -1851,3 +1851,29 @@ No external decoder code/dependency is imported.
 Sensitivity: substituting current shape for previous shape failed the independent analysis oracle: `n=960 seq=OnlyLong bin=0: -1024.3450776386292 vs -1026.0142568988708`. Source was restored. All three generated artifacts reproduce identical hashes.
 
 Validation: restored owned-library tests passed 462 with zero failures and one pre-existing ignored. Offline media/player integration passed 13 with zero failures and one pending LTP playback acceptance ignored. All six forward-transform sizes passed dense direct-cosine comparison.
+
+### Owned AAC TNS analysis for LTP prediction spectra (2026-10-09)
+
+`TnsData::analyze_owned` applies the all-zero/FIR analysis counterpart of the
+existing TNS synthesis filter to an owned f64 spectrum. Each filter keeps
+original-input history, resets at its own band/window boundary and respects
+direction plus clipped spectral-band intervals. Geometry/finite LPC validation
+precedes processing; overflow refuses. The buffer is consumed and reused with
+no second frame allocation. This is a computation stage, not AOT4 admission.
+
+The own generator supplies 96 full-spectrum direct-convolution references over
+960/1024 geometry, long/eight-short windows, two filter intervals, both directions,
+clipping limits 0/2/5 and orders through 20 (generic Main-capable TNS data;
+profile-specific limits still belong to syntax admission). Tests compare FIR
+results independently, check synthesis reversibility within f32 precision,
+retained pointer/capacity and malformed/overflow refusal. They do not prove all
+possible LPC coefficients or geometry. Generation is separate from tests and
+uses no private source media, foreign decoder execution, FFmpeg or network.
+
+LTP still needs selected-band application, profile/ICS admission, decoder state
+integration and end-to-end scale/rounding/PCM acceptance. Existing synthetic LTP
+videos retain exact configuration refusal; intended playback remains ignored.
+Analysis recurrence reference consulted: [FAAD2 TNS analysis](https://github.com/knik0/faad2/blob/master/libfaad/tns.c).
+No external code/dependency is imported.
+
+Validation: 462 owned-library tests and 15 offline media/player integration tests passed, with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. All three generated artifacts retained identical SHA-256 hashes after regeneration. A temporary incorrect feedback-history mutation failed the independent FIR comparison at n=960, sample=0; the original implementation was restored before these final checks.

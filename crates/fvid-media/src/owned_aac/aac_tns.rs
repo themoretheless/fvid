@@ -13,6 +13,38 @@ pub struct TnsData {
     pub windows: Vec<Vec<TnsFilter>>,
 }
 impl TnsData {
+    /// FIR analysis for LTP prediction spectra, inverse to TNS synthesis.
+    /// Consume a packet-local f64 buffer without a second allocation.
+    pub fn analyze_owned(&self, mut spectrum: Vec<f64>, offsets: &[usize], max_band: usize) -> Result<Vec<f64>> {
+        let size = offsets.last().copied().unwrap_or(0);
+        if !matches!(spectrum.len(), 960 | 1024) || !matches!(self.windows.len(), 1 | 8)
+            || size != spectrum.len()/self.windows.len() || offsets.first()!=Some(&0)
+            || offsets.windows(2).any(|p|p[0]>=p[1]) || max_band>=offsets.len()
+            || spectrum.iter().any(|x|!x.is_finite()) {
+            return Err(invalid("invalid AAC TNS analysis geometry"));
+        }
+        if self.windows.iter().flatten().any(|f| f.lpc.len()>20 || f.lpc.iter().any(|x|!x.is_finite())) {
+            return Err(invalid("invalid AAC TNS predictor"));
+        }
+        for (window, filters) in self.windows.iter().enumerate() {
+            let mut top = offsets.len()-1;
+            for filter in filters {
+                let bottom = top.saturating_sub(filter.length);
+                let (start,end)=(window*size+offsets[bottom.min(max_band)],window*size+offsets[top.min(max_band)]);
+                top=bottom;
+                let mut history=[0.0;20];
+                for step in 0..end-start {
+                    let index=if filter.reverse {end-1-step} else {start+step};
+                    let original=spectrum[index];
+                    let value=original+filter.lpc.iter().zip(history).map(|(a,x)|a*x).sum::<f64>();
+                    if !value.is_finite() {return Err(invalid("AAC TNS analysis overflow"));}
+                    spectrum[index]=value;
+                    history.rotate_right(1);history[0]=original;
+                }
+            }
+        }
+        Ok(spectrum)
+    }
     /// Apply each filter within its spectral band interval. `max_band` is
     /// min(max_sfb, sample-rate-specific TNS band limit). No caller mutation.
     pub fn filter(&self, spectrum: &[f32], offsets: &[usize], max_band: usize) -> Result<Vec<f32>> {
