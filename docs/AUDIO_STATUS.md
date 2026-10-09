@@ -1340,3 +1340,36 @@ qualification gaps; no complete AAC or all-codec parity claim is made.
 Validation: 12 integration tests passed across `aac_main_ps`,
 `aac_main_ps_cce` and `aac_pce_roster`, locked/offline with `media,player`
 and no FFmpeg. Production code is unchanged.
+
+### AAC Main PS independent point-3 sources (2026-10-09)
+
+Four authored MP4 videos cover independent CCE tags 1/15 at PS output
+24/48 kHz. Each source has distinct residuals, Main prediction history,
+window-transition schedule and sine/KBD shapes. Two cases carry source SBR
+on tag 1 while tag 15 uses upsampling; two use upsampling for both. Wire
+order alternates, including CCE placement before and after the target SCE.
+The scalar oracle independently computes each source's Main prediction and
+IMDCT/overlap. Qualified SBR/PS stages then render source/core composition,
+adding independent coupling only to the left SCE output after PS, aligned
+with the delayed frame index. This is composition evidence, not a new
+independent numerical SBR/PS implementation.
+
+Acceptance checks waveform, source-history sensitivity, packet rollback and
+checkpoint replay, reset, all 12 source frame indices including delayed EOF,
+MP4 PCM export, syntax probe replay, intervals, rewind and seek. A temporary
+production mutation omitting CCE Main prediction fails waveform acceptance
+at sample 7196 for 24 kHz upsampling. The original source was restored
+byte-for-byte. Generator `scripts/generate_aac_main_ps_independent_fixtures.py`
+reproduces ten artifacts deterministically and stays separate from ordinary
+tests. No private media, FFmpeg, foreign decoder or network is used.
+
+This qualifies continuously coded Main PS point-3 sources and one authored
+source-SBR geometry. Source absence/arrival, PCE roster transitions, multiple
+source-SBR geometries, source PS, PNS and wider layouts/profiles remain open;
+full AAC/all-codec parity has not been demonstrated.
+
+Validation: 12 integration tests passed across `aac_main_ps`,
+`aac_main_ps_cce` and `aac_main_ps_independent`, locked/offline with
+`media,player` and no FFmpeg. Reassigning source SBR FIL to the other
+source changes the composition reference at both clocks, guarding binding
+sensitivity. Production code is unchanged.
