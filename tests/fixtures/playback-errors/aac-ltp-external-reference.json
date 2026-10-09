@@ -6,15 +6,43 @@
       "source_sha256": "29a78d03c890b4f983b17456cc9c330b2a85355b7cd82220e5a5c3039e348845",
       "reference_sha256": "469928411224df12c7d5ba57ac9c9072dc272a009ee43e5f49ed8727ca4292c2",
       "samples": 12288,
-      "elapsed_ms": 40.486874990165234
+      "elapsed_ms": 46.66054199333303
     },
     {
       "name": "active",
       "source_sha256": "268ac3167ccb4239575c9a62287aa01b003695e3baa78f33a41fa8176450ec9d",
       "reference_sha256": "70a12a40fe8111fdab032feb9bdb6e0893ae243da9b4fa7219d332de9d848814",
       "samples": 12288,
-      "elapsed_ms": 54.05229202006012
+      "elapsed_ms": 24.40391600248404
+    },
+    {
+      "name": "pair-common-ms0",
+      "source_sha256": "28f7b3f82d1361761897074da03f5ae8b29ec90d8f8baf31aff3e82774d0a2c7",
+      "reference_sha256": "71dcef12f04b517d9e37dd1f244fa88fb222073ad5e3808de9590589778c19dc",
+      "samples": 24576,
+      "elapsed_ms": 26.221959007671103
+    },
+    {
+      "name": "pair-common-ms1",
+      "source_sha256": "ae300b82a49a28d4ba732d60141275ff2f44c74cf16d88a089bc20ec5f2e756d",
+      "reference_sha256": "47829112c1cd63ee5c9febd01d1bafdce155556d7481c2bf7b4bcc3569f11625",
+      "samples": 24576,
+      "elapsed_ms": 23.97783301421441
+    },
+    {
+      "name": "pair-common-ms2",
+      "source_sha256": "07fe305741e3f05a5c62d6e9f05d90c1840e2a191c6506154ae5731957f10f37",
+      "reference_sha256": "5a7f5ed667fbca24a594b08e14d5a7ad43a1a2a29b65c04a6c881597b78bbcf7",
+      "samples": 24576,
+      "elapsed_ms": 23.90245901187882
+    },
+    {
+      "name": "pair-independent",
+      "source_sha256": "a77ba30d918e58a80402d49a72c01299c619a49d3674b2903a27bfe2e5725cb3",
+      "reference_sha256": "c7d71391c5a8ead23ce5b03fbddf65a8ad30b51dfa97f3ec006d8a1ebb003707",
+      "samples": 24576,
+      "elapsed_ms": 24.55437497701496
     }
   ],
-  "scope": "Authored mono 24k/1024 long-window inactive and active ordinary LTP videos; explicit external-reference benchmark, not full-profile certification."
+  "scope": "Authored mono and stereo 24k/1024 long-window ordinary LTP videos; explicit external-reference benchmark, not full-profile certification. Independent stereo right-channel flag changes reproduce a saved external-reference disagreement and use the own scalar oracle for acceptance."
 }

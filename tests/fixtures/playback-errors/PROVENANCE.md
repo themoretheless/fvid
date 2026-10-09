@@ -4031,3 +4031,48 @@ full, rewind and seek output. The existing short own SSR video supplies the exac
 reproducer; no private media or replacement tolerance was introduced.
 
 Validation: 462 owned-library tests, four root channel unit tests and 51 offline integration tests across 13 suites passed with zero failures. One pre-existing library test and 1 integration test(s) remain ignored, including pending root LTP playback acceptance. The previously failing SSR helper now passes full/rewind/seek/ranges with exact PCM equality after EOF drain.
+
+### Owned LTP CPE packet parsing and independent channel state (2026-10-09)
+
+`ChannelPair::read_ltp` parses ordinary AOT4 common-window or independent-window
+pairs, returning independent LTP data for both channels. Common MS masks use the
+same helper as existing Main/LC/SSR pair syntax; either stream's failure restores
+the entire pair cursor. The prediction data is kept separate from common ICS
+geometry, so different channel lag/coefficient/usage does not break stereo tools.
+Production AOT4 ASC admission/dispatch remains gated.
+
+The own generator authors four short 24k/1024 stereo LTP videos: common MS off,
+explicit, all and independent windows. Twelve frames each cover inactive lead-in,
+left/right presence changes, distinct lag/coefficient, and sine/KBD shape changes
+(shared or independent). The explicit benchmark saves external interleaved PCM,
+version and source/PCM hashes. Offline tests parse actual CPE payloads, reconstruct
+MS spectra, run independent channel states, compare every sample to an own direct
+cosine-sum scalar PCM oracle at 1e-7, verify
+END alignment, checkpoint replay and whole-pair rollback for truncated streams,
+reserved MS mode and incorrect profile. No private media/codec parameters or
+runtime FFmpeg dependency is introduced. Generation and benchmark remain separate
+from ordinary tests.
+
+This qualifies these ordinary stereo packet/channel cases, not all LTP layouts,
+intensity/PNS interactions, short prediction, 960 external-reference behavior,
+CCE/PCE mapping or root player/MP4 admission. The original root LTP playback
+acceptance still awaits production integration and memory accounting.
+
+The three common-window cases also match every saved external PCM sample at
+1e-7. Independent-window frames 0–4 and the complete left channel match that
+reference; right-channel frame 5 diverges by 4.8556743e-4, and frame 6 by
+4.4325036e-4. The offline regression retains and reproduces this disagreement
+while requiring all independent-channel PCM to match the scalar oracle.
+FFmpeg's [LTP dispatch](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec.c)
+gates both channels on the left predictor flag and does not clear LTP presence
+when an independent ICS lacks prediction; this explains the observed right-channel
+reference limitation. [FAAD2 stereo reconstruction](https://github.com/knik0/faad2/blob/master/libfaad/specrec.c)
+applies separate channel predictors. FVid retains independent channel flags;
+the saved external output is diagnostic evidence, not an acceptance oracle for
+these divergent frames. The scalar reference uses authored residuals, direct
+MDCT/IMDCT sums, float history, and independently constructed sine/KBD windows.
+
+Validation: owned library 462 passed / 1 pre-existing ignored; root AAC pair
+5 passed; fourteen offline AAC integration suites 53 passed / 1 pending root
+LTP acceptance ignored. Own pair generation is deterministic and all saved
+benchmark source/reference SHA-256 hashes are verified.

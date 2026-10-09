@@ -1,0 +1,472 @@
+{
+  "cases": [
+    {
+      "name": "common-ms0",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 16,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 32,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 48,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 68,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 88,
+          "bytes": 18,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 106,
+          "bytes": 18,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 124,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 144,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 164,
+          "bytes": 18,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 182,
+          "bytes": 18,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 200,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 2,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-pair-common-ms0-synthetic.mp4",
+        "sha256": "28f7b3f82d1361761897074da03f5ae8b29ec90d8f8baf31aff3e82774d0a2c7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "common-ms1",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 220,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 236,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 252,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 268,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 289,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 310,
+          "bytes": 19,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 329,
+          "bytes": 19,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 348,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 369,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 390,
+          "bytes": 19,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 409,
+          "bytes": 19,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 428,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 2,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-pair-common-ms1-synthetic.mp4",
+        "sha256": "ae300b82a49a28d4ba732d60141275ff2f44c74cf16d88a089bc20ec5f2e756d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "common-ms2",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 449,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 465,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 481,
+          "bytes": 16,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 497,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 517,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 537,
+          "bytes": 18,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 555,
+          "bytes": 18,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 573,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 593,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 613,
+          "bytes": 18,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 631,
+          "bytes": 18,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 649,
+          "bytes": 20,
+          "active": [
+            true,
+            true
+          ]
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 2,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-pair-common-ms2-synthetic.mp4",
+        "sha256": "07fe305741e3f05a5c62d6e9f05d90c1840e2a191c6506154ae5731957f10f37",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "independent",
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 669,
+          "bytes": 17,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 686,
+          "bytes": 17,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 703,
+          "bytes": 17,
+          "active": [
+            false,
+            false
+          ]
+        },
+        {
+          "offset": 720,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 741,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 762,
+          "bytes": 19,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 781,
+          "bytes": 19,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 800,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 821,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        },
+        {
+          "offset": 842,
+          "bytes": 19,
+          "active": [
+            true,
+            false
+          ]
+        },
+        {
+          "offset": 861,
+          "bytes": 19,
+          "active": [
+            false,
+            true
+          ]
+        },
+        {
+          "offset": 880,
+          "bytes": 21,
+          "active": [
+            true,
+            true
+          ]
+        }
+      ],
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "channels": 2,
+      "slots": 16,
+      "bands": 32,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-pair-independent-synthetic.mp4",
+        "sha256": "a77ba30d918e58a80402d49a72c01299c619a49d3674b2903a27bfe2e5725cb3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    }
+  ]
+}

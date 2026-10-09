@@ -136,25 +136,7 @@ impl ChannelPair {
         } else {
             None
         };
-        let mut explicit_mask = false;
-        let mid_side = if let Some(info) = &common {
-            let mode = cursor.read(2)?;
-            explicit_mask = mode == 1;
-            if mode == 3 {
-                return Err(invalid("reserved AAC mid/side mask mode"));
-            }
-            let mut mask = vec![vec![mode == 2; info.max_sfb as usize]; info.group_lengths.len()];
-            if mode == 1 {
-                for group in &mut mask {
-                    for used in group {
-                        *used = cursor.bit()?;
-                    }
-                }
-            }
-            Some(mask)
-        } else {
-            None
-        };
+        let (explicit_mask, mid_side) = Self::read_mask(&mut cursor, common.as_ref())?;
         let left = ChannelData::read_common(&mut cursor, config, common.as_ref())?;
         let right_start = cursor.position();
         let right = ChannelData::read_common(&mut cursor, config, common.as_ref())?;
@@ -165,4 +147,49 @@ impl ChannelPair {
             right_span,
         ))
     }
+    fn read_mask(bits: &mut BitReader<'_>, common: Option<&super::aac_ics::IcsInfo>) -> Result<(bool, Option<Vec<Vec<bool>>>)> {
+        let mut explicit_mask = false;
+        let mid_side = if let Some(info) = common {
+            let mode = bits.read(2)?;
+            explicit_mask = mode == 1;
+            if mode == 3 {
+                return Err(invalid("reserved AAC mid/side mask mode"));
+            }
+            let mut mask = vec![vec![mode == 2; info.max_sfb as usize]; info.group_lengths.len()];
+            if mode == 1 {
+                for group in &mut mask {
+                    for used in group {
+                        *used = bits.bit()?;
+                    }
+                }
+            }
+            Some(mask)
+        } else {
+            None
+        };
+        Ok((explicit_mask, mid_side))
+    }
+    /// Parse ordinary AOT4 pairs with independent per-channel LTP data.
+    /// A failure in either stream restores the complete pair cursor.
+    pub fn read_ltp(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<(Self, [Option<super::aac_ltp_syntax::LtpData>; 2])> {
+        if config.object_type != 4 { return Err(invalid("AAC LTP pair requires AOT4")); }
+        let tables = BandTables::for_config(config)?;
+        let mut cursor = bits.clone();
+        let common = if cursor.bit()? {
+            Some(super::aac_ltp_syntax::LtpIcsInfo::read(&mut cursor,
+                ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8), config.frame_samples,true)?)
+        } else { None };
+        let (explicit_mask, mid_side) = Self::read_mask(&mut cursor, common.as_ref().map(|header| &header.info))?;
+        let (left, right, prediction) = if let Some(header) = common {
+            (ChannelData::read_common(&mut cursor,config,Some(&header.info))?,
+             ChannelData::read_common(&mut cursor,config,Some(&header.info))?, header.channels)
+        } else {
+            let (left, before) = ChannelData::read_ltp(&mut cursor,config)?;
+            let (right, after) = ChannelData::read_ltp(&mut cursor,config)?;
+            (left,right,[before,after])
+        };
+        *bits = cursor;
+        Ok((Self { left,right,mid_side,explicit_mask },prediction))
+    }
+
 }
