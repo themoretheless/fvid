@@ -218,6 +218,7 @@ impl Sps {
         let mut extended_precision = false;
         let mut cabac_bypass_alignment = false;
         let mut scc_extension = false;
+        let mut future_extension = false;
         let mut palette = None;
         let mut current_picture_reference = false;
         let mut motion_vector_resolution_control = 0;
@@ -227,9 +228,10 @@ impl Sps {
             let multilayer = b.bit()?;
             let three_d = b.bit()?;
             scc_extension = b.bit()?;
-            if multilayer || three_d || b.read(4)? != 0 {
+            future_extension = b.read(4)? != 0;
+            if multilayer || three_d {
                 return Err(crate::unsupported(
-                    "HEVC multilayer/3D/unknown SPS extensions are not implemented",
+                    "HEVC multilayer/3D SPS extensions are not implemented",
                 ));
             }
             if range {
@@ -282,6 +284,13 @@ impl Sps {
                 }
                 motion_vector_resolution_control = resolution as u8;
                 intra_boundary_filtering_disabled = b.bit()?;
+            }
+        }
+        if future_extension {
+            // H.265 7.4.3: future extension data does not affect the known
+            // decoding process. Preserve validation of rbsp_trailing_bits.
+            while b.more_rbsp_data() {
+                b.bit()?;
             }
         }
         b.finish_rbsp()?;

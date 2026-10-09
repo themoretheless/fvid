@@ -7151,3 +7151,23 @@ frame boundaries, including the interval extended across suppressed RASL, in
 alternating forward/backward order. It requires the requested time to lie in
 the sequentially derived interval and compares both that exact interval and
 pixels; matching some output frame alone is not sufficient.
+
+
+### HEVC future SPS/PPS extension data
+
+Reserved nonzero `sps_extension_4bits` / `pps_extension_4bits` now cause the
+remaining opaque extension data to be consumed rather than refusing the base
+picture. Known range/SCC syntax is still parsed first and RBSP termination
+is still validated. Multilayer and 3D extensions remain unsupported.
+H.265 section 7.4.3 requires decoders to ignore these future data flags:
+https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202108-S%21%21PDF-E&lang=e&type=items
+
+Three authored `hevc-future-extension-{sps,pps,both}-synthetic.mp4` videos
+reuse our short Main IPB seed with only configuration parameter tails changed.
+Before the fix the SPS case failed with the exact unknown-extension refusal.
+`tests/hevc_extension_tails.rs` requires every retained picture, PTS, duration
+and EOF to match baseline through rewind. A fourth malformed-stop fixture
+requires bounded parsing failure. Generate separately using
+`python3 scripts/generate_hevc_extension_tail_fixtures.py`; neither generation
+nor ordinary tests need FFmpeg or network. This is future-tail compatibility,
+not implementation of the remaining layered or 3D coding tools.

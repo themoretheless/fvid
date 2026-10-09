@@ -194,6 +194,7 @@ impl Pps {
         let mut chroma_qp_offset_list = None;
         let mut cross_component_prediction = false;
         let mut scc_extension = false;
+        let mut future_extension = false;
         let mut palette_initial = None;
         let mut current_picture_reference = false;
         let mut adaptive_colour_transform = false;
@@ -204,9 +205,10 @@ impl Pps {
             let multilayer = b.bit()?;
             let three_d = b.bit()?;
             scc_extension = b.bit()?;
-            if multilayer || three_d || b.read(4)? != 0 {
+            future_extension = b.read(4)? != 0;
+            if multilayer || three_d {
                 return Err(crate::unsupported(
-                    "HEVC multilayer/3D/unknown PPS extensions are not implemented",
+                    "HEVC multilayer/3D PPS extensions are not implemented",
                 ));
             }
             if range {
@@ -299,6 +301,13 @@ impl Pps {
                     }
                     palette_initial = Some(entries);
                 }
+            }
+        }
+        if future_extension {
+            // H.265 7.4.3: future extension data does not affect the known
+            // decoding process. Preserve validation of rbsp_trailing_bits.
+            while b.more_rbsp_data() {
+                b.bit()?;
             }
         }
         b.finish_rbsp()?;
