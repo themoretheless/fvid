@@ -2741,3 +2741,11 @@ use independent direct 32-band QMF convolution, not decimation of decoded
 PCM. The shared active reference is reproduced by either target or CCE
 generator. Existing full-rate Main reference artifacts remain byte-identical
 after adding the 32-band parameter to the independent oracle.
+
+Two direct-target implicit 24 kHz videos and fourteen implicit 24 kHz CCE
+variants omit ASC SBR signalling while retaining authored SBR FIL from the
+first packet and the fixed core-rate container clock. Before the fix the
+target video reproduced precisely `AAC fill extension tool SBR requires
+extension-aware stream signalling`. Acceptance now compares the same
+independent 32-band QMF reference, with native replay and player seek.
+The generated media contains no private data or foreign codec parameters.

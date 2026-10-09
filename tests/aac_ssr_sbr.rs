@@ -220,7 +220,7 @@ fn active_ssr_core_control_matches_independent_ipqf_before_sbr() {
 }
 
 #[test]
-fn explicit_and_sync_ssr_sbr_downsampled_target_matches_independent_qmf() {
+fn explicit_sync_and_implicit_ssr_sbr_downsampled_target_matches_independent_qmf() {
     for case in cases()["downsampled"].as_array().unwrap() {
         let mut pcm = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&video(case), &mut pcm).unwrap();
@@ -247,4 +247,25 @@ fn explicit_and_sync_ssr_sbr_downsampled_target_matches_independent_qmf() {
             );
         }
     }
+}
+
+#[test]
+fn fixed_core_rate_sbr_hint_is_not_a_dual_rate_discovery_checkpoint() {
+    use fvid_media::owned_aac::NativeAacDecoder;
+    let manifest = cases();
+    let case = manifest["downsampled"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["name"] == "implicit-active-downsampled")
+        .unwrap();
+    let asc = hex(case["asc"].as_str().unwrap());
+    let mut fixed = NativeAacDecoder::new_with_output_rate(&asc, 24000).unwrap();
+    let discovery = NativeAacDecoder::new_with_sbr_detection(&asc).unwrap();
+    assert_eq!(fixed.sample_rate(), discovery.sample_rate());
+    assert!(fixed.restore(&discovery.checkpoint()).is_err());
+    let own = fixed.checkpoint();
+    fixed.reset();
+    fixed.restore(&own).unwrap();
+    assert_eq!(fixed.sample_rate(), 24000);
 }

@@ -65,6 +65,13 @@ def main():
                   container_rate=24000,container_frame_samples=1024,samples=6144,reference=reference_file)
         case['video']=video_fixture([case],blob,channels=channels,filename='aac-ssr-sbr-cce-'+case['name']+'-synthetic.mp4')
         cases.append(case)
+    for base in list(cases):
+        if not base['name'].endswith('-downsampled'):continue
+        channels=base['channels'];tags=(1,15) if base['factor']==2 else (1,)
+        prefix=field(3,5)+frequency(24000)+'0000'+'000'
+        case=dict(base,name=base['name']+'-implicit',asc=packed(program(prefix,channels,3,tags)).hex())
+        case['video']=video_fixture([case],blob,channels=channels,filename='aac-ssr-sbr-cce-'+case['name']+'-synthetic.mp4')
+        cases.append(case)
     (DEST / 'aac-ssr-sbr-cce-packets.bin').write_bytes(blob)
     (DEST / 'aac-ssr-sbr-cce.json').write_text(json.dumps(dict(cases=cases,
         provenance='Owned silent target, active SSR CCE1, unit and positive separate-channel independent gain and authored SBR on CCE only. Existing independent SSR/IPQF and SBR reference PCM; no private media or external codec.'), indent=2) + '\n')

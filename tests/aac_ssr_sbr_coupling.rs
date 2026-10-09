@@ -89,7 +89,11 @@ fn ssr_sbr_cce_pending_checkpoint_invalid_packet_reset_and_eof_keep_sources() {
             .map(|s| u8::from_str_radix(std::str::from_utf8(s).unwrap(), 16).unwrap())
             .collect();
         let blob = include_bytes!("fixtures/playback-errors/aac-ssr-sbr-cce-packets.bin");
-        let mut decoder = NativeAacDecoder::new(&asc).unwrap();
+        let mut decoder = NativeAacDecoder::new_with_output_rate(
+            &asc,
+            case["container_rate"].as_u64().unwrap() as u32,
+        )
+        .unwrap();
         let mut reference = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&video(case), &mut reference).unwrap();
         for replay in 0..2 {

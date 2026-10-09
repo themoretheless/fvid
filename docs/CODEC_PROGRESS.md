@@ -8226,3 +8226,31 @@ Final checks: 6 SSR/SBR and 5 SSR/SBR CCE integration tests pass
 locked/offline without FFmpeg; all 50 combined SSR/SBR artifacts regenerate
 identically through both generators, including the shared active 32-band
 reference. Changed Rust test formatting and `git diff --check` pass.
+
+
+### 2026-10-09 — implicit SBR at a fixed core-rate output clock
+
+Two target and fourteen CCE videos now isolate implicit SBR at 24 kHz input
+and output. Before the fix a valid first-packet FIL refused with
+`AAC fill extension tool SBR requires extension-aware stream signalling`.
+A matching output/core clock is now a fixed clock hint, not an implicit
+assertion that SBR is absent. When ASC leaves SBR unspecified, the decoder
+can discover valid FIL without changing that hint. Explicit disable flags
+remain honored. Reset preserves the hint; checkpoint compatibility rejects
+restoring an automatic dual-rate candidate into a fixed-core candidate, even
+when their initial sample rates are equal. Optional controlled-memory
+admission covers unknown-signalling SBR candidates before their first FIL.
+
+The direct target and CCE regressions exercise independent scalar PCM,
+checkpoint/error/reset/EOF and player rewind/seek. The exact refusal is now
+replaced by enabled acceptance. Core-only controls and existing Main/SBR/ADTS
+regressions stay green. This qualifies FIL present from the first packet;
+late discovery, mixed/source-alignment mode transitions, source retirement,
+SSR PS and other codec profiles/tools remain open. No default memory cap,
+FFmpeg fallback, foreign codec or network dependency was introduced.
+
+Final validation: 909 root and 460 owned-media unit tests plus 17
+distinct integration tests passed (7 SSR/SBR, 5 CCE, 2 Main/SBR, 3 ADTS SSR).
+Twenty-four existing unit tests remain ignored. All 66 combined SSR/SBR
+artifacts regenerate identically. Checks were locked/offline without FFmpeg;
+changed-test formatting and `git diff --check` pass.

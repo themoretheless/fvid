@@ -201,6 +201,7 @@ pub struct NativeAacDecoder {
     channel_mask: u32,
     sbr_rate: Option<u32>,
     detect_sbr: bool,
+    sbr_detection_rate: Option<u32>,
     sbr_elements: Vec<Option<ElementSbr>>,
 }
 /// Opaque complete packet-boundary state. Configuration and layout are retained
@@ -225,6 +226,7 @@ pub struct AacCheckpoint {
     channel_mask: u32,
     sbr_rate: Option<u32>,
     detect_sbr: bool,
+    sbr_detection_rate: Option<u32>,
     sbr_elements: Vec<Option<ElementSbr>>,
 }
 fn sbr_layout(parsed: &AudioSpecificConfig) -> Result<bool> {
@@ -318,12 +320,15 @@ impl NativeAacDecoder {
             program,
             mapping,
             channel_mask,
-            sbr_rate, detect_sbr:false,
+            sbr_rate, detect_sbr:false,sbr_detection_rate:None,
             sbr_elements: if sbr_rate.is_some() { vec![None; element_slots] } else { Vec::new() },
         })
     }
     /// Container-declared output clock can identify implicit dual-rate SBR.
     /// No silent rate guessing: unhinted ADTS and explicit SBR=false stay strict.
+    /// Decode at a fixed container clock. Unspecified SBR presence may be
+    /// discovered from FIL even when the output clock equals the core rate;
+    /// discovery must not change this hint. Explicit disable flags are honored.
     pub fn new_with_output_rate(asc:&[u8], output_rate:u32) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         parsed.resolve_output_rate(output_rate)?;
@@ -334,7 +339,13 @@ impl NativeAacDecoder {
             }
             decoder.sbr_rate=Some(output_rate);
             decoder.sbr_elements=vec![None; decoder.sbr_slots()];
-
+        } else if parsed.sbr_present.is_none()
+            && matches!(parsed.core.object_type,1|2|3) && sbr_layout(&parsed)? {
+            // A fixed core-rate hint does not mean SBR is absent. Keep the
+            // negotiated clock while admitting a valid implicit SBR FIL.
+            decoder.detect_sbr=true;
+            decoder.sbr_detection_rate=Some(output_rate);
+            decoder.sbr_elements=vec![None;decoder.sbr_slots()];
         }
         Ok(decoder)
     }
@@ -371,11 +382,11 @@ impl NativeAacDecoder {
         AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),program:self.program.clone(),
             synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
-            sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_elements:self.sbr_elements.clone()}
+            sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_detection_rate:self.sbr_detection_rate,sbr_elements:self.sbr_elements.clone()}
     }
     /// Restore without changing the decoder if configuration/layout differs.
     pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
-        if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
+        if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
         self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration.clone();self.ssr_fixed_clock=state.ssr_fixed_clock;self.ssr_source_alignment=state.ssr_source_alignment;
@@ -549,7 +560,7 @@ impl NativeAacDecoder {
                 }
                 6 => super::aac_pce::read_fill(&mut bits, |input, end, crc| {
                     if sbr_rate.is_none() && self.detect_sbr {
-                        sbr_rate=Some(self.config.sample_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?);
+                        sbr_rate=Some(match self.sbr_detection_rate {Some(rate)=>rate,None=>self.config.sample_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?});
                     }
                     if sbr_rate.is_none() {
                         return Err(unsupported("AAC fill extension tool SBR requires extension-aware stream signalling"));

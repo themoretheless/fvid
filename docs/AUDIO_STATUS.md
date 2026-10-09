@@ -867,5 +867,6 @@ not a decimated production output or a production decoder result. Silent
 and nonzero target programs, mono/stereo CCE targets, one/two sources and
 common-gain scales/sign flags are exercised. Native checkpoint/error/reset/EOF
 and player rewind/seek pass for both 24 and 48 kHz output clocks.
-This does not qualify implicit SBR discovery with an unchanged container clock,
-SSR PS, arbitrary source switching/retirement or all SSR/SBR tools.
+Implicit FIL present from the first packet is now also qualified at an unchanged
+24 kHz container clock for direct target and CCE programs. Late FIL discovery,
+SSR PS, arbitrary source switching/retirement and wider tools remain separate.

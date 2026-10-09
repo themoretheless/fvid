@@ -57,10 +57,10 @@ def main():
     (DEST/'aac-ssr-sbr-downsampled-reference.f64le').write_bytes(struct.pack('<'+str(len(active32))+'d',*active32))
     downsampled=[]
     for base in cases:
-        if base['name'] not in ('explicit','sync','explicit-active','sync-active'):continue
+        if base['name'] not in ('explicit','sync','implicit','explicit-active','sync-active','implicit-active'):continue
         explicit=base['name'].startswith('explicit')
         config=(field(5,5)+frequency(24000)+'0001'+frequency(24000)+field(3,5)+'000' if explicit
-                else field(3,5)+frequency(24000)+'0001'+'000'+field(0x2b7,11)+field(5,5)+'1'+frequency(24000))
+                else field(3,5)+frequency(24000)+'0001'+'000'+('' if base['name'].startswith('implicit') else field(0x2b7,11)+field(5,5)+'1'+frequency(24000)))
         c=dict(base,name=base['name']+'-downsampled',asc=packed(config).hex(),container_rate=24000,container_frame_samples=1024,samples=6144,
                reference='aac-ssr-sbr-downsampled-reference.f64le' if base['name'].endswith('active') else 'aac-ssr-sbr-downsampled-silent-reference.f64le')
         c['video']=video_fixture([c],blob,filename='aac-ssr-sbr-'+c['name']+'-synthetic.mp4')
