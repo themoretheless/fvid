@@ -23,6 +23,12 @@ Malformed AAC packets now return errors and require decoder reset; they are
 not reported as successful empty output. Out-of-range unsigned timestamps
 are rejected before touching codec state instead of wrapping to negative PTS.
 
+AAC-LC/SSR `GASpecificConfig.extensionFlag=1` is accepted when the following
+`extensionFlag3` is zero, including after an explicit PCE. Eight ASC variants
+qualify indexed LC/SSR, PCE coupling, SBR absent/present sync signalling,
+explicit HE-AAC and explicit/sync PS. Their full PCM and headless playback are
+identical to baseline videos; nonzero or missing `extensionFlag3` refuses.
+
 ## What works
 
 | Source | Codec | Path | Verified |

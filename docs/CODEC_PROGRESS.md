@@ -7532,3 +7532,36 @@ suite passed again, including both MP4 and Matroska paths, every-sample scalar
 comparison and playback/range coverage. The earlier failure log records the
 precise roster-continuity refusal before the fix. No new acceptance is ignored.
 Regeneration reproduced all 38 alignment fixture files byte-for-byte.
+
+### 2026-10-09 — AAC GASpecificConfig extension flag and following metadata
+
+The native ASC parser rejected any `extensionFlag=1`, although implemented LC
+and SSR cores have no ER/sub-frame fields there and allow a following zero
+`extensionFlag3`. Eight original short MP4 scenarios pair otherwise identical
+flag-zero and flag-one ASCs and payloads: indexed LC, LC with SBR-absent sync,
+indexed stereo SSR, mono SSR PCE with CCE, explicit HE-AAC, sync HE-AAC, explicit
+PS and sync PS. Initial regression execution reproduced precisely
+`AAC extension flag is not yet supported`, before any packet decoding.
+
+Shared `config_impl.rs` now retains `extensionFlag` while reading the optional
+PCE, then consumes `extensionFlag3` at its actual syntax position. Nonzero future
+flags produce `AAC extensionFlag3 must be zero`; a separate short video with no
+future bit reaches `truncated or oversized bit field`. Unsupported core object
+types still refuse before reading unimplemented ER-specific syntax.
+
+Enabled acceptance compares parsed metadata and every emitted PCM byte with the
+flag-zero baseline, including SBR/PS clocks, nonzero decoded audio and SSR window
+transitions. Owned/root MP4 export, packet checkpoint replay where applicable,
+player decoder checkpoint replay, rewind, seeks at 1100/3000 and exact EOF, and
+terminal drain are checked. All eight nonzero future-flag videos and the missing
+future-bit video have exact parser refusal checks; the PCM path also refuses
+those ASCs. The generator uses only own AAC packets/AVC seed video, runs offline
+without a codec executable, and is not invoked by ordinary tests.
+
+This closes the LC/SSR extensionFlag parsing gap, not AAC Main/LTP/ER tools or
+other unimplemented profiles. Before broadening the fixture set with sync PS,
+the same production change passed 909 core, 4 gain, 3 SSR, 3 coupling, 9 alignment
+and 3 extension-flag integration tests, plus 450 owned media tests: 1381 passing
+test executions, with 24 existing unrelated ignored tests.
+The final eight-scenario 3-test suite passed, including sync PS; regeneration
+reproduced all 27 extension-flag fixture files byte-for-byte.

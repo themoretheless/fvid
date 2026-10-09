@@ -58,9 +58,7 @@ impl AacConfig {
         } else {
             None
         };
-        if b.bit()? {
-            return Err(invalid("AAC extension flag is not yet supported"));
-        }
+        let extension_flag = b.bit()?;
         let program = if config == 0 {
             let program = super::aac_pce::ProgramConfig::read(b, 0)?;
             if u32::from(program.object_type) != object_type || program.sample_rate != sample_rate {
@@ -71,6 +69,12 @@ impl AacConfig {
         } else {
             None
         };
+        // GASpecificConfig carries extensionFlag3 after any PCE. For LC/SSR
+        // there are no ER/sub-frame fields before it; this future-use bit must
+        // be zero. Do not mistake extensionFlag itself for unsupported audio.
+        if extension_flag && b.bit()? {
+            return Err(invalid("AAC extensionFlag3 must be zero"));
+        }
         Ok((
             Self {
                 channel_configuration: config as u8,
