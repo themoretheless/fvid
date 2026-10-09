@@ -190,17 +190,25 @@ impl PacketPcmDecoder {
         }
     }
     pub(crate) fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_))
+        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
+    }
+    pub(crate) fn decode_timed(&mut self,packet:&[u8],pts:u64,duration:u64)->Result<Option<Vec<f32>>> {
+        match self {
+            Self::Aac(d)=>Ok(d.decode_timed(packet,i64::try_from(pts).map_err(|_|invalid("AAC timestamp overflow"))?,duration)?.map(|f|f.samples)),
+            _=>self.decode_delayed(packet),
+        }
     }
     pub(crate) fn decode_delayed(&mut self, packet: &[u8]) -> Result<Option<Vec<f32>>> {
         match self {
             Self::Ps(d) => Ok(d.decode(packet)?.map(|f| f.pcm)),
+            Self::Aac(d) => Ok(d.decode_timed(packet,0,u64::from(d.core_frame_samples()))?.map(|f|f.samples)),
             _ => Ok(Some(self.decode(packet)?)),
         }
     }
     pub(crate) fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
         match self {
             Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+            Self::Aac(d) => Ok(d.finish()?.map(|f|f.samples)),
             _ => Ok(None),
         }
     }

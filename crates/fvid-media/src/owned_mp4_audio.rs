@@ -170,18 +170,19 @@ impl Mp4TimelineDecoder {
         }
     }
     fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_))
+        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
     }
     fn finish_delayed(&mut self) -> Result<Option<Vec<f32>>> {
         match self {
             Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+            Self::Aac(d) => Ok(d.finish()?.map(|f|f.samples)),
             _ => Ok(None),
         }
     }
-    fn decode_delayed(&mut self, bytes: &[u8]) -> Result<Option<Vec<f32>>> {
+    fn decode_timed(&mut self, bytes: &[u8], pts:u64,duration:u64) -> Result<Option<Vec<f32>>> {
         let pcm = match self {
             Self::Ps(d) => return Ok(d.decode(bytes)?.map(|f| f.pcm)),
-            Self::Aac(d) => d.decode(bytes)?,
+            Self::Aac(d) => return Ok(d.decode_timed(bytes,i64::try_from(pts).map_err(|_|invalid("AAC timestamp overflow"))?,duration)?.map(|f|f.samples)),
             Self::Alac(d) => d.decode_pcm(bytes)?,
             Self::Pcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
             Self::Ima4(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
@@ -470,7 +471,7 @@ mod precise {
         fn finish_delayed(&mut self) -> Result<Option<Vec<f64>>> {
             Ok(None)
         }
-        fn decode_delayed(&mut self, bytes: &[u8]) -> Result<Option<Vec<f64>>> {
+        fn decode_timed(&mut self, bytes: &[u8], _pts:u64,_duration:u64) -> Result<Option<Vec<f64>>> {
             self.0
                 .decode_pcm_f64(bytes)
                 .map(Some)

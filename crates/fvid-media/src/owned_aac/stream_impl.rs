@@ -51,7 +51,7 @@ impl<R: std::io::Read> NegotiatedAdts<R> {
                     emit_adts_samples(&cached_pcm, output, from, to, &mut position, &mut stats)?;
                 } else {
                     spool.read_record(Some(&mut packet), None)?;
-                    let samples = self.decoder.decode(&packet)?;
+                    let samples = self.decoder.decode_timed(&packet,0,u64::from(self.decoder.core_frame_samples()))?.map_or_else(Vec::new,|f|f.samples);
                     emit_adts_samples(&samples, output, from, to, &mut position, &mut stats)?;
                 }
             }
@@ -72,9 +72,14 @@ impl<R: std::io::Read> NegotiatedAdts<R> {
             let Some(packet) = self.reader.next_packet()? else {
                 break;
             };
-            let samples = self.decoder.decode(&packet)?;
+            let samples = self.decoder.decode_timed(&packet,0,u64::from(self.decoder.core_frame_samples()))?.map_or_else(Vec::new,|f|f.samples);
             emit_adts_samples(&samples, output, from, to, &mut position, &mut stats)?;
             control.packet(packet.len())?;
+        }
+        if position < to {
+            if let Some(frame)=self.decoder.finish()? {
+                emit_adts_samples(&frame.samples,output,from,to,&mut position,&mut stats)?;
+            }
         }
         if stats.sample_frames == 0 {
             return Err(invalid("audio interval contains no samples"));
@@ -96,7 +101,7 @@ pub(crate) fn negotiate_adts_aac_reader<R: std::io::Read>(
     let asc = reader.audio_specific_config().to_vec();
     control.check_admission(&asc)?;
     let parsed = AdtsAudioConfig::parse(&asc)?;
-    let discovery = parsed.sbr_present.is_none()
+    let discovery = parsed.core.object_type == 2 && parsed.sbr_present.is_none()
         && parsed.program.is_none()
         && matches!(parsed.core.channel_configuration, 1 | 2);
     let mut decoder = if discovery {
@@ -209,7 +214,7 @@ fn emit_adts_samples(
         .sample_frames
         .checked_add(last.saturating_sub(first) as u64)
         .ok_or_else(|| invalid("audio sample count overflow"))?;
-    stats.decoded_frames += 1;
+    if !samples.is_empty() { stats.decoded_frames += 1; }
     *position = end;
     Ok(())
 }

@@ -128,14 +128,14 @@ impl MatroskaTimelineDecoder {
         }
     }
     fn delayed(&self) -> bool {
-        matches!(self, Self::Ps(_))
+        matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
     }
     fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
         let samples = match self {
             Self::Ps(d) => return Ok(d.decode(data)?.map(|f| f.pcm)),
             Self::Pcm(d) => d.decode_pcm(data)?,
             Self::Alac(d) => d.decode_pcm(data)?,
-            Self::Aac(d) => d.decode(data)?,
+            Self::Aac(d) => return Ok(d.decode_timed(data,0,u64::from(d.core_frame_samples()))?.map(|f|f.samples)),
             Self::Opus(d) => d.decode(data).map_err(|e| invalid(&e))?,
         };
         Ok(Some(samples))
@@ -143,6 +143,7 @@ impl MatroskaTimelineDecoder {
     fn finish(&mut self) -> Result<Option<Vec<f32>>> {
         match self {
             Self::Ps(d) => Ok(d.finish()?.map(|f| f.pcm)),
+            Self::Aac(d) => Ok(d.finish()?.map(|f|f.samples)),
             _ => Ok(None),
         }
     }

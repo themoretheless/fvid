@@ -80,6 +80,12 @@ impl NativeAacDecoder {
                 state.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
             }
         }
+        for tags in [Some(&self.ssr_alignment_tags), checkpoint.map(|state| &state.ssr_alignment_tags)].into_iter().flatten() {
+            footprint.vector(tags).map_err(|e| invalid(&e))?;
+        }
+        for alignment in [self.ssr_alignment.as_ref(), checkpoint.and_then(|state| state.ssr_alignment.as_ref())].into_iter().flatten() {
+            footprint.add(alignment.retained_payload_bytes()?).map_err(|e| invalid(&e))?;
+        }
         visit(
             &self.synthesis,
             &self.coupling_synthesis,

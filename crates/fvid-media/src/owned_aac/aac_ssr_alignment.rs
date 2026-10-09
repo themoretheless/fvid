@@ -1,6 +1,6 @@
 //! Bounded packet-boundary PCM alignment for independently switched AAC SSR lanes.
 //! Each lane is mono with per-chunk output gains. Frame stamps belong to the
-//! caller's clock. This primitive does not yet change native packet dispatch.
+//! caller's clock. Native SSR dispatch uses this queue when lane extents differ.
 use super::{Result, invalid};
 use std::collections::VecDeque;
 const MAX_ROWS: usize = 1472;

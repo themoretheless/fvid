@@ -163,7 +163,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                         .ok_or_else(|| invalid("audio timestamp overflow"))?,
                 );
                 reader.read_packet(index, sample_index, &mut packet)?;
-                let samples = decoder.decode_delayed(&packet)?;
+                let samples = decoder.decode_timed(&packet,start,duration)?;
                 control.packet(packet.len())?;
                 if decoder.delayed() {
                     let previous = pending_window.replace((start, duration));

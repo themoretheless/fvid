@@ -31,11 +31,22 @@ impl ElementSbr {
         Self { width, stream: Default::default(), dsp: Default::default() }
     }
 }
+/// PCM retains the timing of its source packet, including delayed SSR output.
+#[derive(Debug, PartialEq)]
+pub struct AacFrame {
+    pub samples: Vec<f32>,
+    pub pts: i64,
+    pub duration: u64,
+}
 pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
+    ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
+    ssr_alignment_tags: Vec<u8>,
+    ssr_pending_duration: Option<u64>,
+    ssr_fixed_clock: bool,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     noise: NoiseState,
     program: Option<super::aac_pce::ProgramConfig>,
@@ -55,6 +66,10 @@ pub struct AacCheckpoint {
     synthesis: Vec<LongSineSynthesis>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
     ssr_coupling_synthesis: Vec<Option<Box<super::aac_ssr_synthesis::SsrSynthesis>>>,
+    ssr_alignment: Option<super::aac_ssr_alignment::SsrPcmAlignment>,
+    ssr_alignment_tags: Vec<u8>,
+    ssr_pending_duration: Option<u64>,
+    ssr_fixed_clock: bool,
     coupling_synthesis: Vec<Option<LongSineSynthesis>>,
     noise: NoiseState,
     mapping: Vec<usize>,
@@ -143,7 +158,7 @@ impl NativeAacDecoder {
         Ok(Self {
             config,
             synthesis, ssr_synthesis,
-            ssr_coupling_synthesis,
+            ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:None, ssr_fixed_clock:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
             program,
@@ -187,6 +202,7 @@ impl NativeAacDecoder {
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
     }
+    pub fn core_frame_samples(&self) -> u16 { self.config.frame_samples }
     pub fn channels(&self) -> u8 {
         self.config.channels
     }
@@ -200,7 +216,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {config:self.config.clone(),program:self.program.clone(),
-            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
+            synthesis:self.synthesis.clone(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration,ssr_fixed_clock:self.ssr_fixed_clock,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
             sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_elements:self.sbr_elements.clone()}
     }
@@ -209,10 +225,12 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
+        self.ssr_alignment=state.ssr_alignment.clone();self.ssr_alignment_tags=state.ssr_alignment_tags.clone();self.ssr_pending_duration=state.ssr_pending_duration;self.ssr_fixed_clock=state.ssr_fixed_clock;
         self.synthesis=state.synthesis.clone();self.ssr_synthesis=state.ssr_synthesis.clone();self.ssr_coupling_synthesis=state.ssr_coupling_synthesis.clone();self.coupling_synthesis=state.coupling_synthesis.clone();self.noise=state.noise.clone();self.sbr_rate=state.sbr_rate;self.sbr_elements=state.sbr_elements.clone();
         Ok(())
     }
     pub fn reset(&mut self) {
+        self.ssr_alignment=None; self.ssr_alignment_tags.clear(); self.ssr_pending_duration=None;self.ssr_fixed_clock=false;
         for synth in &mut self.synthesis {
             synth.reset();
         }
@@ -225,7 +243,28 @@ impl NativeAacDecoder {
     }
     /// One raw_data_block, returning interleaved normalized floating PCM.
     /// A malformed/unsupported packet leaves all decoding state unchanged.
+    /// Untimed convenience API. An empty vector means one consumed delayed
+    /// packet; callers must drain `finish` at EOF. Timed callers use decode_timed.
     pub fn decode(&mut self, packet: &[u8]) -> Result<Vec<f32>> {
+        Ok(self
+            .decode_timed(packet, 0, 0)?
+            .map_or_else(Vec::new, |f| f.samples))
+    }
+    pub fn delayed(&self) -> bool {
+        self.ssr_alignment.is_some()
+    }
+    pub fn finish(&mut self) -> Result<Option<AacFrame>> {
+        let Some(alignment) = &mut self.ssr_alignment else {
+            return Ok(None);
+        };
+        let frame = alignment.finish()?;
+        Ok(frame.map(|frame| AacFrame {
+            samples: frame.samples,
+            pts: frame.stamp as i64,
+            duration: self.ssr_pending_duration.take().unwrap_or(0),
+        }))
+    }
+    pub fn decode_timed(&mut self, packet: &[u8], pts:i64, duration:u64) -> Result<Option<AacFrame>> {
         let mut bits = BitReader::new(packet);
         let mut noise = self.noise.clone();
         let mut sbr_rate = self.sbr_rate;
@@ -410,14 +449,19 @@ impl NativeAacDecoder {
             }
         }
         // byte_alignment bits have no audio payload.
+        let fixed_clock_history=self.ssr_fixed_clock;
         let n = if self.config.object_type == 3 {
-            let sequence = channels[0].0.info.sequence;
+            let sequence = channels.iter().find(|(_,_,target)|*target==0).ok_or_else(||invalid("AAC primary output channel is absent"))?.0.info.sequence;
             let samples = super::aac_ssr_synthesis::SsrSynthesis::output_samples(sequence);
-            if channels.iter().any(|(channel,_,_)| super::aac_ssr_synthesis::SsrSynthesis::output_samples(channel.info.sequence) != samples) {
-                return Err(unsupported("AAC SSR independent channel window extents require alignment"));
-            }
-            samples
+            // Standard AAC clocks keep 1024 rows per access unit. SSR window
+            // transitions change internal block length, not that packet clock.
+            // Duration zero preserves the explicitly untimed synthesis API.
+            if duration == u64::from(self.config.frame_samples) && samples != self.config.frame_samples as usize {self.ssr_fixed_clock=true;}
+            if self.ssr_fixed_clock {self.config.frame_samples as usize} else {samples}
         } else { self.config.frame_samples as usize };
+        let alignment_history=self.ssr_alignment.clone();
+        let alignment_tags_history=self.ssr_alignment_tags.clone();
+        let pending_duration_history=self.ssr_pending_duration;
         let ssr_history = self.ssr_synthesis.clone();
         let ssr_coupling_history = self.ssr_coupling_synthesis.clone();
         let history: Vec<_> = self
@@ -430,20 +474,117 @@ impl NativeAacDecoder {
             .iter()
             .map(|state| state.as_ref().map(LongSineSynthesis::history))
             .collect();
-        let result = (|| -> Result<Vec<f32>> {
+        let result = (|| -> Result<Option<AacFrame>> {
+            if self.config.object_type == 3 {
+                use super::aac_ssr_alignment::{LaneInput, OutputGain, SsrPcmAlignment};
+                use super::aac_ssr_synthesis::SsrSynthesis;
+                let mut lanes = vec![Vec::<f32>::new(); channels.len()];
+                let mut gains: Vec<Vec<OutputGain>> = (0..channels.len())
+                    .map(|channel| vec![OutputGain { channel, gain: 1.0 }])
+                    .collect();
+                for (channel, spectrum, target) in &channels {
+                    let mut pcm = vec![0.0; SsrSynthesis::output_samples(channel.info.sequence)];
+                    let gain = channel
+                        .gain
+                        .clone()
+                        .unwrap_or(super::aac_gain_control::GainControl { bands: Vec::new() })
+                        .into();
+                    self.ssr_synthesis[*target].synthesize_pcm(
+                        channel.info.sequence,
+                        channel.info.shape,
+                        &gain,
+                        spectrum,
+                        &mut pcm,
+                    )?;
+                    lanes[*target] = pcm.into_iter().map(|s| s as f32).collect();
+                }
+                let mut tags = Vec::new();
+                // Stable tag order associates queues with source histories even
+                // when packet element order changes.
+                let mut independent: Vec<_> = couplings.iter().filter(|(c, _)| c.point == 3).collect();
+                independent.sort_by_key(|(c, _)| c.tag);
+                for (coupling, spectrum) in independent {
+                    tags.push(coupling.tag);
+                    let state = &mut self.ssr_coupling_synthesis[coupling.tag as usize];
+                    if state.is_none() {
+                        *state = Some(Box::new(SsrSynthesis::new()?));
+                    }
+                    let mut pcm = vec![0.0; SsrSynthesis::output_samples(coupling.channel.info.sequence)];
+                    let gain = coupling
+                        .channel
+                        .gain
+                        .clone()
+                        .unwrap_or(super::aac_gain_control::GainControl { bands: Vec::new() })
+                        .into();
+                    state.as_mut().unwrap().synthesize_pcm(
+                        coupling.channel.info.sequence,
+                        coupling.channel.info.shape,
+                        &gain,
+                        spectrum,
+                        &mut pcm,
+                    )?;
+                    lanes.push(pcm.into_iter().map(|s| s as f32).collect());
+                    let mut outputs = Vec::new();
+                    for target in &coupling.targets {
+                        let (_, _, offset) = decoded_elements
+                            .iter()
+                            .find(|(k, t, _)| *k == u32::from(target.pair) && *t == u32::from(target.tag))
+                            .ok_or_else(|| invalid("AAC coupling target is absent"))?;
+                        outputs.push(OutputGain {
+                            channel: self.mapping[*offset + target.channel as usize],
+                            gain: target.gain,
+                        });
+                    }
+                    gains.push(outputs);
+                }
+                let needs_alignment = lanes.iter().any(|lane| lane.len() != n);
+                if self.ssr_alignment.is_none() && needs_alignment {
+                    self.ssr_alignment = Some(SsrPcmAlignment::new(channels.len(), lanes.len())?);
+                    self.ssr_alignment_tags = tags.clone();
+                }
+                if let Some(alignment) = &mut self.ssr_alignment {
+                    if tags != self.ssr_alignment_tags {
+                        return Err(unsupported(
+                            "AAC SSR aligned coupling roster changes require lane continuity",
+                        ));
+                    }
+                    let inputs: Vec<_> = lanes
+                        .iter()
+                        .zip(&gains)
+                        .map(|(samples, outputs)| LaneInput { samples, outputs })
+                        .collect();
+                    let output = alignment.submit(pts as u64, n, &inputs)?;
+                    let previous = self.ssr_pending_duration.replace(duration);
+                    return Ok(output.map(|f| AacFrame {
+                        samples: f.samples,
+                        pts: f.stamp as i64,
+                        duration: previous.unwrap_or(0),
+                    }));
+                }
+                let mut samples = vec![0.0; n * channels.len()];
+                for (lane, outputs) in lanes.iter().zip(&gains) {
+                    for (i, &sample) in lane.iter().enumerate() {
+                        for output in outputs {
+                            let value = &mut samples[i * channels.len() + output.channel];
+                            *value += sample * output.gain;
+                            if !value.is_finite() {
+                                return Err(invalid("AAC coupled PCM exceeds finite f32 output"));
+                            }
+                        }
+                    }
+                }
+                return Ok(Some(AacFrame {
+                    samples,
+                    pts,
+                    duration,
+                }));
+            }
             let mut output = vec![0.0; n * channels.len()];
             let mut pcm = vec![0.0; n];
             for (channel, spectrum, target) in &channels {
-                if self.config.object_type == 3 {
-                    let empty=super::aac_gain_control::GainControl {bands:Vec::new()};
-                    let gain = channel.gain.clone().unwrap_or(empty).into();
-                    self.ssr_synthesis[*target].synthesize_pcm(channel.info.sequence, channel.info.shape, &gain, spectrum, &mut pcm)?;
-                } else { self.synthesis[*target].synthesize_pcm(
-                    channel.info.sequence,
-                    channel.info.shape,
-                    spectrum,
-                    &mut pcm,
-                )?; }
+                self.synthesis[*target].synthesize_pcm(
+                    channel.info.sequence,channel.info.shape,spectrum,&mut pcm,
+                )?;
                 for i in 0..n {
                     output[i * channels.len() + target] = pcm[i] as f32;
                 }
@@ -481,15 +622,6 @@ impl NativeAacDecoder {
                 if coupling.point != 3 {
                     continue;
                 }
-                if self.config.object_type == 3 {
-                    if super::aac_ssr_synthesis::SsrSynthesis::output_samples(coupling.channel.info.sequence)!=n {
-                        return Err(unsupported("AAC SSR independent coupling window extents require alignment"));
-                    }
-                    let state = &mut self.ssr_coupling_synthesis[coupling.tag as usize];
-                    if state.is_none() { *state=Some(Box::new(super::aac_ssr_synthesis::SsrSynthesis::new()?)); }
-                    let gain = coupling.channel.gain.clone().unwrap_or(super::aac_gain_control::GainControl {bands:Vec::new()}).into();
-                    state.as_mut().unwrap().synthesize_pcm(coupling.channel.info.sequence,coupling.channel.info.shape,&gain,&spectrum,&mut pcm)?;
-                } else {
                 let state = &mut self.coupling_synthesis[coupling.tag as usize];
                 if state.is_none() {
                     *state = Some(LongSineSynthesis::new(n)?);
@@ -500,7 +632,6 @@ impl NativeAacDecoder {
                     &spectrum,
                     &mut pcm,
                 )?;
-                }
                 let coupled: Vec<f32> = if sbr_rate.is_some() || self.detect_sbr {
                     let offset = usize::from(self.config.channels) + usize::from(coupling.tag);
                     let state = sbr_elements[offset].get_or_insert_with(|| ElementSbr::new(1));
@@ -530,7 +661,7 @@ impl NativeAacDecoder {
                     }
                 }
             }
-            Ok(output)
+            Ok(Some(AacFrame {samples:output,pts,duration}))
         })();
         match result {
             Ok(output) => {
@@ -540,6 +671,7 @@ impl NativeAacDecoder {
                 Ok(output)
             }
             Err(error) => {
+                self.ssr_fixed_clock=fixed_clock_history;self.ssr_alignment=alignment_history;self.ssr_alignment_tags=alignment_tags_history;self.ssr_pending_duration=pending_duration_history;
                 self.ssr_synthesis=ssr_history;self.ssr_coupling_synthesis=ssr_coupling_history;
                 for (state, saved) in self.synthesis.iter_mut().zip(&history) {
                     state.restore_history(saved)?;

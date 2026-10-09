@@ -14,7 +14,9 @@ impl AacDecoder {
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> crate::Result<Self> {
         let asc = crate::codec::config::aac_specific_config(configuration)?;
         let parsed = crate::codec::config::AudioSpecificConfig::parse(asc)?;
-        if parsed.resolve_output_rate(sample_rate).is_err() || u16::from(parsed.output_channels()) != channels {
+        if parsed.resolve_output_rate(sample_rate).is_err()
+            || u16::from(parsed.output_channels()) != channels
+        {
             return Err(crate::invalid(
                 "AAC configuration disagrees with container sample rate or channels",
             ));
@@ -41,24 +43,39 @@ impl AacDecoder {
             return Err(crate::invalid("AAC decoder requires reset after an error"));
         }
         i64::try_from(pts).map_err(|_| crate::invalid("AAC timestamp overflow"))?;
-        let samples = match self.decoder.decode(packet_data) {
-            Ok(samples) => samples,
-            Err(e) => {
-                self.failed = true;
-                return Err(crate::invalid(&format!("AAC decode: {e}")));
-            }
-        };
-
-        let sample_bytes: Vec<u8> = samples.iter().flat_map(|s| s.to_le_bytes()).collect();
-
-        Ok(Some(AudioPacket {
-            data: sample_bytes,
-            pts,
-            timebase_num: 1,
-            timebase_den: self.sample_rate,
-        }))
+        Ok(self
+            .decode_source(packet_data, pts as i64, _duration)?
+            .map(|frame| frame.packet))
     }
-
+    fn frame(&self, frame: super::aac_native::AacFrame) -> crate::audio::DecodedAudio {
+        crate::audio::DecodedAudio {
+            packet: AudioPacket {
+                data: frame.samples.iter().flat_map(|s| s.to_le_bytes()).collect(),
+                pts: frame.pts.max(0) as u64,
+                timebase_num: 1,
+                timebase_den: self.sample_rate,
+            },
+            source_pts: frame.pts,
+            source_duration: frame.duration,
+        }
+    }
+    fn decode_source(
+        &mut self,
+        data: &[u8],
+        pts: i64,
+        duration: u64,
+    ) -> crate::Result<Option<crate::audio::DecodedAudio>> {
+        if self.failed {
+            return Err(crate::invalid("AAC decoder requires reset after an error"));
+        }
+        match self.decoder.decode_timed(data, pts, duration) {
+            Ok(frame) => Ok(frame.map(|frame| self.frame(frame))),
+            Err(error) => {
+                self.failed = true;
+                Err(crate::invalid(&format!("AAC decode: {error}")))
+            }
+        }
+    }
     /// Current audio specification (sample rate, channels).
     pub fn spec(&self) -> AudioSpec {
         AudioSpec {
@@ -76,12 +93,37 @@ impl AacDecoder {
 }
 
 impl crate::audio::AudioDecode for AacDecoder {
-    fn checkpoint(&self)->Option<crate::audio::AudioCheckpoint> {
-        (!self.failed).then(||crate::audio::AudioCheckpoint::Aac(self.decoder.checkpoint()))
+    fn decode_packet(
+        &mut self,
+        data: &[u8],
+        pts: i64,
+        duration: u64,
+    ) -> crate::Result<Option<crate::audio::DecodedAudio>> {
+        self.decode_source(data, pts, duration)
     }
-    fn restore(&mut self,state:&crate::audio::AudioCheckpoint)->crate::Result<()> {
-        let crate::audio::AudioCheckpoint::Aac(state)=state else {return Err(crate::invalid("AAC checkpoint codec mismatch"));};
-        self.decoder.restore(state)?;self.failed=false;Ok(())
+    fn finish_packet(&mut self) -> crate::Result<Option<crate::audio::DecodedAudio>> {
+        if self.failed {
+            return Err(crate::invalid("AAC decoder requires reset after an error"));
+        }
+        match self.decoder.finish() {
+            Ok(frame) => Ok(frame.map(|frame| self.frame(frame))),
+            Err(error) => {
+                self.failed = true;
+                Err(crate::invalid(&format!("AAC EOF: {error}")))
+            }
+        }
+    }
+
+    fn checkpoint(&self) -> Option<crate::audio::AudioCheckpoint> {
+        (!self.failed).then(|| crate::audio::AudioCheckpoint::Aac(self.decoder.checkpoint()))
+    }
+    fn restore(&mut self, state: &crate::audio::AudioCheckpoint) -> crate::Result<()> {
+        let crate::audio::AudioCheckpoint::Aac(state) = state else {
+            return Err(crate::invalid("AAC checkpoint codec mismatch"));
+        };
+        self.decoder.restore(state)?;
+        self.failed = false;
+        Ok(())
     }
 
     fn decode_encoded(

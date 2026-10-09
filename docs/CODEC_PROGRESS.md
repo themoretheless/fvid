@@ -7425,3 +7425,65 @@ with an explicit integration reason and was run separately to confirm that
 precise refusal. It must be enabled after native delayed-frame dispatch, source
 PTS/checkpoints and EOF draining are integrated. A passing refusal or primitive
 test does not close that remaining codec gap. SSR SBR/PS and ADTS remain separate.
+
+### 2026-10-09 — native SSR alignment, source timing and final-frame drain
+
+Integrated `SsrPcmAlignment` into both native AAC instantiations. Independently
+switched output channels and independent CCEs synthesize their own lengths; the
+first unequal extent activates one packet of lookahead. Before that point,
+existing equal-extent SSR packets retain immediate output. Alignment persists
+until reset and keeps per-source gain chunks, original signed packet PTS and
+source duration. The full queue and pending source duration belong to opaque
+checkpoints, rollback, reset and retained-payload accounting. Timed callers use
+`decode_timed`; untimed `decode` returns an empty vector for a consumed delayed
+packet and must be drained with `finish`. This is not malformed-packet success.
+
+Root playback now returns the original source window through `AudioDecode` and
+flushes the final original frame at EOF. Owned/root MP4 and Matroska dispatch
+recognize delayed AAC; ADTS streaming drains it and excludes SSR from LC/SBR
+clock-discovery caching. The former ignored MP4 acceptance is enabled and the
+old exact-refusal expectation has become delayed-frame acceptance.
+
+The five original coupled videos (source ahead, source starts ahead, source
+behind, late source behind and opposite switches), plus an original stereo CPE with independently switched channels,
+compare all 6144 sample frames against the scalar oracle. Root and owned full
+exports agree; playback verifies checkpoint replay, rewind, seeks at 1100,
+2600, 5900 and exact EOF, repeated interval exports and terminal drain. A new
+short unfinished video reaches the precise `SSR PCM alignment incomplete at
+stream end` error, leaves its queued samples and timestamps untouched, and can
+continue after the rejected finish. No private media or codec parameters are
+used, and ordinary tests require no generator, network or FFmpeg.
+
+Qualification remains scoped to the authored 24 kHz mono/stereo switch schedules
+and container durations. Changing independent CCE rosters while a queue is
+active still refuses explicitly; SSR SBR/PS, other rate/profile coverage, general priming/discard-padding
+qualification and changing channel/coupling topology remain separate gaps. This
+does not establish complete AAC or codec parity.
+
+Fixed-clock extension of the same regression: four MP4 variants use the usual
+1024-sample AAC packet duration. Before the fix their stop windows reached
+`MP4 audio packet duration disagrees with decoded samples` (verified failing
+acceptance, not an unrelated parse error). Timed native SSR now selects the
+standard access-unit clock when a transition requires it, checkpoints that
+choice and continues using it through final packet trimming. A late-transition
+video with a 600-sample final duration previously reached `SSR PCM alignment
+incomplete at stream end`; its enabled acceptance compares all 5720 selected
+sample frames with the untrimmed scalar oracle prefix. Raw untimed synthesis
+retains its variable block API. Authored variable-duration fixtures continue
+passing as well.
+
+Four original AVC/AAC Matroska variants and a stereo SSR ADTS stream reuse the
+same own packets. Root and owned full and 10–150 ms interval exports are byte
+identical to MP4, including EOF drain. No external codec executable creates or
+reads them. A separate original video removes an independent CCE after queue
+activation and tests the precise remaining roster-change refusal and complete
+rollback; that is a refusal test, not playback acceptance for changing rosters.
+
+Final local checks for this milestone: root `cargo test --offline --features
+media,player --lib --test aac_ssr --test aac_ssr_coupling --test
+aac_ssr_alignment --test aac_gain_control` passed 909 core, 4 gain, 3 SSR,
+3 coupling and 8 alignment tests (23 unrelated core tests remain ignored).
+Owned media library passed 448 tests with one existing ignored test. These are
+1375 successful test executions, not 1375 independent codec profiles. The
+media-only offline build passed; regeneration reproduced all 26 alignment
+fixture files byte-for-byte. The new playback acceptances are enabled.

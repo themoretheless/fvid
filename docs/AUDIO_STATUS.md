@@ -7,8 +7,15 @@ tables retain their MPL-2.0 provenance. Current AAC qualification is recorded in
 states. AAC SSR now has native AOT 3 packet synthesis and headless MP4 acceptance
 for eight original 24 kHz mono/stereo fixtures with active gain and window
 transitions. Fourteen further videos qualify dependent and independent SSR
-coupling, including simultaneous CCE tags 1/15. SSR SBR/PS and independently
-switched channel/coupling windows with unequal output extents remain unsupported.
+coupling, including simultaneous CCE tags 1/15. Five more coupled videos and
+one independently switched stereo CPE video qualify unequal SSR window extents,
+bounded PCM alignment, original packet timing, EOF drain, checkpoint replay,
+rewind, seek and interval export. SSR SBR/PS and changing independent CCE rosters
+while alignment is active remain unsupported. Four fixed-clock MP4 variants
+and a shortened final-packet fixture qualify reassembly into 1024 samples per
+AAC access unit and final duration trimming. Four Matroska videos and one
+stereo ADTS stream qualify full/interval root and owned export against the same
+MP4 PCM. These are authored 24 kHz cases, not general profile qualification.
 Malformed AAC packets now return errors and require decoder reset; they are
 not reported as successful empty output. Out-of-range unsigned timestamps
 are rejected before touching codec state instead of wrapping to negative PTS.
