@@ -43,6 +43,9 @@ fn reference(c: &Value) -> Vec<f32> {
     reference_core(c, false)
 }
 fn reference_core(c: &Value, discarded: bool) -> Vec<f32> {
+    reference_state(c, discarded, false)
+}
+fn reference_state(c: &Value, discarded: bool, reset_absent_dsp: bool) -> Vec<f32> {
     use fvid_media::owned_aac::{
         aac_sbr_dsp::{Dsp, OutputRate},
         aac_sbr_history::Stream,
@@ -70,20 +73,33 @@ fn reference_core(c: &Value, discarded: bool) -> Vec<f32> {
             out.push(frame.pcm[1][i] as f32);
         }
     }
-    for (i, row) in c["frames"].as_array().unwrap().iter().enumerate() {
+    for row in c["frames"].as_array().unwrap() {
         let raw = hex(row["payload"].as_str().unwrap());
         let mut bits = BitReader::new(&raw);
         let crc = bits.read(4).unwrap() == 14;
         let frame = ps
             .read(&mut bits, raw.len() * 8, crc, &[0.; 1024], 48000, 16, mode)
             .unwrap();
+        if reset_absent_dsp {
+            for (tag, state) in sources.iter_mut() {
+                if !row["sources"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|source| source["tag"] == *tag)
+                {
+                    state.1 = Dsp::default();
+                }
+            }
+        }
         let mut left = vec![0f32; samples];
         for source in row["sources"].as_array().unwrap() {
             let name = source[if discarded { "discarded" } else { "reference" }]
                 .as_str()
                 .unwrap();
             let data = bytes(name);
-            let core: Vec<f32> = data[i * 4096..(i + 1) * 4096]
+            let core: Vec<f32> = data[source["core_index"].as_u64().unwrap() as usize * 4096
+                ..(source["core_index"].as_u64().unwrap() as usize + 1) * 4096]
                 .chunks_exact(4)
                 .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
                 .collect();
@@ -256,6 +272,9 @@ fn source_sbr_fil_reassociation_changes_independent_ps_pcm() {
         let mut swapped = c.clone();
         for row in swapped["frames"].as_array_mut().unwrap() {
             let sources = row["sources"].as_array_mut().unwrap();
+            if sources.len() != 2 {
+                continue;
+            }
             let first = sources[0]["payload"].clone();
             sources[0]["payload"] = sources[1]["payload"].clone();
             sources[1]["payload"] = first;
@@ -273,5 +292,54 @@ fn source_sbr_fil_reassociation_changes_independent_ps_pcm() {
             "{} source FIL reassociation is not observable: {delta}",
             c["name"]
         );
+    }
+}
+
+#[test]
+fn dynamic_rosters_preserve_point3_source_histories_and_dsp() {
+    let manifest = m();
+    let cases = manifest["cases"].as_array().unwrap();
+    for c in cases.iter().filter(|c| c["dynamic"] == true) {
+        let stable = cases
+            .iter()
+            .find(|s| {
+                s["dynamic"] == false
+                    && s["schedule"] == c["schedule"]
+                    && s["source_sbr"] == c["source_sbr"]
+                    && s["container_rate"] == c["container_rate"]
+            })
+            .unwrap();
+        let mut dynamic_pcm = vec![];
+        let mut static_pcm = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["video"]["file"].as_str().unwrap()),
+            &mut dynamic_pcm,
+        )
+        .unwrap();
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(stable["video"]["file"].as_str().unwrap()),
+            &mut static_pcm,
+        )
+        .unwrap();
+        assert_eq!(
+            dynamic_pcm, static_pcm,
+            "{} PCE roster changed source state",
+            c["name"]
+        );
+        if c["schedule"] == "return" {
+            let good = reference(c);
+            let wrong = reference_state(c, false, true);
+            assert_eq!(good.len(), wrong.len());
+            let delta = good
+                .iter()
+                .zip(&wrong)
+                .map(|(a, b)| (a - b).abs())
+                .fold(0f32, f32::max);
+            assert!(
+                delta > 1e-6,
+                "{} discarded DSP history is not observable: {delta}",
+                c["name"]
+            );
+        }
     }
 }

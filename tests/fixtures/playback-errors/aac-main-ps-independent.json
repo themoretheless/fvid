@@ -2,6 +2,8 @@
   "cases": [
     {
       "name": "0-24000",
+      "schedule": "full",
+      "dynamic": false,
       "source_sbr": false,
       "asc": "eb030400c20002008fc000",
       "frames": [
@@ -12,12 +14,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 0,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 0,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -31,12 +35,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 1,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 1,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -50,12 +56,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 2,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 2,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -69,12 +77,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 3,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 3,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -88,12 +98,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 4,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 4,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -107,12 +119,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 5,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 5,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -126,12 +140,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 6,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 6,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -145,12 +161,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 7,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 7,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -164,12 +182,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 8,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 8,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -183,12 +203,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 9,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 9,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -202,12 +224,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 10,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 10,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -221,12 +245,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 11,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 11,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -252,6 +278,8 @@
     },
     {
       "name": "0-48000",
+      "schedule": "full",
+      "dynamic": false,
       "source_sbr": false,
       "asc": "eb018400c20002008fc000",
       "frames": [
@@ -262,12 +290,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 0,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 0,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -281,12 +311,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 1,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 1,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -300,12 +332,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 2,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 2,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -319,12 +353,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 3,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 3,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -338,12 +374,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 4,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 4,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -357,12 +395,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 5,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 5,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -376,12 +416,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 6,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 6,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -395,12 +437,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 7,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 7,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -414,12 +458,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 8,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 8,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -433,12 +479,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 9,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 9,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -452,12 +500,14 @@
           "sources": [
             {
               "tag": 1,
+              "core_index": 10,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 10,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -471,12 +521,14 @@
           "sources": [
             {
               "tag": 15,
+              "core_index": 11,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 11,
               "payload": "",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -501,23 +553,2067 @@
       }
     },
     {
-      "name": "1-24000",
-      "source_sbr": true,
+      "name": "0-24000-return-static",
+      "schedule": "return",
+      "dynamic": false,
+      "source_sbr": false,
       "asc": "eb030400c20002008fc000",
       "frames": [
         {
           "offset": 926,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1079,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1113,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1146,
+          "bytes": 161,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1307,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1341,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1366,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1511,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1545,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1588,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1759,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1794,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-0-24000-return-static-synthetic.mp4",
+        "sha256": "dc97e9650b41436d334bc94f2147afff287569bea0236d5c4dc15b3f62e646e6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-48000-return-static",
+      "schedule": "return",
+      "dynamic": false,
+      "source_sbr": false,
+      "asc": "eb018400c20002008fc000",
+      "frames": [
+        {
+          "offset": 926,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1079,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1113,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1146,
+          "bytes": 161,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1307,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1341,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1366,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1511,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1545,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1588,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1759,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1794,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-0-48000-return-static-synthetic.mp4",
+        "sha256": "dc7f81d167e3d9d460d31293bbb13a38206936faa5153e4b4672448c63b80072",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "0-24000-return-dynamic",
+      "schedule": "return",
+      "dynamic": true,
+      "source_sbr": false,
+      "asc": "eb030400c20002008fc000",
+      "frames": [
+        {
+          "offset": 1827,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1980,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2014,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2047,
+          "bytes": 161,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2208,
+          "bytes": 41,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2249,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2274,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2419,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2461,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2504,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2675,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2710,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-0-24000-return-dynamic-synthetic.mp4",
+        "sha256": "0758e8e4094dbf540d9bcc0fe00c42d173f9c0e0814d1d36e50de6ee453cf553",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-48000-return-dynamic",
+      "schedule": "return",
+      "dynamic": true,
+      "source_sbr": false,
+      "asc": "eb018400c20002008fc000",
+      "frames": [
+        {
+          "offset": 1827,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 1980,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2014,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2047,
+          "bytes": 161,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2208,
+          "bytes": 41,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2249,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2274,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2419,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2461,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2504,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2675,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2710,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-0-48000-return-dynamic-synthetic.mp4",
+        "sha256": "ef7da41d3fa6a3cabffa3076168f2691079a694a1e0ababf654f0aa31b1724f9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "0-24000-arrival-static",
+      "schedule": "arrival",
+      "dynamic": false,
+      "source_sbr": false,
+      "asc": "eb030400c20002008fc000",
+      "frames": [
+        {
+          "offset": 2743,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2888,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2914,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2939,
+          "bytes": 161,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3100,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3142,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3175,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3328,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3362,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3405,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3576,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3611,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-0-24000-arrival-static-synthetic.mp4",
+        "sha256": "5037c51bcb41a193c163205283c503094cb48739d57845ef61e8af591d630b58",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-48000-arrival-static",
+      "schedule": "arrival",
+      "dynamic": false,
+      "source_sbr": false,
+      "asc": "eb018400c20002008fc000",
+      "frames": [
+        {
+          "offset": 2743,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2888,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2914,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 2939,
+          "bytes": 161,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3100,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3142,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3175,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3328,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3362,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3405,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3576,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3611,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-0-48000-arrival-static-synthetic.mp4",
+        "sha256": "888b3ebd9db45b489b15e420c7e6b02d5e7a62f636a669539af1892a9ad07429",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "0-24000-arrival-dynamic",
+      "schedule": "arrival",
+      "dynamic": true,
+      "source_sbr": false,
+      "asc": "eb030400c2000100f800",
+      "frames": [
+        {
+          "offset": 3644,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3789,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3815,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3840,
+          "bytes": 169,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4009,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4051,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4084,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4237,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4271,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4314,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4485,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4520,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-0-24000-arrival-dynamic-synthetic.mp4",
+        "sha256": "3177aa460692c4db484e11685ad80edcf6d2d883fa5effd094cad8a1012c545a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c2000100f800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-48000-arrival-dynamic",
+      "schedule": "arrival",
+      "dynamic": true,
+      "source_sbr": false,
+      "asc": "eb018400c2000100f800",
+      "frames": [
+        {
+          "offset": 3644,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3789,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3815,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 3840,
+          "bytes": 169,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4009,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4051,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4084,
+          "bytes": 153,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4237,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4271,
+          "bytes": 43,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4314,
+          "bytes": 171,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4485,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 4520,
+          "bytes": 33,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-0-48000-arrival-dynamic-synthetic.mp4",
+        "sha256": "818ebba57cc217d89a7adf381265a4ba86f8efd70ea7593b960ec05a49ad0ae5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c2000100f800",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "1-24000",
+      "schedule": "full",
+      "dynamic": false,
+      "source_sbr": true,
+      "asc": "eb030400c20002008fc000",
+      "frames": [
+        {
+          "offset": 4553,
           "bytes": 165,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 1,
+              "core_index": 0,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 0,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -525,18 +2621,20 @@
           ]
         },
         {
-          "offset": 1091,
+          "offset": 4718,
           "bytes": 43,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 15,
+              "core_index": 1,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 1,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -544,18 +2642,20 @@
           ]
         },
         {
-          "offset": 1134,
+          "offset": 4761,
           "bytes": 41,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 1,
+              "core_index": 2,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 2,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -563,18 +2663,20 @@
           ]
         },
         {
-          "offset": 1175,
+          "offset": 4802,
           "bytes": 173,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 15,
+              "core_index": 3,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 3,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -582,18 +2684,20 @@
           ]
         },
         {
-          "offset": 1348,
+          "offset": 4975,
           "bytes": 51,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 1,
+              "core_index": 4,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 4,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -601,18 +2705,20 @@
           ]
         },
         {
-          "offset": 1399,
+          "offset": 5026,
           "bytes": 51,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 15,
+              "core_index": 5,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 5,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -620,18 +2726,20 @@
           ]
         },
         {
-          "offset": 1450,
+          "offset": 5077,
           "bytes": 175,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 1,
+              "core_index": 6,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 6,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -639,18 +2747,20 @@
           ]
         },
         {
-          "offset": 1625,
+          "offset": 5252,
           "bytes": 43,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 15,
+              "core_index": 7,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 7,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -658,18 +2768,20 @@
           ]
         },
         {
-          "offset": 1668,
+          "offset": 5295,
           "bytes": 41,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 1,
+              "core_index": 8,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 8,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -677,18 +2789,20 @@
           ]
         },
         {
-          "offset": 1709,
+          "offset": 5336,
           "bytes": 173,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 15,
+              "core_index": 9,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 9,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -696,18 +2810,20 @@
           ]
         },
         {
-          "offset": 1882,
+          "offset": 5509,
           "bytes": 45,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 1,
+              "core_index": 10,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 10,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -715,18 +2831,20 @@
           ]
         },
         {
-          "offset": 1927,
+          "offset": 5554,
           "bytes": 41,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 15,
+              "core_index": 11,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 11,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -752,22 +2870,26 @@
     },
     {
       "name": "1-48000",
+      "schedule": "full",
+      "dynamic": false,
       "source_sbr": true,
       "asc": "eb018400c20002008fc000",
       "frames": [
         {
-          "offset": 926,
+          "offset": 4553,
           "bytes": 165,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 1,
+              "core_index": 0,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 0,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -775,18 +2897,20 @@
           ]
         },
         {
-          "offset": 1091,
+          "offset": 4718,
           "bytes": 43,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 15,
+              "core_index": 1,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 1,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -794,18 +2918,20 @@
           ]
         },
         {
-          "offset": 1134,
+          "offset": 4761,
           "bytes": 41,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 1,
+              "core_index": 2,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 2,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -813,18 +2939,20 @@
           ]
         },
         {
-          "offset": 1175,
+          "offset": 4802,
           "bytes": 173,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 15,
+              "core_index": 3,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 3,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -832,18 +2960,20 @@
           ]
         },
         {
-          "offset": 1348,
+          "offset": 4975,
           "bytes": 51,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 1,
+              "core_index": 4,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 4,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -851,18 +2981,20 @@
           ]
         },
         {
-          "offset": 1399,
+          "offset": 5026,
           "bytes": 51,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 15,
+              "core_index": 5,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 5,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -870,18 +3002,20 @@
           ]
         },
         {
-          "offset": 1450,
+          "offset": 5077,
           "bytes": 175,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 1,
+              "core_index": 6,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 6,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -889,18 +3023,20 @@
           ]
         },
         {
-          "offset": 1625,
+          "offset": 5252,
           "bytes": 43,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 15,
+              "core_index": 7,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 7,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -908,18 +3044,20 @@
           ]
         },
         {
-          "offset": 1668,
+          "offset": 5295,
           "bytes": 41,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 1,
+              "core_index": 8,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 8,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -927,18 +3065,20 @@
           ]
         },
         {
-          "offset": 1709,
+          "offset": 5336,
           "bytes": 173,
           "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
           "sources": [
             {
               "tag": 15,
+              "core_index": 9,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 9,
               "payload": "d88c180a04010000000070",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -946,18 +3086,20 @@
           ]
         },
         {
-          "offset": 1882,
+          "offset": 5509,
           "bytes": 45,
           "payload": "e3d80e0000000014b33021ff",
           "sources": [
             {
               "tag": 1,
+              "core_index": 10,
               "payload": "ee600e0000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
             },
             {
               "tag": 15,
+              "core_index": 10,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
@@ -965,18 +3107,20 @@
           ]
         },
         {
-          "offset": 1927,
+          "offset": 5554,
           "bytes": 41,
           "payload": "d0380000000052ccc097fc",
           "sources": [
             {
               "tag": 15,
+              "core_index": 11,
               "payload": "",
               "reference": "aac-main-ps-independent-15-core.f32le",
               "discarded": "aac-main-ps-independent-15-discarded.f32le"
             },
             {
               "tag": 1,
+              "core_index": 11,
               "payload": "d0380000000000",
               "reference": "aac-main-ps-independent-1-core.f32le",
               "discarded": "aac-main-ps-independent-1-discarded.f32le"
@@ -999,7 +3143,2047 @@
         "pcm_offset": 0,
         "samples": 24576
       }
+    },
+    {
+      "name": "1-24000-return-static",
+      "schedule": "return",
+      "dynamic": false,
+      "source_sbr": true,
+      "asc": "eb030400c20002008fc000",
+      "frames": [
+        {
+          "offset": 5595,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 5760,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 5803,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 5844,
+          "bytes": 173,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6017,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6051,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6076,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6221,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6264,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6315,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6498,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6542,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-1-24000-return-static-synthetic.mp4",
+        "sha256": "33efcba96ec06e9e76d7e171170ec848d2fe863c61fa939809615de4ea9d937d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-48000-return-static",
+      "schedule": "return",
+      "dynamic": false,
+      "source_sbr": true,
+      "asc": "eb018400c20002008fc000",
+      "frames": [
+        {
+          "offset": 5595,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 5760,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 5803,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 5844,
+          "bytes": 173,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6017,
+          "bytes": 34,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6051,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6076,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6221,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6264,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6315,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6498,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6542,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-1-48000-return-static-synthetic.mp4",
+        "sha256": "9257e008bdde91378a5567c83b4838aabeae2105a30f2165dfebf21b9162c5bd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "1-24000-return-dynamic",
+      "schedule": "return",
+      "dynamic": true,
+      "source_sbr": true,
+      "asc": "eb030400c20002008fc000",
+      "frames": [
+        {
+          "offset": 6583,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6748,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6791,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6832,
+          "bytes": 173,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7005,
+          "bytes": 41,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7046,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7071,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7216,
+          "bytes": 51,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7267,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7318,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7501,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7545,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-1-24000-return-dynamic-synthetic.mp4",
+        "sha256": "9b24cfe957f30de7acc6274ad457e51fea2b31b06595f6c484967925715e8ef7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-48000-return-dynamic",
+      "schedule": "return",
+      "dynamic": true,
+      "source_sbr": true,
+      "asc": "eb018400c20002008fc000",
+      "frames": [
+        {
+          "offset": 6583,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6748,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6791,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 6832,
+          "bytes": 173,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7005,
+          "bytes": 41,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7046,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7071,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7216,
+          "bytes": 51,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7267,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7318,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7501,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7545,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-1-48000-return-dynamic-synthetic.mp4",
+        "sha256": "f76e7ff052e2ca87ff8bb8ca1417fdf426460d24ddae0ff7e521ffd37c16c444",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "1-24000-arrival-static",
+      "schedule": "arrival",
+      "dynamic": false,
+      "source_sbr": true,
+      "asc": "eb030400c20002008fc000",
+      "frames": [
+        {
+          "offset": 7586,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7731,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7757,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7782,
+          "bytes": 173,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7955,
+          "bytes": 51,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8006,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8047,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8212,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8255,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8306,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8489,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8533,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-1-24000-arrival-static-synthetic.mp4",
+        "sha256": "c5434edc8228d9a87b9a1f9d55451bc9735701b9eafd2485ecd0a7194f2429e9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-48000-arrival-static",
+      "schedule": "arrival",
+      "dynamic": false,
+      "source_sbr": true,
+      "asc": "eb018400c20002008fc000",
+      "frames": [
+        {
+          "offset": 7586,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7731,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7757,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7782,
+          "bytes": 173,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 7955,
+          "bytes": 51,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8006,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8047,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8212,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8255,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8306,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8489,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8533,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-1-48000-arrival-static-synthetic.mp4",
+        "sha256": "7c99ac6d059152df9ee3f1dcfe9db875bb50e73eb0c6f77d2ef7a890c43d8a25",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002008fc000",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
+    },
+    {
+      "name": "1-24000-arrival-dynamic",
+      "schedule": "arrival",
+      "dynamic": true,
+      "source_sbr": true,
+      "asc": "eb030400c2000100f800",
+      "frames": [
+        {
+          "offset": 8574,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8719,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8745,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8770,
+          "bytes": 181,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8951,
+          "bytes": 51,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9002,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9043,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9208,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9251,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9302,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9485,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9529,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-independent-1-24000-arrival-dynamic-synthetic.mp4",
+        "sha256": "fea3d93cfbe38c2d3435b1219a0046aacee32bf2f1c7203d2a057150996df434",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c2000100f800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-48000-arrival-dynamic",
+      "schedule": "arrival",
+      "dynamic": true,
+      "source_sbr": true,
+      "asc": "eb018400c2000100f800",
+      "frames": [
+        {
+          "offset": 8574,
+          "bytes": 145,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 0,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8719,
+          "bytes": 26,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 1,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8745,
+          "bytes": 25,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 2,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8770,
+          "bytes": 181,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 3,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 0,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 8951,
+          "bytes": 51,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 1,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 4,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9002,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 5,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 2,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9043,
+          "bytes": 165,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 3,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 6,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9208,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 7,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 4,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9251,
+          "bytes": 51,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 5,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 8,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9302,
+          "bytes": 183,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 9,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 6,
+              "payload": "d88c180a04010000000070",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9485,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff",
+          "sources": [
+            {
+              "tag": 1,
+              "core_index": 7,
+              "payload": "ee600e0000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            },
+            {
+              "tag": 15,
+              "core_index": 10,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            }
+          ]
+        },
+        {
+          "offset": 9529,
+          "bytes": 41,
+          "payload": "d0380000000052ccc097fc",
+          "sources": [
+            {
+              "tag": 15,
+              "core_index": 11,
+              "payload": "",
+              "reference": "aac-main-ps-independent-15-core.f32le",
+              "discarded": "aac-main-ps-independent-15-discarded.f32le"
+            },
+            {
+              "tag": 1,
+              "core_index": 8,
+              "payload": "d0380000000000",
+              "reference": "aac-main-ps-independent-1-core.f32le",
+              "discarded": "aac-main-ps-independent-1-discarded.f32le"
+            }
+          ]
+        }
+      ],
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-independent-1-48000-arrival-dynamic-synthetic.mp4",
+        "sha256": "86ac0239126acd8254edfa81f33cb5793eff5cb113712a2bbe1b085a46b8daf4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c2000100f800",
+        "pcm_offset": 0,
+        "samples": 24576
+      }
     }
   ],
-  "provenance": "Own Main PS independent CCE tags 1/15 with distinct windows/shapes/predictor histories; independent scalar core prediction/IMDCT; authored source SBR and target PS payloads; no private media, foreign decoder, FFmpeg or network."
+  "provenance": "Own Main PS independent CCE tags 1/15 with distinct windows/shapes/predictor histories; independent scalar core prediction/IMDCT; coded source clocks pause on absence and PCE coupling rosters change; authored source SBR and target PS payloads; no private media, foreign decoder, FFmpeg or network."
 }

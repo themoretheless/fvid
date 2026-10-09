@@ -3360,3 +3360,36 @@ Validation: 12 integration tests passed across `aac_main_ps`,
 `media,player` and no FFmpeg. Reassigning source SBR FIL to the other
 source changes the composition reference at both clocks, guarding binding
 sensitivity. Production code is unchanged.
+
+### AAC Main PS point-3 source absence and PCE roster transitions (2026-10-09)
+
+Sixteen additional authored MP4 videos extend point-3 qualification to 20
+videos: tag 1 disappears for three target frames and returns, or first appears
+after three frames, while tag 15 remains coded. Each schedule has static and
+dynamic PCE variants, source-SBR on/off and 24/48 kHz output. Dynamic PCE
+removes/re-adds the coupling tag while preserving the mono target layout.
+Source packet windows, prediction and SBR payloads follow a compact coded
+ordinal clock that pauses on absence; the target PS presentation clock
+continues. The reference selects independent scalar Main/IMDCT core PCM by
+that coded ordinal and retains tag-keyed qualified SBR DSP/history state.
+
+Waveform, packet rollback/checkpoints, reset, delayed EOF, export, probe,
+intervals, rewind and seek acceptance cover all 20 videos. Static and dynamic
+roster variants must produce byte-identical PCM. A numerical control resets
+only the absent source's DSP and observably changes return PCM at both rates,
+with source-SBR enabled and disabled. A temporary production mutation clearing
+CCE states on every PCE update passes static cases but fails waveform at
+sample 8192 in `0-24000-return-dynamic`. Production source is fully restored.
+All 26 artifacts reproduce deterministically; the eight prior video/core/
+control files remain byte-identical. Generation remains separate from tests,
+with no private media, FFmpeg, foreign decoder or network.
+
+This supersedes the tag-1 absence/arrival and compatible PCE roster gap for
+this mono Main PS point-3 matrix. Initial empty rosters, simultaneous absence
+of both sources, source TNS/PNS combinations, multiple source-SBR geometries,
+source PS and wider layouts/profiles remain unqualified; all-codec completion
+is not established.
+
+Validation: 13 integration tests passed across `aac_main_ps`,
+`aac_main_ps_cce` and `aac_main_ps_independent`, locked/offline with
+`media,player` and no FFmpeg. Production code is unchanged.
