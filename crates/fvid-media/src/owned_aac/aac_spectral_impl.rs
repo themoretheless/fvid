@@ -44,13 +44,29 @@ pub fn read(
             let count = width * count as usize;
             match book {
                 0 | 13..=15 => result.resize(result.len() + count, 0),
-                1..=11 => {
+                1..=11 | 16..=31 => {
                     let tuple = if book <= 4 { 4 } else { 2 };
                     if !width.is_multiple_of(tuple) {
                         return Err(invalid("AAC band splits spectral tuple"));
                     }
                     for _ in 0..count / tuple {
-                        let (values, n) = aac_huffman::spectral(&mut cursor, book)?;
+                        let (values, n) =
+                            aac_huffman::spectral(&mut cursor, if book >= 16 { 11 } else { book })?;
+                        // ISO/IEC 14496-3 table 4.95: virtual indices share
+                        // physical book11 but bound the decoded escape magnitude.
+                        const VIRTUAL_LAV: [i16; 16] = [
+                            15, 31, 47, 63, 95, 127, 159, 191, 223, 255, 319, 383, 511, 767, 1023,
+                            2047,
+                        ];
+                        if book >= 16
+                            && values[..n]
+                                .iter()
+                                .any(|v| v.abs() > VIRTUAL_LAV[usize::from(book - 16)])
+                        {
+                            return Err(invalid(
+                                "AAC virtual codebook magnitude exceeds section limit",
+                            ));
+                        }
                         result.extend_from_slice(&values[..n]);
                     }
                 }

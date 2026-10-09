@@ -10,6 +10,8 @@ pub struct AacConfig {
     pub channels: u8,
     pub frame_samples: u16,
     pub core_coder_delay: Option<u16>,
+    /// ER section syntax: five-bit books and implicit one-band escape sections.
+    pub section_data_resilience: bool,
 }
 fn audio_object_type(b: &mut BitReader<'_>) -> Result<u32> {
     let n = b.read(5)?;
@@ -40,7 +42,9 @@ impl AacConfig {
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
         if !matches!(object_type, 1 | 2 | 3 | 4 | 17) {
-            return Err(invalid("only AAC Main, LC, SSR, LTP and ER-LC core configurations are implemented"));
+            return Err(invalid(
+                "only AAC Main, LC, SSR, LTP and ER-LC core configurations are implemented",
+            ));
         }
         if object_type == 17 && config == 0 {
             return Err(invalid("ER AAC LC PCE layout is not yet implemented"));
@@ -75,9 +79,17 @@ impl AacConfig {
         // GASpecificConfig carries extensionFlag3 after any PCE. For LC/SSR
         // there are no ER/sub-frame fields before it; this future-use bit must
         // be zero. Do not mistake extensionFlag itself for unsupported audio.
-        if extension_flag && object_type == 17 && b.read(3)? != 0 {
-            return Err(invalid("ER AAC LC resilience tools are not yet implemented"));
-        }
+        let section_data_resilience = if extension_flag && object_type == 17 {
+            let section = b.bit()?;
+            if b.read(2)? != 0 {
+                return Err(invalid(
+                    "ER AAC LC resilience tools are not yet implemented",
+                ));
+            }
+            section
+        } else {
+            false
+        };
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }
@@ -92,6 +104,7 @@ impl AacConfig {
                 channels,
                 frame_samples,
                 core_coder_delay,
+                section_data_resilience,
             },
             program,
         ))

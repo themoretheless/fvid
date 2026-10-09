@@ -80,7 +80,7 @@ impl ChannelData {
             pulse.apply_where(&mut quantized, |position| {
                 let band = offsets.partition_point(|&start| start <= position) - 1;
                 band < self.info.max_sfb as usize
-                    && matches!(self.codebooks[0][band], 1..=11)
+                    && matches!(self.codebooks[0][band], 1..=11 | 16..=31)
                     && matches!(self.scales[0][band], BandScale::Spectral(_))
             })?;
         }
@@ -91,7 +91,7 @@ impl ChannelData {
             for (band, scale) in self.scales[group].iter().enumerate() {
                 let book = self.codebooks[group][band];
                 match (book, scale) {
-                    (0, BandScale::Zero) | (1..=11, BandScale::Spectral(_)) => {}
+                    (0, BandScale::Zero) | (1..=11 | 16..=31, BandScale::Spectral(_)) => {}
                     (14..=15, BandScale::Intensity(_)) if allow => {}
                     (13, BandScale::Noise(_)) if noise.is_some() => {}
                     (13, BandScale::Noise(_)) | (14..=15, BandScale::Intensity(_)) => {
@@ -200,7 +200,7 @@ impl ChannelData {
         gain: u8, info: IcsInfo,
     ) -> Result<Self> {
         let mut cursor = bits.clone();
-        let codebooks = info.read_sections(&mut cursor)?;
+        let codebooks = info.read_sections_with_resilience(&mut cursor, config.section_data_resilience)?;
         let scales = aac_scalefactors::read(&mut cursor, gain, &codebooks)?;
         let pulse = if cursor.bit()? {
             Some(PulseData::read(&mut cursor, info.sequence, tables.long)?)

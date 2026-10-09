@@ -30,7 +30,7 @@ pub fn read(bits: &mut BitReader<'_>, gain: u8, books: &[Vec<u8>]) -> Result<Vec
         for &book in group {
             let value = match book {
                 0 => BandScale::Zero,
-                1..=11 => {
+                1..=11 | 16..=31 => {
                     spectral += aac_huffman::scalefactor(&mut cursor)?;
                     if !(0..=255).contains(&spectral) {
                         return Err(invalid("AAC spectral scalefactor out of range"));

@@ -14,6 +14,7 @@ mod tests {
             channels: 2,
             frame_samples: 1024,
             core_coder_delay: None,
+            section_data_resilience: false,
         }
     }
     #[test]

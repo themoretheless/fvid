@@ -23,7 +23,11 @@ impl IcsInfo {
     pub fn read(bits: &mut BitReader<'_>, bands: (u8, u8)) -> Result<Self> {
         Self::read_profile(bits, bands, None)
     }
-    pub fn read_profile(bits: &mut BitReader<'_>, bands: (u8, u8), prediction_limit: Option<usize>) -> Result<Self> {
+    pub fn read_profile(
+        bits: &mut BitReader<'_>,
+        bands: (u8, u8),
+        prediction_limit: Option<usize>,
+    ) -> Result<Self> {
         let mut cursor = bits.clone();
         if cursor.bit()? {
             return Err(invalid("AAC reserved ICS bit is set"));
@@ -56,14 +60,21 @@ impl IcsInfo {
                 }
             }
         } else if cursor.bit()? {
-            let limit = prediction_limit.ok_or_else(|| unsupported("prediction is not allowed in AAC-LC"))?;
+            let limit = prediction_limit
+                .ok_or_else(|| unsupported("prediction is not allowed in AAC-LC"))?;
             let reset_group = if cursor.bit()? {
                 let group = cursor.read(5)? as u8;
-                if !(1..=30).contains(&group) { return Err(invalid("invalid AAC Main predictor reset group")); }
+                if !(1..=30).contains(&group) {
+                    return Err(invalid("invalid AAC Main predictor reset group"));
+                }
                 Some(group)
-            } else { None };
+            } else {
+                None
+            };
             let mut used = Vec::new();
-            for _ in 0..usize::from(max_sfb).min(limit) { used.push(cursor.bit()?); }
+            for _ in 0..usize::from(max_sfb).min(limit) {
+                used.push(cursor.bit()?);
+            }
             prediction = Some(MainPrediction { reset_group, used });
         }
         *bits = cursor;
@@ -158,6 +169,14 @@ impl IcsInfo {
     /// One codebook per scale-factor band in each window group. Codebook 12
     /// is reserved; 0 is zero, 13 noise, and 14/15 intensity stereo.
     pub fn read_sections(&self, bits: &mut BitReader<'_>) -> Result<Vec<Vec<u8>>> {
+        self.read_sections_with_resilience(bits, false)
+    }
+    /// ER virtual codebooks retain their identity for spectral magnitude checks.
+    pub fn read_sections_with_resilience(
+        &self,
+        bits: &mut BitReader<'_>,
+        resilience: bool,
+    ) -> Result<Vec<Vec<u8>>> {
         let mut cursor = bits.clone();
         let width = if self.sequence == WindowSequence::EightShort {
             3
@@ -169,12 +188,13 @@ impl IcsInfo {
         for _ in &self.group_lengths {
             let mut codebooks = Vec::with_capacity(self.max_sfb as usize);
             while codebooks.len() < self.max_sfb as usize {
-                let codebook = cursor.read(4)? as u8;
+                let codebook = cursor.read(if resilience { 5 } else { 4 })? as u8;
                 if codebook == 12 {
                     return Err(invalid("reserved AAC section codebook"));
                 }
-                let mut length = 0usize;
-                loop {
+                let implicit = resilience && (codebook == 11 || codebook >= 16);
+                let mut length = usize::from(implicit);
+                while !implicit {
                     let increment = cursor.read(width)?;
                     length += increment as usize;
                     if length > self.max_sfb as usize - codebooks.len() {
