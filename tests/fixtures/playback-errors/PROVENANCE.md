@@ -3864,3 +3864,29 @@ Analysis recurrence reference consulted: [FAAD2 TNS analysis](https://github.com
 No external code/dependency is imported.
 
 Validation: 462 owned-library tests and 15 offline media/player integration tests passed, with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. All three generated artifacts retained identical SHA-256 hashes after regeneration. A temporary incorrect feedback-history mutation failed the independent FIR comparison at n=960, sample=0; the original implementation was restored before these final checks.
+
+### Owned AAC LTP selected-band spectral addition (2026-10-09)
+
+`apply_long_prediction` adds a previously TNS-analyzed prediction to only the
+signaled long-window spectral bands. It checks frame geometry, strictly ordered
+band offsets, finite operands and the ordinary LTP 40-band limit. All selected
+sums are checked for f32 range before any residual write; a late overflow leaves
+the caller's complete residual unchanged. No frame allocation occurs. Inputs
+must already share normalization; this helper does not establish that contract
+for the decoder's eventual LTP integration.
+
+The own offline generator supplies 512 per-bin interval-union references: all
+256 masks over eight unequal bands for both 960 and 1024 samples. Exact binary
+fractions avoid rounding ambiguity. Tests include the first/last bin, untouched
+bands, the 40-band ceiling, malformed geometry, nonfinite values, a late overflow
+and reuse after refusal. These are spectral-stage acceptance tests, not video
+playback acceptance. The existing own active/inactive LTP MP4 reproducers remain
+configuration refusals and the playback acceptance remains pending.
+
+Reference for ordering (analysis filterbank, TNS analysis, selected-band addition):
+[FAAD2 LTP](https://github.com/knik0/faad2/blob/master/libfaad/lt_predict.c).
+No external implementation or runtime dependency is imported. Profile admission,
+channel-pair syntax, transactional decoder history, normalization/rounding and
+independent end-to-end PCM qualification remain required.
+
+Validation: 462 owned-library and 17 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. The own 512-case band fixture regenerates with an identical SHA-256 hash.

@@ -92,3 +92,46 @@ impl LtpAnalysis {
             .forward_with_scratch(&self.windowed, output, &mut self.scratch)
     }
 }
+
+/// Add a TNS-analyzed long-window prediction only to signaled spectral bands.
+/// Validate all selected sums before committing any caller-visible writes.
+/// Prediction and residual must already share the same normalization.
+pub fn apply_long_prediction(
+    residual: &mut [f32],
+    prediction: &[f64],
+    offsets: &[usize],
+    used: &[bool],
+) -> Result<()> {
+    if !matches!(residual.len(), 960 | 1024)
+        || prediction.len() != residual.len()
+        || offsets.first() != Some(&0)
+        || offsets.last() != Some(&residual.len())
+        || offsets.windows(2).any(|p| p[0] >= p[1])
+        || used.len() > 40
+        || used.len() >= offsets.len()
+        || residual.iter().any(|x| !x.is_finite())
+        || prediction.iter().any(|x| !x.is_finite())
+    {
+        return Err(invalid("invalid AAC LTP spectral bands"));
+    }
+    for (band, selected) in used.iter().enumerate() {
+        if !selected {
+            continue;
+        }
+        for bin in offsets[band]..offsets[band + 1] {
+            let sum = residual[bin] as f64 + prediction[bin];
+            if !sum.is_finite() || sum.abs() > f32::MAX as f64 {
+                return Err(invalid("AAC LTP spectral addition overflow"));
+            }
+        }
+    }
+    for (band, selected) in used.iter().enumerate() {
+        if !selected {
+            continue;
+        }
+        for bin in offsets[band]..offsets[band + 1] {
+            residual[bin] = (residual[bin] as f64 + prediction[bin]) as f32;
+        }
+    }
+    Ok(())
+}
