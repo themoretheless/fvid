@@ -30,7 +30,7 @@ pub fn prepare<'a>(
     for nal in NalUnits::new(packet, length_size)? {
         let nal = nal?;
         match nal[0] & 31 {
-            6 | 7 | 8 | 9 | 12 => continue,
+            6 | 7 | 8 | 9 | 10 | 11 | 12 => continue,
             1 | 5 => {}
             _ => return Err(invalid("unsupported in-band AVC NAL")),
         }

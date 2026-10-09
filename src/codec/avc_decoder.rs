@@ -615,7 +615,7 @@ impl AvcDecoder {
                 1 | 5 => {
                     coded.get_or_insert(nal);
                 }
-                6 | 7 | 8 | 9 | 12 => {}
+                6 | 7 | 8 | 9 | 10 | 11 | 12 => {}
                 _ => return Err(invalid("unsupported in-band AVC NAL")),
             }
         }

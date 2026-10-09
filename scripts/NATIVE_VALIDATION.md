@@ -1150,3 +1150,22 @@ Separate syntax tests cover all window modes, maximum lists and every byte
 truncation. Fixture generation is deterministic/offline and outside tests.
 Container clock overrides were added to the own MP4 generator; existing default
 fixture bytes are unchanged.
+
+### 2026-10-09 — AVC end-of-sequence/end-of-stream NAL admission
+
+The owned AU preparer and stateful decoder now admit NAL types 10/11 as
+non-VCL markers. They do not participate in slice coverage or fabricate
+a decoded picture. Decoder output ordering remains caller-owned; playback
+drains its existing B-frame queue at container EOF. Reference parsing also
+classifies these as non-VCL:
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/h264dec.c
+
+Six short synthetic MP4s append sequence, stream or both markers to the final
+AU of the existing authored eight-frame two-slice I/P/B fixture, repacked at
+2/4-byte NAL lengths. Before the fix both prepare and software playback failed
+exactly with unsupported in-band AVC NAL. Acceptance checks compare each
+decode-order picture to the unmodified baseline and full display-order YUV
+to the saved oracle after rewind/seek. Marker-only packets return no picture,
+and explicit decoder reset permits replay. Fixture generation is deterministic
+and requires neither FFmpeg nor network. These cases do not qualify auxiliary
+slices, scalable profiles or other still-unsupported AVC reconstruction tools.

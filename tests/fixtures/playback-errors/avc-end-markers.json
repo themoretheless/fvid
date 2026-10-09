@@ -1,0 +1,62 @@
+{
+  "seed": "avc-multislice-ipb.mp4",
+  "seed_sha256": "a76a62e6b9482ddb09f0debf60aa6360b202002f0d79d5c61243964335991f3c",
+  "cases": [
+    {
+      "file": "avc-end-sequence-length2-synthetic.mp4",
+      "markers": [
+        10
+      ],
+      "length_size": 2,
+      "frames": 8,
+      "sha256": "480885a9c88abf08ec9cb2a4218cf930e18907b3ed314432504ef7d04e889ed1"
+    },
+    {
+      "file": "avc-end-stream-length2-synthetic.mp4",
+      "markers": [
+        11
+      ],
+      "length_size": 2,
+      "frames": 8,
+      "sha256": "6a74269487dde1034a30417fd3c6b775df6848c0adb8175461a2113cd0c96a5d"
+    },
+    {
+      "file": "avc-end-both-length2-synthetic.mp4",
+      "markers": [
+        10,
+        11
+      ],
+      "length_size": 2,
+      "frames": 8,
+      "sha256": "d7918b01f7fdbf6ff634be9e9f5008dea49a4bea7bbc9acd528f3f1057ed34c4"
+    },
+    {
+      "file": "avc-end-sequence-length4-synthetic.mp4",
+      "markers": [
+        10
+      ],
+      "length_size": 4,
+      "frames": 8,
+      "sha256": "2d9448a36740e2c1a1ddd5d93135241f8c0c6020d8c257613219924d41138466"
+    },
+    {
+      "file": "avc-end-stream-length4-synthetic.mp4",
+      "markers": [
+        11
+      ],
+      "length_size": 4,
+      "frames": 8,
+      "sha256": "b06c8b2bb14977f7ebbaeeeffa510bfa75e9a0ac598de7620d94959c9293c7ab"
+    },
+    {
+      "file": "avc-end-both-length4-synthetic.mp4",
+      "markers": [
+        10,
+        11
+      ],
+      "length_size": 4,
+      "frames": 8,
+      "sha256": "62a62b0426bc9db603ee71b4ac1a8bf87e3eb144390fbcf005d324ef0cd4a88c"
+    }
+  ]
+}
