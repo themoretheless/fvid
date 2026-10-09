@@ -90,13 +90,24 @@ fn reference(c: &Value) -> Vec<f32> {
         let mut coupled = vec![0f64; if mode == OutputRate::Core { 1024 } else { 2048 }];
         if point == 3 {
             let count = c["tags"].as_array().unwrap().len() as f32;
-            let core: Vec<f32> = pcm[i * 1024..(i + 1) * 1024]
+            let common_core: Vec<f32> = pcm[i * 1024..(i + 1) * 1024]
                 .iter()
                 .map(|v| v / count)
                 .collect();
             for tag in c["tags"].as_array().unwrap() {
+                let key = tag.as_u64().unwrap().to_string();
+                let core = if let Some(source) = c["source_pcm"].get(&key) {
+                    core(source)[i * 1024..(i + 1) * 1024].to_vec()
+                } else {
+                    common_core.clone()
+                };
                 let state = sources.entry(tag.as_u64().unwrap()).or_default();
-                let rendered = if let Some(raw) = row["source_payload"].as_str() {
+                let raw = if c["distinct_sources"] == true {
+                    row["source_payloads"][&key].as_str()
+                } else {
+                    row["source_payload"].as_str()
+                };
+                let rendered = if let Some(raw) = raw {
                     let raw = hex(raw);
                     let mut bits = BitReader::new(&raw);
                     let crc = bits.read(4).unwrap() == 14;
@@ -130,7 +141,7 @@ fn reference(c: &Value) -> Vec<f32> {
 #[test]
 fn configured_ssr_cce_core_controls_match_independent_nonzero_gain_and_window_pcm() {
     let m = manifest();
-    assert_eq!(m["controls"].as_array().unwrap().len(), 14);
+    assert_eq!(m["controls"].as_array().unwrap().len(), 20);
     for c in m["controls"].as_array().unwrap() {
         let mut pcm = vec![];
         fvid::native_media::decode_mp4_aac_pcm(&video(c), &mut pcm).unwrap();

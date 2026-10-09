@@ -84,6 +84,59 @@ def main():
         case = dict(base,name=base['name']+'-source-sbr',frames=rows)
         case['video'] = video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-'+case['name']+'-synthetic.mp4')
         cases.append(case)
+    # Unlike the original matrix, these sources have independent sine/KBD
+    # histories and a 2:1 spectral amplitude ratio. Their wire order alternates.
+    from generate_aac_ssr_fixtures import oracle
+    for active in (False,True):
+        target_shapes = [int(i%2==0) for i in range(6)]
+        source_shapes = {1:[1-s for s in target_shapes],15:target_shapes}
+        source_refs = {}
+        for tag in (1,15):
+            pcm,_ = oracle(source_shapes[tag],1,active)
+            if tag==15:pcm=b''.join(struct.pack('<f',v[0]*2) for v in struct.iter_unpack('<f',pcm))
+            source_refs[str(tag)] = dict(pcm_offset=len(gold),pcm_bytes=len(pcm))
+            gold.extend(pcm)
+        mono = {tag:[v[0] for v in struct.iter_unpack('<f',gold[r['pcm_offset']:r['pcm_offset']+r['pcm_bytes']])]
+                for tag,r in ((tag,source_refs[str(tag)]) for tag in (1,15))}
+        combined = b''.join(struct.pack('<f',a+b) for a,b in zip(mono[1],mono[15]))
+        combined_ref = dict(pcm_offset=len(gold),pcm_bytes=len(combined));gold.extend(combined)
+        def distinct_packet(i,selected,payload,sbr_payloads):
+            seq=SEQUENCES[i]
+            target='0000000'+silent(seq,target_shapes[i],0,False,False)+fill(payload)
+            sources=[]
+            for tag in selected:
+                raw=channel(i,seq,source_shapes[tag][i],0,active,False)
+                if tag==15:raw=field(144,8)+raw[8:]
+                sources.append('010'+field(tag,4)+'1'+'000'+'0'+'0000'+'0'+'0'+'10'+raw+fill(sbr_payloads.get(tag,b'')))
+            if i%2:sources.reverse()
+            return packed((''.join(sources)+target if i%2 else target+''.join(sources))+'111')
+        for selected in ((1,),(15,),(1,15)):
+            rows=[]
+            for i in range(6):
+                raw=distinct_packet(i,selected,b'',{})
+                rows.append(dict(offset=len(blob),bytes=len(raw)));blob.extend(raw)
+            ref=combined_ref if len(selected)==2 else source_refs[str(selected[0])]
+            control=dict(name='distinct-'+str(int(active))+'-'+''.join(map(str,selected)),asc=config(1,3,selected).hex(),
+                         frames=rows,slots=16,bands=32,container_rate=24000,container_frame_samples=1472,
+                         durations=[SAMPLES[s] for s in SEQUENCES],samples=6144,**ref)
+            control['video']=video_fixture([control],blob,filename='aac-ssr-ps-cce-'+control['name']+'-core-control-synthetic.mp4')
+            controls.append(control)
+        for mode in ('none','both','asymmetric'):
+            rows=[]
+            for i in range(6):
+                source=mono_payload(len(tables(10,27,0,False,0,0)[1])-1,2,True,i)
+                payloads={} if mode=='none' else ({1:source,15:source} if mode=='both' else {15:source})
+                raw=distinct_packet(i,(1,15),bytes.fromhex(ps[i%3]),payloads)
+                rows.append(dict(offset=len(blob),bytes=len(raw),payload=ps[i%3],
+                                 source_payloads={str(tag):value.hex() for tag,value in payloads.items()}));blob.extend(raw)
+            for rate,bands in ((24000,32),(48000,64)):
+                prefix=field(29,5)+frequency(24000)+'0000'+frequency(rate)+field(3,5)+'000'
+                case=dict(name=f'distinct-{int(active)}-{mode}-{rate}',asc=packed(program(prefix,1,3,(1,15))).hex(),
+                          point=3,tags=[1,15],active=active,frames=rows,slots=16,bands=bands,container_rate=rate,
+                          container_frame_samples=rate//24000*1024,samples=rate//24000*6144,source_pcm=source_refs,
+                          distinct_sources=True,**combined_ref)
+                case['video']=video_fixture([case],blob,channels=2,filename='aac-ssr-ps-cce-'+case['name']+'-synthetic.mp4')
+                cases.append(case)
     base = next(c for c in cases if c['point']==1 and c['active'] and c['tags']==[1,15] and c['bands']==64)
     for failure in ('shape','target'):
         rows = []

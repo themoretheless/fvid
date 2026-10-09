@@ -3020,3 +3020,21 @@ Distinct source spectra, independently switched source windows, live source
 appearance/absence with PS, target TNS composition, PCE replacement and broader
 profiles/layouts remain further qualification or implementation requirements.
 This section supersedes earlier SSR/PS coupling and nonzero-core refusal notes.
+
+
+### Distinct SSR/PS coupling source histories (2026-10-09)
+
+The coupling fixture matrix now contains 20 core controls and 48 PS programs.
+Six new core controls and twelve new PS videos use independent scalar SSR/IPQF
+PCM for tags 1 and 15, different sine/KBD histories and a 2:1 spectral amplitude
+ratio. Source wire order reverses on alternating packets. The PS cases cover
+inactive/active gain, 24/48 kHz output and absent, shared or asymmetric source
+SBR payloads. Native waveform, rollback, rewind, seek, ranges and delayed EOF
+acceptance use each source's own reference PCM and extension history.
+
+These are authored synthetic fixtures; ordinary tests need neither FFmpeg nor
+network access. The combined PS reference composes independently evaluated SSR
+PCM with the qualified owned SBR/PS stage, rather than providing a new fully
+independent PS oracle. This qualification does not cover independently switched
+source window sequences, source absence/return under PS, or PCE replacement.
+No production decoder change was required for this extension.
