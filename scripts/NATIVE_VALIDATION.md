@@ -989,3 +989,45 @@ Local offline verification for this change: root/player library 909 passed,
 suites 172 passed. Total: 1513 passed, 24 ignored, no failures. Regeneration of
 all 53 new assets was byte-identical. This does not establish acceptance of
 independent CCE/SBR, CCE FIL, or untested profiles.
+
+### 2026-10-09 — independent AAC CCE after per-element SBR
+
+`generate_he_aac_independent_coupling_fixtures.py` authors 240 long-window
+cases with 960/1024 core samples, mono/stereo targets, one/two independent CCEs,
+tags 1/15, alternating CCE wire order, separate stereo gains, 24/48 kHz output,
+explicit/sync ASC and container-hinted implicit double-rate output. Target FIL
+can be absent; CCE FIL can be absent or missing for a middle packet. 144 short
+MP4 acceptance videos include an original AVC track. Two malformed videos
+exercise missing target and protected CRC failure in a later wire CCE.
+Regeneration uses only the Python standard library and saved owned protocol
+assets; ordinary tests neither generate fixtures nor invoke codec executables.
+
+`he_aac_independent_coupling` uses independently computed direct-cosine CCE
+core PCM followed by separately qualified standalone SBR DSP for each tag.
+The target's silent core goes through a separate SBR state. Gains are applied
+only after both target and CCE SBR, including the correctly silent cancellation
+of two independently nonzero opposite mono CCEs without FIL. This qualifies
+stage composition, not a new independently implemented full SBR oracle.
+
+Decoder SBR slots reserve a separate four-bit CCE tag domain after canonical
+audio-element slots. CCE FIL is mono and binds to the immediately preceding
+independent CCE. Syntax/DSP states clone transactionally, participate in memory
+reporting/checkpoints, and reset together with IMDCT/overlap synthesis history.
+The ASC-aware budget includes 2 MiB for each configured independent CCE in
+addition to output channels; MP4 additionally admits its three whole decoder
+states. The prior independent-ASC constructor refusal test now accepts admission
+and still rejects a dependent in-band PCE changing the configured program.
+
+The primary reference's [ordering of IMDCT, SBR and independent coupling](https://ffmpeg.org/doxygen/trunk/libavcodec_2aac_2aacdec_8c_source.html)
+was inspected for research; no implementation was copied or linked. Dependent
+CCE-owned FIL, coupling with PS, other AAC profiles and unqualified window/tool
+combinations remain open. Full native codec coverage is not established here.
+
+Local verification: root/player library 909 passed, 23 ignored; owned media
+library 432 passed, 1 ignored; 43 AAC integration suites 176 passed. After that
+suite set was compiled, one additional focused acceptance test verified 12
+bare-LC configurations without any FIL: candidate discovery retains 24 kHz and
+matches ordinary LC PCM and the independent core oracle. Combined current-code
+qualification: 1518 passed, 24 ignored, no remaining failures. All 149 new
+fixture assets regenerate byte-identically. These checks qualify the stated
+long-window CCE/SBR cases, not all AAC profiles or all codec tools.

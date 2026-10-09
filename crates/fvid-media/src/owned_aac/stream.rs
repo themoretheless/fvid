@@ -79,7 +79,7 @@ pub(crate) fn decode_admission_bytes(channels: u16) -> Result<usize> {
     Ok(estimated)
 }
 /// ASC-aware admission for container AAC. In addition to the LC reserve,
-/// SBR charges 2 MiB/channel: 12 complex row buffers at 64x64x16 bytes,
+/// SBR charges 2 MiB per output channel and independent CCE: 12 complex row buffers at 64x64x16 bytes,
 /// eight 64 KiB history/transaction reserves, twelve 5x64x64-byte
 /// parameter/level buffers, and four 16 KiB PCM buffers. This rounds their
 /// 1.55 MiB sum upward for vector growth/headers and small frequency tables.
@@ -92,8 +92,9 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     config.resolve_output_rate(output_rate)?;
     let mut bytes = decode_admission_bytes(u16::from(config.core.channels))?;
     if config.sbr_present == Some(true) || output_rate != config.core.sample_rate {
+        let independent_cce = config.program.as_ref().map_or(0, |p| p.coupling.iter().filter(|(independent, _)| *independent).count());
         bytes = bytes
-            .checked_add(usize::from(config.core.channels) * 2 * 1024 * 1024)
+            .checked_add((usize::from(config.core.channels) + independent_cce) * 2 * 1024 * 1024)
             .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
     }
     if config.ps_present != Some(false)

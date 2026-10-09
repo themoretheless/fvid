@@ -250,19 +250,22 @@ fn missing_cce_target_video_rejects_exact_failure_and_restores_sbr_histories() {
 }
 
 #[test]
-fn dependent_sbr_admission_does_not_claim_independent_coupling_acceptance() {
+fn independent_sbr_admission_preserves_configured_pce_identity() {
     for c in manifest()["cases"].as_array().unwrap() {
         let asc = hex(c["independent_asc"].as_str().unwrap());
         let parsed = AudioSpecificConfig::parse(&asc).unwrap();
         assert_eq!(parsed.program.unwrap().coupling, vec![(true, 1)]);
-        let error =
+        let mut decoder =
             NativeAacDecoder::new_with_output_rate(&asc, c["output_rate"].as_u64().unwrap() as u32)
-                .err()
-                .expect("independent SBR must remain a refusal");
+                .unwrap();
+        // Admission now accepts independent CCE; this dependent in-band PCE
+        // must still fail, rather than silently changing the configured program.
         assert!(
-            error
+            decoder
+                .decode(packet(&c["frames"][0]))
+                .unwrap_err()
                 .to_string()
-                .contains("SBR AAC coupling synthesis is not yet implemented")
+                .contains("AAC in-band PCE changed the configured layout")
         );
     }
 }

@@ -6881,3 +6881,15 @@ implicit signalling. Core PCM is independently computed; SBR composition uses
 the separately qualified own DSP. Missing-target videos verify exact refusal
 and rollback. Independent coupling with SBR and CCE-owned SBR FIL remain open,
 as do other unqualified AAC profiles/tools. Details: `scripts/NATIVE_VALIDATION.md`.
+
+### 2026-10-09 — independent AAC CCE and its own SBR FIL
+
+Independent CCE/SBR admission is superseded by per-tag CCE SBR state and final
+PCM mixing after target SBR. 240 authored long-window cases and 144 acceptance
+videos cover both frame sizes, mono/stereo, one/two CCEs, sparse/high tags,
+changing wire order, present/absent/missing CCE FIL, core/double clocks and
+explicit/sync/hinted implicit signalling. CCE states join checkpoint/reset,
+transactional rollback and controlled-memory admission. The original refusal
+expectation is updated; malformed video regressions retain exact error checks.
+Dependent CCE FIL, coupling with PS and further profiles/tools still need
+qualification. PCM evidence and validation are in `scripts/NATIVE_VALIDATION.md`.

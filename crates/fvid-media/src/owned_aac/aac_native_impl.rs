@@ -60,13 +60,10 @@ pub struct AacCheckpoint {
     sbr_elements: Vec<Option<ElementSbr>>,
 }
 fn sbr_layout(parsed: &AudioSpecificConfig) -> Result<bool> {
-    let Some(program) = &parsed.program else {
+    let Some(_) = &parsed.program else {
         return Ok(matches!(parsed.core.channel_configuration, 1..=7 | 11 | 12 | 14));
     };
-    Ok(parsed.core.channel_configuration == 0
-        // Dependent CCE is mixed into target spectra before their IMDCT/SBR.
-        // Independent CCE needs its own SBR state and mixing after SBR.
-        && program.coupling.iter().all(|(independent, _)| !independent))
+    Ok(parsed.core.channel_configuration == 0)
 }
 impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
@@ -132,7 +129,8 @@ impl NativeAacDecoder {
             LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from)?;
             usize::from(config.channels)
         ];
-        let element_slots = usize::from(config.channels);
+        // Four-bit CCE tags occupy a separate fixed domain after audio slots.
+        let element_slots = usize::from(config.channels) + if program.as_ref().is_some_and(|p| p.coupling.iter().any(|(independent, _)| *independent)) { 16 } else { 0 };
         Ok(Self {
             config,
             synthesis,
@@ -156,7 +154,7 @@ impl NativeAacDecoder {
                 return Err(unsupported("implicit SBR AAC coupling synthesis is not yet implemented"));
             }
             decoder.sbr_rate=Some(output_rate);
-            decoder.sbr_elements=vec![None; usize::from(decoder.config.channels)];
+            decoder.sbr_elements=vec![None; decoder.sbr_slots()];
 
         }
         Ok(decoder)
@@ -168,9 +166,12 @@ impl NativeAacDecoder {
         let parsed=AudioSpecificConfig::parse(asc)?;
         let mut decoder=Self::new(asc)?;
         decoder.detect_sbr=parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
-        if decoder.detect_sbr { decoder.sbr_elements=vec![None; usize::from(decoder.config.channels)]; }
+        if decoder.detect_sbr { decoder.sbr_elements=vec![None; decoder.sbr_slots()]; }
 
         Ok(decoder)
+    }
+    fn sbr_slots(&self) -> usize {
+        usize::from(self.config.channels) + if self.program.as_ref().is_some_and(|p| p.coupling.iter().any(|(independent, _)| *independent)) { 16 } else { 0 }
     }
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
@@ -216,7 +217,7 @@ impl NativeAacDecoder {
         let mut noise = self.noise.clone();
         let mut sbr_rate = self.sbr_rate;
         let mut sbr_elements = self.sbr_elements.clone();
-        let mut sbr_frames = vec![None; usize::from(self.config.channels)];
+        let mut sbr_frames = vec![None; self.sbr_slots()];
         let mut previous_element = None;
         let mut channels = Vec::new();
         let mut decoded_elements = Vec::new();
@@ -321,12 +322,19 @@ impl NativeAacDecoder {
                     if sbr_rate.is_none() {
                         return Err(unsupported("AAC fill extension tool SBR requires extension-aware stream signalling"));
                     }
-                    if !matches!(previous_element, Some(0 | 1)) {
-                        return Err(invalid("SBR fill must follow its audio element"));
-                    }
-                    let &(kind, _, offset) = decoded_elements.last().ok_or_else(|| invalid("SBR fill has no audio element"))?;
+                    let (width, offset) = match previous_element {
+                        Some(0 | 1) => {
+                            let &(kind, _, offset) = decoded_elements.last().ok_or_else(|| invalid("SBR fill has no audio element"))?;
+                            (if kind == 1 { 2 } else { 1 }, offset)
+                        }
+                        Some(2) => {
+                            let (coupling, _) = couplings.last().ok_or_else(|| invalid("SBR fill has no coupling element"))?;
+                            if coupling.point != 3 { return Err(unsupported("SBR fill on dependent AAC coupling is not implemented")); }
+                            (1, usize::from(self.config.channels) + usize::from(coupling.tag))
+                        }
+                        _ => return Err(invalid("SBR fill must follow its audio element")),
+                    };
                     if sbr_frames[offset].is_some() { return Err(invalid("duplicate SBR fill for AAC element")); }
-                    let width = if kind == 1 { 2 } else { 1 };
                     let state = sbr_elements[offset].get_or_insert_with(|| ElementSbr::new(width));
                     if state.width != width { return Err(invalid("SBR element width changed")); }
                     let mut source = SbrBitReader::new(packet);
@@ -403,32 +411,6 @@ impl NativeAacDecoder {
                     output[i * channels.len() + target] = pcm[i] as f32;
                 }
             }
-            for (coupling, spectrum) in couplings {
-                if coupling.point != 3 {
-                    continue;
-                }
-                let state = &mut self.coupling_synthesis[coupling.tag as usize];
-                if state.is_none() {
-                    *state = Some(LongSineSynthesis::new(n)?);
-                }
-                state.as_mut().unwrap().synthesize_pcm(
-                    coupling.channel.info.sequence,
-                    coupling.channel.info.shape,
-                    &spectrum,
-                    &mut pcm,
-                )?;
-                for target in coupling.targets {
-                    let kind = u32::from(target.pair);
-                    let (_, _, offset) = decoded_elements
-                        .iter()
-                        .find(|(k, t, _)| *k == kind && *t == u32::from(target.tag))
-                        .ok_or_else(|| invalid("AAC coupling target is absent"))?;
-                    let channel = self.mapping[*offset + target.channel as usize];
-                    for i in 0..n {
-                        output[i * channels.len() + channel] += pcm[i] as f32 * target.gain;
-                    }
-                }
-            }
             if sbr_rate.is_some() || self.detect_sbr {
                 let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
                 let mode = if sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
@@ -456,6 +438,50 @@ impl NativeAacDecoder {
                 }
                 if sbr_rate.is_some() {output=expanded;}
 
+            }
+            // Independent coupling is applied to final target PCM, after SBR.
+            for (coupling, spectrum) in couplings {
+                if coupling.point != 3 {
+                    continue;
+                }
+                let state = &mut self.coupling_synthesis[coupling.tag as usize];
+                if state.is_none() {
+                    *state = Some(LongSineSynthesis::new(n)?);
+                }
+                state.as_mut().unwrap().synthesize_pcm(
+                    coupling.channel.info.sequence,
+                    coupling.channel.info.shape,
+                    &spectrum,
+                    &mut pcm,
+                )?;
+                let coupled: Vec<f32> = if sbr_rate.is_some() || self.detect_sbr {
+                    let offset = usize::from(self.config.channels) + usize::from(coupling.tag);
+                    let state = sbr_elements[offset].get_or_insert_with(|| ElementSbr::new(1));
+                    let core: Vec<f32> = pcm.iter().map(|&value| value as f32).collect();
+                    let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
+                    let mode = if sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
+                    let rendered = if let Some(frame) = &sbr_frames[offset] {
+                        state.dsp.process(frame, &[&core], rate, (n/64) as u8, mode)
+                    } else {
+                        state.dsp.process_upsampling(&[&core], rate, (n/64) as u8, mode)
+                    }.map_err(|e| invalid(&e.0))?;
+                    if sbr_rate.is_some() { rendered[0].iter().map(|&v| v as f32).collect() } else { core }
+                } else { pcm.iter().map(|&v| v as f32).collect() };
+                if coupled.len() != output.len()/channels.len() || coupled.iter().any(|v| !v.is_finite()) {
+                    return Err(invalid("SBR coupling output length or finite PCM mismatch"));
+                }
+                for target in coupling.targets {
+                    let kind = u32::from(target.pair);
+                    let (_, _, offset) = decoded_elements
+                        .iter()
+                        .find(|(k, t, _)| *k == kind && *t == u32::from(target.tag))
+                        .ok_or_else(|| invalid("AAC coupling target is absent"))?;
+                    let channel = self.mapping[*offset + target.channel as usize];
+                    for (i, &value) in coupled.iter().enumerate() {
+                        output[i * channels.len() + channel] += value * target.gain;
+                        if !output[i * channels.len() + channel].is_finite() { return Err(invalid("AAC coupled PCM exceeds finite f32 output")); }
+                    }
+                }
             }
             Ok(output)
         })();
