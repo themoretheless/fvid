@@ -78,8 +78,8 @@ fn channel_pcm_matches_scalar_history_analysis_tns_and_synthesis() {
                 );
             }
             channel.restore(&saved).unwrap();
-            let repeated = channel
-                .process(
+            let prepared = channel
+                .prepare_spectrum(
                     source.clone(),
                     data,
                     WindowSequence::OnlyLong,
@@ -88,6 +88,9 @@ fn channel_pcm_matches_scalar_history_analysis_tns_and_synthesis() {
                     3,
                     Some(&tns),
                 )
+                .unwrap();
+            let repeated = channel
+                .synthesize_spectrum(&prepared, WindowSequence::OnlyLong, shape)
                 .unwrap();
             assert_eq!(repeated, pcm);
             // Refusal after a checkpoint must not advance either channel history.

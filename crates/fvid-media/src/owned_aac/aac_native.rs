@@ -253,6 +253,26 @@ mod ltp_dispatch_tests {
     use super::*;
     use serde_json::Value;
     #[test]
+    fn native_target_only_phase_controls_match_scalar_ltp_tns_pcm() {
+        let manifest:Value=serde_json::from_slice(&bytes("aac-ltp-phase.json")).unwrap();
+        let blob=bytes("aac-ltp-phase-control-packets.bin");let gold=bytes("aac-ltp-phase-control-reference.f32le");
+        for case in manifest["cases"].as_array().unwrap() {
+            let mut state=decoder(case["asc"].as_str().unwrap());
+            for row in case["frames"].as_array().unwrap() {
+                let at=row["control_offset"].as_u64().unwrap() as usize;
+                let packet=&blob[at..at+row["control_bytes"].as_u64().unwrap() as usize];
+                let saved=state.checkpoint();let pcm=state.decode(packet).unwrap();
+                let at=row["control_reference_offset"].as_u64().unwrap() as usize;
+                assert_eq!(pcm.len(),1024);
+                for (i,&sample) in pcm.iter().enumerate() {
+                    let expected=f32::from_le_bytes(gold[at+i*4..at+i*4+4].try_into().unwrap());
+                    assert!((sample-expected).abs()<1e-7,"native staged TNS frame sample={i}: {sample} vs {expected}");
+                }
+                state.restore(&saved).unwrap();assert_eq!(state.decode(packet).unwrap(),pcm);
+            }
+        }
+    }
+    #[test]
     fn authored_cce_videos_reproduce_pending_native_coupling_state_without_advance() {
         let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-coupling.json")).unwrap();
         let blob = bytes("aac-ltp-coupling-packets.bin");
@@ -339,9 +359,11 @@ mod ltp_dispatch_tests {
             .collect();
         assert_eq!(raw[0] >> 3, 4);
         raw[0] = (raw[0] & 7) | (2 << 3);
+        if (raw[1]>>3)&15==0 {raw[2]=(raw[2]&!0x0c)|0x04;}
         let mut parsed = AudioSpecificConfig::parse(&raw).unwrap();
         parsed.signaled_object_type = 4;
         parsed.core.object_type = 4;
+        if let Some(program)=&mut parsed.program {program.object_type=4;}
         NativeAacDecoder::from_parsed(parsed).unwrap()
     }
     fn qualify(case: &Value, blob: &[u8], reference: &[u8]) {
@@ -417,7 +439,7 @@ mod ltp_dispatch_tests {
         }
     }
     #[test]
-    fn native_ltp_checkpoints_count_only_histories_and_packet_failure_rolls_back_left() {
+    fn native_ltp_checkpoints_count_only_histories_and_right_preparation_failure_preserves_histories() {
         let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-pair.json")).unwrap();
         let case = &manifest["cases"][3];
         let blob = bytes("aac-ltp-pair-packets.bin");
@@ -448,8 +470,9 @@ mod ltp_dispatch_tests {
         let saved = state.checkpoint();
         let gold = state.decode(packet).unwrap();
         state.restore(&saved).unwrap();
-        // Controlled internal geometry failure after the left lane advances;
-        // this is a rollback test, not a claim about a reachable valid ASC.
+        // Controlled right-lane geometry failure after left preparation.
+        // All preparation now precedes synthesis, so no history may advance.
+        // This is a state-transaction test, not a reachable valid ASC.
         let right = state.ltp_synthesis[1].clone();
         state.ltp_synthesis[1] = super::super::aac_ltp_channel::LtpChannel::new(960).unwrap();
         assert!(

@@ -670,9 +670,18 @@ impl NativeAacDecoder {
             return Err(invalid("trailing bytes after AAC END"));
         }
         for point in [0, 1] {
-            if point == 1 && self.config.object_type!=4 {
-                for (channel, spectrum, _) in &mut channels {
-                    *spectrum = channel.apply_tns(&self.config, std::mem::take(spectrum))?;
+            if point == 1 {
+                for (channel, spectrum, target) in &mut channels {
+                    if self.config.object_type==4 {
+                        let tables=BandTables::for_config(&self.config)?;
+                        let short=channel.info.sequence==super::aac_synthesis::WindowSequence::EightShort;
+                        let offsets=if short {tables.short}else{tables.long};
+                        let limit=BandTables::tns_limit(self.config.sample_rate,short).min(channel.info.max_sfb as usize);
+                        let prediction=ltp_data[*target].as_ref().map(ltp_data_for_channel);
+                        *spectrum=self.ltp_synthesis[*target].prepare_spectrum(std::mem::take(spectrum),prediction.as_deref(),channel.info.sequence,channel.info.shape,offsets,limit,channel.tns.as_ref())?;
+                    } else {
+                        *spectrum = channel.apply_tns(&self.config, std::mem::take(spectrum))?;
+                    }
                 }
             }
             for (coupling, source) in &couplings {
@@ -888,12 +897,7 @@ impl NativeAacDecoder {
             let mut pcm = vec![0.0; n];
             for (channel, spectrum, target) in &channels {
                 if self.config.object_type==4 {
-                    let tables=BandTables::for_config(&self.config)?;
-                    let short=channel.info.sequence==super::aac_synthesis::WindowSequence::EightShort;
-                    let offsets=if short {tables.short}else{tables.long};
-                    let limit=BandTables::tns_limit(self.config.sample_rate,short).min(channel.info.max_sfb as usize);
-                    let prediction=ltp_data[*target].as_ref().map(ltp_data_for_channel);
-                    pcm=self.ltp_synthesis[*target].process(spectrum.clone(),prediction.as_deref(),channel.info.sequence,channel.info.shape,offsets,limit,channel.tns.as_ref())?;
+                    pcm=self.ltp_synthesis[*target].synthesize_spectrum(spectrum,channel.info.sequence,channel.info.shape)?;
                 } else {
                     self.synthesis[*target].synthesize_pcm(
                         channel.info.sequence,channel.info.shape,spectrum,&mut pcm,

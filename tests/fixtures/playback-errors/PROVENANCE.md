@@ -4134,3 +4134,41 @@ The final two-test CCE suite also verifies that the legacy ICS path rejects the
 same active-LTP source presence bit with its exact prediction diagnostic while
 the new CCE reader accepts the packet. Nineteen generated artifacts are
 deterministic; existing PCM references and tolerances are unchanged.
+
+### LTP preparation/synthesis phases for coupling (2026-10-10)
+
+`LtpChannel::prepare_spectrum` performs prediction analysis and TNS without
+advancing PCM history or previous shape. `synthesize_spectrum` accepts the
+prepared/coupled spectrum and commits both histories and shape only after all
+synthesis stages succeed. The existing combined `process` delegates to these
+stages. Preparation rejects non-finite raw spectra, including the tool-free path.
+The caller retains the sequence/shape between stages and owns the spectral buffer.
+
+Native target preparation now occurs between the existing point-0 and point-1
+mixing loops; the final PCM loop only synthesizes the prepared spectrum, avoiding
+a second TNS pass. All target preparation precedes PCM commits, so a right-lane
+preparation failure leaves left history untouched. Native CCE source/tag state
+is still refused, and public AOT4 ASC admission remains unchanged.
+
+The own generator adds three 12-frame coupled-phase videos plus three distinct
+target-only controls. Target lag/gain, window shape and directional TNS vary by
+coupling configuration; independent source prediction and windows vary separately.
+The independent scalar oracle uses direct sparse MDCT/IMDCT sums, sine/KBD,
+float history and first-order FIR/AR TNS. Parsed packets exercise staged point-0,
+point-1 and point-3 output against every saved PCM sample at 1e-7. A wrong point-1
+pre-TNS control must differ by more than 1e-5; repeated preparation, invalid
+synthesis, retained storage and checkpoint replay verify history boundaries.
+Existing 960/1024 channel references also compare split and combined APIs exactly.
+Native private-metadata target-only dispatch matches scalar PCM and checkpoints.
+
+These are staged-channel and uncoupled native acceptance tests; coupled native
+playback remains pending source tag histories, coupling dispatch and accounting,
+additional layouts/tools and production ASC admission. This does not enable the
+ignored root LTP playback acceptance. All media/parameters are authored, generation
+is separate from ordinary offline tests, and no FFmpeg/network call is required.
+
+Validation: owned library 470 passed / 1 pre-existing ignored; root native AAC
+15 passed; sixteen offline AAC integration suites 56 passed / 1 pending root
+LTP playback acceptance ignored. Eleven phase fixture artifacts are deterministic.
+Existing PCM references and tolerances remain unchanged. Coupled native dispatch
+and public AOT4 admission are still pending; their refusal expectations are kept.

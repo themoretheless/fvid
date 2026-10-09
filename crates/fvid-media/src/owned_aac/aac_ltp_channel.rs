@@ -105,7 +105,7 @@ impl LtpChannel {
     /// stages succeed. Returned PCM uses the existing owned 1/65536 convention.
     pub fn process(
         &mut self,
-        mut residual: Vec<f32>,
+        residual: Vec<f32>,
         data: Option<&LtpData>,
         sequence: WindowSequence,
         shape: WindowShape,
@@ -113,8 +113,29 @@ impl LtpChannel {
         tns_max_band: usize,
         tns: Option<&TnsData>,
     ) -> Result<Vec<f64>> {
+        let spectrum =
+            self.prepare_spectrum(residual, data, sequence, shape, offsets, tns_max_band, tns)?;
+        self.synthesize_spectrum(&spectrum, sequence, shape)
+    }
+    /// Prediction analysis and TNS without advancing either PCM history or
+    /// previous window shape. The returned spectrum remains in raw synthesis
+    /// units. Callers may mix point-1 coupling before `synthesize_spectrum`;
+    /// point-0 coupling must be mixed into the residual before this call.
+    pub fn prepare_spectrum(
+        &mut self,
+        mut residual: Vec<f32>,
+        data: Option<&LtpData>,
+        sequence: WindowSequence,
+        shape: WindowShape,
+        offsets: &[usize],
+        tns_max_band: usize,
+        tns: Option<&TnsData>,
+    ) -> Result<Vec<f32>> {
         if residual.len() != self.n {
             return Err(invalid("invalid AAC LTP channel residual geometry"));
+        }
+        if residual.iter().any(|value| !value.is_finite()) {
+            return Err(invalid("non-finite AAC LTP channel spectrum"));
         }
         if let Some(data) = data {
             self.analysis.predict_long(
@@ -132,11 +153,25 @@ impl LtpChannel {
         if let Some(tns) = tns {
             residual = tns.filter_owned(residual, offsets, tns_max_band)?;
         }
+        Ok(residual)
+    }
+    /// Synthesize an already prepared (and optionally coupled) spectrum.
+    /// Advance synthesis/LTP histories and previous shape only on success.
+    /// The caller must retain the sequence/shape used during preparation.
+    pub fn synthesize_spectrum(
+        &mut self,
+        spectrum: &[f32],
+        sequence: WindowSequence,
+        shape: WindowShape,
+    ) -> Result<Vec<f64>> {
+        if spectrum.len() != self.n {
+            return Err(invalid("invalid AAC LTP channel residual geometry"));
+        }
         // Initial transactional adapter: clone state, never expose partial advance.
         let mut next_synthesis = self.synthesis.clone();
         let mut next_history = self.history.clone();
         let mut pcm = vec![0.; self.n];
-        next_synthesis.synthesize_shaped(sequence, shape, &residual, &mut pcm)?;
+        next_synthesis.synthesize_shaped(sequence, shape, spectrum, &mut pcm)?;
         let saved = next_synthesis.history();
         next_history.update_raw(&pcm, saved.overlap_raw())?;
         for value in &mut pcm {
