@@ -141,6 +141,7 @@ mod tests {
             quantized: vec![value; 64],
             pulse: None,
             tns: None,
+            gain: None,
         };
         let mut pair = ChannelPair {
             explicit_mask: true,
@@ -211,6 +212,7 @@ mod tests {
             quantized: vec![0; 4],
             pulse: None,
             tns: None,
+            gain: None,
         };
         let mut pair = ChannelPair {
             left: channel(0),

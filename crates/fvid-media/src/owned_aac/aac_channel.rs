@@ -21,6 +21,15 @@ impl ChannelData {
             footprint.vector(group).map_err(Error)?;
         }
         footprint.vector(&self.quantized).map_err(Error)?;
+        if let Some(gain) = &self.gain {
+            footprint.vector(&gain.bands).map_err(Error)?;
+            for band in &gain.bands {
+                footprint.vector(band).map_err(Error)?;
+                for window in band {
+                    footprint.vector(window).map_err(Error)?;
+                }
+            }
+        }
         if let Some(tns) = &self.tns {
             footprint.vector(&tns.windows).map_err(Error)?;
             for window in &tns.windows {
@@ -73,6 +82,7 @@ mod memory_tests {
             quantized,
             pulse: None,
             tns: Some(super::super::aac_tns::TnsData { windows }),
+            gain: None,
         };
         assert_eq!(channel.retained_payload_bytes().unwrap(), expected);
     }

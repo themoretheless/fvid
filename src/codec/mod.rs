@@ -283,6 +283,7 @@ pub mod aac_spectral;
 pub mod aac_bands;
 
 pub mod aac_gain_control;
+pub use fvid_media::owned_aac::aac_ssr_synthesis;
 pub mod aac_channel;
 
 pub mod aac_pair;

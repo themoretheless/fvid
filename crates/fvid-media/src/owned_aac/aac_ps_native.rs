@@ -542,6 +542,9 @@ impl InBandPsProbe {
 }
 
 fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
+    if parsed.core.object_type != 2 {
+        return Err(unsupported("AAC SSR parametric stereo synthesis is not implemented"));
+    }
     if parsed.core.channels != 1 {
         return Err(unsupported(
             "native PS decoder requires one mono AAC-LC element",

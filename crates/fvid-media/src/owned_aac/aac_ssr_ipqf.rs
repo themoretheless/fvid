@@ -72,6 +72,13 @@ impl Default for SsrIpqf {
     }
 }
 impl SsrIpqf {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        footprint.shared(&self.coefficients)?;
+        Ok(())
+    }
     pub fn new() -> Self {
         let coefficients = std::array::from_fn(|phase| {
             std::array::from_fn(|band| {

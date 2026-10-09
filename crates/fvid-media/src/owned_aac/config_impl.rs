@@ -39,8 +39,8 @@ impl AacConfig {
         sample_rate: u32,
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
-        if object_type != 2 {
-            return Err(invalid("only AAC-LC core configuration is implemented"));
+        if !matches!(object_type, 2 | 3) {
+            return Err(invalid("only AAC-LC and AAC-SSR core configurations are implemented"));
         }
         let mut channels = match config {
             0 => 0,
@@ -50,6 +50,9 @@ impl AacConfig {
             _ => return Err(invalid("unsupported AAC channel configuration")),
         };
         let frame_samples = if b.bit()? { 960 } else { 1024 };
+        if object_type == 3 && frame_samples != 1024 {
+            return Err(invalid("AAC SSR requires frameLengthFlag zero"));
+        }
         let core_coder_delay = if b.bit()? {
             Some(b.read(14)? as u16)
         } else {

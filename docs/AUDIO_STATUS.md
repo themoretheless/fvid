@@ -2,9 +2,12 @@
 
 Ownership status: `codec::aac_decoder` now uses FVid NativeAacDecoder for AAC
 playback; the Symphonia AAC dependency/feature is removed. Numeric protocol
-tables retain their MPL-2.0 provenance. AAC-LC 1024-sample standard layouts
-through 5.1 are implemented; 960-sample bands, 7.1/PCE and other profiles remain
-unsupported. The incremental implementation notes below describe earlier states.
+tables retain their MPL-2.0 provenance. Current AAC qualification is recorded in
+`CODEC_PROGRESS.md`; the incremental implementation notes below describe earlier
+states. AAC SSR now has native AOT 3 packet synthesis and headless MP4 acceptance
+for eight original 24 kHz mono/stereo fixtures with active gain and window
+transitions. SSR coupling, SBR/PS and independently switched channel windows
+with unequal output extents remain unsupported.
 Malformed AAC packets now return errors and require decoder reset; they are
 not reported as successful empty output. Out-of-range unsigned timestamps
 are rejected before touching codec state instead of wrapping to negative PTS.
@@ -14,6 +17,7 @@ are rejected before touching codec state instead of wrapping to negative PTS.
 | Source | Codec | Path | Verified |
 | --- | --- | --- | --- |
 | MP4 | AAC-LC (`mp4a`) | `playback_mp4_audio` → `codec::aac_decoder` → cpal | yes, headless |
+| MP4 | AAC SSR (`mp4a`, AOT 3) | owned four-band synthesis → `playback_mp4_audio` | yes, synthetic mono/stereo, gain, seek/rewind/ranges |
 | WebM | AAC (`A_AAC`) | `playback_webm_audio` → `playback_aac::esds_for` → `codec::aac_decoder` | yes, headless |
 | WebM | Vorbis (`A_VORBIS`) | `playback_webm_audio` → symphonia Vorbis → cpal | yes, headless |
 | WebM | Opus (`A_OPUS`) | — | not supported |

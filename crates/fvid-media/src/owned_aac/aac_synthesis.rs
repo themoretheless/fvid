@@ -19,7 +19,7 @@ pub enum WindowShape {
 
 // KBD half-window: square root of the normalized cumulative Kaiser window.
 // Include both Kaiser endpoints in the denominator for power complementarity.
-fn kbd_window(n: usize, alpha: f64) -> Vec<f64> {
+pub(crate) fn kbd_window(n: usize, alpha: f64) -> Vec<f64> {
     fn i0(x: f64) -> f64 {
         let mut sum = 1.0;
         let mut term = 1.0;

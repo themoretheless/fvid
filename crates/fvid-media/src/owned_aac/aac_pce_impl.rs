@@ -216,7 +216,7 @@ impl ProgramConfig {
             .iter()
             .position(|r| *r == self.sample_rate)
             .ok_or_else(|| invalid("PCE sample rate has no index"))?;
-        if self.object_type != 2 {
+        if !matches!(self.object_type, 2 | 3) {
             return Err(invalid("PCE initialization requires AAC-LC"));
         }
         let mut fields = Vec::<bool>::new();

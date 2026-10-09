@@ -93,6 +93,7 @@ mod tests {
             quantized: [vec![8; 12], vec![-8; 12], vec![8; 20], vec![-8; 20]].concat(),
             pulse: None,
             tns: None,
+            gain: None,
         };
         let spectrum = channel.ordinary_spectrum(&config).unwrap();
         for window in 0..8 {
@@ -133,6 +134,7 @@ mod tests {
             quantized: vec![0; 64],
             pulse: None,
             tns: None,
+            gain: None,
         };
         let mut noise = crate::codec::aac_noise::NoiseState::default();
         let spectrum = channel.spectrum_with_noise(&config, &mut noise).unwrap();

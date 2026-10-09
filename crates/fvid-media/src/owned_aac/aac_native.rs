@@ -69,6 +69,10 @@ impl NativeAacDecoder {
             Ok(())
         }
         let mut footprint = super::memory::Footprint::new();
+        for states in [Some(&self.ssr_synthesis), checkpoint.map(|state| &state.ssr_synthesis)].into_iter().flatten() {
+            footprint.vector(states).map_err(|e| invalid(&e))?;
+            for state in states { state.visit_retained(&mut footprint).map_err(|e| invalid(&e))?; }
+        }
         visit(
             &self.synthesis,
             &self.coupling_synthesis,

@@ -7341,3 +7341,33 @@ SSR windows, appropriate band tables/TNS, and ASC/native-decoder integration
 remain required, followed by an independently qualified synthetic AOT 3 video.
 The existing active-gain refusal fixtures remain refusals. Ordinary tests do
 not fetch the standard or invoke FFmpeg.
+
+### 2026-10-09 — AAC SSR raw packets and MP4 playback acceptance
+
+AOT 3 configuration now reaches the owned SSR synthesis, with frameLengthFlag
+required to be zero. Spectra retain the standard 1024/128 scalefactor geometry;
+four 256/32-line transforms reverse the even one-based PQF bands. SSR-specific
+TNS limits follow Table 4.157. The first frame uses its own shape on both window
+halves; later frames retain the previous shape. Gain, overlap, IPQF and window
+state participate in packet rollback, checkpoints and reset, including retained
+allocation accounting. PS paths explicitly reject SSR instead of treating it
+as an LC core. Existing LC active-gain refusal remains unchanged.
+
+`scripts/generate_aac_ssr_fixtures.py` creates eight original short MP4 videos
+with mono/stereo, sine/mixed-KBD shapes, empty/active gain in every controlled
+band, and long/start/short/stop transitions. It writes a separate scalar oracle:
+direct cosine IMDCT, gain interpolation/overlap and literal zero-insertion FIR
+convolution. Spectra are nonzero in all four PQF bands. `tests/aac_ssr.rs`
+compares every decoded sample (2e-7 absolute tolerance), verifies the MP4 packet
+bytes, root/owned PCM export, exact variable output extents, rewind, seek and
+repeated ranges. LongStart produces 1472 samples and LongStop 576, so the
+container's authored stts matches the actual synthesis timeline. A ninth video
+refuses invalid transition gain location 14 and checks complete state rollback.
+The original AOT 3 configuration refusal is reproduced by restoring the prior
+LC-only guard before running the new acceptance test; it fails for that exact
+reason. Generation and ordinary tests stay separate, offline and FFmpeg-free.
+
+Qualification is for these 24 kHz fixtures, not all SSR encoders/profiles.
+SSR coupling, SBR/PS, independently switched channel windows with unequal output
+extents, and dedicated ADTS discovery/profile integration remain explicit gaps.
+Full AAC profile parity (Main/LTP/ER/ELD/USAC) is still not achieved.

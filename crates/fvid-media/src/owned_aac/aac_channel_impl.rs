@@ -17,6 +17,7 @@ pub struct ChannelData {
     pub quantized: Vec<i16>,
     pub pulse: Option<PulseData>,
     pub tns: Option<tns_syntax::TnsData>,
+    pub gain: Option<super::aac_gain_control::GainControl>,
 }
 impl ChannelData {
     /// Reconstruct ordinary spectral bands into per-window order. Special
@@ -130,7 +131,7 @@ impl ChannelData {
             let short = self.info.sequence == WindowSequence::EightShort;
             let offsets = if short { tables.short } else { tables.long };
             let limit =
-                BandTables::tns_limit(config.sample_rate, short).min(self.info.max_sfb as usize);
+                (if config.object_type == 3 { BandTables::ssr_tns_limit(config.sample_rate, short) } else { BandTables::tns_limit(config.sample_rate, short) }).min(self.info.max_sfb as usize);
             tns.filter_owned(spectrum, offsets, limit).map_err(Error::from)
         } else {
             Ok(spectrum)
@@ -164,12 +165,13 @@ impl ChannelData {
         } else {
             None
         };
-        if cursor.bit()? {
+        let gain_control = if cursor.bit()? {
             let gain = super::aac_gain_control::GainControl::read(&mut cursor, info.sequence)?;
-            if !gain.is_empty() {
+            if config.object_type != 3 && !gain.is_empty() {
                 return Err(unsupported("owned AAC active gain control synthesis is not implemented"));
             }
-        }
+            Some(gain)
+        } else { None };
         let offsets = if info.sequence == WindowSequence::EightShort {
             tables.short
         } else {
@@ -190,6 +192,7 @@ impl ChannelData {
             quantized,
             pulse,
             tns,
+            gain: gain_control,
         })
     }
 }
