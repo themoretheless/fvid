@@ -1,0 +1,3037 @@
+{
+  "controls": [
+    {
+      "name": "0-0-1",
+      "asc": "1b0009840002001000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 59
+        },
+        {
+          "offset": 250,
+          "bytes": 61
+        },
+        {
+          "offset": 385,
+          "bytes": 106
+        },
+        {
+          "offset": 609,
+          "bytes": 106
+        },
+        {
+          "offset": 953,
+          "bytes": 61
+        },
+        {
+          "offset": 1088,
+          "bytes": 59
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-0-0-1-core-control-synthetic.mp4",
+        "sha256": "b945445b429516451529faf270a17d38e33262501222f1a6397c31d26b6ebc32",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002001000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-0-2",
+      "asc": "1b000984000400178000",
+      "frames": [
+        {
+          "offset": 1218,
+          "bytes": 110
+        },
+        {
+          "offset": 1570,
+          "bytes": 113
+        },
+        {
+          "offset": 1809,
+          "bytes": 197
+        },
+        {
+          "offset": 2215,
+          "bytes": 197
+        },
+        {
+          "offset": 2741,
+          "bytes": 113
+        },
+        {
+          "offset": 2980,
+          "bytes": 110
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 24576,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-0-0-2-core-control-synthetic.mp4",
+        "sha256": "87ad602ee5ed31f2239701fb28efb23e50a4e8237b719ce67ab7193010e44356",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b000984000400178000",
+        "pcm_offset": 24576,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-1-1",
+      "asc": "1b0009840002001000",
+      "frames": [
+        {
+          "offset": 3212,
+          "bytes": 62
+        },
+        {
+          "offset": 3468,
+          "bytes": 66
+        },
+        {
+          "offset": 3613,
+          "bytes": 124
+        },
+        {
+          "offset": 3873,
+          "bytes": 124
+        },
+        {
+          "offset": 4253,
+          "bytes": 67
+        },
+        {
+          "offset": 4400,
+          "bytes": 62
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-0-1-1-core-control-synthetic.mp4",
+        "sha256": "bdf4800f07abb92e384b878483f6d816b1630fef1e08b1319c78dc7b56a68796",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002001000",
+        "pcm_offset": 49152,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-1-2",
+      "asc": "1b000984000400178000",
+      "frames": [
+        {
+          "offset": 4536,
+          "bytes": 113
+        },
+        {
+          "offset": 4894,
+          "bytes": 119
+        },
+        {
+          "offset": 5145,
+          "bytes": 215
+        },
+        {
+          "offset": 5587,
+          "bytes": 215
+        },
+        {
+          "offset": 6149,
+          "bytes": 120
+        },
+        {
+          "offset": 6402,
+          "bytes": 113
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 73728,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-0-1-2-core-control-synthetic.mp4",
+        "sha256": "b34bb29dfe96d5f72a184e3d128ae9ea5550df96175004b91dea287caa83efc8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b000984000400178000",
+        "pcm_offset": 73728,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-0-1",
+      "asc": "1b0009840002001000",
+      "frames": [
+        {
+          "offset": 6640,
+          "bytes": 59
+        },
+        {
+          "offset": 6890,
+          "bytes": 61
+        },
+        {
+          "offset": 7025,
+          "bytes": 106
+        },
+        {
+          "offset": 7249,
+          "bytes": 106
+        },
+        {
+          "offset": 7593,
+          "bytes": 61
+        },
+        {
+          "offset": 7728,
+          "bytes": 59
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 98304,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-1-0-1-core-control-synthetic.mp4",
+        "sha256": "7b893660e89256f6216b8ce5a35d71688d3fcd7f2494925d9cfdf520d5b229cd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002001000",
+        "pcm_offset": 98304,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-0-2",
+      "asc": "1b000984000400178000",
+      "frames": [
+        {
+          "offset": 7858,
+          "bytes": 110
+        },
+        {
+          "offset": 8210,
+          "bytes": 113
+        },
+        {
+          "offset": 8449,
+          "bytes": 197
+        },
+        {
+          "offset": 8855,
+          "bytes": 197
+        },
+        {
+          "offset": 9381,
+          "bytes": 113
+        },
+        {
+          "offset": 9620,
+          "bytes": 110
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 122880,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-1-0-2-core-control-synthetic.mp4",
+        "sha256": "f286bd3fb18a54833c17ade89400edabf4e1f0e635723eb5d85c38f3d02627ab",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b000984000400178000",
+        "pcm_offset": 122880,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-1-1",
+      "asc": "1b0009840002001000",
+      "frames": [
+        {
+          "offset": 9852,
+          "bytes": 62
+        },
+        {
+          "offset": 10108,
+          "bytes": 66
+        },
+        {
+          "offset": 10253,
+          "bytes": 124
+        },
+        {
+          "offset": 10513,
+          "bytes": 124
+        },
+        {
+          "offset": 10893,
+          "bytes": 67
+        },
+        {
+          "offset": 11040,
+          "bytes": 62
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 147456,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-1-1-1-core-control-synthetic.mp4",
+        "sha256": "e38c3a4571278d90e608f043c81e197b873a23aa32024386f9a65c737210ab2e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002001000",
+        "pcm_offset": 147456,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-1-2",
+      "asc": "1b000984000400178000",
+      "frames": [
+        {
+          "offset": 11176,
+          "bytes": 113
+        },
+        {
+          "offset": 11534,
+          "bytes": 119
+        },
+        {
+          "offset": 11785,
+          "bytes": 215
+        },
+        {
+          "offset": 12227,
+          "bytes": 215
+        },
+        {
+          "offset": 12789,
+          "bytes": 120
+        },
+        {
+          "offset": 13042,
+          "bytes": 113
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 172032,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-1-1-2-core-control-synthetic.mp4",
+        "sha256": "2dc35c454ee53e995d3437366685bfe4f94af2f5fc4999823330aa05eca99032",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b000984000400178000",
+        "pcm_offset": 172032,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-0-1",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 13280,
+          "bytes": 59
+        },
+        {
+          "offset": 13530,
+          "bytes": 61
+        },
+        {
+          "offset": 13665,
+          "bytes": 106
+        },
+        {
+          "offset": 13889,
+          "bytes": 106
+        },
+        {
+          "offset": 14233,
+          "bytes": 61
+        },
+        {
+          "offset": 14368,
+          "bytes": 59
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 196608,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-1-core-control-synthetic.mp4",
+        "sha256": "e894ff358632ac6cbc62b43bbe08d6bbf4f743dd4a79fdc8532ab2e22764661d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 196608,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-0-2",
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 14498,
+          "bytes": 110
+        },
+        {
+          "offset": 14850,
+          "bytes": 113
+        },
+        {
+          "offset": 15089,
+          "bytes": 197
+        },
+        {
+          "offset": 15495,
+          "bytes": 197
+        },
+        {
+          "offset": 16021,
+          "bytes": 113
+        },
+        {
+          "offset": 16260,
+          "bytes": 110
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 221184,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-2-core-control-synthetic.mp4",
+        "sha256": "c2ef8240e1b9aa9c4d237c5d1bbd546c3cc975ffa92ed9585b019b305619cc58",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 221184,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-1-1",
+      "asc": "1b0009840002011000",
+      "frames": [
+        {
+          "offset": 16492,
+          "bytes": 66
+        },
+        {
+          "offset": 16755,
+          "bytes": 72
+        },
+        {
+          "offset": 16911,
+          "bytes": 142
+        },
+        {
+          "offset": 17207,
+          "bytes": 142
+        },
+        {
+          "offset": 17623,
+          "bytes": 74
+        },
+        {
+          "offset": 17784,
+          "bytes": 66
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-1-core-control-synthetic.mp4",
+        "sha256": "8b7b4f9a50dd92a02b45ae7188eaf6770779fd70649caf16aae7eb300a701878",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840002011000",
+        "pcm_offset": 245760,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-1-2",
+      "asc": "1b0009840004011f8000",
+      "frames": [
+        {
+          "offset": 17927,
+          "bytes": 120
+        },
+        {
+          "offset": 18299,
+          "bytes": 129
+        },
+        {
+          "offset": 18570,
+          "bytes": 251
+        },
+        {
+          "offset": 19084,
+          "bytes": 251
+        },
+        {
+          "offset": 19718,
+          "bytes": 133
+        },
+        {
+          "offset": 19996,
+          "bytes": 120
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-2-core-control-synthetic.mp4",
+        "sha256": "9e330a85649644f64aee190f66bd6a2f74f7c10163e990a4ee9f9dae7a46d80d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b0009840004011f8000",
+        "pcm_offset": 270336,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "mono-0",
+      "asc": "1b00098400000000",
+      "frames": [
+        {
+          "offset": 20248,
+          "bytes": 50
+        },
+        {
+          "offset": 20480,
+          "bytes": 52
+        },
+        {
+          "offset": 20596,
+          "bytes": 90
+        },
+        {
+          "offset": 20788,
+          "bytes": 90
+        },
+        {
+          "offset": 21100,
+          "bytes": 52
+        },
+        {
+          "offset": 21216,
+          "bytes": 50
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-mono-0-core-control-synthetic.mp4",
+        "sha256": "5f0e1b139c2fe3d77abda1369d5b880e493b83e813a73a86743c25beddd3b9e3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b00098400000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "mono-1",
+      "asc": "1b00098400000000",
+      "frames": [
+        {
+          "offset": 21328,
+          "bytes": 54
+        },
+        {
+          "offset": 21568,
+          "bytes": 57
+        },
+        {
+          "offset": 21695,
+          "bytes": 108
+        },
+        {
+          "offset": 21923,
+          "bytes": 108
+        },
+        {
+          "offset": 22271,
+          "bytes": 58
+        },
+        {
+          "offset": 22400,
+          "bytes": 54
+        }
+      ],
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1472,
+      "durations": [
+        1024,
+        1472,
+        1024,
+        1024,
+        576,
+        1024
+      ],
+      "samples": 6144,
+      "video": {
+        "file": "aac-ssr-ps-cce-mono-1-core-control-synthetic.mp4",
+        "sha256": "364c38a43cc5e7cae9b38fbc950285e228e64ed5b8bb7731bd31bd666d26e4de",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "1b00098400000000",
+        "pcm_offset": 49152,
+        "samples": 6144
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "0-0-1-24000",
+      "asc": "eb030c04c20001000800",
+      "frames": [
+        {
+          "offset": 59,
+          "bytes": 191,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 311,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 491,
+          "bytes": 118,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 715,
+          "bytes": 238,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1014,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1147,
+          "bytes": 71,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-0-1-24000-synthetic.mp4",
+        "sha256": "83a944397f9072f05e6f4af70f3407181d21d9495009b70ffbda64138a654c1c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001000800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-0-1-48000",
+      "asc": "eb018c04c20001000800",
+      "frames": [
+        {
+          "offset": 59,
+          "bytes": 191,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 311,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 491,
+          "bytes": 118,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 715,
+          "bytes": 238,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1014,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1147,
+          "bytes": 71,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-0-1-48000-synthetic.mp4",
+        "sha256": "ba223888a61673ba08ca93e26d3b2766815f73c01f0597733895caa310fae391",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001000800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-0-2-24000",
+      "asc": "eb030c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 1328,
+          "bytes": 242,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1683,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2006,
+          "bytes": 209,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2412,
+          "bytes": 329,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2854,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3090,
+          "bytes": 122,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 24576,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-0-2-24000-synthetic.mp4",
+        "sha256": "0ac5d1cb7ee2e87385dc5e5507b3ab84f35f47de9f79ec66960686ec406a064b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002000bc000",
+        "pcm_offset": 24576,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-0-2-48000",
+      "asc": "eb018c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 1328,
+          "bytes": 242,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1683,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2006,
+          "bytes": 209,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2412,
+          "bytes": 329,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2854,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3090,
+          "bytes": 122,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 24576,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-0-2-48000-synthetic.mp4",
+        "sha256": "d9ce0bdcc8e308fe10ac573076ee4cf7788dc0a7858476a991eb772249310284",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002000bc000",
+        "pcm_offset": 24576,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-1-1-24000",
+      "asc": "eb030c04c20001000800",
+      "frames": [
+        {
+          "offset": 3274,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3534,
+          "bytes": 79,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3737,
+          "bytes": 136,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3997,
+          "bytes": 256,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4320,
+          "bytes": 80,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4462,
+          "bytes": 74,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-1-1-24000-synthetic.mp4",
+        "sha256": "2a7b2f6be04920e4622221ac29e676a13d8effd7eae5e13a17fa1deda8ca5176",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001000800",
+        "pcm_offset": 49152,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-1-1-48000",
+      "asc": "eb018c04c20001000800",
+      "frames": [
+        {
+          "offset": 3274,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3534,
+          "bytes": 79,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3737,
+          "bytes": 136,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3997,
+          "bytes": 256,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4320,
+          "bytes": 80,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4462,
+          "bytes": 74,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-1-1-48000-synthetic.mp4",
+        "sha256": "1da23ea6ce3acfaf3a9739d355c1c348c519aa262c75dce6f7d51cd93d52e27b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001000800",
+        "pcm_offset": 49152,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "0-1-2-24000",
+      "asc": "eb030c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 4649,
+          "bytes": 245,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5013,
+          "bytes": 132,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5360,
+          "bytes": 227,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5802,
+          "bytes": 347,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6269,
+          "bytes": 133,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6515,
+          "bytes": 125,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 73728,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-1-2-24000-synthetic.mp4",
+        "sha256": "33db8e54cd31b2a68aea32ba75446331b4a702a8772fe4d42ac706aea949f7b5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002000bc000",
+        "pcm_offset": 73728,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "0-1-2-48000",
+      "asc": "eb018c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 4649,
+          "bytes": 245,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5013,
+          "bytes": 132,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5360,
+          "bytes": 227,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5802,
+          "bytes": 347,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6269,
+          "bytes": 133,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6515,
+          "bytes": 125,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 0,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 73728,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-0-1-2-48000-synthetic.mp4",
+        "sha256": "1a857eb5511ce3f7770b5a9612b9db35104a3c93fed448b90deea00179c90bde",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002000bc000",
+        "pcm_offset": 73728,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-0-1-24000",
+      "asc": "eb030c04c20001000800",
+      "frames": [
+        {
+          "offset": 6699,
+          "bytes": 191,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6951,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7131,
+          "bytes": 118,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7355,
+          "bytes": 238,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7654,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7787,
+          "bytes": 71,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 98304,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-0-1-24000-synthetic.mp4",
+        "sha256": "871d55e9a9cb188fbbd8012621ec64b0ca0711a974994e673631582ca7053fe2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001000800",
+        "pcm_offset": 98304,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-0-1-48000",
+      "asc": "eb018c04c20001000800",
+      "frames": [
+        {
+          "offset": 6699,
+          "bytes": 191,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6951,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7131,
+          "bytes": 118,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7355,
+          "bytes": 238,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7654,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7787,
+          "bytes": 71,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 98304,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-0-1-48000-synthetic.mp4",
+        "sha256": "f7675a672a8c368b190ccf3cf08dfe92eb95b53184ca28340f2fe846aa01f5ae",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001000800",
+        "pcm_offset": 98304,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-0-2-24000",
+      "asc": "eb030c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 7968,
+          "bytes": 242,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8323,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8646,
+          "bytes": 209,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9052,
+          "bytes": 329,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9494,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9730,
+          "bytes": 122,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 122880,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-0-2-24000-synthetic.mp4",
+        "sha256": "571d087bd2413c8f09e0141310269a83f4c21b504b7a7c91cfe35a50e9112827",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002000bc000",
+        "pcm_offset": 122880,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-0-2-48000",
+      "asc": "eb018c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 7968,
+          "bytes": 242,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8323,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8646,
+          "bytes": 209,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9052,
+          "bytes": 329,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9494,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9730,
+          "bytes": 122,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 122880,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-0-2-48000-synthetic.mp4",
+        "sha256": "ed811b811f2f369dfe4f81d5641f19ef98005ca7fce210cd92b098109383a137",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002000bc000",
+        "pcm_offset": 122880,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-1-1-24000",
+      "asc": "eb030c04c20001000800",
+      "frames": [
+        {
+          "offset": 9914,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10174,
+          "bytes": 79,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10377,
+          "bytes": 136,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10637,
+          "bytes": 256,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10960,
+          "bytes": 80,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 11102,
+          "bytes": 74,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 147456,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-1-1-24000-synthetic.mp4",
+        "sha256": "ddd38db8b92fc231bf3b302b29ca2e536e0ec181f6311af36705402f02f36e06",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001000800",
+        "pcm_offset": 147456,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-1-1-48000",
+      "asc": "eb018c04c20001000800",
+      "frames": [
+        {
+          "offset": 9914,
+          "bytes": 194,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10174,
+          "bytes": 79,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10377,
+          "bytes": 136,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10637,
+          "bytes": 256,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10960,
+          "bytes": 80,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 11102,
+          "bytes": 74,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 147456,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-1-1-48000-synthetic.mp4",
+        "sha256": "9553dffc9f9f5a68c6aa4dacf568ecc5eee8840656f3b8ea109d5a31440a37fc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001000800",
+        "pcm_offset": 147456,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "1-1-2-24000",
+      "asc": "eb030c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 11289,
+          "bytes": 245,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 11653,
+          "bytes": 132,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 12000,
+          "bytes": 227,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 12442,
+          "bytes": 347,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 12909,
+          "bytes": 133,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 13155,
+          "bytes": 125,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 172032,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-1-2-24000-synthetic.mp4",
+        "sha256": "aa0ff8460725a346332ae460eae99fa22a06e5544934b20c666961538b55cef8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002000bc000",
+        "pcm_offset": 172032,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "1-1-2-48000",
+      "asc": "eb018c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 11289,
+          "bytes": 245,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 11653,
+          "bytes": 132,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 12000,
+          "bytes": 227,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 12442,
+          "bytes": 347,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 12909,
+          "bytes": 133,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 13155,
+          "bytes": 125,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 172032,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-1-1-2-48000-synthetic.mp4",
+        "sha256": "d16124f0998f4ae465764c29504568a766aef4215e36ef1430ed150053eabeb0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002000bc000",
+        "pcm_offset": 172032,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-0-1-24000",
+      "asc": "eb030c04c20001008800",
+      "frames": [
+        {
+          "offset": 13339,
+          "bytes": 191,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 13591,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 13771,
+          "bytes": 118,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 13995,
+          "bytes": 238,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 14294,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 14427,
+          "bytes": 71,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 196608,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-1-24000-synthetic.mp4",
+        "sha256": "7786448e85d12f570ba4a02dbd301ac360d92ac6ba0362aef71235389feafa54",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 196608,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-0-1-48000",
+      "asc": "eb018c04c20001008800",
+      "frames": [
+        {
+          "offset": 13339,
+          "bytes": 191,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 13591,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 13771,
+          "bytes": 118,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 13995,
+          "bytes": 238,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 14294,
+          "bytes": 74,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 14427,
+          "bytes": 71,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 196608,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-1-48000-synthetic.mp4",
+        "sha256": "9d7afc4c3f93b1d1171e4ca2cfd9d6cc593cc8610817ebe7ea6693aca3acc7ce",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 196608,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-0-2-24000",
+      "asc": "eb030c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 14608,
+          "bytes": 242,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 14963,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 15286,
+          "bytes": 209,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 15692,
+          "bytes": 329,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 16134,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 16370,
+          "bytes": 122,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 221184,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-2-24000-synthetic.mp4",
+        "sha256": "3e833b95dd10ea7cd78fada0406d340203803ea43d77c0aca00f93917897dfd8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002008fc000",
+        "pcm_offset": 221184,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-0-2-48000",
+      "asc": "eb018c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 14608,
+          "bytes": 242,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 14963,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 15286,
+          "bytes": 209,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 15692,
+          "bytes": 329,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 16134,
+          "bytes": 126,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 16370,
+          "bytes": 122,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 221184,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-2-48000-synthetic.mp4",
+        "sha256": "8fa6afc517fd609b84d3812164e27623ad2aa84623a329357709076aea4983ac",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002008fc000",
+        "pcm_offset": 221184,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-1-1-24000",
+      "asc": "eb030c04c20001008800",
+      "frames": [
+        {
+          "offset": 16558,
+          "bytes": 197,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 16827,
+          "bytes": 84,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 17053,
+          "bytes": 154,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 17349,
+          "bytes": 274,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 17697,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 17850,
+          "bytes": 77,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-1-24000-synthetic.mp4",
+        "sha256": "859ffbb081ecba952aa849c9fb57aa1b9d043f75e68a9e02139b8895f1212092",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 245760,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-1-1-48000",
+      "asc": "eb018c04c20001008800",
+      "frames": [
+        {
+          "offset": 16558,
+          "bytes": 197,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 16827,
+          "bytes": 84,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 17053,
+          "bytes": 154,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 17349,
+          "bytes": 274,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 17697,
+          "bytes": 87,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 17850,
+          "bytes": 77,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-1-48000-synthetic.mp4",
+        "sha256": "b2b77004a07d5e25ad8929b27d5a65bd901fcad4f552638a083236509b147a1e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 245760,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-1-2-24000",
+      "asc": "eb030c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 18047,
+          "bytes": 252,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 18428,
+          "bytes": 142,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 18821,
+          "bytes": 263,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 19335,
+          "bytes": 383,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 19851,
+          "bytes": 145,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 20116,
+          "bytes": 132,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-2-24000-synthetic.mp4",
+        "sha256": "75507a40c7ad8de43a83ef581af2d13e89042aeb144153c0ebd59e3d73d4764a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002008fc000",
+        "pcm_offset": 270336,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-1-2-48000",
+      "asc": "eb018c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 18047,
+          "bytes": 252,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 18428,
+          "bytes": 142,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 18821,
+          "bytes": 263,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 19335,
+          "bytes": 383,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 19851,
+          "bytes": 145,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 20116,
+          "bytes": 132,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-2-48000-synthetic.mp4",
+        "sha256": "5b85dd4e6b718dc05d576e8d2a34117d940ee71d6fcaa9657b8f579b5b190e47",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002008fc000",
+        "pcm_offset": 270336,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "mono-0-24000",
+      "asc": "eb030c04c200000000",
+      "frames": [
+        {
+          "offset": 20298,
+          "bytes": 182,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 20532,
+          "bytes": 64,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 20686,
+          "bytes": 102,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 20878,
+          "bytes": 222,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 21152,
+          "bytes": 64,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 21266,
+          "bytes": 62,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": -1,
+      "tags": [],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-mono-0-24000-synthetic.mp4",
+        "sha256": "7be1cc33c54286f2fcf2baa94216067255613a9ea990e6824ef3e3afb721489e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c200000000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "mono-0-48000",
+      "asc": "eb018c04c200000000",
+      "frames": [
+        {
+          "offset": 20298,
+          "bytes": 182,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 20532,
+          "bytes": 64,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 20686,
+          "bytes": 102,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 20878,
+          "bytes": 222,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 21152,
+          "bytes": 64,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 21266,
+          "bytes": 62,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": -1,
+      "tags": [],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-mono-0-48000-synthetic.mp4",
+        "sha256": "bd5ee191133853748825edb31152d3e31365a9c877b356eea28117541a7442f4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c200000000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "mono-1-24000",
+      "asc": "eb030c04c200000000",
+      "frames": [
+        {
+          "offset": 21382,
+          "bytes": 186,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 21625,
+          "bytes": 70,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 21803,
+          "bytes": 120,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 22031,
+          "bytes": 240,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 22329,
+          "bytes": 71,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 22454,
+          "bytes": 66,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": -1,
+      "tags": [],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-mono-1-24000-synthetic.mp4",
+        "sha256": "39b97187798c1f2976c1ef462b6e64d00583528b8d2b9acb4f1de07e41e4b46c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c200000000",
+        "pcm_offset": 49152,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "mono-1-48000",
+      "asc": "eb018c04c200000000",
+      "frames": [
+        {
+          "offset": 21382,
+          "bytes": 186,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 21625,
+          "bytes": 70,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 21803,
+          "bytes": 120,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 22031,
+          "bytes": 240,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 22329,
+          "bytes": 71,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 22454,
+          "bytes": 66,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": -1,
+      "tags": [],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 49152,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-mono-1-48000-synthetic.mp4",
+        "sha256": "fa8968d978c741b9444fe24fa31e92d7f3e545ec3d0abcac18ec828841c47b89",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c200000000",
+        "pcm_offset": 49152,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-0-1-24000-source-sbr",
+      "asc": "eb030c04c20001008800",
+      "frames": [
+        {
+          "offset": 22520,
+          "bytes": 203,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 22723,
+          "bytes": 83,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 22806,
+          "bytes": 126,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 22932,
+          "bytes": 246,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 23178,
+          "bytes": 82,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 23260,
+          "bytes": 79,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 196608,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-1-24000-source-sbr-synthetic.mp4",
+        "sha256": "d9bde757eed8f821a4a0f3edfd08c11451d0c1b9844da8d4e3046d728c91b4de",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 196608,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-0-1-48000-source-sbr",
+      "asc": "eb018c04c20001008800",
+      "frames": [
+        {
+          "offset": 23339,
+          "bytes": 203,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 23542,
+          "bytes": 83,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 23625,
+          "bytes": 126,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 23751,
+          "bytes": 246,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 23997,
+          "bytes": 82,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 24079,
+          "bytes": 79,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 196608,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-1-48000-source-sbr-synthetic.mp4",
+        "sha256": "a8e05a65b424f1c5ea4697bdeceeef29c297801c5c82f0321fb73d6b4c65f7a9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 196608,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-0-2-24000-source-sbr",
+      "asc": "eb030c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 24158,
+          "bytes": 266,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 24424,
+          "bytes": 144,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 24568,
+          "bytes": 224,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 24792,
+          "bytes": 344,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 25136,
+          "bytes": 142,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 25278,
+          "bytes": 138,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 221184,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-2-24000-source-sbr-synthetic.mp4",
+        "sha256": "d7daab40ada9f3a23670d6ef5ec6ca50a700c95157060899d5595d1b1a95a8f8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002008fc000",
+        "pcm_offset": 221184,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-0-2-48000-source-sbr",
+      "asc": "eb018c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 25416,
+          "bytes": 266,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 25682,
+          "bytes": 144,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 25826,
+          "bytes": 224,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 26050,
+          "bytes": 344,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 26394,
+          "bytes": 142,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 26536,
+          "bytes": 138,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": false,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 221184,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-0-2-48000-source-sbr-synthetic.mp4",
+        "sha256": "78672585dd1c53c7afc704f716ac7639481c00ff550ec836fde11af768fc5fc8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002008fc000",
+        "pcm_offset": 221184,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-1-1-24000-source-sbr",
+      "asc": "eb030c04c20001008800",
+      "frames": [
+        {
+          "offset": 26674,
+          "bytes": 209,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 26883,
+          "bytes": 93,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 26976,
+          "bytes": 162,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 27138,
+          "bytes": 282,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 27420,
+          "bytes": 95,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 27515,
+          "bytes": 85,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-1-24000-source-sbr-synthetic.mp4",
+        "sha256": "92409ec1641df720f99e7a0479c3b69bf73caa74078b5990b3dfa143cb2af1ad",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20001008800",
+        "pcm_offset": 245760,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-1-1-48000-source-sbr",
+      "asc": "eb018c04c20001008800",
+      "frames": [
+        {
+          "offset": 27600,
+          "bytes": 209,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 27809,
+          "bytes": 93,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 27902,
+          "bytes": 162,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 28064,
+          "bytes": 282,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 28346,
+          "bytes": 95,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 28441,
+          "bytes": 85,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 245760,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-1-48000-source-sbr-synthetic.mp4",
+        "sha256": "9be63bd50e281853999b59f114365dea32c8db0fc4c55d450169ac61c7961c38",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20001008800",
+        "pcm_offset": 245760,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "3-1-2-24000-source-sbr",
+      "asc": "eb030c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 28526,
+          "bytes": 276,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 28802,
+          "bytes": 160,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 28962,
+          "bytes": 278,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 29240,
+          "bytes": 398,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 29638,
+          "bytes": 161,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 29799,
+          "bytes": 148,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 32,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-2-24000-source-sbr-synthetic.mp4",
+        "sha256": "08faea55e26316fa2de3af3f94c09ae828d85bde0495973a066943b40acf9f34",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030c04c20002008fc000",
+        "pcm_offset": 270336,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "3-1-2-48000-source-sbr",
+      "asc": "eb018c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 29947,
+          "bytes": 276,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d88c182b04010000000070"
+        },
+        {
+          "offset": 30223,
+          "bytes": 160,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "ee600e0000000000"
+        },
+        {
+          "offset": 30383,
+          "bytes": 278,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 30661,
+          "bytes": 398,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 31059,
+          "bytes": 161,
+          "payload": "e3d80e0000000014b33021ff",
+          "source_payload": "d0380000000000"
+        },
+        {
+          "offset": 31220,
+          "bytes": 148,
+          "payload": "d0380000000052ccc097fc",
+          "source_payload": "d0380000000000"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-3-1-2-48000-source-sbr-synthetic.mp4",
+        "sha256": "4f2737c401dc36ea5ee7e62bd17cc89af3d87d73d35479bbd39179ffe4238f7c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002008fc000",
+        "pcm_offset": 270336,
+        "samples": 12288
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "shape",
+      "asc": "eb018c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 31368,
+          "bytes": 245,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 31613,
+          "bytes": 132,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 31745,
+          "bytes": 227,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 31972,
+          "bytes": 347,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 32319,
+          "bytes": 133,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 32452,
+          "bytes": 125,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 172032,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-invalid-shape-synthetic.mp4",
+        "sha256": "e8c2f9d86bd5cd031887eebd2ed00e0fddb2d4a6c61e0cf5d73f01b62eb3924b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002000bc000",
+        "pcm_offset": 172032,
+        "samples": 12288
+      },
+      "error": "AAC SSR dependent coupling window shape mismatch"
+    },
+    {
+      "name": "target",
+      "asc": "eb018c04c20002000bc000",
+      "frames": [
+        {
+          "offset": 32577,
+          "bytes": 245,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 32822,
+          "bytes": 132,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 32954,
+          "bytes": 227,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 33181,
+          "bytes": 347,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 33528,
+          "bytes": 133,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 33661,
+          "bytes": 125,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 1,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 172032,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-invalid-target-synthetic.mp4",
+        "sha256": "bf5aeb4e04f8d8125bc3ee1766c00e18d8912b09a9208d5b34283e571fb31943",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002000bc000",
+        "pcm_offset": 172032,
+        "samples": 12288
+      },
+      "error": "AAC coupling target is absent"
+    },
+    {
+      "name": "crc",
+      "asc": "eb018c04c20002008fc000",
+      "frames": [
+        {
+          "offset": 33786,
+          "bytes": 276,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 34062,
+          "bytes": 160,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 34222,
+          "bytes": 278,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 34500,
+          "bytes": 398,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 34898,
+          "bytes": 161,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 35059,
+          "bytes": 148,
+          "payload": "d0380000000052ccc097fc"
+        }
+      ],
+      "point": 3,
+      "tags": [
+        1,
+        15
+      ],
+      "active": true,
+      "slots": 16,
+      "bands": 64,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 12288,
+      "pcm_offset": 270336,
+      "pcm_bytes": 24576,
+      "provenance": "independent original scalar SSR/IPQF core; separately qualified owned SBR/PS composition",
+      "video": {
+        "file": "aac-ssr-ps-cce-invalid-crc-synthetic.mp4",
+        "sha256": "2f89ce539073965fe9f76f659724ccc86ae29becf90679986d6f8f7c0467b943",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018c04c20002008fc000",
+        "pcm_offset": 270336,
+        "samples": 12288
+      },
+      "error": "SBR CRC mismatch"
+    }
+  ],
+  "acceptance": "Enabled native SSR/PS coupling waveform for points 0/1/3, tags 1/15, gain and window transitions; stage composition uses independent scalar SSR core.",
+  "provenance": "Own SSR gain/windows and tags 1/15, configured mono PCE and original PS payloads; no private media, foreign codec, FFmpeg or network."
+}

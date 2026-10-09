@@ -30,9 +30,10 @@ bounded PCM alignment, original packet timing, EOF drain, checkpoint replay,
 rewind, seek and interval export. Explicit independent CCE absence/return now
 preserves queued source history. Mono SSR/PS is qualified across three silent
 core window schedules, explicit/sync signalling, both output clocks, MP4,
-Matroska, ADTS and two-frame EOF drain. SSR PS coupling, nonzero SSR spectral/gain
-composition with PS and wider profiles/layouts still require implementation or
-additional acceptance evidence. New independent CCEs can appear while alignment is active: six
+Matroska, ADTS and two-frame EOF drain. SSR/PS points 0/1/3 coupling and nonzero
+SSR spectrum/gain composition now have stable configured program acceptance.
+Live source changes, target TNS composition, PCE replacement and wider
+profiles/layouts still require implementation or additional acceptance evidence. New independent CCEs can appear while alignment is active: six
 further MP4/Matroska pairs qualify first occurrence, canonical tag reordering,
 source timing and preservation of prior filter/PCM histories. Four fixed-clock
 MP4 variants
@@ -994,3 +995,47 @@ SSR/PS tests, including the formerly ignored native waveform acceptance, are
 enabled. Checks were locked/offline without FFmpeg. All 46 artifacts regenerate
 identically, and the 18 original binary fixtures/references remain unchanged.
 Changed Rust module/test formatting and `git diff --check` pass.
+
+
+### Native SSR/PS dependent and independent CCE composition (2026-10-09)
+
+The configured SSR PS coupling gate is removed. Points 0/1 use spectral mixing
+and the target SSR gain/window/IPQF pipeline, with the same mandatory dependent
+window-shape check as the ordinary SSR decoder. Point 3 synthesizes each CCE
+with its own tag-keyed SSR filterbank/gain history. A source-preserving alignment
+queue retains raw PCM and original output gain boundaries, then applies that
+source's original SBR FIL (or pure upsampling) at the fixed PS core clock.
+Only channel 0 selected by the mono SCE target receives independent coupling
+after PS, consistently with the existing owned LC/PS dispatch contract.
+Canonical source lanes preserve prior chunks when tags are added; explicitly
+absent lanes have no output gains. Native packet transactions, checkpoint,
+reset and both EOF frames retain the source syntax, PCM and coupling identity.
+SSR CCEs do not allocate an unused LC filterbank.
+
+`scripts/generate_aac_ssr_ps_coupling_fixtures.py` authors 14 nonzero SSR core
+controls, 36 combined PS programs and three malformed videos. The matrix
+covers points 0/1/3, tag 1 alone and tags 1/15 together, active/inactive SSR gain,
+sine/KBD and long/start/short/stop transitions, both 24/48 kHz PS clocks, eight
+independent-source SBR programs and four standalone nonzero mono SSR/PS programs.
+Controls use the original independently evaluated scalar SSR/IPQF PCM. Combined
+acceptance uses that scalar core plus separately qualified owned SBR/PS DSP
+composition; it is not a new independent end-to-end PS numerical oracle.
+Malformed shape, absent target and source CRC reproduce their specific errors
+and preserve queued audio through a complete valid continuation and EOF replay.
+All native waveform and export/range/rewind/seek tests are enabled. The old
+profile-gate reproduction passed before the implementation and was removed
+when the intended acceptance was enabled.
+
+No private media, foreign codec, FFmpeg or network is used. Ordinary tests
+read committed artifacts and do not run the generator. This qualifies the
+listed stable configured programs, not all coupling or codec conformance.
+Distinct source spectra, independently switched source windows, live source
+appearance/absence with PS, target TNS composition, PCE replacement and broader
+profiles/layouts remain further qualification or implementation requirements.
+This section supersedes earlier SSR/PS coupling and nonzero-core refusal notes.
+
+Validation: 909 root and 461 owned-media unit tests plus 36 selected integration
+tests passed (1406 distinct passes, 24 existing ignored unit tests). All five
+new SSR/PS coupling tests are enabled. The 56 new artifacts regenerate
+identically. Checks were locked/offline without FFmpeg; changed native/test
+formatting and `git diff --check` pass.

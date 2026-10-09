@@ -2982,3 +2982,41 @@ read committed artifacts and do not run generators. This qualifies these mono
 programs; nonzero SSR spectral/gain tools composed with PS, SSR PS CCE, broader
 layouts/profiles and general codec conformance remain separate requirements.
 This section supersedes the earlier preparation-only native refusal status.
+
+
+### Native SSR/PS dependent and independent CCE composition (2026-10-09)
+
+The configured SSR PS coupling gate is removed. Points 0/1 use spectral mixing
+and the target SSR gain/window/IPQF pipeline, with the same mandatory dependent
+window-shape check as the ordinary SSR decoder. Point 3 synthesizes each CCE
+with its own tag-keyed SSR filterbank/gain history. A source-preserving alignment
+queue retains raw PCM and original output gain boundaries, then applies that
+source's original SBR FIL (or pure upsampling) at the fixed PS core clock.
+Only channel 0 selected by the mono SCE target receives independent coupling
+after PS, consistently with the existing owned LC/PS dispatch contract.
+Canonical source lanes preserve prior chunks when tags are added; explicitly
+absent lanes have no output gains. Native packet transactions, checkpoint,
+reset and both EOF frames retain the source syntax, PCM and coupling identity.
+SSR CCEs do not allocate an unused LC filterbank.
+
+`scripts/generate_aac_ssr_ps_coupling_fixtures.py` authors 14 nonzero SSR core
+controls, 36 combined PS programs and three malformed videos. The matrix
+covers points 0/1/3, tag 1 alone and tags 1/15 together, active/inactive SSR gain,
+sine/KBD and long/start/short/stop transitions, both 24/48 kHz PS clocks, eight
+independent-source SBR programs and four standalone nonzero mono SSR/PS programs.
+Controls use the original independently evaluated scalar SSR/IPQF PCM. Combined
+acceptance uses that scalar core plus separately qualified owned SBR/PS DSP
+composition; it is not a new independent end-to-end PS numerical oracle.
+Malformed shape, absent target and source CRC reproduce their specific errors
+and preserve queued audio through a complete valid continuation and EOF replay.
+All native waveform and export/range/rewind/seek tests are enabled. The old
+profile-gate reproduction passed before the implementation and was removed
+when the intended acceptance was enabled.
+
+No private media, foreign codec, FFmpeg or network is used. Ordinary tests
+read committed artifacts and do not run the generator. This qualifies the
+listed stable configured programs, not all coupling or codec conformance.
+Distinct source spectra, independently switched source windows, live source
+appearance/absence with PS, target TNS composition, PCE replacement and broader
+profiles/layouts remain further qualification or implementation requirements.
+This section supersedes earlier SSR/PS coupling and nonzero-core refusal notes.

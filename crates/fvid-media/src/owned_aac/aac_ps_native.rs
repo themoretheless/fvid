@@ -16,16 +16,23 @@ use super::{
     invalid, unsupported,
 };
 #[derive(Clone)]
+struct SsrFrame {
+    prepared: aac_sbr_ps::PreparedFrame,
+    sources: Vec<Option<aac_sbr_history::Frame>>,
+}
+#[derive(Clone)]
 struct SsrState {
     synthesis: super::aac_ssr_synthesis::SsrSynthesis,
     alignment: super::aac_ssr_alignment::SsrPcmAlignment,
-    prepared: std::collections::VecDeque<aac_sbr_ps::PreparedFrame>,
+    prepared: std::collections::VecDeque<SsrFrame>,
+    tags: Vec<u8>,
 }
 #[derive(Clone, Default)]
 struct CceState {
     stream: aac_sbr_history::Stream,
     dsp: aac_sbr_dsp::Dsp,
     synthesis: Option<LongSineSynthesis>,
+    ssr_synthesis: Option<super::aac_ssr_synthesis::SsrSynthesis>,
 }
 #[derive(Clone)]
 pub struct NativePsAacDecoder {
@@ -117,6 +124,7 @@ impl NativePsAacDecoder {
                 synthesis: super::aac_ssr_synthesis::SsrSynthesis::new()?,
                 alignment: super::aac_ssr_alignment::SsrPcmAlignment::new(1, 1)?,
                 prepared: Default::default(),
+                tags: Vec::new(),
             })
         } else {
             None
@@ -150,7 +158,7 @@ impl NativePsAacDecoder {
     pub fn pending_frame_index(&self) -> Option<u64> {
         self.ssr
             .as_ref()
-            .and_then(|s| s.prepared.back().map(|p| p.frame_index()))
+            .and_then(|s| s.prepared.back().map(|p| p.prepared.frame_index()))
             .or_else(|| self.extension.pending_frame_index())
     }
     pub fn checkpoint(&self) -> Checkpoint {
@@ -178,6 +186,9 @@ impl NativePsAacDecoder {
             ssr.synthesis.reset();
             ssr.alignment.reset();
             ssr.prepared.clear();
+            ssr.tags.clear();
+            ssr.alignment = super::aac_ssr_alignment::SsrPcmAlignment::new(1, 1)
+                .expect("fixed mono SSR alignment geometry");
         }
         self.noise.reset();
         self.extension.reset();
@@ -312,6 +323,11 @@ impl NativePsAacDecoder {
                     if channel.info.sequence != coupling.channel.info.sequence {
                         return Err(invalid("AAC coupling target window sequence mismatch"));
                     }
+                    if trial.config.object_type == 3
+                        && channel.info.shape != coupling.channel.info.shape
+                    {
+                        return Err(invalid("AAC SSR dependent coupling window shape mismatch"));
+                    }
                     coupling.mix_spectrum(target, &trial.config, source, &mut spectrum)?;
                 }
             }
@@ -351,7 +367,7 @@ impl NativePsAacDecoder {
         if pcm.iter().any(|v| !v.is_finite()) {
             return Err(invalid("PS AAC core PCM exceeds finite f32 output"));
         }
-        let output = if trial.ssr.is_some() {
+        if trial.ssr.is_some() {
             let prepared = if let Some((position, end, crc)) = extension {
                 let mut reader = BitReader::new(packet);
                 reader.skip(position)?;
@@ -368,20 +384,91 @@ impl NativePsAacDecoder {
                     .extension
                     .prepare_upsampling(rate, slots, trial.mode)?
             };
+            use super::aac_ssr_alignment::{LaneInput, OutputGain};
+            use super::aac_ssr_synthesis::SsrSynthesis;
             let stamp = prepared.frame_index();
+            let mut coded = Vec::new();
+            for (coupling, spectrum) in &couplings {
+                if coupling.point != 3 {
+                    continue;
+                }
+                let mut outputs = Vec::new();
+                for target in &coupling.targets {
+                    validate_coupling_target(target, tag)?;
+                    outputs.push(OutputGain {
+                        channel: 0,
+                        gain: target.gain,
+                    });
+                }
+                let state =
+                    trial.cce_states[coupling.tag as usize].get_or_insert_with(CceState::default);
+                if state.ssr_synthesis.is_none() {
+                    state.ssr_synthesis = Some(SsrSynthesis::new()?);
+                }
+                let mut source =
+                    vec![0.; SsrSynthesis::output_samples(coupling.channel.info.sequence)];
+                let gain = coupling
+                    .channel
+                    .gain
+                    .clone()
+                    .unwrap_or(super::aac_gain_control::GainControl { bands: Vec::new() })
+                    .into();
+                state.ssr_synthesis.as_mut().unwrap().synthesize_pcm(
+                    coupling.channel.info.sequence,
+                    coupling.channel.info.shape,
+                    &gain,
+                    spectrum,
+                    &mut source,
+                )?;
+                let source: Vec<f32> = source.into_iter().map(|v| v as f32).collect();
+                coded.push((coupling.tag, source, outputs));
+            }
             let ssr = trial.ssr.as_mut().unwrap();
-            ssr.prepared.push_back(prepared);
-            let gain = [super::aac_ssr_alignment::OutputGain {
+            let mut tags = ssr.tags.clone();
+            tags.extend(coded.iter().map(|c| c.0));
+            tags.sort_unstable();
+            tags.dedup();
+            if tags != ssr.tags {
+                let order: Vec<_> = std::iter::once(Some(0))
+                    .chain(tags.iter().map(|tag| {
+                        ssr.tags
+                            .iter()
+                            .position(|old| old == tag)
+                            .map(|index| index + 1)
+                    }))
+                    .collect();
+                ssr.alignment.extend_lanes(&order)?;
+                ssr.tags = tags;
+            }
+            let mut lanes = vec![pcm];
+            let mut outputs = vec![vec![OutputGain {
                 channel: 0,
                 gain: 1.0,
-            }];
-            let input = [super::aac_ssr_alignment::LaneInput {
-                samples: &pcm,
-                outputs: &gain,
-            }];
-            let aligned = ssr.alignment.submit(stamp, n, &input)?;
-            trial.aligned_output(aligned)?
-        } else if let Some((position, end, crc)) = extension {
+            }]];
+            for (index, tag) in ssr.tags.iter().enumerate() {
+                if let Some((_, source, gains)) = coded.iter().find(|c| c.0 == *tag) {
+                    lanes.push(source.clone());
+                    outputs.push(gains.clone());
+                } else {
+                    lanes.push(vec![0.; ssr.alignment.absent_input_rows(index + 1, n)?]);
+                    outputs.push(Vec::new());
+                }
+            }
+            let inputs: Vec<_> = lanes
+                .iter()
+                .zip(&outputs)
+                .map(|(samples, outputs)| LaneInput { samples, outputs })
+                .collect();
+            ssr.prepared.push_back(SsrFrame {
+                prepared,
+                sources: cce_frames,
+            });
+            let aligned = ssr.alignment.submit_sources(stamp, n, &inputs)?;
+            let output = trial.aligned_output(aligned)?;
+            *self = trial;
+            return Ok(output);
+        }
+        let output = if let Some((position, end, crc)) = extension {
             let mut reader = BitReader::new(packet);
             reader.skip(position)?;
             let output =
@@ -461,8 +548,8 @@ impl NativePsAacDecoder {
     }
     fn aligned_output(
         &mut self,
-        aligned: Option<super::aac_ssr_alignment::AlignedFrame>,
-    ) -> Result<Option<aac_sbr_ps::Frame>> {
+        aligned: Option<super::aac_ssr_alignment::AlignedSources>,
+    ) -> Result<Option<Frame>> {
         let Some(aligned) = aligned else {
             return Ok(None);
         };
@@ -470,17 +557,73 @@ impl NativePsAacDecoder {
             .ssr
             .as_mut()
             .ok_or_else(|| invalid("missing PS SSR alignment"))?;
-        let prepared = ssr
+        let metadata = ssr
             .prepared
             .front()
             .ok_or_else(|| invalid("missing PS SSR prepared frame"))?;
-        if prepared.frame_index() != aligned.stamp {
+        if metadata.prepared.frame_index() != aligned.stamp || aligned.rows != 1024 {
             return Err(invalid("PS SSR aligned frame identity mismatch"));
+        }
+        let target: Vec<_> = aligned.lanes[0]
+            .iter()
+            .flat_map(|c| c.samples.iter().copied())
+            .collect();
+        if target.len() != 1024 {
+            return Err(invalid("PS SSR aligned target length mismatch"));
         }
         let output = self
             .extension
-            .process_prepared(prepared, &aligned.samples)?;
+            .process_prepared(&metadata.prepared, &target)?;
+        let rate = self
+            .config
+            .sample_rate
+            .checked_mul(2)
+            .ok_or_else(|| invalid("PS frequency overflow"))?;
+        let ratio = if self.mode == OutputRate::Core { 1 } else { 2 };
+        let mut left = if ssr.tags.is_empty() {
+            Vec::new()
+        } else {
+            vec![0f32; 1024 * ratio]
+        };
+        for (index, &tag) in ssr.tags.iter().enumerate() {
+            let chunks = &aligned.lanes[index + 1];
+            let samples: Vec<_> = chunks
+                .iter()
+                .flat_map(|c| c.samples.iter().copied())
+                .collect();
+            if samples.len() != 1024 {
+                return Err(invalid("PS SSR aligned source length mismatch"));
+            }
+            let state = self.cce_states[tag as usize].get_or_insert_with(CceState::default);
+            let rendered = if let Some(frame) = &metadata.sources[tag as usize] {
+                state.dsp.process(frame, &[&samples], rate, 16, self.mode)?
+            } else {
+                state
+                    .dsp
+                    .process_upsampling(&[&samples], rate, 16, self.mode)?
+            };
+            if rendered[0].len() != left.len() {
+                return Err(invalid("SBR coupling output length mismatch"));
+            }
+            let mut offset = 0;
+            for chunk in chunks {
+                let end = offset + chunk.samples.len() * ratio;
+                for (dest, &sample) in left[offset..end].iter_mut().zip(&rendered[0][offset..end]) {
+                    for gain in &chunk.outputs {
+                        *dest += sample as f32 * gain.gain;
+                        if !dest.is_finite() {
+                            return Err(invalid("AAC coupled PCM exceeds finite f32 output"));
+                        }
+                    }
+                }
+                offset = end;
+            }
+        }
         ssr.prepared.pop_front();
+        let output = self.coupled_output(output)?;
+        if !left.is_empty() {
+            self.pending_coupling = Some((aligned.stamp, left));
+        }
         Ok(output)
     }
     fn coupled_output(&mut self, frame: Option<aac_sbr_ps::Frame>) -> Result<Option<Frame>> {
@@ -507,16 +650,19 @@ impl NativePsAacDecoder {
             ));
         }
         let mut trial = self.clone();
-        let aligned = if let Some(ssr) = &mut trial.ssr {
-            ssr.alignment.finish()?
+        let output = if let Some(ssr) = &mut trial.ssr {
+            let aligned = ssr.alignment.finish_sources()?;
+            match trial.aligned_output(aligned)? {
+                Some(output) => Some(output),
+                None => {
+                    let output = trial.extension.finish()?;
+                    trial.coupled_output(output)?
+                }
+            }
         } else {
-            None
+            let output = trial.extension.finish()?;
+            trial.coupled_output(output)?
         };
-        let mut output = trial.aligned_output(aligned)?;
-        if output.is_none() {
-            output = trial.extension.finish()?;
-        }
-        let output = trial.coupled_output(output)?;
         *self = trial;
         Ok(output)
     }
@@ -670,16 +816,6 @@ fn validate_mono_program(parsed: &AudioSpecificConfig) -> Result<()> {
     if !matches!(parsed.core.object_type, 2 | 3) {
         return Err(unsupported(
             "AAC parametric stereo core profile is not implemented",
-        ));
-    }
-    if parsed.core.object_type == 3
-        && parsed
-            .program
-            .as_ref()
-            .is_some_and(|p| !p.coupling.is_empty())
-    {
-        return Err(unsupported(
-            "AAC SSR parametric stereo coupling synthesis is not implemented",
         ));
     }
     if parsed.core.channels != 1 {
