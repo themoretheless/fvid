@@ -2824,3 +2824,40 @@ separate gaps; this does not establish complete AAC conformance.
 Generator: `scripts/generate_aac_late_sbr_fixed_clock_fixtures.py`.
 Artifacts: `aac-late-sbr-fixed-*`; both references use the independent
 `generate_aac_main_sbr_oracle.py` convolution with `first_sbr_frame=3`.
+
+
+### Independently switched SSR/SBR windows — 2026-10-09
+
+Five unequal window schedules now have synthetic SBR acceptance: source
+ahead, source starting ahead, source behind, late target drift, and opposite
+long/start/short/stop switching. The target remains silent with sine windows;
+the independent CCE has authored nonzero spectra/gain and alternating
+sine/KBD windows. Packet element order alternates while FIL remains attached
+to its own CCE. Each schedule has a bit-exact nonzero core-only control and
+explicit/sync/implicit SBR programs at both 24 and 48 kHz output clocks:
+35 six-frame MP4 videos in total, of which 30 contain SBR.
+
+The source-preserving SSR queue and per-source SBR DSP already accept these
+schedules; no decoder change was required. Complete PCM is checked against
+independent scalar SSR/IPQF core values from the authored alignment oracle,
+followed by direct QMF/HF/noise convolutions at 32 and 64 bands. No production
+decoder produces the reference. Native checkpoint/invalid-packet rollback,
+reset and delayed EOF, and player rewind/seek/EOF cover every program.
+
+All four enabled integration tests passed (15.77 seconds). No refusal or
+ignored test is counted as playback acceptance. The 47 generated artifacts
+regenerate identically offline, without FFmpeg, private media or network
+access. Ordinary tests read committed artifacts and do not run generators.
+Formatting and `git diff --check` pass.
+
+This qualifies the five authored window/gain schedules, mono target and one
+independent unit-gain CCE with stable tag roster. Dynamic source retirement,
+SSR PS, arbitrary wider layouts, untimed late discovery and other codec
+profiles/tools remain open. The complete codec goal remains unproven.
+
+Generator: `scripts/generate_aac_ssr_sbr_window_drift_fixtures.py`.
+The five input schedules and source scalar PCM ranges come from
+`aac-ssr-alignment.json` / `aac-ssr-alignment-pcm.f32le`, authored by
+`generate_aac_ssr_alignment_fixtures.py`; SBR syntax is the committed
+owned DSP syntax fixture. Output references are the direct scalar
+`generate_aac_main_sbr_oracle.py` convolution over those core samples.

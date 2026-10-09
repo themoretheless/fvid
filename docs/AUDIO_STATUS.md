@@ -889,3 +889,15 @@ history. Authored 24 kHz SCE/CCE programs retain bit-exact core prefixes
 and compare the complete waveform against independent scalar QMF output.
 Checkpoint/error/reset/EOF and player rewind/seek cover the transition.
 Broader signalling/rate switches, layouts and coupling tools remain open.
+
+
+### SSR/SBR independent window schedules — 2026-10-09
+
+Five independent target/CCE long/start/short/stop schedules now have full PCM
+acceptance with explicit, sync-extension and implicit SBR at 24/48 kHz.
+The 35 authored programs include five bit-exact nonzero core controls;
+complete SBR output agrees with independent scalar IPQF→QMF references.
+Checkpoint/error/reset/EOF and player rewind/seek cover all programs.
+The existing queue/DSP handles these schedules without decoder changes.
+This covers a stable mono target / unit independent CCE roster; dynamic
+retirement, SSR PS and broader tools/layouts remain separate work.

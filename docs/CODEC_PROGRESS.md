@@ -8348,3 +8348,33 @@ tests (3 new fixed-clock Main/LC, 2 Main/SBR, 5 SSR CCE, 5 SSR late-FIL,
 3 ADTS SSR) passed: 1387 distinct passes, 24 existing ignored unit tests.
 All fourteen fixture/reference artifacts regenerate identically. Checks
 were locked/offline without FFmpeg; formatting and diff checks pass.
+
+
+### 2026-10-09 — independently switched SSR/SBR target and CCE windows
+
+Five unequal window schedules now have synthetic SBR acceptance: source
+ahead, source starting ahead, source behind, late target drift, and opposite
+long/start/short/stop switching. The target remains silent with sine windows;
+the independent CCE has authored nonzero spectra/gain and alternating
+sine/KBD windows. Packet element order alternates while FIL remains attached
+to its own CCE. Each schedule has a bit-exact nonzero core-only control and
+explicit/sync/implicit SBR programs at both 24 and 48 kHz output clocks:
+35 six-frame MP4 videos in total, of which 30 contain SBR.
+
+The source-preserving SSR queue and per-source SBR DSP already accept these
+schedules; no decoder change was required. Complete PCM is checked against
+independent scalar SSR/IPQF core values from the authored alignment oracle,
+followed by direct QMF/HF/noise convolutions at 32 and 64 bands. No production
+decoder produces the reference. Native checkpoint/invalid-packet rollback,
+reset and delayed EOF, and player rewind/seek/EOF cover every program.
+
+All four enabled integration tests passed (15.77 seconds). No refusal or
+ignored test is counted as playback acceptance. The 47 generated artifacts
+regenerate identically offline, without FFmpeg, private media or network
+access. Ordinary tests read committed artifacts and do not run generators.
+Formatting and `git diff --check` pass.
+
+This qualifies the five authored window/gain schedules, mono target and one
+independent unit-gain CCE with stable tag roster. Dynamic source retirement,
+SSR PS, arbitrary wider layouts, untimed late discovery and other codec
+profiles/tools remain open. The complete codec goal remains unproven.
