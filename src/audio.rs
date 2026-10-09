@@ -532,6 +532,7 @@ pub enum AudioStep {
 pub trait AudioStream: Send {
     /// Build a decoder after the reader has negotiated the decoded layout.
     /// Readers with verified in-band extensions may override metadata dispatch.
+    #[cfg(feature = "player")]
     fn make_decoder(&self) -> crate::Result<Box<dyn AudioDecode>> {
         crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())
     }
