@@ -2795,3 +2795,32 @@ This qualifies the authored six-frame, 24 kHz, 1024-tick direct SCE and unit
 independent CCE programs. Arbitrary late rate changes, untimed variable-length
 discovery, source retirement, SSR PS and wider codec profiles/tools remain
 open; this fixture qualification is not complete codec conformance.
+
+
+### Main/LC fixed-clock late FIL — 2026-10-09
+
+Eight owned six-frame programs cover Main/LC and direct SCE0/independent
+unit-gain CCE1, each with a core-only control and a first valid FIL at packet
+3. The new acceptance initially reproduced exactly
+`SBR output rate changed without reset`, after the valid core prefix.
+
+Before presence was established, Main/LC selected Double for warm-up even
+when `new_with_output_rate` retained a fixed Core output hint. First FIL
+then selected Core, invalidating the retained synthesis state. Target and
+CCE warm-up now use the same immutable output hint as discovery. The
+pre-FIL published output remains core PCM; QMF history is preserved.
+
+The scalar reference independently combines authored integer spectra, Main
+prediction (disabled for LC), direct IMDCT, 32-band prefix QMF and the
+existing authored SBR geometry/noise. Enabled acceptance checks all samples,
+bit-identical published prefixes, checkpoint/invalid-packet rollback, reset,
+EOF and player rewind/seek across the transition. Fourteen generated
+artifacts are independent of production decoding, FFmpeg and network access.
+
+This qualifies these 24 kHz, 1024-sample, six-frame programs. Arbitrary
+late rate switches, wider layouts/tools and dependent coupling remain
+separate gaps; this does not establish complete AAC conformance.
+
+Generator: `scripts/generate_aac_late_sbr_fixed_clock_fixtures.py`.
+Artifacts: `aac-late-sbr-fixed-*`; both references use the independent
+`generate_aac_main_sbr_oracle.py` convolution with `first_sbr_frame=3`.

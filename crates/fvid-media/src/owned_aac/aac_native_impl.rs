@@ -846,9 +846,11 @@ impl NativeAacDecoder {
                     output[i * channels.len() + target] = pcm[i] as f32;
                 }
             }
+            // Warm-up must use the fixed output hint before FIL establishes
+            // presence, so discovery preserves the same synthesis history.
             if sbr_rate.is_some() || self.detect_sbr {
                 let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
-                let mode = if sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
+                let mode = if sbr_rate.or(self.sbr_detection_rate) == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
                 let samples = if mode == sbr_dsp::OutputRate::Core { n } else { n*2 };
                 let mut expanded = vec![0.0; samples*channels.len()];
                 for &(kind, _, offset) in &decoded_elements {
@@ -894,7 +896,7 @@ impl NativeAacDecoder {
                     let state = sbr_elements[offset].get_or_insert_with(|| ElementSbr::new(1));
                     let core: Vec<f32> = pcm.iter().map(|&value| value as f32).collect();
                     let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
-                    let mode = if sbr_rate == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
+                    let mode = if sbr_rate.or(self.sbr_detection_rate) == Some(self.config.sample_rate) { sbr_dsp::OutputRate::Core } else { sbr_dsp::OutputRate::Double };
                     let rendered = if let Some(frame) = &sbr_frames[offset] {
                         state.dsp.process(frame, &[&core], rate, (n/64) as u8, mode)
                     } else {

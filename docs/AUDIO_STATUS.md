@@ -878,3 +878,14 @@ now qualify pre-FIL QMF history at a fixed 24 kHz clock: each aligned source
 is analyzed and synthesized before FIL, while the published prefix remains
 bit-exact core PCM. This does not establish arbitrary late rate changes,
 untimed variable-length SSR discovery, PS or source retirement.
+
+
+### Main/LC late SBR with fixed core output — 2026-10-09
+
+Main/LC discovery warm-up now honors a fixed core output hint before FIL,
+for direct target and independent CCE DSP alike. The old change from
+Double warm-up to Core synthesis at first FIL no longer discards/refuses
+history. Authored 24 kHz SCE/CCE programs retain bit-exact core prefixes
+and compare the complete waveform against independent scalar QMF output.
+Checkpoint/error/reset/EOF and player rewind/seek cover the transition.
+Broader signalling/rate switches, layouts and coupling tools remain open.

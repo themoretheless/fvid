@@ -8317,3 +8317,34 @@ passed (2 Main/SBR, 7 SSR/SBR, 5 CCE, 5 late-FIL, 3 ADTS SSR): 1391 distinct
 passes, 24 existing ignored unit tests. The late-FIL acceptance is enabled,
 not a passing refusal. Checks were locked/offline without FFmpeg. Changed-test
 formatting and `git diff --check` pass.
+
+
+### 2026-10-09 — Main/LC late SBR at a fixed core output clock
+
+Eight owned six-frame programs cover Main/LC and direct SCE0/independent
+unit-gain CCE1, each with a core-only control and a first valid FIL at packet
+3. The new acceptance initially reproduced exactly
+`SBR output rate changed without reset`, after the valid core prefix.
+
+Before presence was established, Main/LC selected Double for warm-up even
+when `new_with_output_rate` retained a fixed Core output hint. First FIL
+then selected Core, invalidating the retained synthesis state. Target and
+CCE warm-up now use the same immutable output hint as discovery. The
+pre-FIL published output remains core PCM; QMF history is preserved.
+
+The scalar reference independently combines authored integer spectra, Main
+prediction (disabled for LC), direct IMDCT, 32-band prefix QMF and the
+existing authored SBR geometry/noise. Enabled acceptance checks all samples,
+bit-identical published prefixes, checkpoint/invalid-packet rollback, reset,
+EOF and player rewind/seek across the transition. Fourteen generated
+artifacts are independent of production decoding, FFmpeg and network access.
+
+This qualifies these 24 kHz, 1024-sample, six-frame programs. Arbitrary
+late rate switches, wider layouts/tools and dependent coupling remain
+separate gaps; this does not establish complete AAC conformance.
+
+Validation: 909 root and 460 owned-media unit tests, plus 18 integration
+tests (3 new fixed-clock Main/LC, 2 Main/SBR, 5 SSR CCE, 5 SSR late-FIL,
+3 ADTS SSR) passed: 1387 distinct passes, 24 existing ignored unit tests.
+All fourteen fixture/reference artifacts regenerate identically. Checks
+were locked/offline without FFmpeg; formatting and diff checks pass.
