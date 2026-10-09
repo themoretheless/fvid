@@ -63,3 +63,70 @@ impl LtpData {
         })
     }
 }
+
+/// Ordinary AOT4 ICS, including independent predictors for a common-window pair.
+/// Does not admit ER/LD syntax or change decoder configuration support.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LtpIcsInfo {
+    pub info: super::aac_ics::IcsInfo,
+    pub channels: [Option<LtpData>; 2],
+}
+impl LtpIcsInfo {
+    pub fn read(
+        bits: &mut BitReader<'_>,
+        bands: (u8, u8),
+        frame_samples: u16,
+        common_window: bool,
+    ) -> Result<Self> {
+        use super::aac_synthesis::WindowShape;
+        if !matches!(frame_samples, 960 | 1024) || bands.0 > 63 || bands.1 > 15 {
+            return Err(invalid("invalid AAC LTP ICS geometry"));
+        }
+        let mut trial = bits.clone();
+        if trial.bit()? {
+            return Err(invalid("AAC reserved ICS bit is set"));
+        }
+        let sequence = match trial.read(2)? {
+            0 => WindowSequence::OnlyLong,
+            1 => WindowSequence::LongStart,
+            2 => WindowSequence::EightShort,
+            _ => WindowSequence::LongStop,
+        };
+        let shape = if trial.bit()? {
+            WindowShape::Kbd
+        } else {
+            WindowShape::Sine
+        };
+        let short = sequence == WindowSequence::EightShort;
+        let max_sfb = trial.read(if short { 4 } else { 6 })? as u8;
+        if max_sfb > if short { bands.1 } else { bands.0 } {
+            return Err(invalid("AAC max_sfb exceeds band table"));
+        }
+        let mut groups = vec![1];
+        let mut channels = [None, None];
+        if short {
+            for _ in 0..7 {
+                if trial.bit()? {
+                    *groups.last_mut().unwrap() += 1;
+                } else {
+                    groups.push(1);
+                }
+            }
+        } else if trial.bit()? {
+            for channel in channels.iter_mut().take(if common_window { 2 } else { 1 }) {
+                if trial.bit()? {
+                    *channel = Some(LtpData::read(&mut trial, sequence, max_sfb, frame_samples)?);
+                }
+            }
+        }
+        let info = super::aac_ics::IcsInfo {
+            sequence,
+            shape,
+            max_sfb,
+            group_lengths: groups,
+            prediction: None,
+        };
+        *bits = trial;
+        Ok(Self { info, channels })
+    }
+}

@@ -9415,3 +9415,28 @@ channel-pair syntax, transactional decoder history, normalization/rounding and
 independent end-to-end PCM qualification remain required.
 
 Validation: 462 owned-library and 17 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. The own 512-case band fixture regenerates with an identical SHA-256 hash.
+
+### Owned ordinary LTP ICS and common-window pair syntax (2026-10-09)
+
+`LtpIcsInfo::read` parses the complete ordinary AOT4 ICS header transactionally,
+including independent left/right LTP presence and data in a common-window pair.
+Short windows consume only grouping, without long-window predictor flags.
+Main predictor state remains separate. Geometry, reserved-bit, band-limit or
+nested predictor failures leave the caller cursor unchanged. ER/LD syntax and
+production configuration admission are not enabled by this parser.
+
+The own generator authors 896 ICS cases over 960/1024, long/start/stop, sine/KBD,
+0/1/40/63 bands, independent pair presence combinations, and every one of 128
+short grouping masks for single/common-window modes. Tests verify exact cursor
+and a following section sentinel, predictors, groups, all truncated byte prefixes
+that end within the ICS, and band-limit rollback. Existing active/inactive own
+LTP video packet ICS headers also parse correctly and leave the following
+spectral-section codebook aligned. Their decoder playback remains a configuration
+refusal; the ignored PCM acceptance is not enabled prematurely.
+
+Syntax reference consulted: [FAAD2 ICS Table 4.4.6](https://github.com/knik0/faad2/blob/master/libfaad/syntax.c).
+No external source implementation was copied or linked. Decoder channel-state
+integration, normalization/rounding and independent end-to-end PCM qualification
+remain required before AOT4 admission.
+
+Validation: 462 owned-library and 20 offline media/player integration tests passed with zero failures. One pre-existing library test and one pending LTP playback acceptance remain ignored. Both ICS artifacts regenerate with identical SHA-256 hashes.
