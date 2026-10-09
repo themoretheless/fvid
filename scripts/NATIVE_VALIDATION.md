@@ -926,3 +926,27 @@ tests. Twenty-four new assets regenerate offline deterministically; ordinary
 tests never run generators or codec executables. Multi-element PCE, coupling
 with SBR, height-layer PCE and implicit downsampled SBR remain unqualified and
 are not claimed by this sole-element acceptance.
+
+Multi-element AAC SBR (2026-10-09): SBR syntax and QMF/DSP state is now retained
+per configured audio element offset, rather than once for the entire block.
+FIL reads one SCE/CPE's width, independent of total output channels; synthesis
+maps that element back to canonical PCE/standard PCM positions. Checkpoints,
+reset, transactional decode and retained-allocation inspection include every
+state. Core-only LC does not allocate these states. AAC coupling with SBR is
+still refused; independent element processing removes the former sole-element
+and height admission restrictions.
+
+One hundred authored cases cover two SCEs, PCE and indexed 5.1, reordered PCE elements,
+a missing FIL in one back pair, and mixed top-front/normal-back PCE positions and indexed height configuration 14,
+with explicit/sync SBR, implicit double-rate, 960/1024 and 24/48 kHz. Every channel
+matches independently generated mono/missing-fill DSP PCM, including LFE
+upsampling and distinct histories. Reverting the implementation and allocation
+visitor to the previous commit reproduces the exact former constructor refusal
+`SBR requires one normal front SCE/CPE without coupling`. Sixty MP4 videos
+accept root/owned PCM, intervals, WAV speaker masks, memory admission and
+playback decoder factories with preserved source windows. A later CPE CRC-error
+video reproduces the exact SBR CRC error and verifies rollback of earlier SBR,
+core and filter state; it is refusal evidence, not acceptance. Sixty-three new
+assets regenerate deterministically with no foreign codec or network. Ordinary
+tests never execute the generator. This qualifies the listed layouts, not AAC
+coupling, all possible profiles/height combinations or PS on multi-element cores.

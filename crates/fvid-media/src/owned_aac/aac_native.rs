@@ -87,11 +87,12 @@ impl NativeAacDecoder {
             )
             .map_err(|e| invalid(&e))?;
         }
-        for stream in [self.sbr_stream.as_ref(), checkpoint.and_then(|state| state.sbr_stream.as_ref())].into_iter().flatten() {
-            stream.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
-        }
-        for dsp in [self.sbr_dsp.as_ref(), checkpoint.and_then(|state| state.sbr_dsp.as_ref())].into_iter().flatten() {
-            dsp.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
+        for elements in [Some(&self.sbr_elements), checkpoint.map(|state| &state.sbr_elements)].into_iter().flatten() {
+            footprint.vector(elements).map_err(|e| invalid(&e))?;
+            for element in elements.iter().flatten() {
+                element.stream.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
+                element.dsp.visit_retained(&mut footprint).map_err(|e| invalid(&e))?;
+            }
         }
         Ok(footprint.total())
     }

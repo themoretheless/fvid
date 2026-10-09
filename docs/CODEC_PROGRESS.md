@@ -6857,3 +6857,16 @@ is superseded only for these sole-element layouts. Multi-element/coupled AAC
 PCE with SBR, height layers and implicit downsampled SBR remain open.
 
 Full fixture and validation details are recorded in `scripts/NATIVE_VALIDATION.md`.
+
+### 2026-10-09 — independent SBR state for multiple AAC elements
+
+The sole-element SBR restriction above is superseded by per-element syntax and
+QMF/DSP state. A FIL follows its SCE/CPE and is read with that element's channel
+count; canonical PCM routing remains determined by the configured layout.
+State is included in checkpoint/reset, rollback and retained memory reporting.
+One hundred independent PCM cases cover two SCEs, PCE/indexed 5.1, reordered elements,
+missing FIL on one pair a mixed normal/top PCE and indexed height configuration 14. Sixty MP4 videos qualify
+export, intervals, WAV speaker masks and playback decoder factories. A CRC error
+in a later element preserves previous histories and rolls back earlier parsed extensions. AAC
+coupling with SBR and multi-element PS remain open; this is not universal codec
+profile qualification. See `scripts/NATIVE_VALIDATION.md` for fixture evidence.
