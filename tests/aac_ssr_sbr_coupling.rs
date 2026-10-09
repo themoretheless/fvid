@@ -29,8 +29,13 @@ fn ssr_sbr_independent_cce_fixture_has_accepted_nonzero_core_control() {
 #[test]
 fn ssr_sbr_independent_cce_pcm_acceptance() {
     let manifest = cases();
-    let reference = include_bytes!("fixtures/playback-errors/aac-ssr-sbr-active-reference.f64le");
     for case in manifest["cases"].as_array().unwrap().iter().skip(1) {
+        let ratio = case["container_rate"].as_u64().unwrap() as usize / 24000;
+        let reference: &[u8] = if ratio == 1 {
+            include_bytes!("fixtures/playback-errors/aac-ssr-sbr-downsampled-reference.f64le")
+        } else {
+            include_bytes!("fixtures/playback-errors/aac-ssr-sbr-active-reference.f64le")
+        };
         let channels = case["channels"].as_u64().unwrap() as usize;
         let factor = case["factor"].as_u64().unwrap() as f64;
         let mut pcm = Vec::new();
@@ -50,7 +55,7 @@ fn ssr_sbr_independent_cce_pcm_acceptance() {
                         .unwrap()
                         .iter()
                         .position(|rows| {
-                            boundary += rows.as_u64().unwrap() as usize * 2;
+                            boundary += rows.as_u64().unwrap() as usize * ratio;
                             i < boundary
                         })
                         .unwrap();
@@ -75,6 +80,7 @@ fn ssr_sbr_cce_pending_checkpoint_invalid_packet_reset_and_eof_keep_sources() {
     use fvid_media::owned_aac::NativeAacDecoder;
     let manifest = cases();
     for case in manifest["cases"].as_array().unwrap().iter().skip(1) {
+        let ticks = case["container_frame_samples"].as_u64().unwrap();
         let asc: Vec<_> = case["asc"]
             .as_str()
             .unwrap()
@@ -95,13 +101,17 @@ fn ssr_sbr_cce_pending_checkpoint_invalid_packet_reset_and_eof_keep_sources() {
                 let at = row["offset"].as_u64().unwrap() as usize;
                 let end = at + row["bytes"].as_u64().unwrap() as usize;
                 let saved = decoder.checkpoint();
-                assert!(decoder.decode_timed(&[], i as i64 * 2048, 2048).is_err());
+                assert!(
+                    decoder
+                        .decode_timed(&[], i as i64 * ticks as i64, ticks)
+                        .is_err()
+                );
                 let first = decoder
-                    .decode_timed(&blob[at..end], i as i64 * 2048, 2048)
+                    .decode_timed(&blob[at..end], i as i64 * ticks as i64, ticks)
                     .unwrap();
                 decoder.restore(&saved).unwrap();
                 let again = decoder
-                    .decode_timed(&blob[at..end], i as i64 * 2048, 2048)
+                    .decode_timed(&blob[at..end], i as i64 * ticks as i64, ticks)
                     .unwrap();
                 assert_eq!(first, again);
                 if let Some(frame) = again {
@@ -109,7 +119,7 @@ fn ssr_sbr_cce_pending_checkpoint_invalid_packet_reset_and_eof_keep_sources() {
                         frame.pts,
                         (pcm.len() / (4 * case["channels"].as_u64().unwrap() as usize)) as i64
                     );
-                    assert_eq!(frame.duration, 2048);
+                    assert_eq!(frame.duration, ticks);
                     pcm.extend(frame.samples.iter().flat_map(|s| s.to_le_bytes()));
                 }
                 assert!(
@@ -177,7 +187,10 @@ fn ssr_sbr_cce_player_rewind_seek_and_eof_match_source_pcm() {
             Default::default(),
         )
         .unwrap();
-        assert_eq!(reader.sample_rate(), 48000);
+        assert_eq!(
+            reader.sample_rate(),
+            case["container_rate"].as_u64().unwrap() as u32
+        );
         assert_eq!(play(&mut reader), expected);
         reader.rewind();
         assert_eq!(play(&mut reader), expected);
@@ -192,26 +205,29 @@ fn ssr_sbr_cce_player_rewind_seek_and_eof_match_source_pcm() {
 fn independent_common_gain_sign_flag_does_not_invert_the_output() {
     let manifest = cases();
     let rows = manifest["cases"].as_array().unwrap();
-    for scale in 0..4 {
-        let select = |sign| {
-            rows.iter()
-                .find(|case| {
-                    case["name"].as_str().unwrap().contains("-scale-")
-                        && case["gain_scale"] == scale
-                        && case["gain_sign"] == sign
-                })
-                .unwrap()
-        };
-        let unsigned = video(select(0));
-        let signed = video(select(1));
-        assert_ne!(
-            unsigned, signed,
-            "the sign flag must differ in authored syntax"
-        );
-        let mut expected = Vec::new();
-        let mut actual = Vec::new();
-        fvid::native_media::decode_mp4_aac_pcm(&unsigned, &mut expected).unwrap();
-        fvid::native_media::decode_mp4_aac_pcm(&signed, &mut actual).unwrap();
-        assert_eq!(actual, expected, "common gain scale {scale}");
+    for rate in [24000, 48000] {
+        for scale in 0..4 {
+            let select = |sign| {
+                rows.iter()
+                    .find(|case| {
+                        case["name"].as_str().unwrap().contains("-scale-")
+                            && case["container_rate"] == rate
+                            && case["gain_scale"] == scale
+                            && case["gain_sign"] == sign
+                    })
+                    .unwrap()
+            };
+            let unsigned = video(select(0));
+            let signed = video(select(1));
+            assert_ne!(
+                unsigned, signed,
+                "the sign flag must differ in authored syntax"
+            );
+            let mut expected = Vec::new();
+            let mut actual = Vec::new();
+            fvid::native_media::decode_mp4_aac_pcm(&unsigned, &mut expected).unwrap();
+            fvid::native_media::decode_mp4_aac_pcm(&signed, &mut actual).unwrap();
+            assert_eq!(actual, expected, "common gain scale {scale}");
+        }
     }
 }

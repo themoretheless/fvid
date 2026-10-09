@@ -38,7 +38,8 @@ def patch_sources():
     assert patches==[(2,10,8),(2,18,7)]
     return {target+i:source+i for source,target,width in patches for i in range(width)}
 
-def reference(prediction=True, pcm_override=None):
+def reference(prediction=True, pcm_override=None, bands=64):
+    assert bands in (32,64)
     source=Path(__file__).resolve().parents[1]/'crates/fvid-media/src/owned_aac/aac_sbr_qmf_window.rs'
     window=[float(x) for x in re.findall(r'-?\d+\.\d+',source.read_text().split('= [',1)[1])]
     noise_bytes=(DEST/'aac-sbr-noise-protocol.f64le').read_bytes()
@@ -70,8 +71,8 @@ def reference(prediction=True, pcm_override=None):
             sequence=history+[level];blended=[tuple(math.fsum(weights[j]*sequence[-1-j][k][p] for j in range(5)) for p in range(2)) for k in range(17)]
             row=low[t]+[blended[k][0]*r[k]+blended[k][1]*noise[((frame*32+t)*17+k+1)%512] for k in range(17)]
             rows.append(row);history=(history+[level])[-4:]
-    terms=[[[window[64*lag+k]*complex(math.cos(math.pi*(b+.5)*(2*(k+64*(lag%2))-255)/128),math.sin(math.pi*(b+.5)*(2*(k+64*(lag%2))-255)/128))/64 for b in range(27)] for k in range(64)] for lag in range(10)]
-    output=[math.fsum((rows[t-lag][b]*terms[lag][k][b]).real for lag in range(min(10,t+1)) for b in range(27))/32768 for t in range(192) for k in range(64)]
+    terms=[[[window[(64//bands)*(bands*lag+k)]*complex(math.cos(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)),math.sin(math.pi*(b+.5)*(2*(k+bands*(lag%2))-(255 if bands==64 else 127.5))/(2*bands)))/64 for b in range(27)] for k in range(bands)] for lag in range(10)]
+    output=[math.fsum((rows[t-lag][b]*terms[lag][k][b]).real for lag in range(min(10,t+1)) for b in range(27))/32768 for t in range(192) for k in range(bands)]
     return output
 
 def main():

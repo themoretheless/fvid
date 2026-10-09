@@ -2,6 +2,14 @@ use std::path::Path;
 fn cases() -> serde_json::Value {
     serde_json::from_str(include_str!("fixtures/playback-errors/aac-ssr-sbr.json")).unwrap()
 }
+fn all_sbr(manifest: &serde_json::Value) -> impl Iterator<Item = &serde_json::Value> {
+    manifest["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["name"] != "core-control")
+        .chain(manifest["downsampled"].as_array().unwrap().iter())
+}
 fn video(case: &serde_json::Value) -> Vec<u8> {
     std::fs::read(
         Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -26,12 +34,8 @@ fn ssr_sbr_fixture_has_valid_silent_core_control() {
 }
 #[test]
 fn ssr_sbr_transition_video_acceptance() {
-    for case in cases()["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| c["name"] != "core-control")
-    {
+    let manifest = cases();
+    for case in all_sbr(&manifest) {
         let mut pcm = Vec::new();
         fvid::native_media::decode_mp4_aac_pcm(&video(case), &mut pcm).unwrap();
         check_pcm(&pcm, case);
@@ -39,13 +43,18 @@ fn ssr_sbr_transition_video_acceptance() {
 }
 
 fn check_pcm(pcm: &[u8], case: &serde_json::Value) {
-    let active = case["reference"].is_string();
-    let reference: &[u8] = if active {
+    let active = case["name"].as_str().unwrap().contains("active");
+    let downsampled = case["container_rate"] == 24000;
+    let reference: &[u8] = if downsampled && active {
+        include_bytes!("fixtures/playback-errors/aac-ssr-sbr-downsampled-reference.f64le")
+    } else if downsampled {
+        include_bytes!("fixtures/playback-errors/aac-ssr-sbr-downsampled-silent-reference.f64le")
+    } else if active {
         include_bytes!("fixtures/playback-errors/aac-ssr-sbr-active-reference.f64le")
     } else {
         include_bytes!("fixtures/playback-errors/aac-ssr-sbr-reference.f64le")
     };
-    assert_eq!(pcm.len(), 12288 * 4);
+    assert_eq!(pcm.len(), case["samples"].as_u64().unwrap() as usize * 4);
     assert_eq!(reference.len(), pcm.len() * 2);
     let mut maximum_error = 0.0f64;
     for (i, (sample, gold)) in pcm
@@ -73,14 +82,12 @@ fn hex(s: &str) -> Vec<u8> {
 fn ssr_sbr_pending_checkpoint_invalid_packet_reset_and_eof_keep_pcm() {
     use fvid_media::owned_aac::NativeAacDecoder;
     let blob = include_bytes!("fixtures/playback-errors/aac-ssr-sbr-packets.bin");
-    for case in cases()["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| c["name"] != "core-control")
-    {
+    let manifest = cases();
+    for case in all_sbr(&manifest) {
+        let ticks = case["container_frame_samples"].as_u64().unwrap();
+        let rate = case["container_rate"].as_u64().unwrap() as u32;
         let mut decoder =
-            NativeAacDecoder::new_with_output_rate(&hex(case["asc"].as_str().unwrap()), 48000)
+            NativeAacDecoder::new_with_output_rate(&hex(case["asc"].as_str().unwrap()), rate)
                 .unwrap();
         for replay in 0..2 {
             if replay != 0 {
@@ -91,18 +98,22 @@ fn ssr_sbr_pending_checkpoint_invalid_packet_reset_and_eof_keep_pcm() {
                 let at = p["offset"].as_u64().unwrap() as usize;
                 let len = p["bytes"].as_u64().unwrap() as usize;
                 let saved = decoder.checkpoint();
-                assert!(decoder.decode_timed(&[], i as i64 * 2048, 2048).is_err());
+                assert!(
+                    decoder
+                        .decode_timed(&[], i as i64 * ticks as i64, ticks)
+                        .is_err()
+                );
                 let first = decoder
-                    .decode_timed(&blob[at..at + len], i as i64 * 2048, 2048)
+                    .decode_timed(&blob[at..at + len], i as i64 * ticks as i64, ticks)
                     .unwrap();
                 decoder.restore(&saved).unwrap();
                 let again = decoder
-                    .decode_timed(&blob[at..at + len], i as i64 * 2048, 2048)
+                    .decode_timed(&blob[at..at + len], i as i64 * ticks as i64, ticks)
                     .unwrap();
                 assert_eq!(first, again);
                 if let Some(frame) = again {
                     assert_eq!(frame.pts, (pcm.len() / 4) as i64);
-                    assert_eq!(frame.duration, 2048);
+                    assert_eq!(frame.duration, ticks);
                     for x in frame.samples {
                         pcm.extend_from_slice(&x.to_le_bytes());
                     }
@@ -162,22 +173,19 @@ fn ssr_sbr_player_rewind_seek_eof_and_interval_match_scalar_pcm() {
         assert!(decoder.finish_packet().unwrap().is_none());
         pcm
     }
-    for c in cases()["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| c["name"] != "core-control")
-    {
+    let manifest = cases();
+    for c in all_sbr(&manifest) {
         let data = video(c);
         let mut reader =
             fvid::playback_mp4_audio::Mp4AudioReader::open(Cursor::new(&data), Default::default())
                 .unwrap();
-        assert_eq!((reader.sample_rate(), reader.channels()), (48000, 1));
+        let rate = c["container_rate"].as_u64().unwrap() as usize;
+        assert_eq!((reader.sample_rate(), reader.channels()), (rate as u32, 1));
         let expected = play(&mut reader);
         check_pcm(&expected, c);
         reader.rewind();
         assert_eq!(play(&mut reader), expected);
-        for target in [1100, 6500, 12288] {
+        for target in [1100, 6500, c["samples"].as_i64().unwrap()] {
             let landed = reader.seek_to(target);
             assert_eq!(play(&mut reader), expected[landed as usize * 4..]);
         }
@@ -189,7 +197,7 @@ fn ssr_sbr_player_rewind_seek_eof_and_interval_match_scalar_pcm() {
             &Default::default(),
         )
         .unwrap();
-        assert_eq!(interval, expected[960 * 4..9600 * 4]);
+        assert_eq!(interval, expected[rate / 50 * 4..rate / 5 * 4]);
     }
 }
 
@@ -209,4 +217,34 @@ fn active_ssr_core_control_matches_independent_ipqf_before_sbr() {
         assert!(delta < 2e-7, "core sample {i}: {delta}");
     }
     eprintln!("SSR core maximum scalar difference: {maximum_error:e}");
+}
+
+#[test]
+fn explicit_and_sync_ssr_sbr_downsampled_target_matches_independent_qmf() {
+    for case in cases()["downsampled"].as_array().unwrap() {
+        let mut pcm = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&video(case), &mut pcm).unwrap();
+        let reference: &[u8] = if case["name"].as_str().unwrap().contains("active") {
+            include_bytes!("fixtures/playback-errors/aac-ssr-sbr-downsampled-reference.f64le")
+        } else {
+            include_bytes!(
+                "fixtures/playback-errors/aac-ssr-sbr-downsampled-silent-reference.f64le"
+            )
+        };
+        assert_eq!(pcm.len(), 6144 * 4);
+        assert_eq!(pcm.len() * 2, reference.len());
+        for (i, (sample, gold)) in pcm
+            .chunks_exact(4)
+            .zip(reference.chunks_exact(8))
+            .enumerate()
+        {
+            let sample = f32::from_le_bytes(sample.try_into().unwrap()) as f64;
+            let gold = f64::from_le_bytes(gold.try_into().unwrap());
+            assert!(
+                (sample - gold).abs() < 1e-9,
+                "{} sample {i}: {sample} vs {gold}",
+                case["name"]
+            );
+        }
+    }
 }

@@ -8199,3 +8199,30 @@ SSR/SBR switching and broader codec tools/profiles remain separate work.
 Validation: five distinct integration tests pass locked/offline without
 FFmpeg; all seventeen artifacts regenerate identically. Changed Rust test
 formatting and `git diff --check` pass. Production code is unchanged.
+
+
+### 2026-10-09 — downsampled SSR/SBR target and CCE qualification
+
+The independent scalar oracle now evaluates either 64-band full-rate or
+32-band core-rate QMF synthesis from authored SSR/IPQF core PCM. Four new
+explicit/sync target videos cover silent/nonzero spectra and gain control;
+fourteen more explicit CCE videos cover mono/stereo targets, one/two sources
+and all existing common-gain examples at 24 kHz output. Raw syntax is owned
+and reused without private input. Container packet clock is 1024 output
+samples rather than 2048, preserving the same 256 ms stream duration.
+
+The native/player regressions now negotiate rate/ticks from each authored
+case, compare scalar PCM at 1e-9, replay checkpoints/reset/errors, drain EOF
+and check rewind/seek/intervals in the proper output timescale. Gain-boundary
+expectations use source-row extents with the appropriate output/core ratio.
+A sign-flag comparison runs at both clocks. Production code needed no change.
+Existing three full-rate Main oracle artifacts regenerate identically.
+
+Remaining scope includes implicit SBR with unchanged output clock, broader
+SSR/SBR switching and retirement, PS, more CCE target layouts and other
+codec profiles/tools. This is bounded fixture acceptance, not full codec parity.
+
+Final checks: 6 SSR/SBR and 5 SSR/SBR CCE integration tests pass
+locked/offline without FFmpeg; all 50 combined SSR/SBR artifacts regenerate
+identically through both generators, including the shared active 32-band
+reference. Changed Rust test formatting and `git diff --check` pass.

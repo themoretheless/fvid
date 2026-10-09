@@ -854,5 +854,18 @@ a constant right gain of 0.5 and positive time-varying gain 1/0.5/2 across
 SSR source-chunk boundaries. Eight more programs qualify all four common
 gain scales and both sign-flag values, which preserve positive common gain
 for independent CCE; signed differential gain belongs to dependent coupling. Wider tools/layouts, broader CCE gain configurations, transitions between
-mixed and source-aligned modes, source retirement and downsampled SSR/SBR
+mixed and source-aligned modes, source retirement and broader downsampled SSR/SBR tools
 remain separate work, not claimed as complete.
+
+
+### AAC SSR/SBR downsampled container output — 2026-10-09
+
+Four explicit/sync target programs and fourteen explicit independent CCE
+programs qualify 24 kHz output from the 24 kHz SSR core with SBR present.
+The oracle independently evaluates 32-band QMF synthesis; expected PCM is
+not a decimated production output or a production decoder result. Silent
+and nonzero target programs, mono/stereo CCE targets, one/two sources and
+common-gain scales/sign flags are exercised. Native checkpoint/error/reset/EOF
+and player rewind/seek pass for both 24 and 48 kHz output clocks.
+This does not qualify implicit SBR discovery with an unchanged container clock,
+SSR PS, arbitrary source switching/retirement or all SSR/SBR tools.

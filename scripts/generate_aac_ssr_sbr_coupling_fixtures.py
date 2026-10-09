@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Authored SSR independent CCE with its own SBR FIL, no external codec."""
-import json
+import json, struct
+from generate_aac_main_sbr_oracle import reference
 from generate_aac_ssr_coupling_fixtures import program, silent
 from generate_aac_ssr_fixtures import channel, info, SC, SL
 from generate_he_aac_packet_fixtures import DEST, field, frequency, packed, video_fixture
@@ -52,6 +53,17 @@ def main():
             case['gain_sign'] = sign
             case['gain_core_rows'] = [1024,1472,1024,1024,576,1024]
         case['video'] = video_fixture([case], blob, channels=channels, filename='aac-ssr-sbr-cce-' + case['name'] + '-synthetic.mp4')
+        cases.append(case)
+    core = (DEST / 'aac-ssr-sbr-active-core-reference.f32le').read_bytes()
+    scalar = reference(pcm_override=[v[0] for v in struct.iter_unpack('<f',core)], bands=32)
+    reference_file = 'aac-ssr-sbr-downsampled-reference.f64le'
+    (DEST / reference_file).write_bytes(struct.pack('<'+str(len(scalar))+'d',*scalar))
+    for base in list(cases[1:]):
+        channels=base['channels'];tags=(1,15) if base['factor']==2 else (1,)
+        prefix=field(5,5)+frequency(24000)+'0000'+frequency(24000)+field(3,5)+'000'
+        case=dict(base,name=base['name']+'-downsampled',asc=packed(program(prefix,channels,3,tags)).hex(),
+                  container_rate=24000,container_frame_samples=1024,samples=6144,reference=reference_file)
+        case['video']=video_fixture([case],blob,channels=channels,filename='aac-ssr-sbr-cce-'+case['name']+'-synthetic.mp4')
         cases.append(case)
     (DEST / 'aac-ssr-sbr-cce-packets.bin').write_bytes(blob)
     (DEST / 'aac-ssr-sbr-cce.json').write_text(json.dumps(dict(cases=cases,
