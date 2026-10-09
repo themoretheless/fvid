@@ -2147,3 +2147,41 @@ The final syntax suite also retains 5 passing tests and the pending acceptance;
 its ignore reason now names ASC admission and remaining tool/layout qualification.
 Root syntax metadata is explicitly adapted to owned LTP data; the library path
 borrows it directly. Existing synthetic packets/PCM references are unchanged.
+
+### Ordinary LTP CCE syntax and gain-list qualification (2026-10-10)
+
+`Coupling::read_ltp` preserves AOT4 source prediction data separately from its
+channel and target gain lists, while sharing the existing Main/LC/SSR CCE payload
+parser. Whole-element cursor commit occurs only after all spectral/gain syntax
+succeeds; an incorrect profile refuses without consuming bits.
+
+The own offline generator creates seventeen 12-frame 24k/1024 synthetic videos
+and their 204 raw CCE packets: points 0/1/3, mono targets, all four stereo target
+selections, separate common gains and signed per-band gain lists. Wire order,
+sine/KBD shape, prediction presence, lag/coefficient and band use vary. Both
+root and library parsing are checked against authored metadata, exact residual
+spectra, gain values, target selections and payload boundaries; truncated CCEs
+must leave the complete element cursor unchanged. No private parameters/media,
+foreign codec or FFmpeg/network dependency is used by generation or tests.
+
+This is CCE parsing acceptance, not native coupling playback acceptance. A
+separate private-metadata native test reproduces the existing specific LTP
+coupling-state refusal on these same packets and verifies retained payload,
+noise state and deterministic history probes are unchanged by the failed decode.
+Checkpoint restoration may shrink spare metadata vector capacity, so refusal
+memory inspection compares the state immediately before and after each attempt.
+Public AOT4 ASC refusal and ignored root playback acceptance remain unchanged.
+
+Native integration still needs source tag histories, prediction/TNS phases and
+coupling ordering, history advancement rules, CCE snapshots/memory, and scalar
+coupled-PCM qualification. [The primary dispatch reference](https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/aac/aacdec.c)
+places target point-0 mixing before prediction/TNS, and point-1 mixing after TNS;
+the combined LTP channel adapter must be split to support those phases. No
+reference decoder implementation was copied into production.
+
+Validation: owned library 469 passed / 1 pre-existing ignored; fifteen offline
+AAC integration suites 55 passed / 1 pending root LTP playback acceptance ignored.
+The final two-test CCE suite also verifies that the legacy ICS path rejects the
+same active-LTP source presence bit with its exact prediction diagnostic while
+the new CCE reader accepts the packet. Nineteen generated artifacts are
+deterministic; existing PCM references and tolerances are unchanged.

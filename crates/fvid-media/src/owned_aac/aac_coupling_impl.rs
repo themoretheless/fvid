@@ -15,6 +15,15 @@ pub struct Coupling {
 }
 impl Coupling {
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
+        Self::read_payload(bits, config, false).map(|(coupling, _)| coupling)
+    }
+    /// Ordinary AOT4 CCE, preserving prediction data separately from gains.
+    /// Whole-element transactional parsing; state/profile admission is separate.
+    pub fn read_ltp(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<(Self, Option<super::aac_ltp_syntax::LtpData>)> {
+        if config.object_type != 4 { return Err(invalid("AAC LTP coupling requires AOT4")); }
+        Self::read_payload(bits, config, true)
+    }
+    fn read_payload(bits: &mut BitReader<'_>, config: &AacConfig, ltp: bool) -> Result<(Self, Option<super::aac_ltp_syntax::LtpData>)> {
         let mut input = bits.clone();
         let tag = input.read(4)? as u8;
         let independent = input.bit()?;
@@ -30,7 +39,9 @@ impl Coupling {
         let point = if independent { 3 } else { u8::from(after) };
         let sign = input.bit()?;
         let scale = input.read(2)?;
-        let channel = ChannelData::read(&mut input, config)?;
+        let (channel, prediction) = if ltp {
+            ChannelData::read_ltp(&mut input, config)?
+        } else { (ChannelData::read(&mut input, config)?, None) };
         let mut targets = Vec::new();
         let mut gain_index = 0;
         for (pair, tag, selection) in selected {
@@ -88,12 +99,12 @@ impl Coupling {
             }
         }
         *bits = input;
-        Ok(Self {
+        Ok((Self {
             tag,
             point,
             channel,
             targets,
-        })
+        }, prediction))
     }
 }
 

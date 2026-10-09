@@ -252,6 +252,75 @@ mod main_prediction_memory_tests {
 mod ltp_dispatch_tests {
     use super::*;
     use serde_json::Value;
+    #[test]
+    fn authored_cce_videos_reproduce_pending_native_coupling_state_without_advance() {
+        let manifest: Value = serde_json::from_slice(&bytes("aac-ltp-coupling.json")).unwrap();
+        let blob = bytes("aac-ltp-coupling-packets.bin");
+        for case in manifest["cases"].as_array().unwrap() {
+            let mut asc: Vec<u8> = case["asc"]
+                .as_str()
+                .unwrap()
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+                .collect();
+            // Both outer AOT and PCE object tag must agree for existing ASC parsing.
+            asc[0] = (asc[0] & 7) | (2 << 3);
+            asc[2] = (asc[2] & !0x0c) | 0x04;
+            let mut parsed = AudioSpecificConfig::parse(&asc).unwrap();
+            parsed.core.object_type = 4;
+            parsed.signaled_object_type = 4;
+            parsed.program.as_mut().unwrap().object_type = 4;
+            let mut decoder = NativeAacDecoder::from_parsed(parsed).unwrap();
+            let probe = |decoder: &NativeAacDecoder| {
+                let tables = BandTables::for_config(&decoder.config).unwrap();
+                let data = super::super::aac_ltp_syntax::LtpData {
+                    lag: 1024,
+                    coefficient_index: 7,
+                    usage: super::super::aac_ltp_syntax::Usage::Bands(vec![true, true]),
+                };
+                decoder
+                    .ltp_synthesis
+                    .iter()
+                    .map(|state| {
+                        let mut state = state.clone();
+                        let mut spectrum = vec![0f32; 1024];
+                        spectrum[0] = 1024.;
+                        state
+                            .process(
+                                spectrum,
+                                Some(&data),
+                                super::super::aac_synthesis::WindowSequence::OnlyLong,
+                                super::super::aac_synthesis::WindowShape::Kbd,
+                                tables.long,
+                                2,
+                                None,
+                            )
+                            .unwrap()
+                    })
+                    .collect::<Vec<_>>()
+            };
+            let saved = decoder.checkpoint();
+            for row in case["frames"].as_array().unwrap() {
+                let at = row["offset"].as_u64().unwrap() as usize;
+                let packet = &blob[at..at + row["bytes"].as_u64().unwrap() as usize];
+                let before = decoder.retained_payload_bytes().unwrap();
+                let pcm = probe(&decoder);
+                let noise = decoder.noise.clone();
+                let error = decoder.decode(packet).unwrap_err();
+                assert!(
+                    error
+                        .to_string()
+                        .contains("AAC LTP coupling state is not integrated"),
+                    "{error}"
+                );
+                assert_eq!(decoder.retained_payload_bytes().unwrap(), before);
+                assert_eq!(probe(&decoder), pcm);
+                assert_eq!(decoder.noise, noise);
+                decoder.restore(&saved).unwrap();
+            }
+        }
+    }
     fn bytes(name: &str) -> Vec<u8> {
         std::fs::read(
             std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
