@@ -130,7 +130,7 @@ impl NativeAacDecoder {
             usize::from(config.channels)
         ];
         // Four-bit CCE tags occupy a separate fixed domain after audio slots.
-        let element_slots = usize::from(config.channels) + if program.as_ref().is_some_and(|p| p.coupling.iter().any(|(independent, _)| *independent)) { 16 } else { 0 };
+        let element_slots = usize::from(config.channels) + if program.as_ref().is_some_and(|p| !p.coupling.is_empty()) { 16 } else { 0 };
         Ok(Self {
             config,
             synthesis,
@@ -171,7 +171,7 @@ impl NativeAacDecoder {
         Ok(decoder)
     }
     fn sbr_slots(&self) -> usize {
-        usize::from(self.config.channels) + if self.program.as_ref().is_some_and(|p| p.coupling.iter().any(|(independent, _)| *independent)) { 16 } else { 0 }
+        usize::from(self.config.channels) + if self.program.as_ref().is_some_and(|p| !p.coupling.is_empty()) { 16 } else { 0 }
     }
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
@@ -329,7 +329,6 @@ impl NativeAacDecoder {
                         }
                         Some(2) => {
                             let (coupling, _) = couplings.last().ok_or_else(|| invalid("SBR fill has no coupling element"))?;
-                            if coupling.point != 3 { return Err(unsupported("SBR fill on dependent AAC coupling is not implemented")); }
                             (1, usize::from(self.config.channels) + usize::from(coupling.tag))
                         }
                         _ => return Err(invalid("SBR fill must follow its audio element")),
@@ -341,6 +340,14 @@ impl NativeAacDecoder {
                     source.skip(input.position()).map_err(|e| invalid(&e.0))?;
                     let rate = self.config.sample_rate.checked_mul(2).ok_or_else(|| invalid("SBR frequency overflow"))?;
                     let frame = state.stream.read(&mut source, end, crc, rate, (self.config.frame_samples/64) as u8, width).map_err(|e| invalid(&e.0))?;
+                    // Dependent CCE remains spectral: retain/validate its FIL
+                    // history, but do not synthesize another PCM contribution.
+                    if previous_element == Some(2)
+                        && couplings.last().is_some_and(|(c, _)| c.point != 3)
+                        && frame.syntax.data.extended_data.as_ref().is_some_and(|v| !v.is_empty())
+                    {
+                        return Err(unsupported("SBR extended audio/PS synthesis is not yet implemented"));
+                    }
                     input.skip(source.position()-input.position())?;
                     sbr_frames[offset] = Some(frame);
                     Ok(())

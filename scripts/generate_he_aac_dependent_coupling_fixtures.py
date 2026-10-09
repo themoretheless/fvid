@@ -24,7 +24,7 @@ def info():return '0'+'00'+'0'+field(1,6)+'0'
 # Silent target has one active band and first-order TNS (reflection sin(pi/7)).
 def target(common):
  return field(140,8)+('' if common else info())+field(0,4)+field(1,5)+'0'+'1'+field(1,2)+'0'+field(49,6)+field(1,5)+'00'+field(1,3)+'0'
-def packet(frame,stereo,point,raw,missing=False):
+def packet(frame,stereo,point,raw,missing=False,cce_raw=b''):
  bits=program('101',stereo)
  bits+=('001'+'0000'+'1'+info()+'00'+target(True)*2) if stereo else ('000'+'0000'+target(False))
  if raw:
@@ -33,6 +33,8 @@ def packet(frame,stereo,point,raw,missing=False):
  bits+=field(140,8)+info()+field(1,4)+field(1,5)+word(60)+'000'
  index=80 if frame%2==0 else 0;bits+=field(codes[index],lens[index])
  if stereo:bits+='1'+word(64)
+ if cce_raw:
+  size=len(cce_raw);bits+='110'+(field(size,4) if size<15 else '1111'+field(size-14,8))+''.join(field(b,8) for b in cce_raw)
  return packed(bits+'111')
 # Independent O(N^2) IMDCT/window/overlap, not the production FFT synthesis.
 def core(n,stereo,point):

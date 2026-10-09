@@ -6893,3 +6893,15 @@ transactional rollback and controlled-memory admission. The original refusal
 expectation is updated; malformed video regressions retain exact error checks.
 Dependent CCE FIL, coupling with PS and further profiles/tools still need
 qualification. PCM evidence and validation are in `scripts/NATIVE_VALIDATION.md`.
+
+### 2026-10-09 — dependent CCE-owned SBR FIL
+
+The dependent CCE FIL refusal above is superseded by per-tag syntax/header/CRC
+and temporal coefficient history. Dependent CCE stays in the spectral path;
+its FIL does not produce another PCM contribution. 160 cases and 96 acceptance
+videos require exact PCM equality to the qualified no-CCE-FIL baseline, covering
+both coupling points, frame sizes, target layouts and output clocks, including
+missing CCE FIL and actual in-band discovery. Four CRC/PS videos retain explicit
+refusals with transactional rollback; those PS checks are not PS acceptance.
+Coupling with PS and further profiles/tools remain open. Detailed evidence is
+in `scripts/NATIVE_VALIDATION.md`.

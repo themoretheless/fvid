@@ -1031,3 +1031,43 @@ matches ordinary LC PCM and the independent core oracle. Combined current-code
 qualification: 1518 passed, 24 ignored, no remaining failures. All 149 new
 fixture assets regenerate byte-identically. These checks qualify the stated
 long-window CCE/SBR cases, not all AAC profiles or all codec tools.
+
+### 2026-10-09 — dependent CCE-owned SBR FIL syntax
+
+`generate_he_aac_dependent_fil_fixtures.py` adds valid mono FIL syntax after
+an originally authored dependent CCE. 160 cases and 96 MP4 acceptance videos
+cover coupling before/after TNS, mono/stereo target, 960/1024 frames, 24/48 kHz
+output, explicit/sync/hinted implicit signalling, target FIL present/absent,
+and CCE FIL present throughout or missing in a middle packet. The generator
+extends the existing original dependent-Coupling packet author, whose 53
+baseline assets remain byte-identical. New assets regenerate deterministically.
+
+The decoder parses and retains the dependent CCE's own SBR header, CRC and
+temporal coefficient history, indexed by four-bit CCE tag. Dependent CCE mixes
+spectra before target IMDCT/SBR; it does not add a separate CCE SBR PCM signal.
+The new test therefore requires byte-exact equality with the already qualified
+no-CCE-FIL baseline, as well as comparison with independent direct-cosine core
+PCM followed by separately qualified SBR DSP. Headerless later FIL, checkpoints,
+reset and in-band clock discovery exercise retained syntax history. Memory
+reporting includes this extra state, and conservative SBR admission now reserves
+2 MiB per configured CCE (dependent or independent) plus output channels.
+
+Four malformed/unsupported videos distinguish acceptance from refusals: two
+corrupt CCE CRC, and two contain a PS extension in the dependent CCE FIL. They
+verify the specific CRC or unsupported-extension error and rollback of all
+preceding target/CCE histories. Passing the PS refusal is not PS acceptance;
+CCE extension bytes are never silently ignored as supported audio processing.
+Container tests compare root/owned PCM, interval slices, WAV geometry and actual
+playback packet sample windows. Tests are offline and use checked-in assets;
+generators remain separate from ordinary test execution.
+
+The primary reference accepts CCE as [mono SBR data syntax](https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aacsbr_template.c),
+while its [sample conversion](https://ffmpeg.org/doxygen/trunk/libavcodec_2aac_2aacdec_8c_source.html)
+performs CCE IMDCT/SBR only for independent coupling. These sources were used for
+research only, without copying implementation or linking external codec code.
+Coupling with PS, broader AAC profiles and unqualified tools remain open.
+
+Local offline qualification: root/player library 909 passed, 23 ignored; owned
+media library 432 passed, 1 ignored; all 44 AAC integration suites 180 passed.
+Total: 1521 passed, 24 ignored, no failures. All 102 new assets regenerate
+byte-identically, and the existing 53 dependent-SBR assets are unchanged.
