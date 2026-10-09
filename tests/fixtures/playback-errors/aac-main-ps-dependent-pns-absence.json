@@ -1,0 +1,1701 @@
+{
+  "cases": [
+    {
+      "name": "0-0-0-24000",
+      "source_tns": false,
+      "tns": false,
+      "point": 0,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 149,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 179,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 218,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 377,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 417,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 456,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 605,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 635,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 664,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 823,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 865,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 904,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1063,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1103,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1142,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-0-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-0-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-0-0-24000-synthetic.mp4",
+        "sha256": "7b3931843844ea34774f300b2853df1cbab1ba8a1b9a21bd153eadf8d1839f78",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "0-0-0-48000",
+      "source_tns": false,
+      "tns": false,
+      "point": 0,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 149,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 179,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 218,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 377,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 417,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 456,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 605,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 635,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 664,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 823,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 865,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 904,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1063,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1103,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1142,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-0-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-0-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-0-0-48000-synthetic.mp4",
+        "sha256": "984973976ba196840ebfb5a3572f27e6a0d488602af5609cd027245deef354a7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "0-0-1-24000",
+      "source_tns": false,
+      "tns": false,
+      "point": 1,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 1301,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1450,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1480,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1519,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1678,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1718,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1757,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1906,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1936,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1965,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2124,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2166,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2205,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2364,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2404,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2443,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-0-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-0-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-0-1-24000-synthetic.mp4",
+        "sha256": "dee6f959c93ec7bea4fdcf210cdbfb5e6961aee3377522f613a200f0ce3a8141",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "0-0-1-48000",
+      "source_tns": false,
+      "tns": false,
+      "point": 1,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 1301,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1450,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1480,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1519,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1678,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1718,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1757,
+          "bytes": 149,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 1906,
+          "bytes": 30,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 1936,
+          "bytes": 29,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 1965,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2124,
+          "bytes": 42,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2166,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2205,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2364,
+          "bytes": 40,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2404,
+          "bytes": 39,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2443,
+          "bytes": 159,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-0-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-0-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-0-1-48000-synthetic.mp4",
+        "sha256": "0d46bde063af4e5e0fd56a9fa4110317bb9f2ad42fadb281373b37e24db5097f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "0-1-0-24000",
+      "source_tns": false,
+      "tns": true,
+      "point": 0,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 2602,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2753,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2785,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2827,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2989,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3032,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3074,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3225,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3257,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3288,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3450,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3494,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3536,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3698,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3741,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3783,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-1-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-1-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-1-0-24000-synthetic.mp4",
+        "sha256": "fa4d8706c5bba4a2810510c3871d17ae75ef7b127072630065a446fe18c28f05",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "0-1-0-48000",
+      "source_tns": false,
+      "tns": true,
+      "point": 0,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 2602,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2753,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 2785,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 2827,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 2989,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3032,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3074,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3225,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3257,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3288,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3450,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3494,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3536,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 3698,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 3741,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 3783,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-1-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-1-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-1-0-48000-synthetic.mp4",
+        "sha256": "e58f67cb958a1ba0c7caba1b698f4388bfd711e63f83b619fc29fbb95b885776",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "0-1-1-24000",
+      "source_tns": false,
+      "tns": true,
+      "point": 1,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 3945,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4096,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4128,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4170,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4332,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4375,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4417,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4568,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4600,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4631,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4793,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4837,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4879,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5041,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5084,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5126,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-1-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-1-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-1-1-24000-synthetic.mp4",
+        "sha256": "ec65217c780e2fa13f6f7966f9032db98183775f8d3a188cf19275a2b479cb1e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "0-1-1-48000",
+      "source_tns": false,
+      "tns": true,
+      "point": 1,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 3945,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4096,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4128,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4170,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4332,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4375,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4417,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4568,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4600,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4631,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4793,
+          "bytes": 44,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 4837,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4879,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5041,
+          "bytes": 43,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5084,
+          "bytes": 42,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5126,
+          "bytes": 162,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-0-1-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-0-1-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-0-1-1-48000-synthetic.mp4",
+        "sha256": "31fed28f0acb2231c5d89362eea4f37a64c2e06d8a1458916db86cb8e55141a5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "1-0-0-24000",
+      "source_tns": true,
+      "tns": false,
+      "point": 0,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 5288,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5439,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5471,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5515,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5679,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5724,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5768,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5919,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5951,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5982,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6146,
+          "bytes": 46,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6192,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6236,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6400,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6445,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6489,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-0-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-0-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-0-0-24000-synthetic.mp4",
+        "sha256": "cb5fc9307f7741e27cb037c9cdf657c32b061ab8466a694378e43c31a4b78a74",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "1-0-0-48000",
+      "source_tns": true,
+      "tns": false,
+      "point": 0,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 5288,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5439,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5471,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5515,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5679,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5724,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5768,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5919,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 5951,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5982,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6146,
+          "bytes": 46,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6192,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6236,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6400,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6445,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6489,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-0-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-0-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-0-0-48000-synthetic.mp4",
+        "sha256": "f0dd3942c8b6f5c6d891cc842267760c79fd21e037c3ddcc170849c886a77d4b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "1-0-1-24000",
+      "source_tns": true,
+      "tns": false,
+      "point": 1,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 6653,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6804,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6836,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6880,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7044,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7089,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7133,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7284,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7316,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7347,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7511,
+          "bytes": 46,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7557,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7601,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7765,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7810,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7854,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-0-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-0-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-0-1-24000-synthetic.mp4",
+        "sha256": "4fe1b8895b569dc449518e9fdb194013d185fdd7b2916bb81ba5bdb6a45871ea",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "1-0-1-48000",
+      "source_tns": true,
+      "tns": false,
+      "point": 1,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 6653,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6804,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 6836,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6880,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7044,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7089,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7133,
+          "bytes": 151,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7284,
+          "bytes": 32,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7316,
+          "bytes": 31,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7347,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7511,
+          "bytes": 46,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7557,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7601,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 7765,
+          "bytes": 45,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 7810,
+          "bytes": 44,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 7854,
+          "bytes": 164,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-0-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-0-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-0-1-48000-synthetic.mp4",
+        "sha256": "e7922d8a1e420fd9eaefdee32067c032614e2ee6c9fa0e55e548bac8d9636880",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "1-1-0-24000",
+      "source_tns": true,
+      "tns": true,
+      "point": 0,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 8018,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8172,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8207,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8253,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8419,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8466,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8512,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8666,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8701,
+          "bytes": 34,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8735,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8901,
+          "bytes": 49,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8950,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8996,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9162,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9209,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9255,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-1-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-1-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-1-0-24000-synthetic.mp4",
+        "sha256": "33bd8f82b4efd8cb7e7ad06fee68ad6565238d4c8fcf1767b704596f63062fe5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "1-1-0-48000",
+      "source_tns": true,
+      "tns": true,
+      "point": 0,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 8018,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8172,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8207,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8253,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8419,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8466,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8512,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8666,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8701,
+          "bytes": 34,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8735,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 8901,
+          "bytes": 49,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 8950,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 8996,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9162,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9209,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9255,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-1-0-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-1-0-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-1-0-48000-synthetic.mp4",
+        "sha256": "1dbbd4415e839bbff30920b9e3002354b923a48c3e72222032796eb6413ad745",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    },
+    {
+      "name": "1-1-1-24000",
+      "source_tns": true,
+      "tns": true,
+      "point": 1,
+      "asc": "eb030400c20002000bc000",
+      "frames": [
+        {
+          "offset": 9421,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9575,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9610,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9656,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9822,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9869,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9915,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10069,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10104,
+          "bytes": 34,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10138,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10304,
+          "bytes": 49,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10353,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10399,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10565,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10612,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10658,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-1-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-1-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 32,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 16384,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-1-1-24000-synthetic.mp4",
+        "sha256": "1f9d1fb951c4d30d6a69a9d418739c3134289c37e0cf2b1a8b88f1bf157aa9d7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb030400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "1-1-1-48000",
+      "source_tns": true,
+      "tns": true,
+      "point": 1,
+      "asc": "eb018400c20002000bc000",
+      "frames": [
+        {
+          "offset": 9421,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9575,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9610,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9656,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 9822,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 9869,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 9915,
+          "bytes": 154,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10069,
+          "bytes": 35,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10104,
+          "bytes": 34,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10138,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10304,
+          "bytes": 49,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10353,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10399,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 10565,
+          "bytes": 47,
+          "payload": "e3d80e0000000014b33021ff"
+        },
+        {
+          "offset": 10612,
+          "bytes": 46,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 10658,
+          "bytes": 166,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "reference": "aac-main-ps-dependent-pns-absence-1-1-1-core.f32le",
+      "discarded": "aac-main-ps-dependent-pns-absence-1-1-1-retained-predictor.f32le",
+      "slots": 16,
+      "bands": 64,
+      "channels": 2,
+      "pcm_offset": 0,
+      "samples": 32768,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-main-ps-dependent-pns-absence-1-1-1-48000-synthetic.mp4",
+        "sha256": "465bcf8a79c6571cb42c42b46751b521a16e1c98d311b416a968d0ca227fd414",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb018400c20002000bc000",
+        "pcm_offset": 0,
+        "samples": 32768
+      }
+    }
+  ],
+  "provenance": "Own delayed tag15 arrival and three-frame tag1 absence/return; two-source Main PS dependent coupling points 0/1; scalar global wire-order PNS and Main predictor/reset, directional source and target TNS, f32 spectral addition, direct IMDCT; authored target PS; no private media, foreign decoder, FFmpeg or network."
+}

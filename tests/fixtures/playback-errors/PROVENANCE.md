@@ -3589,3 +3589,30 @@ profiles/layouts and all-codec parity remain open. It does not establish a
 new independent numerical SBR/PS oracle.
 
 Validation: the offline media/player integration run passed 10 tests across `aac_main_ps_dependent_pns`, `aac_main_ps`, and `aac_main_tools`; no failures. Production source was restored byte-for-byte after the mutation check.
+
+### AAC Main PS dependent PNS source absence/arrival (2026-10-09)
+
+The owned generator `generate_aac_main_ps_dependent_pns_absence_fixtures.py`
+authors 16 short synthetic MP4 videos: dependent coupling points 0/1,
+24/48 kHz output, optional directional source TNS and target TNS.
+Tag 15 first appears on packet 2; tag 1 is absent on packets 6–8 and returns
+on packet 9 after its earlier PNS bands. Target and source wire order alternate.
+The scalar oracle advances global noise only for actually coded sources and
+preserves independent Main prediction histories across absent packets. It
+computes source/target TNS, f32 spectral sums and direct IMDCT overlap itself.
+The target PS composition uses the separately qualified owned PS stage; this
+is not a new independent numerical oracle for PS. Generation is separate from
+ordinary offline tests and uses no FFmpeg, network or private media.
+
+The acceptance covers waveform, packet checkpoint/rollback, reset/EOF,
+MP4 export, probe replay, interval crop, rewind and seek. Short-window dependent
+PNS, grouped bands, target layout transitions and wider codec profiles remain
+separate qualification work; this matrix does not prove full AAC parity.
+
+Sensitivity control: temporarily clearing absent CCE states in the production
+PS decoder failed waveform acceptance in case `0-0-0-24000`, sample 19275
+(`0.0001914204` versus `0.00019121692`), after tag 1 returned. The source was
+restored byte-for-byte. All 34 generated artifacts reproduced identical SHA-256
+hashes on regeneration.
+
+Validation: restored offline media/player run passed 14 tests across dependent PNS absence, dependent PNS, Main/PS and Main tools; zero failures.
