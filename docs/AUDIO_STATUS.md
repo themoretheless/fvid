@@ -3061,3 +3061,20 @@ All 282 generated files reproduce deterministically. No production changes
 were needed for this matrix. LFE is silent in these cases, so nonzero LFE
 resampling/delay, active ER-LTP+SBR, implicit discovery and large extension
 regions still require separate qualification; this is not full ER conformance.
+
+### Active ER-LTP with SBR and implicit clock qualification (2026-10-10)
+
+Six original AOT19 1024-sample mono sequences exercise nonzero sparse core
+residuals, active LTP from frame four, varying lag/coefficient and SBR temporal
+history at 24/48 kHz with explicit, sync and unspecified SBR signalling.
+PCM matches the existing independently authored scalar LTP/direct-QMF oracle
+within 1e-9; a no-prediction oracle differs by more than 1e-5 after SBR, so
+these fixtures verify actual prediction rather than merely accepting its flag.
+Native checkpoint replay, forbidden CRC failure rollback, fixed-clock container
+hints and unhinted 24→48 kHz discovery (including checkpoint restore back to
+24 kHz), public/owned export, repeated ranges and seek/rewind all pass.
+Six forbidden-CRC companion videos preserve specific refusal coverage.
+All 14 new files regenerate deterministically without FFmpeg/network. No
+production change was needed. This does not qualify 960-sample active ER-LTP
+with SBR, nonzero multichannel/LFE synthesis, all predictor/TNS/window tools,
+or protected epConfig and other remaining codec tools.
