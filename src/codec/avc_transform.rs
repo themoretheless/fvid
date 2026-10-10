@@ -437,10 +437,12 @@ fn sp_chroma_420(
     }
     fn quant(value: i64, qs: u8, category: usize, dc: bool) -> i64 {
         let shift = 15 + qs / 6 + u8::from(dc);
-        value.signum()
-            * ((value.abs() * SWITCHING_QUANT[usize::from(qs % 6)][category]
-                + (1i64 << (shift - 1)))
-                >> shift)
+        // Chroma equations 8-425/429/435/439 put Sign inside the
+        // arithmetic shift. Luma 8-420/432 deliberately uses Sign outside.
+        (value.signum()
+            * (value.abs() * SWITCHING_QUANT[usize::from(qs % 6)][category]
+                + (1i64 << (shift - 1))))
+            >> shift
     }
     let mut coefficients = [[0i64; 16]; 4];
     for block in 0..4 {

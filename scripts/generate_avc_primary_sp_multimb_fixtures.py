@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from generate_avc_mbaff_direct_samples import Writer
 from avc_fixture_mp4 import mux, annexb
+from avc_sp_chroma_reference import sequence
 
 DEST = Path(__file__).resolve().parents[1] / 'tests/fixtures/playback-errors'
 
@@ -85,8 +86,13 @@ def main():
                     raw = (d / 'owned.yuv').read_bytes()
                     assert len(raw) == 6144, (name, len(raw))
                     (DEST / reference).write_bytes(raw)
-            cases.append(dict(file=filename, reference=reference, configuration=config.hex(), packets=packets, slices=slices, mode=mode, motion=motion))
-    (DEST / 'avc-primary-sp-multimb.json').write_text(json.dumps(dict(cases=cases, provenance='Original smooth planar steps, 32x32 four I_PCM macroblocks then three primary SP skip pictures at QPY50 and QSY0/26/51. One or four slices; deblocking modes0/1/2. Additional four-slice coded inter pictures use quarter-sample MV (1,-1), (3,2), (-5,7) and zero residual. Optional explicit JM reference capture; normal generation and tests offline without FFmpeg. No private media.'), indent=2) + '\n')
+            jm_reference = reference
+            reference = name + '-normative-reference.yuv'
+            jm = (DEST / jm_reference).read_bytes()
+            assert sequence(jm, planes, 32, mode, slices, motion, False) == jm
+            (DEST / reference).write_bytes(sequence(jm, planes, 32, mode, slices, motion))
+            cases.append(dict(file=filename, reference=reference, jm_reference=jm_reference, configuration=config.hex(), packets=packets, slices=slices, mode=mode, motion=motion))
+    (DEST / 'avc-primary-sp-multimb.json').write_text(json.dumps(dict(cases=cases, provenance='Original smooth planar steps, 32x32 four I_PCM macroblocks then three primary SP skip pictures at QPY50 and QSY0/26/51. One or four slices; deblocking modes0/1/2. Additional four-slice coded inter pictures use quarter-sample MV (1,-1), (3,2), (-5,7) and zero residual. JM captures are preserved separately; normative chroma is independently reconstructed with sign-inside-shift matrix math, scalar bilinear prediction and scalar filtering; saved JM luma is the unchanged cross-check. Optional explicit JM reference capture; normal generation and tests offline without FFmpeg. No private media.'), indent=2) + '\n')
 
 
 if __name__ == '__main__': main()

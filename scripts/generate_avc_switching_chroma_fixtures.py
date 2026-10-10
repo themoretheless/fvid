@@ -5,7 +5,7 @@ from generate_avc_switching_luma_fixtures import DEST,C,Q,D,inverse,reference,vi
 from generate_avc_mbaff_direct_samples import Writer
 from avc_fixture_mp4 import mux
 
-def chroma(p,dc,ac,qp,qs):
+def chroma(p,dc,ac,qp,qs,sign_inside=True):
     matrices=[]
     for b in range(4):
         block=[p[(b//2*4+i//4)*8+b%2*4+i%4] for i in range(16)]
@@ -13,7 +13,9 @@ def chroma(p,dc,ac,qp,qs):
     H=[[1,1],[1,-1]]
     def had(v):return [sum(H[y][j]*v[j*2+k]*H[x][k] for j in range(2) for k in range(2)) for y in range(2) for x in range(2)]
     def quant(v,cat,extra=0):
-        n=(abs(v)*Q[qs%6][cat]+2**(14+qs//6+extra))//2**(15+qs//6+extra)
+        magnitude=abs(v)*Q[qs%6][cat]+2**(14+qs//6+extra)
+        if sign_inside:return ((-magnitude if v<0 else magnitude) if v else 0)//2**(15+qs//6+extra)
+        n=magnitude//2**(15+qs//6+extra)
         return n if v>=0 else -n
     predicted=had([m[0] for m in matrices])
     qdc=[quant(predicted[i]+dc[i]*16*D[qp%6][0]*16*2**(qp//6)//512,0,1) for i in range(4)]

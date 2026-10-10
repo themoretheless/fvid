@@ -22,7 +22,7 @@ fn fixture(name: &str) -> Vec<u8> {
     .unwrap()
 }
 #[test]
-fn primary_sp_cross_macroblock_and_slice_filtering_matches_saved_jm() {
+fn primary_sp_cross_macroblock_and_slice_filtering_matches_normative_oracle() {
     let m = manifest();
     for c in m["cases"].as_array().unwrap() {
         let reference = fixture(c["reference"].as_str().unwrap());
@@ -60,7 +60,7 @@ fn primary_sp_cross_macroblock_and_slice_filtering_matches_saved_jm() {
 
 #[cfg(feature = "player")]
 #[test]
-fn primary_sp_multislice_software_player_rewind_and_seek_match_saved_jm() {
+fn primary_sp_multislice_software_player_rewind_and_seek_match_normative_oracle() {
     for c in manifest()["cases"].as_array().unwrap() {
         let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
             std::io::Cursor::new(fixture(c["file"].as_str().unwrap())),

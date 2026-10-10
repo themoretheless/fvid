@@ -14,8 +14,8 @@ def chroma(p, dc, ac, qs):
     H=[[1,1],[1,-1]]
     def had(v): return [sum(H[y][j]*v[j*2+k]*H[x][k] for j in range(2) for k in range(2)) for y in range(2) for x in range(2)]
     def quant(v,cat,extra=0):
-        n=(abs(v)*Q[qs%6][cat]+2**(14+qs//6+extra))//2**(15+qs//6+extra)
-        return n if v>=0 else -n
+        magnitude=abs(v)*Q[qs%6][cat]+2**(14+qs//6+extra)
+        return ((-magnitude if v<0 else magnitude) if v else 0)//2**(15+qs//6+extra)
     predicted=had([m[0] for m in matrices])
     # H.264 8-439/440/441: quantize, add residual, Hadamard, copy DC.
     output_dc=had([quant(predicted[i],0,1)+dc[i] for i in range(4)])

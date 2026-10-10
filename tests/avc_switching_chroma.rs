@@ -170,7 +170,7 @@ fn primary_sp_mp4_software_playback_and_rewind_match_oracle() {
 }
 
 #[test]
-fn primary_sp_deblocking_matches_jm_and_secondary_sp_decodes() {
+fn primary_sp_deblocking_matches_normative_oracle_and_secondary_sp_decodes() {
     use fvid::codec::{
         avc_decoder::AvcDecoder,
         avc_transform::{primary_sp_chroma_420, switching_luma_4x4},
