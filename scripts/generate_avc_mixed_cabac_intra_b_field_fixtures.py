@@ -46,7 +46,7 @@ def initial_pcm(bottom,reverse,address,source,idr):
     return b.nal(0x65 if idr else 0x41,trailing=False)
 
 
-def slice_nal(bottom,reverse,address,mode,intra_kind,prediction,source,spatial,init):
+def slice_nal(bottom,reverse,address,mode,intra_kind,prediction,source,spatial,init,skip=False):
     kind=2 if intra_kind is not None else (0 if prediction<0 else 1)
     b=aligned_header(bottom,reverse,address,kind,mode,init,spatial=spatial)
     c=CabacWriter(-1 if kind==2 else init,26)
@@ -68,7 +68,10 @@ def slice_nal(bottom,reverse,address,mode,intra_kind,prediction,source,spatial,i
                 b.bits.extend(c.finish());return b.nal(0x01,trailing=False)
             c.decision(14,0);c.decision(15,0);c.decision(16,0)
         else:
-            c.decision(24,0);mb_type(c,prediction,0)
+            c.decision(24,int(skip))
+            if skip:
+                b.bits.extend(c.finish());return b.nal(0x01,trailing=False)
+            mb_type(c,prediction,0)
         for _ in range(0 if prediction==0 else (2 if prediction==3 else 1)):
             c.mvd(0,0,0);c.mvd(1,0,0)
     if intra_kind!='i16':

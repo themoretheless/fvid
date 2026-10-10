@@ -14,11 +14,12 @@ def smooth(bottom):
             for base,sign,width,height in [(64,1,32,16),(96,1,16,8),(160,-1,16,8)]]
 
 
-def filter_plane(samples, width, height, chroma, mode, slices, owners=None, horizontal_strength=3, switching_blocks=None):
+def filter_plane(samples, width, height, chroma, mode, slices, owners=None, horizontal_strength=3, switching_blocks=None, boundary_strengths=None):
     """Fixed QP26/offset0 fixture oracle: alpha15, beta6, tc0(bS3)=1.
 
-    Every MB is switching/intra: vertical external strength4, all other
-    present edges strength3. No horizontal external edge in this geometry.
+    By default every MB is switching/intra: vertical external strength4, all other
+    present edges strength3. Optional boundary strengths suppress other edges;
+    at QP26 all weak strengths1/2/3 have tc0=1.
     """
     out=samples[:]
     if mode==1:return out
@@ -36,6 +37,11 @@ def filter_plane(samples, width, height, chroma, mode, slices, owners=None, hori
                         neighbour=current-(1 if vertical else width//size)
                         if (owners is None and slices==2) or (owners is not None and owners[current]!=owners[neighbour]):continue
                     strength=(4 if vertical else horizontal_strength) if external else 3
+                    if boundary_strengths is not None:
+                        current=my*(width//size)+mx
+                        neighbour=current-(1 if vertical else width//size) if external else current
+                        strength=boundary_strengths.get((current,neighbour),0) if external else 0
+                        if strength==0:continue
                     if switching_blocks is not None:
                         current=my*(width//size)+mx
                         neighbour=current-(1 if vertical else width//size) if external else current

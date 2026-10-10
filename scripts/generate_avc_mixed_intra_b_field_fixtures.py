@@ -10,7 +10,7 @@ from generate_avc_switching_field_filter_fixtures import smooth, filter_plane
 from generate_avc_switching_field_motion_fixtures import compensate, verify_jm
 
 
-def slice_nal(bottom, reverse, address, mode, intra_kind, prediction, source, spatial):
+def slice_nal(bottom, reverse, address, mode, intra_kind, prediction, source, spatial, skip=False):
     is_intra=intra_kind is not None
     b=Writer();b.ue(address);b.ue(2 if is_intra else 1);b.ue(0)
     b.u(1,4);b.u(1);b.u(int(bottom));b.u(2+int(bottom!=reverse),4)
@@ -20,6 +20,8 @@ def slice_nal(bottom, reverse, address, mode, intra_kind, prediction, source, sp
     # Non-reference slices have no decoded-reference marking syntax.
     b.se(0);b.ue(mode)
     if mode!=1:b.se(0);b.se(0)
+    if skip and not is_intra:
+        b.ue(1);return b.nal(0x01)
     if is_intra:
         if intra_kind=='pcm':
             b.ue(25);b.align()

@@ -607,13 +607,12 @@ pub(super) fn decode_inter_field_impl(
     }
     for current in headers {
         let ordinary_mixed = matches!(current.slice_type, SliceType::I | SliceType::P | SliceType::B)
-            && matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)
-            && (current.slice_type == SliceType::I || h.slice_type == SliceType::I);
+            && matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B);
         let switching_mixed = !pps.cabac
             && matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
             && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp);
         if !current.field_pic
-            // Intra slices keep their own entropy table and inactive lists.
+            // Each slice keeps its own entropy syntax and active reference lists.
             || current.slice_type != h.slice_type && !(ordinary_mixed || switching_mixed)
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
