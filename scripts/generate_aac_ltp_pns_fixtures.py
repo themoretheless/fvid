@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Authored AOT4/19/23 PNS precedence reproducers, controls and scalar PCM."""
 import json,math,struct
-from generate_aac_main_tools_fixtures import channel,Noise,f32
+from generate_aac_main_tools_fixtures import channel,Noise,f32,sc
 from generate_aac_ld_filterbank_fixtures import window
 from generate_aac_ld_ltp_fixtures import GAINS
 from generate_he_aac_packet_fixtures import DEST,field,frequency,packed,video_fixture
@@ -35,9 +35,13 @@ def main():
     for aot in (4,19,23):
         for n in ((480,512) if aot==23 else (960,1024)):
             cos=[[math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for i in range(2*n)] for k in range(8)]
-            for mode in (('mono','independent-right','correlated','uncorrelated','coupling','coupling-before-tns','coupling-after-tns') if aot==4 else ('mono','independent-right','correlated','uncorrelated')):
-                point=0 if mode=='coupling-before-tns' else 1 if mode=='coupling-after-tns' else 3
+            for mode in (('mono','independent-right','correlated','uncorrelated','coupling','coupling-before-tns','coupling-after-tns') if aot==4 else ('mono','independent-right','correlated','uncorrelated'))+ (tuple(f'coupling-stereo-{p}-{selection}' for p in (0,1,3) for selection in range(4)) if aot==4 else ()):
+                stereo_target=mode.startswith('coupling-stereo-')
+                selection=int(mode.rsplit('-',1)[1]) if stereo_target else 2
+                point=int(mode.split('-')[-2]) if stereo_target else 0 if mode=='coupling-before-tns' else 1 if mode=='coupling-after-tns' else 3
                 width=1 if mode=='mono' or mode.startswith('coupling') else 2;common=mode in ('correlated','uncorrelated');ms=1 if mode=='correlated' else 0
+                output_width=2 if stereo_target else width
+                gains=[0. if selection==1 else 1.,0. if selection==2 else .5 if selection==3 else 1.] if stereo_target else [1.]*width
                 banks=[Oracle(n,aot==23,cos) for _ in range(width)];mutants=[Oracle(n,aot==23,cos) for _ in range(width)]
                 noise=Noise();rows=[];control_rows=[];start=len(gold)
                 for frame in range(12):
@@ -68,8 +72,9 @@ def main():
                         if mode.startswith('coupling'):
                             # CCE tag1 -> silent SCE tag0, unity gain at each coupling point.
                             source=wire[7:]
-                            target='0000000'+channel(0,[0,0],[[0]*8],info=base+'0')
-                            cce='0100001'+field(point==3,1)+'000'+'0'+'0000'+field(point==1,1)+'0'+'10'+source
+                            target=('0010000'+'1'+base+'0'+'00'+2*channel(0,[0,0],[[0]*8])) if stereo_target else '0000000'+channel(0,[0,0],[[0]*8],info=base+'0')
+                            cce='0100001'+field(point==3,1)+'000'+field(stereo_target,1)+'0000'+(field(selection,2) if stereo_target else '')+field(point==1,1)+'0'+'10'+source
+                            if stereo_target and selection==3:cce+=('' if point==3 else '1')+sc(2)
                             wire=cce+target if frame%2 else target+cce
                         return packed(wire+('111' if aot==4 else ''))
                     raw=encode(pred);rows.append(dict(offset=len(blob),bytes=len(raw),reference_offset=len(gold)));blob.extend(raw)
@@ -84,16 +89,19 @@ def main():
                                 a,b=spectra[0][k],spectra[1][k];spectra[0][k]=f32(a+b);spectra[1][k]=f32(a-b)
                     pcm=[banks[ch].run(spectra[ch],shape,active,lags[ch],coefs[ch],[True,books[ch][1]!=13]) for ch in range(width)]
                     mutant=[mutants[ch].run(spectra[ch],shape,active,lags[ch],coefs[ch],[True,True]) for ch in range(width)]
-                    for values in zip(*pcm):gold.extend(struct.pack('<'+'f'*width,*values))
-                    for values in zip(*mutant):wrong.extend(struct.pack('<'+'f'*width,*values))
+                    if stereo_target:
+                        pcm=[[f32(v*g) for v in pcm[0]] for g in gains]
+                        mutant=[[f32(v*g) for v in mutant[0]] for g in gains]
+                    for values in zip(*pcm):gold.extend(struct.pack('<'+'f'*output_width,*values))
+                    for values in zip(*mutant):wrong.extend(struct.pack('<'+'f'*output_width,*values))
                 asc=packed(field(aot,5)+frequency(24000)+field(width,4)+field(n in (480,960),1)+'00'+('00' if aot!=4 else '')).hex()
                 if mode.startswith('coupling'):
                     prefix=field(4,5)+frequency(24000)+'0000'+field(n==960,1)+'00'
-                    pce=field(0,4)+field(3,2)+frequency(24000)+field(1,4)+field(0,4)+field(0,4)+field(0,2)+field(0,3)+field(1,4)+'000'+'0'+field(0,4)+field(point==3,1)+field(1,4)
+                    pce=field(0,4)+field(3,2)+frequency(24000)+field(1,4)+field(0,4)+field(0,4)+field(0,2)+field(0,3)+field(1,4)+'000'+field(stereo_target,1)+field(0,4)+field(point==3,1)+field(1,4)
                     asc=packed(prefix+pce+'0'*(-len(prefix+pce)%8)+field(0,8)).hex()
-                name=f'{aot}-{n}-{mode}';c=dict(name=name,aot=aot,n=n,channels=width,asc=asc,frames=rows,control_frames=control_rows,reference_offset=start,reference_bytes=len(gold)-start,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
-                c['video']=video_fixture([c],blob,channels=width,filename=f'aac-ltp-pns-{name}-synthetic.mp4')
-                c['control_video']=video_fixture([dict(c,frames=control_rows)],blob,channels=width,filename=f'aac-ltp-pns-{name}-control-synthetic.mp4');cases.append(c)
+                name=f'{aot}-{n}-{mode}';c=dict(name=name,aot=aot,n=n,channels=output_width,asc=asc,point=point if mode.startswith('coupling') else None,selection=selection if stereo_target else None,frames=rows,control_frames=control_rows,reference_offset=start,reference_bytes=len(gold)-start,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
+                c['video']=video_fixture([c],blob,channels=output_width,filename=f'aac-ltp-pns-{name}-synthetic.mp4')
+                c['control_video']=video_fixture([dict(c,frames=control_rows)],blob,channels=output_width,filename=f'aac-ltp-pns-{name}-control-synthetic.mp4');cases.append(c)
     (DEST/'aac-ltp-pns-packets.bin').write_bytes(blob);(DEST/'aac-ltp-pns-reference.f32le').write_bytes(gold);(DEST/'aac-ltp-pns-incorrect-prediction.f32le').write_bytes(wrong)
     (DEST/'aac-ltp-pns.json').write_text(json.dumps(dict(cases=cases,provenance='Own AOT4/19/23 long-window PNS precedence packets with active overlapping LTP flags and matched controls clearing only those flags. Original scalar PNS, direct cosine/timeline/LD or sine overlap PCM plus deliberately incorrect PNS-prediction mutant. No private media, FFmpeg, network or foreign decoder.'),indent=2)+'\n')
     print(f'generated {len(cases)} PNS precedence videos and {len(cases)} matched controls')

@@ -47,11 +47,42 @@ fn pns_takes_precedence_over_ltp_without_losing_pcm_or_lag_history() {
     let gold = bytes("aac-ltp-pns-reference.f32le");
     let wrong = bytes("aac-ltp-pns-incorrect-prediction.f32le");
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 30);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 54);
+    let stereo_roster: std::collections::BTreeSet<_> = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| !c["selection"].is_null())
+        .map(|c| {
+            (
+                c["n"].as_u64().unwrap(),
+                c["point"].as_u64().unwrap(),
+                c["selection"].as_u64().unwrap(),
+            )
+        })
+        .collect();
+    let expected_roster: std::collections::BTreeSet<_> = [960, 1024]
+        .into_iter()
+        .flat_map(|n| {
+            [0, 1, 3]
+                .into_iter()
+                .flat_map(move |point| (0..4).map(move |selection| (n, point, selection)))
+        })
+        .collect();
+    assert_eq!(stereo_roster, expected_roster);
     for c in m["cases"].as_array().unwrap() {
         let actual = native(c, "frames", &blob);
         let control = native(c, "control_frames", &blob);
         let correct = reference(c, &gold);
+        assert_eq!(actual.len(), correct.len(), "{} PCM geometry", c["name"]);
+        if let Some(selection @ (1 | 2)) = c["selection"].as_u64() {
+            let silent = if selection == 1 { 0 } else { 1 };
+            assert!(
+                actual.chunks_exact(2).all(|pair| pair[silent] == 0.),
+                "{} unselected channel is audible",
+                c["name"]
+            );
+        }
         let mutant = reference(c, &wrong);
         assert!(
             correct

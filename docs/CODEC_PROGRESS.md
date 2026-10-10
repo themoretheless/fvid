@@ -10482,3 +10482,18 @@ with active prediction before/after PNS and alternating CCE/SCE wire order.
 The PNS matrix now has 30 cases. These fixtures have no TNS filter and use unity
 gain into a silent mono target; nontrivial TNS/gains and stereo routing remain
 separate qualification requirements.
+
+
+### LTP/PNS stereo coupling routing (2026-10-10)
+
+The authored PNS matrix adds 24 stereo CCE cases: 960/1024 frame sizes, coupling
+points 0/1/3 and all four channel selections. The target CPE is silent, the
+source has its own active LTP/PCM history and alternates between ordinary and
+PNS bands. Selections route to both, right only, left only, or separate left
+and right gain lists; the separate right list applies gain 0.5 versus unity on
+left. The scalar oracle computes source PCM independently and maps/scales it
+into the two expected lanes, so the unselected lane must remain silent. Matched
+controls clear only noise-band prediction flags. The matrix now contains 54
+cases, with native/checkpoint, public/owned export and player range/rewind/seek
+acceptance. Signed band-varying gains, nonzero target residuals and nontrivial
+source/target TNS remain separate qualification requirements.
