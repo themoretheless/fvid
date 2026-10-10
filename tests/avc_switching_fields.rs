@@ -29,6 +29,22 @@ fn manifest() -> Value {
         .as_array_mut()
         .unwrap()
         .extend(rows["cases"].as_array().unwrap().iter().cloned());
+    let mixed: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-mixed-sp-fields.json"
+    ))
+    .unwrap();
+    base["cases"]
+        .as_array_mut()
+        .unwrap()
+        .extend(mixed["cases"].as_array().unwrap().iter().cloned());
+    let uniform: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-uniform-type-fields.json"
+    ))
+    .unwrap();
+    base["cases"]
+        .as_array_mut()
+        .unwrap()
+        .extend(uniform["cases"].as_array().unwrap().iter().cloned());
     base
 }
 fn hex(s: &str) -> Vec<u8> {

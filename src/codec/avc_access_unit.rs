@@ -72,6 +72,15 @@ pub fn prepare<'a>(
             macroblocks: start..count,
         });
     }
+    // slice_type5..9 promises a uniform type across the entire picture,
+    // including slices received earlier or later in arbitrary NAL order.
+    if let Some(uniform) = slices.iter().find(|slice| slice.header.all_same_type)
+        && slices
+            .iter()
+            .any(|slice| slice.header.slice_type != uniform.header.slice_type)
+    {
+        return Err(invalid("AVC uniform slice type promise violated"));
+    }
     slices.sort_unstable_by_key(|slice| slice.header.first_mb);
     if slices.first().is_some_and(|s| s.header.first_mb != 0) {
         return Err(invalid("AVC access unit must cover macroblock zero"));
@@ -84,4 +93,66 @@ pub fn prepare<'a>(
         slices[index].macroblocks.end = end;
     }
     Ok(slices)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn mixed_fields_reject_uniform_slice_type_promises() {
+        use super::super::avc_decoder::AvcDecoder;
+        let packets: &[&[u8]] = &[
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-plain-mb0-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-plain-mb0-aso-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-plain-mb1-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-plain-mb1-aso-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-primary-mb0-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-primary-mb0-aso-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-primary-mb1-packet.bin"
+            ) as &[u8],
+            include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-invalid-uniform-type-field-primary-mb1-aso-packet.bin"
+            ) as &[u8],
+        ];
+        for packet in packets {
+            let mut decoder = AvcDecoder::new(
+                include_bytes!("../../tests/fixtures/playback-errors/avc-uniform-type-fields.avcc"),
+                4 << 20,
+            )
+            .unwrap();
+            assert!(
+                decoder
+                    .decode(include_bytes!(
+                        "../../tests/fixtures/playback-errors/avc-uniform-type-fields-pcm0.bin"
+                    ))
+                    .unwrap()
+                    .is_none()
+            );
+            assert!(
+                decoder
+                    .decode(include_bytes!(
+                        "../../tests/fixtures/playback-errors/avc-uniform-type-fields-pcm1.bin"
+                    ))
+                    .unwrap()
+                    .is_some()
+            );
+            let error = decoder.decode(packet).unwrap_err().to_string();
+            assert!(
+                error.contains("AVC uniform slice type promise violated"),
+                "{error}"
+            );
+        }
+    }
 }

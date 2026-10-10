@@ -602,7 +602,11 @@ pub(super) fn decode_inter_field_impl(
     }
     for current in headers {
         if !current.field_pic
+            // P and SP slices share the inter syntax; switching reconstruction
+            // and boundary strengths remain local to each slice below.
             || current.slice_type != h.slice_type
+                && !(matches!(current.slice_type, SliceType::P | SliceType::Sp)
+                    && matches!(h.slice_type, SliceType::P | SliceType::Sp))
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
             || current.pps_id != h.pps_id

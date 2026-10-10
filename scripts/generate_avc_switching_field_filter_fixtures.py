@@ -14,7 +14,7 @@ def smooth(bottom):
             for base,sign,width,height in [(64,1,32,16),(96,1,16,8),(160,-1,16,8)]]
 
 
-def filter_plane(samples, width, height, chroma, mode, slices, owners=None, horizontal_strength=3):
+def filter_plane(samples, width, height, chroma, mode, slices, owners=None, horizontal_strength=3, switching_blocks=None):
     """Fixed QP26/offset0 fixture oracle: alpha15, beta6, tc0(bS3)=1.
 
     Every MB is switching/intra: vertical external strength4, all other
@@ -36,6 +36,10 @@ def filter_plane(samples, width, height, chroma, mode, slices, owners=None, hori
                         neighbour=current-(1 if vertical else width//size)
                         if (owners is None and slices==2) or (owners is not None and owners[current]!=owners[neighbour]):continue
                     strength=(4 if vertical else horizontal_strength) if external else 3
+                    if switching_blocks is not None:
+                        current=my*(width//size)+mx
+                        neighbour=current-(1 if vertical else width//size) if external else current
+                        if current not in switching_blocks and neighbour not in switching_blocks:continue
                     for line in range(size):
                         x=mx*size+(edge if vertical else line)
                         y=my*size+(line if vertical else edge)
