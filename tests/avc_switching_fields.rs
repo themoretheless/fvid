@@ -13,6 +13,14 @@ fn manifest() -> Value {
         .as_array_mut()
         .unwrap()
         .extend(motion["cases"].as_array().unwrap().iter().cloned());
+    let filtered: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-switching-field-filter.json"
+    ))
+    .unwrap();
+    base["cases"]
+        .as_array_mut()
+        .unwrap()
+        .extend(filtered["cases"].as_array().unwrap().iter().cloned());
     base
 }
 fn hex(s: &str) -> Vec<u8> {

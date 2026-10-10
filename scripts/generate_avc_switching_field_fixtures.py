@@ -14,7 +14,7 @@ def planes(bottom):
             [192-bottom*17-x*5-y*3 for y in range(8) for x in range(16)]]
 
 
-def header(bottom, frame, qs, kind, idr, reverse=False, address=0):
+def header(bottom, frame, qs, kind, idr, reverse=False, address=0, deblock=1):
     b=Writer();b.ue(address);b.ue(4 if kind=='si' else (2 if kind=='pcm' else 3));b.ue(0);b.u(frame,4);b.u(1);b.u(int(bottom))
     if idr:b.ue(0)
     b.u(frame*2+int(bottom != reverse),4)
@@ -25,12 +25,13 @@ def header(bottom, frame, qs, kind, idr, reverse=False, address=0):
     if kind not in ['pcm']:
         if kind!='si':b.u(int(kind=='secondary'))
         b.se(qs-26)
-    b.ue(1)
+    b.ue(deblock)
+    if deblock != 1:b.se(0);b.se(0)
     return b
 
 
-def pcm(bottom,idr,reverse):
-    b=header(bottom,0,0,'pcm',idr,reverse);p=planes(bottom)
+def pcm(bottom,idr,reverse,source=None):
+    b=header(bottom,0,0,'pcm',idr,reverse);p=planes(bottom) if source is None else source
     for mb in range(2):
         b.ue(25);b.align()
         for plane,w,n in zip(p,[32,16,16],[16,8,8]):
@@ -39,8 +40,8 @@ def pcm(bottom,idr,reverse):
     return b.nal(0x65 if idr else 0x41)
 
 
-def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0)):
-    b=header(bottom,frame,qs,kind,idr,reverse,address or 0)
+def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0),deblock=1):
+    b=header(bottom,frame,qs,kind,idr,reverse,address or 0,deblock)
     if kind!='si' and not coded and address is None:b.ue(2)
     else:
         for mb in (range(2) if address is None else [address]):
@@ -59,9 +60,10 @@ def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0)):
     return b.nal(0x65 if idr else 0x41)
 
 
-def reconstruct(previous, qs, kind, coded):
+def reconstruct(previous, qs, kind, coded, independent_slices=False):
     out=[[0]*512,[0]*128,[0]*128];ready=set()
     for mb in range(2):
+        if independent_slices:ready.clear()
         for block in range(16):
             bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2;x=mb*16+bx*4;y=by*4
             if kind=='si':
@@ -80,7 +82,7 @@ def reconstruct(previous, qs, kind, coded):
                 p=[]
                 for row in range(8):
                     start=row//4*4
-                    dc_pred=(sum(plane[y*16+x-1] for y in range(start,start+4))+2)//4 if mb else 128
+                    dc_pred=(sum(plane[y*16+x-1] for y in range(start,start+4))+2)//4 if mb and not independent_slices else 128
                     p.extend([dc_pred]*8)
             else:p=[previous[component+1][i//8*16+x+i%8] for i in range(64)]
             dc=[0,0,(1 if (component+mb)%2==0 else -1) if coded else 0,0]

@@ -5352,3 +5352,36 @@ Validation: both integration tests passed over all140 streams (12 existing plus
 MP4 seek/rewind. Repeated generation with explicit optional JM cross-check left
 all282 switching-field artifacts byte-identical; all128 new luma checks passed.
 No production decoder change was needed for the tested fractional-motion cases.
+
+### Complementary SP/SI deblocking controls (2026-10-10)
+
+An independent scalar field-filter oracle adds 216 original streams for primary
+SP, secondary SP and SI, zero/signed residual, both parity arrival orders,
+one/two slices per compact field, QS0/26/51 and deblocking modes0/1/2. SP starts
+from an unfiltered original smooth I_PCM field pair. SI starts directly with an
+IDR field; independent slices correctly suppress spatial intra neighbours.
+
+The scalar reconstruction is filtered per compact field before weaving. At the
+fixed component QP26 and zero offsets, H.264 tables8-16/17 give alpha15, beta6
+and tc0(bS3)=1. The oracle applies strength4 at vertical external macroblock
+edges and strength3 internally, preserving sample-update order. Geometry is
+32x16 per field, so there are no horizontal external macroblock boundaries.
+Deblocking uses QP26, not switching QS. Controls demonstrate nonzero internal
+filter changes in all three families and mode0/mode2 differences across slice
+boundaries: 12 primary, 8 secondary and 2 SI paired controls.
+
+Explicit JM validation accepted all144 SP streams and exactly matched their
+luma planes, including filtering. SI is checked against the independent scalar
+normative oracle rather than JM's known incompatible SI mode syntax. The
+ordinary automated tests consume committed fixtures without JM, FFmpeg or
+network. Optional generator --jm-decoder repeats only the SP luma cross-check.
+
+This establishes neither horizontal external field boundaries nor varying QP,
+filter offsets, mixed slices, opposite-parity/weighted references or MBAFF.
+Those combinations remain separate codec qualification requirements.
+
+Validation: both switching-field integration tests passed over all356 streams
+(216 filter controls plus the previous140), with exact planar output, reset
+and software MP4 seek/rewind. All715 switching-field artifacts regenerated
+byte-for-byte. Optional JM cross-check again matched all144 SP luma streams.
+No production decoder change was needed for these deblocking combinations.
