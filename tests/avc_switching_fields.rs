@@ -1,52 +1,24 @@
 use fvid::codec::avc_decoder::AvcDecoder;
 use serde_json::Value;
 fn manifest() -> Value {
-    let mut base: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/avc-switching-fields.json"
-    ))
-    .unwrap();
-    let motion: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/avc-switching-field-motion.json"
-    ))
-    .unwrap();
-    base["cases"]
-        .as_array_mut()
-        .unwrap()
-        .extend(motion["cases"].as_array().unwrap().iter().cloned());
-    let filtered: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/avc-switching-field-filter.json"
-    ))
-    .unwrap();
-    base["cases"]
-        .as_array_mut()
-        .unwrap()
-        .extend(filtered["cases"].as_array().unwrap().iter().cloned());
-    let rows: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/avc-switching-field-rows.json"
-    ))
-    .unwrap();
-    base["cases"]
-        .as_array_mut()
-        .unwrap()
-        .extend(rows["cases"].as_array().unwrap().iter().cloned());
-    let mixed: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/avc-mixed-sp-fields.json"
-    ))
-    .unwrap();
-    base["cases"]
-        .as_array_mut()
-        .unwrap()
-        .extend(mixed["cases"].as_array().unwrap().iter().cloned());
-    let uniform: Value = serde_json::from_str(include_str!(
-        "fixtures/playback-errors/avc-uniform-type-fields.json"
-    ))
-    .unwrap();
-    base["cases"]
-        .as_array_mut()
-        .unwrap()
-        .extend(uniform["cases"].as_array().unwrap().iter().cloned());
+    let mut base: Value = serde_json::from_slice(&fixture("avc-switching-fields.json")).unwrap();
+    for name in [
+        "avc-switching-field-motion.json",
+        "avc-switching-field-filter.json",
+        "avc-switching-field-rows.json",
+        "avc-mixed-sp-fields.json",
+        "avc-uniform-type-fields.json",
+        "avc-mixed-intra-sp-fields.json",
+    ] {
+        let extra: Value = serde_json::from_slice(&fixture(name)).unwrap();
+        base["cases"]
+            .as_array_mut()
+            .unwrap()
+            .extend(extra["cases"].as_array().unwrap().iter().cloned());
+    }
     base
 }
+
 fn hex(s: &str) -> Vec<u8> {
     s.as_bytes()
         .chunks_exact(2)

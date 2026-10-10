@@ -316,7 +316,7 @@ impl AvcDecoder {
         }
         let order = self.poc.decode(sps, header)?;
         let mut retained_motion = None;
-        let mut field = if matches!(header.slice_type, SliceType::P | SliceType::Sp | SliceType::B) {
+        let mut field = if headers.iter().any(|h| matches!(h.slice_type, SliceType::P | SliceType::Sp | SliceType::B)) {
             let dpb = self
                 .field_dpb
                 .as_ref()

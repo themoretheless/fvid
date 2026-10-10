@@ -517,13 +517,17 @@ pub(super) fn decode_inter_field_impl(
     if direct.is_some_and(|contexts| contexts.len() != headers.len()) {
         return Err(invalid("AVC field direct contexts differ from slices"));
     }
+    // An I slice has no active references, even when it arrives before an
+    // inter slice. Geometry comes from an actual inter reference in the unit.
     let reference = references
-        .first()
-        .ok_or_else(|| invalid("missing AVC field reference"))?[0]
-        .first()
+        .iter()
+        .find_map(|lists| lists[0].first())
         .ok_or_else(|| invalid("empty AVC field reference list"))?
         .0;
     if headers.iter().zip(references).any(|(h, lists)| {
+        if h.slice_type == SliceType::I {
+            return !lists[0].is_empty() || !lists[1].is_empty();
+        }
         lists[0].len() != h.refs_l0 as usize
             || lists[0].is_empty()
             || lists[0].len() > 32
@@ -588,7 +592,8 @@ pub(super) fn decode_inter_field_impl(
         return Ok((picture, Some(motion)));
     }
     if !h.field_pic
-        || !matches!(h.slice_type, SliceType::P | SliceType::Sp | SliceType::B)
+        || !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp | SliceType::B)
+        || h.slice_type == SliceType::I && pps.cabac
         || h.redundant_pic_cnt != 0
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || h.disable_deblocking_filter_idc > 2
@@ -602,11 +607,12 @@ pub(super) fn decode_inter_field_impl(
     }
     for current in headers {
         if !current.field_pic
-            // P and SP slices share the inter syntax; switching reconstruction
-            // and boundary strengths remain local to each slice below.
+            // CAVLC I/P/SP share this dispatcher. Intra syntax has no skip
+            // run or references; switching reconstruction stays slice-local.
             || current.slice_type != h.slice_type
-                && !(matches!(current.slice_type, SliceType::P | SliceType::Sp)
-                    && matches!(h.slice_type, SliceType::P | SliceType::Sp))
+                && !(!pps.cabac
+                    && matches!(current.slice_type, SliceType::I | SliceType::P | SliceType::Sp)
+                    && matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp))
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
             || current.pps_id != h.pps_id
@@ -689,7 +695,7 @@ pub(super) fn decode_inter_field_impl(
     let list_storage = references
         .iter()
         .try_fold(0usize, |n, lists| {
-            n.checked_add((lists[0].len() - 1 + lists[1].len()) * 32)
+            n.checked_add((lists[0].len().saturating_sub(1) + lists[1].len()) * 32)
         })
         .ok_or_else(|| invalid("AVC field reference list storage overflow"))?;
     let required = pixels
@@ -808,7 +814,7 @@ pub(super) fn decode_inter_field_impl(
                 }
                 qp = *current;
                 1
-            } else if pps.cabac {
+            } else if pps.cabac || h.slice_type == SliceType::I {
                 0
             } else {
                 bits.unsigned_golomb()? as usize
@@ -835,7 +841,11 @@ pub(super) fn decode_inter_field_impl(
                 } else if !pps.cabac && step == skipped {
                     let mut probe = bits.clone();
                     let code = probe.unsigned_golomb()?;
-                    let intra_offset = if h.slice_type == SliceType::B { 23 } else { 5 };
+                    let intra_offset = match h.slice_type {
+                        SliceType::I => 0,
+                        SliceType::B => 23,
+                        _ => 5,
+                    };
                     if code >= intra_offset {
                         bits = probe;
                         Some(intra.as_mut().unwrap().read_embedded(
