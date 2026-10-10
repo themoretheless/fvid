@@ -5013,3 +5013,21 @@ controls; public/owned PCM, forbidden CRC, ranges and rewind/seek are checked.
 These cases use silent core coefficients: nonzero LTP+SBR, multichannel ER
 routing, ER implicit discovery and long ER extension regions need additional
 qualification. This does not add ER-LD SBR or protected epConfig support.
+
+### Indexed multichannel ER SBR qualification (2026-10-10)
+
+72 original ER LC/LTP scenarios now exercise channelConfiguration 2–7,
+11, 12 and 14, both 960/1024 core frames and single/double output rate.
+Every non-LFE channel has a distinct absolute SBR envelope energy; temporal
+zero deltas carry that per-channel history through subsequent packets.
+The scalar expectation uses the independent direct-QMF noise oracle scaled
+by sqrt(2)^source_channel, then the normative indexed PCM speaker mapping.
+This distinguishes routing swaps that equal centered signals would conceal.
+Complete PCM also matches ordinary indexed HE-AAC controls exactly.
+Missing/excess SBR records and ancillary data after SBR have 208 authored
+malformed companion videos and specific-error assertions; native failure
+rollback, checkpoint replay, public/owned export, ranges, rewind and seek pass.
+All 282 generated files reproduce deterministically. No production changes
+were needed for this matrix. LFE is silent in these cases, so nonzero LFE
+resampling/delay, active ER-LTP+SBR, implicit discovery and large extension
+regions still require separate qualification; this is not full ER conformance.
