@@ -809,5 +809,5 @@
       "mode": 2
     }
   ],
-  "provenance": "Own smooth block steps and primary SP skip at QPY50, QSY0/26/51; modes0/2. Optional explicit JM capture saves filtered YUV separately; ordinary generation and tests need no external process, FFmpeg or network. Secondary SP companions are refusal tests, not acceptance."
+  "provenance": "Own smooth block steps and primary SP skip at QPY50, QSY0/26/51; modes0/2. Optional explicit JM capture saves filtered YUV separately; ordinary generation and tests need no external process, FFmpeg or network. Secondary SP companions originally reproduced a refusal; now acceptance tests decode them. The JM reference is for primary SP only."
 }

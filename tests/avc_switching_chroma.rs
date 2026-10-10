@@ -170,7 +170,7 @@ fn primary_sp_mp4_software_playback_and_rewind_match_oracle() {
 }
 
 #[test]
-fn primary_sp_deblocking_matches_jm_and_secondary_sp_remains_specific_refusal() {
+fn primary_sp_deblocking_matches_jm_and_secondary_sp_decodes() {
     use fvid::codec::{
         avc_decoder::AvcDecoder,
         avc_transform::{primary_sp_chroma_420, switching_luma_4x4},
@@ -228,21 +228,16 @@ fn primary_sp_deblocking_matches_jm_and_secondary_sp_remains_specific_refusal() 
         decoder
             .decode(&hex(c["packets"][0].as_str().unwrap()))
             .unwrap();
-        let error = decoder
+        assert!(decoder
             .decode(&hex(c["secondary_packets"][0].as_str().unwrap()))
-            .unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .contains("switching SP is not implemented"),
-            "{error}"
-        );
+            .unwrap()
+            .is_some());
     }
 }
 
 #[cfg(feature = "player")]
 #[test]
-fn secondary_sp_mp4_refusal_is_not_primary_sp_acceptance() {
+fn formerly_refused_secondary_sp_mp4_now_decodes_all_frames() {
     let m: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/playback-errors/avc-primary-sp-filter.json"
     ))
@@ -261,24 +256,9 @@ fn secondary_sp_mp4_refusal_is_not_primary_sp_acceptance() {
         )
         .unwrap();
         let mut frames = 0;
-        let error = loop {
-            match reader.read_frame() {
-                Err(e) => break e,
-                Ok(Some(_)) => {
-                    frames += 1;
-                    assert!(
-                        frames <= 1,
-                        "secondary SP must not enter primary reconstruction"
-                    );
-                }
-                Ok(None) => panic!("secondary SP refusal was lost"),
-            }
-        };
-        assert!(
-            error
-                .to_string()
-                .contains("switching SP is not implemented"),
-            "{error}"
-        );
+        while reader.read_frame().unwrap().is_some() {
+            frames += 1;
+        }
+        assert_eq!(frames, 4);
     }
 }

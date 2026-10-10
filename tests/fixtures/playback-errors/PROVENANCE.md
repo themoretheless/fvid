@@ -5233,3 +5233,25 @@ internal filtering, external slice boundaries, and filtering disabled entirely.
 Validation: both automated tests passed across all nine streams offline without
 FFmpeg. All 19 artifacts reproduced byte-for-byte with ordinary generation and
 with repeated explicit JM reference capture.
+
+### Original secondary-SP normative reconstruction
+
+`generate_avc_secondary_sp_fixtures.py` constructs two original four-frame
+Extended-profile streams: I_PCM followed by three secondary SP pictures with
+QSY0/26/51, either skip or signed luma/chroma DC/AC residuals. The independent
+scalar matrix oracle saves complete 1536-byte planar YUV streams; 120 component
+matrix cases cover QSC0..39. No private media, FFmpeg, network or external encoder
+is used. Generation is separate from ordinary automated tests.
+
+Chroma follows the unscaled DC copy in H.264 8.6.2.2 equation8-441 (2016 and
+08/2024 editions). JM19 instead scales that DC. An explicit local JM check accepted
+both synthetic bitstreams and matched every luma frame exactly, while chroma
+showed the predicted discrepancy. Therefore JM is not the chroma pixel oracle for
+these two fixtures. `tests/avc_secondary_sp.rs` checks normative pixels, decoder
+reset and software MP4 seek/rewind. Existing secondary-refusal companion filenames
+are historical and their old refusal tests are replaced with acceptance checks.
+
+Validation: 200 AVC unit tests and 15 switching integration tests passed offline
+without FFmpeg (secondary SP3, primary/chroma7, luma3, multi-MB2). All five new
+secondary artifacts reproduced byte-for-byte. Explicit JM syntax/luma checks
+passed for both secondary streams; the chroma DC discrepancy is documented above.

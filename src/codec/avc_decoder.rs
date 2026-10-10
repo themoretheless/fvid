@@ -642,12 +642,11 @@ impl AvcDecoder {
             return Err(crate::unsupported("AVC picture type is not implemented"));
         }
         if slices.iter().any(|slice| slice.header.slice_type == SliceType::Sp)
-            && (slices.iter().any(|slice| slice.header.slice_type == SliceType::Sp && slice.header.sp_for_switch)
-                || !sps.frame_mbs_only || sps.chroma_format != 1 || sps.separate_colour_plane
+            && (!sps.frame_mbs_only || sps.chroma_format != 1 || sps.separate_colour_plane
                 || sps.bit_depth_luma != 8 || sps.bit_depth_chroma != 8 || pps.cabac
                 || sps.profile != 88 || pps.transform_8x8 || sps.transform_bypass)
         {
-            return Err(crate::unsupported("AVC primary SP requires progressive eight-bit 4:2:0 CAVLC; switching SP is not implemented"));
+            return Err(crate::unsupported("AVC SP requires progressive eight-bit 4:2:0 CAVLC"));
         }
         if !header.idr
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))

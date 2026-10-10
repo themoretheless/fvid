@@ -388,6 +388,29 @@ pub fn primary_sp_chroma_420(
     qp: u8,
     qs: u8,
 ) -> Result<[u16; 64]> {
+    sp_chroma_420(prediction, dc_levels, ac_levels, qp, qs, false)
+}
+
+/// Secondary SP/SI chroma, H.264 8.6.2.2. DC is copied after Hadamard
+/// (8-441), without the primary-SP dequantization in equation 8-431.
+/// Inputs use raster block/coefficient order, with AC index zero unused.
+pub fn switching_chroma_420(
+    prediction: &[u16; 64],
+    dc_levels: &[i32; 4],
+    ac_levels: &[[i32; 16]; 4],
+    qs: u8,
+) -> Result<[u16; 64]> {
+    sp_chroma_420(prediction, dc_levels, ac_levels, qs, qs, true)
+}
+
+fn sp_chroma_420(
+    prediction: &[u16; 64],
+    dc_levels: &[i32; 4],
+    ac_levels: &[[i32; 16]; 4],
+    qp: u8,
+    qs: u8,
+    switching: bool,
+) -> Result<[u16; 64]> {
     if qp > 39 || qs > 39 {
         return Err(invalid("AVC switching chroma QP out of range"));
     }
@@ -438,11 +461,14 @@ pub fn primary_sp_chroma_420(
     let predicted_dc = hadamard(coefficients.map(|c| c[0]));
     let mut quantized_dc = [0; 4];
     for i in 0..4 {
-        let sum = predicted_dc[i]
-            + ((i64::from(dc_levels[i]) * 16 * NORMALIZATION[usize::from(qp % 6)][0] * 16
-                << (qp / 6))
-                >> 9);
-        quantized_dc[i] = quant(sum, qs, 0, true);
+        quantized_dc[i] = if switching {
+            quant(predicted_dc[i], qs, 0, true) + i64::from(dc_levels[i])
+        } else {
+            let sum = predicted_dc[i]
+                + ((i64::from(dc_levels[i]) * 16 * NORMALIZATION[usize::from(qp % 6)][0] * 16
+                    << (qp / 6)) >> 9);
+            quant(sum, qs, 0, true)
+        };
     }
     let dc = hadamard(quantized_dc);
     let mut output = [0; 64];
@@ -458,20 +484,24 @@ pub fn primary_sp_chroma_420(
             } else {
                 2
             };
-            let sum = coefficients[block][i]
-                + ((i64::from(ac_levels[block][i])
-                    * 16
-                    * NORMALIZATION[usize::from(qp % 6)][category]
-                    * [16, 25, 20][category]
-                    << (qp / 6))
-                    >> 10);
-            levels[i] = i32::try_from(quant(sum, qs, category, false))
+            let value = if switching {
+                quant(coefficients[block][i], qs, category, false)
+                    + i64::from(ac_levels[block][i])
+            } else {
+                let sum = coefficients[block][i]
+                    + ((i64::from(ac_levels[block][i]) * 16
+                        * NORMALIZATION[usize::from(qp % 6)][category]
+                        * [16, 25, 20][category] << (qp / 6)) >> 10);
+                quant(sum, qs, category, false)
+            };
+            levels[i] = i32::try_from(value)
                 .map_err(|_| invalid("AVC switching chroma coefficient exceeds numeric range"))?;
         }
-        let scaled_dc = i32::try_from(
-            (dc[block] * 16 * NORMALIZATION[usize::from(qs % 6)][0] << (qs / 6)) >> 5,
-        )
-        .map_err(|_| invalid("AVC switching chroma DC exceeds numeric range"))?;
+        let scaled_dc = i32::try_from(if switching {
+            dc[block]
+        } else {
+            (dc[block] * 16 * NORMALIZATION[usize::from(qs % 6)][0] << (qs / 6)) >> 5
+        }).map_err(|_| invalid("AVC switching chroma DC exceeds numeric range"))?;
         let samples = residual_4x4(&levels, qs, 8, &[16; 16], Some(scaled_dc))?;
         let ox = (block % 2) * 4;
         let oy = (block / 2) * 4;

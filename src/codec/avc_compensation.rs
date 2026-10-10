@@ -295,22 +295,34 @@ impl Prediction420 {
     /// Primary-SP reconstruction, including requantization for skipped blocks.
     /// Entropy supplies raster luma/AC blocks and scanned 2x2 chroma DC levels.
     pub fn reconstruct_primary_sp(
-        mut self,
+        self,
         luma: &[[i32; 16]; 16],
         chroma_dc: &[[i32; 4]; 2],
         chroma_ac: &[[[i32; 16]; 4]; 2],
         qp: [u8; 3],
         qs: [u8; 3],
     ) -> Result<Self> {
+        self.reconstruct_sp(luma, chroma_dc, chroma_ac, qp, qs, false)
+    }
+    /// Reconstruct primary or secondary SP from prediction and parsed levels.
+    pub fn reconstruct_sp(
+        mut self,
+        luma: &[[i32; 16]; 16],
+        chroma_dc: &[[i32; 4]; 2],
+        chroma_ac: &[[[i32; 16]; 4]; 2],
+        qp: [u8; 3],
+        qs: [u8; 3],
+        switching: bool,
+    ) -> Result<Self> {
         if self.dimensions() != (16, 16) || self.depth != 8 {
-            return Err(invalid("primary SP requires an eight-bit 16x16 prediction"));
+            return Err(invalid("SP requires an eight-bit 16x16 prediction"));
         }
         for index in 0..16 {
             let x = index % 4 * 4;
             let y = index / 4 * 4;
             let p = std::array::from_fn(|i| self.y[(y + i / 4) * 16 + x + i % 4]);
             let block =
-                super::avc_transform::switching_luma_4x4(&p, &luma[index], qp[0], qs[0], false)?;
+                super::avc_transform::switching_luma_4x4(&p, &luma[index], qp[0], qs[0], switching)?;
             for i in 0..16 {
                 self.y[(y + i / 4) * 16 + x + i % 4] = block[i];
             }
@@ -322,13 +334,11 @@ impl Prediction420 {
                 .as_slice()
                 .try_into()
                 .map_err(|_| invalid("invalid SP chroma geometry"))?;
-            let samples = super::avc_transform::primary_sp_chroma_420(
-                p,
-                &dc,
-                &chroma_ac[component],
-                qp[component + 1],
-                qs[component + 1],
-            )?;
+            let samples = if switching {
+                super::avc_transform::switching_chroma_420(p, &dc, &chroma_ac[component], qs[component + 1])?
+            } else {
+                super::avc_transform::primary_sp_chroma_420(p, &dc, &chroma_ac[component], qp[component + 1], qs[component + 1])?
+            };
             plane.copy_from_slice(&samples);
         }
         Ok(self)

@@ -34,6 +34,7 @@ struct InterJob {
     qps: [u8; 3],
     bypass: bool,
     sp_qs: Option<[u8; 3]>,
+    sp_switching: bool,
 }
 /// Decode-order record replayed by pass B (see below).
 enum Order {
@@ -66,11 +67,11 @@ fn reconstruct_inter_job(
         let zero_luma = [[0;16];16];
         let zero_dc = [[0;4];2];
         let zero_ac = [[[0;16];4];2];
-        prediction.reconstruct_primary_sp(
+        prediction.reconstruct_sp(
             job.coefficients.as_ref().map_or(&zero_luma, |c| &c.luma4),
             job.coefficients.as_ref().map_or(&zero_dc, |c| &c.chroma_dc),
             job.coefficients.as_ref().map_or(&zero_ac, |c| &c.chroma_ac),
-            job.qps, qs,
+            job.qps, qs, job.sp_switching,
         )?
     } else if let Some(c) = &job.coefficients {
         let luma = if job.eight {
@@ -210,11 +211,10 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         .first()
         .ok_or_else(|| invalid("missing inter slices"))?;
     if headers.iter().any(|h|h.slice_type==SliceType::Sp)
-        && (headers.iter().any(|h|h.slice_type==SliceType::Sp && h.sp_for_switch)
-            || sps.profile!=88 || !sps.frame_mbs_only || sps.bit_depth_luma!=8
+        && (sps.profile!=88 || !sps.frame_mbs_only || sps.bit_depth_luma!=8
             || sps.bit_depth_chroma!=8 || pps.cabac || pps.transform_8x8 || sps.transform_bypass)
     {
-        return Err(crate::unsupported("AVC primary SP requires progressive eight-bit 4:2:0 CAVLC; switching SP is not implemented"));
+        return Err(crate::unsupported("AVC SP requires progressive eight-bit 4:2:0 CAVLC"));
     }
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()
@@ -829,6 +829,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                                 eight,
                                 bypass: sps.transform_bypass && qps[0] == 0,
                                 qps,
+                                sp_switching: header.sp_for_switch,
                                 sp_qs: if header.slice_type == SliceType::Sp {
                                     let qs=header.slice_qs.ok_or_else(||invalid("missing SP QS"))?;
                                     Some([qs as u8,chroma_qp(qs,pps.chroma_qp_offset,8),chroma_qp(qs,pps.second_chroma_qp_offset,8)])

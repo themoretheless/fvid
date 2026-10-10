@@ -10874,3 +10874,35 @@ SP remain open rather than being inferred from these progressive fixtures.
 Validation: both automated tests passed across all nine streams offline without
 FFmpeg. All 19 artifacts reproduced byte-for-byte with ordinary generation and
 with repeated explicit JM reference capture.
+
+### Progressive secondary SP, normative switching reconstruction (2026-10-10)
+
+Secondary SP (`sp_for_switch_flag=1`) now uses a distinct switching reconstruction
+through the owned progressive eight-bit 4:2:0 CAVLC decoder and software MP4
+reader. Prediction coefficients are quantized at QS before parsed signed residual
+levels are added. Primary-SP residual scaling/requantization remains separate.
+The public `switching_chroma_420` kernel also implements the chroma operation used
+by SI; this does not yet enable SI syntax/picture decoding.
+
+The independent scalar matrix oracle follows H.264 8.6.2.2, equations8-439..441:
+chroma DC is quantized, combined with parsed DC, inverse Hadamard transformed and
+copied into the inverse 4x4 transform without additional scaling. Both the local
+2016 normative text and the indexed ITU 08/2024 text explicitly specify that copy.
+JM19 instead dequantizes this DC as in primary SP. This discrepancy is retained
+explicitly: the two original four-frame secondary streams are accepted by JM,
+and every luma frame matches the scalar oracle, but chroma differs. JM is a syntax
+and luma cross-check, not the secondary chroma pixel oracle. No silent JM-specific
+compatibility branch was introduced.
+
+Original secondary skip/signed-residual fixtures cover QSY0/26/51, mapped chroma
+QSC, DC scan order, positive/negative AC and repeated reference updates. A 120-case
+matrix covers every component QS0..39 with flat/ramp prediction and signed levels.
+Acceptance tests replace the former secondary-SP refusal expectations and check
+full normative YUV after decoder reset and software MP4 seek/rewind. Older fixture
+filenames containing `secondary-refusal` record their historical purpose; they
+are now decoded by acceptance tests. SI and field/MBAFF SP remain open.
+
+Validation: 200 AVC unit tests and 15 switching integration tests passed offline
+without FFmpeg (secondary SP3, primary/chroma7, luma3, multi-MB2). All five new
+secondary artifacts reproduced byte-for-byte. Explicit JM syntax/luma checks
+passed for both secondary streams; the chroma DC discrepancy is documented above.
