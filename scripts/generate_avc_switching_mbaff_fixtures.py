@@ -43,7 +43,7 @@ def write_chroma_dc_one(b,negative,level=1):
     b.u(1,2)
 
 
-def slice_nal(pair,field,frame,kind,qs,coded,previous,skip,chroma=None,mv=(0,0),reference_field=0,dc_level=1,mode=1):
+def slice_nal(pair,field,frame,kind,qs,coded,previous,skip,chroma=None,mv=(0,0),reference_field=0,dc_level=1,mode=1,offsets=(0,0)):
     b=Writer();b.ue(pair);b.ue(2 if frame==0 else 3);b.ue(0);b.u(frame,4);b.u(0)
     if frame==0:b.ue(0)
     b.u(frame*2,4)
@@ -53,7 +53,7 @@ def slice_nal(pair,field,frame,kind,qs,coded,previous,skip,chroma=None,mv=(0,0),
     b.se(0)
     if frame:b.u(int(kind=='secondary'));b.se(qs-26)
     b.ue(mode)
-    if mode!=1:b.se(0);b.se(0)
+    if mode!=1:b.se(offsets[0]//2);b.se(offsets[1]//2)
     if frame and skip=='both':b.ue(2);return b.nal(0x41)
     for parity in [0,1]:
         if frame:

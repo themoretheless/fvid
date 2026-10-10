@@ -7,24 +7,26 @@ from generate_avc_secondary_sp_fixtures import chroma
 from avc_fixture_mp4 import mux
 
 
-def configuration(constrained):
+def configuration(constrained,height=32):
     b=Writer();b.u(88,8);b.u(0,8);b.u(10,8);b.ue(0)
-    b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(0)
+    b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(height//32-1)
     b.u(0);b.u(1);b.u(1);b.u(0);b.u(0);sps=b.nal(0x67)
     b=Writer();b.ue(0);b.ue(0);b.u(0);b.u(0);b.ue(0);b.ue(0);b.ue(0)
     b.u(0);b.u(0,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(int(constrained));b.u(0);pps=b.nal(0x68)
     return bytes([1,88,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 
 
-def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_level=1):
+def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_level=1,mode=1,offsets=(0,0)):
+    height=len(fields)*16
     b=Writer();b.ue(addresses[0]//2);b.ue(4);b.ue(0);b.u(frame,4);b.u(0)
     if frame==0:b.ue(0)
     b.u(frame*2,4)
     if frame==0:b.u(0);b.u(0)
     else:b.u(0)
-    b.se(0);b.se(qs-26);b.ue(1)
-    counts=[None]*1024
-    chroma_counts=[[None]*256 for _ in range(2)]
+    b.se(0);b.se(qs-26);b.ue(mode)
+    if mode!=1:b.se(offsets[0]//2);b.se(offsets[1]//2)
+    counts=[None]*(32*height)
+    chroma_counts=[[None]*(8*height) for _ in range(2)]
     for address in addresses:
         if address%2==0:b.u(int(fields[address//2]))
         if address in pcm:
@@ -46,7 +48,7 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_
             bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2
             pos=locations[by*4*16+bx*4];y,x=divmod(pos,32)
             if active:
-                neighbours=[counts[yy*32+xx] for xx,yy in [(x-1,y),(x,y-step)] if 0<=xx<32 and 0<=yy<32 and counts[yy*32+xx] is not None]
+                neighbours=[counts[yy*32+xx] for xx,yy in [(x-1,y),(x,y-step)] if 0<=xx<32 and 0<=yy<height and counts[yy*32+xx] is not None]
                 nc=(sum(neighbours)+len(neighbours)//2)//len(neighbours) if neighbours else 0
                 # Table9-5, TotalCoeff1/TrailingOnes1; PCM contributes count16.
                 token,length=(1,2) if nc<2 else ((2,2) if nc<4 else ((14,4) if nc<8 else (1,6)))
@@ -64,7 +66,7 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_
                 ac=active and chroma_mode in ['ac','both']
                 if ac:
                     counts_c=chroma_counts[component]
-                    neighbours=[counts_c[yy*16+xx] for xx,yy in [(x-1,y),(x,y-step)] if 0<=xx<16 and 0<=yy<16 and counts_c[yy*16+xx] is not None]
+                    neighbours=[counts_c[yy*16+xx] for xx,yy in [(x-1,y),(x,y-step)] if 0<=xx<16 and 0<=yy<height//2 and counts_c[yy*16+xx] is not None]
                     nc=(sum(neighbours)+len(neighbours)//2)//len(neighbours) if neighbours else 0
                     token,length=(1,2) if nc<2 else ((2,2) if nc<4 else ((14,4) if nc<8 else (1,6)))
                     b.u(token,length);b.u((block+component+address)%2);b.u(1)
@@ -78,9 +80,10 @@ def pcm_value(address,component):
 
 
 def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=None,dc_level=1):
-    out=[[0]*1024,[0]*256,[0]*256]
+    height=len(fields)*16
+    out=[[0]*(32*height),[0]*(8*height),[0]*(8*height)]
     for addresses in groups:
-        ready=[[0]*1024,[0]*256,[0]*256]
+        ready=[[0]*len(plane) for plane in out]
         for address in addresses:
             pair,parity=divmod(address,2);field=fields[pair];step=2 if field else 1
             si=switching[address];tag=2 if si else 1
@@ -89,7 +92,7 @@ def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=Non
                     for pos in indices(pair,parity,field,component):out[component][pos]=pcm_value(address,component);ready[component][pos]=1
                 continue
             def edge(component,coordinates):
-                width=32 if component==0 else 16;height=width
+                width=32 if component==0 else 16;height=len(out[component])//width
                 if not all(0<=x<width and 0<=y<height and ready[component][y*width+x] and not (constrained and not si and ready[component][y*width+x]==2) for x,y in coordinates):return []
                 return [out[component][y*width+x] for x,y in coordinates]
             locations=indices(pair,parity,field,0)

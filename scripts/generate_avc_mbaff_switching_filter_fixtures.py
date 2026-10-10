@@ -5,13 +5,18 @@ from generate_avc_switching_mbaff_fixtures import DEST, configuration, indices, 
 from avc_fixture_mp4 import mux
 
 
-def filter_picture(planes, fields, mode):
-    """H.264 8.7 at QP26: alpha15, beta6, tc0(bS3)=1.
+def filter_picture(planes, fields, mode, offsets=(0,0), slices=None):
+    """H.264 8.7 at QP26, with selected signed alpha/beta offsets.
 
     Ownership is obtained by painting each macroblock's samples, including field
     parity, rather than using the decoder's edge traversal or address mapping.
-    Every pair is an independent slice; mode2 suppresses only cross-pair edges.
+    Default slices are independent pairs; explicit identities cover whole pictures.
     """
+    # Table8-16/17 at QP26; actual offsets are twice slice syntax.
+    alpha={-4:9,0:15,4:25}[offsets[0]]
+    beta={-2:4,0:6,2:7}[offsets[1]]
+    tc0={-4:1,0:1,4:2}[offsets[0]]
+    if slices is None:slices=[address//2 for address in range(2*len(fields))]
     result=[]
     for component, plane in enumerate(planes):
         out=plane[:];width=16 if component else 32;size=width//2
@@ -40,14 +45,14 @@ def filter_picture(planes, fields, mode):
                             at=y*width+x
                             if at-step<0:continue
                             neighbour=owners[at-step]
-                            if external and mode==2 and neighbour//2!=pair:continue
+                            if external and mode==2 and slices[neighbour]!=slices[address]:continue
                             strength=4 if external and (vertical or not field and not fields[neighbour//2]) else 3
                             p=[out[at-(i+1)*step] for i in range(4)]
                             q=[out[at+i*step] for i in range(4)]
-                            if abs(p[0]-q[0])>=15 or abs(p[1]-p[0])>=6 or abs(q[1]-q[0])>=6:continue
-                            a=p[:];b=q[:];ap=abs(p[2]-p[0])<6;aq=abs(q[2]-q[0])<6
+                            if abs(p[0]-q[0])>=alpha or abs(p[1]-p[0])>=beta or abs(q[1]-q[0])>=beta:continue
+                            a=p[:];b=q[:];ap=abs(p[2]-p[0])<beta;aq=abs(q[2]-q[0])<beta
                             if strength==4:
-                                strong=not component and abs(p[0]-q[0])<5
+                                strong=not component and abs(p[0]-q[0])<alpha//4+2
                                 for near,far,dst,enabled in [(p,q,a,ap),(q,p,b,aq)]:
                                     if strong and enabled:
                                         dst[0]=(near[2]+2*near[1]+2*near[0]+2*far[0]+far[1]+4)//8
@@ -56,13 +61,13 @@ def filter_picture(planes, fields, mode):
                                     else:dst[0]=(2*near[1]+near[0]+far[1]+2)//4
                             else:
                                 limit=lambda v,n:max(-n,min(n,v))
-                                tc=2 if component else 1+ap+aq
+                                tc=tc0+1 if component else tc0+ap+aq
                                 delta=limit((4*(q[0]-p[0])+p[1]-q[1]+4)//8,tc)
                                 a[0]=max(0,min(255,p[0]+delta));b[0]=max(0,min(255,q[0]-delta))
                                 average=(p[0]+q[0]+1)//2
                                 if not component:
-                                    if ap:a[1]+=limit((p[2]+average-2*p[1])//2,1)
-                                    if aq:b[1]+=limit((q[2]+average-2*q[1])//2,1)
+                                    if ap:a[1]+=limit((p[2]+average-2*p[1])//2,tc0)
+                                    if aq:b[1]+=limit((q[2]+average-2*q[1])//2,tc0)
                             for i in range(3):out[at-(i+1)*step]=a[i];out[at+i*step]=b[i]
         result.append(out)
     return result
