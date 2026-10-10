@@ -10853,3 +10853,24 @@ Validation: 200 AVC unit tests; 7 primary-SP integration tests (including softwa
 MP4 seek/rewind and secondary refusal); 3 luma and 3 scaling-list IPB regression
 tests passed offline without FFmpeg. Seven new artifacts reproduced exactly,
 including explicitly repeated optional JM capture.
+
+### Primary SP across macroblocks, slices and fractional motion (2026-10-10)
+
+Original 32x32 Extended-profile streams now exercise four macroblocks and three
+primary SP pictures at QPY50 / QSY0,26,51. Nine cases cover one/four slices,
+deblocking modes0/1/2, and four-slice coded inter prediction with quarter-sample
+vectors (1,-1), (3,2), (-5,7). The latter deliberately makes spatial MV predictors
+unavailable at each slice boundary; it tests motion compensation followed by SP
+quantization, not multi-MB MV prediction. Source pixels and syntax are generated
+locally; optional explicit JM capture supplies full YUV references. Ordinary
+fixture generation and acceptance tests require neither FFmpeg nor network.
+
+Decoder reset and software MP4 seek/rewind compare complete frames with the saved
+reference. Matched controls prove external slice-boundary filtering is exercised:
+mode0 equals mode2 for a single slice, differs for four slices, and mode1 differs
+from mode2. This extends primary-SP qualification; secondary SP, SI and field/MBAFF
+SP remain open rather than being inferred from these progressive fixtures.
+
+Validation: both automated tests passed across all nine streams offline without
+FFmpeg. All 19 artifacts reproduced byte-for-byte with ordinary generation and
+with repeated explicit JM reference capture.

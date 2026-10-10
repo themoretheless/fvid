@@ -5216,3 +5216,20 @@ Validation: 200 AVC unit tests; 7 primary-SP integration tests (including softwa
 MP4 seek/rewind and secondary refusal); 3 luma and 3 scaling-list IPB regression
 tests passed offline without FFmpeg. Seven new artifacts reproduced exactly,
 including explicitly repeated optional JM capture.
+
+### Original primary-SP multi-macroblock and fractional-motion streams
+
+`generate_avc_primary_sp_multimb_fixtures.py` writes original 32x32 four-macroblock
+I_PCM input followed by three primary SP pictures (QPY50; QSY0/26/51). Nine streams
+combine one/four slices, deblocking modes0/1/2 and signed fractional motion vectors
+(1,-1), (3,2), (-5,7). Each motion macroblock starts a new slice, so its spatial MV
+predictor is zero. No private media or parameter sets are used. The explicit
+`--jm-decoder` option captures 6144-byte planar YUV references per stream;
+ordinary generation preserves these references and invokes no external decoder.
+`tests/avc_primary_sp_multimb.rs` checks complete decoder output after reset and
+software MP4 playback after seek/rewind. Matched filtering controls distinguish
+internal filtering, external slice boundaries, and filtering disabled entirely.
+
+Validation: both automated tests passed across all nine streams offline without
+FFmpeg. All 19 artifacts reproduced byte-for-byte with ordinary generation and
+with repeated explicit JM reference capture.
