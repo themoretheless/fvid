@@ -54,7 +54,7 @@ def main():
     rejected=[];malformed=[];alignment=[]
     for n in (960,1024):
         base=next(c for c in cases if c['n']==n and c['channels']==1)
-        for flags,ep,flag3 in [(flags,0,False) for flags in (1,2,3,5,6,7)]+[(0,ep,False) for ep in (1,2,3)]+[(0,0,True)]:
+        for flags,ep,flag3 in [(flags,0,False) for flags in (1,3,5,7)]+[(0,ep,False) for ep in (1,2,3)]+[(0,0,True)]:
             asc=field(17,5)+frequency(24000)+'0001'+field(n==960,1)+'01'+field(flags,3)+field(flag3,1)+field(ep,2)
             c=dict(base,asc=packed(asc).hex())
             error='ER AAC LC resilience tools are not yet implemented' if flags else 'ER AAC LC epConfig is not yet implemented' if ep else 'AAC extensionFlag3 must be zero'

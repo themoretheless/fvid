@@ -24,6 +24,7 @@ fn ltp_pair_packets_match_scalar_and_qualified_external_pcm() {
         frame_samples: 1024,
         core_coder_delay: None,
         section_data_resilience: false,
+        scalefactor_data_resilience: false,
     };
     let offsets = BandTables::new(24000, 1024).unwrap().long;
     for case in m["cases"].as_array().unwrap() {
@@ -135,6 +136,7 @@ fn ltp_pair_reserved_mask_and_profile_refuse_without_consuming_bits() {
         frame_samples: 1024,
         core_coder_delay: None,
         section_data_resilience: false,
+        scalefactor_data_resilience: false,
     };
     let mut b = BitReader::new(&raw);
     b.skip(7).unwrap();

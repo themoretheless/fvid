@@ -15,6 +15,7 @@ mod tests {
             frame_samples: 1024,
             core_coder_delay: None,
             section_data_resilience: false,
+            scalefactor_data_resilience: false,
         }
     }
     #[test]

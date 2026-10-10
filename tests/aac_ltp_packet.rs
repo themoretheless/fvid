@@ -23,6 +23,7 @@ fn ltp_packet_parse_reconstruction_and_channel_match_external_pcm() {
         frame_samples: 1024,
         core_coder_delay: None,
         section_data_resilience: false,
+        scalefactor_data_resilience: false,
     };
     let offsets = BandTables::new(24000, 1024).unwrap().long;
     for video in m["videos"].as_array().unwrap() {

@@ -3375,18 +3375,6 @@
       "error": "ER AAC LC resilience tools are not yet implemented"
     },
     {
-      "asc": "8b0d40",
-      "video": {
-        "file": "aac-er-lc-rejected-960-2-0-0-synthetic.mp4",
-        "sha256": "e4580510189970d3f98ea7de0ac0b34141b42a6204cfbc2d6c9b6a0a017fd808",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0d40",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "ER AAC LC resilience tools are not yet implemented"
-    },
-    {
       "asc": "8b0d60",
       "video": {
         "file": "aac-er-lc-rejected-960-3-0-0-synthetic.mp4",
@@ -3405,18 +3393,6 @@
         "sha256": "59555e89af2bb0a69f35aee0d6999cf82a51321034c3b48b46028be07f1805f6",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "8b0da0",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "ER AAC LC resilience tools are not yet implemented"
-    },
-    {
-      "asc": "8b0dc0",
-      "video": {
-        "file": "aac-er-lc-rejected-960-6-0-0-synthetic.mp4",
-        "sha256": "8542eb4ce6834839dcc7aabca976cc9bbf9d54fcd81071d70397edf6ebfe7507",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0dc0",
         "pcm_offset": 0,
         "samples": 11520
       },
@@ -3495,18 +3471,6 @@
       "error": "ER AAC LC resilience tools are not yet implemented"
     },
     {
-      "asc": "8b0940",
-      "video": {
-        "file": "aac-er-lc-rejected-1024-2-0-0-synthetic.mp4",
-        "sha256": "22684d1c3a53b9d9b3aff3005ed48435e378f26eef2c1f22f72894a59a536821",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b0940",
-        "pcm_offset": 0,
-        "samples": 12288
-      },
-      "error": "ER AAC LC resilience tools are not yet implemented"
-    },
-    {
       "asc": "8b0960",
       "video": {
         "file": "aac-er-lc-rejected-1024-3-0-0-synthetic.mp4",
@@ -3525,18 +3489,6 @@
         "sha256": "5c9749d1a9706bc17f13ba86f54f0d1a9d0e7e4d54a27ec1de2508d9718b0b0a",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "8b09a0",
-        "pcm_offset": 0,
-        "samples": 12288
-      },
-      "error": "ER AAC LC resilience tools are not yet implemented"
-    },
-    {
-      "asc": "8b09c0",
-      "video": {
-        "file": "aac-er-lc-rejected-1024-6-0-0-synthetic.mp4",
-        "sha256": "ffa3178acfea0f2464e9148bb5b0a1bbb7a0fe151d0b21da0f8a90acf1bab9da",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b09c0",
         "pcm_offset": 0,
         "samples": 12288
       },

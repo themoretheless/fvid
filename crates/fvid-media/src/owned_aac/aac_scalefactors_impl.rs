@@ -65,3 +65,5 @@ pub fn read(bits: &mut BitReader<'_>, gain: u8, books: &[Vec<u8>]) -> Result<Vec
     *bits = cursor;
     Ok(result)
 }
+
+include!("aac_rvlc_impl.rs");

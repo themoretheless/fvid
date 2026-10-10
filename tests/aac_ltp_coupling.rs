@@ -26,6 +26,7 @@ fn owned_cce_ltp_syntax_gains_and_boundaries_match_authored_packets() {
             frame_samples: 1024,
             core_coder_delay: None,
             section_data_resilience: false,
+            scalefactor_data_resilience: false,
         };
         for row in c["frames"].as_array().unwrap() {
             let at = row["offset"].as_u64().unwrap() as usize;
@@ -176,6 +177,7 @@ fn root_cce_parser_preserves_prediction_and_end_alignment() {
             frame_samples: 1024,
             core_coder_delay: None,
             section_data_resilience: false,
+            scalefactor_data_resilience: false,
         };
         for row in case["frames"].as_array().unwrap() {
             let at = row["offset"].as_u64().unwrap() as usize;
@@ -214,6 +216,7 @@ fn root_cce_parser_preserves_prediction_and_end_alignment() {
                 frame_samples: 1024,
                 core_coder_delay: None,
                 section_data_resilience: false,
+                scalefactor_data_resilience: false,
             };
             let (expected, _) =
                 fvid_media::owned_aac::aac_coupling_syntax::Coupling::read_ltp(&mut owned, &cfg)

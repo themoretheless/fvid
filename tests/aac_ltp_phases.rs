@@ -24,6 +24,7 @@ fn parsed_ltp_tns_coupling_phases_match_independent_scalar_pcm() {
         frame_samples: 1024,
         core_coder_delay: None,
         section_data_resilience: false,
+        scalefactor_data_resilience: false,
     };
     let tables = BandTables::new(config.sample_rate, config.frame_samples as usize).unwrap();
     let mut wrong_point1_peak = 0f64;

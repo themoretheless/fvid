@@ -201,7 +201,14 @@ impl ChannelData {
     ) -> Result<Self> {
         let mut cursor = bits.clone();
         let codebooks = info.read_sections_with_resilience(&mut cursor, config.section_data_resilience)?;
-        let scales = aac_scalefactors::read(&mut cursor, gain, &codebooks)?;
+        let rvlc = if config.scalefactor_data_resilience {
+            Some(aac_scalefactors::RvlcHeader::read(
+                &mut cursor, info.sequence == WindowSequence::EightShort, &codebooks,
+            )?)
+        } else { None };
+        let mut scales = if rvlc.is_none() {
+            aac_scalefactors::read(&mut cursor, gain, &codebooks)?
+        } else { Vec::new() };
         let pulse = if cursor.bit()? {
             Some(PulseData::read(&mut cursor, info.sequence, tables.long)?)
         } else {
@@ -219,6 +226,9 @@ impl ChannelData {
             }
             Some(gain)
         } else { None };
+        if let Some(header) = rvlc {
+            scales = header.decode(&mut cursor, gain, &codebooks)?;
+        }
         if tns_present && er {
             tns = Some(tns_syntax::read_profile(&mut cursor, info.sequence, false)?);
         }
