@@ -4997,3 +4997,19 @@ truncated band tables exercise the specific bounded-parser error. Native replay,
 public/owned decode and player ranges/rewind/seek are regression tested.
 Generation uses own bits and cosine oracle, with no private media, FFmpeg,
 foreign decoder or network; normal tests only read checked-in fixtures.
+
+### ER AAC LC/LTP SBR integration (2026-10-10)
+
+ER LC AOT17 and ER LTP AOT19 now admit explicit/sync SBR ASC and route
+trailing SBR records to the configured SCE/CPE order, excluding LFE. This
+uses the owned header/coefficient histories and QMF/HF synthesis. ER SBR CRC,
+excess/missing SBR records and non-SBR extensions after SBR receive specific
+errors (ISO/IEC 14496-3:2009 4.5.2.8.2.3). LFE retains the existing owned
+upsampling path. Packet-local trial state preserves rollback on failure.
+Sixteen authored mono cases cover both AOTs, 960/1024 core frames, single/
+double output rate and explicit/sync signalling. Nonzero SBR PCM is compared
+to the independent direct-QMF scalar oracle and matched ordinary HE-AAC
+controls; public/owned PCM, forbidden CRC, ranges and rewind/seek are checked.
+These cases use silent core coefficients: nonzero LTP+SBR, multichannel ER
+routing, ER implicit discovery and long ER extension regions need additional
+qualification. This does not add ER-LD SBR or protected epConfig support.

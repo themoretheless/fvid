@@ -429,7 +429,7 @@ pub(crate) fn read_fill(
         count += input.read(8)? as usize;
         count -= 1;
     }
-    read_extension_bytes(&mut input, count, sbr)?;
+    read_extension_bytes(&mut input, count, false, sbr)?;
     *bits = input;
     Ok(())
 }
@@ -437,13 +437,20 @@ pub(crate) fn read_fill(
 /// ER top-level payload has no FIL element/count header. Remaining whole
 /// bytes contain extension_payload() records; final alignment stays outside.
 pub(crate) fn skip_er_extensions(bits: &mut super::bits::BitReader<'_>) -> Result<()> {
-    let count = bits.remaining() / 8;
-    read_extension_bytes(bits, count, |_, _, _| Err(unsupported("ER AAC SBR extension synthesis is not yet implemented")))
+    read_er_extensions(bits, |_, _, _| Err(unsupported("ER AAC SBR extension synthesis is not yet implemented")))
+}
+
+pub(crate) fn read_er_extensions(
+    bits: &mut super::bits::BitReader<'_>,
+    sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
+) -> Result<()> {
+    read_extension_bytes(bits, bits.remaining()/8, true, sbr)
 }
 
 fn read_extension_bytes(
     bits: &mut super::bits::BitReader<'_>,
     count: usize,
+    er: bool,
     mut sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
 ) -> Result<()> {
     let mut input = bits.clone();
@@ -451,6 +458,7 @@ fn read_extension_bytes(
     if count * 8 > input.remaining() {
         return Err(invalid("truncated AAC fill payload"));
     }
+    let mut sbr_started=false;
     while input.position() < end {
         let read = |input: &mut super::bits::BitReader<'_>, width: u8| -> Result<u32> {
             if usize::from(width) > end - input.position() {
@@ -458,7 +466,10 @@ fn read_extension_bytes(
             }
             input.read(width)
         };
-        match read(&mut input, 4)? {
+        let kind=read(&mut input, 4)?;
+        if er && kind==14 {return Err(invalid("ER AAC SBR CRC is forbidden"));}
+        if er && sbr_started && kind!=13 {return Err(invalid("ER AAC extensions must precede SBR"));}
+        match kind {
             0 => input.skip(end - input.position())?,
             1 => {
                 if read(&mut input, 4)? != 0 {
@@ -513,6 +524,7 @@ fn read_extension_bytes(
                 for _ in 0..bands { read(&mut input, 8)?; } // sign + gain
             }
             kind @ (13 | 14) => {
+                sbr_started=true;
                 let start = input.position();
                 sbr(&mut input, end, kind == 14)?;
                 if input.position() <= start || input.position() > end {

@@ -200,7 +200,7 @@ impl AudioSpecificConfig {
                 }
             }
         }
-        if matches!(core.object_type,17|19|23) && (sbr_present == Some(true) || ps_present == Some(true)) {
+        if core.object_type == 23 && (sbr_present == Some(true) || ps_present == Some(true)) {
             return Err(invalid(if core.object_type == 23 {"ER AAC LD SBR/PS is not yet implemented"} else if core.object_type == 19 {"ER AAC LTP SBR/PS is not yet implemented"} else {"ER AAC LC SBR/PS is not yet implemented"}));
         }
         if ps_present == Some(true) && core.channels != 1 {

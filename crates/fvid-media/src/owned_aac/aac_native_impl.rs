@@ -394,7 +394,7 @@ impl NativeAacDecoder {
             decoder.sbr_rate=Some(output_rate);
             decoder.sbr_elements=vec![None; decoder.sbr_slots()];
         } else if parsed.sbr_present.is_none()
-            && matches!(parsed.core.object_type,1|2|3|4) && sbr_layout(&parsed)? {
+            && matches!(parsed.core.object_type,1|2|3|4|17|19) && sbr_layout(&parsed)? {
             // A fixed core-rate hint does not mean SBR is absent. Keep the
             // negotiated clock while admitting a valid implicit SBR FIL.
             decoder.detect_sbr=true;
@@ -409,7 +409,7 @@ impl NativeAacDecoder {
     pub fn new_with_sbr_detection(asc:&[u8]) -> Result<Self> {
         let parsed=AudioSpecificConfig::parse(asc)?;
         let mut decoder=Self::new(asc)?;
-        decoder.detect_sbr=matches!(parsed.core.object_type, 1 | 2 | 3 | 4) && parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
+        decoder.detect_sbr=matches!(parsed.core.object_type, 1 | 2 | 3 | 4 | 17 | 19) && parsed.sbr_present.is_none() && sbr_layout(&parsed)?;
         if decoder.detect_sbr { decoder.sbr_elements=vec![None; decoder.sbr_slots()]; }
 
         Ok(decoder)
@@ -703,7 +703,26 @@ impl NativeAacDecoder {
             return Err(invalid("AAC block has no configured audio element"));
         }
         if matches!(self.config.object_type,17|19) {
-            super::aac_pce::skip_er_extensions(&mut bits)?;
+            let groups:Vec<_>=decoded_elements.iter().filter(|(kind,_,_)|*kind!=3).copied().collect();
+            let mut index=0;
+            super::aac_pce::read_er_extensions(&mut bits, |input,end,_| {
+                if sbr_rate.is_none() && self.detect_sbr {
+                    sbr_rate=Some(self.sbr_detection_rate.unwrap_or(self.config.sample_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?));
+                }
+                if sbr_rate.is_none() {return Err(unsupported("ER AAC SBR requires extension-aware stream signalling"));}
+                let &(kind,_,offset)=groups.get(index).ok_or_else(||invalid("excess ER AAC SBR element"))?;
+                let width=if kind==1 {2}else{1};
+                let state=sbr_elements[offset].get_or_insert_with(||ElementSbr::new(width));
+                if state.width!=width {return Err(invalid("SBR element width changed"));}
+                let mut source=SbrBitReader::new(packet);
+                source.skip(input.position()).map_err(|e|invalid(&e.0))?;
+                let rate=self.config.sample_rate.checked_mul(2).ok_or_else(||invalid("SBR frequency overflow"))?;
+                let frame=state.stream.read(&mut source,end,false,rate,(self.config.frame_samples/64) as u8,width).map_err(|e|invalid(&e.0))?;
+                input.skip(source.position()-input.position())?;
+                sbr_frames[offset]=Some(frame);index+=1;
+                Ok(())
+            })?;
+            if index!=0 && index!=groups.len() {return Err(invalid("missing ER AAC SBR element"));}
         }
         if bits.remaining() > 7 {
             return Err(invalid(if matches!(self.config.object_type,17|19) {"trailing bytes after ER AAC block"} else {"trailing bytes after AAC END"}));
