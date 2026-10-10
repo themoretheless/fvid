@@ -10685,3 +10685,21 @@ All 14 new files regenerate deterministically without FFmpeg/network. No
 production change was needed. This does not qualify 960-sample active ER-LTP
 with SBR, nonzero multichannel/LFE synthesis, all predictor/TNS/window tools,
 or protected epConfig and other remaining codec tools.
+
+### Nonzero ER SBR LFE delay/resampling qualification (2026-10-10)
+
+24 original ER LC/LTP sequences exercise indexed 5.1 and height 7.1 layouts,
+24/48 kHz output and explicit/sync/implicit signalling with nonzero sparse LFE
+residuals. LFE receives no SBR payload. Its independently computed core IMDCT
+is passed through direct full-band QMF analysis, six-row alignment and 32/64
+band synthesis; all other channels have distinct noise SBR energies. A scalar
+no-delay mutant differs by more than 1e-5 in both rate modes, establishing that
+the fixture is sensitive to alignment rather than just nonzero PCM.
+Native PCM matches the complete interleaved scalar oracle within 1e-9 and
+ordinary HE-AAC controls exactly. Checkpoint/reset replay, rollback after an
+extra SBR payload attributed to LFE, public/owned export, ranges and rewind/
+seek pass. All 24 malformed companion videos assert the excess-element error.
+The fixture uses 1024-sample long sine windows and no active LFE predictor;
+960-sample LFE, other window/TNS schedules and broader profiles still need
+separate qualification. No production changes were needed. Generation and
+ordinary tests do not require FFmpeg, foreign codecs, private media or network.

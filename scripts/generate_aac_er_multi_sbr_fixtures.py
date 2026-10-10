@@ -6,13 +6,13 @@ from generate_aac_sbr_data_fixtures import word
 from generate_aac_sbr_dsp_fixtures import header
 from generate_aac_sbr_frequency_oracles import tables
 LAYOUTS={2:([1],[0,1],3),3:([0,1],[2,0,1],7),4:([0,1,0],[2,0,1,3],0x107),5:([0,1,1],[2,0,1,3,4],0x37),6:([0,1,1,3],[2,0,1,4,5,3],0x3f),7:([0,1,1,1,3],[2,6,7,0,1,4,5,3],0xff),11:([0,1,1,0,3],[2,0,1,4,5,6,3],0x13f),12:([0,1,1,1,3],[2,0,1,6,7,4,5,3],0x63f),14:([0,1,1,3,1],[2,0,1,4,5,3,6,7],0x503f)}
-def sbr(gains,frame,nhigh):
+def sbr(gains,frame,nhigh,smoothing=True):
     temporal=frame>0;env=[]
     for gain in gains:env.append(word(0,0)*nhigh if temporal else field(2+2*gain,7)+word(1,0)*(nhigh-1))
     noise=word(8,0) if temporal else field(7,5)
     width=len(gains)
     data='0'+('0' if width==2 else '')+'00001'*width+field(temporal,1)*(2*width)+'00'*width+''.join(env)+noise*width+'0'*(width+1)
-    return packed(field(13,4)+field(frame==0,1)+(header(0,True) if frame==0 else '')+data)
+    return packed(field(13,4)+field(frame==0,1)+(header(0,smoothing) if frame==0 else '')+data)
 def main():
     source=json.loads((DEST/'aac-sbr-dsp-oracles.json').read_text())['cases'];_,high,_,_=tables(10,27,0,False,0,0);blob=bytearray();cases=[]
     channel=field(100,8)+'0000'+'000000'+'0'+'000'

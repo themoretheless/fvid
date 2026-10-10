@@ -38,7 +38,7 @@ def patch_sources():
     assert patches==[(2,10,8),(2,18,7)]
     return {target+i:source+i for source,target,width in patches for i in range(width)}
 
-def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0, sbr_frames=None):
+def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0, sbr_frames=None, qmf_delay=6):
     assert bands in (32,64)
     assert 0 <= first_sbr_frame < 6
     enabled = [i >= first_sbr_frame for i in range(6)] if sbr_frames is None else list(sbr_frames)
@@ -53,7 +53,7 @@ def reference(prediction=True, pcm_override=None, bands=64, first_sbr_frame=0, s
     factors=[[window[2*lag]*complex(math.cos(math.pi*(b+.5)*(2*(lag%64)-.5)/64),math.sin(math.pi*(b+.5)*(2*(lag%64)-.5)/64))*65536 for lag in range(320)] for b in range(width)]
     for last in range(31,len(pcm),32):
         analysis.append([complex(math.fsum(pcm[last-lag]*factors[b][lag].real for lag in range(min(320,last+1))),math.fsum(pcm[last-lag]*factors[b][lag].imag for lag in range(min(320,last+1)))) for b in range(width)])
-    delayed=[[0j]*width for _ in range(6)]+analysis
+    delayed=[[0j]*width for _ in range(qmf_delay)]+analysis
     # Figure 4.48 gives 8-band and 7-band patches. The final two-band
     # patch at 25 is discarded; unpatched bands still receive envelope noise.
     mapping=patch_sources()
