@@ -5,7 +5,7 @@ from generate_avc_switching_mbaff_fixtures import DEST, configuration, indices, 
 from avc_fixture_mp4 import mux
 
 
-def filter_picture(planes, fields, mode, offsets=(0,0), slices=None):
+def filter_picture(planes, fields, mode, offsets=(0,0), slices=None, switching_blocks=None):
     """H.264 8.7 at QP26, with selected signed alpha/beta offsets.
 
     Ownership is obtained by painting each macroblock's samples, including field
@@ -47,6 +47,12 @@ def filter_picture(planes, fields, mode, offsets=(0,0), slices=None):
                             neighbour=owners[at-step]
                             if external and mode==2 and slices[neighbour]!=slices[address]:continue
                             strength=4 if external and (vertical or not field and not fields[neighbour//2]) else 3
+                            if switching_blocks is not None and address not in switching_blocks and (not external or neighbour not in switching_blocks):
+                                # Uncoded zero-motion P/B neighbours: only mixed
+                                # frame/field reference identity has strength1.
+                                strength=int(external and field!=fields[neighbour//2])
+                            if strength==0:continue
+                            weak_tc0=tc0 if strength==3 else {-4:0,0:1,4:1}[offsets[0]]
                             p=[out[at-(i+1)*step] for i in range(4)]
                             q=[out[at+i*step] for i in range(4)]
                             if abs(p[0]-q[0])>=alpha or abs(p[1]-p[0])>=beta or abs(q[1]-q[0])>=beta:continue
@@ -61,13 +67,13 @@ def filter_picture(planes, fields, mode, offsets=(0,0), slices=None):
                                     else:dst[0]=(2*near[1]+near[0]+far[1]+2)//4
                             else:
                                 limit=lambda v,n:max(-n,min(n,v))
-                                tc=tc0+1 if component else tc0+ap+aq
+                                tc=weak_tc0+1 if component else weak_tc0+ap+aq
                                 delta=limit((4*(q[0]-p[0])+p[1]-q[1]+4)//8,tc)
                                 a[0]=max(0,min(255,p[0]+delta));b[0]=max(0,min(255,q[0]-delta))
                                 average=(p[0]+q[0]+1)//2
                                 if not component:
-                                    if ap:a[1]+=limit((p[2]+average-2*p[1])//2,tc0)
-                                    if aq:b[1]+=limit((q[2]+average-2*q[1])//2,tc0)
+                                    if ap:a[1]+=limit((p[2]+average-2*p[1])//2,weak_tc0)
+                                    if aq:b[1]+=limit((q[2]+average-2*q[1])//2,weak_tc0)
                             for i in range(3):out[at-(i+1)*step]=a[i];out[at+i*step]=b[i]
         result.append(out)
     return result

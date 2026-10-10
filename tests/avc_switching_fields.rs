@@ -3,6 +3,8 @@ use serde_json::Value;
 fn manifest() -> Value {
     let mut base: Value = serde_json::from_slice(&fixture("avc-switching-fields.json")).unwrap();
     for name in [
+        "avc-mbaff-mixed-si-inter-reproducer.json",
+        "avc-mbaff-mixed-si-inter.json",
         "avc-mbaff-si-filter.json",
         "avc-mbaff-sp-filter-offsets.json",
         "avc-mbaff-switching-filter.json",

@@ -814,7 +814,8 @@ impl AvcDecoder {
                 )?,
                 None,
             ),
-            SliceType::I | SliceType::P | SliceType::Sp | SliceType::B => {
+            // Mixed SI/inter frames retain motion metadata for the inter regions.
+            SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B => {
                 let lists = slices
                     .iter()
                     .map(|slice| buffer.lists(&slice.header, order.before_marking.picture()))
@@ -983,7 +984,6 @@ impl AvcDecoder {
                 };
                 (picture, motion)
             }
-            _ => unreachable!(),
         };
         let picture = Arc::new(picture);
         if let Some(canonical) = self.frame_field_dpb.as_mut() {

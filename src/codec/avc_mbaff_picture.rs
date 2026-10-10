@@ -124,7 +124,11 @@ enum MbaffSliceReader<'a> {
 }
 impl<'a> MbaffSliceReader<'a> {
     fn new(header: &'a SliceHeader, sps: &'a Sps, pps: &'a Pps, count: usize) -> Result<Self> {
-        Ok(if header.slice_type == super::avc_slice::SliceType::I {
+        // SI uses intra entropy syntax, switching QS and SI readiness tags.
+        Ok(if matches!(
+            header.slice_type,
+            super::avc_slice::SliceType::I | super::avc_slice::SliceType::Si
+        ) {
             if pps.cabac {
                 Self::IntraCabac(IntraCabacReader::new_mbaff(header, sps, pps, count)?)
             } else {
@@ -293,7 +297,7 @@ fn decode_optional_slices_impl(
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
         || headers.iter().any(|h| {
-            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp | SliceType::B)
+            !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
