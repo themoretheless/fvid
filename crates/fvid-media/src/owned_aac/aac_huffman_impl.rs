@@ -17,15 +17,21 @@ fn table(book: u8) -> Result<(&'static [u32], &'static [u8])> {
     })
 }
 fn symbol(bits: &mut BitReader<'_>, codes: &[u32], lengths: &[u8]) -> Result<usize> {
+    symbol_prefix(bits, codes, lengths)?.ok_or_else(|| invalid("truncated or oversized bit field"))
+}
+fn symbol_prefix(bits: &mut BitReader<'_>, codes: &[u32], lengths: &[u8]) -> Result<Option<usize>> {
     let mut code = 0;
     for length in 1..=19 {
+        if bits.remaining() == 0 {
+            return Ok(None);
+        }
         code = (code << 1) | bits.read(1)?;
         if let Some(index) = codes
             .iter()
             .zip(lengths)
             .position(|(&c, &n)| n == length && c == code)
         {
-            return Ok(index);
+            return Ok(Some(index));
         }
     }
     Err(invalid("invalid AAC Huffman codeword"))
@@ -40,9 +46,19 @@ pub fn scalefactor(bits: &mut BitReader<'_>) -> Result<i16> {
 /// Decode a pair or quad. Unused quad slots in a pair are zero. Signs for
 /// unsigned books precede escape magnitudes. Failure preserves the cursor.
 pub fn spectral(bits: &mut BitReader<'_>, book: u8) -> Result<([i16; 4], usize)> {
+    spectral_prefix(bits, book)?.ok_or_else(|| invalid("truncated or oversized bit field"))
+}
+/// None means a valid unfinished prefix; both None and errors preserve input.
+pub(crate) fn spectral_prefix(
+    bits: &mut BitReader<'_>,
+    book: u8,
+) -> Result<Option<([i16; 4], usize)>> {
     let (codes, lengths) = table(book)?;
     let mut cursor = bits.clone();
-    let mut index = symbol(&mut cursor, codes, lengths)?;
+    let mut index = match symbol_prefix(&mut cursor, codes, lengths)? {
+        Some(i) => i,
+        None => return Ok(None),
+    };
     let (width, radix, bias): (usize, usize, i16) = match book {
         1 | 2 => (4, 3, 1),
         3 | 4 => (4, 3, 0),
@@ -58,8 +74,13 @@ pub fn spectral(bits: &mut BitReader<'_>, book: u8) -> Result<([i16; 4], usize)>
     }
     if bias == 0 {
         for value in &mut values[..width] {
-            if *value != 0 && cursor.bit()? {
-                *value = -*value;
+            if *value != 0 {
+                if cursor.remaining() == 0 {
+                    return Ok(None);
+                }
+                if cursor.bit()? {
+                    *value = -*value;
+                }
             }
         }
     }
@@ -67,11 +88,20 @@ pub fn spectral(bits: &mut BitReader<'_>, book: u8) -> Result<([i16; 4], usize)>
         for value in &mut values[..width] {
             if value.abs() == 16 {
                 let mut width = 4;
-                while cursor.bit()? {
+                loop {
+                    if cursor.remaining() == 0 {
+                        return Ok(None);
+                    }
+                    if !cursor.bit()? {
+                        break;
+                    }
                     width += 1;
                     if width > 12 {
                         return Err(invalid("AAC escape magnitude exceeds 8191"));
                     }
+                }
+                if cursor.remaining() < usize::from(width) {
+                    return Ok(None);
                 }
                 let magnitude = (1i16 << width) + cursor.read(width)? as i16;
                 *value = value.signum() * magnitude;
@@ -79,5 +109,5 @@ pub fn spectral(bits: &mut BitReader<'_>, book: u8) -> Result<([i16; 4], usize)>
         }
     }
     *bits = cursor;
-    Ok((values, width))
+    Ok(Some((values, width)))
 }

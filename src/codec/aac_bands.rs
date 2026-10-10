@@ -16,6 +16,7 @@ mod tests {
             core_coder_delay: None,
             section_data_resilience: false,
             scalefactor_data_resilience: false,
+            spectral_data_resilience: false,
         }
     }
     #[test]

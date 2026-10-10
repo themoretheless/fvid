@@ -14,6 +14,8 @@ pub struct AacConfig {
     pub section_data_resilience: bool,
     /// ER reversible scalefactor coding and separately bounded escape words.
     pub scalefactor_data_resilience: bool,
+    /// ER Huffman codeword reordering for spectral coefficients.
+    pub spectral_data_resilience: bool,
 }
 fn audio_object_type(b: &mut BitReader<'_>) -> Result<u32> {
     let n = b.read(5)?;
@@ -81,18 +83,10 @@ impl AacConfig {
         // GASpecificConfig carries extensionFlag3 after any PCE. For LC/SSR
         // there are no ER/sub-frame fields before it; this future-use bit must
         // be zero. Do not mistake extensionFlag itself for unsupported audio.
-        let (section_data_resilience, scalefactor_data_resilience) = if extension_flag && object_type == 17 {
-            let section = b.bit()?;
-            let scalefactor = b.bit()?;
-            if b.bit()? {
-                return Err(invalid(
-                    "ER AAC LC resilience tools are not yet implemented",
-                ));
-            }
-            (section, scalefactor)
-        } else {
-            (false, false)
-        };
+        let (section_data_resilience, scalefactor_data_resilience, spectral_data_resilience) =
+            if extension_flag && object_type == 17 {
+                (b.bit()?, b.bit()?, b.bit()?)
+            } else { (false, false, false) };
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }
@@ -109,6 +103,7 @@ impl AacConfig {
                 core_coder_delay,
                 section_data_resilience,
                 scalefactor_data_resilience,
+                spectral_data_resilience,
             },
             program,
         ))

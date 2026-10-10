@@ -1,14 +1,11 @@
 use super::{aac_huffman, aac_ics::IcsInfo, aac_synthesis::WindowSequence, bits::BitReader};
 
-/// Read coefficients in group/band/window order. Bounds and group geometry are
-/// validated before decoding; failure leaves the input bit cursor unchanged.
-pub fn read(
-    bits: &mut BitReader<'_>,
+fn spectral_geometry(
     info: &IcsInfo,
     offsets: &[usize],
     books: &[Vec<u8>],
     frame_samples: usize,
-) -> Result<Vec<i16>> {
+) -> Result<usize> {
     let windows = if info.sequence == WindowSequence::EightShort {
         8
     } else {
@@ -36,6 +33,19 @@ pub fn read(
     {
         return Err(invalid("invalid AAC spectral band layout"));
     }
+    Ok(windows)
+}
+
+/// Read coefficients in group/band/window order. Bounds and group geometry are
+/// validated before decoding; failure leaves the input bit cursor unchanged.
+pub fn read(
+    bits: &mut BitReader<'_>,
+    info: &IcsInfo,
+    offsets: &[usize],
+    books: &[Vec<u8>],
+    frame_samples: usize,
+) -> Result<Vec<i16>> {
+    let windows = spectral_geometry(info, offsets, books, frame_samples)?;
     let mut cursor = bits.clone();
     let mut result = Vec::with_capacity(offsets[info.max_sfb as usize] * windows);
     for (group, &count) in books.iter().zip(&info.group_lengths) {
@@ -52,21 +62,7 @@ pub fn read(
                     for _ in 0..count / tuple {
                         let (values, n) =
                             aac_huffman::spectral(&mut cursor, if book >= 16 { 11 } else { book })?;
-                        // ISO/IEC 14496-3 table 4.95: virtual indices share
-                        // physical book11 but bound the decoded escape magnitude.
-                        const VIRTUAL_LAV: [i16; 16] = [
-                            15, 31, 47, 63, 95, 127, 159, 191, 223, 255, 319, 383, 511, 767, 1023,
-                            2047,
-                        ];
-                        if book >= 16
-                            && values[..n]
-                                .iter()
-                                .any(|v| v.abs() > VIRTUAL_LAV[usize::from(book - 16)])
-                        {
-                            return Err(invalid(
-                                "AAC virtual codebook magnitude exceeds section limit",
-                            ));
-                        }
+                        check_virtual_magnitudes(book, &values[..n])?;
                         result.extend_from_slice(&values[..n]);
                     }
                 }
@@ -77,3 +73,16 @@ pub fn read(
     *bits = cursor;
     Ok(result)
 }
+
+fn check_virtual_magnitudes(book: u8, values: &[i16]) -> Result<()> {
+    const LAV: [i16; 16] = [
+        15, 31, 47, 63, 95, 127, 159, 191, 223, 255, 319, 383, 511, 767, 1023, 2047,
+    ];
+    if book >= 16 && values.iter().any(|v| v.abs() > LAV[usize::from(book - 16)]) {
+        return Err(invalid(
+            "AAC virtual codebook magnitude exceeds section limit",
+        ));
+    }
+    Ok(())
+}
+include!("aac_hcr_impl.rs");

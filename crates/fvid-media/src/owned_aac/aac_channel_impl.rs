@@ -161,12 +161,13 @@ impl ChannelData {
     }
     /// Starts at global_gain, after the element tag. Transactional on failure.
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
-        Self::read_common(bits, config, None)
+        Self::read_common(bits, config, None, false)
     }
     pub(crate) fn read_common(
         bits: &mut BitReader<'_>,
         config: &AacConfig,
         common: Option<&IcsInfo>,
+        pair: bool,
     ) -> Result<Self> {
         let tables = BandTables::for_config(config)?;
         let mut cursor = bits.clone();
@@ -175,7 +176,7 @@ impl ChannelData {
             Some(info) => info.clone(),
             None => tables.read_ics(&mut cursor)?,
         };
-        let channel = Self::read_payload(&mut cursor, config, &tables, gain, info)?;
+        let channel = Self::read_payload(&mut cursor, config, &tables, gain, info, pair)?;
         *bits = cursor;
         Ok(channel)
     }
@@ -191,13 +192,13 @@ impl ChannelData {
         let header = super::aac_ltp_syntax::LtpIcsInfo::read(
             &mut cursor, ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8), config.frame_samples, false,
         )?;
-        let channel = Self::read_payload(&mut cursor, config, &tables, gain, header.info)?;
+        let channel = Self::read_payload(&mut cursor, config, &tables, gain, header.info, false)?;
         *bits = cursor;
         Ok((channel, header.channels.into_iter().next().unwrap()))
     }
     fn read_payload(
         bits: &mut BitReader<'_>, config: &AacConfig, tables: &BandTables,
-        gain: u8, info: IcsInfo,
+        gain: u8, info: IcsInfo, pair: bool,
     ) -> Result<Self> {
         let mut cursor = bits.clone();
         let codebooks = info.read_sections_with_resilience(&mut cursor, config.section_data_resilience)?;
@@ -226,6 +227,9 @@ impl ChannelData {
             }
             Some(gain)
         } else { None };
+        let hcr = if config.spectral_data_resilience {
+            Some(aac_spectral::HcrHeader::read(&mut cursor, pair)?)
+        } else { None };
         if let Some(header) = rvlc {
             scales = header.decode(&mut cursor, gain, &codebooks)?;
         }
@@ -237,13 +241,17 @@ impl ChannelData {
         } else {
             tables.long
         };
-        let quantized = aac_spectral::read(
+        let quantized = if let Some(header) = hcr {
+            header.decode(&mut cursor, &info, offsets, &codebooks, config.frame_samples as usize)?
+        } else {
+            aac_spectral::read(
             &mut cursor,
             &info,
             offsets,
             &codebooks,
             config.frame_samples as usize,
-        )?;
+        )?
+        };
         *bits = cursor;
         Ok(Self {
             info,

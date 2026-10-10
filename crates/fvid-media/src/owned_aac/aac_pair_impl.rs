@@ -137,9 +137,9 @@ impl ChannelPair {
             None
         };
         let (explicit_mask, mid_side) = Self::read_mask(&mut cursor, common.as_ref())?;
-        let left = ChannelData::read_common(&mut cursor, config, common.as_ref())?;
+        let left = ChannelData::read_common(&mut cursor, config, common.as_ref(), true)?;
         let right_start = cursor.position();
-        let right = ChannelData::read_common(&mut cursor, config, common.as_ref())?;
+        let right = ChannelData::read_common(&mut cursor, config, common.as_ref(), true)?;
         let right_span = right_start..cursor.position();
         *bits = cursor;
         Ok((
@@ -189,9 +189,9 @@ impl ChannelPair {
         } else { None };
         let (explicit_mask, mid_side) = Self::read_mask(&mut cursor, common.as_ref().map(|header| &header.info))?;
         let (left, right, prediction, right_start) = if let Some(header) = common {
-            let left = ChannelData::read_common(&mut cursor,config,Some(&header.info))?;
+            let left = ChannelData::read_common(&mut cursor,config,Some(&header.info),true)?;
             let right_start = cursor.position();
-            let right = ChannelData::read_common(&mut cursor,config,Some(&header.info))?;
+            let right = ChannelData::read_common(&mut cursor,config,Some(&header.info),true)?;
             (left, right, header.channels, right_start)
         } else {
             let (left, before) = ChannelData::read_ltp(&mut cursor,config)?;
