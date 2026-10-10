@@ -4745,3 +4745,28 @@ oracle. The old public-profile refusal expectations were removed. The LD-LTP
 packet generator now places ER TNS data after the gain-control presence bit;
 PCM references are unchanged because the authored decoded TNS parameters are
 unchanged. Earlier primitive-only descriptions above record the prior stage.
+
+
+### AAC-LD stereo and resilience combinations
+
+`scripts/generate_aac_ld_stereo_fixtures.py` authors 64 positive and 64 malformed
+AOT23 epConfig=0 videos plus `aac-ld-stereo-{packets.bin,reference.f32le}` and
+`aac-ld-stereo.json`. The matrix covers 480/512, independent or common windows,
+MS modes 0/1/2 and every section/RVLC/HCR flag combination. Channels use distinct
+PCM histories, lag updates/reuse/absence, coefficients, scalefactor changes and
+TNS directions; independent windows also switch LD shapes independently.
+Section-resilience cases use virtual book 17; RVLC cases include escape deltas.
+
+All audio parameters and residuals are authored. The scalar reference computes
+inverse quantization, stereo mixing, absolute PCM timeline prediction, direct
+cosine analysis/synthesis, FIR/AR TNS and LD window/overlap independently of Rust.
+Video/container scaffolding uses existing authored fixtures. No private source
+media/parameters, FFmpeg, network or foreign decoder is used. Generation is
+separate from ordinary tests.
+
+Malformed right-channel cases specifically test zero HCR longest-codeword,
+RVLC reverse-gain mismatch, virtual-book LAV overflow or trailing bytes. They
+are refusal regressions; the paired positive videos require intended playback.
+`tests/aac_ld_stereo.rs` checks native/public PCM, packet timestamps, checkpoint
+replay, reset, pair cursor rollback and player ranges/rewind/seek. This is a
+finite stereo/resilience matrix, not universal LD/ELD/USAC conformance.

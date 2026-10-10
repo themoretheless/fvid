@@ -2818,3 +2818,10 @@ AAC-LD AOT23 is now connected to the owned raw decoder and MP4 PCM export with
 now have intended PCM acceptance instead of profile-refusal expectations.
 Pair/resilience combinations remain to be qualified; PCE, protected epConfig,
 ELD and USAC are not covered by this milestone. See CODEC_PROGRESS.md.
+
+
+AAC-LD qualification now includes 64 authored stereo/resilience combinations:
+480/512, independent/common windows, MS 0/1/2, section/RVLC/HCR flags, independent
+lag histories, window-shape switches and bidirectional TNS. PCM, malformed input
+rollback and player range/rewind/seek are checked against synthetic references.
+Additional rates/layouts/tools and protected epConfig/PCE/ELD/USAC remain open.
