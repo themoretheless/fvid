@@ -2890,3 +2890,19 @@ controls clear only noise-band prediction flags. The matrix now contains 54
 cases, with native/checkpoint, public/owned export and player range/rewind/seek
 acceptance. Signed band-varying gains, nonzero target residuals and nontrivial
 source/target TNS remain separate qualification requirements.
+
+
+### Signed band-varying LTP/PNS coupling gains (2026-10-10)
+
+Four additional authored stereo CCE cases cover 960/1024 and dependent coupling
+points 0/1 with separate signed right-channel band gain lists. Every 12-packet
+case cycles all four gain scales and DPCM pairs (3,2), (-1,0), (2,-3), exercising
+negative accumulated values, sign changes and zero deltas. The scalar oracle
+uses cumulative DPCM before sign/exponent extraction (ISO/IEC 14496-3:2009
+coupling process), applies each band gain to the reconstructed source spectrum,
+and synthesizes separate target overlap histories. Thus changing gains across
+frames is not approximated by scaling already overlapped source PCM.
+The 58-case matrix checks native/public/owned PCM, matched noise controls,
+checkpoint rollback and player ranges/rewind/seek. These cases have silent
+stereo targets and no TNS; other target residuals and TNS interactions remain
+separate qualification requirements.
