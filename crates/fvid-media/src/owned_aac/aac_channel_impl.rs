@@ -202,6 +202,16 @@ impl ChannelData {
         *bits = cursor;
         Ok((channel, header.channels.into_iter().next().unwrap()))
     }
+    /// LD single-channel stream, including lag-update predictor metadata.
+    pub fn read_ld(bits:&mut BitReader<'_>,config:&AacConfig,pair:bool)->Result<(Self,Option<super::aac_ld_ltp::LdLtpData>)> {
+        if config.object_type!=23 {return Err(invalid("AAC LD channel requires AOT23"));}
+        let tables=BandTables::for_config(config)?;
+        let mut cursor=bits.clone();
+        let gain=cursor.read(8)? as u8;
+        let (info,data,_)=super::aac_ld_syntax::read_ics(&mut cursor,(tables.long.len()-1) as u8,false)?;
+        let channel=Self::read_payload(&mut cursor,config,&tables,gain,info,pair)?;
+        *bits=cursor; Ok((channel,data))
+    }
     fn read_payload(
         bits: &mut BitReader<'_>, config: &AacConfig, tables: &BandTables,
         gain: u8, info: IcsInfo, pair: bool,
@@ -222,7 +232,7 @@ impl ChannelData {
             None
         };
         let tns_present = cursor.bit()?;
-        let er = matches!(config.object_type,17|19);
+        let er = matches!(config.object_type,17|19|23);
         let mut tns = if tns_present && !er {
             Some(tns_syntax::read_profile(&mut cursor, info.sequence, config.object_type == 1)?)
         } else { None };

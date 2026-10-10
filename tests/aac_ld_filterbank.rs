@@ -120,16 +120,33 @@ fn ld_forward_analysis_matches_all_four_window_pairs_without_advancing_history()
     }
 }
 #[test]
-fn aot23_public_gap_videos_refuse_profile_until_ld_packet_integration() {
+fn aot23_public_filterbank_videos_decode_owned_pcm() {
+    let gold = bytes("aac-ld-filterbank-reference.f32le");
     for c in manifest()["cases"].as_array().unwrap() {
         let data = bytes(c["video"]["file"].as_str().unwrap());
         let mut out = vec![];
-        let e = fvid::native_media::decode_mp4_aac_pcm(&data, &mut out).unwrap_err();
-        assert!(
-            e.to_string().contains(
-                "only AAC Main, LC, SSR, LTP, ER-LC and ER-LTP core configurations are implemented"
-            ),
-            "{e}"
-        );
+        fvid::native_media::decode_mp4_aac_pcm(&data, &mut out).unwrap();
+        let mut owned = vec![];
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            std::io::Cursor::new(&data),
+            &mut owned,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(out, owned);
+        assert_eq!(out.len(), c["reference_bytes"].as_u64().unwrap() as usize);
+        let start = c["reference_offset"].as_u64().unwrap() as usize;
+        for (a, b) in out
+            .chunks_exact(4)
+            .zip(gold[start..start + out.len()].chunks_exact(4))
+        {
+            assert!(
+                (f32::from_le_bytes(a.try_into().unwrap())
+                    - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+                    < 1e-9
+            );
+        }
     }
 }

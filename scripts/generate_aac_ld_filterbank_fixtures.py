@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Own AAC-LD spectra/PCM and AOT23 gap videos, offline direct cosine oracle."""
+"""Own AAC-LD spectra/PCM and AOT23 videos, offline direct cosine oracle."""
 import json,math,struct
 from generate_aac_main_tools_fixtures import channel,ics,f32
 from generate_he_aac_packet_fixtures import DEST,field,frequency,packed,video_fixture
@@ -36,6 +36,6 @@ def main():
             ref=[sum(v*window(n,i,before if i<n else current)*math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for i,v in enumerate(values)) for k in range(n)]
             c['analysis'].append(dict(previous=before,current=current,reference_offset=len(analysis)));analysis.extend(struct.pack('<'+'d'*n,*ref))
     (DEST/'aac-ld-filterbank-packets.bin').write_bytes(packets);(DEST/'aac-ld-filterbank-reference.f32le').write_bytes(gold);(DEST/'aac-ld-filterbank-analysis.f64le').write_bytes(analysis)
-    (DEST/'aac-ld-filterbank.json').write_text(json.dumps(dict(cases=cases,provenance='Own AOT23 ep0 no-prediction/no-resilience packets and sine/low-overlap direct cosine/window/overlap oracle. Public profile remains a gap until packet/LD-LTP integration. No private or foreign media, FFmpeg or network.'),indent=2)+'\n')
-    print('generated two LD gap videos, 48 PCM blocks and eight forward-MDCT cases')
+    (DEST/'aac-ld-filterbank.json').write_text(json.dumps(dict(cases=cases,provenance='Own AOT23 ep0 no-prediction/no-resilience packets and sine/low-overlap direct cosine/window/overlap oracle. Public mono ep0 MP4 PCM is accepted by the owned LD decoder. No private or foreign media, FFmpeg or network.'),indent=2)+'\n')
+    print('generated two LD videos, 48 PCM blocks and eight forward-MDCT cases')
 if __name__=='__main__':main()

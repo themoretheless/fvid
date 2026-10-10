@@ -11,7 +11,8 @@ fn spectral_geometry(
     } else {
         1
     };
-    if !matches!(frame_samples, 960 | 1024)
+    if !matches!(frame_samples, 480 | 512 | 960 | 1024)
+        || (frame_samples <= 512 && info.sequence != WindowSequence::OnlyLong)
         || info.group_lengths.is_empty()
         || info.group_lengths.len() > windows
         || info.group_lengths.contains(&0)

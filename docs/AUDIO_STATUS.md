@@ -2811,3 +2811,10 @@ transform references at 480/512 and two LD window/checkpoint unit tests (one
 pre-existing ignored). Two standalone LD acceptance tests and one specifically
 labelled public-profile refusal test passed offline. All six authored artifacts
 regenerate byte-identically. No FFmpeg was executed.
+
+
+AAC-LD AOT23 is now connected to the owned raw decoder and MP4 PCM export with
+480/512 frames, LD windows/LTP and ER TNS ordering. The six authored mono videos
+now have intended PCM acceptance instead of profile-refusal expectations.
+Pair/resilience combinations remain to be qualified; PCE, protected epConfig,
+ELD and USAC are not covered by this milestone. See CODEC_PROGRESS.md.

@@ -4737,3 +4737,11 @@ lag reuse after absent LTP, lag 1023, all gains and sine/low-overlap switches.
 replay. Public AOT23 specifically refuses at profile admission; this test is gap
 reproduction, not playback acceptance. Replace it with full decode/player
 acceptance when native packet dispatch is connected.
+
+
+AAC-LD integration update: both `aac_ld_filterbank.rs` public cases and all four
+`aac_ld_ltp.rs` video cases now require successful MP4 PCM matching the scalar
+oracle. The old public-profile refusal expectations were removed. The LD-LTP
+packet generator now places ER TNS data after the gain-control presence bit;
+PCM references are unchanged because the authored decoded TNS parameters are
+unchanged. Earlier primitive-only descriptions above record the prior stage.

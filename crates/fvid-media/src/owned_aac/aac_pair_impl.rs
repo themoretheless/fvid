@@ -211,6 +211,29 @@ impl ChannelPair {
         Ok((Self { left,right,mid_side,explicit_mask },prediction,right_span))
     }
 
+    /// ER AAC-LD pair with deferred common-window predictors.
+    pub fn read_ld(bits:&mut BitReader<'_>,config:&AacConfig)->Result<(Self,[Option<super::aac_ld_ltp::LdLtpData>;2])> {
+        if config.object_type!=23 {return Err(invalid("AAC LD pair requires AOT23"));}
+        let tables=BandTables::for_config(config)?;
+        let mut cursor=bits.clone();
+        let common=if cursor.bit()? {Some(super::aac_ld_syntax::read_ics(&mut cursor,(tables.long.len()-1) as u8,true)?)}else{None};
+        let (explicit_mask,mid_side)=Self::read_mask(&mut cursor,common.as_ref().map(|h|&h.0))?;
+        let (left,right,prediction)=if let Some((info,_,present))=common {
+            let read_prediction=|bits:&mut BitReader<'_>|->Result<Option<super::aac_ld_ltp::LdLtpData>> {
+                if present && bits.bit()? {Ok(Some(super::aac_ld_syntax::read_data(bits,info.max_sfb)?))}else{Ok(None)}
+            };
+            let before=read_prediction(&mut cursor)?;
+            let left=ChannelData::read_common(&mut cursor,config,Some(&info),true)?;
+            let after=read_prediction(&mut cursor)?;
+            let right=ChannelData::read_common(&mut cursor,config,Some(&info),true)?;
+            (left,right,[before,after])
+        }else{
+            let (left,before)=ChannelData::read_ld(&mut cursor,config,true)?;
+            let (right,after)=ChannelData::read_ld(&mut cursor,config,true)?;
+            (left,right,[before,after])
+        };
+        *bits=cursor; Ok((Self {left,right,mid_side,explicit_mask},prediction))
+    }
     fn read_er_prediction(bits: &mut BitReader<'_>, info: &super::aac_ics::IcsInfo, config: &AacConfig)
         -> Result<Option<super::aac_ltp_syntax::LtpData>> {
         if bits.bit()? {

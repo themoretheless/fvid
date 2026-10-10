@@ -116,7 +116,8 @@ impl IcsInfo {
         zero: T,
         valid: impl Fn(&T) -> bool,
     ) -> Result<()> {
-        if !matches!(output.len(), 960 | 1024) {
+        if !matches!(output.len(), 480 | 512 | 960 | 1024)
+            || (output.len()<=512 && self.sequence != WindowSequence::OnlyLong) {
             return Err(invalid("AAC spectrum requires 960 or 1024 samples"));
         }
         let windows = if self.sequence == WindowSequence::EightShort {

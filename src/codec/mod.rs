@@ -309,3 +309,7 @@ pub mod ffv1_decoder;
 
 
 pub mod aac_coupling;
+
+// LD transforms/history are owned by the media library.
+pub use fvid_media::owned_aac::{aac_ld_bands,aac_ld_channel,aac_ld_ltp,aac_ld_synthesis};
+pub mod aac_ld_syntax;

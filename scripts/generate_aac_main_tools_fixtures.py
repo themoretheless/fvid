@@ -16,7 +16,7 @@ def tuple_bits(values):
 def ics(seq,bands,active,reset=None,shape=0):
     prediction='0' if not active else '1'+('1'+field(reset,5) if reset else '0')+'1'*bands
     return '0'+field(seq,2)+str(shape)+field(bands,4 if seq==2 else 6)+('1111111' if seq==2 else prediction)
-def channel(seq,books,values,position=0,energy=50,info='',tns=None):
+def channel(seq,books,values,position=0,energy=50,info='',tns=None,er=False):
     sections=''.join(field(book,4)+field(1,3 if seq==2 else 5) for book in books)
     scales='';first_noise=True
     for book in books:
@@ -29,10 +29,10 @@ def channel(seq,books,values,position=0,energy=50,info='',tns=None):
     if tns:
         reverse,order=tns
         # length=47 reaches band zero, clipped to max_sfb=8 (32 coefficients).
-        payload+='1'+field(1,2)+'0'+field(47,6)+field(order,5)+field(reverse,1)+'0'
+        payload+='1'+('0' if er else '')+field(1,2)+'0'+field(47,6)+field(order,5)+field(reverse,1)+'0'
         payload+='000'*(order-1)+'001'
     else:payload+='0'
-    payload+='0'
+    if not (er and tns):payload+='0'
     for band,book in enumerate(books):
         if book==1:
             for window in range(8 if seq==2 else 1):payload+=tuple_bits(values[window][4*band:4*band+4])

@@ -19,23 +19,7 @@ impl LdLtpData {
         if !matches!(frame_samples, 480 | 512) || max_sfb > 37 {
             return Err(invalid("invalid AAC LD LTP geometry"));
         }
-        let mut trial = bits.clone();
-        let lag_update = if trial.bit()? {
-            Some(trial.read(10)? as u16)
-        } else {
-            None
-        };
-        let coefficient_index = trial.read(3)? as u8;
-        let mut used = Vec::with_capacity(usize::from(max_sfb));
-        for _ in 0..max_sfb {
-            used.push(trial.bit()?);
-        }
-        *bits = trial;
-        Ok(Self {
-            lag_update,
-            coefficient_index,
-            used,
-        })
+        super::aac_ld_syntax::read_data(bits, max_sfb)
     }
     pub fn resolve(&self, previous_lag: u16, frame_samples: u16) -> Result<LtpData> {
         let lag = self.lag_update.unwrap_or(previous_lag);

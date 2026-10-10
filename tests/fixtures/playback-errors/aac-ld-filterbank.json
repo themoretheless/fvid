@@ -861,5 +861,5 @@
       ]
     }
   ],
-  "provenance": "Own AOT23 ep0 no-prediction/no-resilience packets and sine/low-overlap direct cosine/window/overlap oracle. Public profile remains a gap until packet/LD-LTP integration. No private or foreign media, FFmpeg or network."
+  "provenance": "Own AOT23 ep0 no-prediction/no-resilience packets and sine/low-overlap direct cosine/window/overlap oracle. Public mono ep0 MP4 PCM is accepted by the owned LD decoder. No private or foreign media, FFmpeg or network."
 }

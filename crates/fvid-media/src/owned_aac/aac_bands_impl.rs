@@ -7,6 +7,10 @@ pub struct BandTables {
 }
 impl BandTables {
     pub fn for_config(config: &AacConfig) -> Result<Self> {
+        if config.object_type == 23 {
+            let bands=super::aac_ld_bands::LdBands::new(config.sample_rate,config.frame_samples as usize).map_err(|e|invalid(&e.0))?;
+            return Ok(Self {long:bands.offsets,short:&[0],prediction_limit:None});
+        }
         if !matches!(config.object_type, 1 | 2 | 3 | 4 | 17 | 19) {
             return Err(unsupported("band tables require AAC Main, LC, SSR, LTP, ER-LC or ER-LTP"));
         }

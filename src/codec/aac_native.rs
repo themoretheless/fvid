@@ -21,6 +21,7 @@ fn ltp_data_for_channel(data: &super::aac_ltp_syntax::LtpData) -> std::borrow::C
     })
 }
 include!("../../crates/fvid-media/src/owned_aac/aac_native_impl.rs");
+include!("../../crates/fvid-media/src/owned_aac/aac_ld_native_impl.rs");
 
 #[cfg(test)]
 mod tests {

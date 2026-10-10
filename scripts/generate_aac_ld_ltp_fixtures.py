@@ -24,7 +24,7 @@ def main():
                 info='000'+field(shape,1)+field(2,6)+field(active,1)
                 if active:
                     info+='1'+field(update,1)+(field(lag,10) if update else '')+field(coefficient,3)+''.join(field(v,1) for v in used)
-                raw=packed('0000'+channel(0,[1,1],[q],info=info,tns=(reverse,1)))
+                raw=packed('0000'+channel(0,[1,1],[q],info=info,tns=(reverse,1),er=True))
                 rows.append(dict(offset=len(blob),bytes=len(raw),shape=shape,active=active,lag_update=lag if update else None,coefficient=coefficient,used=used,spectrum=[v*1024. for v in q],reference_offset=len(gold)))
                 blob.extend(raw)
                 spectrum=[v*1024. for v in q]
@@ -57,6 +57,6 @@ def main():
             c['video']=video_fixture([c],blob,filename=f'aac-ld-ltp-{n}-tns-{int(reverse)}-synthetic.mp4');cases.append(c)
     (DEST/'aac-ld-ltp-packets.bin').write_bytes(blob)
     (DEST/'aac-ld-ltp-reference.f32le').write_bytes(gold)
-    (DEST/'aac-ld-ltp.json').write_text(json.dumps(dict(cases=cases,provenance='Own AOT23 ep0 LTP lag updates/reuse/absence, sine/low-overlap switches and forward/reverse order-one TNS. Independent scalar cosine, absolute PCM timeline, FIR/AR and overlap oracle. Public AOT23 remains a specifically labelled admission gap. No private media, foreign codec, FFmpeg or network.'),indent=2)+'\n')
+    (DEST/'aac-ld-ltp.json').write_text(json.dumps(dict(cases=cases,provenance='Own AOT23 ep0 LTP lag updates/reuse/absence, sine/low-overlap switches and forward/reverse order-one TNS. Independent scalar cosine, absolute PCM timeline, FIR/AR and overlap oracle. Public mono AOT23 ep0 MP4 PCM is accepted; ER TNS follows gain-control presence. No private media, foreign codec, FFmpeg or network.'),indent=2)+'\n')
     print('generated four authored LD LTP/TNS videos and 64 scalar PCM frames')
 if __name__=='__main__':main()

@@ -241,19 +241,145 @@ fn ld_channel_errors_do_not_advance_lag_pcm_or_window_history() {
         );
     }
 }
+fn hex(s: &str) -> Vec<u8> {
+    s.as_bytes()
+        .chunks_exact(2)
+        .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
+        .collect()
+}
 #[test]
-fn active_ld_ltp_videos_reproduce_public_profile_gap_until_packet_dispatch() {
+fn ld_ltp_native_packets_and_public_mp4_match_scalar_pcm() {
+    let blob = bytes("aac-ld-ltp-packets.bin");
+    let gold = bytes("aac-ld-ltp-reference.f32le");
+    for case in manifest()["cases"].as_array().unwrap() {
+        let n = case["n"].as_u64().unwrap() as usize;
+        let asc = hex(case["asc"].as_str().unwrap());
+        let mut decoder = fvid_media::owned_aac::NativeAacDecoder::new(&asc).unwrap();
+        let config = fvid_media::owned_aac::config::AacConfig::parse(&asc).unwrap();
+        assert_eq!(
+            (config.object_type, usize::from(config.frame_samples)),
+            (23, n)
+        );
+        let retained = decoder.retained_payload_bytes().unwrap();
+        let mut all = vec![];
+        for row in case["frames"].as_array().unwrap() {
+            let at = row["offset"].as_u64().unwrap() as usize;
+            let size = row["bytes"].as_u64().unwrap() as usize;
+            let packet = &blob[at..at + size];
+            let saved = decoder.checkpoint();
+            assert!(
+                decoder
+                    .retained_payload_bytes_with_checkpoint(Some(&saved))
+                    .unwrap()
+                    > retained
+            );
+            let mut bad = packet.to_vec();
+            bad.push(0);
+            assert!(
+                decoder
+                    .decode(&bad)
+                    .unwrap_err()
+                    .to_string()
+                    .contains("trailing bytes")
+            );
+            assert!(decoder.decode(&packet[..packet.len() - 1]).is_err());
+            let pcm = decoder.decode(packet).unwrap();
+            decoder.restore(&saved).unwrap();
+            assert_eq!(pcm, decoder.decode(packet).unwrap());
+            all.extend(pcm);
+            assert_eq!(decoder.retained_payload_bytes().unwrap(), retained);
+        }
+        decoder.reset();
+        let first = case["frames"][0].clone();
+        let at = first["offset"].as_u64().unwrap() as usize;
+        let size = first["bytes"].as_u64().unwrap() as usize;
+        assert_eq!(&all[..n], decoder.decode(&blob[at..at + size]).unwrap());
+        let data = bytes(case["video"]["file"].as_str().unwrap());
+        let mut out = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(&data, &mut out).unwrap();
+        let mut owned = vec![];
+        fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            std::io::Cursor::new(&data),
+            &mut owned,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(out, owned);
+        assert_eq!(out.len(), all.len() * 4);
+        let start = first["reference_offset"].as_u64().unwrap() as usize;
+        for ((actual, raw), reference) in all
+            .iter()
+            .zip(out.chunks_exact(4))
+            .zip(gold[start..start + out.len()].chunks_exact(4))
+        {
+            assert_eq!(*actual, f32::from_le_bytes(raw.try_into().unwrap()));
+            assert!((*actual - f32::from_le_bytes(reference.try_into().unwrap())).abs() < 2e-9);
+        }
+        for (from, to) in [(30, 120), (10, 60), (30, 120)] {
+            let mut range = vec![];
+            fvid::native_media::decode_mp4_aac_pcm_interval(
+                &data,
+                &mut range,
+                Some((
+                    std::time::Duration::from_millis(from),
+                    std::time::Duration::from_millis(to),
+                )),
+            )
+            .unwrap();
+            assert_eq!(range, out[from as usize * 24 * 4..to as usize * 24 * 4]);
+        }
+    }
+}
+
+#[cfg(feature = "player")]
+fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
+    let mut decoder = reader.make_decoder().unwrap();
+    let mut output = vec![];
+    while let Some(packet) = reader.next_packet().unwrap() {
+        if let Some(frame) = decoder
+            .decode_packet(&packet.data, packet.pts, packet.duration as u64)
+            .unwrap()
+        {
+            if let Some(pcm) = reader
+                .present_decoded(frame.packet, frame.source_pts)
+                .unwrap()
+            {
+                output.extend(pcm.data);
+            }
+        }
+    }
+    while let Some(frame) = decoder.finish_packet().unwrap() {
+        if let Some(pcm) = reader
+            .present_decoded(frame.packet, frame.source_pts)
+            .unwrap()
+        {
+            output.extend(pcm.data);
+        }
+    }
+    assert!(decoder.finish_packet().unwrap().is_none());
+    output
+}
+#[cfg(feature = "player")]
+#[test]
+fn ld_player_rewind_seek_and_packet_clock_match_public_pcm() {
+    use fvid::audio::AudioStream;
     for case in manifest()["cases"].as_array().unwrap() {
         let data = bytes(case["video"]["file"].as_str().unwrap());
-        let mut pcm = vec![];
-        let error = fvid::native_media::decode_mp4_aac_pcm(&data, &mut pcm)
-            .unwrap_err()
-            .to_string();
-        assert!(
-            error.contains(
-                "only AAC Main, LC, SSR, LTP, ER-LC and ER-LTP core configurations are implemented"
-            ),
-            "{error}"
-        );
+        let mut full = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(&data, &mut full).unwrap();
+        let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+            std::io::Cursor::new(&data),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!((reader.sample_rate(), reader.channels()), (24000, 1));
+        assert_eq!(play(&mut reader), full);
+        reader.rewind();
+        assert_eq!(play(&mut reader), full);
+        for target in [0, 13, 479, 512, 2500, (full.len() / 4) as i64] {
+            let landed = reader.seek_to(target);
+            assert_eq!(play(&mut reader), full[landed as usize * 4..]);
+        }
     }
 }

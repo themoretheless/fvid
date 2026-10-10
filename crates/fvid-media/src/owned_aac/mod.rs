@@ -30,6 +30,7 @@ pub mod aac_ld_bands;
 pub mod aac_ld_ltp;
 pub mod aac_ld_history;
 pub mod aac_ld_channel;
+pub mod aac_ld_syntax;
 pub mod aac_synthesis;
 pub mod aac_sbr_bands;
 pub mod aac_sbr_header;

@@ -224,6 +224,7 @@ pub struct AacFrame {
 pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
+    ld_synthesis: Vec<super::aac_ld_channel::LdChannel>,
     ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannel>,
     ltp_coupling_synthesis: Vec<Option<super::aac_ltp_channel::LtpChannel>>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -254,6 +255,7 @@ pub struct AacCheckpoint {
     initial_program: Option<super::aac_pce::ProgramConfig>,
     program: Option<super::aac_pce::ProgramConfig>,
     synthesis: Vec<LongSineSynthesis>,
+    ld_synthesis: Vec<super::aac_ld_channel::LdChannelCheckpoint>,
     ltp_synthesis: Vec<super::aac_ltp_channel::LtpChannelCheckpoint>,
     ltp_coupling_synthesis: Vec<Option<super::aac_ltp_channel::LtpChannelCheckpoint>>,
     ssr_synthesis: Vec<super::aac_ssr_synthesis::SsrSynthesis>,
@@ -341,10 +343,11 @@ impl NativeAacDecoder {
         };
         // Clone initialized state so channels share immutable transforms/windows
         // while every channel retains independent overlap and scratch buffers.
-        let synthesis = if matches!(config.object_type,3|4|19) { Vec::new() } else { vec![
+        let synthesis = if matches!(config.object_type,3|4|19|23) { Vec::new() } else { vec![
             LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from)?;
             usize::from(config.channels)
         ] };
+        let ld_synthesis=if config.object_type==23 {vec![super::aac_ld_channel::LdChannel::new(config.frame_samples as usize)?;usize::from(config.channels)]}else{Vec::new()};
         let ltp_synthesis = if matches!(config.object_type,4|19) {
             vec![super::aac_ltp_channel::LtpChannel::new(config.frame_samples as usize)?; usize::from(config.channels)]
         } else { Vec::new() };
@@ -363,7 +366,7 @@ impl NativeAacDecoder {
         Ok(Self {
             main_prediction,
             config,
-            synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
+            ld_synthesis, synthesis, ssr_synthesis, ltp_synthesis, ltp_coupling_synthesis,
             ssr_coupling_synthesis, ssr_alignment:None, ssr_alignment_tags:Vec::new(), ssr_pending_duration:Default::default(), ssr_fixed_clock:false,ssr_source_alignment:false,
             coupling_synthesis:vec![None;16],
             noise: NoiseState::default(),
@@ -431,6 +434,7 @@ impl NativeAacDecoder {
     }
     pub fn checkpoint(&self) -> AacCheckpoint {
         AacCheckpoint {main_prediction:self.main_prediction.clone(),config:self.config.clone(),initial_program:self.initial_program.clone(),program:self.program.clone(),
+            ld_synthesis:self.ld_synthesis.iter().map(super::aac_ld_channel::LdChannel::checkpoint).collect(),
             synthesis:self.synthesis.clone(),ltp_coupling_synthesis:self.ltp_coupling_synthesis.iter().map(|s|s.as_ref().map(super::aac_ltp_channel::LtpChannel::checkpoint)).collect(),ltp_synthesis:self.ltp_synthesis.iter().map(super::aac_ltp_channel::LtpChannel::checkpoint).collect(),ssr_synthesis:self.ssr_synthesis.clone(),ssr_coupling_synthesis:self.ssr_coupling_synthesis.clone(),ssr_alignment:self.ssr_alignment.clone(),ssr_alignment_tags:self.ssr_alignment_tags.clone(),ssr_pending_duration:self.ssr_pending_duration.clone(),ssr_fixed_clock:self.ssr_fixed_clock,ssr_source_alignment:self.ssr_source_alignment,coupling_synthesis:self.coupling_synthesis.clone(),noise:self.noise.clone(),
             mapping:self.mapping.clone(),channel_mask:self.channel_mask,
             sbr_rate:self.sbr_rate,detect_sbr:self.detect_sbr,sbr_detection_rate:self.sbr_detection_rate,sbr_elements:self.sbr_elements.clone()}
@@ -440,6 +444,8 @@ impl NativeAacDecoder {
         if self.config!=state.config || self.initial_program!=state.initial_program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask || self.detect_sbr!=state.detect_sbr || self.sbr_detection_rate!=state.sbr_detection_rate || (!self.detect_sbr && self.sbr_rate!=state.sbr_rate) {
             return Err(invalid("AAC checkpoint configuration mismatch"));
         }
+        if self.ld_synthesis.len()!=state.ld_synthesis.len() {return Err(invalid("AAC LD checkpoint channel count mismatch"));}
+        for (channel,saved) in self.ld_synthesis.iter_mut().zip(&state.ld_synthesis) {channel.restore(saved)?;}
         if self.ltp_synthesis.len()!=state.ltp_synthesis.len() { return Err(invalid("AAC LTP checkpoint channel count mismatch")); }
         for (channel,saved) in self.ltp_synthesis.iter_mut().zip(&state.ltp_synthesis) {channel.restore(saved)?;}
         if self.ltp_coupling_synthesis.len()!=state.ltp_coupling_synthesis.len() {return Err(invalid("AAC LTP checkpoint coupling count mismatch"));}
@@ -461,6 +467,7 @@ impl NativeAacDecoder {
         for synth in &mut self.synthesis {
             synth.reset();
         }
+        for channel in &mut self.ld_synthesis {channel.reset();}
         for channel in &mut self.ltp_synthesis {channel.reset();}
         self.ltp_coupling_synthesis.fill(None);
         for synthesis in self.coupling_synthesis.iter_mut().flatten() {synthesis.reset();}
@@ -500,6 +507,7 @@ impl NativeAacDecoder {
         Ok(Some(output))
     }
     pub fn decode_timed(&mut self, packet: &[u8], pts:i64, duration:u64) -> Result<Option<AacFrame>> {
+        if self.config.object_type==23 {return self.decode_ld_timed(packet,pts,duration);}
         let mut ltp_coupling_synthesis=self.ltp_coupling_synthesis.clone();
         let mut bits = BitReader::new(packet);
         let mut current_program = self.program.clone();

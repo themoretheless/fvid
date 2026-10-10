@@ -45,13 +45,13 @@ impl AacConfig {
         sample_rate: u32,
         config: u32,
     ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
-        if !matches!(object_type, 1 | 2 | 3 | 4 | 17 | 19) {
+        if !matches!(object_type, 1 | 2 | 3 | 4 | 17 | 19 | 23) {
             return Err(invalid(
-                "only AAC Main, LC, SSR, LTP, ER-LC and ER-LTP core configurations are implemented",
+                "only AAC Main, LC, SSR, LTP, ER-LC, ER-LTP and ER-LD core configurations are implemented",
             ));
         }
-        if matches!(object_type,17|19) && config == 0 {
-            return Err(invalid(if object_type == 19 {"ER AAC LTP PCE layout is not yet implemented"} else {"ER AAC LC PCE layout is not yet implemented"}));
+        if matches!(object_type,17|19|23) && config == 0 {
+            return Err(invalid(if object_type == 23 {"ER AAC LD PCE layout is not yet implemented"} else if object_type == 19 {"ER AAC LTP PCE layout is not yet implemented"} else {"ER AAC LC PCE layout is not yet implemented"}));
         }
         let mut channels = match config {
             0 => 0,
@@ -60,7 +60,11 @@ impl AacConfig {
             11 => 7,
             _ => return Err(invalid("unsupported AAC channel configuration")),
         };
-        let frame_samples = if b.bit()? { 960 } else { 1024 };
+        let mut frame_samples = if b.bit()? { 960 } else { 1024 };
+        if object_type == 23 {
+            frame_samples /= 2;
+            super::aac_ld_bands::LdBands::new(sample_rate,frame_samples as usize).map_err(|e|invalid(&e.0))?;
+        }
         if object_type == 3 && frame_samples != 1024 {
             return Err(invalid("AAC SSR requires frameLengthFlag zero"));
         }
@@ -84,14 +88,14 @@ impl AacConfig {
         // there are no ER/sub-frame fields before it; this future-use bit must
         // be zero. Do not mistake extensionFlag itself for unsupported audio.
         let (section_data_resilience, scalefactor_data_resilience, spectral_data_resilience) =
-            if extension_flag && matches!(object_type,17|19) {
+            if extension_flag && matches!(object_type,17|19|23) {
                 (b.bit()?, b.bit()?, b.bit()?)
             } else { (false, false, false) };
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }
-        if matches!(object_type,17|19) && b.read(2)? != 0 {
-            return Err(invalid(if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"}));
+        if matches!(object_type,17|19|23) && b.read(2)? != 0 {
+            return Err(invalid(if object_type == 23 {"ER AAC LD epConfig is not yet implemented"} else if object_type == 19 {"ER AAC LTP epConfig is not yet implemented"} else {"ER AAC LC epConfig is not yet implemented"}));
         }
         Ok((
             Self {
@@ -196,8 +200,8 @@ impl AudioSpecificConfig {
                 }
             }
         }
-        if matches!(core.object_type,17|19) && (sbr_present == Some(true) || ps_present == Some(true)) {
-            return Err(invalid(if core.object_type == 19 {"ER AAC LTP SBR/PS is not yet implemented"} else {"ER AAC LC SBR/PS is not yet implemented"}));
+        if matches!(core.object_type,17|19|23) && (sbr_present == Some(true) || ps_present == Some(true)) {
+            return Err(invalid(if core.object_type == 23 {"ER AAC LD SBR/PS is not yet implemented"} else if core.object_type == 19 {"ER AAC LTP SBR/PS is not yet implemented"} else {"ER AAC LC SBR/PS is not yet implemented"}));
         }
         if ps_present == Some(true) && core.channels != 1 {
             return Err(invalid("AAC parametric stereo requires a mono core"));
