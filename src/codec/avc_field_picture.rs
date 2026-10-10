@@ -593,7 +593,7 @@ pub(super) fn decode_inter_field_impl(
     }
     if !h.field_pic
         || !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
-        || matches!(h.slice_type, SliceType::I | SliceType::Si) && pps.cabac
+        || h.slice_type == SliceType::Si && pps.cabac
         || h.redundant_pic_cnt != 0
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || h.disable_deblocking_filter_idc > 2
@@ -606,15 +606,15 @@ pub(super) fn decode_inter_field_impl(
         return Err(invalid("invalid AVC P field slice count"));
     }
     for current in headers {
+        let ordinary_mixed = matches!(current.slice_type, SliceType::I | SliceType::P | SliceType::B)
+            && matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)
+            && (current.slice_type == SliceType::I || h.slice_type == SliceType::I);
+        let switching_mixed = !pps.cabac
+            && matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
+            && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp);
         if !current.field_pic
-            // CAVLC I/SI/P/SP share this dispatcher. Intra syntax has no skip
-            // run or references; switching reconstruction stays slice-local.
-            || current.slice_type != h.slice_type
-                && !(!pps.cabac
-                    && ((matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
-                        && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp))
-                        || (matches!(current.slice_type, SliceType::I | SliceType::B)
-                            && matches!(h.slice_type, SliceType::I | SliceType::B))))
+            // Intra slices keep their own entropy table and inactive lists.
+            || current.slice_type != h.slice_type && !(ordinary_mixed || switching_mixed)
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
             || current.pps_id != h.pps_id

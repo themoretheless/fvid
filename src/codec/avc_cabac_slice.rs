@@ -46,8 +46,10 @@ impl<'a> InterCabacSlice<'a> {
         budget: usize,
         mbaff: bool,
     ) -> Result<Self> {
-        if !matches!(header.slice_type, SliceType::P | SliceType::B) {
-            return Err(invalid("CABAC mixed slice requires P/B"));
+        if !matches!(header.slice_type, SliceType::P | SliceType::B)
+            && !(header.slice_type == SliceType::I && header.field_pic && !mbaff)
+        {
+            return Err(invalid("CABAC dispatcher requires P/B or an I field slice"));
         }
         let count = (sps.width_mbs as usize)
             .checked_mul(sps.height_map_units as usize)
@@ -159,6 +161,13 @@ impl<'a> InterCabacSlice<'a> {
         result
     }
     fn read_next(&mut self) -> Result<Option<InterMacroblock>> {
+        if self.slice == SliceType::I {
+            // I slices own their context bank and have no skip/type prefix
+            // from the inter tables. The intra reader also owns termination.
+            return self.reader.read_macroblock().map(|block| {
+                block.map(|block| InterMacroblock::Intra(Box::new(block)))
+            });
+        }
         if self.reader.is_finished() {
             return Ok(None);
         }

@@ -11,6 +11,8 @@ fn manifest() -> Value {
         "avc-mixed-intra-sp-fields.json",
         "avc-mixed-si-sp-fields.json",
         "avc-mixed-intra-b-fields.json",
+        "avc-mixed-cabac-intra-p-fields.json",
+        "avc-mixed-cabac-intra-b-fields.json",
     ] {
         let extra: Value = serde_json::from_slice(&fixture(name)).unwrap();
         base["cases"]
