@@ -35,8 +35,9 @@ def main():
     for aot in (4,19,23):
         for n in ((480,512) if aot==23 else (960,1024)):
             cos=[[math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for i in range(2*n)] for k in range(8)]
-            for mode in (('mono','independent-right','correlated','uncorrelated','coupling') if aot==4 else ('mono','independent-right','correlated','uncorrelated')):
-                width=1 if mode in ('mono','coupling') else 2;common=mode in ('correlated','uncorrelated');ms=1 if mode=='correlated' else 0
+            for mode in (('mono','independent-right','correlated','uncorrelated','coupling','coupling-before-tns','coupling-after-tns') if aot==4 else ('mono','independent-right','correlated','uncorrelated')):
+                point=0 if mode=='coupling-before-tns' else 1 if mode=='coupling-after-tns' else 3
+                width=1 if mode=='mono' or mode.startswith('coupling') else 2;common=mode in ('correlated','uncorrelated');ms=1 if mode=='correlated' else 0
                 banks=[Oracle(n,aot==23,cos) for _ in range(width)];mutants=[Oracle(n,aot==23,cos) for _ in range(width)]
                 noise=Noise();rows=[];control_rows=[];start=len(gold)
                 for frame in range(12):
@@ -64,11 +65,11 @@ def main():
                             for ch in range(width):
                                 info=base+field(active,1)+(prediction[ch] if active else '')
                                 wire+=channel(0,books[ch],[q[ch]],energy=energy[ch],info=info)
-                        if mode=='coupling':
-                            # Independent CCE tag1 -> silent SCE tag0, unity gain.
+                        if mode.startswith('coupling'):
+                            # CCE tag1 -> silent SCE tag0, unity gain at each coupling point.
                             source=wire[7:]
                             target='0000000'+channel(0,[0,0],[[0]*8],info=base+'0')
-                            cce='0100001'+'1'+'000'+'0'+'0000'+'0'+'0'+'10'+source
+                            cce='0100001'+field(point==3,1)+'000'+'0'+'0000'+field(point==1,1)+'0'+'10'+source
                             wire=cce+target if frame%2 else target+cce
                         return packed(wire+('111' if aot==4 else ''))
                     raw=encode(pred);rows.append(dict(offset=len(blob),bytes=len(raw),reference_offset=len(gold)));blob.extend(raw)
@@ -86,9 +87,9 @@ def main():
                     for values in zip(*pcm):gold.extend(struct.pack('<'+'f'*width,*values))
                     for values in zip(*mutant):wrong.extend(struct.pack('<'+'f'*width,*values))
                 asc=packed(field(aot,5)+frequency(24000)+field(width,4)+field(n in (480,960),1)+'00'+('00' if aot!=4 else '')).hex()
-                if mode=='coupling':
+                if mode.startswith('coupling'):
                     prefix=field(4,5)+frequency(24000)+'0000'+field(n==960,1)+'00'
-                    pce=field(0,4)+field(3,2)+frequency(24000)+field(1,4)+field(0,4)+field(0,4)+field(0,2)+field(0,3)+field(1,4)+'000'+'0'+field(0,4)+'1'+field(1,4)
+                    pce=field(0,4)+field(3,2)+frequency(24000)+field(1,4)+field(0,4)+field(0,4)+field(0,2)+field(0,3)+field(1,4)+'000'+'0'+field(0,4)+field(point==3,1)+field(1,4)
                     asc=packed(prefix+pce+'0'*(-len(prefix+pce)%8)+field(0,8)).hex()
                 name=f'{aot}-{n}-{mode}';c=dict(name=name,aot=aot,n=n,channels=width,asc=asc,frames=rows,control_frames=control_rows,reference_offset=start,reference_bytes=len(gold)-start,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
                 c['video']=video_fixture([c],blob,channels=width,filename=f'aac-ltp-pns-{name}-synthetic.mp4')

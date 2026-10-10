@@ -10466,3 +10466,19 @@ before and after PNS. The same cases run checkpoint rollback, public/owned MP4
 export and player range/rewind/seek checks. This extends the PNS matrix to 26
 cases; dependent spectral coupling, stereo target selection and intensity/LTP
 combinations still require separate qualification.
+
+
+### Dependent LTP coupling history fix (2026-10-10)
+
+Dependent CCE sources at spectral coupling points 0/1 previously prepared LTP
+spectra without advancing their own synthesis, PCM history or previous window
+shape. A synthetic 960-sample point-0 control reproduced a scalar PCM mismatch
+before the fix, even with noise-band prediction flags cleared. The decoder now
+synthesizes each dependent source once solely to update its own prediction loop;
+its spectrum has already been mixed and no second PCM contribution is added.
+Packet commit/rollback retains the existing cloned coupling-state transaction.
+Four additional authored videos and four controls cover both points at 960/1024,
+with active prediction before/after PNS and alternating CCE/SCE wire order.
+The PNS matrix now has 30 cases. These fixtures have no TNS filter and use unity
+gain into a silent mono target; nontrivial TNS/gains and stereo routing remain
+separate qualification requirements.

@@ -979,6 +979,12 @@ impl NativeAacDecoder {
             // Independent coupling is applied to final target PCM, after SBR.
             for (coupling, spectrum) in couplings {
                 if coupling.point != 3 {
+                    // Spectral coupling already contributed to the target.
+                    // Its own reconstructed PCM must still advance the LTP
+                    // loop, including frames without prediction and PNS bands.
+                    if matches!(self.config.object_type,4|19) {
+                        ltp_coupling_synthesis[usize::from(coupling.tag)].as_mut().ok_or_else(||invalid("AAC LTP coupling state missing"))?.synthesize_spectrum(&spectrum,coupling.channel.info.sequence,coupling.channel.info.shape)?;
+                    }
                     continue;
                 }
                 if matches!(self.config.object_type,4|19) {

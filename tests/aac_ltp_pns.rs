@@ -47,7 +47,7 @@ fn pns_takes_precedence_over_ltp_without_losing_pcm_or_lag_history() {
     let gold = bytes("aac-ltp-pns-reference.f32le");
     let wrong = bytes("aac-ltp-pns-incorrect-prediction.f32le");
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 26);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 30);
     for c in m["cases"].as_array().unwrap() {
         let actual = native(c, "frames", &blob);
         let control = native(c, "control_frames", &blob);
