@@ -4817,3 +4817,15 @@ a deliberately incorrect PCM oracle, and a manifest. Audio samples, parameters
 and syntax are authored; existing authored AVC/container scaffolding is reused.
 No private media, FFmpeg, network or foreign decoder is used. Generation is
 separate from ordinary regression tests in `tests/aac_ltp_pns.rs`.
+
+
+### Independent LTP coupling with PNS (2026-10-10)
+
+Two additional authored AOT4 videos (960 and 1024 samples) exercise PNS in an
+independent CCE source, with unity coupling into a silent SCE and alternating
+CCE/SCE wire order. Both the overlapping prediction flags and matched cleared
+flags are checked against the scalar PCM timeline, including predictor history
+before and after PNS. The same cases run checkpoint rollback, public/owned MP4
+export and player range/rewind/seek checks. This extends the PNS matrix to 26
+cases; dependent spectral coupling, stereo target selection and intensity/LTP
+combinations still require separate qualification.

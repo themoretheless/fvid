@@ -10454,3 +10454,15 @@ only noise-band prediction flags cleared matched the correct scalar oracle.
 Acceptance checks cover native/public PCM, owned export, checkpoint rollback,
 player ranges, rewind and seek. Dedicated PNS coupling, intensity interactions
 and other unqualified codec combinations remain outside this fixture matrix.
+
+
+### Independent LTP coupling with PNS (2026-10-10)
+
+Two additional authored AOT4 videos (960 and 1024 samples) exercise PNS in an
+independent CCE source, with unity coupling into a silent SCE and alternating
+CCE/SCE wire order. Both the overlapping prediction flags and matched cleared
+flags are checked against the scalar PCM timeline, including predictor history
+before and after PNS. The same cases run checkpoint rollback, public/owned MP4
+export and player range/rewind/seek checks. This extends the PNS matrix to 26
+cases; dependent spectral coupling, stereo target selection and intensity/LTP
+combinations still require separate qualification.
