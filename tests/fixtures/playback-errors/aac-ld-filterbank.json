@@ -1,0 +1,865 @@
+{
+  "cases": [
+    {
+      "name": "480",
+      "n": 480,
+      "asc": "bb0c00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 0
+        },
+        {
+          "offset": 8,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 1920
+        },
+        {
+          "offset": 16,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 3840
+        },
+        {
+          "offset": 24,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 5760
+        },
+        {
+          "offset": 32,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 7680
+        },
+        {
+          "offset": 40,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 9600
+        },
+        {
+          "offset": 48,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 11520
+        },
+        {
+          "offset": 56,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 13440
+        },
+        {
+          "offset": 64,
+          "bytes": 6,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reference_offset": 15360
+        },
+        {
+          "offset": 70,
+          "bytes": 6,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reference_offset": 17280
+        },
+        {
+          "offset": 76,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 19200
+        },
+        {
+          "offset": 84,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 21120
+        },
+        {
+          "offset": 92,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 23040
+        },
+        {
+          "offset": 100,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 24960
+        },
+        {
+          "offset": 108,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 26880
+        },
+        {
+          "offset": 116,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 28800
+        },
+        {
+          "offset": 124,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 30720
+        },
+        {
+          "offset": 132,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 32640
+        },
+        {
+          "offset": 140,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 34560
+        },
+        {
+          "offset": 148,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 36480
+        },
+        {
+          "offset": 156,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 38400
+        },
+        {
+          "offset": 164,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 40320
+        },
+        {
+          "offset": 172,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 42240
+        },
+        {
+          "offset": 180,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 44160
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-ld-filterbank-480-synthetic.mp4",
+        "sha256": "1ccd097ce376ea86ea56b606bcb4b36046bea85c574f7574208a67bed340a045",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0c00",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "analysis": [
+        {
+          "previous": 0,
+          "current": 0,
+          "reference_offset": 0
+        },
+        {
+          "previous": 0,
+          "current": 1,
+          "reference_offset": 3840
+        },
+        {
+          "previous": 1,
+          "current": 0,
+          "reference_offset": 7680
+        },
+        {
+          "previous": 1,
+          "current": 1,
+          "reference_offset": 11520
+        }
+      ]
+    },
+    {
+      "name": "512",
+      "n": 512,
+      "asc": "bb0800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 188,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 46080
+        },
+        {
+          "offset": 196,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 48128
+        },
+        {
+          "offset": 204,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 50176
+        },
+        {
+          "offset": 212,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 52224
+        },
+        {
+          "offset": 220,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 54272
+        },
+        {
+          "offset": 228,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 56320
+        },
+        {
+          "offset": 236,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 58368
+        },
+        {
+          "offset": 244,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 60416
+        },
+        {
+          "offset": 252,
+          "bytes": 6,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reference_offset": 62464
+        },
+        {
+          "offset": 258,
+          "bytes": 6,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reference_offset": 64512
+        },
+        {
+          "offset": 264,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 66560
+        },
+        {
+          "offset": 272,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 68608
+        },
+        {
+          "offset": 280,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 70656
+        },
+        {
+          "offset": 288,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 72704
+        },
+        {
+          "offset": 296,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 74752
+        },
+        {
+          "offset": 304,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 76800
+        },
+        {
+          "offset": 312,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 78848
+        },
+        {
+          "offset": 320,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 80896
+        },
+        {
+          "offset": 328,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 82944
+        },
+        {
+          "offset": 336,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 84992
+        },
+        {
+          "offset": 344,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 87040
+        },
+        {
+          "offset": 352,
+          "bytes": 8,
+          "shape": 1,
+          "spectrum": [
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0
+          ],
+          "reference_offset": 89088
+        },
+        {
+          "offset": 360,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0
+          ],
+          "reference_offset": 91136
+        },
+        {
+          "offset": 368,
+          "bytes": 8,
+          "shape": 0,
+          "spectrum": [
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0,
+            1024.0,
+            0.0,
+            -1024.0
+          ],
+          "reference_offset": 93184
+        }
+      ],
+      "reference_offset": 46080,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-ld-filterbank-512-synthetic.mp4",
+        "sha256": "b1243ba5a36ed7c7dde206ddc906f9c7f16ac8698699d0dd6488fcb717faa893",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0800",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "analysis": [
+        {
+          "previous": 0,
+          "current": 0,
+          "reference_offset": 15360
+        },
+        {
+          "previous": 0,
+          "current": 1,
+          "reference_offset": 19456
+        },
+        {
+          "previous": 1,
+          "current": 0,
+          "reference_offset": 23552
+        },
+        {
+          "previous": 1,
+          "current": 1,
+          "reference_offset": 27648
+        }
+      ]
+    }
+  ],
+  "provenance": "Own AOT23 ep0 no-prediction/no-resilience packets and sine/low-overlap direct cosine/window/overlap oracle. Public profile remains a gap until packet/LD-LTP integration. No private or foreign media, FFmpeg or network."
+}

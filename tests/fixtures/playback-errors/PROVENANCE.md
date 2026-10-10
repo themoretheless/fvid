@@ -4703,3 +4703,20 @@ No private media, frames, audio or codec parameters, foreign codec code or
 foreign decoder execution are used. Generation is separate from tests, offline
 and FFmpeg-free. Syntax references remain ISO/IEC14496-3 subpart4 HCR/RVLC/LTP
 and the FAAD2 2.11.2 primary field-order cross-check linked above.
+
+### AAC-LD filterbank and explicit AOT23 gap
+
+`aac-ld-filterbank-*` is authored by
+`scripts/generate_aac_ld_filterbank_fixtures.py`. Two 480/512-sample videos
+carry original AOT23 ep0/no-prediction/no-resilience spectral packets. Forty-eight
+PCM blocks use scalar direct cosine sums and sine/low-overlap windows; eight
+forward-MDCT vectors cover all four previous/current shape pairs. The low-overlap
+window is independently authored from the formula in
+[ISO14496-3:2001 section4.6.17.2.3](https://www.ossrs.net/lts/zh-cn/assets/files/ISO_IEC_14496-3-AAC-2001-7f4d0b3622b322cb72c78f85d91c449f.pdf).
+No private media, frames, audio, codec parameter sets or foreign decoder output
+are copied. Existing authored AVC/container templates are only scaffolding.
+Generation is separate from normal tests and needs no FFmpeg or network.
+
+Standalone filterbank tests are acceptance tests. Public MP4 decoding still has
+a specific AOT23 profile-refusal reproduction; replace that refusal with public
+PCM/playback acceptance when the packet/LD-LTP path is integrated.

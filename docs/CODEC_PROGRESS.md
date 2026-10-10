@@ -10273,3 +10273,33 @@ Validation: 481 owned library tests and 37 selected AAC integration tests passed
 offline (518 total; one pre-existing library test ignored). The six new tests
 passed on the final 70-combination/four-valid-CPE corpus. All 147 final
 artifacts regenerate byte-identically. No FFmpeg was executed.
+
+## AAC-LD filterbank foundation (AOT23 admission still open)
+
+Owned IMDCT/MDCT now accepts 480/512 coefficients. The new `LdSynthesis`
+implements sine and the LD low-overlap window from ISO14496-3 4.6.17.2.3;
+LD shape1 is not the ordinary KBD window. Leading and trailing halves use
+previous/current shapes. Synthesis has packet-boundary checkpoint/reset,
+transactional input/history checks, retained-allocation inspection and no
+per-frame allocation. Windowed forward MDCT is available for subsequent LD-LTP
+integration and does not advance PCM history.
+
+Two authored AOT23 ep0/no-prediction videos carry 48 spectral frames with all
+four window-shape transitions and silence/overlap tails. Direct scalar cosine,
+window and overlap PCM verifies the standalone filterbank; eight independent
+forward-MDCT cases cover every shape pair. Window support/symmetry/power
+complementarity, checkpoint replay and invalid-input rollback are tested.
+The videos currently retain a specifically labelled public AOT23 profile-refusal
+test. This is a gap reproduction, not public playback acceptance.
+
+Required integration remains: LD band tables and frame geometry, LD LTP
+lag-update/history semantics, native decoder/checkpoint/budget dispatch,
+resilience/TNS/stereo combinations and MP4/player timing/seek acceptance. The
+AOT23 gate is intentionally unchanged until those paths are implemented. This
+milestone does not establish LD/ELD/USAC or complete codec conformance.
+
+Validation: 483 owned library tests passed, including expanded forward/inverse
+transform references at 480/512 and two LD window/checkpoint unit tests (one
+pre-existing ignored). Two standalone LD acceptance tests and one specifically
+labelled public-profile refusal test passed offline. All six authored artifacts
+regenerate byte-identically. No FFmpeg was executed.

@@ -35,9 +35,9 @@ impl Imdct {
         Ok(())
     }
 
-    /// AAC-LC long/short transforms and AAC-SSR quarter-band transforms.
+    /// AAC long/short, LD half-size and SSR quarter-band transforms.
     pub fn new(coefficients: usize) -> Result<Self> {
-        if !matches!(coefficients, 32 | 120 | 128 | 256 | 960 | 1024) {
+        if !matches!(coefficients, 32 | 120 | 128 | 256 | 480 | 512 | 960 | 1024) {
             return Err(invalid("unsupported AAC IMDCT length"));
         }
         let size = (2 * coefficients - 1).next_power_of_two();
@@ -187,7 +187,7 @@ mod tests {
     #[test]
     fn forward_mdct_all_lengths_match_dense_direct_cosine_sum() {
         use super::*;
-        for n in [32, 120, 128, 256, 960, 1024] {
+        for n in [32, 120, 128, 256, 480, 512, 960, 1024] {
             let transform = Imdct::new(n).unwrap();
             let input: Vec<_> = (0..2*n).map(|i| ((i*17)%31) as f64 - 15.25).collect();
             let mut output = vec![0.0; n];
@@ -205,7 +205,7 @@ mod tests {
     use super::*;
     #[test]
     fn every_aac_length_matches_direct_cosine_basis() {
-        for n in [32, 120, 128, 256, 960, 1024] {
+        for n in [32, 120, 128, 256, 480, 512, 960, 1024] {
             let plan = Imdct::new(n).unwrap();
             let mut spectrum = vec![0.0; n];
             let mut output = vec![0.0; 2 * n];
@@ -229,7 +229,7 @@ mod tests {
     }
     #[test]
     fn dense_spectra_match_direct_basis_with_reused_scratch() {
-        for n in [32, 120, 128, 256, 960, 1024] {
+        for n in [32, 120, 128, 256, 480, 512, 960, 1024] {
             let plan = Imdct::new(n).unwrap();
             let mut scratch = vec![[999.0; 2]; plan.scratch_len()];
             let mut output = vec![0.0; 2 * n];
