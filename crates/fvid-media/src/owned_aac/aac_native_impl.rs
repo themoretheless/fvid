@@ -686,7 +686,7 @@ impl NativeAacDecoder {
                     // history, but do not synthesize another PCM contribution.
                     if previous_element == Some(2)
                         && couplings.last().is_some_and(|(c, _)| c.point != 3)
-                        && frame.syntax.data.extended_data.as_ref().is_some_and(|v| !v.is_empty())
+                        && frame.syntax.data.has_ps_extension()
                     {
                         return Err(unsupported("SBR extended audio/PS synthesis is not yet implemented"));
                     }

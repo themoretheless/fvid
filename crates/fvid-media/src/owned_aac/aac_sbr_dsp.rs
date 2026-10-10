@@ -105,9 +105,7 @@ impl Dsp {
         if frame
             .syntax
             .data
-            .extended_data
-            .as_ref()
-            .is_some_and(|v| !v.is_empty())
+            .has_ps_extension()
         {
             return Err(unsupported(
                 "SBR extended audio/PS synthesis is not yet implemented",

@@ -10759,3 +10759,21 @@ count parser. Regression covers exact PCM equivalence, checkpoints, truncated
 second-element rollback, native MP4 decoding and owned MP4 export. Generation
 is explicit, deterministic and offline; ordinary tests do not use FFmpeg.
 This does not qualify split-class epConfig transport or error protection.
+
+### Reserved SBR extension IDs (2026-10-10)
+
+Table 8.A.1 assigns ID 2 to PS; IDs 0/1/3 consume the remaining declared
+extension area as opaque fill. Ordinary DSP and coupling paths now reject
+unsupported PS by that ID, rather than rejecting every nonempty area.
+Markers resembling PS later inside reserved data remain opaque. Genuine
+PS refusal in ordinary DSP is retained; extension-aware PS paths still parse PS.
+
+`generate_aac_sbr_reserved_fixtures.py` authors LC/ER-LC/ER-LTP mono/CPE
+streams with 960/1024 core samples and reserved IDs 0/1/3. Declared lengths
+cover 1 byte, escaped 15 bytes, ordinary 240 bytes and ER 270 bytes.
+Nonzero PCM must exactly match absent-extension controls. Each case has a
+synthetic MP4 and a malformed companion truncated inside the declared area.
+Tests cover native decode, checkpoint rollback, both MP4 APIs and player
+ranges/rewind/seek. The pre-fix acceptance failure was specifically
+`SBR extended audio/PS synthesis is not yet implemented`. Fixtures are
+original and generated offline, separately from ordinary test execution.

@@ -33,7 +33,7 @@ def main():
             assert sum(len(e)//8 for e in extensions)>269
             wire=''.join(cores)+''.join(extensions)
             rows.append(store(packed(wire)));controls.append(store(packed(ordinary+'111')))
-            # Truncate inside the second element's declared extended data.
+            # Truncate inside the second element's envelope Huffman data.
             bad.append(store(packed(wire[:-800])))
         name=f'{aot}-{slots}'
         asc=lambda core:packed(field(5,5)+frequency(24000)+field(3,4)+frequency(48000)+field(core,5)+field(slots==15,1)+'00'+('00' if core in (17,19) else '')).hex()

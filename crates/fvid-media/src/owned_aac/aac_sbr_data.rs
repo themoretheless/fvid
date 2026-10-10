@@ -34,6 +34,15 @@ pub struct Data {
     pub extended_data: Option<Vec<u8>>,
 }
 
+impl Data {
+    /// Table 8.A.1: PS is ID 2. Any other first ID consumes the whole
+    /// remaining area as opaque fill, including bits resembling later IDs.
+    pub fn has_ps_extension(&self) -> bool {
+        self.extended_data.as_ref().and_then(|v| v.first())
+            .is_some_and(|byte| byte >> 6 == 2)
+    }
+}
+
 fn field(bits: &mut BitReader<'_>, end: usize, width: u8) -> Result<u8> {
     if end < bits.position()
         || end - bits.position() > bits.remaining()
