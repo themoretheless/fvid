@@ -180,12 +180,12 @@ impl ChannelData {
         *bits = cursor;
         Ok(channel)
     }
-    /// Read an ordinary AOT4 single-channel stream, including LTP side data.
+    /// Read an AOT4/AOT19 single-channel stream, including LTP side data.
     /// Transactional; production ASC/profile admission remains separate.
     pub fn read_ltp(
         bits: &mut BitReader<'_>, config: &AacConfig,
     ) -> Result<(Self, Option<super::aac_ltp_syntax::LtpData>)> {
-        if config.object_type != 4 { return Err(invalid("AAC LTP channel requires AOT4")); }
+        if !matches!(config.object_type,4|19) { return Err(invalid("AAC LTP channel requires AOT4 or AOT19")); }
         let tables = BandTables::for_config(config)?;
         let mut cursor = bits.clone();
         let gain = cursor.read(8)? as u8;
@@ -216,7 +216,7 @@ impl ChannelData {
             None
         };
         let tns_present = cursor.bit()?;
-        let er = config.object_type == 17;
+        let er = matches!(config.object_type,17|19);
         let mut tns = if tns_present && !er {
             Some(tns_syntax::read_profile(&mut cursor, info.sequence, config.object_type == 1)?)
         } else { None };

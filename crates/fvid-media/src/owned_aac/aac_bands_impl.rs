@@ -7,8 +7,8 @@ pub struct BandTables {
 }
 impl BandTables {
     pub fn for_config(config: &AacConfig) -> Result<Self> {
-        if !matches!(config.object_type, 1 | 2 | 3 | 4 | 17) {
-            return Err(unsupported("band tables require AAC Main, LC, SSR, LTP or ER-LC"));
+        if !matches!(config.object_type, 1 | 2 | 3 | 4 | 17 | 19) {
+            return Err(unsupported("band tables require AAC Main, LC, SSR, LTP, ER-LC or ER-LTP"));
         }
         if !matches!(config.frame_samples, 960 | 1024) {
             return Err(unsupported("AAC band tables require 960 or 1024 samples"));

@@ -62,11 +62,13 @@ impl LtpData {
 }
 
 /// Ordinary AOT4 ICS, including independent predictors for a common-window pair.
-/// Does not admit ER/LD syntax or change decoder configuration support.
+/// ER common-window mode defers predictor data to the pair payload.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LtpIcsInfo {
     pub info: super::aac_ics::IcsInfo,
     pub channels: [Option<LtpData>; 2],
+    /// ER common-window predictors are deferred outside the ICS header.
+    pub predictor_present: bool,
 }
 impl LtpIcsInfo {
     pub fn read(
@@ -74,6 +76,17 @@ impl LtpIcsInfo {
         bands: (u8, u8),
         frame_samples: u16,
         common_window: bool,
+    ) -> Result<Self> {
+        Self::read_profile(bits, bands, frame_samples, common_window, false)
+    }
+    pub(crate) fn read_er_common(
+        bits: &mut BitReader<'_>, bands: (u8,u8), frame_samples: u16,
+    ) -> Result<Self> {
+        Self::read_profile(bits, bands, frame_samples, true, true)
+    }
+    fn read_profile(
+        bits: &mut BitReader<'_>, bands: (u8,u8), frame_samples: u16,
+        common_window: bool, er_common: bool,
     ) -> Result<Self> {
         use super::aac_synthesis::WindowShape;
         if !matches!(frame_samples, 960 | 1024) || bands.0 > 63 || bands.1 > 15 {
@@ -101,6 +114,7 @@ impl LtpIcsInfo {
         }
         let mut groups = vec![1];
         let mut channels = [None, None];
+        let mut predictor_present = false;
         if short {
             for _ in 0..7 {
                 if trial.bit()? {
@@ -110,7 +124,8 @@ impl LtpIcsInfo {
                 }
             }
         } else if trial.bit()? {
-            for channel in channels.iter_mut().take(if common_window { 2 } else { 1 }) {
+            predictor_present = true;
+            for channel in channels.iter_mut().take(if er_common { 0 } else if common_window { 2 } else { 1 }) {
                 if trial.bit()? {
                     *channel = Some(LtpData::read(&mut trial, sequence, max_sfb, frame_samples)?);
                 }
@@ -124,6 +139,6 @@ impl LtpIcsInfo {
             prediction: None,
         };
         *bits = trial;
-        Ok(Self { info, channels })
+        Ok(Self { info, channels, predictor_present })
     }
 }

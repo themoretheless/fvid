@@ -169,7 +169,7 @@ impl ChannelPair {
         };
         Ok((explicit_mask, mid_side))
     }
-    /// Parse ordinary AOT4 pairs with independent per-channel LTP data.
+    /// Parse AOT4/AOT19 pairs with independent per-channel LTP data.
     /// A failure in either stream restores the complete pair cursor.
     pub fn read_ltp(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<(Self, [Option<super::aac_ltp_syntax::LtpData>; 2])> {
         Self::read_ltp_with_right_span(bits, config).map(|(pair, prediction, _)| (pair, prediction))
@@ -180,16 +180,23 @@ impl ChannelPair {
         bits: &mut BitReader<'_>,
         config: &AacConfig,
     ) -> Result<(Self, [Option<super::aac_ltp_syntax::LtpData>; 2], std::ops::Range<usize>)> {
-        if config.object_type != 4 { return Err(invalid("AAC LTP pair requires AOT4")); }
+        if !matches!(config.object_type,4|19) { return Err(invalid("AAC LTP pair requires AOT4 or AOT19")); }
         let tables = BandTables::for_config(config)?;
         let mut cursor = bits.clone();
         let common = if cursor.bit()? {
-            Some(super::aac_ltp_syntax::LtpIcsInfo::read(&mut cursor,
-                ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8), config.frame_samples,true)?)
+            let bands = ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8);
+            Some(if config.object_type == 19 {
+                super::aac_ltp_syntax::LtpIcsInfo::read_er_common(&mut cursor,bands,config.frame_samples)?
+            } else {
+                super::aac_ltp_syntax::LtpIcsInfo::read(&mut cursor,bands,config.frame_samples,true)?
+            })
         } else { None };
         let (explicit_mask, mid_side) = Self::read_mask(&mut cursor, common.as_ref().map(|header| &header.info))?;
-        let (left, right, prediction, right_start) = if let Some(header) = common {
+        let (left, right, prediction, right_start) = if let Some(mut header) = common {
+            let deferred = config.object_type == 19 && header.predictor_present;
+            if deferred { header.channels[0] = Self::read_er_prediction(&mut cursor,&header.info,config)?; }
             let left = ChannelData::read_common(&mut cursor,config,Some(&header.info),true)?;
+            if deferred { header.channels[1] = Self::read_er_prediction(&mut cursor,&header.info,config)?; }
             let right_start = cursor.position();
             let right = ChannelData::read_common(&mut cursor,config,Some(&header.info),true)?;
             (left, right, header.channels, right_start)
@@ -202,6 +209,13 @@ impl ChannelPair {
         let right_span = right_start..cursor.position();
         *bits = cursor;
         Ok((Self { left,right,mid_side,explicit_mask },prediction,right_span))
+    }
+
+    fn read_er_prediction(bits: &mut BitReader<'_>, info: &super::aac_ics::IcsInfo, config: &AacConfig)
+        -> Result<Option<super::aac_ltp_syntax::LtpData>> {
+        if bits.bit()? {
+            Ok(Some(super::aac_ltp_syntax::LtpData::read(bits,info.sequence,info.max_sfb,config.frame_samples)?))
+        } else { Ok(None) }
     }
 
 }

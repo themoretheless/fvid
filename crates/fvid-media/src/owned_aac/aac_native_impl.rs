@@ -341,14 +341,14 @@ impl NativeAacDecoder {
         };
         // Clone initialized state so channels share immutable transforms/windows
         // while every channel retains independent overlap and scratch buffers.
-        let synthesis = if matches!(config.object_type,3|4) { Vec::new() } else { vec![
+        let synthesis = if matches!(config.object_type,3|4|19) { Vec::new() } else { vec![
             LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from)?;
             usize::from(config.channels)
         ] };
-        let ltp_synthesis = if config.object_type==4 {
+        let ltp_synthesis = if matches!(config.object_type,4|19) {
             vec![super::aac_ltp_channel::LtpChannel::new(config.frame_samples as usize)?; usize::from(config.channels)]
         } else { Vec::new() };
-        let ltp_coupling_synthesis = if config.object_type==4 {vec![None;16]} else {Vec::new()};
+        let ltp_coupling_synthesis = if matches!(config.object_type,4|19) {vec![None;16]} else {Vec::new()};
         let ssr_synthesis = if config.object_type == 3 { vec![super::aac_ssr_synthesis::SsrSynthesis::new()?; usize::from(config.channels)] } else { Vec::new() };
         // Four-bit CCE tags occupy a separate fixed domain after audio slots.
         let element_slots = usize::from(config.channels) + if program.is_some() { 16 } else { 0 };
@@ -510,7 +510,7 @@ impl NativeAacDecoder {
         let mut sbr_frames = vec![None; self.sbr_slots()];
         let mut previous_element = None;
         let mut channels = Vec::new();
-        let mut ltp_data=if self.config.object_type==4 {vec![None;usize::from(self.config.channels)]} else {Vec::new()};
+        let mut ltp_data=if matches!(self.config.object_type,4|19) {vec![None;usize::from(self.config.channels)]} else {Vec::new()};
         let mut decoded_elements = Vec::new();
         let mut couplings = Vec::new();
         let elements: &[u32] = match self.config.channel_configuration {
@@ -528,9 +528,9 @@ impl NativeAacDecoder {
         let mut element_index = 0;
         let mut tags = ElementTags::default();
         loop {
-            // ER-LC omits element IDs and END: the configured layout fixes
+            // ER AAC omits element IDs and END: the configured layout fixes
             // element kinds and count. Each element still carries four tag bits.
-            let er = self.config.object_type == 17;
+            let er = matches!(self.config.object_type,17|19);
             let element = if er {elements.get(element_index).copied().unwrap_or(7)} else {bits.read(3)?};
             let mut target_offset = channels.len();
             if matches!(element, 0 | 1 | 3) {
@@ -566,7 +566,7 @@ impl NativeAacDecoder {
             }
             match element {
                 0 | 3 => {
-                    let channel = if self.config.object_type==4 {
+                    let channel = if matches!(self.config.object_type,4|19) {
                         let (channel,data)=ChannelData::read_ltp(&mut bits,&self.config)?;
                         ltp_data[self.mapping[target_offset]]=data;channel
                     } else {ChannelData::read(&mut bits,&self.config)?};
@@ -577,7 +577,7 @@ impl NativeAacDecoder {
                     channels.push((channel, spectrum, self.mapping[target_offset]));
                 }
                 1 => {
-                    let pair = if self.config.object_type==4 {
+                    let pair = if matches!(self.config.object_type,4|19) {
                         let (pair,data)=ChannelPair::read_ltp(&mut bits,&self.config)?;
                         let [left,right]=data;
                         ltp_data[self.mapping[target_offset]]=left;
@@ -596,7 +596,7 @@ impl NativeAacDecoder {
                     channels.push((pair.right, right, self.mapping[target_offset + 1]));
                 }
                 2 => {
-                    let (coupling,prediction)=if self.config.object_type==4 {Coupling::read_ltp(&mut bits,&self.config)?} else {(Coupling::read(&mut bits,&self.config)?,None)};
+                    let (coupling,prediction)=if matches!(self.config.object_type,4|19) {Coupling::read_ltp(&mut bits,&self.config)?} else {(Coupling::read(&mut bits,&self.config)?,None)};
                     if current_program
                         .as_ref()
                         .is_none_or(|p| !p.coupling.contains(&(coupling.point == 3, coupling.tag)))
@@ -617,7 +617,7 @@ impl NativeAacDecoder {
                         }
                         coupling.channel.predict_main(&self.config, main_prediction[slot].as_mut().unwrap(), &mut spectrum)?;
                     }
-                    let spectrum = if self.config.object_type==4 {
+                    let spectrum = if matches!(self.config.object_type,4|19) {
                         let slot=&mut ltp_coupling_synthesis[usize::from(coupling.tag)];
                         if slot.is_none() {let mut fresh=self.ltp_synthesis[0].clone();fresh.reset();*slot=Some(fresh);}
                         let tables=BandTables::for_config(&self.config)?;
@@ -691,12 +691,12 @@ impl NativeAacDecoder {
             return Err(invalid("AAC block has no configured audio element"));
         }
         if bits.remaining() > 7 {
-            return Err(invalid(if self.config.object_type == 17 {"trailing bytes after ER AAC block"} else {"trailing bytes after AAC END"}));
+            return Err(invalid(if matches!(self.config.object_type,17|19) {"trailing bytes after ER AAC block"} else {"trailing bytes after AAC END"}));
         }
         for point in [0, 1] {
             if point == 1 {
                 for (channel, spectrum, target) in &mut channels {
-                    if self.config.object_type==4 {
+                    if matches!(self.config.object_type,4|19) {
                         let tables=BandTables::for_config(&self.config)?;
                         let short=channel.info.sequence==super::aac_synthesis::WindowSequence::EightShort;
                         let offsets=if short {tables.short}else{tables.long};
@@ -920,7 +920,7 @@ impl NativeAacDecoder {
             let mut output = vec![0.0; n * channels.len()];
             let mut pcm = vec![0.0; n];
             for (channel, spectrum, target) in &channels {
-                if self.config.object_type==4 {
+                if matches!(self.config.object_type,4|19) {
                     pcm=self.ltp_synthesis[*target].synthesize_spectrum(spectrum,channel.info.sequence,channel.info.shape)?;
                 } else {
                     self.synthesis[*target].synthesize_pcm(
@@ -966,7 +966,7 @@ impl NativeAacDecoder {
                 if coupling.point != 3 {
                     continue;
                 }
-                if self.config.object_type==4 {
+                if matches!(self.config.object_type,4|19) {
                     pcm=ltp_coupling_synthesis[usize::from(coupling.tag)].as_mut().ok_or_else(||invalid("AAC LTP coupling state missing"))?.synthesize_spectrum(&spectrum,coupling.channel.info.sequence,coupling.channel.info.shape)?;
                 } else {
                     let state = &mut self.coupling_synthesis[coupling.tag as usize];
