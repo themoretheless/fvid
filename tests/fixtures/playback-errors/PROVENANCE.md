@@ -5876,3 +5876,15 @@ above/below P. Two PCM references, three switching pictures and a retained P
 picture exercise the cases documented in CODEC_PROGRESS. No private media,
 frames, audio or codec parameter sets, external codec, FFmpeg or network are
 used. Generation is separate from ordinary automated acceptance tests.
+
+
+## Complementary mixed switching/B fields (2026-10-11)
+
+`generate_avc_mixed_si_b_field_fixtures.py` owns all 1296
+`avc-mixed-si-b-field-*` streams and scalar YUV references. Each has original
+PCM fields, mixed SI/primary-SP/secondary-SP and B-L0/L1/Bi fields, then retained
+P fields. Shared owned writers and scalar transform/filter/interpolation
+helpers generate these offline; no private videos, frames, audio or codec
+parameter sets are used. Opposite-parity chroma MV adjustment is included in
+L1/Bi expected pixels. Exact-pixel/reset and software seek/rewind acceptance
+is `tests/avc_mixed_si_b_fields.rs`; fixture generation remains separate.

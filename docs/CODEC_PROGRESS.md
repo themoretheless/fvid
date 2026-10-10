@@ -11410,3 +11410,38 @@ mixed inter motion/residual/profile combinations remain outside this matrix.
 After acceptance, both generator modes were rerun sequentially: all 4609
 reproducer/stream/reference artifacts matched their pre-regeneration SHA-256
 hashes. All generator observability and equivalence controls passed.
+
+
+### Complementary mixed SI/SP and B fields (2026-10-11)
+
+An original 32x32 PCM-pair / mixed SI+B-L0 pair / retained P-pair stream
+reproduced `AVC P field slice identity mismatch` at packet 2. Mixed CAVLC field
+identity validation admitted SI/SP with P but excluded B. It now admits the
+owned B reader alongside SI/SP, retaining per-slice reference and entropy
+syntax. CABAC SI is still rejected, and identity checks remain intact.
+
+`generate_avc_mixed_si_b_field_fixtures.py` and
+`avc_mixed_si_b_fields.rs` qualify 1296 original streams: SI, primary SP or
+secondary SP beside explicit B-L0/L1/Bi 16x16 with zero motion/no B residual;
+both parity arrival orders and switching-MB positions, normal/ASO slice
+arrival, zero/signed switching residual, QS0/26/51 and filter modes0/1/2.
+Independent scalar prediction follows the same-parity L0 and swapped L1
+field list initialization. L1 uses the opposite-parity PCM reference for the
+first field and the retained mixed field for the second, with +/-2 chroma MV
+parity adjustment before interpolation. Bi averages the two predictions.
+
+The initial expanded oracle omitted the parity adjustment; acceptance caught
+its Cb mismatch and the scalar oracle was corrected. Final exact YUV after
+reset and software playback/seek/rewind pass every stream. ASO equality,
+observable external filtering, and distinct L1/Bi vs L0 pixels are asserted by
+the generator. All 204 AVC unit tests pass using the standalone fvid-codecs
+manifest; a zero-test root filter run is not counted as evidence.
+
+This covers Extended-profile eight-bit 4:2:0 CAVLC complementary fields with
+explicit zero-motion B partitions. Direct/skip, nonzero B motion/residual,
+weighted prediction, arbitrary FMO/profile combinations and full codec
+conformance are not established by this matrix. Tests do not generate files
+or require FFmpeg, an external codec or network access.
+
+After acceptance all2593 new fixtures, references and manifest regenerated
+byte-identically against captured SHA-256 hashes; generator controls passed.

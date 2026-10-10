@@ -609,8 +609,8 @@ pub(super) fn decode_inter_field_impl(
         let ordinary_mixed = matches!(current.slice_type, SliceType::I | SliceType::P | SliceType::B)
             && matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B);
         let switching_mixed = !pps.cabac
-            && matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
-            && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp);
+            && matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
+            && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B);
         if !current.field_pic
             // Each slice keeps its own entropy syntax and active reference lists.
             || current.slice_type != h.slice_type && !(ordinary_mixed || switching_mixed)
