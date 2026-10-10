@@ -107,7 +107,7 @@ impl<'a> IntraCavlcReader<'a> {
     ) -> Result<Self> {
         if !matches!(
             header.slice_type,
-            SliceType::I | SliceType::P | SliceType::B
+            SliceType::I | SliceType::P | SliceType::Sp | SliceType::B
         ) || header.field_pic
             || sps.frame_mbs_only
             || !sps.mb_adaptive_frame_field

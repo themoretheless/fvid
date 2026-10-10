@@ -293,7 +293,7 @@ fn decode_optional_slices_impl(
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
         || headers.iter().any(|h| {
-            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)
+            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
@@ -487,7 +487,7 @@ fn decode_optional_slices_impl(
                 deblocking[address] = edge_state(
                     [BlockEdge {
                         intra: true,
-                        switching_slice: false,
+                        switching_slice: header.slice_type == SliceType::Sp,
                         nonzero_luma: false,
                         motion: [None; 2],
                     }; 16],
@@ -598,7 +598,7 @@ fn decode_optional_slices_impl(
             ];
             let mut blocks = [BlockEdge {
                 intra: false,
-                switching_slice: false,
+                switching_slice: header.slice_type == SliceType::Sp,
                 nonzero_luma: false,
                 motion: [None; 2],
             }; 16];
@@ -656,12 +656,33 @@ fn decode_optional_slices_impl(
                 slice as u32,
                 header,
             );
+            // SP quantizes the prediction even when CBP is zero or the MB is
+            // skipped. Finish switching reconstruction before publishing samples.
+            let switching = header.slice_type == SliceType::Sp;
+            let prediction = if switching {
+                let qs = header.slice_qs.ok_or_else(|| invalid("missing MBAFF SP QS"))?;
+                let zero_luma = [[0; 16]; 16];
+                let zero_dc = [[0; 4]; 2];
+                let zero_ac = [[[0; 16]; 4]; 2];
+                prediction.reconstruct_sp(
+                    coefficients.as_deref().map_or(&zero_luma, |c| &c.luma4),
+                    coefficients.as_deref().map_or(&zero_dc, |c| &c.chroma_dc),
+                    coefficients.as_deref().map_or(&zero_ac, |c| &c.chroma_ac),
+                    qps,
+                    [qs as u8,
+                        super::avc_picture::chroma_qp(qs, pps.chroma_qp_offset, 8),
+                        super::avc_picture::chroma_qp(qs, pps.second_chroma_qp_offset, 8)],
+                    header.sp_for_switch,
+                )?
+            } else {
+                prediction
+            };
             reconstruct_inter_macroblock_ready(
                 &mut picture,
                 address,
                 field,
                 prediction,
-                coefficients.as_deref(),
+                if switching { None } else { coefficients.as_deref() },
                 eight,
                 qps,
                 sps.transform_bypass && qps[0] == 0,

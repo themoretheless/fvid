@@ -3,6 +3,7 @@ use serde_json::Value;
 fn manifest() -> Value {
     let mut base: Value = serde_json::from_slice(&fixture("avc-switching-fields.json")).unwrap();
     for name in [
+        "avc-switching-mbaff.json",
         "avc-mixed-pb-fields.json",
         "avc-switching-field-motion.json",
         "avc-switching-field-filter.json",
@@ -50,7 +51,12 @@ fn complementary_sp_si_fields_match_normative_pixels_and_reset() {
                 let picture = d
                     .decode(&hex(p.as_str().unwrap()))
                     .unwrap_or_else(|e| panic!("{} packet{i}: {e}", c["file"]));
-                assert_eq!(picture.is_some(), i % 2 == 1, "{} packet{i}", c["file"]);
+                assert_eq!(
+                    picture.is_some(),
+                    c["frame_picture"].as_bool().unwrap_or(false) || i % 2 == 1,
+                    "{} packet{i}",
+                    c["file"]
+                );
                 if let Some(picture) = picture {
                     assert_eq!(
                         picture.dimensions(),

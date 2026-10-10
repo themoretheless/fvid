@@ -19,7 +19,7 @@ pub fn mbaff_weights(
     use super::avc_slice::SliceType;
     if motion.is_empty()
         || motion.len() > 16
-        || !matches!(header.slice_type, SliceType::P | SliceType::B)
+        || !matches!(header.slice_type, SliceType::P | SliceType::Sp | SliceType::B)
         || pps.weighted_bipred > 2
     {
         return Err(invalid("invalid MBAFF weight inputs"));

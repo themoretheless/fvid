@@ -648,11 +648,16 @@ impl AvcDecoder {
             return Err(crate::unsupported("AVC picture type is not implemented"));
         }
         if slices.iter().any(|slice| matches!(slice.header.slice_type, SliceType::Sp | SliceType::Si))
-            && (sps.mb_adaptive_frame_field && !header.field_pic || sps.chroma_format != 1 || sps.separate_colour_plane
+            && (sps.chroma_format != 1 || sps.separate_colour_plane
                 || sps.bit_depth_luma != 8 || sps.bit_depth_chroma != 8 || pps.cabac
                 || sps.profile != 88 || pps.transform_8x8 || sps.transform_bypass)
         {
-            return Err(crate::unsupported("AVC SP/SI requires non-MBAFF eight-bit 4:2:0 CAVLC"));
+            return Err(crate::unsupported("AVC SP/SI requires eight-bit Extended-profile 4:2:0 CAVLC"));
+        }
+        if sps.mb_adaptive_frame_field && !header.field_pic
+            && slices.iter().any(|slice| slice.header.slice_type == SliceType::Si)
+        {
+            return Err(crate::unsupported("AVC MBAFF SI reconstruction is not implemented"));
         }
         if !header.idr
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))

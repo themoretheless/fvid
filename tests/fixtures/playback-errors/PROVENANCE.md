@@ -5639,3 +5639,35 @@ previous artifacts regenerated unchanged across I/B, CABAC I/B, CABAC I/P and
 switching-field filter families, confirming helper defaults remained compatible.
 Ordinary tests stayed locked, offline and free of FFmpeg/JM execution. The valid
 pre-fix packet2 refusal is now an enabled acceptance case.
+
+## MBAFF primary and secondary SP frames
+
+`generate_avc_switching_mbaff_fixtures.py` writes128 original32x32 Extended-profile
+streams: PCM IDR followed by SP pictures at QS0/26/51. Pair layouts are frame,
+field and both mixed orientations; each pair is a separate slice, also delivered
+in reversed order. Primary/secondary SP uses zero or signed luma DC coefficients.
+Each topology exercises coded pairs, skipped top, skipped bottom and whole skipped
+pairs. Independent whole skipped pairs infer frame mode, including transitions
+from field-coded references. Both reference parity and address-local publication
+are therefore observable. The scalar oracle extracts each logical macroblock,
+performs normative luma/chroma switching transforms and scatters into frame or
+alternating field rows. MP4 samples, parameter sets and pixels are original.
+The optional explicit local JM check accepted all128 streams and matched every
+luma byte; switching chroma remains checked against the independent normative
+scalar oracle because of the already documented JM chroma discrepancies.
+Default generation and ordinary tests invoke no FFmpeg, JM or network.
+
+The first valid stream reproduced `AVC SP/SI requires non-MBAFF eight-bit 4:2:0
+CAVLC` at packet1 before the fix, after its PCM picture decoded successfully.
+Enabling SP exposed a second barrier, `invalid MBAFF weight inputs`; SP now uses
+the same reference-weight plumbing as P. Switching transforms run before sample
+publication, including skip and CBP0, and SP slice identity reaches the existing
+MBAFF deblocking metadata. This fixture family disables filtering: it does not
+qualify MBAFF switching filter pixels, signed chroma residual, nonzero motion,
+explicit weights, FMO or embedded intra. MBAFF SI still explicitly refuses until
+its constrained-intra switching-neighbor readiness labels are preserved.
+
+Validation:201 AVC unit tests, both exact-YUV/reset and software playback/seek/
+rewind integration tests across8476 streams (8348 older +128 MBAFF SP), and all29
+existing MBAFF regression tests passed. All257 new fixture artifacts regenerated
+byte-identically. Local JM luma verification was explicit and separate from tests.
