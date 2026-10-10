@@ -1,0 +1,3725 @@
+{
+  "cases": [
+    {
+      "name": "4-960-mono",
+      "aot": 4,
+      "n": 960,
+      "channels": 1,
+      "asc": "230c",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 9,
+          "reference_offset": 0
+        },
+        {
+          "offset": 18,
+          "bytes": 11,
+          "reference_offset": 3840
+        },
+        {
+          "offset": 40,
+          "bytes": 11,
+          "reference_offset": 7680
+        },
+        {
+          "offset": 62,
+          "bytes": 11,
+          "reference_offset": 11520
+        },
+        {
+          "offset": 84,
+          "bytes": 11,
+          "reference_offset": 15360
+        },
+        {
+          "offset": 106,
+          "bytes": 11,
+          "reference_offset": 19200
+        },
+        {
+          "offset": 128,
+          "bytes": 11,
+          "reference_offset": 23040
+        },
+        {
+          "offset": 150,
+          "bytes": 11,
+          "reference_offset": 26880
+        },
+        {
+          "offset": 172,
+          "bytes": 11,
+          "reference_offset": 30720
+        },
+        {
+          "offset": 194,
+          "bytes": 11,
+          "reference_offset": 34560
+        },
+        {
+          "offset": 216,
+          "bytes": 11,
+          "reference_offset": 38400
+        },
+        {
+          "offset": 238,
+          "bytes": 11,
+          "reference_offset": 42240
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 9,
+          "bytes": 9,
+          "reference_offset": 0
+        },
+        {
+          "offset": 29,
+          "bytes": 11,
+          "reference_offset": 3840
+        },
+        {
+          "offset": 51,
+          "bytes": 11,
+          "reference_offset": 7680
+        },
+        {
+          "offset": 73,
+          "bytes": 11,
+          "reference_offset": 11520
+        },
+        {
+          "offset": 95,
+          "bytes": 11,
+          "reference_offset": 15360
+        },
+        {
+          "offset": 117,
+          "bytes": 11,
+          "reference_offset": 19200
+        },
+        {
+          "offset": 139,
+          "bytes": 11,
+          "reference_offset": 23040
+        },
+        {
+          "offset": 161,
+          "bytes": 11,
+          "reference_offset": 26880
+        },
+        {
+          "offset": 183,
+          "bytes": 11,
+          "reference_offset": 30720
+        },
+        {
+          "offset": 205,
+          "bytes": 11,
+          "reference_offset": 34560
+        },
+        {
+          "offset": 227,
+          "bytes": 11,
+          "reference_offset": 38400
+        },
+        {
+          "offset": 249,
+          "bytes": 11,
+          "reference_offset": 42240
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-960-mono-synthetic.mp4",
+        "sha256": "a95fadc3feedb3e5eede39db1b3f242c23bfb5b8f22e6a6d0a0439274ef742ab",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "230c",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-960-mono-control-synthetic.mp4",
+        "sha256": "0f8ea83e9e23a902352195a67e09590c6088a10db91d2fc8d428ca69915edea1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "230c",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "4-960-independent-right",
+      "aot": 4,
+      "n": 960,
+      "channels": 2,
+      "asc": "2314",
+      "frames": [
+        {
+          "offset": 260,
+          "bytes": 16,
+          "reference_offset": 46080
+        },
+        {
+          "offset": 292,
+          "bytes": 21,
+          "reference_offset": 53760
+        },
+        {
+          "offset": 334,
+          "bytes": 21,
+          "reference_offset": 61440
+        },
+        {
+          "offset": 376,
+          "bytes": 20,
+          "reference_offset": 69120
+        },
+        {
+          "offset": 416,
+          "bytes": 21,
+          "reference_offset": 76800
+        },
+        {
+          "offset": 458,
+          "bytes": 21,
+          "reference_offset": 84480
+        },
+        {
+          "offset": 500,
+          "bytes": 20,
+          "reference_offset": 92160
+        },
+        {
+          "offset": 540,
+          "bytes": 21,
+          "reference_offset": 99840
+        },
+        {
+          "offset": 582,
+          "bytes": 21,
+          "reference_offset": 107520
+        },
+        {
+          "offset": 624,
+          "bytes": 21,
+          "reference_offset": 115200
+        },
+        {
+          "offset": 666,
+          "bytes": 21,
+          "reference_offset": 122880
+        },
+        {
+          "offset": 708,
+          "bytes": 21,
+          "reference_offset": 130560
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 276,
+          "bytes": 16,
+          "reference_offset": 46080
+        },
+        {
+          "offset": 313,
+          "bytes": 21,
+          "reference_offset": 53760
+        },
+        {
+          "offset": 355,
+          "bytes": 21,
+          "reference_offset": 61440
+        },
+        {
+          "offset": 396,
+          "bytes": 20,
+          "reference_offset": 69120
+        },
+        {
+          "offset": 437,
+          "bytes": 21,
+          "reference_offset": 76800
+        },
+        {
+          "offset": 479,
+          "bytes": 21,
+          "reference_offset": 84480
+        },
+        {
+          "offset": 520,
+          "bytes": 20,
+          "reference_offset": 92160
+        },
+        {
+          "offset": 561,
+          "bytes": 21,
+          "reference_offset": 99840
+        },
+        {
+          "offset": 603,
+          "bytes": 21,
+          "reference_offset": 107520
+        },
+        {
+          "offset": 645,
+          "bytes": 21,
+          "reference_offset": 115200
+        },
+        {
+          "offset": 687,
+          "bytes": 21,
+          "reference_offset": 122880
+        },
+        {
+          "offset": 729,
+          "bytes": 21,
+          "reference_offset": 130560
+        }
+      ],
+      "reference_offset": 46080,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-960-independent-right-synthetic.mp4",
+        "sha256": "1f108209037d5e2a83feea8fb822f5760c614a7559ff388114145fcbad69364f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2314",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-960-independent-right-control-synthetic.mp4",
+        "sha256": "7f45a37d1059323728c00d8109dac613ecb31d081f90a86cad0dc6a017590ae2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2314",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "4-960-correlated",
+      "aot": 4,
+      "n": 960,
+      "channels": 2,
+      "asc": "2314",
+      "frames": [
+        {
+          "offset": 750,
+          "bytes": 15,
+          "reference_offset": 138240
+        },
+        {
+          "offset": 780,
+          "bytes": 20,
+          "reference_offset": 145920
+        },
+        {
+          "offset": 820,
+          "bytes": 20,
+          "reference_offset": 153600
+        },
+        {
+          "offset": 860,
+          "bytes": 20,
+          "reference_offset": 161280
+        },
+        {
+          "offset": 900,
+          "bytes": 20,
+          "reference_offset": 168960
+        },
+        {
+          "offset": 940,
+          "bytes": 20,
+          "reference_offset": 176640
+        },
+        {
+          "offset": 980,
+          "bytes": 20,
+          "reference_offset": 184320
+        },
+        {
+          "offset": 1020,
+          "bytes": 20,
+          "reference_offset": 192000
+        },
+        {
+          "offset": 1060,
+          "bytes": 20,
+          "reference_offset": 199680
+        },
+        {
+          "offset": 1100,
+          "bytes": 20,
+          "reference_offset": 207360
+        },
+        {
+          "offset": 1140,
+          "bytes": 20,
+          "reference_offset": 215040
+        },
+        {
+          "offset": 1180,
+          "bytes": 20,
+          "reference_offset": 222720
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 765,
+          "bytes": 15,
+          "reference_offset": 138240
+        },
+        {
+          "offset": 800,
+          "bytes": 20,
+          "reference_offset": 145920
+        },
+        {
+          "offset": 840,
+          "bytes": 20,
+          "reference_offset": 153600
+        },
+        {
+          "offset": 880,
+          "bytes": 20,
+          "reference_offset": 161280
+        },
+        {
+          "offset": 920,
+          "bytes": 20,
+          "reference_offset": 168960
+        },
+        {
+          "offset": 960,
+          "bytes": 20,
+          "reference_offset": 176640
+        },
+        {
+          "offset": 1000,
+          "bytes": 20,
+          "reference_offset": 184320
+        },
+        {
+          "offset": 1040,
+          "bytes": 20,
+          "reference_offset": 192000
+        },
+        {
+          "offset": 1080,
+          "bytes": 20,
+          "reference_offset": 199680
+        },
+        {
+          "offset": 1120,
+          "bytes": 20,
+          "reference_offset": 207360
+        },
+        {
+          "offset": 1160,
+          "bytes": 20,
+          "reference_offset": 215040
+        },
+        {
+          "offset": 1200,
+          "bytes": 20,
+          "reference_offset": 222720
+        }
+      ],
+      "reference_offset": 138240,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-960-correlated-synthetic.mp4",
+        "sha256": "6c70819db1c7e8f62cbedf6aba93ea998e750f94e6b836757f11807d66065641",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2314",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-960-correlated-control-synthetic.mp4",
+        "sha256": "d0108684f76fdbf883ed1ada71b10fb72a74aba8c6538115562623c5bf906a4b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2314",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "4-960-uncorrelated",
+      "aot": 4,
+      "n": 960,
+      "channels": 2,
+      "asc": "2314",
+      "frames": [
+        {
+          "offset": 1220,
+          "bytes": 15,
+          "reference_offset": 230400
+        },
+        {
+          "offset": 1250,
+          "bytes": 20,
+          "reference_offset": 238080
+        },
+        {
+          "offset": 1290,
+          "bytes": 20,
+          "reference_offset": 245760
+        },
+        {
+          "offset": 1330,
+          "bytes": 19,
+          "reference_offset": 253440
+        },
+        {
+          "offset": 1368,
+          "bytes": 19,
+          "reference_offset": 261120
+        },
+        {
+          "offset": 1406,
+          "bytes": 20,
+          "reference_offset": 268800
+        },
+        {
+          "offset": 1446,
+          "bytes": 19,
+          "reference_offset": 276480
+        },
+        {
+          "offset": 1484,
+          "bytes": 19,
+          "reference_offset": 284160
+        },
+        {
+          "offset": 1522,
+          "bytes": 20,
+          "reference_offset": 291840
+        },
+        {
+          "offset": 1562,
+          "bytes": 19,
+          "reference_offset": 299520
+        },
+        {
+          "offset": 1600,
+          "bytes": 20,
+          "reference_offset": 307200
+        },
+        {
+          "offset": 1640,
+          "bytes": 20,
+          "reference_offset": 314880
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 1235,
+          "bytes": 15,
+          "reference_offset": 230400
+        },
+        {
+          "offset": 1270,
+          "bytes": 20,
+          "reference_offset": 238080
+        },
+        {
+          "offset": 1310,
+          "bytes": 20,
+          "reference_offset": 245760
+        },
+        {
+          "offset": 1349,
+          "bytes": 19,
+          "reference_offset": 253440
+        },
+        {
+          "offset": 1387,
+          "bytes": 19,
+          "reference_offset": 261120
+        },
+        {
+          "offset": 1426,
+          "bytes": 20,
+          "reference_offset": 268800
+        },
+        {
+          "offset": 1465,
+          "bytes": 19,
+          "reference_offset": 276480
+        },
+        {
+          "offset": 1503,
+          "bytes": 19,
+          "reference_offset": 284160
+        },
+        {
+          "offset": 1542,
+          "bytes": 20,
+          "reference_offset": 291840
+        },
+        {
+          "offset": 1581,
+          "bytes": 19,
+          "reference_offset": 299520
+        },
+        {
+          "offset": 1620,
+          "bytes": 20,
+          "reference_offset": 307200
+        },
+        {
+          "offset": 1660,
+          "bytes": 20,
+          "reference_offset": 314880
+        }
+      ],
+      "reference_offset": 230400,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-960-uncorrelated-synthetic.mp4",
+        "sha256": "791cb726c37b4485e76c3fcc636e351e34a456b441a88d5e323b596410a26447",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2314",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-960-uncorrelated-control-synthetic.mp4",
+        "sha256": "f0975ecf35a4019ab6911b649658b6bcd6b4221eb5b708ab6fe81d789e3f8bdc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2314",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "4-1024-mono",
+      "aot": 4,
+      "n": 1024,
+      "channels": 1,
+      "asc": "2308",
+      "frames": [
+        {
+          "offset": 1680,
+          "bytes": 9,
+          "reference_offset": 322560
+        },
+        {
+          "offset": 1698,
+          "bytes": 11,
+          "reference_offset": 326656
+        },
+        {
+          "offset": 1720,
+          "bytes": 11,
+          "reference_offset": 330752
+        },
+        {
+          "offset": 1742,
+          "bytes": 11,
+          "reference_offset": 334848
+        },
+        {
+          "offset": 1764,
+          "bytes": 11,
+          "reference_offset": 338944
+        },
+        {
+          "offset": 1786,
+          "bytes": 11,
+          "reference_offset": 343040
+        },
+        {
+          "offset": 1808,
+          "bytes": 11,
+          "reference_offset": 347136
+        },
+        {
+          "offset": 1830,
+          "bytes": 11,
+          "reference_offset": 351232
+        },
+        {
+          "offset": 1852,
+          "bytes": 11,
+          "reference_offset": 355328
+        },
+        {
+          "offset": 1874,
+          "bytes": 11,
+          "reference_offset": 359424
+        },
+        {
+          "offset": 1896,
+          "bytes": 11,
+          "reference_offset": 363520
+        },
+        {
+          "offset": 1918,
+          "bytes": 11,
+          "reference_offset": 367616
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 1689,
+          "bytes": 9,
+          "reference_offset": 322560
+        },
+        {
+          "offset": 1709,
+          "bytes": 11,
+          "reference_offset": 326656
+        },
+        {
+          "offset": 1731,
+          "bytes": 11,
+          "reference_offset": 330752
+        },
+        {
+          "offset": 1753,
+          "bytes": 11,
+          "reference_offset": 334848
+        },
+        {
+          "offset": 1775,
+          "bytes": 11,
+          "reference_offset": 338944
+        },
+        {
+          "offset": 1797,
+          "bytes": 11,
+          "reference_offset": 343040
+        },
+        {
+          "offset": 1819,
+          "bytes": 11,
+          "reference_offset": 347136
+        },
+        {
+          "offset": 1841,
+          "bytes": 11,
+          "reference_offset": 351232
+        },
+        {
+          "offset": 1863,
+          "bytes": 11,
+          "reference_offset": 355328
+        },
+        {
+          "offset": 1885,
+          "bytes": 11,
+          "reference_offset": 359424
+        },
+        {
+          "offset": 1907,
+          "bytes": 11,
+          "reference_offset": 363520
+        },
+        {
+          "offset": 1929,
+          "bytes": 11,
+          "reference_offset": 367616
+        }
+      ],
+      "reference_offset": 322560,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-1024-mono-synthetic.mp4",
+        "sha256": "a86a89ea4eea50d339aa7f33d129fe04bd90b1b9abb9803ae439272d5381e54e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2308",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-1024-mono-control-synthetic.mp4",
+        "sha256": "3069405150bf476e03145d592842cfd43caf7e65d682400ebc2ffd763f32a877",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2308",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "4-1024-independent-right",
+      "aot": 4,
+      "n": 1024,
+      "channels": 2,
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 1940,
+          "bytes": 16,
+          "reference_offset": 371712
+        },
+        {
+          "offset": 1972,
+          "bytes": 21,
+          "reference_offset": 379904
+        },
+        {
+          "offset": 2014,
+          "bytes": 21,
+          "reference_offset": 388096
+        },
+        {
+          "offset": 2056,
+          "bytes": 20,
+          "reference_offset": 396288
+        },
+        {
+          "offset": 2096,
+          "bytes": 21,
+          "reference_offset": 404480
+        },
+        {
+          "offset": 2138,
+          "bytes": 21,
+          "reference_offset": 412672
+        },
+        {
+          "offset": 2180,
+          "bytes": 20,
+          "reference_offset": 420864
+        },
+        {
+          "offset": 2220,
+          "bytes": 21,
+          "reference_offset": 429056
+        },
+        {
+          "offset": 2262,
+          "bytes": 21,
+          "reference_offset": 437248
+        },
+        {
+          "offset": 2304,
+          "bytes": 21,
+          "reference_offset": 445440
+        },
+        {
+          "offset": 2346,
+          "bytes": 21,
+          "reference_offset": 453632
+        },
+        {
+          "offset": 2388,
+          "bytes": 21,
+          "reference_offset": 461824
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 1956,
+          "bytes": 16,
+          "reference_offset": 371712
+        },
+        {
+          "offset": 1993,
+          "bytes": 21,
+          "reference_offset": 379904
+        },
+        {
+          "offset": 2035,
+          "bytes": 21,
+          "reference_offset": 388096
+        },
+        {
+          "offset": 2076,
+          "bytes": 20,
+          "reference_offset": 396288
+        },
+        {
+          "offset": 2117,
+          "bytes": 21,
+          "reference_offset": 404480
+        },
+        {
+          "offset": 2159,
+          "bytes": 21,
+          "reference_offset": 412672
+        },
+        {
+          "offset": 2200,
+          "bytes": 20,
+          "reference_offset": 420864
+        },
+        {
+          "offset": 2241,
+          "bytes": 21,
+          "reference_offset": 429056
+        },
+        {
+          "offset": 2283,
+          "bytes": 21,
+          "reference_offset": 437248
+        },
+        {
+          "offset": 2325,
+          "bytes": 21,
+          "reference_offset": 445440
+        },
+        {
+          "offset": 2367,
+          "bytes": 21,
+          "reference_offset": 453632
+        },
+        {
+          "offset": 2409,
+          "bytes": 21,
+          "reference_offset": 461824
+        }
+      ],
+      "reference_offset": 371712,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-1024-independent-right-synthetic.mp4",
+        "sha256": "84fa7c31cc8586bc9b61c88afcbb176fb7fef6e601c99f6bebc67bfbc4b4d8e4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-1024-independent-right-control-synthetic.mp4",
+        "sha256": "6e8c67a5383a7ec54672b0c6fead60441af8e4dad9bc84279113100de60e7217",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "4-1024-correlated",
+      "aot": 4,
+      "n": 1024,
+      "channels": 2,
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 2430,
+          "bytes": 15,
+          "reference_offset": 470016
+        },
+        {
+          "offset": 2460,
+          "bytes": 20,
+          "reference_offset": 478208
+        },
+        {
+          "offset": 2500,
+          "bytes": 20,
+          "reference_offset": 486400
+        },
+        {
+          "offset": 2540,
+          "bytes": 20,
+          "reference_offset": 494592
+        },
+        {
+          "offset": 2580,
+          "bytes": 20,
+          "reference_offset": 502784
+        },
+        {
+          "offset": 2620,
+          "bytes": 20,
+          "reference_offset": 510976
+        },
+        {
+          "offset": 2660,
+          "bytes": 20,
+          "reference_offset": 519168
+        },
+        {
+          "offset": 2700,
+          "bytes": 20,
+          "reference_offset": 527360
+        },
+        {
+          "offset": 2740,
+          "bytes": 20,
+          "reference_offset": 535552
+        },
+        {
+          "offset": 2780,
+          "bytes": 20,
+          "reference_offset": 543744
+        },
+        {
+          "offset": 2820,
+          "bytes": 20,
+          "reference_offset": 551936
+        },
+        {
+          "offset": 2860,
+          "bytes": 20,
+          "reference_offset": 560128
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 2445,
+          "bytes": 15,
+          "reference_offset": 470016
+        },
+        {
+          "offset": 2480,
+          "bytes": 20,
+          "reference_offset": 478208
+        },
+        {
+          "offset": 2520,
+          "bytes": 20,
+          "reference_offset": 486400
+        },
+        {
+          "offset": 2560,
+          "bytes": 20,
+          "reference_offset": 494592
+        },
+        {
+          "offset": 2600,
+          "bytes": 20,
+          "reference_offset": 502784
+        },
+        {
+          "offset": 2640,
+          "bytes": 20,
+          "reference_offset": 510976
+        },
+        {
+          "offset": 2680,
+          "bytes": 20,
+          "reference_offset": 519168
+        },
+        {
+          "offset": 2720,
+          "bytes": 20,
+          "reference_offset": 527360
+        },
+        {
+          "offset": 2760,
+          "bytes": 20,
+          "reference_offset": 535552
+        },
+        {
+          "offset": 2800,
+          "bytes": 20,
+          "reference_offset": 543744
+        },
+        {
+          "offset": 2840,
+          "bytes": 20,
+          "reference_offset": 551936
+        },
+        {
+          "offset": 2880,
+          "bytes": 20,
+          "reference_offset": 560128
+        }
+      ],
+      "reference_offset": 470016,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-1024-correlated-synthetic.mp4",
+        "sha256": "c9ba1eba1fde53cd9736444b767a03c4c886ae4d6b832f4cb41d57badd551b31",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-1024-correlated-control-synthetic.mp4",
+        "sha256": "dbc968bf37946db905536bea42d8ce138e5cf85ef4370057cb83def946ff3de1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "4-1024-uncorrelated",
+      "aot": 4,
+      "n": 1024,
+      "channels": 2,
+      "asc": "2310",
+      "frames": [
+        {
+          "offset": 2900,
+          "bytes": 15,
+          "reference_offset": 568320
+        },
+        {
+          "offset": 2930,
+          "bytes": 20,
+          "reference_offset": 576512
+        },
+        {
+          "offset": 2970,
+          "bytes": 20,
+          "reference_offset": 584704
+        },
+        {
+          "offset": 3010,
+          "bytes": 19,
+          "reference_offset": 592896
+        },
+        {
+          "offset": 3048,
+          "bytes": 19,
+          "reference_offset": 601088
+        },
+        {
+          "offset": 3086,
+          "bytes": 20,
+          "reference_offset": 609280
+        },
+        {
+          "offset": 3126,
+          "bytes": 19,
+          "reference_offset": 617472
+        },
+        {
+          "offset": 3164,
+          "bytes": 19,
+          "reference_offset": 625664
+        },
+        {
+          "offset": 3202,
+          "bytes": 20,
+          "reference_offset": 633856
+        },
+        {
+          "offset": 3242,
+          "bytes": 19,
+          "reference_offset": 642048
+        },
+        {
+          "offset": 3280,
+          "bytes": 20,
+          "reference_offset": 650240
+        },
+        {
+          "offset": 3320,
+          "bytes": 20,
+          "reference_offset": 658432
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 2915,
+          "bytes": 15,
+          "reference_offset": 568320
+        },
+        {
+          "offset": 2950,
+          "bytes": 20,
+          "reference_offset": 576512
+        },
+        {
+          "offset": 2990,
+          "bytes": 20,
+          "reference_offset": 584704
+        },
+        {
+          "offset": 3029,
+          "bytes": 19,
+          "reference_offset": 592896
+        },
+        {
+          "offset": 3067,
+          "bytes": 19,
+          "reference_offset": 601088
+        },
+        {
+          "offset": 3106,
+          "bytes": 20,
+          "reference_offset": 609280
+        },
+        {
+          "offset": 3145,
+          "bytes": 19,
+          "reference_offset": 617472
+        },
+        {
+          "offset": 3183,
+          "bytes": 19,
+          "reference_offset": 625664
+        },
+        {
+          "offset": 3222,
+          "bytes": 20,
+          "reference_offset": 633856
+        },
+        {
+          "offset": 3261,
+          "bytes": 19,
+          "reference_offset": 642048
+        },
+        {
+          "offset": 3300,
+          "bytes": 20,
+          "reference_offset": 650240
+        },
+        {
+          "offset": 3340,
+          "bytes": 20,
+          "reference_offset": 658432
+        }
+      ],
+      "reference_offset": 568320,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-4-1024-uncorrelated-synthetic.mp4",
+        "sha256": "0358903170b824ced20fddac9de8a2a8b2ce3dfe01432bf62319f6ce06d9f0c2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-4-1024-uncorrelated-control-synthetic.mp4",
+        "sha256": "f92d98814081f453a143ebe53038722aa82346a437086cf9978cd7b117282ce8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2310",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "19-960-mono",
+      "aot": 19,
+      "n": 960,
+      "channels": 1,
+      "asc": "9b0c00",
+      "frames": [
+        {
+          "offset": 3360,
+          "bytes": 8,
+          "reference_offset": 666624
+        },
+        {
+          "offset": 3376,
+          "bytes": 10,
+          "reference_offset": 670464
+        },
+        {
+          "offset": 3396,
+          "bytes": 11,
+          "reference_offset": 674304
+        },
+        {
+          "offset": 3418,
+          "bytes": 10,
+          "reference_offset": 678144
+        },
+        {
+          "offset": 3438,
+          "bytes": 10,
+          "reference_offset": 681984
+        },
+        {
+          "offset": 3458,
+          "bytes": 10,
+          "reference_offset": 685824
+        },
+        {
+          "offset": 3478,
+          "bytes": 10,
+          "reference_offset": 689664
+        },
+        {
+          "offset": 3498,
+          "bytes": 10,
+          "reference_offset": 693504
+        },
+        {
+          "offset": 3518,
+          "bytes": 10,
+          "reference_offset": 697344
+        },
+        {
+          "offset": 3538,
+          "bytes": 10,
+          "reference_offset": 701184
+        },
+        {
+          "offset": 3558,
+          "bytes": 10,
+          "reference_offset": 705024
+        },
+        {
+          "offset": 3578,
+          "bytes": 11,
+          "reference_offset": 708864
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 3368,
+          "bytes": 8,
+          "reference_offset": 666624
+        },
+        {
+          "offset": 3386,
+          "bytes": 10,
+          "reference_offset": 670464
+        },
+        {
+          "offset": 3407,
+          "bytes": 11,
+          "reference_offset": 674304
+        },
+        {
+          "offset": 3428,
+          "bytes": 10,
+          "reference_offset": 678144
+        },
+        {
+          "offset": 3448,
+          "bytes": 10,
+          "reference_offset": 681984
+        },
+        {
+          "offset": 3468,
+          "bytes": 10,
+          "reference_offset": 685824
+        },
+        {
+          "offset": 3488,
+          "bytes": 10,
+          "reference_offset": 689664
+        },
+        {
+          "offset": 3508,
+          "bytes": 10,
+          "reference_offset": 693504
+        },
+        {
+          "offset": 3528,
+          "bytes": 10,
+          "reference_offset": 697344
+        },
+        {
+          "offset": 3548,
+          "bytes": 10,
+          "reference_offset": 701184
+        },
+        {
+          "offset": 3568,
+          "bytes": 10,
+          "reference_offset": 705024
+        },
+        {
+          "offset": 3589,
+          "bytes": 11,
+          "reference_offset": 708864
+        }
+      ],
+      "reference_offset": 666624,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-960-mono-synthetic.mp4",
+        "sha256": "a74ff87c11465c2c8da8d49e37ae7f30b0f2810be68798e4145d867ba3cdfa16",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c00",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-960-mono-control-synthetic.mp4",
+        "sha256": "aa5e897bc32ea191f1dc98227c4e3aa663443f0368e62bad62e7b88c08c6b527",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c00",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "19-960-independent-right",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "asc": "9b1400",
+      "frames": [
+        {
+          "offset": 3600,
+          "bytes": 16,
+          "reference_offset": 712704
+        },
+        {
+          "offset": 3632,
+          "bytes": 20,
+          "reference_offset": 720384
+        },
+        {
+          "offset": 3672,
+          "bytes": 20,
+          "reference_offset": 728064
+        },
+        {
+          "offset": 3712,
+          "bytes": 20,
+          "reference_offset": 735744
+        },
+        {
+          "offset": 3752,
+          "bytes": 20,
+          "reference_offset": 743424
+        },
+        {
+          "offset": 3792,
+          "bytes": 20,
+          "reference_offset": 751104
+        },
+        {
+          "offset": 3832,
+          "bytes": 20,
+          "reference_offset": 758784
+        },
+        {
+          "offset": 3872,
+          "bytes": 20,
+          "reference_offset": 766464
+        },
+        {
+          "offset": 3912,
+          "bytes": 20,
+          "reference_offset": 774144
+        },
+        {
+          "offset": 3952,
+          "bytes": 20,
+          "reference_offset": 781824
+        },
+        {
+          "offset": 3992,
+          "bytes": 20,
+          "reference_offset": 789504
+        },
+        {
+          "offset": 4032,
+          "bytes": 20,
+          "reference_offset": 797184
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 3616,
+          "bytes": 16,
+          "reference_offset": 712704
+        },
+        {
+          "offset": 3652,
+          "bytes": 20,
+          "reference_offset": 720384
+        },
+        {
+          "offset": 3692,
+          "bytes": 20,
+          "reference_offset": 728064
+        },
+        {
+          "offset": 3732,
+          "bytes": 20,
+          "reference_offset": 735744
+        },
+        {
+          "offset": 3772,
+          "bytes": 20,
+          "reference_offset": 743424
+        },
+        {
+          "offset": 3812,
+          "bytes": 20,
+          "reference_offset": 751104
+        },
+        {
+          "offset": 3852,
+          "bytes": 20,
+          "reference_offset": 758784
+        },
+        {
+          "offset": 3892,
+          "bytes": 20,
+          "reference_offset": 766464
+        },
+        {
+          "offset": 3932,
+          "bytes": 20,
+          "reference_offset": 774144
+        },
+        {
+          "offset": 3972,
+          "bytes": 20,
+          "reference_offset": 781824
+        },
+        {
+          "offset": 4012,
+          "bytes": 20,
+          "reference_offset": 789504
+        },
+        {
+          "offset": 4052,
+          "bytes": 20,
+          "reference_offset": 797184
+        }
+      ],
+      "reference_offset": 712704,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-960-independent-right-synthetic.mp4",
+        "sha256": "deba98abbb10ff5709c1b1906db47e2d4e7c52a3baa74f29c909fa2226fcb34b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1400",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-960-independent-right-control-synthetic.mp4",
+        "sha256": "05cef20492c5ff33b1c6e1c6fd5358c3dd54308c5422dc1f22e5c4bd7748766e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1400",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "19-960-correlated",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "asc": "9b1400",
+      "frames": [
+        {
+          "offset": 4072,
+          "bytes": 15,
+          "reference_offset": 804864
+        },
+        {
+          "offset": 4102,
+          "bytes": 19,
+          "reference_offset": 812544
+        },
+        {
+          "offset": 4140,
+          "bytes": 19,
+          "reference_offset": 820224
+        },
+        {
+          "offset": 4178,
+          "bytes": 19,
+          "reference_offset": 827904
+        },
+        {
+          "offset": 4216,
+          "bytes": 19,
+          "reference_offset": 835584
+        },
+        {
+          "offset": 4254,
+          "bytes": 19,
+          "reference_offset": 843264
+        },
+        {
+          "offset": 4292,
+          "bytes": 19,
+          "reference_offset": 850944
+        },
+        {
+          "offset": 4330,
+          "bytes": 19,
+          "reference_offset": 858624
+        },
+        {
+          "offset": 4368,
+          "bytes": 19,
+          "reference_offset": 866304
+        },
+        {
+          "offset": 4406,
+          "bytes": 19,
+          "reference_offset": 873984
+        },
+        {
+          "offset": 4444,
+          "bytes": 19,
+          "reference_offset": 881664
+        },
+        {
+          "offset": 4482,
+          "bytes": 19,
+          "reference_offset": 889344
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 4087,
+          "bytes": 15,
+          "reference_offset": 804864
+        },
+        {
+          "offset": 4121,
+          "bytes": 19,
+          "reference_offset": 812544
+        },
+        {
+          "offset": 4159,
+          "bytes": 19,
+          "reference_offset": 820224
+        },
+        {
+          "offset": 4197,
+          "bytes": 19,
+          "reference_offset": 827904
+        },
+        {
+          "offset": 4235,
+          "bytes": 19,
+          "reference_offset": 835584
+        },
+        {
+          "offset": 4273,
+          "bytes": 19,
+          "reference_offset": 843264
+        },
+        {
+          "offset": 4311,
+          "bytes": 19,
+          "reference_offset": 850944
+        },
+        {
+          "offset": 4349,
+          "bytes": 19,
+          "reference_offset": 858624
+        },
+        {
+          "offset": 4387,
+          "bytes": 19,
+          "reference_offset": 866304
+        },
+        {
+          "offset": 4425,
+          "bytes": 19,
+          "reference_offset": 873984
+        },
+        {
+          "offset": 4463,
+          "bytes": 19,
+          "reference_offset": 881664
+        },
+        {
+          "offset": 4501,
+          "bytes": 19,
+          "reference_offset": 889344
+        }
+      ],
+      "reference_offset": 804864,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-960-correlated-synthetic.mp4",
+        "sha256": "8c8d075fc4a25a43988a90e8ce58994f105465c9e8378539d6de9d4a41e08322",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1400",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-960-correlated-control-synthetic.mp4",
+        "sha256": "f089ecc5cf347e71c73517a77e1ec31b448c69b5b37c6cd81c7e85cd7f8fec7a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1400",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "19-960-uncorrelated",
+      "aot": 19,
+      "n": 960,
+      "channels": 2,
+      "asc": "9b1400",
+      "frames": [
+        {
+          "offset": 4520,
+          "bytes": 14,
+          "reference_offset": 897024
+        },
+        {
+          "offset": 4548,
+          "bytes": 19,
+          "reference_offset": 904704
+        },
+        {
+          "offset": 4586,
+          "bytes": 19,
+          "reference_offset": 912384
+        },
+        {
+          "offset": 4624,
+          "bytes": 19,
+          "reference_offset": 920064
+        },
+        {
+          "offset": 4662,
+          "bytes": 19,
+          "reference_offset": 927744
+        },
+        {
+          "offset": 4700,
+          "bytes": 19,
+          "reference_offset": 935424
+        },
+        {
+          "offset": 4738,
+          "bytes": 19,
+          "reference_offset": 943104
+        },
+        {
+          "offset": 4776,
+          "bytes": 19,
+          "reference_offset": 950784
+        },
+        {
+          "offset": 4814,
+          "bytes": 19,
+          "reference_offset": 958464
+        },
+        {
+          "offset": 4852,
+          "bytes": 19,
+          "reference_offset": 966144
+        },
+        {
+          "offset": 4890,
+          "bytes": 19,
+          "reference_offset": 973824
+        },
+        {
+          "offset": 4928,
+          "bytes": 19,
+          "reference_offset": 981504
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 4534,
+          "bytes": 14,
+          "reference_offset": 897024
+        },
+        {
+          "offset": 4567,
+          "bytes": 19,
+          "reference_offset": 904704
+        },
+        {
+          "offset": 4605,
+          "bytes": 19,
+          "reference_offset": 912384
+        },
+        {
+          "offset": 4643,
+          "bytes": 19,
+          "reference_offset": 920064
+        },
+        {
+          "offset": 4681,
+          "bytes": 19,
+          "reference_offset": 927744
+        },
+        {
+          "offset": 4719,
+          "bytes": 19,
+          "reference_offset": 935424
+        },
+        {
+          "offset": 4757,
+          "bytes": 19,
+          "reference_offset": 943104
+        },
+        {
+          "offset": 4795,
+          "bytes": 19,
+          "reference_offset": 950784
+        },
+        {
+          "offset": 4833,
+          "bytes": 19,
+          "reference_offset": 958464
+        },
+        {
+          "offset": 4871,
+          "bytes": 19,
+          "reference_offset": 966144
+        },
+        {
+          "offset": 4909,
+          "bytes": 19,
+          "reference_offset": 973824
+        },
+        {
+          "offset": 4947,
+          "bytes": 19,
+          "reference_offset": 981504
+        }
+      ],
+      "reference_offset": 897024,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 11520,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-960-uncorrelated-synthetic.mp4",
+        "sha256": "c3354c1a584abf1af5c56bad6d6aa926a206891e4bd8a92b6d4e68b433a8f942",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1400",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-960-uncorrelated-control-synthetic.mp4",
+        "sha256": "e3fdc24f89370ff9d32715471d3b99d7edc244c557a70297e062eba9e709193e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1400",
+        "pcm_offset": 0,
+        "samples": 11520
+      }
+    },
+    {
+      "name": "19-1024-mono",
+      "aot": 19,
+      "n": 1024,
+      "channels": 1,
+      "asc": "9b0800",
+      "frames": [
+        {
+          "offset": 4966,
+          "bytes": 8,
+          "reference_offset": 989184
+        },
+        {
+          "offset": 4982,
+          "bytes": 10,
+          "reference_offset": 993280
+        },
+        {
+          "offset": 5002,
+          "bytes": 11,
+          "reference_offset": 997376
+        },
+        {
+          "offset": 5024,
+          "bytes": 10,
+          "reference_offset": 1001472
+        },
+        {
+          "offset": 5044,
+          "bytes": 10,
+          "reference_offset": 1005568
+        },
+        {
+          "offset": 5064,
+          "bytes": 10,
+          "reference_offset": 1009664
+        },
+        {
+          "offset": 5084,
+          "bytes": 10,
+          "reference_offset": 1013760
+        },
+        {
+          "offset": 5104,
+          "bytes": 10,
+          "reference_offset": 1017856
+        },
+        {
+          "offset": 5124,
+          "bytes": 10,
+          "reference_offset": 1021952
+        },
+        {
+          "offset": 5144,
+          "bytes": 10,
+          "reference_offset": 1026048
+        },
+        {
+          "offset": 5164,
+          "bytes": 10,
+          "reference_offset": 1030144
+        },
+        {
+          "offset": 5184,
+          "bytes": 11,
+          "reference_offset": 1034240
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 4974,
+          "bytes": 8,
+          "reference_offset": 989184
+        },
+        {
+          "offset": 4992,
+          "bytes": 10,
+          "reference_offset": 993280
+        },
+        {
+          "offset": 5013,
+          "bytes": 11,
+          "reference_offset": 997376
+        },
+        {
+          "offset": 5034,
+          "bytes": 10,
+          "reference_offset": 1001472
+        },
+        {
+          "offset": 5054,
+          "bytes": 10,
+          "reference_offset": 1005568
+        },
+        {
+          "offset": 5074,
+          "bytes": 10,
+          "reference_offset": 1009664
+        },
+        {
+          "offset": 5094,
+          "bytes": 10,
+          "reference_offset": 1013760
+        },
+        {
+          "offset": 5114,
+          "bytes": 10,
+          "reference_offset": 1017856
+        },
+        {
+          "offset": 5134,
+          "bytes": 10,
+          "reference_offset": 1021952
+        },
+        {
+          "offset": 5154,
+          "bytes": 10,
+          "reference_offset": 1026048
+        },
+        {
+          "offset": 5174,
+          "bytes": 10,
+          "reference_offset": 1030144
+        },
+        {
+          "offset": 5195,
+          "bytes": 11,
+          "reference_offset": 1034240
+        }
+      ],
+      "reference_offset": 989184,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-1024-mono-synthetic.mp4",
+        "sha256": "981bb1f61e1600e0283cb9465d9ebdd50c36c935231a6ba6501dcfd72cd384fe",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0800",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-1024-mono-control-synthetic.mp4",
+        "sha256": "9e65d55ef39c8839225d503631549b258b19a577dfdbf2f82ac147ea404098fd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0800",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "19-1024-independent-right",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "asc": "9b1000",
+      "frames": [
+        {
+          "offset": 5206,
+          "bytes": 16,
+          "reference_offset": 1038336
+        },
+        {
+          "offset": 5238,
+          "bytes": 20,
+          "reference_offset": 1046528
+        },
+        {
+          "offset": 5278,
+          "bytes": 20,
+          "reference_offset": 1054720
+        },
+        {
+          "offset": 5318,
+          "bytes": 20,
+          "reference_offset": 1062912
+        },
+        {
+          "offset": 5358,
+          "bytes": 20,
+          "reference_offset": 1071104
+        },
+        {
+          "offset": 5398,
+          "bytes": 20,
+          "reference_offset": 1079296
+        },
+        {
+          "offset": 5438,
+          "bytes": 20,
+          "reference_offset": 1087488
+        },
+        {
+          "offset": 5478,
+          "bytes": 20,
+          "reference_offset": 1095680
+        },
+        {
+          "offset": 5518,
+          "bytes": 20,
+          "reference_offset": 1103872
+        },
+        {
+          "offset": 5558,
+          "bytes": 20,
+          "reference_offset": 1112064
+        },
+        {
+          "offset": 5598,
+          "bytes": 20,
+          "reference_offset": 1120256
+        },
+        {
+          "offset": 5638,
+          "bytes": 20,
+          "reference_offset": 1128448
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 5222,
+          "bytes": 16,
+          "reference_offset": 1038336
+        },
+        {
+          "offset": 5258,
+          "bytes": 20,
+          "reference_offset": 1046528
+        },
+        {
+          "offset": 5298,
+          "bytes": 20,
+          "reference_offset": 1054720
+        },
+        {
+          "offset": 5338,
+          "bytes": 20,
+          "reference_offset": 1062912
+        },
+        {
+          "offset": 5378,
+          "bytes": 20,
+          "reference_offset": 1071104
+        },
+        {
+          "offset": 5418,
+          "bytes": 20,
+          "reference_offset": 1079296
+        },
+        {
+          "offset": 5458,
+          "bytes": 20,
+          "reference_offset": 1087488
+        },
+        {
+          "offset": 5498,
+          "bytes": 20,
+          "reference_offset": 1095680
+        },
+        {
+          "offset": 5538,
+          "bytes": 20,
+          "reference_offset": 1103872
+        },
+        {
+          "offset": 5578,
+          "bytes": 20,
+          "reference_offset": 1112064
+        },
+        {
+          "offset": 5618,
+          "bytes": 20,
+          "reference_offset": 1120256
+        },
+        {
+          "offset": 5658,
+          "bytes": 20,
+          "reference_offset": 1128448
+        }
+      ],
+      "reference_offset": 1038336,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-1024-independent-right-synthetic.mp4",
+        "sha256": "02af942b666de81a9f14b4b583405ea8942e395a4ffa4699d5e9da17d201d512",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-1024-independent-right-control-synthetic.mp4",
+        "sha256": "fe1b2d70dc0e211444cbd61552ba7f3ce6733e0a48d8909c29d31583cf0f02d4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "19-1024-correlated",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "asc": "9b1000",
+      "frames": [
+        {
+          "offset": 5678,
+          "bytes": 15,
+          "reference_offset": 1136640
+        },
+        {
+          "offset": 5708,
+          "bytes": 19,
+          "reference_offset": 1144832
+        },
+        {
+          "offset": 5746,
+          "bytes": 19,
+          "reference_offset": 1153024
+        },
+        {
+          "offset": 5784,
+          "bytes": 19,
+          "reference_offset": 1161216
+        },
+        {
+          "offset": 5822,
+          "bytes": 19,
+          "reference_offset": 1169408
+        },
+        {
+          "offset": 5860,
+          "bytes": 19,
+          "reference_offset": 1177600
+        },
+        {
+          "offset": 5898,
+          "bytes": 19,
+          "reference_offset": 1185792
+        },
+        {
+          "offset": 5936,
+          "bytes": 19,
+          "reference_offset": 1193984
+        },
+        {
+          "offset": 5974,
+          "bytes": 19,
+          "reference_offset": 1202176
+        },
+        {
+          "offset": 6012,
+          "bytes": 19,
+          "reference_offset": 1210368
+        },
+        {
+          "offset": 6050,
+          "bytes": 19,
+          "reference_offset": 1218560
+        },
+        {
+          "offset": 6088,
+          "bytes": 19,
+          "reference_offset": 1226752
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 5693,
+          "bytes": 15,
+          "reference_offset": 1136640
+        },
+        {
+          "offset": 5727,
+          "bytes": 19,
+          "reference_offset": 1144832
+        },
+        {
+          "offset": 5765,
+          "bytes": 19,
+          "reference_offset": 1153024
+        },
+        {
+          "offset": 5803,
+          "bytes": 19,
+          "reference_offset": 1161216
+        },
+        {
+          "offset": 5841,
+          "bytes": 19,
+          "reference_offset": 1169408
+        },
+        {
+          "offset": 5879,
+          "bytes": 19,
+          "reference_offset": 1177600
+        },
+        {
+          "offset": 5917,
+          "bytes": 19,
+          "reference_offset": 1185792
+        },
+        {
+          "offset": 5955,
+          "bytes": 19,
+          "reference_offset": 1193984
+        },
+        {
+          "offset": 5993,
+          "bytes": 19,
+          "reference_offset": 1202176
+        },
+        {
+          "offset": 6031,
+          "bytes": 19,
+          "reference_offset": 1210368
+        },
+        {
+          "offset": 6069,
+          "bytes": 19,
+          "reference_offset": 1218560
+        },
+        {
+          "offset": 6107,
+          "bytes": 19,
+          "reference_offset": 1226752
+        }
+      ],
+      "reference_offset": 1136640,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-1024-correlated-synthetic.mp4",
+        "sha256": "7093ae4d4a6fc253ef5a133362514add686846e93473bf01e9948e67cd5d3869",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-1024-correlated-control-synthetic.mp4",
+        "sha256": "b79cb330a0e14dd3762d3570d40d801622b962b70814e71a4d39821a4fdf4237",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "19-1024-uncorrelated",
+      "aot": 19,
+      "n": 1024,
+      "channels": 2,
+      "asc": "9b1000",
+      "frames": [
+        {
+          "offset": 6126,
+          "bytes": 14,
+          "reference_offset": 1234944
+        },
+        {
+          "offset": 6154,
+          "bytes": 19,
+          "reference_offset": 1243136
+        },
+        {
+          "offset": 6192,
+          "bytes": 19,
+          "reference_offset": 1251328
+        },
+        {
+          "offset": 6230,
+          "bytes": 19,
+          "reference_offset": 1259520
+        },
+        {
+          "offset": 6268,
+          "bytes": 19,
+          "reference_offset": 1267712
+        },
+        {
+          "offset": 6306,
+          "bytes": 19,
+          "reference_offset": 1275904
+        },
+        {
+          "offset": 6344,
+          "bytes": 19,
+          "reference_offset": 1284096
+        },
+        {
+          "offset": 6382,
+          "bytes": 19,
+          "reference_offset": 1292288
+        },
+        {
+          "offset": 6420,
+          "bytes": 19,
+          "reference_offset": 1300480
+        },
+        {
+          "offset": 6458,
+          "bytes": 19,
+          "reference_offset": 1308672
+        },
+        {
+          "offset": 6496,
+          "bytes": 19,
+          "reference_offset": 1316864
+        },
+        {
+          "offset": 6534,
+          "bytes": 19,
+          "reference_offset": 1325056
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 6140,
+          "bytes": 14,
+          "reference_offset": 1234944
+        },
+        {
+          "offset": 6173,
+          "bytes": 19,
+          "reference_offset": 1243136
+        },
+        {
+          "offset": 6211,
+          "bytes": 19,
+          "reference_offset": 1251328
+        },
+        {
+          "offset": 6249,
+          "bytes": 19,
+          "reference_offset": 1259520
+        },
+        {
+          "offset": 6287,
+          "bytes": 19,
+          "reference_offset": 1267712
+        },
+        {
+          "offset": 6325,
+          "bytes": 19,
+          "reference_offset": 1275904
+        },
+        {
+          "offset": 6363,
+          "bytes": 19,
+          "reference_offset": 1284096
+        },
+        {
+          "offset": 6401,
+          "bytes": 19,
+          "reference_offset": 1292288
+        },
+        {
+          "offset": 6439,
+          "bytes": 19,
+          "reference_offset": 1300480
+        },
+        {
+          "offset": 6477,
+          "bytes": 19,
+          "reference_offset": 1308672
+        },
+        {
+          "offset": 6515,
+          "bytes": 19,
+          "reference_offset": 1316864
+        },
+        {
+          "offset": 6553,
+          "bytes": 19,
+          "reference_offset": 1325056
+        }
+      ],
+      "reference_offset": 1234944,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 12288,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-19-1024-uncorrelated-synthetic.mp4",
+        "sha256": "0f41381ef8f343dee3a9375c0eec7631f172821ae2d72799b6ce7d07d05973c9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-19-1024-uncorrelated-control-synthetic.mp4",
+        "sha256": "8ad6c38e8a29b3ec3e7c65ab58fd3b9439e8235a7c2b84bc1f8c5f5e294fb5b7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b1000",
+        "pcm_offset": 0,
+        "samples": 12288
+      }
+    },
+    {
+      "name": "23-480-mono",
+      "aot": 23,
+      "n": 480,
+      "channels": 1,
+      "asc": "bb0c00",
+      "frames": [
+        {
+          "offset": 6572,
+          "bytes": 8,
+          "reference_offset": 1333248
+        },
+        {
+          "offset": 6588,
+          "bytes": 10,
+          "reference_offset": 1335168
+        },
+        {
+          "offset": 6608,
+          "bytes": 11,
+          "reference_offset": 1337088
+        },
+        {
+          "offset": 6630,
+          "bytes": 10,
+          "reference_offset": 1339008
+        },
+        {
+          "offset": 6650,
+          "bytes": 10,
+          "reference_offset": 1340928
+        },
+        {
+          "offset": 6670,
+          "bytes": 10,
+          "reference_offset": 1342848
+        },
+        {
+          "offset": 6690,
+          "bytes": 10,
+          "reference_offset": 1344768
+        },
+        {
+          "offset": 6710,
+          "bytes": 10,
+          "reference_offset": 1346688
+        },
+        {
+          "offset": 6730,
+          "bytes": 10,
+          "reference_offset": 1348608
+        },
+        {
+          "offset": 6750,
+          "bytes": 10,
+          "reference_offset": 1350528
+        },
+        {
+          "offset": 6770,
+          "bytes": 10,
+          "reference_offset": 1352448
+        },
+        {
+          "offset": 6790,
+          "bytes": 11,
+          "reference_offset": 1354368
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 6580,
+          "bytes": 8,
+          "reference_offset": 1333248
+        },
+        {
+          "offset": 6598,
+          "bytes": 10,
+          "reference_offset": 1335168
+        },
+        {
+          "offset": 6619,
+          "bytes": 11,
+          "reference_offset": 1337088
+        },
+        {
+          "offset": 6640,
+          "bytes": 10,
+          "reference_offset": 1339008
+        },
+        {
+          "offset": 6660,
+          "bytes": 10,
+          "reference_offset": 1340928
+        },
+        {
+          "offset": 6680,
+          "bytes": 10,
+          "reference_offset": 1342848
+        },
+        {
+          "offset": 6700,
+          "bytes": 10,
+          "reference_offset": 1344768
+        },
+        {
+          "offset": 6720,
+          "bytes": 10,
+          "reference_offset": 1346688
+        },
+        {
+          "offset": 6740,
+          "bytes": 10,
+          "reference_offset": 1348608
+        },
+        {
+          "offset": 6760,
+          "bytes": 10,
+          "reference_offset": 1350528
+        },
+        {
+          "offset": 6780,
+          "bytes": 10,
+          "reference_offset": 1352448
+        },
+        {
+          "offset": 6801,
+          "bytes": 11,
+          "reference_offset": 1354368
+        }
+      ],
+      "reference_offset": 1333248,
+      "reference_bytes": 23040,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-480-mono-synthetic.mp4",
+        "sha256": "75ff734a059bf07f2142c033da0aa15aa7f6e0281182b616cacf96705f6bdb95",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0c00",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-480-mono-control-synthetic.mp4",
+        "sha256": "187c164c1b6698e03a6aa577d8389dd4d1e7d0190deed865b298efcdedad476f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0c00",
+        "pcm_offset": 0,
+        "samples": 5760
+      }
+    },
+    {
+      "name": "23-480-independent-right",
+      "aot": 23,
+      "n": 480,
+      "channels": 2,
+      "asc": "bb1400",
+      "frames": [
+        {
+          "offset": 6812,
+          "bytes": 16,
+          "reference_offset": 1356288
+        },
+        {
+          "offset": 6844,
+          "bytes": 20,
+          "reference_offset": 1360128
+        },
+        {
+          "offset": 6884,
+          "bytes": 20,
+          "reference_offset": 1363968
+        },
+        {
+          "offset": 6924,
+          "bytes": 20,
+          "reference_offset": 1367808
+        },
+        {
+          "offset": 6964,
+          "bytes": 20,
+          "reference_offset": 1371648
+        },
+        {
+          "offset": 7004,
+          "bytes": 20,
+          "reference_offset": 1375488
+        },
+        {
+          "offset": 7044,
+          "bytes": 20,
+          "reference_offset": 1379328
+        },
+        {
+          "offset": 7084,
+          "bytes": 20,
+          "reference_offset": 1383168
+        },
+        {
+          "offset": 7124,
+          "bytes": 20,
+          "reference_offset": 1387008
+        },
+        {
+          "offset": 7164,
+          "bytes": 20,
+          "reference_offset": 1390848
+        },
+        {
+          "offset": 7204,
+          "bytes": 20,
+          "reference_offset": 1394688
+        },
+        {
+          "offset": 7244,
+          "bytes": 20,
+          "reference_offset": 1398528
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 6828,
+          "bytes": 16,
+          "reference_offset": 1356288
+        },
+        {
+          "offset": 6864,
+          "bytes": 20,
+          "reference_offset": 1360128
+        },
+        {
+          "offset": 6904,
+          "bytes": 20,
+          "reference_offset": 1363968
+        },
+        {
+          "offset": 6944,
+          "bytes": 20,
+          "reference_offset": 1367808
+        },
+        {
+          "offset": 6984,
+          "bytes": 20,
+          "reference_offset": 1371648
+        },
+        {
+          "offset": 7024,
+          "bytes": 20,
+          "reference_offset": 1375488
+        },
+        {
+          "offset": 7064,
+          "bytes": 20,
+          "reference_offset": 1379328
+        },
+        {
+          "offset": 7104,
+          "bytes": 20,
+          "reference_offset": 1383168
+        },
+        {
+          "offset": 7144,
+          "bytes": 20,
+          "reference_offset": 1387008
+        },
+        {
+          "offset": 7184,
+          "bytes": 20,
+          "reference_offset": 1390848
+        },
+        {
+          "offset": 7224,
+          "bytes": 20,
+          "reference_offset": 1394688
+        },
+        {
+          "offset": 7264,
+          "bytes": 20,
+          "reference_offset": 1398528
+        }
+      ],
+      "reference_offset": 1356288,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-480-independent-right-synthetic.mp4",
+        "sha256": "5d64e8dacbc4e5bebe161e8bb3c1f527da015db252b23c01ba87400c9a90fe83",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1400",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-480-independent-right-control-synthetic.mp4",
+        "sha256": "162420445fee4182d09730f8035765ec67e20deb6f70aa4df20f3870f6d37694",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1400",
+        "pcm_offset": 0,
+        "samples": 5760
+      }
+    },
+    {
+      "name": "23-480-correlated",
+      "aot": 23,
+      "n": 480,
+      "channels": 2,
+      "asc": "bb1400",
+      "frames": [
+        {
+          "offset": 7284,
+          "bytes": 15,
+          "reference_offset": 1402368
+        },
+        {
+          "offset": 7314,
+          "bytes": 19,
+          "reference_offset": 1406208
+        },
+        {
+          "offset": 7352,
+          "bytes": 19,
+          "reference_offset": 1410048
+        },
+        {
+          "offset": 7390,
+          "bytes": 19,
+          "reference_offset": 1413888
+        },
+        {
+          "offset": 7428,
+          "bytes": 19,
+          "reference_offset": 1417728
+        },
+        {
+          "offset": 7466,
+          "bytes": 19,
+          "reference_offset": 1421568
+        },
+        {
+          "offset": 7504,
+          "bytes": 19,
+          "reference_offset": 1425408
+        },
+        {
+          "offset": 7542,
+          "bytes": 19,
+          "reference_offset": 1429248
+        },
+        {
+          "offset": 7580,
+          "bytes": 19,
+          "reference_offset": 1433088
+        },
+        {
+          "offset": 7618,
+          "bytes": 19,
+          "reference_offset": 1436928
+        },
+        {
+          "offset": 7656,
+          "bytes": 19,
+          "reference_offset": 1440768
+        },
+        {
+          "offset": 7694,
+          "bytes": 19,
+          "reference_offset": 1444608
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 7299,
+          "bytes": 15,
+          "reference_offset": 1402368
+        },
+        {
+          "offset": 7333,
+          "bytes": 19,
+          "reference_offset": 1406208
+        },
+        {
+          "offset": 7371,
+          "bytes": 19,
+          "reference_offset": 1410048
+        },
+        {
+          "offset": 7409,
+          "bytes": 19,
+          "reference_offset": 1413888
+        },
+        {
+          "offset": 7447,
+          "bytes": 19,
+          "reference_offset": 1417728
+        },
+        {
+          "offset": 7485,
+          "bytes": 19,
+          "reference_offset": 1421568
+        },
+        {
+          "offset": 7523,
+          "bytes": 19,
+          "reference_offset": 1425408
+        },
+        {
+          "offset": 7561,
+          "bytes": 19,
+          "reference_offset": 1429248
+        },
+        {
+          "offset": 7599,
+          "bytes": 19,
+          "reference_offset": 1433088
+        },
+        {
+          "offset": 7637,
+          "bytes": 19,
+          "reference_offset": 1436928
+        },
+        {
+          "offset": 7675,
+          "bytes": 19,
+          "reference_offset": 1440768
+        },
+        {
+          "offset": 7713,
+          "bytes": 19,
+          "reference_offset": 1444608
+        }
+      ],
+      "reference_offset": 1402368,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-480-correlated-synthetic.mp4",
+        "sha256": "7bd91d5e32a9a8831a5b2d695c47c5b7b61682b64a2fe361591b6c0da32849d1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1400",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-480-correlated-control-synthetic.mp4",
+        "sha256": "4c78cb4a095eda571988bb0f12805a2ec75920a4f43a6a69efc163dc53da559a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1400",
+        "pcm_offset": 0,
+        "samples": 5760
+      }
+    },
+    {
+      "name": "23-480-uncorrelated",
+      "aot": 23,
+      "n": 480,
+      "channels": 2,
+      "asc": "bb1400",
+      "frames": [
+        {
+          "offset": 7732,
+          "bytes": 14,
+          "reference_offset": 1448448
+        },
+        {
+          "offset": 7760,
+          "bytes": 19,
+          "reference_offset": 1452288
+        },
+        {
+          "offset": 7798,
+          "bytes": 19,
+          "reference_offset": 1456128
+        },
+        {
+          "offset": 7836,
+          "bytes": 19,
+          "reference_offset": 1459968
+        },
+        {
+          "offset": 7874,
+          "bytes": 19,
+          "reference_offset": 1463808
+        },
+        {
+          "offset": 7912,
+          "bytes": 19,
+          "reference_offset": 1467648
+        },
+        {
+          "offset": 7950,
+          "bytes": 19,
+          "reference_offset": 1471488
+        },
+        {
+          "offset": 7988,
+          "bytes": 19,
+          "reference_offset": 1475328
+        },
+        {
+          "offset": 8026,
+          "bytes": 19,
+          "reference_offset": 1479168
+        },
+        {
+          "offset": 8064,
+          "bytes": 19,
+          "reference_offset": 1483008
+        },
+        {
+          "offset": 8102,
+          "bytes": 19,
+          "reference_offset": 1486848
+        },
+        {
+          "offset": 8140,
+          "bytes": 19,
+          "reference_offset": 1490688
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 7746,
+          "bytes": 14,
+          "reference_offset": 1448448
+        },
+        {
+          "offset": 7779,
+          "bytes": 19,
+          "reference_offset": 1452288
+        },
+        {
+          "offset": 7817,
+          "bytes": 19,
+          "reference_offset": 1456128
+        },
+        {
+          "offset": 7855,
+          "bytes": 19,
+          "reference_offset": 1459968
+        },
+        {
+          "offset": 7893,
+          "bytes": 19,
+          "reference_offset": 1463808
+        },
+        {
+          "offset": 7931,
+          "bytes": 19,
+          "reference_offset": 1467648
+        },
+        {
+          "offset": 7969,
+          "bytes": 19,
+          "reference_offset": 1471488
+        },
+        {
+          "offset": 8007,
+          "bytes": 19,
+          "reference_offset": 1475328
+        },
+        {
+          "offset": 8045,
+          "bytes": 19,
+          "reference_offset": 1479168
+        },
+        {
+          "offset": 8083,
+          "bytes": 19,
+          "reference_offset": 1483008
+        },
+        {
+          "offset": 8121,
+          "bytes": 19,
+          "reference_offset": 1486848
+        },
+        {
+          "offset": 8159,
+          "bytes": 19,
+          "reference_offset": 1490688
+        }
+      ],
+      "reference_offset": 1448448,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-480-uncorrelated-synthetic.mp4",
+        "sha256": "0913cb2659c42d0e923a1547c8a38d7dd51550b499ce163f699a5b6ad2c97d3e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1400",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-480-uncorrelated-control-synthetic.mp4",
+        "sha256": "0fc0611d29ec2bf4c61b06aed2c0082a1d3edc08262426646ac522394eea5141",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1400",
+        "pcm_offset": 0,
+        "samples": 5760
+      }
+    },
+    {
+      "name": "23-512-mono",
+      "aot": 23,
+      "n": 512,
+      "channels": 1,
+      "asc": "bb0800",
+      "frames": [
+        {
+          "offset": 8178,
+          "bytes": 8,
+          "reference_offset": 1494528
+        },
+        {
+          "offset": 8194,
+          "bytes": 10,
+          "reference_offset": 1496576
+        },
+        {
+          "offset": 8214,
+          "bytes": 11,
+          "reference_offset": 1498624
+        },
+        {
+          "offset": 8236,
+          "bytes": 10,
+          "reference_offset": 1500672
+        },
+        {
+          "offset": 8256,
+          "bytes": 10,
+          "reference_offset": 1502720
+        },
+        {
+          "offset": 8276,
+          "bytes": 10,
+          "reference_offset": 1504768
+        },
+        {
+          "offset": 8296,
+          "bytes": 10,
+          "reference_offset": 1506816
+        },
+        {
+          "offset": 8316,
+          "bytes": 10,
+          "reference_offset": 1508864
+        },
+        {
+          "offset": 8336,
+          "bytes": 10,
+          "reference_offset": 1510912
+        },
+        {
+          "offset": 8356,
+          "bytes": 10,
+          "reference_offset": 1512960
+        },
+        {
+          "offset": 8376,
+          "bytes": 10,
+          "reference_offset": 1515008
+        },
+        {
+          "offset": 8396,
+          "bytes": 11,
+          "reference_offset": 1517056
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 8186,
+          "bytes": 8,
+          "reference_offset": 1494528
+        },
+        {
+          "offset": 8204,
+          "bytes": 10,
+          "reference_offset": 1496576
+        },
+        {
+          "offset": 8225,
+          "bytes": 11,
+          "reference_offset": 1498624
+        },
+        {
+          "offset": 8246,
+          "bytes": 10,
+          "reference_offset": 1500672
+        },
+        {
+          "offset": 8266,
+          "bytes": 10,
+          "reference_offset": 1502720
+        },
+        {
+          "offset": 8286,
+          "bytes": 10,
+          "reference_offset": 1504768
+        },
+        {
+          "offset": 8306,
+          "bytes": 10,
+          "reference_offset": 1506816
+        },
+        {
+          "offset": 8326,
+          "bytes": 10,
+          "reference_offset": 1508864
+        },
+        {
+          "offset": 8346,
+          "bytes": 10,
+          "reference_offset": 1510912
+        },
+        {
+          "offset": 8366,
+          "bytes": 10,
+          "reference_offset": 1512960
+        },
+        {
+          "offset": 8386,
+          "bytes": 10,
+          "reference_offset": 1515008
+        },
+        {
+          "offset": 8407,
+          "bytes": 11,
+          "reference_offset": 1517056
+        }
+      ],
+      "reference_offset": 1494528,
+      "reference_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-512-mono-synthetic.mp4",
+        "sha256": "5ae529061d53c6faa5deafc0803589cd74c09374bd635464314c394e5a01a359",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-512-mono-control-synthetic.mp4",
+        "sha256": "5b3f80a693e6e2922179063b08ee37224c8f649533abc0f55d31ae455e4e5b3d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0800",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "23-512-independent-right",
+      "aot": 23,
+      "n": 512,
+      "channels": 2,
+      "asc": "bb1000",
+      "frames": [
+        {
+          "offset": 8418,
+          "bytes": 16,
+          "reference_offset": 1519104
+        },
+        {
+          "offset": 8450,
+          "bytes": 20,
+          "reference_offset": 1523200
+        },
+        {
+          "offset": 8490,
+          "bytes": 20,
+          "reference_offset": 1527296
+        },
+        {
+          "offset": 8530,
+          "bytes": 20,
+          "reference_offset": 1531392
+        },
+        {
+          "offset": 8570,
+          "bytes": 20,
+          "reference_offset": 1535488
+        },
+        {
+          "offset": 8610,
+          "bytes": 20,
+          "reference_offset": 1539584
+        },
+        {
+          "offset": 8650,
+          "bytes": 20,
+          "reference_offset": 1543680
+        },
+        {
+          "offset": 8690,
+          "bytes": 20,
+          "reference_offset": 1547776
+        },
+        {
+          "offset": 8730,
+          "bytes": 20,
+          "reference_offset": 1551872
+        },
+        {
+          "offset": 8770,
+          "bytes": 20,
+          "reference_offset": 1555968
+        },
+        {
+          "offset": 8810,
+          "bytes": 20,
+          "reference_offset": 1560064
+        },
+        {
+          "offset": 8850,
+          "bytes": 20,
+          "reference_offset": 1564160
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 8434,
+          "bytes": 16,
+          "reference_offset": 1519104
+        },
+        {
+          "offset": 8470,
+          "bytes": 20,
+          "reference_offset": 1523200
+        },
+        {
+          "offset": 8510,
+          "bytes": 20,
+          "reference_offset": 1527296
+        },
+        {
+          "offset": 8550,
+          "bytes": 20,
+          "reference_offset": 1531392
+        },
+        {
+          "offset": 8590,
+          "bytes": 20,
+          "reference_offset": 1535488
+        },
+        {
+          "offset": 8630,
+          "bytes": 20,
+          "reference_offset": 1539584
+        },
+        {
+          "offset": 8670,
+          "bytes": 20,
+          "reference_offset": 1543680
+        },
+        {
+          "offset": 8710,
+          "bytes": 20,
+          "reference_offset": 1547776
+        },
+        {
+          "offset": 8750,
+          "bytes": 20,
+          "reference_offset": 1551872
+        },
+        {
+          "offset": 8790,
+          "bytes": 20,
+          "reference_offset": 1555968
+        },
+        {
+          "offset": 8830,
+          "bytes": 20,
+          "reference_offset": 1560064
+        },
+        {
+          "offset": 8870,
+          "bytes": 20,
+          "reference_offset": 1564160
+        }
+      ],
+      "reference_offset": 1519104,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-512-independent-right-synthetic.mp4",
+        "sha256": "6992b1c7b222a7ea0fce5299fdb6d7bf55de4e6997021f8db45700e7c54ede1a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-512-independent-right-control-synthetic.mp4",
+        "sha256": "ec82950804e288d60c30d84ee83f92191f8905f1dbbe4ee29b6e286f31798c66",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "23-512-correlated",
+      "aot": 23,
+      "n": 512,
+      "channels": 2,
+      "asc": "bb1000",
+      "frames": [
+        {
+          "offset": 8890,
+          "bytes": 15,
+          "reference_offset": 1568256
+        },
+        {
+          "offset": 8920,
+          "bytes": 19,
+          "reference_offset": 1572352
+        },
+        {
+          "offset": 8958,
+          "bytes": 19,
+          "reference_offset": 1576448
+        },
+        {
+          "offset": 8996,
+          "bytes": 19,
+          "reference_offset": 1580544
+        },
+        {
+          "offset": 9034,
+          "bytes": 19,
+          "reference_offset": 1584640
+        },
+        {
+          "offset": 9072,
+          "bytes": 19,
+          "reference_offset": 1588736
+        },
+        {
+          "offset": 9110,
+          "bytes": 19,
+          "reference_offset": 1592832
+        },
+        {
+          "offset": 9148,
+          "bytes": 19,
+          "reference_offset": 1596928
+        },
+        {
+          "offset": 9186,
+          "bytes": 19,
+          "reference_offset": 1601024
+        },
+        {
+          "offset": 9224,
+          "bytes": 19,
+          "reference_offset": 1605120
+        },
+        {
+          "offset": 9262,
+          "bytes": 19,
+          "reference_offset": 1609216
+        },
+        {
+          "offset": 9300,
+          "bytes": 19,
+          "reference_offset": 1613312
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 8905,
+          "bytes": 15,
+          "reference_offset": 1568256
+        },
+        {
+          "offset": 8939,
+          "bytes": 19,
+          "reference_offset": 1572352
+        },
+        {
+          "offset": 8977,
+          "bytes": 19,
+          "reference_offset": 1576448
+        },
+        {
+          "offset": 9015,
+          "bytes": 19,
+          "reference_offset": 1580544
+        },
+        {
+          "offset": 9053,
+          "bytes": 19,
+          "reference_offset": 1584640
+        },
+        {
+          "offset": 9091,
+          "bytes": 19,
+          "reference_offset": 1588736
+        },
+        {
+          "offset": 9129,
+          "bytes": 19,
+          "reference_offset": 1592832
+        },
+        {
+          "offset": 9167,
+          "bytes": 19,
+          "reference_offset": 1596928
+        },
+        {
+          "offset": 9205,
+          "bytes": 19,
+          "reference_offset": 1601024
+        },
+        {
+          "offset": 9243,
+          "bytes": 19,
+          "reference_offset": 1605120
+        },
+        {
+          "offset": 9281,
+          "bytes": 19,
+          "reference_offset": 1609216
+        },
+        {
+          "offset": 9319,
+          "bytes": 19,
+          "reference_offset": 1613312
+        }
+      ],
+      "reference_offset": 1568256,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-512-correlated-synthetic.mp4",
+        "sha256": "701ba93213e4e23995e0d08004ec562fd26391d91cdf96ee0e380299949dce74",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-512-correlated-control-synthetic.mp4",
+        "sha256": "47c5ed2dd4579a078f110a7b3320c52142a36b6a0425e5c9ed7911e01ac2c6f1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "23-512-uncorrelated",
+      "aot": 23,
+      "n": 512,
+      "channels": 2,
+      "asc": "bb1000",
+      "frames": [
+        {
+          "offset": 9338,
+          "bytes": 14,
+          "reference_offset": 1617408
+        },
+        {
+          "offset": 9366,
+          "bytes": 19,
+          "reference_offset": 1621504
+        },
+        {
+          "offset": 9404,
+          "bytes": 19,
+          "reference_offset": 1625600
+        },
+        {
+          "offset": 9442,
+          "bytes": 19,
+          "reference_offset": 1629696
+        },
+        {
+          "offset": 9480,
+          "bytes": 19,
+          "reference_offset": 1633792
+        },
+        {
+          "offset": 9518,
+          "bytes": 19,
+          "reference_offset": 1637888
+        },
+        {
+          "offset": 9556,
+          "bytes": 19,
+          "reference_offset": 1641984
+        },
+        {
+          "offset": 9594,
+          "bytes": 19,
+          "reference_offset": 1646080
+        },
+        {
+          "offset": 9632,
+          "bytes": 19,
+          "reference_offset": 1650176
+        },
+        {
+          "offset": 9670,
+          "bytes": 19,
+          "reference_offset": 1654272
+        },
+        {
+          "offset": 9708,
+          "bytes": 19,
+          "reference_offset": 1658368
+        },
+        {
+          "offset": 9746,
+          "bytes": 19,
+          "reference_offset": 1662464
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 9352,
+          "bytes": 14,
+          "reference_offset": 1617408
+        },
+        {
+          "offset": 9385,
+          "bytes": 19,
+          "reference_offset": 1621504
+        },
+        {
+          "offset": 9423,
+          "bytes": 19,
+          "reference_offset": 1625600
+        },
+        {
+          "offset": 9461,
+          "bytes": 19,
+          "reference_offset": 1629696
+        },
+        {
+          "offset": 9499,
+          "bytes": 19,
+          "reference_offset": 1633792
+        },
+        {
+          "offset": 9537,
+          "bytes": 19,
+          "reference_offset": 1637888
+        },
+        {
+          "offset": 9575,
+          "bytes": 19,
+          "reference_offset": 1641984
+        },
+        {
+          "offset": 9613,
+          "bytes": 19,
+          "reference_offset": 1646080
+        },
+        {
+          "offset": 9651,
+          "bytes": 19,
+          "reference_offset": 1650176
+        },
+        {
+          "offset": 9689,
+          "bytes": 19,
+          "reference_offset": 1654272
+        },
+        {
+          "offset": 9727,
+          "bytes": 19,
+          "reference_offset": 1658368
+        },
+        {
+          "offset": 9765,
+          "bytes": 19,
+          "reference_offset": 1662464
+        }
+      ],
+      "reference_offset": 1617408,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-ltp-pns-23-512-uncorrelated-synthetic.mp4",
+        "sha256": "73c5b09c061410df90d160ae35f1a12da28647475087611b533f60667105fc76",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "control_video": {
+        "file": "aac-ltp-pns-23-512-uncorrelated-control-synthetic.mp4",
+        "sha256": "1893083b169d1449158602bd1e3c5e47cb0f69bb8bf8f8f23c37a63110580612",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1000",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    }
+  ],
+  "provenance": "Own AOT4/19/23 long-window PNS precedence packets with active overlapping LTP flags and matched controls clearing only those flags. Original scalar PNS, direct cosine/timeline/LD or sine overlap PCM plus deliberately incorrect PNS-prediction mutant. No private media, FFmpeg, network or foreign decoder."
+}

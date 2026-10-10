@@ -4795,3 +4795,25 @@ PCM, speaker masks, timestamps/durations, checkpoint replay, stable retained
 storage and rollback on trailing data. Player tests check sample-clock ranges,
 rewind and seek at both indexed and explicit rates. This matrix does not claim
 all possible rates, layouts or codec-tool combinations.
+
+
+### AAC LTP/PNS precedence (2026-10-10)
+
+The owned decoder suppresses long-window LTP prediction in PNS codebook-13
+bands, as required by ISO/IEC 14496-3:2001 section 4.6.7.4.2, while preserving
+lag metadata and reconstructed PCM history. This applies to AOT4, ER-LTP AOT19
+and LD AOT23, including the shared ordinary coupling preparation path.
+The 24 authored cases cover 960/1024 and 480/512 frames, mono, independent
+right-channel noise, correlated and uncorrelated stereo. Before the fix all
+24 matched a deliberately incorrect prediction oracle; matched controls with
+only noise-band prediction flags cleared matched the correct scalar oracle.
+Acceptance checks cover native/public PCM, owned export, checkpoint rollback,
+player ranges, rewind and seek. Dedicated PNS coupling, intensity interactions
+and other unqualified codec combinations remain outside this fixture matrix.
+
+Generate with `python3 scripts/generate_aac_ltp_pns_fixtures.py`. The generator
+writes 24 videos and 24 matched control videos, packet data, correct scalar PCM,
+a deliberately incorrect PCM oracle, and a manifest. Audio samples, parameters
+and syntax are authored; existing authored AVC/container scaffolding is reused.
+No private media, FFmpeg, network or foreign decoder is used. Generation is
+separate from ordinary regression tests in `tests/aac_ltp_pns.rs`.

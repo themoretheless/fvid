@@ -2832,3 +2832,18 @@ and three explicit rates across all ten admitted channel configurations, with
 both 480/512 frames. The fixture matrix validates WAVE channel ordering/masks,
 independent LTP histories and sample-clock ranges/rewind/seek. Additional tool
 cross-products and protected epConfig/PCE/ELD/USAC remain unqualified/open.
+
+
+### AAC LTP/PNS precedence (2026-10-10)
+
+The owned decoder suppresses long-window LTP prediction in PNS codebook-13
+bands, as required by ISO/IEC 14496-3:2001 section 4.6.7.4.2, while preserving
+lag metadata and reconstructed PCM history. This applies to AOT4, ER-LTP AOT19
+and LD AOT23, including the shared ordinary coupling preparation path.
+The 24 authored cases cover 960/1024 and 480/512 frames, mono, independent
+right-channel noise, correlated and uncorrelated stereo. Before the fix all
+24 matched a deliberately incorrect prediction oracle; matched controls with
+only noise-band prediction flags cleared matched the correct scalar oracle.
+Acceptance checks cover native/public PCM, owned export, checkpoint rollback,
+player ranges, rewind and seek. Dedicated PNS coupling, intensity interactions
+and other unqualified codec combinations remain outside this fixture matrix.

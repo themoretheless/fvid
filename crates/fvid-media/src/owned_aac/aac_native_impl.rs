@@ -632,6 +632,10 @@ impl NativeAacDecoder {
                         let short=coupling.channel.info.sequence==super::aac_synthesis::WindowSequence::EightShort;
                         let offsets=if short {tables.short}else{tables.long};
                         let limit=BandTables::tns_limit(self.config.sample_rate,short).min(coupling.channel.info.max_sfb as usize);
+                        let mut prediction=prediction;
+                        if let Some(data)=&mut prediction {
+                            if let super::aac_ltp_syntax::Usage::Bands(used)=&mut data.usage {coupling.channel.suppress_ltp_noise(used);}
+                        }
                         let prediction=prediction.as_ref().map(ltp_data_for_channel);
                         slot.as_mut().unwrap().prepare_spectrum(spectrum,prediction.as_deref(),coupling.channel.info.sequence,coupling.channel.info.shape,offsets,limit,coupling.channel.tns.as_ref())?
                     } else {coupling.channel.apply_tns(&self.config, spectrum)?};
@@ -709,6 +713,9 @@ impl NativeAacDecoder {
                         let short=channel.info.sequence==super::aac_synthesis::WindowSequence::EightShort;
                         let offsets=if short {tables.short}else{tables.long};
                         let limit=BandTables::tns_limit(self.config.sample_rate,short).min(channel.info.max_sfb as usize);
+                        if let Some(data)=&mut ltp_data[*target] {
+                            if let super::aac_ltp_syntax::Usage::Bands(used)=&mut data.usage {channel.suppress_ltp_noise(used);}
+                        }
                         let prediction=ltp_data[*target].as_ref().map(ltp_data_for_channel);
                         *spectrum=self.ltp_synthesis[*target].prepare_spectrum(std::mem::take(spectrum),prediction.as_deref(),channel.info.sequence,channel.info.shape,offsets,limit,channel.tns.as_ref())?;
                     } else {

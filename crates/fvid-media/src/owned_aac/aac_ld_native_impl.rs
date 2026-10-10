@@ -48,7 +48,7 @@ impl NativeAacDecoder {
         let mut next = self.ld_synthesis.clone();
         let n = usize::from(config.frame_samples);
         let mut output = vec![0.; n * channels.len()];
-        for (slot, (channel, residual, prediction)) in channels.into_iter().enumerate() {
+        for (slot, (channel, residual, mut prediction)) in channels.into_iter().enumerate() {
             let target = self.mapping[slot];
             let shape = if channel.info.shape == super::aac_synthesis::WindowShape::Sine {
                 LdWindowShape::Sine
@@ -56,6 +56,7 @@ impl NativeAacDecoder {
                 LdWindowShape::LowOverlap
             };
             let limit = bands.tns_max_bands.min(usize::from(channel.info.max_sfb));
+            if let Some(data) = &mut prediction { channel.suppress_ltp_noise(&mut data.used); }
             let pcm = next[target].process(
                 residual,
                 prediction.as_ref(),

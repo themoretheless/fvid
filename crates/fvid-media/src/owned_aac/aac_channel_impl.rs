@@ -20,6 +20,16 @@ pub struct ChannelData {
     pub gain: Option<super::aac_gain_control::GainControl>,
 }
 impl ChannelData {
+    /// ISO 4.6.7.4.2: PNS wins over LTP in the same long-window band.
+    /// Keep the predictor/lag metadata, since the reconstructed noise still
+    /// advances PCM history and later ordinary bands may use prediction.
+    pub(crate) fn suppress_ltp_noise(&self, used: &mut [bool]) {
+        if let Some(books) = self.codebooks.first() {
+            for (flag, book) in used.iter_mut().zip(books) {
+                if *book == 13 { *flag = false; }
+            }
+        }
+    }
     /// Reconstruct ordinary spectral bands into per-window order. Special
     /// noise/intensity bands need separate tools and are rejected here.
     /// Output uses AAC spectral units; PCM normalization is not applied.
