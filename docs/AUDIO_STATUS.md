@@ -2921,3 +2921,38 @@ native/public/owned PCM, control flags, checkpoint rollback, player ranges,
 rewind and seek. This qualifies these specific order-one long-window
 combinations; higher orders, short/transition windows and additional source or
 target rosters remain separate requirements.
+
+
+### Long LTP/PNS coupling TNS orders 1–12 (2026-10-10)
+
+`scripts/generate_aac_ltp_tns_orders_fixtures.py` authors four stereo CCE videos
+and matched controls at 48 kHz, 960/1024 and coupling points 0/1. Each 24-packet stream
+cycles all long TNS orders 1–12, with alternating directions, six spectral bands
+(24 nonzero coefficients), PNS, active LTP, separate signed band gains and
+nonzero target residuals. Source/target orders are complementary on the left.
+The filters use a nonzero last reflection coefficient and zero preceding
+coefficients, so high orders cause an actual delayed-tap response over the
+24-coefficient region. This qualifies all order lengths for this coefficient
+family, not all reflection-coefficient combinations. The independent scalar
+oracle computes FIR prediction analysis, AR spectral reconstruction, source
+PCM history and both target overlap histories. Regression coverage includes
+native checkpoint/rollback, complete public/owned PCM export, ranges, rewind
+and seek; ordinary tests use saved fixtures without FFmpeg/network. Multi-tap
+reflection patterns, compressed/4-bit coefficients, short/transition windows
+and additional source rosters remain separate qualification requirements.
+
+Normative limit note: ISO/IEC 14496-3:2009 table4.156 limits non-Main long TNS
+to 12; the earlier 2001 table4.102 allowed 20 for other AOT above32kHz. This
+matrix follows the 2009 table. Initial order13..20 rejection is not reported as
+a decoder defect, nor as acceptance of legacy2001 streams.
+
+Four separate 48-kHz refusal videos retain orders13/20 for both frame lengths.
+The regression requires the specific TNS-order error in native/public decoding,
+no published PCM, and unchanged native history after refusal. These are explicit
+refusal checks under the 2009 limit, not playback acceptance or a claim that
+legacy2001 order13..20 streams have been implemented.
+
+Generator geometry note: at48kHz TNS length63 explicitly reaches band zero;
+length47 would start above the first bands. The saved videos and scalar oracle
+therefore filter the same full24-coefficient interval. A preliminary mismatch
+with length47 was corrected in the generator, not labelled a decoder defect.
