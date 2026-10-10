@@ -4770,3 +4770,28 @@ are refusal regressions; the paired positive videos require intended playback.
 `tests/aac_ld_stereo.rs` checks native/public PCM, packet timestamps, checkpoint
 replay, reset, pair cursor rollback and player ranges/rewind/seek. This is a
 finite stereo/resilience matrix, not universal LD/ELD/USAC conformance.
+
+
+### AAC-LD rate/layout/final-band matrix
+
+`scripts/generate_aac_ld_layout_fixtures.py` authors 160 AOT23 epConfig=0 videos,
+`aac-ld-layout-packets.bin`, `aac-ld-layout-reference.f32le` and
+`aac-ld-layout.json`. The matrix covers 480/512; indexed 22050, 24000, 32000,
+44100 and 48000 Hz; explicit 27713, 37566 and 46009 Hz; configurations
+1–7, 11, 12 and 14. Non-LFE streams place authored quantized values in the first
+and last long scalefactor band. ISO 4.86–4.91 band counts and last-band lower
+boundaries are supplied independently to the generator. LFE uses one low band.
+
+Channels have distinct gains/residuals, independent LD windows, lag 1023 and
+other lag updates/reuse/absence. The scalar oracle uses sparse direct cosine
+sums and an absolute PCM timeline, then reorders the authored AAC channel lanes
+to ascending WAVE speaker bits. All audio data and codec parameters are authored;
+video/container scaffolding uses existing authored fixtures. No private source
+media/parameters, FFmpeg, network or foreign decoder is used. Generation remains
+separate from tests.
+
+`tests/aac_ld_layout.rs` checks the complete matrix roster, scalar/native/public
+PCM, speaker masks, timestamps/durations, checkpoint replay, stable retained
+storage and rollback on trailing data. Player tests check sample-clock ranges,
+rewind and seek at both indexed and explicit rates. This matrix does not claim
+all possible rates, layouts or codec-tool combinations.

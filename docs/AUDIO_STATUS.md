@@ -2825,3 +2825,10 @@ AAC-LD qualification now includes 64 authored stereo/resilience combinations:
 lag histories, window-shape switches and bidirectional TNS. PCM, malformed input
 rollback and player range/rewind/seek are checked against synthetic references.
 Additional rates/layouts/tools and protected epConfig/PCE/ELD/USAC remain open.
+
+
+AAC-LD now has authored first/final-band PCM and player coverage at five indexed
+and three explicit rates across all ten admitted channel configurations, with
+both 480/512 frames. The fixture matrix validates WAVE channel ordering/masks,
+independent LTP histories and sample-clock ranges/rewind/seek. Additional tool
+cross-products and protected epConfig/PCE/ELD/USAC remain unqualified/open.
