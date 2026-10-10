@@ -10799,3 +10799,27 @@ This is a transform primitive, not SI/SP playback acceptance. Chroma switching,
 SI entropy dispatch and picture/DPB/deblocking integration remain required.
 The decoder's existing SI/SP picture refusal remains enabled until that work
 and end-to-end pixel acceptance are complete.
+
+### Primary-SP 4:2:0 chroma foundation (2026-10-10)
+
+`avc_transform::primary_sp_chroma_420` implements the eight-bit Extended
+profile primary-SP process (8.6.1.2). Inputs are mapped QPC/QSC and raster
+DC/AC levels. It transforms prediction, separately requantizes the coupled
+2x2 DC and each AC block, scales at QSC, reconstructs and clips samples.
+AC slot zero must be zero because DC is supplied separately. Component QPs
+0..39, sample precision and coefficient ranges are checked.
+
+`generate_avc_switching_chroma_fixtures.py` supplies 720 independent matrix/
+Hadamard cases across all mapped QSC values and six QPC boundaries. Two
+original four-frame MP4 streams start with an I_PCM gradient and continue
+with primary SP QSY 0/26/51: one uses P_Skip, the other zero motion plus
+signed luma/DC/AC residuals. Chroma DC scan index 1 is converted to raster
+(row=1,column=0). Local JM 19 exactly matched both independently generated
+YUV references (1536 bytes each). Ordinary tests use saved references and
+do not launch JM, FFmpeg or network operations. Regeneration is separate.
+
+The full-picture decoder's explicit SP refusal remains until entropy,
+reconstruction and deblocking integration is implemented. These kernel tests
+are not player acceptance. SI/secondary-SP chroma remains open: the
+2016/2024 normative text's DC-copy equation differs from JM's scaled-DC
+implementation; no compatibility behavior is silently selected here.
