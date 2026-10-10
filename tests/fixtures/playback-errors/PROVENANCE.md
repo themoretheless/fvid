@@ -4684,3 +4684,22 @@ section 4.6.6; ER common-window data placement was cross-checked against the
 [FAAD2 2.11.2 primary syntax source](https://raw.githubusercontent.com/knik0/faad2/2.11.2/libfaad/syntax.c).
 Only field meanings/order were inspected; no foreign decoder code is copied,
 linked or executed.
+
+### ER AAC-LTP resilience combinations
+
+`aac-er-ltp-resilient-*` is authored by
+`scripts/generate_aac_er_ltp_resilient_fixtures.py`, using own Huffman tuple,
+RVLC and segmented HCR writers. Seventy positive videos span AOT19/ep0, all
+seven nonzero resilience combinations, 960/1024, mono/independent/common stereo,
+MS0/1/2, active LTP, virtual book17, RVLC escapes and directional TNS. Four
+independent-window CPE videos alternate a 10192-bit HCR channel with a small
+channel, keeping the entire CPE within its 12288-bit input buffer. Seventy malformed videos isolate HCR zero-longest,
+RVLC reverse-gain and virtual-LAV overflow after valid packet history.
+
+PCM is from own scalar inverse quantization, MS, direct cosine prediction,
+TNS FIR/AR, sine/KBD windows and float history. Existing authored AVC and
+container templates are used only as synthetic video/container scaffolding.
+No private media, frames, audio or codec parameters, foreign codec code or
+foreign decoder execution are used. Generation is separate from tests, offline
+and FFmpeg-free. Syntax references remain ISO/IEC14496-3 subpart4 HCR/RVLC/LTP
+and the FAAD2 2.11.2 primary field-order cross-check linked above.

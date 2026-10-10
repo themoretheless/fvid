@@ -185,6 +185,12 @@ impl ChannelData {
     pub fn read_ltp(
         bits: &mut BitReader<'_>, config: &AacConfig,
     ) -> Result<(Self, Option<super::aac_ltp_syntax::LtpData>)> {
+        Self::read_ltp_context(bits, config, false)
+    }
+    /// Independent-window CPEs retain their pair HCR length allowance.
+    pub(crate) fn read_ltp_context(
+        bits: &mut BitReader<'_>, config: &AacConfig, pair: bool,
+    ) -> Result<(Self, Option<super::aac_ltp_syntax::LtpData>)> {
         if !matches!(config.object_type,4|19) { return Err(invalid("AAC LTP channel requires AOT4 or AOT19")); }
         let tables = BandTables::for_config(config)?;
         let mut cursor = bits.clone();
@@ -192,7 +198,7 @@ impl ChannelData {
         let header = super::aac_ltp_syntax::LtpIcsInfo::read(
             &mut cursor, ((tables.long.len()-1) as u8,(tables.short.len()-1) as u8), config.frame_samples, false,
         )?;
-        let channel = Self::read_payload(&mut cursor, config, &tables, gain, header.info, false)?;
+        let channel = Self::read_payload(&mut cursor, config, &tables, gain, header.info, pair)?;
         *bits = cursor;
         Ok((channel, header.channels.into_iter().next().unwrap()))
     }

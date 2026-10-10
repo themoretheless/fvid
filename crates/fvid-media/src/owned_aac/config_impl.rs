@@ -87,9 +87,6 @@ impl AacConfig {
             if extension_flag && matches!(object_type,17|19) {
                 (b.bit()?, b.bit()?, b.bit()?)
             } else { (false, false, false) };
-        if object_type == 19 && (section_data_resilience || scalefactor_data_resilience || spectral_data_resilience) {
-            return Err(invalid("ER AAC LTP resilience tools are not yet qualified"));
-        }
         if extension_flag && b.bit()? {
             return Err(invalid("AAC extensionFlag3 must be zero"));
         }

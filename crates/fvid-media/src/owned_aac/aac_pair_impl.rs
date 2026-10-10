@@ -201,9 +201,9 @@ impl ChannelPair {
             let right = ChannelData::read_common(&mut cursor,config,Some(&header.info),true)?;
             (left, right, header.channels, right_start)
         } else {
-            let (left, before) = ChannelData::read_ltp(&mut cursor,config)?;
+            let (left, before) = ChannelData::read_ltp_context(&mut cursor,config,true)?;
             let right_start = cursor.position();
-            let (right, after) = ChannelData::read_ltp(&mut cursor,config)?;
+            let (right, after) = ChannelData::read_ltp_context(&mut cursor,config,true)?;
             (left,right,[before,after],right_start)
         };
         let right_span = right_start..cursor.position();

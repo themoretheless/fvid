@@ -15,9 +15,10 @@ channel layouts and 960/1024 core frames. Authored mono/stereo/3.0/5.1 PCM
 qualification is below; protected epConfig, PCE, SBR/PS and other ER profiles
 remain incomplete.
 
-ER AAC-LTP (AOT19) baseline/epConfig0 now has owned mono/stereo 960/1024
-acceptance, including deferred common-window prediction data. Its resilience
-flags, protected epConfig, PCE and SBR/PS remain incomplete.
+ER AAC-LTP (AOT19)/epConfig0 has owned mono/stereo 960/1024 acceptance,
+including all seven section/RVLC/HCR combinations, deferred common-window
+prediction data and independent-window CPE HCR lengths. Protected epConfig,
+PCE and SBR/PS remain incomplete.
 
 AAC Main: owned frequency-domain prediction is integrated with channel/CCE
 history, checkpoint/reset and stereo tool ordering. Two mono MP4 fixtures
@@ -2740,3 +2741,43 @@ offline (512 total; one pre-existing library test ignored). All 33 ER-LTP
 artifacts regenerate byte-identically. The initial AOT19 profile refusal was
 reproduced before the fix and replaced with five acceptance/rollback tests.
 No FFmpeg was executed.
+
+## ER AAC-LTP resilience and independent-window HCR
+
+AOT19/epConfig0 now admits all seven nonzero section/RVLC/HCR flag combinations.
+This supersedes the baseline resilience refusal above. Existing owned resilience
+readers feed the owned LTP/TNS/synthesis path. Independent-window CPE channel
+parsing now carries element context, so both channels retain the CPE HCR
+12288-bit allowance instead of the SCE 6144-bit allowance. This changes no
+ordinary AOT4 spectral syntax.
+
+Seventy authored twelve-frame videos cover 960/1024 mono, independently coded
+stereo and common-window MS0/1/2, all seven combinations, independent predictor
+switching, all eight LTP coefficients, lag and band-use variation, sine/KBD and
+long/start/eight-short/stop transitions. They include initial zero HCR regions,
+virtual book17, RVLC signed/escape deltas and directional deferred TNS. An own
+scalar inverse-quantization/MS/FIR prediction/AR TNS/direct cosine/window/float
+history oracle qualifies every PCM sample at absolute tolerance 1e-7.
+
+Four additional three-frame independent-window CPE videos alternate the large
+channel: one HCR region is 10192 bits, the other is small, and the entire CPE
+stays within its 12288-bit input buffer. Reusing the former SCE context
+reproduces `AAC HCR incomplete nonpriority codeword`; the fixed direct pair
+parsing, native/public/owned PCM, rewind and seek pass. Seventy separate corrupt
+videos isolate HCR zero-longest, RVLC reverse-gain and virtual-LAV failures.
+Channel/pair cursors and decoder histories roll back after failures; every
+byte prefix of the seventy regular cases is also checked; the four large CPE
+cases check selected truncations. Public MP4 export, repeated ranges and seeks
+are acceptance tests, replacing the ASC-refusal reproduction.
+
+This is finite ER-LTP tool-combination qualification, not complete AAC or codec
+conformance. Protected epConfig, ER PCE/SBR/PS, wider tools/layout combinations,
+LD/ELD/USAC and broader video codec profiles/tools remain incomplete. Generator:
+`scripts/generate_aac_er_ltp_resilient_fixtures.py`; fixtures are authored offline
+and ordinary tests require no FFmpeg or network. No private media or codec
+parameter sets were used.
+
+Validation: 481 owned library tests and 37 selected AAC integration tests passed
+offline (518 total; one pre-existing library test ignored). The six new tests
+passed on the final 70-combination/four-valid-CPE corpus. All 147 final
+artifacts regenerate byte-identically. No FFmpeg was executed.
