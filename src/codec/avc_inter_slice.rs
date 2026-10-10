@@ -50,7 +50,7 @@ impl<'a> InterCavlcSlice<'a> {
         syntax: InterSyntax,
         memory_limit: usize,
     ) -> Result<Self> {
-        if !matches!(syntax.slice, SliceType::P | SliceType::B) || syntax.chroma_array_type != 1 {
+        if !matches!(syntax.slice, SliceType::P | SliceType::Sp | SliceType::B) || syntax.chroma_array_type != 1 {
             return Err(invalid(
                 "inter slice reader requires progressive 4:2:0 P/B CAVLC",
             ));
@@ -341,7 +341,7 @@ impl<'a> InterCavlcSlice<'a> {
         }
         let mut probe = self.bits.clone();
         let code = probe.unsigned_golomb()?;
-        let offset = if self.syntax.slice == SliceType::P {
+        let offset = if matches!(self.syntax.slice, SliceType::P | SliceType::Sp) {
             5
         } else {
             23

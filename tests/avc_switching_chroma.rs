@@ -95,33 +95,190 @@ fn complete_primary_sp_kernel_sequence_matches_saved_scalar_yuv() {
     }
 }
 #[test]
-fn primary_sp_video_refusal_remains_until_picture_integration() {
-    use fvid::codec::{
-        avc::{Pps, Sps},
-        avc_decoder::AvcDecoder,
-        avc_slice::{SliceHeader, SliceType},
-        config::AvcConfig,
-    };
+fn primary_sp_video_decodes_exact_signed_residual_and_skip_frames_after_reset() {
+    use fvid::codec::avc_decoder::AvcDecoder;
     let m = manifest();
-    let config = hex(m["video"]["configuration"].as_str().unwrap());
-    let avc = AvcConfig::parse(&config).unwrap();
-    let sps = Sps::parse(avc.sps[0]).unwrap();
-    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
-    let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
-    decoder
-        .decode(&hex(m["video"]["packets"][0].as_str().unwrap()))
-        .unwrap()
+    for key in ["video", "coded_video"] {
+        let c = &m[key];
+        let config = hex(c["configuration"].as_str().unwrap());
+        let expected: &[u8] = if key == "video" {
+            include_bytes!("fixtures/playback-errors/avc-primary-sp-skip-reference.yuv")
+        } else {
+            include_bytes!("fixtures/playback-errors/avc-primary-sp-signed-residual-reference.yuv")
+        };
+        let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+        for _ in 0..2 {
+            let mut actual = vec![];
+            for packet in c["packets"].as_array().unwrap() {
+                let frame = decoder
+                    .decode(&hex(packet.as_str().unwrap()))
+                    .unwrap()
+                    .unwrap();
+                frame.write_planar(&mut actual).unwrap();
+            }
+            assert_eq!(actual, expected, "{key}");
+            decoder.reset();
+        }
+    }
+}
+#[cfg(feature = "player")]
+#[test]
+fn primary_sp_mp4_software_playback_and_rewind_match_oracle() {
+    let m = manifest();
+    for key in ["video", "coded_video"] {
+        let c = &m[key];
+        let data = std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/playback-errors")
+                .join(c["file"].as_str().unwrap()),
+        )
         .unwrap();
-    let packet = hex(m["video"]["packets"][1].as_str().unwrap());
-    let h = SliceHeader::parse(&packet[4..], &sps, &pps).unwrap();
-    assert_eq!(h.slice_type, SliceType::Sp);
-    assert!(!h.sp_for_switch);
-    assert_eq!(h.slice_qs, Some(0));
-    let error = decoder.decode(&packet).unwrap_err();
-    assert!(
-        error
-            .to_string()
-            .contains("AVC picture type is not implemented"),
-        "{error}"
-    );
+        let expected: &[u8] = if key == "video" {
+            include_bytes!("fixtures/playback-errors/avc-primary-sp-skip-reference.yuv")
+        } else {
+            include_bytes!("fixtures/playback-errors/avc-primary-sp-signed-residual-reference.yuv")
+        };
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+            std::io::Cursor::new(data),
+            Default::default(),
+            1 << 20,
+        )
+        .unwrap();
+        assert!(!reader.hardware_accelerated());
+        for target in [None, Some(2), Some(3), None] {
+            if let Some(target) = target {
+                assert_eq!(reader.seek_to_sync(target), 0);
+            } else {
+                reader.rewind();
+            }
+            let mut actual = vec![];
+            while let Some(frame) = reader.read_frame().unwrap() {
+                actual.extend(
+                    frame
+                        .picture
+                        .y
+                        .iter()
+                        .chain(&frame.picture.cb)
+                        .chain(&frame.picture.cr)
+                        .map(|v| *v as u8),
+                );
+            }
+            assert_eq!(actual, expected, "{key}");
+            reader.rewind();
+        }
+    }
+}
+
+#[test]
+fn primary_sp_deblocking_matches_jm_and_secondary_sp_remains_specific_refusal() {
+    use fvid::codec::{
+        avc_decoder::AvcDecoder,
+        avc_transform::{primary_sp_chroma_420, switching_luma_4x4},
+    };
+    let m: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-primary-sp-filter.json"
+    ))
+    .unwrap();
+    for c in m["cases"].as_array().unwrap() {
+        let config = hex(c["configuration"].as_str().unwrap());
+        let expected = std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/playback-errors")
+                .join(c["reference"].as_str().unwrap()),
+        )
+        .unwrap();
+        let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
+        let mut actual = vec![];
+        for packet in c["packets"].as_array().unwrap() {
+            decoder
+                .decode(&hex(packet.as_str().unwrap()))
+                .unwrap()
+                .unwrap()
+                .write_planar(&mut actual)
+                .unwrap();
+        }
+        assert_eq!(actual, expected, "filter mode {}", c["mode"]);
+        // Prove that this stream exercises filtering rather than matching by omission.
+        let source: Vec<u16> = c["source"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_u64().unwrap() as u16)
+            .collect();
+        let mut unfiltered = vec![0u16; 384];
+        for b in 0..16 {
+            let x = b % 4 * 4;
+            let y = b / 4 * 4;
+            let p = std::array::from_fn(|i| source[(y + i / 4) * 16 + x + i % 4]);
+            let samples = switching_luma_4x4(&p, &[0; 16], 50, 0, false).unwrap();
+            for i in 0..16 {
+                unfiltered[(y + i / 4) * 16 + x + i % 4] = samples[i];
+            }
+        }
+        for offset in [256, 320] {
+            let p = source[offset..offset + 64].try_into().unwrap();
+            unfiltered[offset..offset + 64]
+                .copy_from_slice(&primary_sp_chroma_420(p, &[0; 4], &[[0; 16]; 4], 39, 0).unwrap());
+        }
+        assert_ne!(
+            unfiltered.iter().map(|v| *v as u8).collect::<Vec<_>>(),
+            expected[384..768]
+        );
+        decoder.reset();
+        decoder
+            .decode(&hex(c["packets"][0].as_str().unwrap()))
+            .unwrap();
+        let error = decoder
+            .decode(&hex(c["secondary_packets"][0].as_str().unwrap()))
+            .unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("switching SP is not implemented"),
+            "{error}"
+        );
+    }
+}
+
+#[cfg(feature = "player")]
+#[test]
+fn secondary_sp_mp4_refusal_is_not_primary_sp_acceptance() {
+    let m: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-primary-sp-filter.json"
+    ))
+    .unwrap();
+    for c in m["cases"].as_array().unwrap() {
+        let data = std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/playback-errors")
+                .join(c["secondary_file"].as_str().unwrap()),
+        )
+        .unwrap();
+        let mut reader = fvid::playback_mp4::Mp4VideoReader::open_software(
+            std::io::Cursor::new(data),
+            Default::default(),
+            1 << 20,
+        )
+        .unwrap();
+        let mut frames = 0;
+        let error = loop {
+            match reader.read_frame() {
+                Err(e) => break e,
+                Ok(Some(_)) => {
+                    frames += 1;
+                    assert!(
+                        frames <= 1,
+                        "secondary SP must not enter primary reconstruction"
+                    );
+                }
+                Ok(None) => panic!("secondary SP refusal was lost"),
+            }
+        };
+        assert!(
+            error
+                .to_string()
+                .contains("switching SP is not implemented"),
+            "{error}"
+        );
+    }
 }

@@ -33,6 +33,7 @@ struct InterJob {
     eight: bool,
     qps: [u8; 3],
     bypass: bool,
+    sp_qs: Option<[u8; 3]>,
 }
 /// Decode-order record replayed by pass B (see below).
 enum Order {
@@ -61,7 +62,17 @@ fn reconstruct_inter_job(
         [&refs[0], &refs[1]],
         job.weights.as_deref(),
     )?;
-    let prediction = if let Some(c) = &job.coefficients {
+    let prediction = if let Some(qs) = job.sp_qs {
+        let zero_luma = [[0;16];16];
+        let zero_dc = [[0;4];2];
+        let zero_ac = [[[0;16];4];2];
+        prediction.reconstruct_primary_sp(
+            job.coefficients.as_ref().map_or(&zero_luma, |c| &c.luma4),
+            job.coefficients.as_ref().map_or(&zero_dc, |c| &c.chroma_dc),
+            job.coefficients.as_ref().map_or(&zero_ac, |c| &c.chroma_ac),
+            job.qps, qs,
+        )?
+    } else if let Some(c) = &job.coefficients {
         let luma = if job.eight {
             InterLumaResidual::Blocks8(&c.luma8)
         } else {
@@ -198,10 +209,17 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
     let header = *headers
         .first()
         .ok_or_else(|| invalid("missing inter slices"))?;
+    if headers.iter().any(|h|h.slice_type==SliceType::Sp)
+        && (headers.iter().any(|h|h.slice_type==SliceType::Sp && h.sp_for_switch)
+            || sps.profile!=88 || !sps.frame_mbs_only || sps.bit_depth_luma!=8
+            || sps.bit_depth_chroma!=8 || pps.cabac || pps.transform_8x8 || sps.transform_bypass)
+    {
+        return Err(crate::unsupported("AVC primary SP requires progressive eight-bit 4:2:0 CAVLC; switching SP is not implemented"));
+    }
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()
         || headers.iter().any(|h| {
-            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)
+            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
@@ -225,7 +243,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
     }
     if !matches!(
         header.slice_type,
-        SliceType::I | SliceType::P | SliceType::B
+        SliceType::I | SliceType::P | SliceType::Sp | SliceType::B
     ) || header.first_mb != 0
         || header.disable_deblocking_filter_idc > 2
         || header.field_pic
@@ -347,7 +365,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                     .map(|_| DecodedBlockEdges {
                         blocks: [BlockEdge {
                             intra: false,
-                            switching_slice: false,
+                            switching_slice: header.slice_type == SliceType::Sp,
                             nonzero_luma: false,
                             motion: [None; 2],
                         }; 16],
@@ -445,7 +463,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                     let explicit_weights = if is_b {
                         pps.weighted_bipred == 1
                     } else {
-                        header.slice_type == SliceType::P && pps.weighted_pred
+                        matches!(header.slice_type, SliceType::P | SliceType::Sp) && pps.weighted_pred
                     };
                     let lengths = [
                         if header.slice_type == SliceType::I {
@@ -583,7 +601,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                                 DecodedBlockEdges {
                                     blocks: [BlockEdge {
                                         intra: true,
-                                        switching_slice: false,
+                                        switching_slice: header.slice_type == SliceType::Sp,
                                         nonzero_luma: false,
                                         motion: [None; 2],
                                     }; 16],
@@ -737,7 +755,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                         ];
                         let empty = BlockEdge {
                             intra: false,
-                            switching_slice: false,
+                            switching_slice: header.slice_type == SliceType::Sp,
                             nonzero_luma: false,
                             motion: [None; 2],
                         };
@@ -811,6 +829,10 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                                 eight,
                                 bypass: sps.transform_bypass && qps[0] == 0,
                                 qps,
+                                sp_qs: if header.slice_type == SliceType::Sp {
+                                    let qs=header.slice_qs.ok_or_else(||invalid("missing SP QS"))?;
+                                    Some([qs as u8,chroma_qp(qs,pps.chroma_qp_offset,8),chroma_qp(qs,pps.second_chroma_qp_offset,8)])
+                                } else {None},
                             });
                         covered[address] = true;
                         seen += 1;

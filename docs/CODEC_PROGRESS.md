@@ -10818,8 +10818,38 @@ signed luma/DC/AC residuals. Chroma DC scan index 1 is converted to raster
 YUV references (1536 bytes each). Ordinary tests use saved references and
 do not launch JM, FFmpeg or network operations. Regeneration is separate.
 
-The full-picture decoder's explicit SP refusal remains until entropy,
-reconstruction and deblocking integration is implemented. These kernel tests
-are not player acceptance. SI/secondary-SP chroma remains open: the
+At this kernel-only milestone, full-picture SP decoding was still refused.
+The later primary-SP integration entry below supersedes that status; these
+kernel tests alone are not player acceptance. SI/secondary-SP chroma remains open: the
 2016/2024 normative text's DC-copy equation differs from JM's scaled-DC
 implementation; no compatibility behavior is silently selected here.
+
+### Progressive primary-SP decoder and software player (2026-10-10)
+
+Primary SP now uses the owned progressive Extended-profile eight-bit CAVLC
+4:2:0 picture path. Entropy and P-like references/motion retain slice type SP;
+inter residuals and P_Skip both use SP requantization at QSY and mapped QSC.
+Intra macroblocks retain ordinary intra reconstruction. Chroma DC scan levels
+are converted to raster order for the switching transform. Each slice's SP
+marker reaches deblocking boundary strength; filter QPs remain QPY/QPC rather
+than QSY/QSC. Mixed I/P/B paths keep their previous reconstruction.
+
+`avc_switching_chroma` replaces the old primary-SP refusal expectation with
+exact four-frame decode/reset acceptance for the signed-residual and skip
+streams. Software MP4 playback/rewind is checked with hardware disabled.
+`generate_avc_primary_sp_filter_fixtures.py` authors smooth block-step
+I_PCM references and primary-SP skip streams at QPY50, QSY0/26/51 with
+deblocking modes 0/2; saved JM YUV provides independent filter acceptance.
+The test also proves unfiltered pixels differ and retains an explicit
+secondary-SP refusal companion. Only optional, explicitly requested fixture
+reference capture launches JM; ordinary generation/tests require no FFmpeg
+or network.
+
+This does not establish all AVC switching coverage: SI/secondary SP chroma,
+field/MBAFF SP and the associated picture integration remain open. The
+decoder explicitly rejects those paths before selecting primary reconstruction.
+
+Validation: 200 AVC unit tests; 7 primary-SP integration tests (including software
+MP4 seek/rewind and secondary refusal); 3 luma and 3 scaling-list IPB regression
+tests passed offline without FFmpeg. Seven new artifacts reproduced exactly,
+including explicitly repeated optional JM capture.
