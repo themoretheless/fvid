@@ -10563,3 +10563,21 @@ Generator geometry note: at48kHz TNS length63 explicitly reaches band zero;
 length47 would start above the first bands. The saved videos and scalar oracle
 therefore filter the same full24-coefficient interval. A preliminary mismatch
 with length47 was corrected in the generator, not labelled a decoder defect.
+
+
+### Multi-tap long LTP/PNS coupling TNS (2026-10-10)
+
+The shared long-order fixture generator now has a separate multi-tap mode,
+invoked by `scripts/generate_aac_ltp_tns_multitap_fixtures.py`. Four authored
+48-packet videos cover 960/1024 and coupling points0/1; each stream contains
+all48 order1..12 × resolution3/4 × compressed/uncompressed combinations with
+nonzero +/-1 reflection coefficients throughout, alternating directions,
+source LTP/PNS, signed band gains and nonzero stereo target residuals. The
+scalar oracle independently computes the reflection-to-LPC recursion and FIR/AR
+history, direct cosine transforms and source/target PCM overlap. Complete PCM,
+checkpoint rollback, public/owned export, ranges and player rewind/seek are
+checked. This is the authored +/-1 coefficient family, not every possible
+reflection value or every Cartesian product with PNS/prediction presence.
+The initial no-prediction frame primes PCM history; later frames exercise LTP.
+Separate order13/20 refusal fixtures remain distinct from acceptance. Short
+windows, transitions and additional source/tag rosters remain separate work.

@@ -1,0 +1,3287 @@
+{
+  "cases": [
+    {
+      "name": "960-0",
+      "n": 960,
+      "point": 0,
+      "asc": "21840cc40002201000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 134,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 274,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 414,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 556,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 698,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 840,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 984,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 1128,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 1274,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 1420,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 1566,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 1714,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 1850,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 1986,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2122,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2260,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2398,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2536,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2676,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2816,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2956,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 3096,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 3236,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 3378,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 3520,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 3664,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 3808,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 3954,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 4100,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4248,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 4396,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4546,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 4696,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4848,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 5000,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 5154,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 5294,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 5434,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 5574,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 5716,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 5858,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 6002,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 6146,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 6290,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 6436,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 6582,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 6728,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 67,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 204,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 344,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 485,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 627,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 769,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 912,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 1056,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 1201,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 1347,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 1493,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 1640,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 1782,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 1918,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2054,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2191,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2329,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2467,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2606,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 2746,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 2886,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 3026,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 3166,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 3307,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 3449,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 3592,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 3736,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 3881,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4027,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 4174,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4322,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 4471,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4621,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 4772,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 4924,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 5077,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 5224,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 5364,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 5504,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 5645,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 5787,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 5930,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 6074,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 6218,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 6363,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 6509,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 6655,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 6802,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 368640,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 46080,
+      "slots": 15,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-tns-multitap-960-0-synthetic.mp4",
+        "sha256": "d2f68cc7a6fae6d7c7341d93dfffa813461935c4e86fe3d172e1598d3dc3ef86",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21840cc40002201000",
+        "pcm_offset": 0,
+        "samples": 46080
+      },
+      "control_video": {
+        "file": "aac-ltp-tns-multitap-960-0-control-synthetic.mp4",
+        "sha256": "424b12437796d59d80a39b29018b819607657e432e6badb40468a46c1d9e3109",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21840cc40002201000",
+        "pcm_offset": 0,
+        "samples": 46080
+      }
+    },
+    {
+      "name": "960-1",
+      "n": 960,
+      "point": 1,
+      "asc": "21840cc40002201000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 6971,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7105,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 7245,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7385,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 7527,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7669,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 7811,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7955,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 8099,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 8245,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 8391,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 8537,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 8685,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 8821,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 8957,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9093,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9231,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9369,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9507,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9647,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9787,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9927,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 10067,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 10207,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 10349,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 10491,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 10635,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 10779,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 10925,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11071,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 11219,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11367,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 11517,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11667,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 11819,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11971,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 12125,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 12265,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 12405,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 12545,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 12687,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 12829,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 12973,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 13117,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 13261,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 13407,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 13553,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 13699,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 7038,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7175,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 7315,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7456,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 7598,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 7740,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 7883,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 8027,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 8172,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 8318,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 8464,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 8611,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 8753,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 8889,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9025,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9162,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9300,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9438,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9577,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9717,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 9857,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 9997,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 10137,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 10278,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 10420,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 10563,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 10707,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 10852,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 10998,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11145,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 11293,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11442,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 11592,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 11743,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 11895,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 12048,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 12195,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 12335,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 12475,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 12616,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 12758,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 12901,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 13045,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 13189,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 13334,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 13480,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 13626,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 13773,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "reference_offset": 368640,
+      "reference_bytes": 368640,
+      "container_rate": 48000,
+      "container_frame_samples": 960,
+      "samples": 46080,
+      "slots": 15,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-tns-multitap-960-1-synthetic.mp4",
+        "sha256": "010765802c4cfff5bce65165f0bfc1f4ff2ad94e1eb7facacd6e3186db0820b1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21840cc40002201000",
+        "pcm_offset": 0,
+        "samples": 46080
+      },
+      "control_video": {
+        "file": "aac-ltp-tns-multitap-960-1-control-synthetic.mp4",
+        "sha256": "82ce1f4a4b280c905863f606e704d4e428a3fef000a0ec1d4949c614fb226ff2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21840cc40002201000",
+        "pcm_offset": 0,
+        "samples": 46080
+      }
+    },
+    {
+      "name": "1024-0",
+      "n": 1024,
+      "point": 0,
+      "asc": "21800cc40002201000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 13847,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 13981,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14121,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14261,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14403,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14545,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14687,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14831,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14975,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 15121,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 15267,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 15413,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 15561,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 15697,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 15833,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 15969,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16107,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16245,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16383,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16523,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16663,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16803,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16943,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 17083,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 17225,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 17367,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 17511,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 17655,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 17801,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 17947,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 18095,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18243,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 18393,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18543,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 18695,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18847,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 19001,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19141,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 19281,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19421,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 19563,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19705,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 19849,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19993,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 20137,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 20283,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 20429,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 20575,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 13914,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14051,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14191,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14332,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14474,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14616,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 14759,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 14903,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 15048,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 15194,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 15340,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 15487,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 15629,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 15765,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 15901,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16038,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16176,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16314,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16453,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16593,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 16733,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 16873,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 17013,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 17154,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 17296,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 17439,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 17583,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 17728,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 17874,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18021,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 18169,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18318,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 18468,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18619,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 18771,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 18924,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 19071,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19211,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 19351,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19492,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 19634,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 19777,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 19921,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 20065,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 20210,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 20356,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 20502,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 20649,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "reference_offset": 737280,
+      "reference_bytes": 393216,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 49152,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-tns-multitap-1024-0-synthetic.mp4",
+        "sha256": "d0903e65fa5b26c38f100eb32ad96b38489ad03798712dbe3067f04df1a4ea93",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21800cc40002201000",
+        "pcm_offset": 0,
+        "samples": 49152
+      },
+      "control_video": {
+        "file": "aac-ltp-tns-multitap-1024-0-control-synthetic.mp4",
+        "sha256": "782b3986aa79e9ed09cdb13bfdd369e83e9dd88edb7cf28c67cd41bec9107ff4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21800cc40002201000",
+        "pcm_offset": 0,
+        "samples": 49152
+      }
+    },
+    {
+      "name": "1024-1",
+      "n": 1024,
+      "point": 1,
+      "asc": "21800cc40002201000",
+      "channels": 2,
+      "frames": [
+        {
+          "offset": 20818,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 20952,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21092,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21232,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21374,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21516,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21658,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21802,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21946,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 22092,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 22238,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 22384,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 22532,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 22668,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 22804,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 22940,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23078,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23216,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23354,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23494,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23634,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23774,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23914,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 24054,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 24196,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 24338,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 24482,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 24626,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 24772,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 24918,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25066,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 25214,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25364,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 25514,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25666,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 25818,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25972,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26112,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 26252,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26392,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 26534,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26676,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 26820,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26964,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 27108,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 27254,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 27400,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 27546,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 20885,
+          "bytes": 67,
+          "order": 1,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21022,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21162,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21303,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21445,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21587,
+          "bytes": 71,
+          "order": 6,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 21730,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 21874,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 22019,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 22165,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 22311,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 22458,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 3,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 22600,
+          "bytes": 68,
+          "order": 1,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 22736,
+          "bytes": 68,
+          "order": 2,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 22872,
+          "bytes": 68,
+          "order": 3,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23009,
+          "bytes": 69,
+          "order": 4,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23147,
+          "bytes": 69,
+          "order": 5,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23285,
+          "bytes": 69,
+          "order": 6,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23424,
+          "bytes": 70,
+          "order": 7,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23564,
+          "bytes": 70,
+          "order": 8,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23704,
+          "bytes": 70,
+          "order": 9,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 23844,
+          "bytes": 70,
+          "order": 10,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 23984,
+          "bytes": 70,
+          "order": 11,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 24125,
+          "bytes": 71,
+          "order": 12,
+          "resolution": 3,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 24267,
+          "bytes": 71,
+          "order": 1,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 24410,
+          "bytes": 72,
+          "order": 2,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 24554,
+          "bytes": 72,
+          "order": 3,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 24699,
+          "bytes": 73,
+          "order": 4,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 24845,
+          "bytes": 73,
+          "order": 5,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 24992,
+          "bytes": 74,
+          "order": 6,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25140,
+          "bytes": 74,
+          "order": 7,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 25289,
+          "bytes": 75,
+          "order": 8,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25439,
+          "bytes": 75,
+          "order": 9,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 25590,
+          "bytes": 76,
+          "order": 10,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 25742,
+          "bytes": 76,
+          "order": 11,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": false
+        },
+        {
+          "offset": 25895,
+          "bytes": 77,
+          "order": 12,
+          "resolution": 4,
+          "compression": 0,
+          "reverse": true
+        },
+        {
+          "offset": 26042,
+          "bytes": 70,
+          "order": 1,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26182,
+          "bytes": 70,
+          "order": 2,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 26322,
+          "bytes": 70,
+          "order": 3,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26463,
+          "bytes": 71,
+          "order": 4,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 26605,
+          "bytes": 71,
+          "order": 5,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 26748,
+          "bytes": 72,
+          "order": 6,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 26892,
+          "bytes": 72,
+          "order": 7,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 27036,
+          "bytes": 72,
+          "order": 8,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 27181,
+          "bytes": 73,
+          "order": 9,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 27327,
+          "bytes": 73,
+          "order": 10,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        },
+        {
+          "offset": 27473,
+          "bytes": 73,
+          "order": 11,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": true
+        },
+        {
+          "offset": 27620,
+          "bytes": 74,
+          "order": 12,
+          "resolution": 4,
+          "compression": 1,
+          "reverse": false
+        }
+      ],
+      "reference_offset": 1130496,
+      "reference_bytes": 393216,
+      "container_rate": 48000,
+      "container_frame_samples": 1024,
+      "samples": 49152,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-tns-multitap-1024-1-synthetic.mp4",
+        "sha256": "d5b5973885fbcaab02dcdfb641e5f402d8ce30975f043654b8a02a623ab41208",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21800cc40002201000",
+        "pcm_offset": 0,
+        "samples": 49152
+      },
+      "control_video": {
+        "file": "aac-ltp-tns-multitap-1024-1-control-synthetic.mp4",
+        "sha256": "0eea1aed8f03dbb048280aaba57d45d2b61c647b36e121877de6468817d8f1b9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21800cc40002201000",
+        "pcm_offset": 0,
+        "samples": 49152
+      }
+    }
+  ],
+  "refusals": [
+    {
+      "n": 960,
+      "order": 13,
+      "asc": "21840cc40002201000",
+      "packet": {
+        "offset": 6876,
+        "bytes": 46
+      },
+      "video": {
+        "file": "aac-ltp-tns-multitap-960-refuse-13-synthetic.mp4",
+        "sha256": "6b71e67342f8441a510da9b93fd9ec3df7e060aa66f14107c31da60a415729a3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21840cc40002201000",
+        "pcm_offset": 0,
+        "samples": 960
+      }
+    },
+    {
+      "n": 960,
+      "order": 20,
+      "asc": "21840cc40002201000",
+      "packet": {
+        "offset": 6922,
+        "bytes": 49
+      },
+      "video": {
+        "file": "aac-ltp-tns-multitap-960-refuse-20-synthetic.mp4",
+        "sha256": "29f71644f32ee1a831ac350999f388e3f67e882c837ed2395224af1e53375562",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21840cc40002201000",
+        "pcm_offset": 0,
+        "samples": 960
+      }
+    },
+    {
+      "n": 1024,
+      "order": 13,
+      "asc": "21800cc40002201000",
+      "packet": {
+        "offset": 20723,
+        "bytes": 46
+      },
+      "video": {
+        "file": "aac-ltp-tns-multitap-1024-refuse-13-synthetic.mp4",
+        "sha256": "e5770171cdd010ba1758e03ddeadcbc8badcbfd85b56d21e3c1b9d0c6c974090",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21800cc40002201000",
+        "pcm_offset": 0,
+        "samples": 1024
+      }
+    },
+    {
+      "n": 1024,
+      "order": 20,
+      "asc": "21800cc40002201000",
+      "packet": {
+        "offset": 20769,
+        "bytes": 49
+      },
+      "video": {
+        "file": "aac-ltp-tns-multitap-1024-refuse-20-synthetic.mp4",
+        "sha256": "3c99885a7bb3138d1f5005bfba5ed7fa3096a7a774b4529e3c4010149f573e76",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "21800cc40002201000",
+        "pcm_offset": 0,
+        "samples": 1024
+      }
+    }
+  ],
+  "provenance": "Multi-tap reflections +/-1, all order/resolution/compression combinations. Own long-window orders 1..12, multiple reflection coefficients, six nonzero bands, PNS, LTP, signed gains, source/target TNS and distinct target residuals. Scalar direct cosine and absolute PCM histories; no FFmpeg, private media, foreign decoder or network."
+}
