@@ -292,3 +292,85 @@ mod dc_tests {
         assert_eq!(chroma_dc_2x2(&[-1, 0, 0, 0], 0, 8, 16).unwrap(), [-5; 4]);
     }
 }
+
+/// H.264 8.6 luma reconstruction for Extended-profile SP/SI macroblocks.
+/// `levels` are raster-ordered parsed residual levels (not already dequantized).
+/// `switching` selects SI/secondary SP; false selects primary SP.
+/// Extended profile uses eight-bit samples and flat 4x4 scaling weights.
+pub fn switching_luma_4x4(
+    prediction: &[u16; 16],
+    levels: &[i32; 16],
+    qp: u8,
+    qs: u8,
+    switching: bool,
+) -> Result<[u16; 16]> {
+    validate(qp, 8, &[16; 16])?;
+    validate(qs, 8, &[16; 16])?;
+    if prediction.iter().any(|&v| v > 255) {
+        return Err(invalid("AVC switching predictor exceeds bit depth"));
+    }
+    if levels.iter().any(|&v| !(-32768..=32767).contains(&v)) {
+        return Err(invalid("AVC switching coefficient exceeds numeric range"));
+    }
+    fn forward(v: [i64; 4]) -> [i64; 4] {
+        let a = v[0] + v[3];
+        let b = v[1] + v[2];
+        let c = v[1] - v[2];
+        let d = v[0] - v[3];
+        [a + b, 2 * d + c, a - b, d - 2 * c]
+    }
+    const QUANT: [[i64; 3]; 6] = [
+        [13107, 5243, 8066],
+        [11916, 4660, 7490],
+        [10082, 4194, 6554],
+        [9362, 3647, 5825],
+        [8192, 3355, 5243],
+        [7282, 2893, 4559],
+    ];
+    let mut predicted = prediction.map(i64::from);
+    for row in predicted.chunks_exact_mut(4) {
+        row.copy_from_slice(&forward([row[0], row[1], row[2], row[3]]));
+    }
+    for x in 0..4 {
+        let c = forward([
+            predicted[x],
+            predicted[4 + x],
+            predicted[8 + x],
+            predicted[12 + x],
+        ]);
+        for y in 0..4 {
+            predicted[y * 4 + x] = c[y];
+        }
+    }
+    let mut combined = [0; 16];
+    for i in 0..16 {
+        let row = i / 4;
+        let col = i % 4;
+        let category = if row % 2 == 0 && col % 2 == 0 {
+            0
+        } else if row % 2 == 1 && col % 2 == 1 {
+            1
+        } else {
+            2
+        };
+        let value = if switching {
+            predicted[i]
+        } else {
+            // Equations 8-416/417, flat LevelScale4x4 = 16 * normalization.
+            predicted[i]
+                + ((i64::from(levels[i])
+                    * 16
+                    * NORMALIZATION[usize::from(qp % 6)][category]
+                    * [16, 25, 20][category]
+                    << (qp / 6))
+                    >> 10)
+        };
+        let quantized = value.signum()
+            * ((value.abs() * QUANT[usize::from(qs % 6)][category] + (1i64 << (14 + qs / 6)))
+                >> (15 + qs / 6));
+        combined[i] = i32::try_from(quantized + if switching { i64::from(levels[i]) } else { 0 })
+            .map_err(|_| invalid("AVC switching coefficient exceeds numeric range"))?;
+    }
+    let output = residual_4x4(&combined, qs, 8, &[16; 16], None)?;
+    reconstruct_4x4(&[0; 16], &output, 8)
+}

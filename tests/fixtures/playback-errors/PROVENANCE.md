@@ -5140,3 +5140,25 @@ Tests cover native decode, checkpoint rollback, both MP4 APIs and player
 ranges/rewind/seek. The pre-fix acceptance failure was specifically
 `SBR extended audio/PS synthesis is not yet implemented`. Fixtures are
 original and generated offline, separately from ordinary test execution.
+
+### AVC SP/SI switching luma foundation (2026-10-10)
+
+`avc_transform::switching_luma_4x4` implements Extended-profile eight-bit
+luma equations 8-415..420 (primary SP) and 8-432..434 (SI/secondary SP).
+Prediction is transformed and quantized before the switching residual is added.
+Primary SP instead dequantizes its residual before requantizing the sum at QSY.
+The flat-weight inverse transform reconstructs samples directly, without adding
+the pixel-domain predictor again. Input QP/QS, sample and level ranges are checked.
+
+`generate_avc_switching_luma_fixtures.py` generates 1248 matrix-oracle cases
+covering every QSY 0..51, six QPY values at shift boundaries, both processes,
+constant/ramp predictors and signed residuals. Tests also retain a specific
+SI-picture refusal, with a matched accepted I-picture control. Its three-frame
+SI I_PCM MP4 contains original gradients; local JM 19 decoded the corresponding
+owned Annex B stream to exactly the 1152 source bytes. JM is not required by
+generation or ordinary tests. No private source or FFmpeg was used.
+
+This is a transform primitive, not SI/SP playback acceptance. Chroma switching,
+SI entropy dispatch and picture/DPB/deblocking integration remain required.
+The decoder's existing SI/SP picture refusal remains enabled until that work
+and end-to-end pixel acceptance are complete.
