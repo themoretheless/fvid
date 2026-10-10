@@ -210,16 +210,16 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
     let header = *headers
         .first()
         .ok_or_else(|| invalid("missing inter slices"))?;
-    if headers.iter().any(|h|h.slice_type==SliceType::Sp)
+    if headers.iter().any(|h|matches!(h.slice_type,SliceType::Sp | SliceType::Si))
         && (sps.profile!=88 || sps.mb_adaptive_frame_field || sps.bit_depth_luma!=8
             || sps.bit_depth_chroma!=8 || pps.cabac || pps.transform_8x8 || sps.transform_bypass)
     {
-        return Err(crate::unsupported("AVC SP requires non-MBAFF eight-bit 4:2:0 CAVLC"));
+        return Err(crate::unsupported("AVC SP/SI requires non-MBAFF eight-bit 4:2:0 CAVLC"));
     }
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()
         || headers.iter().any(|h| {
-            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp | SliceType::B)
+            !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
@@ -243,7 +243,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
     }
     if !matches!(
         header.slice_type,
-        SliceType::I | SliceType::P | SliceType::Sp | SliceType::B
+        SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B
     ) || header.first_mb != 0
         || header.disable_deblocking_filter_idc > 2
         || header.field_pic
@@ -282,7 +282,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
             return Err(invalid("B-slice direct metadata is missing"));
         }
         let lengths = [
-            if header.slice_type == SliceType::I {
+            if matches!(header.slice_type, SliceType::I | SliceType::Si) {
                 0
             } else {
                 header.refs_l0 as usize
@@ -292,7 +292,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         for list in 0..2 {
             if references[list].len() != lengths[list]
                 || lengths[list] > 32
-                || (list == 0 || is_b) && header.slice_type != SliceType::I && lengths[list] == 0
+                || (list == 0 || is_b) && !matches!(header.slice_type, SliceType::I | SliceType::Si) && lengths[list] == 0
             {
                 return Err(invalid("inter-picture reference count mismatch"));
             }
@@ -466,7 +466,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                         matches!(header.slice_type, SliceType::P | SliceType::Sp) && pps.weighted_pred
                     };
                     let lengths = [
-                        if header.slice_type == SliceType::I {
+                        if matches!(header.slice_type, SliceType::I | SliceType::Si) {
                             0
                         } else {
                             header.refs_l0 as usize
@@ -505,7 +505,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                         return Err(invalid("inter slice weight table is incomplete"));
                     }
                     order.push(Order::SliceBegin);
-                    let mut cavlc = if pps.cabac || header.slice_type == SliceType::I {
+                    let mut cavlc = if pps.cabac || matches!(header.slice_type, SliceType::I | SliceType::Si) {
                         None
                     } else {
                         Some(if fmo {
@@ -514,7 +514,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                             InterCavlcSlice::new_mixed(header, sps, pps, count * 4096)?
                         })
                     };
-                    let mut cabac = if pps.cabac && header.slice_type != SliceType::I {
+                    let mut cabac = if pps.cabac && !matches!(header.slice_type, SliceType::I | SliceType::Si) {
                         Some(super::avc_cabac_slice::InterCabacSlice::new(
                             header,
                             sps,
@@ -525,7 +525,8 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                         None
                     };
 
-                    let mut intra_cavlc = if !pps.cabac && header.slice_type == SliceType::I {
+                    // SI carries intra syntax and switching QS through Pass B.
+                    let mut intra_cavlc = if !pps.cabac && matches!(header.slice_type, SliceType::I | SliceType::Si) {
                         Some(if fmo {
                             super::avc_macroblock::IntraCavlcReader::new_fmo(
                                 header,
@@ -544,7 +545,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                     } else {
                         None
                     };
-                    let mut intra_cabac = if pps.cabac && header.slice_type == SliceType::I {
+                    let mut intra_cabac = if pps.cabac && matches!(header.slice_type, SliceType::I | SliceType::Si) {
                         Some(super::avc_cabac_macroblock::IntraCabacReader::new(
                             header,
                             sps,

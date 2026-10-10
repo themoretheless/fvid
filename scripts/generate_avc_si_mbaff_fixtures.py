@@ -7,18 +7,27 @@ from generate_avc_secondary_sp_fixtures import chroma
 from avc_fixture_mp4 import mux
 
 
-def configuration(constrained,height=32):
+def configuration(constrained,height=32,raster=False,interlaced=False,max_refs=3):
     b=Writer();b.u(88,8);b.u(0,8);b.u(10,8);b.ue(0)
-    b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(height//32-1)
-    b.u(0);b.u(1);b.u(1);b.u(0);b.u(0);sps=b.nal(0x67)
+    b.ue(0);b.ue(0);b.ue(0);b.ue(max_refs);b.u(0);b.ue(1);b.ue(height//(32 if not raster or interlaced else 16)-1)
+    b.u(int(raster and not interlaced))
+    if not raster or interlaced:b.u(int(not raster))
+    b.u(1);b.u(0);b.u(0);sps=b.nal(0x67)
     b=Writer();b.ue(0);b.ue(0);b.u(0);b.u(0);b.ue(0);b.ue(0);b.ue(0)
     b.u(0);b.u(0,2);b.se(0);b.se(0);b.se(0);b.u(1);b.u(int(constrained));b.u(0);pps=b.nal(0x68)
     return bytes([1,88,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 
 
-def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_level=1,mode=1,offsets=(0,0)):
+def positions(pair,parity,field,component,raster=False):
+    if not raster:return indices(pair,parity,field,component)
+    side=8 if component else 16;address=2*pair+parity;width=2*side
+    return [((address//2)*side+y)*width+(address%2)*side+x for y in range(side) for x in range(side)]
+
+
+def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_level=1,mode=1,offsets=(0,0),raster=False,interlaced=False):
     height=len(fields)*16
-    b=Writer();b.ue(addresses[0]//2);b.ue(4);b.ue(0);b.u(frame,4);b.u(0)
+    b=Writer();b.ue(addresses[0] if raster else addresses[0]//2);b.ue(4);b.ue(0);b.u(frame,4)
+    if not raster or interlaced:b.u(0)
     if frame==0:b.ue(0)
     b.u(frame*2,4)
     if frame==0:b.u(0);b.u(0)
@@ -28,21 +37,21 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_
     counts=[None]*(32*height)
     chroma_counts=[[None]*(8*height) for _ in range(2)]
     for address in addresses:
-        if address%2==0:b.u(int(fields[address//2]))
+        if not raster and address%2==0:b.u(int(fields[address//2]))
         if address in pcm:
             b.ue(26);b.align()
             for component,side in [(0,16),(1,8),(2,8)]:
                 for _ in range(side*side):b.u(pcm_value(address,component),8)
-            for pos in indices(address//2,address%2,fields[address//2],0):counts[pos]=16
+            for pos in positions(address//2,address%2,fields[address//2],0,raster):counts[pos]=16
             for component in range(2):
-                for pos in indices(address//2,address%2,fields[address//2],component+1):chroma_counts[component][pos]=16
+                for pos in positions(address//2,address%2,fields[address//2],component+1,raster):chroma_counts[component][pos]=16
             continue
         b.ue(0 if switching[address] else 1)
         for _ in range(16):b.u(1) # predicted intra4 DC mode
         b.ue(0);active=coded and switching[address]
         b.ue((0 if chroma_mode in ['ac','both'] else (1 if chroma_mode=='dc' else 2)) if active else 3)
         if active:b.se(0)
-        locations=indices(address//2,address%2,fields[address//2],0)
+        locations=positions(address//2,address%2,fields[address//2],0,raster)
         step=2 if fields[address//2] else 1
         for block in range(16):
             bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2
@@ -60,7 +69,7 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_
                 if chroma_mode in ['dc','both']:write_chroma_dc_one(b,(component+address)%2,dc_level)
                 else:b.u(1,2)
         for component in range(2):
-            locations=indices(address//2,address%2,fields[address//2],component+1)
+            locations=positions(address//2,address%2,fields[address//2],component+1,raster)
             for block in range(4):
                 bx=block%2;by=block//2;pos=locations[by*4*8+bx*4];y,x=divmod(pos,16)
                 ac=active and chroma_mode in ['ac','both']
@@ -79,7 +88,7 @@ def pcm_value(address,component):
     return [96+address*7,64+address*19,192-address*17][component]
 
 
-def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=None,dc_level=1):
+def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=None,dc_level=1,raster=False):
     height=len(fields)*16
     out=[[0]*(32*height),[0]*(8*height),[0]*(8*height)]
     for addresses in groups:
@@ -89,13 +98,13 @@ def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=Non
             si=switching[address];tag=2 if si else 1
             if address in pcm:
                 for component in range(3):
-                    for pos in indices(pair,parity,field,component):out[component][pos]=pcm_value(address,component);ready[component][pos]=1
+                    for pos in positions(pair,parity,field,component,raster):out[component][pos]=pcm_value(address,component);ready[component][pos]=1
                 continue
             def edge(component,coordinates):
                 width=32 if component==0 else 16;height=len(out[component])//width
                 if not all(0<=x<width and 0<=y<height and ready[component][y*width+x] and not (constrained and not si and ready[component][y*width+x]==2) for x,y in coordinates):return []
                 return [out[component][y*width+x] for x,y in coordinates]
-            locations=indices(pair,parity,field,0)
+            locations=positions(pair,parity,field,0,raster)
             for block in range(16):
                 bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2
                 pos=locations[by*4*16+bx*4];y,x=divmod(pos,32)
@@ -107,7 +116,7 @@ def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=Non
                 for i,v in enumerate(pixels):
                     pos=locations[(by*4+i//4)*16+bx*4+i%4];out[0][pos]=v;ready[0][pos]=tag
             for component in [1,2]:
-                locations=indices(pair,parity,field,component);y,x=divmod(locations[0],16)
+                locations=positions(pair,parity,field,component,raster);y,x=divmod(locations[0],16)
                 tops=[edge(component,[(x+half*4+i,y-step) for i in range(4)]) for half in range(2)]
                 lefts=[edge(component,[(x-1,y+(half*4+i)*step) for i in range(4)]) for half in range(2)]
                 prediction=[]
