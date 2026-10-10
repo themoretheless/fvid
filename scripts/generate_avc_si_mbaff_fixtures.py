@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Original MBAFF SI and ordinary intra neighbors with scalar sample availability."""
 import json
-from generate_avc_switching_mbaff_fixtures import Writer, DEST, indices
+from generate_avc_switching_mbaff_fixtures import Writer, DEST, indices, write_chroma_dc_one
 from generate_avc_switching_luma_fixtures import reference
 from generate_avc_secondary_sp_fixtures import chroma
 from avc_fixture_mp4 import mux
@@ -16,7 +16,7 @@ def configuration(constrained):
     return bytes([1,88,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 
 
-def slice_nal(addresses,fields,switching,frame,qs,coded,pcm):
+def slice_nal(addresses,fields,switching,frame,qs,coded,pcm,chroma_mode=None,dc_level=1):
     b=Writer();b.ue(addresses[0]//2);b.ue(4);b.ue(0);b.u(frame,4);b.u(0)
     if frame==0:b.ue(0)
     b.u(frame*2,4)
@@ -24,6 +24,7 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm):
     else:b.u(0)
     b.se(0);b.se(qs-26);b.ue(1)
     counts=[None]*1024
+    chroma_counts=[[None]*256 for _ in range(2)]
     for address in addresses:
         if address%2==0:b.u(int(fields[address//2]))
         if address in pcm:
@@ -31,10 +32,13 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm):
             for component,side in [(0,16),(1,8),(2,8)]:
                 for _ in range(side*side):b.u(pcm_value(address,component),8)
             for pos in indices(address//2,address%2,fields[address//2],0):counts[pos]=16
+            for component in range(2):
+                for pos in indices(address//2,address%2,fields[address//2],component+1):chroma_counts[component][pos]=16
             continue
         b.ue(0 if switching[address] else 1)
         for _ in range(16):b.u(1) # predicted intra4 DC mode
-        b.ue(0);active=coded and switching[address];b.ue(2 if active else 3)
+        b.ue(0);active=coded and switching[address]
+        b.ue((0 if chroma_mode in ['ac','both'] else (1 if chroma_mode=='dc' else 2)) if active else 3)
         if active:b.se(0)
         locations=indices(address//2,address%2,fields[address//2],0)
         step=2 if fields[address//2] else 1
@@ -49,6 +53,23 @@ def slice_nal(addresses,fields,switching,frame,qs,coded,pcm):
                 b.u(token,length);b.u((block+address)%2);b.u(1)
             for yy in range(4):
                 for xx in range(4):counts[locations[(by*4+yy)*16+bx*4+xx]]=int(active)
+        if active and chroma_mode:
+            for component in range(2):
+                if chroma_mode in ['dc','both']:write_chroma_dc_one(b,(component+address)%2,dc_level)
+                else:b.u(1,2)
+        for component in range(2):
+            locations=indices(address//2,address%2,fields[address//2],component+1)
+            for block in range(4):
+                bx=block%2;by=block//2;pos=locations[by*4*8+bx*4];y,x=divmod(pos,16)
+                ac=active and chroma_mode in ['ac','both']
+                if ac:
+                    counts_c=chroma_counts[component]
+                    neighbours=[counts_c[yy*16+xx] for xx,yy in [(x-1,y),(x,y-step)] if 0<=xx<16 and 0<=yy<16 and counts_c[yy*16+xx] is not None]
+                    nc=(sum(neighbours)+len(neighbours)//2)//len(neighbours) if neighbours else 0
+                    token,length=(1,2) if nc<2 else ((2,2) if nc<4 else ((14,4) if nc<8 else (1,6)))
+                    b.u(token,length);b.u((block+component+address)%2);b.u(1)
+                for yy in range(4):
+                    for xx in range(4):chroma_counts[component][locations[(by*4+yy)*8+bx*4+xx]]=int(ac)
     return b.nal(0x65 if frame==0 else 0x41)
 
 
@@ -56,7 +77,7 @@ def pcm_value(address,component):
     return [96+address*7,64+address*19,192-address*17][component]
 
 
-def reconstruct(fields,switching,qs,coded,constrained,groups,pcm):
+def reconstruct(fields,switching,qs,coded,constrained,groups,pcm,chroma_mode=None,dc_level=1):
     out=[[0]*1024,[0]*256,[0]*256]
     for addresses in groups:
         ready=[[0]*1024,[0]*256,[0]*256]
@@ -92,7 +113,11 @@ def reconstruct(fields,switching,qs,coded,constrained,groups,pcm):
                         ts=tops[col//4];ls=lefts[row//4]
                         values=(ts or ls) if row<4 and col>=4 else ((ls or ts) if row>=4 and col<4 else ts+ls)
                         prediction.append((sum(values)+len(values)//2)//len(values) if values else 128)
-                values=chroma(prediction,[0]*4,[[0]*16 for _ in range(4)],39 if qs==51 else qs) if si else prediction
+                dc=[0]*4;ac=[[0]*16 for _ in range(4)]
+                if coded and si and chroma_mode in ['dc','both']:dc[2]=dc_level if (component-1+address)%2==0 else -dc_level
+                if coded and si and chroma_mode in ['ac','both']:
+                    for block in range(4):ac[block][4 if field else 1]=1 if (block+component-1+address)%2==0 else -1
+                values=chroma(prediction,dc,ac,39 if qs==51 else qs) if si else prediction
                 for pos,v in zip(locations,values):out[component][pos]=v;ready[component][pos]=tag
     return bytes(v for plane in out for v in plane)
 
