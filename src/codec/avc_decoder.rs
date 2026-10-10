@@ -328,7 +328,8 @@ impl AvcDecoder {
             references
                 .try_reserve_exact(headers.len())
                 .map_err(|_| invalid("cannot allocate AVC field reference contexts"))?;
-            let implicit = header.slice_type == SliceType::B && pps.weighted_bipred == 2;
+            let has_b = headers.iter().any(|h| h.slice_type == SliceType::B);
+            let implicit = has_b && pps.weighted_bipred == 2;
             let mut reference_orders = Vec::new();
             if implicit {
                 reference_orders
@@ -337,7 +338,7 @@ impl AvcDecoder {
             }
             for h in headers {
                 let lists = dpb.lists(h, order.before_marking.picture())?;
-                if header.slice_type == SliceType::B {
+                if has_b && h.slice_type == SliceType::B {
                     let mut entries = [Vec::new(), Vec::new()];
                     for (target, list) in entries.iter_mut().zip([&lists.l0, &lists.l1]) {
                         for r in list {
@@ -361,6 +362,11 @@ impl AvcDecoder {
                         .ok_or_else(|| invalid("missing co-located field"))?;
                     colocated.push((source.motion.as_deref(), source.motion_is_frame));
                     direct_refs.push(entries);
+                } else if has_b {
+                    // Keep direct contexts indexed by wire slice, including
+                    // inactive intra slices which own no reference lists.
+                    direct_refs.push([Vec::new(), Vec::new()]);
+                    colocated.push((None, false));
                 }
                 reference_ids.push([
                     lists
@@ -440,7 +446,7 @@ impl AvcDecoder {
                 pps,
                 &contexts,
                 implicit_context,
-                if header.slice_type == SliceType::B {
+                if has_b {
                     Some(&direct_contexts)
                 } else {
                     None

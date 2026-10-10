@@ -611,8 +611,10 @@ pub(super) fn decode_inter_field_impl(
             // run or references; switching reconstruction stays slice-local.
             || current.slice_type != h.slice_type
                 && !(!pps.cabac
-                    && matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
-                    && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp))
+                    && ((matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
+                        && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp))
+                        || (matches!(current.slice_type, SliceType::I | SliceType::B)
+                            && matches!(h.slice_type, SliceType::I | SliceType::B))))
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
             || current.pps_id != h.pps_id
@@ -638,7 +640,7 @@ pub(super) fn decode_inter_field_impl(
             }
         }
     }
-    let implicit = if h.slice_type == SliceType::B && pps.weighted_bipred == 2 {
+    let implicit = if headers.iter().any(|h| h.slice_type == SliceType::B) && pps.weighted_bipred == 2 {
         let context = implicit.ok_or_else(|| {
             unsupported("implicit weighted B fields require reference POC context")
         })?;

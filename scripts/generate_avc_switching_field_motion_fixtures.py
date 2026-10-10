@@ -45,8 +45,8 @@ def compensate(plane, width, height, mv, chroma=False):
     return result
 
 
-def verify_jm(cases, decoder):
-    """Optional luma-only syntax/interpolation cross-check, outside test execution."""
+def verify_jm(cases, decoder, all_planes=False):
+    """Optional syntax/pixel cross-check, outside test execution; luma by default."""
     with tempfile.TemporaryDirectory(prefix='fvid-sp-field-jm-') as tmp:
         directory=Path(tmp)
         (directory/'decoder.cfg').write_text('')
@@ -62,10 +62,13 @@ def verify_jm(cases, decoder):
             actual=(directory/'decoded.yuv').read_bytes()
             expected=(DEST/case['reference']).read_bytes()
             assert len(actual)==len(expected),case['file']
+            if all_planes:
+                assert actual==expected,case['file']
+                continue
             luma=case.get('width',32)*case.get('height',32)
             for start in range(0,len(expected),luma*3//2):
                 assert actual[start:start+luma]==expected[start:start+luma],case['file']
-    print(f'JM syntax and exact luma cross-check: {len(cases)} streams')
+    print(f'JM syntax and exact {"YUV" if all_planes else "luma"} cross-check: {len(cases)} streams')
 
 
 def main():
