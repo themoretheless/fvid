@@ -345,33 +345,11 @@ pub fn chroma8(
             }
         }
         ChromaMode::Dc => {
-            let sum = |edge: &[u16; 8], half: usize| {
-                edge[half * 4..half * 4 + 4]
-                    .iter()
-                    .map(|&v| u32::from(v))
-                    .sum::<u32>()
-            };
-            for by in 0..2 {
-                for bx in 0..2 {
-                    let value = match (top, left) {
-                        (Some(t), Some(l)) => {
-                            if bx == by {
-                                (sum(t, bx) + sum(l, by) + 4) >> 3
-                            } else if bx == 1 {
-                                (sum(t, 1) + 2) >> 2
-                            } else {
-                                (sum(l, 1) + 2) >> 2
-                            }
-                        }
-                        (Some(t), None) => (sum(t, bx) + 2) >> 2,
-                        (None, Some(l)) => (sum(l, by) + 2) >> 2,
-                        _ => 1 << (depth - 1),
-                    } as u16;
-                    for y in 0..4 {
-                        out[(by * 4 + y) * 8 + bx * 4..(by * 4 + y) * 8 + bx * 4 + 4].fill(value);
-                    }
-                }
-            }
+            return chroma8_dc(
+                std::array::from_fn(|half| top.map(|v| std::array::from_fn(|i| v[half * 4 + i]))),
+                std::array::from_fn(|half| left.map(|v| std::array::from_fn(|i| v[half * 4 + i]))),
+                depth,
+            );
         }
         ChromaMode::Plane => {
             let t = top.ok_or_else(|| invalid("chroma plane requires top"))?;
@@ -398,6 +376,45 @@ pub fn chroma8(
                     out[y * 8 + x] = ((a + b * (x as i32 - 3) + c * (y as i32 - 3) + 16) >> 5)
                         .clamp(0, i32::from(max)) as u16;
                 }
+            }
+        }
+    }
+    Ok(out)
+}
+
+
+/// Chroma DC uses separate availability for each four-sample boundary group
+/// (8.3.4.1), including mixed frame/field neighbors under constrained intra.
+pub fn chroma8_dc(
+    top: [Option<[u16; 4]>; 2],
+    left: [Option<[u16; 4]>; 2],
+    depth: u8,
+) -> Result<[u16; 64]> {
+    let max = max_sample(depth)?;
+    if top.iter().chain(&left).flatten().flatten().any(|&v| v > max) {
+        return Err(invalid("chroma neighbour exceeds bit depth"));
+    }
+    let sums = |edges: [Option<[u16; 4]>; 2]| {
+        edges.map(|edge| edge.map(|v| v.iter().map(|&n| u32::from(n)).sum::<u32>()))
+    };
+    let (top, left) = (sums(top), sums(left));
+    let mut out = [0; 64];
+    for by in 0..2 {
+        for bx in 0..2 {
+            let (t, l) = (top[bx], left[by]);
+            let value = if bx == 1 && by == 0 {
+                t.or(l).map(|n| (n + 2) >> 2)
+            } else if bx == 0 && by == 1 {
+                l.or(t).map(|n| (n + 2) >> 2)
+            } else {
+                match (t, l) {
+                    (Some(t), Some(l)) => Some((t + l + 4) >> 3),
+                    (Some(n), None) | (None, Some(n)) => Some((n + 2) >> 2),
+                    _ => None,
+                }
+            }.unwrap_or(1 << (depth - 1)) as u16;
+            for row in 0..4 {
+                out[(by * 4 + row) * 8 + bx * 4..(by * 4 + row) * 8 + bx * 4 + 4].fill(value);
             }
         }
     }
@@ -494,6 +511,23 @@ mod tests {
             Intra4Mode::Dc
         );
         assert!(derive_intra4_mode(None, None, false, 8).is_err());
+    }
+    #[test]
+    fn chroma_dc_retains_partial_four_sample_boundary_availability() {
+        for (top, left, expected) in [
+            ([None, None], [Some([64; 4]), None], [64, 64, 128, 128]),
+            ([Some([10; 4]), None], [None, Some([30; 4])], [10, 128, 30, 30]),
+            ([None, Some([20; 4])], [Some([60; 4]), None], [60, 20, 128, 20]),
+        ] {
+            let pixels = chroma8_dc(top, left, 8).unwrap();
+            for y in 0..8 {
+                for x in 0..8 {
+                    assert_eq!(pixels[y * 8 + x], expected[y / 4 * 2 + x / 4]);
+                }
+            }
+        }
+        assert_eq!(chroma8_dc([None; 2], [None; 2], 10).unwrap(), [512; 64]);
+        assert!(chroma8_dc([Some([256; 4]), None], [None; 2], 8).is_err());
     }
     #[test]
     fn chroma_dc_quadrants_and_affine_plane() {

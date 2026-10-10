@@ -314,6 +314,19 @@ mod tests {
     }
 
     #[test]
+    fn whole_intra_edges_require_every_sample_to_be_available() {
+        let plane = [64; 1024];
+        let mut ready = [1; 64];
+        ready[6 * 8 + 3] = 2;
+        let (_, left, _) = available_edges::<16>(&plane, 32, 16, 16, &ready, 1, true).unwrap();
+        assert!(left.is_none());
+        let (_, left, _) = available_edges::<16>(&plane, 32, 16, 16, &ready, 1, false).unwrap();
+        assert_eq!(left, Some([64; 16]));
+        ready[6 * 8 + 3] = 0;
+        let (_, left, _) = available_edges::<16>(&plane, 32, 16, 16, &ready, 1, false).unwrap();
+        assert!(left.is_none());
+    }
+    #[test]
     fn intra_pixels_exclude_unavailable_inter_neighbours() {
         let (mut sps, pps, header) = fixture();
         let mut reader = IntraCavlcReader::new(&header, &sps, &pps, 4096).unwrap();
@@ -410,8 +423,8 @@ fn available_edges<const N: usize>(
     };
     let (top, left, corner) = edges::<N>(plane, stride, x, y)?;
     Ok((
-        top.filter(|_| y > 0 && available(x, y - 1)),
-        left.filter(|_| x > 0 && available(x - 1, y)),
+        top.filter(|_| y > 0 && (0..N).all(|i| available(x + i, y - 1))),
+        left.filter(|_| x > 0 && (0..N).all(|i| available(x - 1, y + i))),
         corner.filter(|_| x > 0 && y > 0 && available(x - 1, y - 1)),
     ))
 }
@@ -583,14 +596,22 @@ pub(super) fn reconstruct_macroblock(
             let stride = w / 2;
             let x = mx * 8;
             let y = my * 8;
-            let (t, l, c) = available_edges::<8>(plane, stride, x, y, ready, 2, exclude_si)?;
-            let prediction = chroma8(
-                mb.chroma_mode,
-                t.as_ref(),
-                l.as_ref(),
-                c,
-                sps.bit_depth_chroma,
-            )?;
+            let prediction = if matches!(mb.chroma_mode, super::avc_intra::ChromaMode::Dc) {
+                let mut top = [None; 2];
+                let mut left = [None; 2];
+                for half in 0..2 {
+                    top[half] = available_edges::<4>(
+                        plane, stride, x + half * 4, y, ready, 2, exclude_si,
+                    )?.0;
+                    left[half] = available_edges::<4>(
+                        plane, stride, x, y + half * 4, ready, 2, exclude_si,
+                    )?.1;
+                }
+                super::avc_intra::chroma8_dc(top, left, sps.bit_depth_chroma)?
+            } else {
+                let (t, l, c) = available_edges::<8>(plane, stride, x, y, ready, 2, exclude_si)?;
+                chroma8(mb.chroma_mode, t.as_ref(), l.as_ref(), c, sps.bit_depth_chroma)?
+            };
             if let Some(qs) = mb.switching_qs {
                 let offset = if component == 0 {
                     pps.chroma_qp_offset

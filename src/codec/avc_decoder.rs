@@ -654,11 +654,6 @@ impl AvcDecoder {
         {
             return Err(crate::unsupported("AVC SP/SI requires eight-bit Extended-profile 4:2:0 CAVLC"));
         }
-        if sps.mb_adaptive_frame_field && !header.field_pic
-            && slices.iter().any(|slice| slice.header.slice_type == SliceType::Si)
-        {
-            return Err(crate::unsupported("AVC MBAFF SI reconstruction is not implemented"));
-        }
         if !header.idr
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))
         {

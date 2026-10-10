@@ -93,7 +93,7 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
-        if header.slice_type != SliceType::I {
+        if !matches!(header.slice_type, SliceType::I | SliceType::Si) {
             return Err(invalid("MBAFF CAVLC reader requires an intra frame slice"));
         }
         Self::new_context_mbaff(header, sps, pps, max_macroblocks)
@@ -107,7 +107,7 @@ impl<'a> IntraCavlcReader<'a> {
     ) -> Result<Self> {
         if !matches!(
             header.slice_type,
-            SliceType::I | SliceType::P | SliceType::Sp | SliceType::B
+            SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B
         ) || header.field_pic
             || sps.frame_mbs_only
             || !sps.mb_adaptive_frame_field
@@ -126,14 +126,13 @@ impl<'a> IntraCavlcReader<'a> {
     ) -> Result<Self> {
         if header.slice_type == SliceType::Si
             && (sps.profile != 88
-                || sps.mb_adaptive_frame_field && !header.field_pic
                 || sps.bit_depth_luma != 8
                 || sps.bit_depth_chroma != 8
                 || pps.transform_8x8
                 || sps.transform_bypass)
         {
             return Err(crate::unsupported(
-                "AVC SI requires non-MBAFF eight-bit Extended profile",
+                "AVC SI requires eight-bit Extended profile",
             ));
         }
         if pps.cabac

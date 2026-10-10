@@ -443,6 +443,8 @@ pub struct Readiness420 {
     height: usize,
     mbaff: bool,
     pair_fields: Vec<u8>,
+    // Chroma availability uses bits0..3; bit15 of Cb marks an SI macroblock.
+    // Keeping the tag here preserves the existing bounded storage layout.
     blocks: Vec<[u16; 3]>,
 }
 impl Readiness420 {
@@ -503,9 +505,20 @@ impl Readiness420 {
         geometry: [usize; 2],
         field: bool,
     ) -> Result<()> {
+        self.publish_mbaff_complete_kind(address, geometry, field, false)
+    }
+    /// Publish an intra macroblock while retaining SI identity for constrained
+    /// intra prediction. Ordinary intra and inter publications have kind1.
+    pub fn publish_mbaff_complete_kind(
+        &mut self,
+        address: usize,
+        geometry: [usize; 2],
+        field: bool,
+        switching: bool,
+    ) -> Result<()> {
         self.check_mbaff_complete(address, geometry, field)?;
         self.pair_fields[address / 2] = u8::from(field);
-        self.blocks[address] = [u16::MAX, 15, 15];
+        self.blocks[address] = [u16::MAX, 15 | if switching { 1 << 15 } else { 0 }, 15];
         Ok(())
     }
     /// Publish only after component samples have been successfully written.
@@ -549,6 +562,11 @@ impl Readiness420 {
         Ok(())
     }
     pub fn available(&self, component: usize, sample: [usize; 2]) -> Result<bool> {
+        Ok(self.available_kind(component, sample)? != 0)
+    }
+    /// Zero means unavailable, one ordinary reconstructed samples, two SI.
+    /// Physical sample ownership includes the pair's frame/field row layout.
+    pub fn available_kind(&self, component: usize, sample: [usize; 2]) -> Result<u8> {
         if component > 2 {
             return Err(invalid("AVC readiness component outside range"));
         }
@@ -562,11 +580,17 @@ impl Readiness420 {
                     .map(|v| v != 0)
             })?
         else {
-            return Ok(false);
+            return Ok(0);
         };
         let side = 4 / sub[0];
         let bit = local[1] / 4 * side + local[0] / 4;
-        Ok(self.blocks[address][component] & (1u16 << bit) != 0)
+        Ok(if self.blocks[address][component] & (1u16 << bit) == 0 {
+            0
+        } else if self.blocks[address][1] & (1 << 15) != 0 {
+            2
+        } else {
+            1
+        })
     }
     pub fn reset_slice(&mut self) {
         self.blocks.fill([0; 3]);
@@ -939,6 +963,32 @@ mod tests {
             (None, None, None)
         );
         assert!(prediction_edges::<16>(&plane, 32, [0, 4], 2, |_| true).is_err());
+    }
+    #[test]
+    fn si_readiness_tags_follow_physical_parity_and_reset_without_extra_storage() {
+        let mut ready = Readiness420::new(1, 2, true, 13).unwrap();
+        ready.publish_mbaff_complete_kind(0, [1, 2], true, true).unwrap();
+        ready.publish_mbaff_complete(1, [1, 2], true).unwrap();
+        for component in 0..3 {
+            let height = if component == 0 { 32 } else { 16 };
+            for y in 0..height {
+                assert_eq!(ready.available_kind(component, [0, y]).unwrap(),
+                    if y % 2 == 0 { 2 } else { 1 });
+                assert!(ready.available(component, [0, y]).unwrap());
+            }
+        }
+        assert!(ready.publish_mbaff_complete_kind(0, [1, 2], true, false).is_err());
+        assert_eq!(ready.available_kind(0, [0, 0]).unwrap(), 2);
+        ready.reset_slice();
+        for component in 0..3 {
+            assert_eq!(ready.available_kind(component, [0, 0]).unwrap(), 0);
+        }
+        ready.publish_mbaff_complete_kind(0, [1, 2], false, true).unwrap();
+        ready.publish_mbaff_complete(1, [1, 2], false).unwrap();
+        assert_eq!(ready.available_kind(0, [0, 15]).unwrap(), 2);
+        assert_eq!(ready.available_kind(0, [0, 16]).unwrap(), 1);
+        assert_eq!(ready.available_kind(1, [0, 7]).unwrap(), 2);
+        assert_eq!(ready.available_kind(1, [0, 8]).unwrap(), 1);
     }
     #[test]
     fn field_readiness_never_leaks_into_other_field_component_or_slice() {

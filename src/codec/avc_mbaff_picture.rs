@@ -772,13 +772,17 @@ pub(crate) fn reconstruct_intra_macroblock(
     for by in 0..view_h / 4 {
         for bx in 0..w / 4 {
             let mut available = true;
+            let mut switching = false;
             for dy in 0..4 {
                 for dx in 0..4 {
-                    available &=
-                        readiness.available(0, [bx * 4 + dx, (by * 4 + dy) * step + parity])?;
+                    let kind = readiness.available_kind(
+                        0, [bx * 4 + dx, (by * 4 + dy) * step + parity],
+                    )?;
+                    available &= kind != 0;
+                    switching |= kind == 2;
                 }
             }
-            ready[by * (w / 4) + bx] = u8::from(available);
+            ready[by * (w / 4) + bx] = if !available { 0 } else if switching { 2 } else { 1 };
         }
     }
     let geometry = layout(address, w / 16, h / 16, true, field, [1, 1])?;
@@ -801,7 +805,9 @@ pub(crate) fn reconstruct_intra_macroblock(
         }
         write_samples(dest, stride, target, &samples[..side * side])?;
     }
-    readiness.publish_mbaff_complete(address, [w / 16, h / 16], field)
+    readiness.publish_mbaff_complete_kind(
+        address, [w / 16, h / 16], field, mb.switching_qs.is_some(),
+    )
 }
 
 /// Decode one complete intra MBAFF CAVLC or CABAC slice.
