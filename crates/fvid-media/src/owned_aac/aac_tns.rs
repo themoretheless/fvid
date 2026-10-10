@@ -17,7 +17,8 @@ impl TnsData {
     /// Consume a packet-local f64 buffer without a second allocation.
     pub fn analyze_owned(&self, mut spectrum: Vec<f64>, offsets: &[usize], max_band: usize) -> Result<Vec<f64>> {
         let size = offsets.last().copied().unwrap_or(0);
-        if !matches!(spectrum.len(), 960 | 1024) || !matches!(self.windows.len(), 1 | 8)
+        if !matches!(spectrum.len(), 480 | 512 | 960 | 1024) || !matches!(self.windows.len(), 1 | 8)
+            || (spectrum.len() <= 512 && self.windows.len() != 1)
             || size != spectrum.len()/self.windows.len() || offsets.first()!=Some(&0)
             || offsets.windows(2).any(|p|p[0]>=p[1]) || max_band>=offsets.len()
             || spectrum.iter().any(|x|!x.is_finite()) {
@@ -64,7 +65,8 @@ impl TnsData {
     }
     fn validate(&self, spectrum: &[f32], offsets: &[usize], max_band: usize) -> Result<()> {
         let size = offsets.last().copied().unwrap_or(0);
-        if !matches!(spectrum.len(), 960 | 1024)
+        if !matches!(spectrum.len(), 480 | 512 | 960 | 1024)
+            || (spectrum.len() <= 512 && self.windows.len() != 1)
             || !matches!(self.windows.len(), 1 | 8)
             || size != spectrum.len() / self.windows.len()
             || offsets.first() != Some(&0)

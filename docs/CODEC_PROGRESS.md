@@ -10339,3 +10339,25 @@ These are history primitive checks, not public AOT23 playback acceptance.
 The next integration step is combining LD history, analysis and synthesis with
 spectral/TNS processing, then native dispatch and synthetic MP4/player PCM and
 seek acceptance. The complete codec-gap goal remains open.
+
+### AAC-LD spectral channel and TNS integration
+
+The owned LD channel now composes time-history prediction, LD-windowed forward
+MDCT, FIR TNS on prediction, selected-band addition, AR TNS on the reconstructed
+spectrum and raw LD synthesis/history commit. Prediction and synthesis remain
+separate to admit dependent coupling at the correct point. PCM/window/lag history
+advances only after successful synthesis and validation. Checkpoint/reset and
+retained allocation accounting include LD storage. Shared spectral-addition/TNS
+helpers admit 480/512 only as long windows; short LD TNS geometry is rejected.
+
+Four authored AOT23 videos carry 64 frames of lag updates/reuse/absence, extreme
+lag 1023, both TNS directions, all gains and both window shapes. A separate scalar
+direct-cosine/timeline/FIR/AR oracle qualifies the spectral channel. Public
+profile-refusal is still explicitly labelled gap reproduction. Full AOT23 packet
+and config dispatch, stereo/resilience/coupling, MP4/player timing and seek
+acceptance remain open; primitive PCM evidence does not close them.
+
+Validation: 489 owned library tests passed (one pre-existing ignored), plus four
+standalone LD filterbank/channel acceptance checks and two explicitly labelled
+public-profile gap reproductions. All seven new artifacts regenerated
+byte-identically. Ordinary tests did not execute FFmpeg or fixture generation.

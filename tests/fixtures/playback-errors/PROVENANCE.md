@@ -4720,3 +4720,20 @@ Generation is separate from normal tests and needs no FFmpeg or network.
 Standalone filterbank tests are acceptance tests. Public MP4 decoding still has
 a specific AOT23 profile-refusal reproduction; replace that refusal with public
 PCM/playback acceptance when the packet/LD-LTP path is integrated.
+
+### AAC-LD LTP/TNS spectral channel qualification
+
+`aac-ld-ltp-{480,512}-tns-{0,1}-synthetic.mp4`, `aac-ld-ltp-packets.bin`,
+`aac-ld-ltp-reference.f32le` and `aac-ld-ltp.json` are generated offline by
+`scripts/generate_aac_ld_ltp_fixtures.py`. Packets, residuals and predictor/TNS
+parameters are authored. Container/video scaffolding reuses the existing authored
+fixture helper. No private media or parameters are copied; no FFmpeg, network or
+foreign decoder is used. The scalar oracle uses direct cosine sums, an absolute
+PCM timeline, LD windows, FIR/AR TNS and overlap.
+
+The four cases cover 480/512 frames, forward/reverse order-one TNS, lag updates,
+lag reuse after absent LTP, lag 1023, all gains and sine/low-overlap switches.
+`tests/aac_ld_ltp.rs` accepts standalone spectral-channel PCM and checkpoint
+replay. Public AOT23 specifically refuses at profile admission; this test is gap
+reproduction, not playback acceptance. Replace it with full decode/player
+acceptance when native packet dispatch is connected.

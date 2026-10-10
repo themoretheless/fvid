@@ -120,12 +120,12 @@ pub fn apply_long_prediction(
     offsets: &[usize],
     used: &[bool],
 ) -> Result<()> {
-    if !matches!(residual.len(), 960 | 1024)
+    if !matches!(residual.len(), 480 | 512 | 960 | 1024)
         || prediction.len() != residual.len()
         || offsets.first() != Some(&0)
         || offsets.last() != Some(&residual.len())
         || offsets.windows(2).any(|p| p[0] >= p[1])
-        || used.len() > 40
+        || used.len() > if residual.len() <= 512 { 37 } else { 40 }
         || used.len() >= offsets.len()
         || residual.iter().any(|x| !x.is_finite())
         || prediction.iter().any(|x| !x.is_finite())

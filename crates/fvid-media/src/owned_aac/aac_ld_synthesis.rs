@@ -17,6 +17,14 @@ pub struct LdSynthesisHistory {
     previous: LdWindowShape,
     overlap: Vec<f64>,
 }
+impl LdSynthesisHistory {
+    pub(crate) fn overlap_raw(&self) -> &[f64] {
+        &self.overlap
+    }
+    pub(crate) fn visit_retained(&self, f: &mut Footprint) -> std::result::Result<(), String> {
+        f.vector(&self.overlap)
+    }
+}
 #[derive(Clone)]
 pub struct LdSynthesis {
     transform: Imdct,
