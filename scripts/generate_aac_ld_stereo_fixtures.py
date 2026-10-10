@@ -39,7 +39,7 @@ def predictor(active,update,coefficient,used):
     return field(active,1)+(field(update is not None,1)+(field(update,10) if update is not None else '')+field(coefficient,3)+''.join(field(v,1) for v in used) if active else '')
 
 def main():
-    blob=bytearray();gold=bytearray();cases=[];malformed=[]
+    blob=bytearray();gold=bytearray();cases=[];malformed=[];fill_extensions=[]
     for n in (480,512):
         cos=[[math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for i in range(2*n)] for k in range(8)]
         for flags in range(8):
@@ -60,7 +60,7 @@ def main():
                     reverse=[bool((frame+c)%2) for c in range(2)]
                     info=['000'+field(shapes[c],1)+field(2,6) for c in range(2)]
                     kwargs=[dict(flags=flags,scale_values=scales[c],tns=reverse[c]) for c in range(2)]
-                    mutation,error=('zero-longest','AAC HCR nonempty region has zero longest codeword') if flags&1 else ('reverse-gain','AAC RVLC reverse gain mismatch') if flags&2 else ('virtual-lav','AAC virtual codebook magnitude exceeds section limit') if flags&4 else (None,'trailing bytes')
+                    mutation,error=('zero-longest','AAC HCR nonempty region has zero longest codeword') if flags&1 else ('reverse-gain','AAC RVLC reverse gain mismatch') if flags&2 else ('virtual-lav','AAC virtual codebook magnitude exceeds section limit') if flags&4 else (None,'AAC ancillary data exceeds fill payload')
                     mask=[frame%2==0,frame%3==0] if ms==1 else [ms==2]*2
                     wire='0000'+field(common,1);badwire=None;present=any(active)
                     if common:
@@ -84,7 +84,10 @@ def main():
                     pcm=[banks[c].run(residual[c],shapes[c],active[c],updates[c],coefs[c],used[c],reverse[c]) for c in range(2)]
                     for pair in zip(*pcm):gold.extend(struct.pack('<ff',*pair))
                     if badwire is not None:
-                        bad=packed(badwire)+(b'\0' if flags==0 else b'')
+                        if flags==0:
+                            fill=packed(badwire)+b'\0'
+                            row['fill_extension']=dict(offset=len(blob),bytes=len(fill));blob.extend(fill)
+                        bad=packed(badwire+('001000000000010100000000' if flags==0 else ''))
                         row['malformed']=dict(offset=len(blob),bytes=len(bad),error=error);blob.extend(bad)
                 asc=packed(field(23,5)+frequency(24000)+field(2,4)+field(n==480,1)+'01'+field(flags,3)+'000').hex()
                 name=f'{n}-{flags}-{mode}'
@@ -92,7 +95,8 @@ def main():
                 case['video']=video_fixture([case],blob,channels=2,filename=f'aac-ld-stereo-{name}-synthetic.mp4');cases.append(case)
                 bad=rows[3]['malformed'];badcase=dict(case,frames=rows[:3]+[bad])
                 malformed.append(dict(video=video_fixture([badcase],blob,channels=2,filename=f'aac-ld-stereo-{name}-malformed-synthetic.mp4'),error=error))
+                if flags==0:fill_extensions.append(dict(video=video_fixture([dict(case,frames=rows[:3]+[rows[3]['fill_extension']])],blob,channels=2,filename=f'aac-ld-stereo-{name}-fill-synthetic.mp4'),reference_offset=start,reference_bytes=4*n*2*4))
     (DEST/'aac-ld-stereo-packets.bin').write_bytes(blob);(DEST/'aac-ld-stereo-reference.f32le').write_bytes(gold)
-    (DEST/'aac-ld-stereo.json').write_text(json.dumps(dict(cases=cases,malformed=malformed,provenance='Own AOT23 stereo, all resilience flag combinations, virtual book17, RVLC escapes, HCR, independent/common windows, MS modes, deferred independent LD predictors and bidirectional TNS. Scalar absolute timeline/cosine/FIR/AR/LD-window PCM oracle. No private media, FFmpeg, network or foreign decoder.'),indent=2)+'\n')
+    (DEST/'aac-ld-stereo.json').write_text(json.dumps(dict(cases=cases,malformed=malformed,fill_extensions=fill_extensions,provenance='Own AOT23 stereo, all resilience flag combinations, virtual book17, RVLC escapes, HCR, independent/common windows, MS modes, deferred independent LD predictors and bidirectional TNS. Scalar absolute timeline/cosine/FIR/AR/LD-window PCM oracle. No private media, FFmpeg, network or foreign decoder.'),indent=2)+'\n')
     print(f'generated {len(cases)} LD stereo acceptance and {len(malformed)} malformed videos')
 if __name__=='__main__':main()

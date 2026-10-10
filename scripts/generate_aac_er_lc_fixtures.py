@@ -51,7 +51,7 @@ def main():
                     name=f'{n}-{config}-{ms}-{int(extension)}'
                     c=dict(name=name,n=n,channels=channels,asc=packed(asc).hex(),frames=rows,reference_offset=start,reference_bytes=12*n*channels*4,slots=n//64,bands=32,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0)
                     c['video']=video_fixture([c],blob,channels=channels,filename=f'aac-er-lc-{name}-synthetic.mp4');cases.append(c)
-    rejected=[];malformed=[];alignment=[]
+    rejected=[];malformed=[];alignment=[];fill_extensions=[]
     for n in (960,1024):
         base=next(c for c in cases if c['n']==n and c['channels']==1)
         for flags,ep,flag3 in [(0,ep,False) for ep in (1,2,3)]+[(0,0,True)]:
@@ -67,10 +67,10 @@ def main():
             else:raw[-1]|=1
             bad=dict(row,offset=len(blob),bytes=len(raw));blob.extend(raw)
             video=video_fixture([dict(c,frames=c['frames'][:7]+[bad])],blob,channels=6,filename=f'aac-er-lc-{n}-{"alignment" if kind=="padding" else kind}-synthetic.mp4')
-            if kind=='trailing':malformed.append(dict(video=video,error='trailing bytes after ER AAC block'))
+            if kind=='trailing':fill_extensions.append(dict(video=video,reference_offset=c['reference_offset'],reference_bytes=8*n*6*4))
             else:alignment.append(dict(video=video,reference_offset=c['reference_offset'],reference_bytes=8*n*6*4))
     (DEST/'aac-er-lc-packets.bin').write_bytes(blob)
     (DEST/'aac-er-lc-reference.f32le').write_bytes(gold)
-    (DEST/'aac-er-lc.json').write_text(json.dumps(dict(cases=cases,rejected=rejected,malformed=malformed,alignment=alignment,provenance='Own ER-LC epConfig0 fixed-order tagged elements, deferred TNS syntax, 960/1024 transitions, sine/KBD, mono/stereo/3.0/5.1 and common MS modes0/1/2. Independent sparse IMDCT/window/TNS/PCM mapping; no private media, FFmpeg or network.'),indent=2)+'\n')
+    (DEST/'aac-er-lc.json').write_text(json.dumps(dict(cases=cases,rejected=rejected,malformed=malformed,alignment=alignment,fill_extensions=fill_extensions,provenance='Own ER-LC epConfig0 fixed-order tagged elements, deferred TNS syntax, 960/1024 transitions, sine/KBD, mono/stereo/3.0/5.1 and common MS modes0/1/2. Independent sparse IMDCT/window/TNS/PCM mapping; no private media, FFmpeg or network.'),indent=2)+'\n')
     print(len(cases),'own ER-LC videos')
 if __name__=='__main__':main()

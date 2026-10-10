@@ -3459,30 +3459,7 @@
       "error": "AAC extensionFlag3 must be zero"
     }
   ],
-  "malformed": [
-    {
-      "video": {
-        "file": "aac-er-lc-960-trailing-synthetic.mp4",
-        "sha256": "fef9659ecbcec3b772decc4cb71f6c7a15a2b96ae2ffd91aa2d684328594d013",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b3400",
-        "pcm_offset": 0,
-        "samples": 11520
-      },
-      "error": "trailing bytes after ER AAC block"
-    },
-    {
-      "video": {
-        "file": "aac-er-lc-1024-trailing-synthetic.mp4",
-        "sha256": "48af0e959388f4b71484b1d0ce37dab25b9ca7373cc746d11a3f46f0e84f40e2",
-        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
-        "asc": "8b3000",
-        "pcm_offset": 0,
-        "samples": 12288
-      },
-      "error": "trailing bytes after ER AAC block"
-    }
-  ],
+  "malformed": [],
   "alignment": [
     {
       "video": {
@@ -3500,6 +3477,32 @@
       "video": {
         "file": "aac-er-lc-1024-alignment-synthetic.mp4",
         "sha256": "b32476dcd9c341a7e9b594852a596f190137da2420cf2511834c6cb9f725cbf0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b3000",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "reference_offset": 2353152,
+      "reference_bytes": 196608
+    }
+  ],
+  "fill_extensions": [
+    {
+      "video": {
+        "file": "aac-er-lc-960-trailing-synthetic.mp4",
+        "sha256": "fef9659ecbcec3b772decc4cb71f6c7a15a2b96ae2ffd91aa2d684328594d013",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b3400",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "reference_offset": 737280,
+      "reference_bytes": 184320
+    },
+    {
+      "video": {
+        "file": "aac-er-lc-1024-trailing-synthetic.mp4",
+        "sha256": "48af0e959388f4b71484b1d0ce37dab25b9ca7373cc746d11a3f46f0e84f40e2",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "8b3000",
         "pcm_offset": 0,

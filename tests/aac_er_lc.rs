@@ -42,16 +42,13 @@ fn er_lc_native_transitions_tns_and_stereo_match_scalar_pcm() {
                 let len = row["bytes"].as_u64().unwrap() as usize;
                 let raw = &blob[at..at + len];
                 let saved = decoder.checkpoint();
-                let mut bad = raw.to_vec();
-                bad.push(0);
-                assert!(decoder
-                    .decode(&bad)
-                    .err()
-                    .unwrap()
-                    .to_string()
-                    .contains("trailing bytes after ER AAC block"));
+                let mut padded = raw.to_vec();
+                padded.push(0); // Valid ER EXT_FILL, rather than trailing garbage.
+                let padded_pcm = decoder.decode(&padded).unwrap();
+                decoder.restore(&saved).unwrap();
                 assert!(decoder.decode(&raw[..raw.len() - 1]).is_err());
                 let pcm = decoder.decode(raw).unwrap();
+                assert_eq!(padded_pcm, pcm);
                 decoder.restore(&saved).unwrap();
                 assert_eq!(decoder.decode(raw).unwrap(), pcm);
                 out.extend(pcm);
@@ -193,7 +190,13 @@ fn er_lc_unimplemented_resilience_and_malformed_videos_refuse_specific_errors() 
 #[test]
 fn er_lc_alignment_bits_do_not_change_pcm() {
     let gold = bytes("aac-er-lc-reference.f32le");
-    for c in manifest()["alignment"].as_array().unwrap() {
+    let m = manifest();
+    for c in m["alignment"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .chain(m["fill_extensions"].as_array().unwrap())
+    {
         let mut out = vec![];
         fvid::native_media::decode_mp4_aac_pcm(
             &bytes(c["video"]["file"].as_str().unwrap()),

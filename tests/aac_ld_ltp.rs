@@ -273,15 +273,7 @@ fn ld_ltp_native_packets_and_public_mp4_match_scalar_pcm() {
                     .unwrap()
                     > retained
             );
-            let mut bad = packet.to_vec();
-            bad.push(0);
-            assert!(
-                decoder
-                    .decode(&bad)
-                    .unwrap_err()
-                    .to_string()
-                    .contains("trailing bytes")
-            );
+            assert!(decoder.decode(&packet[..packet.len() / 2]).is_err());
             assert!(decoder.decode(&packet[..packet.len() - 1]).is_err());
             let pcm = decoder.decode(packet).unwrap();
             decoder.restore(&saved).unwrap();

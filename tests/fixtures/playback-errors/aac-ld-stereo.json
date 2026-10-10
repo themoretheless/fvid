@@ -27,49 +27,53 @@
           "offset": 74,
           "bytes": 26,
           "reference_offset": 11520,
-          "malformed": {
+          "fill_extension": {
             "offset": 100,
-            "bytes": 27,
-            "error": "trailing bytes"
+            "bytes": 27
+          },
+          "malformed": {
+            "offset": 127,
+            "bytes": 29,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 127,
+          "offset": 156,
           "bytes": 25,
           "reference_offset": 15360
         },
         {
-          "offset": 152,
+          "offset": 181,
           "bytes": 24,
           "reference_offset": 19200
         },
         {
-          "offset": 176,
+          "offset": 205,
           "bytes": 26,
           "reference_offset": 23040
         },
         {
-          "offset": 202,
+          "offset": 231,
           "bytes": 25,
           "reference_offset": 26880
         },
         {
-          "offset": 227,
+          "offset": 256,
           "bytes": 25,
           "reference_offset": 30720
         },
         {
-          "offset": 252,
+          "offset": 281,
           "bytes": 26,
           "reference_offset": 34560
         },
         {
-          "offset": 278,
+          "offset": 307,
           "bytes": 24,
           "reference_offset": 38400
         },
         {
-          "offset": 302,
+          "offset": 331,
           "bytes": 25,
           "reference_offset": 42240
         }
@@ -100,67 +104,71 @@
       "asc": "bb1500",
       "frames": [
         {
-          "offset": 327,
+          "offset": 356,
           "bytes": 23,
           "reference_offset": 46080
         },
         {
-          "offset": 350,
+          "offset": 379,
           "bytes": 25,
           "reference_offset": 49920
         },
         {
-          "offset": 375,
+          "offset": 404,
           "bytes": 23,
           "reference_offset": 53760
         },
         {
-          "offset": 398,
+          "offset": 427,
           "bytes": 25,
           "reference_offset": 57600,
+          "fill_extension": {
+            "offset": 452,
+            "bytes": 26
+          },
           "malformed": {
-            "offset": 423,
-            "bytes": 26,
-            "error": "trailing bytes"
+            "offset": 478,
+            "bytes": 28,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 449,
+          "offset": 506,
           "bytes": 24,
           "reference_offset": 61440
         },
         {
-          "offset": 473,
+          "offset": 530,
           "bytes": 23,
           "reference_offset": 65280
         },
         {
-          "offset": 496,
+          "offset": 553,
           "bytes": 25,
           "reference_offset": 69120
         },
         {
-          "offset": 521,
+          "offset": 578,
           "bytes": 24,
           "reference_offset": 72960
         },
         {
-          "offset": 545,
+          "offset": 602,
           "bytes": 24,
           "reference_offset": 76800
         },
         {
-          "offset": 569,
+          "offset": 626,
           "bytes": 25,
           "reference_offset": 80640
         },
         {
-          "offset": 594,
+          "offset": 651,
           "bytes": 23,
           "reference_offset": 84480
         },
         {
-          "offset": 617,
+          "offset": 674,
           "bytes": 24,
           "reference_offset": 88320
         }
@@ -191,67 +199,71 @@
       "asc": "bb1500",
       "frames": [
         {
-          "offset": 641,
+          "offset": 698,
           "bytes": 23,
           "reference_offset": 92160
         },
         {
-          "offset": 664,
+          "offset": 721,
           "bytes": 26,
           "reference_offset": 96000
         },
         {
-          "offset": 690,
+          "offset": 747,
           "bytes": 23,
           "reference_offset": 99840
         },
         {
-          "offset": 713,
+          "offset": 770,
           "bytes": 25,
           "reference_offset": 103680,
+          "fill_extension": {
+            "offset": 795,
+            "bytes": 26
+          },
           "malformed": {
-            "offset": 738,
-            "bytes": 26,
-            "error": "trailing bytes"
+            "offset": 821,
+            "bytes": 28,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 764,
+          "offset": 849,
           "bytes": 24,
           "reference_offset": 107520
         },
         {
-          "offset": 788,
+          "offset": 873,
           "bytes": 23,
           "reference_offset": 111360
         },
         {
-          "offset": 811,
+          "offset": 896,
           "bytes": 25,
           "reference_offset": 115200
         },
         {
-          "offset": 836,
+          "offset": 921,
           "bytes": 24,
           "reference_offset": 119040
         },
         {
-          "offset": 860,
+          "offset": 945,
           "bytes": 24,
           "reference_offset": 122880
         },
         {
-          "offset": 884,
+          "offset": 969,
           "bytes": 25,
           "reference_offset": 126720
         },
         {
-          "offset": 909,
+          "offset": 994,
           "bytes": 23,
           "reference_offset": 130560
         },
         {
-          "offset": 932,
+          "offset": 1017,
           "bytes": 24,
           "reference_offset": 134400
         }
@@ -282,67 +294,71 @@
       "asc": "bb1500",
       "frames": [
         {
-          "offset": 956,
+          "offset": 1041,
           "bytes": 23,
           "reference_offset": 138240
         },
         {
-          "offset": 979,
+          "offset": 1064,
           "bytes": 25,
           "reference_offset": 142080
         },
         {
-          "offset": 1004,
+          "offset": 1089,
           "bytes": 23,
           "reference_offset": 145920
         },
         {
-          "offset": 1027,
+          "offset": 1112,
           "bytes": 25,
           "reference_offset": 149760,
+          "fill_extension": {
+            "offset": 1137,
+            "bytes": 26
+          },
           "malformed": {
-            "offset": 1052,
-            "bytes": 26,
-            "error": "trailing bytes"
+            "offset": 1163,
+            "bytes": 28,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 1078,
+          "offset": 1191,
           "bytes": 24,
           "reference_offset": 153600
         },
         {
-          "offset": 1102,
+          "offset": 1215,
           "bytes": 23,
           "reference_offset": 157440
         },
         {
-          "offset": 1125,
+          "offset": 1238,
           "bytes": 25,
           "reference_offset": 161280
         },
         {
-          "offset": 1150,
+          "offset": 1263,
           "bytes": 24,
           "reference_offset": 165120
         },
         {
-          "offset": 1174,
+          "offset": 1287,
           "bytes": 24,
           "reference_offset": 168960
         },
         {
-          "offset": 1198,
+          "offset": 1311,
           "bytes": 25,
           "reference_offset": 172800
         },
         {
-          "offset": 1223,
+          "offset": 1336,
           "bytes": 23,
           "reference_offset": 176640
         },
         {
-          "offset": 1246,
+          "offset": 1359,
           "bytes": 24,
           "reference_offset": 180480
         }
@@ -373,67 +389,67 @@
       "asc": "bb1520",
       "frames": [
         {
-          "offset": 1270,
+          "offset": 1383,
           "bytes": 29,
           "reference_offset": 184320
         },
         {
-          "offset": 1299,
+          "offset": 1412,
           "bytes": 31,
           "reference_offset": 188160
         },
         {
-          "offset": 1330,
+          "offset": 1443,
           "bytes": 29,
           "reference_offset": 192000
         },
         {
-          "offset": 1359,
+          "offset": 1472,
           "bytes": 31,
           "reference_offset": 195840,
           "malformed": {
-            "offset": 1390,
+            "offset": 1503,
             "bytes": 31,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 1421,
+          "offset": 1534,
           "bytes": 30,
           "reference_offset": 199680
         },
         {
-          "offset": 1451,
+          "offset": 1564,
           "bytes": 29,
           "reference_offset": 203520
         },
         {
-          "offset": 1480,
+          "offset": 1593,
           "bytes": 31,
           "reference_offset": 207360
         },
         {
-          "offset": 1511,
+          "offset": 1624,
           "bytes": 30,
           "reference_offset": 211200
         },
         {
-          "offset": 1541,
+          "offset": 1654,
           "bytes": 30,
           "reference_offset": 215040
         },
         {
-          "offset": 1571,
+          "offset": 1684,
           "bytes": 31,
           "reference_offset": 218880
         },
         {
-          "offset": 1602,
+          "offset": 1715,
           "bytes": 29,
           "reference_offset": 222720
         },
         {
-          "offset": 1631,
+          "offset": 1744,
           "bytes": 30,
           "reference_offset": 226560
         }
@@ -464,67 +480,67 @@
       "asc": "bb1520",
       "frames": [
         {
-          "offset": 1661,
+          "offset": 1774,
           "bytes": 28,
           "reference_offset": 230400
         },
         {
-          "offset": 1689,
+          "offset": 1802,
           "bytes": 30,
           "reference_offset": 234240
         },
         {
-          "offset": 1719,
+          "offset": 1832,
           "bytes": 28,
           "reference_offset": 238080
         },
         {
-          "offset": 1747,
+          "offset": 1860,
           "bytes": 30,
           "reference_offset": 241920,
           "malformed": {
-            "offset": 1777,
+            "offset": 1890,
             "bytes": 30,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 1807,
+          "offset": 1920,
           "bytes": 29,
           "reference_offset": 245760
         },
         {
-          "offset": 1836,
+          "offset": 1949,
           "bytes": 28,
           "reference_offset": 249600
         },
         {
-          "offset": 1864,
+          "offset": 1977,
           "bytes": 30,
           "reference_offset": 253440
         },
         {
-          "offset": 1894,
+          "offset": 2007,
           "bytes": 29,
           "reference_offset": 257280
         },
         {
-          "offset": 1923,
+          "offset": 2036,
           "bytes": 29,
           "reference_offset": 261120
         },
         {
-          "offset": 1952,
+          "offset": 2065,
           "bytes": 30,
           "reference_offset": 264960
         },
         {
-          "offset": 1982,
+          "offset": 2095,
           "bytes": 28,
           "reference_offset": 268800
         },
         {
-          "offset": 2010,
+          "offset": 2123,
           "bytes": 29,
           "reference_offset": 272640
         }
@@ -555,67 +571,67 @@
       "asc": "bb1520",
       "frames": [
         {
-          "offset": 2039,
+          "offset": 2152,
           "bytes": 28,
           "reference_offset": 276480
         },
         {
-          "offset": 2067,
+          "offset": 2180,
           "bytes": 31,
           "reference_offset": 280320
         },
         {
-          "offset": 2098,
+          "offset": 2211,
           "bytes": 28,
           "reference_offset": 284160
         },
         {
-          "offset": 2126,
+          "offset": 2239,
           "bytes": 30,
           "reference_offset": 288000,
           "malformed": {
-            "offset": 2156,
+            "offset": 2269,
             "bytes": 30,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 2186,
+          "offset": 2299,
           "bytes": 29,
           "reference_offset": 291840
         },
         {
-          "offset": 2215,
+          "offset": 2328,
           "bytes": 28,
           "reference_offset": 295680
         },
         {
-          "offset": 2243,
+          "offset": 2356,
           "bytes": 30,
           "reference_offset": 299520
         },
         {
-          "offset": 2273,
+          "offset": 2386,
           "bytes": 29,
           "reference_offset": 303360
         },
         {
-          "offset": 2302,
+          "offset": 2415,
           "bytes": 29,
           "reference_offset": 307200
         },
         {
-          "offset": 2331,
+          "offset": 2444,
           "bytes": 30,
           "reference_offset": 311040
         },
         {
-          "offset": 2361,
+          "offset": 2474,
           "bytes": 28,
           "reference_offset": 314880
         },
         {
-          "offset": 2389,
+          "offset": 2502,
           "bytes": 29,
           "reference_offset": 318720
         }
@@ -646,67 +662,67 @@
       "asc": "bb1520",
       "frames": [
         {
-          "offset": 2418,
+          "offset": 2531,
           "bytes": 28,
           "reference_offset": 322560
         },
         {
-          "offset": 2446,
+          "offset": 2559,
           "bytes": 30,
           "reference_offset": 326400
         },
         {
-          "offset": 2476,
+          "offset": 2589,
           "bytes": 28,
           "reference_offset": 330240
         },
         {
-          "offset": 2504,
+          "offset": 2617,
           "bytes": 30,
           "reference_offset": 334080,
           "malformed": {
-            "offset": 2534,
+            "offset": 2647,
             "bytes": 30,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 2564,
+          "offset": 2677,
           "bytes": 29,
           "reference_offset": 337920
         },
         {
-          "offset": 2593,
+          "offset": 2706,
           "bytes": 28,
           "reference_offset": 341760
         },
         {
-          "offset": 2621,
+          "offset": 2734,
           "bytes": 30,
           "reference_offset": 345600
         },
         {
-          "offset": 2651,
+          "offset": 2764,
           "bytes": 29,
           "reference_offset": 349440
         },
         {
-          "offset": 2680,
+          "offset": 2793,
           "bytes": 29,
           "reference_offset": 353280
         },
         {
-          "offset": 2709,
+          "offset": 2822,
           "bytes": 30,
           "reference_offset": 357120
         },
         {
-          "offset": 2739,
+          "offset": 2852,
           "bytes": 28,
           "reference_offset": 360960
         },
         {
-          "offset": 2767,
+          "offset": 2880,
           "bytes": 29,
           "reference_offset": 364800
         }
@@ -737,67 +753,67 @@
       "asc": "bb1540",
       "frames": [
         {
-          "offset": 2796,
+          "offset": 2909,
           "bytes": 31,
           "reference_offset": 368640
         },
         {
-          "offset": 2827,
+          "offset": 2940,
           "bytes": 33,
           "reference_offset": 372480
         },
         {
-          "offset": 2860,
+          "offset": 2973,
           "bytes": 30,
           "reference_offset": 376320
         },
         {
-          "offset": 2890,
+          "offset": 3003,
           "bytes": 33,
           "reference_offset": 380160,
           "malformed": {
-            "offset": 2923,
+            "offset": 3036,
             "bytes": 33,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 2956,
+          "offset": 3069,
           "bytes": 32,
           "reference_offset": 384000
         },
         {
-          "offset": 2988,
+          "offset": 3101,
           "bytes": 30,
           "reference_offset": 387840
         },
         {
-          "offset": 3018,
+          "offset": 3131,
           "bytes": 32,
           "reference_offset": 391680
         },
         {
-          "offset": 3050,
+          "offset": 3163,
           "bytes": 32,
           "reference_offset": 395520
         },
         {
-          "offset": 3082,
+          "offset": 3195,
           "bytes": 32,
           "reference_offset": 399360
         },
         {
-          "offset": 3114,
+          "offset": 3227,
           "bytes": 32,
           "reference_offset": 403200
         },
         {
-          "offset": 3146,
+          "offset": 3259,
           "bytes": 30,
           "reference_offset": 407040
         },
         {
-          "offset": 3176,
+          "offset": 3289,
           "bytes": 32,
           "reference_offset": 410880
         }
@@ -828,67 +844,67 @@
       "asc": "bb1540",
       "frames": [
         {
-          "offset": 3208,
+          "offset": 3321,
           "bytes": 30,
           "reference_offset": 414720
         },
         {
-          "offset": 3238,
+          "offset": 3351,
           "bytes": 31,
           "reference_offset": 418560
         },
         {
-          "offset": 3269,
+          "offset": 3382,
           "bytes": 29,
           "reference_offset": 422400
         },
         {
-          "offset": 3298,
+          "offset": 3411,
           "bytes": 32,
           "reference_offset": 426240,
           "malformed": {
-            "offset": 3330,
+            "offset": 3443,
             "bytes": 32,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 3362,
+          "offset": 3475,
           "bytes": 31,
           "reference_offset": 430080
         },
         {
-          "offset": 3393,
+          "offset": 3506,
           "bytes": 29,
           "reference_offset": 433920
         },
         {
-          "offset": 3422,
+          "offset": 3535,
           "bytes": 31,
           "reference_offset": 437760
         },
         {
-          "offset": 3453,
+          "offset": 3566,
           "bytes": 31,
           "reference_offset": 441600
         },
         {
-          "offset": 3484,
+          "offset": 3597,
           "bytes": 31,
           "reference_offset": 445440
         },
         {
-          "offset": 3515,
+          "offset": 3628,
           "bytes": 31,
           "reference_offset": 449280
         },
         {
-          "offset": 3546,
+          "offset": 3659,
           "bytes": 29,
           "reference_offset": 453120
         },
         {
-          "offset": 3575,
+          "offset": 3688,
           "bytes": 31,
           "reference_offset": 456960
         }
@@ -919,67 +935,67 @@
       "asc": "bb1540",
       "frames": [
         {
-          "offset": 3606,
+          "offset": 3719,
           "bytes": 30,
           "reference_offset": 460800
         },
         {
-          "offset": 3636,
+          "offset": 3749,
           "bytes": 32,
           "reference_offset": 464640
         },
         {
-          "offset": 3668,
+          "offset": 3781,
           "bytes": 29,
           "reference_offset": 468480
         },
         {
-          "offset": 3697,
+          "offset": 3810,
           "bytes": 32,
           "reference_offset": 472320,
           "malformed": {
-            "offset": 3729,
+            "offset": 3842,
             "bytes": 32,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 3761,
+          "offset": 3874,
           "bytes": 31,
           "reference_offset": 476160
         },
         {
-          "offset": 3792,
+          "offset": 3905,
           "bytes": 29,
           "reference_offset": 480000
         },
         {
-          "offset": 3821,
+          "offset": 3934,
           "bytes": 31,
           "reference_offset": 483840
         },
         {
-          "offset": 3852,
+          "offset": 3965,
           "bytes": 31,
           "reference_offset": 487680
         },
         {
-          "offset": 3883,
+          "offset": 3996,
           "bytes": 31,
           "reference_offset": 491520
         },
         {
-          "offset": 3914,
+          "offset": 4027,
           "bytes": 31,
           "reference_offset": 495360
         },
         {
-          "offset": 3945,
+          "offset": 4058,
           "bytes": 29,
           "reference_offset": 499200
         },
         {
-          "offset": 3974,
+          "offset": 4087,
           "bytes": 31,
           "reference_offset": 503040
         }
@@ -1010,67 +1026,67 @@
       "asc": "bb1540",
       "frames": [
         {
-          "offset": 4005,
+          "offset": 4118,
           "bytes": 30,
           "reference_offset": 506880
         },
         {
-          "offset": 4035,
+          "offset": 4148,
           "bytes": 31,
           "reference_offset": 510720
         },
         {
-          "offset": 4066,
+          "offset": 4179,
           "bytes": 29,
           "reference_offset": 514560
         },
         {
-          "offset": 4095,
+          "offset": 4208,
           "bytes": 32,
           "reference_offset": 518400,
           "malformed": {
-            "offset": 4127,
+            "offset": 4240,
             "bytes": 32,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 4159,
+          "offset": 4272,
           "bytes": 31,
           "reference_offset": 522240
         },
         {
-          "offset": 4190,
+          "offset": 4303,
           "bytes": 29,
           "reference_offset": 526080
         },
         {
-          "offset": 4219,
+          "offset": 4332,
           "bytes": 31,
           "reference_offset": 529920
         },
         {
-          "offset": 4250,
+          "offset": 4363,
           "bytes": 31,
           "reference_offset": 533760
         },
         {
-          "offset": 4281,
+          "offset": 4394,
           "bytes": 31,
           "reference_offset": 537600
         },
         {
-          "offset": 4312,
+          "offset": 4425,
           "bytes": 31,
           "reference_offset": 541440
         },
         {
-          "offset": 4343,
+          "offset": 4456,
           "bytes": 29,
           "reference_offset": 545280
         },
         {
-          "offset": 4372,
+          "offset": 4485,
           "bytes": 31,
           "reference_offset": 549120
         }
@@ -1101,67 +1117,67 @@
       "asc": "bb1560",
       "frames": [
         {
-          "offset": 4403,
+          "offset": 4516,
           "bytes": 36,
           "reference_offset": 552960
         },
         {
-          "offset": 4439,
+          "offset": 4552,
           "bytes": 38,
           "reference_offset": 556800
         },
         {
-          "offset": 4477,
+          "offset": 4590,
           "bytes": 35,
           "reference_offset": 560640
         },
         {
-          "offset": 4512,
+          "offset": 4625,
           "bytes": 38,
           "reference_offset": 564480,
           "malformed": {
-            "offset": 4550,
+            "offset": 4663,
             "bytes": 38,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 4588,
+          "offset": 4701,
           "bytes": 37,
           "reference_offset": 568320
         },
         {
-          "offset": 4625,
+          "offset": 4738,
           "bytes": 35,
           "reference_offset": 572160
         },
         {
-          "offset": 4660,
+          "offset": 4773,
           "bytes": 37,
           "reference_offset": 576000
         },
         {
-          "offset": 4697,
+          "offset": 4810,
           "bytes": 37,
           "reference_offset": 579840
         },
         {
-          "offset": 4734,
+          "offset": 4847,
           "bytes": 37,
           "reference_offset": 583680
         },
         {
-          "offset": 4771,
+          "offset": 4884,
           "bytes": 37,
           "reference_offset": 587520
         },
         {
-          "offset": 4808,
+          "offset": 4921,
           "bytes": 35,
           "reference_offset": 591360
         },
         {
-          "offset": 4843,
+          "offset": 4956,
           "bytes": 37,
           "reference_offset": 595200
         }
@@ -1192,67 +1208,67 @@
       "asc": "bb1560",
       "frames": [
         {
-          "offset": 4880,
+          "offset": 4993,
           "bytes": 35,
           "reference_offset": 599040
         },
         {
-          "offset": 4915,
+          "offset": 5028,
           "bytes": 36,
           "reference_offset": 602880
         },
         {
-          "offset": 4951,
+          "offset": 5064,
           "bytes": 34,
           "reference_offset": 606720
         },
         {
-          "offset": 4985,
+          "offset": 5098,
           "bytes": 37,
           "reference_offset": 610560,
           "malformed": {
-            "offset": 5022,
+            "offset": 5135,
             "bytes": 37,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 5059,
+          "offset": 5172,
           "bytes": 36,
           "reference_offset": 614400
         },
         {
-          "offset": 5095,
+          "offset": 5208,
           "bytes": 34,
           "reference_offset": 618240
         },
         {
-          "offset": 5129,
+          "offset": 5242,
           "bytes": 36,
           "reference_offset": 622080
         },
         {
-          "offset": 5165,
+          "offset": 5278,
           "bytes": 36,
           "reference_offset": 625920
         },
         {
-          "offset": 5201,
+          "offset": 5314,
           "bytes": 36,
           "reference_offset": 629760
         },
         {
-          "offset": 5237,
+          "offset": 5350,
           "bytes": 36,
           "reference_offset": 633600
         },
         {
-          "offset": 5273,
+          "offset": 5386,
           "bytes": 34,
           "reference_offset": 637440
         },
         {
-          "offset": 5307,
+          "offset": 5420,
           "bytes": 36,
           "reference_offset": 641280
         }
@@ -1283,67 +1299,67 @@
       "asc": "bb1560",
       "frames": [
         {
-          "offset": 5343,
+          "offset": 5456,
           "bytes": 35,
           "reference_offset": 645120
         },
         {
-          "offset": 5378,
+          "offset": 5491,
           "bytes": 37,
           "reference_offset": 648960
         },
         {
-          "offset": 5415,
+          "offset": 5528,
           "bytes": 34,
           "reference_offset": 652800
         },
         {
-          "offset": 5449,
+          "offset": 5562,
           "bytes": 37,
           "reference_offset": 656640,
           "malformed": {
-            "offset": 5486,
+            "offset": 5599,
             "bytes": 37,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 5523,
+          "offset": 5636,
           "bytes": 36,
           "reference_offset": 660480
         },
         {
-          "offset": 5559,
+          "offset": 5672,
           "bytes": 34,
           "reference_offset": 664320
         },
         {
-          "offset": 5593,
+          "offset": 5706,
           "bytes": 36,
           "reference_offset": 668160
         },
         {
-          "offset": 5629,
+          "offset": 5742,
           "bytes": 36,
           "reference_offset": 672000
         },
         {
-          "offset": 5665,
+          "offset": 5778,
           "bytes": 36,
           "reference_offset": 675840
         },
         {
-          "offset": 5701,
+          "offset": 5814,
           "bytes": 36,
           "reference_offset": 679680
         },
         {
-          "offset": 5737,
+          "offset": 5850,
           "bytes": 34,
           "reference_offset": 683520
         },
         {
-          "offset": 5771,
+          "offset": 5884,
           "bytes": 36,
           "reference_offset": 687360
         }
@@ -1374,67 +1390,67 @@
       "asc": "bb1560",
       "frames": [
         {
-          "offset": 5807,
+          "offset": 5920,
           "bytes": 35,
           "reference_offset": 691200
         },
         {
-          "offset": 5842,
+          "offset": 5955,
           "bytes": 36,
           "reference_offset": 695040
         },
         {
-          "offset": 5878,
+          "offset": 5991,
           "bytes": 34,
           "reference_offset": 698880
         },
         {
-          "offset": 5912,
+          "offset": 6025,
           "bytes": 37,
           "reference_offset": 702720,
           "malformed": {
-            "offset": 5949,
+            "offset": 6062,
             "bytes": 37,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 5986,
+          "offset": 6099,
           "bytes": 36,
           "reference_offset": 706560
         },
         {
-          "offset": 6022,
+          "offset": 6135,
           "bytes": 34,
           "reference_offset": 710400
         },
         {
-          "offset": 6056,
+          "offset": 6169,
           "bytes": 36,
           "reference_offset": 714240
         },
         {
-          "offset": 6092,
+          "offset": 6205,
           "bytes": 36,
           "reference_offset": 718080
         },
         {
-          "offset": 6128,
+          "offset": 6241,
           "bytes": 36,
           "reference_offset": 721920
         },
         {
-          "offset": 6164,
+          "offset": 6277,
           "bytes": 36,
           "reference_offset": 725760
         },
         {
-          "offset": 6200,
+          "offset": 6313,
           "bytes": 34,
           "reference_offset": 729600
         },
         {
-          "offset": 6234,
+          "offset": 6347,
           "bytes": 36,
           "reference_offset": 733440
         }
@@ -1465,67 +1481,67 @@
       "asc": "bb1580",
       "frames": [
         {
-          "offset": 6270,
+          "offset": 6383,
           "bytes": 29,
           "reference_offset": 737280
         },
         {
-          "offset": 6299,
+          "offset": 6412,
           "bytes": 32,
           "reference_offset": 741120
         },
         {
-          "offset": 6331,
+          "offset": 6444,
           "bytes": 29,
           "reference_offset": 744960
         },
         {
-          "offset": 6360,
+          "offset": 6473,
           "bytes": 31,
           "reference_offset": 748800,
           "malformed": {
-            "offset": 6391,
+            "offset": 6504,
             "bytes": 31,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 6422,
+          "offset": 6535,
           "bytes": 30,
           "reference_offset": 752640
         },
         {
-          "offset": 6452,
+          "offset": 6565,
           "bytes": 29,
           "reference_offset": 756480
         },
         {
-          "offset": 6481,
+          "offset": 6594,
           "bytes": 31,
           "reference_offset": 760320
         },
         {
-          "offset": 6512,
+          "offset": 6625,
           "bytes": 30,
           "reference_offset": 764160
         },
         {
-          "offset": 6542,
+          "offset": 6655,
           "bytes": 30,
           "reference_offset": 768000
         },
         {
-          "offset": 6572,
+          "offset": 6685,
           "bytes": 31,
           "reference_offset": 771840
         },
         {
-          "offset": 6603,
+          "offset": 6716,
           "bytes": 29,
           "reference_offset": 775680
         },
         {
-          "offset": 6632,
+          "offset": 6745,
           "bytes": 30,
           "reference_offset": 779520
         }
@@ -1556,67 +1572,67 @@
       "asc": "bb1580",
       "frames": [
         {
-          "offset": 6662,
+          "offset": 6775,
           "bytes": 28,
           "reference_offset": 783360
         },
         {
-          "offset": 6690,
+          "offset": 6803,
           "bytes": 31,
           "reference_offset": 787200
         },
         {
-          "offset": 6721,
+          "offset": 6834,
           "bytes": 28,
           "reference_offset": 791040
         },
         {
-          "offset": 6749,
+          "offset": 6862,
           "bytes": 30,
           "reference_offset": 794880,
           "malformed": {
-            "offset": 6779,
+            "offset": 6892,
             "bytes": 30,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 6809,
+          "offset": 6922,
           "bytes": 29,
           "reference_offset": 798720
         },
         {
-          "offset": 6838,
+          "offset": 6951,
           "bytes": 28,
           "reference_offset": 802560
         },
         {
-          "offset": 6866,
+          "offset": 6979,
           "bytes": 30,
           "reference_offset": 806400
         },
         {
-          "offset": 6896,
+          "offset": 7009,
           "bytes": 29,
           "reference_offset": 810240
         },
         {
-          "offset": 6925,
+          "offset": 7038,
           "bytes": 29,
           "reference_offset": 814080
         },
         {
-          "offset": 6954,
+          "offset": 7067,
           "bytes": 30,
           "reference_offset": 817920
         },
         {
-          "offset": 6984,
+          "offset": 7097,
           "bytes": 28,
           "reference_offset": 821760
         },
         {
-          "offset": 7012,
+          "offset": 7125,
           "bytes": 29,
           "reference_offset": 825600
         }
@@ -1647,67 +1663,67 @@
       "asc": "bb1580",
       "frames": [
         {
-          "offset": 7041,
+          "offset": 7154,
           "bytes": 28,
           "reference_offset": 829440
         },
         {
-          "offset": 7069,
+          "offset": 7182,
           "bytes": 31,
           "reference_offset": 833280
         },
         {
-          "offset": 7100,
+          "offset": 7213,
           "bytes": 28,
           "reference_offset": 837120
         },
         {
-          "offset": 7128,
+          "offset": 7241,
           "bytes": 30,
           "reference_offset": 840960,
           "malformed": {
-            "offset": 7158,
+            "offset": 7271,
             "bytes": 31,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 7189,
+          "offset": 7302,
           "bytes": 29,
           "reference_offset": 844800
         },
         {
-          "offset": 7218,
+          "offset": 7331,
           "bytes": 28,
           "reference_offset": 848640
         },
         {
-          "offset": 7246,
+          "offset": 7359,
           "bytes": 31,
           "reference_offset": 852480
         },
         {
-          "offset": 7277,
+          "offset": 7390,
           "bytes": 29,
           "reference_offset": 856320
         },
         {
-          "offset": 7306,
+          "offset": 7419,
           "bytes": 29,
           "reference_offset": 860160
         },
         {
-          "offset": 7335,
+          "offset": 7448,
           "bytes": 30,
           "reference_offset": 864000
         },
         {
-          "offset": 7365,
+          "offset": 7478,
           "bytes": 28,
           "reference_offset": 867840
         },
         {
-          "offset": 7393,
+          "offset": 7506,
           "bytes": 29,
           "reference_offset": 871680
         }
@@ -1738,67 +1754,67 @@
       "asc": "bb1580",
       "frames": [
         {
-          "offset": 7422,
+          "offset": 7535,
           "bytes": 28,
           "reference_offset": 875520
         },
         {
-          "offset": 7450,
+          "offset": 7563,
           "bytes": 31,
           "reference_offset": 879360
         },
         {
-          "offset": 7481,
+          "offset": 7594,
           "bytes": 28,
           "reference_offset": 883200
         },
         {
-          "offset": 7509,
+          "offset": 7622,
           "bytes": 30,
           "reference_offset": 887040,
           "malformed": {
-            "offset": 7539,
+            "offset": 7652,
             "bytes": 30,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 7569,
+          "offset": 7682,
           "bytes": 29,
           "reference_offset": 890880
         },
         {
-          "offset": 7598,
+          "offset": 7711,
           "bytes": 28,
           "reference_offset": 894720
         },
         {
-          "offset": 7626,
+          "offset": 7739,
           "bytes": 30,
           "reference_offset": 898560
         },
         {
-          "offset": 7656,
+          "offset": 7769,
           "bytes": 29,
           "reference_offset": 902400
         },
         {
-          "offset": 7685,
+          "offset": 7798,
           "bytes": 29,
           "reference_offset": 906240
         },
         {
-          "offset": 7714,
+          "offset": 7827,
           "bytes": 30,
           "reference_offset": 910080
         },
         {
-          "offset": 7744,
+          "offset": 7857,
           "bytes": 28,
           "reference_offset": 913920
         },
         {
-          "offset": 7772,
+          "offset": 7885,
           "bytes": 29,
           "reference_offset": 917760
         }
@@ -1829,67 +1845,67 @@
       "asc": "bb15a0",
       "frames": [
         {
-          "offset": 7801,
+          "offset": 7914,
           "bytes": 34,
           "reference_offset": 921600
         },
         {
-          "offset": 7835,
+          "offset": 7948,
           "bytes": 37,
           "reference_offset": 925440
         },
         {
-          "offset": 7872,
+          "offset": 7985,
           "bytes": 34,
           "reference_offset": 929280
         },
         {
-          "offset": 7906,
+          "offset": 8019,
           "bytes": 36,
           "reference_offset": 933120,
           "malformed": {
-            "offset": 7942,
+            "offset": 8055,
             "bytes": 36,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 7978,
+          "offset": 8091,
           "bytes": 35,
           "reference_offset": 936960
         },
         {
-          "offset": 8013,
+          "offset": 8126,
           "bytes": 34,
           "reference_offset": 940800
         },
         {
-          "offset": 8047,
+          "offset": 8160,
           "bytes": 36,
           "reference_offset": 944640
         },
         {
-          "offset": 8083,
+          "offset": 8196,
           "bytes": 35,
           "reference_offset": 948480
         },
         {
-          "offset": 8118,
+          "offset": 8231,
           "bytes": 35,
           "reference_offset": 952320
         },
         {
-          "offset": 8153,
+          "offset": 8266,
           "bytes": 36,
           "reference_offset": 956160
         },
         {
-          "offset": 8189,
+          "offset": 8302,
           "bytes": 34,
           "reference_offset": 960000
         },
         {
-          "offset": 8223,
+          "offset": 8336,
           "bytes": 35,
           "reference_offset": 963840
         }
@@ -1920,67 +1936,67 @@
       "asc": "bb15a0",
       "frames": [
         {
-          "offset": 8258,
+          "offset": 8371,
           "bytes": 33,
           "reference_offset": 967680
         },
         {
-          "offset": 8291,
+          "offset": 8404,
           "bytes": 36,
           "reference_offset": 971520
         },
         {
-          "offset": 8327,
+          "offset": 8440,
           "bytes": 33,
           "reference_offset": 975360
         },
         {
-          "offset": 8360,
+          "offset": 8473,
           "bytes": 35,
           "reference_offset": 979200,
           "malformed": {
-            "offset": 8395,
+            "offset": 8508,
             "bytes": 35,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 8430,
+          "offset": 8543,
           "bytes": 34,
           "reference_offset": 983040
         },
         {
-          "offset": 8464,
+          "offset": 8577,
           "bytes": 33,
           "reference_offset": 986880
         },
         {
-          "offset": 8497,
+          "offset": 8610,
           "bytes": 35,
           "reference_offset": 990720
         },
         {
-          "offset": 8532,
+          "offset": 8645,
           "bytes": 34,
           "reference_offset": 994560
         },
         {
-          "offset": 8566,
+          "offset": 8679,
           "bytes": 34,
           "reference_offset": 998400
         },
         {
-          "offset": 8600,
+          "offset": 8713,
           "bytes": 35,
           "reference_offset": 1002240
         },
         {
-          "offset": 8635,
+          "offset": 8748,
           "bytes": 33,
           "reference_offset": 1006080
         },
         {
-          "offset": 8668,
+          "offset": 8781,
           "bytes": 34,
           "reference_offset": 1009920
         }
@@ -2011,67 +2027,67 @@
       "asc": "bb15a0",
       "frames": [
         {
-          "offset": 8702,
+          "offset": 8815,
           "bytes": 33,
           "reference_offset": 1013760
         },
         {
-          "offset": 8735,
+          "offset": 8848,
           "bytes": 36,
           "reference_offset": 1017600
         },
         {
-          "offset": 8771,
+          "offset": 8884,
           "bytes": 33,
           "reference_offset": 1021440
         },
         {
-          "offset": 8804,
+          "offset": 8917,
           "bytes": 35,
           "reference_offset": 1025280,
           "malformed": {
-            "offset": 8839,
+            "offset": 8952,
             "bytes": 35,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 8874,
+          "offset": 8987,
           "bytes": 34,
           "reference_offset": 1029120
         },
         {
-          "offset": 8908,
+          "offset": 9021,
           "bytes": 33,
           "reference_offset": 1032960
         },
         {
-          "offset": 8941,
+          "offset": 9054,
           "bytes": 36,
           "reference_offset": 1036800
         },
         {
-          "offset": 8977,
+          "offset": 9090,
           "bytes": 34,
           "reference_offset": 1040640
         },
         {
-          "offset": 9011,
+          "offset": 9124,
           "bytes": 34,
           "reference_offset": 1044480
         },
         {
-          "offset": 9045,
+          "offset": 9158,
           "bytes": 35,
           "reference_offset": 1048320
         },
         {
-          "offset": 9080,
+          "offset": 9193,
           "bytes": 33,
           "reference_offset": 1052160
         },
         {
-          "offset": 9113,
+          "offset": 9226,
           "bytes": 34,
           "reference_offset": 1056000
         }
@@ -2102,67 +2118,67 @@
       "asc": "bb15a0",
       "frames": [
         {
-          "offset": 9147,
+          "offset": 9260,
           "bytes": 33,
           "reference_offset": 1059840
         },
         {
-          "offset": 9180,
+          "offset": 9293,
           "bytes": 36,
           "reference_offset": 1063680
         },
         {
-          "offset": 9216,
+          "offset": 9329,
           "bytes": 33,
           "reference_offset": 1067520
         },
         {
-          "offset": 9249,
+          "offset": 9362,
           "bytes": 35,
           "reference_offset": 1071360,
           "malformed": {
-            "offset": 9284,
+            "offset": 9397,
             "bytes": 35,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 9319,
+          "offset": 9432,
           "bytes": 34,
           "reference_offset": 1075200
         },
         {
-          "offset": 9353,
+          "offset": 9466,
           "bytes": 33,
           "reference_offset": 1079040
         },
         {
-          "offset": 9386,
+          "offset": 9499,
           "bytes": 35,
           "reference_offset": 1082880
         },
         {
-          "offset": 9421,
+          "offset": 9534,
           "bytes": 34,
           "reference_offset": 1086720
         },
         {
-          "offset": 9455,
+          "offset": 9568,
           "bytes": 34,
           "reference_offset": 1090560
         },
         {
-          "offset": 9489,
+          "offset": 9602,
           "bytes": 35,
           "reference_offset": 1094400
         },
         {
-          "offset": 9524,
+          "offset": 9637,
           "bytes": 33,
           "reference_offset": 1098240
         },
         {
-          "offset": 9557,
+          "offset": 9670,
           "bytes": 34,
           "reference_offset": 1102080
         }
@@ -2193,67 +2209,67 @@
       "asc": "bb15c0",
       "frames": [
         {
-          "offset": 9591,
+          "offset": 9704,
           "bytes": 36,
           "reference_offset": 1105920
         },
         {
-          "offset": 9627,
+          "offset": 9740,
           "bytes": 38,
           "reference_offset": 1109760
         },
         {
-          "offset": 9665,
+          "offset": 9778,
           "bytes": 35,
           "reference_offset": 1113600
         },
         {
-          "offset": 9700,
+          "offset": 9813,
           "bytes": 38,
           "reference_offset": 1117440,
           "malformed": {
-            "offset": 9738,
+            "offset": 9851,
             "bytes": 38,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 9776,
+          "offset": 9889,
           "bytes": 37,
           "reference_offset": 1121280
         },
         {
-          "offset": 9813,
+          "offset": 9926,
           "bytes": 35,
           "reference_offset": 1125120
         },
         {
-          "offset": 9848,
+          "offset": 9961,
           "bytes": 37,
           "reference_offset": 1128960
         },
         {
-          "offset": 9885,
+          "offset": 9998,
           "bytes": 37,
           "reference_offset": 1132800
         },
         {
-          "offset": 9922,
+          "offset": 10035,
           "bytes": 37,
           "reference_offset": 1136640
         },
         {
-          "offset": 9959,
+          "offset": 10072,
           "bytes": 37,
           "reference_offset": 1140480
         },
         {
-          "offset": 9996,
+          "offset": 10109,
           "bytes": 35,
           "reference_offset": 1144320
         },
         {
-          "offset": 10031,
+          "offset": 10144,
           "bytes": 37,
           "reference_offset": 1148160
         }
@@ -2284,67 +2300,67 @@
       "asc": "bb15c0",
       "frames": [
         {
-          "offset": 10068,
+          "offset": 10181,
           "bytes": 35,
           "reference_offset": 1152000
         },
         {
-          "offset": 10103,
+          "offset": 10216,
           "bytes": 37,
           "reference_offset": 1155840
         },
         {
-          "offset": 10140,
+          "offset": 10253,
           "bytes": 34,
           "reference_offset": 1159680
         },
         {
-          "offset": 10174,
+          "offset": 10287,
           "bytes": 37,
           "reference_offset": 1163520,
           "malformed": {
-            "offset": 10211,
+            "offset": 10324,
             "bytes": 37,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 10248,
+          "offset": 10361,
           "bytes": 36,
           "reference_offset": 1167360
         },
         {
-          "offset": 10284,
+          "offset": 10397,
           "bytes": 34,
           "reference_offset": 1171200
         },
         {
-          "offset": 10318,
+          "offset": 10431,
           "bytes": 36,
           "reference_offset": 1175040
         },
         {
-          "offset": 10354,
+          "offset": 10467,
           "bytes": 36,
           "reference_offset": 1178880
         },
         {
-          "offset": 10390,
+          "offset": 10503,
           "bytes": 36,
           "reference_offset": 1182720
         },
         {
-          "offset": 10426,
+          "offset": 10539,
           "bytes": 36,
           "reference_offset": 1186560
         },
         {
-          "offset": 10462,
+          "offset": 10575,
           "bytes": 34,
           "reference_offset": 1190400
         },
         {
-          "offset": 10496,
+          "offset": 10609,
           "bytes": 36,
           "reference_offset": 1194240
         }
@@ -2375,67 +2391,67 @@
       "asc": "bb15c0",
       "frames": [
         {
-          "offset": 10532,
+          "offset": 10645,
           "bytes": 35,
           "reference_offset": 1198080
         },
         {
-          "offset": 10567,
+          "offset": 10680,
           "bytes": 37,
           "reference_offset": 1201920
         },
         {
-          "offset": 10604,
+          "offset": 10717,
           "bytes": 34,
           "reference_offset": 1205760
         },
         {
-          "offset": 10638,
+          "offset": 10751,
           "bytes": 38,
           "reference_offset": 1209600,
           "malformed": {
-            "offset": 10676,
+            "offset": 10789,
             "bytes": 38,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 10714,
+          "offset": 10827,
           "bytes": 37,
           "reference_offset": 1213440
         },
         {
-          "offset": 10751,
+          "offset": 10864,
           "bytes": 34,
           "reference_offset": 1217280
         },
         {
-          "offset": 10785,
+          "offset": 10898,
           "bytes": 37,
           "reference_offset": 1221120
         },
         {
-          "offset": 10822,
+          "offset": 10935,
           "bytes": 37,
           "reference_offset": 1224960
         },
         {
-          "offset": 10859,
+          "offset": 10972,
           "bytes": 37,
           "reference_offset": 1228800
         },
         {
-          "offset": 10896,
+          "offset": 11009,
           "bytes": 37,
           "reference_offset": 1232640
         },
         {
-          "offset": 10933,
+          "offset": 11046,
           "bytes": 34,
           "reference_offset": 1236480
         },
         {
-          "offset": 10967,
+          "offset": 11080,
           "bytes": 37,
           "reference_offset": 1240320
         }
@@ -2466,67 +2482,67 @@
       "asc": "bb15c0",
       "frames": [
         {
-          "offset": 11004,
+          "offset": 11117,
           "bytes": 35,
           "reference_offset": 1244160
         },
         {
-          "offset": 11039,
+          "offset": 11152,
           "bytes": 37,
           "reference_offset": 1248000
         },
         {
-          "offset": 11076,
+          "offset": 11189,
           "bytes": 34,
           "reference_offset": 1251840
         },
         {
-          "offset": 11110,
+          "offset": 11223,
           "bytes": 37,
           "reference_offset": 1255680,
           "malformed": {
-            "offset": 11147,
+            "offset": 11260,
             "bytes": 37,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 11184,
+          "offset": 11297,
           "bytes": 36,
           "reference_offset": 1259520
         },
         {
-          "offset": 11220,
+          "offset": 11333,
           "bytes": 34,
           "reference_offset": 1263360
         },
         {
-          "offset": 11254,
+          "offset": 11367,
           "bytes": 36,
           "reference_offset": 1267200
         },
         {
-          "offset": 11290,
+          "offset": 11403,
           "bytes": 36,
           "reference_offset": 1271040
         },
         {
-          "offset": 11326,
+          "offset": 11439,
           "bytes": 36,
           "reference_offset": 1274880
         },
         {
-          "offset": 11362,
+          "offset": 11475,
           "bytes": 36,
           "reference_offset": 1278720
         },
         {
-          "offset": 11398,
+          "offset": 11511,
           "bytes": 34,
           "reference_offset": 1282560
         },
         {
-          "offset": 11432,
+          "offset": 11545,
           "bytes": 36,
           "reference_offset": 1286400
         }
@@ -2557,67 +2573,67 @@
       "asc": "bb15e0",
       "frames": [
         {
-          "offset": 11468,
+          "offset": 11581,
           "bytes": 41,
           "reference_offset": 1290240
         },
         {
-          "offset": 11509,
+          "offset": 11622,
           "bytes": 43,
           "reference_offset": 1294080
         },
         {
-          "offset": 11552,
+          "offset": 11665,
           "bytes": 40,
           "reference_offset": 1297920
         },
         {
-          "offset": 11592,
+          "offset": 11705,
           "bytes": 43,
           "reference_offset": 1301760,
           "malformed": {
-            "offset": 11635,
+            "offset": 11748,
             "bytes": 43,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 11678,
+          "offset": 11791,
           "bytes": 42,
           "reference_offset": 1305600
         },
         {
-          "offset": 11720,
+          "offset": 11833,
           "bytes": 40,
           "reference_offset": 1309440
         },
         {
-          "offset": 11760,
+          "offset": 11873,
           "bytes": 42,
           "reference_offset": 1313280
         },
         {
-          "offset": 11802,
+          "offset": 11915,
           "bytes": 42,
           "reference_offset": 1317120
         },
         {
-          "offset": 11844,
+          "offset": 11957,
           "bytes": 42,
           "reference_offset": 1320960
         },
         {
-          "offset": 11886,
+          "offset": 11999,
           "bytes": 42,
           "reference_offset": 1324800
         },
         {
-          "offset": 11928,
+          "offset": 12041,
           "bytes": 40,
           "reference_offset": 1328640
         },
         {
-          "offset": 11968,
+          "offset": 12081,
           "bytes": 42,
           "reference_offset": 1332480
         }
@@ -2648,67 +2664,67 @@
       "asc": "bb15e0",
       "frames": [
         {
-          "offset": 12010,
+          "offset": 12123,
           "bytes": 40,
           "reference_offset": 1336320
         },
         {
-          "offset": 12050,
+          "offset": 12163,
           "bytes": 42,
           "reference_offset": 1340160
         },
         {
-          "offset": 12092,
+          "offset": 12205,
           "bytes": 39,
           "reference_offset": 1344000
         },
         {
-          "offset": 12131,
+          "offset": 12244,
           "bytes": 42,
           "reference_offset": 1347840,
           "malformed": {
-            "offset": 12173,
+            "offset": 12286,
             "bytes": 42,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 12215,
+          "offset": 12328,
           "bytes": 41,
           "reference_offset": 1351680
         },
         {
-          "offset": 12256,
+          "offset": 12369,
           "bytes": 39,
           "reference_offset": 1355520
         },
         {
-          "offset": 12295,
+          "offset": 12408,
           "bytes": 41,
           "reference_offset": 1359360
         },
         {
-          "offset": 12336,
+          "offset": 12449,
           "bytes": 41,
           "reference_offset": 1363200
         },
         {
-          "offset": 12377,
+          "offset": 12490,
           "bytes": 41,
           "reference_offset": 1367040
         },
         {
-          "offset": 12418,
+          "offset": 12531,
           "bytes": 41,
           "reference_offset": 1370880
         },
         {
-          "offset": 12459,
+          "offset": 12572,
           "bytes": 39,
           "reference_offset": 1374720
         },
         {
-          "offset": 12498,
+          "offset": 12611,
           "bytes": 41,
           "reference_offset": 1378560
         }
@@ -2739,67 +2755,67 @@
       "asc": "bb15e0",
       "frames": [
         {
-          "offset": 12539,
+          "offset": 12652,
           "bytes": 40,
           "reference_offset": 1382400
         },
         {
-          "offset": 12579,
+          "offset": 12692,
           "bytes": 42,
           "reference_offset": 1386240
         },
         {
-          "offset": 12621,
+          "offset": 12734,
           "bytes": 39,
           "reference_offset": 1390080
         },
         {
-          "offset": 12660,
+          "offset": 12773,
           "bytes": 43,
           "reference_offset": 1393920,
           "malformed": {
-            "offset": 12703,
+            "offset": 12816,
             "bytes": 43,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 12746,
+          "offset": 12859,
           "bytes": 42,
           "reference_offset": 1397760
         },
         {
-          "offset": 12788,
+          "offset": 12901,
           "bytes": 39,
           "reference_offset": 1401600
         },
         {
-          "offset": 12827,
+          "offset": 12940,
           "bytes": 42,
           "reference_offset": 1405440
         },
         {
-          "offset": 12869,
+          "offset": 12982,
           "bytes": 42,
           "reference_offset": 1409280
         },
         {
-          "offset": 12911,
+          "offset": 13024,
           "bytes": 42,
           "reference_offset": 1413120
         },
         {
-          "offset": 12953,
+          "offset": 13066,
           "bytes": 42,
           "reference_offset": 1416960
         },
         {
-          "offset": 12995,
+          "offset": 13108,
           "bytes": 39,
           "reference_offset": 1420800
         },
         {
-          "offset": 13034,
+          "offset": 13147,
           "bytes": 42,
           "reference_offset": 1424640
         }
@@ -2830,67 +2846,67 @@
       "asc": "bb15e0",
       "frames": [
         {
-          "offset": 13076,
+          "offset": 13189,
           "bytes": 40,
           "reference_offset": 1428480
         },
         {
-          "offset": 13116,
+          "offset": 13229,
           "bytes": 42,
           "reference_offset": 1432320
         },
         {
-          "offset": 13158,
+          "offset": 13271,
           "bytes": 39,
           "reference_offset": 1436160
         },
         {
-          "offset": 13197,
+          "offset": 13310,
           "bytes": 42,
           "reference_offset": 1440000,
           "malformed": {
-            "offset": 13239,
+            "offset": 13352,
             "bytes": 42,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 13281,
+          "offset": 13394,
           "bytes": 41,
           "reference_offset": 1443840
         },
         {
-          "offset": 13322,
+          "offset": 13435,
           "bytes": 39,
           "reference_offset": 1447680
         },
         {
-          "offset": 13361,
+          "offset": 13474,
           "bytes": 41,
           "reference_offset": 1451520
         },
         {
-          "offset": 13402,
+          "offset": 13515,
           "bytes": 41,
           "reference_offset": 1455360
         },
         {
-          "offset": 13443,
+          "offset": 13556,
           "bytes": 41,
           "reference_offset": 1459200
         },
         {
-          "offset": 13484,
+          "offset": 13597,
           "bytes": 41,
           "reference_offset": 1463040
         },
         {
-          "offset": 13525,
+          "offset": 13638,
           "bytes": 39,
           "reference_offset": 1466880
         },
         {
-          "offset": 13564,
+          "offset": 13677,
           "bytes": 41,
           "reference_offset": 1470720
         }
@@ -2921,67 +2937,71 @@
       "asc": "bb1100",
       "frames": [
         {
-          "offset": 13605,
+          "offset": 13718,
           "bytes": 24,
           "reference_offset": 1474560
         },
         {
-          "offset": 13629,
+          "offset": 13742,
           "bytes": 26,
           "reference_offset": 1478656
         },
         {
-          "offset": 13655,
+          "offset": 13768,
           "bytes": 24,
           "reference_offset": 1482752
         },
         {
-          "offset": 13679,
+          "offset": 13792,
           "bytes": 26,
           "reference_offset": 1486848,
+          "fill_extension": {
+            "offset": 13818,
+            "bytes": 27
+          },
           "malformed": {
-            "offset": 13705,
-            "bytes": 27,
-            "error": "trailing bytes"
+            "offset": 13845,
+            "bytes": 29,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 13732,
+          "offset": 13874,
           "bytes": 25,
           "reference_offset": 1490944
         },
         {
-          "offset": 13757,
+          "offset": 13899,
           "bytes": 24,
           "reference_offset": 1495040
         },
         {
-          "offset": 13781,
+          "offset": 13923,
           "bytes": 26,
           "reference_offset": 1499136
         },
         {
-          "offset": 13807,
+          "offset": 13949,
           "bytes": 25,
           "reference_offset": 1503232
         },
         {
-          "offset": 13832,
+          "offset": 13974,
           "bytes": 25,
           "reference_offset": 1507328
         },
         {
-          "offset": 13857,
+          "offset": 13999,
           "bytes": 26,
           "reference_offset": 1511424
         },
         {
-          "offset": 13883,
+          "offset": 14025,
           "bytes": 24,
           "reference_offset": 1515520
         },
         {
-          "offset": 13907,
+          "offset": 14049,
           "bytes": 25,
           "reference_offset": 1519616
         }
@@ -3012,67 +3032,71 @@
       "asc": "bb1100",
       "frames": [
         {
-          "offset": 13932,
+          "offset": 14074,
           "bytes": 23,
           "reference_offset": 1523712
         },
         {
-          "offset": 13955,
+          "offset": 14097,
           "bytes": 25,
           "reference_offset": 1527808
         },
         {
-          "offset": 13980,
+          "offset": 14122,
           "bytes": 23,
           "reference_offset": 1531904
         },
         {
-          "offset": 14003,
+          "offset": 14145,
           "bytes": 25,
           "reference_offset": 1536000,
+          "fill_extension": {
+            "offset": 14170,
+            "bytes": 26
+          },
           "malformed": {
-            "offset": 14028,
-            "bytes": 26,
-            "error": "trailing bytes"
+            "offset": 14196,
+            "bytes": 28,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 14054,
+          "offset": 14224,
           "bytes": 24,
           "reference_offset": 1540096
         },
         {
-          "offset": 14078,
+          "offset": 14248,
           "bytes": 23,
           "reference_offset": 1544192
         },
         {
-          "offset": 14101,
+          "offset": 14271,
           "bytes": 25,
           "reference_offset": 1548288
         },
         {
-          "offset": 14126,
+          "offset": 14296,
           "bytes": 24,
           "reference_offset": 1552384
         },
         {
-          "offset": 14150,
+          "offset": 14320,
           "bytes": 24,
           "reference_offset": 1556480
         },
         {
-          "offset": 14174,
+          "offset": 14344,
           "bytes": 25,
           "reference_offset": 1560576
         },
         {
-          "offset": 14199,
+          "offset": 14369,
           "bytes": 23,
           "reference_offset": 1564672
         },
         {
-          "offset": 14222,
+          "offset": 14392,
           "bytes": 24,
           "reference_offset": 1568768
         }
@@ -3103,67 +3127,71 @@
       "asc": "bb1100",
       "frames": [
         {
-          "offset": 14246,
+          "offset": 14416,
           "bytes": 23,
           "reference_offset": 1572864
         },
         {
-          "offset": 14269,
+          "offset": 14439,
           "bytes": 26,
           "reference_offset": 1576960
         },
         {
-          "offset": 14295,
+          "offset": 14465,
           "bytes": 23,
           "reference_offset": 1581056
         },
         {
-          "offset": 14318,
+          "offset": 14488,
           "bytes": 25,
           "reference_offset": 1585152,
+          "fill_extension": {
+            "offset": 14513,
+            "bytes": 26
+          },
           "malformed": {
-            "offset": 14343,
-            "bytes": 26,
-            "error": "trailing bytes"
+            "offset": 14539,
+            "bytes": 28,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 14369,
+          "offset": 14567,
           "bytes": 24,
           "reference_offset": 1589248
         },
         {
-          "offset": 14393,
+          "offset": 14591,
           "bytes": 23,
           "reference_offset": 1593344
         },
         {
-          "offset": 14416,
+          "offset": 14614,
           "bytes": 25,
           "reference_offset": 1597440
         },
         {
-          "offset": 14441,
+          "offset": 14639,
           "bytes": 24,
           "reference_offset": 1601536
         },
         {
-          "offset": 14465,
+          "offset": 14663,
           "bytes": 24,
           "reference_offset": 1605632
         },
         {
-          "offset": 14489,
+          "offset": 14687,
           "bytes": 25,
           "reference_offset": 1609728
         },
         {
-          "offset": 14514,
+          "offset": 14712,
           "bytes": 23,
           "reference_offset": 1613824
         },
         {
-          "offset": 14537,
+          "offset": 14735,
           "bytes": 24,
           "reference_offset": 1617920
         }
@@ -3194,67 +3222,71 @@
       "asc": "bb1100",
       "frames": [
         {
-          "offset": 14561,
+          "offset": 14759,
           "bytes": 23,
           "reference_offset": 1622016
         },
         {
-          "offset": 14584,
+          "offset": 14782,
           "bytes": 25,
           "reference_offset": 1626112
         },
         {
-          "offset": 14609,
+          "offset": 14807,
           "bytes": 23,
           "reference_offset": 1630208
         },
         {
-          "offset": 14632,
+          "offset": 14830,
           "bytes": 25,
           "reference_offset": 1634304,
+          "fill_extension": {
+            "offset": 14855,
+            "bytes": 26
+          },
           "malformed": {
-            "offset": 14657,
-            "bytes": 26,
-            "error": "trailing bytes"
+            "offset": 14881,
+            "bytes": 28,
+            "error": "AAC ancillary data exceeds fill payload"
           }
         },
         {
-          "offset": 14683,
+          "offset": 14909,
           "bytes": 24,
           "reference_offset": 1638400
         },
         {
-          "offset": 14707,
+          "offset": 14933,
           "bytes": 23,
           "reference_offset": 1642496
         },
         {
-          "offset": 14730,
+          "offset": 14956,
           "bytes": 25,
           "reference_offset": 1646592
         },
         {
-          "offset": 14755,
+          "offset": 14981,
           "bytes": 24,
           "reference_offset": 1650688
         },
         {
-          "offset": 14779,
+          "offset": 15005,
           "bytes": 24,
           "reference_offset": 1654784
         },
         {
-          "offset": 14803,
+          "offset": 15029,
           "bytes": 25,
           "reference_offset": 1658880
         },
         {
-          "offset": 14828,
+          "offset": 15054,
           "bytes": 23,
           "reference_offset": 1662976
         },
         {
-          "offset": 14851,
+          "offset": 15077,
           "bytes": 24,
           "reference_offset": 1667072
         }
@@ -3285,67 +3317,67 @@
       "asc": "bb1120",
       "frames": [
         {
-          "offset": 14875,
+          "offset": 15101,
           "bytes": 29,
           "reference_offset": 1671168
         },
         {
-          "offset": 14904,
+          "offset": 15130,
           "bytes": 31,
           "reference_offset": 1675264
         },
         {
-          "offset": 14935,
+          "offset": 15161,
           "bytes": 29,
           "reference_offset": 1679360
         },
         {
-          "offset": 14964,
+          "offset": 15190,
           "bytes": 31,
           "reference_offset": 1683456,
           "malformed": {
-            "offset": 14995,
+            "offset": 15221,
             "bytes": 31,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 15026,
+          "offset": 15252,
           "bytes": 30,
           "reference_offset": 1687552
         },
         {
-          "offset": 15056,
+          "offset": 15282,
           "bytes": 29,
           "reference_offset": 1691648
         },
         {
-          "offset": 15085,
+          "offset": 15311,
           "bytes": 31,
           "reference_offset": 1695744
         },
         {
-          "offset": 15116,
+          "offset": 15342,
           "bytes": 30,
           "reference_offset": 1699840
         },
         {
-          "offset": 15146,
+          "offset": 15372,
           "bytes": 30,
           "reference_offset": 1703936
         },
         {
-          "offset": 15176,
+          "offset": 15402,
           "bytes": 31,
           "reference_offset": 1708032
         },
         {
-          "offset": 15207,
+          "offset": 15433,
           "bytes": 29,
           "reference_offset": 1712128
         },
         {
-          "offset": 15236,
+          "offset": 15462,
           "bytes": 30,
           "reference_offset": 1716224
         }
@@ -3376,67 +3408,67 @@
       "asc": "bb1120",
       "frames": [
         {
-          "offset": 15266,
+          "offset": 15492,
           "bytes": 28,
           "reference_offset": 1720320
         },
         {
-          "offset": 15294,
+          "offset": 15520,
           "bytes": 30,
           "reference_offset": 1724416
         },
         {
-          "offset": 15324,
+          "offset": 15550,
           "bytes": 28,
           "reference_offset": 1728512
         },
         {
-          "offset": 15352,
+          "offset": 15578,
           "bytes": 30,
           "reference_offset": 1732608,
           "malformed": {
-            "offset": 15382,
+            "offset": 15608,
             "bytes": 30,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 15412,
+          "offset": 15638,
           "bytes": 29,
           "reference_offset": 1736704
         },
         {
-          "offset": 15441,
+          "offset": 15667,
           "bytes": 28,
           "reference_offset": 1740800
         },
         {
-          "offset": 15469,
+          "offset": 15695,
           "bytes": 30,
           "reference_offset": 1744896
         },
         {
-          "offset": 15499,
+          "offset": 15725,
           "bytes": 29,
           "reference_offset": 1748992
         },
         {
-          "offset": 15528,
+          "offset": 15754,
           "bytes": 29,
           "reference_offset": 1753088
         },
         {
-          "offset": 15557,
+          "offset": 15783,
           "bytes": 30,
           "reference_offset": 1757184
         },
         {
-          "offset": 15587,
+          "offset": 15813,
           "bytes": 28,
           "reference_offset": 1761280
         },
         {
-          "offset": 15615,
+          "offset": 15841,
           "bytes": 29,
           "reference_offset": 1765376
         }
@@ -3467,67 +3499,67 @@
       "asc": "bb1120",
       "frames": [
         {
-          "offset": 15644,
+          "offset": 15870,
           "bytes": 28,
           "reference_offset": 1769472
         },
         {
-          "offset": 15672,
+          "offset": 15898,
           "bytes": 31,
           "reference_offset": 1773568
         },
         {
-          "offset": 15703,
+          "offset": 15929,
           "bytes": 28,
           "reference_offset": 1777664
         },
         {
-          "offset": 15731,
+          "offset": 15957,
           "bytes": 30,
           "reference_offset": 1781760,
           "malformed": {
-            "offset": 15761,
+            "offset": 15987,
             "bytes": 30,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 15791,
+          "offset": 16017,
           "bytes": 29,
           "reference_offset": 1785856
         },
         {
-          "offset": 15820,
+          "offset": 16046,
           "bytes": 28,
           "reference_offset": 1789952
         },
         {
-          "offset": 15848,
+          "offset": 16074,
           "bytes": 30,
           "reference_offset": 1794048
         },
         {
-          "offset": 15878,
+          "offset": 16104,
           "bytes": 29,
           "reference_offset": 1798144
         },
         {
-          "offset": 15907,
+          "offset": 16133,
           "bytes": 29,
           "reference_offset": 1802240
         },
         {
-          "offset": 15936,
+          "offset": 16162,
           "bytes": 30,
           "reference_offset": 1806336
         },
         {
-          "offset": 15966,
+          "offset": 16192,
           "bytes": 28,
           "reference_offset": 1810432
         },
         {
-          "offset": 15994,
+          "offset": 16220,
           "bytes": 29,
           "reference_offset": 1814528
         }
@@ -3558,67 +3590,67 @@
       "asc": "bb1120",
       "frames": [
         {
-          "offset": 16023,
+          "offset": 16249,
           "bytes": 28,
           "reference_offset": 1818624
         },
         {
-          "offset": 16051,
+          "offset": 16277,
           "bytes": 30,
           "reference_offset": 1822720
         },
         {
-          "offset": 16081,
+          "offset": 16307,
           "bytes": 28,
           "reference_offset": 1826816
         },
         {
-          "offset": 16109,
+          "offset": 16335,
           "bytes": 30,
           "reference_offset": 1830912,
           "malformed": {
-            "offset": 16139,
+            "offset": 16365,
             "bytes": 30,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 16169,
+          "offset": 16395,
           "bytes": 29,
           "reference_offset": 1835008
         },
         {
-          "offset": 16198,
+          "offset": 16424,
           "bytes": 28,
           "reference_offset": 1839104
         },
         {
-          "offset": 16226,
+          "offset": 16452,
           "bytes": 30,
           "reference_offset": 1843200
         },
         {
-          "offset": 16256,
+          "offset": 16482,
           "bytes": 29,
           "reference_offset": 1847296
         },
         {
-          "offset": 16285,
+          "offset": 16511,
           "bytes": 29,
           "reference_offset": 1851392
         },
         {
-          "offset": 16314,
+          "offset": 16540,
           "bytes": 30,
           "reference_offset": 1855488
         },
         {
-          "offset": 16344,
+          "offset": 16570,
           "bytes": 28,
           "reference_offset": 1859584
         },
         {
-          "offset": 16372,
+          "offset": 16598,
           "bytes": 29,
           "reference_offset": 1863680
         }
@@ -3649,67 +3681,67 @@
       "asc": "bb1140",
       "frames": [
         {
-          "offset": 16401,
+          "offset": 16627,
           "bytes": 31,
           "reference_offset": 1867776
         },
         {
-          "offset": 16432,
+          "offset": 16658,
           "bytes": 33,
           "reference_offset": 1871872
         },
         {
-          "offset": 16465,
+          "offset": 16691,
           "bytes": 30,
           "reference_offset": 1875968
         },
         {
-          "offset": 16495,
+          "offset": 16721,
           "bytes": 33,
           "reference_offset": 1880064,
           "malformed": {
-            "offset": 16528,
+            "offset": 16754,
             "bytes": 33,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 16561,
+          "offset": 16787,
           "bytes": 32,
           "reference_offset": 1884160
         },
         {
-          "offset": 16593,
+          "offset": 16819,
           "bytes": 30,
           "reference_offset": 1888256
         },
         {
-          "offset": 16623,
+          "offset": 16849,
           "bytes": 32,
           "reference_offset": 1892352
         },
         {
-          "offset": 16655,
+          "offset": 16881,
           "bytes": 32,
           "reference_offset": 1896448
         },
         {
-          "offset": 16687,
+          "offset": 16913,
           "bytes": 32,
           "reference_offset": 1900544
         },
         {
-          "offset": 16719,
+          "offset": 16945,
           "bytes": 32,
           "reference_offset": 1904640
         },
         {
-          "offset": 16751,
+          "offset": 16977,
           "bytes": 30,
           "reference_offset": 1908736
         },
         {
-          "offset": 16781,
+          "offset": 17007,
           "bytes": 32,
           "reference_offset": 1912832
         }
@@ -3740,67 +3772,67 @@
       "asc": "bb1140",
       "frames": [
         {
-          "offset": 16813,
+          "offset": 17039,
           "bytes": 30,
           "reference_offset": 1916928
         },
         {
-          "offset": 16843,
+          "offset": 17069,
           "bytes": 31,
           "reference_offset": 1921024
         },
         {
-          "offset": 16874,
+          "offset": 17100,
           "bytes": 29,
           "reference_offset": 1925120
         },
         {
-          "offset": 16903,
+          "offset": 17129,
           "bytes": 32,
           "reference_offset": 1929216,
           "malformed": {
-            "offset": 16935,
+            "offset": 17161,
             "bytes": 32,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 16967,
+          "offset": 17193,
           "bytes": 31,
           "reference_offset": 1933312
         },
         {
-          "offset": 16998,
+          "offset": 17224,
           "bytes": 29,
           "reference_offset": 1937408
         },
         {
-          "offset": 17027,
+          "offset": 17253,
           "bytes": 31,
           "reference_offset": 1941504
         },
         {
-          "offset": 17058,
+          "offset": 17284,
           "bytes": 31,
           "reference_offset": 1945600
         },
         {
-          "offset": 17089,
+          "offset": 17315,
           "bytes": 31,
           "reference_offset": 1949696
         },
         {
-          "offset": 17120,
+          "offset": 17346,
           "bytes": 31,
           "reference_offset": 1953792
         },
         {
-          "offset": 17151,
+          "offset": 17377,
           "bytes": 29,
           "reference_offset": 1957888
         },
         {
-          "offset": 17180,
+          "offset": 17406,
           "bytes": 31,
           "reference_offset": 1961984
         }
@@ -3831,67 +3863,67 @@
       "asc": "bb1140",
       "frames": [
         {
-          "offset": 17211,
+          "offset": 17437,
           "bytes": 30,
           "reference_offset": 1966080
         },
         {
-          "offset": 17241,
+          "offset": 17467,
           "bytes": 32,
           "reference_offset": 1970176
         },
         {
-          "offset": 17273,
+          "offset": 17499,
           "bytes": 29,
           "reference_offset": 1974272
         },
         {
-          "offset": 17302,
+          "offset": 17528,
           "bytes": 32,
           "reference_offset": 1978368,
           "malformed": {
-            "offset": 17334,
+            "offset": 17560,
             "bytes": 32,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 17366,
+          "offset": 17592,
           "bytes": 31,
           "reference_offset": 1982464
         },
         {
-          "offset": 17397,
+          "offset": 17623,
           "bytes": 29,
           "reference_offset": 1986560
         },
         {
-          "offset": 17426,
+          "offset": 17652,
           "bytes": 31,
           "reference_offset": 1990656
         },
         {
-          "offset": 17457,
+          "offset": 17683,
           "bytes": 31,
           "reference_offset": 1994752
         },
         {
-          "offset": 17488,
+          "offset": 17714,
           "bytes": 31,
           "reference_offset": 1998848
         },
         {
-          "offset": 17519,
+          "offset": 17745,
           "bytes": 31,
           "reference_offset": 2002944
         },
         {
-          "offset": 17550,
+          "offset": 17776,
           "bytes": 29,
           "reference_offset": 2007040
         },
         {
-          "offset": 17579,
+          "offset": 17805,
           "bytes": 31,
           "reference_offset": 2011136
         }
@@ -3922,67 +3954,67 @@
       "asc": "bb1140",
       "frames": [
         {
-          "offset": 17610,
+          "offset": 17836,
           "bytes": 30,
           "reference_offset": 2015232
         },
         {
-          "offset": 17640,
+          "offset": 17866,
           "bytes": 31,
           "reference_offset": 2019328
         },
         {
-          "offset": 17671,
+          "offset": 17897,
           "bytes": 29,
           "reference_offset": 2023424
         },
         {
-          "offset": 17700,
+          "offset": 17926,
           "bytes": 32,
           "reference_offset": 2027520,
           "malformed": {
-            "offset": 17732,
+            "offset": 17958,
             "bytes": 32,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 17764,
+          "offset": 17990,
           "bytes": 31,
           "reference_offset": 2031616
         },
         {
-          "offset": 17795,
+          "offset": 18021,
           "bytes": 29,
           "reference_offset": 2035712
         },
         {
-          "offset": 17824,
+          "offset": 18050,
           "bytes": 31,
           "reference_offset": 2039808
         },
         {
-          "offset": 17855,
+          "offset": 18081,
           "bytes": 31,
           "reference_offset": 2043904
         },
         {
-          "offset": 17886,
+          "offset": 18112,
           "bytes": 31,
           "reference_offset": 2048000
         },
         {
-          "offset": 17917,
+          "offset": 18143,
           "bytes": 31,
           "reference_offset": 2052096
         },
         {
-          "offset": 17948,
+          "offset": 18174,
           "bytes": 29,
           "reference_offset": 2056192
         },
         {
-          "offset": 17977,
+          "offset": 18203,
           "bytes": 31,
           "reference_offset": 2060288
         }
@@ -4013,67 +4045,67 @@
       "asc": "bb1160",
       "frames": [
         {
-          "offset": 18008,
+          "offset": 18234,
           "bytes": 36,
           "reference_offset": 2064384
         },
         {
-          "offset": 18044,
+          "offset": 18270,
           "bytes": 38,
           "reference_offset": 2068480
         },
         {
-          "offset": 18082,
+          "offset": 18308,
           "bytes": 35,
           "reference_offset": 2072576
         },
         {
-          "offset": 18117,
+          "offset": 18343,
           "bytes": 38,
           "reference_offset": 2076672,
           "malformed": {
-            "offset": 18155,
+            "offset": 18381,
             "bytes": 38,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 18193,
+          "offset": 18419,
           "bytes": 37,
           "reference_offset": 2080768
         },
         {
-          "offset": 18230,
+          "offset": 18456,
           "bytes": 35,
           "reference_offset": 2084864
         },
         {
-          "offset": 18265,
+          "offset": 18491,
           "bytes": 37,
           "reference_offset": 2088960
         },
         {
-          "offset": 18302,
+          "offset": 18528,
           "bytes": 37,
           "reference_offset": 2093056
         },
         {
-          "offset": 18339,
+          "offset": 18565,
           "bytes": 37,
           "reference_offset": 2097152
         },
         {
-          "offset": 18376,
+          "offset": 18602,
           "bytes": 37,
           "reference_offset": 2101248
         },
         {
-          "offset": 18413,
+          "offset": 18639,
           "bytes": 35,
           "reference_offset": 2105344
         },
         {
-          "offset": 18448,
+          "offset": 18674,
           "bytes": 37,
           "reference_offset": 2109440
         }
@@ -4104,67 +4136,67 @@
       "asc": "bb1160",
       "frames": [
         {
-          "offset": 18485,
+          "offset": 18711,
           "bytes": 35,
           "reference_offset": 2113536
         },
         {
-          "offset": 18520,
+          "offset": 18746,
           "bytes": 36,
           "reference_offset": 2117632
         },
         {
-          "offset": 18556,
+          "offset": 18782,
           "bytes": 34,
           "reference_offset": 2121728
         },
         {
-          "offset": 18590,
+          "offset": 18816,
           "bytes": 37,
           "reference_offset": 2125824,
           "malformed": {
-            "offset": 18627,
+            "offset": 18853,
             "bytes": 37,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 18664,
+          "offset": 18890,
           "bytes": 36,
           "reference_offset": 2129920
         },
         {
-          "offset": 18700,
+          "offset": 18926,
           "bytes": 34,
           "reference_offset": 2134016
         },
         {
-          "offset": 18734,
+          "offset": 18960,
           "bytes": 36,
           "reference_offset": 2138112
         },
         {
-          "offset": 18770,
+          "offset": 18996,
           "bytes": 36,
           "reference_offset": 2142208
         },
         {
-          "offset": 18806,
+          "offset": 19032,
           "bytes": 36,
           "reference_offset": 2146304
         },
         {
-          "offset": 18842,
+          "offset": 19068,
           "bytes": 36,
           "reference_offset": 2150400
         },
         {
-          "offset": 18878,
+          "offset": 19104,
           "bytes": 34,
           "reference_offset": 2154496
         },
         {
-          "offset": 18912,
+          "offset": 19138,
           "bytes": 36,
           "reference_offset": 2158592
         }
@@ -4195,67 +4227,67 @@
       "asc": "bb1160",
       "frames": [
         {
-          "offset": 18948,
+          "offset": 19174,
           "bytes": 35,
           "reference_offset": 2162688
         },
         {
-          "offset": 18983,
+          "offset": 19209,
           "bytes": 37,
           "reference_offset": 2166784
         },
         {
-          "offset": 19020,
+          "offset": 19246,
           "bytes": 34,
           "reference_offset": 2170880
         },
         {
-          "offset": 19054,
+          "offset": 19280,
           "bytes": 37,
           "reference_offset": 2174976,
           "malformed": {
-            "offset": 19091,
+            "offset": 19317,
             "bytes": 37,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 19128,
+          "offset": 19354,
           "bytes": 36,
           "reference_offset": 2179072
         },
         {
-          "offset": 19164,
+          "offset": 19390,
           "bytes": 34,
           "reference_offset": 2183168
         },
         {
-          "offset": 19198,
+          "offset": 19424,
           "bytes": 36,
           "reference_offset": 2187264
         },
         {
-          "offset": 19234,
+          "offset": 19460,
           "bytes": 36,
           "reference_offset": 2191360
         },
         {
-          "offset": 19270,
+          "offset": 19496,
           "bytes": 36,
           "reference_offset": 2195456
         },
         {
-          "offset": 19306,
+          "offset": 19532,
           "bytes": 36,
           "reference_offset": 2199552
         },
         {
-          "offset": 19342,
+          "offset": 19568,
           "bytes": 34,
           "reference_offset": 2203648
         },
         {
-          "offset": 19376,
+          "offset": 19602,
           "bytes": 36,
           "reference_offset": 2207744
         }
@@ -4286,67 +4318,67 @@
       "asc": "bb1160",
       "frames": [
         {
-          "offset": 19412,
+          "offset": 19638,
           "bytes": 35,
           "reference_offset": 2211840
         },
         {
-          "offset": 19447,
+          "offset": 19673,
           "bytes": 36,
           "reference_offset": 2215936
         },
         {
-          "offset": 19483,
+          "offset": 19709,
           "bytes": 34,
           "reference_offset": 2220032
         },
         {
-          "offset": 19517,
+          "offset": 19743,
           "bytes": 37,
           "reference_offset": 2224128,
           "malformed": {
-            "offset": 19554,
+            "offset": 19780,
             "bytes": 37,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 19591,
+          "offset": 19817,
           "bytes": 36,
           "reference_offset": 2228224
         },
         {
-          "offset": 19627,
+          "offset": 19853,
           "bytes": 34,
           "reference_offset": 2232320
         },
         {
-          "offset": 19661,
+          "offset": 19887,
           "bytes": 36,
           "reference_offset": 2236416
         },
         {
-          "offset": 19697,
+          "offset": 19923,
           "bytes": 36,
           "reference_offset": 2240512
         },
         {
-          "offset": 19733,
+          "offset": 19959,
           "bytes": 36,
           "reference_offset": 2244608
         },
         {
-          "offset": 19769,
+          "offset": 19995,
           "bytes": 36,
           "reference_offset": 2248704
         },
         {
-          "offset": 19805,
+          "offset": 20031,
           "bytes": 34,
           "reference_offset": 2252800
         },
         {
-          "offset": 19839,
+          "offset": 20065,
           "bytes": 36,
           "reference_offset": 2256896
         }
@@ -4377,67 +4409,67 @@
       "asc": "bb1180",
       "frames": [
         {
-          "offset": 19875,
+          "offset": 20101,
           "bytes": 29,
           "reference_offset": 2260992
         },
         {
-          "offset": 19904,
+          "offset": 20130,
           "bytes": 32,
           "reference_offset": 2265088
         },
         {
-          "offset": 19936,
+          "offset": 20162,
           "bytes": 29,
           "reference_offset": 2269184
         },
         {
-          "offset": 19965,
+          "offset": 20191,
           "bytes": 31,
           "reference_offset": 2273280,
           "malformed": {
-            "offset": 19996,
+            "offset": 20222,
             "bytes": 31,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 20027,
+          "offset": 20253,
           "bytes": 30,
           "reference_offset": 2277376
         },
         {
-          "offset": 20057,
+          "offset": 20283,
           "bytes": 29,
           "reference_offset": 2281472
         },
         {
-          "offset": 20086,
+          "offset": 20312,
           "bytes": 31,
           "reference_offset": 2285568
         },
         {
-          "offset": 20117,
+          "offset": 20343,
           "bytes": 30,
           "reference_offset": 2289664
         },
         {
-          "offset": 20147,
+          "offset": 20373,
           "bytes": 30,
           "reference_offset": 2293760
         },
         {
-          "offset": 20177,
+          "offset": 20403,
           "bytes": 31,
           "reference_offset": 2297856
         },
         {
-          "offset": 20208,
+          "offset": 20434,
           "bytes": 29,
           "reference_offset": 2301952
         },
         {
-          "offset": 20237,
+          "offset": 20463,
           "bytes": 30,
           "reference_offset": 2306048
         }
@@ -4468,67 +4500,67 @@
       "asc": "bb1180",
       "frames": [
         {
-          "offset": 20267,
+          "offset": 20493,
           "bytes": 28,
           "reference_offset": 2310144
         },
         {
-          "offset": 20295,
+          "offset": 20521,
           "bytes": 31,
           "reference_offset": 2314240
         },
         {
-          "offset": 20326,
+          "offset": 20552,
           "bytes": 28,
           "reference_offset": 2318336
         },
         {
-          "offset": 20354,
+          "offset": 20580,
           "bytes": 30,
           "reference_offset": 2322432,
           "malformed": {
-            "offset": 20384,
+            "offset": 20610,
             "bytes": 30,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 20414,
+          "offset": 20640,
           "bytes": 29,
           "reference_offset": 2326528
         },
         {
-          "offset": 20443,
+          "offset": 20669,
           "bytes": 28,
           "reference_offset": 2330624
         },
         {
-          "offset": 20471,
+          "offset": 20697,
           "bytes": 30,
           "reference_offset": 2334720
         },
         {
-          "offset": 20501,
+          "offset": 20727,
           "bytes": 29,
           "reference_offset": 2338816
         },
         {
-          "offset": 20530,
+          "offset": 20756,
           "bytes": 29,
           "reference_offset": 2342912
         },
         {
-          "offset": 20559,
+          "offset": 20785,
           "bytes": 30,
           "reference_offset": 2347008
         },
         {
-          "offset": 20589,
+          "offset": 20815,
           "bytes": 28,
           "reference_offset": 2351104
         },
         {
-          "offset": 20617,
+          "offset": 20843,
           "bytes": 29,
           "reference_offset": 2355200
         }
@@ -4559,67 +4591,67 @@
       "asc": "bb1180",
       "frames": [
         {
-          "offset": 20646,
+          "offset": 20872,
           "bytes": 28,
           "reference_offset": 2359296
         },
         {
-          "offset": 20674,
+          "offset": 20900,
           "bytes": 31,
           "reference_offset": 2363392
         },
         {
-          "offset": 20705,
+          "offset": 20931,
           "bytes": 28,
           "reference_offset": 2367488
         },
         {
-          "offset": 20733,
+          "offset": 20959,
           "bytes": 30,
           "reference_offset": 2371584,
           "malformed": {
-            "offset": 20763,
+            "offset": 20989,
             "bytes": 31,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 20794,
+          "offset": 21020,
           "bytes": 29,
           "reference_offset": 2375680
         },
         {
-          "offset": 20823,
+          "offset": 21049,
           "bytes": 28,
           "reference_offset": 2379776
         },
         {
-          "offset": 20851,
+          "offset": 21077,
           "bytes": 31,
           "reference_offset": 2383872
         },
         {
-          "offset": 20882,
+          "offset": 21108,
           "bytes": 29,
           "reference_offset": 2387968
         },
         {
-          "offset": 20911,
+          "offset": 21137,
           "bytes": 29,
           "reference_offset": 2392064
         },
         {
-          "offset": 20940,
+          "offset": 21166,
           "bytes": 30,
           "reference_offset": 2396160
         },
         {
-          "offset": 20970,
+          "offset": 21196,
           "bytes": 28,
           "reference_offset": 2400256
         },
         {
-          "offset": 20998,
+          "offset": 21224,
           "bytes": 29,
           "reference_offset": 2404352
         }
@@ -4650,67 +4682,67 @@
       "asc": "bb1180",
       "frames": [
         {
-          "offset": 21027,
+          "offset": 21253,
           "bytes": 28,
           "reference_offset": 2408448
         },
         {
-          "offset": 21055,
+          "offset": 21281,
           "bytes": 31,
           "reference_offset": 2412544
         },
         {
-          "offset": 21086,
+          "offset": 21312,
           "bytes": 28,
           "reference_offset": 2416640
         },
         {
-          "offset": 21114,
+          "offset": 21340,
           "bytes": 30,
           "reference_offset": 2420736,
           "malformed": {
-            "offset": 21144,
+            "offset": 21370,
             "bytes": 30,
             "error": "AAC virtual codebook magnitude exceeds section limit"
           }
         },
         {
-          "offset": 21174,
+          "offset": 21400,
           "bytes": 29,
           "reference_offset": 2424832
         },
         {
-          "offset": 21203,
+          "offset": 21429,
           "bytes": 28,
           "reference_offset": 2428928
         },
         {
-          "offset": 21231,
+          "offset": 21457,
           "bytes": 30,
           "reference_offset": 2433024
         },
         {
-          "offset": 21261,
+          "offset": 21487,
           "bytes": 29,
           "reference_offset": 2437120
         },
         {
-          "offset": 21290,
+          "offset": 21516,
           "bytes": 29,
           "reference_offset": 2441216
         },
         {
-          "offset": 21319,
+          "offset": 21545,
           "bytes": 30,
           "reference_offset": 2445312
         },
         {
-          "offset": 21349,
+          "offset": 21575,
           "bytes": 28,
           "reference_offset": 2449408
         },
         {
-          "offset": 21377,
+          "offset": 21603,
           "bytes": 29,
           "reference_offset": 2453504
         }
@@ -4741,67 +4773,67 @@
       "asc": "bb11a0",
       "frames": [
         {
-          "offset": 21406,
+          "offset": 21632,
           "bytes": 34,
           "reference_offset": 2457600
         },
         {
-          "offset": 21440,
+          "offset": 21666,
           "bytes": 37,
           "reference_offset": 2461696
         },
         {
-          "offset": 21477,
+          "offset": 21703,
           "bytes": 34,
           "reference_offset": 2465792
         },
         {
-          "offset": 21511,
+          "offset": 21737,
           "bytes": 36,
           "reference_offset": 2469888,
           "malformed": {
-            "offset": 21547,
+            "offset": 21773,
             "bytes": 36,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 21583,
+          "offset": 21809,
           "bytes": 35,
           "reference_offset": 2473984
         },
         {
-          "offset": 21618,
+          "offset": 21844,
           "bytes": 34,
           "reference_offset": 2478080
         },
         {
-          "offset": 21652,
+          "offset": 21878,
           "bytes": 36,
           "reference_offset": 2482176
         },
         {
-          "offset": 21688,
+          "offset": 21914,
           "bytes": 35,
           "reference_offset": 2486272
         },
         {
-          "offset": 21723,
+          "offset": 21949,
           "bytes": 35,
           "reference_offset": 2490368
         },
         {
-          "offset": 21758,
+          "offset": 21984,
           "bytes": 36,
           "reference_offset": 2494464
         },
         {
-          "offset": 21794,
+          "offset": 22020,
           "bytes": 34,
           "reference_offset": 2498560
         },
         {
-          "offset": 21828,
+          "offset": 22054,
           "bytes": 35,
           "reference_offset": 2502656
         }
@@ -4832,67 +4864,67 @@
       "asc": "bb11a0",
       "frames": [
         {
-          "offset": 21863,
+          "offset": 22089,
           "bytes": 33,
           "reference_offset": 2506752
         },
         {
-          "offset": 21896,
+          "offset": 22122,
           "bytes": 36,
           "reference_offset": 2510848
         },
         {
-          "offset": 21932,
+          "offset": 22158,
           "bytes": 33,
           "reference_offset": 2514944
         },
         {
-          "offset": 21965,
+          "offset": 22191,
           "bytes": 35,
           "reference_offset": 2519040,
           "malformed": {
-            "offset": 22000,
+            "offset": 22226,
             "bytes": 35,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 22035,
+          "offset": 22261,
           "bytes": 34,
           "reference_offset": 2523136
         },
         {
-          "offset": 22069,
+          "offset": 22295,
           "bytes": 33,
           "reference_offset": 2527232
         },
         {
-          "offset": 22102,
+          "offset": 22328,
           "bytes": 35,
           "reference_offset": 2531328
         },
         {
-          "offset": 22137,
+          "offset": 22363,
           "bytes": 34,
           "reference_offset": 2535424
         },
         {
-          "offset": 22171,
+          "offset": 22397,
           "bytes": 34,
           "reference_offset": 2539520
         },
         {
-          "offset": 22205,
+          "offset": 22431,
           "bytes": 35,
           "reference_offset": 2543616
         },
         {
-          "offset": 22240,
+          "offset": 22466,
           "bytes": 33,
           "reference_offset": 2547712
         },
         {
-          "offset": 22273,
+          "offset": 22499,
           "bytes": 34,
           "reference_offset": 2551808
         }
@@ -4923,67 +4955,67 @@
       "asc": "bb11a0",
       "frames": [
         {
-          "offset": 22307,
+          "offset": 22533,
           "bytes": 33,
           "reference_offset": 2555904
         },
         {
-          "offset": 22340,
+          "offset": 22566,
           "bytes": 36,
           "reference_offset": 2560000
         },
         {
-          "offset": 22376,
+          "offset": 22602,
           "bytes": 33,
           "reference_offset": 2564096
         },
         {
-          "offset": 22409,
+          "offset": 22635,
           "bytes": 35,
           "reference_offset": 2568192,
           "malformed": {
-            "offset": 22444,
+            "offset": 22670,
             "bytes": 35,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 22479,
+          "offset": 22705,
           "bytes": 34,
           "reference_offset": 2572288
         },
         {
-          "offset": 22513,
+          "offset": 22739,
           "bytes": 33,
           "reference_offset": 2576384
         },
         {
-          "offset": 22546,
+          "offset": 22772,
           "bytes": 36,
           "reference_offset": 2580480
         },
         {
-          "offset": 22582,
+          "offset": 22808,
           "bytes": 34,
           "reference_offset": 2584576
         },
         {
-          "offset": 22616,
+          "offset": 22842,
           "bytes": 34,
           "reference_offset": 2588672
         },
         {
-          "offset": 22650,
+          "offset": 22876,
           "bytes": 35,
           "reference_offset": 2592768
         },
         {
-          "offset": 22685,
+          "offset": 22911,
           "bytes": 33,
           "reference_offset": 2596864
         },
         {
-          "offset": 22718,
+          "offset": 22944,
           "bytes": 34,
           "reference_offset": 2600960
         }
@@ -5014,67 +5046,67 @@
       "asc": "bb11a0",
       "frames": [
         {
-          "offset": 22752,
+          "offset": 22978,
           "bytes": 33,
           "reference_offset": 2605056
         },
         {
-          "offset": 22785,
+          "offset": 23011,
           "bytes": 36,
           "reference_offset": 2609152
         },
         {
-          "offset": 22821,
+          "offset": 23047,
           "bytes": 33,
           "reference_offset": 2613248
         },
         {
-          "offset": 22854,
+          "offset": 23080,
           "bytes": 35,
           "reference_offset": 2617344,
           "malformed": {
-            "offset": 22889,
+            "offset": 23115,
             "bytes": 35,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 22924,
+          "offset": 23150,
           "bytes": 34,
           "reference_offset": 2621440
         },
         {
-          "offset": 22958,
+          "offset": 23184,
           "bytes": 33,
           "reference_offset": 2625536
         },
         {
-          "offset": 22991,
+          "offset": 23217,
           "bytes": 35,
           "reference_offset": 2629632
         },
         {
-          "offset": 23026,
+          "offset": 23252,
           "bytes": 34,
           "reference_offset": 2633728
         },
         {
-          "offset": 23060,
+          "offset": 23286,
           "bytes": 34,
           "reference_offset": 2637824
         },
         {
-          "offset": 23094,
+          "offset": 23320,
           "bytes": 35,
           "reference_offset": 2641920
         },
         {
-          "offset": 23129,
+          "offset": 23355,
           "bytes": 33,
           "reference_offset": 2646016
         },
         {
-          "offset": 23162,
+          "offset": 23388,
           "bytes": 34,
           "reference_offset": 2650112
         }
@@ -5105,67 +5137,67 @@
       "asc": "bb11c0",
       "frames": [
         {
-          "offset": 23196,
+          "offset": 23422,
           "bytes": 36,
           "reference_offset": 2654208
         },
         {
-          "offset": 23232,
+          "offset": 23458,
           "bytes": 38,
           "reference_offset": 2658304
         },
         {
-          "offset": 23270,
+          "offset": 23496,
           "bytes": 35,
           "reference_offset": 2662400
         },
         {
-          "offset": 23305,
+          "offset": 23531,
           "bytes": 38,
           "reference_offset": 2666496,
           "malformed": {
-            "offset": 23343,
+            "offset": 23569,
             "bytes": 38,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 23381,
+          "offset": 23607,
           "bytes": 37,
           "reference_offset": 2670592
         },
         {
-          "offset": 23418,
+          "offset": 23644,
           "bytes": 35,
           "reference_offset": 2674688
         },
         {
-          "offset": 23453,
+          "offset": 23679,
           "bytes": 37,
           "reference_offset": 2678784
         },
         {
-          "offset": 23490,
+          "offset": 23716,
           "bytes": 37,
           "reference_offset": 2682880
         },
         {
-          "offset": 23527,
+          "offset": 23753,
           "bytes": 37,
           "reference_offset": 2686976
         },
         {
-          "offset": 23564,
+          "offset": 23790,
           "bytes": 37,
           "reference_offset": 2691072
         },
         {
-          "offset": 23601,
+          "offset": 23827,
           "bytes": 35,
           "reference_offset": 2695168
         },
         {
-          "offset": 23636,
+          "offset": 23862,
           "bytes": 37,
           "reference_offset": 2699264
         }
@@ -5196,67 +5228,67 @@
       "asc": "bb11c0",
       "frames": [
         {
-          "offset": 23673,
+          "offset": 23899,
           "bytes": 35,
           "reference_offset": 2703360
         },
         {
-          "offset": 23708,
+          "offset": 23934,
           "bytes": 37,
           "reference_offset": 2707456
         },
         {
-          "offset": 23745,
+          "offset": 23971,
           "bytes": 34,
           "reference_offset": 2711552
         },
         {
-          "offset": 23779,
+          "offset": 24005,
           "bytes": 37,
           "reference_offset": 2715648,
           "malformed": {
-            "offset": 23816,
+            "offset": 24042,
             "bytes": 37,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 23853,
+          "offset": 24079,
           "bytes": 36,
           "reference_offset": 2719744
         },
         {
-          "offset": 23889,
+          "offset": 24115,
           "bytes": 34,
           "reference_offset": 2723840
         },
         {
-          "offset": 23923,
+          "offset": 24149,
           "bytes": 36,
           "reference_offset": 2727936
         },
         {
-          "offset": 23959,
+          "offset": 24185,
           "bytes": 36,
           "reference_offset": 2732032
         },
         {
-          "offset": 23995,
+          "offset": 24221,
           "bytes": 36,
           "reference_offset": 2736128
         },
         {
-          "offset": 24031,
+          "offset": 24257,
           "bytes": 36,
           "reference_offset": 2740224
         },
         {
-          "offset": 24067,
+          "offset": 24293,
           "bytes": 34,
           "reference_offset": 2744320
         },
         {
-          "offset": 24101,
+          "offset": 24327,
           "bytes": 36,
           "reference_offset": 2748416
         }
@@ -5287,67 +5319,67 @@
       "asc": "bb11c0",
       "frames": [
         {
-          "offset": 24137,
+          "offset": 24363,
           "bytes": 35,
           "reference_offset": 2752512
         },
         {
-          "offset": 24172,
+          "offset": 24398,
           "bytes": 37,
           "reference_offset": 2756608
         },
         {
-          "offset": 24209,
+          "offset": 24435,
           "bytes": 34,
           "reference_offset": 2760704
         },
         {
-          "offset": 24243,
+          "offset": 24469,
           "bytes": 38,
           "reference_offset": 2764800,
           "malformed": {
-            "offset": 24281,
+            "offset": 24507,
             "bytes": 38,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 24319,
+          "offset": 24545,
           "bytes": 37,
           "reference_offset": 2768896
         },
         {
-          "offset": 24356,
+          "offset": 24582,
           "bytes": 34,
           "reference_offset": 2772992
         },
         {
-          "offset": 24390,
+          "offset": 24616,
           "bytes": 37,
           "reference_offset": 2777088
         },
         {
-          "offset": 24427,
+          "offset": 24653,
           "bytes": 37,
           "reference_offset": 2781184
         },
         {
-          "offset": 24464,
+          "offset": 24690,
           "bytes": 37,
           "reference_offset": 2785280
         },
         {
-          "offset": 24501,
+          "offset": 24727,
           "bytes": 37,
           "reference_offset": 2789376
         },
         {
-          "offset": 24538,
+          "offset": 24764,
           "bytes": 34,
           "reference_offset": 2793472
         },
         {
-          "offset": 24572,
+          "offset": 24798,
           "bytes": 37,
           "reference_offset": 2797568
         }
@@ -5378,67 +5410,67 @@
       "asc": "bb11c0",
       "frames": [
         {
-          "offset": 24609,
+          "offset": 24835,
           "bytes": 35,
           "reference_offset": 2801664
         },
         {
-          "offset": 24644,
+          "offset": 24870,
           "bytes": 37,
           "reference_offset": 2805760
         },
         {
-          "offset": 24681,
+          "offset": 24907,
           "bytes": 34,
           "reference_offset": 2809856
         },
         {
-          "offset": 24715,
+          "offset": 24941,
           "bytes": 37,
           "reference_offset": 2813952,
           "malformed": {
-            "offset": 24752,
+            "offset": 24978,
             "bytes": 37,
             "error": "AAC RVLC reverse gain mismatch"
           }
         },
         {
-          "offset": 24789,
+          "offset": 25015,
           "bytes": 36,
           "reference_offset": 2818048
         },
         {
-          "offset": 24825,
+          "offset": 25051,
           "bytes": 34,
           "reference_offset": 2822144
         },
         {
-          "offset": 24859,
+          "offset": 25085,
           "bytes": 36,
           "reference_offset": 2826240
         },
         {
-          "offset": 24895,
+          "offset": 25121,
           "bytes": 36,
           "reference_offset": 2830336
         },
         {
-          "offset": 24931,
+          "offset": 25157,
           "bytes": 36,
           "reference_offset": 2834432
         },
         {
-          "offset": 24967,
+          "offset": 25193,
           "bytes": 36,
           "reference_offset": 2838528
         },
         {
-          "offset": 25003,
+          "offset": 25229,
           "bytes": 34,
           "reference_offset": 2842624
         },
         {
-          "offset": 25037,
+          "offset": 25263,
           "bytes": 36,
           "reference_offset": 2846720
         }
@@ -5469,67 +5501,67 @@
       "asc": "bb11e0",
       "frames": [
         {
-          "offset": 25073,
+          "offset": 25299,
           "bytes": 41,
           "reference_offset": 2850816
         },
         {
-          "offset": 25114,
+          "offset": 25340,
           "bytes": 43,
           "reference_offset": 2854912
         },
         {
-          "offset": 25157,
+          "offset": 25383,
           "bytes": 40,
           "reference_offset": 2859008
         },
         {
-          "offset": 25197,
+          "offset": 25423,
           "bytes": 43,
           "reference_offset": 2863104,
           "malformed": {
-            "offset": 25240,
+            "offset": 25466,
             "bytes": 43,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 25283,
+          "offset": 25509,
           "bytes": 42,
           "reference_offset": 2867200
         },
         {
-          "offset": 25325,
+          "offset": 25551,
           "bytes": 40,
           "reference_offset": 2871296
         },
         {
-          "offset": 25365,
+          "offset": 25591,
           "bytes": 42,
           "reference_offset": 2875392
         },
         {
-          "offset": 25407,
+          "offset": 25633,
           "bytes": 42,
           "reference_offset": 2879488
         },
         {
-          "offset": 25449,
+          "offset": 25675,
           "bytes": 42,
           "reference_offset": 2883584
         },
         {
-          "offset": 25491,
+          "offset": 25717,
           "bytes": 42,
           "reference_offset": 2887680
         },
         {
-          "offset": 25533,
+          "offset": 25759,
           "bytes": 40,
           "reference_offset": 2891776
         },
         {
-          "offset": 25573,
+          "offset": 25799,
           "bytes": 42,
           "reference_offset": 2895872
         }
@@ -5560,67 +5592,67 @@
       "asc": "bb11e0",
       "frames": [
         {
-          "offset": 25615,
+          "offset": 25841,
           "bytes": 40,
           "reference_offset": 2899968
         },
         {
-          "offset": 25655,
+          "offset": 25881,
           "bytes": 42,
           "reference_offset": 2904064
         },
         {
-          "offset": 25697,
+          "offset": 25923,
           "bytes": 39,
           "reference_offset": 2908160
         },
         {
-          "offset": 25736,
+          "offset": 25962,
           "bytes": 42,
           "reference_offset": 2912256,
           "malformed": {
-            "offset": 25778,
+            "offset": 26004,
             "bytes": 42,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 25820,
+          "offset": 26046,
           "bytes": 41,
           "reference_offset": 2916352
         },
         {
-          "offset": 25861,
+          "offset": 26087,
           "bytes": 39,
           "reference_offset": 2920448
         },
         {
-          "offset": 25900,
+          "offset": 26126,
           "bytes": 41,
           "reference_offset": 2924544
         },
         {
-          "offset": 25941,
+          "offset": 26167,
           "bytes": 41,
           "reference_offset": 2928640
         },
         {
-          "offset": 25982,
+          "offset": 26208,
           "bytes": 41,
           "reference_offset": 2932736
         },
         {
-          "offset": 26023,
+          "offset": 26249,
           "bytes": 41,
           "reference_offset": 2936832
         },
         {
-          "offset": 26064,
+          "offset": 26290,
           "bytes": 39,
           "reference_offset": 2940928
         },
         {
-          "offset": 26103,
+          "offset": 26329,
           "bytes": 41,
           "reference_offset": 2945024
         }
@@ -5651,67 +5683,67 @@
       "asc": "bb11e0",
       "frames": [
         {
-          "offset": 26144,
+          "offset": 26370,
           "bytes": 40,
           "reference_offset": 2949120
         },
         {
-          "offset": 26184,
+          "offset": 26410,
           "bytes": 42,
           "reference_offset": 2953216
         },
         {
-          "offset": 26226,
+          "offset": 26452,
           "bytes": 39,
           "reference_offset": 2957312
         },
         {
-          "offset": 26265,
+          "offset": 26491,
           "bytes": 43,
           "reference_offset": 2961408,
           "malformed": {
-            "offset": 26308,
+            "offset": 26534,
             "bytes": 43,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 26351,
+          "offset": 26577,
           "bytes": 42,
           "reference_offset": 2965504
         },
         {
-          "offset": 26393,
+          "offset": 26619,
           "bytes": 39,
           "reference_offset": 2969600
         },
         {
-          "offset": 26432,
+          "offset": 26658,
           "bytes": 42,
           "reference_offset": 2973696
         },
         {
-          "offset": 26474,
+          "offset": 26700,
           "bytes": 42,
           "reference_offset": 2977792
         },
         {
-          "offset": 26516,
+          "offset": 26742,
           "bytes": 42,
           "reference_offset": 2981888
         },
         {
-          "offset": 26558,
+          "offset": 26784,
           "bytes": 42,
           "reference_offset": 2985984
         },
         {
-          "offset": 26600,
+          "offset": 26826,
           "bytes": 39,
           "reference_offset": 2990080
         },
         {
-          "offset": 26639,
+          "offset": 26865,
           "bytes": 42,
           "reference_offset": 2994176
         }
@@ -5742,67 +5774,67 @@
       "asc": "bb11e0",
       "frames": [
         {
-          "offset": 26681,
+          "offset": 26907,
           "bytes": 40,
           "reference_offset": 2998272
         },
         {
-          "offset": 26721,
+          "offset": 26947,
           "bytes": 42,
           "reference_offset": 3002368
         },
         {
-          "offset": 26763,
+          "offset": 26989,
           "bytes": 39,
           "reference_offset": 3006464
         },
         {
-          "offset": 26802,
+          "offset": 27028,
           "bytes": 42,
           "reference_offset": 3010560,
           "malformed": {
-            "offset": 26844,
+            "offset": 27070,
             "bytes": 42,
             "error": "AAC HCR nonempty region has zero longest codeword"
           }
         },
         {
-          "offset": 26886,
+          "offset": 27112,
           "bytes": 41,
           "reference_offset": 3014656
         },
         {
-          "offset": 26927,
+          "offset": 27153,
           "bytes": 39,
           "reference_offset": 3018752
         },
         {
-          "offset": 26966,
+          "offset": 27192,
           "bytes": 41,
           "reference_offset": 3022848
         },
         {
-          "offset": 27007,
+          "offset": 27233,
           "bytes": 41,
           "reference_offset": 3026944
         },
         {
-          "offset": 27048,
+          "offset": 27274,
           "bytes": 41,
           "reference_offset": 3031040
         },
         {
-          "offset": 27089,
+          "offset": 27315,
           "bytes": 41,
           "reference_offset": 3035136
         },
         {
-          "offset": 27130,
+          "offset": 27356,
           "bytes": 39,
           "reference_offset": 3039232
         },
         {
-          "offset": 27169,
+          "offset": 27395,
           "bytes": 41,
           "reference_offset": 3043328
         }
@@ -5829,46 +5861,46 @@
     {
       "video": {
         "file": "aac-ld-stereo-480-0-independent-malformed-synthetic.mp4",
-        "sha256": "d7ed703fd24d1ae40ee9819cccd8d6116a9308d3411eebbc1e6f3659a9210ddd",
+        "sha256": "99f0025c3b6210efcde73ec8c03482baa26aa5cfdd991f0e05ae4f16b9e5c901",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1500",
         "pcm_offset": 0,
         "samples": 5760
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
         "file": "aac-ld-stereo-480-0-common-0-malformed-synthetic.mp4",
-        "sha256": "82bbbbbbc590ea6b80fbd0123f654a700a9c316801146ec5975b156a995108c6",
+        "sha256": "0d1bb7543cd66f102e85f70b861c9aff57e4d714c4092c09a3f20ced726fa0cc",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1500",
         "pcm_offset": 0,
         "samples": 5760
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
         "file": "aac-ld-stereo-480-0-common-1-malformed-synthetic.mp4",
-        "sha256": "5917c54d5ff35ffa20e2ef368cae9337d3307f67dbe558f3927a0741ea40dff0",
+        "sha256": "d3a6f539a4db81eef3c4137150ccf40e175d3301b4eb4e471fa957b3df39c0bb",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1500",
         "pcm_offset": 0,
         "samples": 5760
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
         "file": "aac-ld-stereo-480-0-common-2-malformed-synthetic.mp4",
-        "sha256": "06435ca33c535d034302115ff4aa61c2fb6d13efd42ce1899e51e83629043d6f",
+        "sha256": "aad9ff8c95544504745550252930e2aba5f3d8c3ae6cc68d3678a8df78c7b580",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1500",
         "pcm_offset": 0,
         "samples": 5760
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
@@ -6181,46 +6213,46 @@
     {
       "video": {
         "file": "aac-ld-stereo-512-0-independent-malformed-synthetic.mp4",
-        "sha256": "588092bb0281556c6d89e2f2140490d26a0c44d28ef28fefd51486587f13933e",
+        "sha256": "94af174b5913259212a025329d6e00d7d4ff63e93fd28f103b9a4d8283c2c4ef",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1100",
         "pcm_offset": 0,
         "samples": 6144
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
         "file": "aac-ld-stereo-512-0-common-0-malformed-synthetic.mp4",
-        "sha256": "4a1b0106087ecdceec62b818e016aea7f46d894645d2176c978f6d40fa0c8525",
+        "sha256": "b947161963d7ca2a4579583125b1fa0f9d3cbbc26a5219dcd12db35683ceadb7",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1100",
         "pcm_offset": 0,
         "samples": 6144
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
         "file": "aac-ld-stereo-512-0-common-1-malformed-synthetic.mp4",
-        "sha256": "842522e03b742a644c5f70afedf78a9deeafd09ae9de6d9cfa0ed9cc35d26283",
+        "sha256": "3089bf6fe738f580f1f0a4179836217f87085019ec615a24cd219b75c6c7debd",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1100",
         "pcm_offset": 0,
         "samples": 6144
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
         "file": "aac-ld-stereo-512-0-common-2-malformed-synthetic.mp4",
-        "sha256": "6d31b616873af1eaf447eeb9843996da36047a15eca95460ae5ea78ecb0c4b2b",
+        "sha256": "2be5a16a14d1d7db5ed786cb68806aa4d2905d9f7b2bbcc387051fc376f07a20",
         "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
         "asc": "bb1100",
         "pcm_offset": 0,
         "samples": 6144
       },
-      "error": "trailing bytes"
+      "error": "AAC ancillary data exceeds fill payload"
     },
     {
       "video": {
@@ -6529,6 +6561,104 @@
         "samples": 6144
       },
       "error": "AAC HCR nonempty region has zero longest codeword"
+    }
+  ],
+  "fill_extensions": [
+    {
+      "video": {
+        "file": "aac-ld-stereo-480-0-independent-fill-synthetic.mp4",
+        "sha256": "d7ed703fd24d1ae40ee9819cccd8d6116a9308d3411eebbc1e6f3659a9210ddd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1500",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "reference_offset": 0,
+      "reference_bytes": 15360
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-480-0-common-0-fill-synthetic.mp4",
+        "sha256": "82bbbbbbc590ea6b80fbd0123f654a700a9c316801146ec5975b156a995108c6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1500",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "reference_offset": 46080,
+      "reference_bytes": 15360
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-480-0-common-1-fill-synthetic.mp4",
+        "sha256": "5917c54d5ff35ffa20e2ef368cae9337d3307f67dbe558f3927a0741ea40dff0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1500",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "reference_offset": 92160,
+      "reference_bytes": 15360
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-480-0-common-2-fill-synthetic.mp4",
+        "sha256": "06435ca33c535d034302115ff4aa61c2fb6d13efd42ce1899e51e83629043d6f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1500",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "reference_offset": 138240,
+      "reference_bytes": 15360
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-512-0-independent-fill-synthetic.mp4",
+        "sha256": "588092bb0281556c6d89e2f2140490d26a0c44d28ef28fefd51486587f13933e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1100",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "reference_offset": 1474560,
+      "reference_bytes": 16384
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-512-0-common-0-fill-synthetic.mp4",
+        "sha256": "4a1b0106087ecdceec62b818e016aea7f46d894645d2176c978f6d40fa0c8525",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1100",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "reference_offset": 1523712,
+      "reference_bytes": 16384
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-512-0-common-1-fill-synthetic.mp4",
+        "sha256": "842522e03b742a644c5f70afedf78a9deeafd09ae9de6d9cfa0ed9cc35d26283",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1100",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "reference_offset": 1572864,
+      "reference_bytes": 16384
+    },
+    {
+      "video": {
+        "file": "aac-ld-stereo-512-0-common-2-fill-synthetic.mp4",
+        "sha256": "6d31b616873af1eaf447eeb9843996da36047a15eca95460ae5ea78ecb0c4b2b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb1100",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "reference_offset": 1622016,
+      "reference_bytes": 16384
     }
   ],
   "provenance": "Own AOT23 stereo, all resilience flag combinations, virtual book17, RVLC escapes, HCR, independent/common windows, MS modes, deferred independent LD predictors and bidirectional TNS. Scalar absolute timeline/cosine/FIR/AR/LD-window PCM oracle. No private media, FFmpeg, network or foreign decoder."

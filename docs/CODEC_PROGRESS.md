@@ -10598,3 +10598,23 @@ PCM, so the regression checks the history requirement rather than mere syntax
 admission. Native checkpoint rollback, complete public/owned PCM, ranges,
 rewind and seek are tested. This does not claim support for legacy short-window
 prediction signaling or every source/tag/layout combination.
+
+
+### ER AAC trailing fill/ancillary extensions (2026-10-10)
+
+ER-LC AOT17, ER-LTP AOT19 and ER-LD AOT23 ep0 now parse whole trailing
+extension_payload bytes after their configured channel elements, leaving final
+bit alignment outside the extension region (ISO/IEC14496-3:2009 table4.19).
+The existing bounded FIL parser is shared without adding a FIL/count header to
+ER streams. EXT_FILL, EXT_FILL_DATA and ANC_DATA are accepted, including
+chained payloads, empty ancillary and escaped255-byte lengths. Each whole
+extension region commits its bit cursor only on success; decoder state commits
+remain packet-atomic. ER SBR, dynamic-range and other unimplemented extension
+tools retain specific refusals.
+Six authored videos at960/1024 or480/512, matched extension-free controls and
+six ancillary-overrun companions reproduce the former trailing-byte refusal.
+Before the fix all six controls matched scalar PCM and all extension streams
+failed at that gate. Acceptance checks compare native/scalar/public/owned PCM,
+malformed rollback, export, ranges and player rewind/seek. Old tests which used
+an appended zero byte as malformed now recognize valid ER EXT_FILL or use real
+truncation; arbitrary trailing-zero rejection is not a valid ER invariant.

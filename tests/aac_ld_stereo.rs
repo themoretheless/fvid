@@ -66,6 +66,15 @@ fn ld_stereo_resilience_native_public_pcm_and_history_rollback_match_scalar() {
             let size = row["bytes"].as_u64().unwrap() as usize;
             let raw = &blob[at..at + size];
             let saved = decoder.checkpoint();
+            if let Some(fill) = row.get("fill_extension") {
+                let at = fill["offset"].as_u64().unwrap() as usize;
+                let end = at + fill["bytes"].as_u64().unwrap() as usize;
+                let padded = decoder.decode(&blob[at..end]).unwrap();
+                decoder.restore(&saved).unwrap();
+                assert_eq!(padded, decoder.decode(raw).unwrap());
+                decoder.restore(&saved).unwrap();
+            }
+
             let mut pair_bits = BitReader::new(raw);
             pair_bits.skip(4).unwrap();
             ChannelPair::read_ld(&mut pair_bits, &config).unwrap();
@@ -231,5 +240,31 @@ fn ld_stereo_player_ranges_rewind_seek_and_channel_order_preserve_pcm() {
             let landed = reader.seek_to(target);
             assert_eq!(play(&mut reader), full[landed as usize * 8..]);
         }
+    }
+}
+
+#[test]
+fn ld_stereo_zero_extension_videos_are_pcm_acceptance() {
+    let m = manifest();
+    let gold = bytes("aac-ld-stereo-reference.f32le");
+    assert_eq!(m["fill_extensions"].as_array().unwrap().len(), 8);
+    for c in m["fill_extensions"].as_array().unwrap() {
+        let mut out = vec![];
+        fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["video"]["file"].as_str().unwrap()),
+            &mut out,
+        )
+        .unwrap();
+        let at = c["reference_offset"].as_u64().unwrap() as usize;
+        let size = c["reference_bytes"].as_u64().unwrap() as usize;
+        assert_eq!(out.len(), size);
+        assert!(
+            out.chunks_exact(4)
+                .zip(gold[at..at + size].chunks_exact(4))
+                .all(|(a, b)| (f32::from_le_bytes(a.try_into().unwrap())
+                    - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+                    < 2e-7)
+        );
     }
 }

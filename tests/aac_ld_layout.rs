@@ -66,15 +66,7 @@ fn ld_indexed_explicit_rates_all_layouts_and_final_bands_match_scalar_pcm() {
             let size = row["bytes"].as_u64().unwrap() as usize;
             let raw = &blob[at..at + size];
             let saved = decoder.checkpoint();
-            let mut bad = raw.to_vec();
-            bad.push(0);
-            assert!(
-                decoder
-                    .decode(&bad)
-                    .unwrap_err()
-                    .to_string()
-                    .contains("trailing bytes")
-            );
+            assert!(decoder.decode(&raw[..raw.len() / 2]).is_err());
             let pts = index as i64 * i64::from(config.frame_samples);
             let frame = decoder
                 .decode_timed(raw, pts, u64::from(config.frame_samples))

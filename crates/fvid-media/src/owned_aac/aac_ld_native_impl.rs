@@ -38,6 +38,7 @@ impl NativeAacDecoder {
                 channels.push((channel, spectrum, prediction));
             }
         }
+        super::aac_pce::skip_er_extensions(&mut bits)?;
         if channels.len() != usize::from(config.channels) || bits.remaining() > 7 {
             return Err(invalid(
                 "trailing bytes or channel mismatch after AAC LD block",

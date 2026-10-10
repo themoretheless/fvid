@@ -702,6 +702,9 @@ impl NativeAacDecoder {
         if channels.len() != self.config.channels as usize {
             return Err(invalid("AAC block has no configured audio element"));
         }
+        if matches!(self.config.object_type,17|19) {
+            super::aac_pce::skip_er_extensions(&mut bits)?;
+        }
         if bits.remaining() > 7 {
             return Err(invalid(if matches!(self.config.object_type,17|19) {"trailing bytes after ER AAC block"} else {"trailing bytes after AAC END"}));
         }

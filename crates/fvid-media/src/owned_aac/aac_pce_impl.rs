@@ -421,7 +421,7 @@ pub(crate) fn skip_fill(bits: &mut super::bits::BitReader<'_>) -> Result<()> {
 /// all other fill/ancillary syntax uses the same bounded parser as AAC-LC.
 pub(crate) fn read_fill(
     bits: &mut super::bits::BitReader<'_>,
-    mut sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
+    sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
 ) -> Result<()> {
     let mut input = bits.clone();
     let mut count = input.read(4)? as usize;
@@ -429,6 +429,24 @@ pub(crate) fn read_fill(
         count += input.read(8)? as usize;
         count -= 1;
     }
+    read_extension_bytes(&mut input, count, sbr)?;
+    *bits = input;
+    Ok(())
+}
+
+/// ER top-level payload has no FIL element/count header. Remaining whole
+/// bytes contain extension_payload() records; final alignment stays outside.
+pub(crate) fn skip_er_extensions(bits: &mut super::bits::BitReader<'_>) -> Result<()> {
+    let count = bits.remaining() / 8;
+    read_extension_bytes(bits, count, |_, _, _| Err(unsupported("ER AAC SBR extension synthesis is not yet implemented")))
+}
+
+fn read_extension_bytes(
+    bits: &mut super::bits::BitReader<'_>,
+    count: usize,
+    mut sbr: impl FnMut(&mut super::bits::BitReader<'_>, usize, bool) -> Result<()>,
+) -> Result<()> {
+    let mut input = bits.clone();
     let end = input.position() + count * 8;
     if count * 8 > input.remaining() {
         return Err(invalid("truncated AAC fill payload"));

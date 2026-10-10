@@ -8,29 +8,13 @@ fn bytes(name: &str) -> Vec<u8> {
     .unwrap()
 }
 fn manifest() -> serde_json::Value {
-    serde_json::from_slice(&bytes("aac-ltp-pns.json")).unwrap()
+    serde_json::from_slice(&bytes("aac-er-extensions.json")).unwrap()
 }
 fn hex(s: &str) -> Vec<u8> {
     s.as_bytes()
         .chunks_exact(2)
         .map(|v| u8::from_str_radix(std::str::from_utf8(v).unwrap(), 16).unwrap())
         .collect()
-}
-fn native(c: &serde_json::Value, key: &str, blob: &[u8]) -> Vec<f32> {
-    let mut decoder = NativeAacDecoder::new(&hex(c["asc"].as_str().unwrap())).unwrap();
-    let mut out = vec![];
-    for row in c[key].as_array().unwrap() {
-        let at = row["offset"].as_u64().unwrap() as usize;
-        let size = row["bytes"].as_u64().unwrap() as usize;
-        let saved = decoder.checkpoint();
-        let bad = blob[at..at + size / 2].to_vec();
-        assert!(decoder.decode(&bad).is_err());
-        let pcm = decoder.decode(&blob[at..at + size]).unwrap();
-        decoder.restore(&saved).unwrap();
-        assert_eq!(pcm, decoder.decode(&blob[at..at + size]).unwrap());
-        out.extend(pcm);
-    }
-    out
 }
 fn reference(c: &serde_json::Value, raw: &[u8]) -> Vec<f32> {
     let start = c["reference_offset"].as_u64().unwrap() as usize;
@@ -41,106 +25,65 @@ fn reference(c: &serde_json::Value, raw: &[u8]) -> Vec<f32> {
         .collect()
 }
 #[test]
-fn pns_takes_precedence_over_ltp_without_losing_pcm_or_lag_history() {
-    let blob = bytes("aac-ltp-pns-packets.bin");
-    let gold = bytes("aac-ltp-pns-reference.f32le");
-    let wrong = bytes("aac-ltp-pns-incorrect-prediction.f32le");
+fn er_extensions_preserve_pcm_and_malformed_ancillary_is_transactional() {
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 62);
-    let stereo_roster: std::collections::BTreeSet<_> = m["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| !c["selection"].is_null())
-        .map(|c| {
-            (
-                c["n"].as_u64().unwrap(),
-                c["point"].as_u64().unwrap(),
-                c["selection"].as_u64().unwrap(),
-            )
-        })
-        .collect();
-    let expected_roster: std::collections::BTreeSet<_> = [960, 1024]
-        .into_iter()
-        .flat_map(|n| {
-            [0, 1, 3]
-                .into_iter()
-                .flat_map(move |point| (0..4).map(move |selection| (n, point, selection)))
-        })
-        .collect();
-    assert_eq!(stereo_roster, expected_roster);
-    let signed_roster: std::collections::BTreeSet<_> = m["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| c["signed"].as_bool() == Some(true))
-        .map(|c| (c["n"].as_u64().unwrap(), c["point"].as_u64().unwrap()))
-        .collect();
-    assert_eq!(
-        signed_roster,
-        [(960, 0), (960, 1), (1024, 0), (1024, 1)]
-            .into_iter()
-            .collect()
-    );
-    let tns_roster: std::collections::BTreeSet<_> = m["cases"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|c| c["tns"].as_bool() == Some(true))
-        .map(|c| (c["n"].as_u64().unwrap(), c["point"].as_u64().unwrap()))
-        .collect();
-    assert_eq!(
-        tns_roster,
-        [(960, 0), (960, 1), (1024, 0), (1024, 1)]
-            .into_iter()
-            .collect()
-    );
+    let blob = bytes("aac-er-extensions-packets.bin");
+    let gold = bytes("aac-er-extensions-reference.f32le");
+    assert_eq!(m["cases"].as_array().unwrap().len(), 6);
+    let packet = |row: &serde_json::Value| {
+        let at = row["offset"].as_u64().unwrap() as usize;
+        &blob[at..at + row["bytes"].as_u64().unwrap() as usize]
+    };
     for c in m["cases"].as_array().unwrap() {
-        let actual = native(c, "frames", &blob);
-        let control = native(c, "control_frames", &blob);
-        let correct = reference(c, &gold);
-        assert_eq!(actual.len(), correct.len(), "{} PCM geometry", c["name"]);
-        if let Some(selection @ (1 | 2)) = c["selection"].as_u64() {
-            let silent = if selection == 1 { 0 } else { 1 };
+        let mut decoder = NativeAacDecoder::new(&hex(c["asc"].as_str().unwrap())).unwrap();
+        let mut actual = vec![];
+        for (i, row) in c["frames"].as_array().unwrap().iter().enumerate() {
+            let saved = decoder.checkpoint();
+            let error = decoder.decode(packet(&c["bad_frames"][i])).unwrap_err();
             assert!(
-                actual.chunks_exact(2).all(|pair| pair[silent] == 0.),
-                "{} unselected channel is audible",
+                error
+                    .to_string()
+                    .contains("AAC ancillary data exceeds fill payload"),
+                "{}: {error}",
                 c["name"]
             );
+            let pcm = decoder.decode(packet(row)).unwrap();
+            decoder.restore(&saved).unwrap();
+            assert_eq!(
+                pcm,
+                decoder.decode(packet(&c["control_frames"][i])).unwrap()
+            );
+            decoder.restore(&saved).unwrap();
+            assert_eq!(pcm, decoder.decode(packet(row)).unwrap());
+            actual.extend(pcm);
         }
-        let mutant = reference(c, &wrong);
+        let expected = reference(c, &gold);
+        assert_eq!(actual.len(), expected.len());
         assert!(
-            correct
+            actual
                 .iter()
-                .zip(&mutant)
-                .any(|(a, b)| (*a - *b).abs() > 1e-6),
-            "{} not a precedence reproducer",
+                .zip(expected)
+                .all(|(a, b)| (*a - b).abs() < 1e-8),
+            "{}",
             c["name"]
         );
-        for (a, b) in control.iter().zip(&correct) {
-            assert!(
-                (*a - *b).abs() < 1e-8,
-                "{} invalid control: {a} vs {b}",
-                c["name"]
-            );
-        }
-        assert_eq!(
-            actual, control,
-            "{} overlapping flags changed PNS PCM",
-            c["name"]
+        let mut output = vec![];
+        let error = fvid::native_media::decode_mp4_aac_pcm(
+            &bytes(c["bad_video"]["file"].as_str().unwrap()),
+            &mut output,
+        )
+        .unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("AAC ancillary data exceeds fill payload"),
+            "{error}"
         );
-        for (a, b) in actual.iter().zip(&correct) {
-            assert!(
-                (*a - *b).abs() < 1e-8,
-                "{} PNS precedence failure: {a} vs {b}",
-                c["name"]
-            );
-        }
+        assert!(output.is_empty());
     }
 }
-
 #[test]
-fn pns_ltp_public_videos_match_controls_and_owned_export() {
+fn er_extensions_public_videos_match_controls_and_owned_export() {
     for c in manifest()["cases"].as_array().unwrap() {
         let data = bytes(c["video"]["file"].as_str().unwrap());
         let control = bytes(c["control_video"]["file"].as_str().unwrap());
@@ -190,7 +133,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
 }
 #[cfg(feature = "player")]
 #[test]
-fn pns_ltp_player_ranges_rewind_seek_restore_noise_and_predictor_state() {
+fn er_extensions_player_ranges_rewind_seek_restore_noise_and_predictor_state() {
     use fvid::audio::AudioStream;
     for c in manifest()["cases"].as_array().unwrap() {
         let data = bytes(c["video"]["file"].as_str().unwrap());
