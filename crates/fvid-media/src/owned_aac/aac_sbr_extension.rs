@@ -59,9 +59,10 @@ impl State {
             return Err(invalid("invalid SBR extension boundary"));
         }
         let available = end - start;
-        // AAC FIL count is at most 15 + 255 - 1 bytes. Bound the remaining
-        // payload relative to its type, independently of absolute bit offset.
-        if available > 269 * 8 - 4 || (available + 4) % 8 != 0 {
+        // Ordinary FIL limits are enforced by its count parser. ER carries
+        // multiple self-delimited SBR elements in one larger remaining region.
+        // Preserve byte geometry and the checked packet boundary for both.
+        if (available + 4) % 8 != 0 {
             return Err(invalid("invalid SBR extension byte count"));
         }
         let mut trial = bits.clone();

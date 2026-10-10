@@ -1,0 +1,321 @@
+{
+  "cases": [
+    {
+      "name": "17-15",
+      "aot": 17,
+      "asc": "2b19c600",
+      "control_asc": "2b198a00",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 332
+        },
+        {
+          "offset": 901,
+          "bytes": 324
+        },
+        {
+          "offset": 1778,
+          "bytes": 324
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 332,
+          "bytes": 337
+        },
+        {
+          "offset": 1225,
+          "bytes": 329
+        },
+        {
+          "offset": 2102,
+          "bytes": 329
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 669,
+          "bytes": 232
+        },
+        {
+          "offset": 1554,
+          "bytes": 224
+        },
+        {
+          "offset": 2431,
+          "bytes": 224
+        }
+      ],
+      "channels": 3,
+      "bands": 64,
+      "slots": 15,
+      "pcm_offset": 0,
+      "samples": 5760,
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "video": {
+        "file": "aac-er-large-sbr-17-15-synthetic.mp4",
+        "sha256": "82ed700eae3918107c0b8727c1cb84fe53ef0a976013cf8b9cdec8f6e3439ae6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19c600",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "control_video": {
+        "file": "aac-er-large-sbr-17-15-control-synthetic.mp4",
+        "sha256": "69da6e24e0e3e789024eea04d5ccb57f4b1c0d03c09082398c4327d8597f8ef0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b198a00",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "bad_video": {
+        "file": "aac-er-large-sbr-17-15-truncated-synthetic.mp4",
+        "sha256": "3f1538f44e741710be4ff4a42b93bb1da90d59e380749a0f5fdfe1237294bdd6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19c600",
+        "pcm_offset": 0,
+        "samples": 5760
+      }
+    },
+    {
+      "name": "17-16",
+      "aot": 17,
+      "asc": "2b19c400",
+      "control_asc": "2b198800",
+      "frames": [
+        {
+          "offset": 2655,
+          "bytes": 332
+        },
+        {
+          "offset": 3556,
+          "bytes": 324
+        },
+        {
+          "offset": 4433,
+          "bytes": 324
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 2987,
+          "bytes": 337
+        },
+        {
+          "offset": 3880,
+          "bytes": 329
+        },
+        {
+          "offset": 4757,
+          "bytes": 329
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 3324,
+          "bytes": 232
+        },
+        {
+          "offset": 4209,
+          "bytes": 224
+        },
+        {
+          "offset": 5086,
+          "bytes": 224
+        }
+      ],
+      "channels": 3,
+      "bands": 64,
+      "slots": 16,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-er-large-sbr-17-16-synthetic.mp4",
+        "sha256": "68d65d6edf66e16067c45fd37b63284171f1198081d8f1dbea80ad32113193cf",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19c400",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "control_video": {
+        "file": "aac-er-large-sbr-17-16-control-synthetic.mp4",
+        "sha256": "bb15e9db386d92039c29d15f8f84381890c336fbfd3d337aa869ef3311477d84",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b198800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "bad_video": {
+        "file": "aac-er-large-sbr-17-16-truncated-synthetic.mp4",
+        "sha256": "0817530bf5115bf6d20086088cc8c24d0dd6b5acc2f1e89683a023e28dc8b0d2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19c400",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    },
+    {
+      "name": "19-15",
+      "aot": 19,
+      "asc": "2b19ce00",
+      "control_asc": "2b198a00",
+      "frames": [
+        {
+          "offset": 5310,
+          "bytes": 332
+        },
+        {
+          "offset": 6211,
+          "bytes": 324
+        },
+        {
+          "offset": 7088,
+          "bytes": 324
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 5642,
+          "bytes": 337
+        },
+        {
+          "offset": 6535,
+          "bytes": 329
+        },
+        {
+          "offset": 7412,
+          "bytes": 329
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 5979,
+          "bytes": 232
+        },
+        {
+          "offset": 6864,
+          "bytes": 224
+        },
+        {
+          "offset": 7741,
+          "bytes": 224
+        }
+      ],
+      "channels": 3,
+      "bands": 64,
+      "slots": 15,
+      "pcm_offset": 0,
+      "samples": 5760,
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "video": {
+        "file": "aac-er-large-sbr-19-15-synthetic.mp4",
+        "sha256": "7a0df959fbbd9964d99a516c146c23a4921d2eedaebf13c160b9620f18c50772",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19ce00",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "control_video": {
+        "file": "aac-er-large-sbr-19-15-control-synthetic.mp4",
+        "sha256": "69da6e24e0e3e789024eea04d5ccb57f4b1c0d03c09082398c4327d8597f8ef0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b198a00",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "bad_video": {
+        "file": "aac-er-large-sbr-19-15-truncated-synthetic.mp4",
+        "sha256": "0bce3be22a13800782ee84a14b9a0d79328978185daf79c6bb0606e42c51c3a2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19ce00",
+        "pcm_offset": 0,
+        "samples": 5760
+      }
+    },
+    {
+      "name": "19-16",
+      "aot": 19,
+      "asc": "2b19cc00",
+      "control_asc": "2b198800",
+      "frames": [
+        {
+          "offset": 7965,
+          "bytes": 332
+        },
+        {
+          "offset": 8866,
+          "bytes": 324
+        },
+        {
+          "offset": 9743,
+          "bytes": 324
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 8297,
+          "bytes": 337
+        },
+        {
+          "offset": 9190,
+          "bytes": 329
+        },
+        {
+          "offset": 10067,
+          "bytes": 329
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 8634,
+          "bytes": 232
+        },
+        {
+          "offset": 9519,
+          "bytes": 224
+        },
+        {
+          "offset": 10396,
+          "bytes": 224
+        }
+      ],
+      "channels": 3,
+      "bands": 64,
+      "slots": 16,
+      "pcm_offset": 0,
+      "samples": 6144,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "video": {
+        "file": "aac-er-large-sbr-19-16-synthetic.mp4",
+        "sha256": "e6ea30bbc3389553373a21ff0b3f4301695ab7429b80ef1b7a76ace98f1a0ff4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19cc00",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "control_video": {
+        "file": "aac-er-large-sbr-19-16-control-synthetic.mp4",
+        "sha256": "bb15e9db386d92039c29d15f8f84381890c336fbfd3d337aa869ef3311477d84",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b198800",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "bad_video": {
+        "file": "aac-er-large-sbr-19-16-truncated-synthetic.mp4",
+        "sha256": "2e37a59b0adf8f39d35f9fca5e43ab0ca006b4a981052ad8da9455f080d48762",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "2b19cc00",
+        "pcm_offset": 0,
+        "samples": 6144
+      }
+    }
+  ],
+  "provenance": "Own ER LC/LTP 960/1024 three-channel core and two SBR elements with four envelopes and alternating signed Huffman frequency deltas. Each element fits ordinary FIL; combined ER region exceeds 269 bytes. Matched ordinary HE-AAC controls and truncations. No private media, FFmpeg, foreign encoder or network."
+}

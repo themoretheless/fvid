@@ -5106,3 +5106,19 @@ PCE acceptance; genuine overrun, hidden SBR and invalid fill-data refusals stay.
 Generation is deterministic, separate from tests and requires no private media,
 FFmpeg, foreign decoder or network. This fixes forward-compatible metadata
 admission; it does not implement MPEG Surround or the other pending profiles.
+
+### ER AAC multi-element SBR region boundaries (2026-10-10)
+
+`aac-er-large-sbr` authors four three-frame ER-LC/ER-LTP streams (960/1024
+core samples, indexed three-channel layout). Two SBR elements carry four
+envelopes with signed frequency Huffman deltas. Each element fits an ordinary
+FIL, while their combined ER region exceeds 269 bytes. Matched ordinary HE-AAC
+controls decode nonzero PCM. Before the fix, the ER stream specifically failed
+with `invalid SBR extension byte count`; the ordinary controls succeeded.
+
+The SBR reader now bounds by the actual checked input region, retaining byte
+geometry and transactional syntax parsing. Ordinary FIL remains bounded by its
+count parser. Regression covers exact PCM equivalence, checkpoints, truncated
+second-element rollback, native MP4 decoding and owned MP4 export. Generation
+is explicit, deterministic and offline; ordinary tests do not use FFmpeg.
+This does not qualify split-class epConfig transport or error protection.
