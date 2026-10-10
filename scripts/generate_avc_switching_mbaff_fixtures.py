@@ -10,9 +10,9 @@ from generate_avc_secondary_sp_fixtures import chroma as secondary_chroma
 from avc_fixture_mp4 import mux
 
 
-def configuration():
+def configuration(height=32):
     b=Writer();b.u(88,8);b.u(0,8);b.u(10,8);b.ue(0)
-    b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(0)
+    b.ue(0);b.ue(0);b.ue(0);b.ue(3);b.u(0);b.ue(1);b.ue(height//32-1)
     b.u(0);b.u(1);b.u(1);b.u(0);b.u(0)
     sps=b.nal(0x67)
     b=Writer();b.ue(0);b.ue(0);b.u(0);b.u(0);b.ue(0);b.ue(0);b.ue(0)
@@ -21,16 +21,16 @@ def configuration():
     return bytes([1,88,0,10,255,225])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
 
 
-def source():
-    return [[48+(x*5+y*3)%128 for y in range(32) for x in range(32)],
-            [64+x*5+y*3 for y in range(16) for x in range(16)],
-            [192-x*5-y*3 for y in range(16) for x in range(16)]]
+def source(height=32):
+    return [[48+(x*5+y*3)%128 for y in range(height) for x in range(32)],
+            [64+x*5+y*3 for y in range(height//2) for x in range(16)],
+            [192-x*5-y*3 for y in range(height//2) for x in range(16)]]
 
 
 def indices(pair,parity,field,component):
     side=8 if component else 16; width=side*2
-    origin=parity if field else parity*side;step=2 if field else 1
-    return [(origin+y*step)*width+pair*side+x for y in range(side) for x in range(side)]
+    origin=(pair//2)*2*side+(parity if field else parity*side);step=2 if field else 1
+    return [(origin+y*step)*width+(pair%2)*side+x for y in range(side) for x in range(side)]
 
 
 def write_chroma_dc_one(b,negative,level=1):
@@ -43,7 +43,7 @@ def write_chroma_dc_one(b,negative,level=1):
     b.u(1,2)
 
 
-def slice_nal(pair,field,frame,kind,qs,coded,previous,skip,chroma=None,mv=(0,0),reference_field=0,dc_level=1):
+def slice_nal(pair,field,frame,kind,qs,coded,previous,skip,chroma=None,mv=(0,0),reference_field=0,dc_level=1,mode=1):
     b=Writer();b.ue(pair);b.ue(2 if frame==0 else 3);b.ue(0);b.u(frame,4);b.u(0)
     if frame==0:b.ue(0)
     b.u(frame*2,4)
@@ -52,7 +52,8 @@ def slice_nal(pair,field,frame,kind,qs,coded,previous,skip,chroma=None,mv=(0,0),
     else:b.u(0)
     b.se(0)
     if frame:b.u(int(kind=='secondary'));b.se(qs-26)
-    b.ue(1)
+    b.ue(mode)
+    if mode!=1:b.se(0);b.se(0)
     if frame and skip=='both':b.ue(2);return b.nal(0x41)
     for parity in [0,1]:
         if frame:
@@ -96,14 +97,15 @@ def reconstruct(previous,fields,kind,qs,coded,skip,chroma=None,mv=(0,0),referenc
         ref_parity=parity^reference_field if field else None
         key=(component,ref_parity)
         width=32 if component==0 else 16
+        height=len(previous[component])//width
         if key not in predictions:
             plane=previous[component]
-            if field:plane=[v for y in range(ref_parity,width,2) for v in plane[y*width:(y+1)*width]]
+            if field:plane=[v for y in range(ref_parity,height,2) for v in plane[y*width:(y+1)*width]]
             motion=list(mv)
             if component and field and ref_parity!=parity:motion[1]+=2 if parity else -2
-            predictions[key]=compensate(plane,width,width//2 if field else width,tuple(motion),component!=0)
-        side=16 if component==0 else 8;origin_y=0 if field else parity*side
-        return [predictions[key][(origin_y+y)*width+pair*side+x] for y in range(side) for x in range(side)]
+            predictions[key]=compensate(plane,width,height//2 if field else height,tuple(motion),component!=0)
+        side=16 if component==0 else 8;origin_y=(pair//2)*(side if field else 2*side)+(0 if field else parity*side)
+        return [predictions[key][(origin_y+y)*width+(pair%2)*side+x] for y in range(side) for x in range(side)]
     for pair,field in enumerate(fields):
         for parity in [0,1]:
             locations=indices(pair,parity,field,0);p=prediction(0,pair,parity,field)
