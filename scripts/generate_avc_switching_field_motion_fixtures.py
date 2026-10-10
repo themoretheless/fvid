@@ -62,8 +62,9 @@ def verify_jm(cases, decoder):
             actual=(directory/'decoded.yuv').read_bytes()
             expected=(DEST/case['reference']).read_bytes()
             assert len(actual)==len(expected),case['file']
-            for start in range(0,len(expected),1536):
-                assert actual[start:start+1024]==expected[start:start+1024],case['file']
+            luma=case.get('width',32)*case.get('height',32)
+            for start in range(0,len(expected),luma*3//2):
+                assert actual[start:start+luma]==expected[start:start+luma],case['file']
     print(f'JM syntax and exact luma cross-check: {len(cases)} streams')
 
 

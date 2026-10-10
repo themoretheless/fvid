@@ -40,11 +40,12 @@ def pcm(bottom,idr,reverse,source=None):
     return b.nal(0x65 if idr else 0x41)
 
 
-def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0),deblock=1):
-    b=header(bottom,frame,qs,kind,idr,reverse,address or 0,deblock)
-    if kind!='si' and not coded and address is None:b.ue(2)
+def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0),deblock=1,addresses=None):
+    group=list(addresses) if addresses is not None else (list(range(2)) if address is None else [address])
+    b=header(bottom,frame,qs,kind,idr,reverse,group[0],deblock)
+    if kind!='si' and not coded and address is None:b.ue(len(group))
     else:
-        for mb in (range(2) if address is None else [address]):
+        for mb in group:
             if kind=='si':
                 b.ue(0)
                 for _ in range(16):b.u(1)
@@ -60,12 +61,17 @@ def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0),deblo
     return b.nal(0x65 if idr else 0x41)
 
 
-def reconstruct(previous, qs, kind, coded, independent_slices=False):
-    out=[[0]*512,[0]*128,[0]*128];ready=set()
-    for mb in range(2):
-        if independent_slices:ready.clear()
+def reconstruct(previous, qs, kind, coded, independent_slices=False, height=16, slice_groups=None):
+    out=[[0]*(32*height),[0]*(8*height),[0]*(8*height)];ready=set();ready_mb=set()
+    count=2*(height//16)
+    groups=slice_groups if slice_groups is not None else ([[i] for i in range(count)] if independent_slices else [list(range(count))])
+    owners={address:index for index,group in enumerate(groups) for address in group}
+    last_owner=None
+    for mb in range(count):
+        if owners[mb]!=last_owner:ready.clear();ready_mb.clear()
+        last_owner=owners[mb]
         for block in range(16):
-            bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2;x=mb*16+bx*4;y=by*4
+            bx=(block&1)+((block>>2)&1)*2;by=((block>>1)&1)+(block>>3)*2;x=mb%2*16+bx*4;y=mb//2*16+by*4
             if kind=='si':
                 top=[out[0][(y-1)*32+x+i] for i in range(4)] if y and (x//4,y//4-1) in ready else []
                 left=[out[0][(y+i)*32+x-1] for i in range(4)] if x and (x//4-1,y//4) in ready else []
@@ -76,15 +82,22 @@ def reconstruct(previous, qs, kind, coded, independent_slices=False):
             for i,v in enumerate(values):out[0][(y+i//4)*32+x+i%4]=v
             ready.add((x//4,y//4))
         for component in range(2):
-            plane=out[component+1];x=mb*8
+            plane=out[component+1];x=mb%2*8;y=mb//2*8
             if kind=='si':
-                # No top edge in this one-MB-high compact field. DC chroma uses left.
+                have_top=(mb%2,mb//2-1) in ready_mb
+                have_left=(mb%2-1,mb//2) in ready_mb
+                top=[plane[(y-1)*16+x+i] for i in range(8)] if have_top else []
+                left=[plane[(y+i)*16+x-1] for i in range(8)] if have_left else []
                 p=[]
                 for row in range(8):
-                    start=row//4*4
-                    dc_pred=(sum(plane[y*16+x-1] for y in range(start,start+4))+2)//4 if mb and not independent_slices else 128
-                    p.extend([dc_pred]*8)
-            else:p=[previous[component+1][i//8*16+x+i%8] for i in range(64)]
+                    for col in range(8):
+                        ts=top[col//4*4:col//4*4+4]
+                        ls=left[row//4*4:row//4*4+4]
+                        if have_top and have_left:
+                            n=ts if row<4 and col>=4 else (ls if row>=4 and col<4 else ts+ls)
+                        else:n=ts+ls
+                        p.append((sum(n)+len(n)//2)//len(n) if n else 128)
+            else:p=[previous[component+1][(y+i//8)*16+x+i%8] for i in range(64)]
             dc=[0,0,(1 if (component+mb)%2==0 else -1) if coded else 0,0]
             # Field scan index1 maps to raster coefficient4 (vertical AC).
             ac=[[0]*16 for _ in range(4)]
@@ -92,13 +105,14 @@ def reconstruct(previous, qs, kind, coded, independent_slices=False):
                 for block in range(4):ac[block][4]=1 if (block+component+mb)%2==0 else -1
             qsc=39 if qs==51 else qs
             values=primary_chroma(p,dc,ac,26,qsc) if kind=='primary' else switching_chroma(p,dc,ac,qsc)
-            for i,v in enumerate(values):plane[i//8*16+x+i%8]=v
+            for i,v in enumerate(values):plane[(y+i//8)*16+x+i%8]=v
+        ready_mb.add((mb%2,mb//2))
     return out
 
 
-def weave(fields):
+def weave(fields,height=16):
     raw=[]
-    for component,(width,height) in enumerate([(32,16),(16,8),(16,8)]):
+    for component,(width,height) in enumerate([(32,height),(16,height//2),(16,height//2)]):
         for y in range(height):
             for bottom in [False,True]:raw+=fields[bottom][component][y*width:(y+1)*width]
     return bytes(raw)

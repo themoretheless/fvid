@@ -21,6 +21,14 @@ fn manifest() -> Value {
         .as_array_mut()
         .unwrap()
         .extend(filtered["cases"].as_array().unwrap().iter().cloned());
+    let rows: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-switching-field-rows.json"
+    ))
+    .unwrap();
+    base["cases"]
+        .as_array_mut()
+        .unwrap()
+        .extend(rows["cases"].as_array().unwrap().iter().cloned());
     base
 }
 fn hex(s: &str) -> Vec<u8> {
@@ -51,7 +59,13 @@ fn complementary_sp_si_fields_match_normative_pixels_and_reset() {
                     .unwrap_or_else(|e| panic!("{} packet{i}: {e}", c["file"]));
                 assert_eq!(picture.is_some(), i % 2 == 1, "{} packet{i}", c["file"]);
                 if let Some(picture) = picture {
-                    assert_eq!(picture.dimensions(), (32, 32));
+                    assert_eq!(
+                        picture.dimensions(),
+                        (
+                            c["width"].as_u64().unwrap_or(32) as usize,
+                            c["height"].as_u64().unwrap_or(32) as usize
+                        )
+                    );
                     picture.write_planar(&mut actual).unwrap();
                     emitted += 1;
                 }
@@ -95,7 +109,13 @@ fn switching_field_mp4_software_seek_and_rewind_emit_complete_pairs() {
                 .read_frame()
                 .unwrap_or_else(|e| panic!("{}: {e}", c["file"]))
             {
-                assert_eq!(f.picture.dimensions(), (32, 32));
+                assert_eq!(
+                    f.picture.dimensions(),
+                    (
+                        c["width"].as_u64().unwrap_or(32) as usize,
+                        c["height"].as_u64().unwrap_or(32) as usize
+                    )
+                );
                 actual.extend(
                     f.picture
                         .y

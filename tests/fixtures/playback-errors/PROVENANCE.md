@@ -5385,3 +5385,32 @@ Validation: both switching-field integration tests passed over all356 streams
 and software MP4 seek/rewind. All715 switching-field artifacts regenerated
 byte-for-byte. Optional JM cross-check again matched all144 SP luma streams.
 No production decoder change was needed for these deblocking combinations.
+
+### Two-row SP/SI complementary fields (2026-10-10)
+
+The switching-field scalar oracle now supports two compact macroblock rows,
+full top/left chroma DC prediction, and per-slice neighbour availability. The
+new family contains540 original streams, woven32x64: primary/secondary SP and
+SI, zero/signed residual, both field arrival orders, one slice, row slices or
+single-macroblock slices, normal/reversed slice arrival, QS0/26/51 and filter
+modes0/1/2. ASO changes NAL arrival while the scalar oracle reconstructs address
+order with explicit slice ownership. Existing one-row streams are retained.
+
+Horizontal external field edges use bS3; vertical external edges use bS4.
+The generator verifies that deliberately substituting bS4 on horizontal external
+edges changes actual output in each family, preventing insensitive controls.
+Filter mode2 suppresses only edges crossing different slice owners, rather than
+assuming every macroblock belongs to a separate slice. Deblocking remains at
+component QP26 and offsets0. No external codec is needed to generate references.
+Optional JM validation accepted all360 SP streams and matched all luma bytes;
+SI uses the normative scalar oracle due to the documented JM SI syntax issue.
+
+This does not establish variable QP/filter offsets, mixed SP/I/SI slice pictures,
+FMO, opposite-parity/weighted references, or MBAFF reconstruction.
+
+Validation: both switching-field integration tests passed over all896 streams
+(540 two-row and the previous356), including exact planar pixels, complete
+field pairing, reset and software MP4 seek/rewind. All1796 artifacts regenerated
+byte-for-byte, preserving earlier one-row references. Optional JM repeated all360
+SP luma matches. Wrong horizontal strength4 changed24 primary,16 secondary and4
+SI field controls. No production decoder change was needed for these cases.
