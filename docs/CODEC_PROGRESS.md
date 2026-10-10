@@ -10513,3 +10513,18 @@ The 58-case matrix checks native/public/owned PCM, matched noise controls,
 checkpoint rollback and player ranges/rewind/seek. These cases have silent
 stereo targets and no TNS; other target residuals and TNS interactions remain
 separate qualification requirements.
+
+
+### LTP/PNS coupling with source and target TNS (2026-10-10)
+
+Four authored AOT4 stereo cases add 960/1024 at coupling points 0/1, order-one
+TNS on both the source and each target, alternating forward/reverse directions,
+nonzero target residuals and signed band-varying gains. The source scalar oracle
+performs FIR TNS on the LTP estimate, adds selected prediction outside PNS bands,
+then applies AR TNS before updating its independent PCM/overlap history. Targets
+apply their own AR TNS after spectral mixing at point0, or before mixing at
+point1, and maintain separate overlap histories. The 62-case matrix checks
+native/public/owned PCM, control flags, checkpoint rollback, player ranges,
+rewind and seek. This qualifies these specific order-one long-window
+combinations; higher orders, short/transition windows and additional source or
+target rosters remain separate requirements.

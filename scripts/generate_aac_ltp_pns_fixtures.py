@@ -6,12 +6,18 @@ from generate_aac_ld_filterbank_fixtures import window
 from generate_aac_ld_ltp_fixtures import GAINS
 from generate_he_aac_packet_fixtures import DEST,field,frequency,packed,video_fixture
 
+def tns_synthesis(values,reverse):
+    out=values[:];history=0.;lpc=math.sin(math.pi/7)
+    for k in (range(7,-1,-1) if reverse else range(8)):
+        value=out[k]-lpc*history;out[k]=f32(value);history=value
+    return out
+
 class Oracle:
     def __init__(self,n,ld,cos):
         self.n=n;self.ld=ld;self.cos=cos;self.pcm=[];self.overlap=[0.]*n;self.shape=0
     def weight(self,i,shape):
         return window(self.n,i,shape) if self.ld else math.sin(math.pi*(i+.5)/(2*self.n))
-    def run(self,residual,shape,active,lag,coefficient,used):
+    def run(self,residual,shape,active,lag,coefficient,used,tns=None):
         n=self.n;values=residual[:]
         if active:
             estimate=[]
@@ -19,8 +25,14 @@ class Oracle:
                 relative=i-(n if self.ld else 0)-lag;absolute=len(self.pcm)+relative
                 value=self.overlap[relative] if 0<=relative<n else self.pcm[absolute] if relative<0 and absolute>=0 else 0.
                 estimate.append(value*GAINS[coefficient]*self.weight(i,self.shape if i<n else shape))
+            predicted=[sum(v*c for v,c in zip(estimate,self.cos[k])) for k in range(8)]
+            if tns is not None:
+                history=0.;lpc=math.sin(math.pi/7)
+                for k in (range(7,-1,-1) if tns else range(8)):
+                    original=predicted[k];predicted[k]=original+lpc*history;history=original
             for k in range(8):
-                if used[k//4]:values[k]=f32(values[k]+sum(v*c for v,c in zip(estimate,self.cos[k])))
+                if used[k//4]:values[k]=f32(values[k]+predicted[k])
+        if tns is not None:values=tns_synthesis(values,tns)
         self.spectrum=values[:]
         transformed=[2/n*sum(values[k]*self.cos[k][i] for k in range(8)) for i in range(2*n)]
         out=[self.overlap[i]+transformed[i]*self.weight(i,self.shape) for i in range(n)]
@@ -36,9 +48,10 @@ def main():
     for aot in (4,19,23):
         for n in ((480,512) if aot==23 else (960,1024)):
             cos=[[math.cos(math.pi/n*(i+.5+n/2)*(k+.5)) for i in range(2*n)] for k in range(8)]
-            for mode in (('mono','independent-right','correlated','uncorrelated','coupling','coupling-before-tns','coupling-after-tns') if aot==4 else ('mono','independent-right','correlated','uncorrelated'))+ (tuple(f'coupling-stereo-{p}-{selection}' for p in (0,1,3) for selection in range(4)) if aot==4 else ())+(tuple(f'coupling-stereo-signed-{p}-3' for p in (0,1)) if aot==4 else ()):
+            for mode in (('mono','independent-right','correlated','uncorrelated','coupling','coupling-before-tns','coupling-after-tns') if aot==4 else ('mono','independent-right','correlated','uncorrelated'))+ (tuple(f'coupling-stereo-{p}-{selection}' for p in (0,1,3) for selection in range(4)) if aot==4 else ())+(tuple(f'coupling-stereo-signed-{p}-3' for p in (0,1)) if aot==4 else ())+(tuple(f'coupling-stereo-signed-tns-{p}-3' for p in (0,1)) if aot==4 else ()):
                 stereo_target=mode.startswith('coupling-stereo-')
                 signed='-signed-' in mode
+                with_tns='-tns-' in mode and stereo_target
                 selection=int(mode.rsplit('-',1)[1]) if stereo_target else 2
                 point=int(mode.split('-')[-2]) if stereo_target else 0 if mode=='coupling-before-tns' else 1 if mode=='coupling-after-tns' else 3
                 width=1 if mode=='mono' or mode.startswith('coupling') else 2;common=mode in ('correlated','uncorrelated');ms=1 if mode=='correlated' else 0
@@ -49,6 +62,9 @@ def main():
                 mutant_targets=[Oracle(n,False,cos) for _ in range(2)] if signed else []
                 noise=Noise();rows=[];control_rows=[];start=len(gold)
                 for frame in range(12):
+                    source_tns=bool(frame%2) if with_tns else None
+                    target_tns=[bool((frame+ch+1)%2) for ch in range(2)]
+                    target_q=[[(frame+k+ch+1)%3-1 for k in range(8)] for ch in range(2)]
                     scale=frame%4 if signed else 2
                     deltas=[3,2] if frame%3==0 else [-1,0] if frame%3==1 else [2,-3]
                     cumulative=[deltas[0],sum(deltas)]
@@ -76,11 +92,12 @@ def main():
                         else:
                             for ch in range(width):
                                 info=base+field(active,1)+(prediction[ch] if active else '')
-                                wire+=channel(0,books[ch],[q[ch]],energy=energy[ch],info=info)
+                                wire+=channel(0,books[ch],[q[ch]],energy=energy[ch],info=info,tns=(source_tns,1) if with_tns else None)
                         if mode.startswith('coupling'):
                             # CCE tag1 -> silent SCE tag0, unity gain at each coupling point.
                             source=wire[7:]
                             target=('0010000'+'1'+base+'0'+'00'+2*channel(0,[0,0],[[0]*8])) if stereo_target else '0000000'+channel(0,[0,0],[[0]*8],info=base+'0')
+                            if with_tns:target='0010000'+'1'+base+'0'+'00'+''.join(channel(0,[1,1],[target_q[ch]],tns=(target_tns[ch],1)) for ch in range(2))
                             cce='0100001'+field(point==3,1)+'000'+field(stereo_target,1)+'0000'+(field(selection,2) if stereo_target else '')+field(point==1,1)+field(signed,1)+field(scale,2)+source
                             if stereo_target and selection==3:cce+=('0'+''.join(sc(d) for d in deltas)) if signed else (('' if point==3 else '1')+sc(2))
                             wire=cce+target if frame%2 else target+cce
@@ -95,9 +112,20 @@ def main():
                             if books[0][1]==books[1][1]==13:spectra[1][k]=f32(spectra[0][k]*2**((energy[1]-energy[0])/4))
                             else:
                                 a,b=spectra[0][k],spectra[1][k];spectra[0][k]=f32(a+b);spectra[1][k]=f32(a-b)
-                    pcm=[banks[ch].run(spectra[ch],shape,active,lags[ch],coefs[ch],[True,books[ch][1]!=13]) for ch in range(width)]
-                    mutant=[mutants[ch].run(spectra[ch],shape,active,lags[ch],coefs[ch],[True,True]) for ch in range(width)]
-                    if signed:
+                    pcm=[banks[ch].run(spectra[ch],shape,active,lags[ch],coefs[ch],[True,books[ch][1]!=13],tns=source_tns) for ch in range(width)]
+                    mutant=[mutants[ch].run(spectra[ch],shape,active,lags[ch],coefs[ch],[True,True],tns=source_tns) for ch in range(width)]
+                    if with_tns:
+                        def target_pcm(oracles,source):
+                            result=[]
+                            for ch in range(2):
+                                residual=[v*1024. for v in target_q[ch]]
+                                if point==1:residual=tns_synthesis(residual,target_tns[ch])
+                                mixed=[f32(v+f32(source[k]*(band_gains[k//4] if ch else 1.))) for k,v in enumerate(residual)]
+                                result.append(oracles[ch].run(mixed,shape,False,0,0,[False,False],tns=target_tns[ch] if point==0 else None))
+                            return result
+                        pcm=target_pcm(targets,banks[0].spectrum)
+                        mutant=target_pcm(mutant_targets,mutants[0].spectrum)
+                    elif signed:
                         pcm=[targets[ch].run([f32(v*(band_gains[k//4] if ch else 1.)) for k,v in enumerate(banks[0].spectrum)],shape,False,0,0,[False,False]) for ch in range(2)]
                         mutant=[mutant_targets[ch].run([f32(v*(band_gains[k//4] if ch else 1.)) for k,v in enumerate(mutants[0].spectrum)],shape,False,0,0,[False,False]) for ch in range(2)]
                     elif stereo_target:
@@ -110,7 +138,7 @@ def main():
                     prefix=field(4,5)+frequency(24000)+'0000'+field(n==960,1)+'00'
                     pce=field(0,4)+field(3,2)+frequency(24000)+field(1,4)+field(0,4)+field(0,4)+field(0,2)+field(0,3)+field(1,4)+'000'+field(stereo_target,1)+field(0,4)+field(point==3,1)+field(1,4)
                     asc=packed(prefix+pce+'0'*(-len(prefix+pce)%8)+field(0,8)).hex()
-                name=f'{aot}-{n}-{mode}';c=dict(name=name,aot=aot,n=n,channels=output_width,asc=asc,point=point if mode.startswith('coupling') else None,selection=selection if stereo_target else None,signed=signed,frames=rows,control_frames=control_rows,reference_offset=start,reference_bytes=len(gold)-start,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
+                name=f'{aot}-{n}-{mode}';c=dict(name=name,aot=aot,n=n,channels=output_width,asc=asc,point=point if mode.startswith('coupling') else None,selection=selection if stereo_target else None,signed=signed,tns=with_tns,frames=rows,control_frames=control_rows,reference_offset=start,reference_bytes=len(gold)-start,container_rate=24000,container_frame_samples=n,samples=12*n,pcm_offset=0,slots=n//64,bands=32)
                 c['video']=video_fixture([c],blob,channels=output_width,filename=f'aac-ltp-pns-{name}-synthetic.mp4')
                 c['control_video']=video_fixture([dict(c,frames=control_rows)],blob,channels=output_width,filename=f'aac-ltp-pns-{name}-control-synthetic.mp4');cases.append(c)
     (DEST/'aac-ltp-pns-packets.bin').write_bytes(blob);(DEST/'aac-ltp-pns-reference.f32le').write_bytes(gold);(DEST/'aac-ltp-pns-incorrect-prediction.f32le').write_bytes(wrong)

@@ -47,7 +47,7 @@ fn pns_takes_precedence_over_ltp_without_losing_pcm_or_lag_history() {
     let gold = bytes("aac-ltp-pns-reference.f32le");
     let wrong = bytes("aac-ltp-pns-incorrect-prediction.f32le");
     let m = manifest();
-    assert_eq!(m["cases"].as_array().unwrap().len(), 58);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 62);
     let stereo_roster: std::collections::BTreeSet<_> = m["cases"]
         .as_array()
         .unwrap()
@@ -79,6 +79,19 @@ fn pns_takes_precedence_over_ltp_without_losing_pcm_or_lag_history() {
         .collect();
     assert_eq!(
         signed_roster,
+        [(960, 0), (960, 1), (1024, 0), (1024, 1)]
+            .into_iter()
+            .collect()
+    );
+    let tns_roster: std::collections::BTreeSet<_> = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["tns"].as_bool() == Some(true))
+        .map(|c| (c["n"].as_u64().unwrap(), c["point"].as_u64().unwrap()))
+        .collect();
+    assert_eq!(
+        tns_roster,
         [(960, 0), (960, 1), (1024, 0), (1024, 1)]
             .into_iter()
             .collect()
