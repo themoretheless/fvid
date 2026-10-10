@@ -15,6 +15,24 @@ fn se(b: &mut BitReader<'_>, min: i32, max: i32) -> Result<i32> {
     }
     Ok(n)
 }
+/// Annex F.7.3.2.3.4 for the currently admitted independent base layer.
+/// Identity multilayer syntax is meaningful even with no inter-layer prediction.
+fn read_base_multilayer_extension(b: &mut BitReader<'_>) -> Result<()> {
+    if b.bit()? {
+        return Err(crate::unsupported("HEVC multilayer PPS POC reset is not connected"));
+    }
+    if b.bit()? {
+        // F.7.4.3.3.4 forbids inference for a PPS used by layer zero.
+        return Err(invalid("HEVC base-layer PPS cannot infer scaling lists"));
+    }
+    if ue(b, 62)? != 0 {
+        return Err(crate::unsupported("HEVC multilayer PPS reference locations are not connected"));
+    }
+    if b.bit()? {
+        return Err(crate::unsupported("HEVC multilayer PPS colour mapping is not connected"));
+    }
+    Ok(())
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Tiles {
     pub column_widths: Vec<u32>,
@@ -206,9 +224,9 @@ impl Pps {
             let three_d = b.bit()?;
             scc_extension = b.bit()?;
             future_extension = b.read(4)? != 0;
-            if multilayer || three_d {
+            if three_d {
                 return Err(crate::unsupported(
-                    "HEVC multilayer/3D PPS extensions are not implemented",
+                    "HEVC 3D PPS extension is not implemented",
                 ));
             }
             if range {
@@ -237,6 +255,9 @@ impl Pps {
                     sao_offset_scale[component] =
                         ue(b, u32::from(sps.depth[component].saturating_sub(10)))? as u8;
                 }
+            }
+            if multilayer {
+                read_base_multilayer_extension(b)?;
             }
             if scc_extension {
                 current_picture_reference = b.bit()?;

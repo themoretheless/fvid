@@ -1,0 +1,65 @@
+{
+  "cases": [
+    {
+      "file": "hevc-multilayer-pps-main-ipb-identity-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "identity",
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-pps-main-ipb-identity-tail-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "identity-tail",
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-pps-main-ipb-poc-reset-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "poc-reset",
+      "expectation": "refusal"
+    },
+    {
+      "file": "hevc-multilayer-pps-main-ipb-truncated-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "truncated",
+      "expectation": "invalid"
+    },
+    {
+      "file": "hevc-multilayer-pps-main-ipb-colour-mapping-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "colour-mapping",
+      "expectation": "refusal"
+    },
+    {
+      "file": "hevc-multilayer-pps-main10-ipb-identity-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "identity",
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-pps-main10-ipb-identity-tail-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "identity-tail",
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-pps-main10-ipb-poc-reset-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "poc-reset",
+      "expectation": "refusal"
+    },
+    {
+      "file": "hevc-multilayer-pps-main10-ipb-truncated-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "truncated",
+      "expectation": "invalid"
+    },
+    {
+      "file": "hevc-multilayer-pps-main10-ipb-colour-mapping-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "colour-mapping",
+      "expectation": "refusal"
+    }
+  ],
+  "provenance": "Original synthetic testsrc2 I/P/B seeds documented in fixtures/hevc/README.md. Own offline rewriting of PPS Annex F multilayer syntax, identity operation and future tails; POC-reset/colour-mapping cases are configuration refusal only, not playback acceptance; truncated is malformed syntax. No private media, external tool, FFmpeg or network used by this generator or ordinary tests."
+}

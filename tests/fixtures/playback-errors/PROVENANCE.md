@@ -5902,3 +5902,17 @@ spatial/Bi and ASO equivalence plus temporal/filter observability. No private
 media, frames, audio, codec parameter sets, external codec, FFmpeg or network
 are used. Ordinary acceptance is `avc_mixed_switching_b_direct_fields.rs` and
 does not invoke the generator.
+
+
+## HEVC identity multilayer PPS (2026-10-11)
+
+`generate_hevc_multilayer_identity_fixtures.py` rewrites the PPS of the original
+synthetic main/main10 I/P/B testsrc2 seeds documented in fixtures/hevc/README.md.
+Only owned Python bit/box writers execute; no encoder, decoder, FFmpeg or
+network is invoked. No private media, frames, audio or codec parameter sets
+are used. The10 `hevc-multilayer-pps-*-synthetic.mp4` files distinguish identity
+and identity+future-tail acceptance, POC-reset/colour-mapping configuration
+refusals, and invalid truncated syntax. Refusals are not playback acceptance.
+`hevc_multilayer_pps_identity.rs` checks exact same-packet baseline pictures,
+timing, software seek/rewind and direct PPS errors. Generation is separate from
+ordinary tests and reproduces byte-identical MP4s.

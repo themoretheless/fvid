@@ -11478,3 +11478,42 @@ manifest case data matched. The1728-case provenance text was clarified only.
 All2593 existing explicit-family artifacts regenerated unchanged against Git,
 and its3 acceptance tests over1296 streams passed again. No decoder source
 changed during this direct qualification milestone.
+
+
+### HEVC base-layer identity multilayer PPS (2026-10-11)
+
+Authoritative dispatch inspection confirmed separate colour planes are already
+connected through hevc_colour_planes; the lower monochrome/interleaved guard is
+not evidence of an unimplemented public plane path. A real remaining PPS gap
+was the blanket rejection of pps_multilayer_extension_flag.
+
+The new owned generator rewrites only the PPS of the documented synthetic
+17-frame main/main10 I/P/B seeds. Before the fix, player open reported the
+wrapped `HEVC PPS has no valid SPS`; direct PPS parsing reproduced the exact
+`Unsupported("HEVC multilayer/3D PPS extensions are not implemented")`.
+
+The parser now reads Annex F.7.3.2.3.4 identity syntax after the range extension
+and before SCC: no POC reset, no scaling-list inference, zero reference location
+offsets and no colour mapping. It preserves trailing-bit validation and future
+extension data handling. Layer-zero scaling-list inference is invalid per
+F.7.4.3.3.4. Nonidentity POC reset, reference-location and colour-mapping tools
+remain explicit refusals; 3D extensions remain unsupported. No pixel operation
+or additional Pps state is needed for the admitted identity syntax.
+
+`hevc_multilayer_pps_identity.rs` verifies direct syntax acceptance, exact
+baseline pixels/timing/software seek/rewind for 8/10-bit identity and identity
+plus future tails, explicit POC-reset/colour-mapping refusals, and malformed
+truncated RBSP as Invalid rather than Unsupported. The ten-fixture manifest
+labels acceptance/refusal/invalid separately; refusal cases do not establish
+playback support for their declared tools. All10 MP4 files regenerated
+byte-identically. The generator and ordinary tests require no external codec,
+FFmpeg or network and use no private media or parameters.
+
+Validation:24 integration tests passed across the new family, extension tails,
+parameter updates, cross-component prediction and high-depth separate colour
+planes;13 standalone hevc_pps unit tests passed. One baseline link attempt
+failed with errno28 before running tests; after deleting only the disposable
+primary-checkout incremental cache, baseline reproduction and all gates ran to
+terminal. This milestone is base-layer identity metadata support, not full
+multilayer/3D, inter-layer prediction, resampling or POC-reset implementation.
+Specification: https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201906-S%21%21PDF-E&lang=e&type=items
