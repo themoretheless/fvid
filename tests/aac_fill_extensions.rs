@@ -11,6 +11,7 @@ fn ancillary_fill_preserves_nonzero_pcm_and_explicit_pce_configuration() {
         include_bytes!("fixtures/playback-errors/aac-fill-short.aac").as_slice(),
         include_bytes!("fixtures/playback-errors/aac-fill-escaped.aac").as_slice(),
         include_bytes!("fixtures/playback-errors/aac-fill-multiple.aac").as_slice(),
+        include_bytes!("fixtures/playback-errors/aac-fill-version.aac").as_slice(),
     ] {
         let stream = Aac::parse(bytes, &Limits::default()).unwrap();
         assert_eq!(stream.configuration, baseline.configuration);
@@ -38,10 +39,6 @@ fn malformed_ancillary_and_hidden_audio_tools_leave_decoder_state_unchanged() {
         (
             include_bytes!("fixtures/playback-errors/aac-fill-unterminated.aac").as_slice(),
             "exceeds fill payload",
-        ),
-        (
-            include_bytes!("fixtures/playback-errors/aac-fill-version.aac").as_slice(),
-            "ancillary data version",
         ),
         (
             include_bytes!("fixtures/playback-errors/aac-fill-hidden-sbr.aac").as_slice(),

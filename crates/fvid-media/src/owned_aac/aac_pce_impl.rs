@@ -483,7 +483,10 @@ fn read_extension_bytes(
             }
             2 => {
                 if read(&mut input, 4)? != 0 {
-                    return Err(unsupported("AAC ancillary data version is not implemented"));
+                    // Table 4.57: unknown versions fall through to the
+                    // opaque default payload with align=0 after version bits.
+                    input.skip(end - input.position())?;
+                    continue;
                 }
                 let mut length = 0usize;
                 loop {
@@ -531,7 +534,10 @@ fn read_extension_bytes(
                     return Err(invalid("invalid SBR fill extension consumption"));
                 }
             }
-            _ => return Err(unsupported("AAC fill extension tool is not implemented")),
+            12 => return Err(unsupported("AAC fill extension tool is not implemented")),
+            // Table 4.121 reserves all other types for compatible syntax
+            // extensions. Table 4.57 consumes their remaining other_bits.
+            _ => input.skip(end - input.position())?,
         }
     }
     *bits = input;
@@ -541,6 +547,33 @@ fn read_extension_bytes(
 #[cfg(test)]
 mod fill_tests {
     use super::*;
+    #[test]
+    fn opaque_extensions_skip_only_the_declared_payload_at_every_offset() {
+        let kinds:Vec<_>=(3u8..=10).chain([15]).map(|k|(k<<4)|10)
+            .chain((1u8..=15).map(|v|0x20|v)).collect();
+        for offset in 0..8 {
+            for &first in &kinds {
+                let mut fields=vec![false;offset];
+                // FIL count=2, opaque first byte, embedded SBR marker.
+                for (value,width) in [(2u32,4),(u32::from(first),8),(0xd0,8),(0xffff,16)] {
+                    for shift in (0..width).rev() {fields.push(value&(1<<shift)!=0);}
+                }
+                fields.resize(fields.len().next_multiple_of(8),false);
+                let bytes:Vec<_>=fields.chunks_exact(8).map(|c|c.iter().fold(0u8,|n,b|n*2+u8::from(*b))).collect();
+                let mut bits=BitReader::new(&bytes);bits.skip(offset).unwrap();
+                skip_fill(&mut bits).unwrap();assert_eq!(bits.position(),offset+20);
+            }
+            // The opaque rule cannot rescue a truncated declared FIL.
+            let mut fields=vec![false;offset];
+            for (value,width) in [(2u32,4),(0x3a,8)] {
+                for shift in (0..width).rev() {fields.push(value&(1<<shift)!=0);}
+            }
+            fields.resize(fields.len().next_multiple_of(8),false);
+            let bytes:Vec<_>=fields.chunks_exact(8).map(|c|c.iter().fold(0u8,|n,b|n*2+u8::from(*b))).collect();
+            let mut bits=BitReader::new(&bytes);bits.skip(offset).unwrap();
+            assert!(skip_fill(&mut bits).is_err());assert_eq!(bits.position(),offset);
+        }
+    }
     #[test]
     fn dynamic_range_fill_is_bounded_at_every_bit_offset() {
         for offset in 0..8 {

@@ -10721,3 +10721,25 @@ state-replay tests. All six Rust tests pass offline; fixture generation remains
 separate and uses no FFmpeg/network/foreign codec. These are long sine-window
 sequences, not qualification of every window/TNS/predictor combination or
 protected epConfig. No production changes were required for these matrices.
+
+### Forward-compatible opaque AAC extension payloads (2026-10-10)
+
+The shared FIL/ER parser now follows ISO/IEC 14496-3:2009 table 4.57's
+other_bits fallback for reserved extension_type values (table 4.121) and
+unknown EXT_DATA_ELEMENT versions. Each consumes only the remaining declared
+payload, preserving the transactional cursor. Unknown data versions already
+consumed the version nibble, corresponding to the table's align=0 branch.
+Recognized MPEG Surround (type12) retains its unsupported synthesis refusal;
+recognized ANC version0, DRC and SBR keep their bounded structured parsers.
+Ten authored LC/LTP and ER LC/LTP/LD videos cover 26 payload variants: nine
+reserved types, fifteen unknown data versions and two maximum269-byte FIL
+escapes. Embedded SBR/DRC/Surround markers are opaque bytes, not new records.
+Matched controls/scalar PCM, malformed ANC rollback, known Surround refusal,
+public/owned export and player ranges/rewind/seek pass. Before the fix the
+new acceptance suite failed specifically at the fill-extension tool gate.
+All-bit-offset unit coverage verifies bounded cursor consumption and truncated
+FIL rollback. The existing aac-fill-version.aac refusal was migrated to PCM/
+PCE acceptance; genuine overrun, hidden SBR and invalid fill-data refusals stay.
+Generation is deterministic, separate from tests and requires no private media,
+FFmpeg, foreign decoder or network. This fixes forward-compatible metadata
+admission; it does not implement MPEG Surround or the other pending profiles.
