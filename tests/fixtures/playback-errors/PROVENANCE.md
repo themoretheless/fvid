@@ -4981,3 +4981,19 @@ failed at that gate. Acceptance checks compare native/scalar/public/owned PCM,
 malformed rollback, export, ranges and player rewind/seek. Old tests which used
 an appended zero byte as malformed now recognize valid ER EXT_FILL or use real
 truncation; arbitrary trailing-zero rejection is not a valid ER invariant.
+
+### AAC dynamic-range metadata admission (2026-10-10)
+
+The shared FIL/ER extension parser now bounds and consumes EXT_DYNAMIC_RANGE
+(table 4.58/4.59), including PCE tags, continued excluded-channel masks,
+1–16 bands, interpolation, program reference level and signed gain fields.
+Default decoding retains original dynamics: DRC evaluation is optional under
+ISO/IEC 14496-3:2009 4.5.2.7.2. This adds valid-stream playback, not a user
+selectable compression/gain mode. Cursor and decoder state remain transactional.
+Six authored ER LC/LTP/LD videos cover all 16 optional-field combinations,
+nonzero signed gains, 16 bands and chained ancillary/fill payloads. Matched
+controls and direct scalar PCM establish unchanged uncompressed output;
+truncated band tables exercise the specific bounded-parser error. Native replay,
+public/owned decode and player ranges/rewind/seek are regression tested.
+Generation uses own bits and cosine oracle, with no private media, FFmpeg,
+foreign decoder or network; normal tests only read checked-in fixtures.

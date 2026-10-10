@@ -1,0 +1,2003 @@
+{
+  "cases": [
+    {
+      "name": "17-960",
+      "aot": 17,
+      "n": 960,
+      "asc": "8b0c00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 15,
+          "audio_bits": 62,
+          "extension": "b00020014210a5"
+        },
+        {
+          "offset": 33,
+          "bytes": 16,
+          "audio_bits": 62,
+          "extension": "bc800120014210a5"
+        },
+        {
+          "offset": 67,
+          "bytes": 17,
+          "audio_bits": 64,
+          "extension": "b6ad500220014210a5"
+        },
+        {
+          "offset": 102,
+          "bytes": 18,
+          "audio_bits": 62,
+          "extension": "bc86ad500320014210a5"
+        },
+        {
+          "offset": 138,
+          "bytes": 47,
+          "audio_bits": 62,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe048d169f28b13ac34cd55ee770f9028b20014210a5"
+        },
+        {
+          "offset": 203,
+          "bytes": 48,
+          "audio_bits": 64,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe058e17a029b23bc44dd65fe871fa038c20014210a5"
+        },
+        {
+          "offset": 269,
+          "bytes": 49,
+          "audio_bits": 62,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe068f18a12ab33cc54ed760e972fb048d20014210a5"
+        },
+        {
+          "offset": 336,
+          "bytes": 50,
+          "audio_bits": 62,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe079019a22bb43dc64fd861ea73fc058e20014210a5"
+        },
+        {
+          "offset": 404,
+          "bytes": 16,
+          "audio_bits": 64,
+          "extension": "b1920820014210a5"
+        },
+        {
+          "offset": 438,
+          "bytes": 17,
+          "audio_bits": 62,
+          "extension": "bc81920920014210a5"
+        },
+        {
+          "offset": 473,
+          "bytes": 18,
+          "audio_bits": 62,
+          "extension": "b6ad51920a20014210a5"
+        },
+        {
+          "offset": 509,
+          "bytes": 19,
+          "audio_bits": 64,
+          "extension": "bc86ad51920b20014210a5"
+        },
+        {
+          "offset": 546,
+          "bytes": 48,
+          "audio_bits": 62,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920c951ea730b942cb54dd66ef78810a9320014210a5"
+        },
+        {
+          "offset": 612,
+          "bytes": 49,
+          "audio_bits": 62,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920d961fa831ba43cc55de67f079820b9420014210a5"
+        },
+        {
+          "offset": 679,
+          "bytes": 50,
+          "audio_bits": 64,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920e9720a932bb44cd56df68f17a830c9520014210a5"
+        },
+        {
+          "offset": 747,
+          "bytes": 51,
+          "audio_bits": 62,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920f9821aa33bc45ce57e069f27b840d9620014210a5"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 15,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 49,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 84,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 120,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 185,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 251,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 318,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 386,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 420,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 455,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 491,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 528,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 594,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 661,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 729,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 798,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 23,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 57,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 92,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 128,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 193,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 259,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 326,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 394,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 428,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 463,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 499,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 536,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 602,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 669,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 737,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 806,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 61440,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 15360,
+      "slots": 15,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-er-dynamic-range-17-960-synthetic.mp4",
+        "sha256": "85624528d77bb4da1ca006dba4fc7fafdb44d05e13023e3323e1159b5e31b982",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c00",
+        "pcm_offset": 0,
+        "samples": 15360
+      },
+      "control_video": {
+        "file": "aac-er-dynamic-range-17-960-control-synthetic.mp4",
+        "sha256": "5e958ad67a00ecddd3ea0dde7aa73aa5c7a40f66a34346042af599ec144af2eb",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c00",
+        "pcm_offset": 0,
+        "samples": 15360
+      },
+      "bad_video": {
+        "file": "aac-er-dynamic-range-17-960-malformed-synthetic.mp4",
+        "sha256": "d4c0f0208609ad289369694ad3994fbb4f5d889dbc1cf181b032e1f0f9fc81d4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c00",
+        "pcm_offset": 0,
+        "samples": 15360
+      }
+    },
+    {
+      "name": "17-1024",
+      "aot": 17,
+      "n": 1024,
+      "asc": "8b0800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 816,
+          "bytes": 15,
+          "audio_bits": 62,
+          "extension": "b00020014210a5"
+        },
+        {
+          "offset": 849,
+          "bytes": 16,
+          "audio_bits": 62,
+          "extension": "bc800120014210a5"
+        },
+        {
+          "offset": 883,
+          "bytes": 17,
+          "audio_bits": 64,
+          "extension": "b6ad500220014210a5"
+        },
+        {
+          "offset": 918,
+          "bytes": 18,
+          "audio_bits": 62,
+          "extension": "bc86ad500320014210a5"
+        },
+        {
+          "offset": 954,
+          "bytes": 47,
+          "audio_bits": 62,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe048d169f28b13ac34cd55ee770f9028b20014210a5"
+        },
+        {
+          "offset": 1019,
+          "bytes": 48,
+          "audio_bits": 64,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe058e17a029b23bc44dd65fe871fa038c20014210a5"
+        },
+        {
+          "offset": 1085,
+          "bytes": 49,
+          "audio_bits": 62,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe068f18a12ab33cc54ed760e972fb048d20014210a5"
+        },
+        {
+          "offset": 1152,
+          "bytes": 50,
+          "audio_bits": 62,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe079019a22bb43dc64fd861ea73fc058e20014210a5"
+        },
+        {
+          "offset": 1220,
+          "bytes": 16,
+          "audio_bits": 64,
+          "extension": "b1920820014210a5"
+        },
+        {
+          "offset": 1254,
+          "bytes": 17,
+          "audio_bits": 62,
+          "extension": "bc81920920014210a5"
+        },
+        {
+          "offset": 1289,
+          "bytes": 18,
+          "audio_bits": 62,
+          "extension": "b6ad51920a20014210a5"
+        },
+        {
+          "offset": 1325,
+          "bytes": 19,
+          "audio_bits": 64,
+          "extension": "bc86ad51920b20014210a5"
+        },
+        {
+          "offset": 1362,
+          "bytes": 48,
+          "audio_bits": 62,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920c951ea730b942cb54dd66ef78810a9320014210a5"
+        },
+        {
+          "offset": 1428,
+          "bytes": 49,
+          "audio_bits": 62,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920d961fa831ba43cc55de67f079820b9420014210a5"
+        },
+        {
+          "offset": 1495,
+          "bytes": 50,
+          "audio_bits": 64,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920e9720a932bb44cd56df68f17a830c9520014210a5"
+        },
+        {
+          "offset": 1563,
+          "bytes": 51,
+          "audio_bits": 62,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920f9821aa33bc45ce57e069f27b840d9620014210a5"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 831,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 865,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 900,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 936,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1001,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1067,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 1134,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1202,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1236,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 1271,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1307,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1344,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 1410,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1477,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1545,
+          "bytes": 8,
+          "audio_bits": 64,
+          "extension": ""
+        },
+        {
+          "offset": 1614,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 839,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 873,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 908,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 944,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1009,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1075,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1142,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1210,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1244,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1279,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1315,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1352,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1418,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1485,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1553,
+          "bytes": 10,
+          "audio_bits": 64,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1622,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        }
+      ],
+      "reference_offset": 61440,
+      "reference_bytes": 65536,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 16384,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-er-dynamic-range-17-1024-synthetic.mp4",
+        "sha256": "05dd8ca0ea675a6ef37ebb2c4be59fda02891a5f9227e754f17831f4311b2892",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0800",
+        "pcm_offset": 0,
+        "samples": 16384
+      },
+      "control_video": {
+        "file": "aac-er-dynamic-range-17-1024-control-synthetic.mp4",
+        "sha256": "3cd3623d258c05b3ccd6e8c311e1ebbb98e9a55b9f28e915b89324e8393ffe66",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0800",
+        "pcm_offset": 0,
+        "samples": 16384
+      },
+      "bad_video": {
+        "file": "aac-er-dynamic-range-17-1024-malformed-synthetic.mp4",
+        "sha256": "6524a8fa65e930d37bacc63d7da5d42a7b4e7f39a2a84278913f4abecb27c368",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0800",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "19-960",
+      "aot": 19,
+      "n": 960,
+      "asc": "9b0c00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1632,
+          "bytes": 15,
+          "audio_bits": 62,
+          "extension": "b00020014210a5"
+        },
+        {
+          "offset": 1665,
+          "bytes": 18,
+          "audio_bits": 79,
+          "extension": "bc800120014210a5"
+        },
+        {
+          "offset": 1705,
+          "bytes": 20,
+          "audio_bits": 81,
+          "extension": "b6ad500220014210a5"
+        },
+        {
+          "offset": 1749,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "bc86ad500320014210a5"
+        },
+        {
+          "offset": 1791,
+          "bytes": 49,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe048d169f28b13ac34cd55ee770f9028b20014210a5"
+        },
+        {
+          "offset": 1862,
+          "bytes": 51,
+          "audio_bits": 81,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe058e17a029b23bc44dd65fe871fa038c20014210a5"
+        },
+        {
+          "offset": 1937,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe068f18a12ab33cc54ed760e972fb048d20014210a5"
+        },
+        {
+          "offset": 2010,
+          "bytes": 52,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe079019a22bb43dc64fd861ea73fc058e20014210a5"
+        },
+        {
+          "offset": 2084,
+          "bytes": 19,
+          "audio_bits": 81,
+          "extension": "b1920820014210a5"
+        },
+        {
+          "offset": 2127,
+          "bytes": 19,
+          "audio_bits": 79,
+          "extension": "bc81920920014210a5"
+        },
+        {
+          "offset": 2168,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "b6ad51920a20014210a5"
+        },
+        {
+          "offset": 2210,
+          "bytes": 22,
+          "audio_bits": 81,
+          "extension": "bc86ad51920b20014210a5"
+        },
+        {
+          "offset": 2256,
+          "bytes": 50,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920c951ea730b942cb54dd66ef78810a9320014210a5"
+        },
+        {
+          "offset": 2328,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920d961fa831ba43cc55de67f079820b9420014210a5"
+        },
+        {
+          "offset": 2401,
+          "bytes": 53,
+          "audio_bits": 81,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920e9720a932bb44cd56df68f17a830c9520014210a5"
+        },
+        {
+          "offset": 2478,
+          "bytes": 53,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920f9821aa33bc45ce57e069f27b840d9620014210a5"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 1647,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 1683,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 1725,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 1769,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 1840,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 1913,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 1988,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2062,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2103,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 2146,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2188,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2232,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 2306,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2379,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2454,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 2531,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1655,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1693,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1736,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1779,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1850,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1924,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 1998,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2072,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2114,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2156,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2198,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2243,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2316,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2389,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2465,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2541,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        }
+      ],
+      "reference_offset": 126976,
+      "reference_bytes": 61440,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 15360,
+      "slots": 15,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-er-dynamic-range-19-960-synthetic.mp4",
+        "sha256": "433f93336165a550f33d6055b6f36ce84f16c8aa461ce0a392f711b7738ebde6",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c00",
+        "pcm_offset": 0,
+        "samples": 15360
+      },
+      "control_video": {
+        "file": "aac-er-dynamic-range-19-960-control-synthetic.mp4",
+        "sha256": "124374da043922077239bd5ad6bba5d8e0d4a1e209938323f5a04c8eadd99896",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c00",
+        "pcm_offset": 0,
+        "samples": 15360
+      },
+      "bad_video": {
+        "file": "aac-er-dynamic-range-19-960-malformed-synthetic.mp4",
+        "sha256": "4553da04de5f444142bae78eea2e17eb25d4865875e872eadb455b2f9be7c502",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c00",
+        "pcm_offset": 0,
+        "samples": 15360
+      }
+    },
+    {
+      "name": "19-1024",
+      "aot": 19,
+      "n": 1024,
+      "asc": "9b0800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 2553,
+          "bytes": 15,
+          "audio_bits": 62,
+          "extension": "b00020014210a5"
+        },
+        {
+          "offset": 2586,
+          "bytes": 18,
+          "audio_bits": 79,
+          "extension": "bc800120014210a5"
+        },
+        {
+          "offset": 2626,
+          "bytes": 20,
+          "audio_bits": 81,
+          "extension": "b6ad500220014210a5"
+        },
+        {
+          "offset": 2670,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "bc86ad500320014210a5"
+        },
+        {
+          "offset": 2712,
+          "bytes": 49,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe048d169f28b13ac34cd55ee770f9028b20014210a5"
+        },
+        {
+          "offset": 2783,
+          "bytes": 51,
+          "audio_bits": 81,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe058e17a029b23bc44dd65fe871fa038c20014210a5"
+        },
+        {
+          "offset": 2858,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe068f18a12ab33cc54ed760e972fb048d20014210a5"
+        },
+        {
+          "offset": 2931,
+          "bytes": 52,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe079019a22bb43dc64fd861ea73fc058e20014210a5"
+        },
+        {
+          "offset": 3005,
+          "bytes": 19,
+          "audio_bits": 81,
+          "extension": "b1920820014210a5"
+        },
+        {
+          "offset": 3048,
+          "bytes": 19,
+          "audio_bits": 79,
+          "extension": "bc81920920014210a5"
+        },
+        {
+          "offset": 3089,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "b6ad51920a20014210a5"
+        },
+        {
+          "offset": 3131,
+          "bytes": 22,
+          "audio_bits": 81,
+          "extension": "bc86ad51920b20014210a5"
+        },
+        {
+          "offset": 3177,
+          "bytes": 50,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920c951ea730b942cb54dd66ef78810a9320014210a5"
+        },
+        {
+          "offset": 3249,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920d961fa831ba43cc55de67f079820b9420014210a5"
+        },
+        {
+          "offset": 3322,
+          "bytes": 53,
+          "audio_bits": 81,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920e9720a932bb44cd56df68f17a830c9520014210a5"
+        },
+        {
+          "offset": 3399,
+          "bytes": 53,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920f9821aa33bc45ce57e069f27b840d9620014210a5"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 2568,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 2604,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2646,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 2690,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2761,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2834,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 2909,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 2983,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3024,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 3067,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3109,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3153,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 3227,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3300,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3375,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 3452,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2576,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2614,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2657,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2700,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2771,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2845,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2919,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 2993,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3035,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3077,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3119,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3164,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3237,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3310,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3386,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3462,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        }
+      ],
+      "reference_offset": 188416,
+      "reference_bytes": 65536,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 16384,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-er-dynamic-range-19-1024-synthetic.mp4",
+        "sha256": "bfd2dfce3fbc4d236dfc9f7f915c7f6cb816a5e02608cdfd9185ce1d30ce4cf2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0800",
+        "pcm_offset": 0,
+        "samples": 16384
+      },
+      "control_video": {
+        "file": "aac-er-dynamic-range-19-1024-control-synthetic.mp4",
+        "sha256": "7c2447e76da2da775169ce9790f4b5f90bdb13c439d572d8f494443ad43c0f05",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0800",
+        "pcm_offset": 0,
+        "samples": 16384
+      },
+      "bad_video": {
+        "file": "aac-er-dynamic-range-19-1024-malformed-synthetic.mp4",
+        "sha256": "1e3ac82e19e30a684a0f2533258d3cce8b0cd231e9a914da25e53e574d0ac4e9",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0800",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "23-480",
+      "aot": 23,
+      "n": 480,
+      "asc": "bb0c00",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3474,
+          "bytes": 15,
+          "audio_bits": 62,
+          "extension": "b00020014210a5"
+        },
+        {
+          "offset": 3507,
+          "bytes": 18,
+          "audio_bits": 79,
+          "extension": "bc800120014210a5"
+        },
+        {
+          "offset": 3547,
+          "bytes": 20,
+          "audio_bits": 81,
+          "extension": "b6ad500220014210a5"
+        },
+        {
+          "offset": 3591,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "bc86ad500320014210a5"
+        },
+        {
+          "offset": 3633,
+          "bytes": 49,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe048d169f28b13ac34cd55ee770f9028b20014210a5"
+        },
+        {
+          "offset": 3704,
+          "bytes": 51,
+          "audio_bits": 81,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe058e17a029b23bc44dd65fe871fa038c20014210a5"
+        },
+        {
+          "offset": 3779,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe068f18a12ab33cc54ed760e972fb048d20014210a5"
+        },
+        {
+          "offset": 3852,
+          "bytes": 52,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe079019a22bb43dc64fd861ea73fc058e20014210a5"
+        },
+        {
+          "offset": 3926,
+          "bytes": 19,
+          "audio_bits": 81,
+          "extension": "b1920820014210a5"
+        },
+        {
+          "offset": 3969,
+          "bytes": 19,
+          "audio_bits": 79,
+          "extension": "bc81920920014210a5"
+        },
+        {
+          "offset": 4010,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "b6ad51920a20014210a5"
+        },
+        {
+          "offset": 4052,
+          "bytes": 22,
+          "audio_bits": 81,
+          "extension": "bc86ad51920b20014210a5"
+        },
+        {
+          "offset": 4098,
+          "bytes": 50,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920c951ea730b942cb54dd66ef78810a9320014210a5"
+        },
+        {
+          "offset": 4170,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920d961fa831ba43cc55de67f079820b9420014210a5"
+        },
+        {
+          "offset": 4243,
+          "bytes": 53,
+          "audio_bits": 81,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920e9720a932bb44cd56df68f17a830c9520014210a5"
+        },
+        {
+          "offset": 4320,
+          "bytes": 53,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920f9821aa33bc45ce57e069f27b840d9620014210a5"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 3489,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 3525,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3567,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 3611,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3682,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3755,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 3830,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3904,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 3945,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 3988,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4030,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4074,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 4148,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4221,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4296,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 4373,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 3497,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3535,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3578,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3621,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3692,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3766,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3840,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3914,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3956,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 3998,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4040,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4085,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4158,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4231,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4307,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4383,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        }
+      ],
+      "reference_offset": 253952,
+      "reference_bytes": 30720,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 7680,
+      "slots": 7,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-er-dynamic-range-23-480-synthetic.mp4",
+        "sha256": "6e063ea57f19302cc7bb2ff13e10ad7fbea3a4feb3ca0b634736a1de435df40c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0c00",
+        "pcm_offset": 0,
+        "samples": 7680
+      },
+      "control_video": {
+        "file": "aac-er-dynamic-range-23-480-control-synthetic.mp4",
+        "sha256": "1671f89423a41a1e77f38c2b06be30b75bf826f65796c47add0befac79830059",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0c00",
+        "pcm_offset": 0,
+        "samples": 7680
+      },
+      "bad_video": {
+        "file": "aac-er-dynamic-range-23-480-malformed-synthetic.mp4",
+        "sha256": "cc4bf870199893655e30d253dc73d46aec2d673a084193238a372043b63fcdf7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0c00",
+        "pcm_offset": 0,
+        "samples": 7680
+      }
+    },
+    {
+      "name": "23-512",
+      "aot": 23,
+      "n": 512,
+      "asc": "bb0800",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 4395,
+          "bytes": 15,
+          "audio_bits": 62,
+          "extension": "b00020014210a5"
+        },
+        {
+          "offset": 4428,
+          "bytes": 18,
+          "audio_bits": 79,
+          "extension": "bc800120014210a5"
+        },
+        {
+          "offset": 4468,
+          "bytes": 20,
+          "audio_bits": 81,
+          "extension": "b6ad500220014210a5"
+        },
+        {
+          "offset": 4512,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "bc86ad500320014210a5"
+        },
+        {
+          "offset": 4554,
+          "bytes": 49,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe048d169f28b13ac34cd55ee770f9028b20014210a5"
+        },
+        {
+          "offset": 4625,
+          "bytes": 51,
+          "audio_bits": 81,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe058e17a029b23bc44dd65fe871fa038c20014210a5"
+        },
+        {
+          "offset": 4700,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe068f18a12ab33cc54ed760e972fb048d20014210a5"
+        },
+        {
+          "offset": 4773,
+          "bytes": 52,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdffe079019a22bb43dc64fd861ea73fc058e20014210a5"
+        },
+        {
+          "offset": 4847,
+          "bytes": 19,
+          "audio_bits": 81,
+          "extension": "b1920820014210a5"
+        },
+        {
+          "offset": 4890,
+          "bytes": 19,
+          "audio_bits": 79,
+          "extension": "bc81920920014210a5"
+        },
+        {
+          "offset": 4931,
+          "bytes": 20,
+          "audio_bits": 79,
+          "extension": "b6ad51920a20014210a5"
+        },
+        {
+          "offset": 4973,
+          "bytes": 22,
+          "audio_bits": 81,
+          "extension": "bc86ad51920b20014210a5"
+        },
+        {
+          "offset": 5019,
+          "bytes": 50,
+          "audio_bits": 79,
+          "extension": "b3e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920c951ea730b942cb54dd66ef78810a9320014210a5"
+        },
+        {
+          "offset": 5091,
+          "bytes": 51,
+          "audio_bits": 79,
+          "extension": "bc83e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920d961fa831ba43cc55de67f079820b9420014210a5"
+        },
+        {
+          "offset": 5164,
+          "bytes": 53,
+          "audio_bits": 81,
+          "extension": "b6ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920e9720a932bb44cd56df68f17a830c9520014210a5"
+        },
+        {
+          "offset": 5241,
+          "bytes": 53,
+          "audio_bits": 79,
+          "extension": "bc86ad53e61e3e5e7e9ebedeff1f3f5f7f9fbfdfff920f9821aa33bc45ce57e069f27b840d9620014210a5"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 4410,
+          "bytes": 8,
+          "audio_bits": 62,
+          "extension": ""
+        },
+        {
+          "offset": 4446,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4488,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 4532,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4603,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4676,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 4751,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4825,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4866,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 4909,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4951,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 4995,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 5069,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 5142,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        },
+        {
+          "offset": 5217,
+          "bytes": 11,
+          "audio_bits": 81,
+          "extension": ""
+        },
+        {
+          "offset": 5294,
+          "bytes": 10,
+          "audio_bits": 79,
+          "extension": ""
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 4418,
+          "bytes": 10,
+          "audio_bits": 62,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4456,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4499,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4542,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4613,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4687,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4761,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4835,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4877,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4919,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 4961,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 5006,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 5079,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 5152,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 5228,
+          "bytes": 13,
+          "audio_bits": 81,
+          "extension": "b2f0"
+        },
+        {
+          "offset": 5304,
+          "bytes": 12,
+          "audio_bits": 79,
+          "extension": "b2f0"
+        }
+      ],
+      "reference_offset": 284672,
+      "reference_bytes": 32768,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 8192,
+      "slots": 8,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-er-dynamic-range-23-512-synthetic.mp4",
+        "sha256": "98b4449c95c9784d89a57e0eaf8000e73b7b74be8b06c410ec404ec3610bd40c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0800",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "control_video": {
+        "file": "aac-er-dynamic-range-23-512-control-synthetic.mp4",
+        "sha256": "fb765bc3aabe92d3d08f0b8185b01be1ccce599a2ba1c6c03fa7e3e2f69faf9a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0800",
+        "pcm_offset": 0,
+        "samples": 8192
+      },
+      "bad_video": {
+        "file": "aac-er-dynamic-range-23-512-malformed-synthetic.mp4",
+        "sha256": "676c6cfe7b1e624135c2442cad3f4175b07d3d56944c5e6593a79b477111404b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0800",
+        "pcm_offset": 0,
+        "samples": 8192
+      }
+    }
+  ],
+  "provenance": "Own DRC all optional fields, 16 bands, continued exclusions and chained ancillary. Own ER LC/LTP/LD ep0 packets, trailing EXT_FILL/EXT_FILL_DATA/ANC_DATA, chained and escaped lengths, scalar cosine PCM and malformed DRC band table truncation. No private media, FFmpeg, foreign decoder or network."
+}

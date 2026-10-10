@@ -487,6 +487,31 @@ fn read_extension_bytes(
                 }
                 input.skip(length * 8)?;
             }
+            11 => {
+                // ISO 14496-3 tables 4.58/4.59. DRC evaluation is optional
+                // (4.5.2.7.2); default decoding preserves original dynamics.
+                if read(&mut input, 1)? != 0 {
+                    read(&mut input, 4)?; // PCE instance tag
+                    read(&mut input, 4)?; // reserved
+                }
+                if read(&mut input, 1)? != 0 {
+                    loop {
+                        read(&mut input, 7)?; // excluded channel mask
+                        if read(&mut input, 1)? == 0 { break; }
+                    }
+                }
+                let bands = if read(&mut input, 1)? != 0 {
+                    let bands = read(&mut input, 4)? as usize + 1;
+                    read(&mut input, 4)?; // interpolation scheme
+                    for _ in 0..bands { read(&mut input, 8)?; }
+                    bands
+                } else { 1 };
+                if read(&mut input, 1)? != 0 {
+                    read(&mut input, 7)?; // program reference level
+                    read(&mut input, 1)?; // reserved
+                }
+                for _ in 0..bands { read(&mut input, 8)?; } // sign + gain
+            }
             kind @ (13 | 14) => {
                 let start = input.position();
                 sbr(&mut input, end, kind == 14)?;
@@ -504,6 +529,38 @@ fn read_extension_bytes(
 #[cfg(test)]
 mod fill_tests {
     use super::*;
+    #[test]
+    fn dynamic_range_fill_is_bounded_at_every_bit_offset() {
+        for offset in 0..8 {
+            for (payload, accepted) in [
+                (&[0xb0, 0x00][..], true),
+                (&[0xb0, 0x7f, 0xb0, 0xff][..], true),
+                (&[0xb0][..], false),
+                (&[0xb8, 0x00][..], false),
+                (&[0xb4, 0xff][..], false),
+                (&[0xb2, 0xf0][..], false),
+                (&[0xb1, 0x00][..], false),
+            ] {
+                let mut fields = vec![false; offset];
+                for shift in (0..4).rev() {
+                    fields.push(payload.len() & (1 << shift) != 0);
+                }
+                for byte in payload {
+                    for shift in (0..8).rev() {
+                        fields.push(byte & (1 << shift) != 0);
+                    }
+                }
+                fields.extend([true; 64]); // later bytes cannot rescue a short FIL
+                fields.resize(fields.len().next_multiple_of(8), false);
+                let bytes: Vec<_> = fields.chunks_exact(8)
+                    .map(|c| c.iter().fold(0u8, |n,b| n*2+u8::from(*b))).collect();
+                let mut bits = BitReader::new(&bytes);
+                bits.skip(offset).unwrap();
+                assert_eq!(skip_fill(&mut bits).is_ok(), accepted, "{payload:x?}");
+                assert_eq!(bits.position(), if accepted {offset+4+payload.len()*8} else {offset});
+            }
+        }
+    }
     #[test]
     fn ancillary_fill_is_bounded_and_transactional_at_every_bit_offset() {
         for offset in 0..8 {
