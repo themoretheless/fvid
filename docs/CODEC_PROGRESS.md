@@ -10906,3 +10906,42 @@ Validation: 200 AVC unit tests and 15 switching integration tests passed offline
 without FFmpeg (secondary SP3, primary/chroma7, luma3, multi-MB2). All five new
 secondary artifacts reproduced byte-for-byte. Explicit JM syntax/luma checks
 passed for both secondary streams; the chroma DC discrepancy is documented above.
+
+### Progressive SI syntax and intra switching assembly (2026-10-10)
+
+The owned progressive eight-bit Extended-profile CAVLC path now admits SI slices.
+The reader maps raw mb_type0 to SI/Intra_4x4 with switching QS metadata, and raw
+1..26 to the ordinary I table. All sixteen intra4 mode flags are parsed as required
+by H.264 table7-12 and syntax7.3.5.1. Ordinary I types in SI slices retain ordinary
+QP reconstruction; only the SI macroblock uses the switching luma/chroma kernels.
+The SI path uses the existing intra picture pipeline for slices, FMO mapping,
+PCM, chroma DC scan order and deblocking; SI-specific multi-slice/FMO qualification
+remains to be expanded. Field/MBAFF SP/SI remain
+explicitly unsupported and are not inferred from progressive acceptance.
+
+Ready samples retain SI identity. With constrained_intra_pred_flag, ordinary I
+macroblocks cannot use SI samples as neighbours; SI macroblocks retain access.
+The existing mode derivation remains separate from sample availability. Original
+32x16 paired controls place an SI macroblock on the left and ordinary I_NxN on
+the right; changing only the constraint flag changes the right chroma from26 to128
+while retaining left chroma and all luma. Three original 16x16 streams additionally
+cover switching zero/signed residual and ordinary I_NxN at QSY0/26/51. Old SI PCM
+refusal expectations are replaced with sample-exact acceptance.
+
+SI4 reference pixels are independently generated from scalar spatial DC prediction
+and matrix switching equations. JM19 skips SI4 mode parsing and is not used as a
+syntax/pixel oracle for those streams. This is distinct from the previously
+JM-accepted SI I_PCM fixture.
+
+Open normative audit: the printed chroma quantizers in equations8-425/429/435/439
+place Sign inside the arithmetic right shift; the current shared chroma kernel
+and its older scalar oracles apply Sign after shifting. Negative transformed
+chroma prediction coefficients therefore still require a targeted reproducer and
+rounding correction. The new SI fixtures use flat chroma prediction and do not
+establish that missing negative-prediction case. SI/secondary chroma DC also keeps
+the already documented normative-copy versus JM-scaling discrepancy. No complete
+SP/SI conformance claim is made from the selected fixtures.
+
+Validation: 200 AVC unit tests and 18 integration tests passed offline without
+FFmpeg (SI3, secondary SP3, primary/chroma7, luma3, multi-MB2). All11 new SI
+artifacts reproduced byte-for-byte with the separate generator.

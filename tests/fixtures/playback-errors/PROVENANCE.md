@@ -5255,3 +5255,24 @@ Validation: 200 AVC unit tests and 15 switching integration tests passed offline
 without FFmpeg (secondary SP3, primary/chroma7, luma3, multi-MB2). All five new
 secondary artifacts reproduced byte-for-byte. Explicit JM syntax/luma checks
 passed for both secondary streams; the chroma DC discrepancy is documented above.
+
+### Original SI macroblock, ordinary intra and constrained-neighbour fixtures
+
+`generate_avc_si_fixtures.py` generates five original three-frame streams. Three
+16x16 streams cover switching SI zero/signed luma/chroma residuals and ordinary
+I_NxN inside SI slices at QSY0/26/51. Two32x16 controls place SI next to ordinary
+I_NxN and vary constrained_intra_pred_flag. Scalar spatial DC prediction and
+independent matrix switching reconstruction generate full YUV references. No
+private media or parameter sets, FFmpeg, network or foreign encoder is used.
+Ordinary tests read committed files; generation is separate.
+
+SI mb_type0 parses the sixteen intra4 mode flags prescribed by table7-12 and
+syntax7.3.5.1. JM19 does not parse these SI4 mode flags and cannot supply a syntax
+or pixel cross-check for these streams. This limitation is documented rather than
+silently adopting that reference implementation's syntax. Chroma prediction in
+these streams is flat; the separate open signed-chroma-quantization audit in
+CODEC_PROGRESS.md is not covered by their passing oracle comparisons.
+
+Validation: 200 AVC unit tests and 18 integration tests passed offline without
+FFmpeg (SI3, secondary SP3, primary/chroma7, luma3, multi-MB2). All11 new SI
+artifacts reproduced byte-for-byte with the separate generator.

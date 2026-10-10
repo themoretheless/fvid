@@ -637,16 +637,16 @@ impl AvcDecoder {
             .header;
         if !matches!(
             header.slice_type,
-            SliceType::I | SliceType::P | SliceType::Sp | SliceType::B
+            SliceType::I | SliceType::P | SliceType::Sp | SliceType::Si | SliceType::B
         ) {
             return Err(crate::unsupported("AVC picture type is not implemented"));
         }
-        if slices.iter().any(|slice| slice.header.slice_type == SliceType::Sp)
+        if slices.iter().any(|slice| matches!(slice.header.slice_type, SliceType::Sp | SliceType::Si))
             && (!sps.frame_mbs_only || sps.chroma_format != 1 || sps.separate_colour_plane
                 || sps.bit_depth_luma != 8 || sps.bit_depth_chroma != 8 || pps.cabac
                 || sps.profile != 88 || pps.transform_8x8 || sps.transform_bypass)
         {
-            return Err(crate::unsupported("AVC SP requires progressive eight-bit 4:2:0 CAVLC"));
+            return Err(crate::unsupported("AVC SP/SI requires progressive eight-bit 4:2:0 CAVLC"));
         }
         if !header.idr
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))
@@ -799,7 +799,7 @@ impl AvcDecoder {
             .as_mut()
             .ok_or_else(|| invalid("AVC stream must begin with IDR"))?;
         let (picture, motion) = match header.slice_type {
-            SliceType::I if slices.iter().all(|s| s.header.slice_type == SliceType::I) => (
+            SliceType::I | SliceType::Si if slices.iter().all(|s| matches!(s.header.slice_type, SliceType::I | SliceType::Si)) => (
                 decode_intra_slices(
                     &slices.iter().map(|slice| &slice.header).collect::<Vec<_>>(),
                     sps,

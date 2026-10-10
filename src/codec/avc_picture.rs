@@ -106,11 +106,13 @@ pub fn decode_intra_slices(
     if header.first_mb != 0 {
         return Err(invalid("intra picture must begin at zero"));
     }
-    if headers
-        .iter()
-        .any(|slice| slice.slice_type != super::avc_slice::SliceType::I)
-    {
-        return Err(invalid("intra reconstruction requires I slices"));
+    if headers.iter().any(|slice| {
+        !matches!(
+            slice.slice_type,
+            super::avc_slice::SliceType::I | super::avc_slice::SliceType::Si
+        )
+    }) {
+        return Err(invalid("intra reconstruction requires I/SI slices"));
     }
     if sps.mb_adaptive_frame_field && !header.field_pic {
         return super::avc_mbaff_picture::decode_intra_slices(headers, sps, pps, memory_limit);
@@ -400,9 +402,12 @@ fn available_edges<const N: usize>(
     y: usize,
     ready: &[u8],
     scale: usize,
+    exclude_si: bool,
 ) -> Result<(Option<[u16; N]>, Option<[u16; N]>, Option<u16>)> {
-    let available =
-        |px: usize, py: usize| ready[(py * scale / 4) * (stride * scale / 4) + px * scale / 4] != 0;
+    let available = |px: usize, py: usize| {
+        let value = ready[(py * scale / 4) * (stride * scale / 4) + px * scale / 4];
+        value != 0 && !(exclude_si && value == 2)
+    };
     let (top, left, corner) = edges::<N>(plane, stride, x, y)?;
     Ok((
         top.filter(|_| y > 0 && available(x, y - 1)),
@@ -426,19 +431,24 @@ pub(super) fn reconstruct_macroblock(
         super::avc_mbaff::layout(mb.address as usize, w / 16, h / 16, false, false, [1, 1])?;
     let (mx, my) = (block_layout.origin[0] / 16, block_layout.origin[1] / 16);
     let qp = (mb.qp + 6 * (i32::from(sps.bit_depth_luma) - 8)) as u8;
+    let exclude_si = pps.constrained_intra_pred && mb.switching_qs.is_none();
+    let available_cell = |v: u8| v != 0 && !(exclude_si && v == 2);
+    let ready_value = if mb.switching_qs.is_some() { 2 } else { 1 };
     let bypass = sps.transform_bypass && qp == 0;
     match &mb.luma {
         IntraLuma::Blocks8 { modes, levels } => {
             for block in 0..4 {
                 let x = mx * 16 + block % 2 * 8;
                 let y = my * 16 + block / 2 * 8;
-                let (t, l, c) = available_edges::<8>(&picture.y, w, x, y, ready, 1)?;
-                let right =
-                    if y > 0 && x + 15 < w && ready[((y - 1) / 4) * (w / 4) + (x + 8) / 4] != 0 {
-                        Some(std::array::from_fn(|i| picture.y[(y - 1) * w + x + 8 + i]))
-                    } else {
-                        None
-                    };
+                let (t, l, c) = available_edges::<8>(&picture.y, w, x, y, ready, 1, exclude_si)?;
+                let right = if y > 0
+                    && x + 15 < w
+                    && available_cell(ready[((y - 1) / 4) * (w / 4) + (x + 8) / 4])
+                {
+                    Some(std::array::from_fn(|i| picture.y[(y - 1) * w + x + 8 + i]))
+                } else {
+                    None
+                };
                 let pred = super::avc_intra::intra8(
                     modes[block],
                     t.as_ref(),
@@ -478,7 +488,8 @@ pub(super) fn reconstruct_macroblock(
         }
         IntraLuma::Block16(mode) => {
             let direction = super::avc_bypass::luma_direction(*mode);
-            let (t, l, c) = available_edges::<16>(&picture.y, w, mx * 16, my * 16, ready, 1)?;
+            let (t, l, c) =
+                available_edges::<16>(&picture.y, w, mx * 16, my * 16, ready, 1, exclude_si)?;
             let mode = match mode {
                 0 => Intra16Mode::Vertical,
                 1 => Intra16Mode::Horizontal,
@@ -510,7 +521,7 @@ pub(super) fn reconstruct_macroblock(
                 let x = mx * 16 + bx * 4;
                 let y = my * 16 + by * 4;
                 let available = |px: usize, py: usize| {
-                    px < w && py < h && ready[(py / 4) * (w / 4) + px / 4] != 0
+                    px < w && py < h && available_cell(ready[(py / 4) * (w / 4) + px / 4])
                 };
                 let (t, l, c) = edges::<4>(&picture.y, w, x, y)?;
                 let t = t.filter(|_| y > 0 && available(x, y - 1));
@@ -529,7 +540,9 @@ pub(super) fn reconstruct_macroblock(
                     c,
                     sps.bit_depth_luma,
                 )?;
-                let residual = if bypass {
+                let residual = if mb.switching_qs.is_some() {
+                    [0; 16]
+                } else if bypass {
                     super::avc_bypass::residual(
                         &mb.luma_levels[by * 4 + bx],
                         4,
@@ -544,9 +557,19 @@ pub(super) fn reconstruct_macroblock(
                         None,
                     )?
                 };
-                let block = reconstruct_4x4(&pred, &residual, sps.bit_depth_luma)?;
+                let block = if let Some(qs) = mb.switching_qs {
+                    super::avc_transform::switching_luma_4x4(
+                        &pred,
+                        &mb.luma_levels[by * 4 + bx],
+                        qp,
+                        qs,
+                        true,
+                    )?
+                } else {
+                    reconstruct_4x4(&pred, &residual, sps.bit_depth_luma)?
+                };
                 put(&mut picture.y, w, x, y, 4, &block)?;
-                ready[(y / 4) * (w / 4) + x / 4] = 1;
+                ready[(y / 4) * (w / 4) + x / 4] = ready_value;
             }
         }
     }
@@ -560,7 +583,7 @@ pub(super) fn reconstruct_macroblock(
             let stride = w / 2;
             let x = mx * 8;
             let y = my * 8;
-            let (t, l, c) = available_edges::<8>(plane, stride, x, y, ready, 2)?;
+            let (t, l, c) = available_edges::<8>(plane, stride, x, y, ready, 2, exclude_si)?;
             let prediction = chroma8(
                 mb.chroma_mode,
                 t.as_ref(),
@@ -568,6 +591,23 @@ pub(super) fn reconstruct_macroblock(
                 c,
                 sps.bit_depth_chroma,
             )?;
+            if let Some(qs) = mb.switching_qs {
+                let offset = if component == 0 {
+                    pps.chroma_qp_offset
+                } else {
+                    pps.second_chroma_qp_offset
+                };
+                let v = mb.chroma_dc[component];
+                let dc = [v[0], v[2], v[1], v[3]];
+                let samples = super::avc_transform::switching_chroma_420(
+                    &prediction,
+                    &dc,
+                    &mb.chroma_ac[component],
+                    chroma_qp(i32::from(qs), offset, 8),
+                )?;
+                put(plane, stride, x, y, 8, &samples)?;
+                continue;
+            }
             if bypass {
                 use super::avc_bypass::{Direction, blocks4, residual};
                 let direction = match mb.chroma_mode {
@@ -613,7 +653,7 @@ pub(super) fn reconstruct_macroblock(
     }
     for by in 0..4 {
         for bx in 0..4 {
-            ready[(my * 4 + by) * (w / 4) + mx * 4 + bx] = 1;
+            ready[(my * 4 + by) * (w / 4) + mx * 4 + bx] = ready_value;
         }
     }
     Ok(())

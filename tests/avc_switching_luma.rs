@@ -40,7 +40,7 @@ fn switching_luma_rejects_invalid_dimensions_and_levels() {
     assert!(switching_luma_4x4(&[128; 16], &[i32::MAX; 16], 0, 0, true).is_err());
 }
 #[test]
-fn si_video_specific_refusal_is_not_playback_acceptance() {
+fn formerly_refused_si_pcm_video_decodes_all_original_samples() {
     use fvid::codec::{
         avc::{Pps, Sps},
         avc_slice::{SliceHeader, SliceType},
@@ -59,24 +59,29 @@ fn si_video_specific_refusal_is_not_playback_acceptance() {
         .enumerate()
     {
         let frame = control.decode(&hex(p.as_str().unwrap())).unwrap().unwrap();
-        assert!(
-            frame
-                .y
-                .iter()
-                .enumerate()
-                .all(|(i, v)| *v == ((i * 13 + index * 37) % 256) as u16)
-        );
+        assert!(frame
+            .y
+            .iter()
+            .enumerate()
+            .all(|(i, v)| *v == ((i * 13 + index * 37) % 256) as u16));
     }
     let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
     let packet = hex(m["video"]["packets"][0].as_str().unwrap());
     let h = SliceHeader::parse(&packet[4..], &sps, &pps).unwrap();
     assert_eq!(h.slice_type, SliceType::Si);
     assert_eq!(h.slice_qs, Some(0));
-    let error = decoder.decode(&packet).unwrap_err();
-    assert!(
-        error
-            .to_string()
-            .contains("AVC picture type is not implemented"),
-        "{error}"
-    );
+    for (index, packet) in m["video"]["packets"].as_array().unwrap().iter().enumerate() {
+        let picture = decoder
+            .decode(&hex(packet.as_str().unwrap()))
+            .unwrap()
+            .unwrap();
+        let mut actual = vec![];
+        picture.write_planar(&mut actual).unwrap();
+        assert_eq!(
+            actual,
+            (0..384)
+                .map(|i| ((i * 13 + index * 37) % 256) as u8)
+                .collect::<Vec<_>>()
+        );
+    }
 }

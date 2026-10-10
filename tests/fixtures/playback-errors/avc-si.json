@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "configuration": "0158000affe100066758000af4f201000468ce3c80",
+      "packets": [
+        "0000000965961020d57fffe480",
+        "00000007419624d7fffe48",
+        "000000084196488325ffff92"
+      ],
+      "file": "avc-si-switching-zero-synthetic.mp4",
+      "reference": "avc-si-switching-zero-reference.yuv",
+      "kind": "switching-zero"
+    },
+    {
+      "configuration": "0158000affe100066758000af4f201000468ce3c80",
+      "packets": [
+        "0000001565961020d57ffffababababababababceababbabac",
+        "00000014419624d7ffffababababababababceababbabac0",
+        "000000154196488325ffffeaeaeaeaeaeaeaeaf3aaeaeeaeb0"
+      ],
+      "file": "avc-si-switching-signed-synthetic.mp4",
+      "reference": "avc-si-switching-signed-reference.yuv",
+      "kind": "switching-signed"
+    },
+    {
+      "configuration": "0158000affe100066758000af4f201000468ce3c80",
+      "packets": [
+        "0000000965961020d52ffff920",
+        "00000007419624d2ffff92",
+        "000000094196488324bfffe480"
+      ],
+      "file": "avc-si-ordinary-intra-zero-synthetic.mp4",
+      "reference": "avc-si-ordinary-intra-zero-reference.yuv",
+      "kind": "ordinary-intra-zero"
+    },
+    {
+      "configuration": "0158000affe100076758000af45c8001000468ce3c80",
+      "packets": [
+        "0000000c65961020d57fffe45ffff240",
+        "0000000b4196248355ffff917fffc9",
+        "0000000b4196488355ffff917fffc9"
+      ],
+      "file": "avc-si-mixed-neighbours-constrained0-synthetic.mp4",
+      "reference": "avc-si-mixed-neighbours-constrained0-reference.yuv",
+      "kind": "avc-si-mixed-neighbours-constrained0"
+    },
+    {
+      "configuration": "0158000affe100076758000af45c8001000468ce3e80",
+      "packets": [
+        "0000000c65961020d57fffe45ffff240",
+        "0000000b4196248355ffff917fffc9",
+        "0000000b4196488355ffff917fffc9"
+      ],
+      "file": "avc-si-mixed-neighbours-constrained1-synthetic.mp4",
+      "reference": "avc-si-mixed-neighbours-constrained1-reference.yuv",
+      "kind": "avc-si-mixed-neighbours-constrained1"
+    }
+  ],
+  "provenance": "Own Extended-profile SI syntax including sixteen intra4 mode flags required by table7-12 and macroblock prediction syntax7.3.5.1. Independent spatial DC prediction and normative matrix switching oracle, QS0/26/51. Ordinary I_NxN SI-slice control must not use switching. JM19 skips SI4 mode parsing, so is not the syntax/pixel oracle for SI4. No private media, FFmpeg or network."
+}

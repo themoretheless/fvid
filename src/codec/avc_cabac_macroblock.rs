@@ -668,6 +668,7 @@ impl<'a> IntraCabacReader<'a> {
         let (mx, my) = (at % w, at / w);
         self.types[at] = mb_type;
         let mut mb = IntraMacroblock {
+            switching_qs: None,
             address: at as u32,
             qp: self.qp,
             luma: IntraLuma::Block16(0),
@@ -797,6 +798,7 @@ impl<'a> IntraCabacReader<'a> {
             && self.bin(399 + usize::from(a == 1) + usize::from(b == 1))? != 0;
         self.eight[at] = u8::from(eight);
         let mut mb = IntraMacroblock {
+            switching_qs: None,
             address: at as u32,
             qp: self.qp,
             coded_block_pattern: pattern,

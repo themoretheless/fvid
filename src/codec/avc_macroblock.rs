@@ -27,6 +27,8 @@ pub enum IntraLuma {
 pub struct IntraMacroblock {
     pub address: u32,
     pub qp: i32,
+    /// Present only for the switching SI macroblock, not ordinary I types in SI slices.
+    pub switching_qs: Option<u8>,
     pub luma: IntraLuma,
     pub chroma_mode: ChromaMode,
     pub coded_block_pattern: u8,
@@ -61,6 +63,7 @@ pub struct IntraCavlcReader<'a> {
     field_picture: bool,
     pair_fields: Vec<u8>,
     slice_group_map: Vec<u8>,
+    si_qs: Option<u8>,
 }
 impl<'a> IntraCavlcReader<'a> {
     pub fn new(
@@ -69,7 +72,7 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
-        if header.slice_type != SliceType::I {
+        if !matches!(header.slice_type, SliceType::I | SliceType::Si) {
             return Err(invalid("intra reader requires an I slice"));
         }
         Self::new_context(header, sps, pps, max_macroblocks)
@@ -121,6 +124,18 @@ impl<'a> IntraCavlcReader<'a> {
         mbaff: bool,
         allow_fmo: bool,
     ) -> Result<Self> {
+        if header.slice_type == SliceType::Si
+            && (sps.profile != 88
+                || !sps.frame_mbs_only
+                || sps.bit_depth_luma != 8
+                || sps.bit_depth_chroma != 8
+                || pps.transform_8x8
+                || sps.transform_bypass)
+        {
+            return Err(crate::unsupported(
+                "AVC SI requires progressive eight-bit Extended profile",
+            ));
+        }
         if pps.cabac
             || (!mbaff && sps.mb_adaptive_frame_field && !header.field_pic)
             || sps.chroma_format != 1
@@ -191,6 +206,11 @@ impl<'a> IntraCavlcReader<'a> {
             field_picture: header.field_pic,
             pair_fields: grid(if mbaff { count / 2 } else { 0 })?,
             slice_group_map,
+            si_qs: if header.slice_type == SliceType::Si {
+                Some(header.slice_qs.ok_or_else(|| invalid("missing SI QS"))? as u8)
+            } else {
+                None
+            },
         })
     }
     /// Syntax-only FMO I-slice reader. Picture reconstruction remains separate.
@@ -200,7 +220,7 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
-        if header.slice_type != SliceType::I {
+        if !matches!(header.slice_type, SliceType::I | SliceType::Si) {
             return Err(invalid("FMO reader requires an I slice"));
         }
         Self::new_context_impl(
@@ -352,7 +372,21 @@ impl<'a> IntraCavlcReader<'a> {
             }
         }
         let mb_type = self.bits.unsigned_golomb()?;
-        self.read_body(mb_type)
+        let switching = self.si_qs.is_some() && mb_type == 0;
+        let mapped = if self.si_qs.is_some() && !switching {
+            mb_type
+                .checked_sub(1)
+                .ok_or_else(|| invalid("invalid SI macroblock type"))?
+        } else {
+            mb_type
+        };
+        let mut mb = self.read_body(mapped)?;
+        if switching {
+            if let Some(mb) = &mut mb {
+                mb.switching_qs = self.si_qs;
+            }
+        }
+        Ok(mb)
     }
     /// Parse after the mixed-slice dispatcher has consumed mb_type and mapped
     /// it to the I table. Discard this context on error; the caller cursor only
@@ -465,6 +499,7 @@ impl<'a> IntraCavlcReader<'a> {
         let mut mb = IntraMacroblock {
             address: self.address,
             qp: self.qp,
+            switching_qs: None,
             luma: IntraLuma::Block16(0),
             chroma_mode: ChromaMode::Dc,
             coded_block_pattern: 0,
