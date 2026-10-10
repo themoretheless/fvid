@@ -5888,3 +5888,17 @@ helpers generate these offline; no private videos, frames, audio or codec
 parameter sets are used. Opposite-parity chroma MV adjustment is included in
 L1/Bi expected pixels. Exact-pixel/reset and software seek/rewind acceptance
 is `tests/avc_mixed_si_b_fields.rs`; fixture generation remains separate.
+
+
+## Mixed switching/B direct and skip fields (2026-10-11)
+
+`generate_avc_mixed_si_b_field_fixtures.py --direct-only` emits1728
+`avc-mixed-switching-b-direct-field-*` streams and scalar YUV references with
+its own manifest. Original PCM fields precede mixed switching/direct fields,
+then retained P fields. The independent zero-motion field-list identity model
+covers spatial/temporal direct and skip, opposite-parity chroma interpolation,
+switching transforms and filtering. Read-only controls check skip/direct,
+spatial/Bi and ASO equivalence plus temporal/filter observability. No private
+media, frames, audio, codec parameter sets, external codec, FFmpeg or network
+are used. Ordinary acceptance is `avc_mixed_switching_b_direct_fields.rs` and
+does not invoke the generator.
