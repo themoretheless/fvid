@@ -389,7 +389,7 @@ impl<'a> IntraCavlcReader<'a> {
         Ok(mb)
     }
     /// Parse after the mixed-slice dispatcher has consumed mb_type and mapped
-    /// it to the I table. Discard this context on error; the caller cursor only
+    /// it to the I table (or retained the SI table). Discard this context on error; the caller cursor only
     /// advances after success.
     pub fn read_embedded(
         &mut self,
@@ -442,9 +442,20 @@ impl<'a> IntraCavlcReader<'a> {
         self.bits = bits.clone();
         self.address = address;
         self.qp = qp;
-        let mb = self
-            .read_body(mb_type)?
+        // Embedded SI retains its own macroblock table: zero is SI,
+        // while positive types map to the ordinary I table one entry earlier.
+        let switching = self.si_qs.is_some() && mb_type == 0;
+        let mapped = if self.si_qs.is_some() && !switching {
+            mb_type - 1
+        } else {
+            mb_type
+        };
+        let mut mb = self
+            .read_body(mapped)?
             .ok_or_else(|| invalid("missing embedded intra macroblock"))?;
+        if switching {
+            mb.switching_qs = self.si_qs;
+        }
         *bits = self.bits.clone();
         Ok(mb)
     }

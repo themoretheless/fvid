@@ -9,6 +9,7 @@ fn manifest() -> Value {
         "avc-mixed-sp-fields.json",
         "avc-uniform-type-fields.json",
         "avc-mixed-intra-sp-fields.json",
+        "avc-mixed-si-sp-fields.json",
     ] {
         let extra: Value = serde_json::from_slice(&fixture(name)).unwrap();
         base["cases"]

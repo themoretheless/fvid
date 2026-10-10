@@ -525,7 +525,7 @@ pub(super) fn decode_inter_field_impl(
         .ok_or_else(|| invalid("empty AVC field reference list"))?
         .0;
     if headers.iter().zip(references).any(|(h, lists)| {
-        if h.slice_type == SliceType::I {
+        if matches!(h.slice_type, SliceType::I | SliceType::Si) {
             return !lists[0].is_empty() || !lists[1].is_empty();
         }
         lists[0].len() != h.refs_l0 as usize
@@ -592,8 +592,8 @@ pub(super) fn decode_inter_field_impl(
         return Ok((picture, Some(motion)));
     }
     if !h.field_pic
-        || !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp | SliceType::B)
-        || h.slice_type == SliceType::I && pps.cabac
+        || !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
+        || matches!(h.slice_type, SliceType::I | SliceType::Si) && pps.cabac
         || h.redundant_pic_cnt != 0
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || h.disable_deblocking_filter_idc > 2
@@ -607,12 +607,12 @@ pub(super) fn decode_inter_field_impl(
     }
     for current in headers {
         if !current.field_pic
-            // CAVLC I/P/SP share this dispatcher. Intra syntax has no skip
+            // CAVLC I/SI/P/SP share this dispatcher. Intra syntax has no skip
             // run or references; switching reconstruction stays slice-local.
             || current.slice_type != h.slice_type
                 && !(!pps.cabac
-                    && matches!(current.slice_type, SliceType::I | SliceType::P | SliceType::Sp)
-                    && matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::Sp))
+                    && matches!(current.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp)
+                    && matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp))
             || current.frame_num != h.frame_num
             || current.bottom_field != h.bottom_field
             || current.pps_id != h.pps_id
@@ -814,7 +814,7 @@ pub(super) fn decode_inter_field_impl(
                 }
                 qp = *current;
                 1
-            } else if pps.cabac || h.slice_type == SliceType::I {
+            } else if pps.cabac || matches!(h.slice_type, SliceType::I | SliceType::Si) {
                 0
             } else {
                 bits.unsigned_golomb()? as usize
@@ -842,7 +842,7 @@ pub(super) fn decode_inter_field_impl(
                     let mut probe = bits.clone();
                     let code = probe.unsigned_golomb()?;
                     let intra_offset = match h.slice_type {
-                        SliceType::I => 0,
+                        SliceType::I | SliceType::Si => 0,
                         SliceType::B => 23,
                         _ => 5,
                     };
@@ -891,7 +891,7 @@ pub(super) fn decode_inter_field_impl(
                         edges.push(super::avc_boundary::DecodedBlockEdges {
                             blocks: [super::avc_boundary::BlockEdge {
                                 intra: true,
-                                switching_slice: h.slice_type == SliceType::Sp,
+                                switching_slice: matches!(h.slice_type, SliceType::Sp | SliceType::Si),
                                 nonzero_luma: false,
                                 motion: [None; 2],
                             }; 16],
@@ -1051,7 +1051,7 @@ pub(super) fn decode_inter_field_impl(
                 };
                 let mut blocks = [super::avc_boundary::BlockEdge {
                     intra: false,
-                    switching_slice: h.slice_type == SliceType::Sp,
+                    switching_slice: matches!(h.slice_type, SliceType::Sp | SliceType::Si),
                     nonzero_luma: false,
                     motion: [None; 2],
                 }; 16];
