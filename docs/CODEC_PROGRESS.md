@@ -10322,3 +10322,20 @@ admission is still disabled. PCM history must implement the LD-specific
 half-window prediction delay; the ordinary LTP history must not be reused
 unchanged. Decoder/checkpoint/budget dispatch, resilience/TNS/stereo and
 MP4/player timing/seek acceptance remain required.
+
+### AAC-LD predictor PCM history
+
+Implemented a separate floating LD-LTP history using the extra half-window
+delay in ISO 4.6.7.3. It retains n+1023 previous reconstructed PCM samples and
+n overlap samples, so ten-bit lag 1023 is valid at both n=480 and n=512 without
+clipping the lag or accessing before the buffer. Initial history is zero.
+Prediction does not mutate state; a successful raw PCM commit advances history
+and stores a transmitted lag. An absent predictor preserves the previous lag.
+
+An absolute PCM timeline checks all 1024 lags and eight gains at both sizes;
+early-frame cases also check references before stream start. Checkpoint/reset,
+invalid-input/overflow rollback and spare-capacity accounting are covered.
+These are history primitive checks, not public AOT23 playback acceptance.
+The next integration step is combining LD history, analysis and synthesis with
+spectral/TNS processing, then native dispatch and synthetic MP4/player PCM and
+seek acceptance. The complete codec-gap goal remains open.

@@ -5,7 +5,7 @@ use super::{
     invalid, unsupported,
 };
 
-const GAINS: [f64; 8] = [
+pub(crate) const GAINS: [f64; 8] = [
     0.570829, 0.696616, 0.813004, 0.911304, 0.984900, 1.067894, 1.194601, 1.369533,
 ];
 
