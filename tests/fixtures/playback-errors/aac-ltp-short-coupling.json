@@ -1,0 +1,913 @@
+{
+  "cases": [
+    {
+      "name": "960-0",
+      "n": 960,
+      "point": 0,
+      "asc": "23040d840002001000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 46,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 98,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 150,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 334,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 508,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 708,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 898,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 950,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 1002,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 1054,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 1238,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 1434,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 1486,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 1538,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 1590,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 23,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 72,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 124,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 242,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 421,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 608,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 803,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 924,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 976,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 1028,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 1146,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 1336,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 1460,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 1512,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 1564,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 1616,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 61440,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 15360,
+      "slots": 15,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-short-coupling-960-0-synthetic.mp4",
+        "sha256": "08f347dc9eb0eb3c7ab7f47defb9b08a8ee7d08a3802087154234243bc1f19af",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23040d840002001000",
+        "pcm_offset": 0,
+        "samples": 15360
+      },
+      "control_video": {
+        "file": "aac-ltp-short-coupling-960-0-control-synthetic.mp4",
+        "sha256": "d0ddbc5af655c9d0b9fdf9a54bc684abfa4d3e8c4b02893388f50823f60caa6e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23040d840002001000",
+        "pcm_offset": 0,
+        "samples": 15360
+      }
+    },
+    {
+      "name": "960-1",
+      "n": 960,
+      "point": 1,
+      "asc": "23040d840002001000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 1642,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 1688,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 1740,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 1792,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 1976,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 2150,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 2350,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 2540,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 2592,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 2644,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 2696,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 2880,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 3076,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 3128,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 3180,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 3232,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 1665,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 1714,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 1766,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 1884,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 2063,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 2250,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 2445,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 2566,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 2618,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 2670,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 2788,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 2978,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 3102,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 3154,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 3206,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 3258,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "reference_offset": 61440,
+      "reference_bytes": 61440,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 15360,
+      "slots": 15,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-short-coupling-960-1-synthetic.mp4",
+        "sha256": "9417cff76f7592ecc1e2173def6815de0af55a6d8cba9e249c22bca692cb1d32",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23040d840002001000",
+        "pcm_offset": 0,
+        "samples": 15360
+      },
+      "control_video": {
+        "file": "aac-ltp-short-coupling-960-1-control-synthetic.mp4",
+        "sha256": "3cbf1e211dcc0daebb27f204071a4d188f550d731b28a0ec03f52eb3538062f3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23040d840002001000",
+        "pcm_offset": 0,
+        "samples": 15360
+      }
+    },
+    {
+      "name": "1024-0",
+      "n": 1024,
+      "point": 0,
+      "asc": "23000d840002001000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 3284,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 3330,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 3382,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 3434,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 3618,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 3792,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 3992,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 4182,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 4234,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 4286,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 4338,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 4522,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 4718,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 4770,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 4822,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 4874,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 3307,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 3356,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 3408,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 3526,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 3705,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 3892,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 4087,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 4208,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 4260,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 4312,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 4430,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 4620,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 4744,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 4796,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 4848,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 4900,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "reference_offset": 122880,
+      "reference_bytes": 65536,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 16384,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-short-coupling-1024-0-synthetic.mp4",
+        "sha256": "42cd35b0d3a3195ba2ef4efbc685be35ea10da444fb2518889fb0c547f317688",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002001000",
+        "pcm_offset": 0,
+        "samples": 16384
+      },
+      "control_video": {
+        "file": "aac-ltp-short-coupling-1024-0-control-synthetic.mp4",
+        "sha256": "1517fffe79aa5ac74434e24142eaf1bed7a2662c9d0853efb73e4aa287d6bb19",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002001000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    },
+    {
+      "name": "1024-1",
+      "n": 1024,
+      "point": 1,
+      "asc": "23000d840002001000",
+      "channels": 1,
+      "frames": [
+        {
+          "offset": 4926,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 4972,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 5024,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 5076,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 5260,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 5434,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 5634,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 5824,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 5876,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 5928,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 5980,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 6164,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 6360,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 6412,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 6464,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 6516,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 4949,
+          "bytes": 23,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 4998,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 0
+        },
+        {
+          "offset": 5050,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 0
+        },
+        {
+          "offset": 5168,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 0
+        },
+        {
+          "offset": 5347,
+          "bytes": 87,
+          "sequence": 2,
+          "short_index": 1
+        },
+        {
+          "offset": 5534,
+          "bytes": 100,
+          "sequence": 2,
+          "short_index": 2
+        },
+        {
+          "offset": 5729,
+          "bytes": 95,
+          "sequence": 2,
+          "short_index": 3
+        },
+        {
+          "offset": 5850,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 4
+        },
+        {
+          "offset": 5902,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 4
+        },
+        {
+          "offset": 5954,
+          "bytes": 26,
+          "sequence": 1,
+          "short_index": 4
+        },
+        {
+          "offset": 6072,
+          "bytes": 92,
+          "sequence": 2,
+          "short_index": 4
+        },
+        {
+          "offset": 6262,
+          "bytes": 98,
+          "sequence": 2,
+          "short_index": 5
+        },
+        {
+          "offset": 6386,
+          "bytes": 26,
+          "sequence": 3,
+          "short_index": 6
+        },
+        {
+          "offset": 6438,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 6490,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        },
+        {
+          "offset": 6542,
+          "bytes": 26,
+          "sequence": 0,
+          "short_index": 6
+        }
+      ],
+      "reference_offset": 188416,
+      "reference_bytes": 65536,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 16384,
+      "slots": 16,
+      "bands": 32,
+      "pcm_offset": 0,
+      "video": {
+        "file": "aac-ltp-short-coupling-1024-1-synthetic.mp4",
+        "sha256": "5399cc6a82e773a9c9b945a71f9e4ac5b2171d86dd5b33c18e03e76cc231a642",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002001000",
+        "pcm_offset": 0,
+        "samples": 16384
+      },
+      "control_video": {
+        "file": "aac-ltp-short-coupling-1024-1-control-synthetic.mp4",
+        "sha256": "5433f746450a210139dc720cd9849a732340fb4b16fd680be0d351c6bea17ba1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "23000d840002001000",
+        "pcm_offset": 0,
+        "samples": 16384
+      }
+    }
+  ],
+  "provenance": "Own 960/1024 long/start/short/stop LTP coupling points0/1, global PNS, unequal source/target window groups and short TNS orders1..7 with3/4-bit compressed/uncompressed coefficients; scalar source and target PCM histories, stale-short-history mutant; no private media, FFmpeg, network or foreign decoder."
+}

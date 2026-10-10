@@ -4944,3 +4944,20 @@ reflection value or every Cartesian product with PNS/prediction presence.
 The initial no-prediction frame primes PCM history; later frames exercise LTP.
 Separate order13/20 refusal fixtures remain distinct from acceptance. Short
 windows, transitions and additional source/tag rosters remain separate work.
+
+
+### LTP coupling short-window history and TNS transitions (2026-10-10)
+
+`scripts/generate_aac_ltp_short_coupling_fixtures.py` authors four 960/1024
+videos and matched controls for dependent coupling points0/1. Long/start/short/
+stop transitions include sine/KBD changes, source PNS, nonzero target residuals,
+unequal source/target short-window groups and per-window multi-tap TNS orders1..7
+with3/4-bit compressed/uncompressed coefficients. LTP is active on long/start/
+stop packets; short packets do not signal prediction but must update the source
+PCM/overlap history for later prediction. The scalar oracle owns independent
+source and target histories and directional FIR/AR stages. A deliberately stale
+source-history oracle skips short-frame updates and must differ from correct
+PCM, so the regression checks the history requirement rather than mere syntax
+admission. Native checkpoint rollback, complete public/owned PCM, ranges,
+rewind and seek are tested. This does not claim support for legacy short-window
+prediction signaling or every source/tag/layout combination.
