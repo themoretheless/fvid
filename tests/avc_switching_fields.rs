@@ -1,10 +1,19 @@
 use fvid::codec::avc_decoder::AvcDecoder;
 use serde_json::Value;
 fn manifest() -> Value {
-    serde_json::from_str(include_str!(
+    let mut base: Value = serde_json::from_str(include_str!(
         "fixtures/playback-errors/avc-switching-fields.json"
     ))
-    .unwrap()
+    .unwrap();
+    let motion: Value = serde_json::from_str(include_str!(
+        "fixtures/playback-errors/avc-switching-field-motion.json"
+    ))
+    .unwrap();
+    base["cases"]
+        .as_array_mut()
+        .unwrap()
+        .extend(motion["cases"].as_array().unwrap().iter().cloned());
+    base
 }
 fn hex(s: &str) -> Vec<u8> {
     s.as_bytes()

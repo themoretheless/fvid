@@ -5325,3 +5325,30 @@ Validation: 200 AVC unit tests, 35 existing separate-field regression tests and
 both new switching-field integration tests passed offline without FFmpeg. All
 25 generated artifacts reproduced byte-for-byte; the 12 streams cover reset,
 software MP4 seek/rewind and complete complementary-field output.
+
+### Complementary SP fractional motion matrix (2026-10-10)
+
+The original switching-field fixture generator now supports one macroblock per
+slice and explicit P_L0_16x16 motion with either zero CBP or signed residual.
+A separate offline generator adds 128 two-frame streams: primary and secondary
+SP, zero/signed residual, both complementary-field arrival orders, all sixteen
+quarter-luma phases with positive/negative integer displacements, and sampled
+QSY0/26/51. Each compact field has two slices, avoiding implicit cross-slice
+motion predictors. Reference field parity agrees with the current field.
+
+The owned scalar oracle interpolates full compact field planes before applying
+the normative switching transform: clipped-edge six-tap luma half samples,
+unrounded two-dimensional diagonal intermediates, quarter-sample averaging and
+eighth-sample bilinear chroma. Explicit local JM validation accepted all 128
+streams and matched every luma byte in both frames. Chroma remains the normative
+scalar reference; the documented JM switching-chroma discrepancy is not hidden.
+The ordinary regression tests never invoke JM, FFmpeg or network access.
+
+This matrix does not establish deblocking, opposite-parity reference adjustment,
+weighted SP, mixed SP/I slices, SP FMO/ASO, or MBAFF acceptance. Those remain open.
+
+Validation: both integration tests passed over all140 streams (12 existing plus
+128 fractional-motion cases), including exact planar pixels, reset and software
+MP4 seek/rewind. Repeated generation with explicit optional JM cross-check left
+all282 switching-field artifacts byte-identical; all128 new luma checks passed.
+No production decoder change was needed for the tested fractional-motion cases.

@@ -14,8 +14,8 @@ def planes(bottom):
             [192-bottom*17-x*5-y*3 for y in range(8) for x in range(16)]]
 
 
-def header(bottom, frame, qs, kind, idr, reverse=False):
-    b=Writer();b.ue(0);b.ue(4 if kind=='si' else (2 if kind=='pcm' else 3));b.ue(0);b.u(frame,4);b.u(1);b.u(int(bottom))
+def header(bottom, frame, qs, kind, idr, reverse=False, address=0):
+    b=Writer();b.ue(address);b.ue(4 if kind=='si' else (2 if kind=='pcm' else 3));b.ue(0);b.u(frame,4);b.u(1);b.u(int(bottom))
     if idr:b.ue(0)
     b.u(frame*2+int(bottom != reverse),4)
     if kind not in ['si','pcm']:b.u(0);b.u(0)
@@ -39,17 +39,17 @@ def pcm(bottom,idr,reverse):
     return b.nal(0x65 if idr else 0x41)
 
 
-def switching(bottom,frame,qs,kind,coded,idr,reverse):
-    b=header(bottom,frame,qs,kind,idr,reverse)
-    if kind!='si' and not coded:b.ue(2)
+def switching(bottom,frame,qs,kind,coded,idr,reverse,address=None,mv=(0,0)):
+    b=header(bottom,frame,qs,kind,idr,reverse,address or 0)
+    if kind!='si' and not coded and address is None:b.ue(2)
     else:
-        for mb in range(2):
+        for mb in (range(2) if address is None else [address]):
             if kind=='si':
                 b.ue(0)
                 for _ in range(16):b.u(1)
                 b.ue(0);b.ue(0 if coded else 3)
             else:
-                b.ue(0);b.ue(0);b.se(0);b.se(0);b.ue(12)
+                b.ue(0);b.ue(0);b.se(mv[0]);b.se(mv[1]);b.ue(12 if coded else 0)
             if coded:
                 b.se(0)
                 for block in range(16):b.u(1,2);b.u((block+mb)%2);b.u(1)
