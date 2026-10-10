@@ -211,10 +211,10 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         .first()
         .ok_or_else(|| invalid("missing inter slices"))?;
     if headers.iter().any(|h|h.slice_type==SliceType::Sp)
-        && (sps.profile!=88 || !sps.frame_mbs_only || sps.bit_depth_luma!=8
+        && (sps.profile!=88 || sps.mb_adaptive_frame_field || sps.bit_depth_luma!=8
             || sps.bit_depth_chroma!=8 || pps.cabac || pps.transform_8x8 || sps.transform_bypass)
     {
-        return Err(crate::unsupported("AVC SP requires progressive eight-bit 4:2:0 CAVLC"));
+        return Err(crate::unsupported("AVC SP requires non-MBAFF eight-bit 4:2:0 CAVLC"));
     }
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()

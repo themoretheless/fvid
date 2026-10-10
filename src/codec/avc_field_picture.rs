@@ -42,7 +42,7 @@ pub fn decode_intra_slices(
     }
     for h in headers {
         if !h.field_pic
-            || h.slice_type != SliceType::I
+            || !matches!(h.slice_type, SliceType::I | SliceType::Si)
             || h.bottom_field != first.bottom_field
             || h.frame_num != first.frame_num
             || h.pps_id != pps.id
@@ -60,7 +60,7 @@ pub fn decode_intra_slices(
     }
     let mut ordered = headers.to_vec();
     ordered.sort_by_key(|h| h.first_mb);
-    if ordered.iter().all(|h| h.disable_deblocking_filter_idc == 1) {
+    if ordered.iter().all(|h| h.slice_type == SliceType::I && h.disable_deblocking_filter_idc == 1) {
         match decode_pcm_slices(&ordered, sps, pps, budget) {
             Ok(field) => return Ok(field),
             Err(crate::Error::Unsupported(_)) => {}
@@ -531,7 +531,7 @@ pub(super) fn decode_inter_field_impl(
                 && (lists[1].len() != h.refs_l1 as usize
                     || lists[1].is_empty()
                     || lists[1].len() > 32)
-            || h.slice_type == SliceType::P && !lists[1].is_empty()
+            || matches!(h.slice_type, SliceType::P | SliceType::Sp) && !lists[1].is_empty()
     }) {
         return Err(invalid("invalid AVC field active reference list"));
     }
@@ -588,7 +588,7 @@ pub(super) fn decode_inter_field_impl(
         return Ok((picture, Some(motion)));
     }
     if !h.field_pic
-        || !matches!(h.slice_type, SliceType::P | SliceType::B)
+        || !matches!(h.slice_type, SliceType::P | SliceType::Sp | SliceType::B)
         || h.redundant_pic_cnt != 0
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || h.disable_deblocking_filter_idc > 2
@@ -877,7 +877,7 @@ pub(super) fn decode_inter_field_impl(
                         edges.push(super::avc_boundary::DecodedBlockEdges {
                             blocks: [super::avc_boundary::BlockEdge {
                                 intra: true,
-                                switching_slice: false,
+                                switching_slice: h.slice_type == SliceType::Sp,
                                 nonzero_luma: false,
                                 motion: [None; 2],
                             }; 16],
@@ -1037,7 +1037,7 @@ pub(super) fn decode_inter_field_impl(
                 };
                 let mut blocks = [super::avc_boundary::BlockEdge {
                     intra: false,
-                    switching_slice: false,
+                    switching_slice: h.slice_type == SliceType::Sp,
                     nonzero_luma: false,
                     motion: [None; 2],
                 }; 16];
@@ -1228,6 +1228,14 @@ pub(super) fn decode_inter_field_impl(
                         disable_filter: h.disable_deblocking_filter_idc as u8,
                     });
                 }
+                // SP skips and coded zero-CBP blocks still quantize prediction.
+                if h.slice_type == SliceType::Sp && residual.is_none() {
+                    residual = Some((super::avc_inter_coefficients::InterCoefficients {
+                        luma4: [[0;16];16], luma8: [[0;64];4],
+                        chroma_dc: [[0;4];2], chroma_ac: [[[0;16];4];2],
+                        luma_counts: [0;16], chroma_counts: [[0;4];2],
+                    }, false));
+                }
                 if let Some((c, eight)) = residual {
                     let mut prediction =
                         super::avc_compensation::Prediction420::empty(sps.bit_depth_luma);
@@ -1278,7 +1286,11 @@ pub(super) fn decode_inter_field_impl(
                             sps.bit_depth_chroma,
                         ),
                     ];
-                    let reconstructed = if sps.transform_bypass && qps[0] == 0 {
+                    let reconstructed = if h.slice_type == SliceType::Sp {
+                        let qs=h.slice_qs.ok_or_else(||invalid("missing SP field QS"))?;
+                        prediction.reconstruct_sp(&c.luma4, &c.chroma_dc, &c.chroma_ac, qps,
+                            [qs as u8,super::avc_picture::chroma_qp(qs,pps.chroma_qp_offset,8),super::avc_picture::chroma_qp(qs,pps.second_chroma_qp_offset,8)],h.sp_for_switch)?
+                    } else if sps.transform_bypass && qps[0] == 0 {
                         prediction.reconstruct_inter_bypass(luma, &c.chroma_dc, &c.chroma_ac)?
                     } else {
                         prediction.reconstruct_inter(

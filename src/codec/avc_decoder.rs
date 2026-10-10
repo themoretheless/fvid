@@ -226,7 +226,7 @@ impl AvcDecoder {
         let header = headers[0];
         if headers
             .iter()
-            .any(|h| !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B))
+            .any(|h| !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B))
         {
             return Err(crate::unsupported(
                 "AVC inter field reconstruction is not connected",
@@ -316,7 +316,7 @@ impl AvcDecoder {
         }
         let order = self.poc.decode(sps, header)?;
         let mut retained_motion = None;
-        let mut field = if matches!(header.slice_type, SliceType::P | SliceType::B) {
+        let mut field = if matches!(header.slice_type, SliceType::P | SliceType::Sp | SliceType::B) {
             let dpb = self
                 .field_dpb
                 .as_ref()
@@ -642,11 +642,11 @@ impl AvcDecoder {
             return Err(crate::unsupported("AVC picture type is not implemented"));
         }
         if slices.iter().any(|slice| matches!(slice.header.slice_type, SliceType::Sp | SliceType::Si))
-            && (!sps.frame_mbs_only || sps.chroma_format != 1 || sps.separate_colour_plane
+            && (sps.mb_adaptive_frame_field && !header.field_pic || sps.chroma_format != 1 || sps.separate_colour_plane
                 || sps.bit_depth_luma != 8 || sps.bit_depth_chroma != 8 || pps.cabac
                 || sps.profile != 88 || pps.transform_8x8 || sps.transform_bypass)
         {
-            return Err(crate::unsupported("AVC SP/SI requires progressive eight-bit 4:2:0 CAVLC"));
+            return Err(crate::unsupported("AVC SP/SI requires non-MBAFF eight-bit 4:2:0 CAVLC"));
         }
         if !header.idr
             && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))

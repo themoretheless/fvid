@@ -126,14 +126,14 @@ impl<'a> IntraCavlcReader<'a> {
     ) -> Result<Self> {
         if header.slice_type == SliceType::Si
             && (sps.profile != 88
-                || !sps.frame_mbs_only
+                || sps.mb_adaptive_frame_field && !header.field_pic
                 || sps.bit_depth_luma != 8
                 || sps.bit_depth_chroma != 8
                 || pps.transform_8x8
                 || sps.transform_bypass)
         {
             return Err(crate::unsupported(
-                "AVC SI requires progressive eight-bit Extended profile",
+                "AVC SI requires non-MBAFF eight-bit Extended profile",
             ));
         }
         if pps.cabac
