@@ -26,6 +26,8 @@ mod aac_ps_huffman_tables;
 pub mod aac_coupling;
 pub mod aac_imdct;
 pub mod aac_ld_synthesis;
+pub mod aac_ld_bands;
+pub mod aac_ld_ltp;
 pub mod aac_synthesis;
 pub mod aac_sbr_bands;
 pub mod aac_sbr_header;

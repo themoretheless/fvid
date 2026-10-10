@@ -10303,3 +10303,22 @@ transform references at 480/512 and two LD window/checkpoint unit tests (one
 pre-existing ignored). Two standalone LD acceptance tests and one specifically
 labelled public-profile refusal test passed offline. All six authored artifacts
 regenerate byte-identically. No FFmpeg was executed.
+
+### AAC-LD band geometry and lag-update syntax
+
+Added the six distinct 480/512 long-window band tables from ISO tables
+4.86–4.91, including LD TNS limits and explicit-frequency intervals for the
+22.05/24/32/44.1/48 kHz table families. Rates outside those families remain
+explicitly unsupported. These are dedicated LD tables, not shortened LC tables.
+
+The separate LD LTP parser reads lag-update, optional ten-bit lag, coefficient,
+and all max_sfb usage flags transactionally. Resolving a repeated lag takes the
+channel's previous lag explicitly; parsing does not mutate channel history.
+The full 0..1023 lag syntax is supported at both frame sizes. Every bit-prefix
+truncation is checked with no padding available to satisfy the missing field.
+
+This is primitive qualification, not AOT23 playback acceptance. Public AOT23
+admission is still disabled. PCM history must implement the LD-specific
+half-window prediction delay; the ordinary LTP history must not be reused
+unchanged. Decoder/checkpoint/budget dispatch, resilience/TNS/stereo and
+MP4/player timing/seek acceptance remain required.
