@@ -8,17 +8,19 @@ from generate_aac_main_sbr_oracle import reference
 from generate_aac_er_multi_sbr_fixtures import LAYOUTS,sbr
 from generate_aac_sbr_frequency_oracles import tables
 
-def main():
-    _,high,_,_=tables(10,27,0,False,0,0);blob=bytearray();cases=[];oracle=Oracle(1024);cores=[];lfe_core=[];gold=bytearray()
+def main(frame_samples=1024):
+    prefix="aac-er-lfe-sbr" if frame_samples==1024 else f"aac-er-lfe-sbr-{frame_samples}"
+    ga=field(frame_samples==960,1)+"0000"
+    _,high,_,_=tables(10,27,0,False,0,0);blob=bytearray();cases=[];oracle=Oracle(frame_samples);cores=[];lfe_core=[];gold=bytearray()
     for frame in range(6):
         q=([1,-1,1,-1] if frame%3==0 else [-1,0,1,0] if frame%3==1 else [0,0,0,0])
         cores.append(channel(0,[1],[q],info=ics(0,1,False)))
-        lfe_core.extend(oracle.run(0,0,[q+[0]*4],False,1024,0,[False,False]))
+        lfe_core.extend(oracle.run(0,0,[q+[0]*4],False,frame_samples,0,[False,False]))
     references={}
     for bands in (32,64):
-        noise=reference(pcm_override=[0.]*6144,bands=bands)
-        lfe=reference(pcm_override=lfe_core,bands=bands,sbr_frames=[False]*6)
-        wrong=reference(pcm_override=lfe_core,bands=bands,sbr_frames=[False]*6,qmf_delay=0)
+        noise=reference(pcm_override=[0.]*(6*frame_samples),bands=bands,frame_samples=frame_samples)
+        lfe=reference(pcm_override=lfe_core,bands=bands,sbr_frames=[False]*6,frame_samples=frame_samples)
+        wrong=reference(pcm_override=lfe_core,bands=bands,sbr_frames=[False]*6,qmf_delay=0,frame_samples=frame_samples)
         assert max(abs(a-b) for a,b in zip(lfe,wrong))>1e-5
         references[bands]=(noise,lfe,wrong)
     silent=field(100,8)+'0000'+'000000'+'0'+'000'
@@ -45,13 +47,13 @@ def main():
         rows.append(store(packed(audio+extensions)));controls.append(store(packed(ordinary+'111')))
         extra=''.join(field(v,8) for v in sbr([lfe_source],frame%3,len(high)-1,smoothing=False));bad.append(store(packed(audio+extensions+extra)))
        for signal in ('explicit','sync','implicit'):
-        asc=packed(field(5,5)+frequency(24000)+field(layout,4)+frequency(rate)+field(aot,5)+'00000') if signal=='explicit' else packed(field(aot,5)+frequency(24000)+field(layout,4)+'00000'+(field(0x2b7,11)+field(5,5)+'1'+frequency(rate) if signal=='sync' else ''))
-        c=dict(name=f'{aot}-{layout}-{rate}-{signal}',aot=aot,layout=layout,rate=rate,signal=signal,asc=asc.hex(),control_asc=packed(field(5,5)+frequency(24000)+field(layout,4)+frequency(rate)+field(2,5)+'000').hex(),frames=rows,control_frames=controls,bad_frames=bad,channels=channels,channel_mask=mask,lfe_target=target,reference_offset=offset,reference_bytes=len(lfe)*channels*8,slots=16,bands=bands,container_rate=rate,container_frame_samples=bands*32,pcm_offset=0,samples=len(lfe))
-        c['video']=video_fixture([c],blob,channels=channels,filename=f'aac-er-lfe-sbr-{c["name"]}-synthetic.mp4')
-        c['bad_video']=video_fixture([dict(c,frames=[rows[0],bad[1]])],blob,channels=channels,filename=f'aac-er-lfe-sbr-{c["name"]}-excess-synthetic.mp4')
+        asc=packed(field(5,5)+frequency(24000)+field(layout,4)+frequency(rate)+field(aot,5)+ga) if signal=='explicit' else packed(field(aot,5)+frequency(24000)+field(layout,4)+ga+(field(0x2b7,11)+field(5,5)+'1'+frequency(rate) if signal=='sync' else ''))
+        c=dict(name=f'{aot}-{layout}-{rate}-{signal}',aot=aot,layout=layout,rate=rate,signal=signal,asc=asc.hex(),control_asc=packed(field(5,5)+frequency(24000)+field(layout,4)+frequency(rate)+field(2,5)+field(frame_samples==960,1)+'00').hex(),frames=rows,control_frames=controls,bad_frames=bad,channels=channels,channel_mask=mask,lfe_target=target,reference_offset=offset,reference_bytes=len(lfe)*channels*8,slots=frame_samples//64,bands=bands,container_rate=rate,container_frame_samples=bands*(frame_samples//32),pcm_offset=0,samples=len(lfe))
+        c['video']=video_fixture([c],blob,channels=channels,filename=f'{prefix}-{c["name"]}-synthetic.mp4')
+        c['bad_video']=video_fixture([dict(c,frames=[rows[0],bad[1]])],blob,channels=channels,filename=f'{prefix}-{c["name"]}-excess-synthetic.mp4')
         cases.append(c)
-    (DEST/'aac-er-lfe-sbr-packets.bin').write_bytes(blob)
-    (DEST/'aac-er-lfe-sbr-reference.f64le').write_bytes(gold)
-    (DEST/'aac-er-lfe-sbr.json').write_text(json.dumps(dict(cases=cases,delay_mutant_peak={str(b):max(abs(x-y) for x,y in zip(references[b][1],references[b][2])) for b in references},provenance='Own nonzero sparse LFE core, independent direct IMDCT and QMF convolution with six-row alignment, no SBR on LFE; distinct noise SBR other channels. Own no-delay mutant demonstrates delay sensitivity. No private media, foreign decoder, FFmpeg or network.'),indent=2)+'\n')
+    (DEST/f'{prefix}-packets.bin').write_bytes(blob)
+    (DEST/f'{prefix}-reference.f64le').write_bytes(gold)
+    (DEST/f'{prefix}.json').write_text(json.dumps(dict(cases=cases,delay_mutant_peak={str(b):max(abs(x-y) for x,y in zip(references[b][1],references[b][2])) for b in references},provenance='Own nonzero sparse LFE core, independent direct IMDCT and QMF convolution with six-row alignment, no SBR on LFE; distinct noise SBR other channels. Own no-delay mutant demonstrates delay sensitivity. No private media, foreign decoder, FFmpeg or network.'),indent=2)+'\n')
     print(len(cases),'nonzero ER LFE SBR cases')
 if __name__=='__main__':main()

@@ -10703,3 +10703,21 @@ The fixture uses 1024-sample long sine windows and no active LFE predictor;
 960-sample LFE, other window/TNS schedules and broader profiles still need
 separate qualification. No production changes were needed. Generation and
 ordinary tests do not require FFmpeg, foreign codecs, private media or network.
+
+### 960-sample active ER-LTP/SBR and nonzero LFE qualification (2026-10-10)
+
+The independent direct-QMF oracle now accepts 960/1024 core frame geometry.
+960 uses 30 analysis rows per frame for envelope energy averaging, temporal
+noise indexing and synthesis length, retaining the fixed six-row alignment.
+Six authored mono ER-LTP cases cover active lag/coefficient prediction and
+24/48 kHz explicit/sync/implicit clocks against direct scalar LTP/QMF PCM and
+a predictor-disabled control. Native discovery clock rollback/checkpoint replay,
+forbidden CRC companions, public/owned export, ranges and rewind/seek pass.
+A separate 24-case 960-sample ER LC/LTP matrix verifies nonzero LFE in indexed
+5.1/height 7.1, direct full-band QMF delay/resampling, speaker mapping and
+all three signalling modes. The no-delay mutant still differs by more than
+1e-5. Excess SBR payloads have specific-error companion videos and atomic
+state-replay tests. All six Rust tests pass offline; fixture generation remains
+separate and uses no FFmpeg/network/foreign codec. These are long sine-window
+sequences, not qualification of every window/TNS/predictor combination or
+protected epConfig. No production changes were required for these matrices.
