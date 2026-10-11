@@ -312,6 +312,12 @@ fn strict_vps_reset_software_seek_and_rewind_match_existing_reset_oracle() {
             ));
         }
     }
+    for kind in ["msb-reset", "msb-reset-signalled", "full-reset"] {
+        cases.push((
+            format!("hevc-poc-vps-aligned-explicit-cycle-{kind}-synthetic.mp4"),
+            kind,
+        ));
+    }
     cases.push((
         "hevc-poc-vps-alignment-update-at-idr-synthetic.mp4".to_owned(),
         "full-reset",

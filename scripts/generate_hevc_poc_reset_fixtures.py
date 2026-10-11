@@ -106,12 +106,15 @@ def main():
     parser.add_argument('--multislice', action='store_true', help='generate the disjoint four-slice reset agreement family')
     parser.add_argument('--dependent', action='store_true', help='generate one independent and three dependent segment reset family')
     parser.add_argument('--vps-extension', choices=['aligned', 'unaligned'], help='author strict Annex F single-layer VPS syntax')
+    parser.add_argument('--explicit-cycle', action='store_true', help='qualify explicit cycles with aligned single-layer VPS')
     args = parser.parse_args()
+    assert not args.explicit_cycle or args.vps_extension == 'aligned', 'explicit cycles require aligned VPS'
     root = Path(__file__).resolve().parents[1]
     assert sum((args.chroma420, args.longterm, args.multislice, args.dependent)) <= 1, 'choose one family'
     seed = DEST / ('hevc-chroma-qp-list-dependent-rext8.mp4' if args.dependent else 'hevc-chroma-qp-list-slices-rext8.mp4' if args.multislice else 'hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
     stem = 'hevc-poc-dependent' if args.dependent else 'hevc-poc-multislice' if args.multislice else 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
     if args.vps_extension: stem += '-vps-' + args.vps_extension
+    if args.explicit_cycle: stem += '-explicit-cycle'
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -133,6 +136,7 @@ def main():
               'bad-full-nonidr', 'bad-period-repeat', 'bad-anchor', 'bad-truncated', 'bad-empty']
     if args.multislice or args.dependent: labels += ['bad-slice-period', 'bad-slice-reset']
     if args.vps_extension: labels += ['bad-vps-alignment', 'bad-vps-splitting', 'bad-vps-dimensions', 'bad-vps-no-format']
+    if args.explicit_cycle: labels = ['msb-reset', 'msb-reset-signalled', 'full-reset']
     for label in labels:
         reset = label not in ('baseline', 'idr-baseline')
         idr_family = label in ('idr-baseline', 'full-reset')
@@ -211,7 +215,13 @@ def main():
                     if index == 17 and not info['first']:
                         if label == 'bad-slice-period': extension = '01' + '001000'
                         if label == 'bad-slice-reset': extension = '00'
-                    if extension and args.vps_extension == 'aligned' and not (label == 'bad-truncated' and index == 18): extension += '0'
+                    if extension and args.vps_extension == 'aligned' and not (label == 'bad-truncated' and index == 18):
+                        if args.explicit_cycle:
+                            # Cycle is the pre-reset MSB on an initial reset,
+                            # otherwise the current POC MSB in the resetting period.
+                            cycle = epoch // 16 if idr_family else (index - (32 if index > 33 else 16 if index > 17 else 0)) // 16
+                            extension += '1' + ue(cycle)
+                        else: extension += '0'
                     extension = bits(packed(extension))
                     prefix += ue(len(extension) // 8) + extension
                 rewritten = nal[:2] + escape(packed(prefix + '1') + bytes(info['rbsp'][end // 8:]))

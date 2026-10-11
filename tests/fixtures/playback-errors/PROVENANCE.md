@@ -6033,3 +6033,16 @@ All generators are explicit, offline and owned; no private parameters, HM,
 FFmpeg or other external codec is used. Ordinary tests read saved bytes only.
 These qualify single-layer reset extension decoding, not inter-layer prediction,
 external base layers, VPS VUI, 3D/MV-HEVC or universal hardware support.
+
+### Explicit single-layer POC MSB cycles
+
+`generate_hevc_poc_reset_fixtures.py --vps-extension aligned --explicit-cycle`
+authors three original 35-picture monochrome streams: MSB reset, same-period
+signalled reset, and full reset at IDR. The owned PCM/inter seed is unchanged;
+cycle-present flags and Exp-Golomb cycle values are authored in every slice.
+The reset-picture cycle represents the pre-reset MSB; later pictures signal
+the current resetting-period MSB, following Annex F equations F-60 through F-62.
+Tests inspect the actual slice payload, compare all picture planes and POCs to
+implicit-cycle streams, repeat decoding after reset, and compare software
+seek/rewind timing and output. These are acceptance fixtures, not refusal tests.
+No private media, FFmpeg, external codec or network is used.
