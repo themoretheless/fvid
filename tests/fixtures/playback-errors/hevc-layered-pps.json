@@ -155,6 +155,21 @@
       "future": true
     },
     {
+      "prefix": "hevc-layered-pps-bad-inferred-phase",
+      "error": "phase exceeds range",
+      "unsupported": false,
+      "base_context": false,
+      "scaling": "none",
+      "first_coefficient": 16,
+      "locations": [
+        {
+          "id": 0
+        }
+      ],
+      "oracle": null,
+      "future": false
+    },
+    {
       "prefix": "hevc-layered-pps-bad-phase",
       "error": "resampling phase",
       "unsupported": false,

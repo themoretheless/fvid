@@ -151,6 +151,8 @@ mod hevc_colour_planes;
 pub mod hevc_plane;
 #[path = "../../../src/codec/hevc_poc.rs"]
 pub mod hevc_poc;
+#[path = "../../../src/codec/hevc_resample.rs"]
+pub mod hevc_resample;
 #[path = "../../../src/codec/hevc_pps.rs"]
 pub mod hevc_pps;
 #[path = "../../../src/codec/hevc_profile.rs"]

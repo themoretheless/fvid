@@ -168,6 +168,7 @@ def main():
         ('444-phase',dict(chroma=3,locations=[dict(id=0)])),
         ('ignored-phase',dict(base_context=True,locations=[dict(id=3,phases=[4096,2048,512,1024])])),
         ('future',dict(future=True)),
+        ('bad-inferred-phase',dict(target_size=[256,2048],locations=[dict(id=0)],error='phase exceeds range')),
         ('bad-phase',dict(locations=[dict(id=0,phases=[32,0,8,8])],error='resampling phase')),
         ('bad-chroma-phase',dict(locations=[dict(id=0,phases=[0,0,64,8])],error='resampling phase')),
         ('bad-offset',dict(locations=[dict(id=0,scaled=[16384,0,0,0])],error='signed value')),
@@ -201,7 +202,7 @@ def main():
     for label,o in definitions:
         inp=o.get('inp',(8,8)); target=o.get('target',(10,10))
         base_fmt=dict(g.BASE,depth=list(inp))
-        vps,_,_=g.vps(g.fmt(o.get('chroma',1),depth=target),base_format=base_fmt)
+        vps,_,_=g.vps(dict(g.fmt(o.get('chroma',1),depth=target),size=o.get('target_size',[256,192])),base_format=base_fmt)
         base_sps=g.sps(multilayer=False,independent=True,scaling=o.get('base_sps_scaling','explicit'),buffers=4,latency=1,coded_depth=inp)
         current_sps=g.sps(scaling=o.get('current_scaling','default'))
         base_pps=pps(layer=0,scaling=o.get('base_scaling','none'))

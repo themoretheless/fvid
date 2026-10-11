@@ -12347,3 +12347,46 @@ remains ignored. All 67 new artifacts regenerate byte-identically. Two temporary
 production mutations (double interpolation rounding and omitted luma averaging)
 each failed the saved 4:2:0 swap fixture at the corresponding luma/chroma output;
 the restored implementation passed the final checks.
+
+### HEVC inter-layer reference-sample resampling
+
+`hevc_resample::Resampling` resolves the H.8.1.4.1/H.8.1.4.2 region scales,
+reference coordinates and phase offsets from current/reference SPS geometry and
+a direct-reference PPS location. It implements all sixteen phases of the
+normative eight-tap luma and four-tap chroma filters, signed edge extension,
+horizontal precision truncation and final rounding/clipping. Chroma sampling
+may differ between layers (420/422/444); luma downscaling and reference depth
+reduction are rejected as required. Output allocation and row scratch are
+checked together against the supplied budget. Input raster samples stay intact.
+
+Fifty-five original two-frame Y4M/configuration cases cover all nine chroma
+format pairs, 8/10/16-bit and mixed component depths, identity/depth conversion,
+noninteger scales, signed regions, extreme phases and malformed constraints.
+Coordinate and sample oracles use independently authored fixed-point rational
+arithmetic and the normative filter tables; coverage asserts all sixteen phases
+for both luma and chroma. The mixed-depth operation uses a Y4M storage envelope
+at the higher depth; its separate luma/chroma operation depths are explicit in
+the manifest, not claimed as standard mixed-depth Y4M metadata.
+
+A new short PPS MP4 separately reproduces acceptance of an inferred chroma
+phase above 63. The previous reader accepted it, and now rejects that exact
+phase error. Explicit non-direct-reference phases remain ignored. These tests
+accept sample resampling only, not full scalable-profile decoding. Motion/mode
+resampling, inter-layer reference-list/slice integration and per-layer picture
+reconstruction remain open. Monochrome reference-sample resampling is not
+qualified or admitted by this new three-plane path.
+
+The H.8.1.4.1 equality path bypasses filtering when geometry, all offsets,
+phases, subsampling and depths match. New 10/16-bit identity videos, including
+matching nonzero region offsets, preserve all sample bits. Before the bypass,
+the saved 16-bit 420 identity video reproduced low-bit loss from the horizontal
+precision shift. Nonidentity resampling still applies the normative intermediate
+truncation; a deliberate rounding mutation fails the 10-bit fractional-grid
+fixture at a specific luma sample.
+
+Validation on the final equality-aware implementation: 44 integration tests
+across 13 HEVC suites, 211 HEVC unit tests and the player build check pass with
+locked offline dependencies. One explicit generator test remains ignored. All
+339 resampling/PPS artifacts regenerate byte-identically. The inferred-phase
+MP4 and 16-bit identity video first failed their precise regression expectations
+before the corresponding fixes; ordinary tests run only saved bytes.

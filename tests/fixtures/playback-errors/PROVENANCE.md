@@ -6518,3 +6518,27 @@ network participates in generation. Tests read the saved Y4M bytes and check
 all mapped samples and input immutability/replay. These fixtures qualify colour
 mapping of reconstructed reference samples; they do not claim layered HEVC
 picture/playback acceptance.
+
+## HEVC inter-layer resampling
+
+`generate_hevc_inter_layer_resampling.py` authors 55 original two-frame Y4M
+reference videos and a JSON operation/coordinate/pixel oracle. Input patterns
+contain distinct components, extrema and spatial variation. The oracle uses
+exact rational scale/phase rounding, a separately constructed horizontal matrix
+with normative precision truncation, then a vertical filter matrix. Filter
+coefficients are normative H.265 v6 tables H.1/H.2; no production implementation,
+private media, external codec, FFmpeg or network is used. All saved reference
+samples are read from video bytes by tests. The mixed-depth case uses a 10-bit
+Y4M storage envelope with explicitly declared 10/8-bit operation depths.
+
+`hevc-layered-pps-bad-inferred-phase.*` is an additional original VPS/SPS/PPS
+configuration and short MP4 metadata reproducer from the existing PPS writer.
+It has a 128-row reference region and a 2048-row scaled region: omitted phases
+infer vertical chroma-plus8 equal to 68. Before the fix the context-aware PPS
+reader accepted it; the regression now requires the exact phase-range rejection.
+Neither that refusal nor the resampling operation tests imply layered playback.
+
+The additional equal-layer 10/16-bit videos and matching-nonzero-offset video
+qualify the H.8.1.4.1 sample-copy bypass. The original filtering path lost low
+bits in the saved 16-bit 420 identity video; the fixed path preserves every
+source value. This does not bypass filtering for unequal depths or geometry.

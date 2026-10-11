@@ -82,6 +82,11 @@ impl ReferenceLocation {
             None
         }
         .unwrap_or([0, 0, 8, vertical as i64]);
+        if direct && (phases[0] > 31 || phases[1] > 31 || phases[2] > 63 || phases[3] > 63) {
+            return Err(invalid(
+                "HEVC direct-reference resampling phase exceeds range",
+            ));
+        }
         Ok(ReferenceGeometry {
             scaled_offsets,
             reference_offsets,
