@@ -11517,3 +11517,29 @@ primary-checkout incremental cache, baseline reproduction and all gates ran to
 terminal. This milestone is base-layer identity metadata support, not full
 multilayer/3D, inter-layer prediction, resampling or POC-reset implementation.
 Specification: https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-201906-S%21%21PDF-E&lang=e&type=items
+
+### HEVC POC reset integration preparation (2026-10-11)
+
+The ordinary POC derivation now shares a checked implementation of H.265
+equation (5-11), GetCurrMsb. Tests compare 261888 LSB/previous-MSB combinations
+against an independent nearest-congruent-POC oracle, with ties choosing the
+larger POC, and cover both signed overflow boundaries explicitly.
+
+This does not enable POC reset. The PPS refusal remains until Annex F.8.3.1
+is connected end to end. That integration must retain the PPS reset flag,
+parse bounded slice reset syntax, track inferred period IDs, decrement all
+affected retained POCs once per period, and update collocated reference POC
+maps recursively for separate colour planes without altering pixel samples.
+It must also validate agreement between slices, preserve checked arithmetic,
+clear period state on decoder reset, and handle idc 3 random-access entry.
+The synthetic acceptance family must cover idc 1/2/3, wrap boundaries,
+same-period pictures (no second decrement), temporal motion references,
+seek/rewind and malformed lengths. For the currently admitted internal base
+layer, idc 2 on a non-IDR picture is forbidden by F.7.4.7.1; such a fixture
+cannot be used as valid full-reset acceptance. Existing refusal fixtures are
+configuration probes, not complete reset-coded video streams.
+
+Validation: 3 standalone hevc_poc unit tests and 20 integration tests across
+hevc_extension_tails, hevc_multilayer_pps_identity and hevc_parameter_updates
+passed offline with no default features or FFmpeg. All processes reached a
+successful terminal exit; git diff --check passed.
