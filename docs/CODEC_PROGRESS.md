@@ -11957,3 +11957,15 @@ Integration validation: all 26 tests across scaled-reference playback,
 playback-error samples, native WebM lossless export and multitrack workflows
 passed offline without FFmpeg. All four new WebMs and the manifest regenerated
 byte-identically. No target-video performance claim is made.
+
+### 2026-10-11 — VP9 full-chroma original reproducers
+
+Added nine original 64x64 neutral lossless VP9 elementary streams covering
+4:2:0, 4:2:2 and 4:4:4 at 8/10/12 bits. The owned generator uses no external
+codec or private input. All three 4:2:0 controls decode to the analytic
+midpoint in every sample. Six full-chroma streams successfully parse both
+headers and reproduce the exact reconstruction guard, including decoder
+poisoning after refusal. This is gap reproduction, **not full-chroma
+acceptance**; production still requires 4:2:0. Reconstruction, per-axis
+chroma geometry, chroma motion selection, filtering and playback output
+must be updated and independently qualified before claiming full support.

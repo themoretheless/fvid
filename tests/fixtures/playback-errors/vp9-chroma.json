@@ -1,0 +1,95 @@
+{
+  "cases": [
+    {
+      "file": "vp9-chroma-420-8-synthetic.vp9",
+      "depth": 8,
+      "chroma": "420",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 128
+    },
+    {
+      "file": "vp9-chroma-422-8-synthetic.vp9",
+      "depth": 8,
+      "chroma": "422",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 128
+    },
+    {
+      "file": "vp9-chroma-444-8-synthetic.vp9",
+      "depth": 8,
+      "chroma": "444",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 128
+    },
+    {
+      "file": "vp9-chroma-420-10-synthetic.vp9",
+      "depth": 10,
+      "chroma": "420",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 512
+    },
+    {
+      "file": "vp9-chroma-422-10-synthetic.vp9",
+      "depth": 10,
+      "chroma": "422",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 512
+    },
+    {
+      "file": "vp9-chroma-444-10-synthetic.vp9",
+      "depth": 10,
+      "chroma": "444",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 512
+    },
+    {
+      "file": "vp9-chroma-420-12-synthetic.vp9",
+      "depth": 12,
+      "chroma": "420",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 2048
+    },
+    {
+      "file": "vp9-chroma-422-12-synthetic.vp9",
+      "depth": 12,
+      "chroma": "422",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 2048
+    },
+    {
+      "file": "vp9-chroma-444-12-synthetic.vp9",
+      "depth": 12,
+      "chroma": "444",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 2048
+    }
+  ],
+  "provenance": "Original uncompressed header and zero Boolean arithmetic code. DC intra prediction with zero residual; all reconstructed samples equal the bit-depth midpoint. No source media, external codec or network."
+}

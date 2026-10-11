@@ -6115,3 +6115,22 @@ boundaries and analytic gradient interpolation for all four filters. Existing
 VP9 fixed-size, motion, adaptation and 10/12-bit independent oracles still pass.
 No private media, frames, parameters, external codec invocation or network is
 used by generation/tests. Reference geometry follows VP9 v0.7 8.5.2.3.
+
+### VP9 full-chroma reconstruction gap (2026-10-11)
+
+`generate_vp9_chroma.py` authors nine raw, single-picture VP9 elementary
+streams with original headers and zero Boolean arithmetic codes. No private
+media, frozen external entropy, external codec, FFmpeg or network is used.
+Each is a shown 64x64 lossless keyframe: an unsplit superblock, DC intra
+prediction and immediate EOB in every transform. The analytic sample value
+is `1 << (bit_depth - 1)` in every plane. The 4:2:0 controls decode at
+8/10/12 bits and verify every padded sample and plane dimension.
+
+The six 4:2:2 and 4:4:4 cases parse both the uncompressed and compressed
+headers, then reproduce the exact full-chroma reconstruction refusal.
+These are **gap reproduction tests, not playback acceptance**. Enable their
+pixel/dimension acceptance checks as reconstruction is implemented; do not
+retain a refusal expectation for a newly supported format. Chroma-specific
+nonzero residuals, directional prediction, motion and filtering need further
+fixtures for qualification beyond the neutral-picture controls.
+Generation is separate from ordinary offline test execution.
