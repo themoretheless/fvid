@@ -63,8 +63,12 @@ fn reset_video_preserves_pixels_and_translates_poc_once() {
 fn reset_video_software_seek_and_rewind_match_baseline() {
     use fvid::playback_mp4::Mp4VideoReader;
     let open = |name: &str| Mp4VideoReader::open_software(Cursor::new(fixture(name)), Default::default(), 32 << 20).unwrap();
-    for kind in ["msb-reset", "msb-reset-signalled"] {
-        let mut baseline = open("hevc-poc-baseline-synthetic.mp4");
+    for (kind, baseline_name) in [
+        ("msb-reset", "hevc-poc-baseline-synthetic.mp4"),
+        ("msb-reset-signalled", "hevc-poc-baseline-synthetic.mp4"),
+        ("full-reset", "hevc-poc-idr-baseline-synthetic.mp4"),
+    ] {
+        let mut baseline = open(baseline_name);
         let mut actual = open(&format!("hevc-poc-{kind}-synthetic.mp4"));
         assert!(!actual.hardware_accelerated());
         for target in [None, Some(18), Some(34), None] {
@@ -87,7 +91,54 @@ fn reset_video_software_seek_and_rewind_match_baseline() {
                     _ => panic!("reset playback frame count differs"),
                 }
             }
-            assert_eq!(count, 35, "fixture has one sync picture; seek prerolls across both resets");
+            let expected = if kind == "full-reset" {
+                match target { Some(18) => 18, Some(34) => 2, _ => 35 }
+            } else { 35 };
+            assert_eq!(count, expected, "{kind}: sync preroll frame count");
         }
+    }
+}
+
+#[test]
+fn full_reset_at_idr_and_same_period_signalled_reset_preserve_pixels() {
+    let baseline = decode("hevc-poc-idr-baseline-synthetic.mp4");
+    let actual = decode("hevc-poc-full-reset-synthetic.mp4");
+    assert_eq!(baseline.len(), 35);
+    assert_eq!(actual, baseline);
+    for (index, (poc, _)) in actual.iter().enumerate() {
+        let epoch = index - if index >= 33 { 33 } else if index >= 17 { 17 } else { 0 };
+        assert_eq!(*poc, epoch as i32);
+    }
+}
+
+#[test]
+fn malformed_reset_video_fails_at_specific_picture_and_reset_recovers() {
+    let baseline = decode("hevc-poc-baseline-synthetic.mp4");
+    for (kind, failure, message) in [
+        ("bad-full-nonidr", 17, "HEVC internal base-layer full POC reset requires IDR"),
+        ("bad-period-repeat", 18, "consecutive HEVC initial resets reuse a period ID"),
+        ("bad-anchor", 18, "HEVC signalled reset disagrees with period anchor"),
+        ("bad-truncated", 18, "truncated or oversized bit field"),
+        ("bad-empty", 17, "truncated or oversized bit field"),
+    ] {
+        let mut movie = Mp4Reader::open(Cursor::new(fixture(&format!("hevc-poc-{kind}-synthetic.mp4"))), Default::default()).unwrap();
+        let mut decoder = HevcDecoder::from_configuration(&movie.tracks()[0].configuration, 32 << 20).unwrap();
+        let mut packet = Vec::new();
+        let mut first = Vec::new();
+        for index in 0..failure {
+            movie.read_packet(0, index, &mut packet).unwrap();
+            if index == 0 { first.clone_from(&packet); }
+            let frame = decoder.decode_packet(&packet).unwrap_or_else(|e| panic!("{kind} before failure at {index}: {e}")).unwrap();
+            assert_eq!(frame.picture.planes[0].samples(), baseline[index].1, "{kind} picture {index}");
+        }
+        movie.read_packet(0, failure, &mut packet).unwrap();
+        let error = decoder.decode_packet(&packet).err().expect("malformed reset must fail");
+        assert!(matches!(error, fvid::Error::Invalid(_)), "{kind}: {error}");
+        assert_eq!(error.to_string(), message, "{kind}");
+        assert!(decoder.decode_packet(&first).is_err(), "error must poison decoder");
+        decoder.reset();
+        let frame = decoder.decode_packet(&first).unwrap().unwrap();
+        assert_eq!(frame.poc, 0);
+        assert_eq!(frame.picture.planes[0].samples(), baseline[0].1);
     }
 }

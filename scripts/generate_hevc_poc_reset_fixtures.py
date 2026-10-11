@@ -100,8 +100,11 @@ def main():
     entry_kind, entry = next(boxes(child(stbl, b'stsd')[8:]))
     original_config = child(entry[78:], b'hvcC')
     cases = []
-    for label in ['baseline', 'msb-reset', 'msb-reset-signalled']:
-        reset = label != 'baseline'
+    labels = ['baseline', 'msb-reset', 'msb-reset-signalled', 'idr-baseline', 'full-reset',
+              'bad-full-nonidr', 'bad-period-repeat', 'bad-anchor', 'bad-truncated', 'bad-empty']
+    for label in labels:
+        reset = label not in ('baseline', 'idr-baseline')
+        idr_family = label in ('idr-baseline', 'full-reset')
         config = bytearray(original_config[:23])
         at = 23
         original_width = None
@@ -116,7 +119,8 @@ def main():
         assert original_width is not None and at == len(original_config)
         outputs = []
         for index in range(35):
-            source = min(index, 2)
+            epoch = index - (33 if index >= 33 else 17 if index >= 17 else 0) if idr_family else index
+            source = min(epoch, 2)
             units = packet_units(packets[source])
             assert len(units) == len(meta['packets'][source])
             out = []
@@ -133,7 +137,7 @@ def main():
                 if meta['output_flag']: r.read(1)
                 prefix = value[:r.at]
                 if not info['idr']:
-                    prefix += f'{index % 16:04b}'
+                    prefix += f'{epoch % 16:04b}'
                     r.read(original_width)
                 prefix += value[r.at:alignment]
                 if reset:
@@ -141,6 +145,16 @@ def main():
                     if index in (17, 33): extension = '01' + '000111'
                     if label.endswith('signalled') and index == 18:
                         extension = '11' + '000111' + '0' + '0001'
+                    if label == 'full-reset':
+                        period = 2 if index >= 33 else 1 if index >= 17 else 0
+                        if epoch == 0: extension = '10' + f'{period:06b}'
+                        elif epoch == 1: extension = '11' + f'{period:06b}' + '1' + '0000'
+                        else: extension = '00'
+                    if label == 'bad-full-nonidr' and index == 17: extension = '10' + '000111'
+                    if label == 'bad-period-repeat' and index == 18: extension = '01' + '000111'
+                    if label == 'bad-anchor' and index == 18: extension = '11' + '000111' + '1' + '0001'
+                    if label == 'bad-truncated' and index == 18: extension = '11' + '000111'
+                    if label == 'bad-empty' and index == 17: extension = ''
                     extension = bits(packed(extension))
                     prefix += ue(len(extension) // 8) + extension
                 rewritten = nal[:2] + escape(packed(prefix + '1') + bytes(info['rbsp'][end // 8:]))
@@ -154,6 +168,7 @@ def main():
             elif tag == b'stts': payload = bytes(4) + struct.pack('>III', 1, len(outputs), 1)
             elif tag == b'stsc': payload = bytes(4) + struct.pack('>IIII', 1, 1, len(outputs), 1)
             elif tag == b'stco': payload = payload[:8] + struct.pack('>I', len(roots[b'ftyp']) + 16)
+            elif tag == b'stss' and idr_family: payload = bytes(4) + struct.pack('>IIII', 3, 1, 18, 34)
             elif tag == b'stsd': payload = payload[:8] + box(entry_kind, entry[:78] + b''.join(box(t, bytes(config) if t == b'hvcC' else p) for t, p in boxes(entry[78:])))
             elif tag in (b'mvhd', b'mdhd'): payload = payload[:16] + struct.pack('>I', len(outputs)) + payload[20:]
             elif tag == b'tkhd': payload = payload[:20] + struct.pack('>I', len(outputs)) + payload[24:]
@@ -161,9 +176,12 @@ def main():
 
         name = f'hevc-poc-{label}-synthetic.mp4'
         (DEST / name).write_bytes(box(b'ftyp', roots[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', roots[b'moov']))
-        cases.append(dict(file=name, expectation='acceptance', frames=len(outputs), resets=[] if not reset else [17, 33], signalled=[18] if label.endswith('signalled') else []))
+        cases.append(dict(file=name, expectation='invalid' if label.startswith('bad-') else 'acceptance',
+                          frames=len(outputs), resets=[] if not reset else ([0, 17, 33] if idr_family else [17, 33]),
+                          signalled=[1, 18, 34] if label == 'full-reset' else [18] if label.endswith('signalled') else [],
+                          failure_picture=(17 if label in ('bad-full-nonidr', 'bad-empty') else 18) if label.startswith('bad-') else None))
     (DEST / 'hevc-poc-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
-        provenance='Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; this family qualifies MSB reset and same-period signalled reset only.'), indent=2) + '\n')
+        provenance='Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.'), indent=2) + '\n')
 
 
 if __name__ == '__main__': main()

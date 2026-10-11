@@ -5941,3 +5941,12 @@ The earlier identity-multilayer family's `poc-reset` entries now have expectatio
 Colour-mapping entries remain refusals. Current reset playback qualification is
 the new MSB-reset/same-period-signalled family only, not full multilayer or all
 reset/NAL/reference tools. Generation still uses no external codec or network.
+
+The same generator now authors seven additional original files: an IDR
+baseline, a full-reset/idc-3 sequence with sync pictures 0/17/33, and five
+malformed reset variants. Full-reset acceptance checks exact baseline pixels,
+POC and software seek/rewind. Malformed cases are labelled `invalid`, record
+their failure picture, and check exact parser/period errors, valid preceding
+pixels, poisoning and recovery after decoder reset. They do not count as
+playback acceptance. Full-reset coverage here is internal-base IDR behavior;
+retained inter-layer full-reset references are not qualified by these files.

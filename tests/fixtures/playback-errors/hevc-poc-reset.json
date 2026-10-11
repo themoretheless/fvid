@@ -5,7 +5,8 @@
       "expectation": "acceptance",
       "frames": 35,
       "resets": [],
-      "signalled": []
+      "signalled": [],
+      "failure_picture": null
     },
     {
       "file": "hevc-poc-msb-reset-synthetic.mp4",
@@ -15,7 +16,8 @@
         17,
         33
       ],
-      "signalled": []
+      "signalled": [],
+      "failure_picture": null
     },
     {
       "file": "hevc-poc-msb-reset-signalled-synthetic.mp4",
@@ -27,9 +29,89 @@
       ],
       "signalled": [
         18
-      ]
+      ],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-idr-baseline-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 35,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-full-reset-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 35,
+      "resets": [
+        0,
+        17,
+        33
+      ],
+      "signalled": [
+        1,
+        18,
+        34
+      ],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-bad-full-nonidr-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": [],
+      "failure_picture": 17
+    },
+    {
+      "file": "hevc-poc-bad-period-repeat-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": [],
+      "failure_picture": 18
+    },
+    {
+      "file": "hevc-poc-bad-anchor-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": [],
+      "failure_picture": 18
+    },
+    {
+      "file": "hevc-poc-bad-truncated-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": [],
+      "failure_picture": 18
+    },
+    {
+      "file": "hevc-poc-bad-empty-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": [],
+      "failure_picture": 17
     }
   ],
   "seed": "hevc-pcm-mono-reference-rext8.mp4",
-  "provenance": "Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; this family qualifies MSB reset and same-period signalled reset only."
+  "provenance": "Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance."
 }
