@@ -6654,3 +6654,19 @@ entropy markers, not scalable coded-video acceptance. A temporal-DPB operation
 test uses the already documented owned cycle-only coded fixture and changes
 only metadata while sharing its original sample storage. No private media,
 FFmpeg, external codec or network is used in generation or ordinary tests.
+
+### HEVC layer-aware motion identity atlas (2026-10-12)
+
+`hevc-motion-layer-identity.y4m` is an original three-frame 64x32 YUV420 atlas
+from `scripts/generate_hevc_motion_identity_fixtures.py`. Luma values 31, 97,
+163 identify synthetic references (layer 0, POC 100), (layer 2, POC 100),
+(layer 5, POC 99); chroma is neutral. No private source material or encoder is
+used. Codec unit tests exercise canonical mapping and motion prediction using
+these actual samples. Same-POC cross-layer aliasing previously selected luma 31
+instead of 97. AMVP deliberately retains MV [4,0], as specified by the
+POC-based direct candidate rule (not full picture equality). Boundary tests
+must distinguish those identities. POC translation tests use the previously
+owned separate-colour-plane and POC-cycle synthetic MP4s, with explicit saved
+reference metadata to isolate per-layer translation and source immutability.
+These tests accept motion/DPB operations and do not establish scalable HEVC
+coded-picture playback. Fixtures are generated separately from ordinary tests.

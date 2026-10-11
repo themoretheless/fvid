@@ -61,7 +61,7 @@ pub(super) fn decode(
                             .map(|planes| Arc::clone(&planes[plane as usize]))
                             .ok_or_else(|| invalid("HEVC separate colour plane reference has no plane state"))
                     }).transpose()?;
-                    result[l].push(Reference { poc: reference.poc, long_term: reference.long_term, picture });
+                    result[l].push(Reference { layer_id: reference.layer_id, poc: reference.poc, long_term: reference.long_term, picture });
                 }
             }
             Ok(result)
@@ -101,6 +101,7 @@ pub(super) fn decode(
         sao: first.sao.clone(),
         motion: first.motion.clone(),
         reference_pocs: first.reference_pocs.clone(),
+        reference_layers: first.reference_layers.clone(),
         reference_long_term: first.reference_long_term.clone(),
         colour_planes: Some(children),
     };
@@ -117,6 +118,7 @@ impl Picture {
         for list in 0..2 {
             n = n.checked_add(self.reference_pocs[list].len().checked_mul(4)?)?;
             n = n.checked_add(self.reference_long_term[list].len())?;
+            n = n.checked_add(self.reference_layers[list].len())?;
         }
         if let Some(children) = &self.colour_planes {
             for child in children {
@@ -132,6 +134,27 @@ impl Picture {
     /// Arc pictures remain untouched, including on allocation/range failure.
     /// `budget` covers the extra live copy, not the already retained pixels.
     pub(crate) fn translated_pocs(&self, delta: i64, budget: usize) -> Result<Self> {
+        self.translated_layer_pocs(&[delta;63], budget)
+    }
+    /// Validate saved identities and report whether their reference layers move.
+    pub(crate) fn poc_translation_required(&self, deltas: &[i64;63]) -> Result<bool> {
+        let mut required=false;
+        for list in 0..2 {
+            if self.reference_layers[list].len()!=self.reference_pocs[list].len()
+                || self.reference_long_term[list].len()!=self.reference_pocs[list].len() {
+                return Err(crate::invalid("HEVC saved reference identity arrays disagree"));
+            }
+            for &layer in &self.reference_layers[list] {
+                required |= *deltas.get(usize::from(layer)).ok_or_else(||crate::invalid("HEVC saved reference layer out of range"))?!=0;
+            }
+        }
+        if let Some(children)=&self.colour_planes {
+            for child in children { required |= child.poc_translation_required(deltas)?; }
+        }
+        Ok(required)
+    }
+    pub(crate) fn translated_layer_pocs(&self, deltas: &[i64;63], budget: usize) -> Result<Self> {
+        self.poc_translation_required(deltas)?;
         if self.poc_translation_bytes().is_none_or(|n| n > budget) {
             return Err(invalid("HEVC POC translation exceeds metadata budget"));
         }
@@ -143,8 +166,9 @@ impl Picture {
             Ok(out)
         }
         let mut pocs = [copy(&self.reference_pocs[0])?, copy(&self.reference_pocs[1])?];
-        for list in &mut pocs {
-            for poc in list {
+        for (list,pocs) in pocs.iter_mut().enumerate() {
+            for (index,poc) in pocs.iter_mut().enumerate() {
+                let delta=deltas[usize::from(self.reference_layers[list][index])];
                 *poc = i64::from(*poc).checked_sub(delta)
                     .and_then(|v| i32::try_from(v).ok())
                     .ok_or_else(|| invalid("HEVC translated reference POC overflow"))?;
@@ -152,9 +176,9 @@ impl Picture {
         }
         let colour_planes = if let Some(children) = &self.colour_planes {
             Some([
-                Arc::new(children[0].translated_pocs(delta, budget)?),
-                Arc::new(children[1].translated_pocs(delta, budget)?),
-                Arc::new(children[2].translated_pocs(delta, budget)?),
+                Arc::new(children[0].translated_layer_pocs(deltas, budget)?),
+                Arc::new(children[1].translated_layer_pocs(deltas, budget)?),
+                Arc::new(children[2].translated_layer_pocs(deltas, budget)?),
             ])
         } else { None };
         Ok(Self {
@@ -179,6 +203,7 @@ impl Picture {
             sao: copy(&self.sao)?,
             motion: copy(&self.motion)?,
             reference_pocs: pocs,
+            reference_layers: [copy(&self.reference_layers[0])?,copy(&self.reference_layers[1])?],
             reference_long_term: [copy(&self.reference_long_term[0])?, copy(&self.reference_long_term[1])?],
             colour_planes,
         })
@@ -208,6 +233,7 @@ impl Picture {
         for l in 0..2 {
             n = n.checked_add(self.reference_pocs[l].capacity().checked_mul(4)?)?;
             n = n.checked_add(self.reference_long_term[l].capacity())?;
+            n = n.checked_add(self.reference_layers[l].capacity())?;
         }
         if let Some(planes) = &self.colour_planes {
             for plane in planes {
@@ -223,7 +249,7 @@ mod tests {
     use super::super::hevc_decoder::HevcDecoder;
     use super::*;
 
-    fn synthetic_decoder() -> (HevcDecoder, Vec<u8>) {
+    pub(super) fn synthetic_decoder() -> (HevcDecoder, Vec<u8>) {
         let bytes = include_bytes!(
             "../../tests/fixtures/playback-errors/hevc-separate-colour-planes-distinct-synthetic.mp4"
         );
@@ -243,7 +269,7 @@ mod tests {
         let decoder = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
         (decoder, packet.to_vec())
     }
-    fn synthetic_picture() -> Arc<Picture> {
+    pub(super) fn synthetic_picture() -> Arc<Picture> {
         let (mut decoder, packet) = synthetic_decoder();
         decoder.decode_packet(&packet).unwrap().unwrap().picture
     }
@@ -253,9 +279,12 @@ mod tests {
         let mut original = synthetic_picture();
         let picture = Arc::get_mut(&mut original).unwrap();
         picture.reference_pocs = [vec![30, 29], vec![17]];
+        picture.reference_layers = [vec![0,0],vec![0]];
         picture.reference_long_term = [vec![false, true], vec![false]];
         for (i, child) in picture.colour_planes.as_mut().unwrap().iter_mut().enumerate() {
             Arc::get_mut(child).unwrap().reference_pocs = [vec![30 + i as i32], vec![29]];
+            Arc::get_mut(child).unwrap().reference_layers = [vec![0],vec![0]];
+            Arc::get_mut(child).unwrap().reference_long_term = [vec![false],vec![false]];
         }
         let required = original.poc_translation_bytes().unwrap();
         assert!(original.translated_pocs(32, required - 1).is_err());
@@ -308,3 +337,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "hevc_motion_identity_tests.rs"]
+mod identity_tests;

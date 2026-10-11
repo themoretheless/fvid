@@ -348,11 +348,9 @@ impl PocTransition {
             .copied()
             .ok_or_else(|| invalid("HEVC DPB layer out of range"))
     }
-    /// Translate temporal-only DPB identities and collocated metadata without
-    /// changing published source pictures. Budget covers retained sources and
-    /// copies. Cross-layer motion identities require the scalable reconstruction
-    /// path; this entry point must not be used for its inter-layer reference data.
-    pub fn translate_temporal_references(
+    /// Translate DPB identities and collocated references using each saved
+    /// reference's layer. Budget covers retained sources and metadata copies.
+    pub fn translate_references(
         &self,
         references: &[(u8, crate::codec::hevc_motion::Reference)],
         budget: usize,
@@ -365,7 +363,7 @@ impl PocTransition {
             .ok_or_else(|| invalid("missing HEVC layered POC graph"))?;
         let mut retained = 0usize;
         for (layer, reference) in references {
-            if *layer > 62 || graph.registered & (1u64 << layer) == 0 {
+            if *layer > 62 || reference.layer_id != *layer || graph.registered & (1u64 << layer) == 0 {
                 return Err(invalid("HEVC translated DPB has unregistered layer"));
             }
             let source = reference
@@ -379,7 +377,7 @@ impl PocTransition {
                         .ok_or_else(|| invalid("HEVC layered DPB storage overflow"))?,
                 )
                 .ok_or_else(|| invalid("HEVC layered DPB storage overflow"))?;
-            if self.decrements[usize::from(*layer)] != 0 {
+            if source.poc_translation_required(&self.decrements)? {
                 retained = retained
                     .checked_add(
                         source
@@ -417,14 +415,14 @@ impl PocTransition {
                 .and_then(|n| i32::try_from(n).ok())
                 .ok_or_else(|| invalid("HEVC layered translated POC overflow"))?;
             let source = reference.picture.as_ref().unwrap();
-            let picture = if delta == 0 {
+            let picture = if !source.poc_translation_required(&self.decrements)? {
                 source.clone()
             } else {
-                Arc::new(source.translated_pocs(delta, budget)?)
+                Arc::new(source.translated_layer_pocs(&self.decrements, budget)?)
             };
             out.push((
                 *layer,
-                Reference {
+                Reference { layer_id: *layer,
                     poc,
                     long_term: reference.long_term,
                     picture: Some(picture),
@@ -432,6 +430,9 @@ impl PocTransition {
             ));
         }
         Ok(out)
+    }
+    pub fn translate_temporal_references(&self, references: &[(u8,crate::codec::hevc_motion::Reference)], budget: usize) -> Result<Vec<(u8,crate::codec::hevc_motion::Reference)>> {
+        self.translate_references(references,budget)
     }
     pub fn into_state(self) -> LayeredPocState {
         self.next
@@ -485,7 +486,7 @@ mod tests {
             .map(|layer| {
                 (
                     layer,
-                    Reference {
+                    Reference { layer_id: layer,
                         poc: 357,
                         long_term: layer == 2,
                         picture: Some(source.clone()),
@@ -538,6 +539,20 @@ mod tests {
                 .contains("translated POC overflow")
         );
         assert_eq!(references[0].1.poc, 357);
+        // An unmoved owner still needs a metadata copy when its referenced
+        // layer moves. Pixels remain shared and the owner POC stays unchanged.
+        plan.decrements = [0; 63];
+        plan.decrements[0] = 256;
+        let selective = plan.translate_references(&references,32<<20).unwrap();
+        let unmoved = &selective[1].1;
+        assert_eq!(unmoved.layer_id,2);
+        assert_eq!(unmoved.poc,357);
+        assert_eq!(unmoved.picture.as_ref().unwrap().reference_pocs[0],
+            source.reference_pocs[0].iter().map(|p| p-256).collect::<Vec<_>>());
+        assert!(!Arc::ptr_eq(unmoved.picture.as_ref().unwrap(),&source));
+        let mut mismatched = references.clone();
+        mismatched[1].1.layer_id = 0;
+        assert!(plan.translate_references(&mismatched,32<<20).is_err());
         plan.decrements = [0; 63];
         let same = plan
             .translate_temporal_references(&references, 32 << 20)

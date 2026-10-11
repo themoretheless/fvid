@@ -574,7 +574,7 @@ impl HevcDecoder {
                     .and_then(|v| i32::try_from(v).ok())
                     .ok_or_else(|| invalid("HEVC translated DPB POC overflow"))?;
                 let source = reference.picture.as_ref().ok_or_else(|| invalid("HEVC retained reference has no picture"))?;
-                translated.push(Reference { poc, long_term: reference.long_term,
+                translated.push(Reference { layer_id: reference.layer_id, poc, long_term: reference.long_term,
                     picture: Some(Arc::new(source.translated_pocs(decrement, metadata)?)) });
             }
             self.references = translated;
@@ -626,7 +626,7 @@ impl HevcDecoder {
         }
         self.reset_periods = next_periods;
         if header.nal.unit_type >= 16 || header.nal.unit_type & 1 != 0 {
-            self.references.push(Reference {
+            self.references.push(Reference { layer_id: header.nal.layer_id,
                 long_term: false,
                 poc,
                 picture: Some(Arc::clone(&picture)),
@@ -662,14 +662,14 @@ fn reference_lists(
         let target = poc
             .checked_add(r.delta_poc)
             .ok_or_else(|| invalid("HEVC reference POC overflow"))?;
-        if references.iter().any(|r| r.poc == target && r.long_term) {
+        if references.iter().any(|r| r.layer_id == header.nal.layer_id && r.poc == target && r.long_term) {
             return Err(invalid("HEVC RPS uses a long-term picture as short-term"));
         }
         retained.push((target, false));
         if r.used {
             let mut reference = references
                 .iter()
-                .find(|r| r.poc == target)
+                .find(|r| r.layer_id == header.nal.layer_id && r.poc == target)
                 .ok_or_else(|| {
                     invalid(&format!(
                         "HEVC reference POC {target} is missing for POC {poc} (NAL {})",
@@ -685,7 +685,7 @@ fn reference_lists(
             }
         }
     }
-    let dpb_pocs: Vec<_> = references.iter().map(|r| r.poc).collect();
+    let dpb_pocs: Vec<_> = references.iter().filter(|r|r.layer_id==header.nal.layer_id).map(|r| r.poc).collect();
     let mut long = Vec::new();
     for entry in &header.long_term {
         if let Some(target) = entry.resolve(poc, poc_bits, &dpb_pocs)? {
@@ -696,7 +696,7 @@ fn reference_lists(
             if entry.used {
                 let mut reference = references
                     .iter()
-                    .find(|r| r.poc == target)
+                    .find(|r| r.layer_id == header.nal.layer_id && r.poc == target)
                     .ok_or_else(|| invalid("HEVC long-term current reference is missing"))?
                     .clone();
                 reference.long_term = true;
@@ -726,7 +726,7 @@ fn reference_lists(
                     lists[list].push(base[index].clone())
                 }
                 super::hevc_reference_list::Source::Current => {
-                    lists[list].push(Reference {
+                    lists[list].push(Reference { layer_id: header.nal.layer_id,
                         poc,
                         long_term: true,
                         picture: None,
@@ -845,7 +845,7 @@ mod long_term_list_tests {
         header.references = [3, 3];
         let references: Vec<_> = [34, 36, 19]
             .into_iter()
-            .map(|poc| Reference {
+            .map(|poc| Reference { layer_id: 0,
                 poc,
                 long_term: false,
                 picture: Some(Arc::clone(&picture)),

@@ -39,6 +39,7 @@ pub struct Picture {
     /// Collocated motion at the normative 16x16 temporal-prediction grid.
     pub(crate) motion: Vec<Motion>,
     pub(crate) reference_pocs: [Vec<i32>; 2],
+    pub(crate) reference_layers: [Vec<u8>; 2],
     pub(crate) reference_long_term: [Vec<bool>; 2],
     /// Independent reconstructed/motion state for separately coded planes.
     pub(crate) colour_planes: Option<[std::sync::Arc<Picture>; 3]>,
@@ -88,7 +89,7 @@ pub fn decode(
         }
         for r in &lists[list] {
             if r.picture.is_none()
-                && (!pps.current_picture_reference || r.poc != poc || !r.long_term)
+                && (!pps.current_picture_reference || r.poc != poc || r.layer_id != slice.nal.layer_id || !r.long_term)
             {
                 return Err(invalid("invalid HEVC current-picture reference descriptor"));
             }
@@ -485,6 +486,7 @@ pub fn decode(
         fractional_current_chroma_blocks: decoder.fractional_current_chroma_blocks,
         motion,
         reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
+        reference_layers: std::array::from_fn(|l| lists[l].iter().map(|r| r.layer_id).collect()),
         reference_long_term: std::array::from_fn(|l| {
             lists[l].iter().map(|r| r.long_term).collect()
         }),
@@ -521,19 +523,7 @@ pub fn decode_slices(
         return Err(invalid("HEVC slice reference count mismatch"));
     }
     let first_lists = &slice_lists[0];
-    let mut canonical: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
-    for lists in slice_lists {
-        for list in 0..2 {
-            for reference in &lists[list] {
-                if !canonical[list].iter().any(|r| r.poc == reference.poc) {
-                    if canonical[list].len() == 256 {
-                        return Err(invalid("HEVC picture reference map exceeds index range"));
-                    }
-                    canonical[list].push(reference.clone());
-                }
-            }
-        }
-    }
+    let canonical = canonical_references(slice_lists)?;
     if sps.chroma_format > 3 || sps.separate_colour_plane {
         return Err(crate::unsupported(
             "unsupported HEVC multi-slice picture tools",
@@ -857,11 +847,11 @@ pub fn decode_slices(
     if !decoder.planes.iter().all(Plane::complete) {
         return Err(invalid("incomplete HEVC multi-slice picture"));
     }
-    let canonical_pocs: [Vec<i32>; 2] =
-        std::array::from_fn(|l| canonical[l].iter().map(|r| r.poc).collect());
-    let slice_pocs: Vec<[Vec<i32>; 2]> = slice_lists
+    let canonical_ids: [Vec<super::hevc_reference_list::PictureIdentity>; 2] =
+        std::array::from_fn(|l| canonical[l].iter().map(Reference::identity).collect());
+    let slice_pocs: Vec<[Vec<super::hevc_reference_list::PictureIdentity>; 2]> = slice_lists
         .iter()
-        .map(|lists| std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()))
+        .map(|lists| std::array::from_fn(|l| lists[l].iter().map(Reference::identity).collect()))
         .collect();
     for y in (0..h).step_by(4) {
         for x in (0..w).step_by(4) {
@@ -872,7 +862,7 @@ pub fn decode_slices(
             let source_pocs = &slice_pocs[owner];
             let cell = &mut decoder.cells[y as usize / 4 * (w as usize / 4) + x as usize / 4];
             cell.motion =
-                super::hevc_motion::remap_references(cell.motion, source_pocs, &canonical_pocs)?;
+                super::hevc_motion::remap_references(cell.motion, source_pocs, &canonical_ids)?;
         }
     }
     decoder.lists = &canonical;
@@ -945,7 +935,8 @@ pub fn decode_slices(
         #[cfg(test)]
         fractional_current_chroma_blocks: decoder.fractional_current_chroma_blocks,
         motion,
-        reference_pocs: canonical_pocs,
+        reference_pocs: std::array::from_fn(|l| canonical_ids[l].iter().map(|id| id.poc).collect()),
+        reference_layers: std::array::from_fn(|l| canonical_ids[l].iter().map(|id| id.layer_id).collect()),
         reference_long_term: std::array::from_fn(|l| {
             canonical[l].iter().map(|r| r.long_term).collect()
         }),
@@ -2333,13 +2324,50 @@ impl Decoder<'_> {
     }
 }
 
-fn motion_boundary(a: Motion, b: Motion, lists: &[Vec<Reference>; 2]) -> bool {
+/// Canonical slice references retain both layer and POC identity.
+pub(crate) fn canonical_references(
+    slice_lists: &[[Vec<Reference>; 2]],
+) -> Result<[Vec<Reference>; 2]> {
+    let mut canonical: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
+    for lists in slice_lists {
+        for list in 0..2 {
+            for reference in &lists[list] {
+                if reference.layer_id > 62 {
+                    return Err(invalid("HEVC reference layer out of range"));
+                }
+                if let Some(existing) = canonical
+                    .iter()
+                    .flatten()
+                    .find(|r| r.identity() == reference.identity())
+                {
+                    if existing.long_term != reference.long_term {
+                        return Err(invalid(
+                            "HEVC reference identity has conflicting classification",
+                        ));
+                    }
+                }
+                if !canonical[list]
+                    .iter()
+                    .any(|r| r.identity() == reference.identity())
+                {
+                    if canonical[list].len() == 256 {
+                        return Err(invalid("HEVC picture reference map exceeds index range"));
+                    }
+                    canonical[list].push(reference.clone());
+                }
+            }
+        }
+    }
+    Ok(canonical)
+}
+
+pub(crate) fn motion_boundary(a: Motion, b: Motion, lists: &[Vec<Reference>; 2]) -> bool {
     let convert = |m: Motion| {
-        let mut output = [(0, [0; 2]); 2];
+        let mut output = [(super::hevc_reference_list::PictureIdentity {layer_id:0,poc:0}, [0; 2]); 2];
         let mut count = 0;
         for (l, v) in m.into_iter().enumerate() {
             if let Some(v) = v {
-                output[count] = (lists[l][v.reference as usize].poc, v.mv);
+                output[count] = (lists[l][v.reference as usize].identity(), v.mv);
                 count += 1;
             }
         }
@@ -2350,7 +2378,7 @@ fn motion_boundary(a: Motion, b: Motion, lists: &[Vec<Reference>; 2]) -> bool {
     if na != nb {
         return true;
     }
-    let same = |a: (i32, [i16; 2]), b: (i32, [i16; 2])| {
+    let same = |a: (super::hevc_reference_list::PictureIdentity, [i16; 2]), b: (super::hevc_reference_list::PictureIdentity, [i16; 2])| {
         a.0 == b.0 && (0..2).all(|i| (i32::from(a.1[i]) - i32::from(b.1[i])).abs() < 4)
     };
     match na {

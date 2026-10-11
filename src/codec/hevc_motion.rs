@@ -8,6 +8,7 @@ use crate::{Result, invalid};
 use std::sync::Arc;
 #[derive(Clone)]
 pub struct Reference {
+    pub layer_id: u8,
     pub long_term: bool,
     pub poc: i32,
     pub picture: Option<Arc<Picture>>,
@@ -19,6 +20,10 @@ struct View<'a> {
     planes: &'a [super::hevc_plane::Plane; 3],
 }
 impl Reference {
+    pub fn identity(&self) -> super::hevc_reference_list::PictureIdentity {
+        super::hevc_reference_list::PictureIdentity {layer_id:self.layer_id,poc:self.poc}
+    }
+
     fn view<'a>(
         &'a self,
         current: Option<(&'a [super::hevc_plane::Plane; 3], [u8; 2])>,
@@ -49,10 +54,10 @@ pub struct Vector {
 pub type Motion = [Option<Vector>; 2];
 /// Preserve the referenced POC when publishing slice-local motion indices in a
 /// picture-wide map used by deblocking and later temporal prediction.
-pub(crate) fn remap_references(
+pub(crate) fn remap_references<T: PartialEq>(
     mut motion: Motion,
-    source: &[Vec<i32>; 2],
-    target: &[Vec<i32>; 2],
+    source: &[Vec<T>; 2],
+    target: &[Vec<T>; 2],
 ) -> Result<Motion> {
     for list in 0..2 {
         if let Some(vector) = &mut motion[list] {
@@ -129,6 +134,10 @@ impl Spatial<'_> {
             let target = self.lists[list]
                 .get(reference as usize)
                 .ok_or_else(|| invalid("HEVC temporal target reference is missing"))?;
+            let source_layer = *p.reference_layers[source_list]
+                .get(vector.reference as usize)
+                .ok_or_else(|| invalid("HEVC collocated reference layer is missing"))?;
+            if source_layer>62 || target.layer_id>62 { return Err(invalid("HEVC temporal reference layer out of range")); }
             let source_long = *p.reference_long_term[source_list]
                 .get(vector.reference as usize)
                 .ok_or_else(|| invalid("HEVC collocated reference classification is missing"))?;
@@ -334,6 +343,7 @@ impl Spatial<'_> {
                                         if source.long_term != target.long_term {
                                             continue;
                                         }
+                                        // 8.5.3.2.7 compares DiffPicOrderCnt, not picture identity.
                                         if source.poc == target.poc {
                                             return Ok(Some(v.mv));
                                         }
@@ -859,16 +869,17 @@ mod tests {
             sao: Vec::new(),
             motion,
             reference_pocs: [vec![0, 1], Vec::new()],
+            reference_layers: [vec![0, 0], Vec::new()],
             reference_long_term: [vec![false, true], Vec::new()],
         });
         let lists = [
             vec![
-                Reference {
+                Reference { layer_id: 0,
                     poc: 8,
                     long_term: false,
                     picture: Some(Arc::clone(&picture)),
                 },
-                Reference {
+                Reference { layer_id: 0,
                     poc: 1,
                     long_term: true,
                     picture: Some(picture),
@@ -932,6 +943,7 @@ mod tests {
                 sao: Vec::new(),
                 motion: Vec::new(),
                 reference_pocs: [Vec::new(), Vec::new()],
+                reference_layers: [Vec::new(), Vec::new()],
                 reference_long_term: [Vec::new(), Vec::new()],
             };
             let mut state = 97u32;
@@ -943,12 +955,12 @@ mod tests {
             }
             let picture = Arc::new(picture);
             let lists = [
-                vec![Reference {
+                vec![Reference { layer_id: 0,
                     picture: Some(Arc::clone(&picture)),
                     poc: 0,
                     long_term: false,
                 }],
-                vec![Reference {
+                vec![Reference { layer_id: 0,
                     picture: Some(Arc::clone(&picture)),
                     poc: 0,
                     long_term: false,
@@ -1316,7 +1328,7 @@ mod current_sampling_contract {
             p.reconstruct_inter([0, 0, 8, 8], &expected).unwrap();
         }
         let lists = [
-            vec![Reference {
+            vec![Reference { layer_id: 0,
                 poc: 0,
                 long_term: true,
                 picture: None,

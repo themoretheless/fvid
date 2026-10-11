@@ -1,5 +1,29 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC layer-aware motion identities, 2026-10-12
+
+Motion reference descriptors and retained collocated metadata now preserve
+`(nuh_layer_id, POC)`. Slice canonicalization and deblocking compare that full identity.
+AMVP and combined merge retain the specified POC-based comparisons
+(8.5.3.2.4, 8.5.3.2.7 and F.8.5), verified separately by regression.
+Base decoder reference lookup also filters by the slice's layer.
+
+Layered DPB translation shifts each nested reference by its own layer's POC
+reset decrement. A picture in an unmoved layer still receives a metadata copy
+when one of its referenced layers moves; sample planes remain shared. Separate
+colour-plane children preserve and translate the same layer metadata. Metadata
+storage accounts for the layer vectors, and inconsistent saved arrays or layer
+IDs outside 0..62 are rejected.
+
+The original `hevc-motion-layer-identity.y4m` atlas distinguishes equal-POC
+pictures with different samples. Operation acceptance covers canonical slice
+mapping, actual zero-motion prediction pixels, POC-based AMVP selection, boundary
+identity and selective nested POC translation. The generator is pure Python;
+ordinary tests read saved fixtures offline. These are motion/DPB operation
+checks, not scalable coded-picture playback. Nonbase reconstruction routing,
+full scalable prediction and remaining codec tools still need implementation
+and coded-stream acceptance.
+
 ## HEVC context-resolved layered SPS, 2026-10-11
 
 `LayeredSps::parse` shares the ordinary SPS body reader and accepts Annex F
@@ -12696,8 +12720,10 @@ commit only after reconstruction/DPB updates succeed; any planning error leaves
 the original state untouched. `translate_temporal_references` checks memory and
 range bounds, translates retained temporal-reference identities and nested
 collocated metadata, shares pixel buffers, and preserves published source Arcs.
-It is explicitly limited to temporal-only reference data: cross-layer motion
-identities still require the scalable reconstruction path.
+This initial entry point was limited to temporal-only reference data. The
+2026-10-12 layer-aware identity change above adds `translate_references` for
+per-reference-layer metadata translation; scalable reconstruction routing
+remains open.
 
 Twenty-four authored state sequences use 136 new common-header witnesses; two
 additional headers qualify absent-LSB full-reset acceptance/refusal. Aligned and
