@@ -6488,3 +6488,20 @@ OLS1, whose other layer reaches temporal ID two. A dedicated regression first
 reproduced loss of the two higher OLS rows, then verifies all three complete
 aggregate reorder/per-layer storage limits after the fix. It verifies resolved
 metadata, not decoded inter-layer pictures or an operational output scheduler.
+
+## Active-layer PPS and colour mapping
+
+`generate_hevc_layered_pps.py` writes 46 original VPS/SPS/PPS configurations and
+short MP4 metadata reproducers, plus a JSON manifest with independently evaluated
+rational colour-map probes. It uses only the Python standard library and owned
+fixture helpers. No private media, codec parameter sets, external codec, FFmpeg
+or network is used. Each MP4 retains the original synthetic 17-frame seed sample
+payload and replaces its configuration; it is deliberately a metadata reproducer,
+not a conforming multilayer picture acceptance fixture.
+
+The matrix covers PPS/SPS scaling inheritance with distinguishable 17/21/16
+coefficients, signed reference offsets, inferred/explicit/ignored phases, LUT
+partitions and split/unsplit octants, quantization, thresholds, clipping and
+mixed depths. Invalid cases isolate reference/context constraints, phase and
+offset bounds, empty regions, colour-table IDs/depths/coefficients and reserved
+partition syntax. Tests consume saved bytes without invoking the generator.

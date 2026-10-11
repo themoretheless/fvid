@@ -40,10 +40,11 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None):
     if bad_geometry:
         target = dict(target, size=[255, 192])
-    formats = [BASE] if one_format else [BASE, target, fmt(3, True, (16, 12))]
+    base_format = BASE if base_format is None else base_format
+    formats = [base_format] if one_format else [base_format, target, fmt(3, True, (16, 12))]
     # Two layers (IDs 0 and 3), three temporal sublayers, base ordering 16/2/0.
     b = '0000' + '11' + '000001' + '0101' + '1'*16 + ptl(True)
     b += '0' + ue(base_buffers-1) + ue(2) + ue(base_latency)
@@ -81,7 +82,7 @@ def scaling_data():
 
 
 def sps(multilayer=True, independent=False, update=None, scaling='disabled',
-        reference=0, rps=0, pcm=False, scc=False, bad_vps=False, sub=2, nesting=True, buffers=16, reorder=2, latency=0):
+        reference=0, rps=0, pcm=False, scc=False, bad_vps=False, sub=2, nesting=True, buffers=16, reorder=2, latency=0, coded_depth=(8, 8)):
     b = ('0001' if bad_vps else '0000') + ('111' if multilayer else f'{sub:03b}')
     if not multilayer:
         b += str(int(nesting)) + ptl(True, sub=sub)
@@ -89,7 +90,7 @@ def sps(multilayer=True, independent=False, update=None, scaling='disabled',
     if multilayer:
         b += '0' if update is None else '1' + f'{update:08b}'
     else:
-        b += ue(1) + ue(128) + ue(128) + '0' + ue(0) + ue(0)
+        b += ue(1) + ue(128) + ue(128) + '0' + ue(coded_depth[0]-8) + ue(coded_depth[1]-8)
     b += ue(4)  # eight POC LSB bits
     if not multilayer:
         b += '0' + ue(buffers-1) + ue(reorder) + ue(latency)

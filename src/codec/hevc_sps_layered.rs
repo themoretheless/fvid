@@ -60,7 +60,7 @@ impl LayeredSpsContext<'_> {
             .unwrap_or(0)
             != 0)
     }
-    pub(super) fn validate_nal_layer(&self, nal_layer: u8) -> Result<()> {
+    pub(crate) fn validate_nal_layer(&self, nal_layer: u8) -> Result<()> {
         let i = self.index()?;
         let reference = self
             .vps

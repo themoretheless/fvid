@@ -1,6 +1,12 @@
 //! Base HEVC picture parameter sets, including tile geometry and filtering syntax.
 use super::{bits::BitReader, hevc_nal::NalRbsp, hevc_scaling::ScalingLists, hevc_sps::Sps};
 use crate::{Result, invalid};
+#[path = "hevc_colour_mapping.rs"]
+mod colour_mapping;
+pub use colour_mapping::ColourMappingTable;
+#[path = "hevc_pps_layered.rs"]
+mod layered;
+pub use layered::{LayeredPps, LayeredPpsContext, ReferenceGeometry, ReferenceLocation};
 fn ue(b: &mut BitReader<'_>, max: u32) -> Result<u32> {
     let n = b.unsigned_golomb()?;
     if n > max {
@@ -24,10 +30,14 @@ fn read_base_multilayer_extension(b: &mut BitReader<'_>) -> Result<bool> {
         return Err(invalid("HEVC base-layer PPS cannot infer scaling lists"));
     }
     if ue(b, 62)? != 0 {
-        return Err(crate::unsupported("HEVC multilayer PPS reference locations are not connected"));
+        return Err(crate::unsupported(
+            "HEVC multilayer PPS reference locations are not connected",
+        ));
     }
     if b.bit()? {
-        return Err(crate::unsupported("HEVC multilayer PPS colour mapping is not connected"));
+        return Err(crate::unsupported(
+            "HEVC multilayer PPS colour mapping is not connected",
+        ));
     }
     Ok(poc_reset_info_present)
 }
@@ -123,8 +133,20 @@ pub struct Pps {
 }
 impl Pps {
     pub fn parse(nal: &[u8], sps: &Sps, budget: usize) -> Result<Self> {
+        Ok(Self::parse_internal(nal, sps, budget, None)?.pps)
+    }
+    fn parse_internal(
+        nal: &[u8],
+        sps: &Sps,
+        budget: usize,
+        context: Option<&LayeredPpsContext<'_>>,
+    ) -> Result<LayeredPps> {
         let rbsp = NalRbsp::parse(nal, budget)?;
-        rbsp.header.require_base_layer()?;
+        if let Some(c) = context {
+            c.validate_nal_layer(rbsp.header.layer_id)?;
+        } else {
+            rbsp.header.require_base_layer()?;
+        }
         if rbsp.header.unit_type != 34 {
             return Err(invalid("expected HEVC PPS NAL"));
         }
@@ -193,7 +215,8 @@ impl Pps {
         } else {
             Deblocking::default()
         };
-        let scaling_lists = if b.bit()? {
+        let scaling_list_data_present = b.bit()?;
+        let mut scaling_lists = if scaling_list_data_present {
             if !sps.scaling_lists_enabled {
                 return Err(invalid("PPS scaling lists require SPS enablement"));
             }
@@ -218,6 +241,9 @@ impl Pps {
         let mut adaptive_colour_transform = false;
         let mut slice_act_qp_offsets = false;
         let mut act_qp_offsets = [-5, -5, -3];
+        let mut scaling_list_reference = None;
+        let mut reference_locations = Vec::new();
+        let mut colour_mapping = None;
         if b.bit()? {
             let range = b.bit()?;
             let multilayer = b.bit()?;
@@ -257,7 +283,23 @@ impl Pps {
                 }
             }
             if multilayer {
-                poc_reset_info_present = read_base_multilayer_extension(b)?;
+                if let Some(c) = context {
+                    let extension = c.read_extension(
+                        b,
+                        id,
+                        scaling_list_data_present,
+                        budget.saturating_sub(rbsp.bytes.capacity()),
+                    )?;
+                    poc_reset_info_present = extension.poc_reset;
+                    scaling_list_reference = extension.scaling_reference;
+                    if let Some(reference) = scaling_list_reference {
+                        scaling_lists = Some(c.scaling_lists(reference)?.clone());
+                    }
+                    reference_locations = extension.locations;
+                    colour_mapping = extension.colour_mapping;
+                } else {
+                    poc_reset_info_present = read_base_multilayer_extension(b)?;
+                }
             }
             if scc_extension {
                 current_picture_reference = b.bit()?;
@@ -332,7 +374,8 @@ impl Pps {
             }
         }
         b.finish_rbsp()?;
-        Ok(Self {
+        let effective_scaling_lists = scaling_lists.as_ref().unwrap_or(&sps.scaling_lists).clone();
+        let pps = Self {
             id,
             sps_id,
             dependent_slices,
@@ -371,6 +414,18 @@ impl Pps {
             adaptive_colour_transform,
             slice_act_qp_offsets,
             act_qp_offsets,
+        };
+        Ok(LayeredPps {
+            pps,
+            vps_id: sps.vps_id,
+            layer_id: context.map_or(0, |c| c.sps.layer_id),
+            nal_layer_id: rbsp.header.layer_id,
+            output_layer_set: context.map_or(0, |c| c.sps.output_layer_set),
+            scaling_list_data_present,
+            scaling_list_reference,
+            effective_scaling_lists,
+            reference_locations,
+            colour_mapping,
         })
     }
 }

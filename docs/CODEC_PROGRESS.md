@@ -12293,3 +12293,31 @@ writer flushes only prefixes shared by the entire exact coding interval;
 its bytes match the original arbitrary-precision lower-endpoint writer for
 six bounded/random lengths through 100000 symbols and for every AC artifact.
 This keeps the authoring path efficient without changing coded bits.
+
+### HEVC active-layer PPS and colour-mapping metadata
+
+Context-aware `LayeredPps` now resolves scaling lists from the active reference
+PPS (including its SPS fallback), reference-region offsets and resampling phases.
+Non-direct reference phases are retained but ignored; inferred vertical chroma
+phase depends on the scaled/reference heights. Direct-reference regions must
+remain nonempty. The ordinary base-layer PPS path keeps its explicit refusals
+for disconnected inter-layer operations.
+
+The Annex F colour-mapping reader reconstructs bounded octant residuals and the
+predicted signed twelve-bit LUT. A scalar H.8.1.4.4 kernel maps an already sampled
+Y/Cb/Cr triplet with adaptive thresholds, rounding, clipping and separate output
+depths. Forty-six authored configuration cases cover valid metadata, malformed
+parameters, reserved syntax, truncation and LUT allocation limits. A rational
+arithmetic oracle checks every saved LUT cell and sample probes, including
+unsplit octants, quantized residuals, 8/10/16-bit and mixed luma/chroma depths.
+
+These are metadata and scalar-kernel acceptance tests. Spatial colour sampling,
+inter-layer resampling, slice syntax, reference picture management and actual
+multilayer reconstruction/playback are not connected by this change. This does
+not establish general scalable-profile conformance or close codec parity.
+
+Validation: 58 integration tests across 16 HEVC suites and 211 HEVC unit tests
+pass with locked offline dependencies; one explicit fixture-generator test stays
+ignored. The player build check passes. All 412 layered SPS/PPS artifacts
+regenerate byte-identically. Ordinary tests invoke no fixture generator or
+external media tool.
