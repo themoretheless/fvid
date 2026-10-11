@@ -210,7 +210,7 @@ fn legal_non_vcl_placement_shared_pps_and_reserved_payloads_preserve_all_pixels(
         }
         assert!(original.active(0).is_none() && original.active(3).is_none());
     }
-    assert_eq!(accepted, 4);
+    assert_eq!(accepted, 6);
 }
 
 #[test]
@@ -460,5 +460,114 @@ fn layered_dpb_publishes_all_layers_atomically_and_retries_after_reconstruction_
         dpb.reset();
         assert!(dpb.references().next().is_none());
         assert_eq!(dpb.poc(), &LayeredPocState::default());
+    }
+}
+
+#[test]
+fn eos_and_eob_release_references_and_require_a_correct_irap_restart() {
+    use fvid::codec::hevc_decoder::LayeredDpb;
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for (name, kept, error) in [
+        (
+            "hevc-layered-au-eos-base.mp4",
+            vec![],
+            "HEVC picture after EOS must restart its source layer with IRAP",
+        ),
+        (
+            "hevc-layered-au-eos-enhancement.mp4",
+            vec![0],
+            "HEVC picture after EOS must restart its source layer with IRAP",
+        ),
+        (
+            "hevc-layered-au-aud-eos-eob.mp4",
+            vec![],
+            "HEVC access unit after EOB must begin with IRAP",
+        ),
+    ] {
+        let mut input = movie(name);
+        let bytes = input.tracks()[0].configuration.clone();
+        let config = HevcConfig::parse(&bytes).unwrap();
+        let initial = LayeredParameters::from_configuration(&bytes, BUDGET).unwrap();
+        let mut packet = vec![];
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let mut dpb = LayeredDpb::default();
+        let plan =
+            LayeredAccessUnit::parse(&initial, dpb.poc(), &packet, config.length_size, 1, BUDGET)
+                .unwrap();
+        let reconstruct = |picture: &fvid::codec::hevc_decoder::LayeredAccessPicture,
+                           _: &[Reference],
+                           _: &[(PictureStatus, Arc<Picture>)],
+                           budget| {
+            Ok(Arc::new(decode_layered(
+                &picture.binding.context(),
+                &picture.slices,
+                picture.poc,
+                &vec![[vec![], vec![]]; picture.slices.len()],
+                budget,
+            )?))
+        };
+        let (parameters, outputs, _) = dpb.reconstruct(plan, BUDGET, reconstruct).unwrap();
+        assert_eq!(
+            dpb.references().map(|r| r.layer_id).collect::<Vec<_>>(),
+            kept,
+            "{name}"
+        );
+        for layer in [0, 3] {
+            assert_eq!(
+                parameters.active(layer).is_some(),
+                kept.contains(&layer),
+                "{name}"
+            );
+        }
+        assert_eq!(dpb.poc().previous(3), None);
+        assert_eq!(
+            dpb.poc().previous(0),
+            if kept.is_empty() { None } else { Some(0) }
+        );
+        for decoded in outputs {
+            assert_pixels(&decoded.picture, &oracle, 0);
+        }
+        // A predicted continuation must fail at the end-marker rule, before
+        // reconstruction or a misleading missing-reference failure.
+        let mut predicted = movie("hevc-layered-reconstruct-inter-prediction.mp4");
+        predicted.read_packet(0, 1, &mut packet).unwrap();
+        let before = dpb.poc().clone();
+        assert_eq!(
+            LayeredAccessUnit::parse(
+                &parameters,
+                dpb.poc(),
+                &packet,
+                config.length_size,
+                1,
+                BUDGET
+            )
+            .err()
+            .unwrap()
+            .to_string(),
+            error,
+            "{name}"
+        );
+        assert_eq!(dpb.poc(), &before);
+        // An original IRAP packet is accepted without a caller-forced reset.
+        let mut restart = movie("hevc-layered-reconstruct-pcm-dependent.mp4");
+        restart.read_packet(0, 0, &mut packet).unwrap();
+        let plan = LayeredAccessUnit::parse(
+            &parameters,
+            dpb.poc(),
+            &packet,
+            config.length_size,
+            1,
+            BUDGET,
+        )
+        .unwrap();
+        let (_, outputs, _) = dpb.reconstruct(plan, BUDGET, reconstruct).unwrap();
+        for decoded in outputs {
+            assert_pixels(&decoded.picture, &oracle, 0);
+        }
+        assert_eq!(
+            dpb.references().map(|r| r.layer_id).collect::<Vec<_>>(),
+            [0, 3]
+        );
+        assert_eq!(dpb.next_access_unit(), 2);
     }
 }

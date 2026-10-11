@@ -127,6 +127,8 @@ def main():
                 ignored = ((0<<9)|(63<<3)|1).to_bytes(2,"big") + b"\x00\x00\x03\xff"
                 access_case("ignored-layer63",[ignored,aud,*all_slices,ignored],ignored=True)
                 access_case("aud-eos-eob",[aud,*all_slices,eos0,eos3,eob],ended=9,eob=True)
+                access_case("eos-base",[*all_slices,eos0],ended=1)
+                access_case("eos-enhancement",[*all_slices,eos3],ended=8)
                 access_case("descending-layer",slices+base_slices,error="HEVC layered pictures must increase in layer order")
                 access_case("duplicate-first-slice",[*all_slices,slices[0]],error="HEVC slice addresses must increase within one picture")
                 access_case("late-aud",[*base_slices,aud,*slices],error="HEVC access-unit delimiter must be first and unique")

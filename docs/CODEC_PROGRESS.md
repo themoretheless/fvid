@@ -1,5 +1,27 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC layered sequence-end ownership, 2026-10-12
+
+`LayeredDpb` now applies EOS/EOB only after every picture in the current AU
+successfully reconstructs. EOS releases its source layer and all transitively
+predicted layers from reference storage and parameter activation, resetting
+those layers' POC history. The next affected picture must be an IRAP in the
+signalled source layer. EOB releases all reference/parameter state; the next AU
+must begin with IRAP. Already returned output pictures retain their Arc storage.
+Partial EOS preserves unaffected layers and the global POC-reset period.
+
+Two new original PCM packets signal EOS in layer 0 or layer 3. Together with the
+existing AUD/EOS/EOB packet they assert exact pixel output, dependency-aware
+release, refusal of the next predicted packet at the specific restart rule,
+and acceptance of an original IRAP restart without caller-forced reset.
+The parser remains nonpublishing; only successful DPB reconstruction applies
+these markers. Output queuing, operation-point extraction, nonidentity
+inter-layer preparation and player connection remain unfinished.
+
+Validation: 29 layered integration tests and 214 HEVC unit tests pass (one
+existing unit test ignored). The offline player build passes; all 30 checked
+reconstruction/access-unit artifacts regenerate byte-for-byte.
+
 ## HEVC transactional layered DPB reconstruction, 2026-10-12
 
 `hevc_decoder::LayeredDpb` owns translated full layer/POC reference identities,
@@ -11,8 +33,8 @@ leaves the source store unchanged; reset clears references and AU identity.
 
 The reconstruction callback is responsible for inter-layer sample/motion
 preparation and coded picture reconstruction. This is a production transaction
-primitive, not yet the fully connected scalable player. EOS/EOB remain explicit
-unapplied markers for the sequence/output owner; operation-point extraction,
+primitive, not yet the fully connected scalable player. EOS/EOB are now applied
+by this owner after successful reconstruction; operation-point extraction,
 nonidentity preparation and frontend integration are still required.
 
 An acceptance regression uses the original two-AU inter-prediction video,
@@ -50,7 +72,7 @@ parameter stability and AUD/EOS/EOB placement. Parameter NALs between layer
 pictures remain valid. Reserved layer 63 is ignored before payload parsing.
 EOS/EOB are returned to the owner for application after reconstruction.
 
-Seventeen original synthetic packet witnesses cover these rules. Acceptance
+Nineteen original synthetic packet witnesses cover these rules. Acceptance
 cases compare reconstructed pixels in both layers against saved original YUV;
 the two-AU inter-prediction test resolves temporal and same-AU inter-layer
 identities through a test-held DPB. Refusal cases assert their exact failure

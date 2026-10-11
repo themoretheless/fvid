@@ -33,7 +33,8 @@ impl LayeredDpb {
     }
     /// The callback prepares inter-layer samples/motion and reconstructs one
     /// complete picture. No source state is published unless all layers succeed.
-    /// End markers are returned unapplied for the sequence/output owner.
+    /// End markers are applied after reconstruction; returned outputs remain
+    /// available to the sequence/output owner.
     pub fn reconstruct<F>(
         &mut self,
         plan: LayeredAccessUnit,
@@ -208,10 +209,21 @@ impl LayeredDpb {
                 output: first.picture_output,
             });
         }
-        let (parameters, transition, _, end) = plan.into_parts();
-        if let Some(transition) = transition {
-            self.poc = transition.into_state();
+        let (mut parameters, transition, _, end) = plan.into_parts();
+        let mut next_poc = transition.map_or_else(|| self.poc.clone(), |t| t.into_state());
+        let affected = if end.bitstream {
+            next_poc.end_bitstream();
+            (1u64 << 63) - 1
+        } else {
+            next_poc.end_sequences(end.layers)?
+        };
+        staged.retain(|(layer, _)| affected & (1u64 << layer) == 0);
+        for layer in 0..63 {
+            if affected & (1u64 << layer) != 0 {
+                parameters.end_layer_sequence(layer);
+            }
         }
+        self.poc = next_poc;
         self.references = staged;
         self.access_unit = next_access_unit;
         Ok((parameters, outputs, end))

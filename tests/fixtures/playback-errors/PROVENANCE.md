@@ -6740,15 +6740,16 @@ produce the exact missing-active-source refusal, rather than reuse stale data.
 
 ### Layered HEVC access-unit ordering and transactional planning (2026-10-12)
 
-`hevc-layered-access-units.json` describes seventeen short MP4 packets authored
+`hevc-layered-access-units.json` describes nineteen short MP4 packets authored
 by `generate_hevc_layered_reconstruction.py` from the existing original PCM,
 multislice and separate-colour-plane seeds. Only original parameter/slice
 headers and authored control NALs are used; no private source data is copied.
 The generator runs separately from tests without FFmpeg or network access.
 
-Four acceptance witnesses preserve the original coded entropy and saved YUV:
+Six acceptance witnesses preserve the original coded entropy and saved YUV:
 ignored reserved layer 63, AUD/EOS/EOB, a PPS between layer pictures and
-identical PPS RBSP received from a different allowed NAL layer mid-picture.
+identical PPS RBSP received from a different allowed NAL layer mid-picture,
+and separate EOS-in-base/EOS-in-enhancement packets.
 Thirteen malformed witnesses test exact ordering, first/address/colour-plane,
 parameter-change, control-trailing-bit and common-POC failures. These are
 parser/header refusal regressions, not acceptance for malformed streams.
@@ -6756,3 +6757,10 @@ Tests assert source-state rollback and subsequent baseline recovery. Existing
 nine reconstruction witnesses also exercise whole-packet planning and exact
 both-layer pixels, including two inter-predicted access units with a test-held
 DPB. A production scalable decoder/player owner remains separate work.
+
+The EOS packets retain original PCM entropy and add an authored EOS NAL in
+layer 0 or 3 after the complete coded AU. DPB acceptance compares both layers
+to saved YUV, checks release of the source and predicted layers, and uses the
+existing two-AU inter-prediction movie for the exact post-EOS/EOB restart-rule
+refusal. An original IRAP AU then recovers without external reset. These are
+sequence-state tests, not claims of output queue/player qualification.

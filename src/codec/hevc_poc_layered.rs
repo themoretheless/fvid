@@ -90,6 +90,8 @@ pub struct LayeredPocState {
     period_full: Option<bool>,
     previous_initial: bool,
     decremented: u64,
+    ended: u64,
+    restart_all: bool,
 }
 impl Default for LayeredPocState {
     fn default() -> Self {
@@ -100,6 +102,8 @@ impl Default for LayeredPocState {
             period_full: None,
             previous_initial: false,
             decremented: 0,
+            ended: 0,
+            restart_all: false,
         }
     }
 }
@@ -119,6 +123,40 @@ fn idc(reset: Option<Reset>) -> u8 {
     }
 }
 impl LayeredPocState {
+    /// End the signalled layers and every layer predicted from them. No pixel
+    /// ownership lives here; the DPB owner drops the returned reference layers.
+    pub fn end_sequences(&mut self, sources: u64) -> Result<u64> {
+        if sources >> 63 != 0 || self.graph.is_some_and(|g| sources & !g.registered != 0) {
+            return Err(invalid("HEVC EOS layer is not registered"));
+        }
+        let mut affected = sources;
+        if let Some(graph) = self.graph {
+            for id in 0..63 {
+                if sources & (1u64 << id) != 0 {
+                    affected |= graph.predicted[id];
+                }
+            }
+        }
+        for id in 0..63 {
+            if affected & (1u64 << id) != 0 {
+                self.layers[id] = Layer::default();
+            }
+        }
+        self.ended |= sources;
+        self.decremented &= !affected;
+        if self.graph.is_some_and(|g| g.registered & !affected == 0) {
+            self.graph = None;
+            self.period = None;
+            self.period_full = None;
+            self.previous_initial = false;
+            self.decremented = 0;
+        }
+        Ok(affected)
+    }
+    pub fn end_bitstream(&mut self) {
+        *self = Self::default();
+        self.restart_all = true;
+    }
     pub fn previous(&self, layer_id: u8) -> Option<i32> {
         self.layers
             .get(usize::from(layer_id))
@@ -133,6 +171,29 @@ impl LayeredPocState {
             return Err(invalid("HEVC layered POC configuration requires reset"));
         }
         let mut next = self.clone();
+        if next.restart_all {
+            if !pictures[0].header.nal.is_irap() {
+                return Err(invalid("HEVC access unit after EOB must begin with IRAP"));
+            }
+            next.restart_all = false;
+        }
+        for picture in pictures {
+            let h = picture.header;
+            for source in 0..63 {
+                if next.ended & (1u64 << source) == 0 {
+                    continue;
+                }
+                let affected = (1u64 << source) | graph.predicted[source];
+                if affected & (1u64 << h.nal.layer_id) != 0 {
+                    if h.nal.layer_id as usize != source || !h.nal.is_irap() {
+                        return Err(invalid(
+                            "HEVC picture after EOS must restart its source layer with IRAP",
+                        ));
+                    }
+                    next.ended &= !(1u64 << source);
+                }
+            }
+        }
         next.graph = Some(graph);
         let mut derived = [None; 63];
         let mut decrements = [0i64; 63];

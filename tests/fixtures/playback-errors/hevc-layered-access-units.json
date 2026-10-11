@@ -16,6 +16,20 @@
       "eob": true
     },
     {
+      "file": "hevc-layered-au-eos-base.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": null,
+      "ended": 1
+    },
+    {
+      "file": "hevc-layered-au-eos-enhancement.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": null,
+      "ended": 8
+    },
+    {
       "file": "hevc-layered-au-descending-layer.mp4",
       "seed": "hevc-pcm-reference-rext8.mp4",
       "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
