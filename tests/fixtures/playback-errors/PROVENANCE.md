@@ -6455,3 +6455,36 @@ files). Only the configured VPS changes; original media samples and offsets
 remain intact. Tests extract and parse the VPS to verify the precise metadata
 loss/illegal-presence behavior, independently of ordinary playback's multilayer
 refusal. These are metadata acceptance/refusal tests, not scalable playback.
+
+## Context-resolved HEVC layered SPS (2026-10-11)
+
+`generate_hevc_layered_sps.py` uses owned bit writing and box helpers to author
+44 original VPS/SPS pairs, a JSON manifest and 44 short synthetic MP4
+configuration reproducers. The MP4s retain the original synthetic 17-picture
+Main I/P/B media samples and original SPS, replace the configured VPS and append
+the authored SPS. Tests extract these exact NALs and parse them directly with a
+selected layer/OLS and saved active base SPS. No private media or parameter sets,
+external codec, FFmpeg or network is used by this generator or ordinary tests.
+
+Twenty-six metadata acceptance cases cover chroma 0/1/2/3, separate planes,
+8/10/16-bit and mixed depths, crop units, explicit representation override,
+shared base and independent SPS syntax, smaller OLS temporal depth, aggregate
+reordering above 255, default/explicit/inferred scaling, reference-set capacity,
+PCM and SCC palette/future syntax. The active base SPS's first 4x4 scaling list
+has sixteen values of 17 (initial nextCoef 8 plus signed delta 9), making wrong
+default-list inference observable. A second saved base SPS disables scaling.
+Eighteen malformed/context-invalid cases isolate representation indices,
+single-format update, alignment, VPS identity, dependency/syntax mismatch,
+unavailable/reserved scaling references, RPS/PCM bounds, temporal nesting and
+coded SPS ordering/format exceeding VPS limits.
+
+These are parameter metadata acceptance/refusal tests; no profile-conformant
+scalable video or multilayer picture playback is claimed. Existing ordinary
+base-layer decoding is checked separately. Generation is separate from tests,
+and saved fixtures regenerate byte-identically without external tools.
+
+The wide-reorder MP4 also supplies its original temporal-ID-zero base SPS to
+OLS1, whose other layer reaches temporal ID two. A dedicated regression first
+reproduced loss of the two higher OLS rows, then verifies all three complete
+aggregate reorder/per-layer storage limits after the fix. It verifies resolved
+metadata, not decoded inter-layer pictures or an operational output scheduler.

@@ -1,0 +1,2112 @@
+{
+  "cases": [
+    {
+      "prefix": "hevc-layered-sps-c0-d8",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 0,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c0-d10",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 0,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c0-d16",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 0,
+        "separate": false,
+        "depth": [
+          16,
+          16
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c1-d8",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c1-d10",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c1-d16",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          16,
+          16
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c2-d8",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 2,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c2-d10",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 2,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c2-d16",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 2,
+        "separate": false,
+        "depth": [
+          16,
+          16
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c3-d8",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c3-d10",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-c3-d16",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": false,
+        "depth": [
+          16,
+          16
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-separate-d8",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": true,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-separate-d10",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": true,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-separate-d16",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": true,
+        "depth": [
+          16,
+          16
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-update",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": true,
+        "depth": [
+          16,
+          12
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 2,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-shared-base",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": true,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-independent",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          128,
+          128
+        ],
+        "crop": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": true,
+      "multilayer": false,
+      "representation": null,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-infer-scaling",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "infer",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-explicit-scaling",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "explicit",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-default-scaling",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "default",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-rps-bound",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 7,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-pcm",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": true,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-scc",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 3,
+        "separate": true,
+        "depth": [
+          16,
+          12
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 2,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": true
+    },
+    {
+      "prefix": "hevc-layered-sps-wide-reorder",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          300,
+          0
+        ],
+        [
+          7,
+          301,
+          2
+        ],
+        [
+          8,
+          302,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-short-temporal",
+      "error": null,
+      "expectation": "metadata-acceptance",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-update",
+      "error": "representation index",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 3,
+        "separate": true,
+        "depth": [
+          16,
+          12
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 3,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-single-update",
+      "error": "single VPS representation",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          128,
+          128
+        ],
+        "crop": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 0,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-geometry",
+      "error": "block geometry",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          255,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-vps",
+      "error": "different VPS",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-independent",
+      "error": "layer dependencies",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-dependent",
+      "error": "layer dependencies",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-scaling-self",
+      "error": "available reference",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "infer",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-scaling-absent",
+      "error": "available reference",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "infer",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-scaling-reserved",
+      "error": "available reference",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "infer",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-rps",
+      "error": "reference set value",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 8,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-pcm-depth",
+      "error": "PCM parameters",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          8,
+          8
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": true,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-temporal",
+      "error": "temporal layers",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-nesting",
+      "error": "nesting contradicts VPS",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-shared-format",
+      "error": "format exceeds",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          64,
+          64
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": true,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-dpb",
+      "error": "per-layer DPB",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          17,
+          1,
+          0
+        ],
+        [
+          18,
+          2,
+          2
+        ],
+        [
+          19,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": true,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-coded-buffers",
+      "error": "ordering exceeds",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-coded-reorder",
+      "error": "ordering exceeds",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    },
+    {
+      "prefix": "hevc-layered-sps-bad-coded-latency",
+      "error": "ordering exceeds",
+      "expectation": "invalid-metadata",
+      "format": {
+        "chroma": 1,
+        "separate": false,
+        "depth": [
+          10,
+          10
+        ],
+        "size": [
+          256,
+          192
+        ],
+        "crop": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "rows": [
+        [
+          6,
+          1,
+          0
+        ],
+        [
+          7,
+          2,
+          2
+        ],
+        [
+          8,
+          3,
+          3
+        ]
+      ],
+      "shared": false,
+      "independent": false,
+      "multilayer": false,
+      "representation": 1,
+      "scaling": "disabled",
+      "rps": 0,
+      "pcm": false,
+      "scc": false
+    }
+  ],
+  "provenance": "Original owned VPS/SPS syntax. MP4s retain the synthetic 17-frame Main I/P/B seed samples and append the authored SPS in hvcC. Tests parse configuration directly; no scalable-profile or multilayer playback acceptance is claimed. Generation and tests use no private media, external codec or network."
+}

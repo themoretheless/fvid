@@ -15,7 +15,8 @@ use crate::{Result, invalid};
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Ordering {
     pub max_decoded_pictures: u8,
-    pub max_reorder_pictures: u8,
+    /// Per-SPS in Annex A, aggregate OLS reordering in Annex F.
+    pub max_reorder_pictures: u32,
     pub max_latency_increase_plus1: u32,
 }
 /// Shared by VPS and SPS. Level/geometry-dependent DPB limits need a later SPS
@@ -36,7 +37,7 @@ pub fn read_ordering(bits: &mut BitReader<'_>, max_sub_layers_minus1: u8) -> Res
         }
         output[i] = Ordering {
             max_decoded_pictures: (dpb_minus1 + 1) as u8,
-            max_reorder_pictures: reorder as u8,
+            max_reorder_pictures: reorder,
             max_latency_increase_plus1: latency,
         };
         if all

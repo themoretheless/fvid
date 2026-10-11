@@ -1,5 +1,40 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC context-resolved layered SPS, 2026-10-11
+
+`LayeredSps::parse` shares the ordinary SPS body reader and accepts Annex F
+dependent-layer SPS syntax (`sps_ext_or_max_sub_layers_minus1 == 7`) with an
+explicit active VPS/layer/OLS context. It resolves representation mapping or an
+SPS override, converts crop units, checks coding-block alignment, inherits
+temporal nesting and selects the layer's effective VPS PTL. Shared base SPSs
+retain their own coded PTL while the dependent layer receives a separate
+effective profile and VPS geometry. Independent layers retain their coded
+format. Coded format/ordering fields are checked against the VPS.
+
+Per-layer DPB capacities and aggregate OLS reorder/latency values remain
+distinct. The reorder counter now retains u32 values. The declared SPS temporal
+bound is retained separately from a selected OLS with fewer temporal layers.
+Conversely, a temporal-ID-zero base SPS does not truncate higher OLS temporal
+output limits; a short synthetic MP4 regression reproduced that precise loss
+before the fix.
+Where SPS ordering is omitted, reference-set parsing uses the selected layer's
+storage bound. Scaling lists
+can be explicit, default or inherited from an active, enabled, unchained
+reference-layer SPS; unavailable/self/reserved references are rejected.
+PCM, long-term references, range/multilayer/SCC syntax and future tails continue
+through the shared parser after inference.
+
+Forty-four original VPS/SPS pairs and short MP4 configuration reproducers cover
+26 metadata acceptance and 18 precise invalid cases, including 0/1/2/3 chroma,
+separate planes, 8/10/16-bit and mixed depth, format overrides, shared SPS,
+independent layers, temporal subsets, a non-default scaling matrix, RPS bounds,
+PCM, SCC palette initializers and VPS conformance limits. Ordinary Main/Main10
+context parsing is compared with the existing reader. These tests establish
+parameter syntax/inference, not scalable-profile conformance or multilayer
+picture playback. PPS/slice context, inter-layer resampling/prediction, per-layer
+picture storage and actual output scheduling are still unfinished. Ordinary
+`Sps::parse` continues to refuse non-base-layer NALs.
+
 ## HEVC SPS multilayer constraint and VPS profile inheritance, 2026-10-11
 
 `Sps::parse` accepts the Annex F SPS multilayer extension's
@@ -19,10 +54,9 @@ PTL, including its sublayers, and charges its allocation to the connected VPS
 metadata budget. `LayeredVps::profile_for_layer` selects the necessary layer's
 PTL in an OLS and applies F.7.4.4 inheritance from each preceding VPS PTL for
 missing general profile and sublayer profile/level fields. An original complete
-VPS fixture distinguishes inherited fields from replacements. This prepares
-context-aware dependent-layer SPS inference; it does not qualify scalable
-profiles or admit multilayer picture reconstruction. Representation/DPB/SPS
-context inference and inter-layer prediction remain unfinished.
+VPS fixture distinguishes inherited fields from replacements. Context-aware
+SPS inference is implemented as described above; scalable-profile conformance
+and inter-layer picture prediction remain unfinished.
 
 The shared PTL reader also rejects sublayer profile presence when
 `profilePresentFlag` is zero (7.4.4; Annex F does not remove this constraint).
@@ -95,8 +129,9 @@ conformance offsets. Missing colour/depth fields inherit from the preceding
 format; absent mappings use Min(layer index, last format index). Cropping uses
 ChromaArrayType units and checked wide arithmetic. Twenty-six original metadata
 fixtures cover 8/10/16-bit layouts, mixed depths, inheritance, explicit/inferred
-mapping, 256 formats, missing windows and malformed fields. SPS-dependent block
-alignment and connection to picture reconstruction remain unfinished.
+mapping, 256 formats, missing windows and malformed fields. LayeredSps now checks
+SPS-dependent block alignment; connection to picture reconstruction remains
+unfinished.
 
 `LayerSetExtension::output_layers` continues through extra PTLs and OLS syntax.
 It handles inferred/explicit output flags (including reserved default idc 3),

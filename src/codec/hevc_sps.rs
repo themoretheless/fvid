@@ -1,4 +1,4 @@
-//! H.265 sequence parameters for base-layer pictures.
+//! H.265 sequence parameters and context-resolved Annex F SPS syntax.
 use super::{
     bits::BitReader,
     hevc_nal::NalRbsp,
@@ -7,6 +7,10 @@ use super::{
     hevc_vui::Vui,
 };
 use crate::{Result, invalid};
+#[path = "hevc_sps_layered.rs"]
+mod layered;
+use layered::PictureFormat;
+pub use layered::{LayeredSps, LayeredSpsContext};
 fn ue(b: &mut BitReader<'_>, max: u32) -> Result<u32> {
     let value = b.unsigned_golomb()?;
     if value > max {
@@ -40,6 +44,8 @@ pub struct Sps {
     pub crop: [u32; 4],
     pub depth: [u8; 2],
     pub poc_bits: u8,
+    /// Coded SPS limits, or effective OLS/per-layer limits when Annex F omits
+    /// SPS ordering syntax. See LayeredSps::output_ordering for output scheduling.
     pub ordering: Vec<Ordering>,
     #[cfg(test)]
     pub(crate) ordering_bit_range: std::ops::Range<usize>,
@@ -92,56 +98,134 @@ impl Sps {
         ]
     }
     pub fn parse(nal: &[u8], budget: usize) -> Result<Self> {
+        Ok(Self::parse_internal(nal, budget, None)?.sps)
+    }
+    fn parse_internal(
+        nal: &[u8],
+        budget: usize,
+        context: Option<&LayeredSpsContext<'_>>,
+    ) -> Result<LayeredSps> {
         let rbsp = NalRbsp::parse(nal, budget)?;
-        rbsp.header.require_base_layer()?;
+        if let Some(c) = context {
+            c.validate_nal_layer(rbsp.header.layer_id)?;
+        } else {
+            rbsp.header.require_base_layer()?;
+        }
         if rbsp.header.unit_type != 33 || rbsp.header.temporal_id != 0 {
             return Err(invalid("expected HEVC SPS at temporal ID zero"));
         }
         let b = &mut BitReader::new(&rbsp.bytes);
         let vps_id = b.read(4)? as u8;
-        let max_sub = b.read(3)? as u8;
-        let temporal_id_nesting = b.bit()?;
+        let coded_sub = b.read(3)? as u8;
+        let multilayer_syntax = rbsp.header.layer_id != 0 && coded_sub == 7;
+        let dependent = context.map(|c| c.dependent()).transpose()?.unwrap_or(false);
+        let inherited_profile = if let Some(c) = context {
+            if vps_id != c.vps.vps.id {
+                return Err(invalid("HEVC SPS names a different VPS"));
+            }
+            if multilayer_syntax && !dependent
+                || dependent && rbsp.header.layer_id != 0 && !multilayer_syntax
+            {
+                return Err(invalid(
+                    "HEVC SPS multilayer syntax does not match layer dependencies",
+                ));
+            }
+            Some(c.vps.profile_for_layer(c.output_layer_set, c.layer_id)?)
+        } else {
+            None
+        };
+        let max_sub = if multilayer_syntax {
+            context
+                .unwrap()
+                .vps
+                .vps
+                .ordering
+                .len()
+                .checked_sub(1)
+                .ok_or_else(|| invalid("HEVC VPS has no temporal layers"))? as u8
+        } else {
+            coded_sub
+        };
+        if max_sub > 6 || context.is_some_and(|c| usize::from(max_sub) >= c.vps.vps.ordering.len())
+        {
+            return Err(invalid("HEVC SPS temporal layers exceed VPS"));
+        }
+        let temporal_id_nesting = if multilayer_syntax {
+            max_sub == 0 || context.unwrap().vps.vps.temporal_id_nesting
+        } else {
+            b.bit()?
+        };
         if max_sub == 0 && !temporal_id_nesting {
             return Err(invalid("SPS temporal nesting must be set"));
         }
-        let profile = ProfileTierLevel::read(b, true, max_sub)?;
+        if context.is_some_and(|c| c.vps.vps.temporal_id_nesting && !temporal_id_nesting) {
+            return Err(invalid("HEVC SPS temporal nesting contradicts VPS"));
+        }
+        let profile = if multilayer_syntax {
+            inherited_profile.clone().unwrap()
+        } else {
+            ProfileTierLevel::read(b, true, max_sub)?
+        };
         let id = ue(b, 15)? as u8;
-        let chroma_format = ue(b, 3)? as u8;
-        let separate_colour_plane = chroma_format == 3 && b.bit()?;
-        let dimensions = [b.unsigned_golomb()?, b.unsigned_golomb()?];
-        if dimensions.contains(&0) {
-            return Err(invalid("zero HEVC picture dimension"));
-        }
-        let mut crop = [0; 4];
-        if b.bit()? {
-            let scale = if separate_colour_plane {
-                [1, 1]
-            } else {
-                match chroma_format {
-                    1 => [2, 2],
-                    2 => [2, 1],
-                    _ => [1, 1],
-                }
-            };
-            for i in 0..4 {
-                crop[i] = b
-                    .unsigned_golomb()?
-                    .checked_mul(scale[i / 2])
-                    .ok_or_else(|| invalid("HEVC conformance crop overflow"))?;
+        let update = if multilayer_syntax && b.bit()? {
+            Some(b.read(8)? as u8)
+        } else {
+            None
+        };
+        let coded_format = if multilayer_syntax {
+            None
+        } else {
+            Some(PictureFormat::read(b)?)
+        };
+        let mut representation_index = None;
+        let format = if dependent {
+            let c = context.unwrap();
+            let (index, f) = c.format(update)?;
+            if let Some(coded) = coded_format.as_ref() {
+                coded.within(c.format(None)?.1)?;
             }
-            for axis in 0..2 {
-                if u64::from(crop[axis * 2]) + u64::from(crop[axis * 2 + 1])
-                    >= u64::from(dimensions[axis])
-                {
-                    return Err(invalid("HEVC conformance crop removes picture"));
-                }
+            representation_index = Some(index);
+            PictureFormat::from_vps(f)?
+        } else {
+            let coded = coded_format
+                .ok_or_else(|| invalid("HEVC independent SPS has no picture format"))?;
+            if let Some(c) = context.filter(|c| c.vps.extension.is_some()) {
+                coded.within(c.format(None)?.1)?;
             }
-        }
-        let depth = [ue(b, 8)? as u8 + 8, ue(b, 8)? as u8 + 8];
+            coded
+        };
+        let PictureFormat {
+            chroma: chroma_format,
+            separate: separate_colour_plane,
+            dimensions,
+            crop,
+            depth,
+        } = format;
         let poc_bits = ue(b, 12)? as u8 + 4;
         #[cfg(test)]
         let ordering_start = b.position();
-        let ordering = read_ordering(b, max_sub)?;
+        let output_ordering = context.map(|c| c.ordering()).transpose()?.flatten();
+        let ordering = if multilayer_syntax {
+            output_ordering
+                .clone()
+                .ok_or_else(|| invalid("HEVC multilayer SPS has no inferred DPB limits"))?
+        } else {
+            read_ordering(b, max_sub)?
+        };
+        if !multilayer_syntax {
+            if let Some(c) = context {
+                for (sps, vps) in ordering.iter().zip(&c.vps.vps.ordering) {
+                    if sps.max_decoded_pictures > vps.max_decoded_pictures
+                        || sps.max_reorder_pictures > vps.max_reorder_pictures
+                        || vps.max_latency_increase_plus1 != 0
+                            && (sps.max_latency_increase_plus1 == 0
+                                || sps.max_latency_increase_plus1 > vps.max_latency_increase_plus1)
+                    {
+                        return Err(invalid("coded HEVC SPS ordering exceeds VPS limits"));
+                    }
+                }
+            }
+        }
         #[cfg(test)]
         let ordering_bit_range = ordering_start..b.position();
         let min_cb = ue(b, 3)? as u8 + 3;
@@ -161,8 +245,15 @@ impl Sps {
             ue(b, u32::from(max_cb - min_tb))? as u8,
         ];
         let scaling_lists_enabled = b.bit()?;
+        let scaling_list_reference = if scaling_lists_enabled && multilayer_syntax && b.bit()? {
+            Some(b.read(6)? as u8)
+        } else {
+            None
+        };
         let scaling_lists = if !scaling_lists_enabled {
             super::hevc_scaling::ScalingLists::flat()
+        } else if let Some(reference) = scaling_list_reference {
+            context.unwrap().scaling_lists(reference)?.clone()
         } else if b.bit()? {
             super::hevc_scaling::ScalingLists::read(b)?
         } else {
@@ -301,7 +392,7 @@ impl Sps {
             }
         }
         b.finish_rbsp()?;
-        Ok(Self {
+        let sps = Self {
             vps_id,
             id,
             temporal_id_nesting,
@@ -346,6 +437,22 @@ impl Sps {
             motion_vector_resolution_control,
             intra_boundary_filtering_disabled,
             vui,
+        };
+        Ok(LayeredSps {
+            effective_profile: if dependent {
+                inherited_profile.unwrap()
+            } else {
+                sps.profile.clone()
+            },
+            output_ordering: output_ordering.unwrap_or_else(|| sps.ordering.clone()),
+            sps,
+            nal_layer_id: rbsp.header.layer_id,
+            layer_id: context.map_or(0, |c| c.layer_id),
+            output_layer_set: context.map_or(0, |c| c.output_layer_set),
+            multilayer_syntax,
+            max_sub_layers_minus1: max_sub,
+            representation_index,
+            scaling_list_reference,
         })
     }
 }
