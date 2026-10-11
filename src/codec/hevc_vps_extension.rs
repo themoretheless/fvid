@@ -211,6 +211,7 @@ pub struct LayeredExtensionPrefix {
     pub representations: RepresentationFormats,
     pub dpb: DpbParameters,
     pub dependencies: DependencyTypes,
+    retained_bytes: usize,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VideoSignalInfo {
@@ -256,7 +257,29 @@ pub struct VpsVuiPrefix {
     pub base_parameter_compatibility: Vec<Option<bool>>,
     pub end_bit: usize,
 }
+impl VpsVuiPrefix {
+    pub fn retained_bytes(&self) -> usize {
+        fn bytes<T>(v: &Vec<T>) -> usize {
+            v.capacity() * std::mem::size_of::<T>()
+        }
+        std::mem::size_of::<Self>()
+            + bytes(&self.rates)
+            + self.rates.iter().flatten().map(bytes).sum::<usize>()
+            + bytes(&self.video_signals)
+            + bytes(&self.video_signal_indices)
+            + bytes(&self.tiles)
+            + bytes(&self.loop_filter_not_across_tiles)
+            + bytes(&self.aligned_tile_boundaries)
+            + bytes(&self.wpp)
+            + bytes(&self.restrictions)
+            + self.restrictions.iter().map(bytes).sum::<usize>()
+            + bytes(&self.base_parameter_compatibility)
+    }
+}
 impl LayeredExtensionPrefix {
+    pub fn retained_bytes(&self) -> usize {
+        self.retained_bytes
+    }
     pub fn vui_prefix(
         &self,
         bytes: &[u8],
@@ -457,6 +480,16 @@ impl LayeredExtensionPrefix {
             v.capacity() * std::mem::size_of::<T>()
         }
         let mut left = budget;
+        charge(
+            &mut left,
+            std::mem::size_of::<Self>()
+                - std::mem::size_of::<LayerDependencyPrefix>()
+                - std::mem::size_of::<LayerSetExtension>()
+                - std::mem::size_of::<OutputLayerSets>()
+                - std::mem::size_of::<RepresentationFormats>()
+                - std::mem::size_of::<DpbParameters>()
+                - std::mem::size_of::<DependencyTypes>(),
+        )?;
         let graph = LayerDependencyPrefix::parse(bytes, start, layers, sublayers, left)?;
         charge(
             &mut left,
@@ -543,6 +576,7 @@ impl LayeredExtensionPrefix {
             representations,
             dpb,
             dependencies,
+            retained_bytes: budget - left,
         })
     }
 }

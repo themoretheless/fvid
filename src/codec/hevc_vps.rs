@@ -113,10 +113,12 @@ pub struct LayerSetHrd {
     pub parameters: super::hevc_hrd::Hrd,
 }
 fn hrd_bytes(h: &super::hevc_hrd::Hrd) -> usize {
-    h.layers.len() * std::mem::size_of::<super::hevc_hrd::SubLayer>()
+    h.layers.capacity() * std::mem::size_of::<super::hevc_hrd::SubLayer>()
         + h.layers
             .iter()
-            .map(|l| (l.nal.len() + l.vcl.len()) * std::mem::size_of::<super::hevc_hrd::Cpb>())
+            .map(|l| {
+                (l.nal.capacity() + l.vcl.capacity()) * std::mem::size_of::<super::hevc_hrd::Cpb>()
+            })
             .sum::<usize>()
 }
 #[derive(Clone, Debug)]
@@ -134,6 +136,98 @@ pub struct Vps {
     /// Annex A may ignore this tail; Annex F reset decoding needs its semantics.
     pub extension_present: bool,
     reset_extension: Option<std::sync::Arc<ResetExtension>>,
+    extension_start: Option<usize>,
+    metadata_bytes: usize,
+}
+/// Complete VPS NAL metadata syntax through RBSP trailing bits. This does not
+/// establish SPS/profile conformance or admit multilayer picture decoding.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LayeredVps {
+    pub vps: Vps,
+    pub extension: Option<Box<LayeredExtensionPrefix>>,
+    pub vui: Option<Box<VpsVuiPrefix>>,
+    pub bsp: Option<Box<BspHrdParameters>>,
+    pub future_extension: bool,
+}
+impl LayeredVps {
+    pub fn parse(nal: &[u8], budget: usize) -> Result<Self> {
+        fn charge(left: &mut usize, used: usize) -> Result<()> {
+            *left = left
+                .checked_sub(used)
+                .ok_or_else(|| invalid("HEVC layered VPS metadata exceeds memory budget"))?;
+            Ok(())
+        }
+        let rbsp = NalRbsp::parse(nal, budget)?;
+        let mut vps = Vps::parse_rbsp(&rbsp, budget, true)?;
+        let mut left = budget;
+        charge(
+            &mut left,
+            vps.metadata_bytes + std::mem::size_of::<Self>() - std::mem::size_of::<Vps>(),
+        )?;
+        let mut extension = None;
+        let mut vui = None;
+        let mut bsp = None;
+        let mut future = false;
+        if let Some(start) = vps.extension_start {
+            let maximum = vps.ordering.len() as u8 - 1;
+            let prefix =
+                LayeredExtensionPrefix::parse(&rbsp.bytes, start, &vps.layers, maximum, left)?;
+            charge(&mut left, prefix.retained_bytes())?;
+            let mut end = prefix.dependencies.end_bit;
+            if let Some(parsed) = prefix.vui_prefix(&rbsp.bytes, &vps.layers, left)? {
+                charge(&mut left, parsed.retained_bytes())?;
+                end = parsed.end_bit;
+                let reference_bytes =
+                    vps.layer_hrd.len() * std::mem::size_of::<&super::hevc_hrd::Hrd>();
+                if left < reference_bytes {
+                    return Err(invalid("HEVC layered VPS metadata exceeds memory budget"));
+                }
+                let references: Vec<_> = vps.layer_hrd.iter().map(|h| &h.parameters).collect();
+                if let Some(parameters) = parsed.bsp_hrd_refs(
+                    &rbsp.bytes,
+                    &prefix,
+                    &vps.layers,
+                    &references,
+                    maximum,
+                    vps.timing.is_some(),
+                    left - reference_bytes,
+                )? {
+                    charge(&mut left, parameters.retained_bytes())?;
+                    end = parameters.end_bit;
+                    bsp = Some(Box::new(parameters));
+                }
+                vui = Some(Box::new(parsed));
+            }
+            let mut bits = BitReader::new(&rbsp.bytes);
+            bits.skip(end)?;
+            future = bits.bit()?;
+            if future {
+                while bits.more_rbsp_data() {
+                    bits.bit()?;
+                }
+            }
+            bits.finish_rbsp()?;
+            // Replacement allocation briefly overlaps the deferred Annex A
+            // witness, whose storage was charged with the base VPS.
+            charge(
+                &mut left,
+                std::mem::size_of::<ResetExtension>() + 2 * std::mem::size_of::<usize>(),
+            )?;
+            vps.reset_extension = Some(std::sync::Arc::new(ResetExtension::Aligned(
+                prefix.representations.poc_lsb_aligned,
+            )));
+            extension = Some(Box::new(prefix));
+        } else if vps.layers.effective_max_layers() > 1 {
+            return Err(invalid("multilayer HEVC VPS requires extension syntax"));
+        }
+        Ok(Self {
+            vps,
+            extension,
+            vui,
+            bsp,
+            future_extension: future,
+        })
+    }
 }
 // Annex A ignores extension data. Keep the admission witness available for
 // Annex F without turning an inert tail into an ordinary VPS semantic change.
@@ -177,6 +271,9 @@ impl Vps {
     }
     fn parse_internal(nal: &[u8], budget: usize, layered: bool) -> Result<Self> {
         let rbsp = NalRbsp::parse(nal, budget)?;
+        Self::parse_rbsp(&rbsp, budget, layered)
+    }
+    fn parse_rbsp(rbsp: &NalRbsp, budget: usize, layered: bool) -> Result<Self> {
         rbsp.header.require_base_layer()?;
         if rbsp.header.unit_type != 32 || rbsp.header.temporal_id != 0 {
             return Err(invalid("expected base-layer HEVC VPS at temporal ID zero"));
@@ -323,6 +420,7 @@ impl Vps {
             None
         };
         let extension_present = bits.bit()?;
+        let extension_start = extension_present.then_some(bits.position());
         let reset_extension = extension_present.then(|| {
             std::sync::Arc::new(
                 if max_layers_minus1 != 0 || max_layer_id != 0 || extra_sets != 0 {
@@ -374,6 +472,8 @@ impl Vps {
             ordering,
             extension_present,
             reset_extension,
+            extension_start,
+            metadata_bytes,
             #[cfg(test)]
             ordering_bit_range,
             timing,

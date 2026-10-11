@@ -6297,6 +6297,21 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_layered_vps.py` authors ten original complete VPS metadata NALs,
+wrapping owned extension prefixes in original base PTL/ordering/layer-set syntax,
+optional original timing and emulation-prevention bytes. Annex F requires an
+extension for multiple layers and defines extension2/future-data handling.
+Fixtures cover complete plain/VUI/BSP/external metadata, base-to-BSP common HRD
+inheritance with schedules selecting both original and additional HRDs, an opaque future tail,
+missing required extension, alignment failure, missing RBSP stop and unmarked
+trailing data. Tests exercise the entire NAL API, budget admission and byte
+truncations. Unknown future data has no coded length, so some shorter tails
+remain valid; tests require them to preserve all known metadata rather than
+inventing a truncation-detection guarantee. No coded pictures are present and
+base PTL fields do not qualify scalable profile conformance: these are metadata
+syntax acceptance cases, not multilayer video acceptance. Generation/testing
+uses no private source parameter sets, external codec, FFmpeg or network.
+
 `generate_hevc_bsp_hrd.py` authors fourteen original BSP HRD continuations of
 the owned general-VUI prefix, following Annex F.7.3.2.1.6/F.7.4.3.1.6. Original
 NAL CPBs have increasing bitrates and decreasing buffer sizes. Independent

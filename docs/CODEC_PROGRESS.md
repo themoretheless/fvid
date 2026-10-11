@@ -2,6 +2,18 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`LayeredVps::parse` now reads a complete VPS NAL metadata path: shared bounded
+RBSP extraction, base syntax/HRDs, connected Annex F prefix, general VUI/BSP,
+extension2 flag and trailing bits. Existing base HRDs are borrowed rather than
+cloned into BSP parsing. Retained capacities, boxes and temporary HRD references
+are accounted against one metadata budget. The POC alignment witness comes from
+the parsed representation flags. Ten original complete metadata NAL fixtures
+cover plain/VUI/BSP/external/future tails, base-to-BSP HRD inheritance, required extension presence, alignment,
+stop bits and unmarked data. Mandatory syntax truncations fail; a shortened
+unlengthened opaque future tail may remain valid and must preserve known fields.
+This is complete metadata syntax acceptance, not profile/SPS conformance or
+multilayer playback admission. Ordinary `Vps::parse` retains its explicit refusal.
+
 `VpsVuiPrefix::bsp_hrd` continues through BSP HRD and independent-layer
 compatibility flags. It reads additional/inherited HRDs, inferred/signalled
 partitions and per-temporal delivery schedules. Checks cover counts, unique
@@ -10,7 +22,7 @@ availability, CPB bitrate/buffer ordering and VPS timing presence. Retained
 allocations are incrementally budgeted. HRD sublayers now retain CPB count even
 without NAL/VCL lists. Fourteen original metadata continuations include the
 16-scheme/32-schedule/32-CPB bounds and precise invalid cases. Actual HRD timing,
-SPS/level constraints, external inferred partition qualification and full VPS
+SPS/level constraints, external inferred partition qualification and picture
 admission remain distinct unfinished work; no multilayer playback is claimed.
 
 `LayeredExtensionPrefix::vui_prefix` reads general multilayer VPS VUI metadata:

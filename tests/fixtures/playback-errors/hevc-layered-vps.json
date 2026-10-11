@@ -1,0 +1,102 @@
+[
+  {
+    "file": "hevc-layered-vps-plain.vps",
+    "error": null,
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-vui.vps",
+    "error": null,
+    "vui": true,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-bsp.vps",
+    "error": null,
+    "vui": true,
+    "bsp": true,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-external.vps",
+    "error": null,
+    "vui": true,
+    "bsp": false,
+    "internal": false,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-base-hrd.vps",
+    "error": null,
+    "vui": true,
+    "bsp": true,
+    "internal": true,
+    "future": false,
+    "base_hrd": true,
+    "schemes": 1
+  },
+  {
+    "file": "hevc-layered-vps-future.vps",
+    "error": null,
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": true,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-missing-extension.vps",
+    "error": "requires extension syntax",
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-bad-alignment.vps",
+    "error": "alignment bit",
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-bad-stop.vps",
+    "error": "RBSP",
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  },
+  {
+    "file": "hevc-layered-vps-unmarked-tail.vps",
+    "error": "RBSP",
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2
+  }
+]

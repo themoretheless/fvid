@@ -25,6 +25,49 @@ pub struct BspHrdParameters {
     pub base_parameter_compatibility: Vec<Option<bool>>,
     pub end_bit: usize,
 }
+impl BspHrdParameters {
+    pub fn retained_bytes(&self) -> usize {
+        fn bytes<T>(v: &Vec<T>) -> usize {
+            v.capacity() * std::mem::size_of::<T>()
+        }
+        std::mem::size_of::<Self>()
+            + bytes(&self.additional_hrd)
+            + self
+                .additional_hrd
+                .iter()
+                .map(|h| {
+                    bytes(&h.layers)
+                        + h.layers
+                            .iter()
+                            .map(|s| bytes(&s.nal) + bytes(&s.vcl))
+                            .sum::<usize>()
+                })
+                .sum::<usize>()
+            + bytes(&self.sets)
+            + self
+                .sets
+                .iter()
+                .flatten()
+                .map(|schemes| {
+                    bytes(schemes)
+                        + schemes
+                            .iter()
+                            .map(|s| {
+                                bytes(&s.partitions)
+                                    + bytes(&s.schedules)
+                                    + s.schedules
+                                        .iter()
+                                        .map(|rows| {
+                                            bytes(rows) + rows.iter().map(bytes).sum::<usize>()
+                                        })
+                                        .sum::<usize>()
+                            })
+                            .sum::<usize>()
+                })
+                .sum::<usize>()
+            + bytes(&self.base_parameter_compatibility)
+    }
+}
 fn debit(left: &mut usize, bytes: usize) -> Result<()> {
     *left = left
         .checked_sub(bytes)
@@ -65,6 +108,30 @@ impl VpsVuiPrefix {
         timing_present: bool,
         budget: usize,
     ) -> Result<Option<BspHrdParameters>> {
+        if existing.len() > 1024 {
+            return Err(invalid("invalid HEVC BSP metadata geometry"));
+        }
+        let references: Vec<&Hrd> = existing.iter().collect();
+        self.bsp_hrd_refs(
+            bytes,
+            prefix,
+            layers,
+            &references,
+            max_sublayer,
+            timing_present,
+            budget,
+        )
+    }
+    pub(crate) fn bsp_hrd_refs(
+        &self,
+        bytes: &[u8],
+        prefix: &LayeredExtensionPrefix,
+        layers: &LayerSets,
+        existing: &[&Hrd],
+        max_sublayer: u8,
+        timing_present: bool,
+        budget: usize,
+    ) -> Result<Option<BspHrdParameters>> {
         if !self.bsp_hrd_present {
             return Ok(None);
         }
@@ -95,7 +162,7 @@ impl VpsVuiPrefix {
             let index = existing.len() + i;
             let present = index == 0 || b.bit()?;
             let temporal = bounded(&mut b, u32::from(max_sublayer))? as u8;
-            let previous = added.last().or_else(|| existing.last());
+            let previous = added.last().or_else(|| existing.last().copied());
             let parameters = Hrd::read(
                 &mut b,
                 temporal,
