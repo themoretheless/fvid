@@ -209,6 +209,232 @@ pub struct LayeredExtensionPrefix {
     pub dpb: DpbParameters,
     pub dependencies: DependencyTypes,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VideoSignalInfo {
+    pub format: u8,
+    pub full_range: bool,
+    pub primaries: u8,
+    pub transfer: u8,
+    pub matrix: u8,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VuiRate {
+    pub bit_rate: Option<(u16, u16)>,
+    pub picture_rate: Option<(u8, u16)>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct InterLayerRestriction {
+    pub spatial_offset_plus1: u32,
+    pub ctu_based: bool,
+    pub horizontal_offset_plus1: u32,
+}
+/// General VPS VUI prefix. When BSP HRD is present, end_bit points to its syntax
+/// and base-layer compatibility flags remain deferred until after BSP parsing.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct VpsVuiPrefix {
+    pub picture_types_aligned: bool,
+    pub irap_aligned: bool,
+    pub all_idr_aligned: bool,
+    pub rates: Vec<Option<Vec<VuiRate>>>,
+    pub video_signals: Vec<VideoSignalInfo>,
+    /// Raw inferred indices preserve the 06/2019 specification's layer-index
+    /// rule; external-base non-indexed mapping is not yet qualified or applied.
+    pub video_signal_indices: Vec<Option<u8>>,
+    pub tiles_not_in_use: bool,
+    pub tiles: Vec<bool>,
+    pub loop_filter_not_across_tiles: Vec<bool>,
+    pub aligned_tile_boundaries: Vec<u64>,
+    pub wpp_not_in_use: bool,
+    pub wpp: Vec<bool>,
+    pub single_layer_non_irap: bool,
+    pub higher_layer_irap_skip: bool,
+    pub restrictions: Vec<Vec<Option<InterLayerRestriction>>>,
+    pub bsp_hrd_present: bool,
+    pub base_parameter_compatibility: Vec<Option<bool>>,
+    pub end_bit: usize,
+}
+impl LayeredExtensionPrefix {
+    pub fn vui_prefix(
+        &self,
+        bytes: &[u8],
+        layers: &super::hevc_vps::LayerSets,
+        budget: usize,
+    ) -> Result<Option<VpsVuiPrefix>> {
+        if !self.dependencies.vui_present {
+            return Ok(None);
+        }
+        let n = self.graph.layer_ids.len();
+        if n <= usize::from(!layers.base_internal)
+            || n > 63
+            || self.graph.direct.len() != n
+            || self.graph.layer_ids.iter().any(|&id| id > 63)
+            || self.layer_sets.set_sublayers_minus1.len() > 2047
+            || self.layer_sets.set_sublayers_minus1.iter().any(|&s| s > 6)
+        {
+            return Err(invalid("invalid HEVC VPS VUI geometry"));
+        }
+        let cost = 4096
+            + n * n * std::mem::size_of::<Option<InterLayerRestriction>>()
+            + self.layer_sets.set_sublayers_minus1.len()
+                * (std::mem::size_of::<Option<Vec<VuiRate>>>()
+                    + 7 * std::mem::size_of::<VuiRate>());
+        if cost > budget {
+            return Err(invalid("HEVC VPS VUI metadata exceeds memory budget"));
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(self.dependencies.end_bit)?;
+        let aligned = b.bit()?;
+        let irap = aligned || b.bit()?;
+        let idr = irap && b.bit()?;
+        let has_rate = b.bit()?;
+        let has_pictures = b.bit()?;
+        let first = usize::from(!layers.base_internal);
+        let mut rates = vec![None; self.layer_sets.set_sublayers_minus1.len()];
+        if has_rate || has_pictures {
+            for (i, entry) in rates.iter_mut().enumerate().skip(first) {
+                let maximum = self.layer_sets.set_sublayers_minus1[i];
+                let mut rows = Vec::with_capacity(usize::from(maximum) + 1);
+                for _ in 0..=maximum {
+                    let rate = has_rate && b.bit()?;
+                    let pictures = has_pictures && b.bit()?;
+                    let bit_rate = if rate {
+                        Some((b.read(16)? as u16, b.read(16)? as u16))
+                    } else {
+                        None
+                    };
+                    let picture_rate = if pictures {
+                        let constant = b.read(2)? as u8;
+                        if constant > 2 {
+                            return Err(invalid("HEVC VPS VUI constant picture rate out of range"));
+                        }
+                        Some((constant, b.read(16)? as u16))
+                    } else {
+                        None
+                    };
+                    rows.push(VuiRate {
+                        bit_rate,
+                        picture_rate,
+                    });
+                }
+                *entry = Some(rows);
+            }
+        }
+        let indexed = b.bit()?;
+        let last = if indexed {
+            b.read(4)? as usize
+        } else {
+            n - first - 1
+        };
+        let mut signals = Vec::with_capacity(last + 1);
+        for _ in 0..=last {
+            signals.push(VideoSignalInfo {
+                format: b.read(3)? as u8,
+                full_range: b.bit()?,
+                primaries: b.read(8)? as u8,
+                transfer: b.read(8)? as u8,
+                matrix: b.read(8)? as u8,
+            });
+        }
+        let mut indices = vec![None; n];
+        for (i, index) in indices.iter_mut().enumerate().skip(first) {
+            *index = Some(if indexed && last > 0 {
+                let value = b.read(4)? as u8;
+                if usize::from(value) > last {
+                    return Err(invalid("HEVC VPS VUI video signal index out of range"));
+                }
+                value
+            } else if indexed {
+                0
+            } else {
+                i as u8
+            });
+        }
+        let no_tiles = b.bit()?;
+        let mut tiles = vec![false; n];
+        let mut filter = vec![false; n];
+        let mut tile_alignment = vec![0u64; n];
+        if !no_tiles {
+            for i in first..n {
+                tiles[i] = b.bit()?;
+                if tiles[i] {
+                    filter[i] = b.bit()?;
+                }
+            }
+            for i in first + 1..n {
+                for j in 0..i {
+                    if self.graph.direct[i] & (1u64 << self.graph.layer_ids[j]) != 0
+                        && tiles[i]
+                        && tiles[j]
+                        && b.bit()?
+                    {
+                        tile_alignment[i] |= 1u64 << self.graph.layer_ids[j];
+                    }
+                }
+            }
+        }
+        let no_wpp = b.bit()?;
+        let mut wpp = vec![false; n];
+        if !no_wpp {
+            for value in wpp.iter_mut().skip(first) {
+                *value = b.bit()?;
+            }
+        }
+        let single = b.bit()?;
+        let skip = b.bit()?;
+        if skip && !single {
+            return Err(invalid(
+                "HEVC VPS VUI higher-layer skip requires single-layer constraint",
+            ));
+        }
+        let mut restrictions = vec![vec![None; n]; n];
+        if b.bit()? {
+            for i in 1..n {
+                for j in first..i {
+                    if self.graph.direct[i] & (1u64 << self.graph.layer_ids[j]) == 0 {
+                        continue;
+                    }
+                    let spatial = b.unsigned_golomb()?;
+                    let ctu = spatial > 0 && b.bit()?;
+                    let horizontal = if ctu { b.unsigned_golomb()? } else { 0 };
+                    restrictions[i][j] = Some(InterLayerRestriction {
+                        spatial_offset_plus1: spatial,
+                        ctu_based: ctu,
+                        horizontal_offset_plus1: horizontal,
+                    });
+                }
+            }
+        }
+        let bsp = b.bit()?;
+        let mut compatibility = vec![None; n];
+        if !bsp {
+            for (i, value) in compatibility.iter_mut().enumerate().skip(1) {
+                if self.graph.direct[i] == 0 {
+                    *value = Some(b.bit()?);
+                }
+            }
+        }
+        Ok(Some(VpsVuiPrefix {
+            picture_types_aligned: aligned,
+            irap_aligned: irap,
+            all_idr_aligned: idr,
+            rates,
+            video_signals: signals,
+            video_signal_indices: indices,
+            tiles_not_in_use: no_tiles,
+            tiles,
+            loop_filter_not_across_tiles: filter,
+            aligned_tile_boundaries: tile_alignment,
+            wpp_not_in_use: no_wpp,
+            wpp,
+            single_layer_non_irap: single,
+            higher_layer_irap_skip: skip,
+            restrictions,
+            bsp_hrd_present: bsp,
+            base_parameter_compatibility: compatibility,
+            end_bit: b.position(),
+        }))
+    }
+}
 impl LayeredExtensionPrefix {
     /// The budget covers all retained metadata together, excluding borrowed RBSP.
     pub fn parse(

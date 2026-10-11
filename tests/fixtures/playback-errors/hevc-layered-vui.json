@@ -1,0 +1,905 @@
+[
+  {
+    "file": "hevc-layered-vui-basic.bin",
+    "error": null,
+    "end": 299,
+    "internal": true,
+    "rich": false,
+    "rates": [
+      null,
+      null
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      }
+    ],
+    "indices": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "tiles": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "filters": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "alignment": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "wpp": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "restrictions": [],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-rich.bin",
+    "error": null,
+    "end": 581,
+    "internal": true,
+    "rich": true,
+    "rates": [
+      [
+        {
+          "bit_rate": [
+            100,
+            200
+          ],
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": null
+        },
+        {
+          "bit_rate": [
+            102,
+            202
+          ],
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ],
+      [
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": [
+            111,
+            201
+          ],
+          "picture_rate": null
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ]
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      }
+    ],
+    "indices": [
+      0,
+      2,
+      1,
+      2
+    ],
+    "tiles": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "filters": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "alignment": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "wpp": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "restrictions": [
+      {
+        "dependent": 1,
+        "reference": 0,
+        "spatial": 0,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 2,
+        "reference": 1,
+        "spatial": 2,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 3,
+        "reference": 2,
+        "spatial": 3,
+        "ctu": true,
+        "horizontal": 2
+      }
+    ],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-external.bin",
+    "error": null,
+    "end": 458,
+    "internal": false,
+    "rich": true,
+    "rates": [
+      null,
+      [
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": [
+            111,
+            201
+          ],
+          "picture_rate": null
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ]
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      }
+    ],
+    "indices": [
+      null,
+      2,
+      1,
+      2
+    ],
+    "tiles": [
+      false,
+      true,
+      true,
+      true
+    ],
+    "filters": [
+      false,
+      false,
+      true,
+      false
+    ],
+    "alignment": [
+      0,
+      0,
+      0,
+      128
+    ],
+    "wpp": [
+      false,
+      false,
+      true,
+      false
+    ],
+    "restrictions": [
+      {
+        "dependent": 2,
+        "reference": 1,
+        "spatial": 2,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 3,
+        "reference": 2,
+        "spatial": 3,
+        "ctu": true,
+        "horizontal": 2
+      }
+    ],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-inferred.bin",
+    "error": null,
+    "end": 379,
+    "internal": true,
+    "rich": false,
+    "rates": [
+      null,
+      null
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      },
+      {
+        "format": 3,
+        "full_range": true,
+        "primaries": 4,
+        "transfer": 5,
+        "matrix": 6
+      }
+    ],
+    "indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "tiles": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "filters": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "alignment": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "wpp": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "restrictions": [],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-bad-rate.bin",
+    "error": "constant picture rate",
+    "end": 581,
+    "internal": true,
+    "rich": true,
+    "rates": [
+      [
+        {
+          "bit_rate": [
+            100,
+            200
+          ],
+          "picture_rate": [
+            3,
+            7680
+          ]
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": null
+        },
+        {
+          "bit_rate": [
+            102,
+            202
+          ],
+          "picture_rate": [
+            3,
+            7682
+          ]
+        }
+      ],
+      [
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            3,
+            7680
+          ]
+        },
+        {
+          "bit_rate": [
+            111,
+            201
+          ],
+          "picture_rate": null
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            3,
+            7682
+          ]
+        }
+      ]
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      }
+    ],
+    "indices": [
+      0,
+      2,
+      1,
+      2
+    ],
+    "tiles": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "filters": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "alignment": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "wpp": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "restrictions": [
+      {
+        "dependent": 1,
+        "reference": 0,
+        "spatial": 0,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 2,
+        "reference": 1,
+        "spatial": 2,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 3,
+        "reference": 2,
+        "spatial": 3,
+        "ctu": true,
+        "horizontal": 2
+      }
+    ],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-bad-signal.bin",
+    "error": "video signal index",
+    "end": 581,
+    "internal": true,
+    "rich": true,
+    "rates": [
+      [
+        {
+          "bit_rate": [
+            100,
+            200
+          ],
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": null
+        },
+        {
+          "bit_rate": [
+            102,
+            202
+          ],
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ],
+      [
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": [
+            111,
+            201
+          ],
+          "picture_rate": null
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ]
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      }
+    ],
+    "indices": [
+      0,
+      2,
+      3,
+      2
+    ],
+    "tiles": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "filters": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "alignment": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "wpp": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "restrictions": [
+      {
+        "dependent": 1,
+        "reference": 0,
+        "spatial": 0,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 2,
+        "reference": 1,
+        "spatial": 2,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 3,
+        "reference": 2,
+        "spatial": 3,
+        "ctu": true,
+        "horizontal": 2
+      }
+    ],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-bad-skip.bin",
+    "error": "higher-layer skip",
+    "end": 581,
+    "internal": true,
+    "rich": true,
+    "rates": [
+      [
+        {
+          "bit_rate": [
+            100,
+            200
+          ],
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": null
+        },
+        {
+          "bit_rate": [
+            102,
+            202
+          ],
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ],
+      [
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": [
+            111,
+            201
+          ],
+          "picture_rate": null
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ]
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      }
+    ],
+    "indices": [
+      0,
+      2,
+      1,
+      2
+    ],
+    "tiles": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "filters": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "alignment": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "wpp": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "restrictions": [
+      {
+        "dependent": 1,
+        "reference": 0,
+        "spatial": 0,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 2,
+        "reference": 1,
+        "spatial": 2,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 3,
+        "reference": 2,
+        "spatial": 3,
+        "ctu": true,
+        "horizontal": 2
+      }
+    ],
+    "bsp": false
+  },
+  {
+    "file": "hevc-layered-vui-bsp.bin",
+    "error": null,
+    "end": 581,
+    "internal": true,
+    "rich": true,
+    "rates": [
+      [
+        {
+          "bit_rate": [
+            100,
+            200
+          ],
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": null
+        },
+        {
+          "bit_rate": [
+            102,
+            202
+          ],
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ],
+      [
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            0,
+            7680
+          ]
+        },
+        {
+          "bit_rate": [
+            111,
+            201
+          ],
+          "picture_rate": null
+        },
+        {
+          "bit_rate": null,
+          "picture_rate": [
+            2,
+            7682
+          ]
+        }
+      ]
+    ],
+    "signals": [
+      {
+        "format": 0,
+        "full_range": false,
+        "primaries": 1,
+        "transfer": 2,
+        "matrix": 3
+      },
+      {
+        "format": 1,
+        "full_range": true,
+        "primaries": 2,
+        "transfer": 3,
+        "matrix": 4
+      },
+      {
+        "format": 2,
+        "full_range": false,
+        "primaries": 3,
+        "transfer": 4,
+        "matrix": 5
+      }
+    ],
+    "indices": [
+      0,
+      2,
+      1,
+      2
+    ],
+    "tiles": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "filters": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "alignment": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "wpp": [
+      true,
+      false,
+      true,
+      false
+    ],
+    "restrictions": [
+      {
+        "dependent": 1,
+        "reference": 0,
+        "spatial": 0,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 2,
+        "reference": 1,
+        "spatial": 2,
+        "ctu": false,
+        "horizontal": 0
+      },
+      {
+        "dependent": 3,
+        "reference": 2,
+        "spatial": 3,
+        "ctu": true,
+        "horizontal": 2
+      }
+    ],
+    "bsp": true
+  }
+]

@@ -2,6 +2,17 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`LayeredExtensionPrefix::vui_prefix` reads general multilayer VPS VUI metadata:
+picture/IRAP/IDR alignment, per-set/sublayer bit/picture rates, video signals and
+indices, tiles/filter/WPP flags, tile-boundary alignment and inter-layer spatial
+restrictions. External-base fields follow their distinct presence conditions.
+Eight original prefixes cover basic/rich/internal/external metadata, internal
+signal-index inference and targeted malformed fields. When BSP HRD is present,
+the parser explicitly stops before it; otherwise it reads independent-layer
+parameter compatibility flags. BSP HRD schedules, SPS-dependent spatial bounds,
+external-base non-indexed signal mapping qualification and picture admission
+remain unfinished. This is metadata prefix acceptance, not video acceptance.
+
 `DpbParameters::dependency_types` reads common/per-edge dependency types,
 derives sample/motion prediction masks, infers external-base sample-only edges,
 skips bounded non-VUI bytes and validates VUI alignment. Reserved widths/values

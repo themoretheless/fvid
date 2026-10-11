@@ -6297,6 +6297,19 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_layered_vui.py` authors eight original general VPS VUI prefixes
+from the owned connected dependency-type fixtures. Annex F.7.3.2.1.4 defines
+presence ordering for alignment, rate fields, colour signals, tiles/WPP and
+spatial inter-layer restrictions. Explicit array/formula oracles distinguish
+layer-set/temporal rate rows, NAL-ID masks and external-base omissions. Cases
+cover basic/rich metadata, internal inferred signal indices, external explicit
+indices, invalid constant-rate/index/skip fields and a BSP continuation sentinel.
+The BSP case stops before BSP HRD syntax, which remains unimplemented here;
+dropping its sentinel is valid prefix parsing, not acceptance of BSP HRD data.
+SPS-dependent CTU bounds and external non-indexed colour mapping remain
+unqualified. These partial metadata RBSPs are not complete VPS/video streams.
+Fixtures and tests use no private media, external codec, FFmpeg or network.
+
 `generate_hevc_dependency_types.py` authors sixteen original connected Annex F
 prefixes, extending the owned explicit/external DPB metadata. F.7.3.2.1.1 and
 F-14 define common/per-edge types, external-base inference and sample/motion

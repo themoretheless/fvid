@@ -2,6 +2,9 @@
 pub use super::hevc_vps_extension::{DependencyTypes, LayeredExtensionPrefix};
 pub use super::hevc_vps_extension::{DpbParameters, DpbSubLayer};
 pub use super::hevc_vps_extension::{
+    InterLayerRestriction, VideoSignalInfo, VpsVuiPrefix, VuiRate,
+};
+pub use super::hevc_vps_extension::{
     LayerDependencyPrefix, LayerSetExtension, OutputLayerSet, OutputLayerSets,
 };
 pub use super::hevc_vps_extension::{RepresentationFormat, RepresentationFormats};
