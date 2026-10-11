@@ -1,0 +1,62 @@
+{
+  "cases": [
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-cycle-only-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-cycle-bla16-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-cycle-bla17-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-cycle-bla18-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-bad-cycle-truncated-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": 1
+    },
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-bad-cycle-overflow-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": 1
+    },
+    {
+      "file": "hevc-poc-dependent-pps-cycle-only-bad-slice-cycle-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "resets": [],
+      "signalled": [],
+      "failure_picture": 1
+    }
+  ],
+  "seed": "hevc-chroma-qp-list-dependent-rext8.mp4",
+  "provenance": "Three-frame explicit POC cycle without reset IDC; original owned synthetic seed and PPS/VPS/header rewriting; exact POC, pixels, seek and rewind acceptance. Malformed streams are refusals. No FFmpeg, private inputs, external codec or network."
+}

@@ -6631,3 +6631,15 @@ segment disagreement and alignment-changing VPS updates before/after slices
 at the second picture. Generation uses the locked/offline FVid metadata reader;
 ordinary tests use saved files only. No private media, FFmpeg, external codec or
 network is used. These qualify single-layer playback, not scalable decoding.
+
+`generate_hevc_poc_reset_fixtures.py --pps-cycle-only` extends the original
+owned POC family with CRA and BLA_W_LP/BLA_W_RADL/BLA_N_LP cycles activated solely
+by PPS multilayer-extension syntax. VPS extensions and reset IDC syntax are
+absent. Monochrome, `--multislice` and `--dependent` variants total twenty
+three-frame videos and three manifests. Original intra IDR headers are authored
+as CRA/BLA with an empty slice-local RPS; entropy remains the documented original
+synthetic seed's coded data. Exact POC 32/33/34, coded planes, reset, seek/rewind,
+and eight malformed cycle/agreement variants are checked. This is single-layer
+playback acceptance, not scalable reconstruction. Generation uses locked/offline
+FVid metadata; ordinary tests use saved files without FFmpeg, external codecs,
+network, private images, audio or parameter sets.

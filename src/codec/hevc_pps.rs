@@ -123,6 +123,8 @@ pub struct Pps {
     pub parallel_merge_log2: u8,
     pub slice_header_extension: bool,
     pub poc_reset_info_present: bool,
+    /// Retained even when poc_reset_info_present_flag is zero.
+    pub multilayer_extension: bool,
     pub scc_extension: bool,
     /// None inherits the SPS; Some(empty) explicitly clears initial entries.
     pub palette_initial: Option<Vec<[u16; 3]>>,
@@ -230,6 +232,7 @@ impl Pps {
         let parallel_merge_log2 = ue(b, u32::from(sps.coding_block_log2[1] - 2))? as u8 + 2;
         let slice_header_extension = b.bit()?;
         let mut poc_reset_info_present = false;
+        let mut multilayer_extension = false;
         let mut transform_skip_max_log2 = 2;
         let mut sao_offset_scale = [0; 2];
         let mut chroma_qp_offset_list = None;
@@ -247,6 +250,7 @@ impl Pps {
         if b.bit()? {
             let range = b.bit()?;
             let multilayer = b.bit()?;
+            multilayer_extension = multilayer;
             let three_d = b.bit()?;
             scc_extension = b.bit()?;
             future_extension = b.read(4)? != 0;
@@ -408,6 +412,7 @@ impl Pps {
             parallel_merge_log2,
             slice_header_extension,
             poc_reset_info_present,
+            multilayer_extension,
             scc_extension,
             palette_initial,
             current_picture_reference,

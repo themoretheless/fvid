@@ -108,7 +108,10 @@ def main():
     parser.add_argument('--vps-extension', choices=['aligned', 'unaligned'], help='author strict Annex F single-layer VPS syntax')
     parser.add_argument('--explicit-cycle', action='store_true', help='qualify explicit cycles with aligned single-layer VPS')
     parser.add_argument('--cycle-only', action='store_true', help='three-frame explicit MSB cycle without POC reset syntax')
+    parser.add_argument('--pps-cycle-only', action='store_true', help='CRA/BLA cycles signalled only by the PPS, without a VPS extension')
     args = parser.parse_args()
+    cycle_only = args.cycle_only or args.pps_cycle_only
+    assert not args.pps_cycle_only or not (args.cycle_only or args.vps_extension or args.explicit_cycle)
     assert not args.cycle_only or (args.vps_extension == 'aligned' and not args.explicit_cycle)
     assert not args.explicit_cycle or args.vps_extension == 'aligned', 'explicit cycles require aligned VPS'
     root = Path(__file__).resolve().parents[1]
@@ -117,7 +120,7 @@ def main():
     stem = 'hevc-poc-dependent' if args.dependent else 'hevc-poc-multislice' if args.multislice else 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
     if args.vps_extension: stem += '-vps-' + args.vps_extension
     if args.explicit_cycle: stem += '-explicit-cycle'
-    if args.cycle_only: stem += '-cycle-only'
+    if cycle_only: stem += '-pps-cycle-only' if args.pps_cycle_only else '-cycle-only'
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--locked', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -140,8 +143,9 @@ def main():
     if args.multislice or args.dependent: labels += ['bad-slice-period', 'bad-slice-reset']
     if args.vps_extension: labels += ['bad-vps-alignment', 'bad-vps-splitting', 'bad-vps-dimensions', 'bad-vps-no-format']
     if args.explicit_cycle: labels = ['msb-reset', 'msb-reset-signalled', 'full-reset']
-    if args.cycle_only:
+    if cycle_only:
         labels = ['cycle-only', 'bad-cycle-truncated', 'bad-cycle-overflow', 'bad-vps-before-slices', 'bad-vps-after-slices']
+        if args.pps_cycle_only: labels = ['cycle-only', 'cycle-bla16', 'cycle-bla17', 'cycle-bla18', 'bad-cycle-truncated', 'bad-cycle-overflow']
         if args.multislice or args.dependent: labels += ['bad-slice-cycle']
     for label in labels:
         reset = label not in ('baseline', 'idr-baseline')
@@ -155,17 +159,17 @@ def main():
                 n = int.from_bytes(original_config[at:at + 2], 'big'); at += 2
                 nal = original_config[at:at + n]; at += n
                 if header[0] & 63 == 32 and args.vps_extension:
-                    if args.cycle_only:
+                    if cycle_only:
                         alternate_vps = reset_vps(nal, False, int(args.chroma420 or args.multislice or args.dependent or args.longterm))
                     nal = reset_vps(nal, args.vps_extension == 'aligned', int(args.chroma420 or args.multislice or args.dependent or args.longterm), label)
                 if header[0] & 63 == 33: nal, original_width = sps_width(nal)
-                if header[0] & 63 == 34 and reset: nal = reset_pps(nal, not args.cycle_only)
+                if header[0] & 63 == 34 and reset: nal = reset_pps(nal, not cycle_only)
                 config += len(nal).to_bytes(2, 'big') + nal
         assert original_width is not None and at == len(original_config)
         outputs = []
-        for index in range(3 if args.cycle_only else 35):
+        for index in range(3 if cycle_only else 35):
             epoch = index - (33 if index >= 33 else 17 if index >= 17 else 0) if idr_family else index
-            source = min(epoch, 2)
+            source = 0 if args.pps_cycle_only and label.startswith('bad-') and index == 1 else min(epoch, 2)
             units = packet_units(packets[source])
             assert len(units) == len(meta['packets'][source])
             if args.multislice or args.dependent: assert len(units) == 4
@@ -188,6 +192,19 @@ def main():
                     r.read(meta['extra_bits']); r.ue()
                     if meta['output_flag']: r.read(1)
                 prefix = value[:r.at]
+                if args.pps_cycle_only and info['idr']:
+                    kind = int(label[-2:]) if label.startswith('cycle-bla') else 21
+                    nal = ((int.from_bytes(nal[:2], 'big') & ~(63 << 9)) | kind << 9).to_bytes(2, 'big') + nal[2:]
+                    if not info['dependent']:
+                        # Convert the original intra IDR to CRA/BLA with an empty
+                        # slice-local RPS; preserve its original intra entropy.
+                        prefix += f'{epoch % 16:04b}' + '0'
+                        if meta['short_term_sets']: prefix += '0'
+                        prefix += ue(0) + ue(0)
+                        if meta['long_term_present']:
+                            if meta['long_term_entries']: prefix += ue(0)
+                            prefix += ue(0)
+                        if meta['temporal_mvp_enabled']: prefix += '0'
                 if not info['idr'] and not info['dependent']:
                     prefix += f'{epoch % 16:04b}'
                     r.read(original_width)
@@ -230,16 +247,16 @@ def main():
                             cycle = epoch // 16 if idr_family else (index - (32 if index > 33 else 16 if index > 17 else 0)) // 16
                             extension += '1' + ue(cycle)
                         else: extension += '0'
-                    if args.cycle_only:
+                    if cycle_only:
                         cycle = 3 if label == 'bad-slice-cycle' and index == 1 and not info['first'] else 2
                         if label == 'bad-cycle-overflow' and index == 1: cycle = (1 << 28) + 1
-                        extension = '1' + ue(cycle)
-                        if label == 'bad-cycle-truncated' and index == 1: extension = '10000000'
+                        extension = (ue(cycle) if info['idr'] else '') if args.pps_cycle_only else '1' + ue(cycle)
+                        if label == 'bad-cycle-truncated' and index == 1: extension = '00000000' if args.pps_cycle_only else '10000000'
                     extension = bits(packed(extension))
                     prefix += ue(len(extension) // 8) + extension
                 rewritten = nal[:2] + escape(packed(prefix + '1') + bytes(info['rbsp'][end // 8:]))
                 out.append(len(rewritten).to_bytes(4, 'big') + rewritten)
-            if args.cycle_only and index == 1 and label in ('bad-vps-before-slices', 'bad-vps-after-slices'):
+            if cycle_only and index == 1 and label in ('bad-vps-before-slices', 'bad-vps-after-slices'):
                 update = len(alternate_vps).to_bytes(4, 'big') + alternate_vps
                 if label.endswith('before-slices'): out.insert(0, update)
                 else: out.append(update)
@@ -261,11 +278,11 @@ def main():
         name = f'{stem}-{label}-synthetic.mp4'
         (DEST / name).write_bytes(box(b'ftyp', roots[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', roots[b'moov']))
         cases.append(dict(file=name, expectation='invalid' if label.startswith('bad-') else 'acceptance',
-                          frames=len(outputs), resets=[] if args.cycle_only or not reset else ([0, 17, 33] if idr_family else [17, 33]),
+                          frames=len(outputs), resets=[] if cycle_only or not reset else ([0, 17, 33] if idr_family else [17, 33]),
                           signalled=[1, 18, 34] if label == 'full-reset' else [18] if label.endswith('signalled') else [],
-                          failure_picture=(1 if args.cycle_only else 0 if label.startswith('bad-vps-') else 17 if label in ('bad-full-nonidr', 'bad-empty', 'bad-slice-period', 'bad-slice-reset') else 18) if label.startswith('bad-') else None))
+                          failure_picture=(1 if cycle_only else 0 if label.startswith('bad-vps-') else 17 if label in ('bad-full-nonidr', 'bad-empty', 'bad-slice-period', 'bad-slice-reset') else 18) if label.startswith('bad-') else None))
     (DEST / f'{stem}-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
-        provenance=('Three-frame explicit POC cycle without reset IDC; original owned synthetic seed and PPS/VPS/header rewriting; exact POC, pixels, seek and rewind acceptance. Malformed streams are refusals. No FFmpeg, private inputs, external codec or network.' if args.cycle_only else 'Original documented synthetic HEVC seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.')), indent=2) + '\n')
+        provenance=('Three-frame explicit POC cycle without reset IDC; original owned synthetic seed and PPS/VPS/header rewriting; exact POC, pixels, seek and rewind acceptance. Malformed streams are refusals. No FFmpeg, private inputs, external codec or network.' if cycle_only else 'Original documented synthetic HEVC seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.')), indent=2) + '\n')
 
 
 if __name__ == '__main__': main()

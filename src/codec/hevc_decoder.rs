@@ -217,7 +217,7 @@ impl HevcDecoder {
                     // reserved/future bits do not make a semantic parameter change.
                     let semantic_change = previous.is_none_or(|v| *v != new)
                         || params.pairs.iter().any(|(s, p)| s.vps_id == new.id && (p.poc_reset_info_present
-                            || p.slice_header_extension && (new.has_poc_extension()
+                            || p.slice_header_extension && (p.multilayer_extension || new.has_poc_extension()
                                 || previous.is_some_and(Vps::has_poc_extension))));
                     if seen_slice && semantic_change {
                         return Err(invalid("HEVC changed VPS follows picture slices"));
@@ -453,7 +453,7 @@ impl HevcDecoder {
         }
         let header = &headers[0];
         let poc_extension_active = pps.poc_reset_info_present
-            || pps.slice_header_extension && vps.has_poc_extension();
+            || pps.slice_header_extension && (pps.multilayer_extension || vps.has_poc_extension());
         let reset_syntax = if poc_extension_active {
             let lsb_aligned = vps.poc_lsb_aligned()?;
             let parse = |h: &SliceHeader| {
