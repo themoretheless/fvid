@@ -6789,3 +6789,17 @@ retain the existing IRAP reference-admission constraints. Existing authored
 EOS/EOB witnesses also use this entry for release and IRAP restart acceptance.
 No fixtures are generated during ordinary tests. Nonidentity coded playback
 qualification and frontend/output scheduling remain separate work.
+
+### Owned layered packet-stream state and seek priming (2026-10-12)
+
+The existing nine reconstruction witnesses now also qualify `LayeredDecoder`,
+which owns parameters and DPB/POC across packets and restores hvcC on reset.
+All exact layer/frame pixels are compared against the saved original YUV.
+The original SPS-content-update fixture supplies a valid authored PTL update
+for priming: a later deliberately truncated NAL tests transactional receipt,
+and reset must restore the original SPS. The descending-layer fixture tests
+packet-error rollback followed by exact baseline recovery. Priming an original
+I packet must not retain reference pixels for the next predicted packet. The
+existing EOS/EOB packets qualify release and IRAP restart through the owned
+stream entry without test-authored bank/POC copying. These add no generated
+fixtures or external codec dependencies to ordinary test execution.

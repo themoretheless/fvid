@@ -626,3 +626,210 @@ fn owned_layered_decode_prepares_references_and_reconstructs_every_saved_witness
         }
     }
 }
+
+#[test]
+fn stateful_layered_packet_decoder_owns_parameters_references_and_reset() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    let m = manifest("hevc-layered-reconstruction.json");
+    for case in m["cases"].as_array().unwrap() {
+        let name = case["file"].as_str().unwrap();
+        let mut input = movie(name);
+        let bytes = input.tracks()[0].configuration.clone();
+        let oracle = std::fs::read(
+            root()
+                .join(case["seed"].as_str().unwrap())
+                .with_extension("yuv"),
+        )
+        .unwrap();
+        let mut decoder = LayeredDecoder::from_configuration(&bytes, 1, BUDGET).unwrap();
+        for _ in 0..2 {
+            let count = if name.contains("inter-prediction") {
+                2
+            } else {
+                1
+            };
+            let mut packet = vec![];
+            for index in 0..count {
+                input.read_packet(0, index, &mut packet).unwrap();
+                let (pictures, end) = decoder
+                    .decode_packet(&packet)
+                    .unwrap_or_else(|e| panic!("{name}: {e}"));
+                assert_eq!(
+                    pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+                    [0, 3]
+                );
+                for p in pictures {
+                    assert_pixels(&p.picture, &oracle, index);
+                }
+                assert_eq!(end, Default::default());
+                assert_eq!(decoder.next_access_unit(), index as u64 + 1);
+                assert!(decoder.parameters().active(0).is_some());
+                assert!(decoder.parameters().active(3).is_some());
+                assert_eq!(decoder.poc().previous(0), Some(index as i32));
+                assert!(
+                    decoder
+                        .prime_parameters(&packet)
+                        .err()
+                        .unwrap()
+                        .to_string()
+                        .contains("requires a reset decoder")
+                );
+            }
+            decoder.reset();
+            assert_eq!(decoder.poc(), &LayeredPocState::default());
+            assert_eq!(decoder.next_access_unit(), 0);
+            assert!(decoder.parameters().active(0).is_none());
+            assert!(decoder.parameters().active(3).is_none());
+        }
+    }
+}
+
+#[test]
+fn layered_stream_priming_and_packet_errors_never_publish_partial_parameter_state() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    let baseline = movie("hevc-layered-reconstruct-pcm-independent.mp4");
+    let bytes = baseline.tracks()[0].configuration.clone();
+    let mut decoder = LayeredDecoder::from_configuration(&bytes, 1, BUDGET).unwrap();
+    let original = decoder
+        .parameters()
+        .clone()
+        .activate(0, 0, 1)
+        .unwrap()
+        .sps
+        .sps
+        .clone();
+    let update = movie("hevc-layered-sps-content-update.mp4");
+    let config = HevcConfig::parse(&update.tracks()[0].configuration).unwrap();
+    let changed = config
+        .arrays
+        .iter()
+        .find(|a| a.nal_type == 33)
+        .unwrap()
+        .units[1];
+    let mut prime = (changed.len() as u32).to_be_bytes().to_vec();
+    prime.extend_from_slice(changed);
+    let mut invalid = prime.clone();
+    invalid.extend_from_slice(&[0, 0, 0, 1, 0]);
+    assert!(decoder.prime_parameters(&invalid).is_err());
+    assert_eq!(
+        decoder
+            .parameters()
+            .clone()
+            .activate(0, 0, 1)
+            .unwrap()
+            .sps
+            .sps,
+        original
+    );
+    assert_eq!(decoder.poc(), &LayeredPocState::default());
+    decoder.prime_parameters(&prime).unwrap();
+    assert_ne!(
+        decoder
+            .parameters()
+            .clone()
+            .activate(0, 0, 1)
+            .unwrap()
+            .sps
+            .sps,
+        original
+    );
+    assert!(decoder.parameters().active(0).is_none());
+    assert_eq!(decoder.next_access_unit(), 0);
+    decoder.reset();
+    assert_eq!(
+        decoder
+            .parameters()
+            .clone()
+            .activate(0, 0, 1)
+            .unwrap()
+            .sps
+            .sps,
+        original
+    );
+    let mut bad = movie("hevc-layered-au-descending-layer.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&bad.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut baseline = movie("hevc-layered-reconstruct-pcm-dependent.mp4");
+    let mut packet = vec![];
+    bad.read_packet(0, 0, &mut packet).unwrap();
+    assert_eq!(
+        decoder.decode_packet(&packet).err().unwrap().to_string(),
+        "HEVC layered pictures must increase in layer order"
+    );
+    assert_eq!(decoder.next_access_unit(), 0);
+    assert!(decoder.parameters().active(0).is_none());
+    baseline.read_packet(0, 0, &mut packet).unwrap();
+    let (pictures, _) = decoder.decode_packet(&packet).unwrap();
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for p in pictures {
+        assert_pixels(&p.picture, &oracle, 0);
+    }
+    // Priming the skipped I AU must not publish its pixels/POC or make a P AU
+    // accidentally decode using references from before reset.
+    let mut inter = movie("hevc-layered-reconstruct-inter-prediction.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&inter.tracks()[0].configuration, 1, BUDGET).unwrap();
+    inter.read_packet(0, 0, &mut packet).unwrap();
+    decoder.prime_parameters(&packet).unwrap();
+    assert_eq!(decoder.poc(), &LayeredPocState::default());
+    inter.read_packet(0, 1, &mut packet).unwrap();
+    assert!(
+        decoder
+            .decode_packet(&packet)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("reference POC 0 is missing")
+    );
+    assert_eq!(decoder.next_access_unit(), 0);
+    inter.read_packet(0, 0, &mut packet).unwrap();
+    decoder.decode_packet(&packet).unwrap();
+    inter.read_packet(0, 1, &mut packet).unwrap();
+    decoder.decode_packet(&packet).unwrap();
+}
+
+#[test]
+fn stateful_layered_decoder_applies_sequence_ends_without_external_parameter_updates() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    for (file, base_kept) in [
+        ("hevc-layered-au-eos-base.mp4", false),
+        ("hevc-layered-au-eos-enhancement.mp4", true),
+        ("hevc-layered-au-aud-eos-eob.mp4", false),
+    ] {
+        let mut input = movie(file);
+        let mut decoder =
+            LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET)
+                .unwrap();
+        let mut packet = vec![];
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let (pictures, end) = decoder.decode_packet(&packet).unwrap();
+        assert_eq!(pictures.len(), 2);
+        assert_ne!(end, Default::default());
+        assert_eq!(decoder.parameters().active(0).is_some(), base_kept);
+        assert!(decoder.parameters().active(3).is_none());
+        let mut inter = movie("hevc-layered-reconstruct-inter-prediction.mp4");
+        inter.read_packet(0, 1, &mut packet).unwrap();
+        assert!(
+            decoder
+                .decode_packet(&packet)
+                .err()
+                .unwrap()
+                .to_string()
+                .contains(if end.bitstream {
+                    "after EOB"
+                } else {
+                    "after EOS"
+                })
+        );
+        assert_eq!(decoder.next_access_unit(), 1);
+        inter.read_packet(0, 0, &mut packet).unwrap();
+        let (pictures, _) = decoder.decode_packet(&packet).unwrap();
+        let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+        for p in pictures {
+            assert_pixels(&p.picture, &oracle, 0);
+        }
+        assert!(decoder.parameters().active(0).is_some());
+        assert!(decoder.parameters().active(3).is_some());
+        assert_eq!(decoder.next_access_unit(), 2);
+    }
+}

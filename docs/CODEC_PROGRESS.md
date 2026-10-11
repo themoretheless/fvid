@@ -1,5 +1,32 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC owned layered packet stream, 2026-10-12
+
+`hevc_decoder::LayeredDecoder` now owns the received/active parameter banks,
+original configuration snapshot, packet NAL length size, selected OLS, layered
+POC/DPB and allocation budget. `decode_packet` stages parsing and owned reference
+preparation/reconstruction, then publishes the new bank only after the complete
+AU succeeds. Callers no longer manually copy parameter/POC/DPB state between
+packets. Results retain explicit layer identity; EOS/EOB release and restart
+rules apply through this entry.
+
+`reset` restores the original hvcC parameters and empty picture state.
+`prime_parameters` is available only on a reset decoder and receives parameter
+NALs transactionally without decoding skipped pictures or advancing POC/AU
+identity. A malformed later NAL cannot publish an earlier valid SPS update.
+A valid SPS update is retained until reset, which restores the original PTL.
+The skipped I AU cannot make a later P AU decode using stale references.
+
+All nine original reconstruction witnesses qualify the packet entry and reset
+against saved exact YUV. Existing EOS/EOB witnesses qualify release, predicted
+continuation refusal and IRAP restart without external parameter-bank updates.
+Existing descending-layer and SPS-content-update fixtures test rollback and
+seek-parameter preparation. Output scheduling, operation-point extraction,
+nonidentity coded-stream acceptance and frontend integration remain unfinished.
+
+Validation: 33 layered integration tests and 215 HEVC unit tests pass (one
+existing unit test ignored), together with the offline player build check.
+
 ## HEVC owned layered reconstruction dispatch, 2026-10-12
 
 `LayeredDpb::decode` now connects owned reference-list binding, sample/motion

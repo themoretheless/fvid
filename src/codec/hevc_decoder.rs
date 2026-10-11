@@ -22,6 +22,9 @@ pub use access_unit::{LayeredAccessPicture, LayeredAccessUnit, LayeredEndMarkers
 #[path = "hevc_dpb_layered.rs"]
 mod layered_dpb;
 pub use layered_dpb::{LayeredDecoded, LayeredDpb};
+#[path = "hevc_stream_layered.rs"]
+mod layered_stream;
+pub use layered_stream::LayeredDecoder;
 pub struct Decoded {
     pub picture: Arc<Picture>,
     pub poc: i32,
