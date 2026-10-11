@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "file": "hevc-layered-au-ignored-layer63.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": null,
+      "ignored": true
+    },
+    {
+      "file": "hevc-layered-au-aud-eos-eob.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": null,
+      "ended": 9,
+      "eob": true
+    },
+    {
+      "file": "hevc-layered-au-descending-layer.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC layered pictures must increase in layer order"
+    },
+    {
+      "file": "hevc-layered-au-duplicate-first-slice.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC slice addresses must increase within one picture"
+    },
+    {
+      "file": "hevc-layered-au-late-aud.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC access-unit delimiter must be first and unique"
+    },
+    {
+      "file": "hevc-layered-au-duplicate-aud.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC access-unit delimiter must be first and unique"
+    },
+    {
+      "file": "hevc-layered-au-after-eob.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC NAL follows end of bitstream"
+    },
+    {
+      "file": "hevc-layered-au-layer-after-eos.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC NAL follows end of layer sequence"
+    },
+    {
+      "file": "hevc-layered-au-bad-eos-trailing.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "invalid HEVC EOS/EOB trailing bits"
+    },
+    {
+      "file": "hevc-layered-au-prefix-after-last-vcl.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC prefix NAL follows last access-unit VCL"
+    },
+    {
+      "file": "hevc-layered-au-prefix-between-layers.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": null,
+      "pps_nal_layer": 0
+    },
+    {
+      "file": "hevc-layered-au-poc-mismatch.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "error": "HEVC access unit derived POCs disagree"
+    },
+    {
+      "file": "hevc-layered-au-missing-first-slice.mp4",
+      "seed": "hevc-pcm-dependent-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "error": "HEVC layered picture must begin with the first slice"
+    },
+    {
+      "file": "hevc-layered-au-repeated-slice-address.mp4",
+      "seed": "hevc-pcm-dependent-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "error": "HEVC dependent segment address out of range"
+    },
+    {
+      "file": "hevc-layered-au-pps-update-mid-picture.mp4",
+      "seed": "hevc-pcm-dependent-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "error": "HEVC parameter binding changes within a picture"
+    },
+    {
+      "file": "hevc-layered-au-identical-pps-new-nal-layer.mp4",
+      "seed": "hevc-pcm-dependent-rext8.mp4",
+      "baseline": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "error": null,
+      "pps_nal_layer": 0
+    },
+    {
+      "file": "hevc-layered-au-missing-colour-plane.mp4",
+      "seed": "hevc-separate-colour-planes-distinct-synthetic.mp4",
+      "baseline": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+      "error": "HEVC layered access unit is missing a colour plane"
+    }
+  ]
+}

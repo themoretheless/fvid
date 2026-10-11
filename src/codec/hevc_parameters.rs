@@ -66,6 +66,7 @@ pub struct LayeredBinding {
     pub sps: LayeredSps,
     pub pps: LayeredPps,
     sps_nal: Arc<[u8]>,
+    pps_nal: Arc<[u8]>,
     vps_nal: Arc<[u8]>,
 }
 impl LayeredBinding {
@@ -76,7 +77,21 @@ impl LayeredBinding {
             pps: &self.pps,
         }
     }
-    fn storage_bytes(&self) -> usize {
+    pub(crate) fn same_picture_binding(&self, other: &Self) -> bool {
+        self.vps_nal[2..] == other.vps_nal[2..]
+            && self.sps_nal[2..] == other.sps_nal[2..]
+            && self.pps_nal[2..] == other.pps_nal[2..]
+            && self.sps.sps == other.sps.sps
+            && self.sps.effective_profile == other.sps.effective_profile
+            && self.sps.output_ordering == other.sps.output_ordering
+            && self.sps.layer_id == other.sps.layer_id
+            && self.sps.output_layer_set == other.sps.output_layer_set
+            && self.pps.pps == other.pps.pps
+            && self.pps.effective_scaling_lists == other.pps.effective_scaling_lists
+            && self.pps.reference_locations == other.pps.reference_locations
+            && self.pps.colour_mapping == other.pps.colour_mapping
+    }
+    pub(crate) fn storage_bytes(&self) -> usize {
         size_of::<Self>()
             .saturating_add(2 * size_of::<usize>())
             .saturating_add(sps_heap(&self.sps))
@@ -84,8 +99,9 @@ impl LayeredBinding {
             // Conservatively charge raw snapshots even if also present in the
             // received table. Old snapshots can outlive replacement of an ID.
             .saturating_add(self.sps_nal.len())
+            .saturating_add(self.pps_nal.len())
             .saturating_add(self.vps_nal.len())
-            .saturating_add(4 * size_of::<usize>())
+            .saturating_add(6 * size_of::<usize>())
     }
 }
 
@@ -149,6 +165,17 @@ impl LayeredParameters {
         self.budget
             .checked_sub(self.storage_bytes())
             .ok_or_else(|| invalid("HEVC layered parameters exceed memory budget"))
+    }
+    pub(crate) fn with_available<T>(
+        &mut self,
+        available: usize,
+        operation: impl FnOnce(&mut Self) -> Result<T>,
+    ) -> Result<T> {
+        let original = self.budget;
+        self.budget = original.min(self.storage_bytes().saturating_add(available));
+        let result = operation(self);
+        self.budget = original;
+        result
     }
     pub fn active(&self, layer: u8) -> Option<&Arc<LayeredBinding>> {
         self.active.iter().find(|b| b.sps.layer_id == layer)
@@ -252,7 +279,7 @@ impl LayeredParameters {
         pps_id: u8,
         output_layer_set: usize,
     ) -> Result<Arc<LayeredBinding>> {
-        if layer > 63 {
+        if layer > 62 {
             return Err(invalid("invalid HEVC active layer ID"));
         }
         let left = self.remaining()?;
@@ -353,6 +380,7 @@ impl LayeredParameters {
             sps,
             pps,
             sps_nal: Arc::clone(sps_nal),
+            pps_nal: Arc::clone(pps_nal),
             vps_nal: Arc::clone(vps_nal),
         };
         if binding

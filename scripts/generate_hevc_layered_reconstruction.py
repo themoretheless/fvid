@@ -62,6 +62,7 @@ def main():
                   and row["target"]["name"]=="hevc_colour_plane_fixture_meta")
     cases = []
     replacements = []
+    access_cases = []
     for label, seed in [
         ("pcm", "hevc-pcm-reference-rext8"),
         ("multislice", "hevc-pcm-dependent-rext8"),
@@ -111,6 +112,46 @@ def main():
             movie = mux(stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=[all_slices],multilayer=True)
             (D / (prefix+".mp4")).write_bytes(movie)
             cases.append(dict(file=prefix+".mp4",seed=seed+".mp4",independent=independent,layer=3,ols=1))
+            def access_case(name, units, *, error=None, inband=False, **expect):
+                filename = "hevc-layered-au-" + name + ".mp4"
+                authored = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*units])
+                (D/filename).write_bytes(mux(authored,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=[units],multilayer=True,inband_parameters=inband))
+                access_cases.append(dict(file=filename,seed=seed+".mp4",baseline=prefix+".mp4",error=error,**expect))
+            if label == "pcm" and not independent:
+                aud = ((35<<9)|1).to_bytes(2,"big") + b"\x10"
+                eos0 = ((36<<9)|1).to_bytes(2,"big") + b"\x80"
+                eos3 = ((36<<9)|(3<<3)|1).to_bytes(2,"big") + b"\x80"
+                eob = ((37<<9)|1).to_bytes(2,"big") + b"\x80"
+                ignored = ((0<<9)|(63<<3)|1).to_bytes(2,"big") + b"\x00\x00\x03\xff"
+                access_case("ignored-layer63",[ignored,aud,*all_slices,ignored],ignored=True)
+                access_case("aud-eos-eob",[aud,*all_slices,eos0,eos3,eob],ended=9,eob=True)
+                access_case("descending-layer",slices+base_slices,error="HEVC layered pictures must increase in layer order")
+                access_case("duplicate-first-slice",[*all_slices,slices[0]],error="HEVC slice addresses must increase within one picture")
+                access_case("late-aud",[*base_slices,aud,*slices],error="HEVC access-unit delimiter must be first and unique")
+                access_case("duplicate-aud",[aud,aud,*all_slices],error="HEVC access-unit delimiter must be first and unique")
+                access_case("after-eob",[*all_slices,eob,eos3],error="HEVC NAL follows end of bitstream")
+                access_case("layer-after-eos",[eos3,*all_slices],error="HEVC NAL follows end of layer sequence")
+                access_case("bad-eos-trailing",[*all_slices,eos3[:-1]+b"\xc0"],error="invalid HEVC EOS/EOB trailing bits")
+                access_case("prefix-after-last-vcl",[*all_slices,pps],inband=True,error="HEVC prefix NAL follows last access-unit VCL")
+                shared = parameter_ids(params[34][0],0,[1,0])
+                access_case("prefix-between-layers",[*base_slices,shared,*slices],inband=True,pps_nal_layer=0)
+                value = bits(unescape(slices[0][2:]))
+                r = Reader(value,2); r.ue(); r.read(meta["extra_bits"]); r.ue()
+                if meta["output_flag"]: r.read(1)
+                at = r.at
+                changed = slices[0][:2]+escape(packed(value[:at]+f"{1:0{meta['poc_bits']}b}"+value[at+meta["poc_bits"]:]))
+                access_case("poc-mismatch",[*base_slices,changed,*slices[1:]],error="HEVC access unit derived POCs disagree")
+            if label == "multislice" and not independent:
+                access_case("missing-first-slice",[*base_slices,*slices[1:]],error="HEVC layered picture must begin with the first slice")
+                access_case("repeated-slice-address",[*all_slices,slices[-1]],error="HEVC dependent segment address out of range")
+                import generate_hevc_layered_pps as gp
+                changed = gp.pps(layer=3,id=1)
+                access_case("pps-update-mid-picture",[*base_slices,slices[0],changed,*slices[1:]],inband=True,error="HEVC parameter binding changes within a picture")
+                access_case("identical-pps-new-nal-layer",[*base_slices,slices[0],layer(pps,0),*slices[1:]],inband=True,pps_nal_layer=0)
+            if label == "colour-planes" and independent:
+                access_case("missing-colour-plane",[*base_slices,*slices[:-1]],error="HEVC layered access unit is missing a colour plane")
             if label == "pcm" and independent:
                 # Valid content update under SPS 0: changing its progressive-source PTL flag does
                 # not change entropy/pixels, but needs a new layer sequence.
@@ -228,6 +269,7 @@ def main():
     current_pps = parameter_ids(read(".pps"), 0, [1, 1])
     (D / "hevc-layered-activation-inference.mp4").write_bytes(
         gp.movie(read(".vps"),read(".base.sps"),current_sps,read(".base.pps"),current_pps))
+    (D / "hevc-layered-access-units.json").write_text(json.dumps(dict(cases=access_cases),indent=2)+"\n")
     (D / "hevc-layered-reconstruction.json").write_text(json.dumps(dict(cases=cases,replacements=replacements),indent=2)+"\n")
 
 

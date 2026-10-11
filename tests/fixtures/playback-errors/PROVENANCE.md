@@ -6737,3 +6737,22 @@ base PPS from `hevc-layered-pps-infer-from-pps.base.pps` changes its effective
 first scaling coefficient from 17 to 21. Re-activating the unchanged enhancement
 PPS must infer 21 while old snapshots retain 17. Ending the source layer must
 produce the exact missing-active-source refusal, rather than reuse stale data.
+
+### Layered HEVC access-unit ordering and transactional planning (2026-10-12)
+
+`hevc-layered-access-units.json` describes seventeen short MP4 packets authored
+by `generate_hevc_layered_reconstruction.py` from the existing original PCM,
+multislice and separate-colour-plane seeds. Only original parameter/slice
+headers and authored control NALs are used; no private source data is copied.
+The generator runs separately from tests without FFmpeg or network access.
+
+Four acceptance witnesses preserve the original coded entropy and saved YUV:
+ignored reserved layer 63, AUD/EOS/EOB, a PPS between layer pictures and
+identical PPS RBSP received from a different allowed NAL layer mid-picture.
+Thirteen malformed witnesses test exact ordering, first/address/colour-plane,
+parameter-change, control-trailing-bit and common-POC failures. These are
+parser/header refusal regressions, not acceptance for malformed streams.
+Tests assert source-state rollback and subsequent baseline recovery. Existing
+nine reconstruction witnesses also exercise whole-packet planning and exact
+both-layer pixels, including two inter-predicted access units with a test-held
+DPB. A production scalable decoder/player owner remains separate work.

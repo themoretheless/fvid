@@ -1,5 +1,30 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC complete access-unit planning, 2026-10-12
+
+`hevc_decoder::LayeredAccessUnit` stages globally received parameters, complete
+per-layer slice groups and one common POC transition without publishing state.
+It checks picture/layer ordering, colour-plane completeness, within-picture
+parameter stability and AUD/EOS/EOB placement. Parameter NALs between layer
+pictures remain valid. Reserved layer 63 is ignored before payload parsing.
+EOS/EOB are returned to the owner for application after reconstruction.
+
+Seventeen original synthetic packet witnesses cover these rules. Acceptance
+cases compare reconstructed pixels in both layers against saved original YUV;
+the two-AU inter-prediction test resolves temporal and same-AU inter-layer
+identities through a test-held DPB. Refusal cases assert their exact failure
+and successful recovery using unchanged source state.
+
+Validation: all 27 integration tests across ten layered HEVC suites pass.
+All 214 HEVC unit tests pass (one existing test ignored). The player builds
+offline. Regeneration preserves all 28 checked reconstruction
+and access-unit artifacts byte-for-byte; existing tracked fixtures are unchanged.
+
+This is packet/header/POC planning and integration-test reconstruction, not
+production scalable playback. Operation-point extraction, production layered
+DPB/reconstruction ownership, end-marker application and nonidentity reference
+sample/motion attachment remain unfinished.
+
 ## HEVC global parameters and per-layer activation, 2026-10-12
 
 `hevc_decoder::LayeredParameters` owns the globally received VPS/SPS/PPS IDs

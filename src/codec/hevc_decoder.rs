@@ -16,6 +16,9 @@ use std::sync::Arc;
 #[path = "hevc_parameters.rs"]
 mod parameters;
 pub use parameters::{LayeredBinding, LayeredParameters};
+#[path = "hevc_access_unit.rs"]
+mod access_unit;
+pub use access_unit::{LayeredAccessPicture, LayeredAccessUnit, LayeredEndMarkers};
 pub struct Decoded {
     pub picture: Arc<Picture>,
     pub poc: i32,

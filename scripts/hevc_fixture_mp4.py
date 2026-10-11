@@ -34,46 +34,56 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
     units = [n for n in re.split(b'\x00\x00\x00?\x01', stream) if n]
     parameters = {kind: [] for kind in (32, 33, 34)}
     samples, current, sync, pending = [], [], [], []
-    for nal in units:
-        kind = (nal[0] >> 1) & 63
-        if kind in parameters:
-            if inband_parameters:
-                if current:
-                    samples.append(b''.join(current))
-                    current = []
-                pending.append(ints(len(nal)) + nal)
+    if access_units is not None:
+        # The declared AUs are an exact suffix of the authored Annex B stream.
+        # The preceding parameter NALs form hvcC; in-band updates stay in mdat.
+        groups = [list(group) for group in access_units]
+        flattened = [nal for group in groups for nal in group]
+        if not groups or any(not group for group in groups) or not flattened:
+            raise ValueError('explicit AU groups must be nonempty')
+        prefix_count = len(units) - len(flattened)
+        if prefix_count < 0 or units[prefix_count:] != flattened:
+            raise ValueError('explicit AU groups must preserve the authored stream suffix')
+        for nal in units[:prefix_count]:
+            kind = (nal[0] >> 1) & 63
+            if kind not in parameters:
+                raise ValueError('explicit AU configuration prefix must contain parameters only')
             if nal not in parameters[kind]:
                 parameters[kind].append(nal)
-            continue
-        if kind <= 31:
-            if len(nal) < 3:
-                raise ValueError('truncated slice')
-            if nal[2] & 128:
-                if current:
-                    samples.append(b''.join(current))
-                    current = []
-                current = pending
-                pending = []
-                if 16 <= kind <= 23:
-                    sync.append(len(samples) + 1)
-            elif not current:
-                raise ValueError('missing first slice')
-            current.append(ints(len(nal)) + nal)
-        elif kind not in (35, 36, 37, 38, 39, 40):
-            raise ValueError(f'unsupported NAL {kind}')
-    if current:
-        samples.append(b''.join(current))
-    if access_units is not None:
-        # Separate colour planes have independent first-slice flags within one
-        # picture. Explicit authored AU grouping preserves that container shape.
-        if inband_parameters:
-            raise ValueError('explicit AU grouping cannot include inband parameters')
-        groups = [list(group) for group in access_units]
-        coded = [nal for nal in units if (nal[0] >> 1) & 63 <= 31]
-        if not groups or any(not group for group in groups) or [n for g in groups for n in g] != coded:
-            raise ValueError('explicit AU groups must preserve every coded NAL in order')
+        if any((nal[0] >> 1) & 63 in parameters for nal in flattened) and not inband_parameters:
+            raise ValueError('explicit in-band parameter updates require hev1')
         samples = [b''.join(ints(len(nal)) + nal for nal in group) for group in groups]
         sync = [i + 1 for i, group in enumerate(groups) if any(16 <= (n[0] >> 1) & 63 <= 23 for n in group)]
+    else:
+        for nal in units:
+            kind = (nal[0] >> 1) & 63
+            if kind in parameters:
+                if inband_parameters:
+                    if current:
+                        samples.append(b''.join(current))
+                        current = []
+                    pending.append(ints(len(nal)) + nal)
+                if nal not in parameters[kind]:
+                    parameters[kind].append(nal)
+                continue
+            if kind <= 31:
+                if len(nal) < 3:
+                    raise ValueError('truncated slice')
+                if nal[2] & 128:
+                    if current:
+                        samples.append(b''.join(current))
+                        current = []
+                    current = pending
+                    pending = []
+                    if 16 <= kind <= 23:
+                        sync.append(len(samples) + 1)
+                elif not current:
+                    raise ValueError('missing first slice')
+                current.append(ints(len(nal)) + nal)
+            elif kind not in (35, 36, 37, 38, 39, 40):
+                raise ValueError(f'unsupported NAL {kind}')
+        if current:
+            samples.append(b''.join(current))
     if pending:
         raise ValueError('parameter update without a following picture')
     if (not samples or any(not parameters[k] for k in parameters)
@@ -81,7 +91,7 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
         raise ValueError('requires parameter sets and pictures; hvc1 requires one VPS/SPS/PPS')
     if multilayer and access_units is None:
         raise ValueError('multilayer fixture requires explicit access-unit grouping')
-    if inband_parameters:
+    if inband_parameters and access_units is None:
         parameters = {kind: nals[:1] for kind, nals in parameters.items()}
     # SPS begins with one byte of layer/nesting information, then the 12-byte PTL.
     sps = parameters[33][0][2:]

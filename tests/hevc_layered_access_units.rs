@@ -1,0 +1,397 @@
+//! Whole-AU bindings/POC and actual pixels. Stateful DPB/player ownership is separate.
+use fvid::codec::{
+    config::{HevcConfig, NalUnits},
+    hevc_decoder::{LayeredAccessUnit, LayeredParameters},
+    hevc_inter_layer::PictureStatus,
+    hevc_motion::Reference,
+    hevc_nal::NalHeader,
+    hevc_picture::{Picture, decode_layered},
+    hevc_poc::LayeredPocState,
+    hevc_reference_list::{PictureIdentity, ReferenceKind},
+};
+use fvid::container::mp4::Mp4Reader;
+use std::{
+    io::Cursor,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
+const BUDGET: usize = 32 << 20;
+fn root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors")
+}
+fn movie(name: &str) -> Mp4Reader<Cursor<Vec<u8>>> {
+    Mp4Reader::open(
+        Cursor::new(std::fs::read(root().join(name)).unwrap()),
+        Default::default(),
+    )
+    .unwrap()
+}
+fn manifest(name: &str) -> serde_json::Value {
+    serde_json::from_slice(&std::fs::read(root().join(name)).unwrap()).unwrap()
+}
+fn assert_pixels(picture: &Picture, oracle: &[u8], index: usize) {
+    assert_eq!(picture.depth, [8; 2]);
+    let size: usize = picture.planes.iter().map(|p| p.samples().len()).sum();
+    let mut at = index * size;
+    for plane in &picture.planes {
+        let n = plane.samples().len();
+        assert_eq!(
+            plane.samples(),
+            oracle[at..at + n]
+                .iter()
+                .map(|&v| u16::from(v))
+                .collect::<Vec<_>>()
+        );
+        at += n;
+    }
+}
+
+#[test]
+fn all_original_layered_i_pictures_bind_and_reconstruct_as_complete_access_units() {
+    let m = manifest("hevc-layered-reconstruction.json");
+    assert_eq!(m["cases"].as_array().unwrap().len(), 9);
+    for case in m["cases"].as_array().unwrap() {
+        let file = case["file"].as_str().unwrap();
+        let mut input = movie(file);
+        let config_bytes = input.tracks()[0].configuration.clone();
+        let config = HevcConfig::parse(&config_bytes).unwrap();
+        let original = LayeredParameters::from_configuration(&config_bytes, BUDGET).unwrap();
+        let state = LayeredPocState::default();
+        let before = state.clone();
+        let mut packet = vec![];
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let plan =
+            LayeredAccessUnit::parse(&original, &state, &packet, config.length_size, 1, BUDGET)
+                .unwrap_or_else(|e| panic!("{file}: {e}"));
+        assert_eq!(state, before);
+        assert!(original.active(0).is_none() && original.active(3).is_none());
+        assert_eq!(
+            plan.pictures()
+                .iter()
+                .map(|p| p.binding.sps.layer_id)
+                .collect::<Vec<_>>(),
+            [0, 3]
+        );
+        let oracle = std::fs::read(
+            root()
+                .join(case["seed"].as_str().unwrap())
+                .with_extension("yuv"),
+        )
+        .unwrap();
+        for picture in plan.pictures() {
+            assert_eq!(picture.poc, 0, "{file}");
+            let lists = vec![[vec![], vec![]]; picture.slices.len()];
+            let decoded = decode_layered(
+                &picture.binding.context(),
+                &picture.slices,
+                picture.poc,
+                &lists,
+                BUDGET,
+            )
+            .unwrap_or_else(|e| panic!("{file} layer{}: {e}", picture.binding.sps.layer_id));
+            assert_pixels(&decoded, &oracle, 0);
+        }
+        let (parameters, transition, pictures, end) = plan.into_parts();
+        let published = transition.unwrap().into_state();
+        assert_eq!(published.previous(0), Some(0));
+        assert_eq!(published.previous(3), Some(0));
+        assert_eq!(pictures.len(), 2);
+        assert!(parameters.active(0).is_some() && parameters.active(3).is_some());
+        assert_eq!(end.layers, 0);
+        assert!(!end.bitstream);
+    }
+}
+
+#[test]
+fn malformed_whole_au_witnesses_fail_precisely_without_publishing_partial_state() {
+    let m = manifest("hevc-layered-access-units.json");
+    let mut failures = 0;
+    for case in m["cases"].as_array().unwrap() {
+        let Some(expected) = case["error"].as_str() else {
+            continue;
+        };
+        failures += 1;
+        let file = case["file"].as_str().unwrap();
+        let mut input = movie(file);
+        let config_bytes = input.tracks()[0].configuration.clone();
+        let config = HevcConfig::parse(&config_bytes).unwrap();
+        let original = LayeredParameters::from_configuration(&config_bytes, BUDGET).unwrap();
+        let state = LayeredPocState::default();
+        let before = state.clone();
+        let held = original.storage_bytes();
+        let mut packet = vec![];
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let error =
+            LayeredAccessUnit::parse(&original, &state, &packet, config.length_size, 1, BUDGET)
+                .err()
+                .unwrap();
+        assert_eq!(error.to_string(), expected, "{file}");
+        assert_eq!(state, before, "{file}");
+        assert_eq!(original.storage_bytes(), held, "{file}");
+        assert!(
+            original.active(0).is_none() && original.active(3).is_none(),
+            "{file}"
+        );
+        let mut baseline = movie(case["baseline"].as_str().unwrap());
+        baseline.read_packet(0, 0, &mut packet).unwrap();
+        let recovery =
+            LayeredAccessUnit::parse(&original, &state, &packet, config.length_size, 1, BUDGET)
+                .unwrap_or_else(|e| panic!("{file}: failed to recover: {e}"));
+        assert_eq!(recovery.pictures().len(), 2);
+        assert!(recovery.pictures().iter().all(|p| p.poc == 0));
+    }
+    assert!(failures >= 12);
+}
+
+#[test]
+fn legal_non_vcl_placement_shared_pps_and_reserved_payloads_preserve_all_pixels() {
+    let m = manifest("hevc-layered-access-units.json");
+    let mut accepted = 0;
+    for case in m["cases"].as_array().unwrap() {
+        if !case["error"].is_null() {
+            continue;
+        }
+        accepted += 1;
+        let file = case["file"].as_str().unwrap();
+        let mut input = movie(file);
+        let config_bytes = input.tracks()[0].configuration.clone();
+        let config = HevcConfig::parse(&config_bytes).unwrap();
+        let original = LayeredParameters::from_configuration(&config_bytes, BUDGET).unwrap();
+        let state = LayeredPocState::default();
+        let mut packet = vec![];
+        input.read_packet(0, 0, &mut packet).unwrap();
+        if case["ignored"].as_bool() == Some(true) {
+            let ignored = NalUnits::new(&packet, config.length_size)
+                .unwrap()
+                .map(Result::unwrap)
+                .filter(|n| NalHeader::parse(n).unwrap().layer_id == 63)
+                .count();
+            assert_eq!(ignored, 2);
+        }
+        let plan =
+            LayeredAccessUnit::parse(&original, &state, &packet, config.length_size, 1, BUDGET)
+                .unwrap_or_else(|e| panic!("{file}: {e}"));
+        assert_eq!(plan.pictures().len(), 2, "{file}");
+        assert_eq!(
+            plan.end_markers().layers,
+            case["ended"].as_u64().unwrap_or(0)
+        );
+        assert_eq!(
+            plan.end_markers().bitstream,
+            case["eob"].as_bool().unwrap_or(false)
+        );
+        if let Some(layer) = case["pps_nal_layer"].as_u64() {
+            assert_eq!(
+                plan.parameters().active(3).unwrap().pps.nal_layer_id,
+                layer as u8
+            );
+            assert_eq!(
+                original.clone().activate(3, 1, 1).unwrap().pps.nal_layer_id,
+                3
+            );
+        }
+        let oracle = std::fs::read(
+            root()
+                .join(case["seed"].as_str().unwrap())
+                .with_extension("yuv"),
+        )
+        .unwrap();
+        for picture in plan.pictures() {
+            let lists = vec![[vec![], vec![]]; picture.slices.len()];
+            let decoded = decode_layered(
+                &picture.binding.context(),
+                &picture.slices,
+                picture.poc,
+                &lists,
+                BUDGET,
+            )
+            .unwrap();
+            assert_pixels(&decoded, &oracle, 0);
+        }
+        assert!(original.active(0).is_none() && original.active(3).is_none());
+    }
+    assert_eq!(accepted, 4);
+}
+
+#[test]
+fn sequential_complete_units_drive_actual_temporal_and_same_au_inter_prediction() {
+    let mut input = movie("hevc-layered-reconstruct-inter-prediction.mp4");
+    let config_bytes = input.tracks()[0].configuration.clone();
+    let config = HevcConfig::parse(&config_bytes).unwrap();
+    let initial = LayeredParameters::from_configuration(&config_bytes, BUDGET).unwrap();
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for _ in 0..2 {
+        let mut parameters = initial.clone();
+        let mut state = LayeredPocState::default();
+        let mut dpb: Vec<(PictureIdentity, Arc<Picture>)> = vec![];
+        let mut packet = vec![];
+        for index in 0..2 {
+            input.read_packet(0, index, &mut packet).unwrap();
+            let before = state.clone();
+            let plan = LayeredAccessUnit::parse(
+                &parameters,
+                &state,
+                &packet,
+                config.length_size,
+                1,
+                BUDGET,
+            )
+            .unwrap();
+            assert_eq!(state, before);
+            let mut completed: Vec<(PictureStatus, Arc<Picture>)> = vec![];
+            for picture in plan.pictures() {
+                assert_eq!(picture.poc, index as i32);
+                let mut all_lists = vec![];
+                for header in &picture.slices {
+                    let mut lists: [Vec<Reference>; 2] = [vec![], vec![]];
+                    if header.references != [0, 0] {
+                        let mut before = vec![];
+                        let mut after = vec![];
+                        let mut long = vec![];
+                        for r in &header.short_term {
+                            if r.used {
+                                let identity = PictureIdentity {
+                                    layer_id: header.nal.layer_id,
+                                    poc: picture.poc + r.delta_poc,
+                                };
+                                if r.delta_poc < 0 {
+                                    before.push(identity);
+                                } else {
+                                    after.push(identity);
+                                }
+                            }
+                        }
+                        before.sort_by_key(|p| std::cmp::Reverse(p.poc));
+                        after.sort_by_key(|p| p.poc);
+                        let same_layer: Vec<_> = dpb
+                            .iter()
+                            .filter(|(id, _)| id.layer_id == header.nal.layer_id)
+                            .map(|(id, _)| id.poc)
+                            .collect();
+                        for r in &header.long_term {
+                            if r.used {
+                                long.push(PictureIdentity {
+                                    layer_id: header.nal.layer_id,
+                                    poc: r
+                                        .resolve(
+                                            picture.poc,
+                                            picture.binding.sps.sps.poc_bits,
+                                            &same_layer,
+                                        )
+                                        .unwrap()
+                                        .unwrap(),
+                                });
+                            }
+                        }
+                        let bound = header
+                            .bind_inter_layer_references(
+                                &picture.binding.context(),
+                                index as u64,
+                                picture.poc,
+                                &completed,
+                                BUDGET,
+                            )
+                            .unwrap();
+                        for list in 0..2 {
+                            for selected in bound
+                                .select(
+                                    [&before, &after, &long],
+                                    header.current_picture_reference,
+                                    header.references[list] as usize,
+                                    header.list_modification[list].as_deref(),
+                                    list,
+                                    BUDGET,
+                                )
+                                .unwrap()
+                            {
+                                let source = match selected.kind {
+                                    ReferenceKind::Current => None,
+                                    ReferenceKind::InterLayer => {
+                                        Some(bound.resolve(selected).unwrap().clone())
+                                    }
+                                    _ => Some(selected.picture.resolve(&dpb).unwrap().clone()),
+                                };
+                                lists[list].push(Reference {
+                                    layer_id: selected.picture.layer_id,
+                                    poc: selected.picture.poc,
+                                    long_term: selected.long_term(),
+                                    picture: source,
+                                });
+                            }
+                        }
+                    }
+                    all_lists.push(lists);
+                }
+                let decoded = Arc::new(
+                    decode_layered(
+                        &picture.binding.context(),
+                        &picture.slices,
+                        picture.poc,
+                        &all_lists,
+                        BUDGET,
+                    )
+                    .unwrap(),
+                );
+                assert_pixels(&decoded, &oracle, index as usize);
+                let first = &picture.slices[0];
+                let identity = PictureIdentity {
+                    layer_id: first.nal.layer_id,
+                    poc: picture.poc,
+                };
+                completed.push((
+                    PictureStatus {
+                        identity,
+                        access_unit: index as u64,
+                        nal: first.nal,
+                        discardable: first.layered.as_ref().unwrap().discardable,
+                    },
+                    decoded,
+                ));
+            }
+            // Publish only after both base and enhancement pictures succeeded.
+            let (next_parameters, transition, _, end) = plan.into_parts();
+            assert_eq!(end.layers, 0);
+            assert!(!end.bitstream);
+            parameters = next_parameters;
+            state = transition.unwrap().into_state();
+            dpb.extend(
+                completed
+                    .into_iter()
+                    .map(|(status, picture)| (status.identity, picture)),
+            );
+            assert_eq!(state.previous(0), Some(index as i32));
+            assert_eq!(state.previous(3), Some(index as i32));
+        }
+    }
+}
+
+#[test]
+fn metadata_only_and_budget_refusals_keep_source_poc_and_bindings_unchanged() {
+    let input = movie("hevc-layered-reconstruct-pcm-dependent.mp4");
+    let config_bytes = input.tracks()[0].configuration.clone();
+    let config = HevcConfig::parse(&config_bytes).unwrap();
+    let parameters = LayeredParameters::from_configuration(&config_bytes, BUDGET).unwrap();
+    let state = LayeredPocState::default();
+    let pps = config
+        .arrays
+        .iter()
+        .find(|a| a.nal_type == 34)
+        .unwrap()
+        .units[0];
+    let mut packet = (pps.len() as u32).to_be_bytes().to_vec();
+    packet.extend_from_slice(pps);
+    let plan = LayeredAccessUnit::parse(&parameters, &state, &packet, 4, 1, BUDGET).unwrap();
+    assert!(plan.pictures().is_empty() && plan.transition().is_none());
+    assert!(LayeredAccessUnit::parse(&parameters, &state, &packet, 4, 1, 1).is_err());
+    assert!(LayeredAccessUnit::parse(&parameters, &state, &packet, 4, 1, 4096).is_err());
+    assert!(parameters.active(0).is_none() && parameters.active(3).is_none());
+    assert_eq!(state, LayeredPocState::default());
+    assert_eq!(
+        parameters
+            .clone()
+            .activate(63, 1, 1)
+            .unwrap_err()
+            .to_string(),
+        "invalid HEVC active layer ID"
+    );
+}
