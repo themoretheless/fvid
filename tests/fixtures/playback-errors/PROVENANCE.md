@@ -6776,3 +6776,16 @@ predicted-picture motion for an identity-preparation unit regression. Its numeri
 VPS motion-resampling toggle is a parameter-state unit control, not an additional
 coded stream or nonidentity playback acceptance claim. Ordinary tests generate
 nothing and require no FFmpeg, network or private media.
+
+### Owned layered decoding entry and empty-list admission (2026-10-12)
+
+All nine saved original layered reconstruction witnesses now exercise
+`LayeredDpb::decode` without test-authored reconstruction callbacks, preserving
+exact pixels for every layer and reset coverage. The original independent PCM
+I witness specifically reproduced erroneous nonbase-IRAP inter-list admission
+with zero active references; the acceptance test now verifies native dispatch
+without constructing a list for an absent I/P-L1 reference list. Used lists
+retain the existing IRAP reference-admission constraints. Existing authored
+EOS/EOB witnesses also use this entry for release and IRAP restart acceptance.
+No fixtures are generated during ordinary tests. Nonidentity coded playback
+qualification and frontend/output scheduling remain separate work.

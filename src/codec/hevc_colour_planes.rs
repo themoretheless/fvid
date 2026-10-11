@@ -211,6 +211,26 @@ impl Picture {
         })
     }
 
+    /// Additional retained reference allocations when source pixels remain
+    /// borrowed. Shared sample/availability buffers are not charged twice.
+    pub(crate) fn additional_reference_storage(&self, source: &Self) -> Option<usize> {
+        let mut n = self.storage_bytes()?;
+        match (&self.colour_planes, &source.colour_planes) {
+            (None, None) => {
+                for (prepared, original) in self.planes.iter().zip(&source.planes) {
+                    if prepared.shares_storage(original) { n = n.checked_sub(prepared.storage_bytes()?)?; }
+                }
+            }
+            (Some(prepared), Some(original)) => {
+                for (a,b) in prepared.iter().zip(original) {
+                    n = n.checked_sub(a.storage_bytes()?)?.checked_add(a.additional_reference_storage(b)?)?;
+                }
+            }
+            _ => {}
+        }
+        Some(n)
+    }
+
     /// Retained allocations owned by this picture, including separate plane
     /// motion/reference state. Children never contain other pictures.
     pub(crate) fn storage_bytes(&self) -> Option<usize> {

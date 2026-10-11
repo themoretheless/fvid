@@ -1,5 +1,31 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC owned layered reconstruction dispatch, 2026-10-12
+
+`LayeredDpb::decode` now connects owned reference-list binding, sample/motion
+preparation and coded picture reconstruction without a caller reconstruction
+callback. Prepared pictures are cached by full source layer/POC identity across
+all lists and slices of the current picture. One allocation budget covers copied
+active-SPS context, retained prepared references, list buffers and reconstruction
+scratch. Shared samples/availability arrays are charged once; the identity path
+only adds metadata storage. Results expose `LayeredDecoded::layer_id` explicitly.
+The complete AU, POC and DPB still publish only after all layers succeed.
+
+All nine original coded reconstruction witnesses now run through this production
+entry, including independent/dependent SPS, shared PPS, separate colour planes,
+multiple slices and two-AU inter prediction. Every layer compares to saved YUV,
+including after reset, and budget refusal leaves source state unchanged. EOS/EOB
+restart acceptance also uses this entry. The independent I witness reproduced
+an erroneous inter-list admission call for zero active references; absent I/P-L1
+lists now bypass inter-list selection while used lists retain all admission rules.
+
+This is owned library decoding for the qualified witnesses. Nonidentity coded
+stream/oracle acceptance, motion-only/separate-plane nonidentity preparation,
+operation-point extraction, output scheduling and frontend integration remain.
+
+Validation: 30 layered integration tests and 215 HEVC unit tests pass (one
+existing unit test ignored); the offline player build check also passes.
+
 ## HEVC prepared inter-layer reference pictures, 2026-10-12
 
 `LayeredPps::reference_picture` now attaches reference-sample preparation and
@@ -21,7 +47,7 @@ and compares both layers to saved original YUV, including after reset. A unit
 regression checks real P-picture motion and full reference-identity maps survive
 identity preparation with motion resampling both enabled and disabled.
 This qualifies the identity coded path; nonidentity coded-stream/oracle
-acceptance and automatic preparation/dispatch in the player remain required.
+acceptance and automatic frontend dispatch remain required.
 
 Validation: 30 layered integration tests and 215 HEVC unit tests pass (one
 existing unit test ignored), together with the offline player build check.

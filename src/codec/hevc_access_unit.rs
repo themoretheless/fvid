@@ -85,6 +85,11 @@ impl LayeredAccessPicture {
         )?;
         let mut lists: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
         for list in 0..2 {
+            // I slices have no inter reference list; P slices have no L1.
+            // Do not impose nonbase IRAP inter-list constraints on an absent list.
+            if header.references[list] == 0 {
+                continue;
+            }
             for selected in bound.select(
                 [&identities[0], &identities[1], &identities[2]],
                 header.current_picture_reference,

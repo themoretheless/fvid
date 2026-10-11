@@ -494,19 +494,7 @@ fn eos_and_eob_release_references_and_require_a_correct_irap_restart() {
         let plan =
             LayeredAccessUnit::parse(&initial, dpb.poc(), &packet, config.length_size, 1, BUDGET)
                 .unwrap();
-        let reconstruct = |picture: &fvid::codec::hevc_decoder::LayeredAccessPicture,
-                           _: &[Reference],
-                           _: &[(PictureStatus, Arc<Picture>)],
-                           budget| {
-            Ok(Arc::new(decode_layered(
-                &picture.binding.context(),
-                &picture.slices,
-                picture.poc,
-                &vec![[vec![], vec![]]; picture.slices.len()],
-                budget,
-            )?))
-        };
-        let (parameters, outputs, _) = dpb.reconstruct(plan, BUDGET, reconstruct).unwrap();
+        let (parameters, outputs, _) = dpb.decode(plan, BUDGET).unwrap();
         assert_eq!(
             dpb.references().map(|r| r.layer_id).collect::<Vec<_>>(),
             kept,
@@ -560,7 +548,7 @@ fn eos_and_eob_release_references_and_require_a_correct_irap_restart() {
             BUDGET,
         )
         .unwrap();
-        let (_, outputs, _) = dpb.reconstruct(plan, BUDGET, reconstruct).unwrap();
+        let (_, outputs, _) = dpb.decode(plan, BUDGET).unwrap();
         for decoded in outputs {
             assert_pixels(&decoded.picture, &oracle, 0);
         }
@@ -573,82 +561,68 @@ fn eos_and_eob_release_references_and_require_a_correct_irap_restart() {
 }
 
 #[test]
-fn prepared_reference_pictures_drive_actual_inter_layer_reconstruction_without_mutating_sources() {
-    use fvid::codec::{hevc_decoder::LayeredDpb, hevc_pps::LayeredPpsContext};
-    let mut input = movie("hevc-layered-reconstruct-inter-prediction.mp4");
-    let bytes = input.tracks()[0].configuration.clone();
-    let config = HevcConfig::parse(&bytes).unwrap();
-    let initial = LayeredParameters::from_configuration(&bytes, BUDGET).unwrap();
-    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
-    let mut dpb = LayeredDpb::default();
-    for _ in 0..2 {
-        let mut parameters = initial.clone();
-        let mut packet = vec![];
-        for index in 0..2 {
-            input.read_packet(0, index, &mut packet).unwrap();
-            let plan = LayeredAccessUnit::parse(
-                &parameters,
-                dpb.poc(),
-                &packet,
-                config.length_size,
-                1,
-                BUDGET,
-            )
-            .unwrap();
-            let sps: Vec<_> = plan
-                .pictures()
-                .iter()
-                .map(|p| p.binding.sps.clone())
-                .collect();
-            let (next, outputs, _) = dpb
-                .reconstruct(plan, BUDGET, |picture, temporal, completed, budget| {
-                    let context = LayeredPpsContext {
-                        vps: &picture.binding.vps,
-                        sps: &picture.binding.sps,
-                        active_sps: &sps,
-                        active_pps: &[],
-                    };
-                    let mut prepared = vec![];
-                    for (status, source) in completed {
-                        assert_pixels(source, &oracle, index);
-                        assert!(
-                            picture
-                                .binding
-                                .pps
-                                .reference_picture(&context, status.identity.layer_id, source, 1)
-                                .is_err()
-                        );
-                        let reference = picture.binding.pps.reference_picture(
-                            &context,
-                            status.identity.layer_id,
-                            source,
-                            budget,
-                        )?;
-                        assert_pixels(&reference, &oracle, index);
-                        assert_pixels(source, &oracle, index);
-                        prepared.push((*status, Arc::new(reference)));
-                    }
-                    let lists = (0..picture.slices.len())
-                        .map(|slice| {
-                            picture
-                                .reference_lists(slice, index as u64, temporal, &prepared, budget)
-                                .map(|(_, l)| l)
-                        })
-                        .collect::<fvid::Result<Vec<_>>>()?;
-                    Ok(Arc::new(decode_layered(
-                        &picture.binding.context(),
-                        &picture.slices,
-                        picture.poc,
-                        &lists,
-                        budget,
-                    )?))
-                })
-                .unwrap();
-            for output in outputs {
-                assert_pixels(&output.picture, &oracle, index);
+fn owned_layered_decode_prepares_references_and_reconstructs_every_saved_witness() {
+    use fvid::codec::hevc_decoder::LayeredDpb;
+    let manifest = manifest("hevc-layered-reconstruction.json");
+    for case in manifest["cases"].as_array().unwrap() {
+        let name = case["file"].as_str().unwrap();
+        let mut input = movie(name);
+        let bytes = input.tracks()[0].configuration.clone();
+        let config = HevcConfig::parse(&bytes).unwrap();
+        let initial = LayeredParameters::from_configuration(&bytes, BUDGET).unwrap();
+        let oracle = std::fs::read(
+            root()
+                .join(case["seed"].as_str().unwrap())
+                .with_extension("yuv"),
+        )
+        .unwrap();
+        let mut dpb = LayeredDpb::default();
+        for _ in 0..2 {
+            let mut parameters = initial.clone();
+            let mut packet = vec![];
+            let count = if name.contains("inter-prediction") {
+                2
+            } else {
+                1
+            };
+            for index in 0..count {
+                input.read_packet(0, index, &mut packet).unwrap();
+                let original = dpb.poc().clone();
+                let make_plan = |state: &LayeredPocState| {
+                    LayeredAccessUnit::parse(
+                        &parameters,
+                        state,
+                        &packet,
+                        config.length_size,
+                        1,
+                        BUDGET,
+                    )
+                    .unwrap()
+                };
+                assert!(dpb.decode(make_plan(dpb.poc()), 1).is_err());
+                assert_eq!(dpb.poc(), &original);
+                assert_eq!(dpb.next_access_unit(), index as u64);
+                let (next, outputs, end) = dpb
+                    .decode(make_plan(dpb.poc()), BUDGET)
+                    .unwrap_or_else(|e| panic!("{name} packet {index}: {e}"));
+                assert_eq!(
+                    outputs.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+                    [0, 3]
+                );
+                for output in outputs {
+                    assert_pixels(&output.picture, &oracle, index);
+                }
+                for reference in dpb.references() {
+                    assert_pixels(
+                        reference.picture.as_ref().unwrap(),
+                        &oracle,
+                        reference.poc as usize,
+                    );
+                }
+                assert_eq!(end, Default::default());
+                parameters = next;
             }
-            parameters = next;
+            dpb.reset();
         }
-        dpb.reset();
     }
 }

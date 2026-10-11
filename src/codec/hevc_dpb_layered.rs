@@ -1,7 +1,5 @@
 //! Transactional reconstruction/reference storage for already extracted Annex F AUs.
-use super::{
-    Decoded, LayeredAccessPicture, LayeredAccessUnit, LayeredEndMarkers, LayeredParameters,
-};
+use super::{LayeredAccessPicture, LayeredAccessUnit, LayeredEndMarkers, LayeredParameters};
 use crate::codec::{
     hevc_inter_layer::PictureStatus,
     hevc_motion::Reference,
@@ -12,6 +10,13 @@ use crate::codec::{
 use crate::{Result, invalid};
 use std::sync::Arc;
 
+/// Coded-layer identity remains explicit when an AU produces several pictures.
+pub struct LayeredDecoded {
+    pub layer_id: u8,
+    pub picture: Arc<Picture>,
+    pub poc: i32,
+    pub output: bool,
+}
 #[derive(Default)]
 pub struct LayeredDpb {
     poc: LayeredPocState,
@@ -31,6 +36,118 @@ impl LayeredDpb {
     pub fn reset(&mut self) {
         *self = Self::default();
     }
+    /// Reconstruct with owned sample/motion preparation and reference-list
+    /// binding. Preparation is cached per source identity across slices/lists.
+    /// Budget charges active-SPS copies, retained prepared references, lists and
+    /// reconstruction scratch simultaneously; original state stays transactional.
+    pub fn decode(
+        &mut self,
+        plan: LayeredAccessUnit,
+        budget: usize,
+    ) -> Result<(LayeredParameters, Vec<LayeredDecoded>, LayeredEndMarkers)> {
+        use crate::codec::{hevc_picture::decode_layered, hevc_pps::LayeredPpsContext};
+        use std::mem::size_of;
+        let sps_bytes = plan
+            .pictures()
+            .iter()
+            .try_fold(
+                size_of::<Vec<crate::codec::hevc_sps::LayeredSps>>(),
+                |n, p| n.checked_add(p.binding.storage_bytes()),
+            )
+            .ok_or_else(|| invalid("HEVC prepared active-SPS storage overflow"))?;
+        let available = budget
+            .checked_sub(sps_bytes)
+            .ok_or_else(|| invalid("HEVC prepared active SPS exceeds memory budget"))?;
+        let active_sps: Vec<_> = plan
+            .pictures()
+            .iter()
+            .map(|p| p.binding.sps.clone())
+            .collect();
+        let access_unit = self.access_unit;
+        self.reconstruct(plan, available, |picture, temporal, completed, budget| {
+            let context = LayeredPpsContext {
+                vps: &picture.binding.vps,
+                sps: &picture.binding.sps,
+                active_sps: &active_sps,
+                active_pps: &[],
+            };
+            let list_bytes = picture
+                .slices
+                .len()
+                .checked_mul(size_of::<[Vec<Reference>; 2]>() + 32 * size_of::<Reference>())
+                .and_then(|n| {
+                    n.checked_add(
+                        64 * (size_of::<PictureIdentity>() + size_of::<Arc<Picture>>())
+                            + 2 * size_of::<Vec<Reference>>(),
+                    )
+                })
+                .ok_or_else(|| invalid("HEVC prepared list storage overflow"))?;
+            let available = budget
+                .checked_sub(list_bytes)
+                .ok_or_else(|| invalid("HEVC prepared lists exceed memory budget"))?;
+            let mut held = 0usize;
+            let mut cache: Vec<(PictureIdentity, Arc<Picture>)> = Vec::new();
+            let mut lists = Vec::new();
+            lists
+                .try_reserve_exact(picture.slices.len())
+                .map_err(|_| invalid("cannot allocate HEVC prepared slice lists"))?;
+            for slice in 0..picture.slices.len() {
+                let (_, mut selected) = picture.reference_lists(
+                    slice,
+                    access_unit,
+                    temporal,
+                    completed,
+                    available
+                        .checked_sub(held)
+                        .ok_or_else(|| invalid("HEVC prepared references exceed memory budget"))?,
+                )?;
+                for reference in selected.iter_mut().flat_map(|list| list.iter_mut()) {
+                    if reference.layer_id == picture.binding.sps.layer_id {
+                        continue;
+                    }
+                    let identity = reference.identity();
+                    if let Some((_, prepared)) = cache.iter().find(|(id, _)| *id == identity) {
+                        reference.picture = Some(prepared.clone());
+                        continue;
+                    }
+                    let source = reference
+                        .picture
+                        .as_ref()
+                        .ok_or_else(|| invalid("HEVC prepared reference has no source picture"))?;
+                    let remaining = available
+                        .checked_sub(held)
+                        .ok_or_else(|| invalid("HEVC prepared references exceed memory budget"))?;
+                    let prepared = picture.binding.pps.reference_picture(
+                        &context,
+                        reference.layer_id,
+                        source,
+                        remaining,
+                    )?;
+                    let bytes = prepared
+                        .additional_reference_storage(source)
+                        .ok_or_else(|| invalid("HEVC prepared reference storage overflow"))?;
+                    held = held
+                        .checked_add(bytes)
+                        .filter(|&n| n <= available)
+                        .ok_or_else(|| invalid("HEVC prepared references exceed memory budget"))?;
+                    let prepared = Arc::new(prepared);
+                    reference.picture = Some(prepared.clone());
+                    cache.push((identity, prepared));
+                }
+                lists.push(selected);
+            }
+            let remaining = available
+                .checked_sub(held)
+                .ok_or_else(|| invalid("HEVC prepared references exceed memory budget"))?;
+            Ok(Arc::new(decode_layered(
+                &picture.binding.context(),
+                &picture.slices,
+                picture.poc,
+                &lists,
+                remaining,
+            )?))
+        })
+    }
     /// The callback prepares inter-layer samples/motion and reconstructs one
     /// complete picture. No source state is published unless all layers succeed.
     /// End markers are applied after reconstruction; returned outputs remain
@@ -40,7 +157,7 @@ impl LayeredDpb {
         plan: LayeredAccessUnit,
         budget: usize,
         mut decode: F,
-    ) -> Result<(LayeredParameters, Vec<Decoded>, LayeredEndMarkers)>
+    ) -> Result<(LayeredParameters, Vec<LayeredDecoded>, LayeredEndMarkers)>
     where
         F: FnMut(
             &LayeredAccessPicture,
@@ -55,7 +172,7 @@ impl LayeredDpb {
             .ok_or_else(|| invalid("HEVC layered access-unit identity overflow"))?;
         let scratch = 63usize.saturating_mul(
             std::mem::size_of::<PictureStatus>()
-                + std::mem::size_of::<Decoded>()
+                + std::mem::size_of::<LayeredDecoded>()
                 + 3 * std::mem::size_of::<Reference>()
                 + 2 * std::mem::size_of::<Arc<Picture>>(),
         );
@@ -203,7 +320,8 @@ impl LayeredDpb {
                 },
                 decoded.clone(),
             ));
-            outputs.push(Decoded {
+            outputs.push(LayeredDecoded {
+                layer_id: first.nal.layer_id,
                 picture: decoded,
                 poc: picture.poc,
                 output: first.picture_output,

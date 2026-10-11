@@ -667,6 +667,9 @@ mod prepared_reference_tests {
                 .pps
                 .reference_picture(&context, 0, &source, 32 << 20)
                 .unwrap();
+            let metadata = source.poc_translation_bytes().unwrap();
+            let small = current.pps.reference_picture(&context,0,&source,metadata).unwrap();
+            assert!(small.additional_reference_storage(&source).unwrap() <= metadata);
             assert_eq!(prepared.motion, source.motion);
             assert_eq!(prepared.reference_pocs, source.reference_pocs);
             assert_eq!(prepared.reference_layers, source.reference_layers);

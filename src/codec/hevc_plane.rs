@@ -11,6 +11,10 @@ pub struct Plane {
     ready: Arc<Vec<bool>>,
 }
 impl Plane {
+    pub(crate) fn shares_storage(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.samples, &other.samples) && Arc::ptr_eq(&self.ready, &other.ready)
+    }
+
     pub(crate) fn absent(depth: u8) -> Self {
         Self {
             width: 0,
