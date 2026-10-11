@@ -151,6 +151,16 @@ pub struct LayeredVps {
     pub future_extension: bool,
 }
 impl LayeredVps {
+    /// Conservative retained metadata bound, including the parser's RBSP
+    /// allowance. Used when several layer activations share one VPS owner.
+    pub(crate) fn storage_bytes(&self) -> usize {
+        self.vps.metadata_bytes
+            .saturating_add(std::mem::size_of::<Self>() - std::mem::size_of::<Vps>())
+            .saturating_add(self.extension.as_ref().map_or(0, |e| e.retained_bytes()))
+            .saturating_add(self.vui.as_ref().map_or(0, |v| v.retained_bytes()))
+            .saturating_add(self.bsp.as_ref().map_or(0, |b| b.retained_bytes()))
+    }
+
     /// Resolve the PTL applying to a necessary layer of the selected OLS.
     /// Annex F.7.4.4 inherits missing general and sublayer fields from the
     /// preceding VPS PTL, independently of the selected layer's PTL index.

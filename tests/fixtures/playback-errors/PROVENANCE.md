@@ -6700,3 +6700,40 @@ space: base SPS/PPS 0, independent layer-3 SPS/PPS 1, or dependent layer-3
 PPS 1 referring to shared SPS 0. Regression assertions reject the former
 colliding IDs; only headers and alignment change, preserving entropy and
 saved original pixel oracles. Generation remains separate from test execution.
+
+### HEVC global parameter replacement and shared activation (2026-10-12)
+
+The same owned generator adds `hevc-layered-reconstruct-shared-pps.mp4`:
+its last PPS 1 comes from NAL layer 0, refers to SPS 0 and replaces the earlier
+layer-3 PPS 1. Both layers can activate this global PPS; actual layer-3 PCM
+reconstruction matches every original saved sample. The first-slice PPS ID
+selects the parameters, rather than a test choosing a NAL by physical layer.
+
+`hevc-layered-global-33-replacement.mp4` and
+`hevc-layered-global-34-replacement.mp4` are deliberate malformed binding
+witnesses. Their final SPS/PPS 0 comes from NAL layer 3; a base-layer slice must
+resolve that latest global ID and refuse its invalid NAL-layer binding. These
+are refusal/rollback regressions, not playback acceptance for malformed media.
+
+`hevc-layered-sps-content-update.mp4` changes only the original SPS 0's
+progressive-source PTL constraint bit, preserving all coded slices and entropy.
+It tests that new SPS RBSP contents cannot activate in an existing layer
+sequence and can activate once that sequence ends. This is parameter-state
+acceptance, distinct from full scalable playback acceptance. All parameter
+bytes are derived from the existing original synthetic seeds. Ordinary tests
+read saved fixtures without generation, external codecs, FFmpeg or network.
+
+`hevc-layered-reconstruct-multilayer-sps.mp4` uses shortened dependent SPS
+syntax (coded sublayer value 7), SPS ID 1, and the matching VPS representation.
+Its SPS omits PTL/geometry/ordering; the saved owned PCM entropy and pixel
+oracle are unchanged. This is coded-picture reconstruction acceptance through
+global parameter activation, not a complete stateful layered player.
+
+`hevc-layered-activation-inference.mp4` is a parameter-state witness authored
+from the existing `hevc-layered-pps-infer-from-sps` synthetic parameters with
+unique global SPS/PPS IDs. It retains the original metadata seed's samples;
+those samples are not scalable playback acceptance. Activating a new original
+base PPS from `hevc-layered-pps-infer-from-pps.base.pps` changes its effective
+first scaling coefficient from 17 to 21. Re-activating the unchanged enhancement
+PPS must infer 21 while old snapshots retain 17. Ending the source layer must
+produce the exact missing-active-source refusal, rather than reuse stale data.

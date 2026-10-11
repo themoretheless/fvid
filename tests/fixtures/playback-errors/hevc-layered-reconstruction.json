@@ -8,11 +8,29 @@
       "ols": 1
     },
     {
+      "file": "hevc-layered-reconstruct-shared-pps.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "independent": true,
+      "layer": 3,
+      "ols": 1,
+      "sps_id": 0,
+      "shared_pps": true
+    },
+    {
       "file": "hevc-layered-reconstruct-pcm-dependent.mp4",
       "seed": "hevc-pcm-reference-rext8.mp4",
       "independent": false,
       "layer": 3,
       "ols": 1
+    },
+    {
+      "file": "hevc-layered-reconstruct-multilayer-sps.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "independent": false,
+      "layer": 3,
+      "ols": 1,
+      "sps_id": 1,
+      "multilayer_sps": true
     },
     {
       "file": "hevc-layered-reconstruct-inter-prediction.mp4",
@@ -49,6 +67,20 @@
       "independent": false,
       "layer": 3,
       "ols": 1
+    }
+  ],
+  "replacements": [
+    {
+      "file": "hevc-layered-global-33-replacement.mp4",
+      "kind": 33,
+      "id": 0,
+      "latest_layer": 3
+    },
+    {
+      "file": "hevc-layered-global-34-replacement.mp4",
+      "kind": 34,
+      "id": 0,
+      "latest_layer": 3
     }
   ]
 }

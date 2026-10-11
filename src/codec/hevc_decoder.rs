@@ -13,6 +13,9 @@ use super::{
 use crate::color::hdr::HdrMetadata;
 use crate::{Result, invalid};
 use std::sync::Arc;
+#[path = "hevc_parameters.rs"]
+mod parameters;
+pub use parameters::{LayeredBinding, LayeredParameters};
 pub struct Decoded {
     pub picture: Arc<Picture>,
     pub poc: i32,

@@ -61,6 +61,7 @@ def main():
                   if row.get("reason")=="compiler-artifact" and row.get("executable")
                   and row["target"]["name"]=="hevc_colour_plane_fixture_meta")
     cases = []
+    replacements = []
     for label, seed in [
         ("pcm", "hevc-pcm-reference-rext8"),
         ("multislice", "hevc-pcm-dependent-rext8"),
@@ -110,7 +111,74 @@ def main():
             movie = mux(stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=[all_slices],multilayer=True)
             (D / (prefix+".mp4")).write_bytes(movie)
             cases.append(dict(file=prefix+".mp4",seed=seed+".mp4",independent=independent,layer=3,ols=1))
+            if label == "pcm" and independent:
+                # Valid content update under SPS 0: changing its progressive-source PTL flag does
+                # not change entropy/pixels, but needs a new layer sequence.
+                value = bits(unescape(params[33][0][2:]))
+                changed_sps = params[33][0][:2] + escape(packed(value[:48] + str(1-int(value[48])) + value[49:]))
+                updated_parameters = [vps_nal, params[33][0], changed_sps, sps, params[34][0], pps]
+                stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*updated_parameters,*all_slices])
+                filename = "hevc-layered-sps-content-update.mp4"
+                (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=[all_slices],multilayer=True))
+                # Distinct received NAL layers do not make distinct ID spaces.
+                # Keep the overwritten units in hvcC so lookup order is tested.
+                for kind in (33, 34):
+                    replaced = parameter_ids(sps if kind == 33 else pps,
+                                             104 if kind == 33 else 0,
+                                             [0] if kind == 33 else [0, 0])
+                    collision_params = ([vps_nal, params[33][0], replaced, params[34][0], pps]
+                                        if kind == 33 else
+                                        [vps_nal, params[33][0], sps, params[34][0], replaced])
+                    stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*collision_params,*all_slices])
+                    filename = f"hevc-layered-global-{kind}-replacement.mp4"
+                    (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],
+                        chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                        access_units=[all_slices],multilayer=True))
+                    replacements.append(dict(file=filename,kind=kind,id=0,latest_layer=3))
+                # One base-layer PPS may be activated in multiple independent
+                # layers. The final PPS 1 replaces the earlier layer-3 PPS 1.
+                shared = parameter_ids(params[34][0], 0, [1, 0])
+                stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,shared,*all_slices])
+                filename = "hevc-layered-reconstruct-shared-pps.mp4"
+                (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=[all_slices],multilayer=True))
+                cases.append(dict(file=filename,seed=seed+".mp4",independent=True,
+                                  layer=3,ols=1,sps_id=0,shared_pps=True))
             if label == "pcm" and not independent:
+                # A dependent SPS omits PTL/geometry/ordering and obtains them
+                # from the active VPS. Keep the owned coded-picture suffix.
+                value = bits(unescape(params[33][0][2:]))
+                assert value[4:7] == "000"  # owned single-temporal-layer seed
+                r = Reader(value, 104)
+                assert r.ue() == 0
+                chroma = r.ue()
+                if chroma == 3: r.read(1)
+                r.ue(); r.ue()
+                if r.read(1):
+                    for _ in range(4): r.ue()
+                r.ue(); r.ue()
+                poc_start = r.at
+                r.ue()
+                poc_end = r.at
+                r.read(1)
+                r.ue(); r.ue(); r.ue()
+                suffix = r.at
+                for _ in range(6): r.ue()
+                assert r.read(1) == 0  # no scaling syntax needs re-authoring
+                body = "0000111" + ue(1) + "0" + value[poc_start:poc_end] + value[suffix:value.rfind("1")+1]
+                multilayer_sps = ((33<<9)|(3<<3)|1).to_bytes(2,"big") + escape(packed(body))
+                multilayer_pps = parameter_ids(layer(params[34][0],3),0,[1,1])
+                new_parameters = [vps_nal,params[33][0],multilayer_sps,params[34][0],multilayer_pps]
+                stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*new_parameters,*all_slices])
+                filename = "hevc-layered-reconstruct-multilayer-sps.mp4"
+                (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=[all_slices],multilayer=True))
+                cases.append(dict(file=filename,seed=seed+".mp4",independent=False,
+                                  layer=3,ols=1,sps_id=1,multilayer_sps=True))
                 predicted = []
                 base_predicted = []
                 for h in meta["packets"][1]:
@@ -151,7 +219,16 @@ def main():
                     chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                     access_units=groups,multilayer=True))
                 cases.append(dict(file=filename,seed=seed+".mp4",independent=False,layer=3,ols=1,inter=True))
-    (D / "hevc-layered-reconstruction.json").write_text(json.dumps(dict(cases=cases),indent=2)+"\n")
+    # Parameter-state witness, not coded-picture acceptance: inference must
+    # follow the latest active base PPS even if the enhancement NAL is unchanged.
+    import generate_hevc_layered_pps as gp
+    prefix = D / "hevc-layered-pps-infer-from-sps"
+    read = lambda suffix: Path(str(prefix) + suffix).read_bytes()
+    current_sps = parameter_ids(read(".current.sps"), 7, [1])
+    current_pps = parameter_ids(read(".pps"), 0, [1, 1])
+    (D / "hevc-layered-activation-inference.mp4").write_bytes(
+        gp.movie(read(".vps"),read(".base.sps"),current_sps,read(".base.pps"),current_pps))
+    (D / "hevc-layered-reconstruction.json").write_text(json.dumps(dict(cases=cases,replacements=replacements),indent=2)+"\n")
 
 
 if __name__ == "__main__":

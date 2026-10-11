@@ -1,13 +1,11 @@
 //! Coded nonbase-picture acceptance; access-unit/DPB ownership is separate.
 use fvid::codec::{
     config::{HevcConfig, NalUnits},
-    hevc_decoder::HevcDecoder,
+    hevc_decoder::{HevcDecoder, LayeredParameters},
     hevc_nal::NalHeader,
     hevc_picture::{decode_layered, decode_slices},
-    hevc_pps::{LayeredPps, LayeredPpsContext},
+    hevc_pps::LayeredPpsContext,
     hevc_slice::{LayeredSliceContext, SliceHeader},
-    hevc_sps::{LayeredSps, LayeredSpsContext},
-    hevc_vps::LayeredVps,
 };
 use fvid::container::mp4::Mp4Reader;
 use std::{io::Cursor, path::Path};
@@ -32,61 +30,55 @@ fn owned_nonbase_coded_pictures_reconstruct_exact_pixels_with_bound_parameters()
         assert_eq!(movie.tracks()[0].samples.len(), 1, "{file}");
         let configuration = movie.tracks()[0].configuration.clone();
         let config = HevcConfig::parse(&configuration).unwrap();
-        let nal = |kind| {
-            config
-                .arrays
-                .iter()
-                .find(|a| a.nal_type == kind)
-                .unwrap()
-                .units
+        let mut packet = vec![];
+        movie.read_packet(0, 0, &mut packet).unwrap();
+        let units: Vec<_> = NalUnits::new(&packet, config.length_size)
+            .unwrap()
+            .map(Result::unwrap)
+            .collect();
+        let mut parameters =
+            LayeredParameters::from_configuration(&configuration, 32 << 20).unwrap();
+        let first = |layer| {
+            units
                 .iter()
                 .copied()
-                .find(|n| {
-                    kind == 32
-                        || NalHeader::parse(n).unwrap().layer_id
-                            == if kind == 34 || case["independent"].as_bool().unwrap() {
-                                3
-                            } else {
-                                0
-                            }
+                .find(|nal| {
+                    let h = NalHeader::parse(nal).unwrap();
+                    h.is_vcl() && h.layer_id == layer
                 })
                 .unwrap()
         };
-        let vps = LayeredVps::parse(nal(32), 32 << 20).unwrap();
-        let sps = LayeredSps::parse(
-            nal(33),
-            &LayeredSpsContext {
-                vps: &vps,
-                layer_id: 3,
-                output_layer_set: 1,
-                active_sps: &[],
-            },
-            32 << 20,
-        )
-        .unwrap_or_else(|e| panic!("{file}: SPS {e}"));
-        let pps = LayeredPps::parse(
-            nal(34),
-            &LayeredPpsContext {
-                vps: &vps,
-                sps: &sps,
-                active_sps: &[],
-                active_pps: &[],
-            },
-            32 << 20,
-        )
-        .unwrap_or_else(|e| panic!("{file}: PPS {e}"));
+        let base = parameters.activate_slice(first(0), 1).unwrap();
+        let binding = parameters.activate_slice(first(3), 1).unwrap();
+        assert_eq!(base.sps.sps.id, 0);
+        assert_eq!(base.pps.pps.id, 0);
+        assert_eq!(parameters.active(0).unwrap().pps.pps.id, 0);
+        if case["shared_pps"].as_bool() == Some(true) {
+            let shared_base = parameters.activate(0, 1, 1).unwrap();
+            assert_eq!(shared_base.pps.pps, binding.pps.pps);
+            assert_eq!(shared_base.pps.nal_layer_id, 0);
+            assert_eq!(binding.pps.nal_layer_id, 0);
+            assert_eq!(shared_base.pps.layer_id, 0);
+            assert_eq!(binding.pps.layer_id, 3);
+        }
+        let sps = &binding.sps;
+        let pps = &binding.pps;
         // Annex F shares parameter IDs across all NAL layers. These fixtures
         // must not overwrite the base layer's SPS/PPS 0 with different content.
-        assert_eq!(sps.sps.id, u8::from(case["independent"].as_bool().unwrap()));
+        assert_eq!(
+            sps.sps.id,
+            case["sps_id"]
+                .as_u64()
+                .map(|i| i as u8)
+                .unwrap_or(u8::from(case["independent"].as_bool().unwrap()))
+        );
+        assert_eq!(
+            sps.multilayer_syntax,
+            case["multilayer_sps"].as_bool().unwrap_or(false)
+        );
         assert_eq!(pps.pps.id, 1);
         assert_eq!(pps.pps.sps_id, sps.sps.id);
-        let context = LayeredSliceContext {
-            vps: &vps,
-            sps: &sps,
-            pps: &pps,
-        };
-        let mut packet = vec![];
-        movie.read_packet(0, 0, &mut packet).unwrap();
+        let context = binding.context();
         let mut headers = vec![];
         let mut coded_layers = vec![];
         for nal in NalUnits::new(&packet, config.length_size)
@@ -202,53 +194,13 @@ fn coded_nonbase_inter_slice_uses_same_access_unit_base_samples() {
     assert_eq!(movie.tracks()[0].samples.len(), 2);
     let configuration = movie.tracks()[0].configuration.clone();
     let config = HevcConfig::parse(&configuration).unwrap();
-    let nal = |kind, layer| {
-        config
-            .arrays
-            .iter()
-            .find(|a| a.nal_type == kind)
-            .unwrap()
-            .units
-            .iter()
-            .copied()
-            .find(|n| NalHeader::parse(n).unwrap().layer_id == layer)
-            .unwrap()
-    };
-    let vps = LayeredVps::parse(nal(32, 0), 32 << 20).unwrap();
-    let base_sps = LayeredSps::parse(
-        nal(33, 0),
-        &LayeredSpsContext {
-            vps: &vps,
-            layer_id: 0,
-            output_layer_set: 1,
-            active_sps: &[],
-        },
-        32 << 20,
-    )
-    .unwrap();
-    let sps = LayeredSps::parse(
-        nal(33, 0),
-        &LayeredSpsContext {
-            vps: &vps,
-            layer_id: 3,
-            output_layer_set: 1,
-            active_sps: &[],
-        },
-        32 << 20,
-    )
-    .unwrap();
-    let active_sps = [base_sps];
-    let pps = LayeredPps::parse(
-        nal(34, 3),
-        &LayeredPpsContext {
-            vps: &vps,
-            sps: &sps,
-            active_sps: &active_sps,
-            active_pps: &[],
-        },
-        32 << 20,
-    )
-    .unwrap();
+    let mut parameters = LayeredParameters::from_configuration(&configuration, 32 << 20).unwrap();
+    let base_binding = parameters.activate(0, 0, 1).unwrap();
+    let binding = parameters.activate(3, 1, 1).unwrap();
+    let active_sps = [base_binding.sps.clone()];
+    let sps = &binding.sps;
+    let pps = &binding.pps;
+    let vps = &binding.vps;
     assert_eq!(sps.sps.id, 0); // Shared base SPS, distinct global PPS ID.
     assert_eq!(pps.pps.id, 1);
     assert_eq!(pps.pps.sps_id, 0);

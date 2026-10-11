@@ -26,6 +26,12 @@ pub struct ColourMappingTable {
     coefficients: Vec<Cell>,
 }
 impl ColourMappingTable {
+    pub(crate) fn heap_bytes(&self) -> usize {
+        self.reference_layers.capacity().saturating_add(
+            self.coefficients.capacity().saturating_mul(std::mem::size_of::<Cell>()),
+        )
+    }
+
     /// H.8.1.4.4: map a complete reference picture before inter-layer resampling.
     /// Output retains reference geometry and uses the table's output depths.
     /// Budget covers new planes and row scratch; the caller owns the input/LUT.

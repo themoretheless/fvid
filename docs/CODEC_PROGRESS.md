@@ -1,5 +1,48 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC global parameters and per-layer activation, 2026-10-12
+
+`hevc_decoder::LayeredParameters` owns the globally received VPS/SPS/PPS IDs
+and immutable `LayeredBinding` snapshots for active layers. Annex F.7.4.2.4.2
+uses one SPS/PPS ID space regardless of NAL layer: receipt replaces that ID,
+then activation validates the newest parameter's allowed NAL layer. There is
+no fallback to a superseded parameter from the picture's physical layer.
+`activate_slice` reads the coded PPS ID and resolves the complete VPS/SPS/PPS
+chain. Context-dependent syntax is fully parsed at activation; receipt validates
+its header/ID prefix and stores the NAL without requiring future reference layers.
+
+SPS RBSP contents stay pinned through a layer sequence; the NAL layer itself
+is validated even if the updated RBSP is identical. VPS content remains pinned
+until all active sequences end. Failed activation keeps old bindings intact.
+Cloned banks stage AU changes, while immutable snapshots keep already bound
+pictures and other layers stable. Metadata accounting includes raw snapshots,
+nested SPS/PPS structures, shared parsed VPS, and activation scratch. It is a
+conservative bound; caller-held packets and older cloned banks are separate.
+
+Nine coded reconstruction witnesses now select parameters through this bank
+and retain exact saved pixel comparisons. The added shared-PPS video proves
+that one global base-layer PPS can activate independently in layers 0 and 3.
+A dependent multilayer-syntax SPS witness derives its geometry/profile from the
+VPS while reconstructing the exact original pixels. Two short original malformed
+videos replace SPS/PPS 0 with a layer-3 NAL and
+must refuse a base-picture activation at its actual layer-binding failure.
+A valid SPS progressive-source PTL update tests sequence-end rules; VPS updates,
+rollback, immutable snapshots, missing IDs and allocation boundaries are tested.
+An additional parameter-state video proves that unchanged enhancement PPS bytes
+still resolve new active reference-layer scaling lists; an old binding stays
+immutable, and a missing active source cannot be replaced by stale cached inference.
+
+Validation: 22 integration tests across nine layered HEVC suites and 214 HEVC
+unit tests pass (one existing test ignored); the player check also passes.
+All 14 generated artifacts reproduce byte-for-byte. A stale-binding mutation
+fails at the intended coefficient mismatch (17 versus 21), then the restored
+source passes the suites again. Ordinary tests remain offline and invoke no
+external codec.
+
+This supplies parameter ownership and coded reconstruction acceptance, not yet
+a complete stateful scalable player. Complete-AU dispatch, transactional layered
+POC/DPB ownership and attachment of nonidentity sample/motion preparation remain.
+
 ## HEVC context-bound nonbase picture reconstruction, 2026-10-12
 
 `hevc_picture::decode_layered` connects the resolved Annex F active-layer
@@ -30,7 +73,7 @@ external codec. The fixture muxer supports explicit AU grouping so independent
 colour-plane first-slice flags cannot split one picture into multiple samples.
 
 This is coded-picture reconstruction acceptance. `HevcDecoder`/the player still
-need global parameter-ID storage with per-layer activation, complete-AU dispatch and transactional
+need complete-AU dispatch and transactional
 per-layer DPB/POC ownership. Nonidentity inter-layer sample/motion preparation
 must be attached to that owner as well; this change does not claim full scalable
 playback or complete codec/profile/tool coverage.
