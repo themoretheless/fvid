@@ -33,11 +33,15 @@ def segmentation(update,temporal,data,absolute=False,enabled=True,force_intra=Fa
             bits+='00'+'1'+f'{0 if force_intra else 1+i%2:02b}'+'1'
     return bits
 
-def packet(depth,chroma,ids,update=True,temporal=False,data=True,reuse=None,enabled=True,split=True,shown=True,force_intra=False):
+def packet(depth,chroma,ids,update=True,temporal=False,data=True,reuse=None,enabled=True,split=True,shown=True,force_intra=False,side=64,error_resilient=False):
     bits,_=profile_bits(depth,chroma)
-    bits+=('0110' if shown else '01000')+'00'+'00000000'
+    bits+=('011' if shown else '010')+str(int(error_resilient))
+    if not shown:bits+='0'  # inter, not intra-only
+    if not error_resilient:bits+='00'
+    bits+='00000000'
     # LAST is coloured slot0; GOLDEN is neutral slot1; ALT is slot0.
-    bits+='0000'+'0010'+'0000'+'1'+'0'+'0'+'011'
+    bits+='0000'+'0010'+'0000'
+    bits+=('1' if side==64 else '000'+f'{side-1:016b}{side-1:016b}')+'0'+'0'+'011'
     c=BooleanWriter();c.write(128,0)
     for _ in range(3+21+4):c.write(252,0)
     # uniform sign biases imply SINGLE_REFERENCE: no reference-mode bits.
@@ -50,7 +54,7 @@ def packet(depth,chroma,ids,update=True,temporal=False,data=True,reuse=None,enab
         row=(j//2)*4 if split else 0;col=(j%2)*4 if split else 0
         # Previous split64 sets no child contexts until each child completes:
         # all unsplit32 children have partition context8.
-        symbol(b,[0,2,-1,4,-2,-3],partition[8 if split else 12],0)
+        symbol(b,[0,2,-1,4,-2,-3],partition[8 if split or side==32 else 12],0)
         if enabled and update:
             if temporal:
                 pred=reuse[j];b.write([87,149,211][above[col]+left[row]],pred)
@@ -68,7 +72,7 @@ def packet(depth,chroma,ids,update=True,temporal=False,data=True,reuse=None,enab
             b.write(table('DEFAULT_SINGLE_REF_PROB')[2][0],0)
             b.write(table('DEFAULT_INTER_MODE_PROBS')[2][0],0)
     compressed=c.finish();tile=b.finish()
-    bits+='0100'+'0'*10+'0'*8+'000'+segmentation(update,temporal,data,enabled=enabled,force_intra=force_intra)+'0'+f'{len(compressed):016b}'
+    bits+=('00' if error_resilient else '0100')+'0'*10+'0'*8+'000'+segmentation(update,temporal,data,enabled=enabled,force_intra=force_intra)+'0'+f'{len(compressed):016b}'
     return literal(bits)+compressed+tile
 
 def oracle(reference,depth,chroma,ids,split=True):
@@ -87,6 +91,8 @@ def main():
     cases=[]
     quant_cases=[]
     filter_cases=[]
+    reset_cases=[]
+    lossy_cases=[]
     for depth in [8,10,12]:
         for chroma in ['420','422','444','440']:
             key,ref=coloured(depth,chroma)
@@ -103,6 +109,35 @@ def main():
                 expected.append(dict(oracle=name,pts=(i+2)*333000000,shown=stage.get('shown',True)))
             name=f'vp9-segmentation-{chroma}-{depth}.webm';(DEST/name).write_bytes(webm(packets))
             cases.append(dict(file=name,depth=depth,chroma=chroma,frames=expected))
+            for kind in ['error-resilient','resize']:
+                reset=packet(depth,chroma,[0],split=False,update=False,data=True,
+                    side=32 if kind=='resize' else 64,error_resilient=kind=='error-resilient')
+                sequence=[key,neutral_intra(depth,chroma),packet(depth,chroma,[1],split=False),reset,
+                    packet(depth,chroma,[0],split=False,update=False,data=False)]
+                stem=f'vp9-segmentation-reset-{chroma}-{depth}-{kind}'
+                (DEST/f'{stem}.webm').write_bytes(webm(sequence))
+                expected=bytearray();at=0
+                sub={'420':(1,1),'422':(1,0),'444':(0,0),'440':(0,1)}[chroma]
+                for plane in range(3):
+                    sx,sy=sub if plane else (0,0);w,h=64>>sx,64>>sy
+                    if kind=='resize':
+                        for y in range(h//2):
+                            for x in range(w//2):expected+=ref[at+((2*y)*w+2*x)*2:at+((2*y)*w+2*x)*2+2]
+                    else:expected+=ref[at:at+w*h*2]
+                    at+=w*h*2
+                (DEST/f'{stem}.yuv16').write_bytes(expected)
+                (DEST/f'{stem}-return.yuv16').write_bytes(ref)
+                reset_cases.append(dict(file=f'{stem}.webm',oracle=f'{stem}.yuv16',returned=f'{stem}-return.yuv16',depth=depth,chroma=chroma,kind=kind))
+            for base,q,absolute in [(20,6,False),(20,6,True),(20,-100,False),(250,100,False),(20,-100,True),(20,255,True)]:
+                seg='11'+''.join('1'+f'{p:08b}' for p in PROBS)+'0'+'1'+str(int(absolute))
+                seg+='1'+f'{abs(q):08b}'+str(int(q<0))+'000'+'0000'*7
+                index=max(0,min(255,q+(0 if absolute else base)))
+                quant=table('DC_QLOOKUP')[(depth-8)//2][index]
+                picture,expected=coloured(depth,chroma,segment=seg,dc_quant=quant,base_q=base)
+                stem=f'vp9-segmentation-lossy-{chroma}-{depth}-{base}-{q}-{int(absolute)}'
+                (DEST/f'{stem}.vp9').write_bytes(picture)
+                (DEST/f'{stem}.yuv16').write_bytes(expected)
+                lossy_cases.append(dict(file=f'{stem}.vp9',oracle=f'{stem}.yuv16',base=base,q=q,absolute=absolute,index=index))
             for absolute in [False,True]:
                 for q in [-12,6,255]:
                     # Explicit ALT_Q only on segment zero; base_q remains zero.
@@ -130,6 +165,8 @@ def main():
                 (DEST/f'{stem}-control.vp9').write_bytes(control)
                 (DEST/f'{stem}.yuv16').write_bytes(unfiltered)
                 filter_cases.append(dict(file=f'{stem}.vp9',control=f'{stem}-control.vp9',unfiltered=f'{stem}.yuv16',level=level))
+    (DEST/'vp9-segmentation-lossy.json').write_text(json.dumps(dict(cases=lossy_cases),indent=2)+'\n')
+    (DEST/'vp9-segmentation-reset.json').write_text(json.dumps(dict(cases=reset_cases),indent=2)+'\n')
     (DEST/'vp9-segmentation-filter.json').write_text(json.dumps(dict(cases=filter_cases),indent=2)+'\n')
     (DEST/'vp9-segmentation-quant.json').write_text(json.dumps(dict(cases=quant_cases),indent=2)+'\n')
     (DEST/'vp9-segmentation.json').write_text(json.dumps(dict(cases=cases,provenance='Original synthetic coloured and neutral references; owned segmentation syntax/entropy writer, independent reference-selection pixel oracles. No private media, external codecs or network.'),indent=2)+'\n')

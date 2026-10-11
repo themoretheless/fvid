@@ -168,3 +168,137 @@ fn segment_filter_override_matches_equivalent_frame_level_and_zero_is_exact() {
         "positive filter controls must visibly exercise filtering"
     );
 }
+
+#[test]
+fn segment_map_clears_on_resize_and_error_resilience_and_stays_cleared() {
+    let m: serde_json::Value =
+        serde_json::from_slice(&data("vp9-segmentation-reset.json")).unwrap();
+    assert_eq!(m["cases"].as_array().unwrap().len(), 24);
+    for c in m["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        let mut r = WebmReader::open(Cursor::new(data(name)), Limits::default()).unwrap();
+        r.scan_all().unwrap();
+        let packets: Vec<_> = (0..r.packets.len())
+            .map(|i| r.read_packet(i).unwrap())
+            .collect();
+        let mut d = Decoder::new(32 << 20);
+        for _ in 0..2 {
+            d.reset();
+            for p in &packets[..2] {
+                d.decode(p).unwrap();
+            }
+            let seed = d.decode(&packets[2]).unwrap();
+            assert!(
+                seed.picture.planes.iter().all(|p| p
+                    .samples
+                    .iter()
+                    .all(|&v| v == 1 << (seed.picture.depth - 1))),
+                "{name}: nonzero map must select neutral reference"
+            );
+            for (i, field) in [(3, "oracle"), (4, "returned")] {
+                let f = d
+                    .decode(&packets[i])
+                    .unwrap_or_else(|e| panic!("{name} packet {i}: {e}"));
+                let side = if i == 3 && c["kind"] == "resize" {
+                    32
+                } else {
+                    64
+                };
+                assert_eq!(f.picture.size, [side, side], "{name}");
+                assert_eq!(
+                    f.header.error_resilient,
+                    i == 3 && c["kind"] == "error-resilient",
+                    "{name}"
+                );
+                let actual: Vec<_> = f
+                    .picture
+                    .planes
+                    .iter()
+                    .flat_map(|p| p.samples.iter().flat_map(|v| v.to_le_bytes()))
+                    .collect();
+                let expected = data(c[field].as_str().unwrap());
+                assert_eq!(actual.len(), expected.len(), "{name}");
+                for (i, (a, e)) in actual.iter().zip(&expected).enumerate() {
+                    assert_eq!(a, e, "{name} byte {i}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn nonzero_base_quantizer_uses_segment_absolute_delta_and_dct_residuals() {
+    let m: serde_json::Value =
+        serde_json::from_slice(&data("vp9-segmentation-lossy.json")).unwrap();
+    assert_eq!(m["cases"].as_array().unwrap().len(), 72);
+    for c in m["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        let mut d = Decoder::new(32 << 20);
+        for _ in 0..2 {
+            d.reset();
+            let f = d
+                .decode(&data(name))
+                .unwrap_or_else(|e| panic!("{name}: {e}"));
+            assert!(!f.header.lossless());
+            assert_eq!(u64::from(f.header.base_q), c["base"].as_u64().unwrap());
+            let actual: Vec<_> = f
+                .picture
+                .planes
+                .iter()
+                .flat_map(|p| p.samples.iter().flat_map(|v| v.to_le_bytes()))
+                .collect();
+            let expected = data(c["oracle"].as_str().unwrap());
+            assert_eq!(actual.len(), expected.len());
+            for (i, (a, e)) in actual.iter().zip(&expected).enumerate() {
+                assert_eq!(a, e, "{name} byte {i}");
+            }
+        }
+    }
+}
+
+#[test]
+fn segmentation_reset_webm_replays_size_changes_and_independent_maps_after_seek() {
+    let m: serde_json::Value =
+        serde_json::from_slice(&data("vp9-segmentation-reset.json")).unwrap();
+    for c in m["cases"].as_array().unwrap() {
+        let name = c["file"].as_str().unwrap();
+        let depth = c["depth"].as_u64().unwrap() as u8;
+        let mut p = WebmVideoReader::open_software(Cursor::new(data(name)), 32 << 20).unwrap();
+        for pass in 0..3 {
+            if pass == 2 {
+                assert_eq!(p.seek_to_sync(1_000_000_000).unwrap(), 0);
+            } else {
+                p.rewind();
+            }
+            assert!(p.read_frame_planes().unwrap().is_some());
+            let seed = p.read_frame_planes().unwrap().unwrap();
+            assert!(
+                [seed.y, seed.cb, seed.cr]
+                    .into_iter()
+                    .flatten()
+                    .all(|v| v == 128),
+                "{name}"
+            );
+            for (i, field) in [(3, "oracle"), (4, "returned")] {
+                let f = p.read_frame_planes().unwrap().unwrap();
+                let side = if i == 3 && c["kind"] == "resize" {
+                    32
+                } else {
+                    64
+                };
+                assert_eq!([f.width, f.height], [side, side]);
+                let actual: Vec<_> = [f.y, f.cb, f.cr].into_iter().flatten().collect();
+                let expected: Vec<_> = data(c[field].as_str().unwrap())
+                    .chunks_exact(2)
+                    .map(|v| (u16::from_le_bytes([v[0], v[1]]) >> (depth - 8)) as u8)
+                    .collect();
+                assert_eq!(actual.len(), expected.len());
+                for (j, (a, e)) in actual.iter().zip(&expected).enumerate() {
+                    assert_eq!(a, e, "{name} frame {i} byte {j}");
+                }
+                assert_eq!(p.frame_interval().unwrap().0, i * 333_000_000);
+            }
+            assert!(p.read_frame_planes().unwrap().is_none());
+        }
+    }
+}

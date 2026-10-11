@@ -8,7 +8,7 @@ from generate_audio_resample_window_fixture import atom, word, ebml
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / 'tests/fixtures/playback-errors'
-def frame(depth, chroma, width=64, height=64, level=0, tile=None, segmentation='0'):
+def frame(depth, chroma, width=64, height=64, level=0, tile=None, segmentation='0', base_q=0):
     profile = (0 if chroma == '420' else 1) + (2 if depth > 8 else 0)
     bits = '10' + str(profile & 1) + str(profile >> 1)
     if profile == 3: bits += '0'
@@ -20,7 +20,7 @@ def frame(depth, chroma, width=64, height=64, level=0, tile=None, segmentation='
     bits += f'{width-1:016b}{height-1:016b}' + '0'  # 64 square, render size unchanged
     bits += '0100'  # no refresh context, frame parallel, context zero
     bits += f'{level:06b}' + '0000'  # loop filter level/sharpness/delta enable
-    bits += '0' * 8 + '000' + segmentation  # frame lossless quantizer; optional segment tools
+    bits += f'{base_q:08b}' + '000' + segmentation  # frame quantizer; optional segment tools
     bits += '0' + f'{32:016b}'  # one tile row, 32-byte compressed header
     bits += '0' * (-len(bits) % 8)
     # Zero arithmetic code selects no probability updates, unsplit blocks,
@@ -45,7 +45,7 @@ class BooleanWriter:
         bits=f'{self.low:0{8+self.shifts}b}'
         bits+='0'*(-len(bits)%8)
         return bytes(int(bits[i:i+8],2) for i in range(0,len(bits),8))+bytes(8)
-def coloured(depth,chroma,side=64,segment=None,dc_quant=4,level=0):
+def coloured(depth,chroma,side=64,segment=None,dc_quant=4,level=0,base_q=0):
     subs={'420':(1,1),'422':(1,0),'444':(0,0),'440':(0,1)}[chroma]
     coef=table('DEFAULT_COEF_PROBS')[0]; pareto=table('PARETO_TABLE')
     b=BooleanWriter()
@@ -86,9 +86,17 @@ def coloured(depth,chroma,side=64,segment=None,dc_quant=4,level=0):
                 for yy in range(4):
                     for xx in range(4):
                         delta=row[xx]-row[xx]//2 if yy==0 else row[xx]//2
+                        if base_q:
+                            # A lone DCT DC coefficient produces a constant block.
+                            # Standard cos(pi/4) fixed-point scaling, twice, followed
+                            # by the normative 4x4 output shift; signed rounding is
+                            # addition followed by arithmetic shift.
+                            dc1=(4*q*11585+8192)>>14
+                            dc2=(dc1*11585+8192)>>14
+                            delta=(dc2+8)>>4
                         pixels[(y+yy)*w+x+xx]=min((1<<depth)-1,max(0,dc+delta))
         for value in pixels: expected+=value.to_bytes(2,'little')
-    return frame(depth,chroma,width=side,height=side,tile=b.finish(),level=level,segmentation=segment if segment is not None else '0'),expected
+    return frame(depth,chroma,width=side,height=side,tile=b.finish(),level=level,segmentation=segment if segment is not None else '0',base_q=base_q),expected
 def webm(packets):
     video=ebml('b0',b'\x40')+ebml('ba',b'\x40')
     track=ebml('d7',b'\1')+ebml('83',b'\1')+ebml('86',b'V_VP9')+ebml('23e383',(333333333).to_bytes(4,'big'))+ebml('e0',video)

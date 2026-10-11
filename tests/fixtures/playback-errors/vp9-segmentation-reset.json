@@ -1,0 +1,196 @@
+{
+  "cases": [
+    {
+      "file": "vp9-segmentation-reset-420-8-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-420-8-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-420-8-error-resilient-return.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-420-8-resize.webm",
+      "oracle": "vp9-segmentation-reset-420-8-resize.yuv16",
+      "returned": "vp9-segmentation-reset-420-8-resize-return.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-422-8-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-422-8-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-422-8-error-resilient-return.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-422-8-resize.webm",
+      "oracle": "vp9-segmentation-reset-422-8-resize.yuv16",
+      "returned": "vp9-segmentation-reset-422-8-resize-return.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-444-8-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-444-8-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-444-8-error-resilient-return.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-444-8-resize.webm",
+      "oracle": "vp9-segmentation-reset-444-8-resize.yuv16",
+      "returned": "vp9-segmentation-reset-444-8-resize-return.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-440-8-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-440-8-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-440-8-error-resilient-return.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-440-8-resize.webm",
+      "oracle": "vp9-segmentation-reset-440-8-resize.yuv16",
+      "returned": "vp9-segmentation-reset-440-8-resize-return.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-420-10-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-420-10-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-420-10-error-resilient-return.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-420-10-resize.webm",
+      "oracle": "vp9-segmentation-reset-420-10-resize.yuv16",
+      "returned": "vp9-segmentation-reset-420-10-resize-return.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-422-10-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-422-10-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-422-10-error-resilient-return.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-422-10-resize.webm",
+      "oracle": "vp9-segmentation-reset-422-10-resize.yuv16",
+      "returned": "vp9-segmentation-reset-422-10-resize-return.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-444-10-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-444-10-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-444-10-error-resilient-return.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-444-10-resize.webm",
+      "oracle": "vp9-segmentation-reset-444-10-resize.yuv16",
+      "returned": "vp9-segmentation-reset-444-10-resize-return.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-440-10-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-440-10-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-440-10-error-resilient-return.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-440-10-resize.webm",
+      "oracle": "vp9-segmentation-reset-440-10-resize.yuv16",
+      "returned": "vp9-segmentation-reset-440-10-resize-return.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-420-12-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-420-12-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-420-12-error-resilient-return.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-420-12-resize.webm",
+      "oracle": "vp9-segmentation-reset-420-12-resize.yuv16",
+      "returned": "vp9-segmentation-reset-420-12-resize-return.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-422-12-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-422-12-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-422-12-error-resilient-return.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-422-12-resize.webm",
+      "oracle": "vp9-segmentation-reset-422-12-resize.yuv16",
+      "returned": "vp9-segmentation-reset-422-12-resize-return.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-444-12-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-444-12-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-444-12-error-resilient-return.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-444-12-resize.webm",
+      "oracle": "vp9-segmentation-reset-444-12-resize.yuv16",
+      "returned": "vp9-segmentation-reset-444-12-resize-return.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "kind": "resize"
+    },
+    {
+      "file": "vp9-segmentation-reset-440-12-error-resilient.webm",
+      "oracle": "vp9-segmentation-reset-440-12-error-resilient.yuv16",
+      "returned": "vp9-segmentation-reset-440-12-error-resilient-return.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "kind": "error-resilient"
+    },
+    {
+      "file": "vp9-segmentation-reset-440-12-resize.webm",
+      "oracle": "vp9-segmentation-reset-440-12-resize.yuv16",
+      "returned": "vp9-segmentation-reset-440-12-resize-return.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "kind": "resize"
+    }
+  ]
+}

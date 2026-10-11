@@ -1,0 +1,580 @@
+{
+  "cases": [
+    {
+      "file": "vp9-segmentation-lossy-420-8-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-8-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-8-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-8-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-8-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-8-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-8-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-8-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-8-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-8-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-8-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-8-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-8-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-8-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-8-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-8-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-8-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-8-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-8-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-8-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-8-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-8-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-8-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-8-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-8-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-8-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-8-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-8-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-8-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-8-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-8-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-8-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-8-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-8-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-8-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-8-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-8-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-8-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-8-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-8-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-8-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-8-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-8-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-8-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-8-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-8-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-8-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-8-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-10-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-10-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-10-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-10-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-10-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-10-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-10-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-10-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-10-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-10-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-10-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-10-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-10-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-10-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-10-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-10-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-10-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-10-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-10-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-10-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-10-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-10-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-10-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-10-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-10-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-10-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-10-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-10-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-10-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-10-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-10-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-10-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-10-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-10-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-10-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-10-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-10-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-10-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-10-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-10-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-10-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-10-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-10-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-10-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-10-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-10-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-10-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-10-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-12-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-12-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-12-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-12-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-12-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-12-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-12-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-420-12-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-12-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-12-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-420-12-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-420-12-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-12-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-12-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-12-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-12-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-12-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-12-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-12-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-422-12-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-12-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-12-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-422-12-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-422-12-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-12-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-12-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-12-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-12-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-12-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-12-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-12-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-444-12-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-12-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-12-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-444-12-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-444-12-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-12-20-6-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-12-20-6-0.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": false,
+      "index": 26
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-12-20-6-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-12-20-6-1.yuv16",
+      "base": 20,
+      "q": 6,
+      "absolute": true,
+      "index": 6
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-12-20--100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-12-20--100-0.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": false,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-12-250-100-0.vp9",
+      "oracle": "vp9-segmentation-lossy-440-12-250-100-0.yuv16",
+      "base": 250,
+      "q": 100,
+      "absolute": false,
+      "index": 255
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-12-20--100-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-12-20--100-1.yuv16",
+      "base": 20,
+      "q": -100,
+      "absolute": true,
+      "index": 0
+    },
+    {
+      "file": "vp9-segmentation-lossy-440-12-20-255-1.vp9",
+      "oracle": "vp9-segmentation-lossy-440-12-20-255-1.yuv16",
+      "base": 20,
+      "q": 255,
+      "absolute": true,
+      "index": 255
+    }
+  ]
+}

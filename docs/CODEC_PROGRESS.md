@@ -12068,3 +12068,25 @@ open. Tests and generation do not use FFmpeg/libav or network.
 Validation: 38 focused core/playback integration tests and 29 VP9 codec unit
 tests pass with locked offline dependencies; the player feature builds without
 default features. These checks do not establish full codec conformance.
+
+### VP9 segmentation reset and nonzero-base quantizer qualification
+
+Added 24 five-packet WebMs covering error-resilient reset and explicit
+64-to-32-to-64 size changes in every chroma geometry and depth. The pre-reset
+map demonstrably selects the neutral reference; reset must instead select
+the colored reference and remain cleared in the next picture. Exact two-times
+bilinear scaling has zero fractional phase, so resize oracles independently
+select every second reference sample. Direct reset replay and WebM playback
+check every sample, geometry, hidden-frame suppression, timestamps, EOF,
+rewind and sync seek.
+
+72 additional segmented keyframes use nonzero base quantizers. Absolute and
+delta ALT_Q now have observably different outputs, with lower and upper index
+clipping and the DCT path checked against analytic DC-only fixed-point oracles.
+The frame's nonzero base selects DCT even when a segment's effective index is
+zero. Existing lossless and filter fixtures remain unchanged.
+
+No production codec fix was required for these cases. Both focused integration
+suites pass (13 tests); 928 chroma/segmentation artifacts regenerate identically.
+General segmented AC/lossy inter residuals, arbitrary tiled/mixed layouts,
+reference refresh/scaling combinations and broader codec gaps remain open.

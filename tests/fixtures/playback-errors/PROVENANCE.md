@@ -6241,3 +6241,23 @@ exercise visible filtering; zero-level cases additionally require exact
 independent unfiltered pixels. These are differential tests of level selection,
 not an independent oracle for the entire filter algorithm. No private input,
 external codec, FFmpeg/libav or network is used in generation or ordinary tests.
+
+## VP9 segmentation reset and lossy DC qualification
+
+`vp9-segmentation-reset.json` lists 24 original five-packet videos. Each starts
+with authored colored/neutral references and a nonzero map visibly selecting
+the neutral picture. Error-resilient reset or explicit 64-to-32 resizing must
+clear the map; a following 64 picture must retain the cleared state. Exact 2x
+scaling uses independent selection of every second reference sample, with
+zero bilinear phase. Direct decoding and playback compare every sample and
+check reset/replay, seek, hidden frames, dimensions, timestamps and EOF.
+
+`vp9-segmentation-lossy.json` lists 72 original keyframes with nonzero base Q,
+absolute/delta ALT_Q, negative and overflowing effective quantizer indices.
+The owned chroma helper now accepts base Q. Its analytic DC-only oracle applies
+two standard fixed-point cos(pi/4) factors and the 4x4 output shift, independently
+of the production transform. The signalled nonzero base keeps the DCT path
+even when the segment index clamps to zero. Existing generator defaults and
+all prior chroma/segmentation artifacts are unchanged. This qualifies DC-only
+residuals, not arbitrary AC or segmented inter residuals. Generation and tests
+use no private input, external codec, FFmpeg/libav or network.
