@@ -19,6 +19,9 @@ pub use parameters::{LayeredBinding, LayeredParameters};
 #[path = "hevc_access_unit.rs"]
 mod access_unit;
 pub use access_unit::{LayeredAccessPicture, LayeredAccessUnit, LayeredEndMarkers};
+#[path = "hevc_dpb_layered.rs"]
+mod layered_dpb;
+pub use layered_dpb::LayeredDpb;
 pub struct Decoded {
     pub picture: Arc<Picture>,
     pub poc: i32,

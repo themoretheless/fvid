@@ -1,5 +1,28 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC transactional layered DPB reconstruction, 2026-10-12
+
+`hevc_decoder::LayeredDpb` owns translated full layer/POC reference identities,
+POC state and access-unit identity. Reconstruction stages existing references,
+checks the plan against its own POC state, validates per-picture retained RPS
+agreement, and enforces per-layer DPB limits. It publishes references and POC
+only after every picture succeeds. Failed reconstruction or budget admission
+leaves the source store unchanged; reset clears references and AU identity.
+
+The reconstruction callback is responsible for inter-layer sample/motion
+preparation and coded picture reconstruction. This is a production transaction
+primitive, not yet the fully connected scalable player. EOS/EOB remain explicit
+unapplied markers for the sequence/output owner; operation-point extraction,
+nonidentity preparation and frontend integration are still required.
+
+An acceptance regression uses the original two-AU inter-prediction video,
+actual reference-list construction and both layers' exact saved YUV pixels.
+An injected second-layer failure after actual base reconstruction must preserve
+the old store and permit an identical successful retry, including after reset.
+
+Validation: 28 layered integration tests and 214 HEVC unit tests pass (one
+existing unit test ignored); the offline player build check passes.
+
 ## HEVC decoder-owned layered reference lists, 2026-10-12
 
 `LayeredAccessPicture::reference_lists` now resolves temporal RPS with the same

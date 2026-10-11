@@ -371,3 +371,94 @@ fn metadata_only_and_budget_refusals_keep_source_poc_and_bindings_unchanged() {
         "invalid HEVC active layer ID"
     );
 }
+
+#[test]
+fn layered_dpb_publishes_all_layers_atomically_and_retries_after_reconstruction_failure() {
+    use fvid::codec::hevc_decoder::LayeredDpb;
+    let mut input = movie("hevc-layered-reconstruct-inter-prediction.mp4");
+    let bytes = input.tracks()[0].configuration.clone();
+    let config = HevcConfig::parse(&bytes).unwrap();
+    let initial = LayeredParameters::from_configuration(&bytes, BUDGET).unwrap();
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    let mut dpb = LayeredDpb::default();
+    for _ in 0..2 {
+        let mut parameters = initial.clone();
+        let mut packet = vec![];
+        for index in 0..2 {
+            input.read_packet(0, index, &mut packet).unwrap();
+            let original_poc = dpb.poc().clone();
+            let original_ids: Vec<_> = dpb.references().map(Reference::identity).collect();
+            let parse = |state: &LayeredPocState| {
+                LayeredAccessUnit::parse(&parameters, state, &packet, config.length_size, 1, BUDGET)
+                    .unwrap()
+            };
+            let make_picture = |picture: &fvid::codec::hevc_decoder::LayeredAccessPicture,
+                                temporal: &[Reference],
+                                completed: &[(PictureStatus, Arc<Picture>)],
+                                budget: usize| {
+                let lists = (0..picture.slices.len())
+                    .map(|slice| {
+                        picture
+                            .reference_lists(slice, index as u64, temporal, completed, budget)
+                            .map(|(_, lists)| lists)
+                    })
+                    .collect::<fvid::Result<Vec<_>>>()?;
+                Ok(Arc::new(decode_layered(
+                    &picture.binding.context(),
+                    &picture.slices,
+                    picture.poc,
+                    &lists,
+                    budget,
+                )?))
+            };
+            let bad = parse(dpb.poc());
+            let error = dpb
+                .reconstruct(bad, BUDGET, |picture, temporal, completed, budget| {
+                    if picture.binding.sps.layer_id == 3 {
+                        return Err(fvid::Error::from(std::io::Error::other(
+                            "injected reconstruction failure",
+                        )));
+                    }
+                    make_picture(picture, temporal, completed, budget)
+                })
+                .err()
+                .unwrap();
+            assert!(
+                error
+                    .to_string()
+                    .contains("injected reconstruction failure")
+            );
+            assert_eq!(dpb.poc(), &original_poc);
+            assert_eq!(
+                dpb.references()
+                    .map(Reference::identity)
+                    .collect::<Vec<_>>(),
+                original_ids
+            );
+            assert_eq!(dpb.next_access_unit(), index as u64);
+            let low = parse(dpb.poc());
+            assert!(
+                dpb.reconstruct(low, 1, |_, _, _, _| panic!(
+                    "budget refusal must precede reconstruction"
+                ))
+                .is_err()
+            );
+            assert_eq!(dpb.poc(), &original_poc);
+            let good = parse(dpb.poc());
+            let (next, outputs, end) = dpb.reconstruct(good, BUDGET, make_picture).unwrap();
+            assert_eq!(outputs.len(), 2);
+            for decoded in outputs {
+                assert_eq!(decoded.poc, index as i32);
+                assert_pixels(&decoded.picture, &oracle, index);
+            }
+            assert_eq!(end, Default::default());
+            assert_eq!(dpb.next_access_unit(), index as u64 + 1);
+            assert_eq!(dpb.poc().previous(0), Some(index as i32));
+            assert_eq!(dpb.poc().previous(3), Some(index as i32));
+            parameters = next;
+        }
+        dpb.reset();
+        assert!(dpb.references().next().is_none());
+        assert_eq!(dpb.poc(), &LayeredPocState::default());
+    }
+}

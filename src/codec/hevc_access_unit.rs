@@ -176,6 +176,32 @@ fn prefix(kind: u8) -> bool {
     matches!(kind, 32..=34 | 39 | 41..=44 | 48..=55)
 }
 impl LayeredAccessUnit {
+    pub(crate) fn retained_bytes(&self) -> Result<usize> {
+        let mut n = self
+            .parameters
+            .storage_bytes()
+            .saturating_add(size_of::<Self>())
+            .saturating_add(
+                self.pictures
+                    .capacity()
+                    .saturating_mul(size_of::<LayeredAccessPicture>()),
+            );
+        for picture in &self.pictures {
+            n = n
+                .saturating_add(picture.binding.storage_bytes())
+                .saturating_add(
+                    picture
+                        .slices
+                        .capacity()
+                        .saturating_mul(size_of::<SliceHeader>()),
+                );
+            for header in &picture.slices {
+                n = n.saturating_add(header.storage_bytes()?);
+            }
+        }
+        Ok(n)
+    }
+
     pub fn pictures(&self) -> &[LayeredAccessPicture] {
         &self.pictures
     }
