@@ -11543,3 +11543,16 @@ Validation: 3 standalone hevc_poc unit tests and 20 integration tests across
 hevc_extension_tails, hevc_multilayer_pps_identity and hevc_parameter_updates
 passed offline with no default features or FFmpeg. All processes reached a
 successful terminal exit; git diff --check passed.
+
+The next preparation step adds a pure `derive_reset` calculation for Annex F
+equations F-60/F-61: MSB-only, full and signalled resets, explicit MSB cycles,
+and entry without a previously decoded picture. It returns the current POC
+and a wide reference decrement without mutating decoder state. The decrement
+must be i64: it can exceed i32::MAX while translated reference POCs remain
+within the normative signed 32-bit range. Cycle syntax bounds are checked
+separately from current-picture POC bounds. The ordinary MSB path keeps its
+checked i32 result. Neither this helper nor its arithmetic tests enable reset
+playback; PPS admission remains unchanged until period tracking, slice syntax,
+DPB translation and synthetic video acceptance are connected together.
+Validation of this step: all six standalone hevc_poc unit tests passed offline
+on the final source, including the wide decrement cases; git diff --check passed.
