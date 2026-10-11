@@ -5916,3 +5916,20 @@ refusals, and invalid truncated syntax. Refusals are not playback acceptance.
 `hevc_multilayer_pps_identity.rs` checks exact same-packet baseline pictures,
 timing, software seek/rewind and direct PPS errors. Generation is separate from
 ordinary tests and reproduces byte-identical MP4s.
+
+## HEVC POC reset wrap reproducers (2026-10-11)
+
+`scripts/generate_hevc_poc_reset_fixtures.py` starts from the documented
+original synthetic `hevc-pcm-mono-reference-rext8.mp4`. Its offline metadata
+helper uses our Rust parser; the generator uses owned Python bit/MP4 writers.
+It reduces POC width to four bits, repeats the final independently headed
+inter access unit, and creates 35-picture baseline/reset sequences. Reference
+distances and entropy payloads remain unchanged. Reset variants enable the
+multilayer PPS reset flag and signal idc 1 at pictures 17/33, with an optional
+same-period idc 3 at picture 18. No private source material, external codec,
+FFmpeg or network is used. The three original frames are checked against the
+saved YUV oracle; the baseline must decode all 35 pictures with POC 0..34.
+The direct PPS test establishes the specific POC-reset refusal. The exact
+pixel/POC reset acceptance test is explicitly ignored pending stateful decoder
+integration; a passing refusal test is not a claim of reset playback support.
+Ordinary tests never invoke generation or Cargo subprocesses.

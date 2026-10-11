@@ -1,0 +1,32 @@
+{
+  "cases": [
+    {
+      "file": "hevc-poc-baseline-synthetic.mp4",
+      "frames": 35,
+      "resets": [],
+      "signalled": []
+    },
+    {
+      "file": "hevc-poc-msb-reset-synthetic.mp4",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": []
+    },
+    {
+      "file": "hevc-poc-msb-reset-signalled-synthetic.mp4",
+      "frames": 35,
+      "resets": [
+        17,
+        33
+      ],
+      "signalled": [
+        18
+      ]
+    }
+  ],
+  "seed": "hevc-pcm-mono-reference-rext8.mp4",
+  "provenance": "Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Candidate fixtures require baseline decoding and exact reset comparison before acceptance."
+}

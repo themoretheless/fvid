@@ -11599,3 +11599,16 @@ Tests exercise repeated same-period pictures without another decrement,
 inferred IDs, random-access entry, ID reuse and transactional anchor failures.
 All 13 hevc_poc unit tests passed offline. This state is still a preparation
 primitive: PPS admission and reset-coded playback acceptance are unchanged.
+
+A real wrap/reset regression family is now authored from the original
+synthetic three-frame PCM/inter source. The owned generator narrows POC syntax
+to four bits and extends the final independently headed inter picture to a
+35-frame sequence, retaining its entropy and relative RPS. Baseline decoding
+proves all reference sets resolve across two wraps; the first three frames
+also match the saved YUV oracle. Two reset candidates signal idc 1 at 17/33,
+one with a same-period idc 3 at 18. Direct PPS parsing confirms the exact
+existing POC-reset refusal for both. The future acceptance test compares every
+pixel against the corresponding baseline frame and checks POC decrements of
+16/32 exactly once. It remains explicitly ignored until stateful integration;
+two baseline/reproduction tests passed offline, with zero failures. These
+fixtures do not yet qualify full-reset, long-term, seek or motion-tool coverage.
