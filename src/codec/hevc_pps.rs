@@ -3,7 +3,7 @@ use super::{bits::BitReader, hevc_nal::NalRbsp, hevc_scaling::ScalingLists, hevc
 use crate::{Result, invalid};
 #[path = "hevc_colour_mapping.rs"]
 mod colour_mapping;
-pub use colour_mapping::ColourMappingTable;
+pub use colour_mapping::{ColourMappingPicture, ColourMappingTable};
 #[path = "hevc_pps_layered.rs"]
 mod layered;
 pub use layered::{LayeredPps, LayeredPpsContext, ReferenceGeometry, ReferenceLocation};

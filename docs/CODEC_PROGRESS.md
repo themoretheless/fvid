@@ -12321,3 +12321,29 @@ pass with locked offline dependencies; one explicit fixture-generator test stays
 ignored. The player build check passes. All 412 layered SPS/PPS artifacts
 regenerate byte-identically. Ordinary tests invoke no fixture generator or
 external media tool.
+
+### HEVC reference-picture colour mapping
+
+`ColourMappingTable::map_picture` implements the H.8.1.4.4 reference-picture
+colour process on uncropped reconstructed planes. It applies the 4:2:0 vertical
+3:1/horizontal chroma interpolation with a single final rounding, the 4:2:2
+horizontal interpolation, direct 4:4:4 sampling, and the vertical luma average
+used for mapping 4:2:0 chroma. Edges replicate the specified reference samples.
+Output planes retain reference geometry and use the LUT's output depths. Input
+geometry, depth, lengths, sample ranges and aggregate output/scratch allocation
+are checked before output allocation. Input samples remain unchanged.
+
+Sixty-six original two-frame Y4M reference videos (132 mapped pictures) exercise
+8/10/16-bit samples, mixed output depths, threshold boundaries, split/unsplit
+partitions, cross-component coefficients, clipping and minimal edge dimensions.
+An independent rational tensor-product oracle checks every output sample.
+This accepts the complete reference-picture colour process, not inter-layer
+slice decoding, geometric resampling, reference scheduling or multilayer
+playback. Those remaining operations still require implementation/integration.
+
+Validation: 23 integration tests across six affected HEVC suites, 211 HEVC
+unit tests and the player build check pass offline. One explicit generator test
+remains ignored. All 67 new artifacts regenerate byte-identically. Two temporary
+production mutations (double interpolation rounding and omitted luma averaging)
+each failed the saved 4:2:0 swap fixture at the corresponding luma/chroma output;
+the restored implementation passed the final checks.

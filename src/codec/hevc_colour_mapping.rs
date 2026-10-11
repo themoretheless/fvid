@@ -1,7 +1,16 @@
 //! Annex F colour-mapping syntax/LUT and the scalar H.8.1.4.4 mapping kernel.
 //! Picture sampling/interpolation is the caller's separate responsibility.
 use super::super::bits::BitReader;
+use super::super::hevc_plane::Plane;
 use crate::{Result, invalid};
+/// Uncropped, completely reconstructed reference-layer samples in raster order.
+/// Dimensions and subsampling describe the reference layer, not the destination.
+pub struct ColourMappingPicture<'a> {
+    pub dimensions: [usize; 2],
+    pub chroma_format: u8,
+    pub depth: [u8; 2],
+    pub planes: [&'a [u16]; 3],
+}
 type Cell = [[i16; 3]; 4];
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ColourMappingTable {
@@ -17,6 +26,121 @@ pub struct ColourMappingTable {
     coefficients: Vec<Cell>,
 }
 impl ColourMappingTable {
+    /// H.8.1.4.4: map a complete reference picture before inter-layer resampling.
+    /// Output retains reference geometry and uses the table's output depths.
+    /// Budget covers new planes and row scratch; the caller owns the input/LUT.
+    pub fn map_picture(
+        &self,
+        input: ColourMappingPicture<'_>,
+        budget: usize,
+    ) -> Result<[Plane; 3]> {
+        let [w, h] = input.dimensions;
+        let [sx, sy] = match input.chroma_format {
+            1 => [2, 2],
+            2 => [2, 1],
+            3 => [1, 1],
+            _ => return Err(invalid("HEVC colour mapping requires chroma planes")),
+        };
+        if w == 0 || h == 0 || w % sx != 0 || h % sy != 0 || input.depth != self.input_depth {
+            return Err(invalid(
+                "HEVC colour mapping input geometry or depth mismatch",
+            ));
+        }
+        // Validate mutable public table parameters even before output allocation.
+        self.map_sample(0, [0; 3])?;
+        let cw = w / sx;
+        let ch = h / sy;
+        let sizes = [[w, h], [cw, ch], [cw, ch]];
+        let mut count = 0usize;
+        for (c, size) in sizes.iter().enumerate() {
+            let n = size[0]
+                .checked_mul(size[1])
+                .ok_or_else(|| invalid("HEVC colour mapping picture size overflow"))?;
+            if n != input.planes[c].len()
+                || input.planes[c]
+                    .iter()
+                    .any(|&v| u32::from(v) >= 1u32 << input.depth[usize::from(c != 0)])
+            {
+                return Err(invalid("HEVC colour mapping input plane mismatch"));
+            }
+            count = count
+                .checked_add(n)
+                .ok_or_else(|| invalid("HEVC colour mapping picture size overflow"))?;
+        }
+        let overhead = 3
+            * (std::mem::size_of::<Plane>()
+                + 2 * (std::mem::size_of::<Vec<u16>>() + 2 * std::mem::size_of::<usize>()));
+        let required = count
+            .checked_mul(3)
+            .and_then(|v| w.checked_mul(2).and_then(|row| v.checked_add(row)))
+            .and_then(|v| v.checked_add(overhead))
+            .ok_or_else(|| invalid("HEVC colour mapping picture size overflow"))?;
+        if required > budget {
+            return Err(invalid("HEVC colour mapping picture exceeds memory budget"));
+        }
+        let mut output = [
+            Plane::new(w, h, self.output_depth[0], budget)?,
+            Plane::new(cw, ch, self.output_depth[1], budget)?,
+            Plane::new(cw, ch, self.output_depth[1], budget)?,
+        ];
+        let chroma =
+            |c: usize, x: usize, y: usize| -> u32 { u32::from(input.planes[c][y * cw + x]) };
+        for c in 0..3 {
+            let [width, height] = sizes[c];
+            let mut row = vec![0u16; width];
+            for y in 0..height {
+                for (x, sample) in row.iter_mut().enumerate() {
+                    let values = if c == 0 {
+                        let cx = x / sx;
+                        let cy = y / sy;
+                        let mut values = [input.planes[0][y * w + x], 0, 0];
+                        for k in 1..3 {
+                            let right = (cx + 1).min(cw - 1);
+                            let value = if sy == 2 {
+                                let neighbour = if y % 2 == 0 {
+                                    cy.saturating_sub(1)
+                                } else {
+                                    (cy + 1).min(ch - 1)
+                                };
+                                if x % 2 == 0 {
+                                    (3 * chroma(k, cx, cy) + chroma(k, cx, neighbour) + 2) / 4
+                                } else {
+                                    (3 * (chroma(k, cx, cy) + chroma(k, right, cy))
+                                        + chroma(k, cx, neighbour)
+                                        + chroma(k, right, neighbour)
+                                        + 4)
+                                        / 8
+                                }
+                            } else if sx == 2 && x % 2 != 0 {
+                                (chroma(k, cx, cy) + chroma(k, right, cy) + 1) / 2
+                            } else {
+                                chroma(k, cx, cy)
+                            };
+                            values[k] = value as u16;
+                        }
+                        values
+                    } else {
+                        let ly = y * sy;
+                        let lx = x * sx;
+                        let luma = u32::from(input.planes[0][ly * w + lx]);
+                        let luma = if sy == 2 {
+                            (luma + u32::from(input.planes[0][(ly + 1) * w + lx]) + 1) / 2
+                        } else {
+                            luma
+                        };
+                        [
+                            luma as u16,
+                            input.planes[1][y * cw + x],
+                            input.planes[2][y * cw + x],
+                        ]
+                    };
+                    *sample = self.map_sample(c, values)?;
+                }
+                output[c].reconstruct_inter([0, y, width, 1], &row)?;
+            }
+        }
+        Ok(output)
+    }
     pub(super) fn read(
         b: &mut BitReader<'_>,
         current_depth: [u8; 2],

@@ -6505,3 +6505,16 @@ partitions and split/unsplit octants, quantization, thresholds, clipping and
 mixed depths. Invalid cases isolate reference/context constraints, phase and
 offset bounds, empty regions, colour-table IDs/depths/coefficients and reserved
 partition syntax. Tests consume saved bytes without invoking the generator.
+
+## HEVC reference-picture colour mapping
+
+`generate_hevc_colour_mapping_pictures.py` writes 66 two-frame original Y4M
+videos plus `hevc-colour-mapping-pictures.json`. Raster samples are mathematical
+coordinate patterns with distinct luma/chroma, alternating extrema and edge
+values. Saved owned PPS/LUT oracles supply colour coefficients; independently
+composed rational spatial weights and exact affine arithmetic derive outputs.
+No production sampler, decoder, private source, external codec, FFmpeg or
+network participates in generation. Tests read the saved Y4M bytes and check
+all mapped samples and input immutability/replay. These fixtures qualify colour
+mapping of reconstructed reference samples; they do not claim layered HEVC
+picture/playback acceptance.
