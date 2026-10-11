@@ -14,13 +14,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         r.read_packet(0, i, &mut packet)?;
         let mut slices = vec![];
         for header in d.slice_headers(&packet)? {
-            slices.push(serde_json::json!({"entropy_byte_offset":header.entropy_byte_offset,"rbsp":header.rbsp,"idr":header.nal.is_irap(),"first":header.first,"dependent":header.dependent,"kind":header.nal.unit_type}));
+            slices.push(serde_json::json!({"entropy_byte_offset":header.entropy_byte_offset,"rbsp":header.rbsp,"idr":header.nal.is_irap(),"first":header.first,"dependent":header.dependent,"kind":header.nal.unit_type,"temporal_mvp":header.temporal_mvp,"long_term":header.long_term.len()}));
         }
         packets.push(slices);
     }
     println!(
         "{}",
-        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets,"depth":s.depth[0],"chroma_depth":s.depth[1],"pcm_depth":s.pcm.as_ref().map(|pcm| pcm.depth[0]),"dependent_enabled":p.dependent_slices,"ctu_count":s.dimensions.map(|v| v.div_ceil(1 << s.coding_block_log2[1])).iter().product::<u32>()})
+        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets,"depth":s.depth[0],"chroma_depth":s.depth[1],"pcm_depth":s.pcm.as_ref().map(|pcm| pcm.depth[0]),"dependent_enabled":p.dependent_slices,"short_term_sets":s.short_term.len(),"long_term_entries":s.long_term.len(),"ctu_count":s.dimensions.map(|v| v.div_ceil(1 << s.coding_block_log2[1])).iter().product::<u32>()})
     );
     Ok(())
 }

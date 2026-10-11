@@ -112,6 +112,18 @@ fn reset_video_software_seek_and_rewind_match_baseline() {
         ("msb-reset", "hevc-poc-baseline-synthetic.mp4"),
         ("msb-reset-signalled", "hevc-poc-baseline-synthetic.mp4"),
         ("full-reset", "hevc-poc-idr-baseline-synthetic.mp4"),
+        (
+            "long-term-msb-reset",
+            "hevc-poc-long-term-baseline-synthetic.mp4",
+        ),
+        (
+            "long-term-msb-reset-signalled",
+            "hevc-poc-long-term-baseline-synthetic.mp4",
+        ),
+        (
+            "long-term-full-reset",
+            "hevc-poc-long-term-idr-baseline-synthetic.mp4",
+        ),
     ] {
         let mut baseline = open(baseline_name);
         let mut actual = open(&format!("hevc-poc-{kind}-synthetic.mp4"));
@@ -139,7 +151,7 @@ fn reset_video_software_seek_and_rewind_match_baseline() {
                     _ => panic!("reset playback frame count differs"),
                 }
             }
-            let expected = if kind == "full-reset" {
+            let expected = if kind.ends_with("full-reset") {
                 match target {
                     Some(18) => 18,
                     Some(34) => 2,
@@ -155,7 +167,7 @@ fn reset_video_software_seek_and_rewind_match_baseline() {
 
 #[test]
 fn full_reset_at_idr_and_same_period_signalled_reset_preserve_pixels() {
-    for prefix in ["", "420-"] {
+    for prefix in ["", "420-", "long-term-"] {
         let baseline = decode(&format!("hevc-poc-{prefix}idr-baseline-synthetic.mp4"));
         let actual = decode(&format!("hevc-poc-{prefix}full-reset-synthetic.mp4"));
         assert_eq!(baseline.len(), 35);
@@ -176,7 +188,7 @@ fn full_reset_at_idr_and_same_period_signalled_reset_preserve_pixels() {
 
 #[test]
 fn malformed_reset_video_fails_at_specific_picture_and_reset_recovers() {
-    for prefix in ["", "420-"] {
+    for prefix in ["", "420-", "long-term-"] {
         let baseline = decode(&format!("hevc-poc-{prefix}baseline-synthetic.mp4"));
         for (kind, failure, message) in [
             (
@@ -242,7 +254,7 @@ fn malformed_reset_video_fails_at_specific_picture_and_reset_recovers() {
 }
 
 #[test]
-fn automatic_420_reset_playback_matches_owned_software() {
+fn automatic_reset_playback_matches_owned_software() {
     use fvid::playback_mp4::{Mp4VideoReader, VideoFrame};
     fn samples(frame: &VideoFrame) -> [Vec<u16>; 3] {
         if let Some(p) = &frame.planes8 {
@@ -255,55 +267,58 @@ fn automatic_420_reset_playback_matches_owned_software() {
             ]
         }
     }
-    for kind in ["msb-reset", "msb-reset-signalled", "full-reset"] {
-        let name = format!("hevc-poc-420-{kind}-synthetic.mp4");
-        let bytes = fixture(&name);
-        let mut automatic =
-            Mp4VideoReader::open(Cursor::new(bytes.clone()), Default::default(), 32 << 20).unwrap();
-        let mut software =
-            Mp4VideoReader::open_software(Cursor::new(bytes), Default::default(), 32 << 20)
-                .unwrap();
-        eprintln!("{name}: hardware={}", automatic.hardware_accelerated());
-        for target in [None, Some(18), Some(34), None] {
-            if let Some(pts) = target {
-                assert_eq!(automatic.seek_to_sync(pts), software.seek_to_sync(pts));
-            } else {
-                automatic.rewind();
-                software.rewind();
-            }
-            let mut count = 0;
-            loop {
-                match (
-                    automatic
-                        .read_frame()
-                        .unwrap_or_else(|e| panic!("{name} automatic picture {count}: {e}")),
-                    software.read_frame().unwrap(),
-                ) {
-                    (Some(a), Some(b)) => {
-                        assert_eq!(a.sample_index, b.sample_index);
-                        assert_eq!(a.presentation_time, b.presentation_time);
-                        assert_eq!(a.duration, b.duration);
-                        let [ay, acb, acr] = samples(&a);
-                        let [by, bcb, bcr] = samples(&b);
-                        assert!(ay == by, "{name} Y picture {count}");
-                        assert!(acb == bcb, "{name} Cb picture {count}");
-                        assert!(acr == bcr, "{name} Cr picture {count}");
-                        count += 1;
+    for family in ["420", "long-term"] {
+        for kind in ["msb-reset", "msb-reset-signalled", "full-reset"] {
+            let name = format!("hevc-poc-{family}-{kind}-synthetic.mp4");
+            let bytes = fixture(&name);
+            let mut automatic =
+                Mp4VideoReader::open(Cursor::new(bytes.clone()), Default::default(), 32 << 20)
+                    .unwrap();
+            let mut software =
+                Mp4VideoReader::open_software(Cursor::new(bytes), Default::default(), 32 << 20)
+                    .unwrap();
+            eprintln!("{name}: hardware={}", automatic.hardware_accelerated());
+            for target in [None, Some(18), Some(34), None] {
+                if let Some(pts) = target {
+                    assert_eq!(automatic.seek_to_sync(pts), software.seek_to_sync(pts));
+                } else {
+                    automatic.rewind();
+                    software.rewind();
+                }
+                let mut count = 0;
+                loop {
+                    match (
+                        automatic
+                            .read_frame()
+                            .unwrap_or_else(|e| panic!("{name} automatic picture {count}: {e}")),
+                        software.read_frame().unwrap(),
+                    ) {
+                        (Some(a), Some(b)) => {
+                            assert_eq!(a.sample_index, b.sample_index);
+                            assert_eq!(a.presentation_time, b.presentation_time);
+                            assert_eq!(a.duration, b.duration);
+                            let [ay, acb, acr] = samples(&a);
+                            let [by, bcb, bcr] = samples(&b);
+                            assert!(ay == by, "{name} Y picture {count}");
+                            assert!(acb == bcb, "{name} Cb picture {count}");
+                            assert!(acr == bcr, "{name} Cr picture {count}");
+                            count += 1;
+                        }
+                        (None, None) => break,
+                        _ => panic!("{name} automatic/software frame count differs"),
                     }
-                    (None, None) => break,
-                    _ => panic!("{name} automatic/software frame count differs"),
                 }
+                let expected = if kind == "full-reset" {
+                    match target {
+                        Some(18) => 18,
+                        Some(34) => 2,
+                        _ => 35,
+                    }
+                } else {
+                    35
+                };
+                assert_eq!(count, expected);
             }
-            let expected = if kind == "full-reset" {
-                match target {
-                    Some(18) => 18,
-                    Some(34) => 2,
-                    _ => 35,
-                }
-            } else {
-                35
-            };
-            assert_eq!(count, expected);
         }
     }
 }
@@ -315,37 +330,42 @@ fn owned_420_reset_pixels_match_baseline_and_saved_seed_oracle() {
         Mp4VideoReader::open_software(Cursor::new(fixture(name)), Default::default(), 32 << 20)
             .unwrap()
     };
-    let gold = fixture("hevc-pcm-reference-rext8.yuv");
-    assert_eq!(gold.len(), 3 * 64 * 64 * 3 / 2);
-    let mut baseline = open("hevc-poc-420-baseline-synthetic.mp4");
-    for expected in gold.chunks_exact(64 * 64 * 3 / 2) {
-        let frame = baseline.read_frame().unwrap().unwrap();
-        let pixels = [
-            &frame.picture.y[..],
-            &frame.picture.cb[..],
-            &frame.picture.cr[..],
-        ]
-        .concat();
-        assert_eq!(
-            pixels,
-            expected.iter().copied().map(u16::from).collect::<Vec<_>>()
-        );
-    }
-    for (kind, base) in [
-        ("msb-reset", "baseline"),
-        ("msb-reset-signalled", "baseline"),
-        ("full-reset", "idr-baseline"),
+    for (family, oracle) in [
+        ("420", "hevc-pcm-reference-rext8.yuv"),
+        ("long-term", "hevc-long-term-rext8.yuv"),
     ] {
-        let mut baseline = open(&format!("hevc-poc-420-{base}-synthetic.mp4"));
-        let mut actual = open(&format!("hevc-poc-420-{kind}-synthetic.mp4"));
-        for index in 0..35 {
-            let a = actual.read_frame().unwrap().unwrap();
-            let b = baseline.read_frame().unwrap().unwrap();
-            assert_eq!(a.picture.y, b.picture.y, "{kind} Y {index}");
-            assert_eq!(a.picture.cb, b.picture.cb, "{kind} Cb {index}");
-            assert_eq!(a.picture.cr, b.picture.cr, "{kind} Cr {index}");
+        let gold = fixture(oracle);
+        assert_eq!(gold.len(), 3 * 64 * 64 * 3 / 2);
+        let mut baseline = open(&format!("hevc-poc-{family}-baseline-synthetic.mp4"));
+        for expected in gold.chunks_exact(64 * 64 * 3 / 2) {
+            let frame = baseline.read_frame().unwrap().unwrap();
+            let pixels = [
+                &frame.picture.y[..],
+                &frame.picture.cb[..],
+                &frame.picture.cr[..],
+            ]
+            .concat();
+            assert_eq!(
+                pixels,
+                expected.iter().copied().map(u16::from).collect::<Vec<_>>()
+            );
         }
-        assert!(actual.read_frame().unwrap().is_none());
-        assert!(baseline.read_frame().unwrap().is_none());
+        for (kind, base) in [
+            ("msb-reset", "baseline"),
+            ("msb-reset-signalled", "baseline"),
+            ("full-reset", "idr-baseline"),
+        ] {
+            let mut baseline = open(&format!("hevc-poc-{family}-{base}-synthetic.mp4"));
+            let mut actual = open(&format!("hevc-poc-{family}-{kind}-synthetic.mp4"));
+            for index in 0..35 {
+                let a = actual.read_frame().unwrap().unwrap();
+                let b = baseline.read_frame().unwrap().unwrap();
+                assert_eq!(a.picture.y, b.picture.y, "{kind} Y {index}");
+                assert_eq!(a.picture.cb, b.picture.cb, "{kind} Cb {index}");
+                assert_eq!(a.picture.cr, b.picture.cr, "{kind} Cr {index}");
+            }
+            assert!(actual.read_frame().unwrap().is_none());
+            assert!(baseline.read_frame().unwrap().is_none());
+        }
     }
 }

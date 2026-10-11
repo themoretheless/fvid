@@ -5960,3 +5960,15 @@ software, including seek/rewind. The local feature run selected hardware for
 MSB reset, same-period signalled reset and IDR full reset. Generation itself
 uses only owned Rust metadata parsing and Python, never VideoToolbox, FFmpeg,
 an external codec or network. Ordinary tests do not invoke the generator.
+
+`generate_hevc_poc_reset_fixtures.py --longterm` authors ten disjoint
+`hevc-poc-long-term-*` files from original `hevc-long-term-rext8.mp4`.
+The existing saved HM YUV oracle qualifies the original three frames; new
+generation never invokes HM or another external codec. Owned writers adjust
+POC width, explicit long-term reference LSB/MSB-cycle and reset syntax while
+preserving entropy. Tests inspect actual LT syntax/classification and nonzero
+reconstructed motion, compare all planes against the wrap baseline, and check
+seek/rewind and malformed recovery. The local VideoToolbox run selected
+hardware for all three valid reset variants and matched owned software.
+This is explicit preceding-picture LT coverage, not SPS-selected, LSB-only,
+fixed-anchor or universally selected/scaled temporal-MV coverage.

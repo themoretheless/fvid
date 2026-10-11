@@ -84,10 +84,12 @@ def reset_pps(nal):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--chroma420', action='store_true', help='generate the disjoint 4:2:0 family')
+    parser.add_argument('--longterm', action='store_true', help='generate the disjoint explicit long-term family')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    seed = DEST / ('hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
-    stem = 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
+    assert not (args.chroma420 and args.longterm), 'choose one family'
+    seed = DEST / ('hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
+    stem = 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -144,6 +146,19 @@ def main():
                 if not info['idr']:
                     prefix += f'{epoch % 16:04b}'
                     r.read(original_width)
+                    if args.longterm:
+                        start = r.at
+                        assert r.read(1) == 0, 'slice-local short-term set'
+                        if meta['short_term_sets']: assert r.read(1) == 0, 'nonpredicted RPS'
+                        assert r.ue() == 0 and r.ue() == 0, 'no short-term entries'
+                        assert meta['long_term_entries'] == 0 and r.ue() == 1
+                        lsb_at = r.at
+                        r.read(original_width)
+                        assert r.read(1) == 1 and r.read(1) == 1
+                        r.ue()
+                        target = epoch - 1
+                        cycle = int(target % 16 > epoch % 16)
+                        prefix += value[start:lsb_at] + f'{target % 16:04b}' + '11' + ue(cycle)
                 prefix += value[r.at:alignment]
                 if reset:
                     extension = '00'
@@ -186,7 +201,7 @@ def main():
                           signalled=[1, 18, 34] if label == 'full-reset' else [18] if label.endswith('signalled') else [],
                           failure_picture=(17 if label in ('bad-full-nonidr', 'bad-empty') else 18) if label.startswith('bad-') else None))
     (DEST / f'{stem}-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
-        provenance='Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.'), indent=2) + '\n')
+        provenance='Original documented synthetic HEVC seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.'), indent=2) + '\n')
 
 
 if __name__ == '__main__': main()

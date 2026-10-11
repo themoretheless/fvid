@@ -273,6 +273,53 @@ fn generate_long_term_stream() {
     std::fs::write(destination, stream).unwrap();
 }
 
+#[test]
+fn poc_reset_long_term_stream_uses_long_term_motion_across_wraps() {
+    for (name, resets) in [
+        ("hevc-poc-long-term-baseline-synthetic.mp4", false),
+        ("hevc-poc-long-term-msb-reset-synthetic.mp4", true),
+        ("hevc-poc-long-term-msb-reset-signalled-synthetic.mp4", true),
+    ] {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors").join(name);
+        let mut movie = crate::container::mp4::Mp4Reader::open(std::fs::File::open(path).unwrap(), Default::default()).unwrap();
+        let mut decoder = HevcDecoder::from_configuration(&movie.tracks()[0].configuration, 32 << 20).unwrap();
+        let mut packet = Vec::new();
+        let mut nonzero = 0;
+        let mut temporal = 0;
+        for index in 0..35 {
+            movie.read_packet(0, index, &mut packet).unwrap();
+            for header in decoder.slice_headers(&packet).unwrap() {
+                if index != 0 {
+                    assert_eq!(header.long_term.len(), 1);
+                    let reference = &header.long_term[0];
+                    assert!(reference.used);
+                    assert_eq!(reference.poc_lsb, (index as u32 - 1) % 16);
+                    assert_eq!(reference.msb_cycles, Some(u64::from(index % 16 == 0)));
+                    temporal += usize::from(header.temporal_mvp);
+                }
+            }
+            let frame = decoder.decode_packet(&packet).unwrap().unwrap();
+            let decrement = if resets && index >= 33 { 32 } else if resets && index >= 17 { 16 } else { 0 };
+            assert_eq!(frame.poc, index as i32 - decrement);
+            if index != 0 {
+                let target = frame.poc - 1;
+                for motion in &frame.picture.motion {
+                    for (list, vector) in motion.iter().enumerate() {
+                        if let Some(vector) = vector {
+                            assert!(frame.picture.reference_long_term[list][vector.reference as usize]);
+                            assert_eq!(frame.picture.reference_pocs[list][vector.reference as usize], target);
+                            nonzero += usize::from(vector.mv != [0, 0]);
+                        }
+                    }
+                }
+            }
+        }
+        assert_eq!(temporal, 34);
+        assert!(nonzero > 0, "{name}: require actual nonzero long-term motion");
+    }
+}
+
 fn check_video(data: &[u8], expected: &[u8], mode: &str) {
     let mut input =
         crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
