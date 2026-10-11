@@ -190,6 +190,14 @@ impl<'a, T> InterLayerSet<'a, T> {
         }
         Ok(result)
     }
+    pub(crate) fn with_retained_storage(mut self, bytes: usize, budget: usize) -> Result<Self> {
+        self.storage = self
+            .storage
+            .checked_add(bytes)
+            .filter(|&n| n <= budget)
+            .ok_or_else(|| invalid("HEVC retained reference metadata exceeds memory budget"))?;
+        Ok(self)
+    }
     pub fn pictures(&self) -> [&[PictureIdentity]; 2] {
         [&self.pictures[0], &self.pictures[1]]
     }

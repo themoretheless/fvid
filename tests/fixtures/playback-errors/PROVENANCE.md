@@ -6602,3 +6602,14 @@ indices. Final derived POC agreement is enforced independently of coded LSB
 alignment. These fixtures qualify DPB/access-unit selection and list binding,
 not coded scalable slice playback. Generation and tests use no FFmpeg, external
 codec or network; ordinary tests read the saved artifacts only.
+
+
+`generate_hevc_layered_slices.py` authors 148 Annex F common-header witnesses,
+their complete VPS/SPS/PPS parameter NALs and an eight-frame 64x32 Y4M reference
+atlas. All pixels, status metadata and parameter syntax are original. The NAL
+entropy bytes are deliberately opaque markers; they are not valid scalable
+coded-picture payloads. Tests qualify header boundaries, inherited and common
+picture fields, and binding to exact source frames in the matching access unit.
+They do not qualify scalable playback. The ordinary single-layer control uses
+the same parser core. Generation and saved-artifact tests use no FFmpeg,
+external codec, private source or network.

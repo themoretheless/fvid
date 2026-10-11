@@ -9,7 +9,7 @@ from generate_hevc_layered_sps import ptl, ue, packed, escape, representation, v
 D=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 IDS=[0,2,5,9]
 EDGES=[(1,0),(2,0),(3,0),(3,1),(3,2)]
-def vps(views,limits=(7,7,7),one=False):
+def vps(views,limits=(7,7,7),one=False,size=(8,8),default=False,sublayers=None):
     b='0000'+'11'+f'{3:06b}'+'0101'+'1'*16+ptl(True)
     b+='0'+ue(3)+ue(1)+ue(0)  # base ordering
     b+=f'{9:06b}'+ue(1)+''.join('1' if i in IDS else '0' for i in range(10))+'0'+'1'
@@ -18,13 +18,13 @@ def vps(views,limits=(7,7,7),one=False):
     for index,layer in enumerate(IDS[1:],1):b+=f'{layer:06b}{index:02b}'
     b+=('0000' if all(view==0 for view in views) else '0100'+''.join(f'{view:04b}' for view in views))
     b+=''.join(str(int((i,j) in EDGES)) for i in range(1,4) for j in range(i))
-    b+='0'+'1'  # inferred layer sublayers, explicit temporal edge limits
+    b+=('0' if sublayers is None else '1'+''.join(f'{tid:03b}' for tid in sublayers))+'1'
     for ref in range(4):
         for dep in range(ref+1,4):
             if (dep,ref) in EDGES:b+=f'{limits[ref] if dep==3 else 7:03b}'
-    b+='0' # not default-active
+    b+=str(int(default)) # default-reference-layer activation
     b+=ue(1)+ue(0)+'00'+'1111' # PTL count, no extra OLS, all outputs/PTL1
-    f=dict(size=[8,8],chroma=1,separate=False,depth=[8,8],crop=[0]*4)
+    f=dict(size=list(size),chroma=1,separate=False,depth=[8,8],crop=[0]*4)
     b+=ue(0)+representation(f)+str(int(one))+'0' # unaligned POC
     b+='1' # per-temporal DPB
     for tid in range(3):

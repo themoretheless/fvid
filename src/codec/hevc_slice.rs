@@ -8,6 +8,9 @@ use super::{
     hevc_sps::Sps,
 };
 use crate::{Result, invalid};
+#[path = "hevc_slice_layered.rs"]
+mod layered;
+pub use layered::{LayeredSliceContext, LayeredSliceSyntax};
 #[derive(Clone, Copy, Debug)]
 pub struct Weight {
     pub values: [i16; 3],
@@ -24,6 +27,7 @@ pub struct SliceHeader {
     /// Dependent segment inherits syntax/context from the preceding slice.
     pub dependent: bool,
     pub nal: NalHeader,
+    pub layered: Option<LayeredSliceSyntax>,
     pub slice_type: SliceType,
     pub poc_lsb: u32,
     pub short_term: Vec<ShortTermReference>,
@@ -104,6 +108,106 @@ impl SliceHeader {
         }
         Ok(header)
     }
+    /// Owned header storage, including vector capacities and nested weights.
+    pub fn storage_bytes(&self) -> Result<usize> {
+        let buffers = [
+            (self.rbsp.capacity(), 1),
+            (self.extension.capacity(), 1),
+            (
+                self.short_term.capacity(),
+                std::mem::size_of::<ShortTermReference>(),
+            ),
+            (
+                self.long_term.capacity(),
+                std::mem::size_of::<super::hevc_long_term::LongTermReference>(),
+            ),
+            (
+                self.entry_point_offsets.capacity(),
+                std::mem::size_of::<u64>(),
+            ),
+            (
+                self.entropy_substreams.capacity(),
+                std::mem::size_of::<std::ops::Range<usize>>(),
+            ),
+            (
+                self.list_modification[0]
+                    .as_ref()
+                    .map_or(0, |v| v.capacity()),
+                1,
+            ),
+            (
+                self.list_modification[1]
+                    .as_ref()
+                    .map_or(0, |v| v.capacity()),
+                1,
+            ),
+            (
+                self.layered
+                    .as_ref()
+                    .map_or(0, |s| s.reference_layers.capacity()),
+                1,
+            ),
+            (
+                self.weights.as_ref().map_or(0, |w| w.lists[0].capacity()),
+                std::mem::size_of::<Weight>(),
+            ),
+            (
+                self.weights.as_ref().map_or(0, |w| w.lists[1].capacity()),
+                std::mem::size_of::<Weight>(),
+            ),
+        ];
+        buffers
+            .into_iter()
+            .try_fold(std::mem::size_of::<Self>(), |total, (capacity, size)| {
+                capacity
+                    .checked_mul(size)
+                    .and_then(|n| total.checked_add(n))
+                    .ok_or_else(|| invalid("HEVC slice storage overflow"))
+            })
+    }
+    /// Use the same active parameter context that parsed this header. POC and
+    /// access-unit identity must already be derived by the stateful decoder.
+    /// The budget retains this header together with binding/list metadata;
+    /// borrowed source-picture storage remains the caller's responsibility.
+    pub fn bind_inter_layer_references<'a, T>(
+        &self,
+        context: &LayeredSliceContext<'_>,
+        access_unit: u64,
+        poc: i32,
+        decoded: &'a [(super::hevc_inter_layer::PictureStatus, T)],
+        budget: usize,
+    ) -> Result<super::hevc_inter_layer::InterLayerSet<'a, T>> {
+        let syntax = self
+            .layered
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC header has no layered slice syntax"))?;
+        context
+            .layout(self.nal)?
+            .ok_or_else(|| invalid("HEVC layered reference binding has no VPS extension"))?;
+        if self.pps_id != context.pps.pps.id {
+            return Err(invalid("HEVC reference binding PPS disagrees with slice"));
+        }
+        let retained = self.storage_bytes()?;
+        let remaining = budget
+            .checked_sub(retained)
+            .ok_or_else(|| invalid("HEVC slice/reference binding exceeds memory budget"))?;
+        super::hevc_inter_layer::InterLayerSet::derive(
+            context.vps,
+            super::hevc_inter_layer::PictureStatus {
+                identity: super::hevc_reference_list::PictureIdentity {
+                    layer_id: self.nal.layer_id,
+                    poc,
+                },
+                access_unit,
+                nal: self.nal,
+                discardable: syntax.discardable,
+            },
+            &syntax.reference_layers,
+            decoded,
+            remaining,
+        )?
+        .with_retained_storage(retained, budget)
+    }
     /// Read a dependent segment using an already validated preceding header.
     pub fn parse_with_previous(
         nal: &[u8],
@@ -112,8 +216,63 @@ impl SliceHeader {
         budget: usize,
         previous: Option<&Self>,
     ) -> Result<Self> {
+        Self::parse_previous_internal(nal, sps, pps, budget, previous, None)
+    }
+    pub fn parse_layered(
+        nal: &[u8],
+        context: &LayeredSliceContext<'_>,
+        budget: usize,
+    ) -> Result<Self> {
+        Self::parse_internal(
+            nal,
+            &context.sps.sps,
+            &context.pps.pps,
+            budget,
+            Some(context),
+        )
+    }
+    pub fn parse_layered_with_previous(
+        nal: &[u8],
+        context: &LayeredSliceContext<'_>,
+        budget: usize,
+        previous: Option<&Self>,
+    ) -> Result<Self> {
+        Self::parse_previous_internal(
+            nal,
+            &context.sps.sps,
+            &context.pps.pps,
+            budget,
+            previous,
+            Some(context),
+        )
+    }
+    fn parse_previous_internal(
+        nal: &[u8],
+        sps: &Sps,
+        pps: &Pps,
+        budget: usize,
+        previous: Option<&Self>,
+        context: Option<&LayeredSliceContext<'_>>,
+    ) -> Result<Self> {
+        let independent = || -> Result<Self> {
+            let header = Self::parse_internal(nal, sps, pps, budget, context)?;
+            if context.is_some() && !header.first {
+                if let Some(old) = previous {
+                    if header.nal != old.nal
+                        || header.pps_id != old.pps_id
+                        || header.layered != old.layered
+                        || header.poc_lsb != old.poc_lsb
+                        || header.picture_output != old.picture_output
+                        || header.no_output_of_prior_pictures != old.no_output_of_prior_pictures
+                    {
+                        return Err(invalid("HEVC layered slice disagrees with picture header"));
+                    }
+                }
+            }
+            Ok(header)
+        };
         if !pps.dependent_slices || nal.get(2).is_none_or(|byte| byte & 0x80 != 0) {
-            return Self::parse(nal, sps, pps, budget);
+            return independent();
         }
         let payload = NalRbsp::parse(nal, budget)?;
         let b = &mut BitReader::new(&payload.bytes);
@@ -121,17 +280,23 @@ impl SliceHeader {
         let no_output = payload.header.is_irap() && b.bit()?;
         let id = ue(b, 63)? as u8;
         if first || !pps.dependent_slices {
-            return Self::parse(nal, sps, pps, budget);
+            return independent();
         }
         if !b.bit()? {
-            return Self::parse(nal, sps, pps, budget);
+            return independent();
         }
         let previous =
             previous.ok_or_else(|| invalid("HEVC dependent segment has no preceding header"))?;
-        payload.header.require_base_layer()?;
+        if let Some(context) = context {
+            context.layout(payload.header)?;
+        } else {
+            payload.header.require_base_layer()?;
+        }
         if id != pps.id
             || pps.sps_id != sps.id
             || id != previous.pps_id
+            || payload.header.layer_id != previous.nal.layer_id
+            || previous.layered.is_some() != context.is_some_and(|c| c.vps.extension.is_some())
             || payload.header.unit_type != previous.nal.unit_type
             || payload.header.temporal_id != previous.nal.temporal_id
             || no_output != previous.no_output_of_prior_pictures
@@ -177,8 +342,22 @@ impl SliceHeader {
         Ok(result)
     }
     pub fn parse(nal: &[u8], sps: &Sps, pps: &Pps, budget: usize) -> Result<Self> {
+        Self::parse_internal(nal, sps, pps, budget, None)
+    }
+    fn parse_internal(
+        nal: &[u8],
+        sps: &Sps,
+        pps: &Pps,
+        budget: usize,
+        context: Option<&LayeredSliceContext<'_>>,
+    ) -> Result<Self> {
         let payload = NalRbsp::parse(nal, budget)?;
-        payload.header.require_base_layer()?;
+        let layout = if let Some(context) = context {
+            context.layout(payload.header)?
+        } else {
+            payload.header.require_base_layer()?;
+            None
+        };
         if !matches!(payload.header.unit_type,0..=9|16..=21)
             || payload.header.is_irap() && payload.header.temporal_id != 0
         {
@@ -219,15 +398,35 @@ impl SliceHeader {
             }
             address
         };
-        b.skip(usize::from(pps.extra_slice_header_bits))?;
+        let mut layered = if let Some(layout) = layout {
+            Some(layout.extra(b, pps.extra_slice_header_bits)?)
+        } else {
+            b.skip(usize::from(pps.extra_slice_header_bits))?;
+            None
+        };
         let slice_type = match ue(b, 2)? {
             0 => SliceType::B,
             1 => SliceType::P,
             _ => SliceType::I,
         };
-        if payload.header.is_irap() && slice_type != SliceType::I && !pps.current_picture_reference
+        if payload.header.is_irap()
+            && slice_type != SliceType::I
+            && !pps.current_picture_reference
+            && layout.is_none_or(|l| l.direct_count() == 0)
         {
             return Err(invalid("HEVC IRAP slice must be intra"));
+        }
+        if slice_type != SliceType::I
+            && !pps.current_picture_reference
+            && layout.is_some_and(|l| l.direct_count() == 0)
+            && context.is_some_and(|c| {
+                c.sps.output_ordering[usize::from(payload.header.temporal_id)].max_decoded_pictures
+                    <= 1
+            })
+        {
+            return Err(invalid(
+                "HEVC inter slice has no temporal DPB capacity or direct layer",
+            ));
         }
         let picture_output = if pps.output_flag_present {
             b.bit()?
@@ -250,8 +449,10 @@ impl SliceHeader {
         #[cfg(test)]
         let mut short_term_bit_range = 0..0;
         let mut temporal_mvp = false;
-        if !payload.header.is_idr() {
+        if layout.map_or(!payload.header.is_idr(), |l| l.poc_present()) {
             poc_lsb = b.read(sps.poc_bits)?;
+        }
+        if !payload.header.is_idr() {
             #[cfg(test)]
             let short_term_start = b.position();
             if !b.bit()? {
@@ -295,6 +496,18 @@ impl SliceHeader {
             }
             temporal_mvp = sps.temporal_mvp && b.bit()?;
         }
+        let used_temporal = short_term.iter().filter(|r| r.used).count()
+            + long_term.iter().filter(|r| r.used).count();
+        if layout.is_some_and(|l| {
+            payload.header.unit_type == 21
+                || matches!(payload.header.unit_type, 16..=18) && l.direct_count() == 0
+        }) && used_temporal > 0
+        {
+            return Err(invalid("HEVC layered IRAP cannot use temporal RPS entries"));
+        }
+        if let (Some(layout), Some(syntax)) = (layout, layered.as_mut()) {
+            layout.references(b, syntax, budget.saturating_sub(payload.bytes.capacity()))?;
+        }
         let chroma = sps.chroma_format != 0 && !sps.separate_colour_plane;
         let sao = if sps.sao {
             [b.bit()?, chroma && b.bit()?]
@@ -328,7 +541,10 @@ impl SliceHeader {
             }
             let total = short_term.iter().filter(|r| r.used).count()
                 + long_term.iter().filter(|r| r.used).count()
-                + usize::from(pps.current_picture_reference);
+                + usize::from(pps.current_picture_reference)
+                + layered
+                    .as_ref()
+                    .map_or(0, |syntax| syntax.reference_layers.len());
             if total == 0 {
                 return Err(invalid("HEVC inter slice has no current references"));
             }
@@ -505,6 +721,7 @@ impl SliceHeader {
         Ok(Self {
             dependent: false,
             nal: payload.header,
+            layered,
             slice_type,
             poc_lsb,
             short_term,

@@ -40,7 +40,7 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False):
     if bad_geometry:
         target = dict(target, size=[255, 192])
     base_format = BASE if base_format is None else base_format
@@ -61,7 +61,7 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
         b += '1' + '01'  # explicit dependent-layer representation index 1
     b += '01'  # max_one_active_ref=0, aligned POC=1
     if independent:
-        b += '0'  # poc_lsb_not_present_flag for layer 3
+        b += str(int(poc_absent))  # poc_lsb_not_present_flag for layer 3
     b += '1'  # explicit per-temporal DPB syntax
     rows = []
     for tid in range(2 if short_temporal else 3):

@@ -12528,7 +12528,8 @@ equality with the base view, inferred zero ViewIds, selected subsets, temporal
 limits and IRAP exceptions, source status and exact allocation boundaries.
 These are completed-picture selection and list-binding acceptance tests. They
 do not parse scalable slice headers or perform scalable prediction/reconstruction;
-`RefPicLayerId` remains an input from the future layered slice integration.
+`RefPicLayerId` is an explicit input at this operation boundary; the header
+bridge is documented below.
 Ordinary `HevcDecoder` still explicitly refuses nonbase VCL decoding.
 
 Validation: all 17 related integration suites pass (30 tests), followed by 211
@@ -12540,3 +12541,53 @@ filter or discardable refusal makes the saved regression fail. The IRAP fixture
 also reproduces the pre-fix acceptance of an explicit current-only BLA list with
 forbidden temporal RPS entries; the corrected admission refuses it. Final
 validation uses restored protections and the complete IRAP restrictions.
+
+
+### HEVC layered common slice headers and reference binding
+
+`SliceHeader::parse_layered` and `parse_layered_with_previous` share the ordinary
+slice parser with a borrowed `LayeredSliceContext`. Active VPS/SPS/PPS layer,
+ID, output-set and temporal bounds are checked before interpreting Annex F
+fields. Discardable/cross-layer-BLA flags, nonbase IDR POC-LSB presence, and
+F-52/F-53 active inter-layer selection are read at their prescribed positions.
+Default-active references map through the temporal-eligible direct-layer indices;
+explicit counts/indices retain range and increasing-order checks. Coded counts
+are consumed and preserved even when the inferred active count is zero.
+
+Inter-layer entries contribute to NumPicTotalCurr, list-modification widths and
+weighted prediction parsing. Dependent segments inherit layered syntax; later
+independent slices must agree on the picture-wide layered fields, including a
+coded count that does not affect the derived empty reference set. Ordinary
+single-layer parsing remains on the same core path. The ordinary parser still
+refuses nonbase layers rather than silently interpreting their headers as base.
+
+`bind_inter_layer_references` now obtains RefPicLayerId directly from the parsed
+header and connects it to the completed-picture access-unit selector. The caller
+supplies the already derived POC and access-unit identity. Source IRAP admission
+at a zero temporal-edge limit is checked using the actual source picture. Owned
+header vector capacities, including nested weights, remain charged together
+with the returned binding and its subsequent list construction. Borrowed source
+DPB pictures remain the caller's storage responsibility.
+
+148 saved header/admission witnesses use original VPS/SPS/PPS/NAL syntax and
+an original eight-frame 64x32 Y4M reference atlas. Cases cover default/explicit
+selection, temporal filtering, max-one constraints, malformed counts/indices,
+IDR POC presence/absence, flags, weights/MVP, independent/dependent segments,
+picture-wide consistency and an ordinary one-layer control. Exact SAO/QP,
+extension and entropy-offset markers detect bit-position mistakes. The NALs'
+entropy bytes are opaque parser witnesses, not valid coded scalable pictures.
+These are common-header and header-to-DPB-binding acceptance tests, not
+multilayer playback acceptance.
+
+Header-extension bytes remain opaque at this entry point: contextual multilayer
+POC-reset semantics, per-layer state transitions, reference-picture preparation,
+and full scalable prediction/reconstruction still require stateful decoder
+integration. `HevcDecoder` does not yet route nonbase pictures through this API.
+
+Validation: all 53 HEVC integration suites passed (157 tests); the codec-library
+HEVC gate passed 211 tests with one ignored; the player build check passed.
+All gates ran locked/offline without FFmpeg. Regeneration preserved 135 existing
+layered-SPS artifacts, nine inter-layer-set artifacts and all 182 new artifacts
+byte for byte. Two deliberate mutations (omitting inter-layer NumPicTotalCurr
+entries and bypassing temporal-eligible default indices) each failed the precise
+regression; both were restored before the final gates.
