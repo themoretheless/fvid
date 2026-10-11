@@ -5972,3 +5972,21 @@ seek/rewind and malformed recovery. The local VideoToolbox run selected
 hardware for all three valid reset variants and matched owned software.
 This is explicit preceding-picture LT coverage, not SPS-selected, LSB-only,
 fixed-anchor or universally selected/scaled temporal-MV coverage.
+
+### Four-slice HEVC POC reset family
+
+`generate_hevc_poc_reset_fixtures.py --multislice` authors twelve saved
+`hevc-poc-multislice-*-synthetic.mp4` files from the original deterministic
+64x64 I/B/B chroma-QP-list seed `hevc-chroma-qp-list-slices-rext8.mp4`.
+Its historical saved YUV reference is described in README.md; the new generator
+only uses the owned Rust metadata parser and Python header/container rewriting,
+never HM, FFmpeg, private media or network access. CABAC payloads are preserved.
+
+Every access unit has four independent slices at CTU addresses 0/1/2/3.
+The five valid variants qualify baseline, MSB reset, same-period signalled
+reset and full reset at IDR. The seven malformed variants are exact Invalid
+reproduction tests, not acceptance: five prior reset errors plus differing
+period ID and absent reset in the final three slices of picture 17. Saved
+fixtures are consumed without generation in ordinary tests. Tests check every
+preceding picture, exact errors, poisoning and explicit decoder reset recovery.
+This family does not qualify dependent-slice inheritance or layered VPS reset.

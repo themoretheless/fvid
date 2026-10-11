@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Owned offline POC-wrap/reset headers on the documented synthetic PCM seed.
+"""Owned offline POC-wrap/reset headers on documented synthetic HEVC seeds.
 
 Metadata comes from our Rust parser; no external codec or private input is used.
 Generation is explicit and separate from ordinary test execution.
@@ -85,11 +85,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--chroma420', action='store_true', help='generate the disjoint 4:2:0 family')
     parser.add_argument('--longterm', action='store_true', help='generate the disjoint explicit long-term family')
+    parser.add_argument('--multislice', action='store_true', help='generate the disjoint four-slice reset agreement family')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    assert not (args.chroma420 and args.longterm), 'choose one family'
-    seed = DEST / ('hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
-    stem = 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
+    assert sum((args.chroma420, args.longterm, args.multislice)) <= 1, 'choose one family'
+    seed = DEST / ('hevc-chroma-qp-list-slices-rext8.mp4' if args.multislice else 'hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
+    stem = 'hevc-poc-multislice' if args.multislice else 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -109,6 +110,7 @@ def main():
     cases = []
     labels = ['baseline', 'msb-reset', 'msb-reset-signalled', 'idr-baseline', 'full-reset',
               'bad-full-nonidr', 'bad-period-repeat', 'bad-anchor', 'bad-truncated', 'bad-empty']
+    if args.multislice: labels += ['bad-slice-period', 'bad-slice-reset']
     for label in labels:
         reset = label not in ('baseline', 'idr-baseline')
         idr_family = label in ('idr-baseline', 'full-reset')
@@ -130,17 +132,21 @@ def main():
             source = min(epoch, 2)
             units = packet_units(packets[source])
             assert len(units) == len(meta['packets'][source])
+            if args.multislice: assert len(units) == 4
             out = []
             for unit, info in zip(units, meta['packets'][source]):
                 nal = unit[4:]
-                assert info['first'] and not info['dependent']
+                assert not info['dependent']
+                assert info['first'] or args.multislice
                 value = bits(bytes(info['rbsp']))
                 end = info['entropy_byte_offset'] * 8
                 alignment = value[:end].rfind('1')
                 r = Reader(value)
                 r.read(1)
                 if info['idr']: r.read(1)
-                r.ue(); r.read(meta['extra_bits']); r.ue()
+                r.ue()
+                if not info['first']: r.read((meta['ctu_count'] - 1).bit_length())
+                r.read(meta['extra_bits']); r.ue()
                 if meta['output_flag']: r.read(1)
                 prefix = value[:r.at]
                 if not info['idr']:
@@ -175,6 +181,9 @@ def main():
                     if label == 'bad-anchor' and index == 18: extension = '11' + '000111' + '1' + '0001'
                     if label == 'bad-truncated' and index == 18: extension = '11' + '000111'
                     if label == 'bad-empty' and index == 17: extension = ''
+                    if index == 17 and not info['first']:
+                        if label == 'bad-slice-period': extension = '01' + '001000'
+                        if label == 'bad-slice-reset': extension = '00'
                     extension = bits(packed(extension))
                     prefix += ue(len(extension) // 8) + extension
                 rewritten = nal[:2] + escape(packed(prefix + '1') + bytes(info['rbsp'][end // 8:]))
@@ -199,7 +208,7 @@ def main():
         cases.append(dict(file=name, expectation='invalid' if label.startswith('bad-') else 'acceptance',
                           frames=len(outputs), resets=[] if not reset else ([0, 17, 33] if idr_family else [17, 33]),
                           signalled=[1, 18, 34] if label == 'full-reset' else [18] if label.endswith('signalled') else [],
-                          failure_picture=(17 if label in ('bad-full-nonidr', 'bad-empty') else 18) if label.startswith('bad-') else None))
+                          failure_picture=(17 if label in ('bad-full-nonidr', 'bad-empty', 'bad-slice-period', 'bad-slice-reset') else 18) if label.startswith('bad-') else None))
     (DEST / f'{stem}-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
         provenance='Original documented synthetic HEVC seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.'), indent=2) + '\n')
 
