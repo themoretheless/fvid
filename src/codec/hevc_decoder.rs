@@ -216,7 +216,9 @@ impl HevcDecoder {
                     // the tail: a later PPS may activate reset semantics. Inert
                     // reserved/future bits do not make a semantic parameter change.
                     let semantic_change = previous.is_none_or(|v| *v != new)
-                        || params.pairs.iter().any(|(s, p)| s.vps_id == new.id && p.poc_reset_info_present);
+                        || params.pairs.iter().any(|(s, p)| s.vps_id == new.id && (p.poc_reset_info_present
+                            || p.slice_header_extension && (new.has_poc_extension()
+                                || previous.is_some_and(Vps::has_poc_extension))));
                     if seen_slice && semantic_change {
                         return Err(invalid("HEVC changed VPS follows picture slices"));
                     }
@@ -450,11 +452,13 @@ impl HevcDecoder {
             return Err(invalid("HEVC SPS contradicts VPS temporal nesting"));
         }
         let header = &headers[0];
-        let reset_syntax = if pps.poc_reset_info_present {
+        let poc_extension_active = pps.poc_reset_info_present
+            || pps.slice_header_extension && vps.has_poc_extension();
+        let reset_syntax = if poc_extension_active {
             let lsb_aligned = vps.poc_lsb_aligned()?;
             let parse = |h: &SliceHeader| {
                 if pps.slice_header_extension {
-                    super::hevc_poc::ResetSyntax::parse_base(&h.extension, true, sps.poc_bits, h.nal, lsb_aligned)
+                    super::hevc_poc::ResetSyntax::parse_base(&h.extension, pps.poc_reset_info_present, sps.poc_bits, h.nal, lsb_aligned)
                 } else { Ok(super::hevc_poc::ResetSyntax::default()) }
             };
             let first = parse(header)?;
@@ -503,7 +507,9 @@ impl HevcDecoder {
             self.reset_periods = Default::default();
             self.suppress_rasl = false;
         }
-        let reset_alignment_changed = if pps.poc_reset_info_present {
+        let reset_alignment_changed = if poc_extension_active
+            || pps.slice_header_extension && self.decoded_vps.as_ref().is_some_and(Vps::has_poc_extension)
+        {
             match self.decoded_vps.as_ref() {
                 // A new CVS can activate Annex F after an opaque Annex A tail.
                 // Only the newly active VPS needs strict interpretation then.

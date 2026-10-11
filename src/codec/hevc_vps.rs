@@ -339,6 +339,12 @@ impl Vps {
                 .as_deref()
                 .unwrap_or(&ResetExtension::Aligned(false))
     }
+    /// A successfully interpreted Annex F tail activates POC cycle syntax even
+    /// when the PPS does not signal reset IDC. Unknown Annex A future tails
+    /// remain opaque until explicitly required by reset semantics.
+    pub(super) fn has_poc_extension(&self) -> bool {
+        matches!(self.reset_extension.as_deref(), Some(ResetExtension::Aligned(_)))
+    }
     /// Strict Annex F semantics, separate from Annex A's ignored future tail.
     pub fn poc_lsb_aligned(&self) -> Result<bool> {
         self.reset_extension

@@ -6619,3 +6619,15 @@ reset witnesses. Aligned/unaligned CRA/BLA cycle syntax, reset IDC and period,
 signalled full/LSB values, malformed payloads and common/dependent segment
 agreement use authored parameter NALs. Their entropy is still an opaque marker;
 these are contextual header tests, not coded scalable video acceptance.
+
+`generate_hevc_poc_reset_fixtures.py --vps-extension aligned --cycle-only`
+authors three-frame explicit-cycle videos without PPS reset IDC syntax. The
+monochrome, `--multislice` and `--dependent` variants use only existing documented
+original synthetic HEVC seeds. Owned PPS/VPS/slice/MP4 rewriting changes POC
+syntax while retaining original coded-picture entropy. Their POC oracle is
+32, 33, 34; coded planes, playback seek/rewind and reset are compared to the
+owned baseline. Invalid variants target a truncated/out-of-range cycle,
+segment disagreement and alignment-changing VPS updates before/after slices
+at the second picture. Generation uses the locked/offline FVid metadata reader;
+ordinary tests use saved files only. No private media, FFmpeg, external codec or
+network is used. These qualify single-layer playback, not scalable decoding.
