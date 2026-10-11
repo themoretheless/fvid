@@ -110,6 +110,81 @@ pub struct LayeredPps {
     pub colour_mapping: Option<ColourMappingTable>,
 }
 impl LayeredPps {
+    fn reference_source<'a>(
+        &self,
+        context: &'a LayeredPpsContext<'_>,
+        reference_layer: u8,
+        motion: bool,
+    ) -> Result<&'a LayeredSps> {
+        if self.layer_id != context.sps.layer_id
+            || self.output_layer_set != context.sps.output_layer_set
+            || self.vps_id != context.vps.vps.id
+            || context.sps.sps.vps_id != context.vps.vps.id
+            || self.pps.sps_id != context.sps.sps.id
+        {
+            return Err(invalid(
+                "HEVC inter-layer reference uses mismatched active parameters",
+            ));
+        }
+        context
+            .vps
+            .profile_for_layer(self.output_layer_set, self.layer_id)?;
+        if reference_layer > 62 || context.direct()? & (1u64 << reference_layer) == 0 {
+            return Err(invalid("HEVC source is not a direct reference layer"));
+        }
+        let extension = context
+            .vps
+            .extension
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC source has no VPS extension"))?;
+        let index = extension
+            .graph
+            .layer_ids
+            .iter()
+            .position(|&id| id == self.layer_id)
+            .ok_or_else(|| invalid("HEVC sample layer is absent from VPS"))?;
+        let enabled = if motion {
+            &extension.dependencies.motion_prediction
+        } else {
+            &extension.dependencies.sample_prediction
+        };
+        if enabled.get(index).copied().unwrap_or(0) & (1u64 << reference_layer) == 0 {
+            return Err(invalid(if motion {
+                "HEVC VPS disables inter-layer motion prediction"
+            } else {
+                "HEVC VPS disables inter-layer sample prediction"
+            }));
+        }
+        context.active_sps(reference_layer)
+    }
+    /// Prepare H.8.1.4.3 motion/mode metadata from a direct reference layer.
+    /// Sample-only dependencies cannot be requested as motion sources.
+    pub fn reference_motion(
+        &self,
+        context: &LayeredPpsContext<'_>,
+        reference_layer: u8,
+        input: super::super::hevc_resample::MotionSource<'_>,
+        budget: usize,
+    ) -> Result<Vec<super::super::hevc_motion::Motion>> {
+        let reference = self.reference_source(context, reference_layer, true)?;
+        let default = ReferenceLocation {
+            layer_id: reference_layer,
+            scaled_offsets: None,
+            region_offsets: None,
+            phases: None,
+        };
+        let location = self
+            .reference_locations
+            .iter()
+            .rfind(|loc| loc.layer_id == reference_layer)
+            .unwrap_or(&default);
+        super::super::hevc_resample::MotionResampling::new(
+            &context.sps.sps,
+            &reference.sps,
+            location,
+        )?
+        .motion(input, budget)
+    }
     /// H.8.1.4.1 reference samples: colour mapping precedes spatial resampling.
     /// This does not derive motion/mode arrays or attach the result to a DPB.
     /// Budget covers all new sample buffers alive simultaneously, including
@@ -123,47 +198,7 @@ impl LayeredPps {
     ) -> Result<[super::super::hevc_plane::Plane; 3]> {
         use super::super::hevc_resample::Resampling;
         use super::ColourMappingPicture;
-        if self.layer_id != context.sps.layer_id
-            || self.output_layer_set != context.sps.output_layer_set
-            || self.vps_id != context.vps.vps.id
-            || context.sps.sps.vps_id != context.vps.vps.id
-            || self.pps.sps_id != context.sps.sps.id
-        {
-            return Err(invalid(
-                "HEVC inter-layer samples use mismatched active parameters",
-            ));
-        }
-        context
-            .vps
-            .profile_for_layer(self.output_layer_set, self.layer_id)?;
-        if reference_layer > 62 || context.direct()? & (1u64 << reference_layer) == 0 {
-            return Err(invalid(
-                "HEVC sample source is not a direct reference layer",
-            ));
-        }
-        let extension = context
-            .vps
-            .extension
-            .as_ref()
-            .ok_or_else(|| invalid("HEVC sample source has no VPS extension"))?;
-        let index = extension
-            .graph
-            .layer_ids
-            .iter()
-            .position(|&id| id == self.layer_id)
-            .ok_or_else(|| invalid("HEVC sample layer is absent from VPS"))?;
-        if extension
-            .dependencies
-            .sample_prediction
-            .get(index)
-            .copied()
-            .unwrap_or(0)
-            & (1u64 << reference_layer)
-            == 0
-        {
-            return Err(invalid("HEVC VPS disables inter-layer sample prediction"));
-        }
-        let reference = context.active_sps(reference_layer)?;
+        let reference = self.reference_source(context, reference_layer, false)?;
         let default = ReferenceLocation {
             layer_id: reference_layer,
             scaled_offsets: None,

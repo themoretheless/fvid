@@ -1,4 +1,4 @@
-//! H.8.1.4.2 inter-layer sample resampling (not motion/mode resampling).
+//! H.8.1.4.2 sample and H.8.1.4.3 motion/mode inter-layer resampling.
 use super::{
     hevc_plane::Plane,
     hevc_pps::{ReferenceGeometry, ReferenceLocation},
@@ -41,6 +41,12 @@ const CHROMA: [[i16; 4]; 16] = [
     [-2, 10, 58, -2],
     [0, 4, 62, -2],
 ];
+/// Explicit source mode: missing inter metadata is not an all-intra picture.
+#[derive(Clone, Copy, Debug)]
+pub enum MotionSource<'a> {
+    Intra,
+    Grid(&'a [super::hevc_motion::Motion]),
+}
 #[derive(Clone, Debug)]
 pub struct Resampling {
     current: [[usize; 2]; 3],
@@ -166,6 +172,20 @@ impl Resampling {
     pub(crate) fn is_identity(&self) -> bool {
         self.identity
     }
+    /// Resample the compact motion/mode grid using luma geometry only.
+    pub fn motion(
+        &self,
+        input: MotionSource<'_>,
+        budget: usize,
+    ) -> Result<Vec<super::hevc_motion::Motion>> {
+        MotionResampling {
+            current: self.current[0],
+            reference: self.reference[0],
+            scales: self.scales[0],
+            geometry: self.geometry.clone(),
+        }
+        .motion(input, budget)
+    }
     pub fn geometry(&self) -> &ReferenceGeometry {
         &self.geometry
     }
@@ -271,6 +291,123 @@ impl Resampling {
                     }
                 }
                 output[c].reconstruct_inter([0, y, w, 1], &row)?;
+            }
+        }
+        Ok(output)
+    }
+}
+
+/// Motion-only H.8.1.4.3 processing, independent of chroma sample availability.
+#[derive(Clone, Debug)]
+pub struct MotionResampling {
+    current: [usize; 2],
+    reference: [usize; 2],
+    scales: [i64; 2],
+    geometry: ReferenceGeometry,
+}
+impl MotionResampling {
+    pub fn new(current: &Sps, reference: &Sps, location: &ReferenceLocation) -> Result<Self> {
+        for s in [current, reference] {
+            if s.dimensions.contains(&0)
+                || s.chroma_format > 3
+                || (s.separate_colour_plane && s.chroma_format != 3)
+            {
+                return Err(invalid("HEVC motion resampling geometry is invalid"));
+            }
+        }
+        if location
+            .scaled_offsets
+            .into_iter()
+            .chain(location.region_offsets)
+            .flatten()
+            .any(|v| !(-16384..=16383).contains(&v))
+        {
+            return Err(invalid(
+                "HEVC motion resampling reference offset exceeds range",
+            ));
+        }
+        let geometry = location.geometry(current, reference, true)?;
+        if (0..2).any(|a| geometry.scaled_size[a] < geometry.reference_size[a]) {
+            return Err(invalid(
+                "HEVC inter-layer motion cannot downscale luma regions",
+            ));
+        }
+        let scales = std::array::from_fn(|a| {
+            (((geometry.reference_size[a] << 16) + (geometry.scaled_size[a] >> 1))
+                / geometry.scaled_size[a]) as i64
+        });
+        Ok(Self {
+            current: current.dimensions.map(|v| v as usize),
+            reference: reference.dimensions.map(|v| v as usize),
+            scales,
+            geometry,
+        })
+    }
+    /// H.8.1.4.3 motion/mode grid. None/None represents intra; inactive
+    /// list fields are absent in the decoder's compact Motion representation.
+    /// Sample resampling phases do not affect motion-grid selection.
+    pub fn motion(
+        &self,
+        input: MotionSource<'_>,
+        budget: usize,
+    ) -> Result<Vec<super::hevc_motion::Motion>> {
+        let columns = self.current[0].div_ceil(16);
+        let rows = self.current[1].div_ceil(16);
+        let ref_columns = self.reference[0].div_ceil(16);
+        let ref_rows = self.reference[1].div_ceil(16);
+        let grid = match input {
+            MotionSource::Intra => None,
+            MotionSource::Grid(grid) => Some(grid),
+        };
+        if grid.is_some_and(|input| ref_columns.checked_mul(ref_rows) != Some(input.len())) {
+            return Err(invalid("HEVC resampling motion grid mismatch"));
+        }
+        let count = columns
+            .checked_mul(rows)
+            .ok_or_else(|| invalid("HEVC resampling motion grid overflow"))?;
+        let bytes = count
+            .checked_mul(std::mem::size_of::<super::hevc_motion::Motion>())
+            .and_then(|v| v.checked_add(std::mem::size_of::<Vec<super::hevc_motion::Motion>>()))
+            .ok_or_else(|| invalid("HEVC resampling motion storage overflow"))?;
+        if bytes > budget {
+            return Err(invalid("HEVC resampling motion exceeds memory budget"));
+        }
+        let mut output = vec![[None; 2]; count];
+        let Some(input) = grid else {
+            return Ok(output);
+        };
+        for y in 0..rows {
+            for x in 0..columns {
+                let position = [x * 16 + 8, y * 16 + 8];
+                let reference: [i64; 2] = std::array::from_fn(|a| {
+                    let sample = (((position[a] as i64
+                        - i64::from(self.geometry.scaled_offsets[a]))
+                        * self.scales[a]
+                        + 32768)
+                        >> 16)
+                        + i64::from(self.geometry.reference_offsets[a]);
+                    ((sample + 4) >> 4) * 16
+                });
+                if (0..2).any(|a| reference[a] < 0 || reference[a] >= self.reference[a] as i64) {
+                    continue;
+                }
+                let mut motion =
+                    input[reference[1] as usize / 16 * ref_columns + reference[0] as usize / 16];
+                for vector in motion.iter_mut().flatten() {
+                    for a in 0..2 {
+                        if self.geometry.scaled_size[a] != self.geometry.reference_size[a] {
+                            let scale = (((self.geometry.scaled_size[a] << 8)
+                                + (self.geometry.reference_size[a] >> 1))
+                                / self.geometry.reference_size[a])
+                                .min(4095) as i64;
+                            let product = scale * i64::from(vector.mv[a]);
+                            vector.mv[a] = (product.signum() * ((product.abs() + 127) >> 8))
+                                .clamp(-32768, 32767)
+                                as i16;
+                        }
+                    }
+                }
+                output[y * columns + x] = motion;
             }
         }
         Ok(output)

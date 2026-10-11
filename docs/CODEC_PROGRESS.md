@@ -12431,3 +12431,46 @@ fixture-generator test stays ignored. All 983 related artifacts regenerate
 byte-identically after the helper extensions. The peak-accounting and mapped
 identity-allocation mutations each failed their exact regression expectations;
 all final checks used the restored implementation.
+
+### HEVC inter-layer motion/mode resampling
+
+`MotionResampling` implements H.8.1.4.3 on the decoder's compact 16x16 motion
+map: select each block's centre, derive the reference location with the normative
++4 grid rounding, mark out-of-picture locations intra, preserve active L0/L1
+indices/flags, and scale signed vectors with +127 magnitude rounding, the 4095
+scale limit and signed sixteen-bit clipping. Sample filter phases do not enter
+motion selection. Inactive list fields use `None`; their unused raw syntax values
+are not retained. `MotionSource::Intra` explicitly represents an all-intra
+reference; an empty `Grid` is invalid and cannot silently stand in for missing
+inter metadata. This matches the existing decoder's absence of stored motion
+for I pictures without conflating the two states.
+
+`LayeredPps::reference_motion` connects this process to active parameters,
+direct-reference selection and the VPS motion-prediction mask. It shares binding
+checks with sample preparation but keeps the sample/motion permissions separate:
+motion-only dependencies produce motion while refusing sample requests, and
+sample-only dependencies do the inverse. Motion-only geometry also supports
+monochrome without requiring invented chroma arrays. Allocation is checked for
+the newly produced motion map; a future complete reference-picture constructor
+must account for retained sample and motion storage together.
+
+The saved resampling matrix now has 58 cases with authored two-frame motion
+maps and exact rational coordinate/vector oracles. Additional cases vary
+noninteger scale, partial edge blocks and outside-reference centres; four new
+monochrome Y4M videos cover 8/10/16-bit envelopes and identity. The 63 encoded
+paired-layer cases now also verify motion permissions and results. Tests cover
+intra/L0/L1/bidirectional sources, signed ties, scale/vector clipping, phase
+independence, input preservation, replay and memory/grid refusal.
+
+This qualifies the motion/mode operation and active-parameter entry point, not
+multilayer slice reconstruction, per-layer reference lists/POCs, DPB/output
+scheduling or scalable-profile picture playback. Those and broader codec gaps
+remain open.
+
+Validation: 46 integration tests across 15 HEVC suites, 211 HEVC unit tests and
+the player build check pass offline with locked dependencies. One explicit
+fixture-generator test remains ignored. All 991 related artifacts regenerate
+byte-identically. Deliberate +128 vector-tie rounding and +8 block-selection
+mutations each fail an exact saved motion regression; final checks use the
+restored +127/+4 implementation. Ordinary tests do not generate fixtures or
+invoke external media tools.

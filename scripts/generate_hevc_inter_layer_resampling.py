@@ -8,7 +8,7 @@ D=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 # Normative H.265 v6 tables H.1/H.2, independent of production source.
 L=[[0,0,0,64,0,0,0,0],[0,1,-3,63,4,-2,1,0],[-1,2,-5,62,8,-3,1,0],[-1,3,-8,60,13,-4,1,0],[-1,4,-10,58,17,-5,1,0],[-1,4,-11,52,26,-8,3,-1],[-1,3,-9,47,31,-10,4,-1],[-1,4,-11,45,34,-10,4,-1],[-1,4,-11,40,40,-11,4,-1],[-1,4,-10,34,45,-11,4,-1],[-1,4,-10,31,47,-9,3,-1],[-1,3,-8,26,52,-11,4,-1],[0,1,-5,17,58,-10,4,-1],[0,1,-4,13,60,-8,3,-1],[0,1,-3,8,62,-5,2,-1],[0,1,-2,4,63,-3,1,0]]
 C=[[0,64,0,0],[-2,62,4,0],[-2,58,10,-2],[-4,56,14,-2],[-4,54,16,-2],[-6,52,20,-2],[-6,46,28,-4],[-4,42,30,-4],[-4,36,36,-4],[-4,30,42,-4],[-4,28,46,-6],[-2,20,52,-6],[-2,16,54,-4],[-2,14,56,-4],[-2,10,58,-2],[0,4,62,-2]]
-SUB={1:(2,2),2:(2,1),3:(1,1)}
+SUB={0:(1,1),1:(2,2),2:(2,1),3:(1,1)}
 def nearest(v):return floor(v+F(1,2))
 def layout(size,fmt):return [size,[size[0]//SUB[fmt][0],size[1]//SUB[fmt][1]],[size[0]//SUB[fmt][0],size[1]//SUB[fmt][1]]]
 def derive(c):
@@ -72,6 +72,39 @@ def oracle(c,source,coords):
         result.append(output)
     return result
 
+def motion_oracle(c,frame):
+    cols=(c['reference_size'][0]+15)//16; rows=(c['reference_size'][1]+15)//16
+    vectors=[-32768,-129,-128,-1,0,1,127,128,129,32767]
+    source=[]
+    for i in range(cols*rows):
+        mode=(i+frame)%4
+        source.append([None if mode in (0,2) else dict(reference=i%3,mv=[vectors[(i+frame)%10],vectors[(i*3+frame+2)%10]]),None if mode in (0,1) else dict(reference=(i+1)%4,mv=[vectors[(i*2+frame+4)%10],vectors[(i*5+frame+1)%10]])])
+    cs,rs=SUB[c['current_format']],SUB[c['reference_format']]
+    co=[c['scaled'][a]*cs[a] for a in range(2)];ro=[c['region'][a]*rs[a] for a in range(2)]
+    sw=[c['current_size'][a]-c['scaled'][a]*cs[a]-c['scaled'][a+2]*cs[a] for a in range(2)]
+    rw=[c['reference_size'][a]-c['region'][a]*rs[a]-c['region'][a+2]*rs[a] for a in range(2)]
+    scales=[nearest(F(rw[a]*65536,sw[a])) for a in range(2)]
+    output=[]; positions=[]
+    for y in range((c['current_size'][1]+15)//16):
+        for x in range((c['current_size'][0]+15)//16):
+            point=[16*floor(F(nearest(F(((x,y)[a]*16+8-co[a])*scales[a],65536))+ro[a]+4,16)) for a in range(2)]
+            positions.append(point)
+            if any(point[a]<0 or point[a]>=c['reference_size'][a] for a in range(2)):output.append([None,None]);continue
+            entry=source[point[1]//16*cols+point[0]//16];target=[]
+            for vector in entry:
+                if vector is None:target.append(None);continue
+                values=[]
+                for a,v in enumerate(vector['mv']):
+                    if sw[a]!=rw[a]:
+                        factor=min(4095,nearest(F(sw[a]*256,rw[a])))
+                        product=factor*v
+                        v=(1 if product>0 else -1 if product<0 else 0)*floor(F(abs(product)+127,256))
+                        v=max(-32768,min(32767,v))
+                    values.append(v)
+                target.append(dict(reference=vector['reference'],mv=values))
+            output.append(target)
+    return source,output,positions
+
 def main():
     cases=[]
     def add(label,**options):
@@ -90,6 +123,9 @@ def main():
         for depth in (10,16):
             add(f'identity-{fmt}-{depth}',reference_size=[8,6],current_size=[8,6],reference_format=fmt,current_format=fmt,reference_depth=[depth,depth],current_depth=[depth,depth])
     add('identity-offset16',reference_size=[8,6],current_size=[8,6],reference_depth=[16,16],current_depth=[16,16],scaled=[1,-1,-1,1],region=[1,-1,-1,1])
+    add('motion-noninteger',reference_size=[64,48],current_size=[96,80],phases=[7,13,15,5])
+    add('motion-outside',reference_size=[64,48],current_size=[128,96],scaled=[20,0,0,0],region=[-1,0,1,0])
+    add('motion-partial',reference_size=[24,24],current_size=[40,40],reference_depth=[16,16],current_depth=[16,16])
     add('mixed-depth',reference_depth=[10,8],current_depth=[16,10],phases=[1,3,7,9])
     add('bad-inferred-phase',error='phase exceeds range')
     add('bad-downscale',current_size=[2,2],error='cannot downscale')
@@ -109,7 +145,8 @@ def main():
         for f in (0,1):
             source=planes(c,f)
             output=oracle(c,source,c['coordinates']) if c['error'] is None else None
-            c['frames'].append(dict(input=source,output=output))
+            motion_in,motion_out,motion_pos=motion_oracle(c,f) if c['error'] is None else (None,None,None)
+            c['frames'].append(dict(input=source,output=output,motion_input=motion_in,motion_output=motion_out,motion_positions=motion_pos))
             flat=sum(source,[])
             raw+=b'FRAME\n'+(bytes(flat) if depth==8 else struct.pack('<'+'H'*len(flat),*flat))
         (D/(c['prefix']+'.y4m')).write_bytes(raw)

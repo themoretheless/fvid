@@ -1,4 +1,5 @@
 //! Composed reference-sample acceptance, not scalable slice/DPB playback.
+use fvid::codec::hevc_resample::MotionSource;
 use fvid::codec::{
     hevc_pps::{ColourMappingPicture, LayeredPps, LayeredPpsContext},
     hevc_resample::Resampling,
@@ -11,6 +12,24 @@ fn data(name: &str) -> Vec<u8> {
         env!("CARGO_MANIFEST_DIR")
     ))
     .unwrap()
+}
+fn motions(v: &serde_json::Value) -> Vec<fvid::codec::hevc_motion::Motion> {
+    v.as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| {
+            std::array::from_fn(|c| {
+                if entry[c].is_null() {
+                    None
+                } else {
+                    Some(fvid::codec::hevc_motion::Vector {
+                        reference: entry[c]["reference"].as_u64().unwrap() as u8,
+                        mv: std::array::from_fn(|i| entry[c]["mv"][i].as_i64().unwrap() as i16),
+                    })
+                }
+            })
+        })
+        .collect()
 }
 fn minimum(mut valid: impl FnMut(usize) -> bool) -> usize {
     let (mut lo, mut hi) = (0, 1 << 20);
@@ -129,6 +148,36 @@ fn composed_reference_samples_apply_active_parameters_order_and_peak_memory() {
             assert_eq!(serde_json::to_value(&source).unwrap(), frame["input"]);
             let snapshot = source.clone();
             let input = || std::array::from_fn(|c| source[c].as_slice());
+            let motion = motions(&frame["motion_input"]);
+            let result_motion =
+                pps.reference_motion(&context, 0, MotionSource::Grid(&motion), 1 << 20);
+            if (case["dependency"].as_u64().unwrap() + 1) & 2 != 0 {
+                let output = result_motion.unwrap_or_else(|e| panic!("{name} motion: {e}"));
+                assert_eq!(output, motions(&frame["motion_output"]), "{name} motion");
+                let intra = pps
+                    .reference_motion(&context, 0, MotionSource::Intra, 1 << 20)
+                    .unwrap();
+                assert_eq!(intra.len(), output.len());
+                assert!(intra.iter().all(|m| *m == [None; 2]));
+
+                assert!(
+                    pps.reference_motion(&context, 0, MotionSource::Grid(&motion), 0)
+                        .unwrap_err()
+                        .to_string()
+                        .contains("budget")
+                );
+                assert!(
+                    pps.reference_motion(&context, 3, MotionSource::Grid(&motion), 1 << 20)
+                        .is_err()
+                );
+            } else {
+                assert!(
+                    result_motion
+                        .unwrap_err()
+                        .to_string()
+                        .contains("disables inter-layer motion prediction")
+                );
+            }
             let result = pps.reference_samples(&context, 0, input(), 1 << 20);
             if let Some(message) = case["error"].as_str() {
                 let e = result.err().unwrap();

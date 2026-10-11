@@ -1,6 +1,44 @@
 //! Reference-sample resampling acceptance; not inter-layer picture decoding.
+use fvid::codec::hevc_motion::{Motion, Vector};
+use fvid::codec::hevc_resample::MotionSource;
 use fvid::codec::{hevc_pps::ReferenceLocation, hevc_resample::Resampling, hevc_sps::Sps};
 use std::collections::BTreeSet;
+fn motions(v: &serde_json::Value) -> Vec<Motion> {
+    v.as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| {
+            std::array::from_fn(|c| {
+                if entry[c].is_null() {
+                    None
+                } else {
+                    Some(Vector {
+                        reference: entry[c]["reference"].as_u64().unwrap() as u8,
+                        mv: array::<2>(&entry[c]["mv"]).map(|v| v as i16),
+                    })
+                }
+            })
+        })
+        .collect()
+}
+fn motion_json(m: &[Motion]) -> serde_json::Value {
+    serde_json::Value::Array(
+        m.iter()
+            .map(|entry| {
+                serde_json::Value::Array(
+                    entry
+                        .iter()
+                        .map(|v| match v {
+                            None => serde_json::Value::Null,
+                            Some(v) => serde_json::json!({"reference":v.reference,"mv":v.mv}),
+                        })
+                        .collect(),
+                )
+            })
+            .collect(),
+    )
+}
+
 fn data(name: &str) -> Vec<u8> {
     std::fs::read(format!(
         "{}/tests/fixtures/playback-errors/{name}",
@@ -128,6 +166,54 @@ fn inter_layer_resampling_matches_coordinates_planes_and_fixed_point_oracles() {
             assert!(operation.coordinate(chroma, [sizes[c][0], 0]).is_err());
         }
         for (frame, source) in case["frames"].as_array().unwrap().iter().zip(frames) {
+            let motion = motions(&frame["motion_input"]);
+            let motion_snapshot = motion.clone();
+            let mapped_motion = operation
+                .motion(MotionSource::Grid(&motion), 1 << 20)
+                .unwrap();
+            let intra = operation.motion(MotionSource::Intra, 1 << 20).unwrap();
+            assert!(intra.iter().all(|m| *m == [None; 2]));
+            assert_eq!(intra.len(), mapped_motion.len());
+            assert!(operation.motion(MotionSource::Grid(&[]), 1 << 20).is_err());
+            if motion.iter().all(|m| *m == [None; 2]) {
+                assert_eq!(intra, mapped_motion);
+            }
+
+            assert_eq!(
+                motion_json(&mapped_motion),
+                frame["motion_output"],
+                "{name} motion"
+            );
+            assert_eq!(
+                operation
+                    .motion(MotionSource::Grid(&motion), 1 << 20)
+                    .unwrap(),
+                mapped_motion
+            );
+            assert_eq!(motion, motion_snapshot);
+            assert!(
+                operation
+                    .motion(MotionSource::Grid(&motion), 0)
+                    .unwrap_err()
+                    .to_string()
+                    .contains("budget")
+            );
+            assert!(
+                operation
+                    .motion(MotionSource::Grid(&motion[1..]), 1 << 20)
+                    .is_err()
+            );
+            if name.ends_with("motion-noninteger") {
+                let mut other = location.clone();
+                other.phases = Some([1, 2, 8, 8]);
+                assert_eq!(
+                    Resampling::new(&current, &reference, &other)
+                        .unwrap()
+                        .motion(MotionSource::Grid(&motion), 1 << 20)
+                        .unwrap(),
+                    mapped_motion
+                );
+            }
             let snapshot = source.clone();
             let input = || std::array::from_fn(|c| source[c].as_slice());
             let output = operation

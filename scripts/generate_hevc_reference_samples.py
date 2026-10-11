@@ -5,7 +5,7 @@ from pathlib import Path
 import generate_hevc_layered_sps as g
 import generate_hevc_layered_pps as p
 from generate_hevc_colour_mapping_pictures import map_planes
-from generate_hevc_inter_layer_resampling import derive,planes,oracle
+from generate_hevc_inter_layer_resampling import derive,planes,oracle,motion_oracle
 D=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 
 def main():
@@ -45,7 +45,8 @@ def main():
             if table and c['current_depth']==c['reference_depth']:
                 reverse=map_planes(table,cf,*c['current_size'],oracle(c,source,derive(c)))
                 differences=sum(a!=b for pa,pb in zip(output,reverse) for a,b in zip(pa,pb))
-            c['frames'].append(dict(input=source,mapped=mapped,output=output,reverse_order_diff_samples=differences))
+            motion_in,motion_out,motion_positions=motion_oracle(c,f)
+            c['frames'].append(dict(input=source,mapped=mapped,output=output,reverse_order_diff_samples=differences,motion_input=motion_in,motion_output=motion_out,motion_positions=motion_positions))
             flat=sum(source,[]);raw+=b'FRAME\n'+(bytes(flat) if depth==8 else struct.pack('<'+'H'*len(flat),*flat))
         (D/(c['prefix']+'.y4m')).write_bytes(raw)
         cases.append(c)

@@ -6561,3 +6561,22 @@ peak limit for mapped intermediate plus final buffers, while equal mapped 16-bit
 references must reuse the ready colour output. Motion-only/neither dependencies
 are valid metadata but cannot be requested as sample prediction sources. These
 are sample-operation acceptance/refusal tests, not layered playback acceptance.
+
+## Inter-layer HEVC motion/mode maps
+
+The owned resampling generator now saves exact rational H.8.1.4.3 motion oracles
+for 58 two-frame reference videos. Vectors include positive/negative half ties,
+zero and signed extrema; source blocks alternate intra, L0, L1 and bidirectional
+motion with distinguishable reference indices. Noninteger/partial/outside cases
+make source-grid selection observable. Input pixel patterns remain original and
+are read/checked along with motion operation descriptors; these are motion
+operation fixtures rather than coded multilayer video acceptance.
+
+`generate_hevc_motion_resampling.py` adds four original monochrome Y4M videos
+with motion descriptors at 8/10/16-bit storage depths. It reuses the independent
+rational oracle, not production motion code. The composed-reference generator
+adds motion maps to its existing encoded parameter/configuration fixtures so
+VPS sample-only, motion-only, both and neither permissions are checked separately.
+Explicit all-intra source tests and empty-grid refusal distinguish legitimate
+absence of I-picture motion storage from missing inter data. No private media,
+external codec, FFmpeg or network is involved in generation or ordinary tests.
