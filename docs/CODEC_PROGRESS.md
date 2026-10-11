@@ -1,5 +1,35 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC SPS multilayer constraint and VPS profile inheritance, 2026-10-11
+
+`Sps::parse` accepts the Annex F SPS multilayer extension's
+`inter_view_mv_vert_constraint_flag`, retains its value and reads it after the
+range extension and before 3D/SCC syntax. It constrains inter-layer motion and
+does not change base-layer picture reconstruction. Eight original Main/Main10
+I/P/B MP4 variants cover both values, preceding range syntax and following
+future data. Software playback compares every plane/sample, timestamps, sync
+seek and rewind against the original 17-picture seeds. Four malformed variants
+fail RBSP validation; two 3D variants remain explicit refusal tests. All eight
+acceptance inputs were separately verified to reproduce the precise former
+multilayer/3D SPS refusal with the pre-fix parser. Generation is separate,
+offline and does not invoke FFmpeg or another codec.
+
+The dependency graph retains the previously discarded first additional VPS
+PTL, including its sublayers, and charges its allocation to the connected VPS
+metadata budget. `LayeredVps::profile_for_layer` selects the necessary layer's
+PTL in an OLS and applies F.7.4.4 inheritance from each preceding VPS PTL for
+missing general profile and sublayer profile/level fields. An original complete
+VPS fixture distinguishes inherited fields from replacements. This prepares
+context-aware dependent-layer SPS inference; it does not qualify scalable
+profiles or admit multilayer picture reconstruction. Representation/DPB/SPS
+context inference and inter-layer prediction remain unfinished.
+
+The shared PTL reader also rejects sublayer profile presence when
+`profilePresentFlag` is zero (7.4.4; Annex F does not remove this constraint).
+Original malformed VPS NAL and short MP4 metadata reproducers exercise the
+exact check. Their tests parse the configured VPS directly; they do not claim
+multilayer playback acceptance.
+
 ## HEVC layered VPS metadata, 2026-10-11
 
 `LayeredVps::parse` now reads a complete VPS NAL metadata path: shared bounded
@@ -7,7 +37,7 @@ RBSP extraction, base syntax/HRDs, connected Annex F prefix, general VUI/BSP,
 extension2 flag and trailing bits. Existing base HRDs are borrowed rather than
 cloned into BSP parsing. Retained capacities, boxes and temporary HRD references
 are accounted against one metadata budget. The POC alignment witness comes from
-the parsed representation flags. Ten original complete metadata NAL fixtures
+the parsed representation flags. Twelve original complete metadata NAL fixtures
 cover plain/VUI/BSP/external/future tails, base-to-BSP HRD inheritance, required extension presence, alignment,
 stop bits and unmarked data. Mandatory syntax truncations fail; a shortened
 unlengthened opaque future tail may remain valid and must preserve known fields.

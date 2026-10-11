@@ -150,6 +150,90 @@ pub struct LayeredVps {
     pub future_extension: bool,
 }
 impl LayeredVps {
+    /// Resolve the PTL applying to a necessary layer of the selected OLS.
+    /// Annex F.7.4.4 inherits missing general and sublayer fields from the
+    /// preceding VPS PTL, independently of the selected layer's PTL index.
+    /// This selects metadata; it does not certify a profile's coding tools.
+    pub fn profile_for_layer(&self, ols: usize, layer_id: u8) -> Result<ProfileTierLevel> {
+        let Some(extension) = self.extension.as_ref() else {
+            if ols != 0 || layer_id != 0 || !self.vps.layers.base_internal {
+                return Err(invalid("HEVC profile selection is outside the VPS"));
+            }
+            return Ok(self.vps.profile.clone());
+        };
+        let set = extension
+            .output
+            .sets
+            .get(ols)
+            .ok_or_else(|| invalid("HEVC profile output layer set is absent"))?;
+        let layers = extension
+            .layer_sets
+            .layer_sets
+            .get(set.layer_set_index)
+            .ok_or_else(|| invalid("HEVC profile layer set is absent"))?;
+        let position = layers
+            .iter()
+            .position(|&id| id == layer_id)
+            .ok_or_else(|| invalid("HEVC profile layer is absent from the selected set"))?;
+        let index = set
+            .profile_indices
+            .get(position)
+            .copied()
+            .flatten()
+            .ok_or_else(|| {
+                invalid("HEVC profile layer is not necessary for the selected output")
+            })?;
+        if index >= extension.output.profile_count || index > 63 {
+            return Err(invalid("HEVC profile index is outside the VPS"));
+        }
+        if index == 0 && !self.vps.layers.base_internal {
+            return Err(invalid("external HEVC base profile must be ignored"));
+        }
+        let count = self.vps.profile.sub_layers.len();
+        if count > 6 {
+            return Err(invalid("invalid HEVC profile sublayer count"));
+        }
+        let mut resolved = self.vps.profile.clone();
+        if !self.vps.layers.base_internal {
+            // F.7.4.4: external-base PTL0 bits are ignored. An absent PTL1
+            // profile must not inherit an internal profile accidentally
+            // retained by a permissive metadata reader.
+            resolved.profile = Some(super::hevc_profile::Profile {
+                space: 0,
+                tier: false,
+                idc: 0,
+                compatibility: 0,
+                constraints: 0,
+            });
+            resolved.level = 0;
+            resolved
+                .sub_layers
+                .fill(super::hevc_profile::SubLayer::default());
+        }
+        for i in 1..=index {
+            let coded = if i == 1 && self.vps.layers.base_internal {
+                extension.graph.base_additional_profile.as_ref()
+            } else {
+                extension
+                    .output
+                    .extra_profiles
+                    .iter()
+                    .find(|(id, _)| *id == i)
+                    .map(|(_, p)| p)
+            }
+            .ok_or_else(|| invalid("HEVC inherited profile predecessor is absent"))?;
+            if coded.sub_layers.len() != count {
+                return Err(invalid("HEVC inherited profile sublayer counts differ"));
+            }
+            resolved.profile = coded.profile.or(resolved.profile);
+            resolved.level = coded.level;
+            for (effective, field) in resolved.sub_layers.iter_mut().zip(&coded.sub_layers) {
+                effective.profile = field.profile.or(effective.profile);
+                effective.level = field.level.or(effective.level);
+            }
+        }
+        Ok(resolved)
+    }
     pub fn parse(nal: &[u8], budget: usize) -> Result<Self> {
         fn charge(left: &mut usize, used: usize) -> Result<()> {
             *left = left

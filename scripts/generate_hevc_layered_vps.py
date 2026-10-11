@@ -32,6 +32,8 @@ for name,payload,vui,has_bsp,internal,future,error in [
  ('plain',plain,False,False,True,False,None),('vui',rich,True,False,True,False,None),
  ('bsp',bsp,True,True,True,False,None),('external',external,True,False,False,False,None),
  ('base-hrd',borrowed,True,True,True,False,None),
+ ('ptl-inheritance',plain,False,False,True,False,None),
+ ('bad-ptl-profile',plain,False,False,True,False,'absent HEVC general profile'),
  ('future',plain,False,False,True,True,None),
  ('missing-extension','',False,False,True,False,'requires extension syntax'),
  ('bad-alignment',plain,False,False,True,False,'alignment bit'),
@@ -39,7 +41,16 @@ for name,payload,vui,has_bsp,internal,future,error in [
  ('unmarked-tail',plain,False,False,True,False,'RBSP'),
 ]:
  bits='0000'+str(int(internal))+'1'+f'{3:06b}'+'0101'+'1'*16
- bits+='00000001'+f'{1<<30:032b}'+'0'*48+f'{120:08b}'+'0'*16
+ profile=lambda id: f'{id:08b}'+'0'*80
+ if name=='ptl-inheritance':
+  # Base sublayer0 signals only profile; sublayer1 signals profile and level.
+  bits+='00000001'+f'{1<<30:032b}'+'0'*48+f'{120:08b}'+'1011'+'0'*12+profile(2)+profile(3)+f'{30:08b}'
+  # PTL1 has no general/sub-layer profiles; it supplies only sublayer0 level.
+  payload=f'{90:08b}'+'0100'+'0'*12+f'{60:08b}'+payload[24:]
+ else:bits+='00000001'+f'{1<<30:032b}'+'0'*48+f'{120:08b}'+'0'*16
+ if name=='bad-ptl-profile':
+  # F.7.4.4 does not remove 7.4.4's profilePresentFlag==0 restriction.
+  payload=payload[:8]+'1000'+'0'*12+profile(2)+payload[24:]
  bits+='0'+ue(2)+ue(1)+ue(0)
  bits+=f'{15:06b}'+ue(1)+''.join(str(int(bool(32905&(1<<id)))) for id in range(16))
  if has_bsp:
@@ -56,5 +67,31 @@ for name,payload,vui,has_bsp,internal,future,error in [
   if name=='unmarked-tail':bits+='01'
  bits+='0' if name=='bad-stop' else '1'
  file='hevc-layered-vps-'+name+'.vps';(D/file).write_bytes(b'\x40\x01'+escape(packed(bits)))
- cases.append(dict(file=file,error=error,vui=vui,bsp=has_bsp,internal=internal,future=future,base_hrd=name=='base-hrd',schemes=1 if name=='base-hrd' else 2))
+ cases.append(dict(file=file,error=error,vui=vui,bsp=has_bsp,internal=internal,future=future,base_hrd=name=='base-hrd',schemes=1 if name=='base-hrd' else 2,ptl_inheritance=name=='ptl-inheritance'))
 (D/'hevc-layered-vps.json').write_text(json.dumps(cases,indent=2)+'\n')
+
+# Short synthetic MP4 reproducers for the profile-loss/illegal-presence cases.
+# Only hvcC VPS changes; moov follows mdat, so media offsets remain unchanged.
+import struct
+from generate_he_aac_packet_fixtures import boxes
+from hevc_fixture_mp4 import box
+for seed in ('main-ipb','main10-ipb'):
+ original=(D.parent/'hevc'/f'{seed}.mp4').read_bytes()
+ roots=list(boxes(original));assert roots[-1][0]==b'moov'
+ for kind in ('ptl-inheritance','bad-ptl-profile'):
+  nal=(D/f'hevc-layered-vps-{kind}.vps').read_bytes()
+  def config(data):
+   out=bytearray(data[:23]);at=23;changed=0
+   for _ in range(data[22]):
+    header=data[at:at+3];at+=3;out+=header
+    for _ in range(int.from_bytes(header[1:],'big')):
+     n=int.from_bytes(data[at:at+2],'big');at+=2;unit=data[at:at+n];at+=n
+     if header[0]&63==32:unit=nal;changed+=1
+     out+=struct.pack('>H',len(unit))+unit
+   assert at==len(data) and changed==1
+   return bytes(out)
+  def rewrite(tag,payload):
+   if tag in (b'moov',b'trak',b'mdia',b'minf',b'stbl'):payload=b''.join(rewrite(t,p) for t,p in boxes(payload))
+   elif tag==b'stsd':payload=payload[:8]+b''.join(box(t,p[:78]+b''.join(box(k,config(v) if k==b'hvcC' else v) for k,v in boxes(p[78:]))) for t,p in boxes(payload[8:]))
+   return box(tag,payload)
+  (D/f'hevc-layered-vps-{seed}-{kind}-synthetic.mp4').write_bytes(b''.join(rewrite(t,p) for t,p in roots))

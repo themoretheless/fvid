@@ -1,0 +1,103 @@
+{
+  "cases": [
+    {
+      "file": "hevc-multilayer-sps-main-ipb-unconstrained-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "unconstrained",
+      "constraint": false,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main-ipb-constrained-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "constrained",
+      "constraint": true,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main-ipb-range-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "range",
+      "constraint": true,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main-ipb-range-future-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "range-future",
+      "constraint": true,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main-ipb-missing-constraint-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "missing-constraint",
+      "constraint": false,
+      "expectation": "invalid"
+    },
+    {
+      "file": "hevc-multilayer-sps-main-ipb-missing-stop-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "missing-stop",
+      "constraint": false,
+      "expectation": "invalid"
+    },
+    {
+      "file": "hevc-multilayer-sps-main-ipb-three-d-synthetic.mp4",
+      "seed": "main-ipb",
+      "kind": "three-d",
+      "constraint": true,
+      "expectation": "refusal"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-unconstrained-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "unconstrained",
+      "constraint": false,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-constrained-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "constrained",
+      "constraint": true,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-range-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "range",
+      "constraint": true,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-range-future-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "range-future",
+      "constraint": true,
+      "expectation": "acceptance"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-missing-constraint-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "missing-constraint",
+      "constraint": false,
+      "expectation": "invalid"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-missing-stop-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "missing-stop",
+      "constraint": false,
+      "expectation": "invalid"
+    },
+    {
+      "file": "hevc-multilayer-sps-main10-ipb-three-d-synthetic.mp4",
+      "seed": "main10-ipb",
+      "kind": "three-d",
+      "constraint": true,
+      "expectation": "refusal"
+    }
+  ],
+  "provenance": "Original synthetic I/P/B seeds documented in fixtures/hevc/README.md. Own SPS multilayer constraint, range-extension ordering, future-tail and malformed RBSP rewriting. This tests base-layer playback, not inter-layer prediction or 3D acceptance. No private media, parameter sets, external tool or network."
+}

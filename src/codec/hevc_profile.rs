@@ -70,6 +70,11 @@ impl ProfileTierLevel {
         let mut presence = [(false, false); 6];
         for entry in presence.iter_mut().take(max_sub_layers_minus1 as usize) {
             *entry = (bits.bit()?, bits.bit()?);
+            if !profile_present && entry.0 {
+                return Err(invalid(
+                    "absent HEVC general profile has a sublayer profile",
+                ));
+            }
         }
         if max_sub_layers_minus1 > 0 {
             for _ in max_sub_layers_minus1..8 {
@@ -104,6 +109,17 @@ impl ProfileTierLevel {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn absent_general_profile_forbids_sublayer_profile_presence() {
+        for max_sub in [1, 2, 6] {
+            let e = ProfileTierLevel::read(&mut BitReader::new(&[120, 0x80]), false, max_sub)
+                .unwrap_err();
+            assert_eq!(
+                e.to_string(),
+                "absent HEVC general profile has a sublayer profile"
+            );
+        }
+    }
     #[test]
     fn real_x265_vps_and_sps_agree_and_leave_next_fields_aligned() {
         use super::super::hevc_nal::NalRbsp;

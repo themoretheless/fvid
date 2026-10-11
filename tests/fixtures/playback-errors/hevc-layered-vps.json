@@ -7,7 +7,8 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-vui.vps",
@@ -17,7 +18,8 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-bsp.vps",
@@ -27,7 +29,8 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-external.vps",
@@ -37,7 +40,8 @@
     "internal": false,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-base-hrd.vps",
@@ -47,7 +51,30 @@
     "internal": true,
     "future": false,
     "base_hrd": true,
-    "schemes": 1
+    "schemes": 1,
+    "ptl_inheritance": false
+  },
+  {
+    "file": "hevc-layered-vps-ptl-inheritance.vps",
+    "error": null,
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2,
+    "ptl_inheritance": true
+  },
+  {
+    "file": "hevc-layered-vps-bad-ptl-profile.vps",
+    "error": "absent HEVC general profile",
+    "vui": false,
+    "bsp": false,
+    "internal": true,
+    "future": false,
+    "base_hrd": false,
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-future.vps",
@@ -57,7 +84,8 @@
     "internal": true,
     "future": true,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-missing-extension.vps",
@@ -67,7 +95,8 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-bad-alignment.vps",
@@ -77,7 +106,8 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-bad-stop.vps",
@@ -87,7 +117,8 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   },
   {
     "file": "hevc-layered-vps-unmarked-tail.vps",
@@ -97,6 +128,7 @@
     "internal": true,
     "future": false,
     "base_hrd": false,
-    "schemes": 2
+    "schemes": 2,
+    "ptl_inheritance": false
   }
 ]

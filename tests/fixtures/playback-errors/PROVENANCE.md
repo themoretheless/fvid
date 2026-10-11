@@ -6426,3 +6426,32 @@ pictures. The ordinary decoder continues to refuse layered VPS input. Tests
 also check the retained metadata budget. Generation uses owned bit-writing
 helpers and Python's standard library, without private media, parameter sets,
 external codecs, FFmpeg or network. Tests read saved fixtures separately.
+
+## HEVC SPS multilayer constraint and VPS PTL inheritance (2026-10-11)
+
+`generate_hevc_multilayer_sps_fixtures.py` authors fourteen MP4 variants from
+the original synthetic Main/Main10 I/P/B seeds documented in `../hevc/README.md`.
+It rewrites only the SPS in hvcC, preserves media samples and offsets, and uses
+owned bit/box helpers without external codec, FFmpeg or network. Eight variants
+are base-layer playback acceptance: both inter-view vertical-motion constraint
+values, preceding range extension and a following future tail. Tests compare
+every picture plane, timing, seek and rewind with the 17-picture seeds.
+Four malformed variants omit the constraint or RBSP stop; two 3D variants are
+explicit refusal tests, not acceptance. No inter-layer motion or 3D playback is
+claimed, and no private source media, frames, audio or parameter sets are used.
+
+`generate_hevc_layered_vps.py` additionally authors
+`hevc-layered-vps-ptl-inheritance.vps`. The original base and first additional
+PTLs deliberately differ in general level and sublayer field presence: base
+sublayer0 has profile 2, base sublayer1 has profile 3 and level 30; the additional
+PTL has general level 90, sublayer0 level 60 and no sublayer profiles. The fixture proves
+retention of the formerly discarded PTL and field-by-field inheritance. It is
+a metadata NAL, not a profile-conformant scalable video or playback acceptance.
+
+The paired `hevc-layered-vps-bad-ptl-profile.vps` illegally signals a sublayer
+profile while profilePresentFlag is zero. Both VPSs are also saved in short
+synthetic Main/Main10 MP4 containers (four `hevc-layered-vps-*-synthetic.mp4`
+files). Only the configured VPS changes; original media samples and offsets
+remain intact. Tests extract and parse the VPS to verify the precise metadata
+loss/illegal-presence behavior, independently of ordinary playback's multilayer
+refusal. These are metadata acceptance/refusal tests, not scalable playback.

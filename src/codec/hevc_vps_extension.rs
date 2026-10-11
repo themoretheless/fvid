@@ -11,6 +11,9 @@ pub use bsp::{BspHrdParameters, BspScheduleEntry, BspScheme};
 /// a prefix reader, not admission of a complete multilayer picture stream.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LayerDependencyPrefix {
+    /// VpsProfileTierLevel[1] when the internal base layer has an extension.
+    /// Profile fields absent here inherit from VpsProfileTierLevel[0].
+    pub base_additional_profile: Option<ProfileTierLevel>,
     pub layer_ids: Vec<u8>,
     pub scalability_ids: Vec<[u8; 16]>,
     pub view_ids: Vec<u16>,
@@ -500,6 +503,10 @@ impl LayeredExtensionPrefix {
                 + vec_bytes(&graph.direct)
                 + vec_bytes(&graph.transitive)
                 + vec_bytes(&graph.tree_partitions)
+                + graph
+                    .base_additional_profile
+                    .as_ref()
+                    .map_or(0, |p| vec_bytes(&p.sub_layers))
                 + graph.tree_partitions.iter().map(vec_bytes).sum::<usize>(),
         )?;
         let layer_sets = graph.layer_sets(bytes, layers, sublayers, left)?;
@@ -1106,9 +1113,11 @@ impl LayerDependencyPrefix {
                 return Err(invalid("HEVC VPS extension alignment bit is not one"));
             }
         }
-        if layers.max_layers_minus1 > 0 && layers.base_internal {
-            ProfileTierLevel::read(&mut b, false, sublayers)?;
-        }
+        let base_additional_profile = if layers.max_layers_minus1 > 0 && layers.base_internal {
+            Some(ProfileTierLevel::read(&mut b, false, sublayers)?)
+        } else {
+            None
+        };
         let splitting = b.bit()?;
         let mut types = Vec::new();
         for i in 0..16 {
@@ -1202,6 +1211,7 @@ impl LayerDependencyPrefix {
             tree_partitions.push(tree);
         }
         Ok(Self {
+            base_additional_profile,
             layer_ids: ids,
             scalability_ids: dimensions,
             view_ids,

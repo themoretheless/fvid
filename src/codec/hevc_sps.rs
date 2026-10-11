@@ -68,6 +68,9 @@ pub struct Sps {
     pub persistent_rice: bool,
     pub extended_precision: bool,
     pub cabac_bypass_alignment: bool,
+    /// Annex F: inter-layer vertical motion is limited to 56 luma samples.
+    /// This imposes no additional operation on base-layer reconstruction.
+    pub inter_view_mv_vert_constraint: bool,
     /// SCC SPS syntax is present.
     pub scc_extension: bool,
     pub palette: Option<Palette>,
@@ -217,6 +220,7 @@ impl Sps {
         let mut persistent_rice = false;
         let mut extended_precision = false;
         let mut cabac_bypass_alignment = false;
+        let mut inter_view_mv_vert_constraint = false;
         let mut scc_extension = false;
         let mut future_extension = false;
         let mut palette = None;
@@ -229,11 +233,6 @@ impl Sps {
             let three_d = b.bit()?;
             scc_extension = b.bit()?;
             future_extension = b.read(4)? != 0;
-            if multilayer || three_d {
-                return Err(crate::unsupported(
-                    "HEVC multilayer/3D SPS extensions are not implemented",
-                ));
-            }
             if range {
                 let flags = b.read(9)?;
                 // 7.3.2.2.2: the sixth of nine flags disables reference filtering.
@@ -246,6 +245,14 @@ impl Sps {
                 persistent_rice = flags & (1 << 1) != 0;
                 extended_precision = flags & (1 << 4) != 0;
                 cabac_bypass_alignment = flags & 1 != 0;
+            }
+            if multilayer {
+                inter_view_mv_vert_constraint = b.bit()?;
+            }
+            if three_d {
+                return Err(crate::unsupported(
+                    "HEVC 3D SPS extension is not implemented",
+                ));
             }
             if scc_extension {
                 current_picture_reference = b.bit()?;
@@ -332,6 +339,7 @@ impl Sps {
             persistent_rice,
             extended_precision,
             cabac_bypass_alignment,
+            inter_view_mv_vert_constraint,
             scc_extension,
             palette,
             current_picture_reference,
