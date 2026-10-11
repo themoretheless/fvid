@@ -6294,3 +6294,19 @@ endpoints share it. Its resulting bytes match the earlier unflushed exact
 integer writer for random/bounded sequences through 100000 symbols and all
 1297 AC artifacts. Table and matrix-result caches change no outputs. Ordinary
 tests read saved artifacts and do not run a generator.
+
+## HEVC VPS layer-set metadata
+
+`generate_hevc_layer_sets.py` authors 16 original raw VPS NAL units and the
+`hevc-vps-layer-sets.json` manifest. Original Main PTL fields and base VPS syntax
+follow H.265 (06/2019), clauses 7.3.2.1 and 7.4.3.1. Cases cover sparse IDs,
+reserved values 63, 1024 sets, external/unavailable base layers, multiple HRDs
+with preceding-common inheritance, malformed counts, empty/duplicate/oversized
+sets, invalid HRD references and truncation.
+
+These are metadata parser acceptance/refusal fixtures, not full Annex F streams
+or multilayer playback acceptance. They omit the Annex F extension and coded
+pictures. The ordinary decoder continues to refuse layered VPS input. Tests
+also check the retained metadata budget. Generation uses owned bit-writing
+helpers and Python's standard library, without private media, parameter sets,
+external codecs, FFmpeg or network. Tests read saved fixtures separately.

@@ -1,5 +1,17 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC layered VPS metadata, 2026-10-11
+
+`Vps::parse_layered_metadata` now reads sparse layer IDs, up to 1024 unique
+nonempty layer sets, reserved values 63, external base-layer metadata and
+multiple HRDs with preceding-common inheritance. Retained metadata is budgeted.
+Sixteen original VPS fixtures and three tests cover topology, HRD, malformed
+references and memory admission. This is metadata acceptance, not multilayer
+playback acceptance: ordinary `Vps::parse` still refuses layered input.
+Annex F dependencies, per-layer DPB, inter-layer reconstruction/resampling and
+the corresponding SPS/PPS extensions remain unfinished. These parameter-only
+fixtures do not replace future synthetic video acceptance tests.
+
 Цель: собственные H.264, H.265 и AAC в FVid; production-модуль `media`
 не зависит от FFmpeg.
 
