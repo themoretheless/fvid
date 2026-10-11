@@ -460,6 +460,7 @@ impl Decoder<'_> {
         references: [Option<&Picture>; 3],
         picture_size: [u32; 2],
         picture_depth: u8,
+        subsampling: [usize; 2],
         rows: usize,
         cols: usize,
         plane: usize,
@@ -481,36 +482,31 @@ impl Decoder<'_> {
                 "VP9 reference depth differs from the current picture",
             ));
         }
-        let sub = usize::from(plane > 0);
+        let [sx, sy] = subsampling;
         let mut mv = block.mvs[0];
         if w < 8 || h < 8 {
-            if plane == 0 {
-                let idx = ((y - r * 8) / 4) * 2 + (x - c * 8) / 4;
-                mv = block.mvs[idx];
-            } else {
-                for comp in 0..2 {
-                    let sum: i32 = block.mvs.iter().map(|v| v[comp]).sum();
-                    mv[comp] = (sum + if sum < 0 { -2 } else { 2 }) / 4;
-                }
-            }
+            // blockIdx counts prediction units in plane raster order, including
+            // the normative cross-row pair for the bottom 4:2:2 unit.
+            let idx = ((y - (r * 8 >> sy)) / 4) * (2 >> sx) + (x - (c * 8 >> sx)) / 4;
+            mv = vp9_motion::subblock_motion(block.mvs, [sx, sy], idx);
         }
         let units = [h.div_ceil(8) as i32, w.div_ceil(8) as i32];
         let coords = [r as i32, c as i32];
         let dims = [rows as i32, cols as i32];
         for i in 0..2 {
+            let sub = subsampling[1 - i];
             let near = (-coords[i] * 128) >> sub;
             let far = ((dims[i] - units[i] - coords[i]) * 128) >> sub;
             let extend = (4 + ((units[i] * 8) >> sub)) * 16;
             mv[i] = ((2 * mv[i]) >> sub).clamp(near - extend, far + extend - 16);
         }
-        let (origin, step) = vp9_motion::scaled_coordinates(
-            reference.size, picture_size, [x, y], mv, sub,
-        )?;
+        let (origin, step) =
+            vp9_motion::scaled_coordinates(reference.size, picture_size, [x, y], mv, subsampling)?;
         vp9_motion::interpolate(
             &reference.planes[plane],
             [
-                reference.size[0].div_ceil(1 << sub) as usize,
-                reference.size[1].div_ceil(1 << sub) as usize,
+                reference.size[0].div_ceil(1 << sx) as usize,
+                reference.size[1].div_ceil(1 << sy) as usize,
             ],
             origin,
             step,

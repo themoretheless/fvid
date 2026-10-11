@@ -19,6 +19,7 @@ pub struct Plane {
 pub struct Picture {
     pub size: [u32; 2],
     pub depth: u8,
+    pub subsampling: [bool; 2],
     pub planes: [Plane; 3],
     blocks: Vec<Block>,
 }
@@ -71,7 +72,7 @@ fn tree(b: &mut BoolDecoder<'_>, t: &[i8], p: &[u8]) -> Result<u8> {
         at = v as usize;
     }
 }
-/// Decode an intra 4:2:0 picture. Budget includes image storage and block/context metadata.
+/// Decode an intra picture with the signalled chroma geometry. Budget includes image storage and block/context metadata.
 pub fn decode_intra(
     frame: &[u8],
     header: &Header,
@@ -115,12 +116,11 @@ pub(crate) fn decode_frame_counted(
     budget: usize,
 ) -> Result<(Picture, Counts)> {
     if header.show_existing.is_some()
-        || header.picture.format.subsampling != [true; 2]
         || header.segmentation.enabled
         || ch.reference_mode != super::vp9_probs::ReferenceMode::Single
     {
         return Err(crate::unsupported(
-            "VP9 picture decoder requires coded 4:2:0 frames, single-reference prediction and no segmentation",
+            "VP9 picture decoder requires coded frames, single-reference prediction and no segmentation",
         ));
     }
     let [width, height] = header.picture.size;
@@ -135,18 +135,32 @@ pub(crate) fn decode_frame_counted(
     }
     let cols = width.div_ceil(8) as usize;
     let rows = height.div_ceil(8) as usize;
+    // Keep the existing metadata allowance and account for both full-depth
+    // chroma planes at their actual geometry (64/128/256 bytes per mi).
+    let chroma_bytes = 256
+        >> header
+            .picture
+            .format
+            .subsampling
+            .iter()
+            .filter(|&&s| s)
+            .count();
     let required = cols
         .checked_mul(rows)
-        .and_then(|n| n.checked_mul(384))
+        .and_then(|n| n.checked_mul(320 + chroma_bytes))
         .and_then(|n| n.checked_add((cols + rows + 16) * 64 + 65536))
         .ok_or_else(|| invalid("VP9 picture size overflow"))?;
     if required > budget {
         return Err(invalid("VP9 picture exceeds memory budget"));
     }
     let planes = std::array::from_fn(|p| {
-        let sub = usize::from(p > 0);
-        let w = (cols * 8) >> sub;
-        let h = (rows * 8) >> sub;
+        let [sx, sy] = header
+            .picture
+            .format
+            .subsampling
+            .map(|v| usize::from(p > 0 && v));
+        let w = (cols * 8) >> sx;
+        let h = (rows * 8) >> sy;
         Plane {
             width: w,
             height: h,
@@ -160,6 +174,7 @@ pub(crate) fn decode_frame_counted(
         picture: Picture {
             size: [width, height],
             depth: header.picture.format.bit_depth,
+            subsampling: header.picture.format.subsampling,
             planes,
             blocks: Vec::new(),
         },
@@ -435,12 +450,15 @@ impl Decoder<'_> {
         }
         let mut any_nonzero = false;
         for plane in 0..3 {
-            let sub = usize::from(plane > 0);
-            let bw = w.max(8) >> sub;
-            let bh = h.max(8) >> sub;
+            let [sx, sy] = self
+                .picture
+                .subsampling
+                .map(|v| usize::from(plane > 0 && v));
+            let bw = w.max(8) >> sx;
+            let bh = h.max(8) >> sy;
             let size = (4 << tx).min(bw.min(bh));
-            let base_x = c * 8 >> sub;
-            let base_y = r * 8 >> sub;
+            let base_x = c * 8 >> sx;
+            let base_y = r * 8 >> sy;
             // Distances from the block to the frame edges in eighth-pel units,
             // as in the specification's clipped-block rules. A negative value
             // means the block overflows the frame in that direction.
@@ -448,8 +466,8 @@ impl Decoder<'_> {
             let edge_y = (self.rows as isize - (h.max(8) / 8) as isize - r as isize) * 64;
             // First four-pixel unit of the block's span that lies outside the
             // frame, or the end of the span when nothing is clipped.
-            let bound_x = (base_x / 4 + bw / 4) as isize + (edge_x >> (5 + sub)).min(0);
-            let bound_y = (base_y / 4 + bh / 4) as isize + (edge_y >> (5 + sub)).min(0);
+            let bound_x = (base_x / 4 + bw / 4) as isize + (edge_x >> (5 + sx)).min(0);
+            let bound_y = (base_y / 4 + bh / 4) as isize + (edge_y >> (5 + sy)).min(0);
             for dy in (0..bh).step_by(size) {
                 for dx in (0..bw).step_by(size) {
                     let x = base_x + dx;
@@ -494,6 +512,7 @@ impl Decoder<'_> {
                                 references,
                                 picture_size,
                                 picture_depth,
+                                [sx, sy],
                                 rows,
                                 cols,
                                 plane,
@@ -724,11 +743,16 @@ impl Decoder<'_> {
         for row in (0..self.rows).step_by(8) {
             for col in (0..self.cols).step_by(8) {
                 for plane in 0..3 {
+                    let [sx, sy] = self
+                        .picture
+                        .subsampling
+                        .map(|v| usize::from(plane > 0 && v));
                     let plane_samples = &mut self.picture.planes[plane];
                     let pw = plane_samples.width;
                     let ph = plane_samples.height;
                     for pass in 0..2 {
-                        let sub = usize::from(plane > 0);
+                        let sub = if pass == 0 { sx } else { sy };
+                        let along = if pass == 0 { sy } else { sx };
                         for edge in 0..(16 >> sub) {
                             // `props` answers only what the run detection
                             // below compares — filter level and transform
@@ -736,18 +760,10 @@ impl Decoder<'_> {
                             // built once per batched line instead of on
                             // every probe that is then discarded.
                             let props = |i: usize| -> Option<(usize, usize, u8, u8)> {
-                                let x = col * 8
-                                    + if pass == 0 {
-                                        edge * (4 << sub)
-                                    } else {
-                                        i << sub
-                                    };
-                                let y = row * 8
-                                    + if pass == 0 {
-                                        i << sub
-                                    } else {
-                                        edge * (4 << sub)
-                                    };
+                                let x =
+                                    col * 8 + if pass == 0 { edge * (4 << sx) } else { i << sx };
+                                let y =
+                                    row * 8 + if pass == 0 { i << sy } else { edge * (4 << sy) };
                                 if x >= cols * 8
                                     || y >= rows * 8
                                     || (pass == 0 && x == 0)
@@ -755,14 +771,15 @@ impl Decoder<'_> {
                                 {
                                     return None;
                                 }
-                                let loop_col = ((x >> 3) >> sub) << sub;
-                                let loop_row = ((y >> 3) >> sub) << sub;
+                                let loop_col = ((x >> 3) >> sx) << sx;
+                                let loop_row = ((y >> 3) >> sy) << sy;
                                 let block = blocks[loop_row * cols + loop_col];
                                 let tx = if plane == 0 {
                                     block.tx
                                 } else {
                                     block.tx.min(
-                                        ((block.width.max(8).min(block.height.max(8)) >> 1)
+                                        ((block.width.max(8) >> sx)
+                                            .min(block.height.max(8) >> sy)
                                             .trailing_zeros()
                                             as usize)
                                             - 2,
@@ -788,7 +805,7 @@ impl Decoder<'_> {
                                 };
                                 let tx_edge = edge & ((1 << tx) - 1) == 0
                                     && !(pass == 1
-                                        && sub == 1
+                                        && sx == 1
                                         && cols % 2 != 0
                                         && edge % 2 != 0
                                         && x + 8 >= cols * 8);
@@ -826,7 +843,7 @@ impl Decoder<'_> {
                                 };
                                 let level = (i32::from(lf.level) + (delta << (lf.level >> 5)))
                                     .clamp(0, 63) as u8;
-                                Some((x >> sub, y >> sub, level, filter_tx as u8))
+                                Some((x >> sx, y >> sy, level, filter_tx as u8))
                             };
                             let positions = |px: usize, py: usize| -> [usize; 16] {
                                 // Only a window that reaches a plane border
@@ -852,7 +869,7 @@ impl Decoder<'_> {
                                 };
                                 std::array::from_fn(|j| position(j as isize - 8))
                             };
-                            let lim = 64 >> sub;
+                            let lim = 64 >> along;
                             let mut i = 0usize;
                             let mut batch = [(0usize, 0usize, 0u8, 0u8); 4];
                             let mut idxs = [[0usize; 16]; 4];

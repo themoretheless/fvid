@@ -8,7 +8,25 @@
         64,
         64
       ],
-      "sample": 128
+      "sample": 128,
+      "coloured": "vp9-chroma-420-8-coloured.vp9",
+      "oracle": "vp9-chroma-420-8-coloured.yuv16",
+      "webm": "vp9-chroma-420-8-synthetic.webm",
+      "mp4": "vp9-chroma-420-8-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-422-8-synthetic.vp9",
@@ -18,7 +36,25 @@
         64,
         64
       ],
-      "sample": 128
+      "sample": 128,
+      "coloured": "vp9-chroma-422-8-coloured.vp9",
+      "oracle": "vp9-chroma-422-8-coloured.yuv16",
+      "webm": "vp9-chroma-422-8-synthetic.webm",
+      "mp4": "vp9-chroma-422-8-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-444-8-synthetic.vp9",
@@ -28,7 +64,53 @@
         64,
         64
       ],
-      "sample": 128
+      "sample": 128,
+      "coloured": "vp9-chroma-444-8-coloured.vp9",
+      "oracle": "vp9-chroma-444-8-coloured.yuv16",
+      "webm": "vp9-chroma-444-8-synthetic.webm",
+      "mp4": "vp9-chroma-444-8-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
+    },
+    {
+      "file": "vp9-chroma-440-8-synthetic.vp9",
+      "depth": 8,
+      "chroma": "440",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 128,
+      "coloured": "vp9-chroma-440-8-coloured.vp9",
+      "oracle": "vp9-chroma-440-8-coloured.yuv16",
+      "webm": "vp9-chroma-440-8-synthetic.webm",
+      "mp4": null,
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-420-10-synthetic.vp9",
@@ -38,7 +120,25 @@
         64,
         64
       ],
-      "sample": 512
+      "sample": 512,
+      "coloured": "vp9-chroma-420-10-coloured.vp9",
+      "oracle": "vp9-chroma-420-10-coloured.yuv16",
+      "webm": "vp9-chroma-420-10-synthetic.webm",
+      "mp4": "vp9-chroma-420-10-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-422-10-synthetic.vp9",
@@ -48,7 +148,25 @@
         64,
         64
       ],
-      "sample": 512
+      "sample": 512,
+      "coloured": "vp9-chroma-422-10-coloured.vp9",
+      "oracle": "vp9-chroma-422-10-coloured.yuv16",
+      "webm": "vp9-chroma-422-10-synthetic.webm",
+      "mp4": "vp9-chroma-422-10-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-444-10-synthetic.vp9",
@@ -58,7 +176,53 @@
         64,
         64
       ],
-      "sample": 512
+      "sample": 512,
+      "coloured": "vp9-chroma-444-10-coloured.vp9",
+      "oracle": "vp9-chroma-444-10-coloured.yuv16",
+      "webm": "vp9-chroma-444-10-synthetic.webm",
+      "mp4": "vp9-chroma-444-10-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
+    },
+    {
+      "file": "vp9-chroma-440-10-synthetic.vp9",
+      "depth": 10,
+      "chroma": "440",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 512,
+      "coloured": "vp9-chroma-440-10-coloured.vp9",
+      "oracle": "vp9-chroma-440-10-coloured.yuv16",
+      "webm": "vp9-chroma-440-10-synthetic.webm",
+      "mp4": null,
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-420-12-synthetic.vp9",
@@ -68,7 +232,25 @@
         64,
         64
       ],
-      "sample": 2048
+      "sample": 2048,
+      "coloured": "vp9-chroma-420-12-coloured.vp9",
+      "oracle": "vp9-chroma-420-12-coloured.yuv16",
+      "webm": "vp9-chroma-420-12-synthetic.webm",
+      "mp4": "vp9-chroma-420-12-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-422-12-synthetic.vp9",
@@ -78,7 +260,25 @@
         64,
         64
       ],
-      "sample": 2048
+      "sample": 2048,
+      "coloured": "vp9-chroma-422-12-coloured.vp9",
+      "oracle": "vp9-chroma-422-12-coloured.yuv16",
+      "webm": "vp9-chroma-422-12-synthetic.webm",
+      "mp4": "vp9-chroma-422-12-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     },
     {
       "file": "vp9-chroma-444-12-synthetic.vp9",
@@ -88,8 +288,54 @@
         64,
         64
       ],
-      "sample": 2048
+      "sample": 2048,
+      "coloured": "vp9-chroma-444-12-coloured.vp9",
+      "oracle": "vp9-chroma-444-12-coloured.yuv16",
+      "webm": "vp9-chroma-444-12-synthetic.webm",
+      "mp4": "vp9-chroma-444-12-synthetic.mp4",
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
+    },
+    {
+      "file": "vp9-chroma-440-12-synthetic.vp9",
+      "depth": 12,
+      "chroma": "440",
+      "size": [
+        64,
+        64
+      ],
+      "sample": 2048,
+      "coloured": "vp9-chroma-440-12-coloured.vp9",
+      "oracle": "vp9-chroma-440-12-coloured.yuv16",
+      "webm": "vp9-chroma-440-12-synthetic.webm",
+      "mp4": null,
+      "webm_sizes": [
+        [
+          64,
+          64
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          72,
+          65
+        ]
+      ]
     }
   ],
-  "provenance": "Original uncompressed header and zero Boolean arithmetic code. DC intra prediction with zero residual; all reconstructed samples equal the bit-depth midpoint. No source media, external codec or network."
+  "provenance": "Original headers, owned integer-interval Boolean writer, DC prediction and independent analytic lossless residual oracles. Neutral pictures equal the bit-depth midpoint; coloured pictures carry opposite signed chroma DC residuals. No source media, external codec or network."
 }

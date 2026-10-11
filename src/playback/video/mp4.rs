@@ -515,18 +515,23 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     if decoded.header.show_frame {
                         let p = &decoded.picture;
                         let colour = crate::playback_native::AvcColour {
-                            kr: if decoded.header.picture.format.color_space == 1 {
-                                0.2126
-                            } else {
-                                0.299
+                            kr: match decoded.header.picture.format.color_space {
+                                0 | 1 | 3 => 0.299,
+                                2 => 0.2126,
+                                4 => 0.212,
+                                5 => 0.2627,
+                                _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
                             },
-                            kb: if decoded.header.picture.format.color_space == 1 {
-                                0.0722
-                            } else {
-                                0.114
+                            kb: match decoded.header.picture.format.color_space {
+                                0 | 1 | 3 => 0.114,
+                                2 => 0.0722,
+                                4 => 0.087,
+                                5 => 0.0593,
+                                _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
                             },
                             full: decoded.header.picture.format.full_range,
                         };
+                        self.decoded_planar = Some(Arc::new(crate::playback_native::vp9_picture(p, colour)?));
                         let coded_width = p.size[0] as usize;
                         let coded_height = p.size[1] as usize;
                         let picture = IntraPicture {
@@ -538,16 +543,20 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                             cb: p.planes[1].samples.clone(),
                             cr: p.planes[2].samples.clone(),
                         };
-                        let planes = crate::playback_native::coded_planes_to_planar8(
-                            &picture.y,
-                            &picture.cb,
-                            &picture.cr,
-                            coded_width,
-                            coded_height,
-                            [0; 4],
-                            p.depth,
-                            colour,
-                        );
+                        let [sx, sy] = p.subsampling.map(usize::from);
+                        let narrow = |i: usize, width: usize, height: usize| {
+                            let plane = &p.planes[i];
+                            (0..height).flat_map(|y| plane.samples[y * plane.width..y * plane.width + width]
+                                .iter().map(|&v| (v >> p.depth.saturating_sub(8)) as u8)).collect()
+                        };
+                        let cw = coded_width.div_ceil(1 << sx);
+                        let ch = coded_height.div_ceil(1 << sy);
+                        let planes = crate::playback_native::Planar8 {
+                            width: coded_width, height: coded_height,
+                            chroma_width: cw, chroma_height: ch,
+                            y: narrow(0, coded_width, coded_height),
+                            cb: narrow(1, cw, ch), cr: narrow(2, cw, ch), colour,
+                        };
                         return Ok(Some((Arc::new(picture), Some(Arc::new(planes)))));
                     }
                 }

@@ -6116,21 +6116,42 @@ VP9 fixed-size, motion, adaptation and 10/12-bit independent oracles still pass.
 No private media, frames, parameters, external codec invocation or network is
 used by generation/tests. Reference geometry follows VP9 v0.7 8.5.2.3.
 
-### VP9 full-chroma reconstruction gap (2026-10-11)
+### VP9 full-chroma reconstruction (2026-10-11)
 
-`generate_vp9_chroma.py` authors nine raw, single-picture VP9 elementary
-streams with original headers and zero Boolean arithmetic codes. No private
-media, frozen external entropy, external codec, FFmpeg or network is used.
-Each is a shown 64x64 lossless keyframe: an unsplit superblock, DC intra
-prediction and immediate EOB in every transform. The analytic sample value
-is `1 << (bit_depth - 1)` in every plane. The 4:2:0 controls decode at
-8/10/12 bits and verify every padded sample and plane dimension.
+`generate_vp9_chroma.py` authors raw VP9 elementary pictures plus original
+WebM and MP4 wrappers. There is no private input, saved external entropy,
+external encoder/decoder, FFmpeg or network use. Generation is separate
+from ordinary offline test execution.
 
-The six 4:2:2 and 4:4:4 cases parse both the uncompressed and compressed
-headers, then reproduce the exact full-chroma reconstruction refusal.
-These are **gap reproduction tests, not playback acceptance**. Enable their
-pixel/dimension acceptance checks as reconstruction is implemented; do not
-retain a refusal expectation for a newly supported format. Chroma-specific
-nonzero residuals, directional prediction, motion and filtering need further
-fixtures for qualification beyond the neutral-picture controls.
-Generation is separate from ordinary offline test execution.
+Twelve neutral lossless keyframes cover 4:2:0/4:2:2/4:4:4/4:4:0 at
+8/10/12 bits. An unsplit superblock, DC prediction and immediate EOB
+produce the analytic midpoint sample in each plane. The original six
+4:2:2/4:4:4 refusal expectations have been replaced by pixel acceptance.
+
+Twelve coloured pictures use an owned integer-interval Boolean writer.
+Only standard probability tables are read from `vp9_tables.rs`. Every luma
+transform has EOB; each chroma transform carries DC coefficient +4 (U) or
+-4 (V), followed by EOB. With lossless dequantization/WHT this adds +1/-1
+in each 4x4 cell. A separate simple Python DC predictor computes every
+expected sample in the saved little-endian `.yuv16` oracles. The oracle
+never calls the production predictor or transform.
+
+Each WebM has three shown keyframes: coloured 64x64, neutral 17x25 and
+neutral 72x65. The latter two signal loop-filter level 16, exercising both
+passes at clipped and multiple-superblock geometries. Tests check geometry,
+visible pixels, reset/rewind, sync seek, EOF, original high-depth packed
+samples and packed 8-bit planes. Filtering here has a neutral input and is
+not an independent non-flat filter oracle.
+
+Nine single-picture MP4s cover 4:2:0/4:2:2/4:4:4 at all three depths and
+verify packed depth, chroma geometry, every original sample and colour
+matrix. The exact BT.601 regression first failed because the MP4 adapter
+used BT.709 coefficients for VP9 colour-space value 1. The adapter now
+matches the signalled VP9 colour space. MP4 `vpcC` does not describe 4:4:0,
+which is covered only through WebM/raw pictures here.
+
+These acceptances qualify the stated intra/DC/residual and playback paths.
+Arbitrary directional/full-chroma inter streams and non-neutral filtering
+still need independent video oracles. Per-axis scaling and sub-8x8 motion
+pair selection are additionally tested against explicit normative values.
+Segmentation and compound prediction remain unsupported.

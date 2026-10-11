@@ -1043,6 +1043,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 .each_ref()
                 .map(|p| (p.samples.as_slice(), p.width)),
         };
+        let factors = match &current.decoded {
+            Picture::Vp9(d) => d.picture.subsampling.map(|s| 1usize << usize::from(s)),
+            Picture::Av1(d) => d.picture.subsampling.map(|s| 1usize << usize::from(s)),
+            _ => [2, 2],
+        };
         let [y, u, v] = planes;
         let y_stride = y.1;
         let u_stride = u.1;
@@ -1050,13 +1055,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let green = 1.0 - kr - kb;
         for py in 0..h {
             let luma_row = py * y_stride;
-            let cb_row = (py / 2) * u_stride;
-            let cr_row = (py / 2) * v_stride;
+            let cb_row = (py / factors[1]) * u_stride;
+            let cr_row = (py / factors[1]) * v_stride;
             let line = &mut self.rgb[py * w * 3..][..w * 3];
             for (px, pixel) in line.as_chunks_mut::<3>().0.iter_mut().enumerate() {
                 let luma = (f64::from(y.0[luma_row + px]) - offset) / yr;
-                let cb = (f64::from(u.0[cb_row + px / 2]) - 128.0 * scale) / cr;
-                let cv = (f64::from(v.0[cr_row + px / 2]) - 128.0 * scale) / cr;
+                let cb = (f64::from(u.0[cb_row + px / factors[0]]) - 128.0 * scale) / cr;
+                let cv = (f64::from(v.0[cr_row + px / factors[0]]) - 128.0 * scale) / cr;
                 let (cb, cv) = if current.monochrome {
                     (0.0, 0.0)
                 } else {
@@ -1115,6 +1120,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     };
                     let [w,h]=current.size.map(|n|n as usize);
                     let factors = match &current.decoded {
+                        Picture::Vp9(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
                         Picture::Av1(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
                         _ => [2, 2],
                     };
@@ -1193,6 +1199,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let h = current.size[1] as usize;
         let shift = current.depth.saturating_sub(8);
         let factors = match &current.decoded {
+            Picture::Vp9(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
             Picture::Av1(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
             _ => [2, 2],
         };

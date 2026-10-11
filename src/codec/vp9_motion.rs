@@ -2,10 +2,10 @@
 use super::{
     vp9_bool::BoolDecoder,
     vp9_picture::Plane,
-    vp9_probs::{counted, Counts, Probabilities},
+    vp9_probs::{Counts, Probabilities, counted},
     vp9_tables::SUBPEL_FILTERS,
 };
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 use fvid_cpu::interp8_vertical;
 fn tree(b: &mut BoolDecoder<'_>, t: &[i8], p: &[u8], counts: &mut [[u32; 2]]) -> Result<u8> {
     let mut at = 0;
@@ -101,14 +101,35 @@ pub(crate) fn read_vector_counted(
 }
 /// VP9 v0.7 8.5.2.3, after plane-specific motion-vector clamping.
 /// Geometry is luma-sized; chroma fractions also use the luma block position.
+pub(super) fn subblock_motion(mvs: [[i32; 2]; 4], sub: [usize; 2], idx: usize) -> [i32; 2] {
+    let (indices, count) = match sub {
+        [0, 0] => ([idx, 0, 0, 0], 1),
+        [0, 1] => ([idx, idx + 2, 0, 0], 2),
+        [1, 0] => ([idx, idx + 1, 0, 0], 2),
+        _ => ([0, 1, 2, 3], 4),
+    };
+    std::array::from_fn(|comp| {
+        let sum: i32 = indices[..count].iter().map(|&i| mvs[i][comp]).sum();
+        if count == 1 {
+            sum
+        } else {
+            (sum + if sum < 0 {
+                -(count as i32 / 2)
+            } else {
+                count as i32 / 2
+            }) / count as i32
+        }
+    })
+}
+
 pub(super) fn scaled_coordinates(
     reference: [u32; 2],
     current: [u32; 2],
     position: [usize; 2],
     mv: [i32; 2],
-    sub: usize,
+    sub: [usize; 2],
 ) -> Result<([i64; 2], [usize; 2])> {
-    if sub > 1 || position.iter().any(|&v| v > 1 << 20) {
+    if sub.iter().any(|&v| v > 1) || position.iter().any(|&v| v > 1 << 20) {
         return Err(invalid("VP9 scaled coordinate out of range"));
     }
     if reference == current && current.iter().all(|&v| v != 0) {
@@ -131,7 +152,7 @@ pub(super) fn scaled_coordinates(
         let scale = ((r << 14) / c) as i64;
         let p = position[axis] as i64;
         let base = (p * scale) >> 14;
-        let fraction = ((16 * (p << sub) * scale) >> 14) & 15;
+        let fraction = ((16 * (p << sub[axis]) * scale) >> 14) & 15;
         origin[axis] = (base << 4) + ((i64::from(mv[1 - axis]) * scale) >> 14) + fraction;
         step[axis] = ((16 * scale) >> 14) as usize;
     }
@@ -217,6 +238,25 @@ pub fn interpolate(
 mod tests {
     use super::*;
     #[test]
+    fn asymmetric_chroma_selects_normative_subblock_pairs_and_axis_fractions() {
+        let mvs = [[-1, 2], [-4, 5], [-8, 10], [-12, 17]];
+        assert_eq!(subblock_motion(mvs, [0, 0], 3), [-12, 17]);
+        assert_eq!(subblock_motion(mvs, [1, 0], 0), [-3, 4]);
+        // The second 4:2:2 prediction unit deliberately uses indices 1 and 2.
+        assert_eq!(subblock_motion(mvs, [1, 0], 1), [-6, 8]);
+        assert_eq!(subblock_motion(mvs, [0, 1], 0), [-5, 6]);
+        assert_eq!(subblock_motion(mvs, [0, 1], 1), [-8, 11]);
+        assert_eq!(subblock_motion(mvs, [1, 1], 0), [-6, 9]);
+        assert_eq!(
+            scaled_coordinates([32, 32], [31, 31], [7, 5], [-3, 5], [1, 0]).unwrap(),
+            ([124, 78], [16, 16])
+        );
+        assert_eq!(
+            scaled_coordinates([32, 32], [31, 31], [7, 5], [-3, 5], [0, 1]).unwrap(),
+            ([120, 81], [16, 16])
+        );
+    }
+    #[test]
     fn scaled_positions_cover_signed_motion_chroma_and_ratio_limits() {
         for (reference, current, sub, origin, step) in [
             ([32, 32], [31, 31], 0, [120, 78], [16, 16]),
@@ -227,7 +267,7 @@ mod tests {
             ([4, 4], [64, 64], 1, [14, 9], [1, 1]),
         ] {
             assert_eq!(
-                scaled_coordinates(reference, current, [7, 5], [-3, 5], sub).unwrap(),
+                scaled_coordinates(reference, current, [7, 5], [-3, 5], [sub; 2]).unwrap(),
                 (origin, step)
             );
         }
@@ -238,7 +278,7 @@ mod tests {
             ([4, 4], [65, 64]),
         ] {
             assert_eq!(
-                scaled_coordinates(r, c, [0, 0], [0, 0], 0)
+                scaled_coordinates(r, c, [0, 0], [0, 0], [0; 2])
                     .unwrap_err()
                     .to_string(),
                 "VP9 reference scale out of range"
@@ -256,7 +296,8 @@ mod tests {
         };
         let mut scratch = Vec::new();
         let mut out = Vec::new();
-        let (origin, step) = scaled_coordinates([16, 16], [32, 32], [8, 8], [0, 0], 0).unwrap();
+        let (origin, step) =
+            scaled_coordinates([16, 16], [32, 32], [8, 8], [0, 0], [0; 2]).unwrap();
         for filter in 0..4 {
             interpolate(
                 &plane,
@@ -275,7 +316,8 @@ mod tests {
                 .collect();
             assert_eq!(out, expected);
         }
-        let (origin, step) = scaled_coordinates([32, 32], [31, 31], [7, 5], [-3, 5], 1).unwrap();
+        let (origin, step) =
+            scaled_coordinates([32, 32], [31, 31], [7, 5], [-3, 5], [1; 2]).unwrap();
         interpolate(
             &plane,
             [16, 16],

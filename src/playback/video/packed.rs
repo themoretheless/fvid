@@ -320,3 +320,25 @@ pub fn hevc_picture(
         colour,
     )
 }
+
+/// Preserve VP9 plane strides, chroma geometry and full sample depth.
+pub(crate) fn vp9_picture(p: &crate::codec::vp9_picture::Picture, colour: AvcColour) -> Result<PackedPlanar> {
+    let [width, height] = p.size.map(|n| n as usize);
+    let factors = p.subsampling.map(|s| 1usize << usize::from(s));
+    let bytes = if p.depth == 8 { 1 } else { 2 };
+    let mut data = Vec::new();
+    for (i, plane) in p.planes.iter().enumerate() {
+        let w = if i == 0 { width } else { width.div_ceil(factors[0]) };
+        let h = if i == 0 { height } else { height.div_ceil(factors[1]) };
+        if w > plane.width || h > plane.height || plane.samples.len() != plane.width * plane.height {
+            return Err(invalid("invalid VP9 plane storage"));
+        }
+        for y in 0..h {
+            for &sample in &plane.samples[y * plane.width..y * plane.width + w] {
+                if bytes == 1 { data.push(sample as u8); }
+                else { data.extend_from_slice(&sample.to_le_bytes()); }
+            }
+        }
+    }
+    PackedPlanar::new(GeometryFrame { width, height, subsampling: Some(factors), data }, p.depth, colour)
+}

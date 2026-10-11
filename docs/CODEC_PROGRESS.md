@@ -11969,3 +11969,29 @@ poisoning after refusal. This is gap reproduction, **not full-chroma
 acceptance**; production still requires 4:2:0. Reconstruction, per-axis
 chroma geometry, chroma motion selection, filtering and playback output
 must be updated and independently qualified before claiming full support.
+
+### 2026-10-11 — VP9 chroma reconstruction and playback acceptance
+
+Removed the blanket 4:2:0-only reconstruction guard. Plane allocation,
+transform traversal, clipped coefficient contexts, loop-filter geometry,
+motion-vector clamping/scaling and sub-8x8 motion selection now use the
+signalled horizontal and vertical subsampling separately. Memory accounting
+includes the actual chroma storage. WebM CPU RGB, packed 8-bit and high-depth
+outputs preserve these dimensions. MP4 VP9 now supplies explicit packed
+geometry/depth and uses the signalled colour matrix (BT.601 was incorrectly
+mapped to BT.709).
+
+The previous full-chroma gap tests are now acceptance tests. Twelve owned
+coloured lossless streams match independent analytic DC/residual sample
+oracles at 8/10/12 bits across 420/422/444/440; twelve WebMs additionally
+cover 17x25 and 72x65 filtered neutral pictures, seek and rewind. Nine MP4s
+verify every full-depth sample and BT.601 metadata. No fixture generation
+or ordinary test requires FFmpeg/libav or network. This does not qualify
+arbitrary directional prediction/full-chroma inter/non-neutral filtering;
+those video oracles remain work. Compound prediction and segmentation
+remain explicit refusals, so the overall codec-gap goal remains open.
+
+Validation: 27 VP9 codec unit tests; 6 chroma integration tests; existing
+scaled-reference, native WebM lossless and playback-error suites passed
+without FFmpeg. Player feature compilation also passed. All 58 generated
+fixtures/oracles/manifest files regenerate byte-identically.
