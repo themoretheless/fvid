@@ -253,6 +253,152 @@ impl LayeredPps {
             resampling.picture(input, budget)
         }
     }
+    /// Attach H.8.1.4 samples and motion to an immutable inter-layer reference.
+    /// Source picture/parameters are borrowed; budget covers all additional live
+    /// allocations. The output is a prediction reference, not a display picture.
+    pub fn reference_picture(
+        &self,
+        context: &LayeredPpsContext<'_>,
+        reference_layer: u8,
+        source: &super::super::hevc_picture::Picture,
+        budget: usize,
+    ) -> Result<super::super::hevc_picture::Picture> {
+        use super::super::hevc_motion::Motion;
+        use std::mem::size_of;
+        if reference_layer > 62 {
+            return Err(invalid("HEVC source is not a direct reference layer"));
+        }
+        let extension = context
+            .vps
+            .extension
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC source has no VPS extension"))?;
+        let index = extension
+            .graph
+            .layer_ids
+            .iter()
+            .position(|&id| id == self.layer_id)
+            .ok_or_else(|| invalid("HEVC sample layer is absent from VPS"))?;
+        let sample_enabled = extension
+            .dependencies
+            .sample_prediction
+            .get(index)
+            .copied()
+            .unwrap_or(0)
+            & (1u64 << reference_layer)
+            != 0;
+        let reference = self.reference_source(context, reference_layer, !sample_enabled)?;
+        if source.dimensions != reference.sps.dimensions || source.depth != reference.sps.depth {
+            return Err(invalid(
+                "HEVC inter-layer source picture disagrees with active SPS",
+            ));
+        }
+        let metadata = source
+            .poc_translation_bytes()
+            .ok_or_else(|| invalid("HEVC prepared reference metadata overflow"))?;
+        let default = ReferenceLocation {
+            layer_id: reference_layer,
+            scaled_offsets: None,
+            region_offsets: None,
+            phases: None,
+        };
+        let location = self
+            .reference_locations
+            .iter()
+            .rfind(|l| l.layer_id == reference_layer)
+            .unwrap_or(&default);
+        let geometry = location.geometry(&context.sps.sps, &reference.sps, true)?;
+        let mapping = self
+            .colour_mapping
+            .as_ref()
+            .is_some_and(|t| t.reference_layers.contains(&reference_layer));
+        // H.8.1.4.1 shares the decoded reference, including motion, for equal
+        // representations. Do not discard motion merely because its separate
+        // resampling dependency is disabled in this no-processing case.
+        if context.sps.sps.dimensions == reference.sps.dimensions
+            && context.sps.sps.depth == reference.sps.depth
+            && context.sps.sps.chroma_format == reference.sps.chroma_format
+            && context.sps.sps.separate_colour_plane == reference.sps.separate_colour_plane
+            && geometry.scaled_offsets == geometry.reference_offsets
+            && geometry.phases == [0; 4]
+            && !mapping
+        {
+            return source.translated_layer_pocs(&[0; 63], budget);
+        }
+        let available = budget
+            .checked_sub(metadata)
+            .ok_or_else(|| invalid("HEVC prepared reference exceeds memory budget"))?;
+        let planes = self.reference_samples(
+            context,
+            reference_layer,
+            std::array::from_fn(|c| source.planes[c].samples()),
+            available,
+        )?;
+        let held = planes
+            .iter()
+            .try_fold(metadata, |n, p| n.checked_add(p.storage_bytes()?))
+            .ok_or_else(|| invalid("HEVC prepared reference sample storage overflow"))?;
+        let remaining = budget
+            .checked_sub(held)
+            .ok_or_else(|| invalid("HEVC prepared reference exceeds memory budget"))?;
+        let motion_enabled = extension
+            .dependencies
+            .motion_prediction
+            .get(index)
+            .copied()
+            .unwrap_or(0)
+            & (1u64 << reference_layer)
+            != 0;
+        let motion = if motion_enabled {
+            self.reference_motion(
+                context,
+                reference_layer,
+                // Owned Picture stores an empty motion map only for an all-I
+                // reconstruction; inter pictures always retain a complete grid.
+                if source.motion.is_empty() {
+                    super::super::hevc_resample::MotionSource::Intra
+                } else {
+                    super::super::hevc_resample::MotionSource::Grid(&source.motion)
+                },
+                remaining,
+            )?
+        } else {
+            let [w, h] = context.sps.sps.dimensions;
+            let count = (w as usize)
+                .div_ceil(16)
+                .checked_mul((h as usize).div_ceil(16))
+                .ok_or_else(|| invalid("HEVC prepared reference motion size overflow"))?;
+            if count
+                .checked_mul(size_of::<Motion>())
+                .and_then(|n| n.checked_add(size_of::<Vec<Motion>>()))
+                .is_none_or(|n| n > remaining)
+            {
+                return Err(invalid(
+                    "HEVC prepared reference motion exceeds memory budget",
+                ));
+            }
+            let mut grid = Vec::new();
+            grid.try_reserve_exact(count)
+                .map_err(|_| invalid("cannot allocate HEVC prepared reference motion"))?;
+            grid.resize(count, [None; 2]);
+            grid
+        };
+        // Existing bounded copier preserves full layer/POC/reference-class maps,
+        // including their index correspondence with the resampled motion grid.
+        let mut prepared = source.translated_layer_pocs(&[0; 63], metadata)?;
+        prepared.dimensions = context.sps.sps.dimensions;
+        prepared.crop = context.sps.sps.crop;
+        prepared.depth = context.sps.sps.depth;
+        prepared.planes = planes;
+        prepared.motion = motion;
+        prepared.sao.clear();
+        if !motion_enabled {
+            prepared.reference_pocs = [Vec::new(), Vec::new()];
+            prepared.reference_layers = [Vec::new(), Vec::new()];
+            prepared.reference_long_term = [Vec::new(), Vec::new()];
+        }
+        Ok(prepared)
+    }
     pub fn parse(nal: &[u8], context: &LayeredPpsContext<'_>, budget: usize) -> Result<Self> {
         if context.sps.sps.vps_id != context.vps.vps.id {
             return Err(invalid("HEVC PPS SPS belongs to another VPS"));
@@ -448,5 +594,92 @@ impl LayeredPpsContext<'_> {
             locations,
             colour_mapping,
         })
+    }
+}
+
+#[cfg(test)]
+mod prepared_reference_tests {
+    use super::*;
+    use crate::codec::{
+        config::HevcConfig,
+        hevc_decoder::{HevcDecoder, LayeredAccessUnit, LayeredParameters},
+        hevc_poc::LayeredPocState,
+    };
+    #[test]
+    fn identity_reference_retains_real_inter_motion_and_full_reference_identities() {
+        let data =
+            include_bytes!("../../tests/fixtures/playback-errors/hevc-pcm-reference-rext8.mp4");
+        let mut movie =
+            crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())
+                .unwrap();
+        let mut decoder =
+            HevcDecoder::from_configuration(&movie.tracks()[0].configuration, 32 << 20).unwrap();
+        let mut packet = vec![];
+        movie.read_packet(0, 0, &mut packet).unwrap();
+        decoder.decode_packet(&packet).unwrap();
+        movie.read_packet(0, 1, &mut packet).unwrap();
+        let source = decoder.decode_packet(&packet).unwrap().unwrap().picture;
+        assert!(source.motion.iter().flatten().any(Option::is_some));
+        let layered = include_bytes!(
+            "../../tests/fixtures/playback-errors/hevc-layered-reconstruct-inter-prediction.mp4"
+        );
+        let mut movie = crate::container::mp4::Mp4Reader::open(
+            std::io::Cursor::new(layered),
+            Default::default(),
+        )
+        .unwrap();
+        let length_size = HevcConfig::parse(&movie.tracks()[0].configuration).unwrap().length_size;
+        let parameters =
+            LayeredParameters::from_configuration(&movie.tracks()[0].configuration, 32 << 20)
+                .unwrap();
+        movie.read_packet(0, 0, &mut packet).unwrap();
+        let plan = LayeredAccessUnit::parse(
+            &parameters,
+            &LayeredPocState::default(),
+            &packet,
+            length_size,
+            1,
+            32 << 20,
+        )
+        .unwrap();
+        let current = &plan.pictures()[1].binding;
+        let sps: Vec<_> = plan
+            .pictures()
+            .iter()
+            .map(|p| p.binding.sps.clone())
+            .collect();
+        for disable_motion in [false, true] {
+            let mut vps = (*current.vps).clone();
+            if disable_motion {
+                vps.extension
+                    .as_mut()
+                    .unwrap()
+                    .dependencies
+                    .motion_prediction[1] = 0;
+            }
+            let context = LayeredPpsContext {
+                vps: &vps,
+                sps: &current.sps,
+                active_sps: &sps,
+                active_pps: &[],
+            };
+            let prepared = current
+                .pps
+                .reference_picture(&context, 0, &source, 32 << 20)
+                .unwrap();
+            assert_eq!(prepared.motion, source.motion);
+            assert_eq!(prepared.reference_pocs, source.reference_pocs);
+            assert_eq!(prepared.reference_layers, source.reference_layers);
+            assert_eq!(prepared.reference_long_term, source.reference_long_term);
+            for (a, b) in prepared.planes.iter().zip(&source.planes) {
+                assert_eq!(a.samples(), b.samples());
+            }
+            assert!(
+                current
+                    .pps
+                    .reference_picture(&context, 64, &source, 32 << 20)
+                    .is_err()
+            );
+        }
     }
 }

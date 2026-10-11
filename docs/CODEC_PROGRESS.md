@@ -1,5 +1,31 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC prepared inter-layer reference pictures, 2026-10-12
+
+`LayeredPps::reference_picture` now attaches reference-sample preparation and
+motion resampling to a bounded immutable prediction `Picture`. It validates the
+source against its active SPS, preserves layer/POC/reference-class index maps,
+and accounts for mapped/resampled samples, motion and copied metadata alive
+together. The original DPB picture is borrowed and remains unchanged.
+Identical representations retain source samples and motion, including when
+separate motion resampling is disabled. Owned all-I pictures have an explicitly
+empty motion map and use `MotionSource::Intra` when resampling is required.
+Nonidentity sample-enabled dependencies use the existing mapping/resampling
+stages; motion-disabled results have intra-mode metadata. Motion-only
+nonidentity picture attachment and separate-plane nonidentity preparation
+remain unfinished.
+
+A two-AU coded reconstruction regression now prepares actual same-AU base
+references through this API, binds them through production reference lists,
+and compares both layers to saved original YUV, including after reset. A unit
+regression checks real P-picture motion and full reference-identity maps survive
+identity preparation with motion resampling both enabled and disabled.
+This qualifies the identity coded path; nonidentity coded-stream/oracle
+acceptance and automatic preparation/dispatch in the player remain required.
+
+Validation: 30 layered integration tests and 215 HEVC unit tests pass (one
+existing unit test ignored), together with the offline player build check.
+
 ## HEVC layered sequence-end ownership, 2026-10-12
 
 `LayeredDpb` now applies EOS/EOB only after every picture in the current AU

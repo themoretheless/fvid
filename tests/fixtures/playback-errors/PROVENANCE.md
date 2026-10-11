@@ -6764,3 +6764,15 @@ to saved YUV, checks release of the source and predicted layers, and uses the
 existing two-AU inter-prediction movie for the exact post-EOS/EOB restart-rule
 refusal. An original IRAP AU then recovers without external reset. These are
 sequence-state tests, not claims of output queue/player qualification.
+
+### Prepared layered HEVC reference-picture ownership (2026-10-12)
+
+The existing original `hevc-layered-reconstruct-inter-prediction.mp4` now also
+exercises `LayeredPps::reference_picture` before actual inter-layer list binding
+and coded reconstruction. Both layers and both access units retain exact saved
+original YUV comparisons and reset coverage; source DPB pictures stay immutable.
+The existing original `hevc-pcm-reference-rext8.mp4` provides real decoded
+predicted-picture motion for an identity-preparation unit regression. Its numeric
+VPS motion-resampling toggle is a parameter-state unit control, not an additional
+coded stream or nonidentity playback acceptance claim. Ordinary tests generate
+nothing and require no FFmpeg, network or private media.
