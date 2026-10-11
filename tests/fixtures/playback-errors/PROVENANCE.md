@@ -6261,3 +6261,36 @@ even when the segment index clamps to zero. Existing generator defaults and
 all prior chroma/segmentation artifacts are unchanged. This qualifies DC-only
 residuals, not arbitrary AC or segmented inter residuals. Generation and tests
 use no private input, external codec, FFmpeg/libav or network.
+
+## Original VP9 4x4 AC coefficient videos
+
+`scripts/generate_vp9_ac.py` authors `vp9-ac.json`, 144 short WebMs and 576
+coded-picture/sample-oracle pairs. Four patterns cover sparse positive and
+negative AC positions, mixed signed coefficients, dense/internal zero runs and
+empty transforms. All 16 positions and all eleven token symbols occur; 10/12-bit
+category-6 high bits are present. Four chroma layouts and three depths combine
+with frame Q=0/20 and optional segment delta Q=6. The frame Q selects WHT or
+DCT; segment Q changes actual DC and AC dequantization.
+
+The explicit normative scan, bands, token tree and category probabilities come
+from VP9 v0.7 sections 6.4.24–26 and 10.1. Standard probability/quantizer tables
+are loaded from the owned source. An exact owned Boolean writer authors syntax.
+Expected pixels use independent dense Hadamard or even/odd DCT matrix products
+with signed rounding. Intra DC neighbors, neutral single-reference prediction,
+and averaging distinct synthetic colored/neutral references are calculated
+independently, then residuals and sample clipping are applied. No production
+transform, entropy reader or prediction helper produces the saved oracles.
+
+Direct acceptance tests compare every sample and replay after reset. WebM
+playback verifies packed planes, original 10/12-bit samples, timestamps, EOF,
+rewind and sync seek; hidden compound reference pictures are suppressed. Only
+the keyframe is a sync point in inter streams. Generation is separate from tests
+and uses no private input, external codec, FFmpeg/libav or network. This bounded
+matrix does not establish larger transforms, directional/ADST prediction,
+arbitrary partitions/tiles or adaptive-context conformance.
+
+The AC authoring writer flushes a prefix only when the low and inclusive high
+endpoints share it. Its resulting bytes match the earlier unflushed exact
+integer writer for random/bounded sequences through 100000 symbols and all
+1297 AC artifacts. Table and matrix-result caches change no outputs. Ordinary
+tests read saved artifacts and do not run a generator.

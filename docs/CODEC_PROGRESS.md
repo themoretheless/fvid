@@ -12090,3 +12090,34 @@ No production codec fix was required for these cases. Both focused integration
 suites pass (13 tests); 928 chroma/segmentation artifacts regenerate identically.
 General segmented AC/lossy inter residuals, arbitrary tiled/mixed layouts,
 reference refresh/scaling combinations and broader codec gaps remain open.
+
+### VP9 4x4 AC coefficient and residual qualification
+
+Added 144 original short WebMs containing 576 checked residual pictures across
+420/422/444/440, 8/10/12 bits, WHT and lossy DCT, unsegmented and delta-ALT_Q
+cases. Authored patterns cover all 16 coefficient positions, positive/negative
+coefficients, every token category, category-6 high bits at 10/12 bits, internal
+zero runs, early EOB, fully populated blocks and empty transforms. Intra DC,
+single-reference inter, and distinct-reference compound averaging are checked
+at every sample, including clipping. Prediction references are not refreshed
+by the inter pictures, so accumulating residuals into the reference is observable.
+
+The offline writer uses the specification's explicit 4x4 scan/bands and owned
+Boolean coding. Independent oracles use a dense Hadamard matrix with signed
+ceil/floor rounding or separate even/odd fixed-point DCT matrix products.
+Neither calls the production residual reader, predictor or transform. Direct
+reset replay and WebM tests cover original planar depth, packed 8-bit output,
+timestamps, EOF, rewind and sync seek. No production fix was needed for these
+bounded cases.
+
+This qualifies 4x4 DC-predicted/DCT-DCT or WHT residuals, not larger transforms,
+ADST/directional modes, arbitrary partition/tile layouts, adaptive contexts,
+or all codec combinations. These remain distinct qualification work; the
+broader codec-gap objective is still open.
+
+Validation: 25 focused VP9 integration tests pass with locked offline
+dependencies. All 1297 AC artifacts regenerate byte-identically. The fixture
+writer flushes only prefixes shared by the entire exact coding interval;
+its bytes match the original arbitrary-precision lower-endpoint writer for
+six bounded/random lengths through 100000 symbols and for every AC artifact.
+This keeps the authoring path efficient without changing coded bits.

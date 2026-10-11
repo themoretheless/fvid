@@ -1,0 +1,3646 @@
+{
+  "cases": [
+    {
+      "compound_file": "vp9-ac-420-8-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-8-0-0-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-0-1-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-0-2-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-0-3-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-8-0.webm",
+      "depth": 8,
+      "chroma": "420",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-420-8-0-0.vp9",
+          "oracle": "vp9-ac-420-8-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-0-1.vp9",
+          "oracle": "vp9-ac-420-8-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-0-2.vp9",
+          "oracle": "vp9-ac-420-8-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-0-3.vp9",
+          "oracle": "vp9-ac-420-8-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-8-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-8-0-0-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-0-1-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-0-2-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-0-3-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-8-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-8-6-0-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-6-1-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-6-2-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-6-3-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-8-6.webm",
+      "depth": 8,
+      "chroma": "420",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-420-8-6-0.vp9",
+          "oracle": "vp9-ac-420-8-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-6-1.vp9",
+          "oracle": "vp9-ac-420-8-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-6-2.vp9",
+          "oracle": "vp9-ac-420-8-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-6-3.vp9",
+          "oracle": "vp9-ac-420-8-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-8-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-8-6-0-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-6-1-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-6-2-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-6-3-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-8-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-8-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-8-0-dct.webm",
+      "depth": 8,
+      "chroma": "420",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-420-8-0-0-dct.vp9",
+          "oracle": "vp9-ac-420-8-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-0-1-dct.vp9",
+          "oracle": "vp9-ac-420-8-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-0-2-dct.vp9",
+          "oracle": "vp9-ac-420-8-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-0-3-dct.vp9",
+          "oracle": "vp9-ac-420-8-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-8-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-8-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-8-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-8-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-420-8-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-8-6-dct.webm",
+      "depth": 8,
+      "chroma": "420",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-420-8-6-0-dct.vp9",
+          "oracle": "vp9-ac-420-8-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-6-1-dct.vp9",
+          "oracle": "vp9-ac-420-8-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-6-2-dct.vp9",
+          "oracle": "vp9-ac-420-8-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-6-3-dct.vp9",
+          "oracle": "vp9-ac-420-8-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-8-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-8-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-8-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-8-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-8-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-420-8-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-8-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-8-0-0-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-0-1-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-0-2-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-0-3-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-8-0.webm",
+      "depth": 8,
+      "chroma": "422",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-422-8-0-0.vp9",
+          "oracle": "vp9-ac-422-8-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-0-1.vp9",
+          "oracle": "vp9-ac-422-8-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-0-2.vp9",
+          "oracle": "vp9-ac-422-8-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-0-3.vp9",
+          "oracle": "vp9-ac-422-8-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-8-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-8-0-0-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-0-1-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-0-2-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-0-3-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-8-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-8-6-0-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-6-1-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-6-2-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-6-3-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-8-6.webm",
+      "depth": 8,
+      "chroma": "422",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-422-8-6-0.vp9",
+          "oracle": "vp9-ac-422-8-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-6-1.vp9",
+          "oracle": "vp9-ac-422-8-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-6-2.vp9",
+          "oracle": "vp9-ac-422-8-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-6-3.vp9",
+          "oracle": "vp9-ac-422-8-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-8-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-8-6-0-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-6-1-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-6-2-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-6-3-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-8-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-8-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-8-0-dct.webm",
+      "depth": 8,
+      "chroma": "422",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-422-8-0-0-dct.vp9",
+          "oracle": "vp9-ac-422-8-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-0-1-dct.vp9",
+          "oracle": "vp9-ac-422-8-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-0-2-dct.vp9",
+          "oracle": "vp9-ac-422-8-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-0-3-dct.vp9",
+          "oracle": "vp9-ac-422-8-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-8-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-8-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-8-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-8-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-422-8-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-8-6-dct.webm",
+      "depth": 8,
+      "chroma": "422",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-422-8-6-0-dct.vp9",
+          "oracle": "vp9-ac-422-8-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-6-1-dct.vp9",
+          "oracle": "vp9-ac-422-8-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-6-2-dct.vp9",
+          "oracle": "vp9-ac-422-8-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-6-3-dct.vp9",
+          "oracle": "vp9-ac-422-8-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-8-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-8-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-8-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-8-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-8-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-422-8-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-8-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-8-0-0-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-0-1-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-0-2-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-0-3-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-8-0.webm",
+      "depth": 8,
+      "chroma": "444",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-444-8-0-0.vp9",
+          "oracle": "vp9-ac-444-8-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-0-1.vp9",
+          "oracle": "vp9-ac-444-8-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-0-2.vp9",
+          "oracle": "vp9-ac-444-8-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-0-3.vp9",
+          "oracle": "vp9-ac-444-8-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-8-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-8-0-0-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-0-1-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-0-2-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-0-3-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-8-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-8-6-0-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-6-1-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-6-2-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-6-3-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-8-6.webm",
+      "depth": 8,
+      "chroma": "444",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-444-8-6-0.vp9",
+          "oracle": "vp9-ac-444-8-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-6-1.vp9",
+          "oracle": "vp9-ac-444-8-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-6-2.vp9",
+          "oracle": "vp9-ac-444-8-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-6-3.vp9",
+          "oracle": "vp9-ac-444-8-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-8-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-8-6-0-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-6-1-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-6-2-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-6-3-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-8-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-8-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-8-0-dct.webm",
+      "depth": 8,
+      "chroma": "444",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-444-8-0-0-dct.vp9",
+          "oracle": "vp9-ac-444-8-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-0-1-dct.vp9",
+          "oracle": "vp9-ac-444-8-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-0-2-dct.vp9",
+          "oracle": "vp9-ac-444-8-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-0-3-dct.vp9",
+          "oracle": "vp9-ac-444-8-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-8-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-8-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-8-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-8-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-444-8-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-8-6-dct.webm",
+      "depth": 8,
+      "chroma": "444",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-444-8-6-0-dct.vp9",
+          "oracle": "vp9-ac-444-8-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-6-1-dct.vp9",
+          "oracle": "vp9-ac-444-8-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-6-2-dct.vp9",
+          "oracle": "vp9-ac-444-8-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-6-3-dct.vp9",
+          "oracle": "vp9-ac-444-8-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-8-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-8-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-8-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-8-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-8-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-444-8-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-8-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-8-0-0-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-0-1-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-0-2-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-0-3-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-8-0.webm",
+      "depth": 8,
+      "chroma": "440",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-440-8-0-0.vp9",
+          "oracle": "vp9-ac-440-8-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-0-1.vp9",
+          "oracle": "vp9-ac-440-8-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-0-2.vp9",
+          "oracle": "vp9-ac-440-8-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-0-3.vp9",
+          "oracle": "vp9-ac-440-8-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-8-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-8-0-0-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-0-1-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-0-2-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-0-3-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-8-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-8-6-0-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-6-1-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-6-2-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-6-3-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-8-6.webm",
+      "depth": 8,
+      "chroma": "440",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-440-8-6-0.vp9",
+          "oracle": "vp9-ac-440-8-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-6-1.vp9",
+          "oracle": "vp9-ac-440-8-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-6-2.vp9",
+          "oracle": "vp9-ac-440-8-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-6-3.vp9",
+          "oracle": "vp9-ac-440-8-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-8-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-8-6-0-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-6-1-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-6-2-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-6-3-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-8-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-8-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-8-0-dct.webm",
+      "depth": 8,
+      "chroma": "440",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-440-8-0-0-dct.vp9",
+          "oracle": "vp9-ac-440-8-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-0-1-dct.vp9",
+          "oracle": "vp9-ac-440-8-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-0-2-dct.vp9",
+          "oracle": "vp9-ac-440-8-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-0-3-dct.vp9",
+          "oracle": "vp9-ac-440-8-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-8-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-8-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-8-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-8-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-440-8-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-8-6-dct.webm",
+      "depth": 8,
+      "chroma": "440",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-440-8-6-0-dct.vp9",
+          "oracle": "vp9-ac-440-8-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-6-1-dct.vp9",
+          "oracle": "vp9-ac-440-8-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-6-2-dct.vp9",
+          "oracle": "vp9-ac-440-8-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-6-3-dct.vp9",
+          "oracle": "vp9-ac-440-8-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-8-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-8-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-8-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-8-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-8-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-440-8-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-10-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-10-0-0-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-0-1-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-0-2-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-0-3-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-10-0.webm",
+      "depth": 10,
+      "chroma": "420",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-420-10-0-0.vp9",
+          "oracle": "vp9-ac-420-10-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-0-1.vp9",
+          "oracle": "vp9-ac-420-10-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-0-2.vp9",
+          "oracle": "vp9-ac-420-10-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-0-3.vp9",
+          "oracle": "vp9-ac-420-10-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-10-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-10-0-0-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-0-1-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-0-2-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-0-3-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-10-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-10-6-0-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-6-1-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-6-2-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-6-3-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-10-6.webm",
+      "depth": 10,
+      "chroma": "420",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-420-10-6-0.vp9",
+          "oracle": "vp9-ac-420-10-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-6-1.vp9",
+          "oracle": "vp9-ac-420-10-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-6-2.vp9",
+          "oracle": "vp9-ac-420-10-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-6-3.vp9",
+          "oracle": "vp9-ac-420-10-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-10-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-10-6-0-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-6-1-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-6-2-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-6-3-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-10-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-10-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-10-0-dct.webm",
+      "depth": 10,
+      "chroma": "420",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-420-10-0-0-dct.vp9",
+          "oracle": "vp9-ac-420-10-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-0-1-dct.vp9",
+          "oracle": "vp9-ac-420-10-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-0-2-dct.vp9",
+          "oracle": "vp9-ac-420-10-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-0-3-dct.vp9",
+          "oracle": "vp9-ac-420-10-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-10-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-10-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-10-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-10-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-420-10-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-10-6-dct.webm",
+      "depth": 10,
+      "chroma": "420",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-420-10-6-0-dct.vp9",
+          "oracle": "vp9-ac-420-10-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-6-1-dct.vp9",
+          "oracle": "vp9-ac-420-10-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-6-2-dct.vp9",
+          "oracle": "vp9-ac-420-10-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-6-3-dct.vp9",
+          "oracle": "vp9-ac-420-10-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-10-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-10-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-10-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-10-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-10-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-420-10-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-10-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-10-0-0-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-0-1-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-0-2-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-0-3-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-10-0.webm",
+      "depth": 10,
+      "chroma": "422",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-422-10-0-0.vp9",
+          "oracle": "vp9-ac-422-10-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-0-1.vp9",
+          "oracle": "vp9-ac-422-10-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-0-2.vp9",
+          "oracle": "vp9-ac-422-10-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-0-3.vp9",
+          "oracle": "vp9-ac-422-10-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-10-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-10-0-0-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-0-1-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-0-2-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-0-3-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-10-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-10-6-0-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-6-1-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-6-2-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-6-3-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-10-6.webm",
+      "depth": 10,
+      "chroma": "422",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-422-10-6-0.vp9",
+          "oracle": "vp9-ac-422-10-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-6-1.vp9",
+          "oracle": "vp9-ac-422-10-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-6-2.vp9",
+          "oracle": "vp9-ac-422-10-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-6-3.vp9",
+          "oracle": "vp9-ac-422-10-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-10-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-10-6-0-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-6-1-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-6-2-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-6-3-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-10-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-10-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-10-0-dct.webm",
+      "depth": 10,
+      "chroma": "422",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-422-10-0-0-dct.vp9",
+          "oracle": "vp9-ac-422-10-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-0-1-dct.vp9",
+          "oracle": "vp9-ac-422-10-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-0-2-dct.vp9",
+          "oracle": "vp9-ac-422-10-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-0-3-dct.vp9",
+          "oracle": "vp9-ac-422-10-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-10-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-10-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-10-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-10-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-422-10-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-10-6-dct.webm",
+      "depth": 10,
+      "chroma": "422",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-422-10-6-0-dct.vp9",
+          "oracle": "vp9-ac-422-10-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-6-1-dct.vp9",
+          "oracle": "vp9-ac-422-10-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-6-2-dct.vp9",
+          "oracle": "vp9-ac-422-10-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-6-3-dct.vp9",
+          "oracle": "vp9-ac-422-10-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-10-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-10-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-10-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-10-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-10-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-422-10-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-10-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-10-0-0-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-0-1-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-0-2-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-0-3-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-10-0.webm",
+      "depth": 10,
+      "chroma": "444",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-444-10-0-0.vp9",
+          "oracle": "vp9-ac-444-10-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-0-1.vp9",
+          "oracle": "vp9-ac-444-10-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-0-2.vp9",
+          "oracle": "vp9-ac-444-10-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-0-3.vp9",
+          "oracle": "vp9-ac-444-10-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-10-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-10-0-0-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-0-1-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-0-2-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-0-3-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-10-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-10-6-0-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-6-1-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-6-2-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-6-3-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-10-6.webm",
+      "depth": 10,
+      "chroma": "444",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-444-10-6-0.vp9",
+          "oracle": "vp9-ac-444-10-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-6-1.vp9",
+          "oracle": "vp9-ac-444-10-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-6-2.vp9",
+          "oracle": "vp9-ac-444-10-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-6-3.vp9",
+          "oracle": "vp9-ac-444-10-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-10-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-10-6-0-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-6-1-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-6-2-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-6-3-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-10-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-10-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-10-0-dct.webm",
+      "depth": 10,
+      "chroma": "444",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-444-10-0-0-dct.vp9",
+          "oracle": "vp9-ac-444-10-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-0-1-dct.vp9",
+          "oracle": "vp9-ac-444-10-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-0-2-dct.vp9",
+          "oracle": "vp9-ac-444-10-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-0-3-dct.vp9",
+          "oracle": "vp9-ac-444-10-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-10-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-10-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-10-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-10-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-444-10-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-10-6-dct.webm",
+      "depth": 10,
+      "chroma": "444",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-444-10-6-0-dct.vp9",
+          "oracle": "vp9-ac-444-10-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-6-1-dct.vp9",
+          "oracle": "vp9-ac-444-10-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-6-2-dct.vp9",
+          "oracle": "vp9-ac-444-10-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-6-3-dct.vp9",
+          "oracle": "vp9-ac-444-10-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-10-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-10-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-10-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-10-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-10-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-444-10-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-10-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-10-0-0-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-0-1-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-0-2-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-0-3-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-10-0.webm",
+      "depth": 10,
+      "chroma": "440",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-440-10-0-0.vp9",
+          "oracle": "vp9-ac-440-10-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-0-1.vp9",
+          "oracle": "vp9-ac-440-10-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-0-2.vp9",
+          "oracle": "vp9-ac-440-10-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-0-3.vp9",
+          "oracle": "vp9-ac-440-10-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-10-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-10-0-0-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-0-1-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-0-2-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-0-3-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-10-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-10-6-0-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-6-1-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-6-2-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-6-3-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-10-6.webm",
+      "depth": 10,
+      "chroma": "440",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-440-10-6-0.vp9",
+          "oracle": "vp9-ac-440-10-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-6-1.vp9",
+          "oracle": "vp9-ac-440-10-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-6-2.vp9",
+          "oracle": "vp9-ac-440-10-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-6-3.vp9",
+          "oracle": "vp9-ac-440-10-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-10-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-10-6-0-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-6-1-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-6-2-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-6-3-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-10-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-10-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-10-0-dct.webm",
+      "depth": 10,
+      "chroma": "440",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-440-10-0-0-dct.vp9",
+          "oracle": "vp9-ac-440-10-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-0-1-dct.vp9",
+          "oracle": "vp9-ac-440-10-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-0-2-dct.vp9",
+          "oracle": "vp9-ac-440-10-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-0-3-dct.vp9",
+          "oracle": "vp9-ac-440-10-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-10-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-10-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-10-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-10-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-440-10-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-10-6-dct.webm",
+      "depth": 10,
+      "chroma": "440",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-440-10-6-0-dct.vp9",
+          "oracle": "vp9-ac-440-10-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-6-1-dct.vp9",
+          "oracle": "vp9-ac-440-10-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-6-2-dct.vp9",
+          "oracle": "vp9-ac-440-10-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-6-3-dct.vp9",
+          "oracle": "vp9-ac-440-10-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-10-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-10-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-10-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-10-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-10-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-440-10-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-12-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-12-0-0-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-0-1-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-0-2-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-0-3-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-12-0.webm",
+      "depth": 12,
+      "chroma": "420",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-420-12-0-0.vp9",
+          "oracle": "vp9-ac-420-12-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-0-1.vp9",
+          "oracle": "vp9-ac-420-12-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-0-2.vp9",
+          "oracle": "vp9-ac-420-12-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-0-3.vp9",
+          "oracle": "vp9-ac-420-12-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-12-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-12-0-0-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-0-1-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-0-2-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-0-3-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-12-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-12-6-0-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-6-1-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-6-2-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-6-3-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-12-6.webm",
+      "depth": 12,
+      "chroma": "420",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-420-12-6-0.vp9",
+          "oracle": "vp9-ac-420-12-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-6-1.vp9",
+          "oracle": "vp9-ac-420-12-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-6-2.vp9",
+          "oracle": "vp9-ac-420-12-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-6-3.vp9",
+          "oracle": "vp9-ac-420-12-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-12-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-12-6-0-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-6-1-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-6-2-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-6-3-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-12-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-12-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-12-0-dct.webm",
+      "depth": 12,
+      "chroma": "420",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-420-12-0-0-dct.vp9",
+          "oracle": "vp9-ac-420-12-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-0-1-dct.vp9",
+          "oracle": "vp9-ac-420-12-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-0-2-dct.vp9",
+          "oracle": "vp9-ac-420-12-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-0-3-dct.vp9",
+          "oracle": "vp9-ac-420-12-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-12-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-12-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-420-12-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-420-12-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-420-12-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-420-12-6-dct.webm",
+      "depth": 12,
+      "chroma": "420",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-420-12-6-0-dct.vp9",
+          "oracle": "vp9-ac-420-12-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-6-1-dct.vp9",
+          "oracle": "vp9-ac-420-12-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-6-2-dct.vp9",
+          "oracle": "vp9-ac-420-12-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-6-3-dct.vp9",
+          "oracle": "vp9-ac-420-12-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-420-12-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-420-12-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-420-12-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-420-12-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-420-12-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-420-12-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-12-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-12-0-0-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-0-1-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-0-2-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-0-3-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-12-0.webm",
+      "depth": 12,
+      "chroma": "422",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-422-12-0-0.vp9",
+          "oracle": "vp9-ac-422-12-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-0-1.vp9",
+          "oracle": "vp9-ac-422-12-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-0-2.vp9",
+          "oracle": "vp9-ac-422-12-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-0-3.vp9",
+          "oracle": "vp9-ac-422-12-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-12-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-12-0-0-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-0-1-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-0-2-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-0-3-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-12-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-12-6-0-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-6-1-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-6-2-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-6-3-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-12-6.webm",
+      "depth": 12,
+      "chroma": "422",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-422-12-6-0.vp9",
+          "oracle": "vp9-ac-422-12-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-6-1.vp9",
+          "oracle": "vp9-ac-422-12-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-6-2.vp9",
+          "oracle": "vp9-ac-422-12-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-6-3.vp9",
+          "oracle": "vp9-ac-422-12-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-12-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-12-6-0-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-6-1-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-6-2-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-6-3-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-12-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-12-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-12-0-dct.webm",
+      "depth": 12,
+      "chroma": "422",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-422-12-0-0-dct.vp9",
+          "oracle": "vp9-ac-422-12-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-0-1-dct.vp9",
+          "oracle": "vp9-ac-422-12-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-0-2-dct.vp9",
+          "oracle": "vp9-ac-422-12-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-0-3-dct.vp9",
+          "oracle": "vp9-ac-422-12-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-12-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-12-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-422-12-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-422-12-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-422-12-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-422-12-6-dct.webm",
+      "depth": 12,
+      "chroma": "422",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-422-12-6-0-dct.vp9",
+          "oracle": "vp9-ac-422-12-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-6-1-dct.vp9",
+          "oracle": "vp9-ac-422-12-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-6-2-dct.vp9",
+          "oracle": "vp9-ac-422-12-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-6-3-dct.vp9",
+          "oracle": "vp9-ac-422-12-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-422-12-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-422-12-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-422-12-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-422-12-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-422-12-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-422-12-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-12-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-12-0-0-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-0-1-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-0-2-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-0-3-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-12-0.webm",
+      "depth": 12,
+      "chroma": "444",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-444-12-0-0.vp9",
+          "oracle": "vp9-ac-444-12-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-0-1.vp9",
+          "oracle": "vp9-ac-444-12-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-0-2.vp9",
+          "oracle": "vp9-ac-444-12-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-0-3.vp9",
+          "oracle": "vp9-ac-444-12-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-12-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-12-0-0-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-0-1-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-0-2-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-0-3-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-12-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-12-6-0-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-6-1-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-6-2-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-6-3-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-12-6.webm",
+      "depth": 12,
+      "chroma": "444",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-444-12-6-0.vp9",
+          "oracle": "vp9-ac-444-12-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-6-1.vp9",
+          "oracle": "vp9-ac-444-12-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-6-2.vp9",
+          "oracle": "vp9-ac-444-12-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-6-3.vp9",
+          "oracle": "vp9-ac-444-12-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-12-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-12-6-0-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-6-1-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-6-2-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-6-3-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-12-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-12-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-12-0-dct.webm",
+      "depth": 12,
+      "chroma": "444",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-444-12-0-0-dct.vp9",
+          "oracle": "vp9-ac-444-12-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-0-1-dct.vp9",
+          "oracle": "vp9-ac-444-12-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-0-2-dct.vp9",
+          "oracle": "vp9-ac-444-12-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-0-3-dct.vp9",
+          "oracle": "vp9-ac-444-12-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-12-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-12-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-444-12-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-444-12-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-444-12-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-444-12-6-dct.webm",
+      "depth": 12,
+      "chroma": "444",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-444-12-6-0-dct.vp9",
+          "oracle": "vp9-ac-444-12-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-6-1-dct.vp9",
+          "oracle": "vp9-ac-444-12-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-6-2-dct.vp9",
+          "oracle": "vp9-ac-444-12-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-6-3-dct.vp9",
+          "oracle": "vp9-ac-444-12-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-444-12-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-444-12-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-444-12-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-444-12-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-444-12-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-444-12-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-12-0-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-12-0-0-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-0-1-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-0-2-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-0-3-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-12-0.webm",
+      "depth": 12,
+      "chroma": "440",
+      "q": 0,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-440-12-0-0.vp9",
+          "oracle": "vp9-ac-440-12-0-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-0-1.vp9",
+          "oracle": "vp9-ac-440-12-0-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-0-2.vp9",
+          "oracle": "vp9-ac-440-12-0-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-0-3.vp9",
+          "oracle": "vp9-ac-440-12-0-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-12-0-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-12-0-0-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-0-1-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-0-2-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-0-3-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-12-6-compound.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-12-6-0-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-0-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-6-1-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-1-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-6-2-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-2-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-6-3-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-3-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-12-6.webm",
+      "depth": 12,
+      "chroma": "440",
+      "q": 6,
+      "base": 0,
+      "frames": [
+        {
+          "file": "vp9-ac-440-12-6-0.vp9",
+          "oracle": "vp9-ac-440-12-6-0.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-6-1.vp9",
+          "oracle": "vp9-ac-440-12-6-1.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-6-2.vp9",
+          "oracle": "vp9-ac-440-12-6-2.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-6-3.vp9",
+          "oracle": "vp9-ac-440-12-6-3.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-12-6-inter.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-12-6-0-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-0-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-6-1-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-1-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-6-2-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-2-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-6-3-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-3-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-12-0-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-12-0-0-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-0-1-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-0-2-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-0-3-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-0-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-12-0-dct.webm",
+      "depth": 12,
+      "chroma": "440",
+      "q": 0,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-440-12-0-0-dct.vp9",
+          "oracle": "vp9-ac-440-12-0-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-0-1-dct.vp9",
+          "oracle": "vp9-ac-440-12-0-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-0-2-dct.vp9",
+          "oracle": "vp9-ac-440-12-0-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-0-3-dct.vp9",
+          "oracle": "vp9-ac-440-12-0-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-12-0-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-12-0-0-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-0-1-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-0-2-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-0-3-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-0-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "compound_file": "vp9-ac-440-12-6-compound-dct.webm",
+      "compound_frames": [
+        {
+          "file": "vp9-ac-440-12-6-0-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-0-dct-compound.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-6-1-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-1-dct-compound.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-6-2-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-2-dct-compound.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-6-3-dct-compound.vp9",
+          "oracle": "vp9-ac-440-12-6-3-dct-compound.yuv16",
+          "mode": 3
+        }
+      ],
+      "file": "vp9-ac-440-12-6-dct.webm",
+      "depth": 12,
+      "chroma": "440",
+      "q": 6,
+      "base": 20,
+      "frames": [
+        {
+          "file": "vp9-ac-440-12-6-0-dct.vp9",
+          "oracle": "vp9-ac-440-12-6-0-dct.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-6-1-dct.vp9",
+          "oracle": "vp9-ac-440-12-6-1-dct.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-6-2-dct.vp9",
+          "oracle": "vp9-ac-440-12-6-2-dct.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-6-3-dct.vp9",
+          "oracle": "vp9-ac-440-12-6-3-dct.yuv16",
+          "mode": 3
+        }
+      ],
+      "inter_file": "vp9-ac-440-12-6-inter-dct.webm",
+      "inter_frames": [
+        {
+          "file": "vp9-ac-440-12-6-0-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-0-dct-inter.yuv16",
+          "mode": 0
+        },
+        {
+          "file": "vp9-ac-440-12-6-1-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-1-dct-inter.yuv16",
+          "mode": 1
+        },
+        {
+          "file": "vp9-ac-440-12-6-2-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-2-dct-inter.yuv16",
+          "mode": 2
+        },
+        {
+          "file": "vp9-ac-440-12-6-3-dct-inter.vp9",
+          "oracle": "vp9-ac-440-12-6-3-dct-inter.yuv16",
+          "mode": 3
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "tokens": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "signs": [
+      -1,
+      1
+    ],
+    "category6_high_bit_depths": [
+      10,
+      12
+    ]
+  },
+  "provenance": "Original coefficient tokens, normative scan/bands, owned Boolean writer; independent dense Hadamard and even/odd DCT matrix oracles with exact signed rounding, dequantization, DC prediction and clipping. No private media, codec process, FFmpeg or network."
+}
