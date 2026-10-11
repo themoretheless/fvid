@@ -23,6 +23,7 @@ pub struct LayeredSliceSyntax {
     /// RefPicLayerId, not VPS indices or inferred temporal-eligible indices.
     pub reference_layers: Vec<u8>,
     pub poc_lsb_present: bool,
+    pub poc_reset: super::super::hevc_poc::ResetSyntax,
 }
 #[derive(Clone, Copy)]
 pub(super) struct Layout<'a> {
@@ -127,7 +128,29 @@ impl Layout<'_> {
             coded_count_minus1: None,
             reference_layers: Vec::new(),
             poc_lsb_present: self.poc_present(),
+            poc_reset: Default::default(),
         })
+    }
+    pub(super) fn reset(
+        &self,
+        context: &LayeredSliceContext<'_>,
+        syntax: &LayeredSliceSyntax,
+        extension: &[u8],
+        slice_lsb: u32,
+    ) -> Result<super::super::hevc_poc::ResetSyntax> {
+        super::super::hevc_poc::ResetSyntax::parse_context(
+            extension,
+            super::super::hevc_poc::ResetContext {
+                reset_info_present: context.pps.pps.poc_reset_info_present,
+                poc_bits: context.sps.sps.poc_bits,
+                nal: self.nal,
+                lsb_aligned: self.e.representations.poc_lsb_aligned,
+                direct_reference_layers: self.direct_count(),
+                discardable: syntax.discardable,
+                poc_lsb_absent: self.e.representations.poc_lsb_not_present[self.index],
+                slice_lsb,
+            },
+        )
     }
     pub(super) fn references(
         &self,

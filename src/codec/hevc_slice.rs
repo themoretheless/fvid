@@ -328,6 +328,18 @@ impl SliceHeader {
         }
         let (entry_point_offsets, extension, entropy_byte_offset, entropy_substreams) =
             entropy_tail(nal, &payload.bytes, b, pps, count, budget)?;
+        if let Some(context) = context {
+            if let (Some(layout), Some(syntax)) =
+                (context.layout(payload.header)?, previous.layered.as_ref())
+            {
+                let reset = layout.reset(context, syntax, &extension, previous.poc_lsb)?;
+                if reset != syntax.poc_reset {
+                    return Err(invalid(
+                        "HEVC dependent segment POC reset disagrees with picture header",
+                    ));
+                }
+            }
+        }
         let mut result = previous.clone();
         result.dependent = true;
         result.first = false;
@@ -718,6 +730,9 @@ impl SliceHeader {
             };
         let (entry_point_offsets, extension, entropy_byte_offset, entropy_substreams) =
             entropy_tail(nal, &payload.bytes, b, pps, count, budget)?;
+        if let (Some(context), Some(layout), Some(syntax)) = (context, layout, layered.as_mut()) {
+            syntax.poc_reset = layout.reset(context, syntax, &extension, poc_lsb)?;
+        }
         Ok(Self {
             dependent: false,
             nal: payload.header,

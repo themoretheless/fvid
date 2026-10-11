@@ -49,7 +49,21 @@ pub enum Reset {
     Signalled { full: bool, lsb: u32 },
 }
 
-/// Annex F.7.3.6.1 syntax for an internal base layer. The byte slice is the
+/// Local layer context for Annex F.7.3.6.1. Cross-layer access-unit reset
+/// agreement still belongs to the stateful decoder.
+#[derive(Clone, Copy, Debug)]
+pub struct ResetContext {
+    pub reset_info_present: bool,
+    pub poc_bits: u8,
+    pub nal: NalHeader,
+    pub lsb_aligned: bool,
+    pub direct_reference_layers: usize,
+    pub discardable: bool,
+    pub poc_lsb_absent: bool,
+    pub slice_lsb: u32,
+}
+
+/// Annex F.7.3.6.1 syntax for a resolved layer. The byte slice is the
 /// declared header-extension payload only, never CABAC or byte-alignment data.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ResetSyntax {
@@ -66,30 +80,78 @@ impl ResetSyntax {
         lsb_aligned: bool,
     ) -> Result<Self> {
         nal.require_base_layer()?;
+        Self::parse_context(
+            extension,
+            ResetContext {
+                reset_info_present,
+                poc_bits,
+                nal,
+                lsb_aligned,
+                direct_reference_layers: 0,
+                discardable: false,
+                poc_lsb_absent: false,
+                slice_lsb: 0,
+            },
+        )
+    }
+    pub fn parse_context(extension: &[u8], context: ResetContext) -> Result<Self> {
+        let ResetContext {
+            reset_info_present,
+            poc_bits,
+            nal,
+            lsb_aligned,
+            direct_reference_layers,
+            discardable,
+            poc_lsb_absent,
+            slice_lsb,
+        } = context;
+        if direct_reference_layers > 62
+            || (nal.layer_id == 0 && direct_reference_layers != 0)
+            || slice_lsb >= (1u32 << poc_bits.min(31))
+        {
+            return Err(invalid("invalid HEVC POC reset layer context"));
+        }
         if !nal.is_vcl() || !(4..=16).contains(&poc_bits) {
             return Err(invalid("invalid HEVC POC reset slice context"));
         }
         let mut b = super::bits::BitReader::new(extension);
         let idc = if reset_info_present { b.read(2)? } else { 0 };
-        let period = if idc != 0 { Some(b.read(6)? as u8) } else { None };
-        if matches!(idc, 1 | 2) && !updates_previous(nal) {
-            return Err(invalid("HEVC POC reset requires a reference picture at temporal ID zero"));
+        let period = if idc != 0 {
+            Some(b.read(6)? as u8)
+        } else {
+            None
+        };
+        if matches!(idc, 1 | 2) && (!updates_previous(nal) || discardable) {
+            return Err(invalid(
+                "HEVC POC reset requires a reference picture at temporal ID zero",
+            ));
         }
-        if idc == 2 && !nal.is_idr() {
-            return Err(invalid("HEVC internal base-layer full POC reset requires IDR"));
+        if idc == 2 && nal.layer_id == 0 && !nal.is_idr() {
+            return Err(invalid(
+                "HEVC internal base-layer full POC reset requires IDR",
+            ));
         }
         if idc == 3 && matches!(nal.unit_type, 16..=18 | 21) {
             return Err(invalid("HEVC CRA/BLA cannot use signalled POC reset"));
+        }
+        if idc == 2 && poc_lsb_absent && slice_lsb != 0 {
+            return Err(invalid(
+                "HEVC full POC reset has nonzero inferred slice LSB",
+            ));
         }
         let reset = match idc {
             0 => None,
             1 => Some(Reset::Msb),
             2 => Some(Reset::Full),
-            _ => Some(Reset::Signalled { full: b.bit()?, lsb: b.read(poc_bits)? }),
+            _ => Some(Reset::Signalled {
+                full: b.bit()?,
+                lsb: b.read(poc_bits)?,
+            }),
         };
-        // A base layer has no direct reference layers, so F-55 reduces to
-        // CraOrBlaPicFlag regardless of the VPS LSB-alignment flag.
-        let msb_required = matches!(nal.unit_type, 16..=18 | 21);
+        // Equation F-55: an aligned dependent CRA/BLA reads a presence flag;
+        // an independent or unaligned CRA/BLA infers presence instead.
+        let msb_required =
+            matches!(nal.unit_type, 16..=18 | 21) && (!lsb_aligned || direct_reference_layers == 0);
         let cycle_present = if extension.is_empty() {
             false
         } else if msb_required {
@@ -105,9 +167,15 @@ impl ResetSyntax {
                 return Err(invalid("HEVC reset POC cycle out of range"));
             }
             Some(cycle)
-        } else { None };
-        // Remaining extension_data_bit values have no base-layer semantics.
-        Ok(Self { reset, period, msb_cycle })
+        } else {
+            None
+        };
+        // Remaining extension_data_bit values are reserved at this syntax boundary.
+        Ok(Self {
+            reset,
+            period,
+            msb_cycle,
+        })
     }
 }
 

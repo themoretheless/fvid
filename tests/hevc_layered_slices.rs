@@ -135,6 +135,39 @@ fn layered_slice_headers_read_exact_boundaries_inherit_segments_and_bind_referen
         }
         let syntax = header.layered.as_ref().unwrap();
         let expected = &c["expected"];
+        if let Some(reset) = expected.get("reset") {
+            use fvid::codec::hevc_poc::Reset;
+            let actual = syntax.poc_reset;
+            let idc = match actual.reset {
+                None => 0,
+                Some(Reset::Msb) => 1,
+                Some(Reset::Full) => 2,
+                Some(Reset::Signalled { .. }) => 3,
+            };
+            assert_eq!(idc, reset["idc"].as_u64().unwrap(), "{prefix}: reset IDC");
+            assert_eq!(
+                serde_json::to_value(actual.period).unwrap(),
+                reset["period"],
+                "{prefix}: reset period"
+            );
+            assert_eq!(
+                serde_json::to_value(actual.msb_cycle).unwrap(),
+                reset["cycle"],
+                "{prefix}: reset MSB cycle"
+            );
+            if let Some(Reset::Signalled { full, lsb }) = actual.reset {
+                assert_eq!(
+                    full,
+                    reset["full"].as_bool().unwrap(),
+                    "{prefix}: full reset"
+                );
+                assert_eq!(
+                    u64::from(lsb),
+                    reset["lsb"].as_u64().unwrap(),
+                    "{prefix}: signalled LSB"
+                );
+            }
+        }
         assert_eq!(
             serde_json::to_value(&syntax.reference_layers).unwrap(),
             expected["selected"],

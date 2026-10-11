@@ -12,14 +12,15 @@ D=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 ue=g.ue
 ENTROPY=b'\xa5\x5a\x80'
 def nal(kind,layer,tid,bits):return ((kind<<9)|(layer<<3)|(tid+1)).to_bytes(2,'big')+g.escape(g.packed(bits))
-def header_pps(layer,extra,weighted):
+def header_pps(layer,extra,weighted,reset=False):
     b=ue(0)+ue(0)+'11'+f'{extra:03b}'+'01'+ue(0)+ue(0)+se(0)+'000'+se(0)+se(0)
     b+='0'+str(int(weighted))*2+'000'+'0'+'101'+'0'+'1'+ue(0)+'1'
-    b+='1'+'01000000'+'00'+ue(0)+'0'+'1'
+    b+='1'+'01000000'+str(int(reset))+'0'+ue(0)+'0'+'1'
     return nal(34,layer,0,b)
 def main():
     configs={
         'single-layer':dict(single_layer=True),
+        'aligned':dict(aligned=True),
         'explicit':dict(), 'default':dict(default=True),
         'default-filtered':dict(default=True,sublayers=[0,1,2,2]),
         'filtered':dict(limits=[0,1,2]), 'one':dict(one=True),
@@ -28,7 +29,7 @@ def main():
         'absent-poc':dict(independent=True,poc_absent=True),
     }
     cases=[]
-    def add(label,config='explicit',layer=9,kind=1,tid=0,stype=1,enabled=True,count=2,indices=None,temporal=False,extra=2,discardable=False,cross=False,weighted=False,refs=(1,1),mods=None,mvp=False,error=None,binding_error=None,source_irap=False,next_options=None,dependent=False,missing_previous=False,reserved=None):
+    def add(label,config='explicit',layer=9,kind=1,tid=0,stype=1,enabled=True,count=2,indices=None,temporal=False,extra=2,discardable=False,cross=False,weighted=False,refs=(1,1),mods=None,mvp=False,error=None,binding_error=None,source_irap=False,next_options=None,dependent=False,missing_previous=False,reserved=None,reset=False,extension=None,reset_expected=None):
         options=dict(locals());options.pop('label');options.pop('next_options')
         cfg=configs[config];independent=cfg.get('independent',False)
         prefix='hevc-layered-slice-'+label
@@ -45,8 +46,8 @@ def main():
         if not(independent or layer==0):sps=((33<<9)|(layer<<3)|1).to_bytes(2,'big')+sps[2:]
         sps_file=f'hevc-layered-slice-sps-layer{layer}-'+('full' if independent or layer==0 else 'multilayer')+'.sps'
         (D/sps_file).write_bytes(sps)
-        pps_file=f'hevc-layered-slice-pps-layer{layer}-extra{extra}-weighted{int(weighted)}.pps'
-        (D/pps_file).write_bytes(header_pps(layer,extra,weighted))
+        pps_file=f'hevc-layered-slice-pps-layer{layer}-extra{extra}-weighted{int(weighted)}'+('-reset' if reset else '')+'.pps'
+        (D/pps_file).write_bytes(header_pps(layer,extra,weighted,reset))
         direct=[] if independent or layer==0 else [0] if layer in (2,5) else [0,2,5]
         limits=cfg.get('limits',[7,7,7]);sub=cfg.get('sublayers',[2]*4)
         def fields(o,first=True,dep=False):
@@ -104,6 +105,7 @@ def main():
                 b+=se(1) # QP 27
             else:flag=None;coded_count=None
             ext=b'\x80' if k in (16,17,18,21) else b'\x00' if independent else b''
+            if o['extension'] is not None:ext=bytes(o['extension'])
             b+=ue(len(ext))+''.join(f'{x:08b}' for x in ext)+'1'
             b+='0'*((-len(b))%8);offset=len(b)//8
             b+=''.join(f'{x:08b}' for x in ENTROPY)
@@ -117,6 +119,7 @@ def main():
             if dependent:
                 for key in ('selected','flag','count','poc_present'):expected2[key]=expected[key]
             expected=expected2
+        if reset_expected is not None:expected['reset']=reset_expected
         cases.append(dict(prefix=prefix,vps=vps_file,sps=sps_file,pps=pps_file,ols=0 if cfg.get('single_layer') else 1,config=config,layer=layer,kind=kind,tid=tid,stype=stype,extra=extra,discardable=discardable,cross=cross,weighted=weighted,refs=refs,mods=mods,mvp=mvp,temporal=temporal,expected=expected,error=error,binding_error=binding_error,source_irap=source_irap,next=next_options is not None or dependent,dependent=dependent,missing_previous=missing_previous))
     for stype,tid,count in itertools.product((0,1,2),(0,1,2),(0,1,2)):
         for chosen in itertools.combinations(range(3),count+1):
@@ -171,6 +174,37 @@ def main():
     add('next-layer-selection',count=0,indices=[0],next_options=dict(indices=[1]),error='disagrees with picture header')
     add('next-enabled-flag',stype=2,next_options=dict(enabled=False),error='disagrees with picture header')
     add('next-coded-count-empty',config='filtered',tid=2,stype=2,count=0,indices=[],next_options=dict(count=1),error='disagrees with picture header')
+    def extension_bits(bits):
+        bits+='0'*((-len(bits))%8)
+        return [int(bits[i:i+8],2) for i in range(0,len(bits),8)]
+    for kind in (16,17,18,21):
+        for aligned in (False,True):
+            for present in (False,True):
+                # F-55: only aligned dependent CRA/BLA has an explicit flag.
+                cycle_present=present if aligned else True
+                bits=(str(int(present)) if aligned else '')+(ue(3) if cycle_present else '')
+                add(f'reset-cycle-k{kind}-a{int(aligned)}-p{int(present)}',config='aligned' if aligned else 'explicit',kind=kind,extension=extension_bits(bits),reset_expected=dict(idc=0,period=None,lsb=None,cycle=3 if cycle_present else None))
+    for idc in (1,2,3):
+        for full in ((False,True) if idc==3 else (False,)):
+            bits=f'{idc:02b}{7:06b}'+(str(int(full))+f'{100:08b}' if idc==3 else '')
+            ext=extension_bits(bits)
+            expected=dict(idc=idc,full=full,period=7,lsb=100 if idc==3 else None,cycle=None)
+            add(f'reset-idc{idc}-f{int(full)}',reset=True,extension=ext,reset_expected=expected)
+            add(f'reset-inherited-idc{idc}-f{int(full)}',reset=True,extension=ext,reset_expected=expected,dependent=True)
+    for idc,full in ((1,False),(2,False),(3,False),(3,True)):
+        for cycle in (None,3):
+            bits=f'{idc:02b}{7:06b}'+(str(int(full))+f'{100:08b}' if idc==3 else '')
+            bits+=str(int(cycle is not None))+(ue(cycle) if cycle is not None else '')
+            add(f'reset-aligned-idc{idc}-f{int(full)}-cycle{cycle}',config='aligned',reset=True,extension=extension_bits(bits),reset_expected=dict(idc=idc,full=full,period=7,lsb=100 if idc==3 else None,cycle=cycle))
+    add('reset-signalled-discardable',kind=0,discardable=True,reset=True,extension=extension_bits('11'+'000111'+'1'+f'{100:08b}'),reset_expected=dict(idc=3,full=True,period=7,lsb=100,cycle=None))
+    add('reset-cycle-overflow',config='aligned',extension=extension_bits('1'+ue((1<<24)+1)),error='cycle out of range')
+    add('reset-signalled-truncated',reset=True,extension=[0xc7],error='truncated or oversized bit field')
+    add('reset-discardable',kind=0,discardable=True,reset=True,extension=[0x47],error='reset requires a reference picture')
+    add('reset-temporal-id',tid=1,reset=True,extension=[0x47],error='reset requires a reference picture')
+    add('reset-signalled-cra',kind=21,reset=True,extension=extension_bits('11'+'000111'+'0'+f'{100:08b}'),error='cannot use signalled POC reset')
+    add('reset-truncated',reset=True,extension=[],error='truncated or oversized bit field')
+    for dependent in (False,True):
+        add(f'reset-mismatch-dependent{int(dependent)}',reset=True,extension=[0x47],next_options=dict(extension=[0x48]),dependent=dependent,error='disagrees with picture header')
     pictures=[];atlas=b'YUV4MPEG2 W64 H32 F25:1 Ip A1:1 C420\n'
     for au in (40,41):
         for i,layer in enumerate(v.IDS):

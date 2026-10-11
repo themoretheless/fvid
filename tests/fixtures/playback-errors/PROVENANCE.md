@@ -6604,7 +6604,7 @@ not coded scalable slice playback. Generation and tests use no FFmpeg, external
 codec or network; ordinary tests read the saved artifacts only.
 
 
-`generate_hevc_layered_slices.py` authors 148 Annex F common-header witnesses,
+`generate_hevc_layered_slices.py` authors 189 Annex F common-header witnesses,
 their complete VPS/SPS/PPS parameter NALs and an eight-frame 64x32 Y4M reference
 atlas. All pixels, status metadata and parameter syntax are original. The NAL
 entropy bytes are deliberately opaque markers; they are not valid scalable
@@ -6613,3 +6613,9 @@ picture fields, and binding to exact source frames in the matching access unit.
 They do not qualify scalable playback. The ordinary single-layer control uses
 the same parser core. Generation and saved-artifact tests use no FFmpeg,
 external codec, private source or network.
+
+The layered-header family additionally includes 41 original contextual POC
+reset witnesses. Aligned/unaligned CRA/BLA cycle syntax, reset IDC and period,
+signalled full/LSB values, malformed payloads and common/dependent segment
+agreement use authored parameter NALs. Their entropy is still an opaque marker;
+these are contextual header tests, not coded scalable video acceptance.
