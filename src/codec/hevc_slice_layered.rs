@@ -32,6 +32,23 @@ pub(super) struct Layout<'a> {
     nal: NalHeader,
 }
 impl LayeredSliceContext<'_> {
+    pub(crate) fn validate_poc_header(&self, header: &super::SliceHeader) -> Result<()> {
+        let layout = self
+            .layout(header.nal)?
+            .ok_or_else(|| invalid("HEVC layered POC has no VPS extension"))?;
+        let syntax = header
+            .layered
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC layered POC has no syntax"))?;
+        if !(4..=16).contains(&self.sps.sps.poc_bits)
+            || header.pps_id != self.pps.pps.id
+            || header.poc_lsb >= (1u32 << self.sps.sps.poc_bits)
+            || layout.reset(self, syntax, &header.extension, header.poc_lsb)? != syntax.poc_reset
+        {
+            return Err(invalid("HEVC layered POC header context disagrees"));
+        }
+        Ok(())
+    }
     pub(super) fn layout(&self, nal: NalHeader) -> Result<Option<Layout<'_>>> {
         if self.pps.layer_id != nal.layer_id
             || self.sps.layer_id != nal.layer_id

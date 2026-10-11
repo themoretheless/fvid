@@ -6604,7 +6604,7 @@ not coded scalable slice playback. Generation and tests use no FFmpeg, external
 codec or network; ordinary tests read the saved artifacts only.
 
 
-`generate_hevc_layered_slices.py` authors 189 Annex F common-header witnesses,
+`generate_hevc_layered_slices.py` authors 327 Annex F common-header witnesses,
 their complete VPS/SPS/PPS parameter NALs and an eight-frame 64x32 Y4M reference
 atlas. All pixels, status metadata and parameter syntax are original. The NAL
 entropy bytes are deliberately opaque markers; they are not valid scalable
@@ -6643,3 +6643,14 @@ and eight malformed cycle/agreement variants are checked. This is single-layer
 playback acceptance, not scalable reconstruction. Generation uses locked/offline
 FVid metadata; ordinary tests use saved files without FFmpeg, external codecs,
 network, private images, audio or parameter sets.
+
+The layered-header generator adds 24 original access-unit POC state sequences
+(136 headers), plus two absent-LSB full-reset acceptance/refusal witnesses. All
+VPS/SPS/PPS and reset/count/POC syntax is authored; the original reference atlas
+remains eight frames at 64x32. Aligned/unaligned sequences target predicted-layer
+decrements, late joining layers, discardable CRA, reset anchors and exact AU
+conformance failures. These are parsed-header/state acceptance tests with opaque
+entropy markers, not scalable coded-video acceptance. A temporal-DPB operation
+test uses the already documented owned cycle-only coded fixture and changes
+only metadata while sharing its original sample storage. No private media,
+FFmpeg, external codec or network is used in generation or ordinary tests.

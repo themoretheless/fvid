@@ -200,7 +200,11 @@ fn layered_slice_headers_read_exact_boundaries_inherit_segments_and_bind_referen
         );
         assert_eq!(
             header.poc_lsb,
-            if syntax.poc_lsb_present { 100 } else { 0 },
+            if syntax.poc_lsb_present {
+                expected["poc"].as_u64().unwrap_or(100) as u32
+            } else {
+                0
+            },
             "{prefix}: POC LSB"
         );
         assert_eq!(header.qp, 27, "{prefix}: QP marker");

@@ -2,6 +2,10 @@
 use super::{hevc_nal::NalHeader, hevc_sps::Sps};
 use crate::{Result, invalid};
 
+#[path = "hevc_poc_layered.rs"]
+mod layered;
+pub use layered::{DerivedPoc, LayeredPocState, PocPicture, PocTransition};
+
 /// H.265 equation (5-11). The two half-range comparisons are asymmetric.
 fn current_msb(lsb: i32, previous_lsb: i32, previous_msb: i32, modulus: i32) -> Result<i32> {
     i32::try_from(current_msb_wide(lsb.into(), previous_lsb.into(), previous_msb.into(), modulus.into()))
@@ -148,6 +152,9 @@ impl ResetSyntax {
                 lsb: b.read(poc_bits)?,
             }),
         };
+        if matches!(reset, Some(Reset::Signalled { full: true, lsb }) if poc_lsb_absent && lsb != 0) {
+            return Err(invalid("HEVC full signalled reset has nonzero absent-layer LSB"));
+        }
         // Equation F-55: an aligned dependent CRA/BLA reads a presence flag;
         // an independent or unaligned CRA/BLA infers presence instead.
         let msb_required =
@@ -191,6 +198,9 @@ pub struct ResetPeriods {
 }
 impl ResetPeriods {
     pub fn advance(self, syntax: ResetSyntax, nal: NalHeader, slice_lsb: u32) -> Result<(Self, bool)> {
+        self.advance_layered(syntax, nal, slice_lsb, false)
+    }
+    pub fn advance_layered(self, syntax: ResetSyntax, nal: NalHeader, slice_lsb: u32, discardable: bool) -> Result<(Self, bool)> {
         if syntax.period.is_some() != syntax.reset.is_some()
             || syntax.period.is_some_and(|p| p > 63) {
             return Err(invalid("inconsistent HEVC POC reset period syntax"));
@@ -219,7 +229,7 @@ impl ResetPeriods {
         if initial {
             next.initial_reset = Some((syntax.reset == Some(Reset::Full), slice_lsb));
             next.initial_is_previous_t0 = true;
-        } else if updates_previous(nal) {
+        } else if updates_previous(nal) && !discardable {
             next.initial_is_previous_t0 = false;
         }
         next.seen_picture = true;
