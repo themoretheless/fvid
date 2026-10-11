@@ -1,5 +1,5 @@
-//! Annex F.7.3.2.1.1 for an internal, single-layer VPS.
-//! Deferred Annex F interpretation; ordinary Annex A may ignore errors in this tail.
+//! Annex F dependency/layer-set prefixes and strict single-layer VPS extension.
+//! Ordinary Annex A may ignore errors in the deferred single-layer tail.
 use super::{bits::BitReader, hevc_profile::ProfileTierLevel};
 use crate::{Result, invalid};
 
@@ -16,7 +16,153 @@ pub struct LayerDependencyPrefix {
     pub tree_partitions: Vec<Vec<u8>>,
     pub end_bit: usize,
 }
+/// Annex F layer sets and temporal inter-layer admission metadata. Layer lists
+/// preserve normative tree-partition order; they are not sorted bit masks.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LayerSetExtension {
+    pub layer_sets: Vec<Vec<u8>>,
+    pub sublayers_minus1: Vec<u8>,
+    pub set_sublayers_minus1: Vec<u8>,
+    /// Indexed [reference VPS index][dependent VPS index], inferred value 7.
+    pub max_tid_ref_plus1: Vec<Vec<u8>>,
+    pub default_ref_layers_active: bool,
+    pub end_bit: usize,
+}
 impl LayerDependencyPrefix {
+    /// Continue at this prefix's end through default_ref_layers_active_flag.
+    /// Does not consume PTL/OLS/representation/DPB syntax which follows it.
+    pub fn layer_sets(
+        &self,
+        bytes: &[u8],
+        layers: &super::hevc_vps::LayerSets,
+        sublayers: u8,
+        budget: usize,
+    ) -> Result<LayerSetExtension> {
+        let n = self.layer_ids.len();
+        if layers.sets.first() != Some(&1) {
+            return Err(invalid("HEVC layer sets lack inferred base set"));
+        }
+        // Public metadata can be constructed by callers: validate indexing before use.
+        if n == 0
+            || n > 63
+            || self.direct.len() != n
+            || self.layer_ids[0] != 0
+            || self.layer_ids.windows(2).any(|w| w[0] >= w[1])
+            || self.layer_ids.iter().any(|&id| id > 63)
+            || sublayers > 6
+        {
+            return Err(invalid("invalid HEVC dependency prefix geometry"));
+        }
+        let known = self.layer_ids.iter().fold(0u64, |m, &id| m | (1u64 << id));
+        let mut seen = 0u64;
+        for tree in &self.tree_partitions {
+            if tree.is_empty() {
+                return Err(invalid("empty HEVC dependency tree"));
+            }
+            for &id in tree {
+                if id > 63 || known & (1u64 << id) == 0 || seen & (1u64 << id) != 0 {
+                    return Err(invalid("invalid HEVC dependency tree layer"));
+                }
+                seen |= 1u64 << id;
+            }
+        }
+        if seen != known {
+            return Err(invalid("incomplete HEVC dependency trees"));
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(self.end_bit)?;
+        let count = if self.tree_partitions.len() > 1 {
+            bounded(&mut b, 1023)? as usize
+        } else {
+            0
+        };
+        if !layers.base_available && count == 0 {
+            return Err(invalid(
+                "unavailable HEVC base requires additional layer sets",
+            ));
+        }
+        let total = layers
+            .sets
+            .len()
+            .checked_add(count)
+            .ok_or_else(|| invalid("HEVC layer set count overflow"))?;
+        if layers.sets.len() > 1024
+            || total * (std::mem::size_of::<Vec<u8>>() + 64 + 1)
+                + n * n
+                + n * std::mem::size_of::<Vec<u8>>()
+                + 4096
+                > budget
+        {
+            return Err(invalid("HEVC layer set extension exceeds memory budget"));
+        }
+        let mut sets = Vec::with_capacity(total);
+        for &mask in &layers.sets {
+            if mask == 0 || mask & !known != 0 {
+                return Err(invalid("HEVC layer set names absent layer"));
+            }
+            sets.push(
+                self.layer_ids
+                    .iter()
+                    .copied()
+                    .filter(|&id| mask & (1u64 << id) != 0)
+                    .collect(),
+            );
+        }
+        for _ in 0..count {
+            let mut set = Vec::with_capacity(n);
+            // Tree zero is intentionally excluded, per F-9.
+            for tree in self.tree_partitions.iter().skip(1) {
+                let width = (usize::BITS - tree.len().leading_zeros()) as u8;
+                let highest = b.read(width)? as usize;
+                if highest > tree.len() {
+                    return Err(invalid("HEVC highest tree layer index out of range"));
+                }
+                set.extend_from_slice(&tree[..highest]);
+            }
+            if set.is_empty() {
+                return Err(invalid("empty additional HEVC layer set"));
+            }
+            sets.push(set);
+        }
+        let present = b.bit()?;
+        let mut temporal = vec![sublayers; n];
+        if present {
+            for value in &mut temporal {
+                *value = b.read(3)? as u8;
+                if *value > sublayers {
+                    return Err(invalid("HEVC layer exceeds VPS temporal sublayers"));
+                }
+            }
+        }
+        let set_temporal = sets
+            .iter()
+            .map(|set| {
+                set.iter()
+                    .map(|id| temporal[self.layer_ids.binary_search(id).unwrap()])
+                    .max()
+                    .unwrap()
+            })
+            .collect();
+        let mut max_tid = vec![vec![7u8; n]; n];
+        if b.bit()? {
+            for i in 0..n {
+                for j in i + 1..n {
+                    if self.direct[j] & (1u64 << self.layer_ids[i]) != 0 {
+                        max_tid[i][j] = b.read(3)? as u8;
+                    }
+                }
+            }
+        }
+        let active = b.bit()?;
+        Ok(LayerSetExtension {
+            layer_sets: sets,
+            sublayers_minus1: temporal,
+            set_sublayers_minus1: set_temporal,
+            max_tid_ref_plus1: max_tid,
+            default_ref_layers_active: active,
+            end_bit: b.position(),
+        })
+    }
     /// Input is unescaped VPS RBSP; start follows vps_extension_flag.
     /// The caller retains the remaining syntax for additional layer sets/OLS/DPB.
     pub fn parse(

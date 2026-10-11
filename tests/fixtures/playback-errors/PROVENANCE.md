@@ -6082,7 +6082,7 @@ No private input, FFmpeg, external codec or network is used.
 
 ### Single-layer VPS VUI
 
-`generate_hevc_vps_vui.py` authors nine original 35-picture streams by replacing
+`generate_hevc_vps_vui.py` authors eleven original 35-picture streams by replacing
 only the VPS extension of the owned aligned-VPS MSB-reset seed. Three acceptance
 files exercise basic VUI, optional bit/picture-rate syntax, and two additional
 BSP HRD records with common-parameter inheritance. Six exact Invalid files
@@ -6296,6 +6296,16 @@ integer writer for random/bounded sequences through 100000 symbols and all
 tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
+
+`generate_hevc_additional_sets.py` authors eleven original continuation prefixes
+using the original forest dependency prefix. H.265 (06/2019) F-7 through F-10
+define the added sets and their temporal bounds. Cases include repeated legal
+tree prefixes, 1023 additional sets, unavailable base metadata, empty/oversized
+tree prefixes, excessive set counts and invalid temporal sublayers. Expected
+sets are hand-specified as prefixes of [2,9], excluding tree zero [0,5].
+Temporal edge values distinguish reference-major syntax order from dependent-
+major traversal. These are metadata-only partial RBSPs, not complete VPSs or
+playback acceptance. Generation remains separate, offline and FFmpeg-free.
 
 `generate_hevc_dependency_prefix.py` separately authors six original Annex F
 RBSP prefixes through direct_dependency_flag, with a JSON syntax manifest.

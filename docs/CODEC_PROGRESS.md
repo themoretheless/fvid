@@ -2,6 +2,14 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`LayerDependencyPrefix::layer_sets` continues through additional layer sets,
+per-layer temporal sublayers, maximum temporal inter-layer references and
+default reference activation. It preserves the normative F-9 partition order
+and excludes tree zero from additional sets. Bounds, empty sets, unavailable
+base-layer constraints and metadata memory admission are checked. Eleven original
+metadata continuations exercise 1023 additional sets and targeted malformed
+cases. PTL/OLS/representation/DPB parsing and picture decoding remain pending.
+
 `LayerDependencyPrefix::parse` additionally reads Annex F extension alignment,
 the extra PTL, explicit/inferred layer IDs, explicit/split scalability dimensions,
 view IDs and direct dependencies. It derives transitive references and disjoint
