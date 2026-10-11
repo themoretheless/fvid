@@ -11866,3 +11866,19 @@ also includes all three streams. Six integration tests passed offline without
 FFmpeg; production decoder behavior did not need to change.
 This qualifies explicit cycles in these single-layer streams. Extracted-entry
 video, CRA/BLA combinations, layered prediction and VPS VUI remain open.
+
+### Extracted-entry reset video qualification (2026-10-11)
+
+The owned decoder already handled a first-picture signalled reset, including
+period ID zero, but this lacked end-to-end video coverage. Two new synthetic
+streams begin with non-IRAP intra TRAIL_R, an empty RPS and signalled reset;
+two subsequent inter pictures exercise reconstructed reference state. Both
+full and MSB-only signalled reset produce POCs 1/2/3 and match every original
+seed sample in all planes, twice with reset. The same header without reset
+fails with the exact random-access diagnostic and poisons until reset.
+Software playback, seek, rewind, timing and output count also pass.
+Nine integration tests across extracted-entry, explicit-cycle and VPS-reset
+suites passed offline without FFmpeg. No production decoder change was needed.
+This qualifies the authored single-layer extracted-entry forms; it does not
+qualify arbitrary extraction, temporal-layer entry, CRA/BLA combinations,
+multilayer prediction, VPS VUI or hardware extraction.

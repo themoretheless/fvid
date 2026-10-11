@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "file": "hevc-extracted-reset-msb-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    },
+    {
+      "file": "hevc-extracted-reset-full-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    },
+    {
+      "file": "hevc-extracted-reset-bad-no-reset-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    }
+  ],
+  "provenance": "Original owned monochrome PCM/inter seed, rewritten TRAIL_R intra entry, empty RPS and signalled reset. No private parameters, external codec, FFmpeg or network."
+}

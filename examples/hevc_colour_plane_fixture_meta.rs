@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     println!(
         "{}",
-        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets,"depth":s.depth[0],"chroma_depth":s.depth[1],"pcm_depth":s.pcm.as_ref().map(|pcm| pcm.depth[0]),"dependent_enabled":p.dependent_slices,"short_term_sets":s.short_term.len(),"long_term_entries":s.long_term.len(),"ctu_count":s.dimensions.map(|v| v.div_ceil(1 << s.coding_block_log2[1])).iter().product::<u32>()})
+        serde_json::json!({"extra_bits":p.extra_slice_header_bits,"output_flag":p.output_flag_present,"packets":packets,"depth":s.depth[0],"chroma_depth":s.depth[1],"pcm_depth":s.pcm.as_ref().map(|pcm| pcm.depth[0]),"dependent_enabled":p.dependent_slices,"short_term_sets":s.short_term.len(),"long_term_entries":s.long_term.len(),"long_term_present":s.long_term_present,"temporal_mvp_enabled":s.temporal_mvp,"ctu_count":s.dimensions.map(|v| v.div_ceil(1 << s.coding_block_log2[1])).iter().product::<u32>()})
     );
     Ok(())
 }

@@ -6046,3 +6046,18 @@ Tests inspect the actual slice payload, compare all picture planes and POCs to
 implicit-cycle streams, repeat decoding after reset, and compare software
 seek/rewind timing and output. These are acceptance fixtures, not refusal tests.
 No private media, FFmpeg, external codec or network is used.
+
+### Extracted-entry signalled POC reset
+
+`generate_hevc_extracted_reset.py` authors three original three-picture files
+from the owned monochrome PCM/inter seed. The first intra IDR header becomes
+TRAIL_R with an empty RPS, POC LSB 1 and an Annex F signalled reset with period
+ID zero; CABAC/PCM samples stay unchanged. The following two inter pictures
+retain relative RPS and entropy while their POC LSBs shift to 2 and 3.
+MSB-only and full signalled resets are acceptance videos. The no-reset version
+is an exact Invalid reproduction of the random-access requirement, not an
+acceptance video. Tests inspect real NAL/reset/RPS syntax, compare every sample
+in all planes and POCs, repeat after decoder reset, and exercise software
+playback seek/rewind and timestamps. Generation is separate from testing and
+uses only the owned parser, Python and saved synthetic input; no private media,
+FFmpeg, external codec or network is used.
