@@ -6542,3 +6542,22 @@ The additional equal-layer 10/16-bit videos and matching-nonzero-offset video
 qualify the H.8.1.4.1 sample-copy bypass. The original filtering path lost low
 bits in the saved 16-bit 420 identity video; the fixed path preserves every
 source value. This does not bypass filtering for unequal depths or geometry.
+
+## Composed HEVC reference samples
+
+`generate_hevc_reference_samples.py` authors 63 paired VPS/SPS/PPS configurations,
+short MP4 metadata reproducers and original two-frame Y4M reference videos. It
+composes the separately authored rational spatial/colour oracles. Tests parse the
+saved active parameter sets, verify MP4 configuration bytes, consume reference
+sample bytes and check every mapped/final value. The MP4 retains original owned
+seed samples while replacing configuration; it is not a conforming scalable
+picture fixture. Mixed-depth Y4M serves only as an explicitly documented storage
+envelope. No private media/parameters, production codec, external codec, FFmpeg
+or network participates in fixture generation or ordinary test execution.
+
+The 420 partition case distinguishes the required colour-before-resample order
+from its inverse by 262/272 final samples. Budget regressions require a common
+peak limit for mapped intermediate plus final buffers, while equal mapped 16-bit
+references must reuse the ready colour output. Motion-only/neither dependencies
+are valid metadata but cannot be requested as sample prediction sources. These
+are sample-operation acceptance/refusal tests, not layered playback acceptance.

@@ -110,6 +110,114 @@ pub struct LayeredPps {
     pub colour_mapping: Option<ColourMappingTable>,
 }
 impl LayeredPps {
+    /// H.8.1.4.1 reference samples: colour mapping precedes spatial resampling.
+    /// This does not derive motion/mode arrays or attach the result to a DPB.
+    /// Budget covers all new sample buffers alive simultaneously, including
+    /// mapped intermediate planes. Input and active parameter storage are borrowed.
+    pub fn reference_samples(
+        &self,
+        context: &LayeredPpsContext<'_>,
+        reference_layer: u8,
+        input: [&[u16]; 3],
+        budget: usize,
+    ) -> Result<[super::super::hevc_plane::Plane; 3]> {
+        use super::super::hevc_resample::Resampling;
+        use super::ColourMappingPicture;
+        if self.layer_id != context.sps.layer_id
+            || self.output_layer_set != context.sps.output_layer_set
+            || self.vps_id != context.vps.vps.id
+            || context.sps.sps.vps_id != context.vps.vps.id
+            || self.pps.sps_id != context.sps.sps.id
+        {
+            return Err(invalid(
+                "HEVC inter-layer samples use mismatched active parameters",
+            ));
+        }
+        context
+            .vps
+            .profile_for_layer(self.output_layer_set, self.layer_id)?;
+        if reference_layer > 62 || context.direct()? & (1u64 << reference_layer) == 0 {
+            return Err(invalid(
+                "HEVC sample source is not a direct reference layer",
+            ));
+        }
+        let extension = context
+            .vps
+            .extension
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC sample source has no VPS extension"))?;
+        let index = extension
+            .graph
+            .layer_ids
+            .iter()
+            .position(|&id| id == self.layer_id)
+            .ok_or_else(|| invalid("HEVC sample layer is absent from VPS"))?;
+        if extension
+            .dependencies
+            .sample_prediction
+            .get(index)
+            .copied()
+            .unwrap_or(0)
+            & (1u64 << reference_layer)
+            == 0
+        {
+            return Err(invalid("HEVC VPS disables inter-layer sample prediction"));
+        }
+        let reference = context.active_sps(reference_layer)?;
+        let default = ReferenceLocation {
+            layer_id: reference_layer,
+            scaled_offsets: None,
+            region_offsets: None,
+            phases: None,
+        };
+        let location = self
+            .reference_locations
+            .iter()
+            .rfind(|loc| loc.layer_id == reference_layer)
+            .unwrap_or(&default);
+        let mapping = self
+            .colour_mapping
+            .as_ref()
+            .filter(|table| table.reference_layers.contains(&reference_layer));
+        let depth = mapping.map_or(reference.sps.depth, |table| table.output_depth);
+        let resampling =
+            Resampling::with_reference_depth(&context.sps.sps, &reference.sps, depth, location)?;
+        if let Some(table) = mapping {
+            if table.input_depth != reference.sps.depth {
+                return Err(invalid(
+                    "HEVC colour mapping input depth contradicts active reference",
+                ));
+            }
+            let mapped = table.map_picture(
+                ColourMappingPicture {
+                    dimensions: reference.sps.dimensions.map(|v| v as usize),
+                    chroma_format: reference.sps.chroma_format,
+                    depth: reference.sps.depth,
+                    planes: input,
+                },
+                budget,
+            )?;
+            if resampling.is_identity() {
+                return Ok(mapped);
+            }
+            let mut held = std::mem::size_of_val(&mapped);
+            for plane in &mapped {
+                held = held
+                    .checked_add(
+                        plane
+                            .storage_bytes()
+                            .ok_or_else(|| invalid("HEVC mapped reference storage overflow"))?,
+                    )
+                    .ok_or_else(|| invalid("HEVC mapped reference storage overflow"))?;
+            }
+            let remaining = budget
+                .checked_sub(held)
+                .ok_or_else(|| invalid("HEVC mapped reference exceeds memory budget"))?;
+            resampling.picture(std::array::from_fn(|c| mapped[c].samples()), remaining)
+        } else {
+            resampling.picture(input, budget)
+        }
+    }
     pub fn parse(nal: &[u8], context: &LayeredPpsContext<'_>, budget: usize) -> Result<Self> {
         if context.sps.sps.vps_id != context.vps.vps.id {
             return Err(invalid("HEVC PPS SPS belongs to another VPS"));

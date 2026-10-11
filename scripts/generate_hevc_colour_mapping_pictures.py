@@ -31,6 +31,13 @@ def picture(table, fmt, w, h, frame):
     for c,(width,height) in enumerate(sizes):
         maximum=(1 << table['input'][c!=0])-1
         planes.append([maximum if (x+3*y+c+frame)%7==0 else 0 if (3*x+y+c+frame)%5==0 else ((x*173+y*271+c*193+frame*397)*maximum//1023)%(maximum+1) for y in range(height) for x in range(width)])
+    return planes,map_planes(table,fmt,w,h,planes)
+
+
+
+def map_planes(table, fmt, w, h, planes):
+    sx,sy={1:(2,2),2:(2,1),3:(1,1)}[fmt]; cw,ch=w//sx,h//sy
+    sizes=[(w,h),(cw,ch),(cw,ch)]
     output=[[],[],[]]
     for c,(width,height) in enumerate(sizes):
         for y in range(height):
@@ -48,7 +55,7 @@ def picture(table, fmt, w, h, frame):
                     indices=[ly*w+lx] if sy==1 else [ly*w+lx,(ly+1)*w+lx]
                     values=[rounded(sum(F(planes[0][i],len(indices)) for i in indices)),planes[1][y*cw+x],planes[2][y*cw+x]]
                 output[c].append(mapping(table,c,values))
-    return planes,output
+    return output
 
 
 def main():

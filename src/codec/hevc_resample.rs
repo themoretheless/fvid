@@ -68,6 +68,17 @@ impl Resampling {
     /// Resolve direct-reference offsets/phases and validate H.8.1.4.1 constraints.
     /// If colour mapping is enabled, reference SPS depths must describe its output.
     pub fn new(current: &Sps, reference: &Sps, location: &ReferenceLocation) -> Result<Self> {
+        Self::with_reference_depth(current, reference, reference.depth, location)
+    }
+    pub(crate) fn with_reference_depth(
+        current: &Sps,
+        reference: &Sps,
+        reference_depth: [u8; 2],
+        location: &ReferenceLocation,
+    ) -> Result<Self> {
+        if reference_depth.iter().any(|d| !(8..=16).contains(d)) {
+            return Err(invalid("HEVC resampling reference depth is invalid"));
+        }
         let cs = subsampling(current)?;
         let rs = subsampling(reference)?;
         for (s, sub) in [(current, cs), (reference, rs)] {
@@ -78,7 +89,7 @@ impl Resampling {
                 return Err(invalid("HEVC resampling geometry or depth is invalid"));
             }
         }
-        if (0..2).any(|c| reference.depth[c] > current.depth[c]) {
+        if (0..2).any(|c| reference_depth[c] > current.depth[c]) {
             return Err(invalid("HEVC resampling cannot reduce reference depth"));
         }
         if location
@@ -135,7 +146,7 @@ impl Resampling {
             [full, chroma, chroma]
         };
         let identity = current.dimensions == reference.dimensions
-            && current.depth == reference.depth
+            && current.depth == reference_depth
             && cs == rs
             && geometry.scaled_offsets == geometry.reference_offsets
             && geometry.phases == [0; 4];
@@ -144,13 +155,16 @@ impl Resampling {
             current: dimensions(current, cs),
             reference: dimensions(reference, rs),
             current_depth: current.depth,
-            reference_depth: reference.depth,
+            reference_depth,
             scales,
             current_offsets,
             reference_offsets,
             phases,
             geometry,
         })
+    }
+    pub(crate) fn is_identity(&self) -> bool {
+        self.identity
     }
     pub fn geometry(&self) -> &ReferenceGeometry {
         &self.geometry

@@ -40,7 +40,7 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2):
     if bad_geometry:
         target = dict(target, size=[255, 192])
     base_format = BASE if base_format is None else base_format
@@ -72,7 +72,7 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
         latency = 0 if tid == 0 else tid+1
         b += ''.join(ue(v-1) for v in counts) + ue(reorder) + ue(latency)
         rows.append([counts[1], reorder, latency])
-    b += ue(0) + '1' + '10' + ue(0) + '0' + '0' + '1'
+    b += ue(0) + '1' + f'{dependency_type:02b}' + ue(0) + '0' + '0' + '1'
     return b'\x40\x01' + escape(packed(b)), formats, rows
 
 
@@ -82,7 +82,7 @@ def scaling_data():
 
 
 def sps(multilayer=True, independent=False, update=None, scaling='disabled',
-        reference=0, rps=0, pcm=False, scc=False, bad_vps=False, sub=2, nesting=True, buffers=16, reorder=2, latency=0, coded_depth=(8, 8)):
+        reference=0, rps=0, pcm=False, scc=False, bad_vps=False, sub=2, nesting=True, buffers=16, reorder=2, latency=0, coded_depth=(8, 8), coded_size=(128, 128), coded_chroma=1):
     b = ('0001' if bad_vps else '0000') + ('111' if multilayer else f'{sub:03b}')
     if not multilayer:
         b += str(int(nesting)) + ptl(True, sub=sub)
@@ -90,7 +90,7 @@ def sps(multilayer=True, independent=False, update=None, scaling='disabled',
     if multilayer:
         b += '0' if update is None else '1' + f'{update:08b}'
     else:
-        b += ue(1) + ue(128) + ue(128) + '0' + ue(coded_depth[0]-8) + ue(coded_depth[1]-8)
+        b += ue(coded_chroma) + ('0' if coded_chroma==3 else '') + ue(coded_size[0]) + ue(coded_size[1]) + '0' + ue(coded_depth[0]-8) + ue(coded_depth[1]-8)
     b += ue(4)  # eight POC LSB bits
     if not multilayer:
         b += '0' + ue(buffers-1) + ue(reorder) + ue(latency)

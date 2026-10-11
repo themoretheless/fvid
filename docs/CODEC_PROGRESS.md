@@ -12390,3 +12390,44 @@ locked offline dependencies. One explicit generator test remains ignored. All
 339 resampling/PPS artifacts regenerate byte-identically. The inferred-phase
 MP4 and 16-bit identity video first failed their precise regression expectations
 before the corresponding fixes; ordinary tests run only saved bytes.
+
+### HEVC composed inter-layer reference samples
+
+`LayeredPps::reference_samples` now connects active VPS/SPS/PPS selection to the
+H.8.1.4.1 sample path. It validates parameter binding, direct-reference identity,
+active reference SPS and VPS sample-prediction permission. It selects offsets
+and colour tables for the requested reference, colour-maps before resampling,
+and uses the mapped component depths for filter precision. Matching mapped
+geometry/depth returns the ready intermediate without allocating a second image.
+The resampler accepts a depth override without cloning active SPS allocations.
+
+The supplied memory budget covers both stages, including all intermediate
+plane storage held while final planes and row scratch are allocated. Tests find
+the smallest budget that admits each stage individually, then require rejection
+when their simultaneously held storage exceeds that budget. Equal mapped
+references succeed at the colour stage's minimum budget. Deliberately omitting
+held-storage accounting or the mapped-identity return triggers those regressions.
+
+Sixty-three original paired-layer configurations, short MP4 metadata reproducers
+and two-frame reference Y4M videos cover 61 sample-operation acceptance cases
+and two invalid requests on valid motion-only/no-sample dependency declarations.
+The matrix includes nine chroma-format pairs, partition/adaptive colour tables,
+8/10/16-bit and mixed depths, signed regions, no-colour operation, identity and
+sample-only dependencies. Independent composed rational oracles check every
+intermediate/final sample. Reversing the two operations changes 262 first-frame
+samples of the saved 420 partition case. Cross-format equal chroma regions use
+explicit zero phases as required, and all saved parameter geometry meets the
+SPS block alignment constraints.
+
+These tests accept reference sample preparation, not scalable profile conformance
+or coded multilayer picture playback. Motion/mode arrays, inter-layer slice and
+reference-list integration, per-layer reconstruction/DPB/output scheduling and
+broader codec parity remain open. The new encoded configurations have two layers;
+multiple simultaneously direct references are not newly qualified here.
+
+Validation: 45 integration tests across 14 HEVC suites, 211 HEVC unit tests and
+the player build check pass with locked offline dependencies. One explicit
+fixture-generator test stays ignored. All 983 related artifacts regenerate
+byte-identically after the helper extensions. The peak-accounting and mapped
+identity-allocation mutations each failed their exact regression expectations;
+all final checks used the restored implementation.
