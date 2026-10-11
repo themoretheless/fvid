@@ -11,6 +11,8 @@ reference descriptor rules. Single-slice, multi-slice/dependent-segment and
 separate-colour-plane reconstruction all propagate the selected layer.
 Ordinary `decode`/`decode_slices` retain their base-layer contract.
 
+The fixtures use distinct global SPS/PPS IDs for independent layers and a shared
+base SPS with a distinct PPS ID for dependent layers, as Annex F requires.
 Seven original short MP4 witnesses contain base and layer-3 pictures in the
 same access unit. Six qualify independent/dependent eight-bit I-picture reconstruction
 with PCM, dependent segments and separately coded colour planes, against saved
@@ -28,7 +30,7 @@ external codec. The fixture muxer supports explicit AU grouping so independent
 colour-plane first-slice flags cannot split one picture into multiple samples.
 
 This is coded-picture reconstruction acceptance. `HevcDecoder`/the player still
-need a layered parameter namespace, complete-AU dispatch and transactional
+need global parameter-ID storage with per-layer activation, complete-AU dispatch and transactional
 per-layer DPB/POC ownership. Nonidentity inter-layer sample/motion preparation
 must be attached to that owner as well; this change does not claim full scalable
 playback or complete codec/profile/tool coverage.

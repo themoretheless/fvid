@@ -6694,3 +6694,9 @@ independent source-luma perturbation must change the inter-layer output. These
 are low-level coded-picture acceptance tests, not stateful layered player
 acceptance. The ordinary base-only reconstruction API retains a precise refusal
 expectation while the context-bound API accepts the same nonbase pictures.
+
+The layered reconstruction witnesses use the Annex F global parameter-ID
+space: base SPS/PPS 0, independent layer-3 SPS/PPS 1, or dependent layer-3
+PPS 1 referring to shared SPS 0. Regression assertions reject the former
+colliding IDs; only headers and alignment change, preserving entropy and
+saved original pixel oracles. Generation remains separate from test execution.

@@ -38,6 +38,20 @@ def layer(nal, id):
     return ((head & ~0x1f8) | (id << 3)).to_bytes(2, "big") + nal[2:]
 
 
+def parameter_ids(nal, start, ids):
+    value = bits(unescape(nal[2:]))
+    end = start
+    for _ in ids:
+        end = ue_end(value, end)
+    # Preserve syntax through rbsp_stop_one_bit, then re-align padding.
+    value = value[:start] + "".join(ue(i) for i in ids) + value[end:value.rfind("1")+1]
+    return nal[:2] + escape(packed(value))
+
+
+def slice_pps(header, start):
+    return header[:start] + ue(1) + header[ue_end(header, start):]
+
+
 def main():
     build = subprocess.check_output([
         "cargo", "build", "--quiet", "--locked", "--offline", "--no-default-features",
@@ -64,18 +78,17 @@ def main():
             source_ptl = bits(unescape(params[33][0][2:]))[8:104]
             vps_nal = vps_nal[:2] + escape(packed(vbits[:32] + source_ptl + vbits[128:]))
             # Dependent layers use the shared base SPS; independent layers own it.
-            sps = layer(params[33][0], 3 if independent else 0)
-            pps = layer(params[34][0], 3)
+            sps = parameter_ids(layer(params[33][0], 3), 104, [1]) if independent else params[33][0]
+            pps = parameter_ids(layer(params[34][0], 3), 0, [1, int(independent)])
             slices = []
             for h in meta["packets"][0]:
                 assert h["idr"]
                 raw = bytes(h["rbsp"])
-                if independent or h["dependent"]:
-                    body = raw
-                else:
-                    value = bits(raw)
-                    end = h["entropy_byte_offset"] * 8
-                    align = value[:end].rfind("1")
+                value = bits(raw)
+                end = h["entropy_byte_offset"] * 8
+                align = value[:end].rfind("1")
+                header = value[:align]
+                if not independent and not h["dependent"]:
                     insert = ue_end(value, 2)
                     if not h["first"]:
                         insert += int(meta["dependent_enabled"]) + (meta["ctu_count"]-1).bit_length()
@@ -84,8 +97,8 @@ def main():
                     if meta["separate_colour_plane"]:
                         insert += 2
                     # IDR nonbase LSB, then disabled inter-layer prediction.
-                    header = value[:insert] + "0"*meta["poc_bits"] + "0" + value[insert:align] + "1"
-                    body = packed(header) + raw[end//8:]
+                    header = value[:insert] + "0"*meta["poc_bits"] + "0" + value[insert:align]
+                body = packed(slice_pps(header, 2) + "1") + raw[end//8:]
                 slices.append(((h["kind"] << 9) | (3 << 3) | 1).to_bytes(2,"big") + escape(body))
             base_slices = [((h["kind"] << 9) | 1).to_bytes(2,"big") + escape(bytes(h["rbsp"]))
                            for h in meta["packets"][0]]
@@ -128,7 +141,7 @@ def main():
                     if meta["long_term_present"]:
                         empty += (ue(0) if meta["long_term_entries"] else "") + ue(0)
                     if meta["temporal_mvp_enabled"]: empty += str(int(h["temporal_mvp"]))
-                    header = value[:start] + empty + "1" + value[r.at:align] + "1"
+                    header = slice_pps(value[:start] + empty + "1" + value[r.at:align], 1) + "1"
                     predicted.append(((h["kind"]<<9)|(3<<3)|1).to_bytes(2,"big") + escape(packed(header)+raw[end//8:]))
                     base_predicted.append(((h["kind"]<<9)|1).to_bytes(2,"big") + escape(raw))
                 groups = [all_slices,base_predicted+predicted]

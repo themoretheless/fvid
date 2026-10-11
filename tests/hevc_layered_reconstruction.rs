@@ -75,6 +75,11 @@ fn owned_nonbase_coded_pictures_reconstruct_exact_pixels_with_bound_parameters()
             32 << 20,
         )
         .unwrap_or_else(|e| panic!("{file}: PPS {e}"));
+        // Annex F shares parameter IDs across all NAL layers. These fixtures
+        // must not overwrite the base layer's SPS/PPS 0 with different content.
+        assert_eq!(sps.sps.id, u8::from(case["independent"].as_bool().unwrap()));
+        assert_eq!(pps.pps.id, 1);
+        assert_eq!(pps.pps.sps_id, sps.sps.id);
         let context = LayeredSliceContext {
             vps: &vps,
             sps: &sps,
@@ -244,6 +249,9 @@ fn coded_nonbase_inter_slice_uses_same_access_unit_base_samples() {
         32 << 20,
     )
     .unwrap();
+    assert_eq!(sps.sps.id, 0); // Shared base SPS, distinct global PPS ID.
+    assert_eq!(pps.pps.id, 1);
+    assert_eq!(pps.pps.sps_id, 0);
     let context = LayeredSliceContext {
         vps: &vps,
         sps: &sps,
