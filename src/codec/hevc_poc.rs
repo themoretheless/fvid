@@ -111,6 +111,56 @@ impl ResetSyntax {
     }
 }
 
+/// Per-layer Annex F resetting-period state. `advance` returns a candidate
+/// state so a decoder can publish it only after the complete picture succeeds.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ResetPeriods {
+    seen_picture: bool,
+    period: u8,
+    previous_initial_reset: bool,
+    initial_reset: Option<(bool, u32)>,
+    initial_is_previous_t0: bool,
+}
+impl ResetPeriods {
+    pub fn advance(self, syntax: ResetSyntax, nal: NalHeader, slice_lsb: u32) -> Result<(Self, bool)> {
+        if syntax.period.is_some() != syntax.reset.is_some()
+            || syntax.period.is_some_and(|p| p > 63) {
+            return Err(invalid("inconsistent HEVC POC reset period syntax"));
+        }
+        let period = syntax.period.unwrap_or(self.period);
+        let initial = matches!(syntax.reset, Some(Reset::Msb | Reset::Full));
+        if initial && self.previous_initial_reset && period == self.period {
+            return Err(invalid("consecutive HEVC initial resets reuse a period ID"));
+        }
+        // An idc 1/2 picture starts a new period even if a nonconsecutive
+        // earlier period used the same six-bit ID (F.7.4.7.1 note 5).
+        let resetting = initial || syntax.reset.is_some()
+            && (!self.seen_picture || period != self.period);
+        let mut next = self;
+        if resetting {
+            next.initial_reset = None;
+            next.initial_is_previous_t0 = false;
+        }
+        if let Some(Reset::Signalled { full, lsb }) = syntax.reset {
+            if let Some((anchor_full, anchor_lsb)) = next.initial_reset {
+                if full != anchor_full || lsb != anchor_lsb || !next.initial_is_previous_t0 {
+                    return Err(invalid("HEVC signalled reset disagrees with period anchor"));
+                }
+            }
+        }
+        if initial {
+            next.initial_reset = Some((syntax.reset == Some(Reset::Full), slice_lsb));
+            next.initial_is_previous_t0 = true;
+        } else if updates_previous(nal) {
+            next.initial_is_previous_t0 = false;
+        }
+        next.seen_picture = true;
+        next.period = period;
+        next.previous_initial_reset = initial;
+        Ok((next, resetting))
+    }
+}
+
 /// Equations (F-60) and (F-61): current POC and the amount to subtract from
 /// retained reference POCs. `previous == None` means no picture in this layer
 /// has been decoded, so there is no reference decrement. This does not admit
@@ -168,6 +218,55 @@ mod tests {
 
     fn nal(unit_type: u8) -> NalHeader {
         NalHeader { unit_type, layer_id: 0, temporal_id: 0 }
+    }
+
+    fn reset_syntax(reset: Reset, period: u8) -> ResetSyntax {
+        ResetSyntax { reset: Some(reset), period: Some(period), msb_cycle: None }
+    }
+
+    #[test]
+    fn reset_period_decrements_once_and_infers_missing_period_id() {
+        let start = reset_syntax(Reset::Msb, 7);
+        let (state, resetting) = ResetPeriods::default().advance(start, nal(1), 14).unwrap();
+        assert!(resetting);
+        let signalled = reset_syntax(Reset::Signalled { full: false, lsb: 14 }, 7);
+        let mut higher = nal(1);
+        higher.temporal_id = 1;
+        let (state, resetting) = state.advance(signalled, higher, 1).unwrap();
+        assert!(!resetting);
+        let (state, resetting) = state.advance(ResetSyntax::default(), higher, 2).unwrap();
+        assert!(!resetting);
+        assert_eq!(state.period, 7);
+        let (_, resetting) = state.advance(signalled, higher, 3).unwrap();
+        assert!(!resetting);
+    }
+
+    #[test]
+    fn reset_period_random_access_entry_and_id_reuse() {
+        let initial = reset_syntax(Reset::Full, 63);
+        let (state, _) = ResetPeriods::default().advance(initial, nal(19), 0).unwrap();
+        assert!(state.advance(initial, nal(19), 0).is_err());
+        let (state, resetting) = state.advance(ResetSyntax::default(), nal(1), 1).unwrap();
+        assert!(!resetting);
+        assert!(state.advance(initial, nal(19), 0).unwrap().1);
+        let entry = reset_syntax(Reset::Signalled { full: true, lsb: 4 }, 0);
+        let (state, resetting) = ResetPeriods::default().advance(entry, nal(1), 5).unwrap();
+        assert!(resetting, "first extracted picture resets even with inferred initial ID zero");
+        assert!(!state.advance(entry, nal(1), 6).unwrap().1);
+        assert!(state.advance(reset_syntax(Reset::Signalled { full: true, lsb: 4 }, 1), nal(1), 7).unwrap().1);
+    }
+
+    #[test]
+    fn reset_period_rejects_anchor_mismatch_without_changing_source() {
+        let (state, _) = ResetPeriods::default().advance(reset_syntax(Reset::Msb, 2), nal(1), 7).unwrap();
+        let saved = state;
+        for reset in [Reset::Signalled { full: true, lsb: 7 }, Reset::Signalled { full: false, lsb: 6 }] {
+            assert!(state.advance(reset_syntax(reset, 2), nal(1), 8).is_err());
+            assert_eq!(state, saved);
+        }
+        let (state, _) = state.advance(ResetSyntax::default(), nal(1), 8).unwrap();
+        assert!(state.advance(reset_syntax(Reset::Signalled { full: false, lsb: 7 }, 2), nal(1), 9).is_err());
+        assert!(ResetPeriods::default().advance(ResetSyntax { period: Some(1), ..ResetSyntax::default() }, nal(1), 0).is_err());
     }
 
     #[test]

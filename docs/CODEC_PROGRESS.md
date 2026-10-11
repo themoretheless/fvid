@@ -11586,3 +11586,16 @@ and pixel-storage sharing test remains intact. PPS admission is unchanged.
 Validation on final source: 198 HEVC unit tests passed offline, zero failed;
 one explicit long-term fixture-regeneration test remained ignored as intended.
 The command reached exit zero and git diff --check passed.
+
+The per-layer `ResetPeriods` state now produces a candidate state and a
+reset/no-reset decision without mutating the published state. It infers the
+last six-bit period ID for idc 0, resets once on idc 3 entry into a different
+period (including extracted entry with ID zero), and treats idc 1/2 as a new
+period. Consecutive initial resets cannot reuse an ID; nonconsecutive ID reuse
+is allowed as described by F.7.4.7.1 note 5. Signalled resets in a period with
+an observed initial reset must match its full flag and LSB anchor and require
+that anchor to remain the previous qualifying temporal-ID-zero picture.
+Tests exercise repeated same-period pictures without another decrement,
+inferred IDs, random-access entry, ID reuse and transactional anchor failures.
+All 13 hevc_poc unit tests passed offline. This state is still a preparation
+primitive: PPS admission and reset-coded playback acceptance are unchanged.
