@@ -6590,3 +6590,15 @@ uses Annex F group concatenation, repetition and current-picture rules without
 calling production code. These fixtures qualify list/identity operations only,
 not coded scalable slice playback. Generation and ordinary tests need neither
 FFmpeg, an external codec nor network access.
+
+
+`generate_hevc_inter_layer_sets.py` authors seven complete four-/two-layer VPS
+NALs, an original eight-frame 8x8 Y4M atlas, 86 DPB selection/refusal cases and
+81 IRAP list-admission/control cases. No private source samples or parameter sets are
+used. Frame groups intentionally repeat layer/POC across access units with
+different authored pixels, exposing stale-AU substitution. The oracle partitions
+references by independently declared view identifiers and records exact frame
+indices. Final derived POC agreement is enforced independently of coded LSB
+alignment. These fixtures qualify DPB/access-unit selection and list binding,
+not coded scalable slice playback. Generation and tests use no FFmpeg, external
+codec or network; ordinary tests read the saved artifacts only.

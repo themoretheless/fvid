@@ -12502,3 +12502,41 @@ and the player build. Tests run locked/offline without default features;
 player checking explicitly enables `player`. Both new artifacts regenerate
 byte-identically. Mutating L0 group order or resolving by POC alone makes the
 saved regression fail; the final checks use restored production code.
+
+
+### HEVC inter-layer DPB/access-unit binding
+
+`InterLayerSet::derive` binds RefPicLayerId to a unique completed source picture
+in the current access unit, using the active VPS's direct dependency graph,
+ViewOrderIdx/ViewId and temporal edge limits. Matching layer/POC in another AU
+is never substituted. Missing or duplicate sources, discardable pictures and
+RADL-to-RASL references are refused. The zero temporal-edge limit exception
+requires both current TemporalId zero and an IRAP source. The final derived POC
+must agree across the AU (F.8.1.5), as must TemporalId (F.7.4.2.2); this is distinct from coded POC LSB alignment.
+
+The result borrows samples without copying or rewriting the source DPB. It
+partitions references into sets 0/1, feeds the existing F.8.3.4 list constructor,
+and resolves resulting inter-layer entries back to their exact source images.
+List allocations share the budget with retained binding buffers. The bound list
+entry point rejects temporal RPS entries for CRA/IDR and independent BLA, and
+enforces current-picture-only inter lists for an independent nonbase IRAP layer.
+
+Seven original complete VPS NALs and an eight-frame Y4M atlas accompany 86
+selection/admission cases and 81 IRAP list/admission control cases. Earlier-AU frames intentionally
+repeat layer and POC with different pixels. Cases cover both ViewId sides,
+equality with the base view, inferred zero ViewIds, selected subsets, temporal
+limits and IRAP exceptions, source status and exact allocation boundaries.
+These are completed-picture selection and list-binding acceptance tests. They
+do not parse scalable slice headers or perform scalable prediction/reconstruction;
+`RefPicLayerId` remains an input from the future layered slice integration.
+Ordinary `HevcDecoder` still explicitly refuses nonbase VCL decoding.
+
+Validation: all 17 related integration suites pass (30 tests), followed by 211
+HEVC codec unit tests (one explicit fixture-generator test ignored). The player
+build also passes. Checks use locked/offline dependencies; integration tests
+have no default features and player checking explicitly enables `player`.
+All nine new artifacts regenerate byte-identically. Removing the access-unit
+filter or discardable refusal makes the saved regression fail. The IRAP fixture
+also reproduces the pre-fix acceptance of an explicit current-only BLA list with
+forbidden temporal RPS entries; the corrected admission refuses it. Final
+validation uses restored protections and the complete IRAP restrictions.
