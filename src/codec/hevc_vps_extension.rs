@@ -28,6 +28,201 @@ pub struct LayerSetExtension {
     pub default_ref_layers_active: bool,
     pub end_bit: usize,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OutputLayerSet {
+    pub layer_set_index: usize,
+    pub output: u64,
+    pub necessary: u64,
+    /// Aligned with the associated layer list; non-necessary layers have None.
+    pub profile_indices: Vec<Option<u8>>,
+    pub alternative_output: bool,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OutputLayerSets {
+    pub profile_count: u8,
+    /// Coded extra PTLs and their VPS indices; existing base PTLs are not cloned.
+    pub extra_profiles: Vec<(u8, ProfileTierLevel)>,
+    pub default_output_idc: u8,
+    pub sets: Vec<OutputLayerSet>,
+    pub end_bit: usize,
+}
+impl LayerSetExtension {
+    /// Continue through PTL and OLS syntax, stopping before representation formats.
+    pub fn output_layers(
+        &self,
+        bytes: &[u8],
+        graph: &LayerDependencyPrefix,
+        layers: &super::hevc_vps::LayerSets,
+        sublayers: u8,
+        budget: usize,
+    ) -> Result<OutputLayerSets> {
+        let n = graph.layer_ids.len();
+        if n == 0
+            || n > 63
+            || graph.direct.len() != n
+            || graph.transitive.len() != n
+            || graph.layer_ids.iter().any(|&id| id > 63)
+            || graph.layer_ids.windows(2).any(|w| w[0] >= w[1])
+            || self.layer_sets.is_empty()
+            || self.layer_sets.len() > 2047
+            || self.layer_sets[0] != [0]
+            || layers.sets.is_empty()
+            || layers.sets.len() > self.layer_sets.len()
+            || sublayers > 6
+        {
+            return Err(invalid("invalid HEVC output layer metadata geometry"));
+        }
+        for set in &self.layer_sets {
+            let mut mask = 0u64;
+            if set.is_empty() || set.len() > 63 {
+                return Err(invalid("invalid HEVC output layer list"));
+            }
+            for &id in set {
+                if id > 63
+                    || graph.layer_ids.binary_search(&id).is_err()
+                    || mask & (1u64 << id) != 0
+                {
+                    return Err(invalid("invalid HEVC output layer list"));
+                }
+                mask |= 1u64 << id;
+            }
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(self.end_bit)?;
+        let last_profile = bounded(&mut b, 63)? as u8;
+        if layers.max_layers_minus1 > 0 && last_profile == 0 {
+            return Err(invalid("multilayer HEVC requires at least two PTLs"));
+        }
+        // Bound all retained PTLs, including sublayer records, before reading them.
+        if budget < 32768 {
+            return Err(invalid("HEVC output metadata exceeds memory budget"));
+        }
+        let mut profiles = Vec::new();
+        for i in if layers.base_internal { 2 } else { 1 }..=last_profile {
+            let present = b.bit()?;
+            profiles.push((i, ProfileTierLevel::read(&mut b, present, sublayers)?));
+        }
+        let (extra, idc) = if self.layer_sets.len() > 1 {
+            (bounded(&mut b, 1023)? as usize, b.read(2)? as u8)
+        } else {
+            (0, 0)
+        };
+        let count = self.layer_sets.len() + extra;
+        if 32768 + count * (std::mem::size_of::<OutputLayerSet>() + 128) > budget {
+            return Err(invalid("HEVC output metadata exceeds memory budget"));
+        }
+        let mut sets = Vec::with_capacity(count);
+        sets.push(OutputLayerSet {
+            layer_set_index: 0,
+            output: 1,
+            necessary: 1,
+            profile_indices: vec![Some(u8::from(
+                layers.base_internal && layers.max_layers_minus1 > 0,
+            ))],
+            alternative_output: false,
+        });
+        let mut covered = 1u64;
+        for i in 1..count {
+            let index = if i < self.layer_sets.len() {
+                i
+            } else if self.layer_sets.len() > 2 {
+                let width = (usize::BITS - (self.layer_sets.len() - 2).leading_zeros()) as u8;
+                let value = b.read(width)? as usize + 1;
+                if value >= self.layer_sets.len() {
+                    return Err(invalid("HEVC OLS layer set index out of range"));
+                }
+                value
+            } else {
+                1
+            };
+            let list = &self.layer_sets[index];
+            let explicit = i >= layers.sets.len() || idc.min(2) == 2;
+            let highest = *list.iter().max().unwrap();
+            let mut output = 0u64;
+            let mut last = 0;
+            for &id in list {
+                let flag = if explicit {
+                    b.bit()?
+                } else {
+                    idc == 0 || id == highest
+                };
+                if flag {
+                    output |= 1u64 << id;
+                    last = id;
+                }
+            }
+            if output == 0 {
+                return Err(invalid("empty HEVC output layer set"));
+            }
+            let mut necessary = output;
+            for (position, &id) in list.iter().enumerate() {
+                if output & (1u64 << id) == 0 {
+                    continue;
+                }
+                let references = graph.transitive[graph.layer_ids.binary_search(&id).unwrap()];
+                for &reference in &list[..position] {
+                    if references & (1u64 << reference) != 0 {
+                        necessary |= 1u64 << reference;
+                    }
+                }
+            }
+            if index >= layers.sets.len()
+                && necessary.count_ones() == 1
+                && necessary & (1u64 << list[0]) == 0
+            {
+                return Err(invalid("HEVC additional OLS singleton is not first layer"));
+            }
+            let mut indices = vec![None; list.len()];
+            let width = (u8::BITS - last_profile.leading_zeros()) as u8;
+            for (j, &id) in list.iter().enumerate() {
+                if necessary & (1u64 << id) == 0 {
+                    continue;
+                }
+                let value = if last_profile > 0 {
+                    b.read(width)? as u8
+                } else {
+                    0
+                };
+                if value > last_profile || (!layers.base_internal && last_profile > 0 && value == 0)
+                {
+                    return Err(invalid("HEVC OLS PTL index out of range"));
+                }
+                indices[j] = Some(value);
+            }
+            let alternative = if output.count_ones() == 1
+                && graph.direct[graph.layer_ids.binary_search(&last).unwrap()] != 0
+            {
+                b.bit()?
+            } else {
+                false
+            };
+            covered |= necessary;
+            sets.push(OutputLayerSet {
+                layer_set_index: index,
+                output,
+                necessary,
+                profile_indices: indices,
+                alternative_output: alternative,
+            });
+        }
+        for &id in graph
+            .layer_ids
+            .iter()
+            .skip(usize::from(!layers.base_internal))
+        {
+            if covered & (1u64 << id) == 0 {
+                return Err(invalid("HEVC layer is unnecessary in every OLS"));
+            }
+        }
+        Ok(OutputLayerSets {
+            profile_count: last_profile + 1,
+            extra_profiles: profiles,
+            default_output_idc: idc,
+            sets,
+            end_bit: b.position(),
+        })
+    }
+}
 impl LayerDependencyPrefix {
     /// Continue at this prefix's end through default_ref_layers_active_flag.
     /// Does not consume PTL/OLS/representation/DPB syntax which follows it.

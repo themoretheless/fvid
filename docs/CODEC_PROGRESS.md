@@ -2,6 +2,16 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`LayerSetExtension::output_layers` continues through extra PTLs and OLS syntax.
+It handles inferred/explicit output flags (including reserved default idc 3),
+additional OLS mappings, necessary-layer closure within each normative layer
+list, PTL indices and alternate output. It checks global layer coverage, empty
+output sets, additional-set singleton constraints, coded indices and memory.
+Fifteen original partial metadata fixtures cover the three default modes,
+1023 extra OLSs, mapped sets, extra PTLs, unused per-OLS layers and malformed input.
+Representation formats, DPB and the remaining extension syntax are still
+pending; these prefix APIs are not connected to multilayer picture decoding.
+
 `LayerDependencyPrefix::layer_sets` continues through additional layer sets,
 per-layer temporal sublayers, maximum temporal inter-layer references and
 default reference activation. It preserves the normative F-9 partition order

@@ -6297,6 +6297,19 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_output_sets.py` authors fifteen original OLS continuations of
+the original chain dependency prefix, following Annex F.7.3.2.1.1 and F-11
+through F-13. Hand-specified chain masks are 1, 9, 137 and 32905 for NAL layer
+IDs [0,3,7,15]. Fixtures exercise all/highest/explicit outputs, reserved idc 3,
+alternative output, extra PTLs, 1023 additional OLSs and mappings among more
+than two sets. A subset OLS leaves one layer unnecessary while a second OLS
+covers it, checking absent PTL indices for non-necessary layers. Malformed
+cases cover empty output, a globally unused layer, excessive
+counts and invalid PTL/set indices. Saved oracles specify output/necessary
+masks and mappings independently of production code. These are partial RBSP
+metadata fixtures, not complete VPSs or multilayer video acceptance. Authoring
+and tests use no private media, FFmpeg, external codec or network.
+
 `generate_hevc_additional_sets.py` authors eleven original continuation prefixes
 using the original forest dependency prefix. H.265 (06/2019) F-7 through F-10
 define the added sets and their temporal bounds. Cases include repeated legal
