@@ -6095,3 +6095,23 @@ seek/rewind includes all three valid files. Rate fields exercise parsing, not
 HRD scheduling or conformance of measured bit/picture rates. No private media,
 parameters, FFmpeg, external codec or network is used; ordinary tests never
 invoke the generator. Layered VUI and inter-layer decoding are not qualified.
+
+### VP9 scaled references
+
+`generate_vp9_scaled_reference.py` rewrites the public synthetic three-picture
+`tests/fixtures/vp9/header.ivf` seed, whose historical provenance is documented
+in its README. New generation does not invoke FFmpeg/libvpx or any codec.
+Three acceptance WebMs explicitly resize the middle inter frame to 31x32,
+32x31 or 31x31, then restore 32x32. The same 8x8 grid is retained; original
+compressed headers and tile entropy stay byte-identical. A fourth Invalid
+fixture signals 15x32 against a 32x32 reference, violating the allowed ratio.
+The first valid fixture reproduced the exact scaled-reference Unsupported error
+at picture one before the fix. Tests verify sizes, original keyframe pixels,
+every-sample reset replay, exact ratio refusal/recovery, and software playback
+pixel packing, timestamps, seek and rewind against direct decoding. Resized
+frames have no independent full-frame oracle: replay proves determinism only.
+Separate unit tests check hard-coded signed/chroma coordinate results, ratio
+boundaries and analytic gradient interpolation for all four filters. Existing
+VP9 fixed-size, motion, adaptation and 10/12-bit independent oracles still pass.
+No private media, frames, parameters, external codec invocation or network is
+used by generation/tests. Reference geometry follows VP9 v0.7 8.5.2.3.

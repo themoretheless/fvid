@@ -1,0 +1,81 @@
+{
+  "cases": [
+    {
+      "file": "vp9-scaled-reference-horizontal-synthetic.webm",
+      "expectation": "acceptance",
+      "sizes": [
+        [
+          32,
+          32
+        ],
+        [
+          31,
+          32
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "failure_picture": null
+    },
+    {
+      "file": "vp9-scaled-reference-vertical-synthetic.webm",
+      "expectation": "acceptance",
+      "sizes": [
+        [
+          32,
+          32
+        ],
+        [
+          32,
+          31
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "failure_picture": null
+    },
+    {
+      "file": "vp9-scaled-reference-both-synthetic.webm",
+      "expectation": "acceptance",
+      "sizes": [
+        [
+          32,
+          32
+        ],
+        [
+          31,
+          31
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "failure_picture": null
+    },
+    {
+      "file": "vp9-scaled-reference-bad-ratio-synthetic.webm",
+      "expectation": "invalid",
+      "sizes": [
+        [
+          32,
+          32
+        ],
+        [
+          15,
+          32
+        ],
+        [
+          32,
+          32
+        ]
+      ],
+      "failure_picture": 1
+    }
+  ],
+  "provenance": "Frozen public testsrc2 seed documented in tests/fixtures/vp9/README.md. Only explicit frame sizes and WebM tables authored; original entropy retained. No private media, external codec invocation, FFmpeg or network."
+}

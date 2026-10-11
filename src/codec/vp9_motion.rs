@@ -2,10 +2,10 @@
 use super::{
     vp9_bool::BoolDecoder,
     vp9_picture::Plane,
-    vp9_probs::{Counts, Probabilities, counted},
+    vp9_probs::{counted, Counts, Probabilities},
     vp9_tables::SUBPEL_FILTERS,
 };
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 use fvid_cpu::interp8_vertical;
 fn tree(b: &mut BoolDecoder<'_>, t: &[i8], p: &[u8], counts: &mut [[u32; 2]]) -> Result<u8> {
     let mut at = 0;
@@ -99,6 +99,45 @@ pub(crate) fn read_vector_counted(
     }
     Ok(mv)
 }
+/// VP9 v0.7 8.5.2.3, after plane-specific motion-vector clamping.
+/// Geometry is luma-sized; chroma fractions also use the luma block position.
+pub(super) fn scaled_coordinates(
+    reference: [u32; 2],
+    current: [u32; 2],
+    position: [usize; 2],
+    mv: [i32; 2],
+    sub: usize,
+) -> Result<([i64; 2], [usize; 2])> {
+    if sub > 1 || position.iter().any(|&v| v > 1 << 20) {
+        return Err(invalid("VP9 scaled coordinate out of range"));
+    }
+    if reference == current && current.iter().all(|&v| v != 0) {
+        return Ok((
+            [
+                position[0] as i64 * 16 + i64::from(mv[1]),
+                position[1] as i64 * 16 + i64::from(mv[0]),
+            ],
+            [16; 2],
+        ));
+    }
+    let mut origin = [0; 2];
+    let mut step = [0; 2];
+    for axis in 0..2 {
+        let r = u64::from(reference[axis]);
+        let c = u64::from(current[axis]);
+        if r == 0 || c == 0 || r > 2 * c || c > 16 * r {
+            return Err(invalid("VP9 reference scale out of range"));
+        }
+        let scale = ((r << 14) / c) as i64;
+        let p = position[axis] as i64;
+        let base = (p * scale) >> 14;
+        let fraction = ((16 * (p << sub) * scale) >> 14) & 15;
+        origin[axis] = (base << 4) + ((i64::from(mv[1 - axis]) * scale) >> 14) + fraction;
+        step[axis] = ((16 * scale) >> 14) as usize;
+    }
+    Ok((origin, step))
+}
+
 /// Separable normative 8-tap interpolation, including reference-border extension.
 /// Coordinates and steps use 1/16-sample units; filter 0/1/2/3 is regular/smooth/sharp/bilinear.
 /// The `scratch` buffer holds the horizontal intermediate results and is reused across calls.
@@ -177,6 +216,80 @@ pub fn interpolate(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn scaled_positions_cover_signed_motion_chroma_and_ratio_limits() {
+        for (reference, current, sub, origin, step) in [
+            ([32, 32], [31, 31], 0, [120, 78], [16, 16]),
+            ([32, 32], [31, 31], 1, [124, 81], [16, 16]),
+            ([64, 64], [64, 64], 1, [117, 77], [16, 16]),
+            ([32, 32], [16, 16], 0, [234, 154], [32, 32]),
+            ([4, 4], [64, 64], 0, [7, 4], [1, 1]),
+            ([4, 4], [64, 64], 1, [14, 9], [1, 1]),
+        ] {
+            assert_eq!(
+                scaled_coordinates(reference, current, [7, 5], [-3, 5], sub).unwrap(),
+                (origin, step)
+            );
+        }
+        for (r, c) in [
+            ([0, 32], [32, 32]),
+            ([32, 32], [0, 32]),
+            ([33, 32], [16, 32]),
+            ([4, 4], [65, 64]),
+        ] {
+            assert_eq!(
+                scaled_coordinates(r, c, [0, 0], [0, 0], 0)
+                    .unwrap_err()
+                    .to_string(),
+                "VP9 reference scale out of range"
+            );
+        }
+    }
+    #[test]
+    fn scaled_interpolation_matches_analytic_gradient_pixels() {
+        let plane = Plane {
+            width: 16,
+            height: 16,
+            samples: (0..16)
+                .flat_map(|y| (0..16).map(move |x| 4 * x + 8 * y))
+                .collect(),
+        };
+        let mut scratch = Vec::new();
+        let mut out = Vec::new();
+        let (origin, step) = scaled_coordinates([16, 16], [32, 32], [8, 8], [0, 0], 0).unwrap();
+        for filter in 0..4 {
+            interpolate(
+                &plane,
+                [16, 16],
+                origin,
+                step,
+                [4, 4],
+                filter,
+                8,
+                &mut scratch,
+                &mut out,
+            )
+            .unwrap();
+            let expected: Vec<_> = (0..4)
+                .flat_map(|y| (0..4).map(move |x| 48 + 2 * x + 4 * y))
+                .collect();
+            assert_eq!(out, expected);
+        }
+        let (origin, step) = scaled_coordinates([32, 32], [31, 31], [7, 5], [-3, 5], 1).unwrap();
+        interpolate(
+            &plane,
+            [16, 16],
+            origin,
+            step,
+            [1, 1],
+            3,
+            8,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
+        assert_eq!(out, [72]);
+    }
     #[test]
     fn interpolation_integer_identity_bilinear_and_border_extension() {
         let p = Plane {

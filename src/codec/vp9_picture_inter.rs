@@ -481,11 +481,6 @@ impl Decoder<'_> {
                 "VP9 reference depth differs from the current picture",
             ));
         }
-        if reference.size != picture_size {
-            return Err(crate::unsupported(
-                "VP9 scaled references are not yet supported",
-            ));
-        }
         let sub = usize::from(plane > 0);
         let mut mv = block.mvs[0];
         if w < 8 || h < 8 {
@@ -508,17 +503,17 @@ impl Decoder<'_> {
             let extend = (4 + ((units[i] * 8) >> sub)) * 16;
             mv[i] = ((2 * mv[i]) >> sub).clamp(near - extend, far + extend - 16);
         }
+        let (origin, step) = vp9_motion::scaled_coordinates(
+            reference.size, picture_size, [x, y], mv, sub,
+        )?;
         vp9_motion::interpolate(
             &reference.planes[plane],
             [
                 reference.size[0].div_ceil(1 << sub) as usize,
                 reference.size[1].div_ceil(1 << sub) as usize,
             ],
-            [
-                (x * 16) as i64 + i64::from(mv[1]),
-                (y * 16) as i64 + i64::from(mv[0]),
-            ],
-            [16, 16],
+            origin,
+            step,
             [size, size],
             block.filter,
             picture_depth,
