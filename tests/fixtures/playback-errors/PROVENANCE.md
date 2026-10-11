@@ -5950,3 +5950,13 @@ their failure picture, and check exact parser/period errors, valid preceding
 pixels, poisoning and recovery after decoder reset. They do not count as
 playback acceptance. Full-reset coverage here is internal-base IDR behavior;
 retained inter-layer full-reset references are not qualified by these files.
+
+`generate_hevc_poc_reset_fixtures.py --chroma420` creates the disjoint
+`hevc-poc-420-*` family using original `hevc-pcm-reference-rext8.mp4` and its
+saved YUV oracle. The same owned header/box transformations author five
+acceptance and five Invalid files. Software compares all three pixel planes;
+the automatic reader also compares VideoToolbox planes8 output with owned
+software, including seek/rewind. The local feature run selected hardware for
+MSB reset, same-period signalled reset and IDR full reset. Generation itself
+uses only owned Rust metadata parsing and Python, never VideoToolbox, FFmpeg,
+an external codec or network. Ordinary tests do not invoke the generator.

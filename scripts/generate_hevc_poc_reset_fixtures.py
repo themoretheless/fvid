@@ -7,6 +7,7 @@ Generation is explicit and separate from ordinary test execution.
 import json
 import struct
 import subprocess
+import argparse
 from pathlib import Path
 from generate_he_aac_packet_fixtures import DEST, boxes
 from generate_hevc_colour_plane_fixtures import bits, packed, escape, unescape, child, packet_units
@@ -41,7 +42,7 @@ def sps_width(nal):
     r = Reader(value, 104)
     r.ue()
     chroma = r.ue()
-    assert chroma == 0, 'monochrome source required'
+    assert chroma in (0, 1), 'monochrome or 4:2:0 source required'
     r.ue(); r.ue()
     if r.read(1):
         for _ in range(4): r.ue()
@@ -81,8 +82,12 @@ def reset_pps(nal):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--chroma420', action='store_true', help='generate the disjoint 4:2:0 family')
+    args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    seed = DEST / 'hevc-pcm-mono-reference-rext8.mp4'
+    seed = DEST / ('hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
+    stem = 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -174,13 +179,13 @@ def main():
             elif tag == b'tkhd': payload = payload[:20] + struct.pack('>I', len(outputs)) + payload[24:]
             return box(tag, payload)
 
-        name = f'hevc-poc-{label}-synthetic.mp4'
+        name = f'{stem}-{label}-synthetic.mp4'
         (DEST / name).write_bytes(box(b'ftyp', roots[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', roots[b'moov']))
         cases.append(dict(file=name, expectation='invalid' if label.startswith('bad-') else 'acceptance',
                           frames=len(outputs), resets=[] if not reset else ([0, 17, 33] if idr_family else [17, 33]),
                           signalled=[1, 18, 34] if label == 'full-reset' else [18] if label.endswith('signalled') else [],
                           failure_picture=(17 if label in ('bad-full-nonidr', 'bad-empty') else 18) if label.startswith('bad-') else None))
-    (DEST / 'hevc-poc-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
+    (DEST / f'{stem}-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
         provenance='Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.'), indent=2) + '\n')
 
 
