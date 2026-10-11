@@ -1,0 +1,1265 @@
+{
+  "cases": [
+    {
+      "file": "vp9-chroma-inter-420-8-zero.webm",
+      "oracle": "vp9-chroma-inter-420-8-zero.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-integer.webm",
+      "oracle": "vp9-chroma-inter-420-8-integer.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-fractional.webm",
+      "oracle": "vp9-chroma-inter-420-8-fractional.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-opposite.webm",
+      "oracle": "vp9-chroma-inter-420-8-opposite.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-420-8-filter-smooth.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-420-8-filter-regular.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-420-8-filter-sharp.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-420-8-sub8.webm",
+      "oracle": "vp9-chroma-inter-420-8-sub8.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-zero.webm",
+      "oracle": "vp9-chroma-inter-422-8-zero.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-integer.webm",
+      "oracle": "vp9-chroma-inter-422-8-integer.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-fractional.webm",
+      "oracle": "vp9-chroma-inter-422-8-fractional.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-opposite.webm",
+      "oracle": "vp9-chroma-inter-422-8-opposite.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-422-8-filter-smooth.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-422-8-filter-regular.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-422-8-filter-sharp.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-422-8-sub8.webm",
+      "oracle": "vp9-chroma-inter-422-8-sub8.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-zero.webm",
+      "oracle": "vp9-chroma-inter-444-8-zero.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-integer.webm",
+      "oracle": "vp9-chroma-inter-444-8-integer.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-fractional.webm",
+      "oracle": "vp9-chroma-inter-444-8-fractional.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-opposite.webm",
+      "oracle": "vp9-chroma-inter-444-8-opposite.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-444-8-filter-smooth.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-444-8-filter-regular.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-444-8-filter-sharp.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-444-8-sub8.webm",
+      "oracle": "vp9-chroma-inter-444-8-sub8.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-zero.webm",
+      "oracle": "vp9-chroma-inter-440-8-zero.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-integer.webm",
+      "oracle": "vp9-chroma-inter-440-8-integer.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-fractional.webm",
+      "oracle": "vp9-chroma-inter-440-8-fractional.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-opposite.webm",
+      "oracle": "vp9-chroma-inter-440-8-opposite.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-440-8-filter-smooth.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-440-8-filter-regular.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-440-8-filter-sharp.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-440-8-sub8.webm",
+      "oracle": "vp9-chroma-inter-440-8-sub8.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-zero.webm",
+      "oracle": "vp9-chroma-inter-420-10-zero.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-integer.webm",
+      "oracle": "vp9-chroma-inter-420-10-integer.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-fractional.webm",
+      "oracle": "vp9-chroma-inter-420-10-fractional.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-opposite.webm",
+      "oracle": "vp9-chroma-inter-420-10-opposite.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-420-10-filter-smooth.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-420-10-filter-regular.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-420-10-filter-sharp.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-420-10-sub8.webm",
+      "oracle": "vp9-chroma-inter-420-10-sub8.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-zero.webm",
+      "oracle": "vp9-chroma-inter-422-10-zero.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-integer.webm",
+      "oracle": "vp9-chroma-inter-422-10-integer.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-fractional.webm",
+      "oracle": "vp9-chroma-inter-422-10-fractional.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-opposite.webm",
+      "oracle": "vp9-chroma-inter-422-10-opposite.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-422-10-filter-smooth.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-422-10-filter-regular.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-422-10-filter-sharp.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-422-10-sub8.webm",
+      "oracle": "vp9-chroma-inter-422-10-sub8.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-zero.webm",
+      "oracle": "vp9-chroma-inter-444-10-zero.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-integer.webm",
+      "oracle": "vp9-chroma-inter-444-10-integer.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-fractional.webm",
+      "oracle": "vp9-chroma-inter-444-10-fractional.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-opposite.webm",
+      "oracle": "vp9-chroma-inter-444-10-opposite.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-444-10-filter-smooth.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-444-10-filter-regular.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-444-10-filter-sharp.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-444-10-sub8.webm",
+      "oracle": "vp9-chroma-inter-444-10-sub8.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-zero.webm",
+      "oracle": "vp9-chroma-inter-440-10-zero.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-integer.webm",
+      "oracle": "vp9-chroma-inter-440-10-integer.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-fractional.webm",
+      "oracle": "vp9-chroma-inter-440-10-fractional.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-opposite.webm",
+      "oracle": "vp9-chroma-inter-440-10-opposite.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-440-10-filter-smooth.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-440-10-filter-regular.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-440-10-filter-sharp.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-440-10-sub8.webm",
+      "oracle": "vp9-chroma-inter-440-10-sub8.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-zero.webm",
+      "oracle": "vp9-chroma-inter-420-12-zero.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-integer.webm",
+      "oracle": "vp9-chroma-inter-420-12-integer.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-fractional.webm",
+      "oracle": "vp9-chroma-inter-420-12-fractional.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-opposite.webm",
+      "oracle": "vp9-chroma-inter-420-12-opposite.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-420-12-filter-smooth.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-420-12-filter-regular.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-420-12-filter-sharp.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-420-12-sub8.webm",
+      "oracle": "vp9-chroma-inter-420-12-sub8.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-zero.webm",
+      "oracle": "vp9-chroma-inter-422-12-zero.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-integer.webm",
+      "oracle": "vp9-chroma-inter-422-12-integer.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-fractional.webm",
+      "oracle": "vp9-chroma-inter-422-12-fractional.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-opposite.webm",
+      "oracle": "vp9-chroma-inter-422-12-opposite.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-422-12-filter-smooth.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-422-12-filter-regular.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-422-12-filter-sharp.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-422-12-sub8.webm",
+      "oracle": "vp9-chroma-inter-422-12-sub8.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-zero.webm",
+      "oracle": "vp9-chroma-inter-444-12-zero.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-integer.webm",
+      "oracle": "vp9-chroma-inter-444-12-integer.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-fractional.webm",
+      "oracle": "vp9-chroma-inter-444-12-fractional.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-opposite.webm",
+      "oracle": "vp9-chroma-inter-444-12-opposite.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-444-12-filter-smooth.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-444-12-filter-regular.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-444-12-filter-sharp.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-444-12-sub8.webm",
+      "oracle": "vp9-chroma-inter-444-12-sub8.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-zero.webm",
+      "oracle": "vp9-chroma-inter-440-12-zero.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-integer.webm",
+      "oracle": "vp9-chroma-inter-440-12-integer.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        16,
+        -16
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-fractional.webm",
+      "oracle": "vp9-chroma-inter-440-12-fractional.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-opposite.webm",
+      "oracle": "vp9-chroma-inter-440-12-opposite.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        -6,
+        10
+      ]
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-filter-smooth.webm",
+      "oracle": "vp9-chroma-inter-440-12-filter-smooth.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 0
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-filter-regular.webm",
+      "oracle": "vp9-chroma-inter-440-12-filter-regular.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 1
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-filter-sharp.webm",
+      "oracle": "vp9-chroma-inter-440-12-filter-sharp.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        6,
+        -10
+      ],
+      "raw_filter": 2
+    },
+    {
+      "file": "vp9-chroma-inter-440-12-sub8.webm",
+      "oracle": "vp9-chroma-inter-440-12-sub8.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "motion": [
+        [
+          6,
+          -10
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          16,
+          -16
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "key_size": [
+        16,
+        16
+      ]
+    }
+  ],
+  "provenance": "Original coloured lossless keyframe and owned Boolean-coded single-reference skipped inter picture. Independent Python bilinear interpolation with signed coordinates, two-pass rounding and replicated borders supplies every expected sample. No private media, external codec, FFmpeg or network."
+}

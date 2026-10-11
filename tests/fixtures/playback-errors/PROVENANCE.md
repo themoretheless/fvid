@@ -6155,3 +6155,42 @@ Arbitrary directional/full-chroma inter streams and non-neutral filtering
 still need independent video oracles. Per-axis scaling and sub-8x8 motion
 pair selection are additionally tested against explicit normative values.
 Segmentation and compound prediction remain unsupported.
+
+### VP9 full-chroma inter motion oracles (2026-10-11)
+
+`generate_vp9_chroma_inter.py` authors 96 two-picture WebM videos with
+original lossless coloured keyframes and skipped single-reference inter
+pictures. The generator shares only the owned Boolean writer, original
+keyframe authoring and standard probability/filter tables. It invokes no
+external codec, FFmpeg/libav, private source or network.
+
+At each of 8/10/12 bits and 420/422/444/440, the eight cases are:
+
+- Zero motion, integer `[16, -16]`, fractional `[6, -10]` and opposite
+  fractional `[-6, 10]` (vectors in eighth-luma-sample units), with bilinear
+  interpolation and replicated reference borders.
+- The same fractional motion with smooth, regular and sharp 8-tap filters.
+- A 16x16 keyframe followed by an 8x8 inter frame partitioned into four
+  4x4 luma blocks with different signed vectors. The reference is exactly
+  twice the coded size. Chroma uses the prescribed per-format vector pairs,
+  including the cross-row bottom 422 pair; all four formats are checked.
+
+Independent Python interpolation computes every saved little-endian
+`.yuv16` sample. Bilinear cases use explicit 16-weight interpolation and
+rounding in each pass. The other filters use standard taps with independent
+scalar convolution, signed floor coordinates, rounding, clipping and border
+replication. Sub-8x8 oracles independently select and round vector pairs
+before the exact two-times reference scaling. No production decoder,
+motion helper, predictor or transform computes the expected inter pixels.
+
+`vp9_chroma_inter.rs` verifies all 96 direct decoder outputs and reset
+replay against these oracles. Playback checks cover the original depth,
+explicit chroma geometry, packed 8-bit planes, timestamps, EOF, rewind and
+sync seek for every video. Only the first packet is marked as a sync frame.
+The previous generator's 58 artifacts remain byte-identical after its
+keyframe helper gains the explicitly bounded 16x16 authoring option.
+
+These qualify the stated single-reference skip/motion/filter cases, not
+compound prediction, segmentation, arbitrary scaled ratios, reference
+refresh combinations, lossy inter residuals or non-neutral loop filtering.
+Those remain separate qualification/implementation work.

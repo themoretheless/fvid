@@ -28,7 +28,7 @@ def frame(depth, chroma, width=64, height=64, level=0, tile=None):
     return bytes(int(bits[i:i+8], 2) for i in range(0,len(bits),8)) + (bytes(32) + (bytes(4096) if tile is None else tile))
 def table(name):
     text=(ROOT/'src/codec/vp9_tables.rs').read_text()
-    value=re.search(r'pub const '+name+r':.*?= (\[.*?\]);',text,re.S).group(1)
+    value=re.search(r'pub const '+name+r':[^=]+=\s*(\[.*?\]);',text,re.S).group(1)
     return ast.literal_eval(value)
 class BooleanWriter:
     """Exact integer interval coding, with an arbitrary-precision lower bound."""
@@ -45,17 +45,17 @@ class BooleanWriter:
         bits=f'{self.low:0{8+self.shifts}b}'
         bits+='0'*(-len(bits)%8)
         return bytes(int(bits[i:i+8],2) for i in range(0,len(bits),8))+bytes(8)
-def coloured(depth,chroma):
+def coloured(depth,chroma,side=64):
     subs={'420':(1,1),'422':(1,0),'444':(0,0),'440':(0,1)}[chroma]
     coef=table('DEFAULT_COEF_PROBS')[0]; pareto=table('PARETO_TABLE')
     b=BooleanWriter()
-    b.write(table('KF_PARTITION_PROBS')[12][0],0)
+    b.write(table('KF_PARTITION_PROBS')[{64:12,16:4}[side]][0],0)
     b.write(table('DEFAULT_SKIP_PROB')[0],0)
     b.write(table('KF_Y_MODE_PROBS')[0][0][0],0)
     b.write(table('KF_UV_MODE_PROBS')[0][0],0)
     expected=bytearray()
     for plane in range(3):
-        sx,sy=subs if plane else (0,0); w,h=64>>sx,64>>sy
+        sx,sy=subs if plane else (0,0); w,h=side>>sx,side>>sy
         pixels=[0]*(w*h)
         for y in range(0,h,4):
             for x in range(0,w,4):
@@ -78,7 +78,7 @@ def coloured(depth,chroma):
                 value=dc+(1 if plane==1 else -1 if plane==2 else 0)
                 for yy in range(4): pixels[(y+yy)*w+x:(y+yy)*w+x+4]=[value]*4
         for value in pixels: expected+=value.to_bytes(2,'little')
-    return frame(depth,chroma,tile=b.finish()),expected
+    return frame(depth,chroma,width=side,height=side,tile=b.finish()),expected
 def webm(packets):
     video=ebml('b0',b'\x40')+ebml('ba',b'\x40')
     track=ebml('d7',b'\1')+ebml('83',b'\1')+ebml('86',b'V_VP9')+ebml('23e383',(333333333).to_bytes(4,'big'))+ebml('e0',video)

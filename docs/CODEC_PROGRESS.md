@@ -11995,3 +11995,25 @@ Validation: 27 VP9 codec unit tests; 6 chroma integration tests; existing
 scaled-reference, native WebM lossless and playback-error suites passed
 without FFmpeg. Player feature compilation also passed. All 58 generated
 fixtures/oracles/manifest files regenerate byte-identically.
+
+### 2026-10-11 — VP9 full-chroma inter acceptance
+
+Added 96 original two-picture videos across 420/422/444/440 and 8/10/12
+bits. Independent saved sample oracles qualify zero, integer and opposite
+fractional motion, all four interpolation filters, border extension, and
+four distinct sub-8x8 vectors with exactly two-times scaled references.
+The direct decoder and WebM playback match every expected sample. Playback
+also checks geometry, full depth, timestamps, EOF, seek and rewind. The
+existing chroma and scaled-reference suites remain green (11 integration
+tests total). The new qualification required no production codec change.
+
+The owned table reader now handles declarations whose initializer begins
+on the following line without accidentally reading the next constant.
+The keyframe generator can author bounded 16x16 seeds as well as 64x64;
+its existing 58 generated artifacts are unchanged. Fixture generation and
+ordinary tests use neither FFmpeg/libav nor network.
+
+Compound prediction, segmentation, general reference refresh combinations,
+arbitrary reference scales, full-chroma lossy inter residuals and non-neutral
+loop-filter video oracles remain open. This does not complete the overall
+codec-gap objective.
