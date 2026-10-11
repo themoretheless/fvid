@@ -83,7 +83,7 @@ fn reset_fixture_pps_flag_is_admitted() {
 
 #[test]
 fn reset_video_preserves_pixels_and_translates_poc_once() {
-    for prefix in ["", "multislice-"] {
+    for prefix in ["", "multislice-", "dependent-"] {
         let baseline = decode(&format!("hevc-poc-{prefix}baseline-synthetic.mp4"));
         for kind in ["msb-reset", "msb-reset-signalled"] {
             let actual = decode(&format!("hevc-poc-{prefix}{kind}-synthetic.mp4"));
@@ -126,6 +126,18 @@ fn reset_video_software_seek_and_rewind_match_baseline() {
         (
             "multislice-full-reset",
             "hevc-poc-multislice-idr-baseline-synthetic.mp4",
+        ),
+        (
+            "dependent-msb-reset",
+            "hevc-poc-dependent-baseline-synthetic.mp4",
+        ),
+        (
+            "dependent-msb-reset-signalled",
+            "hevc-poc-dependent-baseline-synthetic.mp4",
+        ),
+        (
+            "dependent-full-reset",
+            "hevc-poc-dependent-idr-baseline-synthetic.mp4",
         ),
         (
             "long-term-msb-reset",
@@ -182,7 +194,7 @@ fn reset_video_software_seek_and_rewind_match_baseline() {
 
 #[test]
 fn full_reset_at_idr_and_same_period_signalled_reset_preserve_pixels() {
-    for prefix in ["", "420-", "long-term-", "multislice-"] {
+    for prefix in ["", "420-", "long-term-", "multislice-", "dependent-"] {
         let baseline = decode(&format!("hevc-poc-{prefix}idr-baseline-synthetic.mp4"));
         let actual = decode(&format!("hevc-poc-{prefix}full-reset-synthetic.mp4"));
         assert_eq!(baseline.len(), 35);
@@ -203,7 +215,7 @@ fn full_reset_at_idr_and_same_period_signalled_reset_preserve_pixels() {
 
 #[test]
 fn malformed_reset_video_fails_at_specific_picture_and_reset_recovers() {
-    for prefix in ["", "420-", "long-term-", "multislice-"] {
+    for prefix in ["", "420-", "long-term-", "multislice-", "dependent-"] {
         let baseline = decode(&format!("hevc-poc-{prefix}baseline-synthetic.mp4"));
         for (kind, failure, message) in [
             (
@@ -234,7 +246,7 @@ fn malformed_reset_video_fails_at_specific_picture_and_reset_recovers() {
                 "HEVC slices disagree on POC reset syntax",
             ),
         ] {
-            if kind.starts_with("bad-slice-") && prefix != "multislice-" {
+            if kind.starts_with("bad-slice-") && !matches!(prefix, "multislice-" | "dependent-") {
                 continue;
             }
             let mut movie = Mp4Reader::open(
@@ -295,7 +307,7 @@ fn automatic_reset_playback_matches_owned_software() {
             ]
         }
     }
-    for family in ["420", "long-term", "multislice"] {
+    for family in ["420", "long-term", "multislice", "dependent"] {
         for kind in ["msb-reset", "msb-reset-signalled", "full-reset"] {
             let name = format!("hevc-poc-{family}-{kind}-synthetic.mp4");
             let bytes = fixture(&name);
@@ -362,6 +374,7 @@ fn owned_420_reset_pixels_match_baseline_and_saved_seed_oracle() {
         ("420", "hevc-pcm-reference-rext8.yuv"),
         ("long-term", "hevc-long-term-rext8.yuv"),
         ("multislice", "hevc-chroma-qp-list-slices-rext8.yuv"),
+        ("dependent", "hevc-chroma-qp-list-dependent-rext8.yuv"),
     ] {
         let gold = fixture(oracle);
         assert_eq!(gold.len(), 3 * 64 * 64 * 3 / 2);
@@ -402,48 +415,65 @@ fn owned_420_reset_pixels_match_baseline_and_saved_seed_oracle() {
 #[test]
 fn multislice_reset_headers_agree_and_malformed_variants_diverge_only_at_reset() {
     use fvid::codec::hevc_poc::{Reset, ResetSyntax};
-    for kind in ["msb-reset", "bad-slice-period", "bad-slice-reset"] {
-        let name = format!("hevc-poc-multislice-{kind}-synthetic.mp4");
-        let mut movie = Mp4Reader::open(Cursor::new(fixture(&name)), Default::default()).unwrap();
-        let mut decoder =
-            HevcDecoder::from_configuration(&movie.tracks()[0].configuration, 32 << 20).unwrap();
-        let mut packet = Vec::new();
-        for index in 0..35 {
-            movie.read_packet(0, index, &mut packet).unwrap();
-            let headers = decoder.slice_headers(&packet).unwrap();
-            assert_eq!(headers.len(), 4);
-            assert_eq!(
-                headers.iter().map(|h| h.address).collect::<Vec<_>>(),
-                [0, 1, 2, 3]
-            );
-            assert!(headers[0].first && headers[1..].iter().all(|h| !h.first));
-            let syntax = headers
-                .iter()
-                .map(|h| ResetSyntax::parse_base(&h.extension, true, 4, h.nal, false).unwrap())
-                .collect::<Vec<_>>();
-            if index == 17 && kind.starts_with("bad-") {
-                assert_eq!(syntax[0].reset, Some(Reset::Msb));
-                assert_eq!(syntax[0].period, Some(7));
-                assert!(syntax[1..].iter().all(|s| *s != syntax[0]));
-                if kind == "bad-slice-period" {
-                    assert!(syntax[1..]
-                        .iter()
-                        .all(|s| s.reset == Some(Reset::Msb) && s.period == Some(8)));
-                } else {
-                    assert!(syntax[1..].iter().all(|s| *s == ResetSyntax::default()));
+    for family in ["multislice", "dependent"] {
+        for kind in ["msb-reset", "bad-slice-period", "bad-slice-reset"] {
+            let name = format!("hevc-poc-{family}-{kind}-synthetic.mp4");
+            let mut movie =
+                Mp4Reader::open(Cursor::new(fixture(&name)), Default::default()).unwrap();
+            let mut decoder =
+                HevcDecoder::from_configuration(&movie.tracks()[0].configuration, 32 << 20)
+                    .unwrap();
+            let mut packet = Vec::new();
+            for index in 0..35 {
+                movie.read_packet(0, index, &mut packet).unwrap();
+                let headers = decoder.slice_headers(&packet).unwrap();
+                assert_eq!(headers.len(), 4);
+                assert_eq!(
+                    headers.iter().map(|h| h.address).collect::<Vec<_>>(),
+                    [0, 1, 2, 3]
+                );
+                assert!(headers[0].first && headers[1..].iter().all(|h| !h.first));
+                assert!(!headers[0].dependent);
+                assert!(headers[1..]
+                    .iter()
+                    .all(|h| h.dependent == (family == "dependent")));
+                if family == "dependent" {
+                    for h in &headers[1..] {
+                        assert_eq!(h.poc_lsb, headers[0].poc_lsb);
+                        assert_eq!(h.qp, headers[0].qp);
+                        assert_eq!(h.temporal_mvp, headers[0].temporal_mvp);
+                        assert_eq!(h.references, headers[0].references);
+                        assert_eq!(h.short_term, headers[0].short_term);
+                    }
                 }
-                break;
+                let syntax = headers
+                    .iter()
+                    .map(|h| ResetSyntax::parse_base(&h.extension, true, 4, h.nal, false).unwrap())
+                    .collect::<Vec<_>>();
+                if index == 17 && kind.starts_with("bad-") {
+                    assert_eq!(syntax[0].reset, Some(Reset::Msb));
+                    assert_eq!(syntax[0].period, Some(7));
+                    assert!(syntax[1..].iter().all(|s| *s != syntax[0]));
+                    if kind == "bad-slice-period" {
+                        assert!(syntax[1..]
+                            .iter()
+                            .all(|s| s.reset == Some(Reset::Msb) && s.period == Some(8)));
+                    } else {
+                        assert!(syntax[1..].iter().all(|s| *s == ResetSyntax::default()));
+                    }
+                    break;
+                }
+                assert!(syntax.iter().all(|s| *s == syntax[0]));
+                assert_eq!(
+                    syntax[0].reset,
+                    if matches!(index, 17 | 33) {
+                        Some(Reset::Msb)
+                    } else {
+                        None
+                    }
+                );
+                decoder.decode_packet(&packet).unwrap().unwrap();
             }
-            assert!(syntax.iter().all(|s| *s == syntax[0]));
-            assert_eq!(
-                syntax[0].reset,
-                if matches!(index, 17 | 33) {
-                    Some(Reset::Msb)
-                } else {
-                    None
-                }
-            );
-            decoder.decode_packet(&packet).unwrap().unwrap();
         }
     }
 }

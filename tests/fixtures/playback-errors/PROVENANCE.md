@@ -5990,3 +5990,23 @@ period ID and absent reset in the final three slices of picture 17. Saved
 fixtures are consumed without generation in ordinary tests. Tests check every
 preceding picture, exact errors, poisoning and explicit decoder reset recovery.
 This family does not qualify dependent-slice inheritance or layered VPS reset.
+
+### Dependent-segment HEVC POC reset family
+
+`generate_hevc_poc_reset_fixtures.py --dependent` uses the documented original
+`hevc-chroma-qp-list-dependent-rext8.mp4` I/B/B seed and its historical saved
+YUV oracle. The twelve new `hevc-poc-dependent-*-synthetic.mp4` files contain
+35 pictures with one independent and three dependent segments at CTU addresses
+0/1/2/3. Header rewriting narrows POC LSB only in the independent segment;
+dependent segments preserve inherited picture syntax and CABAC payloads.
+The reset extension is separately authored for each segment, as specified by
+H.265 Annex F.7.3.6.1 outside the independent-segment conditional.
+
+Five files are valid acceptance streams; seven are exact Invalid reproductions.
+Two latter files change only reset presence or period in dependent segments at
+picture 17. Tests verify actual dependent flags, inherited POC/RPS/QP/reference
+metadata, reset payloads, preceding pictures, exact refusal and reset recovery.
+The generator uses only owned Rust metadata and Python rewriting. Neither it
+nor the ordinary tests invokes FFmpeg, HM or a network service; no private media
+or parameter sets are included. Layered-VPS/inter-layer reset is outside this
+family's qualification.

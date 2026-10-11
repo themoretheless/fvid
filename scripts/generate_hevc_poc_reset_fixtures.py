@@ -86,11 +86,12 @@ def main():
     parser.add_argument('--chroma420', action='store_true', help='generate the disjoint 4:2:0 family')
     parser.add_argument('--longterm', action='store_true', help='generate the disjoint explicit long-term family')
     parser.add_argument('--multislice', action='store_true', help='generate the disjoint four-slice reset agreement family')
+    parser.add_argument('--dependent', action='store_true', help='generate one independent and three dependent segment reset family')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    assert sum((args.chroma420, args.longterm, args.multislice)) <= 1, 'choose one family'
-    seed = DEST / ('hevc-chroma-qp-list-slices-rext8.mp4' if args.multislice else 'hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
-    stem = 'hevc-poc-multislice' if args.multislice else 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
+    assert sum((args.chroma420, args.longterm, args.multislice, args.dependent)) <= 1, 'choose one family'
+    seed = DEST / ('hevc-chroma-qp-list-dependent-rext8.mp4' if args.dependent else 'hevc-chroma-qp-list-slices-rext8.mp4' if args.multislice else 'hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
+    stem = 'hevc-poc-dependent' if args.dependent else 'hevc-poc-multislice' if args.multislice else 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -99,7 +100,7 @@ def main():
     stbl = child(child(child(child(roots[b'moov'], b'trak'), b'mdia'), b'minf'), b'stbl')
     table = child(stbl, b'stsz')
     constant, count = struct.unpack_from('>II', table, 4)
-    assert constant == 0 and count == 3 and not meta['dependent_enabled']
+    assert constant == 0 and count == 3 and meta['dependent_enabled'] == args.dependent
     sizes = struct.unpack('>3I', table[12:])
     offset = struct.unpack_from('>I', child(stbl, b'stco'), 8)[0]
     packets = []
@@ -110,7 +111,7 @@ def main():
     cases = []
     labels = ['baseline', 'msb-reset', 'msb-reset-signalled', 'idr-baseline', 'full-reset',
               'bad-full-nonidr', 'bad-period-repeat', 'bad-anchor', 'bad-truncated', 'bad-empty']
-    if args.multislice: labels += ['bad-slice-period', 'bad-slice-reset']
+    if args.multislice or args.dependent: labels += ['bad-slice-period', 'bad-slice-reset']
     for label in labels:
         reset = label not in ('baseline', 'idr-baseline')
         idr_family = label in ('idr-baseline', 'full-reset')
@@ -132,12 +133,12 @@ def main():
             source = min(epoch, 2)
             units = packet_units(packets[source])
             assert len(units) == len(meta['packets'][source])
-            if args.multislice: assert len(units) == 4
+            if args.multislice or args.dependent: assert len(units) == 4
             out = []
             for unit, info in zip(units, meta['packets'][source]):
                 nal = unit[4:]
-                assert not info['dependent']
-                assert info['first'] or args.multislice
+                assert not info['dependent'] or args.dependent
+                assert info['first'] or args.multislice or args.dependent
                 value = bits(bytes(info['rbsp']))
                 end = info['entropy_byte_offset'] * 8
                 alignment = value[:end].rfind('1')
@@ -145,11 +146,14 @@ def main():
                 r.read(1)
                 if info['idr']: r.read(1)
                 r.ue()
-                if not info['first']: r.read((meta['ctu_count'] - 1).bit_length())
-                r.read(meta['extra_bits']); r.ue()
-                if meta['output_flag']: r.read(1)
+                if not info['first']:
+                    if meta['dependent_enabled']: assert bool(r.read(1)) == info['dependent']
+                    r.read((meta['ctu_count'] - 1).bit_length())
+                if not info['dependent']:
+                    r.read(meta['extra_bits']); r.ue()
+                    if meta['output_flag']: r.read(1)
                 prefix = value[:r.at]
-                if not info['idr']:
+                if not info['idr'] and not info['dependent']:
                     prefix += f'{epoch % 16:04b}'
                     r.read(original_width)
                     if args.longterm:
