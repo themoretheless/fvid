@@ -11556,3 +11556,17 @@ playback; PPS admission remains unchanged until period tracking, slice syntax,
 DPB translation and synthetic video acceptance are connected together.
 Validation of this step: all six standalone hevc_poc unit tests passed offline
 on the final source, including the wide decrement cases; git diff --check passed.
+
+`ResetSyntax::parse_base` now represents the Annex F.7.3.6.1 reset header
+extension independently of decoder admission. It reads only the supplied
+declared extension bytes, including period ID, signalled full/LSB fields and
+explicit/inferred MSB-cycle presence. Base-layer F-55 simplifies CRA/BLA cycle
+presence independently of LSB alignment because there are no direct reference
+layers. Remaining future extension bits are ignored, not treated as alignment
+or CABAC. NAL restrictions reject idc 1/2 on RASL/RADL/SLNR or temporal-ID>0,
+idc 2 on a non-IDR internal base picture, and idc 3 on CRA/BLA. Tests cover
+each operation, inferred and explicit cycles, future tails, truncated payloads
+and those NAL restrictions. All ten standalone hevc_poc tests passed offline;
+these are syntax/arithmetic tests, not acceptance of reset-coded playback.
+The existing PPS refusal is unchanged until stateful period/DPB integration
+and the synthetic video acceptance family are implemented.

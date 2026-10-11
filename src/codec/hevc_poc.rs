@@ -49,6 +49,68 @@ pub enum Reset {
     Signalled { full: bool, lsb: u32 },
 }
 
+/// Annex F.7.3.6.1 syntax for an internal base layer. The byte slice is the
+/// declared header-extension payload only, never CABAC or byte-alignment data.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ResetSyntax {
+    pub reset: Option<Reset>,
+    pub period: Option<u8>,
+    pub msb_cycle: Option<u32>,
+}
+impl ResetSyntax {
+    pub fn parse_base(
+        extension: &[u8],
+        reset_info_present: bool,
+        poc_bits: u8,
+        nal: NalHeader,
+        lsb_aligned: bool,
+    ) -> Result<Self> {
+        nal.require_base_layer()?;
+        if !nal.is_vcl() || !(4..=16).contains(&poc_bits) {
+            return Err(invalid("invalid HEVC POC reset slice context"));
+        }
+        let mut b = super::bits::BitReader::new(extension);
+        let idc = if reset_info_present { b.read(2)? } else { 0 };
+        let period = if idc != 0 { Some(b.read(6)? as u8) } else { None };
+        if matches!(idc, 1 | 2) && !updates_previous(nal) {
+            return Err(invalid("HEVC POC reset requires a reference picture at temporal ID zero"));
+        }
+        if idc == 2 && !nal.is_idr() {
+            return Err(invalid("HEVC internal base-layer full POC reset requires IDR"));
+        }
+        if idc == 3 && matches!(nal.unit_type, 16..=18 | 21) {
+            return Err(invalid("HEVC CRA/BLA cannot use signalled POC reset"));
+        }
+        let reset = match idc {
+            0 => None,
+            1 => Some(Reset::Msb),
+            2 => Some(Reset::Full),
+            _ => Some(Reset::Signalled { full: b.bit()?, lsb: b.read(poc_bits)? }),
+        };
+        // A base layer has no direct reference layers, so F-55 reduces to
+        // CraOrBlaPicFlag regardless of the VPS LSB-alignment flag.
+        let msb_required = matches!(nal.unit_type, 16..=18 | 21);
+        let cycle_present = if extension.is_empty() {
+            false
+        } else if msb_required {
+            true
+        } else if lsb_aligned {
+            b.bit()?
+        } else {
+            false
+        };
+        let msb_cycle = if cycle_present {
+            let cycle = b.unsigned_golomb()?;
+            if u64::from(cycle) > (1u64 << (32 - poc_bits)) {
+                return Err(invalid("HEVC reset POC cycle out of range"));
+            }
+            Some(cycle)
+        } else { None };
+        // Remaining extension_data_bit values have no base-layer semantics.
+        Ok(Self { reset, period, msb_cycle })
+    }
+}
+
 /// Equations (F-60) and (F-61): current POC and the amount to subtract from
 /// retained reference POCs. `previous == None` means no picture in this layer
 /// has been decoded, so there is no reference decrement. This does not admit
@@ -103,6 +165,51 @@ pub fn derive_reset(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn nal(unit_type: u8) -> NalHeader {
+        NalHeader { unit_type, layer_id: 0, temporal_id: 0 }
+    }
+
+    #[test]
+    fn reset_extension_decodes_all_operations_and_keeps_future_tail() {
+        let parse = |bytes: &[u8], ty| ResetSyntax::parse_base(bytes, true, 4, nal(ty), false).unwrap();
+        assert_eq!(parse(&[0x41], 1), ResetSyntax { reset: Some(Reset::Msb), period: Some(1), msb_cycle: None });
+        assert_eq!(parse(&[0x81], 19).reset, Some(Reset::Full));
+        assert_eq!(parse(&[0xc2, 0xf0], 1).reset, Some(Reset::Signalled { full: true, lsb: 14 }));
+        assert_eq!(parse(&[0xc2, 0x70], 1).reset, Some(Reset::Signalled { full: false, lsb: 14 }));
+        assert_eq!(parse(&[0xc2, 0xf7, 0xff], 1), parse(&[0xc2, 0xf0], 1));
+        assert_eq!(parse(&[0], 1), ResetSyntax::default());
+    }
+
+    #[test]
+    fn reset_extension_infers_and_reads_cycle_presence() {
+        assert_eq!(ResetSyntax::parse_base(&[0x41, 0x20], true, 4, nal(21), false).unwrap().msb_cycle, Some(3));
+        assert_eq!(ResetSyntax::parse_base(&[0x24], true, 4, nal(1), true).unwrap().msb_cycle, Some(3));
+        assert_eq!(ResetSyntax::parse_base(&[], false, 4, nal(21), false).unwrap(), ResetSyntax::default());
+        assert_eq!(ResetSyntax::parse_base(&[0x20], false, 4, nal(21), false).unwrap().msb_cycle, Some(3));
+    }
+
+    #[test]
+    fn reset_extension_never_reads_beyond_declared_payload() {
+        for (bytes, ty) in [(&[][..], 1), (&[0xc2][..], 1), (&[0x41][..], 21), (&[0x20][..], 1)] {
+            let aligned = bytes == [0x20];
+            assert!(ResetSyntax::parse_base(bytes, true, 16, nal(ty), aligned).is_err());
+        }
+    }
+
+    #[test]
+    fn reset_extension_enforces_base_layer_nal_constraints() {
+        for ty in [0, 2, 4, 6, 7, 8, 9] {
+            assert!(ResetSyntax::parse_base(&[0x41], true, 4, nal(ty), false).is_err());
+        }
+        assert!(ResetSyntax::parse_base(&[0x81], true, 4, nal(1), false).is_err());
+        for ty in [16, 17, 18, 21] {
+            assert!(ResetSyntax::parse_base(&[0xc2, 0xf0], true, 4, nal(ty), false).is_err());
+        }
+        let mut temporal = nal(1);
+        temporal.temporal_id = 1;
+        assert!(ResetSyntax::parse_base(&[0x41], true, 4, temporal, false).is_err());
+    }
 
     #[test]
     fn reset_translation_preserves_reference_distances_across_wrap() {
