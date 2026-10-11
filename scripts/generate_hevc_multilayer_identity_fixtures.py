@@ -34,8 +34,8 @@ def main():
                 elif tag==b'stsd':payload=payload[:8]+b''.join(box(t,p[:78]+b''.join(box(k,config(v) if k==b'hvcC' else v) for k,v in boxes(p[78:]))) for t,p in boxes(payload[8:]))
                 return box(tag,payload)
             name=f'hevc-multilayer-pps-{seed}-{kind}-synthetic.mp4'
-            (DEST/name).write_bytes(b''.join(rewrite(t,p) for t,p in roots));cases.append(dict(file=name,seed=seed,kind=kind,expectation=('invalid' if kind=='truncated' else ('acceptance' if kind.startswith('identity') else 'refusal'))))
-    (DEST/'hevc-multilayer-pps-identity.json').write_text(json.dumps(dict(cases=cases,provenance='Original synthetic testsrc2 I/P/B seeds documented in fixtures/hevc/README.md. Own offline rewriting of PPS Annex F multilayer syntax, identity operation and future tails; POC-reset/colour-mapping cases are configuration refusal only, not playback acceptance; truncated is malformed syntax. No private media, external tool, FFmpeg or network used by this generator or ordinary tests.'),indent=2)+'\n')
+            (DEST/name).write_bytes(b''.join(rewrite(t,p) for t,p in roots));cases.append(dict(file=name,seed=seed,kind=kind,expectation=('invalid' if kind=='truncated' else ('acceptance' if kind.startswith('identity') else ('configuration' if kind=='poc-reset' else 'refusal')))))
+    (DEST/'hevc-multilayer-pps-identity.json').write_text(json.dumps(dict(cases=cases,provenance='Original synthetic testsrc2 I/P/B seeds documented in fixtures/hevc/README.md. Own offline rewriting of PPS Annex F multilayer syntax, identity operation and future tails; POC-reset cases probe configuration admission only; colour-mapping remains refusal, not playback acceptance; truncated is malformed syntax. No private media, external tool, FFmpeg or network used by this generator or ordinary tests.'),indent=2)+'\n')
     print('Multilayer PPS cases:',len(cases))
 
 if __name__=='__main__':main()

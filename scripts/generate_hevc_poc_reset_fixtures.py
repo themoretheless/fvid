@@ -161,9 +161,9 @@ def main():
 
         name = f'hevc-poc-{label}-synthetic.mp4'
         (DEST / name).write_bytes(box(b'ftyp', roots[b'ftyp']) + box(b'mdat', b''.join(outputs)) + rewrite(b'moov', roots[b'moov']))
-        cases.append(dict(file=name, frames=len(outputs), resets=[] if not reset else [17, 33], signalled=[18] if label.endswith('signalled') else []))
+        cases.append(dict(file=name, expectation='acceptance', frames=len(outputs), resets=[] if not reset else [17, 33], signalled=[18] if label.endswith('signalled') else []))
     (DEST / 'hevc-poc-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
-        provenance='Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Candidate fixtures require baseline decoding and exact reset comparison before acceptance.'), indent=2) + '\n')
+        provenance='Original documented synthetic PCM/inter seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; this family qualifies MSB reset and same-period signalled reset only.'), indent=2) + '\n')
 
 
 if __name__ == '__main__': main()

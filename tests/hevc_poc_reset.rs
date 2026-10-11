@@ -34,19 +34,18 @@ fn owned_wrap_baseline_decodes_all_references() {
 }
 
 #[test]
-fn reset_fixture_reproduces_specific_pps_refusal() {
+fn reset_fixture_pps_flag_is_admitted() {
     for kind in ["msb-reset", "msb-reset-signalled"] {
         let bytes = fixture(&format!("hevc-poc-{kind}-synthetic.mp4"));
         let movie = Mp4Reader::open(Cursor::new(bytes), Default::default()).unwrap();
         let config = HevcConfig::parse(&movie.tracks()[0].configuration).unwrap();
         let sps = Sps::parse(config.arrays.iter().find(|a| a.nal_type == 33).unwrap().units[0], 32 << 20).unwrap();
-        let error = Pps::parse(config.arrays.iter().find(|a| a.nal_type == 34).unwrap().units[0], &sps, 32 << 20).unwrap_err();
-        assert_eq!(error.to_string(), "HEVC multilayer PPS POC reset is not connected");
+        let pps = Pps::parse(config.arrays.iter().find(|a| a.nal_type == 34).unwrap().units[0], &sps, 32 << 20).unwrap();
+        assert!(pps.poc_reset_info_present && pps.slice_header_extension);
     }
 }
 
 #[test]
-#[ignore = "enable with stateful HEVC POC reset integration; refusal is not playback acceptance"]
 fn reset_video_preserves_pixels_and_translates_poc_once() {
     let baseline = decode("hevc-poc-baseline-synthetic.mp4");
     for kind in ["msb-reset", "msb-reset-signalled"] {
@@ -56,6 +55,39 @@ fn reset_video_preserves_pixels_and_translates_poc_once() {
             assert_eq!(pixels, expected, "{kind} picture {index}");
             let decrement = if index >= 33 { 32 } else if index >= 17 { 16 } else { 0 };
             assert_eq!(*poc, index as i32 - decrement, "{kind} picture {index}");
+        }
+    }
+}
+
+#[test]
+fn reset_video_software_seek_and_rewind_match_baseline() {
+    use fvid::playback_mp4::Mp4VideoReader;
+    let open = |name: &str| Mp4VideoReader::open_software(Cursor::new(fixture(name)), Default::default(), 32 << 20).unwrap();
+    for kind in ["msb-reset", "msb-reset-signalled"] {
+        let mut baseline = open("hevc-poc-baseline-synthetic.mp4");
+        let mut actual = open(&format!("hevc-poc-{kind}-synthetic.mp4"));
+        assert!(!actual.hardware_accelerated());
+        for target in [None, Some(18), Some(34), None] {
+            if let Some(index) = target {
+                assert_eq!(actual.seek_to_sync(index), baseline.seek_to_sync(index));
+            } else { actual.rewind(); baseline.rewind(); }
+            let mut count = 0;
+            loop {
+                match (actual.read_frame().unwrap(), baseline.read_frame().unwrap()) {
+                    (Some(a), Some(b)) => {
+                        assert_eq!(a.sample_index, b.sample_index);
+                        assert_eq!(a.presentation_time, b.presentation_time);
+                        assert_eq!(a.duration, b.duration);
+                        assert_eq!(a.picture.y, b.picture.y);
+                        assert_eq!(a.picture.cb, b.picture.cb);
+                        assert_eq!(a.picture.cr, b.picture.cr);
+                        count += 1;
+                    }
+                    (None, None) => break,
+                    _ => panic!("reset playback frame count differs"),
+                }
+            }
+            assert_eq!(count, 35, "fixture has one sync picture; seek prerolls across both resets");
         }
     }
 }

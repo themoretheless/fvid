@@ -87,17 +87,13 @@ fn identity_multilayer_pps_preserves_base_layer_pixels_timing_seek_and_rewind() 
     }
 }
 #[test]
-fn poc_reset_extension_remains_an_explicit_refusal() {
+fn poc_reset_flag_is_retained_for_slice_decoding() {
     for seed in ["main-ipb", "main10-ipb"] {
-        let error = parse_pps(fixture(&format!(
+        let pps = parse_pps(fixture(&format!(
             "playback-errors/hevc-multilayer-pps-{seed}-poc-reset-synthetic.mp4"
         )))
-        .err()
-        .expect("POC reset requires separate implementation");
-        assert_eq!(
-            error.to_string(),
-            "HEVC multilayer PPS POC reset is not connected"
-        );
+        .unwrap();
+        assert!(pps.poc_reset_info_present);
     }
 }
 #[test]

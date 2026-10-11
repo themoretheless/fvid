@@ -5929,7 +5929,15 @@ multilayer PPS reset flag and signal idc 1 at pictures 17/33, with an optional
 same-period idc 3 at picture 18. No private source material, external codec,
 FFmpeg or network is used. The three original frames are checked against the
 saved YUV oracle; the baseline must decode all 35 pictures with POC 0..34.
-The direct PPS test establishes the specific POC-reset refusal. The exact
-pixel/POC reset acceptance test is explicitly ignored pending stateful decoder
-integration; a passing refusal test is not a claim of reset playback support.
+Before integration, the direct PPS test established the specific POC-reset
+refusal, independently of the valid 35-picture baseline. With the software
+decoder fix the exact pixel/POC reset acceptance is enabled, and the old direct
+PPS refusal expectation is replaced by retained reset-flag admission. The
+software reader also verifies timing, pixels and seek/rewind across both resets.
 Ordinary tests never invoke generation or Cargo subprocesses.
+
+The earlier identity-multilayer family's `poc-reset` entries now have expectation
+`configuration`: they probe PPS flag admission and do not signal reset slices.
+Colour-mapping entries remain refusals. Current reset playback qualification is
+the new MSB-reset/same-period-signalled family only, not full multilayer or all
+reset/NAL/reference tools. Generation still uses no external codec or network.

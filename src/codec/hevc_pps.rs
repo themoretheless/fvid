@@ -17,10 +17,8 @@ fn se(b: &mut BitReader<'_>, min: i32, max: i32) -> Result<i32> {
 }
 /// Annex F.7.3.2.3.4 for the currently admitted independent base layer.
 /// Identity multilayer syntax is meaningful even with no inter-layer prediction.
-fn read_base_multilayer_extension(b: &mut BitReader<'_>) -> Result<()> {
-    if b.bit()? {
-        return Err(crate::unsupported("HEVC multilayer PPS POC reset is not connected"));
-    }
+fn read_base_multilayer_extension(b: &mut BitReader<'_>) -> Result<bool> {
+    let poc_reset_info_present = b.bit()?;
     if b.bit()? {
         // F.7.4.3.3.4 forbids inference for a PPS used by layer zero.
         return Err(invalid("HEVC base-layer PPS cannot infer scaling lists"));
@@ -31,7 +29,7 @@ fn read_base_multilayer_extension(b: &mut BitReader<'_>) -> Result<()> {
     if b.bit()? {
         return Err(crate::unsupported("HEVC multilayer PPS colour mapping is not connected"));
     }
-    Ok(())
+    Ok(poc_reset_info_present)
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Tiles {
@@ -114,6 +112,7 @@ pub struct Pps {
     pub(crate) lists_modification_bit: usize,
     pub parallel_merge_log2: u8,
     pub slice_header_extension: bool,
+    pub poc_reset_info_present: bool,
     pub scc_extension: bool,
     /// None inherits the SPS; Some(empty) explicitly clears initial entries.
     pub palette_initial: Option<Vec<[u16; 3]>>,
@@ -207,6 +206,7 @@ impl Pps {
         let lists_modification = b.bit()?;
         let parallel_merge_log2 = ue(b, u32::from(sps.coding_block_log2[1] - 2))? as u8 + 2;
         let slice_header_extension = b.bit()?;
+        let mut poc_reset_info_present = false;
         let mut transform_skip_max_log2 = 2;
         let mut sao_offset_scale = [0; 2];
         let mut chroma_qp_offset_list = None;
@@ -257,7 +257,7 @@ impl Pps {
                 }
             }
             if multilayer {
-                read_base_multilayer_extension(b)?;
+                poc_reset_info_present = read_base_multilayer_extension(b)?;
             }
             if scc_extension {
                 current_picture_reference = b.bit()?;
@@ -364,6 +364,7 @@ impl Pps {
             lists_modification_bit,
             parallel_merge_log2,
             slice_header_extension,
+            poc_reset_info_present,
             scc_extension,
             palette_initial,
             current_picture_reference,

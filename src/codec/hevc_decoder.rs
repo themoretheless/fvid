@@ -32,6 +32,7 @@ pub struct HevcDecoder {
     decoded_vps: Option<Vps>,
     references: Vec<Reference>,
     previous_poc: Option<i32>,
+    reset_periods: super::hevc_poc::ResetPeriods,
     suppress_rasl: bool,
     sequence_ended: bool,
     active_pps: Option<u8>,
@@ -124,6 +125,7 @@ impl HevcDecoder {
             decoded_vps: None,
             references: Vec::new(),
             previous_poc: None,
+            reset_periods: Default::default(),
             suppress_rasl: false,
             sequence_ended: false,
             active_pps: None,
@@ -150,6 +152,7 @@ impl HevcDecoder {
         self.decoded_vps = None;
         self.references.clear();
         self.previous_poc = None;
+        self.reset_periods = Default::default();
         self.suppress_rasl = false;
         self.sequence_ended = false;
         self.active_pps = None;
@@ -428,6 +431,23 @@ impl HevcDecoder {
             return Err(invalid("HEVC SPS contradicts VPS temporal nesting"));
         }
         let header = &headers[0];
+        let reset_syntax = if pps.poc_reset_info_present {
+            if vps.extension_present {
+                return Err(crate::unsupported("HEVC POC reset with VPS extension requires layered VPS semantics"));
+            }
+            let parse = |h: &SliceHeader| {
+                if pps.slice_header_extension {
+                    super::hevc_poc::ResetSyntax::parse_base(&h.extension, true, sps.poc_bits, h.nal, false)
+                } else { Ok(super::hevc_poc::ResetSyntax::default()) }
+            };
+            let first = parse(header)?;
+            for other in headers.iter().skip(1) {
+                if parse(other)? != first {
+                    return Err(invalid("HEVC slices disagree on POC reset syntax"));
+                }
+            }
+            first
+        } else { super::hevc_poc::ResetSyntax::default() };
         let new_sequence = self.sequence_ended;
         let begins_cvs = new_sequence || self.previous_poc.is_none()
             || header.nal.is_idr() || matches!(header.nal.unit_type, 16..=18);
@@ -447,6 +467,7 @@ impl HevcDecoder {
         if new_sequence {
             self.references.clear();
             self.previous_poc = None;
+            self.reset_periods = Default::default();
             self.suppress_rasl = false;
         }
         if header.nal.temporal_id as usize >= sps.ordering.len() {
@@ -462,6 +483,7 @@ impl HevcDecoder {
             }
             self.references.clear();
             self.previous_poc = None;
+            self.reset_periods = Default::default();
             self.suppress_rasl = false;
         }
         if self.decoded_vps.as_ref().is_some_and(|previous| previous != vps) {
@@ -470,6 +492,7 @@ impl HevcDecoder {
             }
             self.references.clear();
             self.previous_poc = None;
+            self.reset_periods = Default::default();
             self.suppress_rasl = false;
         }
         self.decoded_vps = Some(vps.clone());
@@ -484,11 +507,45 @@ impl HevcDecoder {
         if self.suppress_rasl && matches!(header.nal.unit_type, 8 | 9) {
             return Ok(None);
         }
-        let poc = super::hevc_poc::derive(sps, header.nal, header.poc_lsb, self.previous_poc)?;
+        let (next_periods, resetting) = self.reset_periods.advance(reset_syntax, header.nal, header.poc_lsb)?;
+        let (poc, decrement) = if resetting {
+            super::hevc_poc::derive_reset(sps.poc_bits, header.poc_lsb, self.previous_poc,
+                reset_syntax.reset.ok_or_else(|| invalid("missing HEVC reset operation"))?, reset_syntax.msb_cycle)?
+        } else if let Some(cycle) = reset_syntax.msb_cycle {
+            let poc = i64::from(cycle) * (1i64 << sps.poc_bits) + i64::from(header.poc_lsb);
+            (i32::try_from(poc).map_err(|_| invalid("HEVC explicit cycle POC overflow"))?, 0)
+        } else {
+            (super::hevc_poc::derive(sps, header.nal, header.poc_lsb, self.previous_poc)?, 0)
+        };
         if header.nal.is_irap() && self.suppress_rasl {
             // An IRAP starting a CVS marks every prior DPB reference unused.
             // BLA carries RPS syntax, but that syntax cannot retain the old CVS.
             self.references.clear();
+        }
+        if decrement != 0 && !self.references.is_empty() {
+            let metadata = self.references.iter().try_fold(
+                self.references.len().checked_mul(std::mem::size_of::<Reference>())
+                    .ok_or_else(|| invalid("HEVC POC translation size overflow"))?,
+                |sum, r| sum.checked_add(r.picture.as_ref()?.poc_translation_bytes()?),
+            ).ok_or_else(|| invalid("HEVC POC translation size overflow"))?;
+            let retained = self.references.iter().try_fold(0usize,
+                |sum, r| sum.checked_add(r.picture.as_ref()?.storage_bytes()?),
+            ).ok_or_else(|| invalid("HEVC retained POC translation size overflow"))?;
+            if retained.checked_add(metadata).is_none_or(|n| n > self.budget) {
+                return Err(invalid("HEVC POC translation exceeds decode budget"));
+            }
+            let mut translated = Vec::new();
+            translated.try_reserve_exact(self.references.len())
+                .map_err(|_| invalid("cannot allocate HEVC translated references"))?;
+            for reference in &self.references {
+                let poc = i64::from(reference.poc).checked_sub(decrement)
+                    .and_then(|v| i32::try_from(v).ok())
+                    .ok_or_else(|| invalid("HEVC translated DPB POC overflow"))?;
+                let source = reference.picture.as_ref().ok_or_else(|| invalid("HEVC retained reference has no picture"))?;
+                translated.push(Reference { poc, long_term: reference.long_term,
+                    picture: Some(Arc::new(source.translated_pocs(decrement, metadata)?)) });
+            }
+            self.references = translated;
         }
         let (retained, lists) = reference_lists(&header, poc, &self.references, sps.poc_bits)?;
         let mut slice_lists = vec![lists];
@@ -530,7 +587,12 @@ impl HevcDecoder {
         )?);
         if super::hevc_poc::updates_previous(header.nal) {
             self.previous_poc = Some(poc);
+        } else if resetting {
+            if let Some(super::hevc_poc::Reset::Signalled { full, lsb }) = reset_syntax.reset {
+                self.previous_poc = Some(if full { 0 } else { lsb as i32 });
+            }
         }
+        self.reset_periods = next_periods;
         if header.nal.unit_type >= 16 || header.nal.unit_type & 1 != 0 {
             self.references.push(Reference {
                 long_term: false,

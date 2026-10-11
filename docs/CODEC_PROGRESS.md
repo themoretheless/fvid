@@ -11612,3 +11612,38 @@ pixel against the corresponding baseline frame and checks POC decrements of
 16/32 exactly once. It remains explicitly ignored until stateful integration;
 two baseline/reproduction tests passed offline, with zero failures. These
 fixtures do not yet qualify full-reset, long-term, seek or motion-tool coverage.
+
+### HEVC base-layer POC reset connected (2026-10-11)
+
+The software decoder now retains the PPS reset flag, parses bounded reset
+extensions and checks that all slices agree on their semantic reset fields.
+It commits candidate period state after picture reconstruction, derives the
+current POC and reference decrement, translates retained DPB identities and
+collocated root/separate-plane maps with checked arithmetic and a live metadata
+budget, and handles previous-POC inference for signalled reset entry. Decoder
+reset, new sequence and parameter-driven DPB flushes clear period state.
+
+The formerly ignored 35-picture reset acceptance test is enabled. Both MSB
+reset streams preserve every baseline pixel, decrement POC by 16 at picture
+17 and by 32 at 33, and avoid a second decrement at same-period idc 3 picture
+18. Software seek/rewind agrees with baseline pixels, sample indices, timing
+and durations while preroll crosses both resets. The old PPS-only refusal is
+now configuration-flag admission and does not itself claim playback coverage.
+
+VPS extension tails remain ignored for ordinary Annex A semantics, including
+VPS equality; reset decoding explicitly refuses an extension-bearing VPS
+until its layered/alignment semantics are parsed. This qualification covers
+owned software decoding of the authored MSB reset and same-period signalled
+reset family. Full reset/idc-3 extracted entry video, explicit-cycle video,
+long-term references, nonzero temporal-MV tools, malformed multi-slice reset
+streams, high depth and default hardware routing still need dedicated video
+qualification. Multilayer/3D and other codec gaps remain open.
+
+Validation: 24 integration tests passed across hevc_poc_reset,
+hevc_multilayer_pps_identity, hevc_extension_tails and hevc_parameter_updates;
+201 HEVC unit tests passed with one explicit fixture generator ignored.
+All commands ran offline without default features or FFmpeg and reached
+successful terminal exits.
+After tests terminated, both owned generators ran again: all 13 MP4s were
+byte-identical. Manifests now mark the old reset-flag probes as configuration
+admission and the new video family as acceptance. git diff --check passed.

@@ -49,7 +49,7 @@ pub struct Timing {
     pub time_scale: u32,
     pub ticks_per_poc: Option<u64>,
 }
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct Vps {
     pub id: u8,
     pub temporal_id_nesting: bool,
@@ -59,7 +59,19 @@ pub struct Vps {
     pub(crate) ordering_bit_range: std::ops::Range<usize>,
     pub timing: Option<Timing>,
     pub hrd: Option<super::hevc_hrd::Hrd>,
+    /// Annex A may ignore this tail; Annex F reset decoding needs its semantics.
+    pub extension_present: bool,
 }
+// Annex A ignores extension data. Keep the admission witness available for
+// Annex F without turning an inert tail into an ordinary VPS semantic change.
+impl PartialEq for Vps {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.temporal_id_nesting == other.temporal_id_nesting
+            && self.profile == other.profile && self.ordering == other.ordering
+            && self.timing == other.timing && self.hrd == other.hrd
+    }
+}
+impl Eq for Vps {}
 impl Vps {
     pub fn parse(nal: &[u8], budget: usize) -> Result<Self> {
         let rbsp = NalRbsp::parse(nal, budget)?;
@@ -133,7 +145,8 @@ impl Vps {
         } else {
             None
         };
-        if bits.bit()? {
+        let extension_present = bits.bit()?;
+        if extension_present {
             // Annex A decoding without INBLD ignores VPS extension data.
             // Base-layer admission above still rejects layered requirements.
             while bits.more_rbsp_data() {
@@ -146,6 +159,7 @@ impl Vps {
             temporal_id_nesting,
             profile,
             ordering,
+            extension_present,
             #[cfg(test)]
             ordering_bit_range,
             timing,
