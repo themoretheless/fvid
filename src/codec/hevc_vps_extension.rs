@@ -107,6 +107,216 @@ pub struct DpbParameters {
     pub sets: Vec<Option<Vec<DpbSubLayer>>>,
     pub end_bit: usize,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DependencyTypes {
+    /// VPS indices [dependent][reference], None where no direct edge exists.
+    pub types: Vec<Vec<Option<u32>>>,
+    /// Masks use NAL layer IDs.
+    pub sample_prediction: Vec<u64>,
+    pub motion_prediction: Vec<u64>,
+    pub coded_width: u8,
+    pub common_type: Option<u32>,
+    pub ignored_extension_bytes: u16,
+    pub vui_present: bool,
+    /// Start of VUI syntax if present; otherwise the end of vps_extension().
+    pub end_bit: usize,
+}
+impl DpbParameters {
+    pub fn dependency_types(
+        &self,
+        bytes: &[u8],
+        graph: &LayerDependencyPrefix,
+        layers: &super::hevc_vps::LayerSets,
+        budget: usize,
+    ) -> Result<DependencyTypes> {
+        let n = graph.layer_ids.len();
+        if n == 0 || n > 63 || graph.direct.len() != n || graph.layer_ids.iter().any(|&id| id > 63)
+        {
+            return Err(invalid("invalid HEVC dependency type geometry"));
+        }
+        if std::mem::size_of::<DependencyTypes>()
+            + n * (n * std::mem::size_of::<Option<u32>>()
+                + std::mem::size_of::<Vec<Option<u32>>>()
+                + 16)
+            > budget
+        {
+            return Err(invalid("HEVC dependency types exceed memory budget"));
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(self.end_bit)?;
+        let width = bounded(&mut b, 30)? as u8 + 2;
+        let common = if b.bit()? { Some(b.read(width)?) } else { None };
+        if common == Some(u32::MAX) {
+            return Err(invalid("invalid HEVC direct dependency type"));
+        }
+        let mut types = vec![vec![None; n]; n];
+        let mut sample = vec![0u64; n];
+        let mut motion = vec![0u64; n];
+        for i in 1..n {
+            for j in 0..i {
+                if graph.direct[i] & (1u64 << graph.layer_ids[j]) == 0 {
+                    continue;
+                }
+                let value = if !layers.base_internal && j == 0 {
+                    0
+                } else if let Some(value) = common {
+                    value
+                } else {
+                    b.read(width)?
+                };
+                if value == u32::MAX {
+                    return Err(invalid("invalid HEVC direct dependency type"));
+                }
+                types[i][j] = Some(value);
+                if (value + 1) & 1 != 0 {
+                    sample[i] |= 1u64 << graph.layer_ids[j];
+                }
+                if (value + 1) & 2 != 0 {
+                    motion[i] |= 1u64 << graph.layer_ids[j];
+                }
+            }
+        }
+        let ignored = bounded(&mut b, 4096)? as u16;
+        b.skip(usize::from(ignored) * 8)?;
+        let vui = b.bit()?;
+        if vui {
+            while b.position() % 8 != 0 {
+                if !b.bit()? {
+                    return Err(invalid("HEVC VPS VUI alignment bit is not one"));
+                }
+            }
+        }
+        Ok(DependencyTypes {
+            types,
+            sample_prediction: sample,
+            motion_prediction: motion,
+            coded_width: width,
+            common_type: common,
+            ignored_extension_bytes: ignored,
+            vui_present: vui,
+            end_bit: b.position(),
+        })
+    }
+}
+/// Connected Annex F prefix through dependency types/non-VUI extension bytes.
+/// VPS VUI, SPS admission and multilayer picture reconstruction remain separate.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LayeredExtensionPrefix {
+    pub graph: LayerDependencyPrefix,
+    pub layer_sets: LayerSetExtension,
+    pub output: OutputLayerSets,
+    pub representations: RepresentationFormats,
+    pub dpb: DpbParameters,
+    pub dependencies: DependencyTypes,
+}
+impl LayeredExtensionPrefix {
+    /// The budget covers all retained metadata together, excluding borrowed RBSP.
+    pub fn parse(
+        bytes: &[u8],
+        start: usize,
+        layers: &super::hevc_vps::LayerSets,
+        sublayers: u8,
+        budget: usize,
+    ) -> Result<Self> {
+        fn charge(left: &mut usize, used: usize) -> Result<()> {
+            *left = left
+                .checked_sub(used)
+                .ok_or_else(|| invalid("HEVC layered metadata exceeds memory budget"))?;
+            Ok(())
+        }
+        fn vec_bytes<T>(v: &Vec<T>) -> usize {
+            v.capacity() * std::mem::size_of::<T>()
+        }
+        let mut left = budget;
+        let graph = LayerDependencyPrefix::parse(bytes, start, layers, sublayers, left)?;
+        charge(
+            &mut left,
+            std::mem::size_of::<LayerDependencyPrefix>()
+                + vec_bytes(&graph.layer_ids)
+                + vec_bytes(&graph.scalability_ids)
+                + vec_bytes(&graph.view_ids)
+                + vec_bytes(&graph.direct)
+                + vec_bytes(&graph.transitive)
+                + vec_bytes(&graph.tree_partitions)
+                + graph.tree_partitions.iter().map(vec_bytes).sum::<usize>(),
+        )?;
+        let layer_sets = graph.layer_sets(bytes, layers, sublayers, left)?;
+        charge(
+            &mut left,
+            std::mem::size_of::<LayerSetExtension>()
+                + vec_bytes(&layer_sets.layer_sets)
+                + layer_sets.layer_sets.iter().map(vec_bytes).sum::<usize>()
+                + vec_bytes(&layer_sets.sublayers_minus1)
+                + vec_bytes(&layer_sets.set_sublayers_minus1)
+                + vec_bytes(&layer_sets.max_tid_ref_plus1)
+                + layer_sets
+                    .max_tid_ref_plus1
+                    .iter()
+                    .map(vec_bytes)
+                    .sum::<usize>(),
+        )?;
+        let output = layer_sets.output_layers(bytes, &graph, layers, sublayers, left)?;
+        charge(
+            &mut left,
+            std::mem::size_of::<OutputLayerSets>()
+                + vec_bytes(&output.sets)
+                + output
+                    .sets
+                    .iter()
+                    .map(|s| vec_bytes(&s.profile_indices))
+                    .sum::<usize>()
+                + vec_bytes(&output.extra_profiles)
+                + output
+                    .extra_profiles
+                    .iter()
+                    .map(|(_, p)| vec_bytes(&p.sub_layers))
+                    .sum::<usize>(),
+        )?;
+        let representations = output.representation_formats(bytes, &graph, layers, left)?;
+        charge(
+            &mut left,
+            std::mem::size_of::<RepresentationFormats>()
+                + vec_bytes(&representations.formats)
+                + vec_bytes(&representations.layer_format_indices)
+                + vec_bytes(&representations.poc_lsb_not_present),
+        )?;
+        let dpb = representations.dpb_parameters(bytes, &output, &layer_sets, layers, left)?;
+        charge(
+            &mut left,
+            std::mem::size_of::<DpbParameters>()
+                + vec_bytes(&dpb.sets)
+                + dpb
+                    .sets
+                    .iter()
+                    .flatten()
+                    .map(|rows| {
+                        vec_bytes(rows)
+                            + rows
+                                .iter()
+                                .map(|r| vec_bytes(&r.decoded_pictures))
+                                .sum::<usize>()
+                    })
+                    .sum::<usize>(),
+        )?;
+        let dependencies = dpb.dependency_types(bytes, &graph, layers, left)?;
+        charge(
+            &mut left,
+            std::mem::size_of::<DependencyTypes>()
+                + vec_bytes(&dependencies.types)
+                + dependencies.types.iter().map(vec_bytes).sum::<usize>()
+                + vec_bytes(&dependencies.sample_prediction)
+                + vec_bytes(&dependencies.motion_prediction),
+        )?;
+        Ok(Self {
+            graph,
+            layer_sets,
+            output,
+            representations,
+            dpb,
+            dependencies,
+        })
+    }
+}
 impl RepresentationFormats {
     /// Read dpb_size(). Profile/level/SPS constraints and actual frame-storage
     /// admission remain separate from the retained metadata budget here.

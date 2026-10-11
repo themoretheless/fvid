@@ -2,6 +2,17 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`DpbParameters::dependency_types` reads common/per-edge dependency types,
+derives sample/motion prediction masks, infers external-base sample-only edges,
+skips bounded non-VUI bytes and validates VUI alignment. Reserved widths/values
+are retained as required, excluding the forbidden all-ones 32-bit type.
+`LayeredExtensionPrefix::parse` connects graph, layer sets, OLS, formats, DPB
+and dependency types with cumulative retained-capacity accounting against one
+metadata budget. Sixteen original connected prefixes cover common/per-edge
+types, external bases, 32-bit types, 4096 ignored bytes and targeted failures.
+The result stops before VPS VUI when present; it is not full VPS validation or
+multilayer playback admission. VPS VUI and connection to SPS/pictures remain.
+
 `RepresentationFormats::dpb_parameters` reads Annex F DPB metadata per OLS
 and temporal sublayer. It retains actual per-layer picture counts, marks
 unnecessary layers, inherits absent sublayers from the preceding one and rejects

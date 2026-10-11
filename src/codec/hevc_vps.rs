@@ -1,4 +1,5 @@
 //! H.265 VPS topology/HRD metadata, strict base-layer admission and sublayer DPB limits.
+pub use super::hevc_vps_extension::{DependencyTypes, LayeredExtensionPrefix};
 pub use super::hevc_vps_extension::{DpbParameters, DpbSubLayer};
 pub use super::hevc_vps_extension::{
     LayerDependencyPrefix, LayerSetExtension, OutputLayerSet, OutputLayerSets,

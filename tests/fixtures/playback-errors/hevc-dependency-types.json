@@ -1,0 +1,434 @@
+[
+  {
+    "file": "hevc-dependency-types-sample.bin",
+    "error": null,
+    "end": 254,
+    "width": 2,
+    "common": 0,
+    "values": [
+      0,
+      0,
+      0
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-motion.bin",
+    "error": null,
+    "end": 254,
+    "width": 2,
+    "common": 1,
+    "values": [
+      1,
+      1,
+      1
+    ],
+    "sample": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-both.bin",
+    "error": null,
+    "end": 254,
+    "width": 2,
+    "common": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-neither.bin",
+    "error": null,
+    "end": 254,
+    "width": 2,
+    "common": 3,
+    "values": [
+      3,
+      3,
+      3
+    ],
+    "sample": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "motion": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-reserved.bin",
+    "error": null,
+    "end": 257,
+    "width": 3,
+    "common": 6,
+    "values": [
+      6,
+      6,
+      6
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-wide.bin",
+    "error": null,
+    "end": 292,
+    "width": 32,
+    "common": 4294967294,
+    "values": [
+      4294967294,
+      4294967294,
+      4294967294
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-edges.bin",
+    "error": null,
+    "end": 258,
+    "width": 2,
+    "common": null,
+    "values": [
+      0,
+      1,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "motion": [
+      0,
+      0,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-external.bin",
+    "error": null,
+    "end": 244,
+    "width": 2,
+    "common": 1,
+    "values": [
+      0,
+      1,
+      1
+    ],
+    "sample": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "motion": [
+      0,
+      0,
+      8,
+      128
+    ],
+    "internal": false,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-external-edges.bin",
+    "error": null,
+    "end": 246,
+    "width": 2,
+    "common": null,
+    "values": [
+      0,
+      1,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "motion": [
+      0,
+      0,
+      8,
+      128
+    ],
+    "internal": false,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-bad-alignment.bin",
+    "error": "VUI alignment",
+    "end": 256,
+    "width": 2,
+    "common": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": true
+  },
+  {
+    "file": "hevc-dependency-types-ignored.bin",
+    "error": null,
+    "end": 33046,
+    "width": 2,
+    "common": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 4096,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-vui.bin",
+    "error": null,
+    "end": 256,
+    "width": 2,
+    "common": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": true
+  },
+  {
+    "file": "hevc-dependency-types-bad-width.bin",
+    "error": "out of range",
+    "end": 295,
+    "width": 33,
+    "common": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-bad-common.bin",
+    "error": "invalid HEVC direct",
+    "end": 292,
+    "width": 32,
+    "common": 4294967295,
+    "values": [
+      4294967295,
+      4294967295,
+      4294967295
+    ],
+    "sample": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "motion": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-bad-edge.bin",
+    "error": "invalid HEVC direct",
+    "end": 356,
+    "width": 32,
+    "common": null,
+    "values": [
+      0,
+      4294967295,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      0,
+      128
+    ],
+    "motion": [
+      0,
+      0,
+      0,
+      128
+    ],
+    "internal": true,
+    "ignored": 0,
+    "vui": false
+  },
+  {
+    "file": "hevc-dependency-types-bad-length.bin",
+    "error": "out of range",
+    "end": 33054,
+    "width": 2,
+    "common": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "sample": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "motion": [
+      0,
+      1,
+      8,
+      128
+    ],
+    "internal": true,
+    "ignored": 4097,
+    "vui": false
+  }
+]

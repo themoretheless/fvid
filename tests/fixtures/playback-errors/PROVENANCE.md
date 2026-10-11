@@ -6297,6 +6297,19 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_dependency_types.py` authors sixteen original connected Annex F
+prefixes, extending the owned explicit/external DPB metadata. F.7.3.2.1.1 and
+F-14 define common/per-edge types, external-base inference and sample/motion
+permissions. Independent explicit permission-table oracles cover types
+0/1/2/3/6/0xfffffffe; malformed cases use forbidden 0xffffffff, width 33,
+4097 ignored bytes and zero VUI alignment bits. A 4096-byte case verifies the
+ignored payload bound. The VUI-positive prefix carries a sentinel after the
+returned byte boundary; dropping that sentinel still parses the prefix, proving
+that VUI syntax is not silently claimed as validated. Combined tests exercise
+the connected graph/set/OLS/format/DPB/type API and its shared metadata budget.
+These remain partial metadata RBSPs, not complete VPSs or video acceptance.
+Authoring/testing uses no private media, FFmpeg, external codec or network.
+
 `generate_hevc_dpb_parameters.py` authors seven original continuations of owned
 OLS/representation prefixes, adding temporal-sublayer PTL presence bits and
 Annex F.7.3.2.1.3 DPB syntax. F.7.4.3.1.3 defines preceding-sublayer inheritance,
