@@ -77,13 +77,16 @@ impl Decoder {
         } else {
             None
         };
-        // At most eight slots, one previous picture and one new picture can be live.
-        let (picture, counts) = vp9_picture::decode_frame_counted(
+        // The segmentation map advances on hidden pictures too; previous shown
+        // motion vectors have a separate lifetime. At most eight slots, one
+        // previous picture and one new picture can be live.
+        let (picture, counts) = vp9_picture::decode_frame_segmented(
             frame,
             &header,
             &compressed,
             refs,
             previous,
+            self.previous.as_deref(),
             self.budget / 10,
         )?;
         let picture = Arc::new(picture);

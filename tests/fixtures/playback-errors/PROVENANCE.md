@@ -6214,3 +6214,30 @@ picture-decoder refusal after the keyframe and hidden reference decoded.
 replay, hidden-frame suppression, depth preservation, timestamps, EOF, seek
 and rewind. This is acceptance for the stated cases, not universal compound
 or VP9 conformance.
+
+## Original VP9 segmentation fixtures
+
+`scripts/generate_vp9_segmentation.py` authors the streams and manifests with
+owned header/Boolean writers. Colored and neutral synthetic references make
+segment reference choices visible. The twelve WebMs cover four chroma layouts
+and three depths, eight segment leaves, all three temporal contexts, hidden
+updates, disabled-frame map preservation, minimum-ID reuse (the minimum is
+not in the top-left block), forced intra prediction and segment skip. Saved
+oracles select analytically authored references; no production decoder is used
+for expected pixels. Restoring the preceding segmentation guard reproduces
+exactly `VP9 picture decoder requires coded frames and no segmentation` after
+both seed pictures decode, rather than an unrelated malformed-header error.
+
+`vp9-segmentation-quant.json` lists 72 original ALT_Q keyframes. Signed DC
+coefficient FOUR and the standard DC quantizer tables give analytic separable
+WHT ceil/floor halves, including nonuniform residuals and sample clipping.
+Absolute/delta mode, negative-index clipping, intermediate and maximum
+quantizer indices are checked at every sample. The shared chroma generator's
+optional segment/quantizer/filter arguments preserve its original defaults.
+
+`vp9-segmentation-filter.json` lists 72 pairs of original ALT_L frames and
+controls with the same ALT_Q and equivalent frame filter level. Controls
+exercise visible filtering; zero-level cases additionally require exact
+independent unfiltered pixels. These are differential tests of level selection,
+not an independent oracle for the entire filter algorithm. No private input,
+external codec, FFmpeg/libav or network is used in generation or ordinary tests.

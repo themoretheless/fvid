@@ -1,0 +1,580 @@
+{
+  "cases": [
+    {
+      "file": "vp9-segmentation-q-420-8-0--12.vp9",
+      "oracle": "vp9-segmentation-q-420-8-0--12.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-8-0-6.vp9",
+      "oracle": "vp9-segmentation-q-420-8-0-6.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-8-0-255.vp9",
+      "oracle": "vp9-segmentation-q-420-8-0-255.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-8-1--12.vp9",
+      "oracle": "vp9-segmentation-q-420-8-1--12.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-8-1-6.vp9",
+      "oracle": "vp9-segmentation-q-420-8-1-6.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-8-1-255.vp9",
+      "oracle": "vp9-segmentation-q-420-8-1-255.yuv16",
+      "depth": 8,
+      "chroma": "420",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-8-0--12.vp9",
+      "oracle": "vp9-segmentation-q-422-8-0--12.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-8-0-6.vp9",
+      "oracle": "vp9-segmentation-q-422-8-0-6.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-8-0-255.vp9",
+      "oracle": "vp9-segmentation-q-422-8-0-255.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-8-1--12.vp9",
+      "oracle": "vp9-segmentation-q-422-8-1--12.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-8-1-6.vp9",
+      "oracle": "vp9-segmentation-q-422-8-1-6.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-8-1-255.vp9",
+      "oracle": "vp9-segmentation-q-422-8-1-255.yuv16",
+      "depth": 8,
+      "chroma": "422",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-8-0--12.vp9",
+      "oracle": "vp9-segmentation-q-444-8-0--12.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-8-0-6.vp9",
+      "oracle": "vp9-segmentation-q-444-8-0-6.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-8-0-255.vp9",
+      "oracle": "vp9-segmentation-q-444-8-0-255.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-8-1--12.vp9",
+      "oracle": "vp9-segmentation-q-444-8-1--12.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-8-1-6.vp9",
+      "oracle": "vp9-segmentation-q-444-8-1-6.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-8-1-255.vp9",
+      "oracle": "vp9-segmentation-q-444-8-1-255.yuv16",
+      "depth": 8,
+      "chroma": "444",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-8-0--12.vp9",
+      "oracle": "vp9-segmentation-q-440-8-0--12.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-8-0-6.vp9",
+      "oracle": "vp9-segmentation-q-440-8-0-6.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-8-0-255.vp9",
+      "oracle": "vp9-segmentation-q-440-8-0-255.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-8-1--12.vp9",
+      "oracle": "vp9-segmentation-q-440-8-1--12.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-8-1-6.vp9",
+      "oracle": "vp9-segmentation-q-440-8-1-6.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-8-1-255.vp9",
+      "oracle": "vp9-segmentation-q-440-8-1-255.yuv16",
+      "depth": 8,
+      "chroma": "440",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-10-0--12.vp9",
+      "oracle": "vp9-segmentation-q-420-10-0--12.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-10-0-6.vp9",
+      "oracle": "vp9-segmentation-q-420-10-0-6.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-10-0-255.vp9",
+      "oracle": "vp9-segmentation-q-420-10-0-255.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-10-1--12.vp9",
+      "oracle": "vp9-segmentation-q-420-10-1--12.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-10-1-6.vp9",
+      "oracle": "vp9-segmentation-q-420-10-1-6.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-10-1-255.vp9",
+      "oracle": "vp9-segmentation-q-420-10-1-255.yuv16",
+      "depth": 10,
+      "chroma": "420",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-10-0--12.vp9",
+      "oracle": "vp9-segmentation-q-422-10-0--12.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-10-0-6.vp9",
+      "oracle": "vp9-segmentation-q-422-10-0-6.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-10-0-255.vp9",
+      "oracle": "vp9-segmentation-q-422-10-0-255.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-10-1--12.vp9",
+      "oracle": "vp9-segmentation-q-422-10-1--12.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-10-1-6.vp9",
+      "oracle": "vp9-segmentation-q-422-10-1-6.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-10-1-255.vp9",
+      "oracle": "vp9-segmentation-q-422-10-1-255.yuv16",
+      "depth": 10,
+      "chroma": "422",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-10-0--12.vp9",
+      "oracle": "vp9-segmentation-q-444-10-0--12.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-10-0-6.vp9",
+      "oracle": "vp9-segmentation-q-444-10-0-6.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-10-0-255.vp9",
+      "oracle": "vp9-segmentation-q-444-10-0-255.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-10-1--12.vp9",
+      "oracle": "vp9-segmentation-q-444-10-1--12.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-10-1-6.vp9",
+      "oracle": "vp9-segmentation-q-444-10-1-6.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-10-1-255.vp9",
+      "oracle": "vp9-segmentation-q-444-10-1-255.yuv16",
+      "depth": 10,
+      "chroma": "444",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-10-0--12.vp9",
+      "oracle": "vp9-segmentation-q-440-10-0--12.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-10-0-6.vp9",
+      "oracle": "vp9-segmentation-q-440-10-0-6.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-10-0-255.vp9",
+      "oracle": "vp9-segmentation-q-440-10-0-255.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-10-1--12.vp9",
+      "oracle": "vp9-segmentation-q-440-10-1--12.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-10-1-6.vp9",
+      "oracle": "vp9-segmentation-q-440-10-1-6.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-10-1-255.vp9",
+      "oracle": "vp9-segmentation-q-440-10-1-255.yuv16",
+      "depth": 10,
+      "chroma": "440",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-12-0--12.vp9",
+      "oracle": "vp9-segmentation-q-420-12-0--12.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-12-0-6.vp9",
+      "oracle": "vp9-segmentation-q-420-12-0-6.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-12-0-255.vp9",
+      "oracle": "vp9-segmentation-q-420-12-0-255.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-420-12-1--12.vp9",
+      "oracle": "vp9-segmentation-q-420-12-1--12.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-12-1-6.vp9",
+      "oracle": "vp9-segmentation-q-420-12-1-6.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-420-12-1-255.vp9",
+      "oracle": "vp9-segmentation-q-420-12-1-255.yuv16",
+      "depth": 12,
+      "chroma": "420",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-12-0--12.vp9",
+      "oracle": "vp9-segmentation-q-422-12-0--12.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-12-0-6.vp9",
+      "oracle": "vp9-segmentation-q-422-12-0-6.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-12-0-255.vp9",
+      "oracle": "vp9-segmentation-q-422-12-0-255.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-422-12-1--12.vp9",
+      "oracle": "vp9-segmentation-q-422-12-1--12.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-12-1-6.vp9",
+      "oracle": "vp9-segmentation-q-422-12-1-6.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-422-12-1-255.vp9",
+      "oracle": "vp9-segmentation-q-422-12-1-255.yuv16",
+      "depth": 12,
+      "chroma": "422",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-12-0--12.vp9",
+      "oracle": "vp9-segmentation-q-444-12-0--12.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-12-0-6.vp9",
+      "oracle": "vp9-segmentation-q-444-12-0-6.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-12-0-255.vp9",
+      "oracle": "vp9-segmentation-q-444-12-0-255.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-444-12-1--12.vp9",
+      "oracle": "vp9-segmentation-q-444-12-1--12.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-12-1-6.vp9",
+      "oracle": "vp9-segmentation-q-444-12-1-6.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-444-12-1-255.vp9",
+      "oracle": "vp9-segmentation-q-444-12-1-255.yuv16",
+      "depth": 12,
+      "chroma": "444",
+      "q": 255,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-12-0--12.vp9",
+      "oracle": "vp9-segmentation-q-440-12-0--12.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "q": -12,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-12-0-6.vp9",
+      "oracle": "vp9-segmentation-q-440-12-0-6.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "q": 6,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-12-0-255.vp9",
+      "oracle": "vp9-segmentation-q-440-12-0-255.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "q": 255,
+      "absolute": false
+    },
+    {
+      "file": "vp9-segmentation-q-440-12-1--12.vp9",
+      "oracle": "vp9-segmentation-q-440-12-1--12.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "q": -12,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-12-1-6.vp9",
+      "oracle": "vp9-segmentation-q-440-12-1-6.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "q": 6,
+      "absolute": true
+    },
+    {
+      "file": "vp9-segmentation-q-440-12-1-255.vp9",
+      "oracle": "vp9-segmentation-q-440-12-1-255.yuv16",
+      "depth": 12,
+      "chroma": "440",
+      "q": 255,
+      "absolute": true
+    }
+  ]
+}

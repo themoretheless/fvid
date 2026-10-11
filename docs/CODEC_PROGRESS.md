@@ -12038,3 +12038,33 @@ This bounded qualification does not establish arbitrary mixed-neighbor block
 layouts, compound lossy residuals, segmentation, all refresh/scaling combinations
 or general codec parity. FFmpeg/libav and network are not used by generation
 or these tests.
+
+### VP9 segmentation reconstruction
+
+Removed the blanket segmentation refusal. Reconstruction now decodes the
+8-leaf segment tree, temporal prediction contexts and minimum-ID prediction
+across the previous map. The saved map survives disabled and hidden pictures;
+independent pictures and size changes clear it. It is independent of the
+previous shown picture used for motion-vector candidates. Segment features
+control quantizer indices, loop-filter levels, forced intra/single-reference
+prediction and skip/ZEROMV syntax without incorrectly consuming entropy bits.
+
+Original offline streams qualify all eight IDs, all three temporal contexts,
+hidden updates, disabled-map preservation, minimum-ID aggregation, forced
+intra/reference/skip behavior, reset, WebM timestamps, seek and rewind across
+four chroma geometries and 8/10/12 bits. 72 keyframes check colored residuals
+under absolute/delta ALT_Q, negative-index clipping and the maximum index with
+independent analytic WHT DC sample oracles. 72 filter cases compare ALT_L to
+an equivalent frame-level filter with identical ALT_Q; zero-filter cases also
+match independent unfiltered pixels. Positive controls visibly change pixels.
+This isolates segment filter-level selection, not independent qualification
+of the complete loop-filter implementation.
+
+Arbitrary tiled/mixed segmentation layouts, nonzero-base lossy segmented
+residuals, all reference refresh/scaling combinations, and the broader codec
+profiles/tools still need qualification. The overall codec-gap goal remains
+open. Tests and generation do not use FFmpeg/libav or network.
+
+Validation: 38 focused core/playback integration tests and 29 VP9 codec unit
+tests pass with locked offline dependencies; the player feature builds without
+default features. These checks do not establish full codec conformance.

@@ -8,7 +8,7 @@ from generate_audio_resample_window_fixture import atom, word, ebml
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / 'tests/fixtures/playback-errors'
-def frame(depth, chroma, width=64, height=64, level=0, tile=None):
+def frame(depth, chroma, width=64, height=64, level=0, tile=None, segmentation='0'):
     profile = (0 if chroma == '420' else 1) + (2 if depth > 8 else 0)
     bits = '10' + str(profile & 1) + str(profile >> 1)
     if profile == 3: bits += '0'
@@ -20,7 +20,7 @@ def frame(depth, chroma, width=64, height=64, level=0, tile=None):
     bits += f'{width-1:016b}{height-1:016b}' + '0'  # 64 square, render size unchanged
     bits += '0100'  # no refresh context, frame parallel, context zero
     bits += f'{level:06b}' + '0000'  # loop filter level/sharpness/delta enable
-    bits += '0' * 8 + '000' + '0'  # lossless quantizer, no segmentation
+    bits += '0' * 8 + '000' + segmentation  # frame lossless quantizer; optional segment tools
     bits += '0' + f'{32:016b}'  # one tile row, 32-byte compressed header
     bits += '0' * (-len(bits) % 8)
     # Zero arithmetic code selects no probability updates, unsplit blocks,
@@ -45,11 +45,13 @@ class BooleanWriter:
         bits=f'{self.low:0{8+self.shifts}b}'
         bits+='0'*(-len(bits)%8)
         return bytes(int(bits[i:i+8],2) for i in range(0,len(bits),8))+bytes(8)
-def coloured(depth,chroma,side=64):
+def coloured(depth,chroma,side=64,segment=None,dc_quant=4,level=0):
     subs={'420':(1,1),'422':(1,0),'444':(0,0),'440':(0,1)}[chroma]
     coef=table('DEFAULT_COEF_PROBS')[0]; pareto=table('PARETO_TABLE')
     b=BooleanWriter()
     b.write(table('KF_PARTITION_PROBS')[{64:12,16:4}[side]][0],0)
+    if segment is not None:
+        for p in [91,137,73]: b.write(p,0)  # segment zero path 0/0/0
     b.write(table('DEFAULT_SKIP_PROB')[0],0)
     b.write(table('KF_Y_MODE_PROBS')[0][0][0],0)
     b.write(table('KF_UV_MODE_PROBS')[0][0],0)
@@ -75,10 +77,18 @@ def coloured(depth,chroma,side=64):
                 if y: neighbours+=pixels[(y-1)*w+x:(y-1)*w+x+4]
                 if x: neighbours += [pixels[(y+i)*w+x-1] for i in range(4)]
                 dc=(sum(neighbours)+len(neighbours)//2)//len(neighbours) if neighbours else 1<<(depth-1)
-                value=dc+(1 if plane==1 else -1 if plane==2 else 0)
-                for yy in range(4): pixels[(y+yy)*w+x:(y+yy)*w+x+4]=[value]*4
+                # A lone signed DC coefficient FOUR dequantizes to +/-4*dc_quant.
+                # The two separable WHT stages split each DC value into ceil/floor
+                # halves (arithmetic shift), so nonmultiples of four give a 4x4
+                # pattern. This analytic oracle does not invoke a codec transform.
+                q=dc_quant if plane==1 else -dc_quant if plane==2 else 0
+                row=[q-q//2,q//2,q//2,q//2]
+                for yy in range(4):
+                    for xx in range(4):
+                        delta=row[xx]-row[xx]//2 if yy==0 else row[xx]//2
+                        pixels[(y+yy)*w+x+xx]=min((1<<depth)-1,max(0,dc+delta))
         for value in pixels: expected+=value.to_bytes(2,'little')
-    return frame(depth,chroma,width=side,height=side,tile=b.finish()),expected
+    return frame(depth,chroma,width=side,height=side,tile=b.finish(),level=level,segmentation=segment if segment is not None else '0'),expected
 def webm(packets):
     video=ebml('b0',b'\x40')+ebml('ba',b'\x40')
     track=ebml('d7',b'\1')+ebml('83',b'\1')+ebml('86',b'V_VP9')+ebml('23e383',(333333333).to_bytes(4,'big'))+ebml('e0',video)

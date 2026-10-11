@@ -279,23 +279,28 @@ impl Decoder<'_> {
         h: usize,
         above: Option<Block>,
         left: Option<Block>,
+        forced_reference: Option<i16>,
+        segment_skip: bool,
     ) -> Result<Block> {
         let a = above.map(Block::references);
         let l = left.map(Block::references);
         let (fixed, var, fixed_idx) = reference_context::layout(self.header.sign_bias);
-        let compound = match self.ch.reference_mode {
-            ReferenceMode::Single => false,
-            ReferenceMode::Compound => true,
-            ReferenceMode::Select => {
-                let ctx = reference_context::mode(a, l, fixed);
-                counted(
-                    b,
-                    self.ch.probabilities.comp_mode[ctx],
-                    &mut self.counts.comp_mode[ctx],
-                )?
-            }
-        };
-        let refs = if compound {
+        let compound = forced_reference.is_none()
+            && match self.ch.reference_mode {
+                ReferenceMode::Single => false,
+                ReferenceMode::Compound => true,
+                ReferenceMode::Select => {
+                    let ctx = reference_context::mode(a, l, fixed);
+                    counted(
+                        b,
+                        self.ch.probabilities.comp_mode[ctx],
+                        &mut self.counts.comp_mode[ctx],
+                    )?
+                }
+            };
+        let refs = if let Some(reference) = forced_reference {
+            [reference as u8, 0]
+        } else if compound {
             let ctx = reference_context::compound(a, l, fixed, var, fixed_idx);
             let choice = usize::from(counted(
                 b,
@@ -348,7 +353,9 @@ impl Decoder<'_> {
             }
             candidates[list] = found;
         }
-        let mut mode = if w >= 8 && h >= 8 {
+        let mut mode = if segment_skip {
+            12
+        } else if w >= 8 && h >= 8 {
             10 + tree(
                 b,
                 &[-2, 2, 0, 4, -1, -3],
@@ -357,7 +364,7 @@ impl Decoder<'_> {
         } else {
             0
         };
-        if w >= 8 && h >= 8 {
+        if w >= 8 && h >= 8 && !segment_skip {
             count_symbol(
                 &[-2, 2, 0, 4, -1, -3],
                 &mut self.counts.inter_mode[ctx],

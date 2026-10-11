@@ -1,0 +1,436 @@
+{
+  "cases": [
+    {
+      "file": "vp9-segmentation-lf-420-8-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-420-8-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-8-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-8-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-420-8-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-8-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-8-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-420-8-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-8-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-420-8-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-420-8-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-8-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-8-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-420-8-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-8-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-420-8-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-420-8-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-8-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-8-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-422-8-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-8-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-8-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-422-8-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-8-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-8-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-422-8-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-8-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-422-8-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-422-8-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-8-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-8-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-422-8-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-8-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-422-8-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-422-8-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-8-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-8-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-444-8-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-8-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-8-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-444-8-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-8-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-8-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-444-8-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-8-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-444-8-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-444-8-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-8-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-8-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-444-8-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-8-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-444-8-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-444-8-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-8-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-8-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-440-8-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-8-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-8-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-440-8-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-8-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-8-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-440-8-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-8-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-440-8-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-440-8-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-8-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-8-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-440-8-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-8-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-440-8-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-440-8-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-8-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-10-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-420-10-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-10-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-10-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-420-10-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-10-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-10-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-420-10-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-10-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-420-10-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-420-10-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-10-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-10-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-420-10-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-10-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-420-10-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-420-10-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-10-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-10-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-422-10-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-10-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-10-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-422-10-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-10-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-10-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-422-10-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-10-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-422-10-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-422-10-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-10-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-10-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-422-10-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-10-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-422-10-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-422-10-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-10-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-10-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-444-10-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-10-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-10-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-444-10-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-10-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-10-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-444-10-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-10-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-444-10-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-444-10-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-10-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-10-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-444-10-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-10-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-444-10-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-444-10-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-10-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-10-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-440-10-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-10-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-10-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-440-10-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-10-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-10-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-440-10-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-10-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-440-10-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-440-10-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-10-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-10-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-440-10-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-10-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-440-10-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-440-10-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-10-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-12-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-420-12-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-12-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-12-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-420-12-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-12-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-12-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-420-12-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-12-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-420-12-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-420-12-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-12-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-420-12-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-420-12-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-12-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-420-12-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-420-12-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-420-12-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-12-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-422-12-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-12-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-12-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-422-12-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-12-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-12-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-422-12-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-12-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-422-12-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-422-12-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-12-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-422-12-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-422-12-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-12-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-422-12-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-422-12-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-422-12-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-12-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-444-12-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-12-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-12-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-444-12-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-12-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-12-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-444-12-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-12-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-444-12-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-444-12-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-12-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-444-12-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-444-12-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-12-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-444-12-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-444-12-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-444-12-0-0-32.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-12-0-16--16.vp9",
+      "control": "vp9-segmentation-lf-440-12-0-16--16-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-12-0-16--16.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-12-0-16--63.vp9",
+      "control": "vp9-segmentation-lf-440-12-0-16--63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-12-0-16--63.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-12-0-16-63.vp9",
+      "control": "vp9-segmentation-lf-440-12-0-16-63-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-12-0-16-63.yuv16",
+      "level": 63
+    },
+    {
+      "file": "vp9-segmentation-lf-440-12-1-16-0.vp9",
+      "control": "vp9-segmentation-lf-440-12-1-16-0-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-12-1-16-0.yuv16",
+      "level": 0
+    },
+    {
+      "file": "vp9-segmentation-lf-440-12-1-16-32.vp9",
+      "control": "vp9-segmentation-lf-440-12-1-16-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-12-1-16-32.yuv16",
+      "level": 32
+    },
+    {
+      "file": "vp9-segmentation-lf-440-12-0-0-32.vp9",
+      "control": "vp9-segmentation-lf-440-12-0-0-32-control.vp9",
+      "unfiltered": "vp9-segmentation-lf-440-12-0-0-32.yuv16",
+      "level": 0
+    }
+  ]
+}

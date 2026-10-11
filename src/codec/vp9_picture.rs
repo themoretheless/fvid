@@ -24,6 +24,9 @@ pub struct Picture {
     pub subsampling: [bool; 2],
     pub planes: [Plane; 3],
     blocks: Vec<Block>,
+    // Saved PrevSegmentIds, not necessarily this picture's block segment IDs:
+    // disabled segmentation and update_map=false must preserve the old map.
+    segment_map: Vec<u8>,
 }
 #[derive(Clone, Copy, Default, Debug)]
 struct Block {
@@ -34,6 +37,7 @@ struct Block {
     height: usize,
     reference: u8,
     second_reference: u8,
+    segment_id: u8,
     inter_mode: u8,
     filter: usize,
     mvs: [[i32; 2]; 4],
@@ -63,6 +67,8 @@ struct Decoder<'a> {
     tile_end: usize,
     references: [Option<&'a Picture>; 3],
     previous: Option<&'a Picture>,
+    above_seg_pred: Vec<bool>,
+    left_seg_pred: Vec<bool>,
     scratch: Vec<i32>,
     pred_scratch: Vec<u16>,
     second_pred_scratch: Vec<u16>,
@@ -128,9 +134,21 @@ pub(crate) fn decode_frame_counted(
     previous: Option<&Picture>,
     budget: usize,
 ) -> Result<(Picture, Counts)> {
-    if header.show_existing.is_some() || header.segmentation.enabled {
+    decode_frame_segmented(frame, header, ch, references, previous, previous, budget)
+}
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn decode_frame_segmented(
+    frame: &[u8],
+    header: &Header,
+    ch: &CompressedHeader,
+    references: [Option<&Picture>; 3],
+    previous: Option<&Picture>,
+    segment_previous: Option<&Picture>,
+    budget: usize,
+) -> Result<(Picture, Counts)> {
+    if header.show_existing.is_some() {
         return Err(crate::unsupported(
-            "VP9 picture decoder requires coded frames and no segmentation",
+            "VP9 picture decoder requires coded frames",
         ));
     }
     let [width, height] = header.picture.size;
@@ -157,7 +175,7 @@ pub(crate) fn decode_frame_counted(
             .count();
     let required = cols
         .checked_mul(rows)
-        .and_then(|n| n.checked_mul(352 + chroma_bytes))
+        .and_then(|n| n.checked_mul(368 + chroma_bytes))
         .and_then(|n| n.checked_add((cols + rows + 16) * 64 + 65536))
         .ok_or_else(|| invalid("VP9 picture size overflow"))?;
     if required > budget {
@@ -187,6 +205,11 @@ pub(crate) fn decode_frame_counted(
             subsampling: header.picture.format.subsampling,
             planes,
             blocks: Vec::new(),
+            segment_map: segment_previous
+                .filter(|p| {
+                    !header.is_intra() && !header.error_resilient && p.size == [width, height]
+                })
+                .map_or_else(|| vec![0; cols * rows], |p| p.segment_map.clone()),
         },
         cols,
         rows,
@@ -199,6 +222,8 @@ pub(crate) fn decode_frame_counted(
         tile_end: cols,
         references,
         previous,
+        above_seg_pred: vec![false; cols + 8],
+        left_seg_pred: vec![false; rows + 8],
         scratch: Vec::new(),
         pred_scratch: Vec::new(),
         second_pred_scratch: Vec::new(),
@@ -214,6 +239,7 @@ pub(crate) fn decode_frame_counted(
         d.tile_end = tile.mi_cols.end as usize;
         for row in (tile.mi_rows.start as usize..tile.mi_rows.end as usize).step_by(8) {
             d.left_partition.fill(0);
+            d.left_seg_pred.fill(false);
             for p in &mut d.left_nz {
                 p.fill(false);
             }
@@ -224,6 +250,11 @@ pub(crate) fn decode_frame_counted(
         b.finish()?;
     }
     d.filter()?;
+    if header.segmentation.enabled && header.segmentation.update_map {
+        for (id, block) in d.picture.segment_map.iter_mut().zip(&d.blocks) {
+            *id = block.segment_id;
+        }
+    }
     d.picture.blocks = d.blocks;
     Ok((d.picture, d.counts))
 }
@@ -326,15 +357,73 @@ impl Decoder<'_> {
         } else {
             None
         };
+        let seg = &self.header.segmentation;
+        let segment_id = if !seg.enabled || (self.header.is_intra() && !seg.update_map) {
+            0
+        } else {
+            let mut predicted = 7;
+            for y in r..(r + h.div_ceil(8)).min(self.rows) {
+                for x in c..(c + w.div_ceil(8)).min(self.cols) {
+                    predicted = predicted.min(self.picture.segment_map[y * self.cols + x]);
+                }
+            }
+            if !seg.update_map {
+                predicted
+            } else {
+                let reuse = if !self.header.is_intra() && seg.temporal_update {
+                    let ctx =
+                        usize::from(self.above_seg_pred[c]) + usize::from(self.left_seg_pred[r]);
+                    let reuse = b.read(seg.pred_probs[ctx])?;
+                    self.above_seg_pred[c..c + w.div_ceil(8)].fill(reuse);
+                    self.left_seg_pred[r..r + h.div_ceil(8)].fill(reuse);
+                    reuse
+                } else {
+                    false
+                };
+                if reuse {
+                    predicted
+                } else {
+                    tree(
+                        b,
+                        &[2, 4, 6, 8, 10, 12, 0, -1, -2, -3, -4, -5, -6, -7],
+                        &seg.tree_probs,
+                    )?
+                }
+            }
+        };
+        let features = if seg.enabled {
+            seg.features[usize::from(segment_id)]
+        } else {
+            [None; 4]
+        };
+        let qindex = features[0].map_or(self.header.base_q, |v| {
+            (i32::from(v)
+                + if seg.absolute {
+                    0
+                } else {
+                    i32::from(self.header.base_q)
+                })
+            .clamp(0, 255) as u8
+        });
+        let segment_skip = features[3].is_some();
+        if segment_skip && (w < 8 || h < 8) {
+            return Err(invalid("VP9 segment skip requires at least an 8x8 block"));
+        }
         let ctx =
             usize::from(above.is_some_and(|v| v.skip)) + usize::from(left.is_some_and(|v| v.skip));
-        let mut skip = counted(
-            b,
-            self.ch.probabilities.skip[ctx],
-            &mut self.counts.skip[ctx],
-        )?;
+        let mut skip = if segment_skip {
+            true
+        } else {
+            counted(
+                b,
+                self.ch.probabilities.skip[ctx],
+                &mut self.counts.skip[ctx],
+            )?
+        };
         let is_inter = if self.header.is_intra() {
             false
+        } else if let Some(reference) = features[2] {
+            reference != 0
         } else {
             let ctx = match (above, left) {
                 (Some(a), Some(l)) => {
@@ -384,7 +473,7 @@ impl Decoder<'_> {
         let mut modes = [0u8; 4];
         let uv;
         if is_inter {
-            motion = self.inter_mode(b, r, c, w, h, above, left)?;
+            motion = self.inter_mode(b, r, c, w, h, above, left, features[2], segment_skip)?;
             modes.fill(motion.inter_mode);
             uv = 0;
         } else {
@@ -592,7 +681,7 @@ impl Decoder<'_> {
                                 &self.coef_values,
                                 size,
                                 self.picture.depth,
-                                self.header.base_q,
+                                qindex,
                                 dc,
                                 ac,
                                 &mut self.dequant_scratch,
@@ -648,6 +737,7 @@ impl Decoder<'_> {
             for x in c..(c + w.div_ceil(8)).min(self.cols) {
                 self.blocks[y * self.cols + x] = Block {
                     skip,
+                    segment_id,
                     tx,
                     modes,
                     width: w,
@@ -853,8 +943,25 @@ impl Decoder<'_> {
                                 } else {
                                     0
                                 };
-                                let level = (i32::from(lf.level) + (delta << (lf.level >> 5)))
-                                    .clamp(0, 63) as u8;
+                                let seg = &self.header.segmentation;
+                                let base_level = if seg.enabled {
+                                    seg.features[usize::from(block.segment_id)][1].map_or(
+                                        i32::from(lf.level),
+                                        |v| {
+                                            (i32::from(v)
+                                                + if seg.absolute {
+                                                    0
+                                                } else {
+                                                    i32::from(lf.level)
+                                                })
+                                            .clamp(0, 63)
+                                        },
+                                    )
+                                } else {
+                                    i32::from(lf.level)
+                                };
+                                let level =
+                                    (base_level + (delta << (lf.level >> 5))).clamp(0, 63) as u8;
                                 Some((x >> sx, y >> sy, level, filter_tx as u8))
                             };
                             let positions = |px: usize, py: usize| -> [usize; 16] {

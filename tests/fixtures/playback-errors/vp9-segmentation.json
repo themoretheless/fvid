@@ -1,0 +1,509 @@
+{
+  "cases": [
+    {
+      "file": "vp9-segmentation-420-8.webm",
+      "depth": 8,
+      "chroma": "420",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-420-8-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-8-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-420-8-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-8-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-8-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-8-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-8-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-422-8.webm",
+      "depth": 8,
+      "chroma": "422",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-422-8-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-8-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-422-8-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-8-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-8-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-8-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-8-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-444-8.webm",
+      "depth": 8,
+      "chroma": "444",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-444-8-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-8-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-444-8-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-8-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-8-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-8-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-8-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-440-8.webm",
+      "depth": 8,
+      "chroma": "440",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-440-8-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-8-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-440-8-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-8-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-8-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-8-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-8-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-420-10.webm",
+      "depth": 10,
+      "chroma": "420",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-420-10-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-10-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-420-10-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-10-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-10-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-10-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-10-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-422-10.webm",
+      "depth": 10,
+      "chroma": "422",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-422-10-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-10-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-422-10-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-10-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-10-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-10-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-10-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-444-10.webm",
+      "depth": 10,
+      "chroma": "444",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-444-10-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-10-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-444-10-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-10-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-10-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-10-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-10-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-440-10.webm",
+      "depth": 10,
+      "chroma": "440",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-440-10-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-10-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-440-10-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-10-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-10-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-10-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-10-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-420-12.webm",
+      "depth": 12,
+      "chroma": "420",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-420-12-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-12-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-420-12-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-12-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-12-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-12-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-420-12-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-422-12.webm",
+      "depth": 12,
+      "chroma": "422",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-422-12-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-12-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-422-12-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-12-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-12-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-12-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-422-12-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-444-12.webm",
+      "depth": 12,
+      "chroma": "444",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-444-12-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-12-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-444-12-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-12-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-12-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-12-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-444-12-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    },
+    {
+      "file": "vp9-segmentation-440-12.webm",
+      "depth": 12,
+      "chroma": "440",
+      "frames": [
+        {
+          "oracle": "vp9-segmentation-440-12-0.yuv16",
+          "pts": 666000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-12-1.yuv16",
+          "pts": 999000000,
+          "shown": false
+        },
+        {
+          "oracle": "vp9-segmentation-440-12-2.yuv16",
+          "pts": 1332000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-12-3.yuv16",
+          "pts": 1665000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-12-4.yuv16",
+          "pts": 1998000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-12-5.yuv16",
+          "pts": 2331000000,
+          "shown": true
+        },
+        {
+          "oracle": "vp9-segmentation-440-12-6.yuv16",
+          "pts": 2664000000,
+          "shown": true
+        }
+      ]
+    }
+  ],
+  "provenance": "Original synthetic coloured and neutral references; owned segmentation syntax/entropy writer, independent reference-selection pixel oracles. No private media, external codecs or network."
+}
