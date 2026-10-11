@@ -6297,6 +6297,20 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_dpb_parameters.py` authors seven original continuations of owned
+OLS/representation prefixes, adding temporal-sublayer PTL presence bits and
+Annex F.7.3.2.1.3 DPB syntax. F.7.4.3.1.3 defines preceding-sublayer inheritance,
+nondecreasing capacities and F-15 latency. Hand-authored capacities and temporal
+presence patterns cover inferred/explicit/partial inheritance, subset OLSs,
+decreasing capacities and wide u32 field values with u64 latency results. The
+external-base prefix omits the initial additional PTL, explicitly supplies PTL
+index 1 and omits coded base DPB counts, verifying their inferred value of one.
+These prefixes stop after dpb_size(), before dependency types and VPS VUI.
+They are metadata parser acceptance/refusal fixtures, not complete VPSs or
+playback acceptance, and wide counts do not establish profile/level conformance
+or permit unbounded frame allocation. Authoring/tests use no private input,
+external codec, FFmpeg or network; generation remains separate from testing.
+
 `generate_hevc_representation_formats.py` authors 26 original continuations of
 the owned highest-output OLS prefix, following Annex F.7.3.2.1.2 and
 F.7.4.3.1.2. It covers monochrome/4:2:0/4:2:2/4:4:4/separate planes at 8/10/16

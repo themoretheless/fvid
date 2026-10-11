@@ -2,6 +2,16 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`RepresentationFormats::dpb_parameters` reads Annex F DPB metadata per OLS
+and temporal sublayer. It retains actual per-layer picture counts, marks
+unnecessary layers, inherits absent sublayers from the preceding one and rejects
+decreasing capacities. OLS zero remains explicitly absent here because the base
+SPS supplies its DPB. Latency uses wide F-15 arithmetic and zero means unlimited.
+Seven original partial metadata fixtures cover explicit/inferred/partially inherited
+sublayers, subset OLSs, external-base inference, decreasing capacities and wide values. Metadata budgeting
+does not admit those values for frame allocation: profile/level/SPS constraints
+and actual DPB storage remain to be connected to multilayer decoding.
+
 `OutputLayerSets::representation_formats` continues through all representation
 formats, layer mappings and POC flags, stopping before DPB syntax. It retains
 dimensions, chroma/separate-plane layout, independent luma/chroma depth and

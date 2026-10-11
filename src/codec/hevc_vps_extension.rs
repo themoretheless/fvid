@@ -87,6 +87,116 @@ pub struct RepresentationFormats {
     pub poc_lsb_not_present: Vec<bool>,
     pub end_bit: usize,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DpbSubLayer {
+    pub explicitly_present: bool,
+    /// Actual picture counts, in associated layer-list order; None if unnecessary.
+    pub decoded_pictures: Vec<Option<u32>>,
+    pub reorder_pictures: u32,
+    pub latency_increase_plus1: u32,
+}
+impl DpbSubLayer {
+    pub fn max_latency_pictures(&self) -> Option<u64> {
+        (self.latency_increase_plus1 != 0)
+            .then(|| u64::from(self.reorder_pictures) + u64::from(self.latency_increase_plus1) - 1)
+    }
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DpbParameters {
+    /// OLS zero is None: its DPB is supplied by the base SPS, not this syntax.
+    pub sets: Vec<Option<Vec<DpbSubLayer>>>,
+    pub end_bit: usize,
+}
+impl RepresentationFormats {
+    /// Read dpb_size(). Profile/level/SPS constraints and actual frame-storage
+    /// admission remain separate from the retained metadata budget here.
+    pub fn dpb_parameters(
+        &self,
+        bytes: &[u8],
+        output: &OutputLayerSets,
+        extension: &LayerSetExtension,
+        layers: &super::hevc_vps::LayerSets,
+        budget: usize,
+    ) -> Result<DpbParameters> {
+        if output.sets.is_empty()
+            || output.sets.len() > 3070
+            || extension.layer_sets.len() != extension.set_sublayers_minus1.len()
+        {
+            return Err(invalid("invalid HEVC DPB metadata geometry"));
+        }
+        let mut cost = std::mem::size_of::<DpbParameters>()
+            + output.sets.len() * std::mem::size_of::<Option<Vec<DpbSubLayer>>>();
+        for ols in output.sets.iter().skip(1) {
+            let list = extension
+                .layer_sets
+                .get(ols.layer_set_index)
+                .ok_or_else(|| invalid("HEVC DPB layer set index out of range"))?;
+            let maximum = extension.set_sublayers_minus1[ols.layer_set_index];
+            if maximum > 6 || list.is_empty() || list.len() > 63 || list.iter().any(|&id| id > 63) {
+                return Err(invalid("invalid HEVC DPB layer geometry"));
+            }
+            cost += (usize::from(maximum) + 1)
+                * (std::mem::size_of::<DpbSubLayer>()
+                    + list.len() * std::mem::size_of::<Option<u32>>());
+        }
+        if cost > budget {
+            return Err(invalid("HEVC DPB metadata exceeds memory budget"));
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(self.end_bit)?;
+        let mut sets = Vec::with_capacity(output.sets.len());
+        sets.push(None);
+        for ols in output.sets.iter().skip(1) {
+            let list = &extension.layer_sets[ols.layer_set_index];
+            let maximum = extension.set_sublayers_minus1[ols.layer_set_index];
+            let flags = b.bit()?;
+            let mut temporal: Vec<DpbSubLayer> = Vec::with_capacity(usize::from(maximum) + 1);
+            for j in 0..=maximum {
+                let present = j == 0 || (flags && b.bit()?);
+                if !present {
+                    let mut inherited = temporal.last().unwrap().clone();
+                    inherited.explicitly_present = false;
+                    temporal.push(inherited);
+                    continue;
+                }
+                let mut pictures = vec![None; list.len()];
+                for (k, &id) in list.iter().enumerate() {
+                    if ols.necessary & (1u64 << id) == 0 {
+                        continue;
+                    }
+                    let value = if layers.base_internal || id != 0 {
+                        b.unsigned_golomb()?
+                            .checked_add(1)
+                            .ok_or_else(|| invalid("HEVC DPB picture count overflow"))?
+                    } else {
+                        1
+                    };
+                    if let Some(previous) = temporal.last().and_then(|p| p.decoded_pictures[k]) {
+                        if value < previous {
+                            return Err(invalid(
+                                "HEVC DPB capacity decreases with temporal sublayer",
+                            ));
+                        }
+                    }
+                    pictures[k] = Some(value);
+                }
+                let reorder = b.unsigned_golomb()?;
+                let latency = b.unsigned_golomb()?;
+                temporal.push(DpbSubLayer {
+                    explicitly_present: true,
+                    decoded_pictures: pictures,
+                    reorder_pictures: reorder,
+                    latency_increase_plus1: latency,
+                });
+            }
+            sets.push(Some(temporal));
+        }
+        Ok(DpbParameters {
+            sets,
+            end_bit: b.position(),
+        })
+    }
+}
 impl OutputLayerSets {
     /// Read representation formats and POC flags, stopping immediately before
     /// dpb_size(). SPS-dependent MinCbSizeY alignment still requires admission
