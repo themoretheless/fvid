@@ -85,6 +85,8 @@ fn cpb(b: &mut BitReader<'_>, count: usize, sub_picture: bool) -> Result<Vec<Cpb
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SubLayer {
+    /// Retained even when both NAL and VCL CPB lists are absent.
+    pub cpb_count: u8,
     pub fixed_rate_general: bool,
     pub elemental_duration: Option<u16>,
     pub low_delay: bool,
@@ -145,6 +147,7 @@ impl Hrd {
                 Vec::new()
             };
             layers.push(SubLayer {
+                cpb_count: count as u8,
                 fixed_rate_general,
                 elemental_duration,
                 low_delay,

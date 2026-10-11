@@ -2,6 +2,17 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`VpsVuiPrefix::bsp_hrd` continues through BSP HRD and independent-layer
+compatibility flags. It reads additional/inherited HRDs, inferred/signalled
+partitions and per-temporal delivery schedules. Checks cover counts, unique
+complete partition coverage, reference ordering, HRD/CPB indices, temporal
+availability, CPB bitrate/buffer ordering and VPS timing presence. Retained
+allocations are incrementally budgeted. HRD sublayers now retain CPB count even
+without NAL/VCL lists. Fourteen original metadata continuations include the
+16-scheme/32-schedule/32-CPB bounds and precise invalid cases. Actual HRD timing,
+SPS/level constraints, external inferred partition qualification and full VPS
+admission remain distinct unfinished work; no multilayer playback is claimed.
+
 `LayeredExtensionPrefix::vui_prefix` reads general multilayer VPS VUI metadata:
 picture/IRAP/IDR alignment, per-set/sublayer bit/picture rates, video signals and
 indices, tiles/filter/WPP flags, tile-boundary alignment and inter-layer spatial
@@ -9,7 +20,7 @@ restrictions. External-base fields follow their distinct presence conditions.
 Eight original prefixes cover basic/rich/internal/external metadata, internal
 signal-index inference and targeted malformed fields. When BSP HRD is present,
 the parser explicitly stops before it; otherwise it reads independent-layer
-parameter compatibility flags. BSP HRD schedules, SPS-dependent spatial bounds,
+parameter compatibility flags. Actual BSP HRD timing, SPS-dependent spatial bounds,
 external-base non-indexed signal mapping qualification and picture admission
 remain unfinished. This is metadata prefix acceptance, not video acceptance.
 
@@ -22,7 +33,8 @@ and dependency types with cumulative retained-capacity accounting against one
 metadata budget. Sixteen original connected prefixes cover common/per-edge
 types, external bases, 32-bit types, 4096 ignored bytes and targeted failures.
 The result stops before VPS VUI when present; it is not full VPS validation or
-multilayer playback admission. VPS VUI and connection to SPS/pictures remain.
+multilayer playback admission. VUI/BSP continuation APIs are described above;
+connection to SPS/pictures remains unfinished.
 
 `RepresentationFormats::dpb_parameters` reads Annex F DPB metadata per OLS
 and temporal sublayer. It retains actual per-layer picture counts, marks
@@ -51,8 +63,8 @@ list, PTL indices and alternate output. It checks global layer coverage, empty
 output sets, additional-set singleton constraints, coded indices and memory.
 Fifteen original partial metadata fixtures cover the three default modes,
 1023 extra OLSs, mapped sets, extra PTLs, unused per-OLS layers and malformed input.
-Representation formats, DPB and the remaining extension syntax are still
-pending; these prefix APIs are not connected to multilayer picture decoding.
+Representation/DPB/VUI continuation APIs are described above; these prefix APIs
+are not connected to multilayer picture decoding.
 
 `LayerDependencyPrefix::layer_sets` continues through additional layer sets,
 per-layer temporal sublayers, maximum temporal inter-layer references and
@@ -60,7 +72,8 @@ default reference activation. It preserves the normative F-9 partition order
 and excludes tree zero from additional sets. Bounds, empty sets, unavailable
 base-layer constraints and metadata memory admission are checked. Eleven original
 metadata continuations exercise 1023 additional sets and targeted malformed
-cases. PTL/OLS/representation/DPB parsing and picture decoding remain pending.
+cases. Subsequent PTL/OLS/representation/DPB parsing is described above;
+connection to picture decoding remains unfinished.
 
 `LayerDependencyPrefix::parse` additionally reads Annex F extension alignment,
 the extra PTL, explicit/inferred layer IDs, explicit/split scalability dimensions,
@@ -68,8 +81,8 @@ view IDs and direct dependencies. It derives transitive references and disjoint
 independent-root tree partitions using NAL layer IDs. Six original raw prefix
 fixtures exercise chain/diamond/forest graphs, splitting, 63 layers and malformed
 IDs; a separate graph oracle verifies closure. It returns a continuation bit
-offset. Additional layer sets/OLS/DPB syntax and connection to picture decoding
-are still pending; this API does not claim complete extension or video acceptance.
+offset. Additional layer sets/OLS/DPB continuation APIs are described above;
+this API does not claim complete extension or video acceptance.
 
 `Vps::parse_layered_metadata` now reads sparse layer IDs, up to 1024 unique
 nonempty layer sets, reserved values 63, external base-layer metadata and
@@ -77,8 +90,9 @@ multiple HRDs with preceding-common inheritance. Retained metadata is budgeted.
 Sixteen original VPS fixtures and three tests cover topology, HRD, malformed
 references and memory admission. This is metadata acceptance, not multilayer
 playback acceptance: ordinary `Vps::parse` still refuses layered input.
-Annex F dependencies, per-layer DPB, inter-layer reconstruction/resampling and
-the corresponding SPS/PPS extensions remain unfinished. These parameter-only
+Annex F dependency/DPB metadata is covered by the continuation APIs above;
+actual per-layer storage, inter-layer reconstruction/resampling and the
+corresponding SPS/PPS extensions remain unfinished. These parameter-only
 fixtures do not replace future synthetic video acceptance tests.
 
 Цель: собственные H.264, H.265 и AAC в FVid; production-модуль `media`

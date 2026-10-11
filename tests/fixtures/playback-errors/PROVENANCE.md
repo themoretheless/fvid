@@ -6297,6 +6297,20 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_bsp_hrd.py` authors fourteen original BSP HRD continuations of
+the owned general-VUI prefix, following Annex F.7.3.2.1.6/F.7.4.3.1.6. Original
+NAL CPBs have increasing bitrates and decreasing buffer sizes. Independent
+expected groups are [0,3] and [7,15], plus inferred single-layer partitions.
+Cases cover additional/common-inherited HRDs, 16 signalled schemes, 32 schedules,
+32 CPBs, no NAL/VCL lists, zero HRDs, invalid counts/indices, omitted/duplicate
+layers, reversed references and non-increasing bitrate schedules. Tests require
+VPS timing and enforce metadata budgets and truncation failures. CPB count is
+retained separately so absent lists do not erase schedule-index bounds.
+These remain partial metadata RBSPs stopping after BSP/compatibility fields;
+they do not qualify full VPS/profile/HRD operation or multilayer playback.
+External inferred partitions and actual BPB timing/size derivation remain open.
+Generation/testing uses no private media, FFmpeg, external codec or network.
+
 `generate_hevc_layered_vui.py` authors eight original general VPS VUI prefixes
 from the owned connected dependency-type fixtures. Annex F.7.3.2.1.4 defines
 presence ordering for alignment, rate fields, colour signals, tiles/WPP and
@@ -6304,7 +6318,8 @@ spatial inter-layer restrictions. Explicit array/formula oracles distinguish
 layer-set/temporal rate rows, NAL-ID masks and external-base omissions. Cases
 cover basic/rich metadata, internal inferred signal indices, external explicit
 indices, invalid constant-rate/index/skip fields and a BSP continuation sentinel.
-The BSP case stops before BSP HRD syntax, which remains unimplemented here;
+The general-VUI BSP case stops before BSP HRD syntax; the separate BSP reader
+uses the real continuations described above. Its sentinel is not BSP acceptance;
 dropping its sentinel is valid prefix parsing, not acceptance of BSP HRD data.
 SPS-dependent CTU bounds and external non-indexed colour mapping remain
 unqualified. These partial metadata RBSPs are not complete VPS/video streams.

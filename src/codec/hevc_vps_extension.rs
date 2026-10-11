@@ -2,6 +2,9 @@
 //! Ordinary Annex A may ignore errors in the deferred single-layer tail.
 use super::{bits::BitReader, hevc_profile::ProfileTierLevel};
 use crate::{Result, invalid};
+#[path = "hevc_bsp_hrd.rs"]
+mod bsp;
+pub use bsp::{BspHrdParameters, BspScheduleEntry, BspScheme};
 
 /// Annex F extension syntax through direct_dependency_flag, before additional
 /// sets/OLS/DPB. Masks use NAL layer IDs, not VPS indices. This is deliberately

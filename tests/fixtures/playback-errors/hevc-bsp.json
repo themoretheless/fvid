@@ -1,0 +1,156 @@
+[
+  {
+    "file": "hevc-bsp-basic.bin",
+    "error": null,
+    "end": 870,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-inherited.bin",
+    "error": null,
+    "end": 1039,
+    "hrds": 2,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": true
+  },
+  {
+    "file": "hevc-bsp-maximum.bin",
+    "error": null,
+    "end": 29802,
+    "hrds": 1,
+    "cpbs": 32,
+    "schemes": 17,
+    "schedules": 32,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-no-cpb-lists.bin",
+    "error": null,
+    "end": 708,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": true,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-zero.bin",
+    "error": null,
+    "end": 582,
+    "hrds": 0,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-bad-schemes.bin",
+    "error": "out of range",
+    "end": 1580,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 18,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-bad-partitions.bin",
+    "error": "out of range",
+    "end": 872,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-duplicate.bin",
+    "error": "multiple partitions",
+    "end": 870,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-omitted.bin",
+    "error": "omits a layer",
+    "end": 870,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-reversed.bin",
+    "error": "follows its dependent",
+    "end": 870,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-bad-cpb.bin",
+    "error": "CPB schedule index",
+    "end": 906,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-bad-hrd.bin",
+    "error": "HRD index",
+    "end": 1288,
+    "hrds": 3,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-bad-temporal.bin",
+    "error": "out of range",
+    "end": 872,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  },
+  {
+    "file": "hevc-bsp-bad-order.bin",
+    "error": "bitrate or buffer ordering",
+    "end": 834,
+    "hrds": 1,
+    "cpbs": 2,
+    "schemes": 2,
+    "schedules": 2,
+    "no_lists": false,
+    "inherited": false
+  }
+]
