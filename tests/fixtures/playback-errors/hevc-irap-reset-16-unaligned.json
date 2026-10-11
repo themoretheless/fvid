@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "file": "hevc-irap-reset-16-unaligned-cycle-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "first_poc": 17,
+      "period": 0
+    },
+    {
+      "file": "hevc-irap-reset-16-unaligned-msb-synthetic.mp4",
+      "expectation": "acceptance",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    },
+    {
+      "file": "hevc-irap-reset-16-unaligned-bad-full-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    },
+    {
+      "file": "hevc-irap-reset-16-unaligned-bad-signalled-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    },
+    {
+      "file": "hevc-irap-reset-16-unaligned-bad-cycle-range-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    },
+    {
+      "file": "hevc-irap-reset-16-unaligned-bad-cycle-truncated-synthetic.mp4",
+      "expectation": "invalid",
+      "frames": 3,
+      "first_poc": 1,
+      "period": 0
+    }
+  ],
+  "provenance": "Original owned monochrome PCM/inter seed, rewritten TRAIL_R intra entry, empty RPS and signalled reset. No private parameters, external codec, FFmpeg or network."
+}

@@ -6061,3 +6061,21 @@ in all planes and POCs, repeat after decoder reset, and exercise software
 playback seek/rewind and timestamps. Generation is separate from testing and
 uses only the owned parser, Python and saved synthetic input; no private media,
 FFmpeg, external codec or network is used.
+
+### CRA/BLA reset and required MSB cycle
+
+`generate_hevc_extracted_reset.py --irap N [--unaligned]` authors six
+three-picture videos for each N in 16/17/18/21 and each VPS alignment value.
+The original monochrome PCM/inter seed supplies pixels and entropy. The first
+intra header becomes CRA or one of the three BLA types, retains its IRAP
+no-output bit, supplies an empty RPS and POC LSB 1, then signals the required
+MSB cycle directly (without a cycle-present flag), following Annex F F-55.
+Two acceptance forms produce POCs 17/18/19 without reset or 1/2/3 with MSB
+reset. Four Invalid reproductions cover full reset outside IDR, forbidden
+signalled reset, out-of-range cycle and a genuinely truncated cycle payload.
+Thus the family has sixteen acceptance and thirty-two refusal files.
+Tests inspect real syntax, compare all pixels to the original seed, repeat
+after reset, verify exact errors and poisoning, and exercise software seek,
+rewind and timestamps. These fixtures do not qualify leading-picture behavior,
+mid-sequence CRA/BLA entry, inter-layer references or hardware decoding.
+No private input, FFmpeg, external codec or network is used.

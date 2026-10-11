@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Original extracted-entry signalled reset on owned PCM/inter pictures, offline."""
+import argparse
 import json
 import struct
 import subprocess
@@ -12,6 +13,11 @@ from hevc_fixture_mp4 import box
 
 
 def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--irap',type=int,choices=[16,17,18,21],help='author BLA/CRA entry variants')
+    parser.add_argument('--unaligned',action='store_true',help='use unaligned VPS for IRAP qualification')
+    args=parser.parse_args()
+    assert args.irap or not args.unaligned
     seed = DEST / 'hevc-pcm-mono-reference-rext8.mp4'
     root = Path(__file__).resolve().parents[1]
     meta = json.loads(subprocess.check_output(['cargo', 'run', '--quiet', '--offline',
@@ -32,9 +38,12 @@ def main():
             nal = config[at:at+size]; at += size
             if header[0] & 63 == 33: _, width = sps_width(nal)
     assert width is not None and meta['long_term_entries'] == 0
-    roots, _, _ = parts((DEST / 'hevc-poc-vps-aligned-msb-reset-synthetic.mp4').read_bytes())
+    alignment='unaligned' if args.unaligned else 'aligned'
+    roots, _, _ = parts((DEST / f'hevc-poc-vps-{alignment}-msb-reset-synthetic.mp4').read_bytes())
+    stem=f'hevc-irap-reset-{args.irap}-{alignment}' if args.irap else 'hevc-extracted-reset'
+    labels=['cycle','msb','bad-full','bad-signalled','bad-cycle-range','bad-cycle-truncated'] if args.irap else ['msb','full','bad-no-reset']
     cases = []
-    for label in ['msb', 'full', 'bad-no-reset']:
+    for label in labels:
         outputs = []
         for index, packet in enumerate(packets):
             units = packet_units(packet)
@@ -51,12 +60,12 @@ def main():
             if index == 0:
                 assert info['kind'] in (19, 20)
                 # Convert the intra picture to TRAIL_R, retaining CABAC/PCM bytes.
-                prefix = value[:1] + value[2:r.at] + '0001' + '0'
+                prefix = (value[:r.at] if args.irap else value[:1] + value[2:r.at]) + '0001' + '0'
                 if meta['short_term_sets']: prefix += '0'
                 prefix += ue(0) + ue(0)
                 if meta['long_term_present']: prefix += ue(0)
                 if meta['temporal_mvp_enabled']: prefix += '0'
-                nal = bytes([2, nal[1]]) + nal[2:]
+                nal = bytes([(args.irap or 1)<<1, nal[1]]) + nal[2:]
             else:
                 prefix = value[:r.at] + f'{index+1:04b}'
                 r.read(width)
@@ -64,7 +73,12 @@ def main():
             extension = '00'
             if index == 0 and label != 'bad-no-reset':
                 extension = '11' + '000000' + str(int(label == 'full')) + '0001'
-            extension += '0'  # cycle-present flag in aligned VPS
+            if args.irap and index == 0:
+                extension = '00' if label == 'cycle' else ('10' if label == 'bad-full' else '11' if label == 'bad-signalled' else '01') + '000000'
+                if label == 'bad-signalled': extension += '0' + '0001'
+                extension += '00000000' if label == 'bad-cycle-truncated' else ue((1<<28)+1 if label == 'bad-cycle-range' else 1)
+            elif not args.unaligned:
+                extension += '0'  # cycle-present flag in aligned VPS
             extension = bits(packed(extension))
             prefix += ue(len(extension)//8) + extension
             rewritten = nal[:2] + escape(packed(prefix+'1') + bytes(info['rbsp'][end//8:]))
@@ -79,9 +93,9 @@ def main():
             elif tag in (b'mvhd',b'mdhd'): payload=payload[:16]+struct.pack('>I',3)+payload[20:]
             elif tag==b'tkhd': payload=payload[:20]+struct.pack('>I',3)+payload[24:]
             return box(tag,payload)
-        name=f'hevc-extracted-reset-{label}-synthetic.mp4'
+        name=f'{stem}-{label}-synthetic.mp4'
         (DEST/name).write_bytes(box(b'ftyp',roots[b'ftyp'])+box(b'mdat',b''.join(outputs))+rewrite(b'moov',roots[b'moov']))
-        cases.append(dict(file=name,expectation='invalid' if label.startswith('bad-') else 'acceptance',frames=3,first_poc=1,period=0))
-    (DEST/'hevc-extracted-reset.json').write_text(json.dumps(dict(cases=cases,provenance='Original owned monochrome PCM/inter seed, rewritten TRAIL_R intra entry, empty RPS and signalled reset. No private parameters, external codec, FFmpeg or network.'),indent=2)+'\n')
+        cases.append(dict(file=name,expectation='invalid' if label.startswith('bad-') else 'acceptance',frames=3,first_poc=17 if label == 'cycle' else 1,period=0))
+    (DEST/f'{stem}.json').write_text(json.dumps(dict(cases=cases,provenance='Original owned monochrome PCM/inter seed, rewritten TRAIL_R intra entry, empty RPS and signalled reset. No private parameters, external codec, FFmpeg or network.'),indent=2)+'\n')
 
 if __name__=='__main__': main()

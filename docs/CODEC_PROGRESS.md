@@ -11882,3 +11882,20 @@ suites passed offline without FFmpeg. No production decoder change was needed.
 This qualifies the authored single-layer extracted-entry forms; it does not
 qualify arbitrary extraction, temporal-layer entry, CRA/BLA combinations,
 multilayer prediction, VPS VUI or hardware extraction.
+
+### CRA/BLA reset-cycle video qualification (2026-10-11)
+
+Sixteen original three-picture acceptance streams now qualify CRA and each BLA
+NAL type (16/17/18/21) with aligned and unaligned single-layer VPS. The first
+picture signals required MSB cycle 1 directly, with no presence bit, as F-55
+requires for a base layer. Without reset the POCs are 17/18/19; with MSB reset
+they are 1/2/3. All samples in all planes match the original owned PCM/inter
+seed, including subsequent reference-based pictures and a second reset pass.
+Thirty-two malformed streams establish exact Invalid errors for forbidden full
+and signalled resets, cycle range and truncated cycle syntax, plus poisoning
+and reset recovery. Software seek/rewind tests compare pixels and timeline.
+Twelve integration tests across IRAP, extracted-entry, explicit-cycle and VPS
+reset suites passed offline without FFmpeg. Production behavior was already
+implemented; this closes video qualification gaps, not new decoder features.
+Leading pictures, mid-sequence CRA/BLA transitions, temporal-layer extraction,
+multilayer prediction, VPS VUI and hardware extraction remain unqualified/open.
