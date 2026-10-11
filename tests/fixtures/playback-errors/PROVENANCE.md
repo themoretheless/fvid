@@ -6079,3 +6079,19 @@ after reset, verify exact errors and poisoning, and exercise software seek,
 rewind and timestamps. These fixtures do not qualify leading-picture behavior,
 mid-sequence CRA/BLA entry, inter-layer references or hardware decoding.
 No private input, FFmpeg, external codec or network is used.
+
+### Single-layer VPS VUI
+
+`generate_hevc_vps_vui.py` authors nine original 35-picture streams by replacing
+only the VPS extension of the owned aligned-VPS MSB-reset seed. Three acceptance
+files exercise basic VUI, optional bit/picture-rate syntax, and two additional
+BSP HRD records with common-parameter inheritance. Six exact Invalid files
+cover VUI alignment, reserved constant-picture-rate ID, out-of-range signal
+index, inconsistent higher-layer skip constraint, HRD count and sublayer count.
+The acceptance test first failed at picture zero with the old explicit VUI
+Unsupported diagnostic, then passed with the single-layer reader. It compares
+every POC and every sample in every plane twice with decoder reset. Software
+seek/rewind includes all three valid files. Rate fields exercise parsing, not
+HRD scheduling or conformance of measured bit/picture rates. No private media,
+parameters, FFmpeg, external codec or network is used; ordinary tests never
+invoke the generator. Layered VUI and inter-layer decoding are not qualified.

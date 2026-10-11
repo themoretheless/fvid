@@ -187,8 +187,8 @@ impl Vps {
         };
         let extension_present = bits.bit()?;
         let reset_extension = extension_present.then(|| std::sync::Arc::new(
-            ResetExtension::from_result(super::hevc_vps_extension::poc_lsb_aligned(
-                &rbsp.bytes, bits.position(), max_sub_layers_minus1))));
+            ResetExtension::from_result(super::hevc_vps_extension::poc_lsb_aligned_with_hrd(
+                &rbsp.bytes, bits.position(), max_sub_layers_minus1, hrd.as_ref()))));
         if extension_present {
             // Annex A decoding without INBLD ignores VPS extension data.
             // Base-layer admission above still rejects layered requirements.

@@ -1,5 +1,5 @@
 //! Annex F.7.3.2.1.1 for an internal, single-layer VPS.
-//! Invoked only when Annex F semantics are needed; Annex A keeps ignoring tails.
+//! Deferred Annex F interpretation; ordinary Annex A may ignore errors in this tail.
 use super::{bits::BitReader, hevc_profile::ProfileTierLevel};
 use crate::{invalid, Result};
 
@@ -11,7 +11,17 @@ fn bounded(b: &mut BitReader<'_>, maximum: u32) -> Result<u32> {
     Ok(value)
 }
 
-pub(super) fn poc_lsb_aligned(bytes: &[u8], start: usize, sublayers: u8) -> Result<bool> {
+#[cfg(test)]
+fn poc_lsb_aligned(bytes: &[u8], start: usize, sublayers: u8) -> Result<bool> {
+    poc_lsb_aligned_with_hrd(bytes, start, sublayers, None)
+}
+
+pub(super) fn poc_lsb_aligned_with_hrd(
+    bytes: &[u8],
+    start: usize,
+    sublayers: u8,
+    base_hrd: Option<&super::hevc_hrd::Hrd>,
+) -> Result<bool> {
     let mut b = BitReader::new(bytes);
     b.skip(start)?;
     while b.position() % 8 != 0 {
@@ -38,7 +48,12 @@ pub(super) fn poc_lsb_aligned(bytes: &[u8], start: usize, sublayers: u8) -> Resu
     b.bit()?; // vps_nuh_layer_id_present_flag: no additional layer IDs
     let view_bits = b.read(4)? as u8;
     b.read(view_bits)?; // NumViews == 1
-    if b.bit()? && b.read(3)? > u32::from(sublayers) {
+    let layer_sublayers = if b.bit()? {
+        b.read(3)? as u8
+    } else {
+        sublayers
+    };
+    if layer_sublayers > sublayers {
         return Err(invalid("HEVC VPS extension exceeds temporal sublayers"));
     }
     b.bit()?; // max_tid_ref_present_flag: no dependency edges
@@ -97,9 +112,12 @@ pub(super) fn poc_lsb_aligned(bytes: &[u8], start: usize, sublayers: u8) -> Resu
     let ignored_bytes = bounded(&mut b, 4096)? as usize;
     b.skip(ignored_bytes * 8)?;
     if b.bit()? {
-        return Err(crate::unsupported(
-            "HEVC POC reset VPS VUI semantics are not implemented",
-        ));
+        while b.position() % 8 != 0 {
+            if !b.bit()? {
+                return Err(invalid("HEVC VPS VUI alignment bit is not one"));
+            }
+        }
+        single_layer_vui(&mut b, layer_sublayers, sublayers, base_hrd)?;
     }
     if b.bit()? {
         while b.more_rbsp_data() {
@@ -108,6 +126,84 @@ pub(super) fn poc_lsb_aligned(bytes: &[u8], start: usize, sublayers: u8) -> Resu
     }
     b.finish_rbsp()?;
     Ok(aligned)
+}
+
+/// Annex F.7.3.2.1.4 with one internal layer/set/OLS. Advisory cross-layer,
+/// rate and video-signal fields do not replace the base-layer SPS VUI (F.15.3.1).
+fn single_layer_vui(
+    b: &mut BitReader<'_>,
+    layer_sublayers: u8,
+    sublayers: u8,
+    base_hrd: Option<&super::hevc_hrd::Hrd>,
+) -> Result<()> {
+    let irap_aligned = if b.bit()? { true } else { b.bit()? };
+    if irap_aligned {
+        b.bit()?;
+    }
+    let rate = b.bit()?;
+    let pictures = b.bit()?;
+    if rate || pictures {
+        for _ in 0..=layer_sublayers {
+            let has_rate = rate && b.bit()?;
+            let has_pictures = pictures && b.bit()?;
+            if has_rate {
+                b.read(16)?;
+                b.read(16)?;
+            }
+            if has_pictures {
+                if b.read(2)? > 2 {
+                    return Err(invalid("HEVC VPS VUI constant picture rate out of range"));
+                }
+                b.read(16)?;
+            }
+        }
+    }
+    let indexed = b.bit()?;
+    let signals = if indexed { b.read(4)? } else { 0 };
+    for _ in 0..=signals {
+        b.read(3)?;
+        b.bit()?;
+        b.read(24)?;
+    }
+    if indexed && signals > 0 && b.read(4)? > signals {
+        return Err(invalid("HEVC VPS VUI video signal index out of range"));
+    }
+    if !b.bit()? && b.bit()? {
+        b.bit()?;
+    } // tiles in the only layer
+    if !b.bit()? {
+        b.bit()?;
+    } // WPP in the only layer
+    let single = b.bit()?;
+    if b.bit()? && !single {
+        return Err(invalid(
+            "HEVC VPS VUI higher-layer skip requires single-layer constraint",
+        ));
+    }
+    b.bit()?; // ILP restrictions have no edges in a single-layer VPS
+    if b.bit()? {
+        let count = b.unsigned_golomb()?;
+        let existing = u32::from(base_hrd.is_some());
+        if count > 1024 - existing {
+            return Err(invalid("HEVC VPS VUI additional HRD count out of range"));
+        }
+        let mut common = base_hrd.map(|h| h.common.clone());
+        for index in existing..existing + count {
+            let present = index == 0 || b.bit()?;
+            let layers = b.unsigned_golomb()?;
+            if layers > u32::from(sublayers) {
+                return Err(invalid("HEVC VPS VUI HRD sublayers exceed VPS"));
+            }
+            let hrd = super::hevc_hrd::Hrd::read(
+                b,
+                layers as u8,
+                if present { None } else { common.as_ref() },
+            )?;
+            common = Some(hrd.common);
+        }
+        // Output layer set zero has inferred partitioning; no schedule syntax.
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -137,6 +233,57 @@ mod tests {
             64,
             u8::from(aligned)
         )
+    }
+    fn with_vui(vui: &str) -> Vec<u8> {
+        let original = syntax(true);
+        let mut prefix = original[..84].to_owned() + "1";
+        while prefix.len() % 8 != 0 {
+            prefix.push('1');
+        }
+        packed(prefix + vui + &original[85..])
+    }
+    fn basic_vui() -> String {
+        "10000".to_owned() + "1010" + &"00000010".repeat(3) + "110000"
+    }
+    #[test]
+    fn vui_optional_fields_truncation_and_hrd_inheritance_bounds() {
+        let signal = "1010".to_owned() + &"00000010".repeat(3);
+        let rate = "11".to_owned() + &"0000000000000001".repeat(2) + "10" + "0000000100000000";
+        let rich = "0011".to_owned()
+            + &rate.repeat(3)
+            + "11111"
+            + &signal.repeat(16)
+            + "1111"
+            + "011"
+            + "01"
+            + "101"
+            + "0";
+        let data = with_vui(&rich);
+        assert!(poc_lsb_aligned(&data, 3, 2).unwrap());
+        for end in 0..data.len() {
+            assert!(poc_lsb_aligned(&data[..end], 3, 2).is_err(), "{end}");
+        }
+        let basic = basic_vui();
+        assert!(poc_lsb_aligned(&with_vui(&basic), 3, 0).unwrap());
+        let common_data = packed("00111".to_owned());
+        let base =
+            super::super::hevc_hrd::Hrd::read(&mut BitReader::new(&common_data), 0, None).unwrap();
+        let inherited =
+            basic[..basic.len() - 1].to_owned() + "1" + &ue(1023) + &"01111".repeat(1023);
+        assert!(poc_lsb_aligned_with_hrd(&with_vui(&inherited), 3, 0, Some(&base)).unwrap());
+        let too_many = basic[..basic.len() - 1].to_owned() + "1" + &ue(1024);
+        assert_eq!(
+            poc_lsb_aligned_with_hrd(&with_vui(&too_many), 3, 0, Some(&base))
+                .unwrap_err()
+                .to_string(),
+            "HEVC VPS VUI additional HRD count out of range"
+        );
+        let independent = basic[..basic.len() - 1].to_owned()
+            + "1"
+            + &ue(1024)
+            + "100111"
+            + &"01111".repeat(1023);
+        assert!(poc_lsb_aligned(&with_vui(&independent), 3, 0).unwrap());
     }
     #[test]
     fn single_layer_alignment_and_every_byte_truncation() {
@@ -212,10 +359,12 @@ mod tests {
                 message
             );
         }
-        assert!(matches!(
-            poc_lsb_aligned(&splice(84, 1, "1"), 3, 0),
-            Err(crate::Error::Unsupported(_))
-        ));
+        assert_eq!(
+            poc_lsb_aligned(&splice(84, 1, "1"), 3, 0)
+                .unwrap_err()
+                .to_string(),
+            "HEVC VPS VUI alignment bit is not one"
+        );
         assert!(poc_lsb_aligned(&splice(85, 1, "110110"), 3, 0).unwrap());
         assert!(poc_lsb_aligned(&splice(82, 1, "110"), 3, 0).unwrap());
         // Maximum 256 formats; later formats inherit chroma/depth, and the base

@@ -326,6 +326,9 @@ fn strict_vps_reset_software_seek_and_rewind_match_existing_reset_oracle() {
         "hevc-poc-vps-alignment-update-annex-a-to-reset-at-idr-synthetic.mp4".to_owned(),
         "full-reset",
     ));
+    for kind in ["basic", "rates", "bsp"] {
+        cases.push((format!("hevc-vps-vui-{kind}-synthetic.mp4"), "msb-reset"));
+    }
     for (name, kind) in cases {
         let mut actual = Mp4VideoReader::open_software(
             Cursor::new(fixture(&name)),

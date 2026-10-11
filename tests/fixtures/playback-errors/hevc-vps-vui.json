@@ -1,0 +1,50 @@
+{
+  "cases": [
+    {
+      "file": "hevc-vps-vui-basic-synthetic.mp4",
+      "expectation": "acceptance",
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-vps-vui-rates-synthetic.mp4",
+      "expectation": "acceptance",
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-vps-vui-bsp-synthetic.mp4",
+      "expectation": "acceptance",
+      "failure_picture": null
+    },
+    {
+      "file": "hevc-vps-vui-bad-alignment-synthetic.mp4",
+      "expectation": "invalid",
+      "failure_picture": 0
+    },
+    {
+      "file": "hevc-vps-vui-bad-rate-synthetic.mp4",
+      "expectation": "invalid",
+      "failure_picture": 0
+    },
+    {
+      "file": "hevc-vps-vui-bad-index-synthetic.mp4",
+      "expectation": "invalid",
+      "failure_picture": 0
+    },
+    {
+      "file": "hevc-vps-vui-bad-skip-synthetic.mp4",
+      "expectation": "invalid",
+      "failure_picture": 0
+    },
+    {
+      "file": "hevc-vps-vui-bad-hrd-count-synthetic.mp4",
+      "expectation": "invalid",
+      "failure_picture": 0
+    },
+    {
+      "file": "hevc-vps-vui-bad-sublayers-synthetic.mp4",
+      "expectation": "invalid",
+      "failure_picture": 0
+    }
+  ],
+  "provenance": "Owned single-layer VUI on original saved reset seed; no private media, external codec, FFmpeg or network."
+}
