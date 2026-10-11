@@ -16,6 +16,109 @@ pub struct LayeredAccessPicture {
     pub poc: i32,
     pub resetting: bool,
 }
+impl LayeredAccessPicture {
+    /// Resolve temporal RPS and same-AU inter-layer candidates before selecting
+    /// lists. Retained temporal identities are returned for the DPB owner.
+    /// Reference pictures must already have undergone any required sample/motion
+    /// preparation; this method does not substitute unprepared layer pixels.
+    pub fn reference_lists(
+        &self,
+        slice: usize,
+        access_unit: u64,
+        temporal: &[crate::codec::hevc_motion::Reference],
+        completed: &[(
+            crate::codec::hevc_inter_layer::PictureStatus,
+            Arc<crate::codec::hevc_picture::Picture>,
+        )],
+        budget: usize,
+    ) -> Result<(
+        Vec<(i32, bool)>,
+        [Vec<crate::codec::hevc_motion::Reference>; 2],
+    )> {
+        use crate::codec::{hevc_motion::Reference, hevc_reference_list::ReferenceKind};
+        let header = self
+            .slices
+            .get(slice)
+            .ok_or_else(|| invalid("HEVC layered slice index out of range"))?;
+        let entries = header
+            .short_term
+            .len()
+            .saturating_add(header.long_term.len());
+        let needed = entries
+            .saturating_mul(4)
+            .saturating_add(60)
+            .saturating_mul(
+                size_of::<Reference>()
+                    + size_of::<crate::codec::hevc_reference_list::PictureIdentity>()
+                    + size_of::<(i32, bool)>(),
+            )
+            .saturating_add(temporal.len().saturating_mul(size_of::<i32>()));
+        let available = budget
+            .checked_sub(needed)
+            .ok_or_else(|| invalid("HEVC layered temporal lists exceed memory budget"))?;
+        for (index, reference) in temporal.iter().enumerate() {
+            if reference.layer_id > 62
+                || temporal[..index]
+                    .iter()
+                    .any(|old| old.identity() == reference.identity())
+            {
+                return Err(invalid(
+                    "invalid or duplicate HEVC temporal picture identity",
+                ));
+            }
+        }
+        let (retained, groups) = super::temporal_reference_groups(
+            header,
+            self.poc,
+            temporal,
+            self.binding.sps.sps.poc_bits,
+        )?;
+        let identities = groups
+            .each_ref()
+            .map(|g| g.iter().map(Reference::identity).collect::<Vec<_>>());
+        let bound = header.bind_inter_layer_references(
+            &self.binding.context(),
+            access_unit,
+            self.poc,
+            completed,
+            available,
+        )?;
+        let mut lists: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
+        for list in 0..2 {
+            for selected in bound.select(
+                [&identities[0], &identities[1], &identities[2]],
+                header.current_picture_reference,
+                header.references[list] as usize,
+                header.list_modification[list].as_deref(),
+                list,
+                available,
+            )? {
+                let picture = match selected.kind {
+                    ReferenceKind::Current => None,
+                    ReferenceKind::InterLayer => Some(bound.resolve(selected)?.clone()),
+                    _ => temporal
+                        .iter()
+                        .find(|r| r.identity() == selected.picture)
+                        .ok_or_else(|| invalid("HEVC layered temporal reference is missing"))?
+                        .picture
+                        .clone(),
+                };
+                if selected.kind != ReferenceKind::Current && picture.is_none() {
+                    return Err(invalid(
+                        "HEVC layered reference has no reconstructed picture",
+                    ));
+                }
+                lists[list].push(Reference {
+                    layer_id: selected.picture.layer_id,
+                    poc: selected.picture.poc,
+                    long_term: selected.long_term(),
+                    picture,
+                });
+            }
+        }
+        Ok((retained, lists))
+    }
+}
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct LayeredEndMarkers {
     pub layers: u64,

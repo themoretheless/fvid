@@ -1,5 +1,23 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC decoder-owned layered reference lists, 2026-10-12
+
+`LayeredAccessPicture::reference_lists` now resolves temporal RPS with the same
+helper used by the base decoder, then inserts admitted same-access-unit
+inter-layer pictures before selecting lists. Empty temporal lists therefore do
+not prevent a valid inter-layer-only prediction. Layer/POC identities remain
+explicit; missing pictures, duplicate temporal identities, invalid slice indices
+and insufficient memory refuse without changing the source DPB or AU plan.
+Retained temporal POCs and long-term status are returned for the future DPB owner.
+
+The two-AU inter-prediction pixel regression now calls this production method
+instead of constructing its own lists. This still requires prepared inter-layer
+samples/motion from the caller. It does not implement that preparation or the
+production stateful DPB/player owner.
+
+Validation: 27 layered integration tests and 214 HEVC unit tests pass (one
+existing unit test ignored), together with the offline player build check.
+
 ## HEVC complete access-unit planning, 2026-10-12
 
 `hevc_decoder::LayeredAccessUnit` stages globally received parameters, complete

@@ -7,7 +7,7 @@ use fvid::codec::{
     hevc_nal::NalHeader,
     hevc_picture::{Picture, decode_layered},
     hevc_poc::LayeredPocState,
-    hevc_reference_list::{PictureIdentity, ReferenceKind},
+    hevc_reference_list::PictureIdentity,
 };
 use fvid::container::mp4::Mp4Reader;
 use std::{
@@ -242,85 +242,61 @@ fn sequential_complete_units_drive_actual_temporal_and_same_au_inter_prediction(
             for picture in plan.pictures() {
                 assert_eq!(picture.poc, index as i32);
                 let mut all_lists = vec![];
-                for header in &picture.slices {
-                    let mut lists: [Vec<Reference>; 2] = [vec![], vec![]];
-                    if header.references != [0, 0] {
-                        let mut before = vec![];
-                        let mut after = vec![];
-                        let mut long = vec![];
-                        for r in &header.short_term {
-                            if r.used {
-                                let identity = PictureIdentity {
-                                    layer_id: header.nal.layer_id,
-                                    poc: picture.poc + r.delta_poc,
-                                };
-                                if r.delta_poc < 0 {
-                                    before.push(identity);
-                                } else {
-                                    after.push(identity);
-                                }
-                            }
-                        }
-                        before.sort_by_key(|p| std::cmp::Reverse(p.poc));
-                        after.sort_by_key(|p| p.poc);
-                        let same_layer: Vec<_> = dpb
-                            .iter()
-                            .filter(|(id, _)| id.layer_id == header.nal.layer_id)
-                            .map(|(id, _)| id.poc)
-                            .collect();
-                        for r in &header.long_term {
-                            if r.used {
-                                long.push(PictureIdentity {
-                                    layer_id: header.nal.layer_id,
-                                    poc: r
-                                        .resolve(
-                                            picture.poc,
-                                            picture.binding.sps.sps.poc_bits,
-                                            &same_layer,
-                                        )
-                                        .unwrap()
-                                        .unwrap(),
-                                });
-                            }
-                        }
-                        let bound = header
-                            .bind_inter_layer_references(
-                                &picture.binding.context(),
-                                index as u64,
-                                picture.poc,
-                                &completed,
-                                BUDGET,
-                            )
-                            .unwrap();
-                        for list in 0..2 {
-                            for selected in bound
-                                .select(
-                                    [&before, &after, &long],
-                                    header.current_picture_reference,
-                                    header.references[list] as usize,
-                                    header.list_modification[list].as_deref(),
-                                    list,
-                                    BUDGET,
-                                )
-                                .unwrap()
-                            {
-                                let source = match selected.kind {
-                                    ReferenceKind::Current => None,
-                                    ReferenceKind::InterLayer => {
-                                        Some(bound.resolve(selected).unwrap().clone())
-                                    }
-                                    _ => Some(selected.picture.resolve(&dpb).unwrap().clone()),
-                                };
-                                lists[list].push(Reference {
-                                    layer_id: selected.picture.layer_id,
-                                    poc: selected.picture.poc,
-                                    long_term: selected.long_term(),
-                                    picture: source,
-                                });
-                            }
-                        }
-                    }
+                let temporal: Vec<_> = dpb
+                    .iter()
+                    .map(|(id, picture)| Reference {
+                        layer_id: id.layer_id,
+                        poc: id.poc,
+                        long_term: false,
+                        picture: Some(picture.clone()),
+                    })
+                    .collect();
+                for slice in 0..picture.slices.len() {
+                    let (_, lists) = picture
+                        .reference_lists(slice, index as u64, &temporal, &completed, BUDGET)
+                        .unwrap();
                     all_lists.push(lists);
+                    assert!(
+                        picture
+                            .reference_lists(slice, index as u64, &temporal, &completed, 1)
+                            .is_err()
+                    );
+                }
+                assert_eq!(
+                    picture
+                        .reference_lists(
+                            picture.slices.len(),
+                            index as u64,
+                            &temporal,
+                            &completed,
+                            BUDGET
+                        )
+                        .err()
+                        .unwrap()
+                        .to_string(),
+                    "HEVC layered slice index out of range"
+                );
+                if !temporal.is_empty() {
+                    let mut duplicate = temporal.clone();
+                    duplicate.push(temporal[0].clone());
+                    assert_eq!(
+                        picture
+                            .reference_lists(0, index as u64, &duplicate, &completed, BUDGET)
+                            .err()
+                            .unwrap()
+                            .to_string(),
+                        "invalid or duplicate HEVC temporal picture identity"
+                    );
+                }
+                if index == 1 && picture.binding.sps.layer_id == 0 {
+                    assert!(
+                        picture
+                            .reference_lists(0, index as u64, &[], &completed, BUDGET)
+                            .err()
+                            .unwrap()
+                            .to_string()
+                            .contains("reference POC 0 is missing")
+                    );
                 }
                 let decoded = Arc::new(
                     decode_layered(

@@ -655,12 +655,14 @@ impl HevcDecoder {
     }
 }
 
-fn reference_lists(
+// Resolve RPS before list selection so layered callers can insert same-AU
+// inter-layer candidates even when both temporal lists are empty.
+pub(super) fn temporal_reference_groups(
     header: &SliceHeader,
     poc: i32,
     references: &[Reference],
     poc_bits: u8,
-) -> Result<(Vec<(i32, bool)>, [Vec<Reference>; 2])> {
+) -> Result<(Vec<(i32, bool)>, [Vec<Reference>; 3])> {
     let mut retained = Vec::new();
     let mut before = Vec::new();
     let mut after = Vec::new();
@@ -710,6 +712,16 @@ fn reference_lists(
             }
         }
     }
+    Ok((retained, [before, after, long]))
+}
+
+fn reference_lists(
+    header: &SliceHeader,
+    poc: i32,
+    references: &[Reference],
+    poc_bits: u8,
+) -> Result<(Vec<(i32, bool)>, [Vec<Reference>; 2])> {
+    let (retained, [before, after, long]) = temporal_reference_groups(header, poc, references, poc_bits)?;
     let mut lists: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
     for list in 0..2 {
         let base: Vec<_> = if list == 0 {
