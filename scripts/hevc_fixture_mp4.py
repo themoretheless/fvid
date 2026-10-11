@@ -1,4 +1,4 @@
-"""Owned muxer for single-layer HM fixture streams with explicit optional presentation order (not general muxing)."""
+"""Owned HEVC fixture muxer with optional explicit AU grouping and presentation order (not general muxing)."""
 import re
 import struct
 
@@ -25,7 +25,7 @@ def header(size, values, matrix_offset=None):
     return bytes(data)
 
 
-def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1, chroma_depth=None):
+def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1, chroma_depth=None, access_units=None, multilayer=False):
     chroma_depth = depth if chroma_depth is None else chroma_depth
     if not 8 <= chroma_depth <= 16:
         raise ValueError("invalid fixture chroma depth")
@@ -63,11 +63,24 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
             raise ValueError(f'unsupported NAL {kind}')
     if current:
         samples.append(b''.join(current))
+    if access_units is not None:
+        # Separate colour planes have independent first-slice flags within one
+        # picture. Explicit authored AU grouping preserves that container shape.
+        if inband_parameters:
+            raise ValueError('explicit AU grouping cannot include inband parameters')
+        groups = [list(group) for group in access_units]
+        coded = [nal for nal in units if (nal[0] >> 1) & 63 <= 31]
+        if not groups or any(not group for group in groups) or [n for g in groups for n in g] != coded:
+            raise ValueError('explicit AU groups must preserve every coded NAL in order')
+        samples = [b''.join(ints(len(nal)) + nal for nal in group) for group in groups]
+        sync = [i + 1 for i, group in enumerate(groups) if any(16 <= (n[0] >> 1) & 63 <= 23 for n in group)]
     if pending:
         raise ValueError('parameter update without a following picture')
     if (not samples or any(not parameters[k] for k in parameters)
-            or (not inband_parameters and any(len(parameters[k]) != 1 for k in parameters))):
+            or (not inband_parameters and not multilayer and any(len(parameters[k]) != 1 for k in parameters))):
         raise ValueError('requires parameter sets and pictures; hvc1 requires one VPS/SPS/PPS')
+    if multilayer and access_units is None:
+        raise ValueError('multilayer fixture requires explicit access-unit grouping')
     if inband_parameters:
         parameters = {kind: nals[:1] for kind, nals in parameters.items()}
     # SPS begins with one byte of layer/nesting information, then the 12-byte PTL.

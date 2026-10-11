@@ -72,11 +72,23 @@ pub fn decode(
     lists: &[Vec<Reference>; 2],
     budget: usize,
 ) -> Result<Picture> {
+    decode_internal(sps, pps, slice, poc, lists, budget, 0)
+}
+
+fn decode_internal(
+    sps: &Sps,
+    pps: &Pps,
+    slice: &SliceHeader,
+    poc: i32,
+    lists: &[Vec<Reference>; 2],
+    budget: usize,
+    layer_id: u8,
+) -> Result<Picture> {
     if sps.chroma_format > 3
         || sps.separate_colour_plane
         || !slice.first
         || slice.address != 0
-        || slice.nal.layer_id != 0
+        || slice.nal.layer_id != layer_id
     {
         return Err(crate::unsupported("unsupported HEVC picture tools"));
     }
@@ -507,14 +519,26 @@ pub fn decode_slices(
     slice_lists: &[[Vec<Reference>; 2]],
     budget: usize,
 ) -> Result<Picture> {
+    decode_slices_internal(sps, pps, slices, poc, slice_lists, budget, 0)
+}
+
+pub(crate) fn decode_slices_internal(
+    sps: &Sps,
+    pps: &Pps,
+    slices: &[SliceHeader],
+    poc: i32,
+    slice_lists: &[[Vec<Reference>; 2]],
+    budget: usize,
+    layer_id: u8,
+) -> Result<Picture> {
     if sps.separate_colour_plane {
-        return super::hevc_colour_planes::decode(sps, pps, slices, poc, slice_lists, budget);
+        return super::hevc_colour_planes::decode(sps, pps, slices, poc, slice_lists, budget, layer_id);
     }
     if slices.len() != slice_lists.len() {
         return Err(invalid("HEVC slice reference count mismatch"));
     }
     if slices.len() == 1 {
-        return decode(sps, pps, &slices[0], poc, &slice_lists[0], budget);
+        return decode_internal(sps, pps, &slices[0], poc, &slice_lists[0], budget, layer_id);
     }
     let slice = slices
         .first()
@@ -532,7 +556,7 @@ pub fn decode_slices(
     for (index, slice) in slices.iter().enumerate() {
         if slice.first != (index == 0)
             || (index == 0 && slice.address != 0)
-            || slice.nal.layer_id != 0
+            || slice.nal.layer_id != layer_id
         {
             return Err(invalid("invalid HEVC slice partition start"));
         }
@@ -2421,3 +2445,7 @@ fn reconstruct_act(
     }
     Ok(())
 }
+
+#[path = "hevc_picture_layered.rs"]
+mod layered;
+pub use layered::decode_layered;

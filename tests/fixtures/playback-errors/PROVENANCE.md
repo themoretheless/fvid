@@ -6670,3 +6670,27 @@ owned separate-colour-plane and POC-cycle synthetic MP4s, with explicit saved
 reference metadata to isolate per-layer translation and source immutability.
 These tests accept motion/DPB operations and do not establish scalable HEVC
 coded-picture playback. Fixtures are generated separately from ordinary tests.
+
+### Context-bound nonbase HEVC reconstruction (2026-10-12)
+
+`generate_hevc_layered_reconstruction.py` authors seven short MP4 witnesses and
+`hevc-layered-reconstruction.json` from the previously original
+`hevc-pcm-reference-rext8`, `hevc-pcm-dependent-rext8` and
+`hevc-separate-colour-planes-distinct-synthetic` seeds. No private source media,
+codec parameters, FFmpeg, libav, network or new external encoder is used. The
+owned Rust metadata helper is built once during explicit generation; ordinary
+tests read saved artifacts only. Saved source YUVs remain the independent pixel
+oracles (first frame, or first two frames for the inter fixture).
+
+The VPS is authored for layers 0 and 3, preserving the source PTL. Independent
+layers own their full SPS; dependent layers share the base SPS. The nonbase PPS
+is layer-bound. IDR headers insert the required nonbase POC/inter-layer syntax;
+entropy bytes are preserved. Both base and nonbase pictures inhabit each MP4
+sample, with explicit AU grouping for independent colour-plane first slices.
+The inter-prediction witness preserves its source B-slice entropy, replaces the
+temporal RPS with an empty set and enables the direct base-layer reference.
+Native reconstruction compares all I/inter pixels with saved oracles; an
+independent source-luma perturbation must change the inter-layer output. These
+are low-level coded-picture acceptance tests, not stateful layered player
+acceptance. The ordinary base-only reconstruction API retains a precise refusal
+expectation while the context-bound API accepts the same nonbase pictures.

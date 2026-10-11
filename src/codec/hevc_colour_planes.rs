@@ -16,6 +16,7 @@ pub(super) fn decode(
     poc: i32,
     lists: &[[Vec<Reference>; 2]],
     budget: usize,
+    layer_id: u8,
 ) -> Result<Picture> {
     if slices.len() != lists.len() || sps.chroma_format != 3 {
         return Err(invalid("invalid HEVC separate colour plane slice set"));
@@ -66,13 +67,14 @@ pub(super) fn decode(
             }
             Ok(result)
         }).collect::<Result<Vec<_>>>()?;
-        children.push(Arc::new(hevc_picture::decode_slices(
+        children.push(Arc::new(hevc_picture::decode_slices_internal(
             &mono,
             pps,
             &headers,
             poc,
             &projected,
             budget / 3,
+            layer_id,
         )?));
     }
     let children: [Arc<Picture>; 3] = children

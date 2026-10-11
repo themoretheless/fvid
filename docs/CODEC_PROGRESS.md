@@ -1,5 +1,38 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC context-bound nonbase picture reconstruction, 2026-10-12
+
+`hevc_picture::decode_layered` connects the resolved Annex F active-layer
+VPS/SPS/PPS context to the existing entropy, prediction, residual and filtering
+pipeline. It validates each slice's binding and picture identity before
+reconstruction, admits only the selected inter-layer identities with the final
+current POC/long-term classification, and preserves the current-picture
+reference descriptor rules. Single-slice, multi-slice/dependent-segment and
+separate-colour-plane reconstruction all propagate the selected layer.
+Ordinary `decode`/`decode_slices` retain their base-layer contract.
+
+Seven original short MP4 witnesses contain base and layer-3 pictures in the
+same access unit. Six qualify independent/dependent eight-bit I-picture reconstruction
+with PCM, dependent segments and separately coded colour planes, against saved
+HM/original pixel oracles. The two-AU inter fixture preserves its owned seed's
+B entropy, replaces the temporal RPS with one direct base-layer source, and
+qualifies actual same-AU inter-layer prediction in both reference lists. Its
+test performs reference binding, checks identity PPS sample preparation, compares
+all output samples with the saved oracle, and changes only source luma to prove
+that prediction reads the inter-layer samples. Wrong reference POC, mixed-picture
+slice identity, parameter/layer mismatch and insufficient budgets are tested.
+
+The generator only uses the existing owned Rust metadata helper and saved
+original fixture seeds; ordinary tests never generate fixtures or invoke an
+external codec. The fixture muxer supports explicit AU grouping so independent
+colour-plane first-slice flags cannot split one picture into multiple samples.
+
+This is coded-picture reconstruction acceptance. `HevcDecoder`/the player still
+need a layered parameter namespace, complete-AU dispatch and transactional
+per-layer DPB/POC ownership. Nonidentity inter-layer sample/motion preparation
+must be attached to that owner as well; this change does not claim full scalable
+playback or complete codec/profile/tool coverage.
+
 ## HEVC layer-aware motion identities, 2026-10-12
 
 Motion reference descriptors and retained collocated metadata now preserve
@@ -20,7 +53,7 @@ pictures with different samples. Operation acceptance covers canonical slice
 mapping, actual zero-motion prediction pixels, POC-based AMVP selection, boundary
 identity and selective nested POC translation. The generator is pure Python;
 ordinary tests read saved fixtures offline. These are motion/DPB operation
-checks, not scalable coded-picture playback. Nonbase reconstruction routing,
+checks, not scalable coded-picture playback. Stateful nonbase access-unit routing,
 full scalable prediction and remaining codec tools still need implementation
 and coded-stream acceptance.
 

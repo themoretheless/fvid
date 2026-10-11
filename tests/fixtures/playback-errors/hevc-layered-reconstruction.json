@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "file": "hevc-layered-reconstruct-pcm-independent.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "independent": true,
+      "layer": 3,
+      "ols": 1
+    },
+    {
+      "file": "hevc-layered-reconstruct-pcm-dependent.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "independent": false,
+      "layer": 3,
+      "ols": 1
+    },
+    {
+      "file": "hevc-layered-reconstruct-inter-prediction.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "independent": false,
+      "layer": 3,
+      "ols": 1,
+      "inter": true
+    },
+    {
+      "file": "hevc-layered-reconstruct-multislice-independent.mp4",
+      "seed": "hevc-pcm-dependent-rext8.mp4",
+      "independent": true,
+      "layer": 3,
+      "ols": 1
+    },
+    {
+      "file": "hevc-layered-reconstruct-multislice-dependent.mp4",
+      "seed": "hevc-pcm-dependent-rext8.mp4",
+      "independent": false,
+      "layer": 3,
+      "ols": 1
+    },
+    {
+      "file": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+      "seed": "hevc-separate-colour-planes-distinct-synthetic.mp4",
+      "independent": true,
+      "layer": 3,
+      "ols": 1
+    },
+    {
+      "file": "hevc-layered-reconstruct-colour-planes-dependent.mp4",
+      "seed": "hevc-separate-colour-planes-distinct-synthetic.mp4",
+      "independent": false,
+      "layer": 3,
+      "ols": 1
+    }
+  ]
+}
