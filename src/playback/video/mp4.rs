@@ -83,6 +83,7 @@ pub struct Mp4VideoReader<R> {
     track_index: usize,
     sample_index: usize,
     pending_avc_field_sample: Option<usize>,
+    hevc_parameter_preroll: Option<usize>,
     packet: Vec<u8>,
     /// What an AV1 track states about its own pictures in bytes this reader can
     /// see the moment the file is open: the signal of its sequence header and
@@ -222,6 +223,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             track_index: index,
             sample_index: 0,
             pending_avc_field_sample: None,
+            hevc_parameter_preroll: None,
             packet: Vec::new(),
             open_signal: None,
             failed: false,
@@ -620,6 +622,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         self.pending.clear();
         self.pending_bytes = 0;
         self.pending_avc_field_sample = None;
+        self.hevc_parameter_preroll = None;
     }
     /// Restart decoding at the sync sample with the greatest presentation time
     /// at or before `pts` (the first sample when none qualifies), dropping all
@@ -638,6 +641,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .map_or(0, |(i, _)| i);
         self.rewind();
         self.sample_index = index;
+        if index > 0 && matches!(&self.decoder, Decoder::Hevc(_)) && !self.hardware_accelerated() {
+            self.hevc_parameter_preroll = Some(index);
+        }
         self.track().samples.get(index).map_or(0, |s| s.pts)
     }
     pub fn read_frame(&mut self) -> Result<Option<VideoFrame>> {
@@ -649,6 +655,17 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         result
     }
     fn read_frame_inner(&mut self) -> Result<Option<VideoFrame>> {
+        if let Some(end) = self.hevc_parameter_preroll.take() {
+            // A sync sample resets pictures, not the in-band parameter history.
+            // Recover only parameter state; no preceding pictures are decoded or
+            // retained, and packet/decoder budgets still apply.
+            for index in 0..end {
+                self.demuxer.read_packet(self.track_index, index, &mut self.packet)?;
+                if let Decoder::Hevc(decoder) = &mut self.decoder {
+                    decoder.prime_parameters(&self.packet)?;
+                }
+            }
+        }
         loop {
             if let Some((index, frame)) = self
                 .pending

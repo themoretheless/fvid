@@ -233,3 +233,6 @@ pub mod avc_field_dpb;
 
 #[path = "../../../src/codec/av1_tile_list.rs"]
 pub mod av1_tile_list;
+
+#[path = "../../../src/codec/hevc_vps_extension.rs"]
+mod hevc_vps_extension;

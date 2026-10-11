@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "file": "hevc-poc-vps-alignment-update-bad-in-sequence-synthetic.mp4",
+      "seed": "hevc-poc-vps-aligned-msb-reset-synthetic.mp4",
+      "picture": 16,
+      "expectation": "invalid",
+      "error": "HEVC active VPS changed within sequence"
+    },
+    {
+      "file": "hevc-poc-vps-alignment-update-at-idr-synthetic.mp4",
+      "seed": "hevc-poc-vps-aligned-full-reset-synthetic.mp4",
+      "picture": 17,
+      "expectation": "acceptance",
+      "error": null
+    },
+    {
+      "file": "hevc-poc-vps-alignment-update-bad-after-slices-synthetic.mp4",
+      "seed": "hevc-poc-vps-aligned-msb-reset-synthetic.mp4",
+      "picture": 16,
+      "expectation": "invalid",
+      "error": "HEVC changed VPS follows picture slices"
+    },
+    {
+      "file": "hevc-poc-vps-alignment-update-annex-a-after-slices-synthetic.mp4",
+      "seed": "hevc-poc-vps-aligned-baseline-synthetic.mp4",
+      "picture": 16,
+      "expectation": "acceptance",
+      "error": null
+    },
+    {
+      "file": "hevc-poc-vps-alignment-update-annex-a-to-reset-at-idr-synthetic.mp4",
+      "seed": "hevc-poc-vps-aligned-baseline-synthetic.mp4",
+      "picture": 17,
+      "expectation": "acceptance",
+      "error": null
+    },
+    {
+      "file": "hevc-poc-vps-alignment-update-reserved-after-slices-synthetic.mp4",
+      "seed": "hevc-poc-vps-aligned-msb-reset-synthetic.mp4",
+      "picture": 16,
+      "expectation": "acceptance",
+      "error": null
+    }
+  ],
+  "provenance": "Original owned reset streams; in-band VPS/PPS replacement only, including IDR activation after an opaque Annex A tail. No private media, external codec, FFmpeg or network."
+}

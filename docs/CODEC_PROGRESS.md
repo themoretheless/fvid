@@ -11785,3 +11785,71 @@ accurate generic HEVC-seed provenance text as their generator. The new dependent
 manifest distinguishes five acceptance from seven exact Invalid cases.
 git diff --check passed. This is authored-stream qualification on this host,
 not universal hardware conformance or full codec parity.
+
+### HEVC single-layer Annex F VPS reset semantics (2026-10-11)
+
+A bounded strict reader now parses the single-layer VPS extension when reset
+semantics need it, instead of rejecting every extension-bearing VPS. It reads
+alignment, scalability dimensions, sublayer limits, additional PTLs, up to 256
+representation formats including chroma/depth inference and crop, dependency
+width/type, up to 4096 ignored non-VUI bytes and extension2 trailing data.
+VPS VUI remains explicitly Unsupported. Multilayer/external-base admission is
+unchanged; the full layered prediction implementation is still required.
+
+VPS stores a compact deferred Annex F result in a shared Arc, rather than
+retaining opaque RBSP buffers. Parsing errors remain deferred so ordinary
+Annex A can ignore future extension data. Parameter updates preserve the latest
+reset semantics for later Annex F activation; clones share only the compact result. Active reset decoding compares
+LSB-alignment semantics: an in-sequence change fails, while a change at IDR is
+accepted; post-slice changes with reset active fail before publishing a picture.
+A synthetic update regression first demonstrated that the old Annex A equality
+shortcut incorrectly discarded the new tail. A codec unit regression verifies
+the retained reset semantics after an Annex A post-slice update and restoration on reset.
+
+New original monochrome videos cover alignment zero/one, MSB/full/signalled
+reset, exact POC/pixel agreement and seek/rewind timing/sample identity. The
+acceptance test was run with the original blanket guard and failed specifically
+at picture zero with the old VPS-extension Unsupported diagnostic. It then
+passed after the reader was connected. Four malformed VPS shapes and five
+malformed reset payloads per alignment have exact Invalid expectations and
+poison/reset recovery. A truncated aligned fixture initially acquired enough
+zero padding to parse; generation was corrected to retain the intended missing
+fields, rather than weakening its expected error.
+
+Parser unit tests cover every byte truncation, invalid alignment/splitting,
+bounded counts, depth/crop errors, dependency width, non-VUI length, extension2
+future bits, all 256 formats with inference and explicit VPS VUI refusal.
+Layered VPS/inter-layer prediction, external base layers, VPS VUI,
+explicit-cycle/extracted-entry video, additional LT forms and selected/scaled
+temporal prediction remain open. This milestone does not establish full parity.
+A fifth update video starts with an opaque Annex A tail, then activates valid
+VPS/PPS reset syntax at IDR 17. Its acceptance first reproduced an incorrect
+strict read of the old, now irrelevant tail; new-CVS handling now interprets
+only the newly active extension. Seek to IDR 33 then exposed a separate existing
+playback gap: rewind restored hvcC and lost VPS/PPS signalled at 17, causing a
+missing-header-alignment error. The same original synthetic video is the seek
+regression. Software MP4 seek now restores preceding VPS/SPS/PPS updates via a
+fresh-decoder parameter-only API, without decoding or retaining earlier pictures.
+A unit test proves empty picture/reference state during priming, correct late-IDR
+entry and restoration of the original configuration on reset. The API refuses
+use after picture decoding and poisons on malformed parameter updates.
+
+Parameter-only seek restoration currently scans earlier packets on each HEVC
+software seek; an index/cache is still needed to avoid that I/O on long files.
+This does not qualify hardware in-band-parameter seek or persistent SEI metadata
+restoration. No changes to FFmpeg dependencies or production workflows were made.
+The sixth update video changes only the reserved base-VPS field after slices.
+It reproduced an erroneous changed-VPS refusal at picture 16: comparing whole
+retained RBSP buffers accidentally included ignored base-prefix bits. Extension
+identity now compares relevant deferred reset semantics, so 7.4.3.1 reserved values remain
+ignored even with reset active. The enabled acceptance compares every picture
+against the unchanged reset baseline. The five VPS regression tests collectively
+exercise six update videos plus both fourteen-file extension families.
+
+Final compact-cache validation (2026-10-11): 209 HEVC codec unit tests passed;
+one explicit fixture generator stayed ignored. Eight software integration suites
+passed all 52 tests. The new five-test VPS suite also passed with VideoToolbox
+compiled in; its monochrome acceptance still exercises owned software decoding,
+not hardware qualification. All 88 fixtures across seven reset families and
+in-band updates regenerated byte-identically. Ordinary tests and these generators
+used no FFmpeg or network. Existing unused-code warnings remain.

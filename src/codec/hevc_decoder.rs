@@ -208,10 +208,16 @@ impl HevcDecoder {
             match header.unit_type {
                 32 => {
                     let new = Vps::parse(nal, self.budget)?;
-                    if params.vps.iter().any(|v| *v == new) {
+                    let previous = params.vps.iter().find(|v| v.id == new.id);
+                    if previous.is_some_and(|v| *v == new && v.same_reset_semantics(&new)) {
                         continue;
                     }
-                    if seen_slice {
+                    // Preserve latest deferred Annex F result even when Annex A ignores
+                    // the tail: a later PPS may activate reset semantics. Inert
+                    // reserved/future bits do not make a semantic parameter change.
+                    let semantic_change = previous.is_none_or(|v| *v != new)
+                        || params.pairs.iter().any(|(s, p)| s.vps_id == new.id && p.poc_reset_info_present);
+                    if seen_slice && semantic_change {
                         return Err(invalid("HEVC changed VPS follows picture slices"));
                     }
                     let params = updated.get_or_insert_with(|| self.params.clone());
@@ -276,6 +282,19 @@ impl HevcDecoder {
                 .collect::<Result<_>>()?;
         }
         Ok(updated)
+    }
+    /// Restore in-band VPS/SPS/PPS before decoding a seek entry point. Call
+    /// only after reset, before any picture; previous picture data is not decoded.
+    pub fn prime_parameters(&mut self, packet: &[u8]) -> Result<()> {
+        if self.failed { return Err(invalid("HEVC decoder requires reset after error")); }
+        if self.decoded_sps.is_some() || self.previous_poc.is_some() {
+            return Err(invalid("HEVC parameter priming requires a reset decoder"));
+        }
+        match self.updated_pairs(packet) {
+            Ok(Some(params)) => { self.params = params; Ok(()) }
+            Ok(None) => Ok(()),
+            Err(error) => { self.failed = true; Err(error) }
+        }
     }
     /// Parse all slices, including prefix PPS updates, without changing state.
     pub fn slice_headers(&self, packet: &[u8]) -> Result<Vec<SliceHeader>> {
@@ -432,12 +451,10 @@ impl HevcDecoder {
         }
         let header = &headers[0];
         let reset_syntax = if pps.poc_reset_info_present {
-            if vps.extension_present {
-                return Err(crate::unsupported("HEVC POC reset with VPS extension requires layered VPS semantics"));
-            }
+            let lsb_aligned = vps.poc_lsb_aligned()?;
             let parse = |h: &SliceHeader| {
                 if pps.slice_header_extension {
-                    super::hevc_poc::ResetSyntax::parse_base(&h.extension, true, sps.poc_bits, h.nal, false)
+                    super::hevc_poc::ResetSyntax::parse_base(&h.extension, true, sps.poc_bits, h.nal, lsb_aligned)
                 } else { Ok(super::hevc_poc::ResetSyntax::default()) }
             };
             let first = parse(header)?;
@@ -486,7 +503,16 @@ impl HevcDecoder {
             self.reset_periods = Default::default();
             self.suppress_rasl = false;
         }
-        if self.decoded_vps.as_ref().is_some_and(|previous| previous != vps) {
+        let reset_alignment_changed = if pps.poc_reset_info_present {
+            match self.decoded_vps.as_ref() {
+                // A new CVS can activate Annex F after an opaque Annex A tail.
+                // Only the newly active VPS needs strict interpretation then.
+                Some(previous) if begins_cvs => !previous.same_reset_semantics(vps),
+                Some(previous) => previous.poc_lsb_aligned()? != vps.poc_lsb_aligned()?,
+                None => false,
+            }
+        } else { false };
+        if reset_alignment_changed || self.decoded_vps.as_ref().is_some_and(|previous| previous != vps) {
             if !begins_cvs {
                 return Err(invalid("HEVC active VPS changed within sequence"));
             }
@@ -709,6 +735,57 @@ fn reference_lists(
 
 #[cfg(test)]
 mod long_term_list_tests {
+    #[test]
+    fn seek_parameter_priming_keeps_picture_state_empty_and_restores_late_idr() {
+        use super::*;
+        let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-poc-vps-alignment-update-annex-a-to-reset-at-idr-synthetic.mp4");
+        let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
+        let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 32 << 20).unwrap();
+        let mut packet = Vec::new();
+        for index in 0..33 {
+            input.read_packet(0, index, &mut packet).unwrap();
+            decoder.prime_parameters(&packet).unwrap();
+            assert!(decoder.references.is_empty());
+            assert!(decoder.previous_poc.is_none() && decoder.decoded_sps.is_none() && decoder.decoded_vps.is_none());
+        }
+        assert!(!decoder.params.vps[0].poc_lsb_aligned().unwrap());
+        assert!(decoder.params.pairs[0].1.poc_reset_info_present);
+        input.read_packet(0, 33, &mut packet).unwrap();
+        let frame = decoder.decode_packet(&packet).unwrap().unwrap();
+        assert_eq!(frame.poc, 0);
+        assert_eq!(decoder.prime_parameters(&packet).unwrap_err().to_string(), "HEVC parameter priming requires a reset decoder");
+        assert!(!decoder.failed);
+        decoder.reset();
+        assert!(!decoder.params.pairs[0].1.poc_reset_info_present);
+        assert!(decoder.params.vps[0].poc_lsb_aligned().is_err());
+        let invalid = include_bytes!("../../tests/fixtures/playback-errors/hevc-future-extension-vps-bad-stop-synthetic.mp4");
+        let bad_movie = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(invalid), Default::default()).unwrap();
+        let config = HevcConfig::parse(&bad_movie.tracks()[0].configuration).unwrap();
+        let nal = config.arrays.iter().find(|a| a.nal_type == 32).unwrap().units[0];
+        let mut bad_packet = (nal.len() as u32).to_be_bytes().to_vec();
+        bad_packet.extend_from_slice(nal);
+        assert!(decoder.prime_parameters(&bad_packet).is_err());
+        assert!(decoder.failed);
+        assert!(decoder.prime_parameters(&[]).is_err());
+        decoder.reset();
+        assert!(!decoder.failed);
+    }
+    #[test]
+    fn annex_a_ignored_vps_tail_is_retained_for_later_annex_f_activation() {
+        use super::*;
+        let data = include_bytes!("../../tests/fixtures/playback-errors/hevc-poc-vps-alignment-update-annex-a-after-slices-synthetic.mp4");
+        let mut input = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default()).unwrap();
+        let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 32 << 20).unwrap();
+        assert!(decoder.params.vps[0].poc_lsb_aligned().unwrap());
+        let mut packet = Vec::new();
+        for index in 0..35 {
+            input.read_packet(0, index, &mut packet).unwrap();
+            assert!(decoder.decode_packet(&packet).unwrap().is_some());
+            assert_eq!(decoder.params.vps[0].poc_lsb_aligned().unwrap(), index < 16);
+        }
+        decoder.reset();
+        assert!(decoder.params.vps[0].poc_lsb_aligned().unwrap());
+    }
     use super::super::{hevc_long_term::LongTermReference, hevc_rps::ShortTermReference};
     use super::*;
     #[test]

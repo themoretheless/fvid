@@ -49,6 +49,37 @@ pub struct Timing {
     pub time_scale: u32,
     pub ticks_per_poc: Option<u64>,
 }
+
+/// Compact deferred Annex F result. Unknown Annex A tails are never retained.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum ResetExtension {
+    Aligned(bool),
+    Invalid(String),
+    Unsupported(String),
+    Io(std::io::ErrorKind, String),
+    Gpu(String),
+}
+impl ResetExtension {
+    fn from_result(result: Result<bool>) -> Self {
+        match result {
+            Ok(aligned) => Self::Aligned(aligned),
+            Err(crate::Error::Invalid(s)) => Self::Invalid(s),
+            Err(crate::Error::Unsupported(s)) => Self::Unsupported(s),
+            Err(crate::Error::Io(e)) => Self::Io(e.kind(), e.to_string()),
+            Err(crate::Error::Gpu(s)) => Self::Gpu(s),
+        }
+    }
+    fn result(&self) -> Result<bool> {
+        match self {
+            Self::Aligned(value) => Ok(*value),
+            Self::Invalid(s) => Err(invalid(s)),
+            Self::Unsupported(s) => Err(crate::unsupported(s)),
+            Self::Io(kind, s) => Err(crate::Error::Io(std::io::Error::new(*kind, s.clone()))),
+            Self::Gpu(s) => Err(crate::Error::Gpu(s.clone())),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Vps {
     pub id: u8,
@@ -61,6 +92,7 @@ pub struct Vps {
     pub hrd: Option<super::hevc_hrd::Hrd>,
     /// Annex A may ignore this tail; Annex F reset decoding needs its semantics.
     pub extension_present: bool,
+    reset_extension: Option<std::sync::Arc<ResetExtension>>,
 }
 // Annex A ignores extension data. Keep the admission witness available for
 // Annex F without turning an inert tail into an ordinary VPS semantic change.
@@ -73,6 +105,14 @@ impl PartialEq for Vps {
 }
 impl Eq for Vps {}
 impl Vps {
+    pub(super) fn same_reset_semantics(&self, other: &Self) -> bool {
+        self.reset_extension.as_deref().unwrap_or(&ResetExtension::Aligned(false))
+            == other.reset_extension.as_deref().unwrap_or(&ResetExtension::Aligned(false))
+    }
+    /// Strict Annex F semantics, separate from Annex A's ignored future tail.
+    pub fn poc_lsb_aligned(&self) -> Result<bool> {
+        self.reset_extension.as_ref().map_or(Ok(false), |value| value.result())
+    }
     pub fn parse(nal: &[u8], budget: usize) -> Result<Self> {
         let rbsp = NalRbsp::parse(nal, budget)?;
         rbsp.header.require_base_layer()?;
@@ -146,6 +186,9 @@ impl Vps {
             None
         };
         let extension_present = bits.bit()?;
+        let reset_extension = extension_present.then(|| std::sync::Arc::new(
+            ResetExtension::from_result(super::hevc_vps_extension::poc_lsb_aligned(
+                &rbsp.bytes, bits.position(), max_sub_layers_minus1))));
         if extension_present {
             // Annex A decoding without INBLD ignores VPS extension data.
             // Base-layer admission above still rejects layered requirements.
@@ -160,6 +203,7 @@ impl Vps {
             profile,
             ordering,
             extension_present,
+            reset_extension,
             #[cfg(test)]
             ordering_bit_range,
             timing,

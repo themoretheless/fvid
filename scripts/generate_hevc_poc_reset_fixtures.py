@@ -81,17 +81,37 @@ def reset_pps(nal):
     return nal[:2] + escape(packed(body + '1010' + '1'))
 
 
+
+def reset_vps(nal, aligned, chroma, malformed=None):
+    value = bits(unescape(nal[2:]))
+    body = value[:value.rfind('1')]
+    assert body[-1] == '0', 'seed VPS extension flag must be absent'
+    body = body[:-1] + '1'
+    padding = -len(body) % 8
+    assert padding > 0
+    body += ('0' if malformed == 'bad-vps-alignment' else '1') + '1' * (padding - 1)
+    # Annex F.7.3.2.1.1: internal single layer and one output layer set.
+    body += ('1' if malformed == 'bad-vps-splitting' else '0') + '0' * 16 + '0' + '0000' + '000' + ue(0) + ue(0)
+    body += f'{0 if malformed == "bad-vps-dimensions" else 64:016b}{64:016b}'
+    if malformed == 'bad-vps-no-format': return nal[:2] + escape(packed(body + '0' + '1'))
+    body += '1' + f'{chroma:02b}' + '00000000' + '0'
+    body += '0' + str(int(aligned)) + ue(0) + '0' + ue(0) + '0' + '0'
+    return nal[:2] + escape(packed(body + '1'))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--chroma420', action='store_true', help='generate the disjoint 4:2:0 family')
     parser.add_argument('--longterm', action='store_true', help='generate the disjoint explicit long-term family')
     parser.add_argument('--multislice', action='store_true', help='generate the disjoint four-slice reset agreement family')
     parser.add_argument('--dependent', action='store_true', help='generate one independent and three dependent segment reset family')
+    parser.add_argument('--vps-extension', choices=['aligned', 'unaligned'], help='author strict Annex F single-layer VPS syntax')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     assert sum((args.chroma420, args.longterm, args.multislice, args.dependent)) <= 1, 'choose one family'
     seed = DEST / ('hevc-chroma-qp-list-dependent-rext8.mp4' if args.dependent else 'hevc-chroma-qp-list-slices-rext8.mp4' if args.multislice else 'hevc-long-term-rext8.mp4' if args.longterm else 'hevc-pcm-reference-rext8.mp4' if args.chroma420 else 'hevc-pcm-mono-reference-rext8.mp4')
     stem = 'hevc-poc-dependent' if args.dependent else 'hevc-poc-multislice' if args.multislice else 'hevc-poc-long-term' if args.longterm else 'hevc-poc-420' if args.chroma420 else 'hevc-poc'
+    if args.vps_extension: stem += '-vps-' + args.vps_extension
     meta = json.loads(subprocess.check_output([
         'cargo', 'run', '--quiet', '--offline', '--no-default-features',
         '--example', 'hevc_colour_plane_fixture_meta', '--', str(seed)], cwd=root))
@@ -112,6 +132,7 @@ def main():
     labels = ['baseline', 'msb-reset', 'msb-reset-signalled', 'idr-baseline', 'full-reset',
               'bad-full-nonidr', 'bad-period-repeat', 'bad-anchor', 'bad-truncated', 'bad-empty']
     if args.multislice or args.dependent: labels += ['bad-slice-period', 'bad-slice-reset']
+    if args.vps_extension: labels += ['bad-vps-alignment', 'bad-vps-splitting', 'bad-vps-dimensions', 'bad-vps-no-format']
     for label in labels:
         reset = label not in ('baseline', 'idr-baseline')
         idr_family = label in ('idr-baseline', 'full-reset')
@@ -123,6 +144,8 @@ def main():
             for _ in range(int.from_bytes(header[1:], 'big')):
                 n = int.from_bytes(original_config[at:at + 2], 'big'); at += 2
                 nal = original_config[at:at + n]; at += n
+                if header[0] & 63 == 32 and args.vps_extension:
+                    nal = reset_vps(nal, args.vps_extension == 'aligned', int(args.chroma420 or args.multislice or args.dependent or args.longterm), label)
                 if header[0] & 63 == 33: nal, original_width = sps_width(nal)
                 if header[0] & 63 == 34 and reset: nal = reset_pps(nal)
                 config += len(nal).to_bytes(2, 'big') + nal
@@ -188,6 +211,7 @@ def main():
                     if index == 17 and not info['first']:
                         if label == 'bad-slice-period': extension = '01' + '001000'
                         if label == 'bad-slice-reset': extension = '00'
+                    if extension and args.vps_extension == 'aligned' and not (label == 'bad-truncated' and index == 18): extension += '0'
                     extension = bits(packed(extension))
                     prefix += ue(len(extension) // 8) + extension
                 rewritten = nal[:2] + escape(packed(prefix + '1') + bytes(info['rbsp'][end // 8:]))
@@ -212,7 +236,7 @@ def main():
         cases.append(dict(file=name, expectation='invalid' if label.startswith('bad-') else 'acceptance',
                           frames=len(outputs), resets=[] if not reset else ([0, 17, 33] if idr_family else [17, 33]),
                           signalled=[1, 18, 34] if label == 'full-reset' else [18] if label.endswith('signalled') else [],
-                          failure_picture=(17 if label in ('bad-full-nonidr', 'bad-empty', 'bad-slice-period', 'bad-slice-reset') else 18) if label.startswith('bad-') else None))
+                          failure_picture=(0 if label.startswith('bad-vps-') else 17 if label in ('bad-full-nonidr', 'bad-empty', 'bad-slice-period', 'bad-slice-reset') else 18) if label.startswith('bad-') else None))
     (DEST / f'{stem}-reset.json').write_text(json.dumps(dict(cases=cases, seed=seed.name,
         provenance='Original documented synthetic HEVC seed; owned POC width, slice, PPS and MP4 rewriting. No private media, FFmpeg, external codec or network. Baseline and reset acceptance compare pixels, exact POC translations and software seek/rewind; This family qualifies MSB reset, full reset at IDR and same-period signalled reset; malformed cases are Invalid refusals, not acceptance.'), indent=2) + '\n')
 

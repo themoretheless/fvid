@@ -6010,3 +6010,26 @@ The generator uses only owned Rust metadata and Python rewriting. Neither it
 nor the ordinary tests invokes FFmpeg, HM or a network service; no private media
 or parameter sets are included. Layered-VPS/inter-layer reset is outside this
 family's qualification.
+
+### Single-layer Annex F VPS reset extensions
+
+`generate_hevc_poc_reset_fixtures.py --vps-extension aligned` and `unaligned`
+author strict Annex F.7.3.2.1.1 single-layer VPS syntax on the original
+64x64 monochrome PCM/inter seed. Each fourteen-file family contains five
+acceptance videos, five malformed reset payloads and four malformed VPS
+extensions (alignment, splitting, zero dimensions and missing first chroma/depth).
+The latter are exact Invalid refusals at picture zero, not acceptance.
+The generator supplies segment-local cycle-present bits for aligned VPS syntax;
+the truncated reproducer deliberately stays one byte so it really lacks fields.
+
+`generate_hevc_vps_reset_updates.py` uses those saved families to author six
+original in-band VPS/PPS replacements at pictures 16/17: valid alignment change
+at IDR, invalid in-sequence change, invalid post-slice change with reset active,
+Annex A's ignored post-slice tail with preserved reset semantics for later activation,
+activation at IDR after a tail that only Annex A can ignore, and a change
+limited to reserved base-VPS bits after slices.
+Every preceding picture is compared, with exact failure/poison/reset checks.
+All generators are explicit, offline and owned; no private parameters, HM,
+FFmpeg or other external codec is used. Ordinary tests read saved bytes only.
+These qualify single-layer reset extension decoding, not inter-layer prediction,
+external base layers, VPS VUI, 3D/MV-HEVC or universal hardware support.
