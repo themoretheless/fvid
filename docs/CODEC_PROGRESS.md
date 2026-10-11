@@ -2,6 +2,15 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`LayerDependencyPrefix::parse` additionally reads Annex F extension alignment,
+the extra PTL, explicit/inferred layer IDs, explicit/split scalability dimensions,
+view IDs and direct dependencies. It derives transitive references and disjoint
+independent-root tree partitions using NAL layer IDs. Six original raw prefix
+fixtures exercise chain/diamond/forest graphs, splitting, 63 layers and malformed
+IDs; a separate graph oracle verifies closure. It returns a continuation bit
+offset. Additional layer sets/OLS/DPB syntax and connection to picture decoding
+are still pending; this API does not claim complete extension or video acceptance.
+
 `Vps::parse_layered_metadata` now reads sparse layer IDs, up to 1024 unique
 nonempty layer sets, reserved values 63, external base-layer metadata and
 multiple HRDs with preceding-common inheritance. Retained metadata is budgeted.

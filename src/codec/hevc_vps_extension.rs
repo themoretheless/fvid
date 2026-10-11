@@ -1,7 +1,150 @@
 //! Annex F.7.3.2.1.1 for an internal, single-layer VPS.
 //! Deferred Annex F interpretation; ordinary Annex A may ignore errors in this tail.
 use super::{bits::BitReader, hevc_profile::ProfileTierLevel};
-use crate::{invalid, Result};
+use crate::{Result, invalid};
+
+/// Annex F extension syntax through direct_dependency_flag, before additional
+/// sets/OLS/DPB. Masks use NAL layer IDs, not VPS indices. This is deliberately
+/// a prefix reader, not admission of a complete multilayer picture stream.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LayerDependencyPrefix {
+    pub layer_ids: Vec<u8>,
+    pub scalability_ids: Vec<[u8; 16]>,
+    pub view_ids: Vec<u16>,
+    pub direct: Vec<u64>,
+    pub transitive: Vec<u64>,
+    pub tree_partitions: Vec<Vec<u8>>,
+    pub end_bit: usize,
+}
+impl LayerDependencyPrefix {
+    /// Input is unescaped VPS RBSP; start follows vps_extension_flag.
+    /// The caller retains the remaining syntax for additional layer sets/OLS/DPB.
+    pub fn parse(
+        bytes: &[u8],
+        start: usize,
+        layers: &super::hevc_vps::LayerSets,
+        sublayers: u8,
+        budget: usize,
+    ) -> Result<Self> {
+        let n = usize::from(layers.effective_max_layers());
+        // Conservative bound including vector growth, scratch dimensions and
+        // temporary PTL sublayers. n is bounded by the normative maximum 63.
+        if 4096 + n * 128 + n * n > budget {
+            return Err(invalid("HEVC dependency metadata exceeds memory budget"));
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(start)?;
+        while b.position() % 8 != 0 {
+            if !b.bit()? {
+                return Err(invalid("HEVC VPS extension alignment bit is not one"));
+            }
+        }
+        if layers.max_layers_minus1 > 0 && layers.base_internal {
+            ProfileTierLevel::read(&mut b, false, sublayers)?;
+        }
+        let splitting = b.bit()?;
+        let mut types = Vec::new();
+        for i in 0..16 {
+            if b.bit()? {
+                types.push(i);
+            }
+        }
+        if splitting && types.is_empty() {
+            return Err(invalid("HEVC VPS splitting has no scalability dimensions"));
+        }
+        let mut widths = Vec::new();
+        let mut offset = 0;
+        for _ in 0..types.len() - usize::from(splitting) {
+            let w = b.read(3)? as u8 + 1;
+            widths.push(w);
+            offset += usize::from(w);
+        }
+        if !types.is_empty() {
+            let previous = if splitting {
+                offset
+            } else {
+                offset - usize::from(*widths.last().unwrap())
+            };
+            if previous >= 6 {
+                return Err(invalid("HEVC VPS split dimensions exceed layer ID"));
+            }
+        }
+        if splitting {
+            widths.push((6 - offset) as u8);
+        }
+        let explicit = b.bit()?;
+        let mut ids = vec![0u8];
+        let mut dimensions = vec![[0u8; 16]; n];
+        for i in 1..n {
+            let id = if explicit { b.read(6)? as u8 } else { i as u8 };
+            if id <= ids[i - 1] || id > layers.max_layer_id {
+                return Err(invalid(
+                    "HEVC VPS layer IDs are not increasing or exceed maximum",
+                ));
+            }
+            ids.push(id);
+            let mut shift = 0;
+            for (&t, &w) in types.iter().zip(&widths) {
+                dimensions[i][t] = if splitting {
+                    ((u32::from(id) >> shift) & ((1u32 << w) - 1)) as u8
+                } else {
+                    b.read(w)? as u8
+                };
+                shift += w;
+            }
+        }
+        let mut views = Vec::new();
+        for d in &dimensions {
+            if !views.contains(&d[1]) {
+                views.push(d[1]);
+            }
+        }
+        let view_width = b.read(4)? as u8;
+        let mut view_ids = Vec::new();
+        for _ in &views {
+            view_ids.push(if view_width == 0 {
+                0
+            } else {
+                b.read(view_width)? as u16
+            });
+        }
+        let mut direct = vec![0u64; n];
+        let mut transitive = vec![0u64; n];
+        for i in 1..n {
+            for j in 0..i {
+                if b.bit()? {
+                    direct[i] |= 1u64 << ids[j];
+                    transitive[i] |= (1u64 << ids[j]) | transitive[j];
+                }
+            }
+        }
+        let mut claimed = 0u64;
+        let mut tree_partitions = Vec::new();
+        for i in 0..n {
+            if direct[i] != 0 {
+                continue;
+            }
+            let mut tree = vec![ids[i]];
+            for j in i + 1..n {
+                let bit = 1u64 << ids[j];
+                if transitive[j] & (1u64 << ids[i]) != 0 && claimed & bit == 0 {
+                    tree.push(ids[j]);
+                    claimed |= bit;
+                }
+            }
+            tree_partitions.push(tree);
+        }
+        Ok(Self {
+            layer_ids: ids,
+            scalability_ids: dimensions,
+            view_ids,
+            direct,
+            transitive,
+            tree_partitions,
+            end_bit: b.position(),
+        })
+    }
+}
 
 fn bounded(b: &mut BitReader<'_>, maximum: u32) -> Result<u32> {
     let value = b.unsigned_golomb()?;

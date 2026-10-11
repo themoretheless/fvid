@@ -6297,6 +6297,17 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_dependency_prefix.py` separately authors six original Annex F
+RBSP prefixes through direct_dependency_flag, with a JSON syntax manifest.
+These are deliberately incomplete metadata prefixes, not VPS NAL units or
+playable videos. They cover sparse IDs, chain/diamond/independent-root graphs,
+split scalability dimensions, 63 layers and duplicate IDs. Tests compare
+transitive references against an independent Floyd-Warshall oracle and tree
+partitions against an independently claimed predicted-layer set. The parser
+returns the exact ending bit for continuation into additional sets/OLS/DPB;
+that remainder and full multilayer playback are not accepted by these tests.
+No private input, FFmpeg, external codec or network is used by authoring/tests.
+
 `generate_hevc_layer_sets.py` authors 16 original raw VPS NAL units and the
 `hevc-vps-layer-sets.json` manifest. Original Main PTL fields and base VPS syntax
 follow H.265 (06/2019), clauses 7.3.2.1 and 7.4.3.1. Cases cover sparse IDs,

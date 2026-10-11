@@ -1,4 +1,5 @@
 //! H.265 VPS topology/HRD metadata, strict base-layer admission and sublayer DPB limits.
+pub use super::hevc_vps_extension::LayerDependencyPrefix;
 use super::{bits::BitReader, hevc_nal::NalRbsp, hevc_profile::ProfileTierLevel};
 use crate::{Result, invalid};
 
