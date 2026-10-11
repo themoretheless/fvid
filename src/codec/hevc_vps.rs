@@ -2,6 +2,7 @@
 pub use super::hevc_vps_extension::{
     LayerDependencyPrefix, LayerSetExtension, OutputLayerSet, OutputLayerSets,
 };
+pub use super::hevc_vps_extension::{RepresentationFormat, RepresentationFormats};
 use super::{bits::BitReader, hevc_nal::NalRbsp, hevc_profile::ProfileTierLevel};
 use crate::{Result, invalid};
 

@@ -2,6 +2,16 @@
 
 ## HEVC layered VPS metadata, 2026-10-11
 
+`OutputLayerSets::representation_formats` continues through all representation
+formats, layer mappings and POC flags, stopping before DPB syntax. It retains
+dimensions, chroma/separate-plane layout, independent luma/chroma depth and
+conformance offsets. Missing colour/depth fields inherit from the preceding
+format; absent mappings use Min(layer index, last format index). Cropping uses
+ChromaArrayType units and checked wide arithmetic. Twenty-six original metadata
+fixtures cover 8/10/16-bit layouts, mixed depths, inheritance, explicit/inferred
+mapping, 256 formats, missing windows and malformed fields. SPS-dependent block
+alignment and connection to picture reconstruction remain unfinished.
+
 `LayerSetExtension::output_layers` continues through extra PTLs and OLS syntax.
 It handles inferred/explicit output flags (including reserved default idc 3),
 additional OLS mappings, necessary-layer closure within each normative layer

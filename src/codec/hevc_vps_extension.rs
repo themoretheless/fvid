@@ -46,6 +46,149 @@ pub struct OutputLayerSets {
     pub sets: Vec<OutputLayerSet>,
     pub end_bit: usize,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RepresentationFormat {
+    pub width: u16,
+    pub height: u16,
+    pub chroma: u8,
+    pub separate_colour_planes: bool,
+    pub luma_depth: u8,
+    pub chroma_depth: u8,
+    /// Coded conformance offsets, in units determined by ChromaArrayType.
+    pub crop: [u32; 4],
+}
+impl RepresentationFormat {
+    pub fn display_size(&self) -> Result<(u16, u16)> {
+        let cat = if self.separate_colour_planes {
+            0
+        } else {
+            self.chroma
+        };
+        let sx = if matches!(cat, 1 | 2) { 2u64 } else { 1 };
+        let sy = if cat == 1 { 2u64 } else { 1 };
+        let x = (u64::from(self.crop[0]) + u64::from(self.crop[1])) * sx;
+        let y = (u64::from(self.crop[2]) + u64::from(self.crop[3])) * sy;
+        if x >= u64::from(self.width) || y >= u64::from(self.height) {
+            return Err(invalid("HEVC VPS representation crop removes picture"));
+        }
+        Ok((
+            (u64::from(self.width) - x) as u16,
+            (u64::from(self.height) - y) as u16,
+        ))
+    }
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RepresentationFormats {
+    pub formats: Vec<RepresentationFormat>,
+    /// VPS layer-index order, including the inferred base mapping.
+    pub layer_format_indices: Vec<u8>,
+    pub max_one_active_reference: bool,
+    pub poc_lsb_aligned: bool,
+    pub poc_lsb_not_present: Vec<bool>,
+    pub end_bit: usize,
+}
+impl OutputLayerSets {
+    /// Read representation formats and POC flags, stopping immediately before
+    /// dpb_size(). SPS-dependent MinCbSizeY alignment still requires admission
+    /// against the activating SPS; this metadata prefix cannot establish it.
+    pub fn representation_formats(
+        &self,
+        bytes: &[u8],
+        graph: &LayerDependencyPrefix,
+        layers: &super::hevc_vps::LayerSets,
+        budget: usize,
+    ) -> Result<RepresentationFormats> {
+        let n = graph.layer_ids.len();
+        if n == 0 || n > 63 || graph.direct.len() != n {
+            return Err(invalid("invalid HEVC representation layer geometry"));
+        }
+        let mut b = BitReader::new(bytes);
+        b.skip(self.end_bit)?;
+        let last = bounded(&mut b, 255)? as usize;
+        if (last + 1) * std::mem::size_of::<RepresentationFormat>()
+            + n * 2
+            + std::mem::size_of::<RepresentationFormats>()
+            > budget
+        {
+            return Err(invalid(
+                "HEVC representation metadata exceeds memory budget",
+            ));
+        }
+        let mut formats: Vec<RepresentationFormat> = Vec::with_capacity(last + 1);
+        for i in 0..=last {
+            let width = b.read(16)? as u16;
+            let height = b.read(16)? as u16;
+            if width == 0 || height == 0 {
+                return Err(invalid("zero HEVC VPS representation dimensions"));
+            }
+            let (chroma, separate, luma_depth, chroma_depth) = if b.bit()? {
+                let chroma = b.read(2)? as u8;
+                let separate = chroma == 3 && b.bit()?;
+                let luma = b.read(4)? as u8 + 8;
+                let colour = b.read(4)? as u8 + 8;
+                if luma > 16 || colour > 16 {
+                    return Err(invalid("HEVC VPS representation depth exceeds 16 bits"));
+                }
+                (chroma, separate, luma, colour)
+            } else {
+                let p = formats.last().ok_or_else(|| {
+                    invalid("first HEVC VPS representation format lacks chroma/depth")
+                })?;
+                (
+                    p.chroma,
+                    p.separate_colour_planes,
+                    p.luma_depth,
+                    p.chroma_depth,
+                )
+            };
+            let mut crop = [0u32; 4];
+            if b.bit()? {
+                for value in &mut crop {
+                    *value = b.unsigned_golomb()?;
+                }
+            }
+            let format = RepresentationFormat {
+                width,
+                height,
+                chroma,
+                separate_colour_planes: separate,
+                luma_depth,
+                chroma_depth,
+                crop,
+            };
+            format.display_size()?;
+            formats.push(format);
+            debug_assert!(i <= 255);
+        }
+        let present = last > 0 && b.bit()?;
+        let mut indices: Vec<u8> = (0..n).map(|i| i.min(last) as u8).collect();
+        if present {
+            let width = (usize::BITS - last.leading_zeros()) as u8;
+            for index in indices.iter_mut().skip(usize::from(layers.base_internal)) {
+                *index = b.read(width)? as u8;
+                if usize::from(*index) > last {
+                    return Err(invalid("HEVC representation format index out of range"));
+                }
+            }
+        }
+        let one = b.bit()?;
+        let aligned = b.bit()?;
+        let mut absent = vec![false; n];
+        for (i, value) in absent.iter_mut().enumerate().skip(1) {
+            if graph.direct[i] == 0 {
+                *value = b.bit()?;
+            }
+        }
+        Ok(RepresentationFormats {
+            formats,
+            layer_format_indices: indices,
+            max_one_active_reference: one,
+            poc_lsb_aligned: aligned,
+            poc_lsb_not_present: absent,
+            end_bit: b.position(),
+        })
+    }
+}
 impl LayerSetExtension {
     /// Continue through PTL and OLS syntax, stopping before representation formats.
     pub fn output_layers(

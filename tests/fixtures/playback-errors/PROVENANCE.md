@@ -6297,6 +6297,18 @@ tests read saved artifacts and do not run a generator.
 
 ## HEVC VPS layer-set metadata
 
+`generate_hevc_representation_formats.py` authors 26 original continuations of
+the owned highest-output OLS prefix, following Annex F.7.3.2.1.2 and
+F.7.4.3.1.2. It covers monochrome/4:2:0/4:2:2/4:4:4/separate planes at 8/10/16
+bits, independent luma/chroma depths, inherited format fields, omitted windows,
+explicit/inferred mappings and 256 formats. Display-size oracles use an explicit
+chroma-unit table and original conformance offsets. Invalid cases target zero
+dimensions, excessive depth/count, absent first colour fields, invalid indices
+and large crop offsets (0xfffffffe, valid ue(v) values) with wide sums. Fixtures
+stop before DPB syntax; they do not prove complete VPS or video acceptance.
+No private media, external codec, FFmpeg or network participates in generation
+or ordinary tests. SPS-dependent MinCbSizeY alignment requires later admission.
+
 `generate_hevc_output_sets.py` authors fifteen original OLS continuations of
 the original chain dependency prefix, following Annex F.7.3.2.1.1 and F-11
 through F-13. Hand-specified chain masks are 1, 9, 137 and 32905 for NAL layer
