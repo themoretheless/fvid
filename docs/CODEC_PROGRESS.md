@@ -11570,3 +11570,19 @@ and those NAL restrictions. All ten standalone hevc_poc tests passed offline;
 these are syntax/arithmetic tests, not acceptance of reset-coded playback.
 The existing PPS refusal is unchanged until stateful period/DPB integration
 and the synthetic video acceptance family are implemented.
+
+POC translation now has a bounded metadata-copy primitive on `Picture`.
+It adjusts both collocated reference lists and recursively adjusts separate
+colour-plane leaves, preserving motion vectors/indices, long-term flags,
+SAO state and shared pixel/availability buffers. It computes the extra live
+metadata cost before copying and uses fallible vector reservations. The
+source picture is never mutated, including when a decrement overflows or
+the metadata budget is insufficient. A unit test decodes the existing owned
+separate-colour-plane synthetic fixture, installs controlled reference POCs,
+and checks shifted root/child identities, unchanged published metadata and
+pixel-buffer pointer identity. This tests the translation primitive only;
+the input video does not yet signal a POC reset. The original decoder reset
+and pixel-storage sharing test remains intact. PPS admission is unchanged.
+Validation on final source: 198 HEVC unit tests passed offline, zero failed;
+one explicit long-term fixture-regeneration test remained ignored as intended.
+The command reached exit zero and git diff --check passed.

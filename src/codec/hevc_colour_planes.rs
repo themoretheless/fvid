@@ -108,6 +108,82 @@ pub(super) fn decode(
 }
 
 impl Picture {
+    /// Additional live metadata needed to translate POC identities while the
+    /// original picture may still be held by a playback caller. Pixels stay shared.
+    pub(crate) fn poc_translation_bytes(&self) -> Option<usize> {
+        let mut n = std::mem::size_of::<Self>() + 2 * std::mem::size_of::<usize>();
+        n = n.checked_add(self.sao.len().checked_mul(std::mem::size_of::<super::hevc_sao::CtuSao>())?)?;
+        n = n.checked_add(self.motion.len().checked_mul(std::mem::size_of::<super::hevc_motion::Motion>())?)?;
+        for list in 0..2 {
+            n = n.checked_add(self.reference_pocs[list].len().checked_mul(4)?)?;
+            n = n.checked_add(self.reference_long_term[list].len())?;
+        }
+        if let Some(children) = &self.colour_planes {
+            for child in children {
+                // Separate-plane children are monochrome leaves.
+                if child.colour_planes.is_some() { return None; }
+                n = n.checked_add(child.poc_translation_bytes()?)?;
+            }
+        }
+        Some(n)
+    }
+
+    /// Copy only metadata, decrementing every collocated POC identity. Source
+    /// Arc pictures remain untouched, including on allocation/range failure.
+    /// `budget` covers the extra live copy, not the already retained pixels.
+    pub(crate) fn translated_pocs(&self, delta: i64, budget: usize) -> Result<Self> {
+        if self.poc_translation_bytes().is_none_or(|n| n > budget) {
+            return Err(invalid("HEVC POC translation exceeds metadata budget"));
+        }
+        fn copy<T: Copy>(source: &[T]) -> Result<Vec<T>> {
+            let mut out = Vec::new();
+            out.try_reserve_exact(source.len())
+                .map_err(|_| invalid("cannot allocate HEVC POC translation metadata"))?;
+            out.extend_from_slice(source);
+            Ok(out)
+        }
+        let mut pocs = [copy(&self.reference_pocs[0])?, copy(&self.reference_pocs[1])?];
+        for list in &mut pocs {
+            for poc in list {
+                *poc = i64::from(*poc).checked_sub(delta)
+                    .and_then(|v| i32::try_from(v).ok())
+                    .ok_or_else(|| invalid("HEVC translated reference POC overflow"))?;
+            }
+        }
+        let colour_planes = if let Some(children) = &self.colour_planes {
+            Some([
+                Arc::new(children[0].translated_pocs(delta, budget)?),
+                Arc::new(children[1].translated_pocs(delta, budget)?),
+                Arc::new(children[2].translated_pocs(delta, budget)?),
+            ])
+        } else { None };
+        Ok(Self {
+            #[cfg(test)]
+            pcm_luma_samples: self.pcm_luma_samples,
+            #[cfg(test)]
+            cross_component_blocks: self.cross_component_blocks,
+            #[cfg(test)]
+            act_blocks: self.act_blocks,
+            #[cfg(test)]
+            current_picture_blocks: self.current_picture_blocks,
+            #[cfg(test)]
+            completed_picture_blocks: self.completed_picture_blocks,
+            #[cfg(test)]
+            bipredicted_blocks: self.bipredicted_blocks,
+            #[cfg(test)]
+            fractional_current_chroma_blocks: self.fractional_current_chroma_blocks,
+            dimensions: self.dimensions,
+            crop: self.crop,
+            depth: self.depth,
+            planes: self.planes.clone(),
+            sao: copy(&self.sao)?,
+            motion: copy(&self.motion)?,
+            reference_pocs: pocs,
+            reference_long_term: [copy(&self.reference_long_term[0])?, copy(&self.reference_long_term[1])?],
+            colour_planes,
+        })
+    }
+
     /// Retained allocations owned by this picture, including separate plane
     /// motion/reference state. Children never contain other pictures.
     pub(crate) fn storage_bytes(&self) -> Option<usize> {
@@ -145,9 +221,9 @@ impl Picture {
 #[cfg(test)]
 mod tests {
     use super::super::hevc_decoder::HevcDecoder;
+    use super::*;
 
-    #[test]
-    fn assembled_colour_planes_share_completed_pixel_storage() {
+    fn synthetic_decoder() -> (HevcDecoder, Vec<u8>) {
         let bytes = include_bytes!(
             "../../tests/fixtures/playback-errors/hevc-separate-colour-planes-distinct-synthetic.mp4"
         );
@@ -164,8 +240,51 @@ mod tests {
             }
             at += length;
         };
-        let mut decoder = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
-        let decoded = decoder.decode_packet(packet).unwrap().unwrap();
+        let decoder = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
+        (decoder, packet.to_vec())
+    }
+    fn synthetic_picture() -> Arc<Picture> {
+        let (mut decoder, packet) = synthetic_decoder();
+        decoder.decode_packet(&packet).unwrap().unwrap().picture
+    }
+
+    #[test]
+    fn translated_pocs_preserve_pixels_motion_and_published_picture() {
+        let mut original = synthetic_picture();
+        let picture = Arc::get_mut(&mut original).unwrap();
+        picture.reference_pocs = [vec![30, 29], vec![17]];
+        picture.reference_long_term = [vec![false, true], vec![false]];
+        for (i, child) in picture.colour_planes.as_mut().unwrap().iter_mut().enumerate() {
+            Arc::get_mut(child).unwrap().reference_pocs = [vec![30 + i as i32], vec![29]];
+        }
+        let required = original.poc_translation_bytes().unwrap();
+        assert!(original.translated_pocs(32, required - 1).is_err());
+        assert!(original.translated_pocs(i64::MAX, required).is_err());
+        let shifted = original.translated_pocs(32, required).unwrap();
+        assert_eq!(original.reference_pocs, [vec![30, 29], vec![17]]);
+        assert_eq!(shifted.reference_pocs, [vec![-2, -3], vec![-15]]);
+        assert_eq!(shifted.reference_long_term, original.reference_long_term);
+        assert_eq!(shifted.motion, original.motion);
+        assert_eq!(shifted.sao, original.sao);
+        for (i, (a, b)) in original.colour_planes.as_ref().unwrap().iter()
+            .zip(shifted.colour_planes.as_ref().unwrap()).enumerate() {
+            assert_eq!(a.reference_pocs, [vec![30 + i as i32], vec![29]]);
+            assert_eq!(b.reference_pocs, [vec![-2 + i as i32], vec![-3]]);
+            assert_eq!(a.motion, b.motion);
+            for (old, new) in a.planes.iter().zip(&b.planes) {
+                assert_eq!(old.samples(), new.samples());
+                assert_eq!(old.samples().as_ptr(), new.samples().as_ptr());
+            }
+        }
+        for (old, new) in original.planes.iter().zip(&shifted.planes) {
+            assert_eq!(old.samples().as_ptr(), new.samples().as_ptr());
+        }
+    }
+
+    #[test]
+    fn assembled_colour_planes_share_completed_pixel_storage() {
+        let (mut decoder, packet) = synthetic_decoder();
+        let decoded = decoder.decode_packet(&packet).unwrap().unwrap();
         let children = decoded.picture.colour_planes.as_ref().unwrap();
         let storage = decoded.picture.storage_bytes().unwrap();
         assert!(
@@ -182,7 +301,7 @@ mod tests {
         }
         let previous = decoded.picture;
         decoder.reset();
-        let next = decoder.decode_packet(packet).unwrap().unwrap();
+        let next = decoder.decode_packet(&packet).unwrap().unwrap();
         for (a, b) in previous.planes.iter().zip(&next.picture.planes) {
             assert_eq!(a.samples(), b.samples());
             assert_ne!(a.samples().as_ptr(), b.samples().as_ptr());
