@@ -12474,3 +12474,31 @@ byte-identically. Deliberate +128 vector-tie rounding and +8 block-selection
 mutations each fail an exact saved motion regression; final checks use the
 restored +127/+4 implementation. Ordinary tests do not generate fixtures or
 invoke external media tools.
+
+
+### HEVC layered reference-list construction and picture identity
+
+`ReferenceSets::select` implements the F.8.3.4 L0/L1 ordering of temporal,
+long-term and both inter-layer sets. It reuses the ordinary decoder's selector
+for repetition, explicit modifications and the L0 current-picture replacement.
+References retain both layer ID and POC; the borrowed resolver refuses missing
+or ambiguous identities. Allocation preflight covers the ordered cycle, selector
+intermediate and resulting list together. Inputs remain unchanged.
+
+An original fourteen-frame 8x8 Y4M atlas and 5846 saved cases cover group sizes,
+active counts, both lists, current-picture presence, explicit duplicate/index
+selection, ordering and invalid identities. Distinct layers at the same POC have
+distinct authored pixels, so resolution checks the actual selected frame.
+This is list/identity operation acceptance, not scalable slice decoding or
+multilayer playback. Slice admission, per-layer DPB integration and reference
+availability remain open, including discardable/RADL/RASL restrictions and the
+independent nonbase IRAP current-only rule. The generic Annex F operation admits
+both inter-layer sets; Annex H profile/view restrictions still require admission
+at the future slice integration boundary.
+
+Validation: all 51 HEVC integration suites pass (154 tests), along with 211
+HEVC codec unit tests (one fixture-generation test remains explicitly ignored)
+and the player build. Tests run locked/offline without default features;
+player checking explicitly enables `player`. Both new artifacts regenerate
+byte-identically. Mutating L0 group order or resolving by POC alone makes the
+saved regression fail; the final checks use restored production code.

@@ -6580,3 +6580,13 @@ VPS sample-only, motion-only, both and neither permissions are checked separatel
 Explicit all-intra source tests and empty-grid refusal distinguish legitimate
 absence of I-picture motion storage from missing inter data. No private media,
 external codec, FFmpeg or network is involved in generation or ordinary tests.
+
+
+`generate_hevc_layered_reference_lists.py` independently authors a fourteen-frame
+8x8 Y4M reference atlas and 5846 list-selection acceptance/refusal cases. Pixels,
+layer IDs and POCs are original; no private media or codec parameters are copied.
+The atlas distinguishes pictures in different layers at the same POC. The oracle
+uses Annex F group concatenation, repetition and current-picture rules without
+calling production code. These fixtures qualify list/identity operations only,
+not coded scalable slice playback. Generation and ordinary tests need neither
+FFmpeg, an external codec nor network access.
