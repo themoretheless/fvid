@@ -6194,3 +6194,23 @@ These qualify the stated single-reference skip/motion/filter cases, not
 compound prediction, segmentation, arbitrary scaled ratios, reference
 refresh combinations, lossy inter residuals or non-neutral loop filtering.
 Those remain separate qualification/implementation work.
+
+## Original VP9 compound-reference streams
+
+`scripts/generate_vp9_compound.py` authors the 288 streams listed in
+`vp9-compound.json` using the owned header/Boolean writer and synthetic colored
+DC keyframe helpers. A hidden neutral intra picture refreshes a distinct slot;
+compound prediction then uses analytically distinct references. All six sign
+bias layouts, both variable choices, forced/selectable modes, four chroma
+geometries and three sample depths are represented. Moving cases use two
+different vectors and append a single-reference NEAREST picture that reuses
+the second list. Saved little-endian 16-bit sample oracles use independent
+interpolation and rounded averaging, never the production decoder. No private
+media, parameter sets, external codec process or network is used.
+
+Before the fix, these streams reached the precise single-reference-only
+picture-decoder refusal after the keyframe and hidden reference decoded.
+`tests/vp9_compound.rs` now requires successful every-sample decoding, reset
+replay, hidden-frame suppression, depth preservation, timestamps, EOF, seek
+and rewind. This is acceptance for the stated cases, not universal compound
+or VP9 conformance.

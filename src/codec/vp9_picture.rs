@@ -1,4 +1,4 @@
-//! VP9 intra and single-reference inter reconstruction. Unsupported tools are rejected before output.
+//! VP9 intra, single-reference and compound inter reconstruction. Unsupported tools are rejected before output.
 use super::{
     vp9::{self, Header},
     vp9_bool::BoolDecoder,
@@ -9,6 +9,8 @@ use super::{
     vp9_transform::{self, Kind},
 };
 use crate::{Result, invalid};
+#[path = "vp9_reference.rs"]
+mod reference_context;
 #[derive(Clone, Debug)]
 pub struct Plane {
     pub width: usize,
@@ -31,9 +33,19 @@ struct Block {
     width: usize,
     height: usize,
     reference: u8,
+    second_reference: u8,
     inter_mode: u8,
     filter: usize,
     mvs: [[i32; 2]; 4],
+    second_mvs: [[i32; 2]; 4],
+}
+impl Block {
+    fn references(self) -> [u8; 2] {
+        [self.reference, self.second_reference]
+    }
+    fn vectors(self, list: usize) -> [[i32; 2]; 4] {
+        if list == 0 { self.mvs } else { self.second_mvs }
+    }
 }
 struct Decoder<'a> {
     counts: Counts,
@@ -53,6 +65,7 @@ struct Decoder<'a> {
     previous: Option<&'a Picture>,
     scratch: Vec<i32>,
     pred_scratch: Vec<u16>,
+    second_pred_scratch: Vec<u16>,
     tx_scratch: Vec<i64>,
     residual_scratch: Vec<i32>,
     coef_values: Vec<i32>,
@@ -84,7 +97,7 @@ pub fn decode_intra(
     }
     decode_frame(frame, header, ch, [None; 3], None, budget)
 }
-/// Decode an intra or single-reference inter picture using already decoded references.
+/// Decode an intra or inter picture using already decoded references.
 pub fn decode_frame(
     frame: &[u8],
     header: &Header,
@@ -115,12 +128,9 @@ pub(crate) fn decode_frame_counted(
     previous: Option<&Picture>,
     budget: usize,
 ) -> Result<(Picture, Counts)> {
-    if header.show_existing.is_some()
-        || header.segmentation.enabled
-        || ch.reference_mode != super::vp9_probs::ReferenceMode::Single
-    {
+    if header.show_existing.is_some() || header.segmentation.enabled {
         return Err(crate::unsupported(
-            "VP9 picture decoder requires coded frames, single-reference prediction and no segmentation",
+            "VP9 picture decoder requires coded frames and no segmentation",
         ));
     }
     let [width, height] = header.picture.size;
@@ -135,7 +145,7 @@ pub(crate) fn decode_frame_counted(
     }
     let cols = width.div_ceil(8) as usize;
     let rows = height.div_ceil(8) as usize;
-    // Keep the existing metadata allowance and account for both full-depth
+    // Include both motion-vector lists and account for both full-depth
     // chroma planes at their actual geometry (64/128/256 bytes per mi).
     let chroma_bytes = 256
         >> header
@@ -147,7 +157,7 @@ pub(crate) fn decode_frame_counted(
             .count();
     let required = cols
         .checked_mul(rows)
-        .and_then(|n| n.checked_mul(320 + chroma_bytes))
+        .and_then(|n| n.checked_mul(352 + chroma_bytes))
         .and_then(|n| n.checked_add((cols + rows + 16) * 64 + 65536))
         .ok_or_else(|| invalid("VP9 picture size overflow"))?;
     if required > budget {
@@ -191,6 +201,7 @@ pub(crate) fn decode_frame_counted(
         previous,
         scratch: Vec::new(),
         pred_scratch: Vec::new(),
+        second_pred_scratch: Vec::new(),
         tx_scratch: Vec::new(),
         residual_scratch: Vec::new(),
         coef_values: Vec::new(),
@@ -526,6 +537,7 @@ impl Decoder<'_> {
                                 &motion,
                                 &mut self.scratch,
                                 &mut self.pred_scratch,
+                                &mut self.second_pred_scratch,
                             )?;
                         } else {
                             Self::prediction(

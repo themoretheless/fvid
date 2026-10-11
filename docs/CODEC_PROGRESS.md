@@ -12017,3 +12017,24 @@ Compound prediction, segmentation, general reference refresh combinations,
 arbitrary reference scales, full-chroma lossy inter residuals and non-neutral
 loop-filter video oracles remain open. This does not complete the overall
 codec-gap objective.
+
+### VP9 compound reference prediction
+
+Implemented compound and selectable reference modes with the normative
+reference entropy contexts, sign-bias-dependent list order, separate motion
+vectors for both lists, and rounded averaging of independently clipped
+predictions. Motion candidate search retains and searches both reference
+lists across pictures. Segmentation remains unsupported.
+
+288 original synthetic streams cover all six nonuniform sign-bias layouts,
+forced/selectable compound mode, both variable-reference choices, four chroma
+geometries and 8/10/12-bit samples. Distinct reference pictures and distinct
+fractional/integer vectors are checked against independent saved pixel
+oracles. Follow-up single-reference NEAREST frames verify reuse of the second
+list's vector. Direct replay and playback tests cover hidden references,
+original depth, timestamps, EOF, sync seek and rewind.
+
+This bounded qualification does not establish arbitrary mixed-neighbor block
+layouts, compound lossy residuals, segmentation, all refresh/scaling combinations
+or general codec parity. FFmpeg/libav and network are not used by generation
+or these tests.

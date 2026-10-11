@@ -1,5 +1,5 @@
 use super::*;
-use crate::codec::vp9_motion;
+use crate::codec::{vp9_motion, vp9_probs::ReferenceMode};
 const SEARCH: [[[i32; 2]; 8]; 13] = [
     [
         [-1, 0],
@@ -198,15 +198,17 @@ impl Decoder<'_> {
                     }
                 };
             }
-            if v.reference == reference {
-                let index = if i < 2 {
-                    sub.map_or(3, |k| {
-                        [[1, 2], [1, 3], [3, 2], [3, 3]][k][usize::from(dx == 0)]
-                    })
-                } else {
-                    3
-                };
-                add(&mut found, v.mvs[index]);
+            for list in 0..2 {
+                if v.references()[list] == reference {
+                    let index = if i < 2 {
+                        sub.map_or(3, |k| {
+                            [[1, 2], [1, 3], [3, 2], [3, 3]][k][usize::from(dx == 0)]
+                        })
+                    } else {
+                        3
+                    };
+                    add(&mut found, v.vectors(list)[index]);
+                }
             }
         }
         let previous = self
@@ -215,19 +217,24 @@ impl Decoder<'_> {
             .and_then(|p| p.blocks.get(r * self.cols + c))
             .copied();
         if let Some(v) = previous {
-            if v.reference == reference {
-                add(&mut found, v.mvs[3]);
+            for list in 0..2 {
+                if v.references()[list] == reference {
+                    add(&mut found, v.vectors(list)[3]);
+                }
             }
         }
         for v in neighbors.iter().map(|v| v.2).chain(previous) {
-            if v.reference > 0 && v.reference != reference {
-                let mut mv = v.mvs[3];
-                if self.header.sign_bias[usize::from(v.reference - 1)]
-                    != self.header.sign_bias[usize::from(reference - 1)]
-                {
-                    mv = mv.map(|v| -v);
+            for list in 0..2 {
+                let other = v.references()[list];
+                if other > 0 && other != reference {
+                    let mut mv = v.vectors(list)[3];
+                    if self.header.sign_bias[usize::from(other - 1)]
+                        != self.header.sign_bias[usize::from(reference - 1)]
+                    {
+                        mv = mv.map(|v| -v);
+                    }
+                    add(&mut found, mv);
                 }
-                add(&mut found, mv);
             }
         }
         while found.len() < 2 {
@@ -273,69 +280,73 @@ impl Decoder<'_> {
         above: Option<Block>,
         left: Option<Block>,
     ) -> Result<Block> {
-        let ar = above.map(|v| v.reference);
-        let lr = left.map(|v| v.reference);
-        let ctx = match (ar, lr) {
-            (Some(0), Some(0)) => 2,
-            (Some(0), Some(v)) | (Some(v), Some(0)) => 4 * usize::from(v == 1),
-            (Some(a), Some(l)) => 2 * usize::from(a == 1) + 2 * usize::from(l == 1),
-            (Some(v), None) | (None, Some(v)) => {
-                if v == 0 {
-                    2
-                } else {
-                    4 * usize::from(v == 1)
-                }
+        let a = above.map(Block::references);
+        let l = left.map(Block::references);
+        let (fixed, var, fixed_idx) = reference_context::layout(self.header.sign_bias);
+        let compound = match self.ch.reference_mode {
+            ReferenceMode::Single => false,
+            ReferenceMode::Compound => true,
+            ReferenceMode::Select => {
+                let ctx = reference_context::mode(a, l, fixed);
+                counted(
+                    b,
+                    self.ch.probabilities.comp_mode[ctx],
+                    &mut self.counts.comp_mode[ctx],
+                )?
             }
-            _ => 2,
         };
-        let reference = if !counted(
-            b,
-            self.ch.probabilities.single_ref[ctx][0],
-            &mut self.counts.single_ref[ctx][0],
-        )? {
-            1
-        } else {
-            let ctx = match (ar, lr) {
-                (Some(0), Some(0)) => 2,
-                (Some(0), Some(v)) | (Some(v), Some(0)) => {
-                    if v == 1 {
-                        3
-                    } else {
-                        4 * usize::from(v == 2)
-                    }
-                }
-                (Some(1), Some(1)) => 3,
-                (Some(1), Some(v)) | (Some(v), Some(1)) => 4 * usize::from(v == 2),
-                (Some(a), Some(l)) => 2 * usize::from(a == 2) + 2 * usize::from(l == 2),
-                (Some(v), None) | (None, Some(v)) => {
-                    if v <= 1 {
-                        2
-                    } else {
-                        4 * usize::from(v == 2)
-                    }
-                }
-                _ => 2,
-            };
-            if counted(
+        let refs = if compound {
+            let ctx = reference_context::compound(a, l, fixed, var, fixed_idx);
+            let choice = usize::from(counted(
                 b,
-                self.ch.probabilities.single_ref[ctx][1],
-                &mut self.counts.single_ref[ctx][1],
+                self.ch.probabilities.comp_ref[ctx],
+                &mut self.counts.comp_ref[ctx],
+            )?);
+            let mut refs = [0; 2];
+            refs[fixed_idx] = fixed;
+            refs[1 - fixed_idx] = var[choice];
+            refs
+        } else {
+            let ctx = reference_context::single_first(a, l);
+            let reference = if counted(
+                b,
+                self.ch.probabilities.single_ref[ctx][0],
+                &mut self.counts.single_ref[ctx][0],
             )? {
-                3
+                let ctx = reference_context::single_second(a, l);
+                if counted(
+                    b,
+                    self.ch.probabilities.single_ref[ctx][1],
+                    &mut self.counts.single_ref[ctx][1],
+                )? {
+                    3
+                } else {
+                    2
+                }
             } else {
-                2
-            }
+                1
+            };
+            [reference, 0]
         };
-        let (mut candidates, ctx) = self.candidates(r, c, w, h, reference, None);
-        for mv in &mut candidates {
-            if !self.header.high_precision_mv || !vp9_motion::high_precision(*mv) {
-                for v in mv.iter_mut() {
-                    if *v & 1 != 0 {
-                        *v -= v.signum();
+        let lists = 1 + usize::from(compound);
+        let mut candidates = [[[0; 2]; 2]; 2];
+        let mut ctx = 0;
+        for list in 0..lists {
+            let (mut found, context) = self.candidates(r, c, w, h, refs[list], None);
+            if list == 0 {
+                ctx = context;
+            }
+            for mv in &mut found {
+                if !self.header.high_precision_mv || !vp9_motion::high_precision(*mv) {
+                    for v in mv.iter_mut() {
+                        if *v & 1 != 0 {
+                            *v -= v.signum();
+                        }
                     }
                 }
+                *mv = self.clamp_mv(*mv, r, c, w, h, 1248);
             }
-            *mv = self.clamp_mv(*mv, r, c, w, h, 1248);
+            candidates[list] = found;
         }
         let mut mode = if w >= 8 && h >= 8 {
             10 + tree(
@@ -375,21 +386,23 @@ impl Decoder<'_> {
             count_symbol(&[0, 2, -1, -2], &mut self.counts.interp_filter[ctx], filter);
             usize::from(filter)
         };
-        let mut mvs = [[0; 2]; 4];
+        let mut mvs = [[[0; 2]; 4]; 2];
         if w >= 8 && h >= 8 {
-            let mv = match mode {
-                10 => candidates[0],
-                11 => candidates[1],
-                12 => [0; 2],
-                _ => vp9_motion::read_vector_counted(
-                    b,
-                    &self.ch.probabilities,
-                    &mut self.counts,
-                    candidates[0],
-                    self.header.high_precision_mv,
-                )?,
-            };
-            mvs.fill(mv);
+            for list in 0..lists {
+                let mv = match mode {
+                    10 => candidates[list][0],
+                    11 => candidates[list][1],
+                    12 => [0; 2],
+                    _ => vp9_motion::read_vector_counted(
+                        b,
+                        &self.ch.probabilities,
+                        &mut self.counts,
+                        candidates[list][0],
+                        self.header.high_precision_mv,
+                    )?,
+                };
+                mvs[list].fill(mv);
+            }
         } else {
             for y in (0..2).step_by(h / 4) {
                 for x in (0..2).step_by(w / 4) {
@@ -405,41 +418,44 @@ impl Decoder<'_> {
                         &mut self.counts.inter_mode[ctx],
                         mode - 10,
                     );
-                    let mv = match mode {
-                        12 => [0; 2],
-                        13 => vp9_motion::read_vector_counted(
-                            b,
-                            &self.ch.probabilities,
-                            &mut self.counts,
-                            candidates[0],
-                            self.header.high_precision_mv,
-                        )?,
-                        _ => {
-                            let (refs, _) = self.candidates(r, c, w, h, reference, Some(block));
-                            let mut list = Vec::with_capacity(2);
-                            if block == 0 {
-                                for mv in refs {
-                                    add(&mut list, mv);
+                    for list in 0..lists {
+                        let mv = match mode {
+                            12 => [0; 2],
+                            13 => vp9_motion::read_vector_counted(
+                                b,
+                                &self.ch.probabilities,
+                                &mut self.counts,
+                                candidates[list][0],
+                                self.header.high_precision_mv,
+                            )?,
+                            _ => {
+                                let (found, _) =
+                                    self.candidates(r, c, w, h, refs[list], Some(block));
+                                let mut choices = Vec::with_capacity(2);
+                                if block == 0 {
+                                    for mv in found {
+                                        add(&mut choices, mv);
+                                    }
+                                } else if block <= 2 {
+                                    add(&mut choices, mvs[list][0]);
+                                } else {
+                                    for i in [2, 1, 0] {
+                                        add(&mut choices, mvs[list][i]);
+                                    }
                                 }
-                            } else if block <= 2 {
-                                add(&mut list, mvs[0]);
-                            } else {
-                                for i in [2, 1, 0] {
-                                    add(&mut list, mvs[i]);
+                                for mv in found {
+                                    add(&mut choices, mv);
                                 }
+                                while choices.len() < 2 {
+                                    choices.push([0; 2]);
+                                }
+                                choices[usize::from(mode == 11)]
                             }
-                            for mv in refs {
-                                add(&mut list, mv);
+                        };
+                        for dy in 0..h / 4 {
+                            for dx in 0..w / 4 {
+                                mvs[list][(y + dy) * 2 + x + dx] = mv;
                             }
-                            while list.len() < 2 {
-                                list.push([0; 2]);
-                            }
-                            list[usize::from(mode == 11)]
-                        }
-                    };
-                    for dy in 0..h / 4 {
-                        for dx in 0..w / 4 {
-                            mvs[(y + dy) * 2 + x + dx] = mv;
                         }
                     }
                 }
@@ -448,10 +464,12 @@ impl Decoder<'_> {
         Ok(Block {
             width: w,
             height: h,
-            reference,
+            reference: refs[0],
+            second_reference: refs[1],
             inter_mode: mode,
             filter,
-            mvs,
+            mvs: mvs[0],
+            second_mvs: mvs[1],
             ..Block::default()
         })
     }
@@ -474,47 +492,66 @@ impl Decoder<'_> {
         block: &Block,
         scratch: &mut Vec<i32>,
         out: &mut Vec<u16>,
+        second_out: &mut Vec<u16>,
     ) -> Result<()> {
-        let reference = references[usize::from(block.reference - 1)]
-            .ok_or_else(|| invalid("missing decoded VP9 reference"))?;
-        if reference.depth != picture_depth {
-            return Err(invalid(
-                "VP9 reference depth differs from the current picture",
-            ));
+        for list in 0..(1 + usize::from(block.second_reference != 0)) {
+            let reference = references[usize::from(block.references()[list] - 1)]
+                .ok_or_else(|| invalid("missing decoded VP9 reference"))?;
+            if reference.depth != picture_depth {
+                return Err(invalid(
+                    "VP9 reference depth differs from the current picture",
+                ));
+            }
+            let [sx, sy] = subsampling;
+            let vectors = block.vectors(list);
+            let mut mv = vectors[0];
+            if w < 8 || h < 8 {
+                // blockIdx counts prediction units in plane raster order, including
+                // the normative cross-row pair for the bottom 4:2:2 unit.
+                let idx = ((y - (r * 8 >> sy)) / 4) * (2 >> sx) + (x - (c * 8 >> sx)) / 4;
+                mv = vp9_motion::subblock_motion(vectors, [sx, sy], idx);
+            }
+            let units = [h.div_ceil(8) as i32, w.div_ceil(8) as i32];
+            let coords = [r as i32, c as i32];
+            let dims = [rows as i32, cols as i32];
+            for i in 0..2 {
+                let sub = subsampling[1 - i];
+                let near = (-coords[i] * 128) >> sub;
+                let far = ((dims[i] - units[i] - coords[i]) * 128) >> sub;
+                let extend = (4 + ((units[i] * 8) >> sub)) * 16;
+                mv[i] = ((2 * mv[i]) >> sub).clamp(near - extend, far + extend - 16);
+            }
+            let (origin, step) = vp9_motion::scaled_coordinates(
+                reference.size,
+                picture_size,
+                [x, y],
+                mv,
+                subsampling,
+            )?;
+            vp9_motion::interpolate(
+                &reference.planes[plane],
+                [
+                    reference.size[0].div_ceil(1 << sx) as usize,
+                    reference.size[1].div_ceil(1 << sy) as usize,
+                ],
+                origin,
+                step,
+                [size, size],
+                block.filter,
+                picture_depth,
+                scratch,
+                if list == 0 {
+                    &mut *out
+                } else {
+                    &mut *second_out
+                },
+            )?;
         }
-        let [sx, sy] = subsampling;
-        let mut mv = block.mvs[0];
-        if w < 8 || h < 8 {
-            // blockIdx counts prediction units in plane raster order, including
-            // the normative cross-row pair for the bottom 4:2:2 unit.
-            let idx = ((y - (r * 8 >> sy)) / 4) * (2 >> sx) + (x - (c * 8 >> sx)) / 4;
-            mv = vp9_motion::subblock_motion(block.mvs, [sx, sy], idx);
+        if block.second_reference != 0 {
+            for (a, &b) in out.iter_mut().zip(second_out.iter()) {
+                *a = (*a + b + 1) >> 1;
+            }
         }
-        let units = [h.div_ceil(8) as i32, w.div_ceil(8) as i32];
-        let coords = [r as i32, c as i32];
-        let dims = [rows as i32, cols as i32];
-        for i in 0..2 {
-            let sub = subsampling[1 - i];
-            let near = (-coords[i] * 128) >> sub;
-            let far = ((dims[i] - units[i] - coords[i]) * 128) >> sub;
-            let extend = (4 + ((units[i] * 8) >> sub)) * 16;
-            mv[i] = ((2 * mv[i]) >> sub).clamp(near - extend, far + extend - 16);
-        }
-        let (origin, step) =
-            vp9_motion::scaled_coordinates(reference.size, picture_size, [x, y], mv, subsampling)?;
-        vp9_motion::interpolate(
-            &reference.planes[plane],
-            [
-                reference.size[0].div_ceil(1 << sx) as usize,
-                reference.size[1].div_ceil(1 << sy) as usize,
-            ],
-            origin,
-            step,
-            [size, size],
-            block.filter,
-            picture_depth,
-            scratch,
-            out,
-        )
+        Ok(())
     }
 }
