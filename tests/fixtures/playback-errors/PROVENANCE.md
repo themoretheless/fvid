@@ -1,3 +1,13 @@
+### hevc-layered-extraction-timing.mp4
+
+Owned reconstruction generator adds structural top-level SEI types 0/1/130,
+content-light metadata, an opaque scalable-nested message and a temporal-1
+reserved prefix to the original two-layer PCM I picture. No private media or
+parameters; generation is offline and separate from ordinary tests. Extraction
+acceptance verifies unchanged exact pixels, whole-NAL timing removal, retained
+metadata/opaque nesting and temporal/layer filtering. Empty timing payloads test
+SEI framing only; this fixture does not qualify HRD timing or nested SEI semantics.
+
 ### hevc-layered-output-*.mp4
 
 Generated separately by `scripts/generate_hevc_layered_reconstruction.py` with

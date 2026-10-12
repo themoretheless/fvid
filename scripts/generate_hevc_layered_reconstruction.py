@@ -273,6 +273,16 @@ def main():
                     chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                     access_units=groups,multilayer=True))
                 cases.append(dict(file=filename,seed=seed+".mp4",independent=False,layer=3,ols=1,inter=True,output_highest=True))
+                # F.10.1 extraction: timing SEI precedes removed layers/temporal NALs.
+                sei = lambda payload: ((39<<9)|1).to_bytes(2,"big")+escape(bytes(payload))
+                timing = [sei([kind,0,128]) for kind in (0,1,130)]
+                retained = [sei([144,4,0,1,0,2,128]), sei([133,3,1,0,128,128])]
+                high_temporal = ((41<<9)|2).to_bytes(2,"big")+b"\x80"
+                extraction_group = [*timing,*retained,high_temporal,*groups[0]]
+                extraction_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*extraction_group])
+                (D/"hevc-layered-extraction-timing.mp4").write_bytes(mux(extraction_stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=[extraction_group],multilayer=True))
                 def output_pps(nal):
                     value = bits(unescape(nal[2:]))
                     r = Reader(value); r.ue(); r.ue()

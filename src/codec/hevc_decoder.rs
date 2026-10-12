@@ -25,6 +25,9 @@ pub use layered_dpb::{LayeredDecoded, LayeredDpb};
 #[path = "hevc_stream_layered.rs"]
 mod layered_stream;
 pub use layered_stream::LayeredDecoder;
+#[path = "hevc_substream.rs"]
+mod substream;
+pub use substream::extract_layered_substream;
 pub struct Decoded {
     pub picture: Arc<Picture>,
     pub poc: i32,

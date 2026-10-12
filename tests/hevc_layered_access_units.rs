@@ -958,3 +958,74 @@ fn alternative_output_policy_reconstructs_pixels_and_refuses_inconsistent_flags_
         }
     }
 }
+
+#[test]
+fn extracted_layer_and_temporal_substreams_drop_only_inapplicable_timing_and_decode() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, extract_layered_substream};
+    let mut input = movie("hevc-layered-extraction-timing.mp4");
+    let config = input.tracks()[0].configuration.clone();
+    let mut packet = vec![];
+    input.read_packet(0, 0, &mut packet).unwrap();
+    let units = |bytes: &[u8]| {
+        NalUnits::new(bytes, 4)
+            .unwrap()
+            .map(|n| n.unwrap().to_vec())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(
+        extract_layered_substream(&packet, 4, 9, 6, BUDGET).unwrap(),
+        packet
+    );
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for (layers, temporal, expected_layers) in [(1, 6, vec![0]), (9, 0, vec![0, 3])] {
+        let extracted = extract_layered_substream(&packet, 4, layers, temporal, BUDGET).unwrap();
+        let original = units(&packet);
+        let retained = units(&extracted);
+        // Metadata before any discarded picture is still removed globally.
+        assert_eq!(
+            retained
+                .iter()
+                .filter(|n| NalHeader::parse(n).unwrap().unit_type == 39)
+                .count(),
+            2
+        );
+        let sei_types = retained
+            .iter()
+            .filter(|n| NalHeader::parse(n).unwrap().unit_type == 39)
+            .map(|n| {
+                let rbsp = fvid::codec::hevc_nal::NalRbsp::parse(n, BUDGET).unwrap();
+                fvid::codec::hevc_sei::messages(&rbsp.bytes).unwrap()[0].payload_type
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(sei_types, [144, 133]);
+        for nal in &retained {
+            assert!(original.contains(nal));
+            let h = NalHeader::parse(nal).unwrap();
+            assert!(layers & (1 << h.layer_id) != 0 && h.temporal_id <= temporal);
+        }
+        let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+        let (pictures, _) = decoder.decode_packet(&extracted).unwrap();
+        assert_eq!(
+            pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+            expected_layers
+        );
+        for picture in pictures {
+            assert_pixels(&picture.picture, &oracle, 0);
+        }
+        assert_eq!(
+            extract_layered_substream(&extracted, 4, layers, temporal, BUDGET).unwrap(),
+            extracted
+        );
+    }
+    for (layers, temporal) in [(0, 0), (1u64 << 63, 0), (1, 7)] {
+        assert_eq!(
+            extract_layered_substream(&packet, 4, layers, temporal, BUDGET)
+                .err()
+                .unwrap()
+                .to_string(),
+            "invalid HEVC extraction target"
+        );
+    }
+    assert!(extract_layered_substream(&packet, 4, 1, 0, 1).is_err());
+    assert!(extract_layered_substream(&packet[..packet.len() - 1], 4, 1, 0, BUDGET).is_err());
+}

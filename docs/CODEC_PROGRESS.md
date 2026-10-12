@@ -1,5 +1,18 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC F.10.1 substream extraction, 2026-10-12
+
+`extract_layered_substream` extracts a complete length-prefixed NAL sequence
+by an explicit dependency-closed layer mask and highest temporal ID. Retained
+NAL bytes/order are unchanged. A global reduction scan removes whole base-layer
+SEI NALs carrying top-level buffering-period, picture-timing or decoding-unit
+information; scalable-nested messages remain opaque. Output plus temporary RBSP
+storage is budgeted. The original coded witness verifies exact pixels after
+base-only or temporal extraction, preservation without reduction and idempotence.
+The timing payloads are structural extraction witnesses, not HRD qualification.
+Automatic active-VPS selection, streaming extraction state, additional-layer-set
+rewriting (F.10.2/F.10.3), output scheduling and player integration remain.
+
 ## HEVC per-access-unit output layer policy, 2026-10-12
 
 Layered decoding applies the selected OLS output mask and alternative-output
