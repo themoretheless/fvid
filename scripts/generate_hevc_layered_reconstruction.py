@@ -359,6 +359,29 @@ def main():
                             reorder_stream,meta["depth"],*meta["dimensions"],
                             chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                             access_units=reorder_groups,multilayer=True,presentation_order=output_pocs))
+                # Original per-layer HDR witnesses: different CLLI values, with
+                # prefix base and suffix enhancement messages in the first AU.
+                def clli(layer_id, peak, average, suffix=False):
+                    payload = peak.to_bytes(2,"big")+average.to_bytes(2,"big")
+                    return (((40 if suffix else 39)<<9)|(layer_id<<3)|1).to_bytes(2,"big")+escape(bytes([144,4])+payload+b"\x80")
+                hdr_pocs = [0,2,1,4,3]
+                hdr_groups = [[intra_nal(21 if i == 0 else 0,poc,id)
+                    for id in [0,3]] for i,poc in enumerate(hdr_pocs)]
+                hdr_groups[0] = [clli(0,600,120),*hdr_groups[0],clli(3,1800,350,True)]
+                hdr_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*sum(hdr_groups,[])])
+                (D/"hevc-layered-hdr-reorder-ctts.mp4").write_bytes(mux(
+                    hdr_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                    chroma_depth=meta["chroma_depth"],access_units=hdr_groups,multilayer=True,
+                    presentation_order=hdr_pocs))
+                hdr_reset_groups = [[intra_nal(kind,i,id) for id in [0,3]]
+                    for i,kind in enumerate([21,0,16,0])]
+                hdr_reset_groups[0] = [clli(0,600,120),*hdr_reset_groups[0],clli(3,1800,350,True)]
+                hdr_reset_groups[2] = [clli(0,900,200),*hdr_reset_groups[2]]
+                hdr_reset_stream = b"".join(b"\x00\x00\x00\x01"+n
+                    for n in [*parameters,*sum(hdr_reset_groups,[])])
+                (D/"hevc-layered-hdr-clvs-reset.mp4").write_bytes(mux(
+                    hdr_reset_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                    chroma_depth=meta["chroma_depth"],access_units=hdr_reset_groups,multilayer=True))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,

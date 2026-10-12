@@ -1829,3 +1829,14 @@ common reader must display layers 0,3,3,3,3 at increasing presentation times,
 with original source samples 1,0,2,4,3. These are coded playback acceptance
 tests, including the ordinary native player source, rewind and seek; generation
 uses the owned Python generator and ordinary tests need neither FFmpeg nor network.
+
+`hevc-layered-hdr-reorder-ctts.mp4` carries original layer-0 prefix CLLI
+(600/120 nits) and layer-3 suffix CLLI (1800/350 nits) on its first AU. Later
+pictures omit SEI. Native layered output must preserve each layer's persistent
+metadata on every picture through POC reordering and rewind. The companion
+`hevc-layered-hdr-clvs-reset.mp4` starts a new CLVS with BLA: layer 0 states
+900/200 nits and layer 3 states none. Metadata must reset per layer without
+changing already queued old-CLVS pictures. These are coded-picture acceptance
+fixtures generated with the owned PCM generator, independent of FFmpeg/network.
+The common single-view player's HDR reporting and metadata priming on seek
+remain separate integration work; these tests qualify native decoded snapshots.

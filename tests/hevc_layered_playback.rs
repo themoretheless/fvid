@@ -247,3 +247,124 @@ fn common_native_player_source_reads_rewinds_and_seeks_layered_hevc() {
         Some(RawFrame::Planar(_))
     ));
 }
+
+#[test]
+fn layered_hdr_is_layer_local_persistent_and_attached_before_reordering() {
+    let mut reader = source("hevc-layered-hdr-reorder-ctts.mp4", 2);
+    for _ in 0..2 {
+        let mut identities = Vec::new();
+        while let Some(frame) = reader.read_frame().unwrap() {
+            let layer = frame.decoded.layer_id;
+            let light = frame.decoded.hdr.light;
+            assert_eq!(
+                (light.max_cll, light.max_fall),
+                if layer == 0 {
+                    (600., 120.)
+                } else {
+                    (1800., 350.)
+                }
+            );
+            assert!(frame.decoded.hdr.mastering.is_none());
+            identities.push((frame.presentation_time.ticks, frame.sample_index, layer));
+        }
+        assert_eq!(
+            identities,
+            [0, 2, 1, 4, 3]
+                .into_iter()
+                .enumerate()
+                .flat_map(|(pts, index)| [0, 3].map(move |layer| (pts as i64, index, layer)))
+                .collect::<Vec<_>>()
+        );
+        reader.rewind();
+    }
+}
+#[test]
+fn layered_hdr_new_clvs_clears_prior_layer_metadata_without_mutating_queued_frames() {
+    let mut reader = source("hevc-layered-hdr-clvs-reset.mp4", 2);
+    for _ in 0..2 {
+        let mut identities = Vec::new();
+        while let Some(frame) = reader.read_frame().unwrap() {
+            let layer = frame.decoded.layer_id;
+            let expected = match (frame.sample_index < 2, layer) {
+                (true, 0) => (600., 120.),
+                (true, 3) => (1800., 350.),
+                (false, 0) => (900., 200.),
+                (false, 3) => (0., 0.),
+                _ => unreachable!(),
+            };
+            assert_eq!(
+                (
+                    frame.decoded.hdr.light.max_cll,
+                    frame.decoded.hdr.light.max_fall
+                ),
+                expected
+            );
+            identities.push((frame.sample_index, layer));
+        }
+        assert_eq!(
+            identities,
+            (0..4)
+                .flat_map(|index| [0, 3].map(move |layer| (index, layer)))
+                .collect::<Vec<_>>()
+        );
+        reader.rewind();
+    }
+}
+#[test]
+fn layered_configuration_hdr_is_seeded_per_layer_and_restored_on_reset() {
+    use fvid::{codec::hevc_decoder::LayeredDecoder, container::mp4::Mp4Reader};
+    let bytes = std::fs::read(root().join("hevc-layered-reconstruct-pcm-dependent.mp4")).unwrap();
+    let mut demux = Mp4Reader::open(Cursor::new(bytes), Limits::default()).unwrap();
+    let mut config = demux.tracks()[0].configuration.clone();
+    config[22] += 1;
+    config.extend([39, 0, 3]);
+    for (layer, peak, average) in [(0u8, 600u16, 120u16), (3, 1800, 350)] {
+        let mut nal = vec![78, (layer << 3) | 1, 144, 4];
+        nal.extend(peak.to_be_bytes());
+        nal.extend(average.to_be_bytes());
+        nal.push(128);
+        config.extend((nal.len() as u16).to_be_bytes());
+        config.extend(nal);
+    }
+    let display = fvid::color::hdr::MasteringDisplay::from_corners(
+        (0.64, 0.33),
+        (0.30, 0.60),
+        (0.15, 0.06),
+        (0.3127, 0.3290),
+        1000.,
+        0.005,
+    )
+    .unwrap();
+    let mut mastering = fvid::codec::hevc_sei::output_hdr_nal(&fvid::color::hdr::HdrMetadata {
+        mastering: Some(display),
+        ..Default::default()
+    })
+    .unwrap();
+    mastering[1] = (3 << 3) | 1;
+    config.extend((mastering.len() as u16).to_be_bytes());
+    config.extend(mastering);
+    let mut packet = Vec::new();
+    demux.read_packet(0, 0, &mut packet).unwrap();
+    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    for _ in 0..2 {
+        let (frames, _) = decoder.decode_packet(&packet).unwrap();
+        assert_eq!(frames.len(), 2);
+        for frame in frames {
+            if frame.layer_id == 0 {
+                assert!(frame.hdr.mastering.is_none());
+            } else {
+                assert_eq!(frame.hdr.mastering.unwrap().max_luminance, 1000.);
+            }
+            let expected = if frame.layer_id == 0 {
+                (600., 120.)
+            } else {
+                (1800., 350.)
+            };
+            assert_eq!(
+                (frame.hdr.light.max_cll, frame.hdr.light.max_fall),
+                expected
+            );
+        }
+        decoder.reset();
+    }
+}

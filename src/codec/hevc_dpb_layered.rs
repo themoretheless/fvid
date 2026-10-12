@@ -24,6 +24,8 @@ pub struct LayeredDecoded {
     pub output: bool,
     pub nal: crate::codec::hevc_nal::NalHeader,
     pub access_unit: u64,
+    /// Layer-local static HDR snapshot for this picture, preserved through output reordering.
+    pub hdr: crate::color::hdr::HdrMetadata,
 }
 impl LayeredDecoded {
     /// Conservative retained ownership for asynchronous output consumers.
@@ -56,14 +58,31 @@ impl LayeredDecoded {
         Ok(output.output & (1u64 << self.layer_id) != 0)
     }
 }
+#[derive(Clone)]
+pub(super) struct LayeredHdr {
+    pub values: [crate::color::hdr::HdrMetadata; 63],
+    started: u64,
+}
+impl Default for LayeredHdr {
+    fn default() -> Self {
+        Self {
+            values: [crate::color::hdr::HdrMetadata::default(); 63],
+            started: 0,
+        }
+    }
+}
 #[derive(Clone, Default)]
 pub struct LayeredDpb {
     poc: LayeredPocState,
     references: Vec<(u8, Reference)>,
     access_unit: u64,
     random_access: super::random_access::RandomAccess,
+    hdr: LayeredHdr,
 }
 impl LayeredDpb {
+    pub(super) fn seed_hdr(&mut self, hdr: &LayeredHdr) {
+        self.hdr = hdr.clone();
+    }
     pub(super) fn output_preview(
         &self,
         plan: &LayeredAccessUnit,
@@ -263,7 +282,8 @@ impl LayeredDpb {
             .access_unit
             .checked_add(1)
             .ok_or_else(|| invalid("HEVC layered access-unit identity overflow"))?;
-        let scratch = std::mem::size_of::<super::random_access::Preview>()
+        let scratch = std::mem::size_of::<LayeredHdr>()
+            + std::mem::size_of::<super::random_access::Preview>()
             + 63usize.saturating_mul(
                 std::mem::size_of::<PictureStatus>()
                     + std::mem::size_of::<LayeredDecoded>()
@@ -311,6 +331,7 @@ impl LayeredDpb {
         } else {
             self.references.clone()
         };
+        let mut next_hdr = self.hdr.clone();
         let mut completed = Vec::new();
         let mut outputs = Vec::new();
         for picture in plan.pictures() {
@@ -320,6 +341,12 @@ impl LayeredDpb {
                 before(picture, None)?;
                 continue;
             }
+            let bit = 1u64 << layer;
+            if random_access.starts_clvs & bit != 0 && next_hdr.started & bit != 0 {
+                next_hdr.values[layer as usize] = Default::default();
+            }
+            next_hdr.started |= bit;
+            next_hdr.values[layer as usize].merge(plan.hdr(layer));
             let temporal: Vec<_> = staged.iter().map(|(_, r)| r.clone()).collect();
             let first = &picture.slices[0];
             let (retained, _) = super::temporal_reference_groups(
@@ -430,6 +457,7 @@ impl LayeredDpb {
                 output: output_mask & (1u64 << first.nal.layer_id) != 0,
                 nal: first.nal,
                 access_unit: self.access_unit,
+                hdr: next_hdr.values[layer as usize],
             });
         }
         let (mut parameters, transition, _, end) = plan.into_parts();
@@ -444,10 +472,12 @@ impl LayeredDpb {
         for layer in 0..63 {
             if affected & (1u64 << layer) != 0 {
                 parameters.end_layer_sequence(layer);
+                next_hdr.values[layer as usize] = Default::default();
             }
         }
         let mut next_random_access = random_access.next;
         next_random_access.end(end, affected);
+        self.hdr = next_hdr;
         self.random_access = next_random_access;
         self.poc = next_poc;
         self.references = staged;

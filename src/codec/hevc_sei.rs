@@ -110,22 +110,31 @@ fn is_trailing(bytes: &[u8]) -> bool {
 /// Every message in an SEI RBSP, unknown payloads returned unread.
 pub fn messages(rbsp: &[u8]) -> Result<Vec<Message<'_>>> {
     let mut found = Vec::new();
+    visit_messages(rbsp, |message| {
+        found.push(message);
+    })?;
+    Ok(found)
+}
+// HDR needs two fixed-size values, not an allocated directory of every unknown
+// SEI message. Keep the same framing validation for both consumers.
+fn visit_messages<'a>(rbsp: &'a [u8], mut visit: impl FnMut(Message<'a>)) -> Result<()> {
     let mut cursor = 0;
     loop {
         let rest = &rbsp[cursor..];
         if rest.is_empty() || is_trailing(rest) {
-            return Ok(found);
+            return Ok(());
         }
         let payload_type = code(rbsp, &mut cursor)?;
-        let size = code(rbsp, &mut cursor)?;
-        let size: usize = size
+        let size: usize = code(rbsp, &mut cursor)?
             .try_into()
             .map_err(|_| invalid("SEI payload size too large"))?;
-        let end = cursor + size;
+        let end = cursor
+            .checked_add(size)
+            .ok_or_else(|| invalid("SEI payload size too large"))?;
         let payload = rbsp
             .get(cursor..end)
             .ok_or_else(|| invalid("SEI payload runs past the RBSP"))?;
-        found.push(Message {
+        visit(Message {
             payload_type,
             payload,
         });
@@ -201,7 +210,7 @@ pub fn active_parameters_from_nal(nal: &[u8], budget: usize) -> Result<Option<Ac
 /// only guides tone mapping, so it must not cost the picture it describes.
 pub fn hdr_from_rbsp(rbsp: &[u8]) -> Result<HdrMetadata> {
     let mut hdr = HdrMetadata::default();
-    for message in messages(rbsp)? {
+    visit_messages(rbsp, |message| {
         let decoded = if message.payload_type == u32::from(SEI_MDCV) {
             HdrMetadata::from_mdcv(message.payload)
         } else if message.payload_type == u32::from(SEI_CLLI) {
@@ -212,7 +221,7 @@ pub fn hdr_from_rbsp(rbsp: &[u8]) -> Result<HdrMetadata> {
         if let Some(decoded) = decoded {
             hdr.merge(decoded);
         }
-    }
+    })?;
     Ok(hdr)
 }
 

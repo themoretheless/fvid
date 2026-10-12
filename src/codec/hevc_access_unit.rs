@@ -137,6 +137,7 @@ pub struct LayeredAccessUnit {
     pictures: Vec<LayeredAccessPicture>,
     transition: Option<PocTransition>,
     end: LayeredEndMarkers,
+    hdr: [crate::color::hdr::HdrMetadata; 63],
 }
 fn remaining(
     budget: usize,
@@ -277,6 +278,9 @@ impl LayeredAccessUnit {
     pub fn transition(&self) -> Option<&PocTransition> {
         self.transition.as_ref()
     }
+    pub(super) fn hdr(&self, layer: u8) -> crate::color::hdr::HdrMetadata {
+        self.hdr[layer as usize]
+    }
     pub fn end_markers(&self) -> LayeredEndMarkers {
         self.end
     }
@@ -327,6 +331,7 @@ impl LayeredAccessUnit {
             .try_reserve_exact(capacity)
             .map_err(|_| invalid("cannot allocate HEVC layered pictures"))?;
         let mut end = LayeredEndMarkers::default();
+        let mut hdr = [crate::color::hdr::HdrMetadata::default(); 63];
         let mut aud = None;
         let mut seen_vcl = false;
         let mut decoded_units = 0usize;
@@ -369,6 +374,11 @@ impl LayeredAccessUnit {
                     }
                     bits.finish_rbsp()?;
                     aud = Some((h.layer_id, kind));
+                }
+                39 | 40 => {
+                    let rbsp = NalRbsp::parse(nal, available)?;
+                    hdr[h.layer_id as usize]
+                        .merge(crate::codec::hevc_sei::hdr_from_rbsp(&rbsp.bytes)?);
                 }
                 36 | 37 => {
                     if h.temporal_id != 0 || h.unit_type == 37 && h.layer_id != 0 {
@@ -560,6 +570,7 @@ impl LayeredAccessUnit {
             pictures,
             transition,
             end,
+            hdr,
         };
         result.output_mask()?;
         Ok(result)

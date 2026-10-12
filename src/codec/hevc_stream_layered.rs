@@ -11,13 +11,30 @@ pub struct LayeredDecoder {
     initial: LayeredParameters,
     parameters: LayeredParameters,
     dpb: LayeredDpb,
+    initial_hdr: super::layered_dpb::LayeredHdr,
     length_size: u8,
     output_layer_set: usize,
     budget: usize,
 }
 impl LayeredDecoder {
     pub fn from_configuration(data: &[u8], output_layer_set: usize, budget: usize) -> Result<Self> {
-        let length_size = HevcConfig::parse(data)?.length_size;
+        let configuration = HevcConfig::parse(data)?;
+        let length_size = configuration.length_size;
+        let mut initial_hdr = super::layered_dpb::LayeredHdr::default();
+        for array in &configuration.arrays {
+            if matches!(array.nal_type, 39 | 40) {
+                for nal in &array.units {
+                    let h = NalHeader::parse(nal)?;
+                    if h.layer_id != 63 {
+                        let rbsp = crate::codec::hevc_nal::NalRbsp::parse(nal, budget)?;
+                        initial_hdr.values[h.layer_id as usize]
+                            .merge(crate::codec::hevc_sei::hdr_from_rbsp(&rbsp.bytes)?);
+                    }
+                }
+            }
+        }
+        let mut dpb = LayeredDpb::default();
+        dpb.seed_hdr(&initial_hdr);
         let initial = LayeredParameters::from_configuration(data, budget)?;
         if initial
             .storage_bytes()
@@ -30,7 +47,8 @@ impl LayeredDecoder {
         Ok(Self {
             parameters: initial.clone(),
             initial,
-            dpb: LayeredDpb::default(),
+            dpb,
+            initial_hdr,
             length_size,
             output_layer_set,
             budget,
@@ -59,6 +77,7 @@ impl LayeredDecoder {
     pub fn reset(&mut self) {
         self.parameters = self.initial.clone();
         self.dpb.reset();
+        self.dpb.seed_hdr(&self.initial_hdr);
     }
     /// Returns every decoded layer with explicit identity. Output queuing and
     /// operation-point extraction belong to the caller. Errors publish no state.

@@ -13,6 +13,7 @@ pub(super) struct Preview {
     pub next: RandomAccess,
     pub suppressed: u64,
     pub ignored: u64,
+    pub starts_clvs: u64,
     pub release: [u64; 63],
     pub output_prior: [(u64, bool); 63],
 }
@@ -21,6 +22,7 @@ impl RandomAccess {
         let mut next = self;
         let mut suppressed = 0u64;
         let mut ignored = 0u64;
+        let mut starts_clvs = 0u64;
         let mut release = [0u64; 63];
         let mut output_prior = [(0u64, false); 63];
         for p in plan.pictures() {
@@ -90,6 +92,7 @@ impl RandomAccess {
                     || next.pending_eos & bit != 0
                     || next.initialized & bit == 0 && ready;
                 if no_rasl {
+                    starts_clvs |= bit;
                     next.no_rasl |= bit;
                     if id == 0 || next.initialized & bit == 0 && ready {
                         next.initialized |= bit;
@@ -132,6 +135,7 @@ impl RandomAccess {
             next,
             suppressed,
             ignored,
+            starts_clvs,
             release,
             output_prior,
         })
