@@ -1,5 +1,16 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC NoClrasOutput first-picture flags, 2026-10-12
+
+POC preview now resets FirstPicInLayerDecodedFlag for every layer on a smallest-
+layer BLA/cross-layer-BLA or an IRAP following base/smallest-layer EOS, and for
+predicted layers on a higher-layer reset. This retains mandatory CL-RAS header
+history instead of incorrectly forgetting it merely because pixels were skipped.
+Two original coded acceptance witnesses check independent-layer CRA after BLA
+or base EOS, hidden/output flags, exact pixels and reset. A third unanchored CRA
+witness must still refuse derived POC disagreement atomically. Further random-
+access combinations, output ordering and frontend integration remain unfinished.
+
 ## HEVC associated-IRAP RASL suppression, 2026-10-12
 
 Layered DPB now stages layer initialization, associated-IRAP NoRaslOutput,

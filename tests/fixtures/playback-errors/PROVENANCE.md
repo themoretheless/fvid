@@ -1,3 +1,15 @@
+### hevc-layered-clras-{bla,eos,unanchored-cra}-poc.mp4
+
+Authored offline by the owned reconstruction generator from original PCM I
+entropy. Independent layers use distinct SPS/PPS IDs. Hidden base CRA127 and
+TRAIL_R255 establish POC history; a layer-3 TRAIL_R255 is ignored as CL-RAS.
+A later base BLA (or CRA after base EOS) requires NoClrasOutput initialization
+of every layer, including the independent layer. Both final pictures must have
+POC1 and original pixels. The ordinary unanchored CRA variant remains a precise
+POC-disagreement refusal: skipped pixels do not erase mandatory header history.
+Tests distinguish coded acceptance from refusal and verify reset/atomic state.
+No private media/parameters, FFmpeg or network; generation is separate.
+
 ### hevc-layered-random-access-*.mp4 and .json
 
 Generated separately by the owned layered reconstruction script. Five authored

@@ -1287,3 +1287,62 @@ fn failed_later_irap_never_publishes_random_access_suppression_state() {
         parameters = next;
     }
 }
+
+#[test]
+fn no_clras_reset_reinitializes_independent_layer_poc_after_bla_or_base_eos() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    for name in [
+        "hevc-layered-clras-bla-poc.mp4",
+        "hevc-layered-clras-eos-poc.mp4",
+    ] {
+        let mut input = movie(name);
+        let mut decoder =
+            LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET)
+                .unwrap();
+        let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+        for _ in 0..2 {
+            for (index, (poc, layers)) in [(127, vec![0]), (255, vec![0]), (1, vec![0, 3])]
+                .into_iter()
+                .enumerate()
+            {
+                let mut packet = vec![];
+                input.read_packet(0, index, &mut packet).unwrap();
+                let (pictures, _) = decoder
+                    .decode_packet(&packet)
+                    .unwrap_or_else(|e| panic!("{name} AU {index}: {e}"));
+                assert_eq!(
+                    pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+                    layers
+                );
+                for p in pictures {
+                    assert_eq!(p.poc, poc, "{name} AU {index} layer {}", p.layer_id);
+                    assert_eq!(p.output, index == 2);
+                    assert_eq!(p.coded_output, index == 2);
+                    assert_pixels(&p.picture, &oracle, 0);
+                }
+            }
+            decoder.reset();
+        }
+    }
+}
+
+#[test]
+fn unanchored_cra_after_ignored_clras_still_refuses_inconsistent_poc_atomically() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    let mut input = movie("hevc-layered-clras-unanchored-cra-poc.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut packet = vec![];
+    for index in 0..2 {
+        input.read_packet(0, index, &mut packet).unwrap();
+        decoder.decode_packet(&packet).unwrap();
+    }
+    let before = decoder.poc().clone();
+    input.read_packet(0, 2, &mut packet).unwrap();
+    assert_eq!(
+        decoder.decode_packet(&packet).err().unwrap().to_string(),
+        "HEVC access unit derived POCs disagree"
+    );
+    assert_eq!(decoder.poc(), &before);
+    assert_eq!(decoder.next_access_unit(), 2);
+}

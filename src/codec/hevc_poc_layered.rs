@@ -297,6 +297,41 @@ impl LayeredPocState {
             }
         }
         next.previous_initial = initial;
+        // F.8.1.3 resets FirstPicInLayerDecodedFlag before F.8.3.1 derives
+        // POC. NoClras applies to all layers, including independent layers that
+        // are not in the smallest layer's predicted closure. Retain POC header
+        // history for ordinary CL-RAS omission; that alone is not a reset.
+        let extension = vps.extension.as_ref().unwrap();
+        let ols = extension
+            .output
+            .sets
+            .get(pictures[0].context.sps.output_layer_set)
+            .ok_or_else(|| invalid("HEVC POC reset OLS is absent"))?;
+        if ols.necessary == 0 {
+            return Err(invalid("HEVC POC reset OLS has no necessary layer"));
+        }
+        let smallest = ols.necessary.trailing_zeros() as u8;
+        let mut reset_decoded = 0u64;
+        for picture in pictures {
+            let h = picture.header;
+            if !h.nal.is_irap() {
+                continue;
+            }
+            let id = h.nal.layer_id;
+            let bit = 1u64 << id;
+            let coded_bla = matches!(h.nal.unit_type, 16..=18)
+                || h.nal.is_idr() && h.layered.as_ref().unwrap().cross_layer_bla;
+            if id == smallest && (coded_bla || self.ended & ((1u64 << smallest) | 1) != 0) {
+                reset_decoded |= graph.registered;
+            } else if id > smallest && (coded_bla || self.ended & bit != 0) {
+                reset_decoded |= graph.predicted[id as usize];
+            }
+        }
+        for id in 0..63 {
+            if reset_decoded & (1u64 << id) != 0 {
+                next.layers[id].decoded = false;
+            }
+        }
         let mut access_poc = None;
         for picture in pictures {
             let h = picture.header;

@@ -290,7 +290,12 @@ def main():
                     access_units=split_groups,multilayer=True))
                 # Intra CRA/RASL/RADL/TRAIL headers with original PCM entropy.
                 # Empty local RPS and disabled temporal/inter-layer prediction.
-                def intra_nal(kind, poc, target_layer):
+                def output_pps(nal):
+                    value = bits(unescape(nal[2:]))
+                    r = Reader(value); r.ue(); r.ue()
+                    at = r.at + 1
+                    return nal[:2] + escape(packed(value[:at]+"1"+value[at+1:]))
+                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None):
                     h = meta["packets"][0][0]
                     raw = bytes(h["rbsp"])
                     value = bits(raw)
@@ -301,6 +306,9 @@ def main():
                     r.read(meta["extra_bits"]); assert r.ue() == 2
                     if meta["output_flag"]: r.read(1)
                     head = "1"+("0" if 16 <= kind <= 23 else "")+ue(int(target_layer != 0))+value[start:r.at]
+                    if picture_output is not None:
+                        assert not meta["output_flag"]
+                        head += str(int(picture_output))
                     head += f"{poc:0{meta['poc_bits']}b}"+"0"
                     if meta["short_term_sets"]: head += "0"
                     head += ue(0)+ue(0)
@@ -308,8 +316,12 @@ def main():
                         if meta["long_term_entries"]: head += ue(0)
                         head += ue(0)
                     if meta["temporal_mvp_enabled"]: head += "0"
-                    if target_layer: head += "0"
-                    head += value[r.at:align]+"1"
+                    if target_layer and inter_layer: head += "0"
+                    head += value[r.at:align]
+                    if extension is not None:
+                        extension += "0"*((-len(extension))%8)
+                        head += ue(len(extension)//8)+extension
+                    head += "1"
                     return ((kind<<9)|(target_layer<<3)|1).to_bytes(2,"big")+escape(packed(head)+raw[end//8:])
                 for name, eos, fallback in [("entry-and-later-cra",False,False),("eos-before-later-cra",True,False),("eob-before-later-cra","bitstream",False),("alternative-radl",False,True)]:
                     kinds = [(21,21),(6,8) if fallback else (8,8),(0,0),(21,21),(8,8)]
@@ -326,11 +338,27 @@ def main():
                     filename = "hevc-layered-random-access-"+name+".mp4"
                     (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=rasl_groups,multilayer=True))
                     random_access_cases.append(dict(file=filename,pocs=pocs,decoded=[[0,3],[0] if fallback else [],[0,3],[0,3],[] if eos else [0,3]],output_masks=[8,1,8,8,8] if fallback else [9,0,9,9,0 if eos else 9]))
-                def output_pps(nal):
-                    value = bits(unescape(nal[2:]))
-                    r = Reader(value); r.ue(); r.ue()
-                    at = r.at + 1
-                    return nal[:2] + escape(packed(value[:at]+"1"+value[at+1:]))
+                # NoClrasOutput resets every layer's FirstPicInLayerDecodedFlag.
+                # BLA/base EOS must clear the independent layer's old POC history;
+                # an ordinary unanchored CRA must retain its precise refusal.
+                from generate_hevc_poc_reset_fixtures import reset_pps
+                cvps,_,_ = vps(fmt,independent=True,poc_absent=False,base_format=fmt)
+                cv = bits(unescape(cvps[2:]))
+                cvps = cvps[:2]+escape(packed(cv[:32]+source_ptl+cv[128:]))
+                csps = parameter_ids(layer(params[33][0],3),104,[1])
+                cpps = parameter_ids(layer(params[34][0],3),0,[1,1])
+                clras_parameters = [cvps,params[33][0],csps,output_pps(reset_pps(params[34][0],False)),output_pps(cpps)]
+                # Hidden base pictures establish the history without requiring
+                # additional output reordering across the later cycle-zero CRA.
+                for cname, base_kind, eos in [("bla",16,False),("eos",21,True),("unanchored-cra",21,False)]:
+                    clras_groups = [
+                        [intra_nal(21,127,0,"1",picture_output=False)],
+                        [intra_nal(1,255,0,"",picture_output=False),intra_nal(1,255,3,inter_layer=False,picture_output=False)],
+                        [intra_nal(base_kind,1,0,ue(0),picture_output=True),intra_nal(21,1,3,inter_layer=False,picture_output=True)],
+                    ]
+                    if eos: clras_groups[1].append(((36<<9)|1).to_bytes(2,"big")+b"\x80")
+                    clras_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*clras_parameters,*sum(clras_groups,[])])
+                    (D/("hevc-layered-clras-"+cname+"-poc.mp4")).write_bytes(mux(clras_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=clras_groups,multilayer=True))
                 def output_slice(nal, original, flag):
                     source = bytes(original["rbsp"])
                     entropy = source[original["entropy_byte_offset"]:]
