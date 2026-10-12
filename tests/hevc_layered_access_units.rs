@@ -895,3 +895,66 @@ fn decoded_picture_bindings_survive_sps_replacement_eos_reset_and_owner_drop() {
         assert!(p.signalled_output_layer().unwrap());
     }
 }
+
+#[test]
+fn alternative_output_policy_reconstructs_pixels_and_refuses_inconsistent_flags_atomically() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    let m = manifest("hevc-layered-output-policy.json");
+    assert_eq!(m["cases"].as_array().unwrap().len(), 4);
+    for case in m["cases"].as_array().unwrap() {
+        let name = case["file"].as_str().unwrap();
+        let mut input = movie(name);
+        let oracle = std::fs::read(
+            root()
+                .join(case["seed"].as_str().unwrap())
+                .with_extension("yuv"),
+        )
+        .unwrap();
+        let mut decoder =
+            LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET)
+                .unwrap();
+        let mut packet = vec![];
+        for index in 0..2 {
+            input.read_packet(0, index, &mut packet).unwrap();
+            let before = decoder.poc().clone();
+            let result = decoder.decode_packet(&packet);
+            if index == 1
+                && let Some(error) = case["error"].as_str()
+            {
+                assert_eq!(result.err().unwrap().to_string(), error, "{name}");
+                assert_eq!(decoder.poc(), &before);
+                assert_eq!(decoder.next_access_unit(), 1);
+                continue;
+            }
+            let (pictures, _) = result.unwrap_or_else(|e| panic!("{name} AU {index}: {e}"));
+            let expected_layers = if index == 1 && case["missing"].as_bool().unwrap() {
+                vec![0]
+            } else {
+                vec![0, 3]
+            };
+            assert_eq!(
+                pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+                expected_layers
+            );
+            let mask = pictures
+                .iter()
+                .filter(|p| p.output)
+                .fold(0u64, |m, p| m | (1 << p.layer_id));
+            assert_eq!(
+                mask,
+                case["output_masks"][index].as_u64().unwrap(),
+                "{name}"
+            );
+            for p in pictures {
+                assert_eq!(p.nal.layer_id, p.layer_id);
+                assert_eq!(p.access_unit, index as u64);
+                assert_eq!(
+                    p.coded_output,
+                    !(index == 1 && case["hidden"].as_bool().unwrap())
+                );
+                assert_pixels(&p.picture, &oracle, index);
+            }
+            assert_eq!(decoder.next_access_unit(), index as u64 + 1);
+        }
+    }
+}

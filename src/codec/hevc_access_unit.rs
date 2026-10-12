@@ -207,6 +207,62 @@ impl LayeredAccessUnit {
         Ok(n)
     }
 
+    /// Final per-AU output eligibility after F.8.1.2 OLS/alternative selection.
+    /// Presentation order and random-access RASL suppression are separate.
+    pub fn output_mask(&self) -> Result<u64> {
+        let Some(first) = self.pictures.first() else {
+            return Ok(0);
+        };
+        let extension = first
+            .binding
+            .vps
+            .extension
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC output policy has no VPS extension"))?;
+        let ols = extension
+            .output
+            .sets
+            .get(first.binding.sps.output_layer_set)
+            .ok_or_else(|| invalid("HEVC output policy has no selected OLS"))?;
+        let coded = self
+            .pictures
+            .iter()
+            .filter(|p| p.slices[0].picture_output)
+            .fold(0u64, |mask, p| mask | (1u64 << p.binding.sps.layer_id));
+        if ols.alternative_output {
+            if ols.output.count_ones() != 1 {
+                return Err(invalid("HEVC alternative output requires one output layer"));
+            }
+            let target = ols.output.trailing_zeros() as u8;
+            let position = extension
+                .graph
+                .layer_ids
+                .binary_search(&target)
+                .map_err(|_| invalid("HEVC output layer is absent from VPS"))?;
+            let references = extension.graph.transitive[position];
+            let mut flag = None;
+            for p in &self.pictures {
+                if ((1u64 << target) | references) & (1u64 << p.binding.sps.layer_id) != 0 {
+                    let current = p.slices[0].picture_output;
+                    if flag.is_some_and(|old| old != current) {
+                        return Err(invalid(
+                            "HEVC alternative output pic_output_flag disagrees across layers",
+                        ));
+                    }
+                    flag = Some(current);
+                }
+            }
+            if coded & ols.output == 0 {
+                let candidates = coded & references;
+                return Ok(if candidates == 0 {
+                    0
+                } else {
+                    1u64 << (63 - candidates.leading_zeros())
+                });
+            }
+        }
+        Ok(coded & ols.output)
+    }
     pub fn pictures(&self) -> &[LayeredAccessPicture] {
         &self.pictures
     }
@@ -494,11 +550,13 @@ impl LayeredAccessUnit {
             }
         }
         remaining(budget, parameters, &staged, &pictures, count)?;
-        Ok(Self {
+        let result = Self {
             parameters: staged,
             pictures,
             transition,
             end,
-        })
+        };
+        result.output_mask()?;
+        Ok(result)
     }
 }

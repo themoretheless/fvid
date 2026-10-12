@@ -40,7 +40,7 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False):
     if bad_geometry:
         target = dict(target, size=[255, 192])
     base_format = BASE if base_format is None else base_format
@@ -60,7 +60,7 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
     # Both layers remain necessary in the dependent highest-output operation.
     b += ue(1) + ue(0) + ('01' if output_highest else '00') + '11'
     if output_highest:
-        b += '0'  # alternative output disabled
+        b += str(int(alternative_output))
     b += ue(len(formats)-1) + ''.join(representation(f) for f in formats)
     if len(formats) > 1:
         b += '1' + '01'  # explicit dependent-layer representation index 1

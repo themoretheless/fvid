@@ -63,6 +63,7 @@ def main():
     cases = []
     replacements = []
     access_cases = []
+    output_cases = []
     for label, seed in [
         ("pcm", "hevc-pcm-reference-rext8"),
         ("multislice", "hevc-pcm-dependent-rext8"),
@@ -272,6 +273,46 @@ def main():
                     chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                     access_units=groups,multilayer=True))
                 cases.append(dict(file=filename,seed=seed+".mp4",independent=False,layer=3,ols=1,inter=True,output_highest=True))
+                def output_pps(nal):
+                    value = bits(unescape(nal[2:]))
+                    r = Reader(value); r.ue(); r.ue()
+                    at = r.at + 1
+                    return nal[:2] + escape(packed(value[:at]+"1"+value[at+1:]))
+                def output_slice(nal, original, flag):
+                    source = bytes(original["rbsp"])
+                    entropy = source[original["entropy_byte_offset"]:]
+                    value = bits(unescape(nal[2:]))
+                    boundary = len(value)-len(entropy)*8
+                    align = value[:boundary].rfind("1")
+                    header = value[:align]
+                    assert original["first"] and not original["dependent"]
+                    r = Reader(header, 1)
+                    if 16 <= ((nal[0]>>1)&63) <= 23: r.read(1)
+                    r.ue(); r.read(meta["extra_bits"]); r.ue()
+                    at = r.at
+                    header = header[:at]+str(int(flag))+header[at+int(meta["output_flag"]):]
+                    return nal[:2]+escape(packed(header+"1")+entropy)
+                for name, alternative, missing, flags, expected, error in [
+                    ("alternative-missing",True,True,None,[8,1],None),
+                    ("disabled-missing",False,True,None,[8,0],None),
+                    ("alternative-hidden",True,False,[False,False],[8,0],None),
+                    ("alternative-disagree",True,False,[True,False],[8],"HEVC alternative output pic_output_flag disagrees across layers"),
+                ]:
+                    policy_vps, _, _ = vps(fmt, independent=False, base_format=fmt, output_highest=True, alternative_output=alternative)
+                    policy_bits = bits(unescape(policy_vps[2:]))
+                    policy_vps = policy_vps[:2]+escape(packed(policy_bits[:32]+source_ptl+policy_bits[128:]))
+                    policy_parameters = [policy_vps,*parameters[1:]]
+                    policy_groups = [list(group) for group in groups]
+                    if missing: policy_groups[1] = base_predicted
+                    if flags is not None:
+                        policy_parameters = [policy_vps,*[output_pps(n) if ((n[0]>>1)&63)==34 else n for n in parameters[1:]]]
+                        for au in range(2):
+                            originals = meta["packets"][au]*2
+                            policy_groups[au] = [output_slice(n,h,True if au==0 else flags[int(i>=len(meta["packets"][au]))]) for i,(n,h) in enumerate(zip(groups[au],originals))]
+                    stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*policy_parameters,*policy_groups[0],*policy_groups[1]])
+                    filename = "hevc-layered-output-"+name+".mp4"
+                    (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=policy_groups,multilayer=True))
+                    output_cases.append(dict(file=filename,seed=seed+".mp4",output_masks=expected,error=error,missing=missing,hidden=flags==[False,False]))
     # Parameter-state witness, not coded-picture acceptance: inference must
     # follow the latest active base PPS even if the enhancement NAL is unchanged.
     import generate_hevc_layered_pps as gp
@@ -281,6 +322,7 @@ def main():
     current_pps = parameter_ids(read(".pps"), 0, [1, 1])
     (D / "hevc-layered-activation-inference.mp4").write_bytes(
         gp.movie(read(".vps"),read(".base.sps"),current_sps,read(".base.pps"),current_pps))
+    (D / "hevc-layered-output-policy.json").write_text(json.dumps(dict(cases=output_cases),indent=2)+"\n")
     (D / "hevc-layered-access-units.json").write_text(json.dumps(dict(cases=access_cases),indent=2)+"\n")
     (D / "hevc-layered-reconstruction.json").write_text(json.dumps(dict(cases=cases,replacements=replacements),indent=2)+"\n")
 

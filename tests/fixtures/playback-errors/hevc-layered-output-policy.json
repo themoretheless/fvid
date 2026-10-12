@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "file": "hevc-layered-output-alternative-missing.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "output_masks": [
+        8,
+        1
+      ],
+      "error": null,
+      "missing": true,
+      "hidden": false
+    },
+    {
+      "file": "hevc-layered-output-disabled-missing.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "output_masks": [
+        8,
+        0
+      ],
+      "error": null,
+      "missing": true,
+      "hidden": false
+    },
+    {
+      "file": "hevc-layered-output-alternative-hidden.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "output_masks": [
+        8,
+        0
+      ],
+      "error": null,
+      "missing": false,
+      "hidden": true
+    },
+    {
+      "file": "hevc-layered-output-alternative-disagree.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "output_masks": [
+        8
+      ],
+      "error": "HEVC alternative output pic_output_flag disagrees across layers",
+      "missing": false,
+      "hidden": false
+    }
+  ]
+}

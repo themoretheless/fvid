@@ -1,3 +1,14 @@
+### hevc-layered-output-*.mp4
+
+Generated separately by `scripts/generate_hevc_layered_reconstruction.py` with
+owned Rust PCM seed generation and Python VPS/PPS/slice-header authorship.
+Original synthetic entropy is retained; no private samples or parameter sets.
+The output-policy manifest records three coded acceptance cases (missing primary
+with/without alternative output and hidden pictures) and a precise conflicting
+output-flag refusal. Ordinary regression tests read the checked-in files offline
+without FFmpeg or generation. These witnesses qualify per-AU output eligibility,
+not presentation ordering or general multilayer profile conformance.
+
 
 ### lutyuv-full-range.y4m
 

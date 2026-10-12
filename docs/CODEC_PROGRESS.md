@@ -1,5 +1,16 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC per-access-unit output layer policy, 2026-10-12
+
+Layered decoding applies the selected OLS output mask and alternative-output
+selection when the primary output layer is absent. Contradictory coded output
+flags in the primary/reference layers are rejected before state publication.
+Decoded pictures retain the original `coded_output`, final `output` eligibility,
+NAL header and access-unit index. Four original two-AU witnesses verify exact
+pixels, disabled fallback, hidden pictures and atomic refusal. This is per-AU
+eligibility; presentation reordering, random-access RASL suppression, extraction
+and player integration remain separate qualification work.
+
 ## HEVC immutable per-picture output parameters, 2026-10-12
 
 `LayeredDecoded` now retains the exact immutable `LayeredBinding` used for its

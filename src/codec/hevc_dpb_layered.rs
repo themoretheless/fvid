@@ -18,7 +18,11 @@ pub struct LayeredDecoded {
     pub binding: Arc<super::LayeredBinding>,
     pub picture: Arc<Picture>,
     pub poc: i32,
+    pub coded_output: bool,
+    /// Eligibility after OLS/alternative selection; not presentation ordering.
     pub output: bool,
+    pub nal: crate::codec::hevc_nal::NalHeader,
+    pub access_unit: u64,
 }
 impl LayeredDecoded {
     /// Membership in the signalled OLS output mask, independently of the coded
@@ -190,6 +194,7 @@ impl LayeredDpb {
             usize,
         ) -> Result<Arc<Picture>>,
     {
+        let output_mask = plan.output_mask()?;
         let next_access_unit = self
             .access_unit
             .checked_add(1)
@@ -349,7 +354,10 @@ impl LayeredDpb {
                 binding: picture.binding.clone(),
                 picture: decoded,
                 poc: picture.poc,
-                output: first.picture_output,
+                coded_output: first.picture_output,
+                output: output_mask & (1u64 << first.nal.layer_id) != 0,
+                nal: first.nal,
+                access_unit: self.access_unit,
             });
         }
         let (mut parameters, transition, _, end) = plan.into_parts();
