@@ -382,6 +382,33 @@ def main():
                 (D/"hevc-layered-hdr-clvs-reset.mp4").write_bytes(mux(
                     hdr_reset_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
                     chroma_depth=meta["chroma_depth"],access_units=hdr_reset_groups,multilayer=True))
+                for damaged in [False,True]:
+                    hdr_seek_groups = [[intra_nal(kind,i,id) for id in [0,3]]
+                        for i,kind in enumerate([21,0,21,0])]
+                    if damaged:
+                        # Keep the slice header intact; only PCM entropy is truncated.
+                        hdr_seek_groups[0][1] = hdr_seek_groups[0][1][:-32]
+                    hdr_seek_groups[0] = [clli(0,600,120),*hdr_seek_groups[0],clli(3,1800,350,True)]
+                    hdr_seek_stream = b"".join(b"\x00\x00\x00\x01"+n
+                        for n in [*parameters,*sum(hdr_seek_groups,[])])
+                    (D/("hevc-layered-hdr-later-cra"+("-skipped-entropy" if damaged else "")+".mp4")).write_bytes(mux(
+                        hdr_seek_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                        chroma_depth=meta["chroma_depth"],access_units=hdr_seek_groups,multilayer=True))
+                # The permitted alternative output must carry base HDR, not
+                # metadata from the suppressed primary enhancement picture.
+                hdr_alt_vps,_,_ = vps(fmt,independent=False,base_format=fmt,
+                    output_highest=True,alternative_output=True)
+                hdr_alt_bits = bits(unescape(hdr_alt_vps[2:]))
+                hdr_alt_vps = hdr_alt_vps[:2]+escape(packed(hdr_alt_bits[:32]+source_ptl+hdr_alt_bits[128:]))
+                hdr_alt_groups = [[intra_nal(kind,poc,id) for kind,id in zip(pair,[0,3])]
+                    for pair,poc in zip([(21,21),(6,8),(0,0),(21,21),(8,8)],[2,1,3,6,5])]
+                hdr_alt_groups[0] = [clli(0,600,120),*hdr_alt_groups[0],clli(3,1800,350,True)]
+                hdr_alt_stream = b"".join(b"\x00\x00\x00\x01"+n
+                    for n in [hdr_alt_vps,*parameters[1:],*sum(hdr_alt_groups,[])])
+                (D/"hevc-layered-hdr-alternative-radl-ctts.mp4").write_bytes(mux(
+                    hdr_alt_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                    chroma_depth=meta["chroma_depth"],access_units=hdr_alt_groups,multilayer=True,
+                    presentation_order=[1,0,2,4,3]))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,

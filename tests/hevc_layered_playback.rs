@@ -368,3 +368,193 @@ fn layered_configuration_hdr_is_seeded_per_layer_and_restored_on_reset() {
         decoder.reset();
     }
 }
+#[test]
+fn common_player_hdr_follows_displayed_layer_and_old_queued_clvs() {
+    use fvid::playback::video::mp4::Mp4VideoReader;
+    for (name, count) in [
+        ("hevc-layered-hdr-reorder-ctts.mp4", 5),
+        ("hevc-layered-hdr-clvs-reset.mp4", 4),
+    ] {
+        let bytes = std::fs::read(root().join(name)).unwrap();
+        let mut reader =
+            Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+        for _ in 0..2 {
+            assert!(reader.bitstream_hdr().is_empty());
+            let mut displayed = 0;
+            while let Some(frame) = reader.read_frame().unwrap() {
+                assert_eq!(reader.selected_layer_id(), Some(3));
+                let expected = if name.contains("clvs-reset") && frame.sample_index >= 2 {
+                    (0., 0.)
+                } else {
+                    (1800., 350.)
+                };
+                let hdr = reader.bitstream_hdr();
+                assert_eq!((hdr.light.max_cll, hdr.light.max_fall), expected);
+                assert!(frame.packed.is_some());
+                displayed += 1;
+            }
+            assert_eq!(displayed, count);
+            reader.rewind();
+        }
+    }
+}
+#[test]
+fn layered_seek_preserves_original_clvs_hdr_and_respects_actual_bla_reset() {
+    for name in [
+        "hevc-layered-hdr-later-cra.mp4",
+        "hevc-layered-hdr-clvs-reset.mp4",
+    ] {
+        let mut reader = source(name, 2);
+        for _ in 0..2 {
+            assert_eq!(reader.seek_to_sync(2), 2);
+            let mut samples = Vec::new();
+            while let Some(frame) = reader.read_frame().unwrap() {
+                let layer = frame.decoded.layer_id;
+                let expected = match (name.contains("clvs-reset"), layer) {
+                    (false, 0) => (600., 120.),
+                    (false, 3) => (1800., 350.),
+                    (true, 0) => (900., 200.),
+                    (true, 3) => (0., 0.),
+                    _ => unreachable!(),
+                };
+                assert_eq!(
+                    (
+                        frame.decoded.hdr.light.max_cll,
+                        frame.decoded.hdr.light.max_fall
+                    ),
+                    expected
+                );
+                assert_eq!(frame.decoded.access_unit as usize, frame.sample_index - 2);
+                samples.push((frame.sample_index, layer));
+            }
+            assert_eq!(samples, [(2, 0), (2, 3), (3, 0), (3, 3)]);
+        }
+    }
+}
+#[test]
+fn metadata_seek_primes_headers_without_decoding_damaged_skipped_entropy() {
+    use fvid::{codec::hevc_decoder::LayeredDecoder, container::mp4::Mp4Reader};
+    let name = "hevc-layered-hdr-later-cra-skipped-entropy.mp4";
+    // Exact reproduction: full playback fails in PCM entropy, not in metadata parsing.
+    let mut full = source(name, 2);
+    let error = full.read_frame().err().unwrap().to_string();
+    assert!(
+        error.contains("truncated or oversized bit field"),
+        "{error}"
+    );
+    // Acceptance: seek clears the failed source and skips entropy reconstruction.
+    assert_eq!(full.seek_to_sync(2), 2);
+    for layer in [0, 3] {
+        let frame = full.read_frame().unwrap().unwrap();
+        assert_eq!(
+            (
+                frame.sample_index,
+                frame.decoded.access_unit,
+                frame.decoded.layer_id
+            ),
+            (2, 0, layer)
+        );
+        assert_eq!(
+            frame.decoded.hdr.light.max_cll,
+            if layer == 0 { 600. } else { 1800. }
+        );
+    }
+    let bytes = std::fs::read(root().join(name)).unwrap();
+    let mut demux = Mp4Reader::open(Cursor::new(bytes), Limits::default()).unwrap();
+    let mut packets = Vec::new();
+    for index in 0..3 {
+        let mut packet = Vec::new();
+        demux.read_packet(0, index, &mut packet).unwrap();
+        packets.push(packet);
+    }
+    // Old parameter-only entry reproduces the missing HDR at an ordinary CRA.
+    let mut old =
+        LayeredDecoder::from_configuration(&demux.tracks()[0].configuration, 1, BUDGET).unwrap();
+    for packet in &packets[..2] {
+        old.prime_parameters(packet).unwrap();
+    }
+    assert!(
+        old.decode_packet(&packets[2])
+            .unwrap()
+            .0
+            .iter()
+            .all(|f| f.hdr.is_empty())
+    );
+    assert!(old.prime_metadata(&packets[0]).is_err());
+    let mut decoder =
+        LayeredDecoder::from_configuration(&demux.tracks()[0].configuration, 1, BUDGET).unwrap();
+    for packet in &packets[..2] {
+        decoder.prime_metadata(packet).unwrap();
+    }
+    assert_eq!(decoder.next_access_unit(), 0);
+    assert!(decoder.prime_parameters(&packets[0]).is_err());
+    assert!(
+        decoder
+            .decode_packet(&packets[2])
+            .err().unwrap()
+            .to_string()
+            .contains("priming must finish")
+    );
+    // A failed header packet must not publish its POC/metadata history.
+    let poc = decoder.poc().clone();
+    assert!(decoder.prime_metadata(&[0, 0, 0, 99, 0]).is_err());
+    assert_eq!(*decoder.poc(), poc);
+    decoder.finish_metadata_priming();
+    let (frames, _) = decoder.decode_packet(&packets[2]).unwrap();
+    assert_eq!(frames.len(), 2);
+    for frame in frames {
+        assert_eq!(frame.access_unit, 0);
+        assert_eq!(
+            frame.hdr.light.max_cll,
+            if frame.layer_id == 0 { 600. } else { 1800. }
+        );
+    }
+    assert!(decoder.prime_metadata(&packets[0]).is_err());
+}
+#[test]
+fn native_player_hdr_survives_seek_and_rewind() {
+    use fvid::playback_native::NativeReader;
+    use std::time::Duration;
+    let bytes = std::fs::read(root().join("hevc-layered-hdr-later-cra.mp4")).unwrap();
+    let mut reader = NativeReader::software(Cursor::new(bytes), BUDGET).unwrap();
+    assert!(reader.read_frame_raw().unwrap().is_some());
+    assert_eq!(reader.hdr().light.max_cll, 1800.);
+    assert!(
+        reader
+            .seek_raw(Duration::from_millis(80))
+            .unwrap()
+            .is_some()
+    );
+    assert_eq!(reader.hdr().light.max_cll, 1800.);
+    reader.rewind().unwrap();
+    assert!(reader.read_frame_raw().unwrap().is_some());
+    assert_eq!(reader.hdr().light.max_fall, 350.);
+}
+#[test]
+fn displayed_alternative_layer_uses_its_own_hdr_not_suppressed_primary_hdr() {
+    use fvid::playback::video::mp4::Mp4VideoReader;
+    let bytes = std::fs::read(root().join("hevc-layered-hdr-alternative-radl-ctts.mp4")).unwrap();
+    let mut reader =
+        Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+    for _ in 0..2 {
+        let mut identities = Vec::new();
+        while let Some(frame) = reader.read_frame().unwrap() {
+            let layer = reader.selected_layer_id().unwrap();
+            let hdr = reader.bitstream_hdr();
+            assert_eq!(
+                (hdr.light.max_cll, hdr.light.max_fall),
+                if layer == 0 {
+                    (600., 120.)
+                } else {
+                    (1800., 350.)
+                }
+            );
+            identities.push((frame.presentation_time.ticks, frame.sample_index, layer));
+        }
+        assert_eq!(
+            identities,
+            [(0, 1, 0), (1, 0, 3), (2, 2, 3), (3, 4, 3), (4, 3, 3)]
+        );
+        reader.rewind();
+    }
+}

@@ -71,6 +71,31 @@ impl Default for LayeredHdr {
         }
     }
 }
+impl LayeredHdr {
+    fn preview(&self, plan: &LayeredAccessUnit, access: &super::random_access::Preview) -> Self {
+        let mut next = self.clone();
+        for picture in plan.pictures() {
+            let layer = picture.binding.sps.layer_id;
+            let bit = 1u64 << layer;
+            if access.ignored & bit != 0 {
+                continue;
+            }
+            if access.starts_clvs & bit != 0 && next.started & bit != 0 {
+                next.values[layer as usize] = Default::default();
+            }
+            next.started |= bit;
+            next.values[layer as usize].merge(plan.hdr(layer));
+        }
+        next
+    }
+    fn end(&mut self, affected: u64) {
+        for layer in 0..63 {
+            if affected & (1u64 << layer) != 0 {
+                self.values[layer] = Default::default();
+            }
+        }
+    }
+}
 #[derive(Clone, Default)]
 pub struct LayeredDpb {
     poc: LayeredPocState,
@@ -78,10 +103,57 @@ pub struct LayeredDpb {
     access_unit: u64,
     random_access: super::random_access::RandomAccess,
     hdr: LayeredHdr,
+    // Original header history survives seek; pixel random-access starts afresh.
+    metadata_access: super::random_access::RandomAccess,
 }
 impl LayeredDpb {
     pub(super) fn seed_hdr(&mut self, hdr: &LayeredHdr) {
         self.hdr = hdr.clone();
+    }
+    /// Read skipped header/SEI history without entropy reconstruction or pixel references.
+    pub(super) fn prime_metadata(
+        &mut self,
+        plan: LayeredAccessUnit,
+        budget: usize,
+    ) -> Result<LayeredParameters> {
+        if self.access_unit != 0 || !self.references.is_empty() {
+            return Err(invalid("HEVC metadata priming requires a reset decoder"));
+        }
+        if plan
+            .retained_bytes()?
+            .saturating_add(std::mem::size_of::<Self>())
+            .saturating_add(std::mem::size_of::<LayeredHdr>())
+            .saturating_add(std::mem::size_of::<super::random_access::Preview>())
+            > budget
+        {
+            return Err(invalid("HEVC metadata priming exceeds memory budget"));
+        }
+        let access = self.metadata_access.preview(&plan)?;
+        let mut hdr = self.hdr.preview(&plan, &access);
+        let (mut parameters, transition, _, end) = plan.into_parts();
+        let mut poc = transition.map_or_else(|| self.poc.clone(), |t| t.into_state());
+        let affected = if end.bitstream {
+            poc.end_bitstream();
+            (1u64 << 63) - 1
+        } else {
+            poc.end_sequences(end.layers)?
+        };
+        for layer in 0..63 {
+            if affected & (1u64 << layer) != 0 {
+                parameters.end_layer_sequence(layer);
+            }
+        }
+        hdr.end(affected);
+        let mut next_access = access.next;
+        next_access.end(end, affected);
+        self.hdr = hdr;
+        self.metadata_access = next_access;
+        self.poc = poc;
+        Ok(parameters)
+    }
+    pub(super) fn finish_metadata_priming(&mut self) {
+        self.poc = LayeredPocState::default();
+        self.random_access = Default::default();
     }
     pub(super) fn output_preview(
         &self,
@@ -283,7 +355,7 @@ impl LayeredDpb {
             .checked_add(1)
             .ok_or_else(|| invalid("HEVC layered access-unit identity overflow"))?;
         let scratch = std::mem::size_of::<LayeredHdr>()
-            + std::mem::size_of::<super::random_access::Preview>()
+            + 2 * std::mem::size_of::<super::random_access::Preview>()
             + 63usize.saturating_mul(
                 std::mem::size_of::<PictureStatus>()
                     + std::mem::size_of::<LayeredDecoded>()
@@ -331,7 +403,8 @@ impl LayeredDpb {
         } else {
             self.references.clone()
         };
-        let mut next_hdr = self.hdr.clone();
+        let metadata_access = self.metadata_access.preview(&plan)?;
+        let mut next_hdr = self.hdr.preview(&plan, &metadata_access);
         let mut completed = Vec::new();
         let mut outputs = Vec::new();
         for picture in plan.pictures() {
@@ -341,12 +414,6 @@ impl LayeredDpb {
                 before(picture, None)?;
                 continue;
             }
-            let bit = 1u64 << layer;
-            if random_access.starts_clvs & bit != 0 && next_hdr.started & bit != 0 {
-                next_hdr.values[layer as usize] = Default::default();
-            }
-            next_hdr.started |= bit;
-            next_hdr.values[layer as usize].merge(plan.hdr(layer));
             let temporal: Vec<_> = staged.iter().map(|(_, r)| r.clone()).collect();
             let first = &picture.slices[0];
             let (retained, _) = super::temporal_reference_groups(
@@ -472,11 +539,14 @@ impl LayeredDpb {
         for layer in 0..63 {
             if affected & (1u64 << layer) != 0 {
                 parameters.end_layer_sequence(layer);
-                next_hdr.values[layer as usize] = Default::default();
             }
         }
         let mut next_random_access = random_access.next;
         next_random_access.end(end, affected);
+        next_hdr.end(affected);
+        let mut next_metadata_access = metadata_access.next;
+        next_metadata_access.end(end, affected);
+        self.metadata_access = next_metadata_access;
         self.hdr = next_hdr;
         self.random_access = next_random_access;
         self.poc = next_poc;

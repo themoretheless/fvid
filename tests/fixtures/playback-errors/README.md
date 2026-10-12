@@ -1838,5 +1838,29 @@ metadata on every picture through POC reordering and rewind. The companion
 900/200 nits and layer 3 states none. Metadata must reset per layer without
 changing already queued old-CLVS pictures. These are coded-picture acceptance
 fixtures generated with the owned PCM generator, independent of FFmpeg/network.
-The common single-view player's HDR reporting and metadata priming on seek
-remain separate integration work; these tests qualify native decoded snapshots.
+The common single-view player reports the displayed layer's immutable HDR
+snapshot, including old queued pictures after a later CLVS has already decoded.
+Rewind clears the displayed snapshot until a new picture is selected.
+
+`hevc-layered-hdr-later-cra.mp4` has an ordinary later CRA without repeated SEI:
+seeking there must preserve the original CLVS's layer-local 600/120 and
+1800/350-nit statements. A BLA seek in the reset companion must instead clear
+or replace them. Header/SEI priming keeps original metadata initialization
+history separate from fresh pixel-decoder random access, discards skipped POC
+history before decoding the indexed target, and preserves source sample/AU
+identity. The native player source verifies HDR after seek and rewind.
+
+`hevc-layered-hdr-later-cra-skipped-entropy.mp4` truncates only original layer-3
+PCM entropy of the first AU. The full-playback refusal test verifies the exact
+entropy error. Separate acceptance seeks to the later independent CRA and
+restores both layers' original HDR without reconstructing skipped pictures.
+The old parameter-only priming API reproduces missing HDR on the same target;
+the metadata-aware path passes. Tests also require explicit completion before
+decode, forbid mixing priming modes, reject priming an active pixel decoder,
+and check that malformed header input leaves the staged POC state unchanged.
+
+`hevc-layered-hdr-alternative-radl-ctts.mp4` combines original distinct layer HDR
+with alternative-output RADL suppression and signed composition offsets. The
+common player must display base layer 0 with 600/120-nit guidance first, then
+layer 3 with 1800/350-nit guidance. This explicitly rules out metadata leaking
+from the suppressed primary layer or the later packet that releases the frame.

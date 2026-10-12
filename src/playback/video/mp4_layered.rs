@@ -192,8 +192,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         self.eof = false;
         self.failed = false;
     }
-    /// Reset at an indexed sync sample and recover preceding parameter NALs
-    /// without decoding preceding pictures. Reading performs the deferred I/O.
+    /// Reset at an indexed sync sample and recover preceding parameter and HDR
+    /// header history without reconstructing skipped pixels. Reading performs
+    /// the deferred I/O; skipped POC history is discarded before target decoding.
     pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
         let index = self
             .track()
@@ -259,8 +260,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 {
                     return Err(invalid("HEVC seek priming exceeds memory budget"));
                 }
-                self.decoder.prime_parameters(&extracted)?;
+                self.decoder.prime_metadata(&extracted)?;
             }
+            self.decoder.finish_metadata_priming();
         }
         loop {
             if let Some(decoded) = self.ready.pop_front() {

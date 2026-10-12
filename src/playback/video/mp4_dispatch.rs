@@ -44,6 +44,7 @@ impl<R: Read + Seek> SingleView<R> {
         self.failed = false;
         self.colour = self.initial_colour;
         self.signal = self.initial_signal;
+        self.hdr = HdrMetadata::default();
     }
     fn group(&mut self) -> Result<Option<LayeredVideoFrame>> {
         let first = if self.lookahead.is_some() {
@@ -130,6 +131,7 @@ impl<R: Read + Seek> SingleView<R> {
         self.colour = crate::playback_native::AvcColour::from_hevc_vui(vui)?;
         self.signal = signal(vui);
         self.selected = Some(frame.decoded.layer_id);
+        self.hdr = frame.decoded.hdr;
         Ok(Some(frame.into_video_frame()?))
     }
 }
@@ -206,18 +208,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     let tid = (vps.vps.ordering.len() - 1) as u8;
                     let mut colour = crate::playback_native::AvcColour::default();
                     let mut stated = ColourDescription::default();
-                    let mut hdr = HdrMetadata::default();
                     for array in &config.arrays {
                         for nal in &array.units {
-                            if matches!(array.nal_type, 39 | 40)
-                                && crate::codec::hevc_nal::NalHeader::parse(nal)?.layer_id == 0
-                            {
-                                if let Some(h) =
-                                    crate::codec::hevc_sei::hdr_from_nal(nal, budget / 2)?
-                                {
-                                    hdr.merge(h);
-                                }
-                            }
                             if array.nal_type == 33
                                 && crate::codec::hevc_nal::NalHeader::parse(nal)?.layer_id == 0
                             {
@@ -240,7 +232,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                             initial_colour: colour,
                             signal: stated,
                             initial_signal: stated,
-                            hdr,
+                            hdr: HdrMetadata::default(),
                             selected: None,
                             failed: false,
                         })),

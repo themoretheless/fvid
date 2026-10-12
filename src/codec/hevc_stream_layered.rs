@@ -7,6 +7,13 @@ use crate::codec::{
 };
 use crate::{Result, invalid};
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Priming {
+    None,
+    Parameters,
+    Metadata,
+}
+
 pub struct LayeredDecoder {
     initial: LayeredParameters,
     parameters: LayeredParameters,
@@ -15,6 +22,7 @@ pub struct LayeredDecoder {
     length_size: u8,
     output_layer_set: usize,
     budget: usize,
+    priming: Priming,
 }
 impl LayeredDecoder {
     pub fn from_configuration(data: &[u8], output_layer_set: usize, budget: usize) -> Result<Self> {
@@ -52,6 +60,7 @@ impl LayeredDecoder {
             length_size,
             output_layer_set,
             budget,
+            priming: Priming::None,
         })
     }
     fn available(&self) -> Result<usize> {
@@ -75,6 +84,7 @@ impl LayeredDecoder {
     }
     /// Restore the original hvcC bank and discard every decoded reference.
     pub fn reset(&mut self) {
+        self.priming = Priming::None;
         self.parameters = self.initial.clone();
         self.dpb.reset();
         self.dpb.seed_hdr(&self.initial_hdr);
@@ -85,6 +95,7 @@ impl LayeredDecoder {
         &mut self,
         packet: &[u8],
     ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
+        self.require_decode_ready()?;
         let budget = self.available()?;
         let plan = LayeredAccessUnit::parse(
             &self.parameters,
@@ -120,6 +131,7 @@ impl LayeredDecoder {
         self.decode_queued_plan(queue, plan, highest_tid, budget)
     }
     fn queued_budget(&self, queue: &super::LayeredOutputQueue) -> Result<usize> {
+        self.require_decode_ready()?;
         // Conservative combined bound: source queue, its transaction, original
         // DPB metadata and the native decoder's own staged working set coexist.
         let held = queue
@@ -245,6 +257,7 @@ impl LayeredDecoder {
         if selection.output_layer_set() != self.output_layer_set {
             return Err(invalid("HEVC extraction OLS disagrees with decoder"));
         }
+        self.require_decode_ready()?;
         let available = self.available()?;
         let extracted = selection.extract_packet(packet, self.length_size, available)?;
         let budget = available
@@ -281,9 +294,51 @@ impl LayeredDecoder {
         self.parameters = parameters;
         Ok((pictures, end))
     }
+    fn require_decode_ready(&self) -> Result<()> {
+        if self.priming == Priming::Metadata {
+            return Err(invalid("HEVC metadata priming must finish before decoding"));
+        }
+        Ok(())
+    }
+    /// Accumulate original skipped parameter, POC, layer initialization and SEI
+    /// header history without entropy decoding or allocating reconstructed pictures.
+    /// Call finish_metadata_priming before decoding the selected sync sample.
+    /// Each packet publishes atomically; this is separate from parameter-only priming.
+    pub fn prime_metadata(&mut self, packet: &[u8]) -> Result<()> {
+        if self.priming == Priming::Parameters {
+            return Err(invalid(
+                "HEVC parameter-only and metadata priming cannot be mixed",
+            ));
+        }
+        if self.dpb.next_access_unit() != 0 || self.dpb.references().next().is_some() {
+            return Err(invalid("HEVC metadata priming requires a reset decoder"));
+        }
+        let budget = self.available()?;
+        let plan = LayeredAccessUnit::parse(
+            &self.parameters,
+            self.dpb.poc(),
+            packet,
+            self.length_size,
+            self.output_layer_set,
+            budget,
+        )?;
+        let parameters = self.dpb.prime_metadata(plan, budget)?;
+        self.parameters = parameters;
+        self.priming = Priming::Metadata;
+        Ok(())
+    }
+    /// Discard skipped POC history for pixel reconstruction but preserve original
+    /// metadata CLVS history, so seeking to an ordinary CRA cannot reset its HDR.
+    pub fn finish_metadata_priming(&mut self) {
+        if self.priming == Priming::Metadata {
+            self.dpb.finish_metadata_priming();
+            self.priming = Priming::None;
+        }
+    }
     /// Seek priming receives only parameter NALs; it never decodes skipped
     /// pictures or updates POC/DPB state. Full activation remains deferred.
     pub fn prime_parameters(&mut self, packet: &[u8]) -> Result<()> {
+        self.require_decode_ready()?;
         if self.dpb.next_access_unit() != 0 || self.dpb.references().next().is_some() {
             return Err(invalid(
                 "HEVC layered parameter priming requires a reset decoder",
@@ -313,6 +368,7 @@ impl LayeredDecoder {
             ));
         }
         self.parameters = parameters;
+        self.priming = Priming::Parameters;
         Ok(())
     }
 }
