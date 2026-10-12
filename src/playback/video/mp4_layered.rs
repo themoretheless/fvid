@@ -90,13 +90,35 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         // Two input/extraction buffers fit in a quarter; working decoder and
         // its native queue use half; emitted-but-unconsumed pictures a quarter.
         limits.packet_bytes = limits.packet_bytes.min(budget / 8);
-        let mut demuxer = Mp4Reader::open(reader, limits)?;
+        let demuxer = Mp4Reader::open(reader, limits)?;
         let track_index = demuxer
             .tracks()
             .iter()
             .position(|t| t.handler == *b"vide" && matches!(&t.codec, b"hvc1" | b"hev1"))
             .ok_or_else(|| invalid("MP4 has no HEVC video track"))?;
-        let track = &demuxer.tracks()[track_index];
+        Self::from_demuxer(demuxer, track_index, output_layer_set, highest_tid, budget)
+    }
+    pub fn from_demuxer(
+        mut demuxer: Mp4Reader<R>,
+        track_index: usize,
+        output_layer_set: usize,
+        highest_tid: u8,
+        budget: usize,
+    ) -> Result<Self> {
+        let track = demuxer
+            .tracks()
+            .get(track_index)
+            .ok_or_else(|| invalid("MP4 track index out of range"))?;
+        if track.handler != *b"vide" || !matches!(&track.codec, b"hvc1" | b"hev1") {
+            return Err(invalid("selected MP4 track is not HEVC video"));
+        }
+        if track
+            .samples
+            .expanded()
+            .is_some_and(|samples| samples.iter().any(|s| s.size as usize > budget / 8))
+        {
+            return Err(invalid("HEVC packet exceeds source memory budget"));
+        }
         if track.samples.expanded().is_none() {
             return Err(invalid("HEVC video samples are not indexed"));
         }

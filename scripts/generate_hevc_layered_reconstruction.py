@@ -337,6 +337,11 @@ def main():
                     stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*rasl_parameters,*sum(rasl_groups,[])])
                     filename = "hevc-layered-random-access-"+name+".mp4"
                     (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=rasl_groups,multilayer=True))
+                    if name == "alternative-radl":
+                        (D/"hevc-layered-random-access-alternative-radl-ctts.mp4").write_bytes(mux(
+                            stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                            chroma_depth=meta["chroma_depth"],access_units=rasl_groups,multilayer=True,
+                            presentation_order=[1,0,2,4,3]))
                     random_access_cases.append(dict(file=filename,pocs=pocs,decoded=[[0,3],[0] if fallback else [],[0,3],[0,3],[] if eos else [0,3]],output_masks=[8,1,8,8,8] if fallback else [9,0,9,9,0 if eos else 9]))
                 # Original PCM pixels with deliberately reordered AU POCs.
                 for output_name, output_pocs in [

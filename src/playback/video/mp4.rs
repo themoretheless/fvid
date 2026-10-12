@@ -14,6 +14,9 @@ use std::sync::Arc;
 #[path = "mp4_layered.rs"]
 mod layered;
 pub use layered::{LayeredMp4VideoReader, LayeredVideoFrame};
+#[path = "mp4_dispatch.rs"]
+mod dispatch;
+pub use dispatch::Mp4VideoReader;
 
 /// Exact track-clock timestamp, including negative composition timestamps.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -77,7 +80,7 @@ impl Decoder {
     }
 }
 /// Indexed MP4 source with AVC and HEVC codec dispatch.
-pub struct Mp4VideoReader<R> {
+struct SingleLayerMp4VideoReader<R> {
     demuxer: Mp4Reader<R>,
     decoder: Decoder,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -106,42 +109,7 @@ pub struct Mp4VideoReader<R> {
 }
 /// Backward-compatible name for the indexed MP4 video reader.
 pub type Mp4AvcReader<R> = Mp4VideoReader<R>;
-impl<R: Read + Seek> Mp4VideoReader<R> {
-    /// Selects the first AVC, HEVC, VP9 or AV1 video track. Use `from_demuxer` to choose explicitly.
-    pub fn open(reader: R, limits: Limits, decoder_budget: usize) -> Result<Self> {
-        Self::open_with_hardware(reader, limits, decoder_budget, true)
-    }
-    /// Decode only with FVid codecs, regardless of compiled platform features.
-    pub fn open_software(reader: R, limits: Limits, decoder_budget: usize) -> Result<Self> {
-        Self::open_with_hardware(reader, limits, decoder_budget, false)
-    }
-    fn open_with_hardware(
-        reader: R,
-        limits: Limits,
-        decoder_budget: usize,
-        allow_hardware: bool,
-    ) -> Result<Self> {
-        let demuxer = Mp4Reader::open(reader, limits)?;
-        let index = demuxer
-            .tracks()
-            .iter()
-            .position(|t| {
-                t.handler == *b"vide"
-                    && matches!(
-                        &t.codec,
-                        b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
-                    )
-            })
-            .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
-        Self::from_demuxer_with_hardware(demuxer, index, decoder_budget, allow_hardware)
-    }
-    pub fn from_demuxer(
-        demuxer: Mp4Reader<R>,
-        index: usize,
-        decoder_budget: usize,
-    ) -> Result<Self> {
-        Self::from_demuxer_with_hardware(demuxer, index, decoder_budget, true)
-    }
+impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     fn from_demuxer_with_hardware(
         demuxer: Mp4Reader<R>,
         index: usize,

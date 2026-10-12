@@ -183,3 +183,67 @@ fn malformed_entropy_requires_source_reset_without_exposing_staged_output() {
         reader.rewind();
     }
 }
+
+#[test]
+fn common_mp4_entry_displays_highest_output_layer_with_composition_timing() {
+    use fvid::playback::video::mp4::Mp4VideoReader;
+    let bytes = std::fs::read(root().join("hevc-layered-output-reorder-ctts.mp4")).unwrap();
+    let mut reader =
+        Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+    assert!(!reader.hardware_accelerated());
+    for _ in 0..2 {
+        let mut out = Vec::new();
+        while let Some(frame) = reader.read_frame().unwrap() {
+            assert_eq!(reader.selected_layer_id(), Some(3));
+            assert!(frame.packed.is_some());
+            out.push((
+                frame.presentation_time.ticks,
+                frame.duration.ticks,
+                frame.sample_index,
+            ));
+        }
+        assert_eq!(out, [(0, 1, 0), (1, 1, 2), (2, 1, 1), (3, 1, 4), (4, 1, 3)]);
+        reader.rewind();
+    }
+}
+#[test]
+fn common_mp4_entry_displays_coded_alternative_layer_when_primary_is_suppressed() {
+    use fvid::playback::video::mp4::Mp4VideoReader;
+    let bytes =
+        std::fs::read(root().join("hevc-layered-random-access-alternative-radl-ctts.mp4")).unwrap();
+    let mut reader =
+        Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+    let mut out = Vec::new();
+    while let Some(frame) = reader.read_frame().unwrap() {
+        out.push((
+            frame.presentation_time.ticks,
+            frame.sample_index,
+            reader.selected_layer_id().unwrap(),
+        ));
+    }
+    assert_eq!(out, [(0, 1, 0), (1, 0, 3), (2, 2, 3), (3, 4, 3), (4, 3, 3)]);
+}
+#[test]
+fn common_native_player_source_reads_rewinds_and_seeks_layered_hevc() {
+    use fvid::playback::video::native::{NativeReader, RawFrame};
+    use std::time::Duration;
+    let bytes = std::fs::read(root().join("hevc-layered-output-reorder-ctts.mp4")).unwrap();
+    let mut reader = NativeReader::software(Cursor::new(bytes), BUDGET).unwrap();
+    assert_eq!(reader.video_codec(), "H.265");
+    for _ in 0..2 {
+        let mut count = 0;
+        while let Some(frame) = reader.read_frame_raw().unwrap() {
+            let RawFrame::Planar(p) = frame else {
+                panic!("native packed output required");
+            };
+            assert!(!p.frame.data.is_empty());
+            count += 1;
+        }
+        assert_eq!(count, 5);
+        reader.rewind().unwrap();
+    }
+    assert!(matches!(
+        reader.seek_raw(Duration::from_millis(80)).unwrap(),
+        Some(RawFrame::Planar(_))
+    ));
+}

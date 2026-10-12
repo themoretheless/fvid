@@ -1817,5 +1817,15 @@ layered reconstruction witnesses and converts their own immutable colour/chroma
 bindings into the common packed-planar player payload with exact saved pixels.
 Tests cover rewind, later-IRAP seek (decoder-relative AU zero maps to source
 sample two), global extraction across a metadata-only sample, error/reset, and
-pre-publication VPS/OLS/temporal-selection refusals. This is an explicit layered
-source API; automatic dispatch from the existing single-view player is separate.
+pre-publication VPS/OLS/temporal-selection refusals. The explicit layered
+source API exposes all selected output layers. The common MP4/player entry now
+automatically selects a native output-layer set and displays its highest eligible
+output layer per access unit; it preserves ordinary single-layer codec dispatch.
+
+`hevc-layered-random-access-alternative-radl-ctts.mp4` adds original signed
+composition offsets to the alternative-output RADL witness. Its base picture
+at POC1 is a permitted alternative when the primary layer is suppressed. The
+common reader must display layers 0,3,3,3,3 at increasing presentation times,
+with original source samples 1,0,2,4,3. These are coded playback acceptance
+tests, including the ordinary native player source, rewind and seek; generation
+uses the owned Python generator and ordinary tests need neither FFmpeg nor network.
