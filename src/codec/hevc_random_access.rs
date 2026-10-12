@@ -1,0 +1,130 @@
+//! Annex F.8.1.3 layer initialization and associated-IRAP RASL suppression.
+//! Preview remains private until the complete AU reconstructs successfully.
+use super::{LayeredAccessUnit, LayeredEndMarkers};
+use crate::{Result, invalid};
+#[derive(Clone, Copy, Default)]
+pub(super) struct RandomAccess {
+    seen: u64,
+    initialized: u64,
+    no_rasl: u64,
+    pending_eos: u64,
+}
+pub(super) struct Preview {
+    pub next: RandomAccess,
+    pub suppressed: u64,
+    pub ignored: u64,
+    pub release: [u64; 63],
+}
+impl RandomAccess {
+    pub fn preview(self, plan: &LayeredAccessUnit) -> Result<Preview> {
+        let mut next = self;
+        let mut suppressed = 0u64;
+        let mut ignored = 0u64;
+        let mut release = [0u64; 63];
+        for p in plan.pictures() {
+            let h = &p.slices[0];
+            let id = h.nal.layer_id;
+            let bit = 1u64 << id;
+            let e = p
+                .binding
+                .vps
+                .extension
+                .as_ref()
+                .ok_or_else(|| invalid("HEVC random access has no VPS extension"))?;
+            let ols = e
+                .output
+                .sets
+                .get(p.binding.sps.output_layer_set)
+                .ok_or_else(|| invalid("HEVC random access OLS is absent"))?;
+            if ols.necessary == 0 {
+                return Err(invalid("HEVC random access OLS has no necessary layer"));
+            }
+            let smallest = ols.necessary.trailing_zeros() as u8;
+            let index = e
+                .graph
+                .layer_ids
+                .binary_search(&id)
+                .map_err(|_| invalid("HEVC random access layer is absent"))?;
+            let direct = *e
+                .graph
+                .direct
+                .get(index)
+                .ok_or_else(|| invalid("HEVC random access graph is incomplete"))?;
+            let mut predicted = 0u64;
+            for (&layer, &references) in e.graph.layer_ids.iter().zip(&e.graph.transitive) {
+                if references & bit != 0 {
+                    predicted |= 1u64 << layer;
+                }
+            }
+            let syntax = h
+                .layered
+                .as_ref()
+                .ok_or_else(|| invalid("HEVC random access has no layered slice syntax"))?;
+            if h.nal.is_irap() {
+                // HandleCraAsBlaFlag defaults to zero. External override is not
+                // supplied by this entry; BLA and coded cross-layer BLA are owned.
+                let bla = matches!(h.nal.unit_type, 16..=18);
+                let no_clras = id == smallest
+                    && (next.seen == 0
+                        || next.pending_eos & ((1u64 << smallest) | 1) != 0
+                        || bla
+                        || h.nal.is_idr() && syntax.cross_layer_bla);
+                if no_clras {
+                    next.initialized = 0;
+                    release[id as usize] = (1u64 << 63) - 1;
+                }
+                let layer_reset = id > smallest
+                    && (next.pending_eos & bit != 0
+                        || bla
+                        || h.nal.is_idr() && syntax.cross_layer_bla);
+                if layer_reset {
+                    next.initialized &= !predicted;
+                    release[id as usize] |= bit | predicted;
+                }
+                let ready = direct & !next.initialized == 0;
+                let no_rasl = h.nal.is_idr()
+                    || bla
+                    || next.seen & bit == 0
+                    || next.pending_eos & bit != 0
+                    || next.initialized & bit == 0 && ready;
+                if no_rasl {
+                    next.no_rasl |= bit;
+                    if id == 0 || next.initialized & bit == 0 && ready {
+                        next.initialized |= bit;
+                    }
+                } else {
+                    next.no_rasl &= !bit;
+                }
+                next.pending_eos &= !bit;
+            }
+            // F.8.1.7 CL-RAS and 8.1.3 leading RASL may be ignored: neither can
+            // affect an output picture. Keep raw flags for conformance checks.
+            if next.initialized & bit == 0
+                || matches!(h.nal.unit_type, 8 | 9) && next.no_rasl & bit != 0
+            {
+                suppressed |= bit;
+                // Base-layer reconstruction still validates missing temporal
+                // references; CL-RAS omission is a non-base-layer process.
+                if id != 0 || matches!(h.nal.unit_type, 8 | 9) && next.no_rasl & bit != 0 {
+                    ignored |= bit;
+                }
+            }
+            next.seen |= bit;
+        }
+        Ok(Preview {
+            next,
+            suppressed,
+            ignored,
+            release,
+        })
+    }
+    pub fn end(&mut self, end: LayeredEndMarkers, affected: u64) {
+        if end.bitstream {
+            *self = Self::default();
+        } else {
+            self.initialized &= !affected;
+            self.no_rasl &= !affected;
+            self.pending_eos |= end.layers;
+        }
+    }
+}

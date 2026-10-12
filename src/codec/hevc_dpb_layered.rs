@@ -50,6 +50,7 @@ pub struct LayeredDpb {
     poc: LayeredPocState,
     references: Vec<(u8, Reference)>,
     access_unit: u64,
+    random_access: super::random_access::RandomAccess,
 }
 impl LayeredDpb {
     pub fn next_access_unit(&self) -> u64 {
@@ -194,17 +195,19 @@ impl LayeredDpb {
             usize,
         ) -> Result<Arc<Picture>>,
     {
-        let output_mask = plan.output_mask()?;
+        let random_access = self.random_access.preview(&plan)?;
+        let output_mask = plan.output_mask_after_suppression(random_access.suppressed)?;
         let next_access_unit = self
             .access_unit
             .checked_add(1)
             .ok_or_else(|| invalid("HEVC layered access-unit identity overflow"))?;
-        let scratch = 63usize.saturating_mul(
-            std::mem::size_of::<PictureStatus>()
-                + std::mem::size_of::<LayeredDecoded>()
-                + 3 * std::mem::size_of::<Reference>()
-                + 2 * std::mem::size_of::<Arc<Picture>>(),
-        );
+        let scratch = std::mem::size_of::<super::random_access::Preview>()
+            + 63usize.saturating_mul(
+                std::mem::size_of::<PictureStatus>()
+                    + std::mem::size_of::<LayeredDecoded>()
+                    + 3 * std::mem::size_of::<Reference>()
+                    + 2 * std::mem::size_of::<Arc<Picture>>(),
+            );
         let source_bytes = storage(&self.references)?
             .saturating_add(scratch)
             .saturating_add(std::mem::size_of::<Self>());
@@ -249,6 +252,11 @@ impl LayeredDpb {
         let mut completed = Vec::new();
         let mut outputs = Vec::new();
         for picture in plan.pictures() {
+            let layer = picture.slices[0].nal.layer_id;
+            staged.retain(|(id, _)| random_access.release[layer as usize] & (1u64 << id) == 0);
+            if random_access.ignored & (1u64 << layer) != 0 {
+                continue;
+            }
             let temporal: Vec<_> = staged.iter().map(|(_, r)| r.clone()).collect();
             let first = &picture.slices[0];
             let (retained, _) = super::temporal_reference_groups(
@@ -374,6 +382,9 @@ impl LayeredDpb {
                 parameters.end_layer_sequence(layer);
             }
         }
+        let mut next_random_access = random_access.next;
+        next_random_access.end(end, affected);
+        self.random_access = next_random_access;
         self.poc = next_poc;
         self.references = staged;
         self.access_unit = next_access_unit;

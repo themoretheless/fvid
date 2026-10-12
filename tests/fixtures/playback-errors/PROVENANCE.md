@@ -1,3 +1,16 @@
+### hevc-layered-random-access-*.mp4 and .json
+
+Generated separately by the owned layered reconstruction script. Five authored
+intra headers (CRA/RASL/TRAIL/CRA/RASL, or RADL in the reference layer) preserve
+original synthetic PCM entropy and pixels, with empty local RPS and disabled
+inter-layer/temporal prediction. Variants add base EOS/EOB before the later CRA or
+highest-only alternative output. The baseline precisely reproduced both leading
+RASL pictures being returned at AU 1 instead of ignored. Acceptance verifies
+exact original pixels, later ordinary CRA/RASL output, EOS suppression, RADL
+fallback, reset and transactional failure/retry. No private media/parameters,
+FFmpeg or network access. These are suppression witnesses, not reordered-output
+or all random-access/POC-wrap qualification.
+
 ### hevc-layered-extraction-split-timing.mp4
 
 The owned reconstruction generator splits the extraction-timing witness into a

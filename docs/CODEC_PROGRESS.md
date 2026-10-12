@@ -1,5 +1,20 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC associated-IRAP RASL suppression, 2026-10-12
+
+Layered DPB now stages layer initialization, associated-IRAP NoRaslOutput,
+cross-layer BLA/EOS restart state and reference-release masks with the whole AU.
+Ignored leading RASL/CL-RAS pictures cannot publish pixels or references; base
+non-IRAP reconstruction still validates missing temporal references. Alternative
+output selection runs after suppression while raw output-flag conformance is
+checked independently. EOS/EOB/reset update the same owned state.
+Four original PCM coded witnesses reproduce the previous unwanted RASL output
+and accept entry suppression, later ordinary CRA/RASL output, EOS/EOB restart and
+RADL fallback when the primary layer is suppressed. A second-layer failure probe
+verifies that an unsuccessful later CRA cannot expose earlier leading RASL.
+External HandleCraAsBla override, full initialization-related POC-wrap cases,
+output reordering and player integration remain unqualified.
+
 ## HEVC globally scanned packet extraction, 2026-10-12
 
 `SubstreamScan` inventories the complete finite source without storing packets;

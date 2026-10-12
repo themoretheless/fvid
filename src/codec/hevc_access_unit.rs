@@ -210,6 +210,9 @@ impl LayeredAccessUnit {
     /// Final per-AU output eligibility after F.8.1.2 OLS/alternative selection.
     /// Presentation order and random-access RASL suppression are separate.
     pub fn output_mask(&self) -> Result<u64> {
+        self.output_mask_after_suppression(0)
+    }
+    pub(crate) fn output_mask_after_suppression(&self, suppressed: u64) -> Result<u64> {
         let Some(first) = self.pictures.first() else {
             return Ok(0);
         };
@@ -227,7 +230,9 @@ impl LayeredAccessUnit {
         let coded = self
             .pictures
             .iter()
-            .filter(|p| p.slices[0].picture_output)
+            .filter(|p| {
+                p.slices[0].picture_output && suppressed & (1u64 << p.binding.sps.layer_id) == 0
+            })
             .fold(0u64, |mask, p| mask | (1u64 << p.binding.sps.layer_id));
         if ols.alternative_output {
             if ols.output.count_ones() != 1 {

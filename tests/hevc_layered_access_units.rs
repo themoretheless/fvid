@@ -1175,3 +1175,115 @@ fn globally_scanned_selection_removes_earlier_timing_and_decodes_packets_atomica
     );
     assert!(scan.select(vps(&config), 99, 0).is_err());
 }
+
+#[test]
+fn random_access_entry_eos_and_alternative_radl_follow_actual_coded_picture_flags() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    let m = manifest("hevc-layered-random-access.json");
+    assert_eq!(m["cases"].as_array().unwrap().len(), 4);
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for case in m["cases"].as_array().unwrap() {
+        let name = case["file"].as_str().unwrap();
+        let mut input = movie(name);
+        let mut decoder =
+            LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET)
+                .unwrap();
+        for _ in 0..2 {
+            for index in 0..5 {
+                let mut packet = vec![];
+                input.read_packet(0, index, &mut packet).unwrap();
+                let (pictures, _) = decoder
+                    .decode_packet(&packet)
+                    .unwrap_or_else(|e| panic!("{name} AU {index}: {e}"));
+                let expected = case["decoded"][index]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|v| v.as_u64().unwrap() as u8)
+                    .collect::<Vec<_>>();
+                assert_eq!(
+                    pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+                    expected,
+                    "{name} AU {index}"
+                );
+                assert_eq!(
+                    pictures
+                        .iter()
+                        .filter(|p| p.output)
+                        .fold(0u64, |mask, p| mask | (1 << p.layer_id)),
+                    case["output_masks"][index].as_u64().unwrap(),
+                    "{name} AU {index}"
+                );
+                for p in pictures {
+                    assert!(p.coded_output);
+                    assert_eq!(p.poc, case["pocs"][index].as_i64().unwrap() as i32);
+                    assert_pixels(&p.picture, &oracle, 0);
+                }
+            }
+            decoder.reset();
+        }
+    }
+}
+
+#[test]
+fn failed_later_irap_never_publishes_random_access_suppression_state() {
+    use fvid::codec::hevc_decoder::LayeredDpb;
+    let mut input = movie("hevc-layered-random-access-entry-and-later-cra.mp4");
+    let config = input.tracks()[0].configuration.clone();
+    let mut parameters = LayeredParameters::from_configuration(&config, BUDGET).unwrap();
+    let mut dpb = LayeredDpb::default();
+    let mut saved = None;
+    for index in 0..3 {
+        let mut packet = vec![];
+        input.read_packet(0, index, &mut packet).unwrap();
+        let plan = LayeredAccessUnit::parse(&parameters, dpb.poc(), &packet, 4, 1, BUDGET).unwrap();
+        let (next, pictures, _) = dpb.decode(plan, BUDGET).unwrap();
+        if index == 0 {
+            saved = Some(pictures[0].picture.clone());
+        }
+        parameters = next;
+    }
+    let before = dpb.poc().clone();
+    let ids = dpb
+        .references()
+        .map(Reference::identity)
+        .collect::<Vec<_>>();
+    let mut packet = vec![];
+    input.read_packet(0, 3, &mut packet).unwrap();
+    let plan = LayeredAccessUnit::parse(&parameters, dpb.poc(), &packet, 4, 1, BUDGET).unwrap();
+    let error = dpb
+        .reconstruct(plan, BUDGET, |picture, _, _, _| {
+            if picture.binding.sps.layer_id == 3 {
+                return Err(fvid::Error::from(std::io::Error::other(
+                    "injected later CRA failure",
+                )));
+            }
+            Ok(saved.clone().unwrap())
+        })
+        .err()
+        .unwrap();
+    assert!(error.to_string().contains("injected later CRA failure"));
+    assert_eq!(dpb.poc(), &before);
+    assert_eq!(dpb.next_access_unit(), 3);
+    assert_eq!(
+        dpb.references()
+            .map(Reference::identity)
+            .collect::<Vec<_>>(),
+        ids
+    );
+    // Still associated with the first CRA: replay its leading RASL, not the
+    // RASL of the failed later CRA. No partial flag transition may expose it.
+    input.read_packet(0, 1, &mut packet).unwrap();
+    let plan = LayeredAccessUnit::parse(&parameters, dpb.poc(), &packet, 4, 1, BUDGET).unwrap();
+    let (next, pictures, _) = dpb.decode(plan, BUDGET).unwrap();
+    assert!(pictures.is_empty());
+    parameters = next;
+    for index in [3, 4] {
+        input.read_packet(0, index, &mut packet).unwrap();
+        let plan = LayeredAccessUnit::parse(&parameters, dpb.poc(), &packet, 4, 1, BUDGET).unwrap();
+        let (next, pictures, _) = dpb.decode(plan, BUDGET).unwrap();
+        assert_eq!(pictures.len(), 2);
+        assert!(pictures.iter().all(|p| p.output));
+        parameters = next;
+    }
+}

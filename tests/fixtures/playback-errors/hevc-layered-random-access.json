@@ -1,0 +1,144 @@
+{
+  "cases": [
+    {
+      "file": "hevc-layered-random-access-entry-and-later-cra.mp4",
+      "pocs": [
+        2,
+        1,
+        3,
+        6,
+        5
+      ],
+      "decoded": [
+        [
+          0,
+          3
+        ],
+        [],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "output_masks": [
+        9,
+        0,
+        9,
+        9,
+        9
+      ]
+    },
+    {
+      "file": "hevc-layered-random-access-eos-before-later-cra.mp4",
+      "pocs": [
+        2,
+        1,
+        3,
+        6,
+        5
+      ],
+      "decoded": [
+        [
+          0,
+          3
+        ],
+        [],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        []
+      ],
+      "output_masks": [
+        9,
+        0,
+        9,
+        9,
+        0
+      ]
+    },
+    {
+      "file": "hevc-layered-random-access-eob-before-later-cra.mp4",
+      "pocs": [
+        2,
+        1,
+        3,
+        6,
+        5
+      ],
+      "decoded": [
+        [
+          0,
+          3
+        ],
+        [],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        []
+      ],
+      "output_masks": [
+        9,
+        0,
+        9,
+        9,
+        0
+      ]
+    },
+    {
+      "file": "hevc-layered-random-access-alternative-radl.mp4",
+      "pocs": [
+        2,
+        1,
+        3,
+        6,
+        5
+      ],
+      "decoded": [
+        [
+          0,
+          3
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "output_masks": [
+        8,
+        1,
+        8,
+        8,
+        8
+      ]
+    }
+  ]
+}
