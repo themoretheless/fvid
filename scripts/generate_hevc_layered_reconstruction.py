@@ -470,6 +470,27 @@ def main():
                     (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
                         epoch_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
                         chroma_depth=meta["chroma_depth"],access_units=epoch_groups,multilayer=True,inband_parameters=True))
+                # F.7.4.2.4.2 also permits VPS activation when every target
+                # layer has an IDR picture, without requiring a preceding EOS.
+                def idr_prior_output(nal):
+                    value = bits(unescape(nal[2:]))
+                    return nal[:2]+escape(packed(value[:1]+"0"+value[2:]))
+                for variant in ["idr","idr-graph","idr-truncated","idr-missing","idr-mixed"]:
+                    target_layer = 4 if variant=="idr-graph" else 3
+                    idr_picture = [idr_prior_output(base_slices[0]), layer(idr_prior_output(slices[0]),target_layer)]
+                    if variant=="idr-truncated":
+                        last = idr_picture[-1]
+                        idr_picture[-1] = last[:2]+escape(unescape(last[2:])[:-256])
+                    if variant=="idr-missing": idr_picture = idr_picture[:1]
+                    if variant=="idr-mixed": idr_picture[-1] = intra_nal(0,0,target_layer)
+                    controls = [graph_vps,layer(pps,4)] if target_layer==4 else [next_vps]
+                    idr_groups = [[timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
+                        [intra_nal(0,1,id) for id in [0,3]], [*controls,*idr_picture],
+                        [*[intra_nal(0,1,id) for id in [0,target_layer]]]]
+                    idr_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*sum(idr_groups,[])])
+                    (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
+                        idr_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                        chroma_depth=meta["chroma_depth"],access_units=idr_groups,multilayer=True,inband_parameters=True))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,

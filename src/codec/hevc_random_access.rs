@@ -131,6 +131,16 @@ impl RandomAccess {
             }
             next.seen |= bit;
         }
+        // Every target layer starts with IDR, so no reference from the prior
+        // CVSG survives. Apply this before translating into a new VPS graph.
+        if let Some(first) = plan.pictures().first() {
+            let idr_layers = plan.pictures().iter().fold(0, |mask, p|
+                mask | (1u64 << p.slices[0].nal.layer_id));
+            if plan.pictures().iter().all(|p| p.slices[0].nal.is_idr())
+                && first.binding.vps.covers_idr_target(first.binding.sps.output_layer_set, idr_layers) {
+                release[first.slices[0].nal.layer_id as usize] = (1u64 << 63) - 1;
+            }
+        }
         Ok(Preview {
             next,
             suppressed,

@@ -366,7 +366,7 @@ fn later_vps_reduces_highest_tid_to_selected_ols_temporal_limit() {
 
 #[test]
 fn failed_implicit_bla_cvsg_keeps_active_old_parameters_until_successful_retry() {
-    for variant in ["bla", "graph"] {
+    for variant in ["bla", "graph", "idr"] {
         let source = reader(variant, 2);
         let (config, good) = packets(variant);
         let (_, bad) = packets(&format!("{variant}-truncated"));
@@ -534,19 +534,22 @@ fn changed_dependency_graph_starts_new_poc_history_and_preserves_old_outputs() {
 
 #[test]
 fn common_player_seek_and_rewind_select_changed_graph_layer() {
-    let bytes = std::fs::read(path("graph")).unwrap();
-    let mut source =
-        Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
-    for _ in 0..2 {
-        for (sample, layer) in [(0, 3), (1, 3), (2, 4), (3, 4)] {
-            assert_eq!(source.read_frame().unwrap().unwrap().sample_index, sample);
-            assert_eq!(source.selected_layer_id(), Some(layer));
+    for variant in ["graph", "idr", "idr-graph"] {
+        let next_layer = if variant == "idr" { 3 } else { 4 };
+        let bytes = std::fs::read(path(variant)).unwrap();
+        let mut source =
+            Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+        for _ in 0..2 {
+            for (sample, layer) in [(0, 3), (1, 3), (2, next_layer), (3, next_layer)] {
+                assert_eq!(source.read_frame().unwrap().unwrap().sample_index, sample);
+                assert_eq!(source.selected_layer_id(), Some(layer));
+            }
+            assert!(source.read_frame().unwrap().is_none());
+            assert_eq!(source.seek_to_sync(2), 2);
+            assert_eq!(source.read_frame().unwrap().unwrap().sample_index, 2);
+            assert_eq!(source.selected_layer_id(), Some(next_layer));
+            source.rewind();
         }
-        assert!(source.read_frame().unwrap().is_none());
-        assert_eq!(source.seek_to_sync(2), 2);
-        assert_eq!(source.read_frame().unwrap().unwrap().sample_index, 2);
-        assert_eq!(source.selected_layer_id(), Some(4));
-        source.rewind();
     }
 }
 
@@ -633,5 +636,63 @@ fn header_vps_reference_lookup_does_not_activate_or_mutate_parameters() {
                 assert!(parameters.active(header.layer_id).is_none());
             }
         }
+    }
+}
+
+#[test]
+fn complete_target_idr_activates_vps_and_graph_with_exact_pixels() {
+    let oracle = std::fs::read(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv"),
+    )
+    .unwrap();
+    for variant in ["idr", "idr-graph"] {
+        let layer = if variant == "idr-graph" { 4 } else { 3 };
+        for tid in [0, 2, 6] {
+            let mut source = reader(variant, tid);
+            for _ in 0..2 {
+                let mut identities = Vec::new();
+                while let Some(frame) = source.read_frame().unwrap() {
+                    assert_eq!(frame.presentation_time.ticks, frame.sample_index as i64);
+                    identities.push((
+                        frame.sample_index,
+                        frame.decoded.layer_id,
+                        frame.decoded.poc,
+                    ));
+                    let packed = frame.into_video_frame().unwrap().packed.unwrap();
+                    assert_eq!(&packed.frame.data, &oracle[..packed.frame.data.len()]);
+                }
+                assert_eq!(
+                    identities,
+                    [
+                        (0, 0, 0),
+                        (0, 3, 0),
+                        (1, 0, 1),
+                        (1, 3, 1),
+                        (2, layer, 0),
+                        (3, layer, 1)
+                    ]
+                );
+                source.rewind();
+            }
+        }
+    }
+}
+
+#[test]
+fn incomplete_target_idr_cannot_replace_active_vps() {
+    for variant in ["idr-missing", "idr-mixed"] {
+        let mut source = reader(variant, 2);
+        let error = loop {
+            match source.read_frame() {
+                Ok(Some(_)) => {}
+                Ok(None) => panic!("expected activation refusal"),
+                Err(e) => break e.to_string(),
+            }
+        };
+        assert!(
+            error.contains("HEVC active VPS changed before sequence end"),
+            "{variant}: {error}"
+        );
     }
 }

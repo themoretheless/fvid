@@ -151,6 +151,11 @@ pub struct LayeredVps {
     pub future_extension: bool,
 }
 impl LayeredVps {
+    /// Complete TargetDecLayerIdList coverage for the all-IDR activation rule.
+    pub(crate) fn covers_idr_target(&self, ols: usize, idr_layers: u64) -> bool {
+        self.extension.as_ref().and_then(|e| e.output.sets.get(ols))
+            .is_some_and(|set| set.necessary != 0 && set.necessary & !idr_layers == 0)
+    }
     /// Retained parsed VPS ownership for callers budgeting immutable snapshots.
     /// Arc control blocks and duplicate shared owners are accounted by the caller.
     pub fn retained_bytes(&self) -> usize {

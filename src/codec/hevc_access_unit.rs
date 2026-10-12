@@ -311,10 +311,14 @@ impl LayeredAccessUnit {
         let mut count = 0usize;
         let mut vcl_count = 0usize;
         let mut last_vcl = None;
+        let mut all_idr = true;
+        let mut idr_layers = 0u64;
         for unit in NalUnits::new(packet, length_size)? {
             let h = NalHeader::parse(unit?)?;
             if h.layer_id != 63 && h.is_vcl() {
                 vcl_count += 1;
+                all_idr &= h.is_idr();
+                if h.is_idr() { idr_layers |= 1u64 << h.layer_id; }
                 last_vcl = Some(count);
             }
             count += 1;
@@ -410,11 +414,18 @@ impl LayeredAccessUnit {
                             "HEVC layered picture must begin with the first slice",
                         ));
                     }
-                    // F.7.4.2.4.2: a base-layer BLA starts a NoClrasOutput
-                    // CVSG even without EOS. Release only staged parameter pins;
+                    // F.7.4.2.4.2: base BLA or a complete target IDR AU
+                    // permits VPS activation without EOS. Release staged pins;
                     // queued old pictures keep immutable bindings, and a failed
                     // AU still publishes neither new parameters nor references.
-                    if pictures.is_empty() && h.layer_id == 0 && matches!(h.unit_type, 16..=18) {
+                    let complete_idr = if pictures.is_empty() && h.layer_id == 0
+                        && h.is_idr() && all_idr {
+                        let raw = staged.referenced_vps(nal)?;
+                        let vps = crate::codec::hevc_vps::LayeredVps::parse(raw, available)?;
+                        vps.covers_idr_target(output_layer_set, idr_layers)
+                    } else { false };
+                    if pictures.is_empty() && h.layer_id == 0
+                        && (matches!(h.unit_type, 16..=18) || complete_idr) {
                         for layer in 0..63 {
                             staged.end_layer_sequence(layer);
                         }

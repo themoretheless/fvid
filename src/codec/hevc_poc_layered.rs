@@ -168,10 +168,14 @@ impl LayeredPocState {
         }
         let graph = Graph::read(vps)?;
         if self.graph.is_some_and(|old| old != graph) {
-            // A base BLA begins a new CVSG. History from removed layers and
+            // Base BLA or complete target IDR can begin a new CVSG.
+            // History from removed layers and
             // reset periods belongs to the old graph, including after seek.
             let first = pictures[0].header.nal;
-            if first.layer_id == 0 && matches!(first.unit_type, 16..=18) {
+            let complete_idr = pictures.iter().all(|p| p.header.nal.is_idr())
+                && vps.covers_idr_target(pictures[0].context.sps.output_layer_set,
+                    pictures.iter().fold(0, |mask, p| mask | (1u64 << p.header.nal.layer_id)));
+            if first.layer_id == 0 && (matches!(first.unit_type, 16..=18) || complete_idr) {
                 return Self::default().preview(vps, pictures);
             }
             return Err(invalid("HEVC layered POC configuration requires reset"));

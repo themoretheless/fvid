@@ -1906,3 +1906,15 @@ Acceptance checks exact PCM pixels, original timestamps, temporal extraction,
 immutable old bindings, rewind and common-player seek. A header-only lookup test
 also verifies that resolving the VPS reference does not activate or mutate the
 parameter bank. Fixtures are authored without FFmpeg and generated separately.
+
+`hevc-layered-vps-epoch-idr.mp4` replaces VPS at an AU containing IDR for every
+necessary target layer, with no preceding EOS and no coded prior-output discard.
+The idr-graph variant also replaces dependent layer 3 with layer 4. Both originally
+refused with `HEVC active VPS changed before sequence end`. Acceptance compares
+original PCM pixels and sample timestamps, preserves queued old-layer output,
+and checks common-player seek/rewind across the new IDR epoch. The idr-truncated
+variant cuts enhancement entropy and verifies atomic parameter/POC/queue rollback
+and successful retry. The idr-missing and idr-mixed variants deliberately omit a
+target IDR or replace it with an ordinary picture: VPS activation must still be
+refused. These fixtures qualify the complete-target-IDR rule independently of
+BLA; coded cross-layer BLA with an incomplete IDR target remains a separate case.
