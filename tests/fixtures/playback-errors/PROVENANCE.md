@@ -6803,3 +6803,21 @@ I packet must not retain reference pixels for the next predicted packet. The
 existing EOS/EOB packets qualify release and IRAP restart through the owned
 stream entry without test-authored bank/POC copying. These add no generated
 fixtures or external codec dependencies to ordinary test execution.
+
+### Immutable output activations and highest-only OLS (2026-10-12)
+
+`hevc-layered-reconstruct-inter-prediction-output-highest.mp4` preserves the
+original two-AU inter-prediction entropy and saved PCM-seed YUV. Its authored
+VPS changes default_output_layer_idc from all layers to highest layer only,
+retaining both necessary layers and their profile/DPB bindings, and codes
+alternative output as disabled. Generator `generate_hevc_layered_sps.vps`
+gains an optional dependent-layer highest-output control; all default outputs
+and previously saved binary witnesses remain byte-identical.
+
+Owned packet decoding must reconstruct both layer 0 and layer 3 exactly, but
+only layer 3 is a signalled OLS output. This is membership acceptance, not
+alternative-output/presentation scheduling qualification. Existing original
+SPS-content-update and EOS/EOB witnesses verify decoded pictures keep their
+exact immutable parameter activation after replacement, reset, sequence end
+and decoder destruction. No private media/parameters or external codecs are
+used; generation stays separate from ordinary offline tests.

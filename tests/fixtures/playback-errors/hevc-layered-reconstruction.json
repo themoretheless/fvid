@@ -41,6 +41,15 @@
       "inter": true
     },
     {
+      "file": "hevc-layered-reconstruct-inter-prediction-output-highest.mp4",
+      "seed": "hevc-pcm-reference-rext8.mp4",
+      "independent": false,
+      "layer": 3,
+      "ols": 1,
+      "inter": true,
+      "output_highest": true
+    },
+    {
       "file": "hevc-layered-reconstruct-multislice-independent.mp4",
       "seed": "hevc-pcm-dependent-rext8.mp4",
       "independent": true,

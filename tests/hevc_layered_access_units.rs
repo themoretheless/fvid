@@ -49,7 +49,7 @@ fn assert_pixels(picture: &Picture, oracle: &[u8], index: usize) {
 #[test]
 fn all_original_layered_i_pictures_bind_and_reconstruct_as_complete_access_units() {
     let m = manifest("hevc-layered-reconstruction.json");
-    assert_eq!(m["cases"].as_array().unwrap().len(), 9);
+    assert_eq!(m["cases"].as_array().unwrap().len(), 10);
     for case in m["cases"].as_array().unwrap() {
         let file = case["file"].as_str().unwrap();
         let mut input = movie(file);
@@ -659,6 +659,11 @@ fn stateful_layered_packet_decoder_owns_parameters_references_and_reset() {
                     [0, 3]
                 );
                 for p in pictures {
+                    let output_highest = case["output_highest"].as_bool().unwrap_or(false);
+                    assert_eq!(
+                        p.signalled_output_layer().unwrap(),
+                        !output_highest || p.layer_id == 3
+                    );
                     assert_pixels(&p.picture, &oracle, index);
                 }
                 assert_eq!(end, Default::default());
@@ -831,5 +836,62 @@ fn stateful_layered_decoder_applies_sequence_ends_without_external_parameter_upd
         assert!(decoder.parameters().active(0).is_some());
         assert!(decoder.parameters().active(3).is_some());
         assert_eq!(decoder.next_access_unit(), 2);
+    }
+}
+
+#[test]
+fn decoded_picture_bindings_survive_sps_replacement_eos_reset_and_owner_drop() {
+    use fvid::codec::hevc_decoder::LayeredDecoder;
+    let mut input = movie("hevc-layered-reconstruct-pcm-independent.mp4");
+    let bytes = input.tracks()[0].configuration.clone();
+    let mut decoder = LayeredDecoder::from_configuration(&bytes, 1, BUDGET).unwrap();
+    let mut packet = vec![];
+    input.read_packet(0, 0, &mut packet).unwrap();
+    let (old, _) = decoder.decode_packet(&packet).unwrap();
+    let old_sps = old[0].binding.sps.sps.clone();
+    let old_pps = old[0].binding.pps.clone();
+    for p in &old {
+        assert_eq!(p.layer_id, p.binding.sps.layer_id);
+        assert!(p.signalled_output_layer().unwrap());
+    }
+    decoder.reset();
+    let update = movie("hevc-layered-sps-content-update.mp4");
+    let config = HevcConfig::parse(&update.tracks()[0].configuration).unwrap();
+    let sps = config
+        .arrays
+        .iter()
+        .find(|a| a.nal_type == 33)
+        .unwrap()
+        .units[1];
+    let mut prime = (sps.len() as u32).to_be_bytes().to_vec();
+    prime.extend_from_slice(sps);
+    decoder.prime_parameters(&prime).unwrap();
+    let (new, _) = decoder.decode_packet(&packet).unwrap();
+    assert_ne!(new[0].binding.sps.sps, old_sps);
+    assert_eq!(old[0].binding.sps.sps, old_sps);
+    assert_eq!(old[0].binding.pps, old_pps);
+    decoder.reset();
+    drop(decoder);
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for p in old.iter().chain(&new) {
+        assert_pixels(&p.picture, &oracle, 0);
+        assert_eq!(p.picture.dimensions, p.binding.sps.sps.dimensions);
+        assert_eq!(p.picture.depth, p.binding.sps.sps.depth);
+        assert!(p.signalled_output_layer().unwrap());
+    }
+    let mut ended = movie("hevc-layered-au-aud-eos-eob.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&ended.tracks()[0].configuration, 1, BUDGET).unwrap();
+    ended.read_packet(0, 0, &mut packet).unwrap();
+    let (pictures, end) = decoder.decode_packet(&packet).unwrap();
+    assert!(end.bitstream);
+    assert!(decoder.parameters().active(0).is_none());
+    assert!(decoder.parameters().active(3).is_none());
+    drop(decoder);
+    for p in pictures {
+        assert_eq!(p.layer_id, p.binding.pps.layer_id);
+        assert_eq!(p.picture.dimensions, p.binding.sps.sps.dimensions);
+        assert_pixels(&p.picture, &oracle, 0);
+        assert!(p.signalled_output_layer().unwrap());
     }
 }

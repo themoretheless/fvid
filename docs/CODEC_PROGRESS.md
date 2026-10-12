@@ -1,5 +1,29 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC immutable per-picture output parameters, 2026-10-12
+
+`LayeredDecoded` now retains the exact immutable `LayeredBinding` used for its
+picture. VPS/SPS/PPS and profile/VUI metadata remain available after a received
+parameter ID changes, EOS/EOB releases activations, reset restores hvcC, or the
+stream decoder is dropped. A snapshot regression holds original frames while
+an authored SPS PTL flag update is primed and decoded, verifying old/new SPS
+identity and unchanged exact pixels independently of decoder lifetime.
+
+`signalled_output_layer` exposes membership in the selected OLS output mask;
+it is distinct from the picture's coded `output` flag and does not implement
+alternative-output policy or presentation ordering. A new original two-AU
+inter-prediction witness sets default_output_layer_idc=1 and disables alternative
+output: layers 0 and 3 remain necessary and reconstruct exactly, while only
+layer 3 belongs to the signalled output set. All ten coded witnesses run through
+owned packet decoding. The generator preserves all prior binary witnesses.
+
+Output scheduling, alternative-output fallback, operation-point extraction,
+nonidentity coded-stream acceptance and frontend integration remain unfinished.
+
+Validation: 34 layered integration tests and 215 HEVC unit tests pass (one
+existing unit test ignored), together with the offline player build check.
+All 31 checked reconstruction/access-unit artifacts regenerate byte-for-byte.
+
 ## HEVC owned layered packet stream, 2026-10-12
 
 `hevc_decoder::LayeredDecoder` now owns the received/active parameter banks,

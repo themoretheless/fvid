@@ -13,9 +13,33 @@ use std::sync::Arc;
 /// Coded-layer identity remains explicit when an AU produces several pictures.
 pub struct LayeredDecoded {
     pub layer_id: u8,
+    /// Exact immutable activation used for this coded picture. It outlives
+    /// parameter replacement, EOS/EOB, reset and asynchronous output consumers.
+    pub binding: Arc<super::LayeredBinding>,
     pub picture: Arc<Picture>,
     pub poc: i32,
     pub output: bool,
+}
+impl LayeredDecoded {
+    /// Membership in the signalled OLS output mask, independently of the coded
+    /// picture-output flag. Alternative-output policy and ordering are separate.
+    pub fn signalled_output_layer(&self) -> Result<bool> {
+        let extension = self
+            .binding
+            .vps
+            .extension
+            .as_ref()
+            .ok_or_else(|| invalid("HEVC output binding has no VPS extension"))?;
+        let output = extension
+            .output
+            .sets
+            .get(self.binding.sps.output_layer_set)
+            .ok_or_else(|| invalid("HEVC output binding has no selected OLS"))?;
+        if self.layer_id != self.binding.sps.layer_id || self.layer_id > 62 {
+            return Err(invalid("HEVC output picture layer disagrees with binding"));
+        }
+        Ok(output.output & (1u64 << self.layer_id) != 0)
+    }
 }
 #[derive(Default)]
 pub struct LayeredDpb {
@@ -322,6 +346,7 @@ impl LayeredDpb {
             ));
             outputs.push(LayeredDecoded {
                 layer_id: first.nal.layer_id,
+                binding: picture.binding.clone(),
                 picture: decoded,
                 poc: picture.poc,
                 output: first.picture_output,

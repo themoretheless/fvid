@@ -262,6 +262,16 @@ def main():
                     chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                     access_units=groups,multilayer=True))
                 cases.append(dict(file=filename,seed=seed+".mp4",independent=False,layer=3,ols=1,inter=True))
+                highest_vps, _, _ = vps(fmt, independent=False, base_format=fmt, output_highest=True)
+                highest_bits = bits(unescape(highest_vps[2:]))
+                highest_vps = highest_vps[:2] + escape(packed(highest_bits[:32]+source_ptl+highest_bits[128:]))
+                highest_parameters = [highest_vps,*parameters[1:]]
+                highest_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*highest_parameters,*groups[0],*groups[1]])
+                filename = "hevc-layered-reconstruct-inter-prediction-output-highest.mp4"
+                (D/filename).write_bytes(mux(highest_stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=groups,multilayer=True))
+                cases.append(dict(file=filename,seed=seed+".mp4",independent=False,layer=3,ols=1,inter=True,output_highest=True))
     # Parameter-state witness, not coded-picture acceptance: inference must
     # follow the latest active base PPS even if the enhancement NAL is unchanged.
     import generate_hevc_layered_pps as gp
