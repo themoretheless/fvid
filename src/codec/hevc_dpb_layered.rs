@@ -46,7 +46,7 @@ impl LayeredDecoded {
         Ok(output.output & (1u64 << self.layer_id) != 0)
     }
 }
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct LayeredDpb {
     poc: LayeredPocState,
     references: Vec<(u8, Reference)>,
@@ -54,6 +54,22 @@ pub struct LayeredDpb {
     random_access: super::random_access::RandomAccess,
 }
 impl LayeredDpb {
+    pub(super) fn output_preview(
+        &self,
+        plan: &LayeredAccessUnit,
+    ) -> Result<super::random_access::Preview> {
+        self.random_access.preview(plan)
+    }
+    pub(super) fn retained_bytes(&self) -> Result<usize> {
+        Ok(storage(&self.references)?.saturating_add(std::mem::size_of::<Self>()))
+    }
+    pub(super) fn metadata_bytes(&self) -> usize {
+        std::mem::size_of::<Self>().saturating_add(
+            self.references
+                .capacity()
+                .saturating_mul(std::mem::size_of::<(u8, Reference)>()),
+        )
+    }
     pub fn next_access_unit(&self) -> u64 {
         self.access_unit
     }

@@ -1774,3 +1774,16 @@ Tests verify actual decoding, the former fixture's exact original PCM pixels,
 output identities, repeated epochs, and atomic budget/identity refusals.
 These qualify F.13.5.2.3 additional bumping only; reference-DPB fullness bumping,
 IRAP discard/flush decisions, and automatic player dispatch remain separate.
+
+The queued native packet entry (`LayeredDecoder::decode_queued_packet`) stages
+reference storage, parameter activations, random-access flags and output together.
+`hevc-layered-output-bla-flush.mp4` and `-bla-discard.mp4` differ in the coded
+prior-output flag: pending POCs 0/1 must respectively be emitted or discarded
+before the two-layer BLA at POC2. `-cra-after-eos.mp4` uses flag zero but CRA
+following base EOS still discards pending output. `-bla-flush-eob.mp4` also flushes
+POC2 at EOB. All use original authored PCM entropy and exact saved pixel oracles.
+`-bla-flush-truncated.mp4` removes 256 unescaped entropy bytes from the last
+layer-3 PCM NAL while keeping valid framing and complete slice headers. This is
+an intentional reconstruction refusal/rollback witness, not a playback
+acceptance stream. The test requires successful AU parsing, preserved POC and
+pending frames, and a successful retry using the valid BLA fixture.

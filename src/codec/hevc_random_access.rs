@@ -14,6 +14,7 @@ pub(super) struct Preview {
     pub suppressed: u64,
     pub ignored: u64,
     pub release: [u64; 63],
+    pub output_prior: [(u64, bool); 63],
 }
 impl RandomAccess {
     pub fn preview(self, plan: &LayeredAccessUnit) -> Result<Preview> {
@@ -21,6 +22,7 @@ impl RandomAccess {
         let mut suppressed = 0u64;
         let mut ignored = 0u64;
         let mut release = [0u64; 63];
+        let mut output_prior = [(0u64, false); 63];
         for p in plan.pictures() {
             let h = &p.slices[0];
             let id = h.nal.layer_id;
@@ -95,6 +97,21 @@ impl RandomAccess {
                 } else {
                     next.no_rasl &= !bit;
                 }
+                // F.13.5.2.2: CRA always discards prior pictures when
+                // NoRaslOutput is set; IDR/BLA use the coded prior-output flag.
+                if no_rasl && (id == smallest || id > smallest && direct == 0) {
+                    let scope = if no_clras {
+                        (1u64 << 63) - 1
+                    } else if layer_reset {
+                        bit | predicted
+                    } else {
+                        bit
+                    };
+                    output_prior[id as usize] = (
+                        scope,
+                        h.nal.unit_type == 21 || h.no_output_of_prior_pictures,
+                    );
+                }
                 next.pending_eos &= !bit;
             }
             // F.8.1.7 CL-RAS and 8.1.3 leading RASL may be ignored: neither can
@@ -116,6 +133,7 @@ impl RandomAccess {
             suppressed,
             ignored,
             release,
+            output_prior,
         })
     }
     pub fn end(&mut self, end: LayeredEndMarkers, affected: u64) {

@@ -12,7 +12,7 @@ struct Pending {
 /// This implements F.13.5.2.3 additional bumping, not a complete HRD/DPB.
 /// Before a POC reset, drain the old epoch; for seek/discard-prior, reset it.
 /// Cropping remains represented by each picture's immutable SPS binding.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct LayeredOutputQueue {
     pending: Vec<Pending>,
     last_poc: Option<i32>,
@@ -20,6 +20,82 @@ pub struct LayeredOutputQueue {
     highest_tid: Option<u8>,
 }
 impl LayeredOutputQueue {
+    pub(crate) fn retained_bytes(&self) -> Result<usize> {
+        let mut bytes = std::mem::size_of::<Self>().saturating_add(
+            self.pending
+                .capacity()
+                .saturating_mul(std::mem::size_of::<Pending>()),
+        );
+        for au in &self.pending {
+            bytes = bytes.saturating_add(
+                au.pictures
+                    .capacity()
+                    .saturating_mul(std::mem::size_of::<LayeredDecoded>()),
+            );
+            for p in &au.pictures {
+                bytes = bytes
+                    .checked_add(
+                        p.picture
+                            .storage_bytes()
+                            .ok_or_else(|| invalid("HEVC output storage overflow"))?,
+                    )
+                    .and_then(|n| n.checked_add(p.binding.storage_bytes()))
+                    .and_then(|n| n.checked_add(p.binding.vps.storage_bytes()))
+                    .ok_or_else(|| invalid("HEVC output storage overflow"))?;
+            }
+        }
+        Ok(bytes)
+    }
+    pub(super) fn prepare(
+        &mut self,
+        plan: &super::LayeredAccessUnit,
+        preview: &super::random_access::Preview,
+    ) -> Vec<LayeredDecoded> {
+        let mut ready = Vec::new();
+        for p in plan.pictures() {
+            if p.resetting {
+                ready.extend(self.drain());
+            }
+            let (mut scope, discard) = preview.output_prior[p.binding.sps.layer_id as usize];
+            if scope != 0
+                && self
+                    .pending
+                    .iter()
+                    .any(|au| au.pictures[0].binding.vps != p.binding.vps)
+            {
+                scope = (1u64 << 63) - 1;
+            }
+            if scope == 0 {
+                continue;
+            }
+            if discard {
+                for au in &mut self.pending {
+                    au.pictures.retain(|p| scope & (1u64 << p.layer_id) == 0);
+                }
+                self.pending.retain(|au| !au.pictures.is_empty());
+            } else {
+                self.pending.sort_by_key(|au| au.pictures[0].poc);
+                // A bump outputs every layer in the earliest AU, including
+                // other sub-DPBs, until all targeted sub-DPBs are empty.
+                while self.pending.iter().any(|au| {
+                    au.pictures
+                        .iter()
+                        .any(|p| scope & (1u64 << p.layer_id) != 0)
+                }) {
+                    ready.extend(self.pending.remove(0).pictures);
+                }
+                if let Some(last) = ready.last() {
+                    self.last_poc = Some(last.poc);
+                }
+            }
+            if scope == (1u64 << 63) - 1 {
+                self.last_poc = None;
+                self.last_access_unit = None;
+                self.highest_tid = None;
+            }
+        }
+        ready
+    }
     pub fn pending_access_units(&self) -> usize {
         self.pending.len()
     }
@@ -45,13 +121,15 @@ impl LayeredOutputQueue {
         highest_tid: u8,
         budget: usize,
     ) -> Result<Vec<LayeredDecoded>> {
+        if self.highest_tid.is_some_and(|tid| tid != highest_tid) {
+            return Err(invalid("HEVC output queue requires an epoch boundary"));
+        }
         let Some(first) = pictures.first() else {
             return Ok(Vec::new());
         };
-        if self.highest_tid.is_some_and(|tid| tid != highest_tid)
-            || self
-                .last_access_unit
-                .is_some_and(|au| first.access_unit <= au)
+        if self
+            .last_access_unit
+            .is_some_and(|au| first.access_unit <= au)
         {
             return Err(invalid("HEVC output queue requires an epoch boundary"));
         }

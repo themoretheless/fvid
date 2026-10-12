@@ -295,7 +295,7 @@ def main():
                     r = Reader(value); r.ue(); r.ue()
                     at = r.at + 1
                     return nal[:2] + escape(packed(value[:at]+"1"+value[at+1:]))
-                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None):
+                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None, discard_prior=False):
                     h = meta["packets"][0][0]
                     raw = bytes(h["rbsp"])
                     value = bits(raw)
@@ -305,7 +305,7 @@ def main():
                     start = r.at
                     r.read(meta["extra_bits"]); assert r.ue() == 2
                     if meta["output_flag"]: r.read(1)
-                    head = "1"+("0" if 16 <= kind <= 23 else "")+ue(int(target_layer != 0))+value[start:r.at]
+                    head = "1"+(str(int(discard_prior)) if 16 <= kind <= 23 else "")+ue(int(target_layer != 0))+value[start:r.at]
                     if picture_output is not None:
                         assert not meta["output_flag"]
                         head += str(int(picture_output))
@@ -349,6 +349,36 @@ def main():
                         reorder_stream,meta["depth"],*meta["dimensions"],
                         chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                         access_units=reorder_groups,multilayer=True))
+                # Prior-output actions must be staged with reconstruction.
+                for prior_name, prior_kind, discard, eos in [
+                    ("bla-flush",16,False,False), ("bla-discard",16,True,False),
+                    ("cra-after-eos",21,False,True)]:
+                    prior_groups = [
+                        [intra_nal(21,0,id) for id in [0,3]],
+                        [intra_nal(0,1,id) for id in [0,3]],
+                        [intra_nal(prior_kind,2,id,discard_prior=discard) for id in [0,3]],
+                    ]
+                    if eos: prior_groups[1].append(((36<<9)|1).to_bytes(2,"big")+b"\x80")
+                    prior_stream = b"".join(b"\x00\x00\x00\x01"+n
+                        for n in [*parameters,*sum(prior_groups,[])])
+                    (D/("hevc-layered-output-"+prior_name+".mp4")).write_bytes(mux(
+                        prior_stream,meta["depth"],*meta["dimensions"],
+                        chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                        access_units=prior_groups,multilayer=True))
+                    if prior_name == "bla-flush":
+                        for suffix, corrupt in [("truncated",True),("eob",False)]:
+                            special_groups = [g[:] for g in prior_groups]
+                            if corrupt:
+                                last = special_groups[2][-1]
+                                special_groups[2][-1] = last[:2]+escape(unescape(last[2:])[:-256])
+                            else:
+                                special_groups[2].append(((37<<9)|1).to_bytes(2,"big")+b"\x80")
+                            special_stream = b"".join(b"\x00\x00\x00\x01"+n
+                                for n in [*parameters,*sum(special_groups,[])])
+                            (D/("hevc-layered-output-bla-flush-"+suffix+".mp4")).write_bytes(mux(
+                                special_stream,meta["depth"],*meta["dimensions"],
+                                chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                                access_units=special_groups,multilayer=True))
                 # NoClrasOutput resets every layer's FirstPicInLayerDecodedFlag.
                 # BLA/base EOS must clear the independent layer's old POC history;
                 # an ordinary unanchored CRA must retain its precise refusal.

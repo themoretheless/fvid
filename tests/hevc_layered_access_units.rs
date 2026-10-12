@@ -1502,3 +1502,231 @@ fn layered_output_queue_rejects_mixed_identity_and_replay_without_publication() 
     assert!(queue.push(pictures, 2, BUDGET).unwrap().is_empty());
     assert_eq!(queue.drain().len(), 2);
 }
+
+#[test]
+fn queued_native_decode_orders_actual_packets_and_resets_output_with_references() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-reorder.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    for _ in 0..2 {
+        let mut ready = Vec::new();
+        for index in 0..5 {
+            let mut packet = vec![];
+            input.read_packet(0, index, &mut packet).unwrap();
+            let (out, end) = decoder
+                .decode_queued_packet(&mut queue, &packet, 2)
+                .unwrap();
+            assert!(!end.bitstream && end.layers == 0);
+            ready.extend(out);
+        }
+        ready.extend(queue.drain());
+        assert_eq!(
+            ready
+                .iter()
+                .map(|p| (p.poc, p.layer_id))
+                .collect::<Vec<_>>(),
+            (0..5)
+                .flat_map(|poc| [(poc, 0), (poc, 3)])
+                .collect::<Vec<_>>()
+        );
+        decoder.reset_queued(&mut queue);
+        assert_eq!(decoder.next_access_unit(), 0);
+        assert_eq!(queue.pending_access_units(), 0);
+    }
+    let mut packet = vec![];
+    input.read_packet(0, 0, &mut packet).unwrap();
+    assert!(
+        decoder
+            .decode_queued_packet(&mut queue, &packet, 2)
+            .unwrap()
+            .0
+            .is_empty()
+    );
+    assert_eq!(queue.pending_access_units(), 1);
+    decoder.reset_queued(&mut queue);
+    assert!(queue.drain().is_empty());
+}
+
+#[test]
+fn queued_native_decode_rolls_back_decoder_when_output_transaction_refuses() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-reorder.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    let mut packet = vec![];
+    input.read_packet(0, 0, &mut packet).unwrap();
+    decoder
+        .decode_queued_packet(&mut queue, &packet, 2)
+        .unwrap();
+    input.read_packet(0, 1, &mut packet).unwrap();
+    let before = decoder.poc().clone();
+    // Native reconstruction succeeds, but changing HighestTid within the queued
+    // output epoch must fail before any DPB/parameter/queue state is published.
+    let error = decoder
+        .decode_queued_packet(&mut queue, &packet, 1)
+        .err()
+        .unwrap();
+    assert!(
+        error
+            .to_string()
+            .contains("output queue requires an epoch boundary"),
+        "{error}"
+    );
+    assert_eq!(decoder.poc(), &before);
+    assert_eq!(decoder.next_access_unit(), 1);
+    assert_eq!(queue.pending_access_units(), 1);
+    decoder
+        .decode_queued_packet(&mut queue, &packet, 2)
+        .unwrap();
+    assert_eq!(decoder.next_access_unit(), 2);
+    assert_eq!(
+        queue.drain().iter().map(|p| p.poc).collect::<Vec<_>>(),
+        [0, 0, 2, 2]
+    );
+}
+
+#[test]
+fn queued_native_irap_flush_and_discard_prior_follow_coded_flags_and_eos() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    for (name, expected) in [
+        ("bla-flush", vec![0, 0, 1, 1]),
+        ("bla-discard", vec![]),
+        ("cra-after-eos", vec![]),
+    ] {
+        let mut input = movie(&format!("hevc-layered-output-{name}.mp4"));
+        let mut decoder =
+            LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET)
+                .unwrap();
+        let mut queue = LayeredOutputQueue::default();
+        let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+        for _ in 0..2 {
+            for index in 0..3 {
+                let mut packet = vec![];
+                input.read_packet(0, index, &mut packet).unwrap();
+                let (ready, _) = decoder
+                    .decode_queued_packet(&mut queue, &packet, 2)
+                    .unwrap_or_else(|e| panic!("{name} AU {index}: {e}"));
+                if index < 2 {
+                    assert!(ready.is_empty());
+                } else {
+                    assert_eq!(ready.iter().map(|p| p.poc).collect::<Vec<_>>(), expected);
+                }
+                for p in ready {
+                    assert_pixels(&p.picture, &oracle, 0);
+                }
+            }
+            assert_eq!(queue.pending_access_units(), 1);
+            let tail = queue.drain();
+            assert_eq!(
+                tail.iter().map(|p| (p.poc, p.layer_id)).collect::<Vec<_>>(),
+                [(2, 0), (2, 3)]
+            );
+            for p in tail {
+                assert_pixels(&p.picture, &oracle, 0);
+            }
+            decoder.reset_queued(&mut queue);
+        }
+    }
+}
+
+#[test]
+fn queued_irap_reconstruction_failure_preserves_prior_frames_and_retry() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-bla-flush-truncated.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    let mut packet = vec![];
+    for index in 0..2 {
+        input.read_packet(0, index, &mut packet).unwrap();
+        assert!(
+            decoder
+                .decode_queued_packet(&mut queue, &packet, 2)
+                .unwrap()
+                .0
+                .is_empty()
+        );
+    }
+    let before = decoder.poc().clone();
+    input.read_packet(0, 2, &mut packet).unwrap();
+    LayeredAccessUnit::parse(
+        decoder.parameters(),
+        decoder.poc(),
+        &packet,
+        HevcConfig::parse(&input.tracks()[0].configuration)
+            .unwrap()
+            .length_size,
+        1,
+        BUDGET,
+    )
+    .expect("the truncated witness must reach reconstruction, not fail AU parsing");
+    let error = decoder
+        .decode_queued_packet(&mut queue, &packet, 2)
+        .err()
+        .unwrap();
+    assert!(
+        error
+            .to_string()
+            .contains("truncated or oversized bit field"),
+        "{error}"
+    );
+    assert_eq!(decoder.poc(), &before);
+    assert_eq!(decoder.next_access_unit(), 2);
+    assert_eq!(queue.pending_access_units(), 2);
+    assert_eq!(
+        queue
+            .clone()
+            .drain()
+            .iter()
+            .map(|p| p.poc)
+            .collect::<Vec<_>>(),
+        [0, 0, 1, 1]
+    );
+    let mut valid = movie("hevc-layered-output-bla-flush.mp4");
+    valid.read_packet(0, 2, &mut packet).unwrap();
+    let ready = decoder
+        .decode_queued_packet(&mut queue, &packet, 2)
+        .unwrap()
+        .0;
+    assert_eq!(
+        ready.iter().map(|p| p.poc).collect::<Vec<_>>(),
+        [0, 0, 1, 1]
+    );
+    assert_eq!(
+        queue.drain().iter().map(|p| p.poc).collect::<Vec<_>>(),
+        [2, 2]
+    );
+}
+
+#[test]
+fn queued_end_of_bitstream_emits_pending_tail_after_irap_flush() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-bla-flush-eob.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    let mut packet = vec![];
+    for index in 0..3 {
+        input.read_packet(0, index, &mut packet).unwrap();
+        let (ready, end) = decoder
+            .decode_queued_packet(&mut queue, &packet, 2)
+            .unwrap();
+        assert_eq!(end.bitstream, index == 2);
+        if index < 2 {
+            assert!(ready.is_empty());
+        } else {
+            assert_eq!(
+                ready
+                    .iter()
+                    .map(|p| (p.poc, p.layer_id))
+                    .collect::<Vec<_>>(),
+                [(0, 0), (0, 3), (1, 0), (1, 3), (2, 0), (2, 3)]
+            );
+        }
+    }
+    assert_eq!(queue.pending_access_units(), 0);
+    assert!(queue.drain().is_empty());
+}

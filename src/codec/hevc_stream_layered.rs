@@ -79,6 +79,74 @@ impl LayeredDecoder {
         self.parameters = parameters;
         Ok((pictures, end))
     }
+    /// Decode and schedule a complete AU atomically. Use one queue exclusively
+    /// with this decoder; seek must reset both. End-of-input requires queue.drain().
+    /// Implements output epochs and additional bumping; reference-DPB fullness
+    /// bumping before reconstruction remains separate from this entry.
+    pub fn decode_queued_packet(
+        &mut self,
+        queue: &mut super::LayeredOutputQueue,
+        packet: &[u8],
+        highest_tid: u8,
+    ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
+        // Conservative combined bound: source queue, its transaction, original
+        // DPB metadata and the native decoder's own staged working set coexist.
+        let held = queue
+            .retained_bytes()?
+            .saturating_mul(2)
+            .saturating_add(self.dpb.metadata_bytes());
+        let budget = self
+            .available()?
+            .checked_sub(held)
+            .ok_or_else(|| invalid("HEVC queued decode exceeds memory budget"))?;
+        let plan = LayeredAccessUnit::parse(
+            &self.parameters,
+            self.dpb.poc(),
+            packet,
+            self.length_size,
+            self.output_layer_set,
+            budget,
+        )?;
+        // Reject invalid temporal limits even if this AU reconstructs no pixels.
+        if highest_tid > 6
+            || plan.pictures().iter().any(|p| {
+                p.slices[0].nal.temporal_id > highest_tid
+                    || p.binding
+                        .sps
+                        .output_ordering
+                        .get(usize::from(highest_tid))
+                        .is_none()
+            })
+        {
+            return Err(invalid("HEVC queued decode temporal limit is invalid"));
+        }
+        let preview = self.dpb.output_preview(&plan)?;
+        let mut staged_queue = queue.clone();
+        let mut ready = staged_queue.prepare(&plan, &preview);
+        let mut staged_dpb = self.dpb.clone();
+        let (parameters, pictures, end) = staged_dpb.decode(plan, budget)?;
+        let output_budget = budget
+            .checked_sub(
+                self.dpb
+                    .retained_bytes()?
+                    .saturating_add(staged_dpb.retained_bytes()?)
+                    .saturating_add(parameters.storage_bytes()),
+            )
+            .ok_or_else(|| invalid("HEVC queued output exceeds memory budget"))?;
+        ready.extend(staged_queue.push(pictures, highest_tid, output_budget)?);
+        if end.bitstream {
+            ready.extend(staged_queue.drain());
+        }
+        self.parameters = parameters;
+        self.dpb = staged_dpb;
+        *queue = staged_queue;
+        Ok((ready, end))
+    }
+    /// Seek/reset discards pending output and references as one operation.
+    pub fn reset_queued(&mut self, queue: &mut super::LayeredOutputQueue) {
+        self.reset();
+        queue.reset();
+    }
     /// Extract one packet with a globally scanned VPS/OLS selection, then decode
     /// atomically. A changed VPS is refused before reconstruction/publication.
     pub fn decode_selected_packet(
