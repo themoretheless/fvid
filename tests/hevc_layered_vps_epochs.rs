@@ -696,3 +696,135 @@ fn incomplete_target_idr_cannot_replace_active_vps() {
         );
     }
 }
+
+#[test]
+fn coded_cross_layer_bla_activates_vps_before_later_enhancement_cra() {
+    let oracle = std::fs::read(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv"),
+    )
+    .unwrap();
+    for variant in ["cross-bla", "cross-bla-graph"] {
+        let next_layer = if variant == "cross-bla-graph" { 4 } else { 3 };
+        for tid in [0, 2, 6] {
+            let mut source = reader(variant, tid);
+            for _ in 0..2 {
+                let mut actual = Vec::new();
+                while let Some(frame) = source.read_frame().unwrap() {
+                    assert_eq!(frame.presentation_time.ticks, frame.sample_index as i64);
+                    actual.push((
+                        frame.sample_index,
+                        frame.decoded.layer_id,
+                        frame.decoded.poc,
+                    ));
+                    let packed = frame.into_video_frame().unwrap().packed.unwrap();
+                    assert_eq!(&packed.frame.data, &oracle[..packed.frame.data.len()]);
+                }
+                assert_eq!(
+                    actual,
+                    [
+                        (0, 0, 0),
+                        (0, 3, 0),
+                        (1, 0, 1),
+                        (1, 3, 1),
+                        (3, next_layer, 1)
+                    ]
+                );
+                source.rewind();
+            }
+        }
+    }
+}
+
+#[test]
+fn unset_cross_layer_bla_cannot_replace_active_vps() {
+    let mut source = reader("cross-bla-unset", 2);
+    let error = loop {
+        match source.read_frame() {
+            Ok(Some(_)) => {}
+            Ok(None) => panic!("expected activation refusal"),
+            Err(e) => break e.to_string(),
+        }
+    };
+    assert!(
+        error.contains("HEVC active VPS changed before sequence end"),
+        "{error}"
+    );
+}
+
+#[test]
+fn failed_cross_layer_bla_preserves_old_parameters_poc_and_output() {
+    let source = reader("cross-bla", 2);
+    let (config, good) = packets("cross-bla");
+    let (_, bad) = packets("cross-bla-truncated");
+    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    for (index, packet) in good[..2].iter().enumerate() {
+        decoder
+            .decode_selected_queued_packet(
+                &mut queue,
+                source.selection_at(index).unwrap(),
+                packet,
+                2,
+            )
+            .unwrap();
+    }
+    let active = decoder.parameters().active(0).unwrap().clone();
+    let poc = decoder.poc().clone();
+    let old = queue.clone().drain();
+    let error = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &bad[2], 2)
+        .err()
+        .unwrap()
+        .to_string();
+    assert!(
+        error.contains("truncated or oversized bit field"),
+        "{error}"
+    );
+    assert!(Arc::ptr_eq(
+        decoder.parameters().active(0).unwrap(),
+        &active
+    ));
+    assert_eq!(decoder.poc(), &poc);
+    assert_eq!(decoder.next_access_unit(), 2);
+    assert_eq!(queue.pending_access_units(), 2);
+    let (released, _) = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &good[2], 2)
+        .unwrap();
+    assert_eq!(released.len(), 4);
+    for (before, after) in old.iter().zip(&released) {
+        assert!(Arc::ptr_eq(&before.binding, &after.binding));
+        assert!(Arc::ptr_eq(&before.picture, &after.picture));
+    }
+    assert_ne!(decoder.parameters().active(0).unwrap().vps, active.vps);
+    let (next, _) = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(3).unwrap(), &good[3], 2)
+        .unwrap();
+    assert_eq!(
+        next.iter()
+            .map(|p| (p.access_unit, p.layer_id))
+            .collect::<Vec<_>>(),
+        [(3, 3)]
+    );
+}
+
+#[test]
+fn common_player_seek_crosses_coded_cross_layer_bla_with_delayed_output_layer() {
+    for variant in ["cross-bla", "cross-bla-graph"] {
+        let next_layer = if variant == "cross-bla-graph" { 4 } else { 3 };
+        let bytes = std::fs::read(path(variant)).unwrap();
+        let mut source =
+            Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            while let Some(frame) = source.read_frame().unwrap() {
+                actual.push((frame.sample_index, source.selected_layer_id()));
+            }
+            assert_eq!(actual, [(0, Some(3)), (1, Some(3)), (3, Some(next_layer))]);
+            assert_eq!(source.seek_to_sync(2), 2);
+            assert_eq!(source.read_frame().unwrap().unwrap().sample_index, 3);
+            assert_eq!(source.selected_layer_id(), Some(next_layer));
+            source.rewind();
+        }
+    }
+}

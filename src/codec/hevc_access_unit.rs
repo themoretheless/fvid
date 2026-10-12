@@ -414,7 +414,7 @@ impl LayeredAccessUnit {
                             "HEVC layered picture must begin with the first slice",
                         ));
                     }
-                    // F.7.4.2.4.2: base BLA or a complete target IDR AU
+                    // F.7.4.2.4.2: base BLA, coded cross-layer BLA or complete IDR
                     // permits VPS activation without EOS. Release staged pins;
                     // queued old pictures keep immutable bindings, and a failed
                     // AU still publishes neither new parameters nor references.
@@ -424,8 +424,11 @@ impl LayeredAccessUnit {
                         let vps = crate::codec::hevc_vps::LayeredVps::parse(raw, available)?;
                         vps.covers_idr_target(output_layer_set, idr_layers)
                     } else { false };
+                    let cross_layer_bla = if pictures.is_empty() && h.layer_id == 0 && h.is_idr() {
+                        staged.with_available(available, |p| p.base_cross_layer_bla(nal))?
+                    } else { false };
                     if pictures.is_empty() && h.layer_id == 0
-                        && (matches!(h.unit_type, 16..=18) || complete_idr) {
+                        && (matches!(h.unit_type, 16..=18) || complete_idr || cross_layer_bla) {
                         for layer in 0..63 {
                             staged.end_layer_sequence(layer);
                         }

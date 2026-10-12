@@ -299,6 +299,41 @@ impl LayeredParameters {
             .as_deref()
             .ok_or_else(|| invalid("HEVC active VPS is absent"))
     }
+    /// Read only the independent base IDR's coded cross-layer restart flag.
+    /// Full slice/VPS validation follows before the staged bank is published.
+    pub(crate) fn base_cross_layer_bla(&self, nal: &[u8]) -> Result<bool> {
+        let header = NalHeader::parse(nal)?;
+        if header.layer_id != 0 || !header.is_idr() {
+            return Ok(false);
+        }
+        let left = self.remaining()?;
+        if nal.len() > left {
+            return Err(invalid("HEVC slice parameter lookup exceeds memory budget"));
+        }
+        let id = SliceHeader::parameter_set_id(nal)?;
+        let pps = self
+            .pps
+            .get(usize::from(id))
+            .and_then(Option::as_ref)
+            .ok_or_else(|| invalid("HEVC active PPS is absent"))?;
+        let rbsp = NalRbsp::parse(pps, left)?;
+        let mut bits = BitReader::new(&rbsp.bytes);
+        bits.unsigned_golomb()?;
+        bits.unsigned_golomb()?;
+        bits.skip(2)?;
+        if bits.read(3)? < 2 {
+            return Ok(false);
+        }
+        let slice = NalRbsp::parse(nal, left.saturating_sub(rbsp.bytes.capacity()))?;
+        let mut bits = BitReader::new(&slice.bytes);
+        if !bits.bit()? {
+            return Ok(false);
+        }
+        bits.skip(1)?; // no_output_of_prior_pics_flag
+        bits.unsigned_golomb()?;
+        bits.skip(1)?; // discardable_flag
+        bits.bit()
+    }
     /// Activate the globally received PPS and its SPS/VPS for one layer. Active
     /// SPS/VPS contents cannot change until the corresponding sequences end.
     /// Failed resolution leaves every prior active binding intact.

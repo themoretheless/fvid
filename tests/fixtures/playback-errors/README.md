@@ -1918,3 +1918,16 @@ and successful retry. The idr-missing and idr-mixed variants deliberately omit a
 target IDR or replace it with an ordinary picture: VPS activation must still be
 refused. These fixtures qualify the complete-target-IDR rule independently of
 BLA; coded cross-layer BLA with an incomplete IDR target remains a separate case.
+
+`hevc-layered-vps-epoch-cross-bla.mp4` codes cross_layer_bla_flag in a base IDR
+and activates a new VPS without EOS. The target enhancement layer is absent in
+that AU and enters in the next AU through CRA. The cross-bla-graph variant also
+replaces dependent layer 3 with layer 4. Before the fix both specifically refused
+with `HEVC active VPS changed before sequence end`. Acceptance checks original
+PCM pixels, original timestamps, immutable queued old-layer output and
+common-player rewind/seek to the base IDR before the delayed output-layer entry.
+Cross-bla-unset carries the same parameter changes with the flag zero and must
+still refuse activation. Cross-bla-truncated cuts only base-IDR entropy and
+checks transactional parameter/POC/queue rollback and complete-packet retry.
+These cases qualify a coded cross-layer restart with a later enhancement CRA;
+same-AU mixed IDR/non-IDR pictures with POC reset require separate qualification.

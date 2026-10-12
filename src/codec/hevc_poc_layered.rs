@@ -175,7 +175,9 @@ impl LayeredPocState {
             let complete_idr = pictures.iter().all(|p| p.header.nal.is_idr())
                 && vps.covers_idr_target(pictures[0].context.sps.output_layer_set,
                     pictures.iter().fold(0, |mask, p| mask | (1u64 << p.header.nal.layer_id)));
-            if first.layer_id == 0 && (matches!(first.unit_type, 16..=18) || complete_idr) {
+            let cross_layer_bla = first.is_idr()
+                && pictures[0].header.layered.as_ref().is_some_and(|s| s.cross_layer_bla);
+            if first.layer_id == 0 && (matches!(first.unit_type, 16..=18) || complete_idr || cross_layer_bla) {
                 return Self::default().preview(vps, pictures);
             }
             return Err(invalid("HEVC layered POC configuration requires reset"));

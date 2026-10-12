@@ -295,7 +295,7 @@ def main():
                     r = Reader(value); r.ue(); r.ue()
                     at = r.at + 1
                     return nal[:2] + escape(packed(value[:at]+"1"+value[at+1:]))
-                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None, discard_prior=False, retain_zero=False):
+                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None, discard_prior=False, retain_zero=False, extra_header=None):
                     h = meta["packets"][0][0]
                     raw = bytes(h["rbsp"])
                     value = bits(raw)
@@ -305,7 +305,8 @@ def main():
                     start = r.at
                     r.read(meta["extra_bits"]); assert r.ue() == 2
                     if meta["output_flag"]: r.read(1)
-                    head = "1"+(str(int(discard_prior)) if 16 <= kind <= 23 else "")+ue(int(target_layer != 0))+value[start:r.at]
+                    head = "1"+(str(int(discard_prior)) if 16 <= kind <= 23 else "")+ue(int(target_layer != 0))
+                    head += (value[start:r.at] if extra_header is None else extra_header+value[start+meta["extra_bits"]:r.at])
                     if picture_output is not None:
                         assert not meta["output_flag"]
                         head += str(int(picture_output))
@@ -491,6 +492,33 @@ def main():
                     (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
                         idr_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
                         chroma_depth=meta["chroma_depth"],access_units=idr_groups,multilayer=True,inband_parameters=True))
+                def cross_bla_pps(nal):
+                    value = bits(unescape(nal[2:]))
+                    r = Reader(value); r.ue(); r.ue()
+                    at = r.at+2
+                    return nal[:2]+escape(packed(value[:at]+"010"+value[at+3:]))
+                def cross_bla_idr(flag):
+                    raw = bytes(meta["packets"][0][0]["rbsp"])
+                    value = bits(raw)
+                    end = meta["packets"][0][0]["entropy_byte_offset"]*8
+                    align = value[:end].rfind("1")
+                    at = ue_end(value,2)
+                    head = value[:1]+"0"+value[2:at]+"0"+str(int(flag))+value[at:align]
+                    return base_slices[0][:2]+escape(packed(head+"1")+raw[end//8:])
+                for variant in ["cross-bla","cross-bla-graph","cross-bla-truncated","cross-bla-unset"]:
+                    target_layer = 4 if variant=="cross-bla-graph" else 3
+                    first_idr = cross_bla_idr(variant!="cross-bla-unset")
+                    if variant=="cross-bla-truncated":
+                        first_idr = first_idr[:2]+escape(unescape(first_idr[2:])[:-256])
+                    controls = [graph_vps,layer(pps,4)] if target_layer==4 else [next_vps]
+                    cross_groups = [[timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
+                        [intra_nal(0,1,id) for id in [0,3]],
+                        [*controls,cross_bla_pps(params[34][0]),first_idr],
+                        [intra_nal(0,1,0,extra_header="00"),intra_nal(21,1,target_layer)]]
+                    cross_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*sum(cross_groups,[])])
+                    (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
+                        cross_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                        chroma_depth=meta["chroma_depth"],access_units=cross_groups,multilayer=True,inband_parameters=True))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,
