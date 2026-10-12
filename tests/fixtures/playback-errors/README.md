@@ -1772,8 +1772,9 @@ coded order 0,6,1,2,3,4,5: at HighestTid=2, POC6's latency reaches five and forc
 additional bumping even after the pending-AU count is within the reorder limit.
 Tests verify actual decoding, the former fixture's exact original PCM pixels,
 output identities, repeated epochs, and atomic budget/identity refusals.
-These qualify F.13.5.2.3 additional bumping only; reference-DPB fullness bumping,
-IRAP discard/flush decisions, and automatic player dispatch remain separate.
+These standalone queue tests qualify F.13.5.2.3 additional bumping. The native
+queued entry also covers output epochs and sub-DPB fullness with the witnesses
+below; automatic player dispatch remains separate.
 
 The queued native packet entry (`LayeredDecoder::decode_queued_packet`) stages
 reference storage, parameter activations, random-access flags and output together.
@@ -1787,3 +1788,23 @@ layer-3 PCM NAL while keeping valid framing and complete slice headers. This is
 an intentional reconstruction refusal/rollback witness, not a playback
 acceptance stream. The test requires successful AU parsing, preserved POC and
 pending frames, and a successful retry using the valid BLA fixture.
+
+Sub-DPB pressure witnesses use four storage slots per layer and a three-AU
+reorder allowance. `hevc-layered-output-dpb-fullness.mp4` retains hidden reference
+POC0 while POCs 1/2/3 await output. Before hidden nonreference POC4 can decode,
+POC1 (both layers) must be bumped; additional bumping alone cannot detect this.
+`-shared-reference.mp4` keeps POC0 both referenced and pending: count its storage
+once, so the final hidden picture must not cause early output. `-rps-release.mp4`
+drops the hidden reference in the final RPS and must not bump either. The passing
+additional-only test is explicitly a reproduction of incomplete DPB accounting;
+the queued native entry is the actual acceptance path. All pixel comparisons
+use the original authored PCM oracle, across repeated resets.
+`-layer-phase.mp4` has independent layers and layer-3 EOS before the final AU.
+Base-layer pressure must output both pictures at POC1 before the subsequent
+layer-3 CRA discards remaining pending pictures in layer 3. Applying all IRAP
+output actions at AU entry would incorrectly discard layer-3 POC1 too early.
+`-fullness-truncated.mp4` retains the same pressure condition but truncates the
+second-layer PCM entropy of the final AU. It must parse successfully, refuse
+reconstruction, preserve all three pending AUs and POC state, and then emit the
+proper early AU when retried with the valid packet. This is a refusal/rollback
+witness, separately tested from successful fullness playback acceptance.

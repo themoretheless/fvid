@@ -81,8 +81,8 @@ impl LayeredDecoder {
     }
     /// Decode and schedule a complete AU atomically. Use one queue exclusively
     /// with this decoder; seek must reset both. End-of-input requires queue.drain().
-    /// Implements output epochs and additional bumping; reference-DPB fullness
-    /// bumping before reconstruction remains separate from this entry.
+    /// Implements output epochs, pre-reconstruction sub-DPB fullness bumping
+    /// and additional bumping after the complete AU is reconstructed.
     pub fn decode_queued_packet(
         &mut self,
         queue: &mut super::LayeredOutputQueue,
@@ -122,9 +122,16 @@ impl LayeredDecoder {
         }
         let preview = self.dpb.output_preview(&plan)?;
         let mut staged_queue = queue.clone();
-        let mut ready = staged_queue.prepare(&plan, &preview);
+        let mut ready = Vec::new();
         let mut staged_dpb = self.dpb.clone();
-        let (parameters, pictures, end) = staged_dpb.decode(plan, budget)?;
+        let (parameters, pictures, end) =
+            staged_dpb.decode_with_before(plan, budget, |picture, refs| {
+                ready.extend(staged_queue.prepare_picture(picture, &preview));
+                if let Some(refs) = refs {
+                    ready.extend(staged_queue.bump_before(picture, refs, highest_tid)?);
+                }
+                Ok(())
+            })?;
         let output_budget = budget
             .checked_sub(
                 self.dpb

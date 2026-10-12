@@ -1,5 +1,5 @@
-//! Post-reconstruction Annex F output ordering. Reference-DPB pressure and
-//! pre-decode IRAP/POC-reset actions remain the caller's responsibility.
+//! Annex F output ordering. The queued native decoder invokes per-picture
+//! RPS/fullness/epoch transitions before reconstruction and AU bumping after it.
 use super::LayeredDecoded;
 use crate::{Result, invalid};
 
@@ -9,7 +9,8 @@ struct Pending {
     latency: u64,
 }
 /// Queue complete decoded AUs, after suppression and alternative-layer policy.
-/// This implements F.13.5.2.3 additional bumping, not a complete HRD/DPB.
+/// Standalone push implements F.13.5.2.3 additional bumping. Use the queued
+/// native decoder for pre-reconstruction DPB fullness and output epochs.
 /// Before a POC reset, drain the old epoch; for seek/discard-prior, reset it.
 /// Cropping remains represented by each picture's immutable SPS binding.
 #[derive(Clone, Default)]
@@ -46,55 +47,115 @@ impl LayeredOutputQueue {
         }
         Ok(bytes)
     }
-    pub(super) fn prepare(
+    pub(super) fn prepare_picture(
         &mut self,
-        plan: &super::LayeredAccessUnit,
+        picture: &super::LayeredAccessPicture,
         preview: &super::random_access::Preview,
     ) -> Vec<LayeredDecoded> {
         let mut ready = Vec::new();
-        for p in plan.pictures() {
-            if p.resetting {
-                ready.extend(self.drain());
+        let p = picture;
+        if p.resetting {
+            ready.extend(self.drain());
+        }
+        let (mut scope, discard) = preview.output_prior[p.binding.sps.layer_id as usize];
+        if scope != 0
+            && self
+                .pending
+                .iter()
+                .any(|au| au.pictures[0].binding.vps != p.binding.vps)
+        {
+            scope = (1u64 << 63) - 1;
+        }
+        if scope == 0 {
+            return ready;
+        }
+        if discard {
+            for au in &mut self.pending {
+                au.pictures.retain(|p| scope & (1u64 << p.layer_id) == 0);
             }
-            let (mut scope, discard) = preview.output_prior[p.binding.sps.layer_id as usize];
-            if scope != 0
-                && self
-                    .pending
+            self.pending.retain(|au| !au.pictures.is_empty());
+        } else {
+            self.pending.sort_by_key(|au| au.pictures[0].poc);
+            // A bump outputs every layer in the earliest AU, including
+            // other sub-DPBs, until all targeted sub-DPBs are empty.
+            while self.pending.iter().any(|au| {
+                au.pictures
                     .iter()
-                    .any(|au| au.pictures[0].binding.vps != p.binding.vps)
-            {
-                scope = (1u64 << 63) - 1;
+                    .any(|p| scope & (1u64 << p.layer_id) != 0)
+            }) {
+                ready.extend(self.pending.remove(0).pictures);
             }
-            if scope == 0 {
-                continue;
-            }
-            if discard {
-                for au in &mut self.pending {
-                    au.pictures.retain(|p| scope & (1u64 << p.layer_id) == 0);
-                }
-                self.pending.retain(|au| !au.pictures.is_empty());
-            } else {
-                self.pending.sort_by_key(|au| au.pictures[0].poc);
-                // A bump outputs every layer in the earliest AU, including
-                // other sub-DPBs, until all targeted sub-DPBs are empty.
-                while self.pending.iter().any(|au| {
-                    au.pictures
-                        .iter()
-                        .any(|p| scope & (1u64 << p.layer_id) != 0)
-                }) {
-                    ready.extend(self.pending.remove(0).pictures);
-                }
-                if let Some(last) = ready.last() {
-                    self.last_poc = Some(last.poc);
-                }
-            }
-            if scope == (1u64 << 63) - 1 {
-                self.last_poc = None;
-                self.last_access_unit = None;
-                self.highest_tid = None;
+            if let Some(last) = ready.last() {
+                self.last_poc = Some(last.poc);
             }
         }
+        if scope == (1u64 << 63) - 1 {
+            self.last_poc = None;
+            self.last_access_unit = None;
+            self.highest_tid = None;
+        }
         ready
+    }
+    /// F.13.5.2.2: RPS has already marked unused references. Count the union of
+    /// remaining references and pictures needed for output in this sub-DPB.
+    pub(super) fn bump_before(
+        &mut self,
+        picture: &super::LayeredAccessPicture,
+        references: &[(u8, crate::codec::hevc_motion::Reference)],
+        highest_tid: u8,
+    ) -> Result<Vec<LayeredDecoded>> {
+        let layer = picture.binding.sps.layer_id;
+        let sps = &picture.binding.sps.sps;
+        let pps = &picture.binding.pps.pps;
+        let two_versions = pps.current_picture_reference
+            && (sps.sao || !pps.deblocking.disabled || pps.deblocking.override_enabled);
+        let ordering = picture
+            .binding
+            .sps
+            .output_ordering
+            .get(usize::from(highest_tid))
+            .ok_or_else(|| invalid("HEVC output temporal limit is absent"))?;
+        let capacity = usize::from(ordering.max_decoded_pictures)
+            .checked_sub(usize::from(two_versions))
+            .filter(|&n| n != 0)
+            .ok_or_else(|| invalid("HEVC current picture versions exceed DPB capacity"))?;
+        let latency = (ordering.max_latency_increase_plus1 != 0).then(|| {
+            u64::from(ordering.max_reorder_pictures)
+                + u64::from(ordering.max_latency_increase_plus1)
+                - 1
+        });
+        let mut ready = Vec::new();
+        loop {
+            let reference_count = references.iter().filter(|(id, _)| *id == layer).count();
+            let pending_only = self
+                .pending
+                .iter()
+                .flat_map(|au| &au.pictures)
+                .filter(|p| {
+                    p.layer_id == layer
+                        && !references
+                            .iter()
+                            .any(|(id, r)| *id == layer && r.poc == p.poc)
+                })
+                .count();
+            if reference_count.saturating_add(pending_only) < capacity
+                && self.pending.len() <= ordering.max_reorder_pictures as usize
+                && !latency.is_some_and(|max| self.pending.iter().any(|au| au.latency >= max))
+            {
+                break;
+            }
+            if self.pending.is_empty() {
+                return Err(invalid(
+                    "HEVC retained references leave no current DPB slot",
+                ));
+            }
+            self.pending.sort_by_key(|au| au.pictures[0].poc);
+            ready.extend(self.pending.remove(0).pictures);
+        }
+        if let Some(last) = ready.last() {
+            self.last_poc = Some(last.poc);
+        }
+        Ok(ready)
     }
     pub fn pending_access_units(&self) -> usize {
         self.pending.len()

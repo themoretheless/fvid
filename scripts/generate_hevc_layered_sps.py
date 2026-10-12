@@ -40,7 +40,7 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None):
     if bad_geometry:
         target = dict(target, size=[255, 192])
     base_format = BASE if base_format is None else base_format
@@ -75,6 +75,8 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
         counts = [4+tid, dpb+tid]
         reorder = (300 if wide else 1)+tid
         latency = 0 if tid == 0 else tid+1
+        if ordering_rows is not None:
+            counts, reorder, latency = ordering_rows[tid]
         b += ''.join(ue(v-1) for v in counts) + ue(reorder) + ue(latency)
         rows.append([counts[1], reorder, latency])
     b += ue(0) + '1' + f'{dependency_type:02b}' + ue(0) + '0' + '0' + '1'

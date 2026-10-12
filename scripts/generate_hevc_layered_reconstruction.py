@@ -295,7 +295,7 @@ def main():
                     r = Reader(value); r.ue(); r.ue()
                     at = r.at + 1
                     return nal[:2] + escape(packed(value[:at]+"1"+value[at+1:]))
-                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None, discard_prior=False):
+                def intra_nal(kind, poc, target_layer, extension=None, inter_layer=True, picture_output=None, discard_prior=False, retain_zero=False):
                     h = meta["packets"][0][0]
                     raw = bytes(h["rbsp"])
                     value = bits(raw)
@@ -311,7 +311,7 @@ def main():
                         head += str(int(picture_output))
                     head += f"{poc:0{meta['poc_bits']}b}"+"0"
                     if meta["short_term_sets"]: head += "0"
-                    head += ue(0)+ue(0)
+                    head += (ue(1)+ue(0)+ue(poc-1)+"0") if retain_zero else ue(0)+ue(0)
                     if meta["long_term_present"]:
                         if meta["long_term_entries"]: head += ue(0)
                         head += ue(0)
@@ -349,6 +349,57 @@ def main():
                         reorder_stream,meta["depth"],*meta["dimensions"],
                         chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                         access_units=reorder_groups,multilayer=True))
+                # Four storage slots with three reorder AUs: a retained hidden
+                # reference can fill the slot otherwise available for decoding.
+                pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,
+                    ordering_rows=[([4,4],3,0)]*3)
+                pv = bits(unescape(pressure_vps[2:]))
+                pressure_vps = pressure_vps[:2]+escape(packed(pv[:32]+source_ptl+pv[128:]))
+                pressure_parameters = [pressure_vps,*[
+                    output_pps(n) if ((n[0]>>1)&63)==34 else n for n in parameters[1:]]]
+                for pressure_name, flags in [
+                    ("fullness",[False,True,True,True,False]),
+                    ("shared-reference",[True,True,True,False]),
+                    ("rps-release",[False,True,True,True,False])]:
+                    pressure_groups = [[intra_nal(21 if poc == 0 else 0,poc,id,
+                        picture_output=flag,retain_zero=poc>0 and
+                        not (pressure_name == "rps-release" and poc == len(flags)-1))
+                        for id in [0,3]] for poc,flag in enumerate(flags)]
+                    pressure_stream = b"".join(b"\x00\x00\x00\x01"+n
+                        for n in [*pressure_parameters,*sum(pressure_groups,[])])
+                    (D/("hevc-layered-output-dpb-"+pressure_name+".mp4")).write_bytes(mux(
+                        pressure_stream,meta["depth"],*meta["dimensions"],
+                        chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                        access_units=pressure_groups,multilayer=True))
+                    if pressure_name == "fullness":
+                        corrupt_groups = [g[:] for g in pressure_groups]
+                        last = corrupt_groups[-1][-1]
+                        corrupt_groups[-1][-1] = last[:2]+escape(unescape(last[2:])[:-256])
+                        corrupt_stream = b"".join(b"\x00\x00\x00\x01"+n
+                            for n in [*pressure_parameters,*sum(corrupt_groups,[])])
+                        (D/"hevc-layered-output-dpb-fullness-truncated.mp4").write_bytes(mux(
+                            corrupt_stream,meta["depth"],*meta["dimensions"],
+                            chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                            access_units=corrupt_groups,multilayer=True))
+                phase_vps,_,_ = vps(fmt,independent=True,base_format=fmt,
+                    ordering_rows=[([4,4],3,0)]*3)
+                ph = bits(unescape(phase_vps[2:]))
+                phase_vps = phase_vps[:2]+escape(packed(ph[:32]+source_ptl+ph[128:]))
+                phase_sps = parameter_ids(layer(params[33][0],3),104,[1])
+                phase_pps = parameter_ids(layer(params[34][0],3),0,[1,1])
+                phase_parameters = [phase_vps,params[33][0],phase_sps,
+                    output_pps(params[34][0]),output_pps(phase_pps)]
+                phase_groups = [[intra_nal(21 if poc == 0 or id == 3 and poc == 4 else 0,
+                    poc,id,inter_layer=False,picture_output=0<poc<4,
+                    retain_zero=poc>0 and not (id == 3 and poc == 4))
+                    for id in [0,3]] for poc in range(5)]
+                phase_groups[3].append(((36<<9)|(3<<3)|1).to_bytes(2,"big")+b"\x80")
+                phase_stream = b"".join(b"\x00\x00\x00\x01"+n
+                    for n in [*phase_parameters,*sum(phase_groups,[])])
+                (D/"hevc-layered-output-dpb-layer-phase.mp4").write_bytes(mux(
+                    phase_stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=phase_groups,multilayer=True))
                 # Prior-output actions must be staged with reconstruction.
                 for prior_name, prior_kind, discard, eos in [
                     ("bla-flush",16,False,False), ("bla-discard",16,True,False),
