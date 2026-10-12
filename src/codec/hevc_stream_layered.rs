@@ -79,6 +79,52 @@ impl LayeredDecoder {
         self.parameters = parameters;
         Ok((pictures, end))
     }
+    /// Extract one packet with a globally scanned VPS/OLS selection, then decode
+    /// atomically. A changed VPS is refused before reconstruction/publication.
+    pub fn decode_selected_packet(
+        &mut self,
+        selection: &super::LayeredSubstream,
+        packet: &[u8],
+    ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
+        if selection.output_layer_set() != self.output_layer_set {
+            return Err(invalid("HEVC extraction OLS disagrees with decoder"));
+        }
+        let available = self.available()?;
+        let extracted = selection.extract_packet(packet, self.length_size, available)?;
+        let budget = available
+            .checked_sub(
+                extracted
+                    .capacity()
+                    .saturating_add(std::mem::size_of_val(&extracted)),
+            )
+            .ok_or_else(|| invalid("HEVC extracted packet exceeds decode budget"))?;
+        for nal in NalUnits::new(&extracted, self.length_size)? {
+            let nal = nal?;
+            if NalHeader::parse(nal)?.unit_type == 32
+                && crate::codec::hevc_vps::LayeredVps::parse(nal, budget)? != *selection.vps
+            {
+                return Err(invalid("HEVC extraction VPS disagrees with active picture"));
+            }
+        }
+        let plan = LayeredAccessUnit::parse(
+            &self.parameters,
+            self.dpb.poc(),
+            &extracted,
+            self.length_size,
+            self.output_layer_set,
+            budget,
+        )?;
+        if plan
+            .pictures()
+            .iter()
+            .any(|p| p.binding.vps.as_ref() != selection.vps.as_ref())
+        {
+            return Err(invalid("HEVC extraction VPS disagrees with active picture"));
+        }
+        let (parameters, pictures, end) = self.dpb.decode(plan, budget)?;
+        self.parameters = parameters;
+        Ok((pictures, end))
+    }
     /// Seek priming receives only parameter NALs; it never decodes skipped
     /// pictures or updates POC/DPB state. Full activation remains deferred.
     pub fn prime_parameters(&mut self, packet: &[u8]) -> Result<()> {

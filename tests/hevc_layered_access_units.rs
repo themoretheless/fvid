@@ -1029,3 +1029,149 @@ fn extracted_layer_and_temporal_substreams_drop_only_inapplicable_timing_and_dec
     assert!(extract_layered_substream(&packet, 4, 1, 0, 1).is_err());
     assert!(extract_layered_substream(&packet[..packet.len() - 1], 4, 1, 0, BUDGET).is_err());
 }
+
+#[test]
+fn globally_scanned_selection_removes_earlier_timing_and_decodes_packets_atomically() {
+    use fvid::codec::{
+        hevc_decoder::{LayeredDecoder, SubstreamScan, extract_layered_substream},
+        hevc_vps::LayeredVps,
+    };
+    let mut input = movie("hevc-layered-extraction-split-timing.mp4");
+    let config = input.tracks()[0].configuration.clone();
+    let vps = |config: &[u8]| {
+        let c = HevcConfig::parse(config).unwrap();
+        let n = &c.arrays.iter().find(|a| a.nal_type == 32).unwrap().units[0];
+        Arc::new(LayeredVps::parse(n, BUDGET).unwrap())
+    };
+    let mut scan = SubstreamScan::default();
+    let mut packets = vec![];
+    for index in 0..2 {
+        let mut packet = vec![];
+        input.read_packet(0, index, &mut packet).unwrap();
+        scan.observe(&packet, 4).unwrap();
+        packets.push(packet);
+    }
+    let before = scan;
+    assert!(
+        scan.observe(&packets[1][..packets[1].len() - 1], 4)
+            .is_err()
+    );
+    assert_eq!(scan, before);
+    let selected = scan.select(vps(&config), 1, 0).unwrap();
+    assert_eq!(selected.layers(), 9);
+    assert_eq!(selected.output_layer_set(), 1);
+    // Packet zero alone contains no discarded header. Whole-source policy differs.
+    assert_eq!(
+        extract_layered_substream(&packets[0], 4, 9, 0, BUDGET).unwrap(),
+        packets[0]
+    );
+    let first = selected.extract_packet(&packets[0], 4, BUDGET).unwrap();
+    let types = NalUnits::new(&first, 4)
+        .unwrap()
+        .map(|n| {
+            let n = n.unwrap();
+            let rbsp = fvid::codec::hevc_nal::NalRbsp::parse(n, BUDGET).unwrap();
+            fvid::codec::hevc_sei::messages(&rbsp.bytes).unwrap()[0].payload_type
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(types, [144, 133]);
+    let full = scan.select(vps(&config), 1, 6).unwrap();
+    assert_eq!(
+        full.extract_packet(&packets[0], 4, BUDGET).unwrap(),
+        packets[0]
+    );
+    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    let base = scan.select(vps(&config), 0, 0).unwrap();
+    assert_eq!(base.layers(), 1);
+    assert_eq!(
+        decoder
+            .decode_selected_packet(&base, &packets[0])
+            .err()
+            .unwrap()
+            .to_string(),
+        "HEVC extraction OLS disagrees with decoder"
+    );
+    assert_eq!(decoder.next_access_unit(), 0);
+    let other = movie("hevc-layered-reconstruct-inter-prediction-output-highest.mp4");
+    let stale = scan
+        .select(vps(&other.tracks()[0].configuration), 1, 0)
+        .unwrap();
+    let other_config = HevcConfig::parse(&other.tracks()[0].configuration).unwrap();
+    let other_vps = &other_config
+        .arrays
+        .iter()
+        .find(|a| a.nal_type == 32)
+        .unwrap()
+        .units[0];
+    let mut control_only = (other_vps.len() as u32).to_be_bytes().to_vec();
+    control_only.extend_from_slice(other_vps);
+    assert_eq!(
+        decoder
+            .decode_selected_packet(&selected, &control_only)
+            .err()
+            .unwrap()
+            .to_string(),
+        "HEVC extraction VPS disagrees with active picture"
+    );
+    assert_eq!(decoder.next_access_unit(), 0);
+    assert!(decoder.parameters().active(0).is_none());
+
+    assert_eq!(
+        decoder
+            .decode_selected_packet(&stale, &packets[1])
+            .err()
+            .unwrap()
+            .to_string(),
+        "HEVC extraction VPS disagrees with active picture"
+    );
+    assert_eq!(decoder.next_access_unit(), 0);
+    assert_eq!(decoder.poc(), &LayeredPocState::default());
+    assert!(
+        decoder
+            .decode_selected_packet(&selected, &packets[0])
+            .unwrap()
+            .0
+            .is_empty()
+    );
+    let (pictures, _) = decoder
+        .decode_selected_packet(&selected, &packets[1])
+        .unwrap();
+    assert_eq!(
+        pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+        [0, 3]
+    );
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    for p in pictures {
+        assert_pixels(&p.picture, &oracle, 0);
+    }
+    // Highest-only OLS still decodes its base reference layer (F-57).
+    assert_eq!(stale.layers(), 9);
+    let mut highest =
+        LayeredDecoder::from_configuration(&other.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let (pictures, _) = highest.decode_selected_packet(&stale, &packets[1]).unwrap();
+    assert_eq!(
+        pictures.iter().map(|p| p.layer_id).collect::<Vec<_>>(),
+        [0, 3]
+    );
+    assert_eq!(
+        pictures
+            .iter()
+            .filter(|p| p.output)
+            .map(|p| p.layer_id)
+            .collect::<Vec<_>>(),
+        [3]
+    );
+    for p in pictures {
+        assert_pixels(&p.picture, &oracle, 0);
+    }
+    let outside = [0, 0, 0, 3, 82, 9, 128]; // a layer absent from the completed scan
+    assert_eq!(
+        selected
+            .extract_packet(&outside, 4, BUDGET)
+            .err()
+            .unwrap()
+            .to_string(),
+        "HEVC packet exceeds scanned extraction source"
+    );
+    assert!(scan.select(vps(&config), 99, 0).is_err());
+}

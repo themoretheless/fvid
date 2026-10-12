@@ -283,6 +283,10 @@ def main():
                 (D/"hevc-layered-extraction-timing.mp4").write_bytes(mux(extraction_stream,meta["depth"],*meta["dimensions"],
                     chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                     access_units=[extraction_group],multilayer=True))
+                split_groups = [[*timing,*retained],[high_temporal,*groups[0]]]
+                (D/"hevc-layered-extraction-split-timing.mp4").write_bytes(mux(extraction_stream,meta["depth"],*meta["dimensions"],
+                    chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                    access_units=split_groups,multilayer=True))
                 def output_pps(nal):
                     value = bits(unescape(nal[2:]))
                     r = Reader(value); r.ue(); r.ue()

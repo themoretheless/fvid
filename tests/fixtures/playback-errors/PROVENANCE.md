@@ -1,3 +1,13 @@
+### hevc-layered-extraction-split-timing.mp4
+
+The owned reconstruction generator splits the extraction-timing witness into a
+metadata-only sample and a later original two-layer PCM coded sample with a
+temporal-1 prefix. Timing SEI must be removed from the earlier sample according
+to the complete source selection, even though no header in that sample is
+excluded. Regression checks the specific SEI types, native exact pixels and
+transactional mismatch/retry. The structural timing payloads do not qualify HRD
+semantics. No private source data; generation remains separate and offline.
+
 ### hevc-layered-extraction-timing.mp4
 
 Owned reconstruction generator adds structural top-level SEI types 0/1/130,

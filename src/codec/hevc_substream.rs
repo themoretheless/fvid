@@ -73,11 +73,27 @@ pub fn extract_layered_substream(
         return Err(invalid("invalid HEVC extraction target"));
     }
     let mut reduced = false;
-    let mut scratch = 0usize;
+
     for nal in NalUnits::new(input, length_size)? {
         let nal = nal?;
         let h = NalHeader::parse(nal)?;
         reduced |= layers & (1u64 << h.layer_id) == 0 || h.temporal_id > temporal;
+    }
+    extract_with_policy(input, length_size, layers, temporal, reduced, budget)
+}
+
+fn extract_with_policy(
+    input: &[u8],
+    length_size: u8,
+    layers: u64,
+    temporal: u8,
+    reduced: bool,
+    budget: usize,
+) -> Result<Vec<u8>> {
+    let mut scratch = 0usize;
+    for nal in NalUnits::new(input, length_size)? {
+        let nal = nal?;
+        let h = NalHeader::parse(nal)?;
         if h.layer_id == 0
             && layers & 1 != 0
             && h.temporal_id <= temporal
@@ -130,6 +146,116 @@ pub fn extract_layered_substream(
         }
     }
     Ok(output)
+}
+
+/// Header inventory of the complete source CVSG, including non-VCL NAL units.
+/// Observe every packet before finishing a finite source; an incomplete scan
+/// cannot determine whether earlier timing SEI applies to later removed layers.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct SubstreamScan {
+    layers: u64,
+    highest_temporal: Option<u8>,
+}
+impl SubstreamScan {
+    /// Atomic on malformed framing/header: the previous inventory is unchanged.
+    pub fn observe(&mut self, packet: &[u8], length_size: u8) -> Result<()> {
+        let mut next = *self;
+        for nal in NalUnits::new(packet, length_size)? {
+            let h = NalHeader::parse(nal?)?;
+            next.layers |= 1u64 << h.layer_id;
+            next.highest_temporal = Some(next.highest_temporal.unwrap_or(0).max(h.temporal_id));
+        }
+        *self = next;
+        Ok(())
+    }
+    /// F-57 resolves necessary decoding layers, not merely output layers.
+    /// The immutable VPS snapshot pins this selection for the source CVSG.
+    pub fn select(
+        self,
+        vps: std::sync::Arc<crate::codec::hevc_vps::LayeredVps>,
+        ols: usize,
+        temporal: u8,
+    ) -> Result<LayeredSubstream> {
+        if temporal > 6 {
+            return Err(invalid("invalid HEVC extraction target"));
+        }
+        if !vps.vps.layers.base_internal || !vps.vps.layers.base_available {
+            return Err(invalid(
+                "HEVC extraction external or unavailable base requires rewriting",
+            ));
+        }
+        let layers = if let Some(extension) = &vps.extension {
+            let set = extension
+                .output
+                .sets
+                .get(ols)
+                .ok_or_else(|| invalid("HEVC extraction output layer set is absent"))?;
+            if set.layer_set_index >= vps.vps.layers.sets.len() {
+                return Err(invalid(
+                    "HEVC extraction additional layer set requires rewriting",
+                ));
+            }
+            let layers = set.necessary;
+            for (i, &layer) in extension.graph.layer_ids.iter().enumerate() {
+                if layers & (1u64 << layer) != 0 && extension.graph.transitive[i] & !layers != 0 {
+                    return Err(invalid("HEVC extraction target omits a reference layer"));
+                }
+            }
+            layers
+        } else if ols == 0 {
+            1
+        } else {
+            return Err(invalid("HEVC extraction output layer set is absent"));
+        };
+        if layers == 0 || layers >> 63 != 0 {
+            return Err(invalid("invalid HEVC extraction target"));
+        }
+        Ok(LayeredSubstream {
+            vps,
+            ols,
+            layers,
+            temporal,
+            source: self,
+            reduced: self.layers & !layers != 0
+                || self.highest_temporal.is_some_and(|t| t > temporal),
+        })
+    }
+}
+
+/// Packet extractor using the reduction decision from a completed source scan.
+#[derive(Clone, Debug)]
+pub struct LayeredSubstream {
+    pub(crate) vps: std::sync::Arc<crate::codec::hevc_vps::LayeredVps>,
+    pub(crate) ols: usize,
+    layers: u64,
+    temporal: u8,
+    source: SubstreamScan,
+    reduced: bool,
+}
+impl LayeredSubstream {
+    pub fn layers(&self) -> u64 {
+        self.layers
+    }
+    pub fn output_layer_set(&self) -> usize {
+        self.ols
+    }
+    pub fn extract_packet(&self, packet: &[u8], length_size: u8, budget: usize) -> Result<Vec<u8>> {
+        let mut seen = SubstreamScan::default();
+        seen.observe(packet, length_size)?;
+        if seen.layers & !self.source.layers != 0
+            || seen.highest_temporal > self.source.highest_temporal
+        {
+            return Err(invalid("HEVC packet exceeds scanned extraction source"));
+        }
+        extract_with_policy(
+            packet,
+            length_size,
+            self.layers,
+            self.temporal,
+            self.reduced,
+            budget,
+        )
+    }
 }
 
 #[cfg(test)]

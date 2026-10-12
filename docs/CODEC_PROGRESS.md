@@ -1,5 +1,20 @@
 # Собственные контейнеры и кодеки: состояние реализации
 
+## HEVC globally scanned packet extraction, 2026-10-12
+
+`SubstreamScan` inventories the complete finite source without storing packets;
+malformed headers/framing leave its state unchanged. Selection resolves necessary
+layers from the immutable VPS/OLS (F-57), including reference layers that are not
+outputs. `LayeredSubstream` then applies one global timing decision to every
+packet and refuses headers outside the scanned source envelope.
+`LayeredDecoder::decode_selected_packet` extracts and reconstructs with one
+combined memory budget, refusing mismatched OLS/VPS before publishing state.
+The split-timing coded witness places SEI in an earlier metadata-only sample and
+removed temporal data in a later coded sample; acceptance checks the exact SEI
+types, original pixels and rollback/recovery with a mismatched VPS. This finite
+source pre-scan is not an online unknown-source extractor. Additional-layer-set
+rewriting, automatic frontend dispatch, RASL handling and output ordering remain.
+
 ## HEVC F.10.1 substream extraction, 2026-10-12
 
 `extract_layered_substream` extracts a complete length-prefixed NAL sequence
