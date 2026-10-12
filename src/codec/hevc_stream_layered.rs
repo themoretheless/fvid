@@ -89,16 +89,7 @@ impl LayeredDecoder {
         packet: &[u8],
         highest_tid: u8,
     ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
-        // Conservative combined bound: source queue, its transaction, original
-        // DPB metadata and the native decoder's own staged working set coexist.
-        let held = queue
-            .retained_bytes()?
-            .saturating_mul(2)
-            .saturating_add(self.dpb.metadata_bytes());
-        let budget = self
-            .available()?
-            .checked_sub(held)
-            .ok_or_else(|| invalid("HEVC queued decode exceeds memory budget"))?;
+        let budget = self.queued_budget(queue)?;
         let plan = LayeredAccessUnit::parse(
             &self.parameters,
             self.dpb.poc(),
@@ -107,6 +98,26 @@ impl LayeredDecoder {
             self.output_layer_set,
             budget,
         )?;
+        self.decode_queued_plan(queue, plan, highest_tid, budget)
+    }
+    fn queued_budget(&self, queue: &super::LayeredOutputQueue) -> Result<usize> {
+        // Conservative combined bound: source queue, its transaction, original
+        // DPB metadata and the native decoder's own staged working set coexist.
+        let held = queue
+            .retained_bytes()?
+            .saturating_mul(2)
+            .saturating_add(self.dpb.metadata_bytes());
+        self.available()?
+            .checked_sub(held)
+            .ok_or_else(|| invalid("HEVC queued decode exceeds memory budget"))
+    }
+    fn decode_queued_plan(
+        &mut self,
+        queue: &mut super::LayeredOutputQueue,
+        plan: LayeredAccessUnit,
+        highest_tid: u8,
+        budget: usize,
+    ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
         // Reject invalid temporal limits even if this AU reconstructs no pixels.
         if highest_tid > 6
             || plan.pictures().iter().any(|p| {
@@ -148,6 +159,57 @@ impl LayeredDecoder {
         self.dpb = staged_dpb;
         *queue = staged_queue;
         Ok((ready, end))
+    }
+    /// Extract the globally scanned operation point and schedule it atomically.
+    /// A different VPS is refused before queue/reference state is published.
+    pub fn decode_selected_queued_packet(
+        &mut self,
+        queue: &mut super::LayeredOutputQueue,
+        selection: &super::LayeredSubstream,
+        packet: &[u8],
+        highest_tid: u8,
+    ) -> Result<(Vec<LayeredDecoded>, LayeredEndMarkers)> {
+        if selection.output_layer_set() != self.output_layer_set {
+            return Err(invalid("HEVC extraction OLS disagrees with decoder"));
+        }
+        if highest_tid != selection.highest_temporal_id() {
+            return Err(invalid(
+                "HEVC extraction temporal target disagrees with decoder",
+            ));
+        }
+        let available = self.queued_budget(queue)?;
+        let extracted = selection.extract_packet(packet, self.length_size, available)?;
+        let budget = available
+            .checked_sub(
+                extracted
+                    .capacity()
+                    .saturating_add(std::mem::size_of_val(&extracted)),
+            )
+            .ok_or_else(|| invalid("HEVC extracted packet exceeds decode budget"))?;
+        for nal in NalUnits::new(&extracted, self.length_size)? {
+            let nal = nal?;
+            if NalHeader::parse(nal)?.unit_type == 32
+                && crate::codec::hevc_vps::LayeredVps::parse(nal, budget)? != *selection.vps
+            {
+                return Err(invalid("HEVC extraction VPS disagrees with active picture"));
+            }
+        }
+        let plan = LayeredAccessUnit::parse(
+            &self.parameters,
+            self.dpb.poc(),
+            &extracted,
+            self.length_size,
+            self.output_layer_set,
+            budget,
+        )?;
+        if plan
+            .pictures()
+            .iter()
+            .any(|p| p.binding.vps.as_ref() != selection.vps.as_ref())
+        {
+            return Err(invalid("HEVC extraction VPS disagrees with active picture"));
+        }
+        self.decode_queued_plan(queue, plan, highest_tid, budget)
     }
     /// Seek/reset discards pending output and references as one operation.
     pub fn reset_queued(&mut self, queue: &mut super::LayeredOutputQueue) {

@@ -1931,3 +1931,96 @@ fn sub_dpb_bumping_rolls_back_when_second_layer_reconstruction_fails() {
         [(2, 0), (2, 3), (3, 0), (3, 3)]
     );
 }
+
+#[test]
+fn selected_queued_decode_refuses_ols_temporal_and_vps_mismatch_atomically() {
+    use fvid::codec::{
+        hevc_decoder::{LayeredDecoder, LayeredOutputQueue, SubstreamScan},
+        hevc_vps::LayeredVps,
+    };
+    let mut input = movie("hevc-layered-extraction-split-timing.mp4");
+    let config = input.tracks()[0].configuration.clone();
+    let vps = |config: &[u8]| {
+        let c = HevcConfig::parse(config).unwrap();
+        Arc::new(
+            LayeredVps::parse(
+                c.arrays.iter().find(|a| a.nal_type == 32).unwrap().units[0],
+                BUDGET,
+            )
+            .unwrap(),
+        )
+    };
+    let mut scan = SubstreamScan::default();
+    let mut packets = Vec::new();
+    for index in 0..2 {
+        let mut packet = Vec::new();
+        input.read_packet(0, index, &mut packet).unwrap();
+        scan.observe(&packet, 4).unwrap();
+        packets.push(packet);
+    }
+    let selected = scan.select(vps(&config), 1, 0).unwrap();
+    let base = scan.select(vps(&config), 0, 0).unwrap();
+    let other = movie("hevc-layered-reconstruct-inter-prediction-output-highest.mp4");
+    let stale = scan
+        .select(vps(&other.tracks()[0].configuration), 1, 0)
+        .unwrap();
+    let c = HevcConfig::parse(&other.tracks()[0].configuration).unwrap();
+    let n = c.arrays.iter().find(|a| a.nal_type == 32).unwrap().units[0];
+    let mut control = (n.len() as u32).to_be_bytes().to_vec();
+    control.extend_from_slice(n);
+    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    decoder
+        .decode_selected_queued_packet(&mut queue, &selected, &packets[0], 0)
+        .unwrap();
+    for (selection, packet, tid, message) in [
+        (
+            &base,
+            &packets[1],
+            0,
+            "HEVC extraction OLS disagrees with decoder",
+        ),
+        (
+            &selected,
+            &packets[1],
+            1,
+            "HEVC extraction temporal target disagrees with decoder",
+        ),
+        (
+            &stale,
+            &packets[1],
+            0,
+            "HEVC extraction VPS disagrees with active picture",
+        ),
+        (
+            &selected,
+            &control,
+            0,
+            "HEVC extraction VPS disagrees with active picture",
+        ),
+    ] {
+        let before = decoder.poc().clone();
+        assert_eq!(
+            decoder
+                .decode_selected_queued_packet(&mut queue, selection, packet, tid)
+                .err()
+                .unwrap()
+                .to_string(),
+            message
+        );
+        assert_eq!(decoder.poc(), &before);
+        assert_eq!(decoder.next_access_unit(), 1);
+        assert_eq!(queue.pending_access_units(), 0);
+    }
+    decoder
+        .decode_selected_queued_packet(&mut queue, &selected, &packets[1], 0)
+        .unwrap();
+    assert_eq!(
+        queue
+            .drain()
+            .iter()
+            .map(|p| (p.access_unit, p.layer_id))
+            .collect::<Vec<_>>(),
+        [(1, 0), (1, 3)]
+    );
+}

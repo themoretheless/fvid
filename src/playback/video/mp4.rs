@@ -11,6 +11,10 @@ use crate::{Result, invalid};
 use std::io::{Read, Seek};
 use std::sync::Arc;
 
+#[path = "mp4_layered.rs"]
+mod layered;
+pub use layered::{LayeredMp4VideoReader, LayeredVideoFrame};
+
 /// Exact track-clock timestamp, including negative composition timestamps.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct MediaTime {

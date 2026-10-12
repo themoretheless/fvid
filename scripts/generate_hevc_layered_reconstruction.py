@@ -349,6 +349,11 @@ def main():
                         reorder_stream,meta["depth"],*meta["dimensions"],
                         chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
                         access_units=reorder_groups,multilayer=True))
+                    if output_name == "reorder":
+                        (D/"hevc-layered-output-reorder-ctts.mp4").write_bytes(mux(
+                            reorder_stream,meta["depth"],*meta["dimensions"],
+                            chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                            access_units=reorder_groups,multilayer=True,presentation_order=output_pocs))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,

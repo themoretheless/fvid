@@ -233,6 +233,14 @@ pub struct LayeredSubstream {
     reduced: bool,
 }
 impl LayeredSubstream {
+    /// Retained selection and its immutable parsed VPS, for source budgeting.
+    pub fn retained_bytes(&self) -> usize {
+        std::mem::size_of::<Self>().saturating_add(self.vps.storage_bytes())
+            .saturating_add(2 * std::mem::size_of::<usize>())
+    }
+    pub fn highest_temporal_id(&self) -> u8 {
+        self.temporal
+    }
     pub fn layers(&self) -> u64 {
         self.layers
     }

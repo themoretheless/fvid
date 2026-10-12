@@ -26,6 +26,16 @@ pub struct LayeredDecoded {
     pub access_unit: u64,
 }
 impl LayeredDecoded {
+    /// Conservative retained ownership for asynchronous output consumers.
+    /// Includes pixels and immutable parameter snapshots; shared owners may
+    /// charge the same buffers again rather than underestimating their budget.
+    pub fn retained_bytes(&self) -> Result<usize> {
+        self.picture
+            .storage_bytes()
+            .and_then(|n| n.checked_add(self.binding.storage_bytes()))
+            .and_then(|n| n.checked_add(self.binding.vps.storage_bytes()))
+            .ok_or_else(|| invalid("HEVC output retained storage overflow"))
+    }
     /// Membership in the signalled OLS output mask, independently of the coded
     /// picture-output flag. Alternative-output policy and ordering are separate.
     pub fn signalled_output_layer(&self) -> Result<bool> {

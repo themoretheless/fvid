@@ -1808,3 +1808,14 @@ second-layer PCM entropy of the final AU. It must parse successfully, refuse
 reconstruction, preserve all three pending AUs and POC state, and then emit the
 proper early AU when retried with the valid packet. This is a refusal/rollback
 witness, separately tested from successful fullness playback acceptance.
+
+`hevc-layered-output-reorder-ctts.mp4` adds an original signed composition-offset
+map to the owned POC permutation witness. `LayeredMp4VideoReader` must preserve
+each delayed result's original sample index, PTS and duration, including both
+output layers at equal PTS. The indexed source also accepts all ten original
+layered reconstruction witnesses and converts their own immutable colour/chroma
+bindings into the common packed-planar player payload with exact saved pixels.
+Tests cover rewind, later-IRAP seek (decoder-relative AU zero maps to source
+sample two), global extraction across a metadata-only sample, error/reset, and
+pre-publication VPS/OLS/temporal-selection refusals. This is an explicit layered
+source API; automatic dispatch from the existing single-view player is separate.
