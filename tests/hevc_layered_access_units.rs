@@ -1346,3 +1346,159 @@ fn unanchored_cra_after_ignored_clras_still_refuses_inconsistent_poc_atomically(
     assert_eq!(decoder.poc(), &before);
     assert_eq!(decoder.next_access_unit(), 2);
 }
+
+#[test]
+fn layered_output_queue_reorders_coded_access_units_and_keeps_layers_together() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-reorder.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let oracle = std::fs::read(root().join("hevc-pcm-reference-rext8.yuv")).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    for highest_tid in [0u8, 1, 2, 2] {
+        let mut output = Vec::new();
+        for (index, poc) in [0, 2, 1, 4, 3].into_iter().enumerate() {
+            let mut packet = vec![];
+            input.read_packet(0, index, &mut packet).unwrap();
+            let (pictures, _) = decoder.decode_packet(&packet).unwrap();
+            assert_eq!(pictures.len(), 2);
+            for p in &pictures {
+                assert_eq!(p.poc, poc);
+                assert!(p.output);
+                assert_pixels(&p.picture, &oracle, 0);
+            }
+            let pending = queue.pending_access_units();
+            assert!(
+                queue
+                    .push(pictures.clone(), highest_tid, 1)
+                    .err()
+                    .unwrap()
+                    .to_string()
+                    .contains("output queue exceeds memory budget")
+            );
+            assert_eq!(queue.pending_access_units(), pending);
+            let mut ready = queue.push(pictures, highest_tid, BUDGET).unwrap();
+            // VPS rows have MaxNumReorderPics=HighestTid+1. Count AUs, not layers.
+            assert_eq!(
+                ready.len(),
+                if index > usize::from(highest_tid) {
+                    2
+                } else {
+                    0
+                }
+            );
+            output.append(&mut ready);
+        }
+        assert_eq!(queue.pending_access_units(), usize::from(highest_tid) + 1);
+        output.extend(queue.drain());
+        assert_eq!(
+            output
+                .iter()
+                .map(|p| (p.poc, p.layer_id))
+                .collect::<Vec<_>>(),
+            [
+                (0, 0),
+                (0, 3),
+                (1, 0),
+                (1, 3),
+                (2, 0),
+                (2, 3),
+                (3, 0),
+                (3, 3),
+                (4, 0),
+                (4, 3)
+            ]
+        );
+        assert_eq!(
+            output.iter().map(|p| p.access_unit).collect::<Vec<_>>(),
+            [0, 0, 2, 2, 1, 1, 4, 4, 3, 3]
+        );
+        assert_eq!(queue.pending_access_units(), 0);
+        decoder.reset();
+    }
+}
+
+#[test]
+fn layered_output_queue_latency_bumps_a_future_au_after_lower_poc_arrivals() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-latency.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    let mut output = Vec::new();
+    for (index, poc) in [0, 6, 1, 2, 3, 4, 5].into_iter().enumerate() {
+        let mut packet = vec![];
+        input.read_packet(0, index, &mut packet).unwrap();
+        let (pictures, _) = decoder.decode_packet(&packet).unwrap();
+        assert!(pictures.iter().all(|p| p.poc == poc && p.output));
+        let ready = queue.push(pictures, 2, BUDGET).unwrap();
+        // VPS row 2: reorder=3, latency_increase_plus1=3 -> max latency=5.
+        // POC6 survives normal count bumping until five lower-POC AUs arrive.
+        assert_eq!(
+            ready.len(),
+            match index {
+                0..=2 => 0,
+                3..=5 => 2,
+                _ => 8,
+            }
+        );
+        output.extend(ready);
+    }
+    assert_eq!(queue.pending_access_units(), 0);
+    assert_eq!(
+        output
+            .iter()
+            .map(|p| (p.poc, p.layer_id))
+            .collect::<Vec<_>>(),
+        (0..7)
+            .flat_map(|poc| [(poc, 0), (poc, 3)])
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn layered_output_queue_rejects_mixed_identity_and_replay_without_publication() {
+    use fvid::codec::hevc_decoder::{LayeredDecoder, LayeredOutputQueue};
+    let mut input = movie("hevc-layered-output-reorder.mp4");
+    let mut decoder =
+        LayeredDecoder::from_configuration(&input.tracks()[0].configuration, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    let mut packet = vec![];
+    input.read_packet(0, 0, &mut packet).unwrap();
+    let (pictures, _) = decoder.decode_packet(&packet).unwrap();
+    let mut duplicate = pictures.clone();
+    duplicate.push(pictures[0].clone());
+    assert!(
+        queue
+            .push(duplicate, 2, BUDGET)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("consistent AU")
+    );
+    let mut mixed = pictures.clone();
+    mixed[1].poc += 1;
+    assert!(
+        queue
+            .push(mixed, 2, BUDGET)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("consistent AU")
+    );
+    assert_eq!(queue.pending_access_units(), 0);
+    assert!(queue.push(pictures.clone(), 2, BUDGET).unwrap().is_empty());
+    assert!(
+        queue
+            .push(pictures.clone(), 2, BUDGET)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("epoch boundary")
+    );
+    assert_eq!(queue.pending_access_units(), 1);
+    queue.reset();
+    assert_eq!(queue.pending_access_units(), 0);
+    assert!(queue.push(pictures, 2, BUDGET).unwrap().is_empty());
+    assert_eq!(queue.drain().len(), 2);
+}

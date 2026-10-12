@@ -1762,3 +1762,15 @@ Explicit disabled tools remain rejected; an ordinary no-PS mono stream rejects
 the PS candidate at EOF while the normal owned mono decoder accepts it.
 This does not assert automatic player/export container discovery. Generation
 is offline and separate from ordinary tests, without external codec programs.
+
+Layered HEVC output ordering witnesses (`generate_hevc_layered_reconstruction.py`):
+`hevc-layered-output-reorder.mp4` has complete two-layer PCM AUs in coded POC
+order 0,2,1,4,3. The owned post-reconstruction queue must emit POCs 0..4 and,
+for each POC, layer 0 followed by layer 3. This reproduces decode-order output
+without requiring private media or external codecs. The latency witness has
+coded order 0,6,1,2,3,4,5: at HighestTid=2, POC6's latency reaches five and forces
+additional bumping even after the pending-AU count is within the reorder limit.
+Tests verify actual decoding, the former fixture's exact original PCM pixels,
+output identities, repeated epochs, and atomic budget/identity refusals.
+These qualify F.13.5.2.3 additional bumping only; reference-DPB fullness bumping,
+IRAP discard/flush decisions, and automatic player dispatch remain separate.

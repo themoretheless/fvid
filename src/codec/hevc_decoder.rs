@@ -27,6 +27,9 @@ pub use layered_dpb::{LayeredDecoded, LayeredDpb};
 #[path = "hevc_stream_layered.rs"]
 mod layered_stream;
 pub use layered_stream::LayeredDecoder;
+#[path = "hevc_output_layered.rs"]
+mod layered_output;
+pub use layered_output::LayeredOutputQueue;
 #[path = "hevc_substream.rs"]
 mod substream;
 pub use substream::{extract_layered_substream, LayeredSubstream, SubstreamScan};

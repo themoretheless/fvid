@@ -11,6 +11,7 @@ use crate::{Result, invalid};
 use std::sync::Arc;
 
 /// Coded-layer identity remains explicit when an AU produces several pictures.
+#[derive(Clone)]
 pub struct LayeredDecoded {
     pub layer_id: u8,
     /// Exact immutable activation used for this coded picture. It outlives

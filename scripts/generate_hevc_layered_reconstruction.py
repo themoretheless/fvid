@@ -338,6 +338,17 @@ def main():
                     filename = "hevc-layered-random-access-"+name+".mp4"
                     (D/filename).write_bytes(mux(stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],access_units=rasl_groups,multilayer=True))
                     random_access_cases.append(dict(file=filename,pocs=pocs,decoded=[[0,3],[0] if fallback else [],[0,3],[0,3],[] if eos else [0,3]],output_masks=[8,1,8,8,8] if fallback else [9,0,9,9,0 if eos else 9]))
+                # Original PCM pixels with deliberately reordered AU POCs.
+                for output_name, output_pocs in [
+                    ("reorder",[0,2,1,4,3]), ("latency",[0,6,1,2,3,4,5])]:
+                    reorder_groups = [[intra_nal(21 if i == 0 else 0,poc,id)
+                        for id in [0,3]] for i,poc in enumerate(output_pocs)]
+                    reorder_stream = b"".join(b"\x00\x00\x00\x01"+n
+                        for n in [*parameters,*sum(reorder_groups,[])])
+                    (D/("hevc-layered-output-"+output_name+".mp4")).write_bytes(mux(
+                        reorder_stream,meta["depth"],*meta["dimensions"],
+                        chroma_format=meta["chroma_format"],chroma_depth=meta["chroma_depth"],
+                        access_units=reorder_groups,multilayer=True))
                 # NoClrasOutput resets every layer's FirstPicInLayerDecodedFlag.
                 # BLA/base EOS must clear the independent layer's old POC history;
                 # an ordinary unanchored CRA must retain its precise refusal.
