@@ -151,6 +151,12 @@ pub struct LayeredVps {
     pub future_extension: bool,
 }
 impl LayeredVps {
+    /// Retained parsed VPS ownership for callers budgeting immutable snapshots.
+    /// Arc control blocks and duplicate shared owners are accounted by the caller.
+    pub fn retained_bytes(&self) -> usize {
+        self.storage_bytes()
+    }
+
     /// Conservative retained metadata bound, including the parser's RBSP
     /// allowance. Used when several layer activations share one VPS owner.
     pub(crate) fn storage_bytes(&self) -> usize {

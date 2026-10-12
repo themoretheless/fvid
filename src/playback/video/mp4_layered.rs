@@ -2,10 +2,11 @@
 //! extraction policy; all selected output layers retain their coded identity.
 use super::{MediaTime, VideoFrame};
 use crate::codec::{
-    config::HevcConfig,
+    config::{HevcConfig, NalUnits},
     hevc_decoder::{
         LayeredDecoded, LayeredDecoder, LayeredOutputQueue, LayeredSubstream, SubstreamScan,
     },
+    hevc_nal::NalHeader,
     hevc_vps::LayeredVps,
 };
 use crate::container::mp4::{Limits, Mp4Reader, Track};
@@ -56,23 +57,96 @@ impl LayeredVideoFrame {
         })
     }
 }
+struct SelectionEpoch {
+    first_sample: usize,
+    selection: LayeredSubstream,
+    scan: SubstreamScan,
+    vps: Arc<LayeredVps>,
+}
+fn selection_storage(epochs: &Vec<SelectionEpoch>) -> usize {
+    epochs
+        .capacity()
+        .saturating_mul(std::mem::size_of::<SelectionEpoch>())
+        .saturating_add(
+            epochs
+                .iter()
+                .map(|e| e.selection.retained_bytes())
+                .fold(0usize, usize::saturating_add),
+        )
+}
+fn retain_selection(
+    epochs: &mut Vec<SelectionEpoch>,
+    first_sample: usize,
+    scan: SubstreamScan,
+    vps: Arc<LayeredVps>,
+    ols: usize,
+    highest_tid: u8,
+    budget: usize,
+) -> Result<()> {
+    // HighestTid is an upper bound; a later VPS may have fewer sublayers.
+    let rows = vps
+        .extension
+        .as_ref()
+        .and_then(|e| e.dpb.sets.get(ols))
+        .and_then(Option::as_ref)
+        .map_or(vps.vps.ordering.len(), Vec::len);
+    let temporal = highest_tid.min((rows - 1) as u8);
+    let merge = epochs.last().is_some_and(|last| *last.vps == *vps);
+    let scan = if merge {
+        epochs.last().unwrap().scan.merged(scan)
+    } else {
+        scan
+    };
+    let selection = scan.select(vps.clone(), ols, temporal)?;
+    if merge {
+        let previous = epochs.last().unwrap().selection.retained_bytes();
+        if selection_storage(epochs)
+            .saturating_sub(previous)
+            .saturating_add(selection.retained_bytes())
+            > budget
+        {
+            return Err(invalid("HEVC source selections exceed memory budget"));
+        }
+        let last = epochs.last_mut().unwrap();
+        last.selection = selection;
+        last.scan = scan;
+        return Ok(());
+    }
+    let growth = (epochs.len() + 1).saturating_mul(std::mem::size_of::<SelectionEpoch>());
+    if selection_storage(epochs)
+        .saturating_add(selection.retained_bytes())
+        .saturating_add(growth)
+        > budget
+    {
+        return Err(invalid("HEVC source selections exceed memory budget"));
+    }
+    epochs
+        .try_reserve_exact(1)
+        .map_err(|_| invalid("cannot allocate HEVC source selections"))?;
+    epochs.push(SelectionEpoch {
+        first_sample,
+        selection,
+        scan,
+        vps,
+    });
+    Ok(())
+}
 /// Each returned layer keeps the PTS/duration of its originating MP4 sample,
 /// even when decoding a later packet releases it. Equal-PTS layers are distinct.
 /// Output follows native POC ordering; container edit lists remain on track().
-/// The operation point uses the configured VPS for this finite source. A VPS
-/// replacement is refused before native state publication, not silently reused.
+/// A completed inventory pins extraction separately for each sequence/VPS epoch.
+/// The native parameter bank still enforces legal VPS activation boundaries.
 /// Demux metadata has its own Limits; caller-owned returned frames are separate.
 pub struct LayeredMp4VideoReader<R> {
     demuxer: Mp4Reader<R>,
     track_index: usize,
     decoder: LayeredDecoder,
     queue: LayeredOutputQueue,
-    selection: LayeredSubstream,
+    selections: Vec<SelectionEpoch>,
     ready: VecDeque<LayeredDecoded>,
     ready_budget: usize,
     packet: Vec<u8>,
     length_size: u8,
-    highest_tid: u8,
     sample_index: usize,
     first_sample: usize,
     prime_until: Option<usize>,
@@ -131,30 +205,114 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             .flat_map(|a| a.units.iter())
             .next()
             .ok_or_else(|| invalid("layered HEVC configuration has no VPS"))?;
-        let vps = Arc::new(LayeredVps::parse(vps, budget / 2)?);
-        let initial_selection =
-            SubstreamScan::default().select(Arc::clone(&vps), output_layer_set, highest_tid)?;
+        if highest_tid > 6 {
+            return Err(invalid("invalid HEVC extraction target"));
+        }
+        let selection_budget = budget / 4;
+        let mut vps = Arc::new(LayeredVps::parse(vps, selection_budget)?);
+        let count = track.samples.len();
+        let mut epochs = Vec::new();
+        let mut first_sample = 0usize;
+        let mut scan = SubstreamScan::default();
+        let mut seen_vcl = false;
+        let mut boundary = false;
+        let mut packet = Vec::new();
+        // Inventory the whole sequence before extracting even its earliest SEI.
+        // Metadata-only samples after EOS belong to the upcoming sequence, whose
+        // VPS may arrive later. Keep their inventory with that upcoming epoch.
+        for index in 0..count {
+            demuxer.read_packet(track_index, index, &mut packet)?;
+            if boundary {
+                retain_selection(
+                    &mut epochs,
+                    first_sample,
+                    scan,
+                    vps.clone(),
+                    output_layer_set,
+                    highest_tid,
+                    selection_budget,
+                )?;
+                first_sample = index;
+                scan = SubstreamScan::default();
+                seen_vcl = false;
+                boundary = false;
+            }
+            let mut candidate: Option<Arc<LayeredVps>> = None;
+            for nal in NalUnits::new(&packet, length_size)? {
+                let nal = nal?;
+                let h = NalHeader::parse(nal)?;
+                if h.layer_id == 0 && h.unit_type == 32 {
+                    let snapshot_bytes = |v: &LayeredVps| {
+                        v.retained_bytes()
+                            .saturating_add(2 * std::mem::size_of::<usize>())
+                    };
+                    let available = selection_budget
+                        .checked_sub(
+                            selection_storage(&epochs)
+                                .saturating_add(snapshot_bytes(&vps))
+                                .saturating_add(
+                                    candidate.as_ref().map_or(0, |v| snapshot_bytes(v)),
+                                ),
+                        )
+                        .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
+                    let received = Arc::new(LayeredVps::parse(nal, available)?);
+                    if candidate
+                        .as_ref()
+                        .is_some_and(|old| old.vps.id != received.vps.id)
+                    {
+                        return Err(crate::unsupported(
+                            "multiple VPS IDs in one source sample require activation selection",
+                        ));
+                    }
+                    candidate = Some(received);
+                }
+            }
+            if let Some(received) = candidate {
+                if *received != *vps {
+                    if seen_vcl {
+                        retain_selection(
+                            &mut epochs,
+                            first_sample,
+                            scan,
+                            vps,
+                            output_layer_set,
+                            highest_tid,
+                            selection_budget,
+                        )?;
+                        first_sample = index;
+                        scan = SubstreamScan::default();
+                        seen_vcl = false;
+                    }
+                    vps = received;
+                }
+            }
+            scan.observe(&packet, length_size)?;
+            for nal in NalUnits::new(&packet, length_size)? {
+                let h = NalHeader::parse(nal?)?;
+                if h.layer_id == 63 {
+                    continue;
+                }
+                seen_vcl |= h.is_vcl();
+                boundary |= h.unit_type == 37 || h.unit_type == 36 && h.layer_id == 0;
+            }
+        }
+        retain_selection(
+            &mut epochs,
+            first_sample,
+            scan,
+            vps,
+            output_layer_set,
+            highest_tid,
+            selection_budget,
+        )?;
         let work_budget = (budget / 2)
-            .checked_sub(
-                initial_selection
-                    .retained_bytes()
-                    .saturating_add(std::mem::size_of::<Self>()),
-            )
-            .ok_or_else(|| invalid("HEVC source selection exceeds memory budget"))?;
+            .checked_sub(selection_storage(&epochs).saturating_add(std::mem::size_of::<Self>()))
+            .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
         let decoder = LayeredDecoder::from_configuration(
-            &track.configuration,
+            &demuxer.tracks()[track_index].configuration,
             output_layer_set,
             work_budget,
         )?;
-        let count = track.samples.len();
-        let mut scan = SubstreamScan::default();
-        let mut packet = Vec::new();
-        // Global timing-SEI reduction must include metadata-only earlier samples.
-        for index in 0..count {
-            demuxer.read_packet(track_index, index, &mut packet)?;
-            scan.observe(&packet, length_size)?;
-        }
-        let selection = scan.select(vps, output_layer_set, highest_tid)?;
         demuxer.invalidate_position();
         packet.clear();
         Ok(Self {
@@ -162,12 +320,11 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             track_index,
             decoder,
             queue: LayeredOutputQueue::default(),
-            selection,
+            selections: epochs,
             ready: VecDeque::new(),
             ready_budget: budget / 4,
             packet,
             length_size,
-            highest_tid,
             sample_index: 0,
             first_sample: 0,
             prime_until: None,
@@ -177,6 +334,19 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
     }
     pub fn track(&self) -> &Track {
         &self.demuxer.tracks()[self.track_index]
+    }
+    /// Completed extraction policy at a source sample, including metadata-only
+    /// samples before its sequence's first coded picture or replacement VPS.
+    pub fn selection_at(&self, sample_index: usize) -> Option<&LayeredSubstream> {
+        if sample_index >= self.track().samples.len() {
+            return None;
+        }
+        Some(&self.selections[self.selection_index(sample_index)].selection)
+    }
+    fn selection_index(&self, sample_index: usize) -> usize {
+        self.selections
+            .partition_point(|e| e.first_sample <= sample_index)
+            .saturating_sub(1)
     }
     pub fn movie_timescale(&self) -> u32 {
         self.demuxer.movie_timescale()
@@ -247,7 +417,8 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             for index in 0..end {
                 self.demuxer
                     .read_packet(self.track_index, index, &mut self.packet)?;
-                let extracted = self.selection.extract_packet(
+                let selection = self.selection_index(index);
+                let extracted = self.selections[selection].selection.extract_packet(
                     &self.packet,
                     self.length_size,
                     self.ready_budget / 2,
@@ -303,11 +474,13 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             }
             self.demuxer
                 .read_packet(self.track_index, self.sample_index, &mut self.packet)?;
+            let selection = self.selection_index(self.sample_index);
+            let selection = &self.selections[selection].selection;
             let (pictures, _) = self.decoder.decode_selected_queued_packet(
                 &mut self.queue,
-                &self.selection,
+                selection,
                 &self.packet,
-                self.highest_tid,
+                selection.highest_temporal_id(),
             )?;
             self.sample_index += 1;
             self.retain_ready(pictures)?;

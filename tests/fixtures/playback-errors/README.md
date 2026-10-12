@@ -1864,3 +1864,24 @@ with alternative-output RADL suppression and signed composition offsets. The
 common player must display base layer 0 with 600/120-nit guidance first, then
 layer 3 with 1800/350-nit guidance. This explicitly rules out metadata leaking
 from the suppressed primary layer or the later packet that releases the frame.
+
+### Layered HEVC VPS epochs
+
+`hevc-layered-vps-epoch-{eos,eob,split,before-first,bla}.mp4` use original
+PCM pixels to change output policy at legal sequence boundaries, including a
+base-layer BLA without an explicit EOS. The split variant places the new VPS
+in a separate packet; before-first replaces an unactivated configuration VPS.
+The multiple variant overwrites an unactivated same-ID definition inside one
+packet and finally activates the original VPS. Its extraction inventory must
+remain global across EOS because the activated VPS is unchanged. The short
+variant reduces the selected OLS temporal limit while old frames remain queued;
+its metadata-only packet must preserve that queue until the new picture.
+
+`hevc_layered_vps_epochs` checks exact pixels, immutable old bindings, original
+sample timestamps, common-player selection, rewind and seek. The illegal variant
+changes VPS on an ordinary non-IRAP picture and must refuse activation. Truncated
+and bla-truncated cut enhancement-layer entropy: failed decoding must preserve
+old parameters and queued output, and retry with the complete packet must work.
+These tests require neither FFmpeg nor generation during test execution. Several
+VPS IDs in one source packet and changes to the layer dependency graph are not
+qualified by these fixtures.

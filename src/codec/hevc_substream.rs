@@ -157,6 +157,14 @@ pub struct SubstreamScan {
     highest_temporal: Option<u8>,
 }
 impl SubstreamScan {
+    /// Combine contiguous inventories belonging to the same activated VPS.
+    pub fn merged(self, other: Self) -> Self {
+        Self {
+            layers: self.layers | other.layers,
+            highest_temporal: self.highest_temporal.max(other.highest_temporal),
+        }
+    }
+
     /// Atomic on malformed framing/header: the previous inventory is unchanged.
     pub fn observe(&mut self, packet: &[u8], length_size: u8) -> Result<()> {
         let mut next = *self;

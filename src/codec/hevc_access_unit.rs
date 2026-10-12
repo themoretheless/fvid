@@ -410,6 +410,15 @@ impl LayeredAccessUnit {
                             "HEVC layered picture must begin with the first slice",
                         ));
                     }
+                    // F.7.4.2.4.2: a base-layer BLA starts a NoClrasOutput
+                    // CVSG even without EOS. Release only staged parameter pins;
+                    // queued old pictures keep immutable bindings, and a failed
+                    // AU still publishes neither new parameters nor references.
+                    if pictures.is_empty() && h.layer_id == 0 && matches!(h.unit_type, 16..=18) {
+                        for layer in 0..63 {
+                            staged.end_layer_sequence(layer);
+                        }
+                    }
                     let binding = staged
                         .with_available(available, |p| p.activate_slice(nal, output_layer_set))?;
                     if !new_picture

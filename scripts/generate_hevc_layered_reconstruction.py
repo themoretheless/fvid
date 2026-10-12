@@ -409,6 +409,46 @@ def main():
                     hdr_alt_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
                     chroma_depth=meta["chroma_depth"],access_units=hdr_alt_groups,multilayer=True,
                     presentation_order=[1,0,2,4,3]))
+                # Genuine VPS epochs: retain old queued output and change OLS
+                # policy from both layers to highest-only after EOS/EOB.
+                next_vps,_,_ = vps(fmt,independent=False,base_format=fmt,output_highest=True,
+                    ordering_rows=[([4,4],0,0)]*3)
+                next_bits = bits(unescape(next_vps[2:]))
+                next_vps = next_vps[:2]+escape(packed(next_bits[:32]+source_ptl+next_bits[128:]))
+                short_vps,_,_ = vps(fmt,independent=False,base_format=fmt,output_highest=True,
+                    short_temporal=True,ordering_rows=[([4,4],0,0)]*2)
+                short_bits = bits(unescape(short_vps[2:]))
+                short_vps = short_vps[:2]+escape(packed(short_bits[:32]+source_ptl+short_bits[128:]))
+                timing_nal = b"\x4e\x01\x01\x00\x80"
+                # Unknown future prefix at temporal ID two: only the next
+                # sequence is reduced for a HighestTid-zero extraction.
+                later_temporal = ((55<<9)|(3<<3)|3).to_bytes(2,"big")+b"\x80"
+                for variant in ["eos","eob","split","before-first","multiple","short","bla","bla-truncated","illegal","truncated"]:
+                    old_groups = [[timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
+                        [intra_nal(0,1,id) for id in [0,3]]]
+                    if variant not in ["illegal","bla","bla-truncated"]:
+                        old_groups[-1].append((((37 if variant=="eob" else 36)<<9)|1).to_bytes(2,"big")+b"\x80")
+                    new_picture = [intra_nal(0 if variant=="illegal" else 16,2 if variant=="illegal" else 0,id) for id in [0,3]]
+                    if variant in ["truncated","bla-truncated"]:
+                        last = new_picture[-1]
+                        new_picture[-1] = last[:2]+escape(unescape(last[2:])[:-256])
+                    active_next_vps = short_vps if variant=="short" else next_vps
+                    epoch_start_groups = [[active_next_vps],new_picture] if variant=="split" else [[active_next_vps,*new_picture]]
+                    if variant == "multiple":
+                        epoch_start_groups = [[next_vps,vps_nal,*new_picture]]
+                    epoch_groups = ([] if variant=="before-first" else old_groups)+[[timing_nal]]+epoch_start_groups+[
+                        [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
+                    if variant in ["bla","bla-truncated"]:
+                        # BLA alone is a legal new-CVSG boundary. Put its timing
+                        # prefix in the same AU, with no explicit EOS/EOB marker.
+                        epoch_start_groups[0].insert(0,timing_nal)
+                        epoch_groups = old_groups+epoch_start_groups+[
+                            [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
+                    epoch_stream = b"".join(b"\x00\x00\x00\x01"+n
+                        for n in [*parameters,*sum(epoch_groups,[])])
+                    (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
+                        epoch_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                        chroma_depth=meta["chroma_depth"],access_units=epoch_groups,multilayer=True,inband_parameters=True))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,

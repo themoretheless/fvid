@@ -182,12 +182,12 @@ impl LayeredOutputQueue {
         highest_tid: u8,
         budget: usize,
     ) -> Result<Vec<LayeredDecoded>> {
-        if self.highest_tid.is_some_and(|tid| tid != highest_tid) {
-            return Err(invalid("HEVC output queue requires an epoch boundary"));
-        }
         let Some(first) = pictures.first() else {
             return Ok(Vec::new());
         };
+        if self.highest_tid.is_some_and(|tid| tid != highest_tid) {
+            return Err(invalid("HEVC output queue requires an epoch boundary"));
+        }
         if self
             .last_access_unit
             .is_some_and(|au| first.access_unit <= au)
