@@ -423,11 +423,15 @@ def main():
                     ordering_rows=[([4,4],0,0)]*3,layer_id=4)
                 graph_bits = bits(unescape(graph_vps[2:]))
                 graph_vps = graph_vps[:2]+escape(packed(graph_bits[:32]+source_ptl+graph_bits[128:]))
+                id_bits = bits(unescape(next_vps[2:]))
+                id_vps = next_vps[:2]+escape(packed("0001"+id_bits[4:]))
+                id_sps_bits = bits(unescape(params[33][0][2:]))
+                id_sps = params[33][0][:2]+escape(packed("0001"+id_sps_bits[4:]))
                 timing_nal = b"\x4e\x01\x01\x00\x80"
                 # Unknown future prefix at temporal ID two: only the next
                 # sequence is reduced for a HighestTid-zero extraction.
                 later_temporal = ((55<<9)|(3<<3)|3).to_bytes(2,"big")+b"\x80"
-                for variant in ["eos","eob","split","before-first","multiple","short","bla","bla-truncated","illegal","truncated","graph","graph-truncated"]:
+                for variant in ["eos","eob","split","before-first","multiple","short","bla","bla-truncated","illegal","truncated","graph","graph-truncated","ids","ids-split","ids-unused"]:
                     old_groups = [[timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
                         [intra_nal(0,1,id) for id in [0,3]]]
                     if variant not in ["illegal","bla","bla-truncated","graph","graph-truncated"]:
@@ -452,6 +456,15 @@ def main():
                             [layer(later_temporal,next_layer),*[intra_nal(0,1,id) for id in [0,next_layer]]]]
                         if variant.startswith("graph"):
                             epoch_start_groups[0].insert(2,layer(pps,next_layer))
+                    if variant in ["ids","ids-split","ids-unused"]:
+                        if variant == "ids-unused":
+                            epoch_groups = [old_groups[0], [id_vps,*[intra_nal(0,1,id) for id in [0,3]]]]
+                        elif variant == "ids-split":
+                            epoch_groups = old_groups+[[id_vps,vps_nal],[id_sps,*new_picture],
+                                [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
+                        else:
+                            epoch_groups = old_groups+[[timing_nal],[id_vps,vps_nal,id_sps,*new_picture],
+                                [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
                     epoch_stream = b"".join(b"\x00\x00\x00\x01"+n
                         for n in [*parameters,*sum(epoch_groups,[])])
                     (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(

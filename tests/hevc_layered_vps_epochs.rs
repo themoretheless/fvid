@@ -549,3 +549,89 @@ fn common_player_seek_and_rewind_select_changed_graph_layer() {
         source.rewind();
     }
 }
+
+#[test]
+fn multiple_vps_ids_select_actual_slice_parameter_chain() {
+    let oracle = std::fs::read(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv"),
+    )
+    .unwrap();
+    for variant in ["ids", "ids-split", "ids-unused"] {
+        for tid in [0, 2, 6] {
+            let mut source = reader(variant, tid);
+            let mut identities = Vec::new();
+            for _ in 0..2 {
+                identities.clear();
+                while let Some(frame) = source.read_frame().unwrap() {
+                    assert_eq!(frame.presentation_time.ticks, frame.sample_index as i64);
+                    assert_eq!(frame.duration.ticks, 1);
+                    identities.push((
+                        frame.sample_index,
+                        frame.decoded.layer_id,
+                        frame.decoded.binding.vps.vps.id,
+                    ));
+                    let packed = frame.into_video_frame().unwrap().packed.unwrap();
+                    assert_eq!(&packed.frame.data, &oracle[..packed.frame.data.len()]);
+                }
+                let mut expected = vec![(0, 0, 0), (0, 3, 0), (1, 0, 0), (1, 3, 0)];
+                if variant != "ids-unused" {
+                    expected.extend([(3, 3, 1), (4, 3, 1)]);
+                }
+                assert_eq!(identities, expected, "{variant}");
+                source.rewind();
+            }
+        }
+    }
+}
+
+#[test]
+fn common_player_seek_uses_referenced_vps_id() {
+    for variant in ["ids", "ids-split", "ids-unused"] {
+        let bytes = std::fs::read(path(variant)).unwrap();
+        let mut source =
+            Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+        let expected = if variant == "ids-unused" {
+            vec![0, 1]
+        } else {
+            vec![0, 1, 3, 4]
+        };
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            while let Some(frame) = source.read_frame().unwrap() {
+                actual.push(frame.sample_index);
+            }
+            assert_eq!(actual, expected);
+            let target = if variant == "ids-unused" { 0 } else { 3 };
+            assert_eq!(source.seek_to_sync(target as i64), target as i64);
+            assert_eq!(source.read_frame().unwrap().unwrap().sample_index, target);
+            assert_eq!(source.selected_layer_id(), Some(3));
+            source.rewind();
+        }
+    }
+}
+
+#[test]
+fn header_vps_reference_lookup_does_not_activate_or_mutate_parameters() {
+    use fvid::codec::{hevc_decoder::LayeredParameters, hevc_nal::NalHeader};
+    let (config, packets) = packets("ids");
+    let mut parameters = LayeredParameters::from_configuration(&config, BUDGET).unwrap();
+    for (index, packet) in packets.iter().enumerate() {
+        for nal in NalUnits::new(packet, 4).unwrap() {
+            let nal = nal.unwrap();
+            let header = NalHeader::parse(nal).unwrap();
+            if matches!(header.unit_type, 32..=34) {
+                parameters.receive(nal).unwrap();
+            }
+            if header.is_vcl() {
+                let bytes = parameters.storage_bytes();
+                assert_eq!(
+                    parameters.referenced_vps(nal).unwrap()[2] >> 4,
+                    if index < 3 { 0 } else { 1 }
+                );
+                assert_eq!(parameters.storage_bytes(), bytes);
+                assert!(parameters.active(header.layer_id).is_none());
+            }
+        }
+    }
+}

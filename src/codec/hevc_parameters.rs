@@ -270,6 +270,35 @@ impl LayeredParameters {
         let id = SliceHeader::parameter_set_id(nal)?;
         self.activate(header.layer_id, id, output_layer_set)
     }
+    /// Find the received VPS referenced by this slice's PPS/SPS chain.
+    /// This does not activate parameters or release existing sequence pins.
+    /// Source inventories can inspect actual references without decoding pixels.
+    pub fn referenced_vps(&self, nal: &[u8]) -> Result<&[u8]> {
+        let left = self.remaining()?;
+        if nal.len() > left {
+            return Err(invalid("HEVC slice parameter lookup exceeds memory budget"));
+        }
+        let id = SliceHeader::parameter_set_id(nal)?;
+        let pps = self
+            .pps
+            .get(usize::from(id))
+            .and_then(Option::as_ref)
+            .ok_or_else(|| invalid("HEVC active PPS is absent"))?;
+        let rbsp = NalRbsp::parse(pps, left)?;
+        let mut bits = BitReader::new(&rbsp.bytes);
+        bits.unsigned_golomb()?;
+        let sps_id = bits.unsigned_golomb()? as usize;
+        let sps = self
+            .sps
+            .get(sps_id)
+            .and_then(Option::as_ref)
+            .ok_or_else(|| invalid("HEVC active SPS is absent"))?;
+        let sps_rbsp = NalRbsp::parse(sps, left.saturating_sub(rbsp.bytes.capacity()))?;
+        let vps_id = BitReader::new(&sps_rbsp.bytes).read(4)? as usize;
+        self.vps[vps_id]
+            .as_deref()
+            .ok_or_else(|| invalid("HEVC active VPS is absent"))
+    }
     /// Activate the globally received PPS and its SPS/VPS for one layer. Active
     /// SPS/VPS contents cannot change until the corresponding sequences end.
     /// Failed resolution leaves every prior active binding intact.

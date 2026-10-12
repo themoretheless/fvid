@@ -1882,9 +1882,8 @@ sample timestamps, common-player selection, rewind and seek. The illegal variant
 changes VPS on an ordinary non-IRAP picture and must refuse activation. Truncated
 and bla-truncated cut enhancement-layer entropy: failed decoding must preserve
 old parameters and queued output, and retry with the complete packet must work.
-These tests require neither FFmpeg nor generation during test execution. Several
-VPS IDs in one source packet and changes to the layer dependency graph are not
-qualified by these fixtures.
+These tests require neither FFmpeg nor generation during test execution. The
+following fixtures separately qualify referenced VPS IDs and graph changes.
 
 `hevc-layered-vps-epoch-graph.mp4` replaces dependent layer 3 with dependent
 layer 4 on a base BLA, preserving original PCM entropy and introducing a layer-4
@@ -1895,3 +1894,15 @@ The graph-truncated variant cuts only new enhancement-layer entropy and verifies
 transactional parameter/POC/queue rollback followed by successful complete retry.
 This qualifies a BLA graph transition; other VPS activation boundaries and
 nonidentity inter-layer prediction tools remain separate requirements.
+
+
+`hevc-layered-vps-epoch-ids.mp4` receives VPS ID 1 and then VPS ID 0 in one
+packet, but activates ID 1 through the slice PPS/SPS chain at BLA. The ids-split
+variant receives both IDs in a metadata-only packet before the new SPS/pictures;
+ids-unused receives ID 1 without ever activating it and continues ordinary
+pictures under ID 0. Before the fix the first two specifically refused with
+`multiple VPS IDs in one source sample require activation selection`.
+Acceptance checks exact PCM pixels, original timestamps, temporal extraction,
+immutable old bindings, rewind and common-player seek. A header-only lookup test
+also verifies that resolving the VPS reference does not activate or mutate the
+parameter bank. Fixtures are authored without FFmpeg and generated separately.

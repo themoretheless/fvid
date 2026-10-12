@@ -4,7 +4,8 @@ use super::{MediaTime, VideoFrame};
 use crate::codec::{
     config::{HevcConfig, NalUnits},
     hevc_decoder::{
-        LayeredDecoded, LayeredDecoder, LayeredOutputQueue, LayeredSubstream, SubstreamScan,
+        LayeredDecoded, LayeredDecoder, LayeredOutputQueue, LayeredParameters, LayeredSubstream,
+        SubstreamScan,
     },
     hevc_nal::NalHeader,
     hevc_vps::LayeredVps,
@@ -210,6 +211,8 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         }
         let selection_budget = budget / 4;
         let mut vps = Arc::new(LayeredVps::parse(vps, selection_budget)?);
+        let mut inventory_parameters =
+            LayeredParameters::from_configuration(&track.configuration, budget / 8)?;
         let count = track.samples.len();
         let mut epochs = Vec::new();
         let mut first_sample = 0usize;
@@ -241,7 +244,14 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             for nal in NalUnits::new(&packet, length_size)? {
                 let nal = nal?;
                 let h = NalHeader::parse(nal)?;
-                if h.layer_id == 0 && h.unit_type == 32 {
+                if h.layer_id == 63 {
+                    continue;
+                }
+                if matches!(h.unit_type, 32..=34) {
+                    inventory_parameters.receive(nal)?;
+                }
+                if h.is_vcl() && candidate.is_none() {
+                    let referenced = inventory_parameters.referenced_vps(nal)?;
                     let snapshot_bytes = |v: &LayeredVps| {
                         v.retained_bytes()
                             .saturating_add(2 * std::mem::size_of::<usize>())
@@ -255,16 +265,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                                 ),
                         )
                         .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
-                    let received = Arc::new(LayeredVps::parse(nal, available)?);
-                    if candidate
-                        .as_ref()
-                        .is_some_and(|old| old.vps.id != received.vps.id)
-                    {
-                        return Err(crate::unsupported(
-                            "multiple VPS IDs in one source sample require activation selection",
-                        ));
-                    }
-                    candidate = Some(received);
+                    candidate = Some(Arc::new(LayeredVps::parse(referenced, available)?));
                 }
             }
             if let Some(received) = candidate {
@@ -305,6 +306,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             highest_tid,
             selection_budget,
         )?;
+        drop(inventory_parameters);
         let work_budget = (budget / 2)
             .checked_sub(selection_storage(&epochs).saturating_add(std::mem::size_of::<Self>()))
             .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
