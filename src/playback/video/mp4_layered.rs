@@ -64,6 +64,11 @@ struct SelectionEpoch {
     scan: SubstreamScan,
     vps: Arc<LayeredVps>,
 }
+fn seek_storage(entries: &Vec<(usize, usize)>) -> usize {
+    entries
+        .capacity()
+        .saturating_mul(std::mem::size_of::<(usize, usize)>())
+}
 fn selection_storage(epochs: &Vec<SelectionEpoch>) -> usize {
     epochs
         .capacity()
@@ -144,6 +149,8 @@ pub struct LayeredMp4VideoReader<R> {
     decoder: LayeredDecoder,
     queue: LayeredOutputQueue,
     selections: Vec<SelectionEpoch>,
+    seek_preroll: Vec<(usize, usize)>,
+    visible_sample: usize,
     ready: VecDeque<LayeredDecoded>,
     ready_budget: usize,
     packet: Vec<u8>,
@@ -215,6 +222,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             LayeredParameters::from_configuration(&track.configuration, budget / 8)?;
         let count = track.samples.len();
         let mut epochs = Vec::new();
+        let mut seek_preroll = Vec::new();
+        let mut safe_sync = 0usize;
+        let mut restart_pending = true;
         let mut first_sample = 0usize;
         let mut scan = SubstreamScan::default();
         let mut seen_vcl = false;
@@ -225,6 +235,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         // VPS may arrive later. Keep their inventory with that upcoming epoch.
         for index in 0..count {
             demuxer.read_packet(track_index, index, &mut packet)?;
+            let mut base_restart = false;
             if boundary {
                 retain_selection(
                     &mut epochs,
@@ -233,7 +244,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                     vps.clone(),
                     output_layer_set,
                     highest_tid,
-                    selection_budget,
+                    selection_budget.saturating_sub(seek_storage(&seek_preroll)),
                 )?;
                 first_sample = index;
                 scan = SubstreamScan::default();
@@ -250,6 +261,10 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 if matches!(h.unit_type, 32..=34) {
                     inventory_parameters.receive(nal)?;
                 }
+                if h.layer_id == 0 && h.is_vcl() {
+                    base_restart |= matches!(h.unit_type, 16..=18)
+                        || inventory_parameters.base_cross_layer_bla(nal)?;
+                }
                 if h.is_vcl() && candidate.is_none() {
                     let referenced = inventory_parameters.referenced_vps(nal)?;
                     let snapshot_bytes = |v: &LayeredVps| {
@@ -259,6 +274,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                     let available = selection_budget
                         .checked_sub(
                             selection_storage(&epochs)
+                                .saturating_add(seek_storage(&seek_preroll))
                                 .saturating_add(snapshot_bytes(&vps))
                                 .saturating_add(
                                     candidate.as_ref().map_or(0, |v| snapshot_bytes(v)),
@@ -278,7 +294,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                             vps,
                             output_layer_set,
                             highest_tid,
-                            selection_budget,
+                            selection_budget.saturating_sub(seek_storage(&seek_preroll)),
                         )?;
                         first_sample = index;
                         scan = SubstreamScan::default();
@@ -288,13 +304,59 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 }
             }
             scan.observe(&packet, length_size)?;
+            let mut present = 0u64;
+            let mut irap = 0u64;
             for nal in NalUnits::new(&packet, length_size)? {
                 let h = NalHeader::parse(nal?)?;
                 if h.layer_id == 63 {
                     continue;
                 }
                 seen_vcl |= h.is_vcl();
+                if h.is_vcl() {
+                    present |= 1u64 << h.layer_id;
+                }
+                if h.is_irap() {
+                    irap |= 1u64 << h.layer_id;
+                }
                 boundary |= h.unit_type == 37 || h.unit_type == 36 && h.layer_id == 0;
+            }
+            let required = vps
+                .extension
+                .as_ref()
+                .and_then(|e| e.output.sets.get(output_layer_set))
+                .map_or(0, |set| set.necessary);
+            let safe = present != 0
+                && (restart_pending || base_restart || required != 0 && required & !irap == 0);
+            if demuxer.tracks()[track_index]
+                .samples
+                .get(index)
+                .unwrap()
+                .sync
+            {
+                if safe {
+                    safe_sync = index;
+                } else {
+                    let growth = (seek_preroll.len() + 1)
+                        .saturating_mul(std::mem::size_of::<(usize, usize)>());
+                    if selection_storage(&epochs)
+                        .saturating_add(seek_storage(&seek_preroll))
+                        .saturating_add(growth)
+                        .saturating_add(vps.retained_bytes())
+                        > selection_budget
+                    {
+                        return Err(invalid("HEVC seek inventory exceeds memory budget"));
+                    }
+                    seek_preroll
+                        .try_reserve_exact(1)
+                        .map_err(|_| invalid("cannot allocate HEVC seek inventory"))?;
+                    seek_preroll.push((index, safe_sync));
+                }
+            }
+            if present != 0 {
+                restart_pending = false;
+            }
+            if boundary {
+                restart_pending = true;
             }
         }
         retain_selection(
@@ -304,11 +366,15 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             vps,
             output_layer_set,
             highest_tid,
-            selection_budget,
+            selection_budget.saturating_sub(seek_storage(&seek_preroll)),
         )?;
         drop(inventory_parameters);
         let work_budget = (budget / 2)
-            .checked_sub(selection_storage(&epochs).saturating_add(std::mem::size_of::<Self>()))
+            .checked_sub(
+                selection_storage(&epochs)
+                    .saturating_add(seek_storage(&seek_preroll))
+                    .saturating_add(std::mem::size_of::<Self>()),
+            )
             .ok_or_else(|| invalid("HEVC source selections exceed memory budget"))?;
         let decoder = LayeredDecoder::from_configuration(
             &demuxer.tracks()[track_index].configuration,
@@ -323,6 +389,8 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             decoder,
             queue: LayeredOutputQueue::default(),
             selections: epochs,
+            seek_preroll,
+            visible_sample: 0,
             ready: VecDeque::new(),
             ready_budget: budget / 4,
             packet,
@@ -360,13 +428,15 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         self.demuxer.invalidate_position();
         self.sample_index = 0;
         self.first_sample = 0;
+        self.visible_sample = 0;
         self.prime_until = None;
         self.eof = false;
         self.failed = false;
     }
     /// Reset at an indexed sync sample and recover preceding parameter and HDR
     /// header history without reconstructing skipped pixels. Reading performs
-    /// the deferred I/O; skipped POC history is discarded before target decoding.
+    /// the deferred I/O. Mixed sync AUs preroll from the last complete layer
+    /// entry; their preparatory frames are hidden while references initialize.
     pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
         let index = self
             .track()
@@ -378,10 +448,16 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             .filter(|(_, s)| s.sync && s.pts <= pts)
             .max_by_key(|(i, s)| (s.pts, std::cmp::Reverse(*i)))
             .map_or(0, |(i, _)| i);
+        let start = self
+            .seek_preroll
+            .binary_search_by_key(&index, |entry| entry.0)
+            .ok()
+            .map_or(index, |at| self.seek_preroll[at].1);
         self.rewind();
-        self.sample_index = index;
-        self.first_sample = index;
-        self.prime_until = (index > 0).then_some(index);
+        self.sample_index = start;
+        self.first_sample = start;
+        self.visible_sample = index;
+        self.prime_until = (start > 0).then_some(start);
         self.track().samples.get(index).map_or(0, |s| s.pts)
     }
     fn retain_ready(&mut self, pictures: Vec<LayeredDecoded>) -> Result<()> {
@@ -446,6 +522,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                             .map_err(|_| invalid("HEVC output sample index overflow"))?,
                     )
                     .ok_or_else(|| invalid("HEVC output sample index overflow"))?;
+                if sample_index < self.visible_sample {
+                    continue;
+                }
                 let sample = self
                     .track()
                     .samples

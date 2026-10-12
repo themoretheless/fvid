@@ -1931,3 +1931,24 @@ still refuse activation. Cross-bla-truncated cuts only base-IDR entropy and
 checks transactional parameter/POC/queue rollback and complete-packet retry.
 These cases qualify a coded cross-layer restart with a later enhancement CRA;
 same-AU mixed IDR/non-IDR pictures with POC reset require separate qualification.
+
+### Mixed IDR/non-IDR POC reset and prior output
+
+`hevc-layered-vps-epoch-mixed-reset-active.mp4` uses base IDR and enhancement
+TRAIL_R in the same AU with full reset IDC 2/period 7, retaining the active VPS
+and already initialized enhancement layer. It reproduced `HEVC output POC
+precedes an already emitted picture`: the queue restored the old POC after
+starting the new period. It also exposed incomplete-layer seek initialization
+at a container sync sample; the source now prerolls from a complete layer entry
+and hides preparation frames while preserving the requested sync PTS.
+
+Mixed-cross-reset and mixed-cross-reset-graph combine the same reset with coded
+cross-layer BLA/VPS activation. Their ordinary enhancement picture is correctly
+ignored until its later CRA. Mixed-cross-reset-discard additionally sets the
+prior-output discard flag and reproduced four leaked old pictures: reset drained
+them before applying discard. Acceptance now expects only the later enhancement
+CRA. Mixed-cross-reset-truncated cuts base entropy and verifies that a failed
+reset/discard preserves old bindings, POC and queue until a successful retry.
+Mixed-cross-reset-badidc omits the required full reset and must retain its precise
+mixed-base-IDR refusal. Tests compare original PCM pixels and timestamps and
+exercise rewind and common-player seek without FFmpeg or fixture generation.

@@ -497,13 +497,16 @@ def main():
                     r = Reader(value); r.ue(); r.ue()
                     at = r.at+2
                     return nal[:2]+escape(packed(value[:at]+"010"+value[at+3:]))
-                def cross_bla_idr(flag):
+                def cross_bla_idr(flag, prior=False, extension=None):
                     raw = bytes(meta["packets"][0][0]["rbsp"])
                     value = bits(raw)
                     end = meta["packets"][0][0]["entropy_byte_offset"]*8
                     align = value[:end].rfind("1")
                     at = ue_end(value,2)
-                    head = value[:1]+"0"+value[2:at]+"0"+str(int(flag))+value[at:align]
+                    head = value[:1]+str(int(prior))+value[2:at]+"0"+str(int(flag))+value[at:align]
+                    if extension is not None:
+                        extension += "0"*((-len(extension))%8)
+                        head += ue(len(extension)//8)+extension
                     return base_slices[0][:2]+escape(packed(head+"1")+raw[end//8:])
                 for variant in ["cross-bla","cross-bla-graph","cross-bla-truncated","cross-bla-unset"]:
                     target_layer = 4 if variant=="cross-bla-graph" else 3
@@ -519,6 +522,26 @@ def main():
                     (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
                         cross_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
                         chroma_depth=meta["chroma_depth"],access_units=cross_groups,multilayer=True,inband_parameters=True))
+                from generate_hevc_poc_reset_fixtures import reset_pps
+                for variant in ["mixed-reset-active","mixed-cross-reset","mixed-cross-reset-discard","mixed-cross-reset-truncated","mixed-cross-reset-badidc","mixed-cross-reset-graph"]:
+                    active = variant=="mixed-reset-active"
+                    target_layer = 4 if variant=="mixed-cross-reset-graph" else 3
+                    discard = variant in ["mixed-cross-reset-discard","mixed-cross-reset-truncated"]
+                    reset_extension = "000" if variant=="mixed-cross-reset-badidc" else "10"+"000111"+"0"
+                    first_idr = cross_bla_idr(not active,prior=discard,extension=reset_extension)
+                    if variant=="mixed-cross-reset-truncated":
+                        first_idr = first_idr[:2]+escape(unescape(first_idr[2:])[:-256])
+                    controls = ([] if active else [graph_vps if target_layer==4 else next_vps])
+                    controls += [cross_bla_pps(reset_pps(params[34][0])),reset_pps(layer(pps,target_layer))]
+                    mixed_groups = [[timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
+                        [intra_nal(0,1,id) for id in [0,3]],
+                        [*controls,first_idr,intra_nal(1,0,target_layer,extension=reset_extension)],
+                        [intra_nal(1,1,0,extension="000",extra_header="00"),
+                            intra_nal(1 if active else 21,1,target_layer,extension="000")]]
+                    mixed_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*sum(mixed_groups,[])])
+                    (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
+                        mixed_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                        chroma_depth=meta["chroma_depth"],access_units=mixed_groups,multilayer=True,inband_parameters=True))
                 # Four storage slots with three reorder AUs: a retained hidden
                 # reference can fill the slot otherwise available for decoding.
                 pressure_vps,_,_ = vps(fmt,independent=False,base_format=fmt,

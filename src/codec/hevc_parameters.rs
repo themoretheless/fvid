@@ -301,7 +301,7 @@ impl LayeredParameters {
     }
     /// Read only the independent base IDR's coded cross-layer restart flag.
     /// Full slice/VPS validation follows before the staged bank is published.
-    pub(crate) fn base_cross_layer_bla(&self, nal: &[u8]) -> Result<bool> {
+    pub fn base_cross_layer_bla(&self, nal: &[u8]) -> Result<bool> {
         let header = NalHeader::parse(nal)?;
         if header.layer_id != 0 || !header.is_idr() {
             return Ok(false);

@@ -54,9 +54,6 @@ impl LayeredOutputQueue {
     ) -> Vec<LayeredDecoded> {
         let mut ready = Vec::new();
         let p = picture;
-        if p.resetting {
-            ready.extend(self.drain());
-        }
         let (mut scope, discard) = preview.output_prior[p.binding.sps.layer_id as usize];
         if scope != 0
             && self
@@ -67,6 +64,7 @@ impl LayeredOutputQueue {
             scope = (1u64 << 63) - 1;
         }
         if scope == 0 {
+            if p.resetting { ready.extend(self.drain()); }
             return ready;
         }
         if discard {
@@ -94,6 +92,10 @@ impl LayeredOutputQueue {
             self.last_access_unit = None;
             self.highest_tid = None;
         }
+        // Prior-output discard must happen before the reset drains remaining
+        // pictures. Reset ordering last: flushing old output must not restore
+        // its POC as the lower bound for the new resetting period.
+        if p.resetting { ready.extend(self.drain()); }
         ready
     }
     /// F.13.5.2.2: RPS has already marked unused references. Count the union of

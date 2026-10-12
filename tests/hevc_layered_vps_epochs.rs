@@ -828,3 +828,215 @@ fn common_player_seek_crosses_coded_cross_layer_bla_with_delayed_output_layer() 
         }
     }
 }
+
+#[test]
+fn mixed_full_reset_discards_prior_output_before_starting_new_poc_epoch() {
+    let mut source = reader("mixed-cross-reset-discard", 2);
+    let mut actual = Vec::new();
+    while let Some(frame) = source.read_frame().unwrap() {
+        actual.push((frame.sample_index, frame.decoded.layer_id));
+    }
+    assert_eq!(actual, [(3, 3)]);
+}
+
+#[test]
+fn mixed_full_reset_without_vps_change_preserves_both_layers() {
+    let mut source = reader("mixed-reset-active", 2);
+    let mut actual = Vec::new();
+    while let Some(frame) = source.read_frame().unwrap() {
+        actual.push((
+            frame.sample_index,
+            frame.decoded.layer_id,
+            frame.decoded.poc,
+        ));
+    }
+    assert_eq!(
+        actual,
+        [
+            (0, 0, 0),
+            (0, 3, 0),
+            (1, 0, 1),
+            (1, 3, 1),
+            (2, 0, 0),
+            (2, 3, 0),
+            (3, 0, 1),
+            (3, 3, 1)
+        ]
+    );
+}
+
+#[test]
+fn coded_mixed_resets_preserve_pixels_timestamps_and_rewind() {
+    let oracle = std::fs::read(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv"),
+    )
+    .unwrap();
+    for variant in [
+        "mixed-reset-active",
+        "mixed-cross-reset",
+        "mixed-cross-reset-graph",
+        "mixed-cross-reset-discard",
+    ] {
+        let mut source = reader(variant, 2);
+        let next_layer = if variant == "mixed-cross-reset-graph" {
+            4
+        } else {
+            3
+        };
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            while let Some(frame) = source.read_frame().unwrap() {
+                assert_eq!(frame.presentation_time.ticks, frame.sample_index as i64);
+                assert_eq!(frame.duration.ticks, 1);
+                actual.push((frame.sample_index, frame.decoded.layer_id));
+                let packed = frame.into_video_frame().unwrap().packed.unwrap();
+                assert_eq!(&packed.frame.data, &oracle[..packed.frame.data.len()]);
+            }
+            let mut expected = if variant == "mixed-cross-reset-discard" {
+                vec![]
+            } else {
+                vec![(0, 0), (0, 3), (1, 0), (1, 3)]
+            };
+            if variant == "mixed-reset-active" {
+                expected.extend([(2, 0), (2, 3), (3, 0), (3, 3)]);
+            } else {
+                expected.push((3, next_layer));
+            }
+            assert_eq!(actual, expected, "{variant}");
+            source.rewind();
+        }
+    }
+}
+
+#[test]
+fn mixed_base_idr_still_requires_full_poc_reset() {
+    let mut source = reader("mixed-cross-reset-badidc", 2);
+    let error = loop {
+        match source.read_frame() {
+            Ok(Some(_)) => {}
+            Ok(None) => panic!("expected full reset refusal"),
+            Err(e) => break e.to_string(),
+        }
+    };
+    assert!(
+        error.contains("HEVC mixed base IDR access unit requires full POC reset"),
+        "{error}"
+    );
+}
+
+#[test]
+fn failed_discarding_mixed_reset_preserves_original_queue_until_retry() {
+    let source = reader("mixed-cross-reset-discard", 2);
+    let (config, good) = packets("mixed-cross-reset-discard");
+    let (_, bad) = packets("mixed-cross-reset-truncated");
+    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    for (index, packet) in good[..2].iter().enumerate() {
+        decoder
+            .decode_selected_queued_packet(
+                &mut queue,
+                source.selection_at(index).unwrap(),
+                packet,
+                2,
+            )
+            .unwrap();
+    }
+    let active = decoder.parameters().active(0).unwrap().clone();
+    let poc = decoder.poc().clone();
+    let old = queue.clone().drain();
+    let error = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &bad[2], 2)
+        .err()
+        .unwrap()
+        .to_string();
+    assert!(
+        error.contains("truncated or oversized bit field"),
+        "{error}"
+    );
+    assert!(Arc::ptr_eq(
+        decoder.parameters().active(0).unwrap(),
+        &active
+    ));
+    assert_eq!(decoder.poc(), &poc);
+    assert_eq!(decoder.next_access_unit(), 2);
+    assert_eq!(queue.pending_access_units(), 2);
+    for (before, after) in old.iter().zip(queue.clone().drain()) {
+        assert!(Arc::ptr_eq(&before.binding, &after.binding));
+        assert!(Arc::ptr_eq(&before.picture, &after.picture));
+    }
+    let (released, _) = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &good[2], 2)
+        .unwrap();
+    assert!(released.is_empty());
+    let (next, _) = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(3).unwrap(), &good[3], 2)
+        .unwrap();
+    assert_eq!(
+        next.iter()
+            .map(|p| (p.access_unit, p.layer_id))
+            .collect::<Vec<_>>(),
+        [(3, 3)]
+    );
+}
+
+#[test]
+fn common_player_seek_and_rewind_cross_mixed_reset_epoch() {
+    for variant in [
+        "mixed-reset-active",
+        "mixed-cross-reset",
+        "mixed-cross-reset-graph",
+        "mixed-cross-reset-discard",
+    ] {
+        let bytes = std::fs::read(path(variant)).unwrap();
+        let mut source =
+            Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+        let expected = match variant {
+            "mixed-reset-active" => vec![0, 1, 2, 3],
+            "mixed-cross-reset-discard" => vec![3],
+            _ => vec![0, 1, 3],
+        };
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            while let Some(frame) = source.read_frame().unwrap() {
+                actual.push(frame.sample_index);
+            }
+            assert_eq!(actual, expected, "{variant}");
+            assert_eq!(source.seek_to_sync(2), 2);
+            assert_eq!(
+                source.read_frame().unwrap().unwrap().sample_index,
+                if variant == "mixed-reset-active" {
+                    2
+                } else {
+                    3
+                }
+            );
+            assert_eq!(
+                source.selected_layer_id(),
+                Some(if variant == "mixed-cross-reset-graph" {
+                    4
+                } else {
+                    3
+                })
+            );
+            source.rewind();
+        }
+    }
+}
+
+#[test]
+fn mixed_sync_seek_prerolls_layers_and_hides_all_preparatory_frames() {
+    for tid in [0, 2, 6] {
+        let mut source = reader("mixed-reset-active", tid);
+        assert_eq!(source.seek_to_sync(2), 2);
+        let mut actual = Vec::new();
+        while let Some(frame) = source.read_frame().unwrap() {
+            actual.push((
+                frame.sample_index,
+                frame.decoded.layer_id,
+                frame.decoded.poc,
+            ));
+        }
+        assert_eq!(actual, [(2, 0, 0), (2, 3, 0), (3, 0, 1), (3, 3, 1)]);
+    }
+}
