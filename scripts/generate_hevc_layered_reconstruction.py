@@ -419,31 +419,39 @@ def main():
                     short_temporal=True,ordering_rows=[([4,4],0,0)]*2)
                 short_bits = bits(unescape(short_vps[2:]))
                 short_vps = short_vps[:2]+escape(packed(short_bits[:32]+source_ptl+short_bits[128:]))
+                graph_vps,_,_ = vps(fmt,independent=False,base_format=fmt,output_highest=True,
+                    ordering_rows=[([4,4],0,0)]*3,layer_id=4)
+                graph_bits = bits(unescape(graph_vps[2:]))
+                graph_vps = graph_vps[:2]+escape(packed(graph_bits[:32]+source_ptl+graph_bits[128:]))
                 timing_nal = b"\x4e\x01\x01\x00\x80"
                 # Unknown future prefix at temporal ID two: only the next
                 # sequence is reduced for a HighestTid-zero extraction.
                 later_temporal = ((55<<9)|(3<<3)|3).to_bytes(2,"big")+b"\x80"
-                for variant in ["eos","eob","split","before-first","multiple","short","bla","bla-truncated","illegal","truncated"]:
+                for variant in ["eos","eob","split","before-first","multiple","short","bla","bla-truncated","illegal","truncated","graph","graph-truncated"]:
                     old_groups = [[timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
                         [intra_nal(0,1,id) for id in [0,3]]]
-                    if variant not in ["illegal","bla","bla-truncated"]:
+                    if variant not in ["illegal","bla","bla-truncated","graph","graph-truncated"]:
                         old_groups[-1].append((((37 if variant=="eob" else 36)<<9)|1).to_bytes(2,"big")+b"\x80")
-                    new_picture = [intra_nal(0 if variant=="illegal" else 16,2 if variant=="illegal" else 0,id) for id in [0,3]]
-                    if variant in ["truncated","bla-truncated"]:
+                    next_layer = 4 if variant.startswith("graph") else 3
+                    new_picture = [intra_nal(0 if variant=="illegal" else 16,2 if variant=="illegal" else 0,id) for id in [0,next_layer]]
+                    if variant in ["truncated","bla-truncated","graph-truncated"]:
                         last = new_picture[-1]
                         new_picture[-1] = last[:2]+escape(unescape(last[2:])[:-256])
                     active_next_vps = short_vps if variant=="short" else next_vps
+                    if variant.startswith("graph"): active_next_vps = graph_vps
                     epoch_start_groups = [[active_next_vps],new_picture] if variant=="split" else [[active_next_vps,*new_picture]]
                     if variant == "multiple":
                         epoch_start_groups = [[next_vps,vps_nal,*new_picture]]
                     epoch_groups = ([] if variant=="before-first" else old_groups)+[[timing_nal]]+epoch_start_groups+[
                         [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
-                    if variant in ["bla","bla-truncated"]:
+                    if variant in ["bla","bla-truncated","graph","graph-truncated"]:
                         # BLA alone is a legal new-CVSG boundary. Put its timing
                         # prefix in the same AU, with no explicit EOS/EOB marker.
                         epoch_start_groups[0].insert(0,timing_nal)
                         epoch_groups = old_groups+epoch_start_groups+[
-                            [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
+                            [layer(later_temporal,next_layer),*[intra_nal(0,1,id) for id in [0,next_layer]]]]
+                        if variant.startswith("graph"):
+                            epoch_start_groups[0].insert(2,layer(pps,next_layer))
                     epoch_stream = b"".join(b"\x00\x00\x00\x01"+n
                         for n in [*parameters,*sum(epoch_groups,[])])
                     (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(

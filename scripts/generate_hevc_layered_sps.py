@@ -40,17 +40,19 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None, layer_id=3):
+    if not 1 <= layer_id <= 62:
+        raise ValueError("enhancement layer ID must be in 1..62")
     if bad_geometry:
         target = dict(target, size=[255, 192])
     base_format = BASE if base_format is None else base_format
     formats = [base_format] if one_format else [base_format, target, fmt(3, True, (16, 12))]
-    # Two layers (IDs 0 and 3), three temporal sublayers, base ordering 16/2/0.
+    # Two layers (base and authored enhancement), three temporal sublayers.
     b = '0000' + '11' + '000001' + '0101' + '1'*16 + ptl(True)
     b += '0' + ue(base_buffers-1) + ue(2) + ue(base_latency)
-    b += '000011' + ue(1) + '1001' + '0' + '1'
+    b += f'{layer_id:06b}' + ue(1) + '1' + '0'*(layer_id-1) + '1' + '0' + '1'
     b += '1' * ((-len(b)) % 8)
-    b += ptl(False, level=90) + '0' + '0'*16 + '1' + '000011' + '0000'
+    b += ptl(False, level=90) + '0' + '0'*16 + '1' + f'{layer_id:06b}' + '0000'
     b += '0' if independent else '1'
     if independent:
         b += ue(0)  # no additional layer sets for the two independent roots

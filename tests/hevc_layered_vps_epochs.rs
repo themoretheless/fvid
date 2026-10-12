@@ -366,54 +366,62 @@ fn later_vps_reduces_highest_tid_to_selected_ols_temporal_limit() {
 
 #[test]
 fn failed_implicit_bla_cvsg_keeps_active_old_parameters_until_successful_retry() {
-    let source = reader("bla", 2);
-    let (config, good) = packets("bla");
-    let (_, bad) = packets("bla-truncated");
-    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
-    let mut queue = LayeredOutputQueue::default();
-    for (index, packet) in good[..2].iter().enumerate() {
-        decoder
-            .decode_selected_queued_packet(
-                &mut queue,
-                source.selection_at(index).unwrap(),
-                packet,
-                2,
-            )
+    for variant in ["bla", "graph"] {
+        let source = reader(variant, 2);
+        let (config, good) = packets(variant);
+        let (_, bad) = packets(&format!("{variant}-truncated"));
+        let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+        let mut queue = LayeredOutputQueue::default();
+        for (index, packet) in good[..2].iter().enumerate() {
+            decoder
+                .decode_selected_queued_packet(
+                    &mut queue,
+                    source.selection_at(index).unwrap(),
+                    packet,
+                    2,
+                )
+                .unwrap();
+        }
+        let active = decoder.parameters().active(0).unwrap().clone();
+        let poc = decoder.poc().clone();
+        let error = decoder
+            .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &bad[2], 2)
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("truncated or oversized bit field"),
+            "{error}"
+        );
+        assert!(Arc::ptr_eq(
+            decoder.parameters().active(0).unwrap(),
+            &active
+        ));
+        assert_eq!(decoder.poc(), &poc);
+        assert_eq!(decoder.next_access_unit(), 2);
+        assert_eq!(queue.pending_access_units(), 2);
+        let (released, _) = decoder
+            .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &good[2], 2)
             .unwrap();
+        assert_eq!(
+            released
+                .iter()
+                .map(|f| (f.access_unit, f.layer_id))
+                .collect::<Vec<_>>(),
+            [
+                (0, 0),
+                (0, 3),
+                (1, 0),
+                (1, 3),
+                (2, if variant == "graph" { 4 } else { 3 })
+            ]
+        );
+        assert_ne!(decoder.parameters().active(0).unwrap().vps, active.vps);
+        assert_eq!(
+            active.vps.extension.as_ref().unwrap().output.sets[1].output,
+            9
+        );
     }
-    let active = decoder.parameters().active(0).unwrap().clone();
-    let poc = decoder.poc().clone();
-    let error = decoder
-        .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &bad[2], 2)
-        .err()
-        .unwrap()
-        .to_string();
-    assert!(
-        error.contains("truncated or oversized bit field"),
-        "{error}"
-    );
-    assert!(Arc::ptr_eq(
-        decoder.parameters().active(0).unwrap(),
-        &active
-    ));
-    assert_eq!(decoder.poc(), &poc);
-    assert_eq!(decoder.next_access_unit(), 2);
-    assert_eq!(queue.pending_access_units(), 2);
-    let (released, _) = decoder
-        .decode_selected_queued_packet(&mut queue, source.selection_at(2).unwrap(), &good[2], 2)
-        .unwrap();
-    assert_eq!(
-        released
-            .iter()
-            .map(|f| (f.access_unit, f.layer_id))
-            .collect::<Vec<_>>(),
-        [(0, 0), (0, 3), (1, 0), (1, 3), (2, 3)]
-    );
-    assert_ne!(decoder.parameters().active(0).unwrap().vps, active.vps);
-    assert_eq!(
-        active.vps.extension.as_ref().unwrap().output.sets[1].output,
-        9
-    );
 }
 
 #[test]
@@ -471,4 +479,73 @@ fn metadata_only_packet_preserves_old_queue_until_new_temporal_epoch_picture() {
         .decode_selected_queued_packet(&mut queue, source.selection_at(3).unwrap(), &packets[3], 1)
         .unwrap();
     assert_eq!(frames.len(), 5);
+}
+
+#[test]
+fn changed_dependency_graph_starts_new_poc_history_and_preserves_old_outputs() {
+    let oracle = std::fs::read(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv"),
+    )
+    .unwrap();
+    let mut source = reader("graph", 2);
+    let mut identities = Vec::new();
+    let mut old_binding = None;
+    for _ in 0..2 {
+        identities.clear();
+        while let Some(frame) = source.read_frame().unwrap() {
+            identities.push((
+                frame.sample_index,
+                frame.decoded.layer_id,
+                frame.decoded.poc,
+            ));
+            if frame.sample_index == 0 {
+                old_binding = Some(frame.decoded.binding.clone());
+            }
+            let packed = frame.into_video_frame().unwrap().packed.unwrap();
+            assert_eq!(&packed.frame.data, &oracle[..packed.frame.data.len()]);
+        }
+        assert_eq!(
+            identities,
+            [
+                (0, 0, 0),
+                (0, 3, 0),
+                (1, 0, 1),
+                (1, 3, 1),
+                (2, 4, 0),
+                (3, 4, 1)
+            ]
+        );
+        assert_eq!(
+            old_binding
+                .as_ref()
+                .unwrap()
+                .vps
+                .extension
+                .as_ref()
+                .unwrap()
+                .graph
+                .layer_ids,
+            [0, 3]
+        );
+        source.rewind();
+    }
+}
+
+#[test]
+fn common_player_seek_and_rewind_select_changed_graph_layer() {
+    let bytes = std::fs::read(path("graph")).unwrap();
+    let mut source =
+        Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+    for _ in 0..2 {
+        for (sample, layer) in [(0, 3), (1, 3), (2, 4), (3, 4)] {
+            assert_eq!(source.read_frame().unwrap().unwrap().sample_index, sample);
+            assert_eq!(source.selected_layer_id(), Some(layer));
+        }
+        assert!(source.read_frame().unwrap().is_none());
+        assert_eq!(source.seek_to_sync(2), 2);
+        assert_eq!(source.read_frame().unwrap().unwrap().sample_index, 2);
+        assert_eq!(source.selected_layer_id(), Some(4));
+        source.rewind();
+    }
 }

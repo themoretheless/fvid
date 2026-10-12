@@ -1885,3 +1885,13 @@ old parameters and queued output, and retry with the complete packet must work.
 These tests require neither FFmpeg nor generation during test execution. Several
 VPS IDs in one source packet and changes to the layer dependency graph are not
 qualified by these fixtures.
+
+`hevc-layered-vps-epoch-graph.mp4` replaces dependent layer 3 with dependent
+layer 4 on a base BLA, preserving original PCM entropy and introducing a layer-4
+PPS binding. Before the fix it specifically refused with `HEVC layered POC
+configuration requires reset`. Acceptance checks exact saved pixels, old-layer
+output snapshots, new POC history, common-player layer selection, rewind and seek.
+The graph-truncated variant cuts only new enhancement-layer entropy and verifies
+transactional parameter/POC/queue rollback followed by successful complete retry.
+This qualifies a BLA graph transition; other VPS activation boundaries and
+nonidentity inter-layer prediction tools remain separate requirements.

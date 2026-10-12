@@ -168,6 +168,12 @@ impl LayeredPocState {
         }
         let graph = Graph::read(vps)?;
         if self.graph.is_some_and(|old| old != graph) {
+            // A base BLA begins a new CVSG. History from removed layers and
+            // reset periods belongs to the old graph, including after seek.
+            let first = pictures[0].header.nal;
+            if first.layer_id == 0 && matches!(first.unit_type, 16..=18) {
+                return Self::default().preview(vps, pictures);
+            }
             return Err(invalid("HEVC layered POC configuration requires reset"));
         }
         let mut next = self.clone();

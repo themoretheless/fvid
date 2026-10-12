@@ -398,7 +398,16 @@ impl LayeredDpb {
                 ));
             }
         }
-        let mut staged = if let Some(transition) = plan.transition() {
+        // NoClras releases every old reference before the first picture.
+        // Do not translate these references against a possibly different VPS
+        // graph: removed layers are legal here and will never be reconstructed.
+        let release_all = plan.pictures().first().is_some_and(|picture| {
+            random_access.release[picture.slices[0].nal.layer_id as usize]
+                == (1u64 << 63) - 1
+        });
+        let mut staged = if release_all {
+            Vec::new()
+        } else if let Some(transition) = plan.transition() {
             transition.translate_references(&self.references, available)?
         } else {
             self.references.clone()
