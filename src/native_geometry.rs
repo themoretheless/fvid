@@ -134,11 +134,8 @@ impl VideoGeometry {
                 if (p.frame.width, p.frame.height) != (width, height) {
                     return Err(invalid("inconsistent packed plane dimensions"));
                 }
-                let [sx, sy] = p
-                    .frame
-                    .subsampling
-                    .ok_or_else(|| invalid("missing planar subsampling"))?;
-                (Cow::Borrowed(p.frame.data.as_slice()), sx, sy, false)
+                let [sx, sy] = p.frame.subsampling.unwrap_or([1, 1]);
+                (Cow::Borrowed(p.frame.data.as_slice()), sx, sy, p.frame.subsampling.is_none())
             }
             RawFrame::Planar8(p) => {
                 if (p.width, p.height) != (width, height) {
@@ -334,7 +331,7 @@ impl VideoGeometry {
         let rgb = subsampling.is_none();
         let [sx, sy] = subsampling.unwrap_or([1, 1]);
         let bytes = if rgb {
-            3
+            3 * if depth == 8 { 1 } else { 2 }
         } else if depth == 8 {
             1
         } else {
@@ -426,12 +423,8 @@ impl VideoGeometry {
             } else {
                 16u16 << (depth - 8)
             };
-            let fill = if rgb {
-                [0, 0, 0]
-            } else {
-                let b = black.to_le_bytes();
-                [b[0], b[1], 0]
-            };
+            let mut fill = [0u8; 6];
+            if !rgb { fill[..2].copy_from_slice(&black.to_le_bytes()); }
             for row in 0..dh {
                 let py = sample_index(row, canvas_h.div_ceil(ody), dh, media);
                 for col in 0..dw {

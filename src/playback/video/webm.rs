@@ -940,6 +940,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             ),
             Picture::Av1(d) => {
                 let color_space = match d.color.matrix {
+                    0 => 7,
                     1 => 2,
                     2 | 5 | 6 => 1,
                     7 => 4,
@@ -1000,6 +1001,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 crate::playback_native::avc_to_rgb(&picture, *colour, &mut self.rgb, self.rgb_budget)?;
             }
             return Ok(true);
+        }
+        if let Picture::Av1(decoded) = &current.decoded {
+            if decoded.color.matrix == 0 && !decoded.color.monochrome {
+                let packed = crate::playback_native::av1_picture(&decoded.picture, &decoded.color,
+                    AvcColour { kr: 0.2126, kb: 0.0722, full: true })?;
+                packed.to_rgb(&mut self.rgb, self.rgb_budget)?;
+                return Ok(true);
+            }
         }
         let (kr, kb) = match current.color_space {
             0 | 1 | 3 => (0.299, 0.114),
@@ -1112,6 +1121,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     picture: picture.clone(),
                     colour: *colour,
                 },
+                Picture::Av1(decoded) if decoded.color.matrix == 0 && !decoded.color.monochrome => {
+                    crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::av1_picture(
+                        &decoded.picture, &decoded.color, AvcColour { kr: 0.2126, kb: 0.0722, full: true },
+                    )?))
+                }
                 Picture::Vp9(_) | Picture::Av1(_) if current.depth > 8 => {
                     let planes=match &current.decoded {
                         Picture::Vp9(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),

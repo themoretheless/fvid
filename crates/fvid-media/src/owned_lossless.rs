@@ -276,6 +276,17 @@ pub fn transcode_lossless(
     if !policy(options, true) {
         return Err("owned Y4M lossless export does not yet implement requested policy".into());
     }
+    // A recognized compressed container whose owned capability was refused is
+    // not Y4M. Keep the refusal explicit instead of parsing binary bytes as text.
+    let mut probe = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let mut prefix = [0u8; 8];
+    let count = std::io::Read::read(&mut probe, &mut prefix).map_err(|e| e.to_string())?;
+    if count == 8 && crate::owned_mp4::recognizes_prefix(&prefix) {
+        return Err("owned MP4 lossless export does not yet support this codec, format or transform".into());
+    }
+    if count >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+        return Err("owned Matroska lossless export does not yet support this codec, format or transform".into());
+    }
     if let Some((from, to)) = request.interval {
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());

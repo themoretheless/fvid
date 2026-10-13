@@ -2098,3 +2098,32 @@ The same AV1 library acceptance now includes owned 4:2:2 (8/10-bit) and 4:4:4
 configuration and in-band header failures must retain the precise owned error
 and leave a pre-existing export destination unchanged. RGB AV1 streaming export
 remains a separate capability gap, not counted as covered by these YUV cases.
+
+2026-10-13 AV1 identity RGB playback: `av1-rgb.json` contains owned 8/10/12-bit
+MP4, WebM and low-overhead samples. The generator authors the conforming
+1/13/0 identity color description in existing synthetic 4:4:4 headers and
+reinterprets their independently saved G/B/R plane samples as interleaved
+R/G/B, without a color conversion or external codec. Native sequence parsing
+and direct decode prove the intended color configuration and exact samples.
+Both container players previously refused with
+`unsupported AV1 RGB matrix coefficients`.
+
+Enabled RGB playback acceptance checks source-depth samples, explicit display
+normalization, timestamps, rewind, seek, byte-exact rotation, flip and black
+padding. Interleaved RGB uses GeometryFrame subsampling=None; sample depth stays
+8/10/12, with LE word storage above eight bits. YUV shaders never consume RGB
+bytes. The owned arbitrary-angle rotation adapter also supports RGB LE words;
+the 10-bit sample previously refused with `RGB rotation requires 8-bit samples`.
+
+RGB lossless export is NOT an enabled acceptance case yet: the separate passing
+refusal test records missing native FFV1 RGB support. Compressed MP4/Matroska
+capability refusals now stay explicit rather than falling through to Y4M ASCII
+parsing. Replace that refusal with exact export acceptance when RGB FFV1 is
+implemented. Regenerate explicitly with
+`python3 scripts/generate_av1_rgb_samples.py`; ordinary tests are offline and do
+not generate fixtures or call FFmpeg/external codecs.
+Rotated RGB MP4 variants set tkhd rotation=90 and retain the coded 64x48 planes.
+They qualify upright 48x64 display codes and source-depth raw/geometry APIs.
+The playback queue originally lost rotation while taking the RGB presentation
+path (the depth-8/90-degree runtime regression failed before the fix); it now
+rotates before explicit display conversion. Native raw samples stay unrotated.

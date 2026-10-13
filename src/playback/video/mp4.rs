@@ -545,7 +545,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         let p = &decoded.picture;
                         let colour = crate::playback_native::AvcColour {
                             kr: match decoded.color.matrix {
-                                1 => 0.2126,
+                                0 | 1 => 0.2126,
                                 2 | 5 | 6 => 0.299,
                                 9 => 0.2627,
                                 _ => {
@@ -553,7 +553,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                                 }
                             },
                             kb: match decoded.color.matrix {
-                                1 => 0.0722,
+                                0 | 1 => 0.0722,
                                 2 | 5 | 6 => 0.114,
                                 9 => 0.0593,
                                 _ => {
@@ -565,7 +565,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         let coded_width = p.size[0] as usize;
                         let coded_height = p.size[1] as usize;
                         let crop = [0; 4];
-                        let explicit_geometry = decoded.color.monochrome
+                        let explicit_geometry = decoded.color.matrix == 0 || decoded.color.monochrome
                             || decoded.color.subsampling != [true, true]
                             || coded_width % 2 != 0
                             || coded_height % 2 != 0;

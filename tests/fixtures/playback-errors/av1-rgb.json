@@ -1,0 +1,86 @@
+{
+  "cases": [
+    {
+      "depth": 8,
+      "width": 64,
+      "height": 48,
+      "frames": 2,
+      "files": {
+        "obu": {
+          "file": "av1-rgb-depth8.obu",
+          "sha256": "e22bdb47d6fa29fb958918c65c65142537e575ee3cfa639d8436195f1432d751"
+        },
+        "mp4": {
+          "file": "av1-rgb-depth8.mp4",
+          "sha256": "3e7d348b5b014ca240dbe3b531810ed2468ea1b495681fd773cb29411c6115ec"
+        },
+        "webm": {
+          "file": "av1-rgb-depth8.webm",
+          "sha256": "8be271d113eb594e2af07748d139b48ac3574fa0d7c1b8ae5b768898a7180159"
+        },
+        "rotated": {
+          "file": "av1-rgb-depth8-rotate90.mp4",
+          "sha256": "9d011afe8272e4ca79f2088209e4ef46d77b12d9d7a07ddc1d58539d032d21e3"
+        }
+      },
+      "reference": "av1-rgb-depth8.rgb",
+      "reference_sha256": "fd0cf271374e452acf7a5f261afa529160d1fe90582b438d112d45ebb3f5681f",
+      "seed": "av1-chroma-layout444-depth8-lossless1"
+    },
+    {
+      "depth": 10,
+      "width": 64,
+      "height": 48,
+      "frames": 2,
+      "files": {
+        "obu": {
+          "file": "av1-rgb-depth10.obu",
+          "sha256": "ecb12f1a888d63046983217c5f169729ac87c517a9e9186eec96f429e3000f02"
+        },
+        "mp4": {
+          "file": "av1-rgb-depth10.mp4",
+          "sha256": "3e1543064d31efd5c65424585342a047c75c14b469c23668998fb0c91a794568"
+        },
+        "webm": {
+          "file": "av1-rgb-depth10.webm",
+          "sha256": "5bce204c0c8dcc943ac6914d655d8dd0a1070d94fa4b1de0f362c69c96ad0e04"
+        },
+        "rotated": {
+          "file": "av1-rgb-depth10-rotate90.mp4",
+          "sha256": "d441ac4f221091c984302d589f4b9003e6961cb71f80b5a1cbd7e496dc53a967"
+        }
+      },
+      "reference": "av1-rgb-depth10.rgb",
+      "reference_sha256": "54d2344c332f38390faed37133cf46f3db9768d3230899423b0bd1977bc3e807",
+      "seed": "av1-chroma-layout444-depth10-lossless1"
+    },
+    {
+      "depth": 12,
+      "width": 64,
+      "height": 48,
+      "frames": 2,
+      "files": {
+        "obu": {
+          "file": "av1-rgb-depth12.obu",
+          "sha256": "96d62af35854e377cfef59bbfa38cf8c05643a4e3e900e03dae6d5af8f056f25"
+        },
+        "mp4": {
+          "file": "av1-rgb-depth12.mp4",
+          "sha256": "02bde2400e466b7200bd06ea14cfa47f46622144d69b3fad84c58d0170636657"
+        },
+        "webm": {
+          "file": "av1-rgb-depth12.webm",
+          "sha256": "b47aecdf148f1427fbe0966be3bba1b13042a97cacf55a30df385ec3d1b5fe3c"
+        },
+        "rotated": {
+          "file": "av1-rgb-depth12-rotate90.mp4",
+          "sha256": "0a7e180baeecc4c07a17e6e98bab95e87a16fbfc1f938f69b823dc925681f9fb"
+        }
+      },
+      "reference": "av1-rgb-depth12.rgb",
+      "reference_sha256": "167d60fd062d24f18501aaa6dfc0fa318f1da49f70dbcbb7f32cd02e14e0c20d",
+      "seed": "av1-chroma-layout444-depth12-lossless1"
+    }
+  ],
+  "provenance": "Owned saved 4:4:4 coding and independent decoded samples. Authored identity-matrix color_config (1/13/0), preserving coding flags. G/B/R samples interleaved to R/G/B without conversion. No private media, external codec or network."
+}

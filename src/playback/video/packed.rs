@@ -1,4 +1,4 @@
-//! Packed planar samples retain codec depth and explicit chroma subsampling.
+//! Packed samples retain codec depth: planar YUV or interleaved identity RGB.
 use super::{AvcColour, Planar8};
 use crate::{Result, invalid, native_geometry::GeometryFrame};
 
@@ -28,6 +28,16 @@ impl PackedPlanar {
         if !kr.is_finite() || !kb.is_finite() || kr < 0.0 || kb < 0.0 || kr + kb >= 1.0 {
             return Err(invalid("invalid planar colour matrix"));
         }
+        if f.subsampling.is_none() {
+            let luma = f.width.checked_mul(f.height)
+                .filter(|_| f.width != 0 && f.height != 0 && (8..=16).contains(&self.depth))
+                .ok_or_else(|| invalid("invalid packed RGB layout"))?;
+            let bytes = if self.depth == 8 { 1 } else { 2 };
+            if luma.checked_mul(3).and_then(|n| n.checked_mul(bytes)) != Some(f.data.len()) {
+                return Err(invalid("invalid packed RGB storage"));
+            }
+            return Ok((0, 0, luma, 0, bytes));
+        }
         let [sx, sy] = f
             .subsampling
             .ok_or_else(|| invalid("planar frame needs chroma geometry"))?;
@@ -55,6 +65,10 @@ impl PackedPlanar {
     }
     pub fn pixel_format(&self) -> Result<String> {
         self.layout()?;
+        if self.frame.subsampling.is_none() {
+            // Storage uses 8-bit bytes or LE words; `depth` retains coded precision.
+            return Ok(if self.depth == 8 { "rgb24" } else { "rgb48le" }.into());
+        }
         let name = match self.frame.subsampling {
             Some([1, 1]) => "444",
             Some([2, 1]) => "422",
@@ -80,6 +94,9 @@ impl PackedPlanar {
     }
     /// Borrow the three encoded planes without narrowing samples or converting colour.
     pub(crate) fn plane_data(&self) -> Result<[&[u8]; 3]> {
+        if self.frame.subsampling.is_none() {
+            return Err(invalid("RGB storage is interleaved, not YUV planes"));
+        }
         let (_, _, luma, chroma, bytes) = self.layout()?;
         let y_end = luma * bytes;
         let cb_end = y_end + chroma * bytes;
@@ -172,6 +189,15 @@ impl PackedPlanar {
             return Err(invalid("invalid planar rotation"));
         }
         let (sx, sy, _, _, bytes) = self.layout()?;
+        if self.frame.subsampling.is_none() {
+            let quarter = matches!(rotation, 90 | 270);
+            return Self::new(GeometryFrame {
+                width: if quarter { self.frame.height } else { self.frame.width },
+                height: if quarter { self.frame.width } else { self.frame.height },
+                subsampling: None,
+                data: super::rotate_plane(&self.frame.data, self.frame.width, self.frame.height, rotation, 3 * bytes),
+            }, self.depth, self.colour);
+        }
         let data = self.plane_data()?;
         let w = self.frame.width;
         let h = self.frame.height;
@@ -195,6 +221,9 @@ impl PackedPlanar {
     }
     /// Explicit 8-bit presentation conversion; raw/export callers keep `frame`.
     pub fn to_planar8(&self, budget: usize) -> Result<Planar8> {
+        if self.frame.subsampling.is_none() {
+            return Err(invalid("RGB samples cannot be borrowed as YUV planes"));
+        }
         let (sx, sy, luma, chroma, bytes) = self.layout()?;
         if luma + 2 * chroma > budget {
             return Err(invalid("planar presentation exceeds budget"));
@@ -226,6 +255,15 @@ impl PackedPlanar {
             .ok_or_else(|| invalid("RGB frame exceeds playback budget"))?;
         if rgb.len() != len {
             *rgb = crate::buffer(len)?;
+        }
+        if self.frame.subsampling.is_none() {
+            let max = (1u32 << self.depth) - 1;
+            for (i, out) in rgb.iter_mut().enumerate() {
+                let value = u32::from(self.sample(i, bytes));
+                if value > max { return Err(invalid("RGB sample exceeds coded depth")); }
+                *out = ((value * 255 + max / 2) / max) as u8;
+            }
+            return Ok(());
         }
         let AvcColour { kr, kb, full } = self.colour;
         if !kr.is_finite() || !kb.is_finite() || kr < 0.0 || kb < 0.0 || kr + kb >= 1.0 {
@@ -354,6 +392,30 @@ pub(crate) fn av1_picture(
         return Err(invalid("invalid AV1 planar depth"));
     }
     let [width, height] = p.size.map(|n| n as usize);
+    if signal.matrix == 0 && !signal.monochrome {
+        if signal.subsampling != [false, false] || !signal.full_range {
+            return Err(invalid("invalid AV1 identity RGB geometry or range"));
+        }
+        let bytes = if p.depth == 8 { 1 } else { 2 };
+        let length = width.checked_mul(height).and_then(|n| n.checked_mul(3 * bytes))
+            .ok_or_else(|| invalid("AV1 RGB size overflow"))?;
+        for plane in &p.planes {
+            if plane.width < width || plane.height < height
+                || plane.width.checked_mul(plane.height) != Some(plane.samples.len()) {
+                return Err(invalid("invalid AV1 RGB plane storage"));
+            }
+        }
+        let mut data = Vec::new();
+        data.try_reserve_exact(length).map_err(|_| invalid("AV1 RGB allocation failed"))?;
+        let max = (1u32 << p.depth) - 1;
+        for y in 0..height { for x in 0..width { for channel in [2, 0, 1] {
+            let plane = &p.planes[channel];
+            let value = plane.samples[y * plane.width + x];
+            if u32::from(value) > max { return Err(invalid("RGB sample exceeds coded depth")); }
+            if bytes == 1 { data.push(value as u8); } else { data.extend_from_slice(&value.to_le_bytes()); }
+        }}}
+        return PackedPlanar::new(GeometryFrame { width, height, subsampling: None, data }, p.depth, colour);
+    }
     let factors = if signal.monochrome {
         [2, 2]
     } else {

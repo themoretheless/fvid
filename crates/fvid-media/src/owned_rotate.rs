@@ -13,9 +13,6 @@ pub fn rotate(
         return Err("invalid rotation geometry, angle or depth".into());
     }
     let rgb = frame.subsampling.is_none();
-    if rgb && depth != 8 {
-        return Err("RGB rotation requires 8-bit samples".into());
-    }
     let [sx, sy] = frame.subsampling.unwrap_or([1, 1]);
     if sx == 0 || sy == 0 {
         return Err("invalid rotation chroma geometry".into());
@@ -100,7 +97,7 @@ pub fn rotate(
                 return f64::from(fill);
             }
             let offset = if rgb {
-                (y as usize * iw + x as usize) * 3 + plane
+                ((y as usize * iw + x as usize) * 3 + plane) * bytes
             } else {
                 source_base + (y as usize * iw + x as usize) * bytes
             };
@@ -129,7 +126,7 @@ pub fn rotate(
                     .round()
                     .clamp(0.0, f64::from(maximum)) as u16;
                 let offset = if rgb {
-                    (y * ow + x) * 3 + plane
+                    ((y * ow + x) * 3 + plane) * bytes
                 } else {
                     dest_base + (y * ow + x) * bytes
                 };

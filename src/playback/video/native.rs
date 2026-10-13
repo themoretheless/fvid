@@ -1046,7 +1046,7 @@ pub enum RawFrame {
     },
     /// Hardware decoder output: already cropped 8-bit planes.
     Planar8(Arc<Planar8>),
-    /// Packed planar output retaining source precision and chroma geometry.
+    /// Packed output retaining source precision: planar YUV or interleaved RGB.
     Planar(Arc<PackedPlanar>),
     /// Uncompressed Y4M frame (luma, then Cb, then Cr) for off-thread conversion.
     Yuv {

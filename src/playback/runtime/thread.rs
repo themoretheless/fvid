@@ -186,7 +186,14 @@ fn into_pixels(
                     "source-depth frame exceeds presentation budget",
                 ));
             }
-            Pixels::Packed(p, None)
+            if p.frame.subsampling.is_none() {
+                let mut rgb = Vec::new();
+                if rotation != 0 { p.rotated(rotation)?.to_rgb(&mut rgb, budget)?; }
+                else { p.to_rgb(&mut rgb, budget)?; }
+                Pixels::Rgb(rgb)
+            } else {
+                Pixels::Packed(p, None)
+            }
         }
         RawFrame::Avc { picture, colour } if picture.bit_depth > 8 => Pixels::Packed(
             Arc::new(crate::playback_native::PackedPlanar::from_picture(
@@ -619,6 +626,25 @@ impl<R: BufRead + Seek> Worker<R> {
 #[cfg(test)]
 mod precision_tests {
     use super::*;
+    #[test]
+    fn identity_rgb_frames_use_rgb_presentation_without_yuv_shader() {
+        for depth in [8, 10, 12] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(format!("tests/fixtures/playback-errors/av1-rgb-depth{depth}.mp4"));
+            let mut reader = NativeReader::software(
+                std::io::Cursor::new(std::fs::read(path).unwrap()), 32 << 20).unwrap();
+            let Some(RawFrame::Planar(packed)) = reader.read_frame_raw().unwrap() else {
+                panic!("identity RGB lost its tagged precision");
+            };
+            for rotation in [0, 90, 180, 270] {
+                let mut expected = Vec::new();
+                packed.rotated(rotation).unwrap().to_rgb(&mut expected, 32 << 20).unwrap();
+                let pixels = into_pixels(RawFrame::Planar(Arc::clone(&packed)), rotation, 32 << 20, None).unwrap();
+                let Pixels::Rgb(actual) = pixels else { panic!("identity RGB sent to YUV shader"); };
+                assert_eq!(actual, expected, "depth {depth}, rotation {rotation}");
+            }
+        }
+    }
     #[test]
     fn source_precision_queue_honours_byte_budget_even_at_large_frames() {
         let bytes = 3840usize * 2160 * 6;
