@@ -2127,3 +2127,27 @@ They qualify upright 48x64 display codes and source-depth raw/geometry APIs.
 The playback queue originally lost rotation while taking the RGB presentation
 path (the depth-8/90-degree runtime regression failed before the fix); it now
 rotates before explicit display conversion. Native raw samples stay unrotated.
+
+2026-10-13 Native FFV1 v1 RGB core: `ffv1-rgb.json` stores independently authored
+Python range-coder packets, 4x2 channel-distinct/extreme sample oracles, complete
+RCT plane traces and two-frame Matroska videos at 8/10/12/16 bits. RFC 9043
+requires a distinct blue-based RCT for 9..15-bit RGB without alpha; 8/16 bits
+use the ordinary green-based RCT. Coding is line-interleaved with n+1 residual
+bits and positively offset chroma differences. The old decoder refused these
+packets with `unsupported FFV1 capability: FFV1 RGB decoding is not implemented`.
+
+Enabled acceptance requires exact independently generated packet bytes from the
+Rust encoder, exact samples from the Rust decoder, reset/keyframe recovery,
+explicit memory-budget refusal and bounded truncation handling. Native Matroska
+playback also verifies RGB precision, display codes, timing, rewind and seek.
+This qualifies v1 range-coded RGB without alpha; version 3, Golomb Rice and
+alpha remain separate gaps. RGB AV1 media-pipeline export still needs wiring to
+this RGB core; its existing refusal test is not export acceptance. Generate
+explicitly with `python3 scripts/generate_ffv1_rgb_fixtures.py`; ordinary tests
+only read saved fixtures and require no FFmpeg, external codec or network.
+Three malformed RGB videos/packets require exact failures for missing chroma,
+subsampled RGB and out-of-depth reconstructed channels, before publication.
+The existing threaded YUV-rotation test also now verifies the current GPU
+contract: coded 12-bit planes plus Frame rotation metadata, then exact rotated
+samples/display codes. Its old expectation failed identically on baseline HEAD
+9f426958b, independently of the RGB codec implementation.

@@ -72,6 +72,7 @@ impl<'a> Range<'a> {
     }
 }
 struct State {
+    rgb: bool,
     depth: u8,
     has_chroma: bool,
     shifts: [u8; 2],
@@ -137,9 +138,9 @@ impl Decoder {
                 transitions[i] = n as u8;
             }
         }
-        if r.integer(&mut h, false)? != 0 {
-            return Err(unsupported("FFV1 RGB decoding is not implemented"));
-        }
+        let rgb = match r.integer(&mut h, false)? {
+            0 => false, 1 => true, _ => return Err(unsupported("unsupported FFV1 color space")),
+        };
         let depth = if version == 0 {
             8
         } else {
@@ -156,6 +157,9 @@ impl Decoder {
         }
         if r.bit(&mut h[0])? {
             return Err(unsupported("FFV1 alpha decoding is not implemented"));
+        }
+        if rgb && (!has_chroma || sx != 0 || sy != 0) {
+            return Err(invalid("invalid FFV1 RGB chroma configuration"));
         }
         let mut tables = [[0; 256]; 5];
         let mut scale = 1i32;
@@ -194,6 +198,7 @@ impl Decoder {
             model.resize(count, [128; 32]);
         }
         Ok(State {
+            rgb,
             depth: depth as u8,
             has_chroma,
             shifts: [sx as u8, sy as u8],
@@ -213,6 +218,12 @@ impl Decoder {
             old.ok_or_else(|| invalid("FFV1 frame requires a preceding keyframe"))?
         };
         r.transitions = state.transitions;
+        if state.rgb {
+            let frame = decode_rgb(&mut r, &mut state, self.width, self.height, self.budget)?;
+            let depth = state.depth;
+            self.state = Some(state);
+            return Ok(Decoded { frame, depth, keyframe });
+        }
         let sx = if state.has_chroma {
             1usize << state.shifts[0]
         } else {
@@ -338,3 +349,5 @@ impl Decoder {
         })
     }
 }
+
+include!("owned_ffv1_rgb_decoder_impl.rs");

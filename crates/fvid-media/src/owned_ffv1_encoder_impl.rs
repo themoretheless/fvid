@@ -85,15 +85,14 @@ impl RangeWriter {
 }
 
 /// Encode one self-contained keyframe. Input is packed planar Y,Cb,Cr; samples
-/// above 8 bits use little-endian u16. RGB and alpha require separate profiles.
+/// above 8 bits use little-endian u16. Interleaved RGB selects the v1 RCT path;
+/// alpha still requires a separate profile.
 /// Every frame resets probability models, so packets can be independently sought.
 pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
     if !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
         return Err(invalid("unsupported FFV1 depth or empty geometry"));
     }
-    let subsampling = frame
-        .subsampling
-        .ok_or_else(|| invalid("FFV1 RGB encoding is not implemented"))?;
+    let Some(subsampling) = frame.subsampling else { return encode_rgb(frame, depth); };
     encode_planes(
         frame.width,
         frame.height,
@@ -230,3 +229,5 @@ pub(super) const TRANSITION: [u8; 256] = [
     230, 231, 232, 234, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248,
     248, 0, 0, 0, 0, 0, 0, 0,
 ];
+
+include!("owned_ffv1_rgb_encoder_impl.rs");

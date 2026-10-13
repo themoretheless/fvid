@@ -1,4 +1,4 @@
-//! Owned FFV1 version 1 range-coded, all-intra YCbCr encoder.
+//! Owned FFV1 version 1 range-coded, all-intra YCbCr/RGB encoder.
 //! Bitstream semantics: RFC 9043. One slice and a single residual context
 //! per luma/chroma model; quantization here selects contexts, not sample loss.
 use crate::owned_frame::GeometryFrame;

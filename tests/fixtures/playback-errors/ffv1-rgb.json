@@ -1,0 +1,349 @@
+{
+  "cases": [
+    {
+      "depth": 8,
+      "file": "ffv1-rgb-depth8.mkv",
+      "sha256": "2f202f60c4fd01f5d01155468602d88a910719b3d26508c9791935c2cb6c31dc",
+      "frames": [
+        {
+          "packet": "ffv1-rgb-depth8-frame0.packet",
+          "reference": "ffv1-rgb-depth8-frame0.rgb",
+          "planes": [
+            [
+              0,
+              63,
+              127,
+              63,
+              255,
+              2,
+              127,
+              77
+            ],
+            [
+              256,
+              256,
+              1,
+              511,
+              256,
+              257,
+              509,
+              210
+            ],
+            [
+              256,
+              511,
+              1,
+              256,
+              256,
+              255,
+              510,
+              302
+            ]
+          ],
+          "sha256": "b155f604e923e460e3289a7e3c3b10e12a72e41fc6c62c2c0584172d86700463"
+        },
+        {
+          "packet": "ffv1-rgb-depth8-frame1.packet",
+          "reference": "ffv1-rgb-depth8-frame1.rgb",
+          "planes": [
+            [
+              0,
+              63,
+              127,
+              63,
+              255,
+              2,
+              127,
+              78
+            ],
+            [
+              256,
+              256,
+              1,
+              511,
+              256,
+              257,
+              509,
+              210
+            ],
+            [
+              256,
+              511,
+              1,
+              256,
+              256,
+              255,
+              510,
+              302
+            ]
+          ],
+          "sha256": "19cfe5566f13d8f597acc4fd0798d16a792c81c77b8eb90f2e83835720f21185"
+        }
+      ]
+    },
+    {
+      "depth": 10,
+      "file": "ffv1-rgb-depth10.mkv",
+      "sha256": "1aa097d7a54db3ff5cbb76829017e38e76ede5ff058371e170295140f756a831",
+      "frames": [
+        {
+          "packet": "ffv1-rgb-depth10-frame0.packet",
+          "reference": "ffv1-rgb-depth10-frame0.rgb",
+          "planes": [
+            [
+              0,
+              255,
+              255,
+              511,
+              1023,
+              2,
+              767,
+              65
+            ],
+            [
+              1024,
+              1024,
+              2047,
+              1,
+              1024,
+              1023,
+              3,
+              1070
+            ],
+            [
+              1024,
+              2047,
+              1024,
+              1,
+              1024,
+              1022,
+              1025,
+              1116
+            ]
+          ],
+          "sha256": "5c34d5ac9393dcc6bee92fddc684dd7f4d84b67ec9d8dfc78edd29122582b0d3"
+        },
+        {
+          "packet": "ffv1-rgb-depth10-frame1.packet",
+          "reference": "ffv1-rgb-depth10-frame1.rgb",
+          "planes": [
+            [
+              0,
+              255,
+              255,
+              511,
+              1023,
+              2,
+              767,
+              66
+            ],
+            [
+              1024,
+              1024,
+              2047,
+              1,
+              1024,
+              1023,
+              3,
+              1070
+            ],
+            [
+              1024,
+              2047,
+              1024,
+              1,
+              1024,
+              1022,
+              1025,
+              1116
+            ]
+          ],
+          "sha256": "df4c49c5faa77eeaad6284b99a6c69e2888234b60ef803d654afd4101a70783d"
+        }
+      ]
+    },
+    {
+      "depth": 12,
+      "file": "ffv1-rgb-depth12.mkv",
+      "sha256": "8c288ab81d219f5495e752fb9334ce3b21f01e493ca864741bb9e6ab2d5bfe93",
+      "frames": [
+        {
+          "packet": "ffv1-rgb-depth12-frame0.packet",
+          "reference": "ffv1-rgb-depth12-frame0.rgb",
+          "planes": [
+            [
+              0,
+              1023,
+              1023,
+              2047,
+              4095,
+              2,
+              3071,
+              65
+            ],
+            [
+              4096,
+              4096,
+              8191,
+              1,
+              4096,
+              4095,
+              3,
+              4142
+            ],
+            [
+              4096,
+              8191,
+              4096,
+              1,
+              4096,
+              4094,
+              4097,
+              4188
+            ]
+          ],
+          "sha256": "1549e0c1ab22fd3abe8dd018ebf0079b1d602c81f775019527710b7a62d5d6ca"
+        },
+        {
+          "packet": "ffv1-rgb-depth12-frame1.packet",
+          "reference": "ffv1-rgb-depth12-frame1.rgb",
+          "planes": [
+            [
+              0,
+              1023,
+              1023,
+              2047,
+              4095,
+              2,
+              3071,
+              66
+            ],
+            [
+              4096,
+              4096,
+              8191,
+              1,
+              4096,
+              4095,
+              3,
+              4142
+            ],
+            [
+              4096,
+              8191,
+              4096,
+              1,
+              4096,
+              4094,
+              4097,
+              4188
+            ]
+          ],
+          "sha256": "69d675a355857746720f2f0c4792cea82f3be6b529c7e99a09e911d3df5e91c6"
+        }
+      ]
+    },
+    {
+      "depth": 16,
+      "file": "ffv1-rgb-depth16.mkv",
+      "sha256": "8c880aca19313475c5a85a0a2bc8543b4b5cee7a54d18cd172ac4ca350513a59",
+      "frames": [
+        {
+          "packet": "ffv1-rgb-depth16-frame0.packet",
+          "reference": "ffv1-rgb-depth16-frame0.rgb",
+          "planes": [
+            [
+              0,
+              16383,
+              32767,
+              16383,
+              65535,
+              2,
+              32767,
+              77
+            ],
+            [
+              65536,
+              65536,
+              1,
+              131071,
+              65536,
+              65537,
+              131069,
+              65490
+            ],
+            [
+              65536,
+              131071,
+              1,
+              65536,
+              65536,
+              65535,
+              131070,
+              65582
+            ]
+          ],
+          "sha256": "85bb46dc7a1dc631d8591db466e2ee7e7b8cf5390a9b68f47276be542b395443"
+        },
+        {
+          "packet": "ffv1-rgb-depth16-frame1.packet",
+          "reference": "ffv1-rgb-depth16-frame1.rgb",
+          "planes": [
+            [
+              0,
+              16383,
+              32767,
+              16383,
+              65535,
+              2,
+              32767,
+              78
+            ],
+            [
+              65536,
+              65536,
+              1,
+              131071,
+              65536,
+              65537,
+              131069,
+              65490
+            ],
+            [
+              65536,
+              131071,
+              1,
+              65536,
+              65536,
+              65535,
+              131070,
+              65582
+            ]
+          ],
+          "sha256": "1d6fb8f831b3ce7daa0549d7c21cea942025d39778e05ce847244b6bcd7fcef1"
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "ffv1-rgb-invalid-no-chroma.mkv",
+      "packet": "ffv1-rgb-invalid-no-chroma.packet",
+      "error": "invalid FFV1 RGB chroma configuration",
+      "sha256": "3c0a3150d0b5d00e3d4a03204f9d1855757192235dd98c3d54e31e73c1fa86fa"
+    },
+    {
+      "file": "ffv1-rgb-invalid-subsampled.mkv",
+      "packet": "ffv1-rgb-invalid-subsampled.packet",
+      "error": "invalid FFV1 RGB chroma configuration",
+      "sha256": "56ff4fa9e8ca77944a9181a7d5baa1e9419f13725705aa55e39ce118a5b8b630"
+    },
+    {
+      "file": "ffv1-rgb-invalid-sample-range.mkv",
+      "packet": "ffv1-rgb-invalid-sample-range.packet",
+      "error": "FFV1 RGB reconstruction exceeds sample depth",
+      "sha256": "4e93955dd8aa98aaae2a2c3e2c3ef7ae813348cd1ec4822a184a9dead50bddbc"
+    }
+  ],
+  "provenance": "Independent Python RFC 9043 v1 range coding, zero context quantizers, line-interleaved RCT with mandatory 9-15 bit RGB exception; authored extreme/channel-distinct pixels. No private media or external codec."
+}

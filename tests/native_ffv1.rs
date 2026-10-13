@@ -267,15 +267,21 @@ fn threaded_playback_and_seek_render_identical_rotated_frames() {
             pixels
         })
         .collect();
-    let presented = |pixels: Pixels, index: usize| match pixels {
+    let presented = |pixels: Pixels, index: usize, rotation: u16| match pixels {
         Pixels::Rgb(rgb) => rgb,
         Pixels::Packed(packed, grade) => {
             assert!(grade.is_none());
             assert_eq!(packed.depth, 12);
-            assert_eq!(packed.frame.subsampling, Some([1, 2]));
-            assert_eq!(packed.frame.data, packed_expected[index]);
+            // GPU presentation retains coded planes and carries rotation in
+            // Frame metadata; rendering applies it without narrowing samples.
+            assert_eq!(rotation, 90);
+            assert_eq!(packed.frame.subsampling, Some([2, 1]));
+            assert_eq!(packed.frame.data, frames[index].data);
+            let upright = packed.rotated(rotation).unwrap();
+            assert_eq!(upright.frame.subsampling, Some([1, 2]));
+            assert_eq!(upright.frame.data, packed_expected[index]);
             let mut rgb = Vec::new();
-            packed.to_rgb(&mut rgb, 2 << 20).unwrap();
+            upright.to_rgb(&mut rgb, 2 << 20).unwrap();
             rgb
         }
         _ => panic!("unexpected FFV1 presentation storage"),
@@ -290,7 +296,7 @@ fn threaded_playback_and_seek_render_identical_rotated_frames() {
         match player.poll() {
             Some(Event::Frame(f)) => {
                 assert_eq!(f.dimensions, [12, 18]);
-                let rgb = presented(f.pixels, index);
+                let rgb = presented(f.pixels, index, f.rotation);
                 assert_eq!(rgb, expected[index]);
                 index += 1;
             }
@@ -307,7 +313,7 @@ fn threaded_playback_and_seek_render_identical_rotated_frames() {
         assert!(Instant::now() < deadline, "FFV1 seek stalled");
         match player.poll() {
             Some(Event::Frame(f)) if f.generation == generation => {
-                let rgb = presented(f.pixels, 2);
+                let rgb = presented(f.pixels, 2, f.rotation);
                 assert_eq!(rgb, expected[2]);
                 assert_eq!(f.interval.unwrap().0, 80_000_000);
                 break;
