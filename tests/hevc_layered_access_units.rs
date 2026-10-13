@@ -1105,16 +1105,15 @@ fn globally_scanned_selection_removes_earlier_timing_and_decodes_packets_atomica
         .units[0];
     let mut control_only = (other_vps.len() as u32).to_be_bytes().to_vec();
     control_only.extend_from_slice(other_vps);
-    assert_eq!(
-        decoder
-            .decode_selected_packet(&selected, &control_only)
-            .err()
-            .unwrap()
-            .to_string(),
-        "HEVC extraction VPS disagrees with active picture"
-    );
-    assert_eq!(decoder.next_access_unit(), 0);
-    assert!(decoder.parameters().active(0).is_none());
+    let mut passive = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    assert!(passive.decode_selected_packet(&selected, &control_only).unwrap().0.is_empty());
+    assert_eq!(passive.next_access_unit(), 1);
+    assert_eq!(passive.poc(), &LayeredPocState::default());
+    assert!(passive.parameters().active(0).is_none());
+    // Receipt is permitted; actual activation still must match the selection.
+    assert_eq!(passive.decode_selected_packet(&selected, &packets[1]).err().unwrap().to_string(),
+        "HEVC extraction VPS disagrees with active picture");
+    assert_eq!(passive.next_access_unit(), 1);
 
     assert_eq!(
         decoder
@@ -1992,12 +1991,6 @@ fn selected_queued_decode_refuses_ols_temporal_and_vps_mismatch_atomically() {
             0,
             "HEVC extraction VPS disagrees with active picture",
         ),
-        (
-            &selected,
-            &control,
-            0,
-            "HEVC extraction VPS disagrees with active picture",
-        ),
     ] {
         let before = decoder.poc().clone();
         assert_eq!(
@@ -2012,6 +2005,20 @@ fn selected_queued_decode_refuses_ols_temporal_and_vps_mismatch_atomically() {
         assert_eq!(decoder.next_access_unit(), 1);
         assert_eq!(queue.pending_access_units(), 0);
     }
+    let mut passive = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    let mut passive_queue = LayeredOutputQueue::default();
+    passive.decode_selected_queued_packet(&mut passive_queue, &selected, &packets[0], 0).unwrap();
+    let before = passive.poc().clone();
+    assert!(passive.decode_selected_queued_packet(&mut passive_queue, &selected, &control, 0).unwrap().0.is_empty());
+    assert_eq!(passive.next_access_unit(), 2);
+    assert_eq!(passive.poc(), &before);
+    assert_eq!(passive_queue.pending_access_units(), 0);
+    assert!(passive.parameters().active(0).is_none());
+    assert_eq!(passive.decode_selected_queued_packet(&mut passive_queue, &selected, &packets[1], 0).err().unwrap().to_string(),
+        "HEVC extraction VPS disagrees with active picture");
+    assert_eq!(passive.next_access_unit(), 2);
+    assert_eq!(passive.poc(), &before);
+    assert_eq!(passive_queue.pending_access_units(), 0);
     decoder
         .decode_selected_queued_packet(&mut queue, &selected, &packets[1], 0)
         .unwrap();

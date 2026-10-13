@@ -1040,3 +1040,192 @@ fn mixed_sync_seek_prerolls_layers_and_hides_all_preparatory_frames() {
         assert_eq!(actual, [(2, 0, 0), (2, 3, 0), (3, 0, 1), (3, 3, 1)]);
     }
 }
+
+#[test]
+fn unactivated_same_id_vps_does_not_change_coded_picture_selection() {
+    let oracle = std::fs::read(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/hevc-pcm-reference-rext8.yuv"),
+    )
+    .unwrap();
+    for variant in ["deferred-vps", "deferred-vps-first"] {
+        for tid in [0, 2, 6] {
+            let mut source = reader(variant, tid);
+            for _ in 0..2 {
+                let mut actual = Vec::new();
+                while let Some(frame) = source.read_frame().unwrap() {
+                    assert_eq!(frame.presentation_time.ticks, frame.sample_index as i64);
+                    actual.push((frame.sample_index, frame.decoded.layer_id));
+                    assert_eq!(
+                        frame
+                            .decoded
+                            .binding
+                            .vps
+                            .extension
+                            .as_ref()
+                            .unwrap()
+                            .output
+                            .sets[1]
+                            .output,
+                        9
+                    );
+                    let packed = frame.into_video_frame().unwrap().packed.unwrap();
+                    assert_eq!(&packed.frame.data, &oracle[..packed.frame.data.len()]);
+                }
+                let expected = if variant == "deferred-vps-first" {
+                    vec![(2, 0), (2, 3), (3, 0), (3, 3)]
+                } else {
+                    vec![
+                        (0, 0),
+                        (0, 3),
+                        (1, 0),
+                        (1, 3),
+                        (4, 0),
+                        (4, 3),
+                        (5, 0),
+                        (5, 3),
+                    ]
+                };
+                assert_eq!(actual, expected);
+                source.rewind();
+            }
+        }
+    }
+}
+
+#[test]
+fn selected_direct_api_receives_unused_vps_without_activating_it() {
+    for variant in ["deferred-vps", "deferred-vps-first"] {
+        let source = reader(variant, 2);
+        let (config, packets) = packets(variant);
+        let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+        let metadata_start = if variant == "deferred-vps-first" {
+            0
+        } else {
+            2
+        };
+        let mut actual = Vec::new();
+        for (index, packet) in packets.iter().enumerate() {
+            let (frames, _) = decoder
+                .decode_selected_packet(source.selection_at(index).unwrap(), packet)
+                .unwrap();
+            if (metadata_start..metadata_start + 2).contains(&index) {
+                assert!(frames.is_empty());
+                assert!(decoder.parameters().active(0).is_none());
+            }
+            actual.extend(
+                frames
+                    .iter()
+                    .filter(|p| p.output)
+                    .map(|p| (p.access_unit, p.layer_id)),
+            );
+        }
+        let expected = if metadata_start == 0 {
+            vec![(2, 0), (2, 3), (3, 0), (3, 3)]
+        } else {
+            vec![
+                (0, 0),
+                (0, 3),
+                (1, 0),
+                (1, 3),
+                (4, 0),
+                (4, 3),
+                (5, 0),
+                (5, 3),
+            ]
+        };
+        assert_eq!(actual, expected);
+    }
+}
+
+#[test]
+fn deferred_vps_entropy_failure_preserves_received_bank_and_old_queue() {
+    let source = reader("deferred-vps", 2);
+    let (config, good) = packets("deferred-vps");
+    let (_, bad) = packets("deferred-vps-truncated");
+    let mut decoder = LayeredDecoder::from_configuration(&config, 1, BUDGET).unwrap();
+    let mut queue = LayeredOutputQueue::default();
+    for (index, packet) in good[..4].iter().enumerate() {
+        let (frames, _) = decoder
+            .decode_selected_queued_packet(
+                &mut queue,
+                source.selection_at(index).unwrap(),
+                packet,
+                2,
+            )
+            .unwrap();
+        assert!(frames.is_empty());
+    }
+    let poc = decoder.poc().clone();
+    let old = queue.clone().drain();
+    assert_eq!(queue.pending_access_units(), 2);
+    assert!(decoder.parameters().active(0).is_none());
+    let error = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(4).unwrap(), &bad[4], 2)
+        .err()
+        .unwrap()
+        .to_string();
+    assert!(
+        error.contains("truncated or oversized bit field"),
+        "{error}"
+    );
+    assert_eq!(decoder.poc(), &poc);
+    assert_eq!(decoder.next_access_unit(), 4);
+    assert_eq!(queue.pending_access_units(), 2);
+    assert!(decoder.parameters().active(0).is_none());
+    for (before, after) in old.iter().zip(queue.clone().drain()) {
+        assert!(Arc::ptr_eq(&before.picture, &after.picture));
+        assert!(Arc::ptr_eq(&before.binding, &after.binding));
+    }
+    let (released, _) = decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(4).unwrap(), &good[4], 2)
+        .unwrap();
+    assert_eq!(released.len(), 4);
+    for (before, after) in old.iter().zip(&released) {
+        assert!(Arc::ptr_eq(&before.binding, &after.binding));
+    }
+    decoder
+        .decode_selected_queued_packet(&mut queue, source.selection_at(5).unwrap(), &good[5], 2)
+        .unwrap();
+    assert_eq!(
+        queue
+            .drain()
+            .iter()
+            .map(|p| (p.access_unit, p.layer_id))
+            .collect::<Vec<_>>(),
+        [(4, 0), (4, 3), (5, 0), (5, 3)]
+    );
+}
+
+#[test]
+fn common_player_seek_and_rewind_skip_unactivated_vps_definitions() {
+    for variant in ["deferred-vps", "deferred-vps-first"] {
+        let bytes = std::fs::read(path(variant)).unwrap();
+        let mut source =
+            Mp4VideoReader::open_software(Cursor::new(bytes), Limits::default(), BUDGET).unwrap();
+        let target = if variant == "deferred-vps-first" {
+            2
+        } else {
+            4
+        };
+        let expected = if target == 2 {
+            vec![2, 3]
+        } else {
+            vec![0, 1, 4, 5]
+        };
+        for _ in 0..2 {
+            let mut actual = Vec::new();
+            while let Some(frame) = source.read_frame().unwrap() {
+                actual.push(frame.sample_index);
+            }
+            assert_eq!(actual, expected);
+            assert_eq!(source.seek_to_sync(target), target);
+            assert_eq!(
+                source.read_frame().unwrap().unwrap().sample_index,
+                target as usize
+            );
+            assert_eq!(source.selected_layer_id(), Some(3));
+            source.rewind();
+        }
+    }
+}

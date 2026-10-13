@@ -192,7 +192,7 @@ impl LayeredDecoder {
         Ok((ready, end))
     }
     /// Extract the globally scanned operation point and schedule it atomically.
-    /// A different VPS is refused before queue/reference state is published.
+    /// An activated VPS mismatch is refused before queue/reference publication.
     pub fn decode_selected_queued_packet(
         &mut self,
         queue: &mut super::LayeredOutputQueue,
@@ -217,7 +217,6 @@ impl LayeredDecoder {
                     .saturating_add(std::mem::size_of_val(&extracted)),
             )
             .ok_or_else(|| invalid("HEVC extracted packet exceeds decode budget"))?;
-        self.check_selected_vps(&extracted, selection, budget)?;
         let plan = LayeredAccessUnit::parse(
             &self.parameters,
             self.dpb.poc(),
@@ -241,7 +240,7 @@ impl LayeredDecoder {
         queue.reset();
     }
     /// Extract one packet with a globally scanned VPS/OLS selection, then decode
-    /// atomically. A changed VPS is refused before reconstruction/publication.
+    /// atomically. Activated picture bindings must match the selected VPS.
     pub fn decode_selected_packet(
         &mut self,
         selection: &super::LayeredSubstream,
@@ -260,7 +259,6 @@ impl LayeredDecoder {
                     .saturating_add(std::mem::size_of_val(&extracted)),
             )
             .ok_or_else(|| invalid("HEVC extracted packet exceeds decode budget"))?;
-        self.check_selected_vps(&extracted, selection, budget)?;
         let plan = LayeredAccessUnit::parse(
             &self.parameters,
             self.dpb.poc(),
@@ -279,35 +277,6 @@ impl LayeredDecoder {
         let (parameters, pictures, end) = self.dpb.decode(plan, budget)?;
         self.parameters = parameters;
         Ok((pictures, end))
-    }
-    // Parameter IDs are global: only the last received definition of an ID
-    // survives. Earlier definitions in this AU may never be activated. Picture
-    // bindings and pinned-sequence checks remain authoritative after extraction.
-    fn check_selected_vps(
-        &self,
-        packet: &[u8],
-        selection: &super::LayeredSubstream,
-        budget: usize,
-    ) -> Result<()> {
-        let mut last = None;
-        for nal in NalUnits::new(packet, self.length_size)? {
-            let nal = nal?;
-            if NalHeader::parse(nal)?.unit_type == 32 {
-                let id = nal
-                    .get(2)
-                    .ok_or_else(|| invalid("truncated HEVC VPS identifier"))?
-                    >> 4;
-                if id == selection.vps.vps.id {
-                    last = Some(nal);
-                }
-            }
-        }
-        if let Some(nal) = last {
-            if crate::codec::hevc_vps::LayeredVps::parse(nal, budget)? != *selection.vps {
-                return Err(invalid("HEVC extraction VPS disagrees with active picture"));
-            }
-        }
-        Ok(())
     }
     fn require_decode_ready(&self) -> Result<()> {
         if self.priming == Priming::Metadata {

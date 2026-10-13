@@ -471,6 +471,22 @@ def main():
                     (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
                         epoch_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
                         chroma_depth=meta["chroma_depth"],access_units=epoch_groups,multilayer=True,inband_parameters=True))
+                # Same global ID may be received but never activated after EOS.
+                # The actual next CVS still uses the original VPS definition.
+                for variant in ["deferred-vps","deferred-vps-first","deferred-vps-truncated"]:
+                    deferred_picture = [intra_nal(16,0,id) for id in [0,3]]
+                    if variant=="deferred-vps-truncated":
+                        last = deferred_picture[-1]
+                        deferred_picture[-1] = last[:2]+escape(unescape(last[2:])[:-256])
+                    deferred_groups = [] if variant=="deferred-vps-first" else [
+                        [timing_nal,*[intra_nal(21,0,id) for id in [0,3]]],
+                        [*[intra_nal(0,1,id) for id in [0,3]],((36<<9)|1).to_bytes(2,"big")+b"\x80"]]
+                    deferred_groups += [[next_vps],[vps_nal],deferred_picture,
+                        [later_temporal,*[intra_nal(0,1,id) for id in [0,3]]]]
+                    deferred_stream = b"".join(b"\x00\x00\x00\x01"+n for n in [*parameters,*sum(deferred_groups,[])])
+                    (D/("hevc-layered-vps-epoch-"+variant+".mp4")).write_bytes(mux(
+                        deferred_stream,meta["depth"],*meta["dimensions"],chroma_format=meta["chroma_format"],
+                        chroma_depth=meta["chroma_depth"],access_units=deferred_groups,multilayer=True,inband_parameters=True))
                 # F.7.4.2.4.2 also permits VPS activation when every target
                 # layer has an IDR picture, without requiring a preceding EOS.
                 def idr_prior_output(nal):

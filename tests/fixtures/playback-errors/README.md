@@ -1952,3 +1952,21 @@ reset/discard preserves old bindings, POC and queue until a successful retry.
 Mixed-cross-reset-badidc omits the required full reset and must retain its precise
 mixed-base-IDR refusal. Tests compare original PCM pixels and timestamps and
 exercise rewind and common-player seek without FFmpeg or fixture generation.
+
+### Received but unactivated same-ID VPS
+
+`hevc-layered-vps-epoch-deferred-vps.mp4` ends the old CVS with EOS, receives a
+same-ID VPS with a different output policy in a metadata-only sample, then
+replaces it with the original definition before the next BLA picture. The
+deferred-vps-first variant receives these unused definitions before any picture. Both
+reproduced `HEVC extraction VPS disagrees with active picture` on the unused
+metadata, rather than actual activation. Selected decoding now checks the VPS
+bound to coded pictures; receiving an unactivated definition does not select it.
+Existing direct/queued mismatch tests still verify refusal at real activation.
+
+Acceptance compares original PCM pixels and sample timestamps, checks all
+selected layers and temporal limits, and exercises direct decoding plus common
+player seek/rewind. The truncated variant cuts enhancement entropy in the next
+BLA: previously received parameters and queued old pictures must survive the
+failure, and a complete retry must preserve old binding identities. Generation
+uses only owned seeds and remains separate from ordinary offline tests.
