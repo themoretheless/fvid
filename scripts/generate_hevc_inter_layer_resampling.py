@@ -10,7 +10,7 @@ L=[[0,0,0,64,0,0,0,0],[0,1,-3,63,4,-2,1,0],[-1,2,-5,62,8,-3,1,0],[-1,3,-8,60,13,
 C=[[0,64,0,0],[-2,62,4,0],[-2,58,10,-2],[-4,56,14,-2],[-4,54,16,-2],[-6,52,20,-2],[-6,46,28,-4],[-4,42,30,-4],[-4,36,36,-4],[-4,30,42,-4],[-4,28,46,-6],[-2,20,52,-6],[-2,16,54,-4],[-2,14,56,-4],[-2,10,58,-2],[0,4,62,-2]]
 SUB={0:(1,1),1:(2,2),2:(2,1),3:(1,1)}
 def nearest(v):return floor(v+F(1,2))
-def layout(size,fmt):return [size,[size[0]//SUB[fmt][0],size[1]//SUB[fmt][1]],[size[0]//SUB[fmt][0],size[1]//SUB[fmt][1]]]
+def layout(size,fmt):return [size,[0,0],[0,0]] if fmt==0 else [size,[size[0]//SUB[fmt][0],size[1]//SUB[fmt][1]],[size[0]//SUB[fmt][0],size[1]//SUB[fmt][1]]]
 def derive(c):
     cs,rs=SUB[c['current_format']],SUB[c['reference_format']]
     scaled=[c['scaled'][i]*cs[i%2] for i in range(4)]
@@ -45,7 +45,7 @@ def planes(c,f):
 
 def oracle(c,source,coords):
     # H.8.1.4.1 bypasses sample filtering for a completely equal reference.
-    if c['reference_size']==c['current_size'] and c['reference_format']==c['current_format'] and c['reference_depth']==c['current_depth'] and c['scaled']==c['region'] and c['phases'] in (None,[0,0,8,8]):
+    if c['reference_size']==c['current_size'] and c['reference_format']==c['current_format'] and (c['reference_depth']==c['current_depth'] or c['reference_format']==0 and c['reference_depth'][0]==c['current_depth'][0]) and c['scaled']==c['region'] and c['phases'] in (None,[0,0,8,8]):
         return [list(p) for p in source]
     result=[]
     for comp,(w,h) in enumerate(layout(c['current_size'],c['current_format'])):
@@ -127,6 +127,14 @@ def main():
     add('motion-outside',reference_size=[64,48],current_size=[128,96],scaled=[20,0,0,0],region=[-1,0,1,0])
     add('motion-partial',reference_size=[24,24],current_size=[40,40],reference_depth=[16,16],current_depth=[16,16])
     add('mixed-depth',reference_depth=[10,8],current_depth=[16,10],phases=[1,3,7,9])
+    for depth in (8,10,16):
+        add(f'mono-grid-{depth}',reference_format=0,current_format=0,reference_depth=[depth,depth],current_depth=[depth,depth])
+        add(f'mono-identity-{depth}',reference_format=0,current_format=0,reference_size=[8,6],current_size=[8,6],reference_depth=[depth,depth],current_depth=[depth,depth])
+        add(f'mono-phase-{depth}',reference_format=0,current_format=0,reference_size=[8,6],current_size=[12,10],reference_depth=[depth,depth],current_depth=[16,16],phases=[31,17,63,0])
+    add('mono-depth',reference_format=0,current_format=0,reference_size=[8,6],current_size=[8,6],current_depth=[16,16])
+    add('mono-offset',reference_format=0,current_format=0,reference_size=[8,6],current_size=[20,16],scaled=[1,-1,2,1],region=[-1,1,1,-1],current_depth=[10,16])
+    for rd,cd in [(8,16),(16,8)]:
+        add(f'mono-unused-chroma-{rd}-{cd}',reference_format=0,current_format=0,reference_size=[8,6],current_size=[8,6],reference_depth=[16,rd],current_depth=[16,cd])
     add('bad-inferred-phase',error='phase exceeds range')
     add('bad-downscale',current_size=[2,2],error='cannot downscale')
     add('bad-depth',reference_depth=[10,10],error='cannot reduce')
@@ -139,7 +147,7 @@ def main():
         if c['error'] is None:c['coordinates']=derive(c)
         c['frames']=[]
         depth=max(c['reference_depth'])
-        fmt={1:'420',2:'422',3:'444'}[c['reference_format']]+(f'p{depth}' if depth!=8 else '')
+        fmt=('mono'+(str(depth) if depth!=8 else '')) if c['reference_format']==0 else {1:'420',2:'422',3:'444'}[c['reference_format']]+(f'p{depth}' if depth!=8 else '')
         w,h=c['reference_size']
         raw=f'YUV4MPEG2 W{w} H{h} F25:1 Ip A1:1 C{fmt}\n'.encode()
         for f in (0,1):

@@ -62,6 +62,7 @@ pub struct Resampling {
 }
 fn subsampling(s: &Sps) -> Result<[u64; 2]> {
     match s.chroma_format {
+        0 if !s.separate_colour_plane => Ok([1, 1]),
         1 if !s.separate_colour_plane => Ok([2, 2]),
         2 if !s.separate_colour_plane => Ok([2, 1]),
         3 => Ok([1, 1]),
@@ -85,6 +86,9 @@ impl Resampling {
         if reference_depth.iter().any(|d| !(8..=16).contains(d)) {
             return Err(invalid("HEVC resampling reference depth is invalid"));
         }
+        if (current.chroma_format == 0) != (reference.chroma_format == 0) {
+            return Err(crate::unsupported("HEVC monochrome/chroma inter-layer conversion"));
+        }
         let cs = subsampling(current)?;
         let rs = subsampling(reference)?;
         for (s, sub) in [(current, cs), (reference, rs)] {
@@ -95,7 +99,8 @@ impl Resampling {
                 return Err(invalid("HEVC resampling geometry or depth is invalid"));
             }
         }
-        if (0..2).any(|c| reference_depth[c] > current.depth[c]) {
+        let components = if current.chroma_format == 0 { 1 } else { 2 };
+        if (0..components).any(|c| reference_depth[c] > current.depth[c]) {
             return Err(invalid("HEVC resampling cannot reduce reference depth"));
         }
         if location
@@ -128,7 +133,7 @@ impl Resampling {
             [geometry.phases[0], geometry.phases[1]],
             [geometry.phases[2], geometry.phases[3]],
         ];
-        for c in 0..2 {
+        for c in 0..if current.chroma_format == 0 { 1 } else { 2 } {
             for a in 0..2 {
                 let csub = if c == 0 { 1 } else { cs[a] };
                 let rsub = if c == 0 { 1 } else { rs[a] };
@@ -148,12 +153,15 @@ impl Resampling {
         }
         let dimensions = |s: &Sps, sub: [u64; 2]| {
             let full = s.dimensions.map(|v| v as usize);
-            let chroma = [full[0] / sub[0] as usize, full[1] / sub[1] as usize];
+            let chroma = if s.chroma_format == 0 { [0, 0] }
+                else { [full[0] / sub[0] as usize, full[1] / sub[1] as usize] };
             [full, chroma, chroma]
         };
         let identity = current.dimensions == reference.dimensions
-            && current.depth == reference_depth
+            && (current.depth == reference_depth || current.chroma_format == 0
+                && current.depth[0] == reference_depth[0])
             && cs == rs
+            && current.chroma_format == reference.chroma_format
             && geometry.scaled_offsets == geometry.reference_offsets
             && geometry.phases == [0; 4];
         Ok(Self {
@@ -239,6 +247,9 @@ impl Resampling {
             return Err(invalid("HEVC resampling picture exceeds memory budget"));
         }
         let make = |c: usize| {
+            if self.current[c] == [0, 0] {
+                return Ok(Plane::absent(self.current_depth[usize::from(c != 0)]));
+            }
             Plane::new(
                 self.current[c][0],
                 self.current[c][1],

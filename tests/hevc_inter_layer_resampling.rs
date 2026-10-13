@@ -57,19 +57,26 @@ fn video(case: &serde_json::Value, reference: &Sps) -> Vec<[Vec<u16>; 3]> {
         2 => [2, 1],
         _ => [1, 1],
     };
-    let counts = [rw * rh, rw * rh / rs[0] / rs[1], rw * rh / rs[0] / rs[1]];
+    let counts = if reference.chroma_format == 0 {
+        [rw * rh, 0, 0]
+    } else {
+        [rw * rh, rw * rh / rs[0] / rs[1], rw * rh / rs[0] / rs[1]]
+    };
     let bytes = data(&format!("{name}.y4m"));
     let mut at = bytes.iter().position(|&v| v == b'\n').unwrap() + 1;
     let storage_depth = *reference.depth.iter().max().unwrap();
     let suffix = format!(
         "C{}{}\n",
         match reference.chroma_format {
+            0 => "mono",
             1 => "420",
             2 => "422",
             _ => "444",
         },
         if storage_depth == 8 {
             String::new()
+        } else if reference.chroma_format == 0 {
+            storage_depth.to_string()
         } else {
             format!("p{storage_depth}")
         }
@@ -146,7 +153,11 @@ fn inter_layer_resampling_matches_coordinates_planes_and_fixed_point_oracles() {
         };
         let cs = sub(current.chroma_format);
         let [w, h] = current.dimensions.map(|v| v as usize);
-        let sizes = [[w, h], [w / cs[0], h / cs[1]], [w / cs[0], h / cs[1]]];
+        let sizes = if current.chroma_format == 0 {
+            [[w, h], [0, 0], [0, 0]]
+        } else {
+            [[w, h], [w / cs[0], h / cs[1]], [w / cs[0], h / cs[1]]]
+        };
         for chroma in [false, true] {
             let c = usize::from(chroma);
             for y in 0..sizes[c][1] {
@@ -241,7 +252,8 @@ fn inter_layer_resampling_matches_coordinates_planes_and_fixed_point_oracles() {
                     .contains("budget")
             );
             let mut short = input();
-            short[1] = &source[1][1..];
+            let plane = if reference.chroma_format == 0 { 0 } else { 1 };
+            short[plane] = &source[plane][1..];
             assert!(operation.picture(short, 1 << 20).is_err());
         }
     }

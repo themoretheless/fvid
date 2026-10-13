@@ -1970,3 +1970,31 @@ player seek/rewind. The truncated variant cuts enhancement entropy in the next
 BLA: previously received parameters and queued old pictures must survive the
 failure, and a complete retry must preserve old binding identities. Generation
 uses only owned seeds and remains separate from ordinary offline tests.
+
+### Monochrome inter-layer reference resampling
+
+`generate_hevc_inter_layer_resampling.py` adds thirteen original monochrome
+Y4M cases to the existing rational FIR atlas: 8/10/16-bit grid, identity and
+phase operations plus depth increase, signed reference offsets and unused-chroma depth changes. Cb/Cr are
+absent, not full-size placeholder arrays. All 58 prior oracle cases remain
+unchanged. Acceptance checks luma coordinates/samples, empty chroma planes,
+motion maps, repeated operations and memory/input validation. Two 16-bit
+identity cases change only the absent chroma depth; they reproduced unwanted
+FIR quantization (65535 became 65532) and now preserve every luma bit.
+
+`generate_hevc_monochrome_inter_layer.py` authors two coded two-frame MP4s from
+the documented `hevc-pcm-mono-reference-rext8` seed, without external codecs.
+The identity control shares samples; the region variant enables same-AU base
+prediction with reference-region offsets [2,2,2,2]. It specifically reproduced
+`HEVC inter-layer resampling requires three sample planes`. Its saved oracle
+uses the independent rational FIR implementation and differs from the identity
+control. Syntax acceptance requires the enabled direct layer 0 and empty
+short/long temporal RPS, so plain temporal prediction cannot satisfy the test.
+Native playback compares every luma sample, original timing, empty decoded
+chroma, packed neutral chroma, rewind and common/native seek. Region-truncated
+retains complete headers but only one CABAC byte for the enhancement P picture:
+failed prediction must preserve POC, parameter bindings and queued output and
+allow a successful complete retry. Ordinary tests generate nothing and require
+neither FFmpeg nor network. Coded acceptance here is 8-bit; the standalone
+resampling atlas additionally covers 10/16-bit. Monochrome/chroma conversion
+remains explicitly unsupported and is not qualified by these fixtures.

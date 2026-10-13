@@ -71,7 +71,7 @@ impl ReferenceLocation {
         let reference_offsets = offsets(self.region_offsets, subsampling(reference))?;
         let scaled_size = size(current.dimensions, scaled_offsets)?;
         let reference_size = size(reference.dimensions, reference_offsets)?;
-        let vertical = if current.chroma_format == 3 {
+        let vertical = if matches!(current.chroma_format, 0 | 3) {
             8
         } else {
             (4 * scaled_size[1] + reference_size[1] / 2) / reference_size[1] + 4
@@ -92,7 +92,8 @@ impl ReferenceLocation {
             reference_offsets,
             scaled_size,
             reference_size,
-            phases: [phases[0], phases[1], phases[2] - 8, phases[3] - 8],
+            phases: if current.chroma_format == 0 { [phases[0], phases[1], 0, 0] }
+                else { [phases[0], phases[1], phases[2] - 8, phases[3] - 8] },
         })
     }
 }
